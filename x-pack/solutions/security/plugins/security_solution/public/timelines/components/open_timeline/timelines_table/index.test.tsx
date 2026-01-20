@@ -9,17 +9,26 @@ import { cloneDeep } from 'lodash/fp';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
+import { useSelector } from 'react-redux';
+import { render, screen } from '@testing-library/react';
 
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';
 import type { OpenTimelineResult } from '../types';
 import type { TimelinesTableProps } from '.';
 import { TimelinesTable } from '.';
 import { getMockTimelinesTableProps } from './mocks';
+import { selectNotesTablePendingDeleteIds } from '../../../../notes';
 
 import * as i18n from '../translations';
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 
 const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
+
+jest.mock('react-redux', () => ({
+  ...jest.requireActual('react-redux'),
+  useSelector: jest.fn(),
+  useDispatch: jest.fn().mockReturnValue(jest.fn()),
+}));
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -28,6 +37,7 @@ describe('TimelinesTable', () => {
 
   beforeEach(() => {
     mockResults = cloneDeep(mockTimelineResults);
+    (useSelector as jest.Mock).mockReturnValue([]);
   });
 
   test('it renders the select all timelines header checkbox when actionTimelineToShow has the action selectable', () => {
@@ -269,5 +279,22 @@ describe('TimelinesTable', () => {
       .props() as TimelinesTableProps;
 
     expect(props.loading).toBe(false);
+  });
+
+  test('it should show a delete confirmation popup when there are pending deletes', () => {
+    (useSelector as jest.Mock).mockImplementation((selector) => {
+      if (selector === selectNotesTablePendingDeleteIds) {
+        return ['1'];
+      }
+      return [];
+    });
+
+    render(
+      <ThemeProvider theme={mockTheme}>
+        <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
+      </ThemeProvider>
+    );
+
+    expect(screen.getByTestId('delete-notes-modal')).toBeInTheDocument();
   });
 });

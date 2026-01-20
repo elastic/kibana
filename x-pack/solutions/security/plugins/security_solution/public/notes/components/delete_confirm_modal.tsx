@@ -63,6 +63,7 @@ export const DeleteConfirmModal = React.memo(
     return (
       <EuiConfirmModal
         aria-labelledby={'delete-notes-modal'}
+        data-test-subj={'delete-notes-modal'}
         title={DELETE}
         onCancel={onCancel}
         onConfirm={onConfirm}
