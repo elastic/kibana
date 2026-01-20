@@ -10,7 +10,6 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/serv
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 
 import type { AgentPolicy } from '../../types';
-import { appContextService } from '../app_context';
 
 export function createClientMock() {
   const agentInHostedDoc = {
@@ -99,9 +98,6 @@ export function createClientMock() {
   } as SavedObject<AgentPolicy>;
 
   const soClientMock = savedObjectsClientMock.create();
-  jest
-    .spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension')
-    .mockReturnValue(soClientMock);
 
   soClientMock.get.mockImplementation(async (_, id) => {
     switch (id) {

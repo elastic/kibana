@@ -35,9 +35,6 @@ describe('getAgentStatusForAgentPolicy', () => {
         withoutSpaceExtensions: soClient as any,
       })
     );
-    jest
-      .spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension')
-      .mockReturnValue(soClient as any);
   });
 
   afterEach(() => {
@@ -76,9 +73,6 @@ describe('getAgentStatusForAgentPolicy', () => {
         ],
       }),
     };
-    jest
-      .spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension')
-      .mockReturnValue(soClient as any);
     const agentPolicyId = 'agentPolicyId';
     const filterKuery = 'filterKuery';
     const spaceId = 'spaceId';
@@ -147,9 +141,6 @@ describe('getAgentStatusForAgentPolicy', () => {
         ],
       }),
     };
-    jest
-      .spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension')
-      .mockReturnValue(soClient as any);
     const agentPolicyId = 'agentPolicyId';
     const filterKuery = 'filterKuery';
     const spaceId = 'spaceId';
@@ -203,9 +194,6 @@ describe('getAgentStatusForAgentPolicy', () => {
         ],
       }),
     };
-    jest
-      .spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension')
-      .mockReturnValue(soClient as any);
     const agentPolicyIds = ['agentPolicyId1', 'agentPolicyId2'];
     const filterKuery = 'filterKuery';
     const spaceId = 'spaceId';
