@@ -101,7 +101,7 @@ describe('SET Autocomplete', () => {
       await setExpectSuggestions('SET project_routing = ^;', ['"_alias: *"', '"_alias:_origin"']);
       await setExpectSuggestions('SET project_routing = ^ ;', ['"_alias: *"', '"_alias:_origin"']);
     });
-    
+
     describe('Unmapped fields setting', () => {
       it('suggests unmapped fields values after assignment operator', async () => {
         await setExpectSuggestions('SET unmapped_fields = ', ['"FAIL";', '"LOAD";', '"NULLIFY";']);
