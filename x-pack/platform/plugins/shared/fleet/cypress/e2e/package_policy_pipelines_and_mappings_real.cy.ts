@@ -146,6 +146,10 @@ describe('Integration package with custom dataset create and edit package policy
     cy.getBySel(ADD_INTEGRATION_POLICY_BTN).click();
 
     cy.getBySel(POLICY_EDITOR.POLICY_NAME_INPUT).click().clear().type(packagePolicyName);
+
+    // Expand the streams section to access input fields
+    cy.get('button').contains('Change defaults').click();
+
     cy.getBySel('multiTextInput-log-file-path')
       .find('[data-test-subj="multiTextInputRow-0"]')
       .click()
@@ -213,6 +217,10 @@ describe('Integration package with fixed dataset create and edit package policy'
     cy.getBySel(ADD_INTEGRATION_POLICY_BTN).click();
 
     cy.getBySel(POLICY_EDITOR.POLICY_NAME_INPUT).click().clear().type(packagePolicyName);
+
+    // Expand the streams section to access input fields
+    cy.get('button').contains('Change defaults').click();
+
     cy.getBySel('multiTextInput-log-file-path')
       .find('[data-test-subj="multiTextInputRow-0"]')
       .click()

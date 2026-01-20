@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { waitFor } from '@testing-library/react';
+import { waitFor, fireEvent } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../../../../mock';
 
@@ -481,6 +481,11 @@ describe('PackagePolicyInputPanel', () => {
           await renderResult.findByText('Collect sample logs from instances')
         ).toBeInTheDocument();
       });
+
+      // Click "Change defaults" to expand the streams section
+      const changeDefaultsButton = renderResult.getByRole('button', { name: /change default/i });
+      fireEvent.click(changeDefaultsButton);
+
       await waitFor(async () => {
         expect(await renderResult.findByText('Sample logs on Agentless')).toBeInTheDocument();
       });
@@ -516,6 +521,11 @@ describe('PackagePolicyInputPanel', () => {
           await renderResult.findByText('Collect sample logs from instances')
         ).toBeInTheDocument();
       });
+
+      // Click "Change defaults" to expand the streams section
+      const changeDefaultsButton = renderResult.getByRole('button', { name: /change default/i });
+      fireEvent.click(changeDefaultsButton);
+
       await waitFor(async () => {
         expect(await renderResult.queryByText('Sample logs on Agentless')).not.toBeInTheDocument();
       });
@@ -681,6 +691,11 @@ describe('PackagePolicyInputPanel', () => {
           await renderResult.findByText('Collect sample logs from instances')
         ).toBeInTheDocument();
       });
+
+      // Click "Change defaults" to expand the streams section
+      const changeDefaultsButton = renderResult.getByRole('button', { name: /change default/i });
+      fireEvent.click(changeDefaultsButton);
+
       await waitFor(async () => {
         expect(await renderResult.queryByText('Sample logs')).toBeInTheDocument();
       });
