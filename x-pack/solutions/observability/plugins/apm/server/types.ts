@@ -64,6 +64,7 @@ import type {
   ProfilingDataAccessPluginSetup,
   ProfilingDataAccessPluginStart,
 } from '@kbn/profiling-data-access-plugin/server';
+import type { SLOServerSetup, SLOServerStart } from '@kbn/slo-plugin/server';
 import type { APMConfig } from '.';
 
 export interface APMPluginSetup {
@@ -93,6 +94,7 @@ export interface APMPluginSetupDependencies {
   home?: HomeServerPluginSetup;
   ml?: MlPluginSetup;
   security?: SecurityPluginSetup;
+  slo?: SLOServerSetup;
   spaces?: SpacesPluginSetup;
   taskManager?: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
@@ -122,6 +124,7 @@ export interface APMPluginStartDependencies {
   home?: HomeServerPluginStart;
   ml?: MlPluginStart;
   security?: SecurityPluginStart;
+  slo?: SLOServerStart;
   spaces?: SpacesPluginStart;
   taskManager?: TaskManagerStartContract;
   usageCollection?: undefined;

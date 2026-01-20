@@ -271,11 +271,16 @@ export class SLOPlugin
     this.tempSummaryCleanupTask?.start(plugins).catch(() => {});
 
     return {
-      getSloClientWithRequest: (request: KibanaRequest) => {
+      getSloClientWithRequest: async (request: KibanaRequest) => {
+        const spaceId =
+          (await plugins.spaces?.spacesService.getActiveSpace(request))?.id ?? 'default';
+
         return getSloClientWithRequest({
           request,
           soClient: core.savedObjects.getScopedClient(request),
           esClient: internalEsClient,
+          scopedClusterClient: core.elasticsearch.client.asScoped(request),
+          spaceId,
         });
       },
     };
