@@ -33,7 +33,7 @@ import type {
   IndexPatternMap,
   RangeIndexPatternColumn,
 } from '@kbn/lens-common';
-import { getESQLForLayer } from './to_esql';
+import { getESQLForLayer, isEsqlQuerySuccess } from './to_esql';
 import { convertToAbsoluteDateRange } from '../../utils';
 import { operationDefinitionMap } from './operations';
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
@@ -178,11 +178,16 @@ function getExpressionForLayer(
     // esql mode variables
     const lensESQLEnabled = featureFlags.getBooleanValue('lens.enable_esql', false);
     const canUseESQL = lensESQLEnabled && uiSettings.get(ENABLE_ESQL) && !forceDSL; // read from a setting
-    const esqlLayer =
-      canUseESQL &&
-      getESQLForLayer(esAggEntries, layer, indexPattern, uiSettings, dateRange, nowInstant);
+    const esqlLayer = getESQLForLayer(
+      esAggEntries,
+      layer,
+      indexPattern,
+      uiSettings,
+      dateRange,
+      nowInstant
+    );
 
-    if (!esqlLayer) {
+    if (!(canUseESQL && isEsqlQuerySuccess(esqlLayer))) {
       esAggEntries.forEach(([colId, col], index) => {
         const def = operationDefinitionMap[col.operationType];
         if (def.input !== 'fullReference' && def.input !== 'managedReference') {
@@ -360,8 +365,11 @@ function getExpressionForLayer(
       });
 
       esAggsIdMap = updatedEsAggsIdMap;
-    } else {
-      esAggsIdMap = esqlLayer.esAggsIdMap;
+    } else if (isEsqlQuerySuccess(esqlLayer)) {
+      // The esAggsIdMap from getESQLForLayer uses the common OriginalColumn type,
+      // but the local OriginalColumn type includes more properties. The runtime
+      // objects have all the necessary properties via the spread operator in getESQLForLayer.
+      esAggsIdMap = esqlLayer.esAggsIdMap as unknown as Record<string, OriginalColumn[]>;
     }
 
     const columnsWithFormatters = columnEntries.filter(
@@ -481,27 +489,28 @@ function getExpressionForLayer(
       )
       .filter((field): field is string => Boolean(field));
 
-    const dataAST = esqlLayer
-      ? buildExpressionFunction('esql', {
-          query: esqlLayer.esql,
-          timeField: allDateHistogramFields[0],
-          ignoreGlobalFilters: Boolean(layer.ignoreGlobalFilters),
-        }).toAst()
-      : buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
-          index: buildExpression([
-            buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>(
-              'indexPatternLoad',
-              { id: indexPattern.id, includeFields: false }
-            ),
-          ]),
-          aggs,
-          metricsAtAllLevels: false,
-          partialRows: false,
-          timeFields: allDateHistogramFields,
-          probability: getSamplingValue(layer),
-          samplerSeed: seedrandom(searchSessionId).int32(),
-          ignoreGlobalFilters: Boolean(layer.ignoreGlobalFilters),
-        }).toAst();
+    const dataAST =
+      canUseESQL && isEsqlQuerySuccess(esqlLayer)
+        ? buildExpressionFunction('esql', {
+            query: esqlLayer.esql,
+            timeField: allDateHistogramFields[0],
+            ignoreGlobalFilters: Boolean(layer.ignoreGlobalFilters),
+          }).toAst()
+        : buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
+            index: buildExpression([
+              buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>(
+                'indexPatternLoad',
+                { id: indexPattern.id, includeFields: false }
+              ),
+            ]),
+            aggs,
+            metricsAtAllLevels: false,
+            partialRows: false,
+            timeFields: allDateHistogramFields,
+            probability: getSamplingValue(layer),
+            samplerSeed: seedrandom(searchSessionId).int32(),
+            ignoreGlobalFilters: Boolean(layer.ignoreGlobalFilters),
+          }).toAst();
 
     return {
       type: 'expression',
@@ -513,7 +522,7 @@ function getExpressionForLayer(
           function: 'lens_map_to_columns',
           arguments: {
             idMap: [JSON.stringify(esAggsIdMap)],
-            isTextBased: [!!esqlLayer],
+            isTextBased: [canUseESQL && isEsqlQuerySuccess(esqlLayer)],
           },
         },
         ...expressions,

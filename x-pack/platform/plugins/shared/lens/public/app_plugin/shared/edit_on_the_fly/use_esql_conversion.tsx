@@ -15,7 +15,7 @@ import type {
 import { partition } from 'lodash';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { getESQLForLayer } from '../../../datasources/form_based/to_esql';
+import { getESQLForLayer, isEsqlQuerySuccess } from '../../../datasources/form_based/to_esql';
 import type { ConvertibleLayer } from './convert_to_esql_modal';
 import { operationDefinitionMap } from '../../../datasources/form_based/operations';
 import type { LensPluginStartDependencies } from '../../../plugin';
@@ -134,7 +134,7 @@ export const useEsqlConversion = (
       // This prevents conversion errors from breaking the visualization
     }
 
-    return esqlLayer
+    return esqlLayer && isEsqlQuerySuccess(esqlLayer)
       ? {
           isConvertToEsqlButtonDisabled: false,
           convertToEsqlButtonTooltip: i18n.translate('xpack.lens.config.convertToEsqlTooltip', {
