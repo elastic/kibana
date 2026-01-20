@@ -6,6 +6,7 @@
  */
 
 import React, { Suspense } from 'react';
+import type { IconType } from '@elastic/eui';
 import { EuiIcon, EuiSkeletonCircle } from '@elastic/eui';
 import type { IconSize } from '@elastic/eui';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
@@ -21,23 +22,36 @@ const iconToSkeletonSizeMap: Record<IconSize, 's' | 'm' | 'l' | 'xl'> = {
 };
 
 /**
- * Utility function to get the appropriate icon for a connector.
+ * Gets the icon type (component or string) for a Catalog.
+ * This is useful for passing to EuiIcon's `type` prop or flyout headers.
+ *
+ * @param iconType - The icon type (e.g., '.github', '.notion')
+ * @returns IconType (component or string) that can be used with EuiIcon
+ */
+export function getConnectorIconType(iconType: string): IconType {
+  return ConnectorIconsMap.get(iconType) ?? 'integration';
+}
+
+/**
+ * Utility function to get the appropriate icon JSX element for a Catalog.
  *
  * @param iconType - The icon type (e.g., '.github', '.notion')
  * @param size - Icon size (default: 'l')
  * @returns JSX element representing the icon
  */
 export function getConnectorIcon(iconType: string, size: IconSize = 'l'): JSX.Element {
-  const LazyIcon = ConnectorIconsMap.get(iconType);
-  if (LazyIcon) {
+  const iconTypeOrComponent = getConnectorIconType(iconType);
+
+  // If it's a lazy-loaded component (not a string), wrap it in Suspense
+  if (typeof iconTypeOrComponent !== 'string') {
     const skeletonSize = iconToSkeletonSizeMap[size];
     return (
       <Suspense fallback={<EuiSkeletonCircle size={skeletonSize} />}>
-        <LazyIcon size={size} />
+        <EuiIcon type={iconTypeOrComponent} size={size} />
       </Suspense>
     );
   }
 
-  // Fallback: Default icon if not found in map
-  return <EuiIcon type="integration" size={size} />;
+  // Otherwise, it's a string icon name, render directly
+  return <EuiIcon type={iconTypeOrComponent} size={size} />;
 }

@@ -7,6 +7,7 @@
 
 import type { ReactNode } from 'react';
 import React, { memo, useCallback, useEffect, useRef, useMemo, useState } from 'react';
+import type { IconType } from '@elastic/eui';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -49,6 +50,7 @@ export interface EditConnectorFlyoutProps {
   tab?: EditConnectorTabs;
   onConnectorUpdated?: (connector: ActionConnector) => void;
   isServerless?: boolean;
+  icon?: IconType;
 }
 
 const getConnectorWithoutSecrets = (
@@ -65,6 +67,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   onClose,
   tab = EditConnectorTabs.Configuration,
   onConnectorUpdated,
+  icon,
 }) => {
   const confirmModalTitleId = useGeneratedHtmlId();
 
@@ -354,7 +357,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
           }
           setTab={handleSetTab}
           selectedTab={selectedTab}
-          icon={actionTypeModel?.iconClass}
+          icon={icon ?? actionTypeModel?.iconClass}
           isExperimental={isExperimental}
           subFeature={actionTypeModel?.subFeature}
           isTestable={isTestable}

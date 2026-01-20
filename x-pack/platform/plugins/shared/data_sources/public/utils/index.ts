@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getConnectorIcon } from './get_connector_icon';
+export { getConnectorIcon, getConnectorIconType } from './get_connector_icon';
