@@ -103,3 +103,5 @@ export const POD_NAMES = Array.from({ length: POD_COUNT }, (_, i) => `pod-${i}`)
 export const DATE_WITHOUT_DATA = '04/01/2024 6:20:59 PM';
 
 export const EXTENDED_TIMEOUT = 45000; // 45 seconds
+
+export const KUBERNETES_TOUR_STORAGE_KEY = 'isKubernetesTourSeen';

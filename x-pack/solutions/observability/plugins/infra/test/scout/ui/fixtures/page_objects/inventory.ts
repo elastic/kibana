@@ -6,8 +6,7 @@
  */
 
 import { type KibanaUrl, type Locator, type ScoutPage } from '@kbn/scout-oblt';
-
-const KUBERNETES_TOUR_STORAGE_KEY = 'isKubernetesTourSeen';
+import { KUBERNETES_TOUR_STORAGE_KEY } from '../constants';
 
 export class InventoryPage {
   public readonly feedbackLink: Locator;
