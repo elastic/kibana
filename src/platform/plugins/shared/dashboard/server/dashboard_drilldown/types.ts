@@ -14,4 +14,4 @@ export type DashboardDrilldown = TypeOf<typeof dashboardDrilldownSchema>;
 
 export type StoredDashboardDrilldown = Omit<DashboardDrilldown, 'dashboard_id'> & {
   dashboardRefName: string;
-}
+};

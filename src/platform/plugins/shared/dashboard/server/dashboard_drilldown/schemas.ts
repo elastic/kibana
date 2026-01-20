@@ -13,5 +13,5 @@ import { dashboardNavigationOptionsSchema } from '../dashboard_navigation';
 
 export const dashboardDrilldownSchema = dashboardNavigationOptionsSchema.extends({
   dashboard_id: schema.string(),
-  type: schema.literal(DASHBOARD_DRILLDOWN_TYPE)
+  type: schema.literal(DASHBOARD_DRILLDOWN_TYPE),
 });
