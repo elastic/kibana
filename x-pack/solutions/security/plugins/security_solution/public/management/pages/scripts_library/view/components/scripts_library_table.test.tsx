@@ -248,5 +248,60 @@ describe('ScriptsLibraryTable', () => {
       const fileSizeCell = getByTestId('test-file-size');
       expect(fileSizeCell).toHaveTextContent('784kb');
     });
+
+    it('should sort by column `Name` when header clicked', async () => {
+      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      render();
+
+      const { getByText } = renderResult;
+      const nameHeader = getByText('Name');
+
+      await userEve.click(nameHeader);
+
+      expect(defaultProps.onChange).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sort: {
+            field: 'name',
+            direction: 'desc',
+          },
+        })
+      );
+    });
+
+    it('should sort by column `Last updated` when header clicked', async () => {
+      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      render();
+
+      const { getByText } = renderResult;
+      const lastUpdatedHeader = getByText('Last updated');
+
+      await userEve.click(lastUpdatedHeader);
+      expect(defaultProps.onChange).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sort: {
+            field: 'updatedAt',
+            direction: 'asc',
+          },
+        })
+      );
+    });
+
+    it('should sort by column `Updated by` when header clicked', async () => {
+      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      render();
+
+      const { getByText } = renderResult;
+      const updatedByHeader = getByText('Updated by');
+
+      await userEve.click(updatedByHeader);
+      expect(defaultProps.onChange).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sort: {
+            field: 'updatedBy',
+            direction: 'asc',
+          },
+        })
+      );
+    });
   });
 });
