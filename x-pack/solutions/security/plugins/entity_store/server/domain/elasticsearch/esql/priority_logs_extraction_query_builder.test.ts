@@ -1,0 +1,26 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { buildPriorityLogsExtractionEsqlQuery } from './priority_logs_extraction_query_builder';
+import { entitiesDefinitionRegistry, getEntityDefinition } from '../../definitions/registry';
+import type { EntityType } from '../../definitions/entity_schema';
+
+describe('buildPriorityLogsExtractionEsqlQuery', () => {
+  Object.keys(entitiesDefinitionRegistry).forEach((type) => {
+    it(`generates the expected query for ${type} entity description`, () => {
+      const query = buildPriorityLogsExtractionEsqlQuery({
+        indexPatterns: ['test-index-*'],
+        latestIndex: 'latest-index',
+        entityDefinition: getEntityDefinition({ type: type as EntityType }),
+        maxPageSearchSize: 10000,
+        fromDateISO: '2022-01-01T00:00:00.000Z',
+        toDateISO: '2022-01-01T23:59:59.999Z',
+      });
+      expect(query).toMatchSnapshot();
+    });
+  });
+});

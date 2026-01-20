@@ -15,7 +15,7 @@ import { userEntityDefinition } from './user';
 import { serviceEntityDefinition } from './service';
 import { genericEntityDefinition } from './generic';
 
-const entitiesDescriptionRegistry = {
+const entitiesDefinitionRegistry = {
   host: hostEntityDefinition,
   user: userEntityDefinition,
   service: serviceEntityDefinition,
@@ -29,7 +29,7 @@ interface EntityDefinitionParams {
 export function getEntityDefinition({ type }: EntityDefinitionParams): ManagedEntityDefinition {
   // TODO: get index patterns from data view in runtime
 
-  const description = entitiesDescriptionRegistry[type];
+  const description = entitiesDefinitionRegistry[type];
   assert(description, `No entity description found for type: ${type}`);
 
   return {
