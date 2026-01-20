@@ -22,10 +22,10 @@ const _allowedExperimentalValues = {
   enableFleetPolicyRevisionsCleanupTask: true,
   agentlessPoliciesAPI: true, // When enabled, agentless policies API will be enabled.
   useAgentlessAPIInUI: true, // When enabled, Fleet UI will use agentless policies API to create agentless policies.
+  enableAgentRollback: true, // When enabled, agent upgrade rollback will be available in the API and UI.
   disableAgentlessLegacyAPI: false, // When enabled, it will disable creating agentless policies via agent or package policies API.
   enableEsqlViewInstall: false,
   newBrowseIntegrationUx: false, // When enabled integrations, browse integrations page will use the new UX.
-  enableAgentRollback: false, // When enabled, agent upgrade rollback will be available in the API and UI.
 };
 
 /**
