@@ -104,8 +104,7 @@ export const GenericEntityFlyoutContent = ({
         }}
       />
       <EntityInsight
-        field={insightsField}
-        value={insightsValue}
+        entityIdentifiers={{ [insightsField]: insightsValue }}
         isPreviewMode={false}
         openDetailsPanel={openGenericEntityDetailsPanelByPath}
       />

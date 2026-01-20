@@ -37,7 +37,7 @@ import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/u
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { MisconfigurationFindingsPreviewPanelKey } from '../../../flyout/csp_details/findings_flyout/constants';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
-import type { CloudPostureEntityIdentifier } from '../entity_insight';
+import type { EntityIdentifiers } from '../../../flyout/document_details/shared/utils';
 
 type MisconfigurationSortFieldType =
   | MISCONFIGURATION.RESULT_EVALUATION
@@ -117,15 +117,7 @@ const useGetFindingsStats = () => {
  * Insights view displayed in the document details expandable flyout left section
  */
 export const MisconfigurationFindingsDetailsTable = memo(
-  ({
-    field,
-    value,
-    scopeId,
-  }: {
-    field: CloudPostureEntityIdentifier;
-    value: string;
-    scopeId: string;
-  }) => {
+  ({ entityIdentifiers, scopeId }: { entityIdentifiers: EntityIdentifiers; scopeId: string }) => {
     useEffect(() => {
       uiMetricService.trackUiMetric(
         METRIC_TYPE.COUNT,
@@ -144,13 +136,13 @@ export const MisconfigurationFindingsDetailsTable = memo(
     sortFieldDirection[sortField] = sortDirection;
 
     const { data, isLoading } = useMisconfigurationFindings({
-      query: buildMisconfigurationEntityFlyoutPreviewQuery({ [field]: value }, currentFilter),
+      query: buildMisconfigurationEntityFlyoutPreviewQuery(entityIdentifiers, currentFilter),
       sort: [sortFieldDirection],
       enabled: true,
       pageSize: 1,
     });
 
-    const { passedFindings, failedFindings } = useHasMisconfigurations({ [field]: value });
+    const { passedFindings, failedFindings } = useHasMisconfigurations(entityIdentifiers);
 
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(10);
@@ -207,8 +199,8 @@ export const MisconfigurationFindingsDetailsTable = memo(
 
     const getNavUrlParams = useGetNavigationUrlParams();
 
-    const getFindingsPageUrl = (name: string, queryField: CloudPostureEntityIdentifier) => {
-      return getNavUrlParams({ [queryField]: name }, 'configurations', ['rule.name']);
+    const getFindingsPageUrl = (identifiers: EntityIdentifiers) => {
+      return getNavUrlParams(identifiers, 'configurations', ['rule.name']);
     };
 
     const linkWidth = 40;
@@ -304,7 +296,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
         <EuiPanel hasShadow={false}>
           <SecuritySolutionLinkAnchor
             deepLinkId={SecurityPageName.cloudSecurityPostureFindings}
-            path={`${getFindingsPageUrl(value, field)}`}
+            path={`${getFindingsPageUrl(entityIdentifiers)}`}
             target={'_blank'}
             external={false}
             onClick={() => {

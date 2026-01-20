@@ -40,7 +40,7 @@ import { buildHostNamesFilter } from '../../../../../common/search_strategy';
 import { HostOverview } from '../../../../overview/components/host_overview';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
-import { EntityIdentifierFields, EntityType } from '../../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../../common/entity_analytics/types';
 import type { EntityIdentifiers } from '../../shared/utils';
 import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/default_renderer';
@@ -198,11 +198,8 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
   const hostRiskData = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
   const isRiskScoreExist = !!hostRiskData?.host.risk;
 
-  const identifierField: EntityIdentifierFields = EntityIdentifierFields.hostName;
-
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    field: identifierField,
-    value: hostName,
+    entityIdentifiers,
     to,
     from,
     queryId: 'HostEntityOverview',

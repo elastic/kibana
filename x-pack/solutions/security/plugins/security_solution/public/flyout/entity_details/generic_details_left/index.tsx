@@ -21,6 +21,7 @@ import {
   getFieldsTableTab,
 } from '../../../entity_analytics/components/entity_details_flyout';
 import { GENERIC_FLYOUT_STORAGE_KEYS } from '../generic_right/constants';
+import type { EntityIdentifiers } from '../../document_details/shared/utils';
 
 interface BaseGenericEntityDetailsPanelProps {
   value: string;
@@ -89,12 +90,12 @@ export const GenericEntityDetailsPanel = (params: GenericEntityDetailsPanelProps
   const source = getGenericEntity.data?._source;
 
   const tabs: LeftPanelTabsType = useMemo(() => {
+    const entityIdentifiers: EntityIdentifiers = { [field]: value };
     const insightsTab =
       hasMisconfigurationFindings || hasVulnerabilitiesFindings || hasNonClosedAlerts
         ? [
             getInsightsInputTab({
-              name: value,
-              fieldName: field as 'related.entity',
+              entityIdentifiers,
               scopeId,
             }),
           ]

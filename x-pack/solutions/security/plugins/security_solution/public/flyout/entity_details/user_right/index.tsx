@@ -33,7 +33,7 @@ import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_
 import { UserPreviewPanelFooter } from '../user_preview/footer';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { useNavigateToUserDetails } from './hooks/use_navigate_to_user_details';
-import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
 import type { EntityIdentifiers } from '../../document_details/shared/utils';
@@ -114,8 +114,7 @@ export const UserPanel = ({
   const { hasMisconfigurationFindings } = useHasMisconfigurations(entityIdentifiers);
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    field: EntityIdentifierFields.userName,
-    value: effectiveUserName,
+    entityIdentifiers,
     to,
     from,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}USER_NAME_RIGHT`,
@@ -193,7 +192,7 @@ export const UserPanel = ({
               managedUser={managedUser}
             />
             <UserPanelContent
-              userName={effectiveUserName}
+              entityIdentifiers={entityIdentifiers}
               observedUser={observedUserWithAnomalies}
               riskScoreState={riskScoreState}
               recalculatingScore={recalculatingScore}

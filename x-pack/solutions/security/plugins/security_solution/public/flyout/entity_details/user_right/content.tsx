@@ -22,9 +22,10 @@ import type { ObservedEntityData } from '../shared/components/observed_entity/ty
 import { useObservedUserItems } from './hooks/use_observed_user_items';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
+import type { EntityIdentifiers } from '../../document_details/shared/utils';
 
 interface UserPanelContentProps {
-  userName: string;
+  entityIdentifiers: EntityIdentifiers;
   observedUser: ObservedEntityData<UserItem>;
   riskScoreState: RiskScoreState<EntityType.user>;
   recalculatingScore: boolean;
@@ -36,7 +37,7 @@ interface UserPanelContentProps {
 }
 
 export const UserPanelContent = ({
-  userName,
+  entityIdentifiers,
   observedUser,
   riskScoreState,
   recalculatingScore,
@@ -51,6 +52,11 @@ export const UserPanelContent = ({
   const isEntityDetailsHighlightsAIEnabled = useIsExperimentalFeatureEnabled(
     'entityDetailsHighlightsEnabled'
   );
+
+  // Extract userName from entityIdentifiers for components that need a string
+  // Priority: entityIdentifiers['user.name'] > entityIdentifiers[first key]
+  const userName =
+    entityIdentifiers[EntityIdentifierFields.userName] || Object.values(entityIdentifiers)[0] || '';
 
   return (
     <FlyoutBody>
@@ -75,8 +81,7 @@ export const UserPanelContent = ({
         onChange={onAssetCriticalityChange}
       />
       <EntityInsight
-        value={userName}
-        field={EntityIdentifierFields.userName}
+        entityIdentifiers={entityIdentifiers}
         isPreviewMode={isPreviewMode}
         openDetailsPanel={openDetailsPanel}
       />

@@ -34,7 +34,7 @@ import {
   FirstLastSeen,
   FirstLastSeenType,
 } from '../../../../common/components/first_last_seen/first_last_seen';
-import { EntityIdentifierFields, EntityType } from '../../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../../common/entity_analytics/types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { DescriptionListStyled } from '../../../../common/components/page';
 import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
@@ -200,8 +200,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ entityId
   );
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    field: EntityIdentifierFields.hostName,
-    value: hostName,
+    entityIdentifiers,
     to,
     from,
     queryId: HOST_ENTITY_OVERVIEW_ID,

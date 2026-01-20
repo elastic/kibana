@@ -31,7 +31,7 @@ import {
   FirstLastSeen,
   FirstLastSeenType,
 } from '../../../../common/components/first_last_seen/first_last_seen';
-import { EntityIdentifierFields, EntityType } from '../../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../../common/entity_analytics/types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { DescriptionListStyled } from '../../../../common/components/page';
 import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
@@ -128,8 +128,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ entityId
 
   const { hasMisconfigurationFindings } = useHasMisconfigurations(entityIdentifiers);
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    field: EntityIdentifierFields.userName,
-    value: entityIdentifiers['user.name'],
+    entityIdentifiers,
     to,
     from,
     queryId: USER_ENTITY_OVERVIEW_ID,

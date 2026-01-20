@@ -25,7 +25,7 @@ import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
 } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import type { CloudPostureEntityIdentifier } from '../entity_insight';
+import type { EntityIdentifiers } from '../../../flyout/document_details/shared/utils';
 
 interface MisconfigurationPreviewDistributionBarProps {
   key: string;
@@ -105,19 +105,16 @@ const MisconfigurationPreviewScore = ({
 };
 
 export const MisconfigurationsPreview = ({
-  value,
-  field,
+  entityIdentifiers,
   isPreviewMode,
   openDetailsPanel,
 }: {
-  value: string;
-  field: CloudPostureEntityIdentifier;
+  entityIdentifiers: EntityIdentifiers;
   isPreviewMode: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
 }) => {
-  const { hasMisconfigurationFindings, passedFindings, failedFindings } = useHasMisconfigurations(
-    { [field]: value }
-  );
+  const { hasMisconfigurationFindings, passedFindings, failedFindings } =
+    useHasMisconfigurations(entityIdentifiers);
   const findingsStats = useGetFindingsStats(passedFindings, failedFindings);
 
   useEffect(() => {

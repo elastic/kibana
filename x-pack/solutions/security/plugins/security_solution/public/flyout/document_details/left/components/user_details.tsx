@@ -36,7 +36,7 @@ import { buildUserNamesFilter } from '../../../../../common/search_strategy';
 import { UserOverview } from '../../../../overview/components/user_overview';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
-import { EntityIdentifierFields, EntityType } from '../../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../../common/entity_analytics/types';
 import type { EntityIdentifiers } from '../../shared/utils';
 import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/default_renderer';
@@ -186,12 +186,9 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
   const isRiskScoreExist = !!userRiskData?.user.risk;
 
-  const identifierField: EntityIdentifierFields = EntityIdentifierFields.userName;
-
   const { hasMisconfigurationFindings } = useHasMisconfigurations(entityIdentifiers);
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    field: identifierField,
-    value: userName,
+    entityIdentifiers,
     to,
     from,
     queryId: USER_DETAILS_INSIGHTS_ID,
