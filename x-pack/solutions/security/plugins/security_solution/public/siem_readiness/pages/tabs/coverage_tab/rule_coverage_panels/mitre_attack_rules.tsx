@@ -5,57 +5,100 @@
  * 2.0.
  */
 
-import React, { useMemo, useReducer } from 'react';
-import { EuiPanel, EuiFlexGroup, EuiText, EuiLoadingSpinner } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { Chart, Partition, Settings, PartitionLayout } from '@elastic/charts';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { useSiemReadinessApi } from '@kbn/siem-readiness';
+import React, { useMemo } from 'react';
 import {
-  CoverageOverviewRuleActivity,
-  CoverageOverviewRuleSource,
-} from '../../../../../../common/api/detection_engine';
-import { useFetchCoverageOverviewQuery } from '../../../../../detection_engine/rule_management/api/hooks/use_fetch_coverage_overview_query';
-import type { CoverageOverviewDashboardState } from '../../../../../detection_engine/rule_management_ui/pages/coverage_overview/coverage_overview_dashboard_reducer';
-import { createCoverageOverviewDashboardReducer } from '../../../../../detection_engine/rule_management_ui/pages/coverage_overview/coverage_overview_dashboard_reducer';
+  EuiPanel,
+  EuiFlexGroup,
+  EuiText,
+  EuiLoadingSpinner,
+  EuiHealth,
+  useEuiTheme,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { useSiemReadinessApi } from '@kbn/siem-readiness';
+import type { SiemReadinessPackageInfo, RelatedIntegrationRuleResponse } from '@kbn/siem-readiness';
+interface DetectionRule extends RelatedIntegrationRuleResponse {
+  rule_id?: string;
+  id?: string;
+  name?: string;
+  enabled?: boolean;
+  threat?: ThreatElement[];
+}
 
-const initialCoverageState: CoverageOverviewDashboardState = {
-  filter: {
-    activity: [CoverageOverviewRuleActivity.Enabled],
-    source: [CoverageOverviewRuleSource.Prebuilt, CoverageOverviewRuleSource.Custom],
-  },
-  showExpandedCells: false,
-  isLoading: false,
-  data: undefined,
-};
+interface ThreatElement {
+  framework?: string;
+  tactic?: {
+    id?: string;
+    name: string;
+    reference?: string;
+  };
+  technique?: Array<{
+    id?: string;
+    name?: string;
+    reference?: string;
+    subtechnique?: Array<{
+      id?: string;
+      name?: string;
+      reference?: string;
+    }>;
+  }>;
+  rule_id: string;
+  rule_name: string;
+}
+
+interface TacticNameCount {
+  name: string;
+  count: number;
+}
+
+interface MissingIntegrationsData {
+  missingIntegrations: string[];
+  ruleIds: string[];
+}
+
+interface TreemapDataItem {
+  name: string;
+  value: number;
+  count: number;
+  missingIntegrations: string[];
+  missingIntegrationCount: number;
+  rulesWithMissingIntegrations: number;
+  color: string;
+  id: string;
+  row: number;
+  col: number;
+  isEmpty: boolean;
+}
 
 export const MitreAttackRuleCoveragePanel: React.FC = () => {
-  const [state, dispatch] = useReducer(
-    createCoverageOverviewDashboardReducer(),
-    initialCoverageState
-  );
+  const { euiTheme } = useEuiTheme();
+  const { getDetectionRules, getIntegrations } = useSiemReadinessApi();
 
-  const { data, isLoading, refetch } = useFetchCoverageOverviewQuery(state.filter);
-  const {
-    getInstalledIntegrations,
-    getDetectionRules,
-    useDetectionRuleById,
-    getReadinessCategories,
-  } = useSiemReadinessApi();
+  const getInstalledIntegrationsData = useMemo(() => {
+    return (
+      getIntegrations?.data?.items?.filter(
+        (pkg: SiemReadinessPackageInfo) => pkg.status === 'installed'
+      ) || []
+    );
+  }, [getIntegrations?.data?.items]);
 
-  const threatFields = useMemo(() => {
+  const installedIntegrationNames = useMemo(() => {
+    return getInstalledIntegrationsData?.map((item) => item.name) || [];
+  }, [getInstalledIntegrationsData]);
+
+  const threatFields = useMemo((): ThreatElement[] => {
     if (!getDetectionRules.data?.data) return [];
 
-    const allThreatElements: any[] = [];
+    const allThreatElements: ThreatElement[] = [];
 
-    getDetectionRules.data.data.forEach((rule: any) => {
-      if (rule.threat && Array.isArray(rule.threat)) {
-        // Add each element from the threat array to our flat array
-        rule.threat.forEach((threatElement: any) => {
+    getDetectionRules.data.data.forEach((rule: DetectionRule) => {
+      // Only include enabled rules
+      if (rule.enabled && rule.threat && Array.isArray(rule.threat)) {
+        rule.threat.forEach((threatElement) => {
           allThreatElements.push({
             ...threatElement,
-            rule_id: rule.rule_id || rule.id,
-            rule_name: rule.name,
+            rule_id: rule.rule_id || rule.id || '',
+            rule_name: rule.name || '',
           });
         });
       }
@@ -84,14 +127,14 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
     []
   );
 
-  const tacticNameCounts = useMemo(() => {
+  const tacticNameCounts = useMemo((): TacticNameCount[] => {
     const countMap = new Map<string, number>();
 
     staticTactics.forEach((tacticName) => {
       countMap.set(tacticName, 0);
     });
 
-    threatFields.forEach((threatElement: any) => {
+    threatFields.forEach((threatElement) => {
       if (threatElement.tactic && threatElement.tactic.name) {
         const tacticName = threatElement.tactic.name.trim();
 
@@ -112,10 +155,10 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
   }, [threatFields, staticTactics]);
 
   // Count total MITRE-related rules
-  const totalMitreRules = useMemo(() => {
+  const totalMitreRules = useMemo((): number => {
     const uniqueRuleIds = new Set<string>();
 
-    threatFields.forEach((threatElement: any) => {
+    threatFields.forEach((threatElement) => {
       if (threatElement.tactic && threatElement.tactic.name && threatElement.rule_id) {
         const tacticName = threatElement.tactic.name.trim();
 
@@ -133,23 +176,112 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
     return uniqueRuleIds.size;
   }, [threatFields, staticTactics]);
 
-  const treemapData = useMemo(() => {
+  // Calculate missing integrations by MITRE tactic using rule data
+  const missingIntegrationsByTactic = useMemo((): Map<string, MissingIntegrationsData> => {
+    const tacticMap = new Map<string, { missingIntegrations: Set<string>; ruleIds: string[] }>();
+
+    staticTactics.forEach((tacticName) => {
+      tacticMap.set(tacticName, { missingIntegrations: new Set<string>(), ruleIds: [] });
+    });
+
+    // Process each rule to find missing integrations per tactic
+    getDetectionRules.data?.data?.forEach((rule: DetectionRule) => {
+      if (!rule.enabled) return;
+
+      const ruleId = rule.rule_id || rule.id || '';
+      const relatedIntegrations = rule.related_integrations || [];
+      const ruleThreat = rule.threat || [];
+
+      // Get missing integrations for this rule
+      const missingIntegrations = relatedIntegrations
+        .filter((integration) => {
+          const packageName = integration.package;
+          return packageName && !installedIntegrationNames.includes(packageName);
+        })
+        .map((integration) => integration.package)
+        .filter((name): name is string => typeof name === 'string');
+
+      // If this rule has missing integrations, map them to its MITRE tactics
+      if (missingIntegrations.length > 0) {
+        ruleThreat.forEach((threatElement) => {
+          if (threatElement.tactic && threatElement.tactic.name) {
+            const tacticName = threatElement.tactic.name.trim();
+
+            // Find matching static tactic
+            const matchingStaticTactic = staticTactics.find(
+              (staticTactic) => staticTactic.toLowerCase() === tacticName.toLowerCase()
+            );
+
+            if (matchingStaticTactic) {
+              const tacticData = tacticMap.get(matchingStaticTactic);
+              if (tacticData) {
+                missingIntegrations.forEach((integration) => {
+                  tacticData.missingIntegrations.add(integration);
+                });
+
+                if (!tacticData.ruleIds.includes(ruleId)) {
+                  tacticData.ruleIds.push(ruleId);
+                }
+              }
+            }
+          }
+        });
+      }
+    });
+
+    const result = new Map<string, MissingIntegrationsData>();
+    tacticMap.forEach((value, key) => {
+      result.set(key, {
+        missingIntegrations: Array.from(value.missingIntegrations),
+        ruleIds: value.ruleIds,
+      });
+    });
+
+    return result;
+  }, [staticTactics, getDetectionRules.data, installedIntegrationNames]);
+
+  const treemapData = useMemo((): TreemapDataItem[] => {
     return staticTactics.map((tacticName, index) => {
       const tacticData = tacticNameCounts.find((t) => t.name === tacticName);
       const count = tacticData ? tacticData.count : 0;
+      const missingData = missingIntegrationsByTactic.get(tacticName) || {
+        missingIntegrations: [],
+        ruleIds: [],
+      };
+
+      let color;
+      if (missingData.missingIntegrations.length > 0) {
+        color = euiTheme.colors.vis.euiColorVis7;
+      } else if (count > 0) {
+        color = euiTheme.colors.vis.euiColorVis1;
+      } else {
+        color = euiTheme.colors.lightShade;
+      }
 
       return {
         name: tacticName,
         value: 1,
         count,
-        color: count > 0 ? euiThemeVars.euiColorVis1 : euiThemeVars.euiColorLightShade,
+        missingIntegrations: missingData.missingIntegrations,
+        missingIntegrationCount: missingData.missingIntegrations.length,
+        rulesWithMissingIntegrations: missingData.ruleIds.length,
+        color,
         id: `tactic-${index}`,
         row: Math.floor(index / 7),
         col: index % 7,
         isEmpty: false,
       };
     });
-  }, [staticTactics, tacticNameCounts]);
+  }, [
+    staticTactics,
+    tacticNameCounts,
+    missingIntegrationsByTactic,
+    euiTheme.colors.vis.euiColorVis7,
+    euiTheme.colors.vis.euiColorVis1,
+    euiTheme.colors.lightShade,
+  ]);
+
+  const isLoading = !getDetectionRules.data || !getIntegrations?.data;
 
   if (isLoading) {
     return (
@@ -184,73 +316,29 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
           )}
         </EuiText>
         <EuiText size="s">
-          {i18n.translate(
-            'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.mitreAttackCount.summary',
-            {
-              defaultMessage:
-                '{mitreRules} out of {totalRules} enabled rules are mapped to a MITRE ATT&CK tactic.',
-              values: {
-                mitreRules: <strong>{totalMitreRules}</strong>,
-                totalRules: <strong>{getDetectionRules.data?.data.length || 0}</strong>,
-              },
-            }
-          )}
+          <>
+            <strong>{totalMitreRules}</strong>{' '}
+            {i18n.translate(
+              'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.mitreAttackCount.summary.middle',
+              {
+                defaultMessage: 'out of',
+              }
+            )}{' '}
+            <strong>{getDetectionRules.data?.data.length || 0}</strong>{' '}
+            {i18n.translate(
+              'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.mitreAttackCount.summary.end',
+              {
+                defaultMessage: 'enabled rules are mapped to a MITRE ATT&CK tactic.',
+              }
+            )}
+          </>
         </EuiText>
 
         <div style={{ height: '300px', width: '100%', position: 'relative' }}>
-          <Chart>
-            <Settings
-              showLegend={false}
-              tooltip={{
-                type: 'vertical',
-                customTooltip: ({ values }) => <div style={{ padding: '8px' }}>HELLO</div>,
-              }}
-              theme={{
-                partition: {
-                  fontFamily: euiThemeVars.euiFontFamily,
-                  outerSizeRatio: 1,
-                  sectorLineStroke: euiThemeVars.euiColorLightestShade,
-                  sectorLineWidth: 1,
-                },
-              }}
-            />
-            <Partition
-              id="mitre-coverage-treemap"
-              data={treemapData}
-              layout={PartitionLayout.treemap}
-              valueAccessor={(d) => d.value}
-              valueFormatter={() => 'HELLO'}
-              config={{
-                partitionLayout: PartitionLayout.treemap,
-              }}
-              layers={[
-                {
-                  groupByRollup: (d) => d.name,
-                  nodeLabel: (d) => '',
-                  fillLabel: {
-                    valueFormatter: () => '',
-                    fontWeight: 'bold',
-                    padding: { top: 0, left: 0, right: 0, bottom: 0 },
-                  },
-                  shape: {
-                    fillColor: (d) => {
-                      const item = treemapData.find((itemx) => itemx.name === d);
-                      return item?.color || euiThemeVars.euiColorLightShade;
-                    },
-                  },
-                },
-              ]}
-            />
-          </Chart>
-
           <div
             style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
               width: '100%',
               height: '100%',
-              pointerEvents: 'none',
               display: 'grid',
               gridTemplateColumns: 'repeat(7, 1fr)',
               gridTemplateRows: 'repeat(2, 1fr)',
@@ -262,38 +350,81 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
               <div
                 key={item.id}
                 style={{
+                  backgroundColor: item.color,
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
-                  padding: '8px',
-                  fontSize: '12px',
+                  padding: euiTheme.size.s,
+                  fontSize: euiTheme.size.m,
                   fontWeight: 'bold',
                 }}
               >
-                <div style={{ textAlign: 'left', fontSize: '12px', fontWeight: 'bold' }}>
+                <div style={{ textAlign: 'left', fontSize: euiTheme.size.m, fontWeight: 'bold' }}>
                   {item.name}
                 </div>
-                <div
-                  style={{
-                    textAlign: 'left',
-                    fontSize: '12px',
-                  }}
-                >
-                  {`${item.count} rules`}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: euiTheme.size.xxs }}>
+                  {item.missingIntegrationCount > 0 && (
+                    <div
+                      style={{
+                        textAlign: 'left',
+                        fontSize: euiTheme.size.m,
+                      }}
+                    >
+                      {`${item.missingIntegrationCount} missing integrations`}
+                    </div>
+                  )}
+                  <div
+                    style={{
+                      textAlign: 'left',
+                      fontSize: euiTheme.size.m,
+                    }}
+                  >
+                    {`${item.count} rules`}
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        <EuiText size="xs" color="subdued">
-          {i18n.translate(
-            'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.mitreAttack.description',
-            {
-              defaultMessage: 'Coverage of enabled detection rules across MITRE ATT&CK tactics',
-            }
-          )}
-        </EuiText>
+        <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiHealth color={euiTheme.colors.vis.euiColorVis1}>
+              <EuiText size="xs">
+                {i18n.translate(
+                  'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.mitreAttack.legend.hasAllRequiredIntegrations',
+                  {
+                    defaultMessage: 'All enabled rules have required integrations',
+                  }
+                )}
+              </EuiText>
+            </EuiHealth>
+          </EuiFlexGroup>
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiHealth color={euiTheme.colors.vis.euiColorVis7}>
+              <EuiText size="xs">
+                {i18n.translate(
+                  'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.mitreAttack.legend.missingIntegrations',
+                  {
+                    defaultMessage: 'At least one enabled rule is missing a required integration',
+                  }
+                )}
+              </EuiText>
+            </EuiHealth>
+          </EuiFlexGroup>
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiHealth color={euiTheme.colors.lightShade}>
+              <EuiText size="xs">
+                {i18n.translate(
+                  'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.mitreAttack.legend.noEnabledRules',
+                  {
+                    defaultMessage: 'No enabled rules',
+                  }
+                )}
+              </EuiText>
+            </EuiHealth>
+          </EuiFlexGroup>
+        </EuiFlexGroup>
       </EuiFlexGroup>
     </EuiPanel>
   );
