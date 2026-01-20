@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { BoundInferenceClient } from '@kbn/inference-common';
+import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
+import { sumTokens } from '@kbn/streams-ai';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Streams } from '@kbn/streams-schema';
 import type { InsightsResult } from '@kbn/streams-schema';
@@ -53,21 +54,16 @@ export async function generateSignificantEventsSummary({
     (result) => result.insights.length > 0
   );
 
-  const tokenUsage = streamInsightsResults.reduce(
-    (acc, result) => {
-      acc.prompt += result.tokenUsage.prompt;
-      acc.completion += result.tokenUsage.completion;
-      acc.total += result.tokenUsage.total;
-      return acc;
-    },
-    { prompt: 0, completion: 0, cached: 0, total: 0 }
+  const tokensUsed = streamInsightsResults.reduce<ChatCompletionTokenCount>(
+    (acc, result) => sumTokens(acc, result.tokensUsed),
+    { prompt: 0, completion: 0, total: 0 }
   );
 
   // If no stream insights, return empty
   if (streamInsightsWithData.length === 0) {
     return {
       insights: [],
-      tokenUsage,
+      tokensUsed,
     };
   }
 
@@ -84,12 +80,7 @@ export async function generateSignificantEventsSummary({
 
     return {
       insights: insights ?? [],
-      tokenUsage: {
-        prompt: tokenUsage.prompt + (response.tokens?.prompt ?? 0),
-        completion: tokenUsage.completion + (response.tokens?.completion ?? 0),
-        cached: tokenUsage.cached + (response.tokens?.cached ?? 0),
-        total: tokenUsage.total + (response.tokens?.total ?? 0),
-      },
+      tokensUsed: sumTokens(tokensUsed, response.tokens),
     };
   } catch (error) {
     if (error.message.includes(`The request exceeded the model's maximum context length`)) {
@@ -99,7 +90,7 @@ export async function generateSignificantEventsSummary({
       );
       return {
         insights: [],
-        tokenUsage,
+        tokensUsed,
       };
     }
 
@@ -139,7 +130,7 @@ async function generateStreamInsights({
   if (queryDataList.length === 0) {
     return {
       insights: [],
-      tokenUsage: { prompt: 0, completion: 0, total: 0 },
+      tokensUsed: { prompt: 0, completion: 0, total: 0 },
     };
   }
 
@@ -157,12 +148,7 @@ async function generateStreamInsights({
 
     return {
       insights: insights ?? [],
-      tokenUsage: {
-        prompt: response.tokens?.prompt ?? 0,
-        completion: response.tokens?.completion ?? 0,
-        cached: response.tokens?.cached ?? 0,
-        total: response.tokens?.total ?? 0,
-      },
+      tokensUsed: response.tokens ?? { prompt: 0, completion: 0, total: 0 },
     };
   } catch (error) {
     if (error.message.includes(`The request exceeded the model's maximum context length`)) {
@@ -172,7 +158,7 @@ async function generateStreamInsights({
       );
       return {
         insights: [],
-        tokenUsage: { prompt: 0, completion: 0, total: 0 },
+        tokensUsed: { prompt: 0, completion: 0, total: 0 },
       };
     }
 

@@ -26,5 +26,5 @@ export interface Insight {
 
 export interface InsightsResult {
   insights: Insight[];
-  tokenUsage: ChatCompletionTokenCount;
+  tokensUsed: ChatCompletionTokenCount;
 }

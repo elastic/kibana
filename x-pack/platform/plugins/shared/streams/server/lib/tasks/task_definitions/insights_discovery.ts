@@ -57,9 +57,9 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                 });
 
                 taskContext.telemetry.trackInsightsGenerated({
-                  input_tokens_used: result.tokenUsage?.prompt ?? 0,
-                  output_tokens_used: result.tokenUsage?.completion ?? 0,
-                  cached_tokens_used: result.tokenUsage?.cached ?? 0,
+                  input_tokens_used: result.tokensUsed?.prompt ?? 0,
+                  output_tokens_used: result.tokensUsed?.completion ?? 0,
+                  cached_tokens_used: result.tokensUsed?.cached ?? 0,
                 });
 
                 await taskClient.complete<InsightsDiscoveryTaskParams, InsightsResult>(
