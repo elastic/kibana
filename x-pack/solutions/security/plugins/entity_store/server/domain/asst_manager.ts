@@ -12,7 +12,11 @@ import { ALL_ENTITY_TYPES } from './definitions/entity_type';
 import { scheduleExtractEntityTasks, stopExtractEntityTasks } from '../tasks/extract_entity_task';
 
 export class AssetManager {
-  constructor(private logger: Logger, private taskManager: TaskManagerStartContract, private namespace: string) {}
+  constructor(
+    private logger: Logger,
+    private taskManager: TaskManagerStartContract,
+    private namespace: string
+  ) {}
 
   public async install(
     entityTypes: EntityType[] = ALL_ENTITY_TYPES,
