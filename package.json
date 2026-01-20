@@ -1913,7 +1913,7 @@
     "ajv-draft-04": "1.0.0",
     "argsplit": "1.0.5",
     "autoprefixer": "10.4.7",
-    "axe-core": "4.11.0",
+    "axe-core": "4.11.1",
     "babel-jest": "29.7.0",
     "babel-loader": "9.2.1",
     "babel-plugin-add-module-exports": "1.0.4",
