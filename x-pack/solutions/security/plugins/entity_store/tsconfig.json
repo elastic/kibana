@@ -26,6 +26,5 @@
     "@kbn/config-schema",
     "@kbn/logging-mocks",
     "@kbn/spaces-plugin",
-    "@kbn/core-saved-objects-utils-server",
   ]
 }
