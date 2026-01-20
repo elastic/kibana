@@ -6,7 +6,6 @@
  */
 
 import { isLensAPIFormat } from '@kbn/lens-embeddable-utils/config_builder/utils';
-import { transformTitlesIn } from '@kbn/presentation-publishing';
 import type { LensTransformDependencies } from '.';
 import { DOC_TYPE } from '../constants';
 import { extractLensReferences } from '../references';
@@ -19,21 +18,20 @@ import { LENS_SAVED_OBJECT_REF_NAME, isByRefLensConfig } from './utils';
 import type { LensSerializedState } from '../../public';
 
 /**
- * Transform from Lens API format to Lens Stored State
+ * Transform from Lens API format to Lens Serialized State
  */
 export const getTransformIn = ({
   builder,
   transformEnhancementsIn,
 }: LensTransformDependencies): LensTransformIn => {
   return function transformIn(config) {
-    const configWithStoredTitles = transformTitlesIn(config);
     const enhancementsResult =
       transformEnhancementsIn && config.enhancements
         ? transformEnhancementsIn(config.enhancements)
         : { state: undefined, references: [] };
 
-    if (isByRefLensConfig(configWithStoredTitles)) {
-      const { savedObjectId: id, ...rest } = configWithStoredTitles;
+    if (isByRefLensConfig(config)) {
+      const { savedObjectId: id, ...rest } = config;
       return {
         state: rest,
         ...(enhancementsResult.state ? { enhancements: enhancementsResult.state } : {}),
@@ -48,12 +46,10 @@ export const getTransformIn = ({
       } satisfies LensByRefTransformInResult;
     }
 
-    const chartType = builder.getType(configWithStoredTitles.attributes);
+    const chartType = builder.getType(config.attributes);
 
     if (!builder.isSupported(chartType)) {
-      const { state, references } = extractLensReferences(
-        configWithStoredTitles as LensSerializedState
-      );
+      const { state, references } = extractLensReferences(config as LensSerializedState);
       // TODO: remove this once all formats are supported
       // when not supported, no transform is needed
       return {
@@ -63,16 +59,16 @@ export const getTransformIn = ({
       } satisfies LensByValueTransformInResult;
     }
 
-    if (!configWithStoredTitles.attributes) {
+    if (!config.attributes) {
       // Not sure if this is possible
       throw new Error('attributes are missing');
     }
 
-    const attributes = isLensAPIFormat(configWithStoredTitles.attributes)
-      ? builder.fromAPIFormat(configWithStoredTitles.attributes)
-      : configWithStoredTitles.attributes;
+    const attributes = isLensAPIFormat(config.attributes)
+      ? builder.fromAPIFormat(config.attributes)
+      : config.attributes;
     const { state, references } = extractLensReferences({
-      ...configWithStoredTitles,
+      ...config,
       attributes,
     });
 

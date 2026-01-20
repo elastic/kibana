@@ -7,7 +7,7 @@
 
 import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';
 import type { SerializedTimeRange } from '@kbn/presentation-publishing';
-import type { SerializedTitles, StoredTitles } from '@kbn/presentation-publishing-schemas';
+import type { SerializedTitles } from '@kbn/presentation-publishing-schemas';
 
 interface ChangePointCommonState extends SerializedTimeRange {
   viewType: ChangePointDetectionViewType;
@@ -21,4 +21,4 @@ interface ChangePointCommonState extends SerializedTimeRange {
 export type ChangePointEmbeddableState = ChangePointCommonState &
   SerializedTitles & { dataViewId: string };
 
-export type StoredChangePointEmbeddableState = ChangePointCommonState & StoredTitles;
+export type StoredChangePointEmbeddableState = Omit<ChangePointEmbeddableState, 'dataViewId'>;

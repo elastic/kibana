@@ -7,11 +7,10 @@
 
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { Reference } from '@kbn/content-management-utils';
-import { transformTitlesIn } from '@kbn/presentation-publishing';
-import { MAP_SAVED_OBJECT_TYPE } from '../../constants';
-import { transformMapAttributesIn } from '../../content_management/transform_map_attributes_in';
 import type { MapByReferenceState, MapByValueState, MapEmbeddableState } from '../types';
 import type { StoredMapEmbeddableState } from './types';
+import { MAP_SAVED_OBJECT_TYPE } from '../../constants';
+import { transformMapAttributesIn } from '../../content_management/transform_map_attributes_in';
 
 export const MAP_SAVED_OBJECT_REF_NAME = 'savedObjectRef';
 
@@ -22,14 +21,13 @@ export function getTransformIn(
     state: StoredMapEmbeddableState;
     references: Reference[];
   } {
-    const stateWithStoredTitles = transformTitlesIn(state);
     const enhancementsResult = state.enhancements
       ? transformEnhancementsIn(state.enhancements)
       : { state: undefined, references: [] };
 
     // by ref
-    if ((stateWithStoredTitles as MapByReferenceState).savedObjectId) {
-      const { savedObjectId, ...rest } = stateWithStoredTitles as MapByReferenceState;
+    if ((state as MapByReferenceState).savedObjectId) {
+      const { savedObjectId, ...rest } = state as MapByReferenceState;
       return {
         state: {
           ...rest,
@@ -47,14 +45,14 @@ export function getTransformIn(
     }
 
     // by value
-    if ((stateWithStoredTitles as MapByValueState).attributes) {
+    if ((state as MapByValueState).attributes) {
       const { attributes, references } = transformMapAttributesIn(
-        (stateWithStoredTitles as MapByValueState).attributes
+        (state as MapByValueState).attributes
       );
 
       return {
         state: {
-          ...stateWithStoredTitles,
+          ...state,
           ...(enhancementsResult.state ? { enhancements: enhancementsResult.state } : {}),
           attributes,
         } as StoredMapEmbeddableState,
@@ -64,7 +62,7 @@ export function getTransformIn(
 
     return {
       state: {
-        ...stateWithStoredTitles,
+        ...state,
         ...(enhancementsResult.state ? { enhancements: enhancementsResult.state } : {}),
       } as StoredMapEmbeddableState,
       references: enhancementsResult.references,

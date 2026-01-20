@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { StoredTitles } from '@kbn/presentation-publishing-schemas';
 import type { StoredMapAttributes } from '../../../server';
 import type { MapByReferenceState, MapByValueState } from '../types';
 
@@ -15,5 +14,4 @@ type StoredByValueState = Omit<MapByValueState, 'attributes'> & {
   attributes: StoredMapAttributes;
 };
 
-export type StoredMapEmbeddableState = StoredTitles &
-  (StoredMapByReferenceState | StoredByValueState);
+export type StoredMapEmbeddableState = StoredMapByReferenceState | StoredByValueState;

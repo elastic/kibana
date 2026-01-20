@@ -9,7 +9,6 @@
 
 import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
-import { transformTitlesIn } from '@kbn/presentation-publishing';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type {
   SearchEmbeddableByReferenceState,
@@ -22,7 +21,7 @@ import { extract } from './search_inject_extract';
 
 export const SAVED_SEARCH_SAVED_OBJECT_REF_NAME = 'savedObjectRef';
 
-function isByRefState(state: object): state is SearchEmbeddableByReferenceState {
+function isByRefState(state: SearchEmbeddableState): state is SearchEmbeddableByReferenceState {
   return 'savedObjectId' in state;
 }
 
@@ -33,14 +32,12 @@ export function getTransformIn(
     state: StoredSearchEmbeddableState;
     references: SavedObjectReference[];
   } {
-    const stateWithStoredTitles = transformTitlesIn(state);
-
     const enhancementsResult = state.enhancements
       ? transformEnhancementsIn(state.enhancements)
       : { state: undefined, references: [] };
 
-    if (isByRefState(stateWithStoredTitles)) {
-      const { savedObjectId, ...rest } = stateWithStoredTitles;
+    if (isByRefState(state)) {
+      const { savedObjectId, ...rest } = state;
       return {
         state: {
           ...rest,
@@ -65,12 +62,12 @@ export function getTransformIn(
     // by value
     const { state: extractedState, references } = extract({
       type: SavedSearchType,
-      attributes: (stateWithStoredTitles as StoredSearchEmbeddableByValueState).attributes,
+      attributes: state.attributes,
     });
 
     return {
       state: {
-        ...stateWithStoredTitles,
+        ...state,
         ...(enhancementsResult.state
           ? {
               enhancements:
@@ -78,7 +75,7 @@ export function getTransformIn(
             }
           : {}),
         attributes: {
-          ...(stateWithStoredTitles as StoredSearchEmbeddableByValueState).attributes,
+          ...state.attributes,
           ...extractedState.attributes,
           // discover session stores references as part of attributes
           references,

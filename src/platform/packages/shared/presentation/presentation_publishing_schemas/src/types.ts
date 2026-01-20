@@ -9,8 +9,6 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type { Writable } from '@kbn/utility-types';
-import type { storedTitlesSchema } from './stored_titles_schema';
 import type { serializedTitlesSchema } from './titles_schema';
 
 export type SerializedTitles = Writable<TypeOf<typeof serializedTitlesSchema>>;
-export type StoredTitles = Writable<TypeOf<typeof storedTitlesSchema>>;

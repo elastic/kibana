@@ -8,32 +8,25 @@
  */
 import type { Reference } from '@kbn/content-management-utils';
 import type {
-  EmbeddableTransforms,
   TransformEnhancementsIn,
   TransformEnhancementsOut,
 } from '@kbn/embeddable-plugin/common';
-import { transformTitlesIn, transformTitlesOut } from '@kbn/presentation-publishing';
-import { type StoredTitles } from '@kbn/presentation-publishing-schemas';
-import type { ImageConfig, ImageEmbeddableState } from '../server';
-
-type StoredImageEmbeddableState = { imageConfig: ImageConfig } & StoredTitles & {
-    enhancements?: any;
-  };
+import { transformTitlesOut } from '@kbn/presentation-publishing';
+import type { ImageEmbeddableState } from '../server';
 
 export function getTransforms(
   transformEnhancementsIn: TransformEnhancementsIn,
   transformEnhancementsOut: TransformEnhancementsOut
-): EmbeddableTransforms<StoredImageEmbeddableState, ImageEmbeddableState> {
+) {
   return {
     transformIn: (state: ImageEmbeddableState) => {
-      const stateWithStoredTitles = transformTitlesIn(state);
       const enhancementResult = state.enhancements
         ? transformEnhancementsIn(state.enhancements)
         : { state: undefined, references: [] };
 
       return {
         state: {
-          ...stateWithStoredTitles,
+          ...state,
           ...(enhancementResult.state ? { enhancements: enhancementResult.state } : {}),
         },
         references: enhancementResult.references,

@@ -8,8 +8,7 @@
  */
 
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
-import type { SerializedTimeRange } from '@kbn/presentation-publishing';
-import type { SerializedTitles, StoredTitles } from '@kbn/presentation-publishing-schemas';
+import type { SerializedTimeRange, SerializedTitles } from '@kbn/presentation-publishing';
 import type {
   SavedSearchAttributes,
   SavedSearchByValueAttributes,
@@ -28,28 +27,29 @@ export type EditableSavedSearchAttributes = Partial<
   Pick<SavedSearchAttributes, (typeof EDITABLE_SAVED_SEARCH_KEYS)[number]>
 >;
 
-type SearchEmbeddableBaseState = SerializedTimeRange &
+type SearchEmbeddableBaseState = SerializedTitles &
+  SerializedTimeRange &
   Partial<DynamicActionsSerializedState> &
   EditableSavedSearchAttributes & {
     nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
   };
 
-export type SearchEmbeddableByValueState = SerializedTitles &
-  SearchEmbeddableBaseState & {
-    attributes: SavedSearchByValueAttributes;
-  };
+export type SearchEmbeddableByValueState = SearchEmbeddableBaseState & {
+  attributes: SavedSearchByValueAttributes;
+};
 
-export type SearchEmbeddableByReferenceState = SerializedTitles &
-  SearchEmbeddableBaseState & {
-    savedObjectId: string;
-  };
+export type SearchEmbeddableByReferenceState = SearchEmbeddableBaseState & {
+  savedObjectId: string;
+};
 
 export type SearchEmbeddableState = SearchEmbeddableByValueState | SearchEmbeddableByReferenceState;
 
-export type StoredSearchEmbeddableByValueState = StoredTitles & SearchEmbeddableByValueState;
+export type StoredSearchEmbeddableByValueState = SearchEmbeddableByValueState;
 
-export type StoredSearchEmbeddableByReferenceState = StoredTitles &
-  Omit<SearchEmbeddableByReferenceState, 'nonPersistedDisplayOptions' | 'savedObjectId'>;
+export type StoredSearchEmbeddableByReferenceState = Omit<
+  SearchEmbeddableByReferenceState,
+  'nonPersistedDisplayOptions' | 'savedObjectId'
+>;
 
 export type StoredSearchEmbeddableState =
   | StoredSearchEmbeddableByValueState

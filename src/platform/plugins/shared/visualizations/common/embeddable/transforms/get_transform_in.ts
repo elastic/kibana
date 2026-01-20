@@ -9,14 +9,13 @@
 
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { Reference } from '@kbn/content-management-utils';
-import { transformTitlesIn } from '@kbn/presentation-publishing';
 import { VISUALIZE_SAVED_OBJECT_TYPE } from '@kbn/visualizations-common';
-import { extractVisReferences } from '../../references/extract_vis_references';
 import type {
   VisualizeByReferenceState,
   VisualizeByValueState,
   VisualizeEmbeddableState,
 } from '../types';
+import { extractVisReferences } from '../../references/extract_vis_references';
 import type {
   StoredVisualizeByReferenceState,
   StoredVisualizeByValueState,
@@ -32,14 +31,13 @@ export function getTransformIn(
     state: StoredVisualizeEmbeddableState;
     references: Reference[];
   } {
-    const stateWithStoredTitles = transformTitlesIn(state);
     const enhancementsResults = state.enhancements
       ? transformEnhancementsIn(state.enhancements)
       : { state: undefined, references: [] };
 
     // by ref
-    if ((stateWithStoredTitles as VisualizeByReferenceState).savedObjectId) {
-      const { savedObjectId, ...rest } = stateWithStoredTitles as VisualizeByReferenceState;
+    if ((state as VisualizeByReferenceState).savedObjectId) {
+      const { savedObjectId, ...rest } = state as VisualizeByReferenceState;
       return {
         state: {
           ...rest,
@@ -57,14 +55,14 @@ export function getTransformIn(
     }
 
     // by value
-    if ((stateWithStoredTitles as VisualizeByValueState).savedVis) {
+    if ((state as VisualizeByValueState).savedVis) {
       const { references, savedVis } = extractVisReferences(
-        (stateWithStoredTitles as VisualizeByValueState).savedVis
+        (state as VisualizeByValueState).savedVis
       );
 
       return {
         state: {
-          ...stateWithStoredTitles,
+          ...state,
           ...(enhancementsResults.state ? { enhancements: enhancementsResults.state } : {}),
           savedVis,
         } as StoredVisualizeByValueState,
@@ -74,7 +72,7 @@ export function getTransformIn(
 
     return {
       state: {
-        ...stateWithStoredTitles,
+        ...state,
         ...(enhancementsResults.state ? { enhancements: enhancementsResults.state } : {}),
       } as StoredVisualizeEmbeddableState,
       references: enhancementsResults.references,

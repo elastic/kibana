@@ -7,16 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { transformTitlesIn } from '@kbn/presentation-publishing';
 import { BOOK_SAVED_OBJECT_TYPE } from '../constants';
 import type { BookByReferenceState, BookEmbeddableState } from '../types';
 
 export function transformIn(state: BookEmbeddableState) {
-  const stateWithStoredTitles = transformTitlesIn(state);
-
   // extract saved object reference for by-reference state
-  if ((stateWithStoredTitles as BookByReferenceState).savedObjectId) {
-    const { savedObjectId, ...rest } = stateWithStoredTitles as BookByReferenceState;
+  if ((state as BookByReferenceState).savedObjectId) {
+    const { savedObjectId, ...rest } = state as BookByReferenceState;
     return {
       state: rest,
       references: [
@@ -30,5 +27,5 @@ export function transformIn(state: BookEmbeddableState) {
   }
 
   // no reference extraction needed for by-value state
-  return { state: stateWithStoredTitles };
+  return { state };
 }

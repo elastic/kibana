@@ -44,13 +44,5 @@ export const stateHasTitles = (state: unknown): state is SerializedTitles => {
 export interface TitlesApi extends PublishesWritableTitle, PublishesWritableDescription {}
 
 export const initializeTitleManager = (initialTitlesState: SerializedTitles): TitleManager => {
-  const stateManager = initializeStateManager(initialTitlesState, defaultTitlesState);
-  return {
-    ...stateManager,
-    api: {
-      ...stateManager.api,
-      hideTitle$: stateManager.api.hideTitle$,
-      setHideTitle: stateManager.api.setHideTitle,
-    },
-  };
+  return initializeStateManager(initialTitlesState, defaultTitlesState);
 };

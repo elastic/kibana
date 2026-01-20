@@ -9,8 +9,8 @@
 
 import Boom from '@hapi/boom';
 import { v4 as uuidv4 } from 'uuid';
+
 import type { SavedObjectReference } from '@kbn/core/server';
-import { transformTitlesIn } from '@kbn/presentation-publishing';
 import { isDashboardSection, prefixReferencesFromPanel } from '../../../../common';
 import type {
   DashboardSavedObjectAttributes,
@@ -52,10 +52,6 @@ export function transformPanelsIn(widgets: Required<DashboardState>['panels']): 
   return { panelsJSON: JSON.stringify(panels), sections, references: panelReferences };
 }
 
-const defaultTransform = (config: DashboardPanel['config']) => {
-  return { state: transformTitlesIn(config), references: [] };
-};
-
 function transformPanelIn(panel: DashboardPanel): {
   storedPanel: SavedDashboardPanel;
   references: SavedObjectReference[];
@@ -78,9 +74,11 @@ function transformPanelIn(panel: DashboardPanel): {
   let transformedPanelConfig = config;
   let references: undefined | SavedObjectReference[];
   try {
-    const transformed = transforms?.transformIn?.(config) ?? defaultTransform(config);
-    transformedPanelConfig = transformed.state;
-    references = transformed.references;
+    if (transforms?.transformIn) {
+      const transformed = transforms.transformIn(config);
+      transformedPanelConfig = transformed.state;
+      references = transformed.references;
+    }
   } catch (transformInError) {
     // do not prevent save if transformIn throws
     logger.warn(

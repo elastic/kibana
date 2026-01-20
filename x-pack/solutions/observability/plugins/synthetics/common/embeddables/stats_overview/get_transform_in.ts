@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import { transformTitlesIn } from '@kbn/presentation-publishing';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { Reference } from '@kbn/content-management-utils';
-import type { OverviewStatsEmbeddableState, OverviewStatsStoredState } from './types';
+import type { OverviewStatsEmbeddableState } from './types';
 
 export function getTransformIn(
   transformEnhancementsIn: EmbeddableSetup['transformEnhancementsIn']
 ) {
   function transformIn(state: OverviewStatsEmbeddableState): {
-    state: OverviewStatsStoredState;
+    state: OverviewStatsEmbeddableState;
     references: Reference[];
   } {
-    const stateWithStoredTitles = transformTitlesIn(state);
-    const { enhancements, ...rest } = stateWithStoredTitles;
+    const { enhancements, ...rest } = state;
     const enhancementsResult = enhancements
       ? transformEnhancementsIn(enhancements)
       : { state: undefined, references: [] };
