@@ -7,6 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ES_VALID_SAMPLE_STEPS, ES_INVALID_SAMPLE_STEPS } from './es_steps';
+import { z } from '@kbn/zod/v4';
 
-export { KIBANA_VALID_SAMPLE_STEPS, KIBANA_INVALID_SAMPLE_STEPS } from './kibana_steps';
+export const getOutputSchemaForStepType = jest.fn((node: { stepType: string }) => {
+  if (node.stepType === 'console') {
+    return z.string();
+  }
+  return z.unknown();
+});
