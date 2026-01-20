@@ -20,6 +20,7 @@ import {
   EuiFieldSearch,
   EuiFilterGroup,
   EuiFilterButton,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -41,6 +42,7 @@ export const QualityTab: React.FC = () => {
   // const { data: indexResultsData } = getIndexResultsLatest;
 
   const indexResultsData = mockQualityResponse;
+  const { euiTheme } = useEuiTheme();
 
   // Track which accordions are open
   const [openAccordions, setOpenAccordions] = useState<Record<string, boolean>>({});
@@ -395,7 +397,13 @@ export const QualityTab: React.FC = () => {
 
       <EuiSpacer size="m" />
 
-      <div style={{ border: '1px solid #D3DAE6', padding: '16px 0', borderRadius: '4px' }}>
+      <div
+        style={{
+          border: euiTheme.border.thin,
+          padding: `${euiTheme.size.base} 0`,
+          borderRadius: euiTheme.border.radius.medium,
+        }}
+      >
         {filteredCategories.map((category, index) => {
           const stats = getCategoryStats(category);
           const statusConfig = STATUS_BADGE_CONFIG[stats.status];
@@ -403,10 +411,10 @@ export const QualityTab: React.FC = () => {
           return (
             <React.Fragment key={category.category}>
               <EuiAccordion
-                style={{ padding: '0 16px' }} // distance between the accordions' wrapper sides and button
+                style={{ padding: `0 ${euiTheme.size.base}` }}
                 id={`accordion-${category.category}`}
                 buttonContent={
-                  <EuiText size="m" style={{ padding: '16px 0' }}>
+                  <EuiText size="m" style={{ padding: `${euiTheme.size.base} 0` }}>
                     <strong>{category.category}</strong>
                   </EuiText>
                 }
@@ -475,7 +483,11 @@ export const QualityTab: React.FC = () => {
                     <EuiSpacer size="m" />
 
                     <EuiInMemoryTable
-                      style={{ border: '1px solid #D3DAE6', padding: '24px', borderRadius: '4px' }}
+                      style={{
+                        border: euiTheme.border.thin,
+                        padding: euiTheme.size.xl,
+                        borderRadius: euiTheme.border.radius.medium,
+                      }}
                       items={category.indices}
                       columns={columns}
                       sorting={{
