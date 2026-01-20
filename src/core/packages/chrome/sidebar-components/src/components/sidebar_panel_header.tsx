@@ -72,12 +72,7 @@ export interface SidebarHeaderProps {
  *   <EuiTitle size="xs"><h3>{dynamicTitle}</h3></EuiTitle>
  * </SidebarHeader>
  */
-export const SidebarHeader: FC<SidebarHeaderProps> = ({
-  title,
-  children,
-  onClose,
-  actions,
-}) => {
+export const SidebarHeader: FC<SidebarHeaderProps> = ({ title, children, onClose, actions }) => {
   const titleContent = children ?? (
     <EuiTitle size="xs">
       <h3>{title}</h3>
