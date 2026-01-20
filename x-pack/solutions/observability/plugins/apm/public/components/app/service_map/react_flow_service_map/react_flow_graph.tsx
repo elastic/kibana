@@ -191,6 +191,59 @@ function ReactFlowGraphInner({
     setSelectedNodeForPopover(null);
   }, [setNodes, setEdges, applyEdgeHighlighting]);
 
+  // Handle keyboard events for accessibility
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Handle ESC to close popover
+      if (event.key === 'Escape' && selectedNodeForPopover) {
+        event.preventDefault();
+        setSelectedNodeId(null);
+        setSelectedNodeForPopover(null);
+        setEdges((currentEdges) => applyEdgeHighlighting(currentEdges, null));
+        // Clear selection from nodes
+        setNodes((currentNodes) => currentNodes.map((n) => ({ ...n, selected: false })));
+        return;
+      }
+
+      // Handle Enter/Space to open popover on the focused node
+      if (event.key === 'Enter' || event.key === ' ') {
+        // Find the currently focused node by checking the DOM
+        const activeElement = document.activeElement;
+        const nodeElement = activeElement?.closest('[data-id]');
+
+        if (nodeElement) {
+          const nodeId = nodeElement.getAttribute('data-id');
+          const focusedNode = nodes.find((n) => n.id === nodeId);
+
+          if (focusedNode) {
+            event.preventDefault();
+
+            // If clicking the same node, close popover
+            if (selectedNodeId === nodeId) {
+              setSelectedNodeId(null);
+              setSelectedNodeForPopover(null);
+              setEdges((currentEdges) => applyEdgeHighlighting(currentEdges, null));
+              setNodes((currentNodes) => currentNodes.map((n) => ({ ...n, selected: false })));
+            } else {
+              // Clear previous selection and select the focused node
+              setNodes((currentNodes) =>
+                currentNodes.map((n) => ({ ...n, selected: n.id === nodeId }))
+              );
+              setSelectedNodeId(nodeId);
+              setSelectedNodeForPopover(focusedNode);
+              setEdges((currentEdges) => applyEdgeHighlighting(currentEdges, nodeId));
+            }
+          }
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [nodes, selectedNodeId, selectedNodeForPopover, setNodes, setEdges, applyEdgeHighlighting]);
+
   const handleMove = useCallback(() => {
     if (selectedNodeForPopover) {
       setSelectedNodeId(null);
@@ -260,6 +313,10 @@ function ReactFlowGraphInner({
         nodesDraggable={true}
         nodesConnectable={false}
         edgesFocusable={false}
+        aria-label={i18n.translate('xpack.apm.serviceMap.ariaLabel', {
+          defaultMessage: 'Service map showing {nodeCount} services and dependencies',
+          values: { nodeCount: nodes.length },
+        })}
       >
         <Background gap={24} size={1} color={euiTheme.colors.lightShade} />
         <Panel position="top-right">

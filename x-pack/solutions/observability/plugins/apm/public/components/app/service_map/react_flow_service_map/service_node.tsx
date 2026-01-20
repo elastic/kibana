@@ -10,6 +10,7 @@ import { Handle, Position, type Node, type NodeProps } from '@xyflow/react';
 import { useEuiTheme, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { getAgentIcon } from '@kbn/custom-icons';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import {
   getServiceHealthStatusColor,
   ServiceHealthStatus,
@@ -60,6 +61,43 @@ export const ServiceNode = memo(
 
     const CIRCLE_SIZE = 56;
 
+    const ariaLabel = useMemo(() => {
+      const parts = [
+        i18n.translate('xpack.apm.serviceMap.serviceNode', {
+          defaultMessage: 'Service: {serviceName}',
+          values: { serviceName: data.label },
+        }),
+      ];
+
+      if (data.agentName) {
+        parts.push(
+          i18n.translate('xpack.apm.serviceMap.agentType', {
+            defaultMessage: 'Agent: {agentName}',
+            values: { agentName: data.agentName },
+          })
+        );
+      }
+
+      if (data.serviceAnomalyStats?.healthStatus) {
+        parts.push(
+          i18n.translate('xpack.apm.serviceMap.healthStatus', {
+            defaultMessage: 'Health status: {status}',
+            values: { status: data.serviceAnomalyStats.healthStatus },
+          })
+        );
+      }
+
+      if (selected) {
+        parts.push(
+          i18n.translate('xpack.apm.serviceMap.selected', {
+            defaultMessage: 'Selected',
+          })
+        );
+      }
+
+      return parts.join(', ');
+    }, [data.label, data.agentName, data.serviceAnomalyStats?.healthStatus, selected]);
+
     return (
       <EuiFlexGroup direction="column" alignItems="center" gutterSize="s" responsive={false}>
         {/* Circle container with handles inside for proper edge positioning */}
@@ -79,11 +117,13 @@ export const ServiceNode = memo(
             `}
           />
           <div
+            role="button"
+            aria-label={ariaLabel}
             css={css`
               width: ${CIRCLE_SIZE}px;
               height: ${CIRCLE_SIZE}px;
               border-radius: 50%;
-              border: ${borderWidth ?? euiTheme.border.width.thin} solid ${borderColor};
+              border: ${borderWidth ?? euiTheme.border.width.thick} solid ${borderColor};
               background: ${euiTheme.colors.backgroundBasePlain};
               display: flex;
               align-items: center;
@@ -91,6 +131,11 @@ export const ServiceNode = memo(
               box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
               cursor: pointer;
               pointer-events: all;
+              [data-id]:focus &,
+              [data-id]:focus-within & {
+                outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
+                outline-offset: 2px;
+              }
             `}
           >
             {iconUrl && (

@@ -10,6 +10,7 @@ import { Handle, Position, type Node, type NodeProps } from '@xyflow/react';
 import { useEuiTheme, transparentize, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { getSpanIcon } from '@kbn/apm-ui-shared';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 
 interface DependencyMapNodeData extends Record<string, any> {
   id: string;
@@ -27,7 +28,7 @@ export const DependencyNode = memo(
   ({ data, selected, sourcePosition, targetPosition }: NodeProps<Node<DependencyMapNodeData>>) => {
     const { euiTheme } = useEuiTheme();
 
-    const borderColor = selected ? euiTheme.colors.primary : euiTheme.colors.mediumShade;
+    const borderColor = euiTheme.colors.mediumShade;
 
     const iconUrl = useMemo(() => {
       if (data.spanType || data.spanSubtype) {
@@ -35,6 +36,43 @@ export const DependencyNode = memo(
       }
       return null;
     }, [data.spanType, data.spanSubtype]);
+
+    const ariaLabel = useMemo(() => {
+      const parts = [
+        i18n.translate('xpack.apm.serviceMap.dependencyNode', {
+          defaultMessage: 'Dependency: {dependencyName}',
+          values: { dependencyName: data.label },
+        }),
+      ];
+
+      if (data.spanType) {
+        parts.push(
+          i18n.translate('xpack.apm.serviceMap.spanType', {
+            defaultMessage: 'Type: {spanType}',
+            values: { spanType: data.spanType },
+          })
+        );
+      }
+
+      if (data.spanSubtype) {
+        parts.push(
+          i18n.translate('xpack.apm.serviceMap.spanSubtype', {
+            defaultMessage: 'Subtype: {spanSubtype}',
+            values: { spanSubtype: data.spanSubtype },
+          })
+        );
+      }
+
+      if (selected) {
+        parts.push(
+          i18n.translate('xpack.apm.serviceMap.selected', {
+            defaultMessage: 'Selected',
+          })
+        );
+      }
+
+      return parts.join(', ');
+    }, [data.label, data.spanType, data.spanSubtype, selected]);
 
     return (
       <EuiFlexGroup direction="column" alignItems="center" gutterSize="s" responsive={false}>
@@ -59,6 +97,8 @@ export const DependencyNode = memo(
           />
           {/* Diamond shape - using div to avoid EuiFlexGroup padding affecting the shape */}
           <div
+            role="button"
+            aria-label={ariaLabel}
             css={css`
               width: ${DIAMOND_SIZE}px;
               height: ${DIAMOND_SIZE}px;
@@ -72,6 +112,11 @@ export const DependencyNode = memo(
               box-sizing: border-box;
               cursor: pointer;
               pointer-events: all;
+              /* Show blue outline when keyboard focused */
+              [data-id]:focus-within & {
+                outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
+                outline-offset: 2px;
+              }
             `}
           >
             <div
@@ -82,7 +127,8 @@ export const DependencyNode = memo(
               {iconUrl && (
                 <img
                   src={iconUrl}
-                  alt={data.spanSubtype || data.spanType || 'dependency'}
+                  alt={data.spanType || data.spanSubtype || 'dependency'}
+                  aria-hidden="true"
                   css={css`
                     width: 20px;
                     height: 20px;
