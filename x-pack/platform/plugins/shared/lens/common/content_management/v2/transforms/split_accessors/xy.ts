@@ -12,8 +12,8 @@ import type {
 } from '../../../../../public/visualizations/xy/types';
 
 /** @deprecated */
-interface DeprecatedSplitAccessorLayer extends Omit<XYDataLayerConfig, 'splitAccessors'> {
-  splitAccessor: string;
+export interface DeprecatedSplitAccessorLayer extends Omit<XYDataLayerConfig, 'splitAccessors'> {
+  splitAccessor?: string;
 }
 
 /**
@@ -26,21 +26,22 @@ export interface DeprecatedSplitAccessorState extends Omit<XYState, 'layers'> {
 }
 
 export function convertToSplitAccessorsFn(state: DeprecatedSplitAccessorState | XYState): XYState {
-  const hasDeprecatedSplitAccessor = state.layers.some((layer) => {
-    return 'splitAccessor' in layer;
-  });
+  const hasDeprecatedSplitAccessor = state.layers.some((layer) => 'splitAccessor' in layer);
 
-  if (!hasDeprecatedSplitAccessor) return state as XYState;
+  if (!hasDeprecatedSplitAccessor) return state satisfies XYState;
 
   const convertedLayers = state.layers.map<XYLayerConfig>((layer) => {
-    if ('splitAccessor' in layer) {
-      const { splitAccessor, ...rest } = layer;
-      return {
-        ...rest,
-        splitAccessors: [layer.splitAccessor],
-      } satisfies XYDataLayerConfig;
+    if (!('splitAccessor' in layer)) {
+      return layer;
     }
-    return layer as XYLayerConfig;
+    const { splitAccessor, ...rest } = layer;
+    if (layer.splitAccessor == null) {
+      return rest;
+    }
+    return {
+      ...rest,
+      splitAccessors: [layer.splitAccessor],
+    };
   });
 
   return {

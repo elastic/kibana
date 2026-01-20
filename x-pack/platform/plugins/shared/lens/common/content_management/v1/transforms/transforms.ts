@@ -11,7 +11,6 @@ import { attributesCleanup } from './attributes';
 import { metricMigrations } from './metric';
 import { addVersion } from './add_version';
 
-import { convertToSplitAccessors } from './split_accessors';
 import type { LensAttributesV0, LensSavedObjectV0 } from '../../v0/types';
 import type { LensAttributesV1, LensSavedObjectV1 } from './types';
 
@@ -30,9 +29,6 @@ export function transformToV1LensItemAttributes(
   attributes: LensAttributesV0 | LensAttributesV1
 ): LensAttributesV1 {
   return [
-    // splitAccessors migration needs to run before the color mapping one due to the
-    // requirements about the splitAccessors required by the color mapping runtime convertion
-    convertToSplitAccessors,
     convertToLegendStats,
     convertToRawColorMappingsFn,
     attributesCleanup,
