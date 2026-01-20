@@ -460,7 +460,10 @@ export const datatableStateSchemaESQL = schema.object(
 export const datatableStateSchema = schema.oneOf(
   [datatableStateSchemaNoESQL, datatableStateSchemaESQL],
   {
-    meta: { description: 'Datatable chart configuration: DSL or ES|QL query based' },
+    meta: {
+      description: 'Datatable chart configuration: DSL or ES|QL query based',
+      id: 'datatableChartSchema',
+    },
   }
 );
 

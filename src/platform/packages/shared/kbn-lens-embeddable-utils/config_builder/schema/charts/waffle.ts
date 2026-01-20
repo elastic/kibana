@@ -17,9 +17,9 @@ import {
   dslOnlyPanelInfoSchema,
   layerSettingsSchema,
   sharedPanelInfoSchema,
+  legendTruncateAfterLinesSchema,
 } from '../shared';
 import {
-  legendTruncateAfterLinesSchema,
   legendVisibleSchema,
   legendSizeSchema,
   valueDisplaySchema,
@@ -93,6 +93,7 @@ export const waffleStateSchemaNoESQL = schema.object(
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
     ...datasetSchema,
+    ...dslOnlyPanelInfoSchema,
     ...waffleStateSharedSchema,
     ...dslOnlyPanelInfoSchema,
     metrics: schema.arrayOf(
@@ -170,7 +171,10 @@ const waffleStateSchemaESQL = schema.object(
  * Complete waffle chart configuration supporting both standard and ES|QL queries
  */
 export const waffleStateSchema = schema.oneOf([waffleStateSchemaNoESQL, waffleStateSchemaESQL], {
-  meta: { description: 'Waffle chart configuration: DSL or ES|QL query based' },
+  meta: {
+    id: 'waffleChartSchema',
+    description: 'Waffle chart configuration: DSL or ES|QL query based',
+  },
 });
 
 export type WaffleState = TypeOf<typeof waffleStateSchema>;

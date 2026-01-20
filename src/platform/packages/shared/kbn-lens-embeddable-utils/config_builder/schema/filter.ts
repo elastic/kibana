@@ -10,36 +10,42 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
-export const filterSchema = schema.object({
-  language: schema.oneOf([schema.literal('kuery'), schema.literal('lucene')], {
-    defaultValue: 'kuery',
-  }),
-  /**
-   * Filter query
-   */
-  query: schema.string({
-    meta: {
-      description: 'Filter query',
-    },
-  }),
-});
-
-export const filterWithLabelSchema = schema.object({
-  /**
-   * Filter query
-   */
-  filter: filterSchema,
-  /**
-   * Label for the filter
-   */
-  label: schema.maybe(
-    schema.string({
+export const filterSchema = schema.object(
+  {
+    language: schema.oneOf([schema.literal('kuery'), schema.literal('lucene')], {
+      defaultValue: 'kuery',
+    }),
+    /**
+     * Filter query
+     */
+    query: schema.string({
       meta: {
-        description: 'Label for the filter',
+        description: 'Filter query',
       },
-    })
-  ),
-});
+    }),
+  },
+  { meta: { id: 'filterSimpleSchema' } }
+);
+
+export const filterWithLabelSchema = schema.object(
+  {
+    /**
+     * Filter query
+     */
+    filter: filterSchema,
+    /**
+     * Label for the filter
+     */
+    label: schema.maybe(
+      schema.string({
+        meta: {
+          description: 'Label for the filter',
+        },
+      })
+    ),
+  },
+  { meta: { id: 'filterWithLabelSchema' } }
+);
 
 export type LensApiFilterType = typeof filterSchema.type;
 
@@ -57,16 +63,19 @@ const FilterQueryType = schema.object({
 /**
  * Unified search filter schema that can accept either a full filter object or a simple query string.
  */
-export const unifiedSearchFilterSchema = schema.oneOf([
-  schema.object({
-    query: schema.oneOf([schema.string(), FilterQueryType]),
-    meta: schema.maybe(schema.object({})),
-    language: schema.maybe(schema.oneOf([schema.literal('kuery'), schema.literal('lucene')])),
-  }),
-  FilterQueryType.extends({
-    meta: schema.maybe(schema.object({})),
-    language: schema.maybe(schema.oneOf([schema.literal('kuery'), schema.literal('lucene')])),
-  }),
-]);
+export const unifiedSearchFilterSchema = schema.oneOf(
+  [
+    schema.object({
+      query: schema.oneOf([schema.string(), FilterQueryType]),
+      meta: schema.maybe(schema.object({})),
+      language: schema.maybe(schema.oneOf([schema.literal('kuery'), schema.literal('lucene')])),
+    }),
+    FilterQueryType.extends({
+      meta: schema.maybe(schema.object({})),
+      language: schema.maybe(schema.oneOf([schema.literal('kuery'), schema.literal('lucene')])),
+    }),
+  ],
+  { meta: { id: 'searchFilterSchema' } }
+);
 
 export type UnifiedSearchFilterType = TypeOf<typeof unifiedSearchFilterSchema>;

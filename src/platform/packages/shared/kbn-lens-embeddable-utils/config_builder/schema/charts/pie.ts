@@ -16,6 +16,7 @@ import {
   collapseBySchema,
   dslOnlyPanelInfoSchema,
   layerSettingsSchema,
+  legendTruncateAfterLinesSchema,
   sharedPanelInfoSchema,
 } from '../shared';
 import {
@@ -27,7 +28,6 @@ import {
   groupIsNotCollapsed,
   legendNestedSchema,
   legendSizeSchema,
-  legendTruncateAfterLinesSchema,
   legendVisibleSchema,
   validateColouringAssignments,
   valueDisplaySchema,
@@ -132,6 +132,7 @@ export const pieStateSchemaNoESQL = schema.object(
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
     ...datasetSchema,
+    ...dslOnlyPanelInfoSchema,
     ...pieStateSharedSchema,
     ...dslOnlyPanelInfoSchema,
     metrics: schema.arrayOf(
@@ -209,7 +210,10 @@ const pieStateSchemaESQL = schema.object(
  * Complete pie/donut chart configuration supporting both standard and ES|QL queries
  */
 export const pieStateSchema = schema.oneOf([pieStateSchemaNoESQL, pieStateSchemaESQL], {
-  meta: { description: 'Pie/donut chart state: standard query or ES|QL query' },
+  meta: {
+    description: 'Pie/donut chart state: standard query or ES|QL query',
+    id: 'pieChartSchema',
+  },
 });
 
 export type PieState = TypeOf<typeof pieStateSchema>;

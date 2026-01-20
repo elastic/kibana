@@ -116,7 +116,7 @@ export const collapseBySchema = schema.oneOf(
      */
     schema.literal('min'),
   ],
-  { meta: { description: 'Collapse by function description' } }
+  { meta: { description: 'Collapse by function description', id: 'collapseBySchema' } }
 );
 
 export type CollapseBySchema = TypeOf<typeof collapseBySchema>;
@@ -131,3 +131,15 @@ export const axisTitleSchemaProps = {
   ),
   visible: schema.maybe(schema.boolean({ meta: { description: 'Whether to show the title' } })),
 };
+
+export const legendTruncateAfterLinesSchema = schema.maybe(
+  schema.number({
+    defaultValue: 1,
+    min: 1,
+    max: 10,
+    meta: {
+      description: 'Maximum lines before truncating legend items (1-10)',
+      id: 'legendTruncateAfterLines',
+    },
+  })
+);

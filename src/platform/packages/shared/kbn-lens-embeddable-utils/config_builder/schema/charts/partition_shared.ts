@@ -10,15 +10,6 @@
 import { schema } from '@kbn/config-schema';
 import type { ColorMappingType, StaticColorType } from '../color';
 
-export const legendTruncateAfterLinesSchema = schema.maybe(
-  schema.number({
-    defaultValue: 1,
-    min: 1,
-    max: 10,
-    meta: { description: 'Maximum lines before truncating legend items (1-10)' },
-  })
-);
-
 export const legendVisibleSchema = schema.maybe(
   schema.oneOf([schema.literal('auto'), schema.literal('show'), schema.literal('hide')], {
     meta: { description: 'Legend visibility: auto, show, or hide' },

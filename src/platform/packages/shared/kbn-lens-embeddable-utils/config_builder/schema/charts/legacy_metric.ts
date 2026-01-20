@@ -103,10 +103,12 @@ const esqlLegacyMetricState = schema.object({
   ]),
 });
 
-export const legacyMetricStateSchema = schema.oneOf([
-  legacyMetricStateSchemaNoESQL,
-  esqlLegacyMetricState,
-]);
+export const legacyMetricStateSchema = schema.oneOf(
+  [legacyMetricStateSchemaNoESQL, esqlLegacyMetricState],
+  {
+    meta: { id: 'legacyMetricChartSchema' },
+  }
+);
 
 export type LegacyMetricState = TypeOf<typeof legacyMetricStateSchema>;
 export type LegacyMetricStateNoESQL = TypeOf<typeof legacyMetricStateSchemaNoESQL>;

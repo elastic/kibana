@@ -17,13 +17,13 @@ import {
   dslOnlyPanelInfoSchema,
   layerSettingsSchema,
   sharedPanelInfoSchema,
+  legendTruncateAfterLinesSchema,
 } from '../shared';
 import type { PartitionMetric } from './partition_shared';
 import {
   groupIsNotCollapsed,
   legendNestedSchema,
   legendSizeSchema,
-  legendTruncateAfterLinesSchema,
   legendVisibleSchema,
   validateColouringAssignments,
   valueDisplaySchema,
@@ -131,6 +131,7 @@ export const treemapStateSchemaNoESQL = schema.object(
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
     ...datasetSchema,
+    ...dslOnlyPanelInfoSchema,
     ...treemapSharedStateSchema,
     ...dslOnlyPanelInfoSchema,
     /**
@@ -229,8 +230,8 @@ const treemapStateSchemaESQL = schema.object(
 
 export const treemapStateSchema = schema.oneOf([treemapStateSchemaNoESQL, treemapStateSchemaESQL], {
   meta: {
-    description:
-      'Treemap chart configuration schema supporting both data source queries (non-ES|QL) and ES|QL query modes',
+    id: 'treemapChartSchema',
+    description: 'Treemap chart configuration: DSL or ES|QL query based',
   },
 });
 

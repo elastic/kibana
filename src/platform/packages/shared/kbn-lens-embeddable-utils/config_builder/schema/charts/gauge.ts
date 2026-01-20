@@ -144,7 +144,9 @@ export const gaugeStateSchemaESQL = schema.object({
   ]),
 });
 
-export const gaugeStateSchema = schema.oneOf([gaugeStateSchemaNoESQL, gaugeStateSchemaESQL]);
+export const gaugeStateSchema = schema.oneOf([gaugeStateSchemaNoESQL, gaugeStateSchemaESQL], {
+  meta: { id: 'gaugeChartSchema' },
+});
 
 export type GaugeState = TypeOf<typeof gaugeStateSchema>;
 export type GaugeStateNoESQL = TypeOf<typeof gaugeStateSchemaNoESQL>;
