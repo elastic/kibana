@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { StreamQueryKql, Streams, System } from '@kbn/streams-schema';
+import type { StreamQuery, Streams } from '@kbn/streams-schema';
 import React, { useState } from 'react';
 import {
   EuiButton,
@@ -17,24 +17,19 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiSpacer,
-  EuiSuperSelect,
+  EuiTextArea,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { validateQuery } from '../common/validate_query';
-import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar/uncontrolled_streams_app_bar';
 import { SeveritySelector } from '../common/severity_selector';
-import { ALL_DATA_OPTION } from '../../system_selector';
 
 interface GeneratedEventPreviewProps {
   definition: Streams.all.Definition;
-  query: StreamQueryKql;
-  onSave: (query: StreamQueryKql) => void;
-  systems: Omit<System, 'description'>[];
-  dataViews: DataView[];
+  query: StreamQuery;
+  onSave: (query: StreamQuery) => void;
   isEditing: boolean;
   setIsEditing: (isEditing: boolean) => void;
 }
@@ -45,19 +40,12 @@ export function GeneratedEventPreview({
   isEditing,
   setIsEditing,
   onSave,
-  systems,
-  dataViews,
 }: GeneratedEventPreviewProps) {
   const { euiTheme } = useEuiTheme();
 
-  const [query, setQuery] = useState<StreamQueryKql>(initialQuery);
+  const [query, setQuery] = useState<StreamQuery>(initialQuery);
 
-  const options = [
-    { value: ALL_DATA_OPTION.value, inputDisplay: ALL_DATA_OPTION.label },
-    ...systems.map((system) => ({ value: system, inputDisplay: system.name })),
-  ];
-
-  const [touched, setTouched] = useState({ title: false, feature: false, kql: false });
+  const [touched, setTouched] = useState({ title: false, esqlWhere: false });
   const validation = validateQuery(query);
 
   return (
@@ -96,8 +84,7 @@ export function GeneratedEventPreview({
                         setQuery(initialQuery);
                         setTouched({
                           title: false,
-                          feature: false,
-                          kql: false,
+                          esqlWhere: false,
                         });
                       }}
                       data-test-subj="significant_events_generated_event_cancel_button"
@@ -112,14 +99,13 @@ export function GeneratedEventPreview({
                     <EuiButton
                       size="s"
                       iconType="save"
-                      disabled={validation.title.isInvalid || validation.kql.isInvalid}
+                      disabled={validation.title.isInvalid || validation.esqlWhere.isInvalid}
                       onClick={() => {
                         setIsEditing(false);
                         onSave(query);
                         setTouched({
                           title: false,
-                          feature: false,
-                          kql: false,
+                          esqlWhere: false,
                         });
                       }}
                       data-test-subj="significant_events_generated_event_save_button"
@@ -181,53 +167,7 @@ export function GeneratedEventPreview({
             severityScore={query.severity_score}
             onChange={(score) => {
               setQuery({ ...query, severity_score: score });
-              setTouched((prev) => ({ ...prev, severity: true }));
             }}
-          />
-        </EuiFormRow>
-
-        <EuiFormRow
-          label={
-            <EuiFormLabel>
-              {i18n.translate(
-                'xpack.streams.addSignificantEventFlyout.generatedEventPreview.formFieldSystemLabel',
-                { defaultMessage: 'System' }
-              )}
-            </EuiFormLabel>
-          }
-        >
-          <EuiSuperSelect
-            options={options}
-            valueOfSelected={
-              query.feature
-                ? options.find(
-                    (option) =>
-                      option.value.name === query.feature?.name &&
-                      option.value.type === query.feature?.type
-                  )?.value
-                : ALL_DATA_OPTION.value
-            }
-            onBlur={() => {
-              setTouched((prev) => ({ ...prev, feature: true }));
-            }}
-            onChange={(value) => {
-              const feature =
-                value.type === ALL_DATA_OPTION.value.type
-                  ? undefined
-                  : {
-                      name: value.name,
-                      filter: value.filter,
-                      type: value.type,
-                    };
-              setQuery({ ...query, feature });
-              setTouched((prev) => ({ ...prev, feature: true }));
-            }}
-            placeholder={i18n.translate(
-              'xpack.streams.addSignificantEventFlyout.generatedEventPreview.systemPlaceholder',
-              { defaultMessage: 'Select system' }
-            )}
-            disabled={!isEditing}
-            fullWidth
           />
         </EuiFormRow>
 
@@ -236,37 +176,32 @@ export function GeneratedEventPreview({
             <EuiFormLabel>
               {i18n.translate(
                 'xpack.streams.addSignificantEventFlyout.generatedEventPreview.formFieldQueryLabel',
-                { defaultMessage: 'Query' }
+                { defaultMessage: 'Query (ES|QL WHERE condition)' }
               )}
             </EuiFormLabel>
           }
-          {...(touched.kql && { ...validation.kql })}
+          {...(touched.esqlWhere && { ...validation.esqlWhere })}
         >
-          <UncontrolledStreamsAppSearchBar
-            query={
-              query.kql ? { language: 'kuery', ...query.kql } : { language: 'kuery', query: '' }
-            }
-            onQueryChange={() => {
-              setTouched((prev) => ({ ...prev, kql: true }));
+          <EuiTextArea
+            value={query.esql.where}
+            disabled={!isEditing}
+            rows={2}
+            compressed
+            onBlur={() => {
+              setTouched((prev) => ({ ...prev, esqlWhere: true }));
             }}
-            onQuerySubmit={(next) => {
+            onChange={(event) => {
+              const nextEsqlWhere = event.currentTarget.value;
               setQuery({
                 ...query,
-                kql: {
-                  query: typeof next.query?.query === 'string' ? next.query.query : '',
-                },
+                esql: { where: nextEsqlWhere },
               });
-              setTouched((prev) => ({ ...prev, kql: true }));
+              setTouched((prev) => ({ ...prev, esqlWhere: true }));
             }}
-            showQueryInput
-            showSubmitButton={false}
-            isDisabled={!isEditing}
             placeholder={i18n.translate(
               'xpack.streams.addSignificantEventFlyout.generatedEventPreview.queryPlaceholder',
               { defaultMessage: 'Enter query' }
             )}
-            indexPatterns={dataViews}
-            submitOnBlur
           />
         </EuiFormRow>
       </EuiForm>
@@ -276,7 +211,7 @@ export function GeneratedEventPreview({
       <PreviewDataSparkPlot
         definition={definition}
         query={query}
-        isQueryValid={!validation.kql.isInvalid}
+        isQueryValid={!validation.esqlWhere.isInvalid}
       />
     </div>
   );

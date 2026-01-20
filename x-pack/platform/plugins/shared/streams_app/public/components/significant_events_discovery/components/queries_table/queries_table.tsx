@@ -50,7 +50,6 @@ import {
   PROMOTE_ALL_ERROR_TOAST_TITLE,
   SEARCH_PLACEHOLDER,
   STREAM_COLUMN,
-  SYSTEMS_COLUMN,
   TABLE_CAPTION,
   TITLE_COLUMN,
   getEventsCount,
@@ -107,14 +106,6 @@ export function QueriesTable() {
       render: (_: unknown, item: SignificantEventItem) => (
         <EuiBadge color="hollow">{item.stream_name || '--'}</EuiBadge>
       ),
-    },
-    {
-      field: 'query.feature',
-      name: SYSTEMS_COLUMN,
-      render: (_: unknown, item: SignificantEventItem) => {
-        const systemName = item.query.feature?.name;
-        return systemName ? <EuiBadge color="hollow">{systemName}</EuiBadge> : '--';
-      },
     },
     {
       field: 'query.severity_score',

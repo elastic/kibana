@@ -4,9 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { conditionSchema } from '@kbn/streamlang';
 import {
-  systemSchema,
   type SignificantEventsGenerateResponse,
   type SignificantEventsGetResponse,
   type SignificantEventsPreviewResponse,
@@ -35,15 +33,8 @@ const previewSignificantEventsRoute = createServerRoute({
     query: z.object({ from: dateFromString, to: dateFromString, bucketSize: z.string() }),
     body: z.object({
       query: z.object({
-        feature: z
-          .object({
-            name: z.string(),
-            filter: conditionSchema,
-            type: z.literal('system'),
-          })
-          .optional(),
-        kql: z.object({
-          query: z.string(),
+        esql: z.object({
+          where: z.string(),
         }),
       }),
     }),
@@ -75,7 +66,9 @@ const previewSignificantEventsRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const {
-      body: { query },
+      body: {
+        query: { esql },
+      },
       path: { name },
       query: { bucketSize, from, to },
     } = params;
@@ -88,7 +81,7 @@ const previewSignificantEventsRoute = createServerRoute({
         bucketSize,
         from,
         to,
-        query,
+        esqlWhere: esql.where,
       },
       {
         scopedClusterClient,
@@ -175,9 +168,6 @@ const generateSignificantEventsRoute = createServerRoute({
           'Number of sample documents to use for generation from the current data of stream'
         ),
     }),
-    body: z.object({
-      system: systemSchema.optional(),
-    }),
   }),
   options: {
     access: 'public',
@@ -232,7 +222,6 @@ const generateSignificantEventsRoute = createServerRoute({
       generateSignificantEventDefinitions(
         {
           definition,
-          system: params.body?.system,
           connectorId,
           start: params.query.from.valueOf(),
           end: params.query.to.valueOf(),

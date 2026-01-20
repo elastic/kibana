@@ -6,14 +6,9 @@
  */
 
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
-import { isInferenceProviderError } from '@kbn/inference-common';
-import {
-  getStreamTypeFromDefinition,
-  type SignificantEventsQueriesGenerationResult,
-  type System,
-} from '@kbn/streams-schema';
-import pLimit from 'p-limit';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
+import { isInferenceProviderError } from '@kbn/inference-common';
+import { getStreamTypeFromDefinition } from '@kbn/streams-schema';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
@@ -25,7 +20,6 @@ export interface SignificantEventsQueriesGenerationTaskParams {
   connectorId: string;
   start: number;
   end: number;
-  systems?: System[];
   sampleDocsSize?: number;
   streamName: string;
 }
@@ -48,9 +42,8 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                 throw new Error('Request is required to run this task');
               }
 
-              const { connectorId, start, end, systems, sampleDocsSize, streamName, _task } =
-                runContext.taskInstance
-                  .params as TaskParams<SignificantEventsQueriesGenerationTaskParams>;
+              const { connectorId, start, end, sampleDocsSize, streamName, _task } = runContext
+                .taskInstance.params as TaskParams<SignificantEventsQueriesGenerationTaskParams>;
 
               const {
                 taskClient,
@@ -76,68 +69,36 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
 
                 const { significantEventsPromptOverride } = await promptsConfigService.getPrompt();
 
-                // If no systems are passed, generate for all data
-                // If systems are passed, generate for each system with concurrency limit
-                const systemsToProcess: Array<System | undefined> =
-                  systems && systems.length > 0 ? systems : [undefined];
-
-                // Process systems with concurrency limit to avoid overwhelming the LLM provider
-                const CONCURRENCY_LIMIT = 3;
-                const limiter = pLimit(CONCURRENCY_LIMIT);
-
-                const resultsArray = await Promise.all(
-                  systemsToProcess.map((system) =>
-                    limiter(() =>
-                      generateSignificantEventDefinitions(
-                        {
-                          definition: stream,
-                          connectorId,
-                          start,
-                          end,
-                          system,
-                          sampleDocsSize,
-                          features,
-                          systemPrompt: significantEventsPromptOverride,
-                        },
-                        {
-                          inferenceClient,
-                          esClient,
-                          logger: taskContext.logger.get('significant_events_generation'),
-                          signal: runContext.abortController.signal,
-                        }
-                      )
-                    )
-                  )
+                const result = await generateSignificantEventDefinitions(
+                  {
+                    definition: stream,
+                    connectorId,
+                    start,
+                    end,
+                    sampleDocsSize,
+                    features,
+                    systemPrompt: significantEventsPromptOverride,
+                  },
+                  {
+                    inferenceClient,
+                    esClient,
+                    logger: taskContext.logger.get('significant_events_generation'),
+                    signal: runContext.abortController.signal,
+                  }
                 );
 
-                // Combine results from all parallel generations in a single pass
-                const combinedResults =
-                  resultsArray.reduce<SignificantEventsQueriesGenerationResult>(
-                    (acc, result) => {
-                      acc.queries.push(...result.queries);
-                      acc.tokensUsed.prompt += result.tokensUsed.prompt;
-                      acc.tokensUsed.completion += result.tokensUsed.completion;
-                      return acc;
-                    },
-                    { queries: [], tokensUsed: { prompt: 0, completion: 0 } }
-                  );
-
                 taskContext.telemetry.trackSignificantEventsQueriesGenerated({
-                  count: combinedResults.queries.length,
-                  systems_count: systems?.length ?? 0,
+                  count: result.queries.length,
                   stream_name: stream.name,
                   stream_type: getStreamTypeFromDefinition(stream),
-                  input_tokens_used: combinedResults.tokensUsed.prompt,
-                  output_tokens_used: combinedResults.tokensUsed.completion,
+                  input_tokens_used: result.tokensUsed.prompt,
+                  output_tokens_used: result.tokensUsed.completion,
                 });
 
-                await taskClient.complete<
-                  SignificantEventsQueriesGenerationTaskParams,
-                  SignificantEventsQueriesGenerationResult
-                >(
+                await taskClient.complete(
                   _task,
-                  { connectorId, start, end, systems, sampleDocsSize, streamName },
-                  combinedResults
+                  { connectorId, start, end, sampleDocsSize, streamName },
+                  result
                 );
               } catch (error) {
                 // Get connector info for error enrichment
@@ -160,7 +121,7 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
 
                 await taskClient.fail<SignificantEventsQueriesGenerationTaskParams>(
                   _task,
-                  { connectorId, start, end, systems, sampleDocsSize, streamName },
+                  { connectorId, start, end, sampleDocsSize, streamName },
                   errorMessage
                 );
 

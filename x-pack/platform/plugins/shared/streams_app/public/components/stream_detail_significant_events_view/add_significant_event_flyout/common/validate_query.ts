@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import type { StreamQueryKql } from '@kbn/streams-schema';
+import type { StreamQuery } from '@kbn/streams-schema';
+import { Parser } from '@kbn/esql-language';
 import { i18n } from '@kbn/i18n';
-import { fromKueryExpression } from '@kbn/es-query';
 
-export function validateQuery(query: Partial<StreamQueryKql>): {
+export function validateQuery(query: Partial<StreamQuery>): {
   title: { isInvalid: boolean; error?: string };
-  kql: { isInvalid: boolean; error?: string };
+  esqlWhere: { isInvalid: boolean; error?: string };
 } {
-  const { title = '', kql: { query: kqlQuery } = { query: '' } } = query;
+  const { title = '' } = query;
+  const esqlWhere = query.esql?.where ?? '';
 
   const isEmptyTitle = title.length === 0;
   const titleErrorMessage = isEmptyTitle
@@ -22,21 +23,21 @@ export function validateQuery(query: Partial<StreamQueryKql>): {
       })
     : undefined;
 
-  const isEmptyKql = kqlQuery.length === 0;
-  let kqlSyntaxError = false;
-  if (!isEmptyKql) {
+  const isEmptyEsqlWhere = esqlWhere.length === 0;
+  let esqlSyntaxError = false;
+  if (!isEmptyEsqlWhere) {
     try {
-      fromKueryExpression(kqlQuery);
-    } catch (error) {
-      kqlSyntaxError = true;
+      Parser.parseExpression(esqlWhere);
+    } catch {
+      esqlSyntaxError = true;
     }
   }
 
-  const kqlErrorMessage = kqlSyntaxError
+  const esqlWhereErrorMessage = esqlSyntaxError
     ? i18n.translate('xpack.streams.significantEventFlyout.formFieldQuerySyntaxError', {
         defaultMessage: 'Invalid syntax',
       })
-    : isEmptyKql
+    : isEmptyEsqlWhere
     ? i18n.translate('xpack.streams.significantEventFlyout.formFieldQueryRequiredError', {
         defaultMessage: 'Required',
       })
@@ -44,6 +45,6 @@ export function validateQuery(query: Partial<StreamQueryKql>): {
 
   return {
     title: { isInvalid: Boolean(titleErrorMessage), error: titleErrorMessage },
-    kql: { isInvalid: Boolean(kqlErrorMessage), error: kqlErrorMessage },
+    esqlWhere: { isInvalid: Boolean(esqlWhereErrorMessage), error: esqlWhereErrorMessage },
   };
 }

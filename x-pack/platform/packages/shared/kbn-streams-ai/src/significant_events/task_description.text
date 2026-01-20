@@ -9,13 +9,13 @@
 
 Generate a set of queries that will help the user understand if anything significant is happening in their data.
 
-These queries will use KQL and an additional filter will be added to only include the data from the specified system.
+These queries will use KQL.
 
 **Generally, these queries will be either on the `body.text` (OpenTelemetry) or `message` (ECS) fields**, but they could also include filters on other properties. If `body.text` is available, you must use `body.text`. Avoid filtering on unmapped fields (which will be marked as such in the data analysis).
 
 ## Context
 
-You will be provided with a name (`name`), a written description (`description`) and sample values of the data from the system (`dataset_analysis`). This data could include things like:
+You will be provided with a name (`name`), a written description (`description`) and features (`features`, including a `dataset_analysis` computed feature). This data could include things like:
 
 ### 1. **System Runtime and Execution Context**
 
@@ -91,7 +91,7 @@ Knowing these properties lets you:
 
 ## Query categories
 
-Generate queries for the following categories, but only when applicable and there is data in the system to justify them. Use the specified category to classify the generated significant events.
+Generate queries for the following categories, but only when applicable and there is data to justify them. Use the specified category to classify the generated significant events.
 
 ### 1. **Startup and Shutdown Logs** (`operational`)
 

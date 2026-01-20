@@ -7,15 +7,14 @@
 
 import { useAbortController } from '@kbn/react-hooks';
 import type {
-  StreamQueryKql,
-  System,
+  StreamQuery,
   SignificantEventsQueriesGenerationTaskResult,
 } from '@kbn/streams-schema';
 import { useKibana } from './use_kibana';
 import { getLast24HoursTimeRange } from '../util/time_range';
 
 interface SignificantEventsApiBulkOperationCreate {
-  index: StreamQueryKql;
+  index: StreamQuery;
 }
 interface SignificantEventsApiBulkOperationDelete {
   delete: { id: string };
@@ -26,14 +25,13 @@ type SignificantEventsApiBulkOperation =
   | SignificantEventsApiBulkOperationDelete;
 
 interface SignificantEventsApi {
-  upsertQuery: (query: StreamQueryKql) => Promise<void>;
+  upsertQuery: (query: StreamQuery) => Promise<void>;
   removeQuery: (id: string) => Promise<void>;
   bulk: (operations: SignificantEventsApiBulkOperation[]) => Promise<void>;
   abort: () => void;
   getGenerationTask: () => Promise<SignificantEventsQueriesGenerationTaskResult>;
   scheduleGenerationTask: (
     connectorId: string,
-    systems?: System[],
     sampleDocsSize?: number
   ) => Promise<SignificantEventsQueriesGenerationTaskResult>;
   cancelGenerationTask: () => Promise<SignificantEventsQueriesGenerationTaskResult>;
@@ -106,11 +104,7 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
         }
       );
     },
-    scheduleGenerationTask: async (
-      connectorId: string,
-      systems?: System[],
-      sampleDocsSize?: number
-    ) => {
+    scheduleGenerationTask: async (connectorId: string, sampleDocsSize?: number) => {
       const { from, to } = getLast24HoursTimeRange();
       return streamsRepositoryClient.fetch(
         'POST /internal/streams/{name}/significant_events/_task',
@@ -124,7 +118,6 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
               from,
               to,
               sampleDocsSize,
-              systems,
             },
           },
         }

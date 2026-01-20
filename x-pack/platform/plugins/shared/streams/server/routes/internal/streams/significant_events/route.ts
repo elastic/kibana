@@ -5,7 +5,6 @@
  * 2.0.
  */
 import {
-  systemSchema,
   type SignificantEventsQueriesGenerationResult,
   type SignificantEventsQueriesGenerationTaskResult,
   type SignificantEventsGetResponse,
@@ -85,7 +84,6 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
         .describe(
           'Number of sample documents to use for generation from the current data of stream'
         ),
-      systems: z.array(systemSchema).optional().describe('Optional array of systems'),
     }),
   }),
   options: {
@@ -134,7 +132,6 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
                   connectorId,
                   start: body.from.getTime(),
                   end: body.to.getTime(),
-                  systems: body.systems,
                   sampleDocsSize: body.sampleDocsSize,
                   streamName: name,
                 };

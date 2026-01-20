@@ -10,7 +10,16 @@ import { v5 } from 'uuid';
 import type { QueryLink } from '../../../../../../common/queries';
 import { ASSET_UUID } from '../../fields';
 
-export function getRuleIdFromQueryLink(query: QueryLink) {
-  const queryHash = objectHash([query[ASSET_UUID], query.query.kql.query]);
+/**
+ * Internal type that extends QueryLink with stored KQL for rule ID generation.
+ * Used during migration to maintain stable rule IDs.
+ */
+export interface QueryLinkWithStoredKql extends QueryLink {
+  _storedKqlQuery?: string;
+}
+
+export function getRuleIdFromQueryLink(query: QueryLinkWithStoredKql) {
+  const queryForHash = query._storedKqlQuery ?? query.query.esql.where;
+  const queryHash = objectHash([query[ASSET_UUID], queryForHash]);
   return v5(queryHash, v5.DNS);
 }

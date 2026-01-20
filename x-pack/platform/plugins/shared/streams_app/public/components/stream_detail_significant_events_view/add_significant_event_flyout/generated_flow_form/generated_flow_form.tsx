@@ -6,10 +6,8 @@
  */
 
 import { EuiCallOut } from '@elastic/eui';
-import type { StreamQueryKql, System } from '@kbn/streams-schema';
-import type { Streams } from '@kbn/streams-schema';
+import type { StreamQuery, Streams } from '@kbn/streams-schema';
 import React, { useEffect, useState } from 'react';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { SignificantEventsGeneratedTable } from './significant_events_generated_table';
 import { AiFlowEmptyState } from './empty_state';
@@ -18,15 +16,13 @@ import { AiFlowWaitingForGeneration } from './waiting_for_generation';
 interface Props {
   isGenerating: boolean;
   isBeingCanceled: boolean;
-  generatedQueries: StreamQueryKql[];
-  onEditQuery: (query: StreamQueryKql) => void;
+  generatedQueries: StreamQuery[];
+  onEditQuery: (query: StreamQuery) => void;
   stopGeneration: () => void;
   definition: Streams.all.Definition;
   isSubmitting: boolean;
-  setQueries: (queries: StreamQueryKql[]) => void;
+  setQueries: (queries: StreamQuery[]) => void;
   setCanSave: (canSave: boolean) => void;
-  systems: Omit<System, 'description'>[];
-  dataViews: DataView[];
   taskStatus?: string;
   taskError?: string;
 }
@@ -41,15 +37,13 @@ export function GeneratedFlowForm({
   definition,
   setCanSave,
   isSubmitting,
-  systems,
-  dataViews,
   taskStatus,
   taskError,
 }: Props) {
-  const [selectedQueries, setSelectedQueries] = useState<StreamQueryKql[]>([]);
+  const [selectedQueries, setSelectedQueries] = useState<StreamQuery[]>([]);
   const [isEditingQueries, setIsEditingQueries] = useState(false);
 
-  const onSelectionChange = (selectedItems: StreamQueryKql[]) => {
+  const onSelectionChange = (selectedItems: StreamQuery[]) => {
     setSelectedQueries(selectedItems);
     setQueries(selectedItems);
   };
@@ -123,8 +117,6 @@ export function GeneratedFlowForm({
         selectedQueries={selectedQueries}
         onSelectionChange={onSelectionChange}
         definition={definition}
-        systems={systems}
-        dataViews={dataViews}
       />
       {isGenerating && (
         <AiFlowWaitingForGeneration
