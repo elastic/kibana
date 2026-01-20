@@ -11,7 +11,9 @@ import type { SelectionOption } from '@kbn/workflows/types/v1';
 
 const resolvedEntityCache = new Map<string, { option: SelectionOption; timestamp: number }>();
 const searchOptionsCache = new Map<string, SelectionOption[]>();
-const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+// The cache purpose is to reduce the number of server requests during heavy UI editing.
+// However, long TTL has a bad impact on UX, showing stale data should be avoided.
+const CACHE_TTL_MS = 30 * 1000; // 30 seconds
 
 function getCacheKey(stepType: string, scope: string, propertyKey: string, value: unknown): string {
   return `${stepType}:${scope}:${propertyKey}:${String(value)}`;
