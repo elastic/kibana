@@ -41,7 +41,7 @@ import { ScriptNameNavLink } from './script_name_nav_link';
 import { getScriptsDetailPath } from '../../../../common/url_routing';
 import { ScriptTablePlatformBadges } from './platform_badges';
 
-const columnWidths = {
+const SCRIPTS_TABLE_COLUMN_WIDTHS = Object.freeze({
   name: '25%',
   platform: '15%',
   tags: '150px',
@@ -49,7 +49,7 @@ const columnWidths = {
   updatedAt: '25%',
   size: '5%',
   actions: '65px',
-};
+});
 
 interface GetScriptsLibraryTableColumnsProps {
   formatBytes: (bytes: number) => string;
@@ -71,7 +71,7 @@ const getScriptsLibraryTableColumns = ({
       field: 'name',
       name: tableLabels.table.columns.name,
       sortable: true,
-      width: columnWidths.name,
+      width: SCRIPTS_TABLE_COLUMN_WIDTHS.name,
       truncateText: true,
       render: (name: string, item: EndpointScript) => {
         const toRoutePath = getScriptsDetailPath({
@@ -93,7 +93,7 @@ const getScriptsLibraryTableColumns = ({
     {
       field: 'platform',
       name: tableLabels.table.columns.platform,
-      width: columnWidths.platform,
+      width: SCRIPTS_TABLE_COLUMN_WIDTHS.platform,
       render: (platforms: SupportedHostOsType[]) => (
         <ScriptTablePlatformBadges
           platforms={platforms}
@@ -104,7 +104,7 @@ const getScriptsLibraryTableColumns = ({
     {
       field: 'tags',
       name: tableLabels.table.columns.tags,
-      width: columnWidths.tags,
+      width: SCRIPTS_TABLE_COLUMN_WIDTHS.tags,
       render: (tags: string[]) => {
         const renderItem = (sortedTag: string, i: number) => (
           <EuiBadge
@@ -131,7 +131,7 @@ const getScriptsLibraryTableColumns = ({
       field: 'updatedBy',
       name: tableLabels.table.columns.updatedBy,
       sortable: true,
-      width: columnWidths.updatedBy,
+      width: SCRIPTS_TABLE_COLUMN_WIDTHS.updatedBy,
       render: (updatedBy: string) => (
         <EuiFacetButton
           icon={
@@ -159,7 +159,7 @@ const getScriptsLibraryTableColumns = ({
     {
       field: 'updatedAt',
       name: tableLabels.table.columns.updatedAt,
-      width: columnWidths.updatedAt,
+      width: SCRIPTS_TABLE_COLUMN_WIDTHS.updatedAt,
       truncateText: true,
       sortable: true,
       render: (updatedAt: string) => {
@@ -175,7 +175,7 @@ const getScriptsLibraryTableColumns = ({
     {
       field: 'fileSize',
       name: tableLabels.table.columns.size,
-      width: columnWidths.size,
+      width: SCRIPTS_TABLE_COLUMN_WIDTHS.size,
       render: (fileSize: number) => (
         <EuiText size="s" data-test-subj={getTestId('file-size')}>
           {formatBytes(fileSize).toLowerCase()}
@@ -185,7 +185,7 @@ const getScriptsLibraryTableColumns = ({
     {
       field: '',
       name: tableLabels.table.columns.actions,
-      width: columnWidths.actions,
+      width: SCRIPTS_TABLE_COLUMN_WIDTHS.actions,
       actions: [],
     },
   ];
