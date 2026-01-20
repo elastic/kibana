@@ -14,6 +14,7 @@ import type {
   ICommandCallbacks,
   ESQLColumnData,
   ESQLCommandSummary,
+  UnmappedFieldsStrategy,
 } from './types';
 
 /**
@@ -68,7 +69,8 @@ export interface ICommandMethods<TContext = any> {
     command: ESQLCommand,
     previousColumns: ESQLColumnData[],
     query: string,
-    newFields: IAdditionalFields
+    newFields: IAdditionalFields,
+    unmappedFieldsStrategy: UnmappedFieldsStrategy
   ) => Promise<ESQLColumnData[]> | ESQLColumnData[];
 
   /**
