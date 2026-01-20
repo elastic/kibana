@@ -8,28 +8,25 @@
  */
 
 /*
- * AUTO-GENERATED FILE - DO NOT EDIT
+ * OVERRIDE FILE
  *
  * Source: /oas_docs/output/kibana.yaml, operations: addCaseCommentDefaultSpace
- *
- * To regenerate: node scripts/generate_workflow_kibana_contracts.js
+ * This override is to support union body with both 'alert' and 'user' comment types.
  */
 
-import { z } from '@kbn/zod/v4';
-
-import {
-  add_case_comment_default_space_request,
-  add_case_comment_default_space_response,
-} from './schemas/kibana_openapi_zod.gen';
-import { getShapeAt } from '../../../common/utils/zod';
+import { buildParamsSchema } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
 import type { InternalConnectorContract } from '../../../types/latest';
 
 import { FetcherConfigSchema } from '../../schema';
+import {
+  add_case_comment_default_space_request,
+  add_case_comment_default_space_response,
+} from '../generated/schemas/kibana_openapi_zod.gen';
 
 // export contract
-export const ADD_CASE_COMMENT_DEFAULT_SPACE_CONTRACT: InternalConnectorContract = {
+export const ADD_CASE_COMMENT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.addCaseComment',
   summary: `Add a case comment or alert`,
   description: `**Spaces method and path for this operation:**
@@ -50,11 +47,11 @@ You must have \`all\` privileges for the **Cases** feature in the **Management**
     urlParams: [],
     bodyParams: ['alertId', 'index', 'owner', 'rule', 'type', 'comment'],
   },
-  paramsSchema: z.object({
-    ...getShapeAt(add_case_comment_default_space_request, 'body'),
-    ...getShapeAt(add_case_comment_default_space_request, 'path'),
-    ...getShapeAt(add_case_comment_default_space_request, 'query'),
-    fetcher: FetcherConfigSchema,
+  paramsSchema: buildParamsSchema({
+    requestSchema: add_case_comment_default_space_request,
+    additionalSchemas: {
+      fetcher: FetcherConfigSchema,
+    },
   }),
   outputSchema: add_case_comment_default_space_response,
 };
