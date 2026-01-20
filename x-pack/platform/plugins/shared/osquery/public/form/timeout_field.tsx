@@ -50,6 +50,7 @@ const TimeoutFieldComponent = ({ euiFieldProps }: TimeoutFieldProps) => {
     [onChange]
   );
   const hasError = useMemo(() => !!error?.message, [error?.message]);
+  const { isDisabled, ...restEuiFieldProps } = euiFieldProps ?? {};
 
   return (
     <EuiFormRow
@@ -82,10 +83,10 @@ const TimeoutFieldComponent = ({ euiFieldProps }: TimeoutFieldProps) => {
         name="timeout"
         min={QUERY_TIMEOUT.DEFAULT}
         max={QUERY_TIMEOUT.MAX}
-        defaultValue={QUERY_TIMEOUT.DEFAULT}
         step={1}
         append="seconds"
-        {...euiFieldProps}
+        disabled={!!isDisabled}
+        {...restEuiFieldProps}
       />
     </EuiFormRow>
   );

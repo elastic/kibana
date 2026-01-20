@@ -27,11 +27,17 @@ import type { SplitButtonProps } from '@kbn/split-button';
 import { SplitButton } from '@kbn/split-button';
 import type { TopNavMenuData } from './top_nav_menu_data';
 
+/**
+ * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+ */
 export interface TopNavMenuItemProps extends TopNavMenuData {
   closePopover: () => void;
   isMobileMenu?: boolean;
 }
 
+/**
+ * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+ */
 export function TopNavMenuItem(props: TopNavMenuItemProps) {
   function isDisabled(): boolean {
     const val = isFunction(props.disableButton) ? props.disableButton() : props.disableButton;
