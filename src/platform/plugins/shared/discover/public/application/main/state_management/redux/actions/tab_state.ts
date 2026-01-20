@@ -53,7 +53,7 @@ const mergeAppState = (
  * Partially update the tab app state, merging with existing state and pushing to URL history
  */
 export const updateAppState: InternalStateThunkActionCreator<[AppStatePayload]> = (payload) =>
-  async function updateAppStateThunkFn(dispatch, getState) {
+  function updateAppStateThunkFn(dispatch, getState) {
     const { mergedAppState, hasStateChanges } = mergeAppState(getState(), payload);
 
     if (hasStateChanges) {
@@ -100,7 +100,7 @@ const mergeGlobalState = (
  * Partially update the tab global state, merging with existing state and pushing to URL history
  */
 export const updateGlobalState: InternalStateThunkActionCreator<[GlobalStatePayload]> = (payload) =>
-  async function updateGlobalStateThunkFn(dispatch, getState) {
+  function updateGlobalStateThunkFn(dispatch, getState) {
     const { mergedGlobalState, hasStateChanges } = mergeGlobalState(getState(), payload);
 
     if (hasStateChanges) {
@@ -158,7 +158,7 @@ export const pushCurrentTabStateToUrl: InternalStateThunkActionCreator<
 export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataViewId: string }>]
 > = ({ tabId, dataViewId }) =>
-  async function transitionFromESQLToDataViewThunkFn(dispatch) {
+  function transitionFromESQLToDataViewThunkFn(dispatch) {
     dispatch(
       updateAppState({
         tabId,
@@ -195,7 +195,7 @@ const clearTimeFieldFromSort = (
 export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataView: DataView }>]
 > = ({ tabId, dataView }) =>
-  async function transitionFromDataViewToESQLThunkFn(dispatch, getState) {
+  function transitionFromDataViewToESQLThunkFn(dispatch, getState) {
     const currentState = getState();
     const appState = selectTab(currentState, tabId).appState;
     const { query, sort } = appState;
@@ -229,7 +229,7 @@ export const updateESQLQuery: InternalStateThunkActionCreator<[UpdateESQLQueryAc
   tabId,
   queryOrUpdater,
 }) =>
-  async function updateESQLQueryThunkFn(dispatch, getState) {
+  function updateESQLQueryThunkFn(dispatch, getState) {
     addLog('updateESQLQuery');
     const currentState = getState();
     const appState = selectTab(currentState, tabId).appState;
@@ -258,7 +258,7 @@ export const onQuerySubmit: InternalStateThunkActionCreator<
     }>
   ]
 > = ({ tabId, payload, isUpdate }) =>
-  async function onQuerySubmitThunkFn(
+  function onQuerySubmitThunkFn(
     dispatch,
     getState,
     { searchSessionManager, runtimeStateManager, services }
@@ -295,7 +295,7 @@ export const onQuerySubmit: InternalStateThunkActionCreator<
 export const fetchData: InternalStateThunkActionCreator<
   [TabActionPayload<{ initial?: boolean }>]
 > = ({ tabId, initial }) =>
-  async function fetchDataThunkFn(dispatch, getState, { runtimeStateManager }) {
+  function fetchDataThunkFn(dispatch, getState, { runtimeStateManager }) {
     addLog('fetchData', { initial });
     const { stateContainer$ } = selectTabRuntimeState(runtimeStateManager, tabId);
     const dataStateContainer = stateContainer$.getValue()?.dataState;
@@ -310,7 +310,7 @@ export const fetchData: InternalStateThunkActionCreator<
 export const pauseAutoRefreshInterval: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataView: DataView }>]
 > = ({ tabId, dataView }) =>
-  async function pauseAutoRefreshIntervalThunkFn(dispatch, getState) {
+  function pauseAutoRefreshIntervalThunkFn(dispatch, getState) {
     if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
       const currentState = getState();
       const globalState = selectTab(currentState, tabId).globalState;

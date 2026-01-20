@@ -59,7 +59,7 @@ export const setDataView: InternalStateThunkActionCreator<
 export const assignNextDataView: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataView: DataView }>]
 > = ({ tabId, dataView }) =>
-  async function assignNextDataViewThunkFn(dispatch, _, { runtimeStateManager }) {
+  function assignNextDataViewThunkFn(dispatch, _, { runtimeStateManager }) {
     dispatch(setDataView({ tabId, dataView }));
     dispatch(internalStateActions.pauseAutoRefreshInterval({ tabId, dataView }));
 
