@@ -64,7 +64,7 @@ export function getColorAssignments(
       );
 
       const splits =
-        !columns || !data.tables[layer.layerId]
+        !columns || columns.length === 0 || !data.tables[layer.layerId]
           ? []
           : uniq(
               data.tables[layer.layerId].rows.flatMap((row) => {

@@ -98,7 +98,7 @@ export function getColorFactory(
             // remove categories one maching an assignment
             return !assignmentMatcher.hasMatch(category);
           })
-          // setting the Map keys as the strinified version of the rawValue
+          // setting the Map keys as the stringified version of the rawValue
           .map((category: RawValue, i) => {
             const key = getValueKey(category);
             const autoAssignment = autoAssignments[i];

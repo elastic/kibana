@@ -11,8 +11,8 @@ import { convertToRawColorMappingsFn } from './raw_color_mappings';
 import { convertToSplitAccessorsFn } from './split_accessors';
 
 export const getRuntimeConverters = (datasourceStates?: Readonly<GeneralDatasourceStates>) => [
-  // splitAccessors migration needs to run before the color mapping one due to the
-  // requirements about the splitAccessors required by the color mapping runtime convertion
+  // splitAccessors runtime migration needs to run before the color mapping one due to the
+  // used `splitAccessors` prop required by the color mapping runtime convertion
   convertToSplitAccessorsFn,
   convertToLegendStats,
   convertToRawColorMappingsFn(datasourceStates),

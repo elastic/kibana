@@ -24,7 +24,7 @@ export function getColorCategories(
   exclude?: RawValue[],
   legacyMode: boolean = false // stringifies raw values
 ): SerializedValue[] {
-  if (!accessors) return [];
+  if (accessors.length === 0) return [];
 
   const seen = new Set<unknown>();
   return rows.reduce<SerializedValue[]>((acc, row) => {
