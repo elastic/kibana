@@ -339,10 +339,7 @@ editorHandlers: {
 **2. `resolve`** - Resolves an entity by its value (used on load, paste, etc.):
 
 ```typescript
-resolve: async (value: unknown, context: SelectionContext) => {
-  if (typeof value !== 'string') {
-    return null;
-  }
+resolve: async (value: string, context: SelectionContext) => {
   const agent = await agentService.get(value);
   if (!agent) {
     return null;
@@ -398,10 +395,7 @@ editorHandlers: {
             description: agent.description,
           }));
         },
-        resolve: async (value: unknown, context: SelectionContext) => {
-          if (typeof value !== 'string') {
-            return null;
-          }
+        resolve: async (value: string, context: SelectionContext) => {
           const agent = await agentService.get(value);
           return agent
             ? {
@@ -412,7 +406,7 @@ editorHandlers: {
             : null;
         },
         getDetails: async (
-          value: unknown,
+          value: string,
           context: SelectionContext,
           option: SelectionOption | null
         ) => {
@@ -486,8 +480,8 @@ For a complete working example, see the `external_step` implementation in `examp
 
 The selection interface includes built-in caching for resolved entities to optimize performance:
 
-- Resolved entities are cached for 5 minutes to avoid redundant API calls
-- The `resolve` function is only called when needed (on load, paste, or when validation is triggered)
+- Resolved entities are cached for 30 seconds to avoid redundant API calls
+- The `resolve` function is only called when needed (on load, paste, or when validation is triggered), and if the value is valid against the schema.
 - The `search` function is called lazily when the user triggers autocomplete
 
 ### Step 4: Register in Plugin Setup
