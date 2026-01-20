@@ -127,7 +127,12 @@ describe('registerDataGeneratorRoutes', () => {
 
   it('returns notFound when the Cases plugin is unavailable', async () => {
     pluginsStart = { cases: undefined };
-    getStartServices.mockResolvedValue([coreStart as any, pluginsStart as any, undefined] as any);
+    const startServices = [
+      coreStart,
+      pluginsStart as unknown as StartPlugins,
+      undefined,
+    ] as unknown as Awaited<ReturnType<StartServicesAccessor<StartPlugins>>>;
+    getStartServices.mockResolvedValue(startServices);
 
     const handler = getRouteHandler();
     await handler(

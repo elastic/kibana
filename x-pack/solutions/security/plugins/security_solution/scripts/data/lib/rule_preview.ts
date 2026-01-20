@@ -105,13 +105,15 @@ export const copyPreviewAlertsToRealAlertsIndex = async ({
   const resolveWriteIndexFromAlias = async (alias: string): Promise<string | undefined> => {
     try {
       const resp = await esClient.indices.getAlias({ name: alias });
-      const entries = Object.entries(resp as Record<string, any>);
+      const entries = Object.entries(resp as unknown as Record<string, unknown>);
       if (entries.length === 0) return undefined;
 
       // Prefer the index explicitly marked as the write index for the alias.
       for (const [indexName, v] of entries) {
-        const aliasInfo = v?.aliases?.[alias];
-        if (aliasInfo && aliasInfo.is_write_index === true) return indexName;
+        if (isRecord(v) && isRecord(v.aliases)) {
+          const aliasInfo = v.aliases[alias];
+          if (isRecord(aliasInfo) && aliasInfo.is_write_index === true) return indexName;
+        }
       }
 
       // If only one concrete index is attached, use it.

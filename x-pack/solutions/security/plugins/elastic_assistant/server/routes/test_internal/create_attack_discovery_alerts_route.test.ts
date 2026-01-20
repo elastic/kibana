@@ -34,7 +34,7 @@ describe('createAttackDiscoveryAlertsRoute', () => {
         headers: { 'kbn-xsrf': 'true', 'elastic-api-version': '1' },
         body: mockCreateAttackDiscoveryAlertsParams,
       }),
-      requestContextMock.convertContext(context as any)
+      requestContextMock.convertContext(context)
     );
 
     expect(res.status).toEqual(403);
@@ -65,7 +65,7 @@ describe('createAttackDiscoveryAlertsRoute', () => {
         },
         body: mockCreateAttackDiscoveryAlertsParams,
       }),
-      requestContextMock.convertContext(context as any)
+      requestContextMock.convertContext(context)
     );
 
     expect(res.status).toEqual(403);
@@ -95,7 +95,7 @@ describe('createAttackDiscoveryAlertsRoute', () => {
         },
         body: mockCreateAttackDiscoveryAlertsParams,
       }),
-      requestContextMock.convertContext(context as any)
+      requestContextMock.convertContext(context)
     );
 
     expect(res.status).toEqual(200);

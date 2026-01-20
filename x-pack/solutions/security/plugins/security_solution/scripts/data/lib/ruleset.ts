@@ -112,44 +112,42 @@ const resolveRulesetAgainstCandidates = <TCandidate, TResolved>({
         const msg = `Ruleset rule_id not ${notFoundLabel}: ${spec.rule_id} (${spec.id})`;
         if (strict) throw new Error(msg);
         log.warning(`${msg}, skipping`);
-        continue;
+      } else {
+        resolved.push(toResolved(found));
       }
-      resolved.push(toResolved(found));
-      continue;
+    } else {
+      const tokens = spec.match?.name_contains_any ?? [];
+      if (tokens.length === 0) {
+        throw new Error(`Ruleset entry ${spec.id} missing rule_id and match.name_contains_any`);
+      }
+
+      const ranked = candidates
+        .map((r) => ({
+          r,
+          score: scoreByNameTokens({
+            name: getName(r),
+            tokens,
+            enabled: getEnabled?.(r),
+            immutable: getImmutable?.(r),
+          }),
+        }))
+        .filter(({ score }) => score > 0)
+        .sort((a, b) => b.score - a.score || getName(a.r).localeCompare(getName(b.r)));
+
+      const best = ranked[0]?.r;
+      if (!best) {
+        const msg = `Ruleset entry ${
+          spec.id
+        } did not match any ${matchedLabel} rules by name tokens: ${tokens.join(', ')}`;
+        if (strict) throw new Error(msg);
+        log.warning(`${msg}, skipping`);
+      } else {
+        log.info(
+          `Ruleset ${spec.id} matched ${matchedLabel} rule: ${getName(best)} (${getRuleId(best)})`
+        );
+        resolved.push(toResolved(best));
+      }
     }
-
-    const tokens = spec.match?.name_contains_any ?? [];
-    if (tokens.length === 0) {
-      throw new Error(`Ruleset entry ${spec.id} missing rule_id and match.name_contains_any`);
-    }
-
-    const ranked = candidates
-      .map((r) => ({
-        r,
-        score: scoreByNameTokens({
-          name: getName(r),
-          tokens,
-          enabled: getEnabled?.(r),
-          immutable: getImmutable?.(r),
-        }),
-      }))
-      .filter(({ score }) => score > 0)
-      .sort((a, b) => b.score - a.score || getName(a.r).localeCompare(getName(b.r)));
-
-    const best = ranked[0]?.r;
-    if (!best) {
-      const msg = `Ruleset entry ${
-        spec.id
-      } did not match any ${matchedLabel} rules by name tokens: ${tokens.join(', ')}`;
-      if (strict) throw new Error(msg);
-      log.warning(`${msg}, skipping`);
-      continue;
-    }
-
-    log.info(
-      `Ruleset ${spec.id} matched ${matchedLabel} rule: ${getName(best)} (${getRuleId(best)})`
-    );
-    resolved.push(toResolved(best));
   }
 
   return resolved;

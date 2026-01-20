@@ -68,7 +68,7 @@ class AuthenticatedKbnClient extends KbnClient {
   }
 
   public override async request<T>(options: Parameters<KbnClient['request']>[0]) {
-    return await super.request<T>({
+    return super.request<T>({
       ...options,
       headers: {
         ...this.defaultHeaders,
