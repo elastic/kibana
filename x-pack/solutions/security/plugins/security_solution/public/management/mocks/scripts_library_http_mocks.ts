@@ -7,7 +7,10 @@
 
 import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import { EndpointScriptsGenerator } from '../../../common/endpoint/data_generators/endpoint_scripts_generator';
-import { SCRIPTS_LIBRARY_ROUTE } from '../../../common/endpoint/constants';
+import {
+  SCRIPTS_LIBRARY_ROUTE,
+  SCRIPTS_LIBRARY_ROUTE_ITEM,
+} from '../../../common/endpoint/constants';
 import type {
   EndpointScriptListApiResponse,
   EndpointScriptApiResponse,
@@ -44,7 +47,7 @@ export const scriptsLibraryHttpMocks = httpHandlerMockFactory<ScriptsLibraryHttp
   {
     id: 'getScriptById',
     method: 'get',
-    path: `${SCRIPTS_LIBRARY_ROUTE}/{id}`,
+    path: SCRIPTS_LIBRARY_ROUTE_ITEM,
     handler: ({ path }): EndpointScriptApiResponse => {
       const response = new EndpointScriptsGenerator('seed').generate();
       response.id = path.substring(path.lastIndexOf('/') + 1) || response.id;
