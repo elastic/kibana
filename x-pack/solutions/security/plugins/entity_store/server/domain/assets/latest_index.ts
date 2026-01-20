@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { getEntityIndexPattern, ENTITY_LATEST, ENTITY_SCHEMA_VERSION_V2 } from '../constants';
+import {
+  getEntityIndexPattern,
+  ENTITY_LATEST,
+  ENTITY_SCHEMA_VERSION_V2,
+  ENTITY_RESET,
+} from '../constants';
 import type { EntityType } from '../definitions/entity_schema';
 
 // Mostly copied from
@@ -15,6 +20,13 @@ export const getLatestEntitiesIndexName = (entityType: EntityType, namespace: st
   getEntityIndexPattern({
     schemaVersion: ENTITY_SCHEMA_VERSION_V2,
     dataset: ENTITY_LATEST,
+    definitionId: getEntityDefinitionId(entityType, namespace),
+  });
+
+export const getResetEntitiesIndexName = (entityType: EntityType, namespace: string) =>
+  getEntityIndexPattern({
+    schemaVersion: ENTITY_SCHEMA_VERSION_V2,
+    dataset: ENTITY_RESET,
     definitionId: getEntityDefinitionId(entityType, namespace),
   });
 

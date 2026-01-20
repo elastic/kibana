@@ -19,6 +19,7 @@ import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/se
 import type { CoreSetup } from '@kbn/core/server';
 import type { AssetManager } from './domain/asset_manager';
 import type { FeatureFlags } from './infra/feature_flags';
+import type { LogsExtractionClient } from './domain/logs_extraction_client';
 
 export interface EntityStoreSetupPlugins {
   taskManager: TaskManagerSetupContract;
@@ -35,6 +36,7 @@ export interface EntityStoreApiRequestHandlerContext {
   logger: Logger;
   assetManager: AssetManager;
   featureFlags: FeatureFlags;
+  logsExtractionClient: LogsExtractionClient;
 }
 
 export type EntityStoreRequestHandlerContext = CustomRequestHandlerContext<{

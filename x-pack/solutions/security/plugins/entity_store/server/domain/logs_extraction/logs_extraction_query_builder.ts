@@ -11,7 +11,11 @@ import type {
   EntityIdentityField,
 } from '../definitions/entity_schema';
 
-const DEFAULT_FIELDS = ['@timestamp', `entity.id`];
+export const HASHED_ID = 'entity.hashedId';
+const HASH_ALG = 'SHA256';
+
+const MAIN_ENTITY_ID = 'entity.id';
+const DEFAULT_FIELDS = ['@timestamp', MAIN_ENTITY_ID];
 const METADATA_FIELDS = ['_index'];
 
 const RECENT_DATA_PREFIX = 'recent';
@@ -47,6 +51,12 @@ export const buildLogsExtractionEsqlQuery = ({
   const idField = identityFields[0];
   const idFieldName = idField.field;
 
+  const cleanFields = fields.filter(
+    // boolean and date still not working, maybe the code is not in the snapshot I'm running locally
+    // I need to further test
+    ({ mapping }) => mapping?.type !== 'boolean' && mapping?.type !== 'date'
+  );
+
   return `FROM ${indexPatterns.join(', ')}
     METADATA ${METADATA_FIELDS.join(', ')}
   | WHERE ${entityIdFiler(idFieldName)}
@@ -58,17 +68,18 @@ export const buildLogsExtractionEsqlQuery = ({
     ${idFieldName} AS ${recentData(idFieldName)}
   | STATS
     ${recentData('timestamp')} = MAX(@timestamp),
-    ${recentFieldStats(fields)}
+    ${recentFieldStats(cleanFields)}
     BY ${recentData(idFieldName)}
   | LOOKUP JOIN ${latestIndex}
       ON ${recentData(idFieldName)} == ${idFieldName}
   | RENAME
     ${recentData(idFieldName)} AS ${idFieldName}
   | EVAL
-    ${mergedFieldStats(idField, fields)},
+    ${mergedFieldStats(idField, cleanFields)},
     ${customFieldEvalLogic()}
-  | KEEP ${fieldsToKeep(idField, fields)}
+  | KEEP ${fieldsToKeep(idField, cleanFields)}
   | LIMIT ${maxPageSearchSize}
+  | EVAL ${HASHED_ID} = HASH("${HASH_ALG}", ${MAIN_ENTITY_ID})
   | SORT @timestamp ASC`;
 };
 
@@ -110,13 +121,13 @@ function mergedFieldStats({ field: idField }: EntityIdentityField, fields: Entit
           throw new Error('unknown field operation');
       }
     })
-    .concat([`entity.id = ${idField}`])
+    .concat([`${MAIN_ENTITY_ID} = ${idField}`])
     .join(',\n ');
 }
 
 function fieldsToKeep({ field: idField }: EntityIdentityField, fields: EntityField[]) {
   return fields
-    .map(({ destination }) => destination)
+    .map(({ destination, source }) => destination || source)
     .concat([...DEFAULT_FIELDS, idField])
     .join(',\n ');
 }

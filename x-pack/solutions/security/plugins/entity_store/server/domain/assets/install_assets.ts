@@ -19,11 +19,14 @@ import {
   getLatestEntityIndexTemplateConfig,
   getLatestIndexTemplateId,
 } from './latest_index_template';
-import { getLatestEntitiesIndexName } from './latest_index';
+import { getLatestEntitiesIndexName, getResetEntitiesIndexName } from './latest_index';
 import {
   getComponentTemplateName,
   getEntityDefinitionComponentTemplate,
+  getResetComponentTemplateName,
+  getResetEntityDefinitionComponentTemplate,
 } from './component_templates';
+import { getResetEntityIndexTemplateConfig, getResetIndexTemplateId } from './reset_index_template';
 
 interface ElasticsearchAssetOptions {
   esClient: ElasticsearchClient;
@@ -43,11 +46,20 @@ export async function installElasticsearchAssets({
     await putComponentTemplate(esClient, getEntityDefinitionComponentTemplate(definition));
     logger.debug(`installed component template for: ${type}`);
 
+    await putComponentTemplate(esClient, getResetEntityDefinitionComponentTemplate(definition));
+    logger.debug(`installed component template for: ${type} reset`);
+
     await putIndexTemplate(esClient, getLatestEntityIndexTemplateConfig(definition));
     logger.debug(`installed index template for: ${type}`);
 
+    await putIndexTemplate(esClient, getResetEntityIndexTemplateConfig(definition));
+    logger.debug(`installed index template for: ${type} reset`);
+
     await createIndex(esClient, getLatestEntitiesIndexName(definition.type, namespace));
     logger.debug(`created latest entity index for: ${type}`);
+
+    await createIndex(esClient, getResetEntitiesIndexName(definition.type, namespace));
+    logger.debug(`created latest entity index for: ${type} reset`);
   } catch (error) {
     logger.error(`error installing assets for ${type}: ${error}`);
 
@@ -68,11 +80,20 @@ export async function uninstallElasticsearchAssets({
     await deleteIndex(esClient, getLatestEntitiesIndexName(definition.type, namespace));
     logger.debug(`deleted entity index: ${type}`);
 
+    await deleteIndex(esClient, getResetEntitiesIndexName(definition.type, namespace));
+    logger.debug(`deleted entity reset index: ${type}`);
+
     await deleteIndexTemplate(esClient, getLatestIndexTemplateId(definition));
     logger.debug(`deleted entity index template: ${type}`);
 
+    await deleteIndexTemplate(esClient, getResetIndexTemplateId(definition));
+    logger.debug(`deleted entity reset index template: ${type}`);
+
     await deleteComponentTemplate(esClient, getComponentTemplateName(definition.id));
     logger.debug(`deleted entity index component template: ${type}`);
+
+    await deleteComponentTemplate(esClient, getResetComponentTemplateName(definition.id));
+    logger.debug(`deleted entity index reset component template: ${type}`);
   } catch (error) {
     logger.error(`error uninstalling assets for ${type}: ${error}`);
     // TODO: degrade status?

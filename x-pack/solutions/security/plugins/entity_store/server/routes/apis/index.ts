@@ -7,3 +7,4 @@
 
 export { registerInstall } from './install';
 export { registerStop } from './stop';
+export { registerForceLogExtraction } from './force_log_extraction';
