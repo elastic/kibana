@@ -62,7 +62,11 @@ export const getExceptionList = async ({
       });
       // eslint-disable-next-line no-console
       console.log(
-        `[DEBUG] getExceptionList: find result for listId=${listId}: total=${savedObject.total}, found=${savedObject.saved_objects.length > 0}, firstId=${savedObject.saved_objects[0]?.id}`
+        `[DEBUG] getExceptionList: find result for listId=${listId}: total=${
+          savedObject.total
+        }, found=${savedObject.saved_objects.length > 0}, firstId=${
+          savedObject.saved_objects[0]?.id
+        }`
       );
       if (savedObject.saved_objects[0] != null) {
         return transformSavedObjectToExceptionList({
