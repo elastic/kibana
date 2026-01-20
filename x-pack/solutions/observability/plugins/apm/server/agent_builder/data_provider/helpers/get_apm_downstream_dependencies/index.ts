@@ -7,13 +7,13 @@
 import datemath from '@elastic/datemath';
 import * as t from 'io-ts';
 import { termQuery } from '@kbn/observability-plugin/server';
-import type { RandomSampler } from '../../../lib/helpers/get_random_sampler';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { SERVICE_NAME } from '../../../../common/es_fields/apm';
-import { environmentQuery } from '../../../../common/utils/environment_query';
-import { getDestinationMap } from '../../../lib/connections/get_connection_stats/get_destination_map';
-import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { NodeType } from '../../../../common/connections';
+import type { RandomSampler } from '../../../../lib/helpers/get_random_sampler';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
+import { SERVICE_NAME } from '../../../../../common/es_fields/apm';
+import { environmentQuery } from '../../../../../common/utils/environment_query';
+import { getDestinationMap } from '../../../../lib/connections/get_connection_stats/get_destination_map';
+import type { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
+import { NodeType } from '../../../../../common/connections';
 
 export const downstreamDependenciesRouteRt = t.intersection([
   t.type({

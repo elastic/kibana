@@ -7,21 +7,18 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { termQuery } from '@kbn/observability-plugin/server';
-import { ApmDocumentType } from '../../../../common/document_type';
-import {
-  SPAN_DESTINATION_SERVICE_RESOURCE,
-  SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
-  SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
-} from '../../../../common/es_fields/apm';
-import { RollupInterval } from '../../../../common/rollup';
-import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { ApmDocumentType } from '../../../../../common/document_type';
+import { SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../../../common/es_fields/apm';
+import { RollupInterval } from '../../../../../common/rollup';
+import type { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 import { fetchSeries } from './fetch_timeseries';
 
-export async function getExitSpanLatency({
+export async function getExitSpanThroughput({
   apmEventClient,
   start,
   end,
   intervalString,
+  bucketSize,
   filter,
   spanDestinationServiceResource,
 }: {
@@ -33,13 +30,16 @@ export async function getExitSpanLatency({
   filter: QueryDslQueryContainer[];
   spanDestinationServiceResource?: string;
 }) {
+  const bucketSizeInMinutes = bucketSize / 60;
+  const rangeInMinutes = (end - start) / 1000 / 60;
+
   return (
     await fetchSeries({
       apmEventClient,
       start,
       end,
-      operationName: 'assistant_get_exit_span_latency',
-      unit: 'ms',
+      operationName: 'assistant_get_exit_span_throughput',
+      unit: 'rpm',
       documentType: ApmDocumentType.ServiceDestinationMetric,
       rollupInterval: RollupInterval.OneMinute,
       intervalString,
@@ -48,23 +48,18 @@ export async function getExitSpanLatency({
       ),
       groupByFields: [SPAN_DESTINATION_SERVICE_RESOURCE],
       aggs: {
-        count: {
-          sum: {
-            field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
-          },
-        },
-        latency: {
-          sum: {
-            field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
-          },
-        },
         value: {
           bucket_script: {
             buckets_path: {
-              latency: 'latency',
-              count: 'count',
+              count: '_count',
             },
-            script: '(params.latency / params.count) / 1000',
+            script: {
+              lang: 'painless',
+              params: {
+                bucketSizeInMinutes,
+              },
+              source: 'params.count / params.bucketSizeInMinutes',
+            },
           },
         },
       },
@@ -72,10 +67,14 @@ export async function getExitSpanLatency({
   ).map((fetchedSerie) => {
     return {
       ...fetchedSerie,
+      value:
+        fetchedSerie.value !== null
+          ? (fetchedSerie.value * bucketSizeInMinutes) / rangeInMinutes
+          : null,
       data: fetchedSerie.data.map((bucket) => {
         return {
           x: bucket.key,
-          y: bucket.value?.value as number | null,
+          y: bucket.value?.value as number,
         };
       }),
     };

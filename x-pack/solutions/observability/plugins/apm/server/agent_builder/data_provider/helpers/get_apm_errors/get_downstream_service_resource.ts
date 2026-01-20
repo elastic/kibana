@@ -7,17 +7,17 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
-import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import { maybe } from '../../../../common/utils/maybe';
-import { ApmDocumentType } from '../../../../common/document_type';
-import { termQuery } from '../../../../common/utils/term_query';
+import { asMutableArray } from '../../../../../common/utils/as_mutable_array';
+import { maybe } from '../../../../../common/utils/maybe';
+import { ApmDocumentType } from '../../../../../common/document_type';
+import { termQuery } from '../../../../../common/utils/term_query';
 import {
   EVENT_OUTCOME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   TRACE_ID,
-} from '../../../../common/es_fields/apm';
-import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { RollupInterval } from '../../../../common/rollup';
+} from '../../../../../common/es_fields/apm';
+import type { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
+import { RollupInterval } from '../../../../../common/rollup';
 
 export async function getDownstreamServiceResource({
   traceId,
