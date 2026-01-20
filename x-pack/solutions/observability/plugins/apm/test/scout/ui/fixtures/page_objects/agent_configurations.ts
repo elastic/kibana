@@ -40,7 +40,8 @@ export class AgentConfigurationsPage {
       const button = this.page.getByText('Create configuration');
       await button.waitFor({ state: 'visible' });
       return true;
-    } catch (_error) {
+    } catch (error) {
+      console.error(error);
       return false;
     }
   }
@@ -52,7 +53,8 @@ export class AgentConfigurationsPage {
       return await this.page
         .getByText('Your user may not have the sufficient permissions')
         .isVisible();
-    } catch (_error) {
+    } catch (error) {
+      console.error(error);
       return false;
     }
   }
