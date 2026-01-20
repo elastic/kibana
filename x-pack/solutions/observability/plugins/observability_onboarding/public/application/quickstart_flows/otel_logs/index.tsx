@@ -117,15 +117,15 @@ export const OtelLogsPanel: React.FC = () => {
       firstStepTitle: HOST_COMMAND,
       content: setupData
         ? buildInstallCommand({
-          platform: 'linux',
-          isMetricsOnboardingEnabled,
-          isManagedOtlpServiceAvailable,
-          managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
-          elasticsearchUrl: setupData.elasticsearchUrl,
-          apiKeyEncoded: setupData.apiKeyEncoded,
-          agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
-          useWiredStreams,
-        })
+            platform: 'linux',
+            isMetricsOnboardingEnabled,
+            isManagedOtlpServiceAvailable,
+            managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
+            elasticsearchUrl: setupData.elasticsearchUrl,
+            apiKeyEncoded: setupData.apiKeyEncoded,
+            agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
+            useWiredStreams,
+          })
         : '',
       start: 'sudo ./otelcol --config otel.yml',
       codeLanguage: 'sh',
@@ -136,15 +136,15 @@ export const OtelLogsPanel: React.FC = () => {
       firstStepTitle: HOST_COMMAND,
       content: setupData
         ? buildInstallCommand({
-          platform: 'mac',
-          isMetricsOnboardingEnabled,
-          isManagedOtlpServiceAvailable,
-          managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
-          elasticsearchUrl: setupData.elasticsearchUrl,
-          apiKeyEncoded: setupData.apiKeyEncoded,
-          agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
-          useWiredStreams,
-        })
+            platform: 'mac',
+            isMetricsOnboardingEnabled,
+            isManagedOtlpServiceAvailable,
+            managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
+            elasticsearchUrl: setupData.elasticsearchUrl,
+            apiKeyEncoded: setupData.apiKeyEncoded,
+            agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
+            useWiredStreams,
+          })
         : '',
       start: './otelcol --config otel.yml',
       codeLanguage: 'sh',
@@ -155,15 +155,15 @@ export const OtelLogsPanel: React.FC = () => {
       firstStepTitle: HOST_COMMAND,
       content: setupData
         ? buildInstallCommand({
-          platform: 'windows',
-          isMetricsOnboardingEnabled,
-          isManagedOtlpServiceAvailable,
-          managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
-          elasticsearchUrl: setupData.elasticsearchUrl,
-          apiKeyEncoded: setupData.apiKeyEncoded,
-          agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
-          useWiredStreams,
-        })
+            platform: 'windows',
+            isMetricsOnboardingEnabled,
+            isManagedOtlpServiceAvailable,
+            managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
+            elasticsearchUrl: setupData.elasticsearchUrl,
+            apiKeyEncoded: setupData.apiKeyEncoded,
+            agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
+            useWiredStreams,
+          })
         : '',
       start: '.\\otelcol.ps1 --config otel.yml',
       codeLanguage: 'powershell',
@@ -304,19 +304,19 @@ export const OtelLogsPanel: React.FC = () => {
                     <p>
                       {selectedTab === 'windows'
                         ? i18n.translate(
-                          'xpack.observability_onboarding.otelLogsPanel.windowsLogDescription',
-                          {
-                            defaultMessage:
-                              'On Windows, logs are collected from the Windows Event Log. You can customize this in the otel.yml file.',
-                          }
-                        )
+                            'xpack.observability_onboarding.otelLogsPanel.windowsLogDescription',
+                            {
+                              defaultMessage:
+                                'On Windows, logs are collected from the Windows Event Log. You can customize this in the otel.yml file.',
+                            }
+                          )
                         : i18n.translate(
-                          'xpack.observability_onboarding.otelLogsPanel.historicalDataDescription2',
-                          {
-                            defaultMessage:
-                              'The default log path is /var/log/*. You can change this path in the otel.yml file if needed.',
-                          }
-                        )}
+                            'xpack.observability_onboarding.otelLogsPanel.historicalDataDescription2',
+                            {
+                              defaultMessage:
+                                'The default log path is /var/log/*. You can change this path in the otel.yml file if needed.',
+                            }
+                          )}
                     </p>
                   </EuiCallOut>
 
