@@ -54,20 +54,13 @@ describe('getKqlSuggestionsIfApplicable', () => {
     expect(result).toBeNull();
   });
 
-  it('should return suggestions with Value kind for Value type', async () => {
-    const mockSuggestions = [{ text: 'value1', type: 'Value', description: 'A value' }];
+  it('should return suggestions if applicable', async () => {
+    const mockSuggestions = [{ text: 'value1', kind: 'Value', detail: 'A value' }];
     const mockGetKqlSuggestions = jest.fn().mockResolvedValue(mockSuggestions);
     const ctx = createContext('KQL("""query', mockGetKqlSuggestions);
 
     const result = await getKqlSuggestionsIfApplicable(ctx);
 
-    expect(result).toEqual([
-      {
-        label: 'value1',
-        text: 'value1',
-        kind: 'Value',
-        detail: 'A value',
-      },
-    ]);
+    expect(result).toEqual(mockSuggestions);
   });
 });

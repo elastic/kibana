@@ -722,9 +722,10 @@ const ESQLEditorInternal = function ESQLEditor({
           suggestions?.map((suggestion) => {
             return {
               text: suggestion.text,
-              description:
+              label: suggestion.text,
+              detail:
                 typeof suggestion.description === 'string' ? suggestion.description : undefined,
-              type: KQL_TYPE_TO_KIND_MAP[suggestion.type] ?? 'Value',
+              kind: KQL_TYPE_TO_KIND_MAP[suggestion.type] ?? 'Value',
             };
           }) ?? []
         );

@@ -140,13 +140,7 @@ export async function getKqlSuggestionsIfApplicable(
       return null;
     }
 
-    // Transform KQL suggestions to ISuggestionItem format
-    return suggestions.map((suggestion) => ({
-      label: suggestion.text,
-      text: suggestion.text,
-      kind: suggestion.type,
-      detail: suggestion.description,
-    }));
+    return suggestions;
   } catch (error) {
     return null;
   }

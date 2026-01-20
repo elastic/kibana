@@ -93,8 +93,9 @@ export const KQL_TYPE_TO_KIND_MAP: Record<string, KQLInESQLSuggestionType> = {
 
 interface KQLInESQLSuggestion {
   text: string;
-  type: KQLInESQLSuggestionType;
-  description?: string;
+  label: string;
+  kind: KQLInESQLSuggestionType;
+  detail?: string;
 }
 
 export interface ESQLCallbacks {
@@ -127,6 +128,7 @@ export interface ESQLCallbacks {
   getKqlSuggestions?: (
     kqlQuery: string,
     cursorPositionInKql: number
-    // it shoud be QuerySuggestion[] from kql package but to avoid circular dependency we define our own type
+    // it shoud be ISuggestionItem[] but we need to carry this first from the kbn-esql-language package
+    // to avoid circular dependency
   ) => Promise<KQLInESQLSuggestion[] | undefined>;
 }
