@@ -23,6 +23,36 @@ interface UseQueryRulesetDetailStateProps {
   createMode: boolean;
 }
 
+const getSearchableFields = (rule: SearchQueryRulesQueryRule): string[] => {
+  return [
+    rule.actions.docs?.flatMap((doc) => [doc._id, doc._index]),
+    rule.actions.ids,
+    rule.criteria.flatMap((criterion) => [
+      criterion.type,
+      ...(criterion.values || []),
+      criterion.metadata,
+    ]),
+  ]
+    .flat()
+    .filter((field) => !!field);
+};
+
+const filterRules = (
+  rules: SearchQueryRulesQueryRule[],
+  searchFilter: string
+): SearchQueryRulesQueryRule[] => {
+  if (searchFilter.trim() === '') {
+    return rules;
+  }
+
+  const lowerCaseFilter = searchFilter.toLowerCase();
+  const shouldFilter = (rule: SearchQueryRulesQueryRule) => {
+    const searchableFields = getSearchableFields(rule);
+    return searchableFields.some((field) => field.toLowerCase().includes(lowerCaseFilter));
+  };
+  return rules.filter(shouldFilter);
+};
+
 export const useQueryRulesetDetailState = ({
   rulesetId,
   createMode,
@@ -32,6 +62,17 @@ export const useQueryRulesetDetailState = ({
     createMode ? createEmptyRuleset(rulesetId) : null
   );
   const [rules, setRules] = useState<SearchQueryRulesQueryRule[]>([]);
+  const [filteredRules, setFilteredRules] = useState<SearchQueryRulesQueryRule[]>([]);
+
+  const [searchFilter, setSearchFilter] = useState<string>('');
+
+  useEffect(() => {
+    if (searchFilter.trim() === '') {
+      setFilteredRules(rules);
+    } else {
+      setFilteredRules(filterRules(rules, searchFilter));
+    }
+  }, [rules, searchFilter]);
 
   useEffect(() => {
     if (!createMode && !isError && data) {
@@ -64,7 +105,10 @@ export const useQueryRulesetDetailState = ({
 
   return {
     queryRuleset,
-    rules,
+    unfilteredRules: rules,
+    rules: filteredRules,
+    setSearchFilter,
+    searchFilter,
     setNewRules: setRules,
     updateRule,
     addNewRule,

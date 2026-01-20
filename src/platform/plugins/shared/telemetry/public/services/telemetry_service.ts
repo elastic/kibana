@@ -199,9 +199,12 @@ export class TelemetryService {
    * Overwrite the opt-in status.
    * It will send a final request to the remote telemetry cluster to report about the opt-in/out change.
    * @param optedIn Whether the user is opting-in (`true`) or out (`false`).
+   * @param signal An AbortSignal to cancel any ongoing requests if the caller decides to
    */
-  public setOptIn = async (optedIn: boolean): Promise<boolean> => {
+  public setOptIn = async (optedIn: boolean, signal?: AbortSignal): Promise<boolean> => {
     const canChangeOptInStatus = this.getCanChangeOptInStatus();
+    let optInUpdated = false;
+
     if (!canChangeOptInStatus) {
       return false;
     }
@@ -212,13 +215,15 @@ export class TelemetryService {
       const optInStatusPayload = await this.http.post<EncryptedTelemetryPayload>(OptInRoute, {
         ...INTERNAL_VERSION,
         body: JSON.stringify({ enabled: optedIn }),
+        signal,
       });
+      optInUpdated = true;
+      this.isOptedIn = optedIn;
       if (this.reportOptInStatusChange) {
         // Use the response to report about the change to the remote telemetry cluster.
         // If it's opt-out, this will be the last communication to the remote service.
-        await this.reportOptInStatus(optInStatusPayload);
+        await this.reportOptInStatus(optInStatusPayload, signal);
       }
-      this.isOptedIn = optedIn;
     } catch (err) {
       this.notifications.toasts.addError(err, {
         title: i18n.translate('telemetry.optInErrorToastTitle', {
@@ -228,11 +233,9 @@ export class TelemetryService {
           defaultMessage: 'An error occurred while trying to set the usage statistics preference.',
         }),
       });
-
-      return false;
     }
 
-    return true;
+    return optInUpdated;
   };
 
   /**
@@ -258,9 +261,11 @@ export class TelemetryService {
   /**
    * Pushes the encrypted payload [{cluster_uuid, opt_in_status}] to the remote telemetry service
    * @param optInStatusPayload [{cluster_uuid, opt_in_status}] encrypted by the server into an array of strings
+   * @param signal An AbortSignal to cancel the ongoing requests if the caller decides to
    */
   private reportOptInStatus = async (
-    optInStatusPayload: EncryptedTelemetryPayload
+    optInStatusPayload: EncryptedTelemetryPayload,
+    signal?: AbortSignal
   ): Promise<void> => {
     const telemetryOptInStatusUrl = this.getOptInStatusUrl();
 
@@ -276,6 +281,7 @@ export class TelemetryService {
               'X-Elastic-Content-Encoding': PAYLOAD_CONTENT_ENCODING,
             },
             body: stats,
+            ...(signal && { signal }),
           });
         })
       );

@@ -66,11 +66,7 @@ export class RRule {
     const nextRecurrences: Moment[] = [];
     let iters = 0;
 
-    while (
-      (!count && !until) ||
-      (count && yieldedRecurrenceCount < count) ||
-      (until && current.getTime() < until.getTime())
-    ) {
+    while (!count || (count && yieldedRecurrenceCount < count)) {
       iters++;
       if (iters > TIMEOUT_LIMIT) {
         throw new Error('RRule iteration limit exceeded');
@@ -78,8 +74,16 @@ export class RRule {
       const next = nextRecurrences.shift()?.toDate();
       if (next) {
         current = next;
+
+        // return if current date has exceeded until
+        if (until && current.getTime() >= until.getTime()) {
+          return null;
+        }
+
         if (!isAfterDtStart(current)) continue;
+
         yieldedRecurrenceCount++;
+
         if (isInBounds(current)) {
           yield current;
         } else if (start && current.getTime() > start.getTime()) {
@@ -93,6 +97,7 @@ export class RRule {
           wkst: this.options.wkst ? (this.options.wkst as Weekday) : Weekday.MO,
         }).forEach((r) => nextRecurrences.push(r));
         isFirstIteration = false;
+
         if (nextRecurrences.length === 0) {
           return null;
         }
@@ -119,8 +124,10 @@ export class RRule {
 
   all(limit: number = ALL_LIMIT): AllResult {
     const dateGenerator = this.dateset();
+
     const dates: AllResult = [];
     let next = dateGenerator.next();
+
     for (let i = 0; i < limit; i++) {
       if (!next.done) dates.push(next.value);
       else break;

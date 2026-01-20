@@ -6,12 +6,11 @@
  */
 
 import { handleActions } from 'redux-actions';
-import immutable from 'object-path-immutable';
+import { set, del } from 'object-path-immutable';
 import { get } from 'lodash';
 import { prepend } from '../../lib/modify_path';
 import * as actions from '../actions/resolved_args';
 
-const { set, del } = immutable;
 /*
   Resolved args are a way to handle async values. They track the status, value, and error
   state thgouh the lifecycle of the request, and are an object that looks like this:

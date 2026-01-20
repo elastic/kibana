@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -504,5 +504,18 @@ describe('rules_settings_flyout', () => {
     });
 
     expect(result.queryByTestId('alert-delete-open-modal-button')).toBe(null);
+  });
+
+  test('save button is disabled on initial load and enabled when user changes a setting', async () => {
+    render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
+    await waitForFlyoutLoad();
+
+    const saveButton = screen.getByTestId('rulesSettingsFlyoutSaveButton');
+    expect(saveButton).toBeDisabled();
+
+    const lookBackWindowInput = screen.getByTestId('lookBackWindowRangeInput');
+    fireEvent.change(lookBackWindowInput, { target: { value: 20 } });
+
+    expect(saveButton).not.toBeDisabled();
   });
 });

@@ -56,7 +56,7 @@ tags:
       Alerting enables you to define rules, which detect complex conditions within your data. When a condition is met, the rule tracks it as an alert and runs the actions that are defined in the rule. Actions typically involve the use of connectors to interact with Kibana services or third party integrations.
     externalDocs:
       description: Alerting documentation
-      url: https://www.elastic.co/docs/explore-analyze/alerts-cases/alerts
+      url: https://www.elastic.co/guide/en/kibana/8.19/alerting-getting-started.html
     x-displayName: Alerting
   - description: |
       Adjust APM agent configuration without need to redeploy your application.
@@ -76,34 +76,79 @@ tags:
     name: cases
     externalDocs:
       description: Cases documentation
-      url: https://www.elastic.co/docs/explore-analyze/alerts-cases/cases
+      url: https://www.elastic.co/guide/en/kibana/8.19/cases.html
     x-displayName: Cases
   - name: connectors
     description: |
       Connectors provide a central place to store connection information for services and integrations with Elastic or third party systems. Alerting rules can use connectors to run actions when rule conditions are met.
     externalDocs:
       description: Connector documentation
-      url: https://www.elastic.co/docs/reference/kibana/connectors-kibana
+      url: https://www.elastic.co/guide/en/kibana/8.19/action-types.html
     x-displayName: Connectors
   - name: Data streams
+    description: |
+      Data stream APIs enable you to manage data streams, which are collections of indices that share the same index template and are managed as a single unit for time-series data.
+    x-displayName: Data streams
   - description: Data view APIs enable you to manage data views, formerly known as Kibana index patterns.
     name: data views
     x-displayName: Data views
   - name: Elastic Agent actions
+    description: |
+      Elastic Agent actions APIs enable you to manage actions performed on Elastic Agents, including agent reassignment, diagnostics collection, enrollment management, upgrades, and bulk operations for agent lifecycle management.
+    x-displayName: Elastic Agent actions
   - name: Elastic Agent binary download sources
+    description: |
+      Elastic Agent binary download sources APIs enable you to manage download sources for Elastic Agent binaries, including creating, updating, and deleting custom download sources for agent binaries.
+    x-displayName: Elastic Agent binary download sources
   - name: Elastic Agent policies
+    description: |
+      Elastic Agent policies APIs enable you to manage agent policies, including creating, updating, and deleting policies, as well as to retrieve agent policy outputs, manifests, and auto-upgrade status information.
+    x-displayName: Elastic Agent policies
   - name: Elastic Agent status
+    description: |
+      Enables you to retrieve status information about Elastic Agents, including health summaries and operational status.
+    x-displayName: Elastic Agent status
   - name: Elastic Agents
+    description: |
+      Elastic Agents APIs enable you to manage Elastic Agents, including retrieving agent information, managing agent lifecycle, handling file uploads, and initiating agent setup.
+    x-displayName: Elastic Agents
   - name: Elastic Package Manager (EPM)
+    description: |
+      Elastic Package Manager (EPM) APIs enable you to manage packages and integrations, including installing, updating, and uninstalling packages, managing custom integrations, and handling package assets.
+    x-displayName: Elastic Package Manager (EPM)
   - name: Fleet enrollment API keys
+    description: |
+      Fleet enrollment API keys APIs enable you to manage enrollment API keys for Fleet, including creating, retrieving, and revoking API keys used for agent enrollment.
+    x-displayName: Fleet enrollment API keys
   - name: Fleet internals
+    description: |
+      Fleet internals APIs enable you to manage Fleet internal operations, including checking permissions, monitoring Fleet Server health, managing settings, and initiating Fleet setup.
+    x-displayName: Fleet internals
   - name: Fleet Kubernetes
   - name: Fleet outputs
+    description: |
+      Fleet outputs APIs enable you to manage Fleet outputs, including creating, updating, and deleting output configurations, generating Logstash API keys, and monitoring output health.
+    x-displayName: Fleet outputs
   - name: Fleet package policies
+    description: |
+      Fleet package policies APIs enable you to manage Fleet package policies, including creating, updating, and deleting policies, performing bulk operations, and managing policy upgrades.
+    x-displayName: Fleet package policies
   - name: Fleet proxies
+    description: |
+      Fleet proxies APIs enable you to manage Fleet proxies, including creating, updating, and deleting proxy configurations for Fleet agent communication.
+    x-displayName: Fleet proxies
   - name: Fleet Server hosts
+    description: |
+      Fleet Server hosts APIs enable you to manage Fleet Server hosts, including creating, updating, and deleting Fleet Server host configurations.
+    x-displayName: Fleet Server hosts
   - name: Fleet service tokens
+    description: |
+      Enables you to create tokens for Fleet service authentication and authorization.
+    x-displayName: Fleet service tokens
   - name: Fleet uninstall tokens
+    description: |
+      Fleet uninstall tokens APIs enable you to manage Fleet uninstall tokens, including retrieving metadata and decrypted tokens for agent uninstallation.
+    x-displayName: Fleet uninstall tokens
   - description: |
       Programmatically integrate with Logstash configuration management.
       > warn
@@ -118,9 +163,10 @@ tags:
       You can schedule single or recurring maintenance windows to temporarily reduce rule notifications. For example, a maintenance window prevents false alarms during planned outages.
     externalDocs:
       description: Maintenance window documentation
-      url: https://www.elastic.co/docs/explore-analyze/alerts-cases/alerts/maintenance-windows
+      url: https://www.elastic.co/guide/en/kibana/8.19/maintenance-windows.html
     x-displayName: Maintenance windows
-  - description: Machine learning
+  - description: |
+      Enables you to synchronize machine learning saved objects.
     name: ml
     x-displayName: Machine learning
   - name: roles
@@ -128,7 +174,7 @@ tags:
     description: Manage the roles that grant Elasticsearch and Kibana privileges.
     externalDocs:
       description: Kibana role management
-      url: https://www.elastic.co/guide/en/kibana/8.x/kibana-role-management.html
+      url: https://www.elastic.co/guide/en/kibana/8.19/kibana-role-management.html
   - description: |
       Export sets of saved objects that you want to import into Kibana, resolve import errors, and rotate an encryption key for encrypted saved objects with the saved objects APIs.
 
@@ -136,10 +182,10 @@ tags:
       For example, use:
 
       * [Data views](../group/endpoint-data-views)
-      * [Spaces](https://www.elastic.co/guide/en/kibana/current/spaces-api.html)
-      * [Short URLs](https://www.elastic.co/guide/en/kibana/current/short-urls-api.html)
+      * [Spaces](../group/endpoint-spaces)
+      * [Short URLs](../group/endpoint-short-url)
 
-      Warning: Do not write documents directly to the `.kibana` index. When you write directly to the `.kibana` index, the data becomes corrupted and permanently breaks future Kibana versions
+      Warning: Do not write documents directly to the `.kibana` index. When you write directly to the `.kibana` index, the data becomes corrupted and permanently breaks future Kibana versions.
     name: saved objects
     x-displayName: Saved objects
   - description: Manage and interact with Security Assistant resources.
@@ -169,7 +215,8 @@ tags:
   - description: Interact with and manage endpoints running the Elastic Defend integration.
     name: Security Endpoint Management API
     x-displayName: Security endpoint management
-  - description: ''
+  - description: |
+      Use the Security entity analytics APIs to manage entity analytics and risk scoring, including asset criticality, privileged user monitoring, and entity engines.
     name: Security Entity Analytics API
     x-displayName: Security entity analytics
   - description: |
@@ -251,18 +298,20 @@ tags:
     x-displayName: Spaces
     description: Manage your Kibana spaces.
     externalDocs:
-      url: https://www.elastic.co/guide/en/kibana/8.x/xpack-spaces.html
+      url: https://www.elastic.co/guide/en/kibana/8.19/xpack-spaces.html
       description: Space overview
   - name: synthetics
     x-displayName: Synthetics
+    description: Synthetics APIs enable you to check the status of your services and applications.
     externalDocs:
       description: Synthetic monitoring
-      url: https://www.elastic.co/guide/en/observability/current/monitor-uptime-synthetics.html
+      url: https://www.elastic.co/guide/en/observability/8.19/monitor-uptime-synthetics.html
   - name: system
     x-displayName: System
     description: |
       Get information about the system status, resource usage, features, and installed plugins.
-  - externalDocs:
+  - description: Task manager APIs enable you to check the health of the Kibana task manager, which is used by features such as alerting, actions, and reporting to run mission critical work as persistent background tasks.
+    externalDocs:
       description: Task manager
       url: https://www.elastic.co/guide/en/kibana/current/task-manager-production-considerations.html
     name: task manager
@@ -270,13 +319,16 @@ tags:
   - description: Check the upgrade status of your Elasticsearch cluster and reindex indices that were created in the previous major version. The assistant helps you prepare for the next major version of Elasticsearch.
     name: upgrade
     x-displayName: Upgrade assistant
-  - externalDocs:
+  - description: Uptime APIs enable you to view and update uptime monitoring settings.
+    externalDocs:
       description: Uptime monitoring
       url: https://www.elastic.co/guide/en/observability/current/uptime-intro.html
     name: uptime
     x-displayName: Uptime
   - name: user session
     x-displayName: User session management
+    description: |
+      Enables you to invalidate user sessions for security and session management purposes.
 paths:
   /api/actions:
     get:
@@ -2474,7 +2526,7 @@ paths:
                       type: object
                       properties:
                         blob:
-                          maxLength: 1000
+                          maxLength: 10000
                           type: string
                       required:
                         - blob
@@ -3455,7 +3507,7 @@ paths:
                       type: object
                       properties:
                         blob:
-                          maxLength: 1000
+                          maxLength: 10000
                           type: string
                       required:
                         - blob
@@ -8614,12 +8666,6 @@ paths:
   /api/cases/reporters:
     get:
       description: |
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/reporters</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
         Returns information about the users who opened cases. You must have read privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases. The API returns information about the users as they existed at the time of the case creation, including their name, full name, and email address. If any of those details change thereafter or if a user is deleted, the information returned by this API is unchanged.
       operationId: getCaseReportersDefaultSpace
       parameters:
@@ -9558,7 +9604,7 @@ paths:
           name: id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+            $ref: '#/components/schemas/Security_Detections_API_UUID'
         - description: The rule's `rule_id` value.
           in: query
           name: rule_id
@@ -9604,7 +9650,7 @@ paths:
           name: id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+            $ref: '#/components/schemas/Security_Detections_API_UUID'
         - description: The rule's `rule_id` value.
           in: query
           name: rule_id
@@ -11847,7 +11893,7 @@ paths:
                 type: object
                 properties:
                   id:
-                    $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+                    $ref: '#/components/schemas/Security_Detections_API_UUID'
                   rule_id:
                     $ref: '#/components/schemas/Security_Detections_API_RuleSignatureId'
               type: array
@@ -11909,7 +11955,7 @@ paths:
                 type: object
                 properties:
                   id:
-                    $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+                    $ref: '#/components/schemas/Security_Detections_API_UUID'
                   rule_id:
                     $ref: '#/components/schemas/Security_Detections_API_RuleSignatureId'
               type: array
@@ -12479,7 +12525,7 @@ paths:
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/Security_Exceptions_API_RuleId'
+            $ref: '#/components/schemas/Security_Exceptions_API_UUID'
       requestBody:
         content:
           application/json:
@@ -13272,12 +13318,6 @@ paths:
   /api/encrypted_saved_objects/_rotate_key:
     post:
       description: |
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/encrypted_saved_objects/_rotate_key</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
         Superuser role required.
 
         If a saved object cannot be decrypted using the primary encryption key, then Kibana will attempt to decrypt it using the specified decryption-only keys. In most of the cases this overhead is negligible, but if you're dealing with a large number of saved objects and experiencing performance issues, you may want to rotate the encryption key.
@@ -13404,19 +13444,19 @@ paths:
           name: id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemId'
+            $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
         - description: Either `id` or `item_id` must be specified
           in: query
           name: item_id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemHumanId'
+            $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EndpointListItem'
+                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
           description: Successful response
         '400':
           content:
@@ -13469,20 +13509,20 @@ paths:
           name: id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemId'
+            $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
         - description: Either `id` or `item_id` must be specified
           in: query
           name: item_id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemHumanId'
+            $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
       responses:
         '200':
           content:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EndpointListItem'
+                  $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
                 type: array
           description: Successful response
         '400':
@@ -13544,11 +13584,11 @@ paths:
                 entries:
                   $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemEntryArray'
                 item_id:
-                  $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemHumanId'
+                  $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
                 meta:
                   $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemMeta'
                 name:
-                  $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemName'
+                  $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
                 os_types:
                   $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemOsTypeArray'
                   default: []
@@ -13569,7 +13609,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EndpointListItem'
+                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
           description: Successful response
         '400':
           content:
@@ -13632,15 +13672,15 @@ paths:
                 entries:
                   $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemEntryArray'
                 id:
-                  $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemId'
+                  $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
                   description: Either `id` or `item_id` must be specified
                 item_id:
-                  $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemHumanId'
+                  $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
                   description: Either `id` or `item_id` must be specified
                 meta:
                   $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemMeta'
                 name:
-                  $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemName'
+                  $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
                 os_types:
                   $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemOsTypeArray'
                   default: []
@@ -13660,7 +13700,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EndpointListItem'
+                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
           description: Successful response
         '400':
           content:
@@ -13716,7 +13756,7 @@ paths:
           name: filter
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_FindEndpointListItemsFilter'
+            $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
         - description: The page number to return
           in: query
           name: page
@@ -13755,7 +13795,7 @@ paths:
                 properties:
                   data:
                     items:
-                      $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EndpointListItem'
+                      $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
                     type: array
                   page:
                     minimum: 0
@@ -15263,13 +15303,13 @@ paths:
           name: id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListId'
+            $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
         - description: Either `id` or `list_id` must be specified
           in: query
           name: list_id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListHumanId'
+            $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
         - in: query
           name: namespace_type
           required: false
@@ -15334,13 +15374,13 @@ paths:
           name: id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListId'
+            $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
         - description: Either `id` or `list_id` must be specified
           in: query
           name: list_id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListHumanId'
+            $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
         - in: query
           name: namespace_type
           required: false
@@ -15410,7 +15450,7 @@ paths:
                 description:
                   $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListDescription'
                 list_id:
-                  $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListHumanId'
+                  $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
                 meta:
                   $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListMeta'
                 name:
@@ -15497,9 +15537,9 @@ paths:
                 description:
                   $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListDescription'
                 id:
-                  $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListId'
+                  $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
                 list_id:
-                  $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListHumanId'
+                  $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
                 meta:
                   $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListMeta'
                 name:
@@ -15581,7 +15621,7 @@ paths:
           name: list_id
           required: true
           schema:
-            $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListHumanId'
+            $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
         - in: query
           name: namespace_type
           required: true
@@ -15656,13 +15696,13 @@ paths:
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListId'
+            $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
         - description: Exception list's human identifier
           in: query
           name: list_id
           required: true
           schema:
-            $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListHumanId'
+            $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
         - in: query
           name: namespace_type
           required: true
@@ -15975,13 +16015,13 @@ paths:
           name: id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemId'
+            $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
         - description: Either `id` or `item_id` must be specified
           in: query
           name: item_id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemHumanId'
+            $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
         - in: query
           name: namespace_type
           required: false
@@ -16046,13 +16086,13 @@ paths:
           name: id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemId'
+            $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
         - description: Either `id` or `item_id` must be specified
           in: query
           name: item_id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemHumanId'
+            $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
         - in: query
           name: namespace_type
           required: false
@@ -16130,13 +16170,13 @@ paths:
                   format: date-time
                   type: string
                 item_id:
-                  $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemHumanId'
+                  $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
                 list_id:
-                  $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListHumanId'
+                  $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
                 meta:
                   $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemMeta'
                 name:
-                  $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemName'
+                  $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
                 namespace_type:
                   $ref: '#/components/schemas/Security_Exceptions_API_ExceptionNamespaceType'
                   default: single
@@ -16227,17 +16267,17 @@ paths:
                   format: date-time
                   type: string
                 id:
-                  $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemId'
+                  $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
                   description: Either `id` or `item_id` must be specified
                 item_id:
-                  $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemHumanId'
+                  $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
                   description: Either `id` or `item_id` must be specified
                 list_id:
-                  $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListHumanId'
+                  $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
                 meta:
                   $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemMeta'
                 name:
-                  $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemName'
+                  $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
                 namespace_type:
                   $ref: '#/components/schemas/Security_Exceptions_API_ExceptionNamespaceType'
                   default: single
@@ -16315,7 +16355,7 @@ paths:
           required: true
           schema:
             items:
-              $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListHumanId'
+              $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
             type: array
         - description: |
             Filters the returned results according to the value of the specified field,
@@ -16326,7 +16366,7 @@ paths:
           schema:
             default: []
             items:
-              $ref: '#/components/schemas/Security_Exceptions_API_FindExceptionListItemsFilter'
+              $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
             type: array
         - description: |
             Determines whether the returned containers are Kibana associated with a Kibana space
@@ -16454,13 +16494,13 @@ paths:
           name: id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListId'
+            $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
         - description: Exception list's human readable identifier
           in: query
           name: list_id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListHumanId'
+            $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
         - in: query
           name: namespace_type
           required: false
@@ -20871,7 +20911,7 @@ paths:
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/Security_Lists_API_ListId'
+            $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
         - in: query
           name: deleteReferences
           required: false
@@ -20942,7 +20982,7 @@ paths:
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/Security_Lists_API_ListId'
+            $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
       responses:
         '200':
           content:
@@ -21004,13 +21044,13 @@ paths:
                 _version:
                   type: string
                 description:
-                  $ref: '#/components/schemas/Security_Lists_API_ListDescription'
+                  $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
                 id:
-                  $ref: '#/components/schemas/Security_Lists_API_ListId'
+                  $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
                 meta:
                   $ref: '#/components/schemas/Security_Lists_API_ListMetadata'
                 name:
-                  $ref: '#/components/schemas/Security_Lists_API_ListName'
+                  $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
                 version:
                   minimum: 1
                   type: integer
@@ -21077,15 +21117,15 @@ paths:
               type: object
               properties:
                 description:
-                  $ref: '#/components/schemas/Security_Lists_API_ListDescription'
+                  $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
                 deserializer:
                   type: string
                 id:
-                  $ref: '#/components/schemas/Security_Lists_API_ListId'
+                  $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
                 meta:
                   $ref: '#/components/schemas/Security_Lists_API_ListMetadata'
                 name:
-                  $ref: '#/components/schemas/Security_Lists_API_ListName'
+                  $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
                 serializer:
                   type: string
                 type:
@@ -21163,13 +21203,13 @@ paths:
                 _version:
                   type: string
                 description:
-                  $ref: '#/components/schemas/Security_Lists_API_ListDescription'
+                  $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
                 id:
-                  $ref: '#/components/schemas/Security_Lists_API_ListId'
+                  $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
                 meta:
                   $ref: '#/components/schemas/Security_Lists_API_ListMetadata'
                 name:
-                  $ref: '#/components/schemas/Security_Lists_API_ListName'
+                  $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
                 version:
                   minimum: 1
                   type: integer
@@ -21268,7 +21308,7 @@ paths:
           name: cursor
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Lists_API_FindListsCursor'
+            $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
         - description: |
             Filters the returned results according to the value of the specified field,
             using the <field name>:<field value> syntax.
@@ -21285,7 +21325,7 @@ paths:
                 type: object
                 properties:
                   cursor:
-                    $ref: '#/components/schemas/Security_Lists_API_FindListsCursor'
+                    $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
                   data:
                     items:
                       $ref: '#/components/schemas/Security_Lists_API_List'
@@ -21527,13 +21567,13 @@ paths:
           name: id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Lists_API_ListId'
+            $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
         - description: Required if `id` is not specified
           in: query
           name: list_id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Lists_API_ListId'
+            $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
         - description: Required if `id` is not specified
           in: query
           name: value
@@ -21613,13 +21653,13 @@ paths:
           name: id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Lists_API_ListId'
+            $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
         - description: Required if `id` is not specified
           in: query
           name: list_id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Lists_API_ListId'
+            $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
         - description: Required if `id` is not specified
           in: query
           name: value
@@ -21691,7 +21731,7 @@ paths:
                 _version:
                   type: string
                 id:
-                  $ref: '#/components/schemas/Security_Lists_API_ListItemId'
+                  $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
                 meta:
                   $ref: '#/components/schemas/Security_Lists_API_ListItemMetadata'
                 refresh:
@@ -21702,7 +21742,7 @@ paths:
                     - wait_for
                   type: string
                 value:
-                  $ref: '#/components/schemas/Security_Lists_API_ListItemValue'
+                  $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
               required:
                 - id
         description: List item's properties
@@ -21770,9 +21810,9 @@ paths:
               type: object
               properties:
                 id:
-                  $ref: '#/components/schemas/Security_Lists_API_ListItemId'
+                  $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
                 list_id:
-                  $ref: '#/components/schemas/Security_Lists_API_ListId'
+                  $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
                 meta:
                   $ref: '#/components/schemas/Security_Lists_API_ListItemMetadata'
                 refresh:
@@ -21783,7 +21823,7 @@ paths:
                     - wait_for
                   type: string
                 value:
-                  $ref: '#/components/schemas/Security_Lists_API_ListItemValue'
+                  $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
               required:
                 - list_id
                 - value
@@ -21852,11 +21892,11 @@ paths:
                 _version:
                   type: string
                 id:
-                  $ref: '#/components/schemas/Security_Lists_API_ListItemId'
+                  $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
                 meta:
                   $ref: '#/components/schemas/Security_Lists_API_ListItemMetadata'
                 value:
-                  $ref: '#/components/schemas/Security_Lists_API_ListItemValue'
+                  $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
               required:
                 - id
                 - value
@@ -21921,7 +21961,7 @@ paths:
           name: list_id
           required: true
           schema:
-            $ref: '#/components/schemas/Security_Lists_API_ListId'
+            $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
       responses:
         '200':
           content:
@@ -21983,7 +22023,7 @@ paths:
           name: list_id
           required: true
           schema:
-            $ref: '#/components/schemas/Security_Lists_API_ListId'
+            $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
         - description: The page number to return
           in: query
           name: page
@@ -22019,7 +22059,7 @@ paths:
           name: cursor
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Lists_API_FindListItemsCursor'
+            $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
         - description: |
             Filters the returned results according to the value of the specified field,
             using the <field name>:<field value> syntax.
@@ -22036,7 +22076,7 @@ paths:
                 type: object
                 properties:
                   cursor:
-                    $ref: '#/components/schemas/Security_Lists_API_FindListItemsCursor'
+                    $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
                   data:
                     items:
                       $ref: '#/components/schemas/Security_Lists_API_ListItem'
@@ -22108,7 +22148,7 @@ paths:
           name: list_id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Lists_API_ListId'
+            $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
         - description: |
             Type of the importing list.
 
@@ -22250,12 +22290,6 @@ paths:
   /api/logstash/pipeline/{id}:
     delete:
       description: |
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/logstash/pipeline/{id}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
         Delete a centrally-managed Logstash pipeline.
         If your Elasticsearch cluster is protected with basic authentication, you must have either the `logstash_admin` built-in role or a customized Logstash writer role.
       externalDocs:
@@ -22278,12 +22312,6 @@ paths:
       x-state: Technical Preview
     get:
       description: |
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/logstash/pipeline/{id}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
         Get information for a centrally-managed Logstash pipeline.
         To use this API, you must have either the `logstash_admin` built-in role or a customized Logstash reader role.
       externalDocs:
@@ -22322,12 +22350,6 @@ paths:
       x-state: Technical Preview
     put:
       description: |
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/logstash/pipeline/{id}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
         Create a centrally-managed Logstash pipeline or update a pipeline.
         To use this API, you must have either the `logstash_admin` built-in role or a customized Logstash writer role.
       externalDocs:
@@ -22336,7 +22358,7 @@ paths:
       operationId: put-logstash-pipeline
       parameters:
         - description: |
-            An identifier for the pipeline. Only alphanumeric characters, hyphens, and underscores are supported.
+            An identifier for the pipeline. Pipeline ID must begin with a letter or underscore and can contain only letters, underscores, dashes, hyphens, and numbers.
           in: path
           name: id
           required: true
@@ -22388,12 +22410,6 @@ paths:
   /api/logstash/pipelines:
     get:
       description: |
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/logstash/pipelines</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
         Get a list of all centrally-managed Logstash pipelines.
 
         To use this API, you must have either the `logstash_admin` built-in role or a customized Logstash reader role.
@@ -26717,12 +26733,6 @@ paths:
       summary: Get all roles
       tags:
         - roles
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/role</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/security/role/_query:
     post:
       operationId: post-security-role-query
@@ -26772,12 +26782,6 @@ paths:
           description: Indicates a successful call.
       summary: Query roles
       tags: []
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/role/_query</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/security/role/{name}:
     delete:
       operationId: delete-security-role-name
@@ -26801,12 +26805,6 @@ paths:
       summary: Delete a role
       tags:
         - roles
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/role/{name}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
     get:
       operationId: get-security-role-name
       parameters:
@@ -26834,21 +26832,8 @@ paths:
       summary: Get a role
       tags:
         - roles
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/role/{name}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
     put:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/role/{name}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Create a new Kibana role or update the attributes of an existing role. Kibana roles are stored in the Elasticsearch native realm.
+      description: Create a new Kibana role or update the attributes of an existing role. Kibana roles are stored in the Elasticsearch native realm.
       operationId: put-security-role-name
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -27261,21 +27246,9 @@ paths:
       summary: Create or update roles
       tags:
         - roles
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/roles</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/security/session/_invalidate:
     post:
       description: |
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/session/_invalidate</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
         Invalidate user sessions that match a query. To use this API, you must be a superuser.
       operationId: post-security-session-invalidate
       parameters:
@@ -27382,12 +27355,6 @@ paths:
   /api/short_url:
     post:
       description: |
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/short_url</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
         Kibana URLs may be long and cumbersome, short URLs are much easier to remember and share.
         Short URLs are created by specifying the locator ID and locator parameters. When a short URL is resolved, the locator ID and locator parameters are used to redirect user to the right Kibana page.
       operationId: post-url
@@ -27432,12 +27399,6 @@ paths:
   /api/short_url/_slug/{slug}:
     get:
       description: |
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/short_url/_slug/{slug}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
         Resolve a Kibana short URL by its slug.
       operationId: resolve-url
       parameters:
@@ -27461,12 +27422,6 @@ paths:
   /api/short_url/{id}:
     delete:
       description: |
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/short_url/{id}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
         Delete a Kibana short URL.
       operationId: delete-url
       parameters:
@@ -27480,12 +27435,6 @@ paths:
       x-state: Technical Preview
     get:
       description: |
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/short_url/{id}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
         Get a single Kibana short URL.
       operationId: get-url
       parameters:
@@ -27503,14 +27452,7 @@ paths:
       x-state: Technical Preview
   /api/spaces/_copy_saved_objects:
     post:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/spaces/_copy_saved_objects</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        It also allows you to automatically copy related objects, so when you copy a dashboard, this can automatically copy over the associated visualizations, data views, and saved Discover sessions, as required. You can request to overwrite any objects that already exist in the target space if they share an identifier or you can use the resolve copy saved objects conflicts API to do this on a per-object basis.<br/><br/>[Required authorization] Route required privileges: copySavedObjectsToSpaces.
+      description: 'It also allows you to automatically copy related objects, so when you copy a dashboard, this can automatically copy over the associated visualizations, data views, and saved Discover sessions, as required. You can request to overwrite any objects that already exist in the target space if they share an identifier or you can use the resolve copy saved objects conflicts API to do this on a per-object basis.<br/><br/>[Required authorization] Route required privileges: copySavedObjectsToSpaces.'
       operationId: post-spaces-copy-saved-objects
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -27633,22 +27575,9 @@ paths:
       summary: Disable legacy URL aliases
       tags:
         - spaces
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/spaces/_disable_legacy_url_aliases</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/spaces/_get_shareable_references:
     post:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/spaces/_get_shareable_references</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Collect references and space contexts for saved objects.
+      description: Collect references and space contexts for saved objects.
       operationId: post-spaces-get-shareable-references
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -27686,14 +27615,7 @@ paths:
         - spaces
   /api/spaces/_resolve_copy_saved_objects_errors:
     post:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/spaces/_resolve_copy_saved_objects_errors</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Overwrite saved objects that are returned as errors from the copy saved objects to space API.<br/><br/>[Required authorization] Route required privileges: copySavedObjectsToSpaces.
+      description: 'Overwrite saved objects that are returned as errors from the copy saved objects to space API.<br/><br/>[Required authorization] Route required privileges: copySavedObjectsToSpaces.'
       operationId: post-spaces-resolve-copy-saved-objects-errors
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -27783,14 +27705,7 @@ paths:
       tags: []
   /api/spaces/_update_objects_spaces:
     post:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/spaces/_update_objects_spaces</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Update one or more saved objects to add or remove them from some spaces.
+      description: Update one or more saved objects to add or remove them from some spaces.
       operationId: post-spaces-update-objects-spaces
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -27896,12 +27811,6 @@ paths:
       summary: Get all spaces
       tags:
         - spaces
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/spaces/space</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
     post:
       operationId: post-spaces-space
       parameters:
@@ -27966,22 +27875,9 @@ paths:
       summary: Create a space
       tags:
         - spaces
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/spaces/space</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/spaces/space/{id}:
     delete:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/spaces/space/{id}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        When you delete a space, all saved objects that belong to the space are automatically deleted, which is permanent and cannot be undone.
+      description: When you delete a space, all saved objects that belong to the space are automatically deleted, which is permanent and cannot be undone.
       operationId: delete-spaces-space-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -28025,12 +27921,6 @@ paths:
       summary: Get a space
       tags:
         - spaces
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/spaces/space/{id}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
     put:
       operationId: put-spaces-space-id
       parameters:
@@ -28101,12 +27991,6 @@ paths:
       summary: Update a space
       tags:
         - spaces
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/spaces/space/{id}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/status:
     get:
       operationId: get-status
@@ -28145,12 +28029,6 @@ paths:
       summary: Get Kibana's current status
       tags:
         - system
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/status</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/synthetics/monitors:
     get:
       description: |
@@ -28490,6 +28368,9 @@ paths:
           required: true
           schema:
             type: string
+      responses:
+        '200':
+          description: OK
       summary: Delete a monitor
       tags:
         - synthetics
@@ -28654,6 +28535,9 @@ paths:
                 - $ref: '#/components/schemas/Synthetics_tcpMonitorFields'
               type: object
         required: true
+      responses:
+        '200':
+          description: OK
       summary: Update a monitor
       tags:
         - synthetics
@@ -28815,11 +28699,11 @@ paths:
       tags:
         - synthetics
   /api/synthetics/params/_bulk_delete:
-    delete:
+    post:
       description: |
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/params/_bulk_delete</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/params/_bulk_delete</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
@@ -28893,6 +28777,9 @@ paths:
           required: true
           schema:
             type: string
+      responses:
+        '200':
+          description: OK
       summary: Delete a parameter
       tags:
         - synthetics
@@ -29179,6 +29066,9 @@ paths:
             maxLength: 1024
             minLength: 1
             type: string
+      responses:
+        '200':
+          description: OK
       summary: Delete a private location
       tags:
         - synthetics
@@ -29296,12 +29186,6 @@ paths:
   /api/task_manager/_health:
     get:
       description: |
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/task_manager/_health</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
         Get the health status of the Kibana task manager.
       operationId: task-manager-health
       responses:
@@ -29607,7 +29491,7 @@ paths:
           description: Indicates that the draft Timeline was successfully retrieved.
         '403':
           content:
-            application:json:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -29618,7 +29502,7 @@ paths:
           description: If a draft Timeline was not found and we attempted to create one, it indicates that the user does not have the required permissions to create a draft Timeline.
         '409':
           content:
-            application:json:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -29663,7 +29547,7 @@ paths:
           description: Indicates that the draft Timeline was successfully created. In the event the user already has a draft Timeline, the existing draft Timeline is cleared and returned.
         '403':
           content:
-            application:json:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -29674,7 +29558,7 @@ paths:
           description: Indicates that the user does not have the required permissions to create a draft Timeline.
         '409':
           content:
-            application:json:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -29794,7 +29678,7 @@ paths:
           description: Indicates the favorite status was successfully updated.
         '403':
           content:
-            application:json:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -29933,7 +29817,7 @@ paths:
           description: Indicates the installation of prepackaged Timelines was successful.
         '500':
           content:
-            application:json:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -30089,7 +29973,7 @@ paths:
           description: Indicates that the (template) Timelines were found and returned.
         '400':
           content:
-            application:json:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -30107,12 +29991,6 @@ paths:
   /api/upgrade_assistant/reindex/{index}:
     get:
       description: |
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/upgrade_assistant/reindex/{index}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
         Check the status of the reindex task.
       operationId: get-upgrade-reindex
       parameters:
@@ -30178,12 +30056,6 @@ paths:
       x-state: Technical Preview
     post:
       description: |
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/upgrade_assistant/reindex/{index}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
         Start a new reindex or resume a paused reindex.
         The following steps are performed during a reindex task:
 
@@ -30241,12 +30113,6 @@ paths:
   /api/upgrade_assistant/reindex/{index}/cancel:
     post:
       description: |
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/upgrade_assistant/reindex/{index}/cancel</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
         Cancel reindexes that are waiting for the Elasticsearch reindex task to complete. For example, cancel reindexing if the `lastCompletedStep` has the value `40`.
       operationId: cancel-upgrade-reindex
       parameters:
@@ -30279,12 +30145,6 @@ paths:
   /api/upgrade_assistant/reindex/batch:
     post:
       description: |
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/upgrade_assistant/reindex/batch</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
         Start or resume multiple reindexing tasks in one request. Additionally, reindexing tasks started or resumed via the batch endpoint will be placed on a queue and run one-by-one, which ensures that minimal cluster resources are consumed over time.
       operationId: batch-start-upgrade-reindex
       requestBody:
@@ -30375,12 +30235,6 @@ paths:
   /api/upgrade_assistant/reindex/batch/queue:
     get:
       description: |
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/upgrade_assistant/reindex/batch/queue</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
         Check the current reindex batch queue.
       operationId: get-batch-upgrade-reindex
       responses:
@@ -30459,14 +30313,7 @@ paths:
       x-state: Technical Preview
   /api/upgrade_assistant/status:
     get:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/upgrade_assistant/status</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Check the status of your cluster.
+      description: Check the status of your cluster.
       operationId: get-upgrade-status
       responses:
         '200':
@@ -36939,7 +36786,8 @@ components:
     Cases_ids:
       description: |
         The cases that you want to removed. All non-ASCII characters must be URL encoded.
-      example: d4e7abb0-b462-11ec-9a8d-698504725a43
+      example:
+        - d4e7abb0-b462-11ec-9a8d-698504725a43
       in: query
       name: ids
       required: true
@@ -43910,6 +43758,9 @@ components:
         reader:
           $ref: '#/components/schemas/Security_AI_Assistant_API_Reader'
           description: Message content.
+        refusal:
+          description: Refusal reason returned by the model when content is filtered.
+          type: string
         role:
           $ref: '#/components/schemas/Security_AI_Assistant_API_MessageRole'
           description: Message role.
@@ -44556,7 +44407,7 @@ components:
       $ref: '#/components/schemas/Security_Detections_API_NonEmptyString'
     Security_Detections_API_AlertTags:
       items:
-        $ref: '#/components/schemas/Security_Detections_API_AlertTag'
+        $ref: '#/components/schemas/Security_Detections_API_NonEmptyString'
       type: array
     Security_Detections_API_AlertVersion:
       type: object
@@ -45495,7 +45346,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -45599,7 +45450,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -45967,7 +45818,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -46096,7 +45947,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -46578,7 +46429,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -46698,7 +46549,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -47177,7 +47028,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -47306,7 +47157,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -47805,7 +47656,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -47928,7 +47779,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -48119,7 +47970,7 @@ components:
         execution_summary:
           $ref: '#/components/schemas/Security_Detections_API_RuleExecutionSummary'
         id:
-          $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+          $ref: '#/components/schemas/Security_Detections_API_UUID'
         immutable:
           $ref: '#/components/schemas/Security_Detections_API_IsRuleImmutable'
         required_fields:
@@ -48922,7 +48773,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -49045,7 +48896,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -49594,7 +49445,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -49726,7 +49577,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -50194,7 +50045,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -50320,7 +50171,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
+              $ref: '#/components/schemas/Security_Detections_API_UUID'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -50468,11 +50319,11 @@ components:
         description:
           $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListDescription'
         id:
-          $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListId'
+          $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
         immutable:
           type: boolean
         list_id:
-          $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListHumanId'
+          $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
         meta:
           $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListMeta'
         name:
@@ -50535,15 +50386,15 @@ components:
           format: date-time
           type: string
         id:
-          $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemId'
+          $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
         item_id:
-          $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemHumanId'
+          $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
         list_id:
-          $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListHumanId'
+          $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
         meta:
           $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemMeta'
         name:
-          $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemName'
+          $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
         namespace_type:
           $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionNamespaceType'
         os_types:
@@ -50640,7 +50491,7 @@ components:
           type: object
           properties:
             id:
-              $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ListId'
+              $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
             type:
               $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ListType'
           required:
@@ -52731,11 +52582,11 @@ components:
           format: date-time
           type: string
         item_id:
-          $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemHumanId'
+          $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
         meta:
           $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemMeta'
         name:
-          $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemName'
+          $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
         namespace_type:
           $ref: '#/components/schemas/Security_Exceptions_API_ExceptionNamespaceType'
           default: single
@@ -52765,11 +52616,11 @@ components:
         description:
           $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListDescription'
         id:
-          $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListId'
+          $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
         immutable:
           type: boolean
         list_id:
-          $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListHumanId'
+          $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
         meta:
           $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListMeta'
         name:
@@ -52832,15 +52683,15 @@ components:
           format: date-time
           type: string
         id:
-          $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemId'
+          $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
         item_id:
-          $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemHumanId'
+          $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
         list_id:
-          $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListHumanId'
+          $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
         meta:
           $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemMeta'
         name:
-          $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemName'
+          $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
         namespace_type:
           $ref: '#/components/schemas/Security_Exceptions_API_ExceptionNamespaceType'
         os_types:
@@ -52937,7 +52788,7 @@ components:
           type: object
           properties:
             id:
-              $ref: '#/components/schemas/Security_Exceptions_API_ListId'
+              $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
             type:
               $ref: '#/components/schemas/Security_Exceptions_API_ListType'
           required:
@@ -53089,11 +52940,11 @@ components:
             - status_code
             - message
         id:
-          $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListId'
+          $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
         item_id:
-          $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemHumanId'
+          $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
         list_id:
-          $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListHumanId'
+          $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
       required:
         - error
     Security_Exceptions_API_ExceptionListsImportBulkErrorArray:
@@ -53229,17 +53080,17 @@ components:
         created_by:
           type: string
         description:
-          $ref: '#/components/schemas/Security_Lists_API_ListDescription'
+          $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
         deserializer:
           type: string
         id:
-          $ref: '#/components/schemas/Security_Lists_API_ListId'
+          $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
         immutable:
           type: boolean
         meta:
           $ref: '#/components/schemas/Security_Lists_API_ListMetadata'
         name:
-          $ref: '#/components/schemas/Security_Lists_API_ListName'
+          $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
         serializer:
           type: string
         tie_breaker_id:
@@ -53286,9 +53137,9 @@ components:
         deserializer:
           type: string
         id:
-          $ref: '#/components/schemas/Security_Lists_API_ListItemId'
+          $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
         list_id:
-          $ref: '#/components/schemas/Security_Lists_API_ListId'
+          $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
         meta:
           $ref: '#/components/schemas/Security_Lists_API_ListItemMetadata'
         serializer:
@@ -53303,7 +53154,7 @@ components:
         updated_by:
           type: string
         value:
-          $ref: '#/components/schemas/Security_Lists_API_ListItemValue'
+          $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
       required:
         - id
         - type
@@ -53443,19 +53294,19 @@ components:
       type: object
       properties:
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_QueryId'
         platform:
-          $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Platform'
         query:
           $ref: '#/components/schemas/Security_Osquery_API_Query'
         removed:
-          $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Removed'
         snapshot:
-          $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
         version:
-          $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Version'
     Security_Osquery_API_CreateLiveQueryRequestBody:
       example:
         agent_all: true
@@ -53494,7 +53345,7 @@ components:
             type: string
           type: array
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
         event_ids:
           description: A list of event IDs associated with the live query.
           items:
@@ -53505,13 +53356,13 @@ components:
           nullable: true
           type: object
         pack_id:
-          $ref: '#/components/schemas/Security_Osquery_API_PackIdOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_PackId'
         queries:
           $ref: '#/components/schemas/Security_Osquery_API_ArrayQueries'
         query:
-          $ref: '#/components/schemas/Security_Osquery_API_QueryOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Query'
         saved_query_id:
-          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryIdOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
     Security_Osquery_API_CreateLiveQueryResponse:
       example:
         data:
@@ -53569,13 +53420,13 @@ components:
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
         enabled:
-          $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Enabled'
         name:
           $ref: '#/components/schemas/Security_Osquery_API_PackName'
         policy_ids:
-          $ref: '#/components/schemas/Security_Osquery_API_PolicyIdsOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
         queries:
           $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
         shards:
@@ -53623,23 +53474,23 @@ components:
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescriptionOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescription'
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
         interval:
           $ref: '#/components/schemas/Security_Osquery_API_Interval'
         platform:
-          $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Platform'
         query:
-          $ref: '#/components/schemas/Security_Osquery_API_QueryOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Query'
         removed:
-          $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Removed'
         snapshot:
-          $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
         version:
-          $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Version'
     Security_Osquery_API_CreateSavedQueryResponse:
       example:
         data: {}
@@ -53871,21 +53722,21 @@ components:
       type: object
       properties:
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_QueryId'
         platform:
-          $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Platform'
         query:
           $ref: '#/components/schemas/Security_Osquery_API_Query'
         removed:
-          $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Removed'
         saved_query_id:
-          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryIdOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
         snapshot:
-          $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
         version:
-          $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Version'
     Security_Osquery_API_PackDescription:
       description: The pack description.
       example: Pack description
@@ -53996,13 +53847,13 @@ components:
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
         enabled:
-          $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Enabled'
         name:
           $ref: '#/components/schemas/Security_Osquery_API_PackName'
         policy_ids:
-          $ref: '#/components/schemas/Security_Osquery_API_PolicyIdsOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
         queries:
           $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
         shards:
@@ -54041,23 +53892,23 @@ components:
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescriptionOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescription'
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
         interval:
-          $ref: '#/components/schemas/Security_Osquery_API_IntervalOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Interval'
         platform:
-          $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Platform'
         query:
-          $ref: '#/components/schemas/Security_Osquery_API_QueryOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Query'
         removed:
-          $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Removed'
         snapshot:
-          $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
         version:
-          $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
+          $ref: '#/components/schemas/Security_Osquery_API_Version'
     Security_Osquery_API_UpdateSavedQueryResponse:
       example:
         data: {}
@@ -56318,6 +56169,8 @@ components:
               type: string
             synthetics_args:
               description: Synthetics agent CLI arguments.
+              items:
+                type: string
               type: array
             type:
               description: The monitor type.
@@ -56477,7 +56330,7 @@ components:
     Synthetics_httpMonitorFields:
       allOf:
         - $ref: '#/components/schemas/Synthetics_commonMonitorFields'
-        - additionalproperties: true
+        - additionalProperties: true
           type: object
           properties:
             check:
@@ -57607,7 +57460,6 @@ components:
           description: |
             Base64-encoded PEM CA certificate content for PKI authentication (Other provider only). Optional.
           minLength: 1
-      required: []
     opsgenie_secrets:
       title: Connector secrets properties for an Opsgenie connector
       required:
@@ -58640,6 +58492,10 @@ components:
               description: The Slack channel identifier.
               example: C123ABC456
     params_property_apm_anomaly:
+      title: APM anomaly
+      description: |
+        The parameters for the APM anomaly rule. These parameters are appropriate when `rule_type_id` is `apm.rules.anomaly`.
+      type: object
       required:
         - windowSize
         - windowUnit
@@ -58675,6 +58531,10 @@ components:
             - minor
             - warning
     params_property_apm_error_count:
+      title: APM error count
+      description: |
+        The parameters for the APM error count rule. These parameters are appropriate when `rule_type_id` is `apm.error_rate`.
+      type: object
       required:
         - windowSize
         - windowUnit
@@ -58717,6 +58577,10 @@ components:
         errorGroupingKey:
           type: string
     params_property_apm_transaction_duration:
+      title: APM transaction duration
+      description: |
+        The parameters for the APM transaction duration rule. These parameters are appropriate when `rule_type_id` is `apm.transaction_duration`.
+      type: object
       required:
         - windowSize
         - windowUnit
@@ -58770,6 +58634,10 @@ components:
             - 95th
             - 99th
     params_property_apm_transaction_error_rate:
+      title: APM transaction error rate
+      description: |
+        The parameters for the APM transaction error rate rule. These parameters are appropriate when `rule_type_id` is `apm.transaction_error_rate`.
+      type: object
       required:
         - windowSize
         - windowUnit
@@ -59157,6 +59025,10 @@ components:
         timeWindowUnit:
           $ref: '#/components/schemas/timewindowunit'
     params_property_infra_inventory:
+      title: Inventory
+      description: |
+        The parameters for the infrastructure inventory rule. These parameters are appropriate when `rule_type_id` is `metrics.alert.inventory.threshold`.
+      type: object
       properties:
         criteria:
           type: array
@@ -59269,7 +59141,9 @@ components:
           type: boolean
     params_property_log_threshold:
       oneOf:
-        - title: Count
+        - title: Log threshold count
+          description: |
+            The parameters for a log threshold rule that counts the number of log entries that match the criteria. These parameters are appropriate when `rule_type_id` is `logs.alert.document.count`.
           type: object
           required:
             - count
@@ -59347,7 +59221,9 @@ components:
               type: array
               items:
                 type: string
-        - title: Ratio
+        - title: Log threshold ratio
+          description: |
+            The parameters for a log threshold rule that calculates the ratio of log entries that match the criteria. These parameters are appropriate when `rule_type_id` is `logs.alert.document.count`.
           type: object
           required:
             - count
@@ -59430,6 +59306,10 @@ components:
               items:
                 type: string
     params_property_infra_metric_threshold:
+      title: Metric threshold
+      description: |
+        The parameters for the metric threshold rule. These parameters are appropriate when `rule_type_id` is `metrics.alert.threshold`.
+      type: object
       properties:
         criteria:
           type: array
@@ -59647,6 +59527,10 @@ components:
           description: |
             If true, an alert occurs if a group that previously reported metrics does not report them again over the expected time period. This check is not recommended for dynamically scaling infrastructures that might rapidly start and stop nodes automatically.
     params_property_slo_burn_rate:
+      title: SLO burn rate
+      description: |
+        The parameters for the SLO burn rate rule. These parameters are appropriate when `rule_type_id` is `slo.rules.burnRate`.
+      type: object
       properties:
         sloId:
           description: The SLO identifier used by the rule
@@ -59685,6 +59569,10 @@ components:
               type: string
               example: m
     params_property_synthetics_uptime_tls:
+      title: Synthetics TLS certificate
+      description: |
+        The parameters for the synthetics TLS certificate rule. These parameters are appropriate when `rule_type_id` is `xpack.uptime.alerts.tls`.
+      type: object
       properties:
         search:
           type: string
@@ -59693,6 +59581,10 @@ components:
         certAgeThreshold:
           type: number
     params_property_synthetics_monitor_status:
+      title: Synthetics monitor status
+      description: |
+        The parameters for the Synthetics monitor status rule. These parameters are appropriate when `rule_type_id` is `xpack.uptime.alerts.monitorStatus`.
+      type: object
       required:
         - numTimes
         - shouldCheckStatus
@@ -59783,4 +59675,4 @@ x-topics:
 
       If you use the Kibana console to send API requests, it automatically adds the appropriate space identifier.
 
-      To learn more, check out [Spaces](https://www.elastic.co/guide/en/kibana/8.x/xpack-spaces.html).
+      To learn more, check out [Spaces](https://www.elastic.co/guide/en/kibana/8.19/xpack-spaces.html).

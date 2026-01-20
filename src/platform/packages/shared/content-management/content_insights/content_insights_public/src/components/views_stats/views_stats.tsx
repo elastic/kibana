@@ -10,7 +10,7 @@
 import { EuiPanel, EuiStat, EuiSpacer, useEuiTheme, EuiIconTip } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { ContentInsightsStats } from '@kbn/content-management-content-insights-server';
 import { css } from '@emotion/react';

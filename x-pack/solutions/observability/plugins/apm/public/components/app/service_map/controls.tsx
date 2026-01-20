@@ -186,7 +186,11 @@ export function Controls() {
   return (
     <ControlsContainer>
       <Panel hasShadow={true} paddingSize="none">
-        <EuiToolTip anchorClassName="eui-displayInline" content={zoomInLabel}>
+        <EuiToolTip
+          anchorClassName="eui-displayInline"
+          content={zoomInLabel}
+          disableScreenReaderOutput
+        >
           <ZoomInButton
             aria-label={zoomInLabel}
             color="text"
@@ -195,7 +199,11 @@ export function Controls() {
             onClick={zoomIn}
           />
         </EuiToolTip>
-        <EuiToolTip anchorClassName="eui-displayInline" content={zoomOutLabel}>
+        <EuiToolTip
+          anchorClassName="eui-displayInline"
+          content={zoomOutLabel}
+          disableScreenReaderOutput
+        >
           <Button
             aria-label={zoomOutLabel}
             color="text"
@@ -206,7 +214,11 @@ export function Controls() {
         </EuiToolTip>
       </Panel>
       <Panel hasShadow={true} paddingSize="none">
-        <EuiToolTip anchorClassName="eui-displayInline" content={centerLabel}>
+        <EuiToolTip
+          anchorClassName="eui-displayInline"
+          content={centerLabel}
+          disableScreenReaderOutput
+        >
           <Button
             data-test-subj="centerServiceMap"
             aria-label={centerLabel}
@@ -218,7 +230,11 @@ export function Controls() {
       </Panel>
       {showViewFullMapButton && (
         <Panel hasShadow={true} paddingSize="none">
-          <EuiToolTip anchorClassName="eui-displayInline" content={viewFullMapLabel}>
+          <EuiToolTip
+            anchorClassName="eui-displayInline"
+            content={viewFullMapLabel}
+            disableScreenReaderOutput
+          >
             <Button
               aria-label={viewFullMapLabel}
               color="text"
@@ -231,7 +247,11 @@ export function Controls() {
       )}
       {downloadUrl && (
         <Panel hasShadow={true} paddingSize="none">
-          <EuiToolTip anchorClassName="eui-displayInline" content={downloadLabel}>
+          <EuiToolTip
+            anchorClassName="eui-displayInline"
+            content={downloadLabel}
+            disableScreenReaderOutput
+          >
             <Button
               aria-label={downloadLabel}
               color="text"

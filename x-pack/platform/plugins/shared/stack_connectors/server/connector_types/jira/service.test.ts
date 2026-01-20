@@ -997,7 +997,7 @@ describe('Jira service', () => {
         logger,
         method: 'get',
         configurationUtilities,
-        url: `https://coolsite.net/rest/api/2/search?jql=project%3D%22CK%22%20and%20summary%20~%22Test%20title%22`,
+        url: `https://coolsite.net/rest/api/2/search/jql?jql=project%3D%22CK%22%20and%20summary%20~%22Test%20title%22&fields=summary,key`,
         connectorUsageCollector,
       });
     });
@@ -1024,7 +1024,7 @@ describe('Jira service', () => {
         logger,
         method: 'get',
         configurationUtilities,
-        url: `https://coolsite.net/rest/api/2/search?jql=project%3D%22CK%22%20and%20summary%20~%22%5C%5C%5Bth%5C%5C!s%5C%5C%5Eis%5C%5C(%5C%5C)a%5C%5C-te%5C%5C%2Bst%5C%5C-%5C%5C%7B%5C%5C~is%5C%5C*s%5C%5C%26ue%5C%5C%3For%5C%5C%7Cand%5C%5Cbye%5C%5C%3A%5C%5C%7D%5C%5C%5D%5C%5C%7D%5C%5C%5D%22`,
+        url: `https://coolsite.net/rest/api/2/search/jql?jql=project%3D%22CK%22%20and%20summary%20~%22%5C%5C%5Bth%5C%5C!s%5C%5C%5Eis%5C%5C(%5C%5C)a%5C%5C-te%5C%5C%2Bst%5C%5C-%5C%5C%7B%5C%5C~is%5C%5C*s%5C%5C%26ue%5C%5C%3For%5C%5C%7Cand%5C%5Cbye%5C%5C%3A%5C%5C%7D%5C%5C%5D%5C%5C%7D%5C%5C%5D%22&fields=summary,key`,
         connectorUsageCollector,
       });
     });

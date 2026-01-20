@@ -85,6 +85,7 @@ describe('ChatHeader', () => {
     copyConversationToClipboard: jest.fn(),
     copyUrl: jest.fn(),
     handleArchiveConversation: jest.fn(),
+    navigateToConnectorsManagementApp: jest.fn(),
   };
 
   beforeEach(() => {
@@ -104,6 +105,8 @@ describe('ChatHeader', () => {
           error: undefined,
           selectConnector: (id: string) => {},
           reloadConnectors: () => {},
+          getConnector: () => undefined,
+          isConnectorSelectionRestricted: false,
         }}
       />
     );
@@ -126,6 +129,8 @@ describe('ChatHeader', () => {
           error: undefined,
           selectConnector: (id: string) => {},
           reloadConnectors: () => {},
+          getConnector: () => undefined,
+          isConnectorSelectionRestricted: false,
         }}
       />
     );
@@ -152,6 +157,8 @@ describe('ChatHeader', () => {
           error: undefined,
           selectConnector: (id: string) => {},
           reloadConnectors: () => {},
+          getConnector: () => undefined,
+          isConnectorSelectionRestricted: false,
         }}
       />
     );
@@ -178,6 +185,8 @@ describe('ChatHeader', () => {
           error: undefined,
           selectConnector: (id: string) => {},
           reloadConnectors: () => {},
+          getConnector: () => undefined,
+          isConnectorSelectionRestricted: false,
         }}
       />
     );

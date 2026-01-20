@@ -10,7 +10,7 @@
 import { execFile } from 'child_process';
 import { availableParallelism } from 'os';
 import { isAbsolute, join } from 'path';
-import { existsSync, readdirSync, readFileSync } from 'fs';
+import { existsSync, readdirSync, readFileSync, unlinkSync } from 'fs';
 
 import { run, RunOptions } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -18,8 +18,15 @@ import { ToolingLog } from '@kbn/tooling-log';
 
 const MAX_PARALLELISM = availableParallelism();
 const buildkiteQuickchecksFolder = join('.buildkite', 'scripts', 'steps', 'checks');
-const quickChecksList = join(buildkiteQuickchecksFolder, 'quick_checks.txt');
+const quickChecksList = join(buildkiteQuickchecksFolder, 'quick_checks.json');
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const COLLECT_COMMITS_MARKER_FILE = join(REPO_ROOT, '.collect_commits_marker');
+
+interface QuickCheck {
+  script: string;
+  mayChangeFiles?: boolean;
+  // Additional properties can be added here in the future
+}
 
 interface CheckResult {
   success: boolean;
@@ -51,28 +58,68 @@ let logger: ToolingLog;
 void run(async ({ log, flagsReader }) => {
   logger = log;
 
-  const scriptsToRun = collectScriptsToRun({
+  // Clean up any existing marker file from previous runs
+  if (existsSync(COLLECT_COMMITS_MARKER_FILE)) {
+    unlinkSync(COLLECT_COMMITS_MARKER_FILE);
+  }
+
+  // Set environment variable so check scripts know where to write the marker file
+  process.env.COLLECT_COMMITS_MARKER_FILE = COLLECT_COMMITS_MARKER_FILE;
+
+  const checksToRun = collectScriptsToRun({
     targetFile: flagsReader.string('file'),
     targetDir: flagsReader.string('dir'),
     checks: flagsReader.string('checks'),
-  }).map((script) => (isAbsolute(script) ? script : join(REPO_ROOT, script)));
+  });
+
+  // Partition checks based on mayChangeFiles flag
+  const fileChangingChecks = checksToRun
+    .filter((check) => check.mayChangeFiles)
+    .map((check) => (isAbsolute(check.script) ? check.script : join(REPO_ROOT, check.script)));
+
+  const regularChecks = checksToRun
+    .filter((check) => !check.mayChangeFiles)
+    .map((check) => (isAbsolute(check.script) ? check.script : join(REPO_ROOT, check.script)));
 
   logger.write(
-    `--- Running ${scriptsToRun.length} checks, with parallelism ${MAX_PARALLELISM}...`,
-    scriptsToRun
+    `--- Running ${checksToRun.length} checks (${fileChangingChecks.length} file-changing with parallelism=1, ${regularChecks.length} regular with parallelism=${MAX_PARALLELISM})...`
   );
   const startTime = Date.now();
-  const results = await runAllChecks(scriptsToRun);
+  const results = await runPartitionedChecks(fileChangingChecks, regularChecks);
 
   logger.write('--- All checks finished.');
   printResults(startTime, results);
+
+  // Check if any commits were made and push them in a single batch
+  // This allows multiple quick-check fixes to be committed and pushed together,
+  // avoiding multiple CI restarts when a PR has multiple offenses.
+  // File-changing checks run with parallelism=1 (sequentially), so commits happen
+  // one at a time without conflicts.
+  const commitsWereMade = existsSync(COLLECT_COMMITS_MARKER_FILE);
+  if (commitsWereMade) {
+    logger.write('--- Commits were made during checks. Pushing all changes now...');
+    try {
+      await pushCommits();
+      logger.write('--- Successfully pushed all commits.');
+      // Clean up marker file
+      if (existsSync(COLLECT_COMMITS_MARKER_FILE)) {
+        unlinkSync(COLLECT_COMMITS_MARKER_FILE);
+      }
+      // Still exit with error to fail the current build, a new build should be started after the push
+      logger.write('--- Build will fail to trigger a new build with the fixes.');
+      process.exitCode = 1;
+    } catch (error) {
+      logger.error(`--- Failed to push commits: ${error}`);
+      process.exitCode = 1;
+    }
+  }
 
   const failedChecks = results.filter((check) => !check.success);
   if (failedChecks.length > 0) {
     logger.write(`--- ${failedChecks.length} quick check(s) failed. ❌`);
     logger.write(`See the script(s) marked with ❌ above for details.`);
     process.exitCode = 1;
-  } else {
+  } else if (!commitsWereMade) {
     logger.write('--- All checks passed. ✅');
     return results;
   }
@@ -82,7 +129,7 @@ function collectScriptsToRun(inputOptions: {
   targetFile: string | undefined;
   targetDir: string | undefined;
   checks: string | undefined;
-}) {
+}): QuickCheck[] {
   const { targetFile, targetDir, checks } = inputOptions;
   if ([targetFile, targetDir, checks].filter(Boolean).length > 1) {
     throw new Error('Only one of --file, --dir, or --checks can be used at a time.');
@@ -90,31 +137,55 @@ function collectScriptsToRun(inputOptions: {
 
   if (targetDir) {
     const targetDirAbsolute = isAbsolute(targetDir) ? targetDir : join(REPO_ROOT, targetDir);
-    return readdirSync(targetDirAbsolute).map((file) => join(targetDir, file));
+    return readdirSync(targetDirAbsolute).map((file) => ({ script: join(targetDir, file) }));
   } else if (checks) {
     return checks
       .trim()
       .split(/[,\n]/)
-      .map((script) => script.trim());
+      .map((script) => ({ script: script.trim() }));
   } else {
     const targetFileWithDefault = targetFile || quickChecksList;
     const targetFileAbsolute = isAbsolute(targetFileWithDefault)
       ? targetFileWithDefault
       : join(REPO_ROOT, targetFileWithDefault);
 
-    return readFileSync(targetFileAbsolute, 'utf-8')
-      .trim()
-      .split('\n')
-      .map((line) => line.trim());
+    const fileContent = readFileSync(targetFileAbsolute, 'utf-8');
+
+    // Support both JSON and legacy plain text formats for backward compatibility
+    if (targetFileAbsolute.endsWith('.json')) {
+      return JSON.parse(fileContent) as QuickCheck[];
+    } else {
+      // Legacy plain text format
+      return fileContent
+        .trim()
+        .split('\n')
+        .map((line) => ({ script: line.trim() }));
+    }
   }
 }
 
-async function runAllChecks(scriptsToRun: string[]): Promise<CheckResult[]> {
+async function runPartitionedChecks(
+  fileChangingChecks: string[],
+  regularChecks: string[]
+): Promise<CheckResult[]> {
+  // Run both partitions concurrently, but with different parallelism
+  const [fileChangingResults, regularResults] = await Promise.all([
+    runAllChecks(fileChangingChecks, 1), // File-changing checks run one at a time
+    runAllChecks(regularChecks, MAX_PARALLELISM), // Regular checks run with full parallelism
+  ]);
+
+  return [...fileChangingResults, ...regularResults];
+}
+
+async function runAllChecks(
+  scriptsToRun: string[],
+  parallelism = MAX_PARALLELISM
+): Promise<CheckResult[]> {
   const checksRunning: Array<Promise<any>> = [];
   const checksFinished: CheckResult[] = [];
 
   while (scriptsToRun.length > 0 || checksRunning.length > 0) {
-    while (scriptsToRun.length > 0 && checksRunning.length < MAX_PARALLELISM) {
+    while (scriptsToRun.length > 0 && checksRunning.length < parallelism) {
       const script = scriptsToRun.shift();
       if (!script) {
         continue;
@@ -150,7 +221,10 @@ async function runCheckAsync(script: string): Promise<CheckResult> {
 
   return new Promise((resolve) => {
     validateScriptPath(script);
-    const scriptProcess = execFile('bash', [script]);
+    // Pass environment variables to child process, including COLLECT_COMMITS_MARKER_FILE
+    const scriptProcess = execFile('bash', [script], {
+      env: { ...process.env },
+    });
     let output = '';
     const appendToOutput = (data: string | Buffer) => (output += data.toString());
 
@@ -225,4 +299,31 @@ function validateScriptPath(scriptPath: string) {
 
 function stripRoot(script: string) {
   return script.replace(REPO_ROOT, '');
+}
+
+async function pushCommits(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const pushProcess = execFile('git', ['push'], {
+      cwd: REPO_ROOT,
+      env: { ...process.env },
+    });
+
+    let output = '';
+    const appendToOutput = (data: string | Buffer) => (output += data.toString());
+
+    pushProcess.stdout?.on('data', appendToOutput);
+    pushProcess.stderr?.on('data', appendToOutput);
+
+    pushProcess.on('exit', (code) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(`git push failed with code ${code}: ${output}`));
+      }
+    });
+
+    pushProcess.on('error', (error) => {
+      reject(error);
+    });
+  });
 }

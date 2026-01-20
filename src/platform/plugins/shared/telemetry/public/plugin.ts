@@ -52,8 +52,9 @@ export interface TelemetryServicePublicApis {
    * Overwrite the opt-in status.
    * It will send a final request to the remote telemetry cluster to report about the opt-in/out change.
    * @param optedIn Whether the user is opting-in (`true`) or out (`false`).
+   * @param signal An AbortSignal to cancel any ongoing requests if the caller decides to
    */
-  setOptIn: (optedIn: boolean) => Promise<boolean>;
+  setOptIn: (optedIn: boolean, signal?: AbortSignal) => Promise<boolean>;
 }
 
 /**

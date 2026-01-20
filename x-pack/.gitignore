@@ -1,6 +1,7 @@
 /.gradle
 /build
 /target
+/test
 /.aws-config.json
 /.env
 /.kibana-plugin-helpers.dev.*

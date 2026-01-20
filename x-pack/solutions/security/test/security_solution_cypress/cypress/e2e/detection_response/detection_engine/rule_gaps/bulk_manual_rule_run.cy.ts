@@ -10,7 +10,7 @@ import { MODAL_ERROR_BODY, TOASTER_BODY } from '../../../../screens/alerts_detec
 import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import {
   disableAutoRefresh,
-  clickErrorToastBtn,
+  clickErrorToastBtnByContent,
   selectAllRules,
   selectRulesByName,
 } from '../../../../tasks/alerts_detection_rules';
@@ -63,15 +63,12 @@ describe('Manual rule run', { tags: ['@ess', '@serverless'] }, () => {
 
     const enabledCount = 3;
     const disabledCount = 2;
+    const toasterContent = `${disabledCount} rules failed to schedule manual rule run.See the full error`;
+
     scheduleManualRuleRunForSelectedRules(enabledCount, disabledCount);
 
-    cy.contains(
-      TOASTER_BODY,
-      `${disabledCount} rules failed to schedule manual rule run.See the full error`
-    );
-
     // on error toast button click display error that it is not possible to schedule manual rule run for disabled rules
-    clickErrorToastBtn();
+    clickErrorToastBtnByContent(toasterContent);
     cy.contains(MODAL_ERROR_BODY, 'Cannot schedule manual rule run for a disabled rule');
   });
 });

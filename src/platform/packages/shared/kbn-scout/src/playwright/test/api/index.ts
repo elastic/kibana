@@ -12,6 +12,7 @@ import {
   coreWorkerFixtures,
   esArchiverFixture,
   apiClientFixture,
+  apiServicesFixture,
   defaultRolesFixture,
   requestAuthFixture,
 } from '../../fixtures/scope/worker';
@@ -21,6 +22,7 @@ import type {
   RequestAuthFixture,
   ApiClientFixture,
   DefaultRolesFixture,
+  ApiServicesFixture,
 } from '../../fixtures/scope/worker';
 
 /**
@@ -28,6 +30,7 @@ import type {
  */
 export interface ApiWorkerFixtures extends CoreWorkerFixtures {
   apiClient: ApiClientFixture;
+  apiServices: ApiServicesFixture;
   defaultRolesFixture: DefaultRolesFixture;
   requestAuth: RequestAuthFixture;
   esArchiver: EsArchiverFixture;
@@ -69,6 +72,7 @@ export const apiTest = mergeTests(
   noBrowserFixtures,
   coreWorkerFixtures,
   apiClientFixture,
+  apiServicesFixture,
   defaultRolesFixture,
   requestAuthFixture,
   esArchiverFixture

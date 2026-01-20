@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -139,6 +139,7 @@
     "@kbn/presentation-containers",
     "@kbn/apm-sources-access-plugin",
     "@kbn/shared-ux-error-boundary",
+    "@kbn/react-query",
   ],
   "exclude": ["target/**/*"]
 }

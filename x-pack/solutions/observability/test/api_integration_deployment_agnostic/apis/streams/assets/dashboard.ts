@@ -25,7 +25,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const ARCHIVES = [
     'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/search.json',
     'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json',
-    'x-pack/test/api_integration/fixtures/kbn_archiver/streams/tagged_dashboard.json',
+    'x-pack/platform/test/functional/fixtures/kbn_archives/streams/tagged_dashboard.json',
   ];
 
   const SEARCH_DASHBOARD_ID = 'b70c7ae0-3224-11e8-a572-ffca06da1357';

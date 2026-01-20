@@ -71,7 +71,7 @@ describe('Connector selector', () => {
       </TestProviders>
     );
     fireEvent.click(getByTestId('connector-selector'));
-    expect(getByTestId('addNewConnectorButton')).toBeInTheDocument();
+    expect(getByTestId('aiAssistantAddConnectorButton')).toBeInTheDocument();
   });
   it('renders with provided selected connector', () => {
     const { getByTestId } = render(
@@ -100,7 +100,7 @@ describe('Connector selector', () => {
       </TestProviders>
     );
     fireEvent.click(getByTestId('connector-selector'));
-    fireEvent.click(getByTestId('addNewConnectorButton'));
+    fireEvent.click(getByTestId('aiAssistantAddConnectorButton'));
 
     fireEvent.click(getByTestId('modal-mock'));
 

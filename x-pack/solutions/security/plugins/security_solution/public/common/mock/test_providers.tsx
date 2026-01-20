@@ -16,7 +16,7 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 import type { Store } from 'redux';
 import { ThemeProvider } from 'styled-components';
 import type { Capabilities } from '@kbn/core/public';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';

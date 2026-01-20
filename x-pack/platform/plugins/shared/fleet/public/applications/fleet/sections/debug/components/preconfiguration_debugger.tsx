@@ -17,7 +17,7 @@ import {
   EuiLink,
   EuiConfirmModal,
 } from '@elastic/eui';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@kbn/react-query';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

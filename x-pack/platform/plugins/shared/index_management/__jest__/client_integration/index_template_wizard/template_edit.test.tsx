@@ -167,13 +167,13 @@ describe('<TemplateEdit />', () => {
           body: JSON.stringify({
             name: 'test',
             indexPatterns: ['myPattern*'],
-            indexMode: 'standard',
             version: 1,
             allowAutoCreate: 'NO_OVERWRITE',
             dataStream: {
               hidden: true,
               anyUnknownKey: 'should_be_kept',
             },
+            indexMode: 'standard',
             _kbnMeta: {
               type: 'default',
               hasDatastream: true,
@@ -287,10 +287,10 @@ describe('<TemplateEdit />', () => {
             body: JSON.stringify({
               name: TEMPLATE_NAME,
               indexPatterns: UPDATED_INDEX_PATTERN,
-              indexMode: 'standard',
               priority: 3,
               version: templateToEdit.version,
               allowAutoCreate: 'TRUE',
+              indexMode: 'standard',
               _kbnMeta: {
                 type: 'default',
                 hasDatastream: false,
@@ -387,9 +387,9 @@ describe('<TemplateEdit />', () => {
           body: JSON.stringify({
             name: TEMPLATE_NAME,
             indexPatterns: INDEX_PATTERNS,
-            indexMode: templateToEdit.indexMode,
             version: templateToEdit.version,
             allowAutoCreate: templateToEdit.allowAutoCreate,
+            indexMode: templateToEdit.indexMode,
             _kbnMeta: templateToEdit._kbnMeta,
             composedOf: [NONEXISTENT_COMPONENT_TEMPLATE.name],
             template: {},

@@ -11,7 +11,7 @@ import { SupertestWithRoleScopeType } from '../../services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 // Notes:
-// Test coverage comes from stateful test suite: x-pack/test/api_integration/apis/security/roles.ts
+// Test coverage comes from stateful test suite: x-pack/platform/test/api_integration/apis/security/roles.ts
 // It has been modified to work for serverless by removing invalid options (run_as, allow_restricted_indices, etc).
 //
 // Note: this suite is currently only called from the feature flags test configs, e.g.

@@ -8,8 +8,9 @@
 import React, { useMemo, useRef } from 'react';
 
 import { EuiPanel, useEuiTheme, EuiResizeObserver, EuiSpacer, EuiProgress } from '@elastic/eui';
-import { Chart, Settings, Heatmap, ScaleType, Tooltip, LEGACY_LIGHT_THEME } from '@elastic/charts';
+import { Chart, Settings, Heatmap, ScaleType, Tooltip } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MonitorStatusHeader } from './monitor_status_header';
 import { MonitorStatusCellTooltip } from './monitor_status_cell_tooltip';
 import { MonitorStatusLegend } from './monitor_status_legend';
@@ -21,6 +22,7 @@ import {
   MonitorStatusPanelProps,
 } from './monitor_status_data';
 import { useMonitorStatusData } from './use_monitor_status_data';
+import { ClientPluginsStart } from '../../../../../plugin';
 
 export const MonitorStatusPanel = ({
   from = 'now-24h',
@@ -34,6 +36,8 @@ export const MonitorStatusPanel = ({
   const initialSizeRef = useRef<HTMLDivElement | null>(null);
   const { loading, timeBins, handleResize, getTimeBinByXValue, xDomain, minsPerBin } =
     useMonitorStatusData({ from, to, initialSizeRef });
+  const { charts } = useKibana<ClientPluginsStart>().services;
+  const baseTheme = charts.theme.useChartsBaseTheme();
 
   const heatmap = useMemo(() => {
     return getMonitorStatusChartTheme(euiTheme, brushable);
@@ -59,7 +63,7 @@ export const MonitorStatusPanel = ({
               {minsPerBin && (
                 <Chart
                   size={{
-                    height: 60,
+                    height: 80,
                   }}
                 >
                   <Tooltip
@@ -74,8 +78,7 @@ export const MonitorStatusPanel = ({
                     showLegend={false}
                     xDomain={xDomain}
                     theme={{ heatmap }}
-                    // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-                    baseTheme={LEGACY_LIGHT_THEME}
+                    baseTheme={baseTheme}
                     onBrushEnd={(brushArea) => {
                       onBrushed?.(getBrushData(brushArea));
                     }}

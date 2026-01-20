@@ -34,7 +34,7 @@ const logThresholdDefaultRecoveryMessage = i18n.translate(
   'xpack.infra.logs.alerting.threshold.defaultRecoveryMessage',
   {
     defaultMessage: `Recovered: '{{context.reason}}'
-    
+
     '{{rule.name}}' has recovered.
 
 [View alert details]('{{context.alertDetailsUrl}}')
@@ -73,7 +73,7 @@ export function createLogThresholdRuleType(
     defaultActionMessage: logThresholdDefaultActionMessage,
     defaultRecoveryMessage: logThresholdDefaultRecoveryMessage,
     requiresAppContext: false,
-    format: createRuleFormatter(logsLocator),
+    format: logsLocator ? createRuleFormatter(logsLocator) : () => ({ reason: '' }),
     priority: 30,
   };
 }

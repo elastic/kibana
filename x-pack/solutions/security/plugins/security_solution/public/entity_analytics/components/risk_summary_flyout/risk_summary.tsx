@@ -78,7 +78,7 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
 
     return getRiskScoreSummaryAttributes({
       severity: entityData?.risk?.calculated_level,
-      query: `${fieldName}: ${entityName}`,
+      query: `${fieldName}: "${entityName}"`,
       spaceId,
       riskEntity: entityType,
       // TODO: add in riskColors when severity palette agreed on.

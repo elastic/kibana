@@ -12,7 +12,7 @@ import type {
   EmbeddedConsoleViewButtonProps,
 } from '@kbn/console-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient } from '@kbn/react-query';
 
 import { NotebookListValue, AppMetricsTracker } from './types';
 

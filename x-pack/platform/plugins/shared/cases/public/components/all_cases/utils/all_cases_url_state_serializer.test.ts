@@ -116,4 +116,21 @@ describe('allCasesUrlStateSerializer', () => {
       }
     `);
   });
+
+  it('encodes the search term', () => {
+    expect(
+      allCasesUrlStateSerializer({
+        filterOptions: { ...DEFAULT_FILTER_OPTIONS, search: '#123' },
+        queryParams: DEFAULT_QUERY_PARAMS,
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "page": 1,
+        "perPage": 10,
+        "search": "%23123",
+        "sortField": "createdAt",
+        "sortOrder": "desc",
+      }
+    `);
+  });
 });

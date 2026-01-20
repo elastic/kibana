@@ -21,7 +21,7 @@ import { mockConfig } from '../__test__/report_listing.test.helpers';
 import React from 'react';
 import { RecursivePartial, UseEuiTheme } from '@elastic/eui';
 import ReportSchedulesTable from './report_schedules_table';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { useGetScheduledList } from '../hooks/use_get_scheduled_list';
 import { mockScheduledReports } from '../../../common/test/fixtures';

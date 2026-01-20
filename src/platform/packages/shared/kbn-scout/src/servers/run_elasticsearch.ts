@@ -7,19 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Url from 'url';
-import { resolve } from 'path';
-import type { ToolingLog } from '@kbn/tooling-log';
-import { REPO_ROOT } from '@kbn/repo-info';
 import type { ArtifactLicense, ServerlessProjectType } from '@kbn/es';
 import { isServerlessProjectType } from '@kbn/es/src/utils';
-import {
-  createTestEsCluster,
-  esTestConfig,
-  cleanupElasticsearch,
-  createEsClientForTesting,
-} from '@kbn/test';
-import { Config } from '../config';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { cleanupElasticsearch, createTestEsCluster, esTestConfig } from '@kbn/test';
+import type { ToolingLog } from '@kbn/tooling-log';
+import { resolve } from 'path';
+import Url from 'url';
+import type { Config } from './configs';
 
 interface RunElasticsearchOptions {
   log: ToolingLog;
@@ -87,25 +82,25 @@ export async function runElasticsearch(
     config,
   });
 
-  // TODO: Remove this once we find out why SAML callback randomly fails with 401
-  log.info('Enable authc debug logs for ES');
-  const clientUrl = new URL(
-    Url.format({
-      protocol: options.config.get('servers.elasticsearch.protocol'),
-      hostname: options.config.get('servers.elasticsearch.hostname'),
-      port: options.config.get('servers.elasticsearch.port'),
-    })
-  );
-  clientUrl.username = options.config.get('servers.kibana.username');
-  clientUrl.password = options.config.get('servers.kibana.password');
-  const esClient = createEsClientForTesting({
-    esUrl: clientUrl.toString(),
-  });
-  await esClient.cluster.putSettings({
-    persistent: {
-      'logger.org.elasticsearch.xpack.security.authc': 'debug',
-    },
-  });
+  // Enable it to debug why SAML callback randomly returns 401
+  // log.info('Enable authc debug logs for ES');
+  // const clientUrl = new URL(
+  //   Url.format({
+  //     protocol: options.config.get('servers.elasticsearch.protocol'),
+  //     hostname: options.config.get('servers.elasticsearch.hostname'),
+  //     port: options.config.get('servers.elasticsearch.port'),
+  //   })
+  // );
+  // clientUrl.username = options.config.get('servers.kibana.username');
+  // clientUrl.password = options.config.get('servers.kibana.password');
+  // const esClient = createEsClientForTesting({
+  //   esUrl: clientUrl.toString(),
+  // });
+  // await esClient.cluster.putSettings({
+  //   persistent: {
+  //     'logger.org.elasticsearch.xpack.security.authc': 'debug',
+  //   },
+  // });
 
   return async () => {
     await cleanupElasticsearch(node, config.serverless, logsDir, log);

@@ -22,7 +22,6 @@ import type {
   OpenPointInTimeResponse,
   SearchRequest,
   SearchResponse,
-  SearchHit,
   SearchRequest as ESSearchRequest,
   SortResults,
   IndicesGetDataStreamRequest,
@@ -64,6 +63,7 @@ import {
   ruleExceptionListItemToTelemetryEvent,
   setClusterInfo,
   newTelemetryLogger,
+  withErrorMessage,
 } from './helpers';
 import { Fetcher } from '../../endpoint/routes/resolver/tree/utils/fetch';
 import type { TreeOptions, TreeResponse } from '../../endpoint/routes/resolver/tree/utils/fetch';
@@ -89,6 +89,7 @@ import type {
   EndpointPolicyResponseAggregation,
   EndpointMetadataAggregation,
   EndpointMetadataDocument,
+  TelemetryQueryConfiguration,
 } from './types';
 import { telemetryConfiguration } from './configuration';
 import { ENDPOINT_METRICS_INDEX } from '../../../common/constants';
@@ -121,7 +122,8 @@ export interface ITelemetryReceiver {
     alertsIndex?: string,
     endpointContextService?: EndpointAppContextService,
     exceptionListClient?: ExceptionListClient,
-    packageService?: PackageService
+    packageService?: PackageService,
+    queryConfig?: TelemetryQueryConfiguration
   ): Promise<void>;
 
   getClusterInfo(): Nullable<ESClusterInfo>;
@@ -201,7 +203,11 @@ export interface ITelemetryReceiver {
    * @see {ITelemetryReceiver#setMaxPageSizeBytes}
    * @see {ITelemetryReceiver#setNumDocsToSample}
    */
-  paginate<T>(index: string, query: ESSearchRequest): AsyncGenerator<T[], void, unknown>;
+  paginate<T>(
+    index: string,
+    query: ESSearchRequest,
+    queryConfig: TelemetryQueryConfiguration | undefined
+  ): AsyncGenerator<T[], void, unknown>;
 
   fetchPolicyConfigs(id: string): Promise<AgentPolicy | null | undefined>;
 
@@ -247,8 +253,9 @@ export interface ITelemetryReceiver {
   fetchTimelineAlerts(
     index: string,
     rangeFrom: string,
-    rangeTo: string
-  ): Promise<Array<SearchHit<EnhancedAlertEvent>>>;
+    rangeTo: string,
+    queryConfig: TelemetryQueryConfiguration
+  ): AsyncGenerator<EnhancedAlertEvent[], void, unknown>;
 
   buildProcessTree(
     entityId: string,
@@ -297,6 +304,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   private packageService?: PackageService;
   private experimentalFeatures: ExperimentalFeatures | undefined;
   private readonly maxRecords = 10_000 as const;
+  private queryConfig?: TelemetryQueryConfiguration;
 
   // default to 2% of host's total memory or 80MiB, whichever is smaller
   private maxPageSizeBytes: number = Math.min(os.totalmem() * 0.02, 80 * 1024 * 1024);
@@ -313,7 +321,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     alertsIndex?: string,
     endpointContextService?: EndpointAppContextService,
     exceptionListClient?: ExceptionListClient,
-    packageService?: PackageService
+    packageService?: PackageService,
+    queryConfig?: TelemetryQueryConfiguration
   ) {
     this.getIndexForType = getIndexForType;
     this.alertsIndex = alertsIndex;
@@ -329,6 +338,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     this.experimentalFeatures = endpointContextService?.experimentalFeatures;
     const elasticsearch = core?.elasticsearch.client as unknown as IScopedClusterClient;
     this.processTreeFetcher = new Fetcher(elasticsearch);
+    this.queryConfig = queryConfig;
 
     setClusterInfo(this.clusterInfo);
   }
@@ -622,8 +632,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
         this.logger.debug('Diagnostic alerts to return', { numOfHits } as LogMeta);
         fetchMore = numOfHits > 0 && numOfHits < telemetryConfiguration.telemetry_max_buffer_size;
-      } catch (e) {
-        this.logger.warn('Error fetching alerts', { error_message: e.message } as LogMeta);
+      } catch (error) {
+        this.logger.warn('Error fetching alerts', withErrorMessage(error));
         fetchMore = false;
       }
 
@@ -1008,10 +1018,10 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
         yield alerts;
       }
-    } catch (e) {
+    } catch (error) {
       // to keep backward compatibility with the previous implementation, silent return
       // once we start using `paginate` this error should be managed downstream
-      this.logger.warn('Error fetching alerts', { error_message: e.message } as LogMeta);
+      this.logger.warn('Error fetching alerts', withErrorMessage(error));
       return;
     } finally {
       await this.closePointInTime(pitId);
@@ -1035,120 +1045,74 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     try {
       await this.esClient().closePointInTime({ id: pitId });
     } catch (error) {
-      this.logger.warn('Error trying to close point in time', {
-        pit: pitId,
-        error_message: error.message,
-      } as LogMeta);
+      this.logger.warn(
+        'Error trying to close point in time',
+        withErrorMessage(error, {
+          pit: pitId,
+        } as LogMeta)
+      );
     }
   }
 
-  async fetchTimelineAlerts(index: string, rangeFrom: string, rangeTo: string) {
-    // default is from looking at Kibana saved objects and online documentation
-    const keepAlive = '5m';
-
-    // create and assign an initial point in time
-    let pitId: OpenPointInTimeResponse['id'] = (
-      await this.esClient().openPointInTime({
-        index: `${index}*`,
-        keep_alive: keepAlive,
-      })
-    ).id;
-
-    let fetchMore = true;
-    let searchAfter: SortResults | undefined;
-    let alertsToReturn: Array<SearchHit<EnhancedAlertEvent>> = [];
-    while (fetchMore) {
-      const query: ESSearchRequest = {
-        query: {
-          bool: {
-            filter: [
-              {
-                bool: {
-                  should: [
-                    {
-                      match_phrase: {
-                        'event.module': 'endpoint',
-                      },
+  fetchTimelineAlerts(
+    index: string,
+    rangeFrom: string,
+    rangeTo: string,
+    queryConfig: TelemetryQueryConfiguration
+  ): AsyncGenerator<EnhancedAlertEvent[], void, unknown> {
+    const query: ESSearchRequest = {
+      query: {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [
+                  {
+                    match_phrase: {
+                      'event.module': 'endpoint',
                     },
-                  ],
-                },
-              },
-              {
-                bool: {
-                  should: [
-                    {
-                      match_phrase: {
-                        'kibana.alert.rule.parameters.immutable': 'true',
-                      },
-                    },
-                  ],
-                },
-              },
-              {
-                range: {
-                  '@timestamp': {
-                    gte: rangeFrom,
-                    lte: rangeTo,
                   },
+                ],
+              },
+            },
+            {
+              bool: {
+                should: [
+                  {
+                    match_phrase: {
+                      'kibana.alert.rule.parameters.immutable': 'true',
+                    },
+                  },
+                ],
+              },
+            },
+            {
+              range: {
+                '@timestamp': {
+                  gte: rangeFrom,
+                  lte: rangeTo,
                 },
               },
-            ],
-          },
-        },
-        aggs: {
-          endpoint_alert_count: {
-            cardinality: {
-              field: 'event.id',
             },
+          ],
+        },
+      },
+      aggs: {
+        endpoint_alert_count: {
+          cardinality: {
+            field: 'event.id',
           },
         },
-        track_total_hits: false,
-        sort: [
-          { '@timestamp': { order: 'asc', format: 'strict_date_optional_time_nanos' } },
-          { _shard_doc: 'desc' },
-        ] as unknown as string[],
-        pit: { id: pitId },
-        search_after: searchAfter,
-        size: 1000,
-      };
+      },
+      track_total_hits: false,
+      sort: [
+        { '@timestamp': { order: 'asc', format: 'strict_date_optional_time_nanos' } },
+        { _shard_doc: 'desc' },
+      ] as unknown as string[],
+      size: this.queryConfig?.pageSize ?? queryConfig.pageSize, // plugin config have precedence over CDN parameter
+    };
 
-      let response = null;
-      try {
-        response = await this.esClient().search<EnhancedAlertEvent>(query);
-        const numOfHits = response?.hits.hits.length;
-
-        if (numOfHits > 0) {
-          const lastHit = response?.hits.hits[numOfHits - 1];
-          searchAfter = lastHit?.sort;
-        }
-
-        fetchMore = numOfHits > 0;
-      } catch (e) {
-        this.logger.warn('Error fetching alerts', { error_message: e.message } as LogMeta);
-        fetchMore = false;
-      }
-
-      const alerts = response?.hits.hits;
-      alertsToReturn = alertsToReturn.concat(alerts ?? []);
-
-      if (response?.pit_id != null) {
-        pitId = response?.pit_id;
-      }
-    }
-
-    try {
-      await this.esClient().closePointInTime({ id: pitId });
-    } catch (error) {
-      this.logger.warn('Error trying to close point in time', {
-        pit: pitId,
-        error_message: error.message,
-        keepAlive,
-      } as LogMeta);
-    }
-
-    this.logger.debug('Timeline alerts to return', { alerts: alertsToReturn.length } as LogMeta);
-
-    return alertsToReturn || [];
+    return this.paginate(index, query, queryConfig);
   }
 
   public async buildProcessTree(
@@ -1326,8 +1290,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       })) as { license: ESLicense };
 
       return ret.license;
-    } catch (err) {
-      this.logger.warn('failed retrieving license', { error_message: err.message } as LogMeta);
+    } catch (error) {
+      this.logger.warn('failed retrieving license', withErrorMessage(error));
       return undefined;
     }
   }
@@ -1352,15 +1316,44 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     return Math.max(Math.floor(this.maxPageSizeBytes / docSizeBytes), 1);
   }
 
-  public async *paginate<T>(index: string, query: ESSearchRequest) {
+  public async *paginate<T>(
+    index: string,
+    query: ESSearchRequest,
+    queryConfig: TelemetryQueryConfiguration | undefined = undefined
+  ) {
     if (query.sort == null) {
       throw Error('Not possible to paginate a query without a sort attribute');
     }
 
-    const size = await this.docsPerPage(index, query);
-    if (size === -1) {
-      return;
+    let queryOptions = {};
+    let pageSize = -1;
+    // kibana.yml configurations take precedence over CDN parameters
+    if (this.queryConfig !== undefined) {
+      queryOptions = {
+        maxResponseSize: this.queryConfig.maxResponseSize,
+        maxCompressedResponseSize: this.queryConfig.maxCompressedResponseSize,
+      };
+      pageSize = this.queryConfig.pageSize;
+    } else if (queryConfig !== undefined) {
+      queryOptions = {
+        maxResponseSize: queryConfig.maxResponseSize,
+        maxCompressedResponseSize: queryConfig.maxCompressedResponseSize,
+      };
+      pageSize = queryConfig.pageSize;
+    } else {
+      pageSize = await this.docsPerPage(index, query);
     }
+
+    if (pageSize === -1) {
+      this.logger.warn('Page size is not defined, default to 100');
+      pageSize = 100;
+    }
+
+    this.logger.debug('Running paginated query', {
+      queryConfig,
+      queryOptions,
+      pageSize,
+    } as LogMeta);
 
     const pit = {
       id: await this.openPointInTime(index),
@@ -1368,11 +1361,12 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     const esQuery: ESSearchRequest = {
       ...cloneDeep(query),
       pit,
-      size: Math.min(size, 10_000),
+      // not allow more than 10K pages
+      size: Math.min(pageSize, 10_000),
     };
     try {
       do {
-        const response = await this.nextPage(esQuery);
+        const response = await this.nextPage(esQuery, queryOptions);
         const hits = response?.hits.hits.length ?? 0;
 
         if (hits === 0) {
@@ -1387,18 +1381,19 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
         yield data;
       } while (esQuery.search_after !== undefined);
-    } catch (e) {
-      this.logger.warn('Error running paginated query', { error_message: e.message } as LogMeta);
-      throw e;
+    } catch (error) {
+      this.logger.warn('Error running paginated query', withErrorMessage(error));
+      throw error;
     } finally {
       await this.closePointInTime(pit.id);
     }
   }
 
   private async nextPage(
-    esQuery: ESSearchRequest
+    esQuery: ESSearchRequest,
+    queryOptions: {}
   ): Promise<SearchResponse<unknown, Record<string, AggregationsAggregate>>> {
-    return this.esClient().search(esQuery);
+    return this.esClient().search(esQuery, queryOptions);
   }
 
   public setMaxPageSizeBytes(bytes: number) {
@@ -1447,7 +1442,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         })
       )
       .catch((error) => {
-        this.logger.warn('Error fetching indices', { error_message: error } as LogMeta);
+        this.logger.warn('Error fetching indices', withErrorMessage(error));
         throw error;
       });
   }
@@ -1488,7 +1483,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         })
       )
       .catch((error) => {
-        this.logger.warn('Error fetching datastreams', { error_message: error } as LogMeta);
+        this.logger.warn('Error fetching datastreams', withErrorMessage(error));
         throw error;
       });
   }
@@ -1553,7 +1548,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
           } as IndexStats;
         }
       } catch (error) {
-        this.logger.warn('Error fetching indices stats', { error_message: error } as LogMeta);
+        this.logger.warn('Error fetching indices stats', withErrorMessage(error));
         throw error;
       }
     }
@@ -1591,7 +1586,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
           yield entry;
         }
       } catch (error) {
-        this.logger.warn('Error fetching ilm stats', { error_message: error } as LogMeta);
+        this.logger.warn('Error fetching ilm stats', withErrorMessage(error));
         throw error;
       }
     }
@@ -1640,7 +1635,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         })
       )
       .catch((error) => {
-        this.logger.warn('Error fetching index templates', { error_message: error } as LogMeta);
+        this.logger.warn('Error fetching index templates', withErrorMessage(error));
         throw error;
       });
   }
@@ -1696,9 +1691,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
           } as IlmPolicy;
         }
       } catch (error) {
-        this.logger.warn('Error fetching ilm policies', {
-          error_message: error.message,
-        } as LogMeta);
+        this.logger.warn('Error fetching ilm policies', withErrorMessage(error));
         throw error;
       }
     }
@@ -1769,9 +1762,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         });
       })
       .catch((error) => {
-        this.logger.warn('Error fetching ingest pipelines stats', {
-          error_message: error,
-        } as LogMeta);
+        this.logger.warn('Error fetching ingest pipelines stats', withErrorMessage(error));
         throw error;
       });
   }

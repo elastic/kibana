@@ -12,7 +12,7 @@ import { DiscoverMainProvider } from '../../state_management/discover_state_prov
 import { DiscoverTopNavInline } from './discover_topnav_inline';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
+import { QueryClientProvider, QueryClient } from '@kbn/react-query';
 import { discoverServiceMock as mockDiscoverService } from '../../../../__mocks__/services';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { render, screen, waitFor } from '@testing-library/react';

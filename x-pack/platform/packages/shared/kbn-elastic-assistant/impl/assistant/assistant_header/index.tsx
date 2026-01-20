@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@tanstack/react-query';
+import { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@kbn/react-query';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiPanel, EuiSkeletonTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';

@@ -386,7 +386,30 @@ describe('commands.stats', () => {
           newFields: new Set(['`agg(a, b)`', '`agg(c, a)`', 'd']),
         },
         {
-          newFields: new Set(['`max(a, b, c)`', '`max2(d.e)`', 'x', 'y', 'i']),
+          newFields: new Set(['`max(a, b, c)`', '`max2(d.e)`', 'y', 'i']),
+        },
+      ]);
+    });
+
+    it('correctly returns new fields when a pre-existing field is referenced in a new stats command', () => {
+      const src = `FROM kibana_sample_data_logs 
+                    | STATS count_per_day=COUNT(*) BY category=CATEGORIZE(message), @timestamp=BUCKET(@timestamp, 1 day) 
+                    | STATS count = SUM(count_per_day), Trend=VALUES(count_per_day) BY category
+                    | KEEP category, count
+                    | STATS sample = SAMPLE(count, 10) BY category`;
+
+      const query = EsqlQuery.fromSrc(src);
+      const summary = commands.stats.summarize(query);
+
+      expect(summary).toMatchObject([
+        {
+          newFields: new Set(['count_per_day', 'category', '@timestamp']),
+        },
+        {
+          newFields: new Set(['count', 'Trend']),
+        },
+        {
+          newFields: new Set(['`sample`']),
         },
       ]);
     });

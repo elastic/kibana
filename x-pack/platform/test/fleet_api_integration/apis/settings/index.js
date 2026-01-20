@@ -7,8 +7,8 @@
 
 export default function loadTests({ loadTestFile }) {
   describe('Settings Endpoints', () => {
-    loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./update'));
+    loadTestFile(require.resolve('./global_settings'));
     loadTestFile(require.resolve('./enrollment'));
     loadTestFile(require.resolve('./enrollment_privileges'));
   });

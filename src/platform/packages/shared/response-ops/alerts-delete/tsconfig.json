@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": ["jest", "node", "@emotion/react/types/css-prop", "@kbn/ambient-ui-types"]
@@ -15,5 +15,6 @@
     "@kbn/alerting-types",
     "@kbn/core-notifications-browser",
     "@kbn/kibana-react-plugin",
+    "@kbn/react-query",
   ]
 }

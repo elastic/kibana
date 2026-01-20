@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiSpacer, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { usePipelineProcessorsContext } from './context';
 import {
@@ -17,16 +18,25 @@ import {
 } from './components';
 import { ProcessorsEditor, GlobalOnFailureProcessorsEditor } from './editors';
 
-import './pipeline_editor.scss';
-
 interface Props {
   onLoadJson: OnDoneLoadJsonHandler;
 }
+
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  return {
+    container: css`
+      background-color: ${euiTheme.colors.backgroundBaseSubdued};
+    `,
+  };
+};
 
 export const PipelineEditor: React.FunctionComponent<Props> = ({ onLoadJson }) => {
   const {
     state: { processors: allProcessors },
   } = usePipelineProcessorsContext();
+
+  const styles = useStyles();
 
   const {
     state: { processors, onFailure },
@@ -58,7 +68,7 @@ export const PipelineEditor: React.FunctionComponent<Props> = ({ onLoadJson }) =
         <EuiFlexItem grow={false}>
           <ProcessorsHeader onLoadJson={onLoadJson} hasProcessors={processors.length > 0} />
         </EuiFlexItem>
-        <EuiFlexItem grow={false} className="pipelineEditor__container">
+        <EuiFlexItem css={styles.container} grow={false}>
           {content}
         </EuiFlexItem>
       </EuiFlexGroup>

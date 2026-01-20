@@ -163,6 +163,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
                     saved_objects: data.saved_objects.map((pack) => ({
                       ...pack.attributes,
                       saved_object_id: pack.id,
+                      references: pack.references,
                     })),
                   }));
 

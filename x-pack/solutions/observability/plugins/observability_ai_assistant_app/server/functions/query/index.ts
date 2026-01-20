@@ -113,6 +113,7 @@ export function registerQueryFunction({
       function takes no input.`,
       visibility: FunctionVisibility.All,
     },
+    // @ts-expect-error upgrade typescript v5.9.3
     async ({ messages, connectorId, simulateFunctionCalling }) => {
       const esqlFunctions = functions
         .getFunctions()

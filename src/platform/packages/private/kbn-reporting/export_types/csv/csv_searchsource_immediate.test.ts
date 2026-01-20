@@ -124,7 +124,8 @@ test('allows csv.scroll.duration to be "auto"', async () => {
     expect.anything(),
     expect.anything(),
     expect.anything(),
-    expect.anything()
+    expect.anything(),
+    'cool-job-id'
   );
 
   expect(mockGenerateData).toBeCalled();

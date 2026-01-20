@@ -4,6 +4,7 @@ steps:
     agents:
       enableNestedVirtualization: true
       machineType: n2-standard-4
+      diskSizeGb: 105
     depends_on:
       - build
       - quick_checks
@@ -12,7 +13,7 @@ steps:
       - linting_with_types
       - check_types
       - check_oas_snapshot
-    timeout_in_minutes: 60
+    timeout_in_minutes: 75
     parallelism: 20
     retry:
       automatic:

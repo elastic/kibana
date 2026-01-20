@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useKibana } from '../hooks/use_kibana';
 import { CloudDefendSetupStatus } from '../../../common';
 import { CURRENT_API_VERSION, STATUS_ROUTE_PATH } from '../../../common/constants';

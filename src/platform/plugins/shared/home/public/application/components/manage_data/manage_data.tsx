@@ -114,6 +114,7 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
             <EuiFlexItem className="homDataManage__item" key={feature.id}>
               <Synopsis
                 description={feature.description}
+                // @ts-expect-error upgrade typescript v5.9.3
                 iconType={feature.icon}
                 id={feature.id}
                 onClick={(event: MouseEvent) => {

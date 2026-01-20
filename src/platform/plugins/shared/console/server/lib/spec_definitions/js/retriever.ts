@@ -114,7 +114,6 @@ export const retriever = (specService: SpecDefinitionsService) => {
       __template: {
         retriever: {},
         ids: [],
-        match_criteria: {},
       },
       retriever: {
         __scope_link: '.',
@@ -122,7 +121,6 @@ export const retriever = (specService: SpecDefinitionsService) => {
       // Only one of 'ids' or 'docs' should be used at a time
       ids: [],
       docs: [],
-      match_criteria: {},
       rank_window_size: 10,
     },
     standard: {

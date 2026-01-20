@@ -74,6 +74,7 @@ export function getComponentTemplate(inferenceId: string) {
         public: {
           type: 'boolean',
         },
+        role: keyword,
       },
     },
   };

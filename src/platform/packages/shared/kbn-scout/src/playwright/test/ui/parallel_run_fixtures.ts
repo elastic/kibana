@@ -60,7 +60,7 @@ export interface ScoutParallelWorkerFixtures {
   apiServices: ApiServicesFixture;
 }
 
-export const globalSetup = mergeTests(
+export const globalSetupFixtures = mergeTests(
   coreWorkerFixtures,
   esArchiverFixture,
   synthtraceFixture,

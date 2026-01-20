@@ -72,13 +72,7 @@ test('generates metric chart config', async () => {
   );
   expect(result).toMatchInlineSnapshot(`
     Object {
-      "references": Array [
-        Object {
-          "id": "test",
-          "name": "indexpattern-datasource-layer-layer_0",
-          "type": "index-pattern",
-        },
-      ],
+      "references": Array [],
       "state": Object {
         "adHocDataViews": Object {
           "test": Object {},
@@ -115,7 +109,13 @@ test('generates metric chart config', async () => {
           },
         },
         "filters": Array [],
-        "internalReferences": Array [],
+        "internalReferences": Array [
+          Object {
+            "id": "test",
+            "name": "indexpattern-datasource-layer-layer_0",
+            "type": "index-pattern",
+          },
+        ],
         "query": Object {
           "language": "kuery",
           "query": "",
@@ -191,18 +191,7 @@ test('generates metric chart config with trendline', async () => {
 
   expect(result).toMatchInlineSnapshot(`
     Object {
-      "references": Array [
-        Object {
-          "id": undefined,
-          "name": "indexpattern-datasource-layer-layer_0",
-          "type": "index-pattern",
-        },
-        Object {
-          "id": undefined,
-          "name": "indexpattern-datasource-layer-layer_0_trendline",
-          "type": "index-pattern",
-        },
-      ],
+      "references": Array [],
       "state": Object {
         "adHocDataViews": Object {
           "3feeaf26-927e-448e-968f-c7e970671564": Object {},

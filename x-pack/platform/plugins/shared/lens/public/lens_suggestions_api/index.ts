@@ -6,12 +6,12 @@
  */
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { ChartType } from '@kbn/visualization-utils';
+import { ChartType } from '@kbn/visualization-utils';
 import { getSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
 import type { DatasourceMap, VisualizationMap, VisualizeEditorContext } from '../types';
 import type { DataViewsState } from '../state_management';
 import type { TypedLensByValueInput } from '../react_embeddable/types';
-import { mergeSuggestionWithVisContext } from './helpers';
+import { mergeSuggestionWithVisContext, switchVisualizationType } from './helpers';
 
 interface SuggestionsApiProps {
   context: VisualizeFieldContext | VisualizeEditorContext;
@@ -94,25 +94,28 @@ export const suggestionsApi = ({
     dataViews,
   }).filter((sug) => !sug.hide && sug.visualizationId !== 'lnsLegacyMetric');
 
-  // check if there is an XY chart suggested
-  // if user has requested for a line or area, we want to sligthly change the state
-  // to return line / area instead of a bar chart
   const chartType = preferredChartType?.toLowerCase();
-  const XYSuggestion = newSuggestions.find((s) => s.visualizationId === 'lnsXY');
-  // a type can be area, line, area_stacked, area_percentage etc
-  const isAreaOrLine = ['area', 'line'].some((type) => chartType?.includes(type));
-  if (XYSuggestion && chartType && isAreaOrLine) {
-    const visualizationState = visualizationMap[
-      XYSuggestion.visualizationId
-    ]?.switchVisualizationType?.(chartType, XYSuggestion?.visualizationState);
 
-    return [
-      {
-        ...XYSuggestion,
-        visualizationState,
-      },
-    ];
-  }
+  // to return line / area instead of a bar chart
+  const xyResult = switchVisualizationType({
+    visualizationMap,
+    suggestions: newSuggestions,
+    targetTypeId: chartType,
+    familyType: 'lnsXY',
+    shouldSwitch: ['area', 'line'].some((type) => chartType?.includes(type)),
+  });
+  if (xyResult) return xyResult;
+
+  // to return a donut instead of a pie chart
+  const pieResult = switchVisualizationType({
+    visualizationMap,
+    suggestions: newSuggestions,
+    targetTypeId: chartType,
+    familyType: 'lnsPie',
+    shouldSwitch: preferredChartType === ChartType.Donut,
+  });
+  if (pieResult) return pieResult;
+
   // in case the user asks for another type (except from area, line) check if it exists
   // in suggestions and return this instead
   const suggestionsList = [activeVisualization, ...newSuggestions];

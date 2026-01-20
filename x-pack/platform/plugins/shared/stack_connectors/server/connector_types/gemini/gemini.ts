@@ -43,6 +43,7 @@ import type {
 } from '../../../common/gemini/types';
 import { SUB_ACTION, DEFAULT_TIMEOUT_MS } from '../../../common/gemini/constants';
 import { DashboardActionParamsSchema } from '../../../common/gemini/schema';
+import { validateGeminiSecrets } from './validators';
 /** Interfaces to define Gemini model response type */
 
 interface MessagePart {
@@ -197,6 +198,8 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
   /** Retrieve access token based on the GCP service account credential json file */
   private async getAccessToken(): Promise<string | null> {
     // Validate the service account credentials JSON file input
+    validateGeminiSecrets(this.secrets);
+
     let credentialsJson;
     try {
       credentialsJson = JSON.parse(this.secrets.credentialsJson);

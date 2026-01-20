@@ -86,6 +86,7 @@ export const ConfigureElasticsearchEngine: React.FC = () => {
 
     // Set isAliasAllowed depending on if the selectedOption is an alias or not.
     // Set it to true if an option was deselected.
+    // @ts-expect-error upgrade typescript v5.9.3
     setIsAliasAllowed(!selectedOption?.alias ?? true);
   };
 

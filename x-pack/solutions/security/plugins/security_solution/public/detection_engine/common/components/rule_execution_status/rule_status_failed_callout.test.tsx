@@ -12,7 +12,7 @@ import { render } from '@testing-library/react';
 import type { RuleExecutionStatus } from '../../../../../common/api/detection_engine/rule_monitoring';
 import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
 import { RuleStatusFailedCallOut } from './rule_status_failed_callout';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { chromeServiceMock } from '@kbn/core/public/mocks';
 import { of } from 'rxjs';
 import { MockAssistantProviderComponent } from '../../../../common/mock/mock_assistant_provider';

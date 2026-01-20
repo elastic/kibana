@@ -14,15 +14,19 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../lib/telemetry/event_based_telemetry';
 import { PassThrough } from 'stream';
-import { getConversationResponseMock } from '../../ai_assistant_data_clients/conversations/update_conversation.test';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
-import { getFindAnonymizationFieldsResultWithSingleHit } from '../../__mocks__/response';
+import {
+  getConversationResponseMock,
+  getFindAnonymizationFieldsResultWithSingleHit,
+} from '../../__mocks__/response';
 import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import { chatCompleteRoute } from './chat_complete_route';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import {
   appendAssistantMessageToConversation,
   createConversationWithUserInput,
+  getSystemPromptFromPromptId,
+  getSystemPromptFromUserConversation,
   langChainExecute,
 } from '../helpers';
 
@@ -40,11 +44,15 @@ jest.mock('../helpers', () => {
     ...original,
     appendAssistantMessageToConversation: jest.fn(),
     createConversationWithUserInput: jest.fn(),
+    getSystemPromptFromPromptId: jest.fn(),
+    getSystemPromptFromUserConversation: jest.fn(),
     langChainExecute: jest.fn(),
   };
 });
 const mockAppendAssistantMessageToConversation = appendAssistantMessageToConversation as jest.Mock;
 const mockCreateConversationWithUserInput = createConversationWithUserInput as jest.Mock;
+const mockGetSystemPromptFromPromptId = getSystemPromptFromPromptId as jest.Mock;
+const mockGetSystemPromptFromUserConversation = getSystemPromptFromUserConversation as jest.Mock;
 
 const mockLangChainExecute = langChainExecute as jest.Mock;
 const mockStream = jest.fn().mockImplementation(() => new PassThrough());
@@ -92,6 +100,9 @@ const mockContext = {
       }),
       getAIAssistantAnonymizationFieldsDataClient: jest.fn().mockResolvedValue({
         findDocuments: jest.fn().mockResolvedValue(getFindAnonymizationFieldsResultWithSingleHit()),
+      }),
+      getAIAssistantPromptsDataClient: jest.fn().mockResolvedValue({
+        findDocuments: jest.fn().mockResolvedValue({}),
       }),
     },
     core: {
@@ -151,6 +162,8 @@ describe('chatCompleteRoute', () => {
     mockAppendAssistantMessageToConversation.mockResolvedValue(true);
     license.hasAtLeast.mockReturnValue(true);
     mockCreateConversationWithUserInput.mockResolvedValue({ id: 'something' });
+    mockGetSystemPromptFromPromptId.mockResolvedValue(undefined);
+    mockGetSystemPromptFromUserConversation.mockResolvedValue(undefined);
     mockLangChainExecute.mockImplementation(
       async ({
         connectorId,
@@ -235,6 +248,103 @@ describe('chatCompleteRoute', () => {
     };
 
     chatCompleteRoute(mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>);
+  });
+
+  it('passes the conversation system prompt to langChainExecute', async () => {
+    mockGetSystemPromptFromUserConversation.mockResolvedValue('You always talk like a pirate');
+
+    const mockRouter = {
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              await handler(mockContext, mockRequest, mockResponse);
+
+              expect(mockLangChainExecute).toHaveBeenCalledWith(
+                expect.objectContaining({
+                  systemPrompt: 'You always talk like a pirate',
+                })
+              );
+            }),
+          };
+        }),
+      },
+    };
+
+    await chatCompleteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
+    );
+  });
+
+  it('appends promptId prompt content to the conversation system prompt', async () => {
+    mockGetSystemPromptFromUserConversation.mockResolvedValue('Conversation prompt');
+    mockGetSystemPromptFromPromptId.mockResolvedValue('Request prompt');
+
+    const requestWithPromptId = {
+      ...mockRequest,
+      body: {
+        ...mockRequest.body,
+        promptId: 'test-prompt-id',
+      },
+    };
+
+    const mockRouter = {
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              await handler(mockContext, requestWithPromptId, mockResponse);
+
+              expect(mockLangChainExecute).toHaveBeenCalledWith(
+                expect.objectContaining({
+                  systemPrompt: 'Conversation prompt\n\nRequest prompt',
+                })
+              );
+            }),
+          };
+        }),
+      },
+    };
+
+    await chatCompleteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
+    );
+  });
+
+  it('passes promptId prompt content when persist=false', async () => {
+    mockGetSystemPromptFromPromptId.mockResolvedValue('Request prompt');
+
+    const requestWithPromptIdAndNoPersist = {
+      ...mockRequest,
+      body: {
+        ...mockRequest.body,
+        conversationId: undefined,
+        persist: false,
+        promptId: 'test-prompt-id',
+      },
+    };
+
+    const mockRouter = {
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              await handler(mockContext, requestWithPromptIdAndNoPersist, mockResponse);
+
+              expect(mockLangChainExecute).toHaveBeenCalledWith(
+                expect.objectContaining({
+                  systemPrompt: 'Request prompt',
+                })
+              );
+            }),
+          };
+        }),
+      },
+    };
+
+    await chatCompleteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
+    );
   });
 
   it('returns the expected error when executeCustomLlmChain fails', async () => {

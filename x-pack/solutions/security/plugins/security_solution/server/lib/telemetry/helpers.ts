@@ -420,11 +420,14 @@ export class TelemetryTimelineFetcher {
     this.timeFrame = this.calculateTimeFrame();
   }
 
-  async fetchTimeline(event: estypes.SearchHit<EnhancedAlertEvent>): Promise<TimelineResult> {
-    const eventId = event._source ? event._source['event.id'] : 'unknown';
-    const alertUUID = event._source ? event._source['kibana.alert.uuid'] : 'unknown';
+  async fetchTimeline(event: EnhancedAlertEvent): Promise<TimelineResult> {
+    const eventId = event ? event['event.id'] : 'unknown';
+    const alertUUID = event ? event['kibana.alert.uuid'] : 'unknown';
 
-    const entities = resolverEntity([event], this.receiver.getExperimentalFeatures());
+    const entities = resolverEntity(
+      [{ _source: event } as estypes.SearchHit],
+      this.receiver.getExperimentalFeatures()
+    );
 
     // Build Tree
     const tree = await this.receiver.buildProcessTree(
@@ -526,6 +529,14 @@ export function unflatten<T extends AnyObject = AnyObject>(object: AnyObject): T
     }
     return accum;
   }, {}) as T;
+}
+
+export function withErrorMessage(error?: Error, meta?: LogMeta): LogMeta {
+  return {
+    error,
+    error_message: error?.message,
+    ...(meta ?? {}),
+  } as LogMeta;
 }
 
 function _set(object: AnyObject, key: string, value: unknown) {

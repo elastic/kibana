@@ -50,7 +50,7 @@ import {
   typeIndexPatterns,
   waitForBulkEditActionToFinish,
   submitBulkEditForm,
-  clickAddIndexPatternsMenuItem,
+  clickBulkAddIndexPatternsMenuItem,
   checkMachineLearningRulesCannotBeModified,
   checkEsqlRulesCannotBeModified,
   openBulkEditAddTagsForm,
@@ -353,7 +353,7 @@ describe(
           const resultingIndexPatterns = [...prePopulatedIndexPatterns, ...indexPattersToBeAdded];
 
           selectAllRules();
-          clickAddIndexPatternsMenuItem();
+          clickBulkAddIndexPatternsMenuItem();
 
           // confirm editing all rules, that are not Machine Learning
           checkMachineLearningRulesCannotBeModified(expectedNumberOfMachineLearningRulesToBeEdited);
@@ -374,7 +374,7 @@ describe(
 
       it('Index pattern action applied to all rules, including machine learning: user cancels action', () => {
         selectAllRules();
-        clickAddIndexPatternsMenuItem();
+        clickBulkAddIndexPatternsMenuItem();
 
         // confirm editing all rules, that are not Machine Learning
         checkMachineLearningRulesCannotBeModified(expectedNumberOfMachineLearningRulesToBeEdited);
@@ -777,7 +777,7 @@ describe('Detection rules, bulk edit, ES|QL rule type', { tags: ['@ess'] }, () =
       { tags: ['@ess'] },
       () => {
         selectAllRules();
-        clickAddIndexPatternsMenuItem();
+        clickBulkAddIndexPatternsMenuItem();
 
         // confirm editing all rules, that are not Machine Learning
         checkEsqlRulesCannotBeModified(1);

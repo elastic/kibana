@@ -5,24 +5,22 @@
  * 2.0.
  */
 
-import { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
-import { IScopedClusterClient } from '@kbn/core/server';
-import {
-  FetchSLOHealthParams,
-  FetchSLOHealthResponse,
-  fetchSLOHealthResponseSchema,
-} from '@kbn/slo-schema';
-import { Dictionary, groupBy, keyBy } from 'lodash';
+import type { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { FetchSLOHealthParams, FetchSLOHealthResponse } from '@kbn/slo-schema';
+import { fetchSLOHealthResponseSchema } from '@kbn/slo-schema';
+import { groupBy, keyBy, map, uniq, type Dictionary } from 'lodash';
 import moment from 'moment';
 import {
   SUMMARY_DESTINATION_INDEX_PATTERN,
   getSLOSummaryTransformId,
   getSLOTransformId,
+  getWildcardTransformId,
 } from '../../common/constants';
-import { SLODefinition } from '../domain/models';
-import { HealthStatus, State } from '../domain/models/health';
-import { SLORepository } from './slo_repository';
-import { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
+import type { SLODefinition } from '../domain/models';
+import type { HealthStatus, State } from '../domain/models/health';
+import type { SLORepository } from './slo_repository';
+import type { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 
 const LAG_THRESHOLD_MINUTES = 10;
 const STALE_THRESHOLD_MINUTES = 2 * 24 * 60;
@@ -34,29 +32,33 @@ export class GetSLOHealth {
   ) {}
 
   public async execute(params: FetchSLOHealthParams): Promise<FetchSLOHealthResponse> {
-    const sloIds = params.list.map(({ sloId }) => sloId);
-    const sloList = await this.repository.findAllByIds(sloIds);
-    const sloById = keyBy(sloList, 'id');
+    const sloIds = uniq(map(params.list, 'sloId'));
+    const definitions = await this.repository.findAllByIds(sloIds);
+    const definitionById = keyBy(definitions, 'id');
 
-    const filteredList = params.list
-      .filter((item) => !!sloById[item.sloId])
+    const list = params.list
+      .filter((item) => !!definitionById[item.sloId])
       .map((item) => ({
-        sloId: item.sloId,
-        sloInstanceId: item.sloInstanceId,
-        sloRevision: sloById[item.sloId].revision,
+        id: item.sloId,
+        instanceId: item.sloInstanceId,
+        revision: definitionById[item.sloId].revision,
+        name: definitionById[item.sloId].name,
       }));
 
-    const transformStatsById = await this.getTransformStats(sloList);
-    const summaryDocsById = await this.getSummaryDocsById(filteredList);
+    const [summaryDocsById, transformStatsById] = await Promise.all([
+      this.getSummaryDocsById(list),
+      this.getTransformStats(definitions),
+    ]);
 
-    const results = filteredList.map((item) => {
+    const results = list.map((item) => {
       const health = computeHealth(transformStatsById, item);
       const state = computeState(summaryDocsById, item);
 
       return {
-        sloId: item.sloId,
-        sloInstanceId: item.sloInstanceId,
-        sloRevision: item.sloRevision,
+        sloId: item.id,
+        sloName: item.name,
+        sloInstanceId: item.instanceId,
+        sloRevision: item.revision,
         state,
         health,
       };
@@ -66,17 +68,18 @@ export class GetSLOHealth {
   }
 
   private async getSummaryDocsById(
-    filteredList: Array<{ sloId: string; sloInstanceId: string; sloRevision: number }>
+    list: Array<{ id: string; instanceId: string; revision: number }>
   ) {
     const summaryDocs = await this.scopedClusterClient.asCurrentUser.search<EsSummaryDocument>({
       index: SUMMARY_DESTINATION_INDEX_PATTERN,
       query: {
         bool: {
-          should: filteredList.map((item) => ({
+          should: list.map((item) => ({
             bool: {
               must: [
-                { term: { 'slo.id': item.sloId } },
-                { term: { 'slo.instanceId': item.sloInstanceId } },
+                { term: { 'slo.id': item.id } },
+                { term: { 'slo.instanceId': item.instanceId } },
+                { term: { 'slo.revision': item.revision } },
               ],
             },
           })),
@@ -92,24 +95,20 @@ export class GetSLOHealth {
   }
 
   private async getTransformStats(
-    sloList: SLODefinition[]
+    definitions: SLODefinition[]
   ): Promise<Dictionary<TransformGetTransformStatsTransformStats>> {
-    const transformStats =
-      await this.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats(
-        {
-          transform_id: sloList
-            .map((slo: SLODefinition) => [
-              getSLOTransformId(slo.id, slo.revision),
-              getSLOSummaryTransformId(slo.id, slo.revision),
-            ])
-            .flat(),
-          allow_no_match: true,
-          size: sloList.length * 2,
-        },
-        { ignore: [404] }
-      );
+    const stats = await this.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats(
+      {
+        transform_id: definitions.map((definition) =>
+          getWildcardTransformId(definition.id, definition.revision)
+        ),
+        allow_no_match: true,
+        size: definitions.length * 2,
+      },
+      { ignore: [404] }
+    );
 
-    return keyBy(transformStats.transforms, (transform) => transform.id);
+    return keyBy(stats.transforms, (transform) => transform.id);
   }
 }
 
@@ -119,9 +118,9 @@ function buildSummaryKey(id: string, instanceId: string) {
 
 function computeState(
   summaryDocsById: Dictionary<EsSummaryDocument[]>,
-  item: { sloId: string; sloInstanceId: string; sloRevision: number }
+  item: { id: string; instanceId: string; revision: number }
 ): State {
-  const sloSummaryDocs = summaryDocsById[buildSummaryKey(item.sloId, item.sloInstanceId)];
+  const sloSummaryDocs = summaryDocsById[buildSummaryKey(item.id, item.instanceId)];
 
   let state: State = 'no_data';
   if (!sloSummaryDocs) {
@@ -154,21 +153,22 @@ function computeState(
 function getTransformHealth(
   transformStat?: TransformGetTransformStatsTransformStats
 ): HealthStatus {
-  return transformStat?.health?.status?.toLowerCase() === 'green' ? 'healthy' : 'unhealthy';
+  if (!transformStat) {
+    return 'missing';
+  }
+  return transformStat.health?.status?.toLowerCase() === 'green' ? 'healthy' : 'unhealthy';
 }
 
 function computeHealth(
   transformStatsById: Dictionary<TransformGetTransformStatsTransformStats>,
-  item: { sloId: string; sloInstanceId: string; sloRevision: number }
-): { overall: HealthStatus; rollup: HealthStatus; summary: HealthStatus } {
-  const rollup = getTransformHealth(
-    transformStatsById[getSLOTransformId(item.sloId, item.sloRevision)]
-  );
+  item: { id: string; instanceId: string; revision: number }
+): { overall: 'healthy' | 'unhealthy'; rollup: HealthStatus; summary: HealthStatus } {
+  const rollup = getTransformHealth(transformStatsById[getSLOTransformId(item.id, item.revision)]);
   const summary = getTransformHealth(
-    transformStatsById[getSLOSummaryTransformId(item.sloId, item.sloRevision)]
+    transformStatsById[getSLOSummaryTransformId(item.id, item.revision)]
   );
 
-  const overall: HealthStatus =
+  const overall: 'healthy' | 'unhealthy' =
     rollup === 'healthy' && summary === 'healthy' ? 'healthy' : 'unhealthy';
 
   return { overall, rollup, summary };

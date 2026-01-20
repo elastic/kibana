@@ -58,8 +58,6 @@ trap "shutdown" EXIT
 
 ecctl deployment create --track --output json --file "$DEPLOYMENT_SPEC" > "$LOGS"
 
-CLOUD_DEPLOYMENT_USERNAME=$(jq -r --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.username' "$LOGS")
-CLOUD_DEPLOYMENT_PASSWORD=$(jq -r --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.password' "$LOGS")
 CLOUD_DEPLOYMENT_ID=$(jq -r --slurp '.[0].id' "$LOGS")
 CLOUD_DEPLOYMENT_STATUS_MESSAGES=$(jq --slurp '[.[]|select(.resources == null)]' "$LOGS")
 
@@ -68,29 +66,3 @@ export CLOUD_DEPLOYMENT_ELASTICSEARCH_URL=$(ecctl deployment show "$CLOUD_DEPLOY
 
 echo "Kibana: $CLOUD_DEPLOYMENT_KIBANA_URL"
 echo "ES: $CLOUD_DEPLOYMENT_ELASTICSEARCH_URL"
-
-# Disable ansi color output for Node.js as we want to get plain values when executing node as a script runner below
-export FORCE_COLOR=0
-
-export TEST_KIBANA_PROTOCOL=$(node -e "console.log(new URL(process.env.CLOUD_DEPLOYMENT_KIBANA_URL).protocol.replace(':', ''))")
-export TEST_KIBANA_HOSTNAME=$(node -e "console.log(new URL(process.env.CLOUD_DEPLOYMENT_KIBANA_URL).hostname)")
-export TEST_KIBANA_PORT=$(node -e "console.log(new URL(process.env.CLOUD_DEPLOYMENT_KIBANA_URL).port || 443)")
-export TEST_KIBANA_USERNAME="$CLOUD_DEPLOYMENT_USERNAME"
-export TEST_KIBANA_PASSWORD="$CLOUD_DEPLOYMENT_PASSWORD"
-
-export TEST_ES_PROTOCOL=$(node -e "console.log(new URL(process.env.CLOUD_DEPLOYMENT_ELASTICSEARCH_URL).protocol.replace(':', ''))")
-export TEST_ES_HOSTNAME=$(node -e "console.log(new URL(process.env.CLOUD_DEPLOYMENT_ELASTICSEARCH_URL).hostname)")
-export TEST_ES_PORT=$(node -e "console.log(new URL(process.env.CLOUD_DEPLOYMENT_ELASTICSEARCH_URL).port || 443)")
-export TEST_ES_USERNAME="$CLOUD_DEPLOYMENT_USERNAME"
-export TEST_ES_PASSWORD="$CLOUD_DEPLOYMENT_PASSWORD"
-
-# Enabling ansi color output for Node.js again as we don't need to use it as a script interpreter anymore
-export FORCE_COLOR=1
-
-export TEST_BROWSER_HEADLESS=1
-
-# Error: attempted to use the "es" service to fetch Elasticsearch version info but the request failed: ConnectionError: self signed certificate in certificate chain
-export NODE_TLS_REJECT_UNAUTHORIZED=0
-
-echo "--- FTR - Reporting"
-node --no-warnings scripts/functional_test_runner.js --config x-pack/platform/test/functional/apps/visualize/config.ts --include-tag=smoke --quiet

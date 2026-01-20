@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { RootSchema, EventTypeOpts } from '@kbn/core/server';
+import type { RootSchema, EventTypeOpts } from '@kbn/core/server';
+import { type Connector, type Scope, connectorSchema, scopeSchema } from '../../common/analytics';
 
-interface ScoredDocument {
+interface ScoredDocument extends Connector, Scope {
   esScore: number;
   llmScore: number;
 }
@@ -33,6 +34,10 @@ const schema: RootSchema<RecallRanking> = {
             description: 'The score produced by the LLM when asked to rerank',
           },
         },
+        connector: {
+          properties: connectorSchema,
+        },
+        scopes: scopeSchema,
       },
     },
   },

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, first } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import { Filter } from '@kbn/es-query';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
@@ -27,6 +28,15 @@ export function initSelectionsManager(
   const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
   const unpublishedTimeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
   const hasUnappliedSelections$ = new BehaviorSubject(false);
+
+  const filtersPublished = new BehaviorSubject<boolean>(false);
+  const untilFiltersPublished = () =>
+    new Promise<void>((resolve) => {
+      filtersPublished.pipe(first((isComplete) => isComplete)).subscribe(() => {
+        resolve();
+        filtersPublished.complete();
+      });
+    });
 
   const subscriptions: Subscription[] = [];
   controlGroupApi.untilInitialized().then(() => {
@@ -96,6 +106,7 @@ export function initSelectionsManager(
         }
       })
     );
+    filtersPublished.next(true);
   });
 
   function applySelections() {
@@ -111,6 +122,7 @@ export function initSelectionsManager(
     api: {
       filters$,
       timeslice$,
+      untilFiltersPublished,
     },
     applySelections,
     cleanup: () => {

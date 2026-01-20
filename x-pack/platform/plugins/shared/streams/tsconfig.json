@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -56,5 +56,6 @@
     "@kbn/inference-common",
     "@kbn/lock-manager",
     "@kbn/core-pricing-common",
+    "@kbn/core-elasticsearch-server-utils",
   ]
 }

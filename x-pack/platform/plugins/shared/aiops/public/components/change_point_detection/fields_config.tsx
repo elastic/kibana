@@ -479,8 +479,8 @@ const FieldPanel: FC<FieldPanelProps> = ({
     timeRange,
   ]);
 
-  const onSaveCallback: SaveModalDashboardProps['onSave'] = useCallback(
-    ({ dashboardId, newTitle, newDescription }) => {
+  const onSaveCallback = useCallback<SaveModalDashboardProps['onSave']>(
+    async ({ dashboardId, newTitle, newDescription }) => {
       const stateTransfer = embeddable!.getStateTransfer();
 
       const embeddableInput: Partial<ChangePointEmbeddableState> = {

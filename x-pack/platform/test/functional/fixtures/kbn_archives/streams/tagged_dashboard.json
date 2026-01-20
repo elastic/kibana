@@ -1,0 +1,92 @@
+{
+  "id": "3fdaa535-5baf-46bc-8265-705eda43b999",
+  "type": "visualization",
+  "namespaces": [
+    "default"
+  ],
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "8.5.0",
+  "updated_at": "2023-04-24T19:57:13.859Z",
+  "created_at": "2023-04-24T19:57:13.859Z",
+  "version": "WzExNCwxXQ==",
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "title": "Managed Count of requests",
+    "uiStateJSON": "{\"spy\":{\"mode\":{\"name\":null,\"fill\":false}}}",
+    "version": 1,
+    "visState": "{\"title\":\"Count of requests\",\"type\":\"area\",\"params\":{\"type\":\"area\",\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100,\"filter\":true},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":\"true\",\"type\":\"area\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"drawLinesBetweenPoints\":true,\"showCircles\":true,\"interpolate\":\"linear\",\"valueAxis\":\"ValueAxis-1\"}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"times\":[],\"addTimeMarker\":false,\"palette\":{\"type\":\"palette\",\"name\":\"kibana_palette\"},\"isVislibVis\":true,\"detailedTooltip\":true,\"fittingFunction\":\"zero\",\"legendSize\":\"auto\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"min_doc_count\":1,\"extended_bounds\":{}}}]}"
+  },
+  "references": [
+    {
+      "id": "91200a00-9efd-11e7-acb3-3dab96693fab",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ]
+}
+
+{
+  "id": "00ad6a46-6ac3-4f6c-892c-2f72c54a5e7d",
+  "type": "tag",
+  "namespaces": [
+    "default"
+  ],
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2023-04-24T19:58:24.550Z",
+  "created_at": "2023-04-24T19:58:24.550Z",
+  "version": "WzEyMSwxXQ==",
+  "attributes": {
+    "color":"#f70250",
+    "description":"",
+    "name":"mytag"
+  },
+  "references": []
+}
+
+{
+  "id": "11fb046d-0e50-48a0-a410-a744b82cb999",
+  "type": "dashboard",
+  "namespaces": [
+    "default"
+  ],
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "8.7.0",
+  "updated_at": "2023-04-24T20:54:57.921Z",
+  "created_at": "2023-04-24T20:54:57.921Z",
+  "version": "WzMwOSwxXQ==",
+  "attributes": {
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[],\"highlightAll\":true,\"version\":true}"
+    },
+    "optionsJSON": "{\"darkTheme\":false}",
+    "panelsJSON": "[{\"version\":\"7.3.0\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":12,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_1\"}]",
+    "refreshInterval": {
+      "display": "Off",
+      "pause": false,
+      "value": 0
+    },
+    "timeFrom": "Wed Sep 16 2015 22:52:17 GMT-0700",
+    "timeRestore": true,
+    "timeTo": "Fri Sep 18 2015 12:24:38 GMT-0700",
+    "title": "My test dashboard",
+    "version": 1
+  },
+  "references": [
+    {
+      "id": "dd7caf20-9efd-11e7-acb3-3dab96693fab",
+      "name": "1:panel_1",
+      "type": "visualization"
+    },
+    {
+      "id":"00ad6a46-6ac3-4f6c-892c-2f72c54a5e7d",
+      "name":"tag-ref-00ad6a46-6ac3-4f6c-892c-2f72c54a5e7d",
+      "type":"tag"
+    }
+  ]
+}

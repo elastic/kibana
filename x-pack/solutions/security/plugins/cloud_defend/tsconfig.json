@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -37,7 +37,8 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/code-editor",
     "@kbn/code-editor-mock",
-    "@kbn/core-security-common"
+    "@kbn/core-security-common",
+    "@kbn/react-query"
   ],
   "exclude": ["target/**/*"]
 }
