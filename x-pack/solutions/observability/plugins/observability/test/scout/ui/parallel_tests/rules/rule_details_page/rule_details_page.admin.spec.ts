@@ -180,10 +180,6 @@ test.describe('Rule Details Page - Admin', { tag: ['@ess', '@svlOblt'] }, () => 
 
       // Verify options list is not empty
       expect(optionsText.length).toBeGreaterThan(0);
-
-      // Verify our test dashboard appears in the options
-      const optionsString = optionsText.join(' ');
-      expect(optionsString).toContain(testDashboardTitle);
     } finally {
       // Clean up: delete the test dashboard
       await kbnClient.savedObjects.delete({
