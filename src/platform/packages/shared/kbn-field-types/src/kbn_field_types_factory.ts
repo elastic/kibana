@@ -132,7 +132,8 @@ export const createKbnFieldTypes = (): KbnFieldType[] => [
     esTypes: [ES_FIELD_TYPES.TDIGEST],
   }),
   new KbnFieldType({
-    name: KBN_FIELD_TYPES.CONFLICT,
+    name: KBN_FIELD_TYPES.NULL,
+    esTypes: [ES_FIELD_TYPES.NULL],
   }),
   kbnFieldTypeUnknown,
 ];
