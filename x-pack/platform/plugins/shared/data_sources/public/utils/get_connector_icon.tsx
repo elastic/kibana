@@ -42,12 +42,13 @@ export function getConnectorIconType(iconType: string): IconType {
 export function getConnectorIcon(iconType: string, size: IconSize = 'l'): JSX.Element {
   const iconTypeOrComponent = getConnectorIconType(iconType);
 
-  // If it's a lazy-loaded component (not a string), wrap it in Suspense
+  // If it's a lazy-loaded component (not a string), render it directly with Suspense
   if (typeof iconTypeOrComponent !== 'string') {
     const skeletonSize = iconToSkeletonSizeMap[size];
+    const IconComponent = iconTypeOrComponent as React.ComponentType<{ size?: IconSize }>;
     return (
       <Suspense fallback={<EuiSkeletonCircle size={skeletonSize} />}>
-        <EuiIcon type={iconTypeOrComponent} size={size} />
+        <IconComponent size={size} />
       </Suspense>
     );
   }
