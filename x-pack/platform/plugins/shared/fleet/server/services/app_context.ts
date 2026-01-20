@@ -87,6 +87,11 @@ class AppContextService {
   private fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
   private lockManagerService: LockManagerService | undefined;
   private alertingStart: AlertingServerStart | undefined;
+  private includedHiddenTypes: string[] = [
+    UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+    KibanaSavedObjectType.alertingRuleTemplate,
+    KibanaSavedObjectType.sloTemplate,
+  ];
 
   public start(appContext: FleetAppContext) {
     this.data = appContext.data;
@@ -208,58 +213,30 @@ class AppContextService {
 
     // soClient as kibana internal users, be careful on how you use it, security is not enabled
     return appContextService.getSavedObjects().getScopedClient(request, {
-      includedHiddenTypes: [
-        UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-        KibanaSavedObjectType.alertingRuleTemplate,
-        KibanaSavedObjectType.sloTemplate,
-      ],
+      includedHiddenTypes: this.includedHiddenTypes,
       excludedExtensions: [SECURITY_EXTENSION_ID],
     });
   }
 
   public getInternalUserSOClient(request?: KibanaRequest) {
     if (!request) {
-      request = {
-        headers: {},
-        getBasePath: () => '',
-        path: '/',
-        route: { settings: {} },
-        url: { href: {} },
-        raw: { req: { url: '/' } },
-        isFakeRequest: true,
-      } as unknown as KibanaRequest;
+      return appContextService.getSavedObjects().getUnsafeInternalClient({
+        includedHiddenTypes: this.includedHiddenTypes,
+      });
     }
 
     // soClient as kibana internal users, be careful on how you use it, security is not enabled
     return appContextService.getSavedObjects().getScopedClient(request, {
-      includedHiddenTypes: [
-        UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-        KibanaSavedObjectType.alertingRuleTemplate,
-        KibanaSavedObjectType.sloTemplate,
-      ],
+      includedHiddenTypes: this.includedHiddenTypes,
       excludedExtensions: [SECURITY_EXTENSION_ID],
     });
   }
 
   public getInternalUserSOClientWithoutSpaceExtension() {
-    const fakeRequest = {
-      headers: {},
-      getBasePath: () => '',
-      path: '/',
-      route: { settings: {} },
-      url: { href: {} },
-      raw: { req: { url: '/' } },
-      isFakeRequest: true,
-    } as unknown as KibanaRequest;
-
     // soClient as kibana internal users, be careful on how you use it, security is not enabled
-    return appContextService.getSavedObjects().getScopedClient(fakeRequest, {
-      excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
-      includedHiddenTypes: [
-        UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-        KibanaSavedObjectType.alertingRuleTemplate,
-        KibanaSavedObjectType.sloTemplate,
-      ],
+    return appContextService.getSavedObjects().getUnsafeInternalClient({
+      excludedExtensions: [SPACES_EXTENSION_ID],
+      includedHiddenTypes: this.includedHiddenTypes,
     });
   }
 
