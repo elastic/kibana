@@ -68,6 +68,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     structuredOutput = false,
     outputSchema,
     startTime = new Date(),
+    configurationOverrides,
   },
   context
 ) => {
@@ -197,6 +198,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       modelProvider,
       stateManager,
       attachmentStateManager: context.attachmentStateManager,
+      configurationOverrides,
     }),
     evictInternalEvents(),
     shareReplay()
