@@ -35,7 +35,7 @@
           "User"
         ],
         "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
-        "lineNumber": 43,
+        "lineNumber": 49,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -53,7 +53,7 @@
               "UserRealm"
             ],
             "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
-            "lineNumber": 47,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -71,7 +71,7 @@
               "UserRealm"
             ],
             "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
-            "lineNumber": 52,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -89,7 +89,7 @@
               "AuthenticationProvider"
             ],
             "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
-            "lineNumber": 57,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -104,7 +104,7 @@
               "\nThe AuthenticationType used by ES to authenticate the user.\n"
             ],
             "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
-            "lineNumber": 62,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -119,7 +119,7 @@
               "\nIndicates whether user is authenticated via Elastic Cloud built-in SAML realm."
             ],
             "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
-            "lineNumber": 69,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -137,7 +137,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
-            "lineNumber": 74,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -155,7 +155,7 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
-            "lineNumber": 79,
+            "lineNumber": 85,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -174,7 +174,7 @@
               " | undefined"
             ],
             "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
-            "lineNumber": 84,
+            "lineNumber": 90,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -348,7 +348,7 @@
           "\nAn Elasticsearch realm that was used to resolve and authenticate the user."
         ],
         "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
-        "lineNumber": 13,
+        "lineNumber": 14,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -363,7 +363,7 @@
               "\nArbitrary name of the security realm."
             ],
             "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
-            "lineNumber": 17,
+            "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -378,7 +378,7 @@
               "\nType of the security realm (file, native, saml etc.)."
             ],
             "path": "src/core/packages/security/common/src/authentication/authenticated_user.ts",
-            "lineNumber": 22,
+            "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
