@@ -37,7 +37,7 @@ export function SettingsPage() {
   const { setBreadcrumbs } = useAppContext();
   const {
     services: {
-      application: { navigateToApp, isAppRegistered, capabilities },
+      application: { navigateToApp, capabilities },
       serverless,
       spaces,
       cloud,
