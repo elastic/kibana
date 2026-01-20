@@ -5,6 +5,7 @@ disabled:
 
   # Base config files, only necessary to inform config finding script
   - src/platform/test/functional/config.base.js
+  - src/platform/test/functional/config.base.http2.ts
   - src/platform/test/functional/firefox/config.base.ts
   - x-pack/platform/test/functional/config.base.ts
   - x-pack/platform/test/localization/config.base.ts
@@ -359,7 +360,6 @@ enabled:
   - x-pack/performance/journeys_e2e/web_logs_dashboard_esql.ts
   - x-pack/performance/journeys_e2e/web_logs_dashboard_dataview.ts
   - x-pack/performance/journeys_e2e/data_stress_test_lens.ts
-  - x-pack/performance/journeys_e2e/data_stress_test_lens_http2.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard_saved_search_only.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard_tsvb_gauge_only.ts
   - x-pack/performance/journeys_e2e/dashboard_listing_page.ts
