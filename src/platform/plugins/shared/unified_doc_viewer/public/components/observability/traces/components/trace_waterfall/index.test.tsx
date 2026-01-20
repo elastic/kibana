@@ -42,6 +42,23 @@ jest.mock('../../../../..', () => ({
   ContentFrameworkSection: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
+jest.mock('../../../../../hooks/use_data_sources', () => ({
+  useDataSourcesContext: () => ({
+    indexes: {
+      apm: {
+        traces: 'traces-apm*',
+        errors: 'apm-error-*',
+      },
+      logs: 'logs-*',
+    },
+  }),
+}));
+
+jest.mock('../../../../../hooks/use_generate_discover_link', () => ({
+  useGetGenerateDiscoverLink: () => ({
+    generateDiscoverLink: jest.fn().mockReturnValue('mock-discover-link'),
+  }),
+}));
 describe('TraceWaterfall', () => {
   const dataView = createStubDataView({
     spec: {
