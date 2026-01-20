@@ -41,7 +41,8 @@
     "@kbn/react-field",
     "@kbn/kql",
     "@kbn/ebt-tools",
-    "@kbn/shared-ux-utility"
+    "@kbn/shared-ux-utility",
+    "@kbn/projects-solutions-groups"
   ],
   "exclude": [
     "target/**/*",
