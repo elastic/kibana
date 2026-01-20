@@ -11,6 +11,7 @@ import type { SerializedStyles } from '@emotion/react';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { waitFor } from '@testing-library/dom';
@@ -67,6 +68,9 @@ describe('ESQLEditor', () => {
     return Promise.resolve([]);
   });
 
+  const kqlMock = kqlPluginMock.createStartContract();
+  (kqlMock.autocomplete.hasQuerySuggestions as jest.Mock).mockReturnValue(true);
+
   const services = {
     uiSettings,
     settings: {
@@ -74,6 +78,7 @@ describe('ESQLEditor', () => {
     },
     core: corePluginMock,
     data: dataPluginMock.createStartContract(),
+    kql: kqlMock,
   };
 
   function renderESQLEditorComponent(testProps: ESQLEditorProps) {
