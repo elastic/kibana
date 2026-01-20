@@ -15,7 +15,7 @@ import type { SetupDeps, StartDeps } from './types';
 export class MarkdownPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   setup(core: CoreSetup<StartDeps>, plugins: SetupDeps) {
     plugins.embeddable.registerTransforms(MARKDOWN_EMBEDDABLE_TYPE, {
-      schema: markdownEmbeddableSchema,
+      getSchema: () => markdownEmbeddableSchema,
     });
   }
 
