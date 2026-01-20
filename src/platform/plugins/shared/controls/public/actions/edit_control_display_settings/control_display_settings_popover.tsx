@@ -7,27 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import type { EuiSwitchEvent, EuiPopoverProps } from '@elastic/eui';
+import type { EuiPopoverProps } from '@elastic/eui';
 import {
-  EuiToolTip,
-  EuiButtonIcon,
-  EuiPopover,
-  EuiWrappingPopover,
-  EuiFormRow,
+  EuiButton,
+  EuiButtonEmpty,
   EuiButtonGroup,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiPopover,
+  EuiPopoverFooter,
   EuiSpacer,
   EuiSwitch,
+  EuiToolTip,
 } from '@elastic/eui';
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
 import type { ControlWidth } from '@kbn/controls-schemas';
 import { i18n } from '@kbn/i18n';
-import {
-  apiCanLockHoverActions,
-  useStateFromPublishingSubject,
-} from '@kbn/presentation-publishing';
-import type { PinnableControlApi } from './types';
+import { apiCanLockHoverActions } from '@kbn/presentation-publishing';
+import React, { useCallback, useMemo, useState } from 'react';
 import { ACTION_EDIT_CONTROL_DISPLAY_SETTINGS } from '../constants';
+import type { PinnableControlApi } from './types';
 
 interface Props {
   api: PinnableControlApi;
@@ -36,72 +37,33 @@ interface Props {
 }
 
 export const ControlDisplaySettingsPopover: React.FC<Props> = ({ api, displayName, iconType }) => {
-  // When the user changes a setting and the new layout is applied, the popover gets destroyed and re-rendered
-  // Make sure it reopens if the user hasn't closed it
-  const isPopoverOpenInitialState = useMemo(
-    () => (apiCanLockHoverActions(api) ? api.hasLockedHoverActions$.value : false),
+  const initialState = useMemo(
+    () => ({
+      width: DEFAULT_CONTROL_WIDTH,
+      grow: DEFAULT_CONTROL_GROW,
+      ...api.parentApi.getLayout(api.uuid),
+    }),
     [api]
   );
+  const [width, setWidth] = useState<ControlWidth>(initialState.width as ControlWidth);
+  const [grow, setGrow] = useState<boolean>(initialState.grow);
 
-  const [isPopoverOpen, setIsPopoverOpen] = useState(isPopoverOpenInitialState);
-
-  const layoutState = useStateFromPublishingSubject(api.parentApi.layout$);
-  console.log({ layoutState });
-  const layoutEntry = useMemo(() => layoutState.controls[api.uuid], [layoutState, api.uuid]);
-  const isToRightOfGrowControl = useMemo(
-    () => layoutEntry.order > 0 && Object.values(layoutState.controls)[layoutEntry.order - 1].grow,
-    [layoutEntry.order, layoutState.controls]
-  );
-
-  const grow = useMemo(() => layoutEntry.grow ?? DEFAULT_CONTROL_GROW, [layoutEntry]);
-  const width = useMemo(() => layoutEntry.width ?? DEFAULT_CONTROL_WIDTH, [layoutEntry]);
-
-  const applyNextLayout = useCallback(
-    (nextGrow: boolean, nextWidth: ControlWidth) => {
-      const currentLayout = api.parentApi.layout$.getValue();
-      api.parentApi.layout$.next({
-        ...currentLayout,
-        controls: {
-          ...currentLayout.controls,
-          [api.uuid]: {
-            ...layoutEntry,
-            grow: nextGrow,
-            width: nextWidth,
-          },
-        },
-      });
-    },
-    [api.parentApi.layout$, api.uuid, layoutEntry]
-  );
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onClose = useCallback(() => {
-    if (apiCanLockHoverActions(api)) {
-      api.lockHoverActions(false);
-    }
     setIsPopoverOpen(false);
-  }, [api]);
+  }, []);
 
   const onClickButton = useCallback(() => {
-    if (isPopoverOpen) onClose();
-    else if (apiCanLockHoverActions(api)) {
+    if (isPopoverOpen) {
+      onClose();
+      return;
+    }
+    if (apiCanLockHoverActions(api)) {
       api.lockHoverActions(true);
     }
     setIsPopoverOpen(true);
   }, [api, isPopoverOpen, onClose]);
-
-  const onWidthChange = useCallback(
-    (id: string) => {
-      applyNextLayout(grow, id as ControlWidth);
-    },
-    [applyNextLayout, grow]
-  );
-
-  const onGrowChange = useCallback(
-    (e: EuiSwitchEvent) => {
-      applyNextLayout(e.target.checked, width);
-    },
-    [applyNextLayout, width]
-  );
 
   const settingsButton = (
     <EuiToolTip disableScreenReaderOutput content={displayName}>
@@ -118,7 +80,6 @@ export const ControlDisplaySettingsPopover: React.FC<Props> = ({ api, displayNam
   const popoverProps: Omit<EuiPopoverProps, 'button'> = {
     repositionOnScroll: true,
     panelPaddingSize: 'm',
-    anchorPosition: isToRightOfGrowControl ? 'downRight' : 'downLeft',
     isOpen: isPopoverOpen,
     closePopover: onClose,
     focusTrapProps: {
@@ -126,46 +87,53 @@ export const ControlDisplaySettingsPopover: React.FC<Props> = ({ api, displayNam
       clickOutsideDisables: false,
       onClickOutside: onClose,
     },
-    panelStyle:
-      /* Prevent popover from visually bouncing if it's being re-rendered already open */
-      isPopoverOpenInitialState ? { transition: 'none' } : undefined,
   };
 
-  const PopoverComponent: React.FC<React.PropsWithChildren> = ({ children }) =>
-    isToRightOfGrowControl ? (
-      <EuiPopover {...popoverProps} button={settingsButton} children={children} />
-    ) : api.prependWrapperRef.current ? (
-      <EuiWrappingPopover
-        {...popoverProps}
-        button={api.prependWrapperRef.current}
-        children={children}
-      />
-    ) : null;
-
   return (
-    <>
-      {!isToRightOfGrowControl && settingsButton}
-      <PopoverComponent data-test-subj={`controlDisplaySettings-${api.uuid}`}>
-        <EuiFormRow label={strings.minimumWidth} fullWidth>
-          <EuiButtonGroup
-            legend={strings.minimumWidth}
-            options={widthOptions}
-            idSelected={width}
-            onChange={onWidthChange}
-            type="single"
-            isFullWidth
-          />
-        </EuiFormRow>
-        <EuiSpacer size="m" />
-        <EuiSwitch
-          compressed
-          label={strings.grow}
-          color="primary"
-          checked={grow}
-          onChange={(e) => onGrowChange(e)}
+    <EuiPopover
+      {...popoverProps}
+      button={settingsButton}
+      data-test-subj={`controlDisplaySettings-${api.uuid}`}
+    >
+      <EuiFormRow label={strings.minimumWidth} fullWidth>
+        <EuiButtonGroup
+          legend={strings.minimumWidth}
+          options={widthOptions}
+          idSelected={width}
+          onChange={(newWidth) => setWidth(newWidth as ControlWidth)}
+          type="single"
+          isFullWidth
         />
-      </PopoverComponent>
-    </>
+      </EuiFormRow>
+      <EuiSpacer size="m" />
+      <EuiSwitch
+        compressed
+        label={strings.grow}
+        color="primary"
+        checked={grow}
+        onChange={(e) => setGrow(Boolean(e.target.checked))}
+      />
+      <EuiPopoverFooter paddingSize="s">
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem>
+            <EuiButtonEmpty size="s" onClick={onClose}>
+              Cancel
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiButton
+              size="s"
+              onClick={() => {
+                onClose();
+                api.parentApi.setLayout(api.uuid, { ...initialState, grow, width });
+              }}
+            >
+              Apply
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPopoverFooter>
+    </EuiPopover>
   );
 };
 

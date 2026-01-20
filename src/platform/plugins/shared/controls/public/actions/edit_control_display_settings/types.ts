@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { apiHasPrependWrapperRef, type HasPrependWrapperRef } from '@kbn/controls-renderer';
+import { PinnedControlLayoutState } from '@kbn/controls-schemas';
 import {
   type IsPinnable,
   type PresentationContainer,
@@ -21,7 +22,7 @@ import {
   type HasType,
 } from '@kbn/presentation-publishing';
 import type { HasUniqueId } from '@kbn/presentation-publishing';
-import { apiPublishesControlsLayout, type PublishesControlsLayout } from '../types';
+// import { apiPublishesControlsLayout, type PublishesControlsLayout } from '../types';
 
 export type PinnableControlApi = HasType &
   HasUniqueId &
@@ -31,14 +32,15 @@ export type PinnableControlApi = HasType &
 
 export type PinnableControlParentApi = PresentationContainer &
   HasType &
-  CanPinPanels &
-  PublishesControlsLayout;
+  CanPinPanels & {
+    getLayout: (id: string) => PinnedControlLayoutState;
+    setLayout: (id: string, layout: PinnedControlLayoutState) => void;
+  };
 
 // This check needs to be a separate function in order for typescript to type the parentApi correctly
 const apiIsPinnableControlParentApi = (
   parentApi: unknown | null
-): parentApi is PinnableControlParentApi =>
-  Boolean(apiPublishesControlsLayout(parentApi) && apiCanPinPanels(parentApi));
+): parentApi is PinnableControlParentApi => Boolean(apiCanPinPanels(parentApi));
 
 export const apiIsPinnableControlApi = (api: unknown | null): api is PinnableControlApi =>
   Boolean(
