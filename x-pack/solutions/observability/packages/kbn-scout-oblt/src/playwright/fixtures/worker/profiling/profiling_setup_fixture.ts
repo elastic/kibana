@@ -109,9 +109,10 @@ export const profilingSetupFixture = base.extend<{}, { profilingSetup: Profiling
         await Promise.all([
           ...profilingIndices.map((index) => esClient.indices.delete({ index })),
           esClient.indices.deleteDataStream({
-            name: 'profiling-events*',
+            name: 'profiling-*',
           }),
         ]);
+
         log.info('Unloaded Profiling data');
       };
 
