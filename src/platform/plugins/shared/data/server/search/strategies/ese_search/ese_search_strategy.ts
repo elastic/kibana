@@ -100,10 +100,21 @@ export const enhancedEsSearchStrategyProvider = (
     { esClient, uiSettingsClient }: SearchStrategyDependencies
   ) {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
+
     const params = {
       ...(await getDefaultAsyncSubmitParams(uiSettingsClient, searchConfig, options, isServerless)),
       ...request.params,
     };
+
+    // If project_routing is present, explicitly pass it in the body to override
+    if (
+      options.projectRouting !== undefined &&
+      typeof params.body === 'object' &&
+      params.body !== null
+    ) {
+      params.body.project_routing = options.projectRouting;
+    }
+
     const { body, headers, meta } = await client.asyncSearch.submit(params, {
       ...options.transport,
       signal: options.abortSignal,
