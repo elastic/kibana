@@ -75,7 +75,7 @@ export async function generateSignificantEventsSummary({
     const response = await inferenceClient.prompt({
       prompt: SummarizeStreamsPrompt,
       input: {
-        streamInsights: JSON.stringify(streamInsightsWithData, null, 2),
+        streamInsights: JSON.stringify(streamInsightsWithData),
       },
       abortSignal: signal,
     });
@@ -148,7 +148,7 @@ async function generateStreamInsights({
       prompt: SummarizeQueriesPrompt,
       input: {
         streamName: stream.name,
-        queries: JSON.stringify(queryDataList, null, 2),
+        queries: JSON.stringify(queryDataList),
       },
       abortSignal: signal,
     });
