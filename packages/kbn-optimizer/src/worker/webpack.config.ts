@@ -262,15 +262,6 @@ export function getWebpackConfig(
           test: /\.text$/,
           loader: require.resolve('@kbn/dot-text-loader'),
         },
-        // Fix for @n8n/json-schema-to-zod ESM imports without extensions
-        // This package uses ESM imports without file extensions, which webpack 5 requires
-        {
-          test: /\.(js|mjs|cjs|ts|tsx)$/,
-          include: /[\/\\]node_modules[\/\\]@n8n[\/\\]json-schema-to-zod[\/\\]/,
-          resolve: {
-            fullySpecified: false,
-          },
-        },
         // emits a separate file and exports the URL. Previously achievable by using file-loader.
         {
           include: [

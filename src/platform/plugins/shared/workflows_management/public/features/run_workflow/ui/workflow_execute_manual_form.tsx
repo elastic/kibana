@@ -19,6 +19,7 @@ import {
   resolveRef,
 } from '@kbn/workflows/spec/lib/input_conversion';
 import { z } from '@kbn/zod/v4';
+import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 import { convertJsonSchemaToZod } from '../../../../common/lib/json_schema_to_zod';
 import { WORKFLOWS_MONACO_EDITOR_THEME } from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
 
@@ -36,7 +37,14 @@ function convertJsonSchemaToZodWithRefs(
     }
   }
 
-  // If it's an object with properties, recursively handle nested properties
+  // After resolving $ref, try using fromJSONSchema (which handles objects, defaults, required, etc.)
+  const zodSchema = fromJSONSchema(schemaToConvert as Record<string, unknown>);
+  if (zodSchema !== undefined) {
+    return zodSchema;
+  }
+
+  // Fallback: If fromJSONSchema doesn't support this schema, use manual conversion
+  // This handles edge cases and ensures backward compatibility
   if (schemaToConvert.type === 'object' && schemaToConvert.properties) {
     const shape: Record<string, z.ZodType> = {};
     for (const [key, propSchema] of Object.entries(schemaToConvert.properties)) {

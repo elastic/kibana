@@ -7,171 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { jsonSchemaToZod } from '@n8n/json-schema-to-zod';
 import type { JSONSchema7 } from 'json-schema';
 import { z } from '@kbn/zod/v4';
+import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 
 /**
- * Converts a JSON Schema string type to a Zod string schema
- */
-function convertStringSchema(jsonSchema: JSONSchema7): z.ZodType {
-  // Apply enum if present (enum takes precedence over other validations)
-  if (jsonSchema.enum && Array.isArray(jsonSchema.enum) && jsonSchema.enum.length > 0) {
-    // z.enum requires at least one element
-    return z.enum(jsonSchema.enum as [string, ...string[]]);
-  }
-
-  let schema = z.string();
-
-  // Apply minLength constraint
-  if (typeof jsonSchema.minLength === 'number') {
-    schema = schema.min(jsonSchema.minLength);
-  }
-
-  // Apply maxLength constraint
-  if (typeof jsonSchema.maxLength === 'number') {
-    schema = schema.max(jsonSchema.maxLength);
-  }
-
-  // Apply pattern (regex) constraint
-  if (typeof jsonSchema.pattern === 'string') {
-    schema = schema.regex(new RegExp(jsonSchema.pattern));
-  }
-
-  // Apply format validation
-  if (jsonSchema.format === 'email') {
-    schema = schema.email();
-  } else if (jsonSchema.format === 'date-time') {
-    schema = schema.datetime();
-  } else if (jsonSchema.format === 'date') {
-    schema = schema.date();
-  } else if (jsonSchema.format === 'uri' || jsonSchema.format === 'url') {
-    schema = schema.url();
-  }
-
-  return schema;
-}
-
-/**
- * Converts a JSON Schema number/integer type to a Zod number schema
- */
-function convertNumberSchema(jsonSchema: JSONSchema7): z.ZodType {
-  let schema = z.number();
-
-  // Apply minimum constraint
-  if (typeof jsonSchema.minimum === 'number') {
-    schema = jsonSchema.exclusiveMinimum
-      ? schema.gt(jsonSchema.minimum)
-      : schema.gte(jsonSchema.minimum);
-  }
-
-  // Apply maximum constraint
-  if (typeof jsonSchema.maximum === 'number') {
-    schema = jsonSchema.exclusiveMaximum
-      ? schema.lt(jsonSchema.maximum)
-      : schema.lte(jsonSchema.maximum);
-  }
-
-  // Apply integer constraint
-  if (jsonSchema.type === 'integer') {
-    schema = schema.int();
-  }
-
-  return schema;
-}
-
-/**
- * Converts a JSON Schema object type to a Zod object schema
- */
-function convertObjectSchema(
-  jsonSchema: JSONSchema7,
-  convertRecursive: (schema: JSONSchema7 | null | undefined) => z.ZodType
-): z.ZodType {
-  if (!jsonSchema.properties) {
-    return z.object({});
-  }
-
-  const shape: Record<string, z.ZodType> = {};
-  for (const [key, propSchema] of Object.entries(jsonSchema.properties)) {
-    // Skip null/undefined schemas (can happen when YAML is partially parsed)
-    if (propSchema && typeof propSchema === 'object') {
-      const prop = propSchema as JSONSchema7;
-      let zodProp = convertRecursive(prop);
-
-      // Check if required - use the parent schema's required array
-      const isRequired = jsonSchema.required?.includes(key) ?? false;
-
-      // Apply default if present (default() automatically makes the field optional)
-      if (prop.default !== undefined) {
-        zodProp = zodProp.default(prop.default);
-      } else if (!isRequired) {
-        // Only apply optional if no default and not required
-        // (default() already makes it optional, so we don't need both)
-        zodProp = zodProp.optional();
-      }
-
-      shape[key] = zodProp;
-    }
-  }
-  return z.object(shape);
-}
-
-/**
- * Recursively converts a JSON Schema object to a Zod object schema
- * This is a fallback when @n8n/json-schema-to-zod fails
+ * Recursively converts a JSON Schema to a Zod schema
+ * This is only used as a fallback for $ref references, which fromJSONSchema doesn't handle
+ * For non-$ref schemas, we use fromJSONSchema directly in the main function
  */
 function convertJsonSchemaToZodRecursive(jsonSchema: JSONSchema7 | null | undefined): z.ZodType {
-  // Defensive check: handle null/undefined schemas (crash prevention)
+  // Defensive check: handle null/undefined schemas
   if (!jsonSchema || typeof jsonSchema !== 'object') {
     return z.any();
   }
 
-  if (jsonSchema.type === 'object' && jsonSchema.properties) {
-    return convertObjectSchema(jsonSchema, convertJsonSchemaToZodRecursive);
+  // For $ref schemas, we can't use fromJSONSchema directly
+  // Return z.any() as a placeholder - $ref should be resolved before calling this
+  if (jsonSchema.$ref) {
+    return z.any();
   }
 
-  if (jsonSchema.type === 'array' && jsonSchema.items) {
-    // Defensive check: handle null/undefined items
-    if (!jsonSchema.items || typeof jsonSchema.items !== 'object') {
-      return z.array(z.any());
-    }
-    const itemsSchema = convertJsonSchemaToZodRecursive(jsonSchema.items as JSONSchema7);
-    return z.array(itemsSchema);
+  // Try fromJSONSchema - it handles most cases
+  const zodSchema = fromJSONSchema(jsonSchema as Record<string, unknown>);
+  if (zodSchema !== undefined) {
+    return zodSchema;
   }
 
-  if (jsonSchema.type === 'string') {
-    return convertStringSchema(jsonSchema);
-  }
-
-  if (jsonSchema.type === 'number' || jsonSchema.type === 'integer') {
-    return convertNumberSchema(jsonSchema);
-  }
-
-  if (jsonSchema.type === 'boolean') {
-    return z.boolean();
-  }
-
-  // Fallback to any for unsupported types
+  // If fromJSONSchema fails, return z.any() as last resort
+  // This should be rare since fromJSONSchema handles most JSON Schema features
   return z.any();
 }
 
 /**
- * Checks if a JSON Schema has validation constraints that need explicit handling
- */
-function hasValidationConstraints(jsonSchema: JSONSchema7): boolean {
-  return (
-    typeof jsonSchema.minLength === 'number' ||
-    typeof jsonSchema.maxLength === 'number' ||
-    typeof jsonSchema.pattern === 'string' ||
-    typeof jsonSchema.minimum === 'number' ||
-    typeof jsonSchema.maximum === 'number' ||
-    typeof jsonSchema.format === 'string' ||
-    jsonSchema.type === 'integer'
-  );
-}
-
-/**
- * Converts a JSON Schema to a Zod schema
+ * Converts a JSON Schema to a Zod schema using fromJSONSchema polyfill
  * @param jsonSchema - The JSON Schema to convert
  * @returns A Zod schema equivalent to the JSON Schema
  */
@@ -181,50 +50,21 @@ export function convertJsonSchemaToZod(jsonSchema: JSONSchema7 | null | undefine
     return z.any();
   }
 
-  // For nested objects, always use our recursive converter to ensure proper structure
-  // This is critical for variable validation to work correctly with nested paths
-  if (jsonSchema.type === 'object' && jsonSchema.properties) {
+  // Note: fromJSONSchema doesn't handle $ref, so we need to resolve them first
+  // For now, if there's a $ref, fall back to recursive converter
+  // TODO: Resolve $ref before calling fromJSONSchema when remote ref support is added
+  if (jsonSchema.$ref) {
     return convertJsonSchemaToZodRecursive(jsonSchema);
   }
 
-  // For schemas with validation constraints, use our recursive converter
-  // to ensure all constraints (format, pattern, minLength, etc.) are properly applied
-  if (hasValidationConstraints(jsonSchema)) {
-    return convertJsonSchemaToZodRecursive(jsonSchema);
+  // Use fromJSONSchema polyfill - it handles objects, arrays, strings, numbers, booleans,
+  // enums, defaults, required fields, validation constraints, etc.
+  const zodSchema = fromJSONSchema(jsonSchema as Record<string, unknown>);
+  if (zodSchema !== undefined) {
+    return zodSchema;
   }
 
-  try {
-    // @n8n/json-schema-to-zod returns a string of Zod code
-    const zodCode = jsonSchemaToZod(jsonSchema);
-
-    // We need to evaluate the generated code to get the actual Zod schema
-    // This is safe because:
-    // 1. We control the input (validated JSON Schema from our own schema validation)
-    // 2. The output is from a trusted library (@n8n/json-schema-to-zod)
-    // 3. The generated code only uses Zod API calls, no arbitrary code execution
-    // The generated code may reference Object, Array, etc., so we provide them in the context
-    // eslint-disable-next-line no-new-func
-    const zodSchema = new Function(
-      'z',
-      'Object',
-      'Array',
-      'String',
-      'Number',
-      'Boolean',
-      `return ${zodCode}`
-    )(z, Object, Array, String, Number, Boolean);
-
-    return zodSchema as z.ZodType;
-  } catch (error) {
-    // If conversion fails, try recursive fallback
-    // This ensures nested objects are properly converted even if the library fails
-    // This is important for variable validation to work correctly
-    try {
-      return convertJsonSchemaToZodRecursive(jsonSchema);
-    } catch (fallbackError) {
-      // If even the fallback fails, return z.any() as last resort
-      // This can happen with very complex schemas that we don't support
-      return z.any();
-    }
-  }
+  // If fromJSONSchema returns undefined (should be rare), fall back to recursive converter
+  // This is a safety net for edge cases the polyfill might not handle
+  return convertJsonSchemaToZodRecursive(jsonSchema);
 }
