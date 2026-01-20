@@ -665,32 +665,6 @@ export class DiscoverPageObject extends FtrService {
     }
   }
 
-  public async selectDataViewMode() {
-    // First check if the button is directly visible
-    if (await this.testSubjects.exists('switch-to-dataviews')) {
-      await this.testSubjects.click('switch-to-dataviews');
-      await this.header.waitUntilLoadingHasFinished();
-      await this.waitUntilSearchingHasFinished();
-      return;
-    }
-
-    // If not visible, try the overflow menu
-    if (await this.testSubjects.exists('app-menu-overflow-button')) {
-      await this.testSubjects.click('app-menu-overflow-button');
-
-      if (await this.testSubjects.exists('switch-to-dataviews')) {
-        await this.testSubjects.click('switch-to-dataviews');
-        await this.header.waitUntilLoadingHasFinished();
-        await this.waitUntilSearchingHasFinished();
-      }
-
-      // Close the popover if open
-      if (await this.testSubjects.exists('app-menu-popover')) {
-        await this.testSubjects.click('app-menu-overflow-button');
-      }
-    }
-  }
-
   public async removeHeaderColumn(name: string) {
     await this.dataGrid.clickRemoveColumn(name);
   }

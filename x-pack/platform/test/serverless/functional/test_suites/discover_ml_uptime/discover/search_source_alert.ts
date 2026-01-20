@@ -228,6 +228,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const openDiscoverAlertFlyout = async () => {
+    await testSubjects.click('app-menu-overflow-button');
     await testSubjects.click('discoverAlertsButton');
     // Different create rule buttons in serverless
     if (await testSubjects.exists('discoverCreateAlertButton')) {
@@ -235,6 +236,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     } else {
       await testSubjects.click('discoverAppMenuCustomThresholdRule');
     }
+    await testSubjects.click('app-menu-overflow-button');
   };
 
   const openManagementAlertFlyout = async () => {

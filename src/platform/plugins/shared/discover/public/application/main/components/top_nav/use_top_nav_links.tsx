@@ -241,16 +241,17 @@ export const useTopNavLinks = ({
     newAppMenuRegistry.registerItems(appMenuItems);
 
     if (services.uiSettings.get(ENABLE_ESQL)) {
-      newAppMenuRegistry.registerItem({
+      newAppMenuRegistry.setSecondaryActionItem({
         id: 'esql',
         label: isEsqlMode
           ? i18n.translate('discover.localMenu.switchToClassicTitle', {
-              defaultMessage: 'Switch to classic',
+              defaultMessage: 'Classic',
             })
           : i18n.translate('discover.localMenu.tryESQLTitle', {
-              defaultMessage: 'Try ES|QL',
+              defaultMessage: 'ES|QL',
             }),
         iconType: 'editorCodeBlock',
+        color: 'text',
         tooltipContent: isEsqlMode
           ? i18n.translate('discover.localMenu.switchToClassicTooltipLabel', {
               defaultMessage: 'Switch to KQL or Lucene syntax.',
@@ -277,7 +278,6 @@ export const useTopNavLinks = ({
           }
         },
         testId: isEsqlMode ? 'switch-to-dataviews' : 'select-text-based-language-btn',
-        order: 9,
       });
     }
 

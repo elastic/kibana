@@ -87,7 +87,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('dscViewModeDocumentButton')).to.be(true);
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
         expect(await testSubjects.exists('discoverQueryHits')).to.be(true);
+        await testSubjects.click('app-menu-overflow-button');
         expect(await testSubjects.exists('discoverAlertsButton')).to.be(true);
+        await testSubjects.click('app-menu-overflow-button');
         expect(await testSubjects.exists('shareTopNavButton')).to.be(true);
         expect(await testSubjects.exists('docTableExpandToggleColumn')).to.be(true);
         expect(await testSubjects.exists('dataGridColumnSortingButton')).to.be(true);
@@ -109,7 +111,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // when Lens suggests a table, we render an ESQL based histogram
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
         expect(await testSubjects.exists('discoverQueryHits')).to.be(true);
+        await testSubjects.click('app-menu-overflow-button');
         expect(await testSubjects.exists('discoverAlertsButton')).to.be(true);
+        await testSubjects.click('app-menu-overflow-button');
         expect(await testSubjects.exists('shareTopNavButton')).to.be(true);
         // we don't sort for the Document view
         expect(await testSubjects.exists('dataGridColumnSortingButton')).to.be(false);
@@ -299,7 +303,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show switch modal when switching to a data view', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
-        await discover.selectDataViewMode();
+        await testSubjects.click('switch-to-dataviews');
         await retry.try(async () => {
           await testSubjects.existOrFail('discover-esql-to-dataview-modal');
         });
@@ -312,7 +316,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
         await discover.waitUntilTabIsLoaded();
-        await discover.selectDataViewMode();
+        await testSubjects.click('switch-to-dataviews');
         await retry.try(async () => {
           await testSubjects.existOrFail('discover-esql-to-dataview-modal');
         });
@@ -323,7 +327,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.missingOrFail('discover-esql-to-dataview-modal');
         });
         await discover.saveSearch('esql_test');
-        await discover.selectDataViewMode();
+        await testSubjects.click('switch-to-dataviews');
         await testSubjects.missingOrFail('discover-esql-to-dataview-modal');
       });
 
@@ -336,7 +340,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
         await discover.waitUntilTabIsLoaded();
-        await discover.selectDataViewMode();
+        await testSubjects.click('switch-to-dataviews');
         await retry.try(async () => {
           await testSubjects.existOrFail('discover-esql-to-dataview-modal');
         });

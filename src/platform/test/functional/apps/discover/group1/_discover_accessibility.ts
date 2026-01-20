@@ -88,8 +88,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('discoverAlertsButton'));
 
       it('should return focus to the alerts button when dismissing the create rule flyout', async () => {
+        await testSubjects.click('app-menu-overflow-button');
         await focusAndPressButton('discoverAlertsButton');
-        expect(await hasFocus('discoverAlertsButton')).to.be(false);
+        expect(await hasFocus('discoverAlertsButton')).to.be(true);
         await focusAndPressButton('discoverCreateAlertButton');
         expect(await testSubjects.exists('addRuleFlyoutTitle')).to.be(true);
         await retry.try(async () => {
@@ -104,7 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               )
             );
           }
-          expect(await hasFocus('discoverAlertsButton')).to.be(true);
+          expect(await hasFocus('app-menu-overflow-button')).to.be(true);
         });
       });
 

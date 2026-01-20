@@ -256,28 +256,9 @@ export class DiscoverApp {
   }
 
   async selectTextBaseLang() {
-    // First check if the button is directly visible
-    if (await this.page.testSubj.isVisible('select-text-based-language-btn')) {
-      await this.page.testSubj.isEnabled('select-text-based-language-btn');
+    if (await this.page.testSubj.isEnabled('select-text-based-language-btn')) {
       await this.page.testSubj.click('select-text-based-language-btn');
       await this.waitForDocTableRendered();
-      return;
-    }
-
-    // If not visible, try the overflow menu
-    if (await this.page.testSubj.isVisible('app-menu-overflow-button')) {
-      await this.page.testSubj.click('app-menu-overflow-button');
-
-      if (await this.page.testSubj.isVisible('select-text-based-language-btn')) {
-        await this.page.testSubj.isEnabled('select-text-based-language-btn');
-        await this.page.testSubj.click('select-text-based-language-btn');
-        await this.waitForDocTableRendered();
-      }
-
-      // Close the popover if open
-      if (await this.page.testSubj.isVisible('app-menu-popover')) {
-        await this.page.testSubj.click('app-menu-overflow-button');
-      }
     }
   }
 

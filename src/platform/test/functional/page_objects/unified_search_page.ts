@@ -13,7 +13,6 @@ export class UnifiedSearchPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
-  private readonly PageObjects = this.ctx.getPageObjects(['discover']);
 
   public async switchDataView(switchButtonSelector: string, dataViewTitle: string) {
     await this.testSubjects.click(switchButtonSelector);
@@ -68,7 +67,7 @@ export class UnifiedSearchPageObject extends FtrService {
   }
 
   public async switchToDataViewMode() {
-    await this.PageObjects.discover.selectDataViewMode();
+    await this.testSubjects.click('switch-to-dataviews');
     await this.retry.waitFor('the modal to open', async () => {
       return await this.testSubjects.exists('discover-esql-to-dataview-modal');
     });

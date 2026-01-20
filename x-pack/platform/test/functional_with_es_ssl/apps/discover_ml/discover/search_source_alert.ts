@@ -198,8 +198,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const openDiscoverAlertFlyout = async () => {
+    await testSubjects.click('app-menu-overflow-button');
     await testSubjects.click('discoverAlertsButton');
     await testSubjects.click('discoverCreateAlertButton');
+    await testSubjects.click('app-menu-overflow-button');
   };
 
   const openManagementAlertFlyout = async () => {
