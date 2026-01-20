@@ -23,6 +23,8 @@
           "UiSettingsClientCommon"
         ],
         "path": "src/core/packages/ui-settings/server-internal/src/clients/ui_settings_client.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -37,6 +39,8 @@
               "any"
             ],
             "path": "src/core/packages/ui-settings/server-internal/src/clients/ui_settings_client.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -51,6 +55,8 @@
                   "UiSettingsServiceOptions"
                 ],
                 "path": "src/core/packages/ui-settings/server-internal/src/clients/ui_settings_client.ts",
+                "lineNumber": 14,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -76,6 +82,8 @@
           "UiSettingsClientCommon"
         ],
         "path": "src/core/packages/ui-settings/server-internal/src/clients/ui_settings_global_client.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -90,6 +98,8 @@
               "any"
             ],
             "path": "src/core/packages/ui-settings/server-internal/src/clients/ui_settings_global_client.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -104,6 +114,8 @@
                   "UiSettingsServiceOptions"
                 ],
                 "path": "src/core/packages/ui-settings/server-internal/src/clients/ui_settings_global_client.ts",
+                "lineNumber": 18,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -122,6 +134,8 @@
               "(changes: Record<string, any>, options?: { validateKeys?: boolean | undefined; }) => Promise<void>"
             ],
             "path": "src/core/packages/ui-settings/server-internal/src/clients/ui_settings_global_client.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -136,6 +150,8 @@
                   "Record<string, any>"
                 ],
                 "path": "src/core/packages/ui-settings/server-internal/src/clients/ui_settings_global_client.ts",
+                "lineNumber": 23,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -148,6 +164,8 @@
                 "label": "options",
                 "description": [],
                 "path": "src/core/packages/ui-settings/server-internal/src/clients/ui_settings_global_client.ts",
+                "lineNumber": 24,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -162,6 +180,8 @@
                       "boolean | undefined"
                     ],
                     "path": "src/core/packages/ui-settings/server-internal/src/clients/ui_settings_global_client.ts",
+                    "lineNumber": 24,
+                    "columnNumber": 16,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -181,6 +201,8 @@
               "(key: string, value: any) => Promise<void>"
             ],
             "path": "src/core/packages/ui-settings/server-internal/src/clients/ui_settings_global_client.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -195,6 +217,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/ui-settings/server-internal/src/clients/ui_settings_global_client.ts",
+                "lineNumber": 38,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -210,6 +234,8 @@
                   "any"
                 ],
                 "path": "src/core/packages/ui-settings/server-internal/src/clients/ui_settings_global_client.ts",
+                "lineNumber": 38,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -233,6 +259,8 @@
           "(options: Options) => Promise<Record<string, any> | undefined>"
         ],
         "path": "src/core/packages/ui-settings/server-internal/src/create_or_upgrade_saved_config/create_or_upgrade_saved_config.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -247,6 +275,8 @@
               "Options"
             ],
             "path": "src/core/packages/ui-settings/server-internal/src/create_or_upgrade_saved_config/create_or_upgrade_saved_config.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -268,6 +298,8 @@
         "label": "uiSettingsConfig",
         "description": [],
         "path": "src/core/packages/ui-settings/server-internal/src/ui_settings_config.ts",
+        "lineNumber": 40,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -279,6 +311,8 @@
             "label": "path",
             "description": [],
             "path": "src/core/packages/ui-settings/server-internal/src/ui_settings_config.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -324,6 +358,8 @@
               "<Readonly<{ themeSwitcherEnabled?: boolean | undefined; defaultTheme?: string | undefined; } & {}> | undefined>; }>"
             ],
             "path": "src/core/packages/ui-settings/server-internal/src/ui_settings_config.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -354,6 +390,8 @@
               "[]"
             ],
             "path": "src/core/packages/ui-settings/server-internal/src/ui_settings_config.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -375,6 +413,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-config/src/deprecation/types.ts",
+                "lineNumber": 124,
+                "columnNumber": 42,
                 "deprecated": false,
                 "trackAdoption": false
               }

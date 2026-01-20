@@ -23,6 +23,8 @@
         "label": "dataStreamServiceMock",
         "description": [],
         "path": "src/core/packages/data-streams/server-mocks/index.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,6 +41,8 @@
               ">"
             ],
             "path": "src/core/packages/data-streams/server-mocks/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -57,6 +61,8 @@
               ">"
             ],
             "path": "src/core/packages/data-streams/server-mocks/index.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],

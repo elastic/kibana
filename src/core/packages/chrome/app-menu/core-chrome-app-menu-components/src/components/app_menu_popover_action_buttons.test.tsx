@@ -39,13 +39,13 @@ describe('AppMenuPopoverActionButtons', () => {
   it('should render container when primary action item is provided', () => {
     render(<AppMenuPopoverActionButtons primaryActionItem={primaryActionItem} />);
 
-    expect(screen.getByTestId('top-nav-menu-popover-action-buttons-container')).toBeInTheDocument();
+    expect(screen.getByTestId('app-menu-popover-action-buttons-container')).toBeInTheDocument();
   });
 
   it('should render container when secondary action item is provided', () => {
     render(<AppMenuPopoverActionButtons secondaryActionItem={secondaryActionItem} />);
 
-    expect(screen.getByTestId('top-nav-menu-popover-action-buttons-container')).toBeInTheDocument();
+    expect(screen.getByTestId('app-menu-popover-action-buttons-container')).toBeInTheDocument();
   });
 
   it('should render primary action button', () => {
@@ -80,7 +80,7 @@ describe('AppMenuPopoverActionButtons', () => {
       />
     );
 
-    const container = screen.getByTestId('top-nav-menu-popover-action-buttons-container');
+    const container = screen.getByTestId('app-menu-popover-action-buttons-container');
     const buttons = container.querySelectorAll('button');
 
     // Secondary should come first, then primary

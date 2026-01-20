@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, InferenceClient } from '@kbn/inference-common';
-import type { GeneratedSignificantEventQuery, Streams, Feature } from '@kbn/streams-schema';
+import type { GeneratedSignificantEventQuery, Streams, System } from '@kbn/streams-schema';
 import { generateSignificantEvents } from '@kbn/streams-ai';
 
 interface Params {
@@ -15,10 +15,9 @@ interface Params {
   connectorId: string;
   start: number;
   end: number;
-  feature?: Feature;
+  system?: System;
   sampleDocsSize?: number;
-  // optional overrides for templates
-  systemPromptOverride?: string;
+  systemPrompt: string;
 }
 
 interface Dependencies {
@@ -32,8 +31,7 @@ export async function generateSignificantEventDefinitions(
   params: Params,
   dependencies: Dependencies
 ): Promise<{ queries: GeneratedSignificantEventQuery[]; tokensUsed: ChatCompletionTokenCount }> {
-  const { definition, connectorId, start, end, feature, sampleDocsSize, systemPromptOverride } =
-    params;
+  const { definition, connectorId, start, end, system, sampleDocsSize, systemPrompt } = params;
   const { inferenceClient, esClient, logger, signal } = dependencies;
 
   const boundInferenceClient = inferenceClient.bindTo({
@@ -47,19 +45,17 @@ export async function generateSignificantEventDefinitions(
     esClient,
     inferenceClient: boundInferenceClient,
     logger,
-    feature,
+    system,
     signal,
     sampleDocsSize,
-    systemPromptOverride,
+    systemPrompt,
   });
 
   return {
     queries: queries.map((query) => ({
       title: query.title,
       kql: query.kql,
-      feature: feature
-        ? { name: feature.name, filter: feature?.filter, type: feature.type }
-        : undefined,
+      feature: system ? { name: system.name, filter: system.filter, type: system.type } : undefined,
       severity_score: query.severity_score,
       evidence: query.evidence,
     })),

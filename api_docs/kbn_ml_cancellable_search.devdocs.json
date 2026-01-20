@@ -54,6 +54,8 @@
           "<any>>(requestBody: RequestBody, options?: {}) => Promise<ResponseType | null>; cancelRequest: () => void; isLoading: boolean; }"
         ],
         "path": "x-pack/platform/packages/private/ml/cancellable_search/src/use_cancellable_search.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -74,6 +76,8 @@
               }
             ],
             "path": "x-pack/platform/packages/private/ml/cancellable_search/src/use_cancellable_search.ts",
+            "lineNumber": 27,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -92,6 +96,8 @@
         "label": "UseCancellableSearch",
         "description": [],
         "path": "x-pack/platform/packages/private/ml/cancellable_search/src/use_cancellable_search.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -122,6 +128,8 @@
               "<any>>(requestBody: RequestBody, options?: object | undefined) => Promise<ResponseType | null>"
             ],
             "path": "x-pack/platform/packages/private/ml/cancellable_search/src/use_cancellable_search.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -136,6 +144,8 @@
                   "RequestBody"
                 ],
                 "path": "x-pack/platform/packages/private/ml/cancellable_search/src/use_cancellable_search.ts",
+                "lineNumber": 19,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -151,6 +161,8 @@
                   "object | undefined"
                 ],
                 "path": "x-pack/platform/packages/private/ml/cancellable_search/src/use_cancellable_search.ts",
+                "lineNumber": 20,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -169,6 +181,8 @@
               "() => void"
             ],
             "path": "x-pack/platform/packages/private/ml/cancellable_search/src/use_cancellable_search.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -182,6 +196,8 @@
             "label": "isLoading",
             "description": [],
             "path": "x-pack/platform/packages/private/ml/cancellable_search/src/use_cancellable_search.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

@@ -80,14 +80,11 @@ export const LogRateAnalysisAttachmentsMenu = ({
 
       const state = {
         serializedState: {
-          rawState: {
-            title: newTitle,
-            description: newDescription,
-            dataViewId: dataView.id,
-            hidePanelTitles: false,
-            ...(applyTimeRange && { timeRange }),
-          },
-          references: [],
+          title: newTitle,
+          description: newDescription,
+          dataViewId: dataView.id,
+          hidePanelTitles: false,
+          ...(applyTimeRange && { timeRange }),
         },
         type: EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,
       };

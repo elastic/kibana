@@ -17,7 +17,6 @@ import {
   LazyIconAgentBuilder,
   LazyIconFindings,
   LazyIconIntelligence,
-  LazyIconWorkflow,
 } from '@kbn/security-solution-navigation/navigation_tree';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { type Services } from '../common/services';
@@ -49,10 +48,7 @@ export const createNavigationTree = (
           link: securityLink(SecurityPageName.alerts),
         },
     {
-      // TODO: update icon from EUI
-      icon: LazyIconWorkflow,
       link: 'workflows',
-      badgeType: 'techPreview' as const,
     },
     ...(chatExperience === AIChatExperience.Agent
       ? [

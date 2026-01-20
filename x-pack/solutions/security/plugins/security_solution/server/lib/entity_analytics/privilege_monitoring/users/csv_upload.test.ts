@@ -28,6 +28,14 @@ import { queryExistingUsers } from './bulk/query_existing_users';
 import { bulkUpsertBatch } from './bulk/upsert_batch';
 import { softDeleteOmittedUsers } from './bulk/soft_delete_omitted_users';
 import * as mockIndexModule from '../engine/elasticsearch/indices';
+import type {
+  BulkBatchProcessingResults,
+  BulkProcessingResults,
+  BulkPrivMonUser,
+  BulkProcessingError,
+} from './bulk/types';
+import { accumulateUpsertResults } from './bulk/utils';
+import { right, left } from 'fp-ts/Either';
 
 const mockPapa = Papa as jest.Mocked<typeof Papa>;
 const mockPrivilegedUserParserTransform = privilegedUserParserTransform as jest.MockedFunction<
@@ -51,7 +59,6 @@ describe('CSV Upload Service', () => {
 
   const mockIndex = 'test-privilege-monitoring-index';
 
-  // Helper function to create mock HapiReadableStream
   const createMockStream = (data: string): HapiReadableStream => {
     const stream = new Readable() as HapiReadableStream;
     stream.push(data);
@@ -248,6 +255,90 @@ describe('CSV Upload Service', () => {
   });
 
   describe('Result Aggregation', () => {
+    const createMockUser = (
+      username: string,
+      index: number,
+      labelValue: string = 'admin'
+    ): BulkPrivMonUser => ({
+      username,
+      index,
+      label: {
+        field: 'label',
+        value: labelValue,
+        source: 'csv',
+      },
+    });
+
+    const createMockError = (
+      message: string,
+      username: string | null,
+      index: number | null
+    ): BulkProcessingError => ({
+      message,
+      username,
+      index,
+    });
+
+    const createEmptyResults = (): BulkProcessingResults => ({
+      users: [],
+      errors: [],
+      failed: 0,
+      successful: 0,
+    });
+
+    const createMockBatch = (
+      uploaded: Array<
+        ReturnType<typeof right<BulkPrivMonUser>> | ReturnType<typeof left<BulkProcessingError>>
+      >,
+      failed: number,
+      successful: number
+    ): BulkBatchProcessingResults => ({
+      batch: {
+        uploaded,
+        existingUsers: {},
+      },
+      failed,
+      successful,
+      errors: [],
+    });
+
+    describe('Accumulator Behavior', () => {
+      it('should accumulate results across multiple batches', () => {
+        const mockUser1 = createMockUser('user1', 0, 'admin');
+        const mockUser2 = createMockUser('user2', 1, 'user');
+        const mockUser3 = createMockUser('user3', 2, 'admin');
+        const mockUser4 = createMockUser('user4', 3, 'user');
+        const mockUser5 = createMockUser('user5', 4, 'admin');
+
+        const mockError1 = createMockError('Validation failed', 'user3', 2);
+        const mockError2 = createMockError('Network timeout', 'user4', 3);
+
+        const batch1 = createMockBatch([right(mockUser1), right(mockUser2)], 1, 2);
+        const batch2 = createMockBatch([right(mockUser3), left(mockError1)], 1, 1);
+        const batch3 = createMockBatch(
+          [right(mockUser4), right(mockUser5), left(mockError2)],
+          1,
+          2
+        );
+
+        // Accumulate as the loop does
+        let results = createEmptyResults();
+        results = accumulateUpsertResults(results, batch1);
+        results = accumulateUpsertResults(results, batch2);
+        results = accumulateUpsertResults(results, batch3);
+
+        // Verify all batches are accumulated
+        expect(results.users).toHaveLength(5); // All 5 users
+        expect(results.errors).toHaveLength(2); // 2 errors
+        expect(results.failed).toBe(3); // 1 + 1 + 1
+        expect(results.successful).toBe(5); // 2 + 1 + 2
+        expect(results.users[0].username).toBe('user1');
+        expect(results.users[4].username).toBe('user5');
+        expect(results.errors[0].message).toBe('Validation failed');
+        expect(results.errors[1].message).toBe('Network timeout');
+      });
+    });
+
     it('should correctly aggregate results from updated and deleted operations', async () => {
       const csvData = 'username,label\njohndoe,admin';
       const mockStream = createMockStream(csvData);

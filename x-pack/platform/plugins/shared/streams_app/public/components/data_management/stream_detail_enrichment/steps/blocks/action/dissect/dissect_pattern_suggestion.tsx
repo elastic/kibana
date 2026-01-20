@@ -49,7 +49,7 @@ export const DissectPatternAISuggestions = ({
   const abortController = useAbortController();
   const [suggestionsState, refreshSuggestions] = useDissectPatternSuggestion(abortController);
 
-  const fieldValue = useWatch<ProcessorFormState, 'from'>({ name: 'from' });
+  const fieldValue = useWatch<ProcessorFormState, 'from'>({ name: 'from' }) as string;
   const isValidField = useMemo(() => {
     return Boolean(
       fieldValue &&

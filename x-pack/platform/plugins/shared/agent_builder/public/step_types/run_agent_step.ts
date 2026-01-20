@@ -36,9 +36,26 @@ export const runAgentStepDefinition: PublicStepDefinition = {
 \`\`\`yaml
 - name: custom_agent
   type: ${RunAgentStepTypeId}
-  agent_id: "my-custom-agent"
+  agent-id: "my-custom-agent"
   with:
     message: "{{ workflow.input.message }}"
+\`\`\``,
+
+      `## Create a conversation and reuse it in a follow-up step
+\`\`\`yaml
+- name: initial_analysis
+  type: ${RunAgentStepTypeId}
+  agent-id: "my-custom-agent"
+  create-conversation: true
+  with:
+    message: "Analyze the event and suggest next steps. {{ event | json }}"
+
+- name: followup
+  type: ${RunAgentStepTypeId}
+  agent-id: "my-custom-agent"
+  with:
+    conversation_id: "{{ steps.initial_analysis.output.conversation_id }}"
+    message: "Continue from the previous analysis and complete any missing steps."
 \`\`\``,
     ],
   },

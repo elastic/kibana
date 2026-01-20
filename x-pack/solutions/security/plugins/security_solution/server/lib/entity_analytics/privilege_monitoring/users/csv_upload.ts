@@ -37,19 +37,20 @@ export const createPrivilegedUsersCsvService = (dataClient: PrivilegeMonitoringD
       .pipe(privilegedUserParserTransform())
       .pipe(batchPartitions(100));
 
+    // initial state of results for accumulation
     let results: BulkProcessingResults = {
       users: [],
       errors: [],
       failed: 0,
       successful: 0,
     };
+
     for await (const batch of batches) {
       const usrs = await queryExistingUsers(esClient, index)(batch);
       const upserted = await bulkUpsertBatch(esClient, index, options)(usrs);
-      results = accumulateUpsertResults(
-        { users: [], errors: [], failed: 0, successful: 0 },
-        upserted
-      );
+      // pass previous results to accumulator, do not reset to empty
+      // just like a plain ol' JS accumulator
+      results = accumulateUpsertResults(results, upserted);
     }
 
     const softDeletedResults = await softDeleteOmittedUsers(esClient, index, options)(results);

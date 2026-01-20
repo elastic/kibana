@@ -89,6 +89,8 @@ export const createAgentGraph = ({
           initialMessages: state.initialMessages,
           actions: state.mainActions,
           attachmentTypes: processedConversation.attachmentTypes,
+          versionedAttachmentPresentation: processedConversation.versionedAttachmentPresentation,
+          outputSchema,
         })
       );
 
@@ -204,6 +206,7 @@ export const createAgentGraph = ({
           actions: state.mainActions,
           answerActions: state.answerActions,
           attachmentTypes: processedConversation.attachmentTypes,
+          versionedAttachmentPresentation: processedConversation.versionedAttachmentPresentation,
         })
       );
 
@@ -233,6 +236,7 @@ export const createAgentGraph = ({
     events,
     outputSchema,
     attachmentTypes: processedConversation.attachmentTypes,
+    versionedAttachmentPresentation: processedConversation.versionedAttachmentPresentation,
     logger,
   });
 

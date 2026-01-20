@@ -12,7 +12,7 @@ import type {
 } from '@kbn/agent-builder-common';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
-import type { PromptRequest } from '@kbn/agent-builder-common/agents';
+import type { PromptRequest, PromptResponse } from '@kbn/agent-builder-common/agents';
 
 /**
  * body payload for request to the /internal/agent_builder/chat endpoint
@@ -24,7 +24,7 @@ export interface ChatRequestBodyPayload {
   capabilities?: AgentCapabilities;
   attachments?: AttachmentInput[];
   input?: string;
-  confirm?: boolean;
+  prompts?: Record<string, PromptResponse>;
   browser_api_tools?: BrowserApiToolMetadata[];
 }
 

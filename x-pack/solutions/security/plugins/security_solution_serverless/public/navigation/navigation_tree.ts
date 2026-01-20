@@ -17,7 +17,6 @@ import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/lin
 import {
   defaultNavigationTree,
   LazyIconFindings,
-  LazyIconWorkflow,
   LazyIconIntelligence,
   LazyIconAgentBuilder,
 } from '@kbn/security-solution-navigation/navigation_tree';
@@ -56,10 +55,7 @@ export const createNavigationTree = async (
           link: securityLink(SecurityPageName.alerts),
         },
     {
-      // TODO: update icon from EUI
-      icon: LazyIconWorkflow,
       link: 'workflows',
-      badgeType: 'techPreview' as const,
     },
     ...(chatExperience === AIChatExperience.Agent
       ? [

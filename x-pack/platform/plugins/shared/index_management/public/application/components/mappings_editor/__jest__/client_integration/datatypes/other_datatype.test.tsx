@@ -50,7 +50,8 @@ describe('Mappings editor: other datatype', () => {
 
     // Select "other" field type using EuiComboBox harness
     const fieldTypeComboBox = new EuiComboBoxTestHarness('fieldType');
-    fieldTypeComboBox.select('other');
+    await fieldTypeComboBox.select('other');
+    await fieldTypeComboBox.close();
 
     await waitFor(() => {
       expect(within(createForm).queryByTestId('fieldSubType')).toBeInTheDocument();
@@ -114,7 +115,8 @@ describe('Mappings editor: other datatype', () => {
 
     // Change the field type to "other" using EuiComboBox harness
     const fieldTypeComboBox = new EuiComboBoxTestHarness('fieldType');
-    fieldTypeComboBox.select('other');
+    await fieldTypeComboBox.select('other');
+    await fieldTypeComboBox.close();
 
     const customTypeInput = await within(flyout).findByTestId('fieldSubType');
     fireEvent.change(customTypeInput, { target: { value: 'customType' } });

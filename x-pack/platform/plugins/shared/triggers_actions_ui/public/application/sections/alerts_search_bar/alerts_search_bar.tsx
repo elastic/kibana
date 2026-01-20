@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import type { Query, TimeRange } from '@kbn/es-query';
 import { compareFilters } from '@kbn/es-query';
-import type { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
+import type { SuggestionsAbstraction } from '@kbn/kql/public/components/typeahead/suggestions_component';
 import { isSiemRuleType } from '@kbn/rule-data-utils';
 import type {
   EuiContextMenuPanelDescriptor,

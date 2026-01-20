@@ -12,14 +12,30 @@ import {
   ConversationRoundStepType,
   ToolResultType,
 } from '@kbn/agent-builder-common';
+import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
 import { getToolResultId } from '@kbn/agent-builder-server/tools/utils';
-
-import { fromEs, toEs, type Document as ConversationDocument } from './converters';
+import {
+  fromEs,
+  toEs,
+  createRequestToEs,
+  type Document as ConversationDocument,
+} from './converters';
 import { expect } from '@kbn/scout';
 
 jest.mock('@kbn/agent-builder-server/tools/utils');
 
 const getToolResultIdMock = getToolResultId as jest.MockedFn<typeof getToolResultId>;
+
+const createTestState = () => ({
+  prompt: {
+    responses: {
+      'tools.my-tool.confirmation': {
+        type: AgentPromptType.confirmation,
+        response: { allow: true },
+      },
+    },
+  },
+});
 
 describe('conversation model converters', () => {
   const creationDate = '2024-09-04T06:44:17.944Z';
@@ -291,6 +307,24 @@ describe('conversation model converters', () => {
 
       expect(deserialized.attachments).toBeUndefined();
     });
+
+    it('deserializes conversation with state', () => {
+      const serialized = documentBase();
+      serialized._source!.state = createTestState();
+
+      const deserialized = fromEs(serialized);
+
+      expect(deserialized.state).toEqual(serialized._source!.state);
+    });
+
+    it('deserializes conversation without state (old format)', () => {
+      const serialized = documentBase();
+      // No state field - old format
+
+      const deserialized = fromEs(serialized);
+
+      expect(deserialized.state).toBeUndefined();
+    });
   });
 
   describe('toEs', () => {
@@ -442,6 +476,61 @@ describe('conversation model converters', () => {
           reasoning: 'reasoning',
         },
       ]);
+    });
+
+    it('serializes conversation with state', () => {
+      const conversation = conversationBase();
+      conversation.state = createTestState();
+
+      const serialized = toEs(conversation, 'space');
+
+      expect(serialized.state).toEqual(createTestState());
+    });
+
+    it('serializes conversation without state', () => {
+      const conversation = conversationBase();
+      // No state field
+
+      const serialized = toEs(conversation, 'space');
+
+      expect(serialized.state).toBeUndefined();
+    });
+  });
+
+  describe('createRequestToEs', () => {
+    it('includes state property when creating new conversation', () => {
+      const conversation = {
+        agent_id: 'agent_id',
+        title: 'conv_title',
+        rounds: [],
+        state: createTestState(),
+      };
+
+      const serialized = createRequestToEs({
+        conversation,
+        space: 'space',
+        currentUser: { id: 'user_id', username: 'user_name' },
+        creationDate: new Date(creationDate),
+      });
+
+      expect(serialized.state).toEqual(conversation.state);
+    });
+
+    it('sets state to undefined when creating conversation without state', () => {
+      const conversation = {
+        agent_id: 'agent_id',
+        title: 'conv_title',
+        rounds: [],
+      };
+
+      const serialized = createRequestToEs({
+        conversation,
+        space: 'space',
+        currentUser: { id: 'user_id', username: 'user_name' },
+        creationDate: new Date(creationDate),
+      });
+
+      expect(serialized.state).toBeUndefined();
     });
   });
 });

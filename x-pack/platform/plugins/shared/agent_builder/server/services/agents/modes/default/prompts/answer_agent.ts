@@ -9,6 +9,7 @@ import type { BaseMessageLike } from '@langchain/core/messages';
 import type { ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import type { ProcessedAttachmentType } from '../../utils/prepare_conversation';
+import type { AttachmentPresentation } from '../../utils/attachment_presentation';
 import type { ResearchAgentAction, AnswerAgentAction } from '../actions';
 import { formatDate } from './utils/helpers';
 import { customInstructionsBlock } from './utils/custom_instructions';
@@ -23,6 +24,7 @@ interface AnswerAgentPromptParams {
   answerActions: AnswerAgentAction[];
   capabilities: ResolvedAgentCapabilities;
   attachmentTypes: ProcessedAttachmentType[];
+  versionedAttachmentPresentation?: AttachmentPresentation;
   clearSystemMessage?: boolean;
 }
 
@@ -101,6 +103,7 @@ export const getStructuredAnswerPrompt = ({
   answerActions: AnswerAgentAction[];
   capabilities: ResolvedAgentCapabilities;
   attachmentTypes: ProcessedAttachmentType[];
+  versionedAttachmentPresentation?: AttachmentPresentation;
 }): BaseMessageLike[] => {
   const visEnabled = capabilities.visualizations;
 

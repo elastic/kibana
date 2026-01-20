@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Streams, Feature } from '@kbn/streams-schema';
+import type { Streams, System } from '@kbn/streams-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, BoundInferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
@@ -28,25 +28,24 @@ interface Query {
 
 /**
  * Generate significant event definitions, based on:
- * - the description of the feature (or stream if feature is undefined)
+ * - the description of the system (or stream if system is undefined)
  * - dataset analysis
  * - for the given significant event types
  */
 export async function generateSignificantEvents({
   stream,
-  feature,
+  system,
   start,
   end,
   esClient,
   inferenceClient,
   signal,
   sampleDocsSize,
-  // optional overrides for templates
-  systemPromptOverride,
+  systemPrompt,
   logger,
 }: {
   stream: Streams.all.Definition;
-  feature?: Feature;
+  system?: System;
   start: number;
   end: number;
   esClient: ElasticsearchClient;
@@ -54,7 +53,7 @@ export async function generateSignificantEvents({
   signal: AbortSignal;
   logger: Logger;
   sampleDocsSize?: number;
-  systemPromptOverride?: string;
+  systemPrompt: string;
 }): Promise<{
   queries: Query[];
   tokensUsed: ChatCompletionTokenCount;
@@ -69,22 +68,19 @@ export async function generateSignificantEvents({
       end,
       esClient,
       index: stream.name,
-      filter: feature?.filter ? conditionToQueryDsl(feature.filter) : undefined,
+      filter: system?.filter ? conditionToQueryDsl(system.filter) : undefined,
     })
   );
 
-  // create the prompt instance using provided overrides (if any)
-  const prompt = createGenerateSignificantEventsPrompt({
-    systemPromptOverride,
-  });
+  const prompt = createGenerateSignificantEventsPrompt({ systemPrompt });
 
   logger.trace('Generating significant events via reasoning agent');
   const response = await withSpan('generate_significant_events', () =>
     executeAsReasoningAgent({
       input: {
-        name: feature?.name || stream.name,
+        name: system?.name || stream.name,
         dataset_analysis: JSON.stringify(formatDocumentAnalysis(analysis, { dropEmpty: true })),
-        description: feature?.description || stream.description,
+        description: system?.description || stream.description,
       },
       maxSteps: 4,
       prompt,

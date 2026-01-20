@@ -24,6 +24,8 @@
           "(encrypted: string) => string"
         ],
         "path": "x-pack/solutions/security/packages/ai-security-labs-content/src/utils.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -40,6 +42,8 @@
               "string"
             ],
             "path": "x-pack/solutions/security/packages/ai-security-labs-content/src/utils.ts",
+            "lineNumber": 29,
+            "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -63,6 +67,8 @@
           "(text: string) => string"
         ],
         "path": "x-pack/solutions/security/packages/ai-security-labs-content/src/utils.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -79,6 +85,8 @@
               "string"
             ],
             "path": "x-pack/solutions/security/packages/ai-security-labs-content/src/utils.ts",
+            "lineNumber": 19,
+            "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -106,6 +114,8 @@
           "string[]"
         ],
         "path": "x-pack/solutions/security/packages/ai-security-labs-content/index.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -123,6 +133,8 @@
           "string[]"
         ],
         "path": "x-pack/solutions/security/packages/ai-security-labs-content/index.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

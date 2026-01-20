@@ -67,3 +67,28 @@ export async function teardownConnector(
   const supertest = getService('supertest');
   await deleteConnectors(supertest);
 }
+
+/**
+ * Creates an MCP connector pointing to an MCP server URL
+ */
+export async function createMcpConnector(
+  serverUrl: string,
+  supertest: SuperTest.Agent,
+  options: { name?: string } = {}
+): Promise<{ id: string }> {
+  const response = await supertest
+    .post('/api/actions/connector')
+    .set('kbn-xsrf', 'mcp-test')
+    .send({
+      name: options.name ?? 'mcp-test-connector',
+      config: {
+        serverUrl,
+        hasAuth: false,
+      },
+      secrets: {},
+      connector_type_id: '.mcp',
+    })
+    .expect(200);
+
+  return { id: response.body.id };
+}

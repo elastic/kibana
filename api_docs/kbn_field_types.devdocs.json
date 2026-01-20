@@ -26,6 +26,8 @@
         "label": "KbnFieldType",
         "description": [],
         "path": "src/platform/packages/shared/kbn-field-types/src/kbn_field_type.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -37,6 +39,8 @@
             "label": "name",
             "description": [],
             "path": "src/platform/packages/shared/kbn-field-types/src/kbn_field_type.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -48,6 +52,8 @@
             "label": "sortable",
             "description": [],
             "path": "src/platform/packages/shared/kbn-field-types/src/kbn_field_type.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -59,6 +65,8 @@
             "label": "filterable",
             "description": [],
             "path": "src/platform/packages/shared/kbn-field-types/src/kbn_field_type.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -81,6 +89,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-field-types/src/kbn_field_type.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -95,6 +105,8 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-field-types/src/kbn_field_type.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -117,6 +129,8 @@
                   ">"
                 ],
                 "path": "src/platform/packages/shared/kbn-field-types/src/kbn_field_type.ts",
+                "lineNumber": 19,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -151,6 +165,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-field-types/src/kbn_field_types.ts",
+        "lineNumber": 40,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -165,6 +181,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-field-types/src/kbn_field_types.ts",
+            "lineNumber": 40,
+            "columnNumber": 42,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -191,6 +209,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-field-types/src/kbn_field_types.ts",
+        "lineNumber": 54,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -205,6 +225,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-field-types/src/kbn_field_types.ts",
+            "lineNumber": 54,
+            "columnNumber": 46,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -228,6 +250,8 @@
           "() => string[]"
         ],
         "path": "src/platform/packages/shared/kbn-field-types/src/kbn_field_types.ts",
+        "lineNumber": 51,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -256,6 +280,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-field-types/src/kbn_field_types.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -270,6 +296,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-field-types/src/kbn_field_types.ts",
+            "lineNumber": 23,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -293,6 +321,8 @@
           "() => string[]"
         ],
         "path": "src/platform/packages/shared/kbn-field-types/src/kbn_field_types.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -309,6 +339,8 @@
         "label": "KbnFieldTypeOptions",
         "description": [],
         "path": "src/platform/packages/shared/kbn-field-types/src/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -320,6 +352,8 @@
             "label": "sortable",
             "description": [],
             "path": "src/platform/packages/shared/kbn-field-types/src/types.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -331,6 +365,8 @@
             "label": "filterable",
             "description": [],
             "path": "src/platform/packages/shared/kbn-field-types/src/types.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -342,6 +378,8 @@
             "label": "name",
             "description": [],
             "path": "src/platform/packages/shared/kbn-field-types/src/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -363,6 +401,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-field-types/src/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -379,6 +419,8 @@
         "label": "ES_FIELD_TYPES",
         "description": [],
         "path": "src/platform/packages/shared/kbn-field-types/src/types.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -391,6 +433,8 @@
         "label": "KBN_FIELD_TYPES",
         "description": [],
         "path": "src/platform/packages/shared/kbn-field-types/src/types.ts",
+        "lineNumber": 70,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

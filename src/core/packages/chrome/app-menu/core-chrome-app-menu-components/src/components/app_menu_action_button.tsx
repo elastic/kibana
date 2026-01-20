@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { type MouseEvent } from 'react';
 import { SplitButtonWithNotification } from '@kbn/split-button';
 import { upperFirst } from 'lodash';
 import type { EuiButtonColor, PopoverAnchorPosition } from '@elastic/eui';
@@ -30,6 +30,7 @@ type AppMenuActionButtonProps = (AppMenuPrimaryActionItem | AppMenuSecondaryActi
   onPopoverToggle: () => void;
   onPopoverClose: () => void;
   popoverAnchorPosition?: PopoverAnchorPosition;
+  onCloseOverflowButton?: () => void;
 };
 
 export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
@@ -51,9 +52,11 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
     isPopoverOpen,
     hidden,
     popoverWidth,
+    popoverTestId,
     onPopoverToggle,
     onPopoverClose,
     popoverAnchorPosition,
+    onCloseOverflowButton,
   } = props;
 
   const itemText = upperFirst(label);
@@ -75,7 +78,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
   const hasItems = items && items.length > 0;
   const hasSplitItems = splitButtonItems && splitButtonItems.length > 0;
 
-  const handleClick = () => {
+  const handleClick = (event: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
     if (isDisabled(disableButton)) return;
 
     if (hasItems) {
@@ -83,10 +86,10 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
       return;
     }
 
-    run?.();
+    run?.({ triggerElement: event.currentTarget });
   };
 
-  const handleSecondaryButtonClick = () => {
+  const handleSecondaryButtonClick = (event: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
     if (isDisabled(splitButtonProps?.isSecondaryButtonDisabled)) return;
 
     if (hasSplitItems) {
@@ -94,13 +97,13 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
       return;
     }
 
-    splitButtonRun?.();
+    splitButtonRun?.({ triggerElement: event.currentTarget });
   };
 
   const commonProps = {
     onClick: href ? undefined : handleClick,
     id: htmlId,
-    'data-test-subj': testId || `top-nav-menu-action-button-${id}`,
+    'data-test-subj': testId || `app-menu-action-button-${id}`,
     iconType,
     isDisabled: isDisabled(disableButton),
     href,
@@ -195,7 +198,9 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
         anchorElement={button}
         isOpen={isPopoverOpen}
         popoverWidth={popoverWidth}
+        popoverTestId={popoverTestId}
         onClose={onPopoverClose}
+        onCloseOverflowButton={onCloseOverflowButton}
         anchorPosition={popoverAnchorPosition}
       />
     );

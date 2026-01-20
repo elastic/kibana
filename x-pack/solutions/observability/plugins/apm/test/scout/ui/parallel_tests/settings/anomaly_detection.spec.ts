@@ -7,6 +7,7 @@
 
 import { expect } from '@kbn/scout-oblt';
 import { test } from '../../fixtures';
+import { PRODUCTION_ENVIRONMENT } from '../../fixtures/constants';
 
 test.describe('Anomaly Detection', { tag: ['@ess', '@svlOblt'] }, () => {
   test('Viewer should not be able to modify settings', async ({
@@ -49,7 +50,7 @@ test.describe('Anomaly Detection', { tag: ['@ess', '@svlOblt'] }, () => {
     await expect(createButton).toBeEnabled();
 
     await test.step('verify create button functionality', async () => {
-      await anomalyDetectionPage.createMlJobs('production');
+      await anomalyDetectionPage.createMlJobs(PRODUCTION_ENVIRONMENT);
     });
 
     await test.step('verify delete button functionality', async () => {

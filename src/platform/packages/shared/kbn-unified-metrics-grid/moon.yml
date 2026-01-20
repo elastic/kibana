@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/unified-metrics-grid'
 type: unknown
 owners:
-  defaultOwner: '@elastic/obs-presentation-team'
+  defaultOwner: '@elastic/obs-exploration-team'
 toolchain:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   name: '@kbn/unified-metrics-grid'
   description: Moon project for @kbn/unified-metrics-grid
   channel: ''
-  owner: '@elastic/obs-presentation-team'
+  owner: '@elastic/obs-exploration-team'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-unified-metrics-grid
 dependsOn:

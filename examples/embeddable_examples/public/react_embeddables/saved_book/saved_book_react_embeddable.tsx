@@ -20,7 +20,7 @@ import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { SerializedPanelState, StateComparators } from '@kbn/presentation-publishing';
+import type { StateComparators } from '@kbn/presentation-publishing';
 import {
   apiHasParentApi,
   initializeTitleManager,
@@ -52,25 +52,19 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
   const savedBookEmbeddableFactory: EmbeddableFactory<BookEmbeddableState, BookApi> = {
     type: BOOK_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-      const titleManager = initializeTitleManager(initialState.rawState);
-      const savedObjectId = (initialState.rawState as BookByReferenceState).savedObjectId;
-      const initialBookState = savedObjectId
-        ? await loadBook(savedObjectId)
-        : initialState.rawState;
+      const titleManager = initializeTitleManager(initialState);
+      const savedObjectId = (initialState as BookByReferenceState).savedObjectId;
+      const initialBookState = savedObjectId ? await loadBook(savedObjectId) : initialState;
       const bookStateManager = initializeStateManager<BookState>(
         initialBookState as BookState,
         defaultBookState
       );
       const isByReference = Boolean(savedObjectId);
 
-      const serializeBook = (id?: string) => {
-        return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            ...(id ? { savedObjectId: id } : bookStateManager.getLatestState()),
-          },
-        };
-      };
+      const serializeBook = (id?: string) => ({
+        ...titleManager.getLatestState(),
+        ...(id ? { savedObjectId: id } : bookStateManager.getLatestState()),
+      });
 
       const serializeState = () => serializeBook(savedObjectId);
 
@@ -87,8 +81,8 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
           };
         },
         onReset: async (lastSaved) => {
-          titleManager.reinitializeState(lastSaved?.rawState);
-          if (!savedObjectId) bookStateManager.reinitializeState(lastSaved?.rawState as BookState);
+          titleManager.reinitializeState(lastSaved);
+          if (!savedObjectId) bookStateManager.reinitializeState(lastSaved as BookState);
         },
       });
 
@@ -139,9 +133,8 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
           return newId;
         },
         checkForDuplicateTitle: async (title) => {},
-        getSerializedStateByValue: () => serializeBook() as SerializedPanelState<BookState>,
-        getSerializedStateByReference: (newId) =>
-          serializeBook(newId) as SerializedPanelState<BookByReferenceState>,
+        getSerializedStateByValue: () => serializeBook() as BookState,
+        getSerializedStateByReference: (newId) => serializeBook(newId) as BookByReferenceState,
         canLinkToLibrary: async () => !isByReference,
         canUnlinkFromLibrary: async () => isByReference,
       });

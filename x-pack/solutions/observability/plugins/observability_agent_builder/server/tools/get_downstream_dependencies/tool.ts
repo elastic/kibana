@@ -65,12 +65,7 @@ When to use:
       },
     },
     handler: async (toolParams, context) => {
-      const {
-        serviceName,
-        serviceEnvironment,
-        start = DEFAULT_TIME_RANGE.start,
-        end = DEFAULT_TIME_RANGE.end,
-      } = toolParams;
+      const { serviceName, serviceEnvironment, start, end } = toolParams;
       const { request } = context;
 
       try {

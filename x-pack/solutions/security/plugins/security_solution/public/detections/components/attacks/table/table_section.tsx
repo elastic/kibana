@@ -12,6 +12,8 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { isGroupingBucket } from '@kbn/grouping/src';
 import type { ParsedGroupingAggregation, RawBucket } from '@kbn/grouping/src';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { AttackDetailsRightPanelKey } from '../../../../flyout/attack_details/constants/panel_keys';
 import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useGroupTakeActionsItems } from '../../../hooks/alerts_table/use_group_take_action_items';
@@ -35,11 +37,12 @@ import { GroupedAlertsTable } from '../../alerts_table/alerts_grouping';
 import type { AlertsGroupingAggregation } from '../../alerts_table/grouping_settings/types';
 import { useGetDefaultGroupTitleRenderers } from '../../../hooks/attacks/use_get_default_group_title_renderers';
 import { useAttackGroupHandler } from '../../../hooks/attacks/use_attack_group_handler';
+import type { AssigneesIdsSelection } from '../../../../common/components/assignees/types';
 
 import { AttackDetailsContainer } from './attack_details/attack_details_container';
+import { AlertsTab } from './attack_details/alerts_tab';
 import { groupingOptions, groupingSettings } from './grouping_configs';
 import * as i18n from './translations';
-import type { AssigneesIdsSelection } from '../../../../common/components/assignees/types';
 
 export const TABLE_SECTION_TEST_ID = 'attacks-page-table-section';
 export const EXPAND_ATTACK_BUTTON_TEST_ID = 'expand-attack-button';
@@ -157,6 +160,16 @@ export const TableSection = React.memo(
         const attack =
           selectedGroup && fieldBucket ? getAttack(selectedGroup, fieldBucket) : undefined;
 
+        if (!attack) {
+          return (
+            <AlertsTab
+              groupingFilters={groupingFilters}
+              defaultFilters={defaultFilters}
+              isTableLoading={isLoading}
+            />
+          );
+        }
+
         return (
           <AttackDetailsContainer
             attack={attack}
@@ -187,14 +200,23 @@ export const TableSection = React.memo(
       return dataView.toSpec(true);
     }, [dataView]);
 
+    const { openFlyout } = useExpandableFlyoutApi();
     const openAttackDetailsFlyout = useCallback(
       (selectedGroup: string, bucket: RawBucket<AlertsGroupingAggregation>) => {
         const attack = getAttack(selectedGroup, bucket);
         if (attack) {
-          // TODO: open attack details flyout logic
+          openFlyout({
+            right: {
+              id: AttackDetailsRightPanelKey,
+              params: {
+                attackId: attack.id,
+                indexName: dataView.getIndexPattern(),
+              },
+            },
+          });
         }
       },
-      [getAttack]
+      [dataView, getAttack, openFlyout]
     );
 
     const getAdditionalActionButtons = useCallback(

@@ -31,7 +31,6 @@ const classicStreamManagementSubTabs = [
   'schemaEditor',
   'schema',
   'attachments',
-  'references',
 ] as const;
 
 type ClassicStreamManagementSubTab = (typeof classicStreamManagementSubTabs)[number];

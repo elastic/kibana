@@ -65,7 +65,7 @@ export const getOverviewEmbeddableFactory = ({
   type: SLO_OVERVIEW_EMBEDDABLE_ID,
   buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
     const deps = { ...coreStart, ...pluginsStart };
-    const state = initialState.rawState;
+    const state = initialState;
 
     const dynamicActionsManager = deps.embeddableEnhanced?.initializeEmbeddableDynamicActions(
       uuid,
@@ -81,15 +81,11 @@ export const getOverviewEmbeddableFactory = ({
     const reload$ = new Subject<boolean>();
 
     function serializeState() {
-      const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
-        dynamicActionsManager?.serializeState() ?? {};
+      const dynamicActionsState = dynamicActionsManager?.getLatestState() ?? {};
       return {
-        rawState: {
-          ...titleManager.getLatestState(),
-          ...sloStateManager.getLatestState(),
-          ...dynamicActionsState,
-        },
-        references: dynamicActionsReferences ?? [],
+        ...titleManager.getLatestState(),
+        ...sloStateManager.getLatestState(),
+        ...dynamicActionsState,
       };
     }
 
@@ -113,9 +109,9 @@ export const getOverviewEmbeddableFactory = ({
         ...(dynamicActionsManager?.comparators ?? { enhancements: 'skip' }),
       }),
       onReset: (lastSaved) => {
-        dynamicActionsManager?.reinitializeState(lastSaved?.rawState ?? {});
-        titleManager.reinitializeState(lastSaved?.rawState);
-        sloStateManager.reinitializeState(lastSaved?.rawState);
+        dynamicActionsManager?.reinitializeState(lastSaved ?? {});
+        titleManager.reinitializeState(lastSaved);
+        sloStateManager.reinitializeState(lastSaved);
       },
     });
 

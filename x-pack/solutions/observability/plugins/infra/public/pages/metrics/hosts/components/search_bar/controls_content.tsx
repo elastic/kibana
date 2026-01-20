@@ -74,11 +74,9 @@ export const ControlsContent = ({
         panelType: replaceable.control.type,
         maybePanelId: replaceable.key,
         serializedState: {
-          rawState: {
-            id: replaceable.key,
-            ...replaceable.control,
-            dataViewId: dataView?.id,
-          },
+          id: replaceable.key,
+          ...replaceable.control,
+          dataViewId: dataView?.id,
         },
       });
     });

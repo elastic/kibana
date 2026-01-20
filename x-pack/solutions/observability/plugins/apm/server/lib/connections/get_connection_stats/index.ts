@@ -7,10 +7,10 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { merge } from 'lodash';
+import { calculateThroughputWithRange } from '@kbn/apm-data-access-plugin/server/utils';
 import type { ValuesType } from 'utility-types';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { withApmSpan } from '../../../utils/with_apm_span';
-import { calculateThroughputWithRange } from '../../helpers/calculate_throughput';
 import type { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
 import type { RandomSampler } from '../../helpers/get_random_sampler';
 import { getDestinationMap } from './get_destination_map';

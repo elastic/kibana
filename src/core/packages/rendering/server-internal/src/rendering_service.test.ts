@@ -58,6 +58,7 @@ const INJECTED_METADATA = {
       buildDate: new Date(BUILD_DATE).toISOString(),
       buildFlavor: expect.any(String),
     },
+    airgapped: expect.any(Boolean),
   },
 };
 

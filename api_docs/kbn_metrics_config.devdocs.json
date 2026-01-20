@@ -30,6 +30,8 @@
           "\nConfiguration for OpenTelemetry metrics"
         ],
         "path": "src/platform/packages/private/opentelemetry/kbn-metrics-config/src/types.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,6 +45,8 @@
               "\nWhether OpenTelemetry metrics are enabled"
             ],
             "path": "src/platform/packages/private/opentelemetry/kbn-metrics-config/src/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -59,6 +63,8 @@
               "moment.Duration"
             ],
             "path": "src/platform/packages/private/opentelemetry/kbn-metrics-config/src/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -90,6 +96,8 @@
               "[]"
             ],
             "path": "src/platform/packages/private/opentelemetry/kbn-metrics-config/src/types.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -106,6 +114,8 @@
           "\nCommon configuration for OTLP metrics exporters"
         ],
         "path": "src/platform/packages/private/opentelemetry/kbn-metrics-config/src/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -122,6 +132,8 @@
               "number | moment.Duration | undefined"
             ],
             "path": "src/platform/packages/private/opentelemetry/kbn-metrics-config/src/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -138,6 +150,8 @@
               "\"delta\" | \"cumulative\""
             ],
             "path": "src/platform/packages/private/opentelemetry/kbn-metrics-config/src/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -176,6 +190,8 @@
           " & { url: string; headers?: Record<string, string> | undefined; }; }"
         ],
         "path": "src/platform/packages/private/opentelemetry/kbn-metrics-config/src/types.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -193,6 +209,8 @@
           "{ readonly enabled: boolean; readonly opentelemetry: Readonly<{} & { metrics: Readonly<{} & { otlp: Readonly<{ url?: string | undefined; headers?: Record<string, string> | undefined; } & { exportIntervalMillis: number; logLevel: string; }>; prometheus: Readonly<{} & { enabled: boolean; }>; }>; }>; }"
         ],
         "path": "src/platform/packages/private/opentelemetry/kbn-metrics-config/src/monitoring_collection_schema.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -227,6 +245,8 @@
           ">"
         ],
         "path": "src/platform/packages/private/opentelemetry/kbn-metrics-config/src/metrics_schema.ts",
+        "lineNumber": 41,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -333,6 +353,8 @@
           "<boolean>; }>; }>; }>; }>"
         ],
         "path": "src/platform/packages/private/opentelemetry/kbn-metrics-config/src/monitoring_collection_schema.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

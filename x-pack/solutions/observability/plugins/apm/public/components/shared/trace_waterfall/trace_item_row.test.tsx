@@ -46,11 +46,17 @@ jest.mock('./toggle_accordion_button', () => ({
   ),
 }));
 jest.mock('./trace_waterfall_context');
+
+const MockEuiAccordion = jest.fn();
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
   return {
     ...actual,
     useEuiTheme: jest.fn(),
+    EuiAccordion: (props: any) => {
+      MockEuiAccordion(props);
+      return <actual.EuiAccordion {...props} />;
+    },
   };
 });
 
@@ -76,6 +82,8 @@ const baseItem = {
 
 describe('TraceItemRow', () => {
   beforeEach(() => {
+    MockEuiAccordion.mockClear();
+
     mockUseTraceWaterfallContext.mockReturnValue({
       duration: 100,
       margin: { left: 20, right: 10 },
@@ -343,6 +351,26 @@ describe('TraceItemRow', () => {
       const bar = getByTestId('bar');
       expect(bar).toHaveAttribute('data-color', 'red');
     });
+  });
+
+  /**
+   * Regression test: EUI forces arrow display when buttonElement="div" for accessibility.
+   * We hide it via arrowProps.css since we use our own ToggleAccordionButton.
+   */
+  it('passes arrowProps with display:none to hide EUI forced arrow', () => {
+    render(<TraceItemRow item={baseItem} childrenCount={2} state="open" onToggle={jest.fn()} />);
+
+    expect(MockEuiAccordion).toHaveBeenCalledWith(
+      expect.objectContaining({
+        buttonElement: 'div',
+        arrowDisplay: 'none',
+        arrowProps: expect.objectContaining({
+          css: expect.objectContaining({
+            styles: expect.stringContaining('display:none'),
+          }),
+        }),
+      })
+    );
   });
 });
 

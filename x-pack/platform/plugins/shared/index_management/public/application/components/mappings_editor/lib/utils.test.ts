@@ -11,10 +11,7 @@ jest.mock('../constants', () => {
 });
 
 import type { EuiSelectableOption } from '@elastic/eui';
-import {
-  ELSER_ON_EIS_INFERENCE_ENDPOINT_ID,
-  ELSER_ON_ML_NODE_INFERENCE_ENDPOINT_ID,
-} from '../../../constants/mappings';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { Fields, NormalizedFields, State } from '../types';
 import {
   stripUndefinedValues,
@@ -848,7 +845,7 @@ describe('prepareFieldsForEisUpdate', () => {
         source: {
           name: 'name',
           type: 'semantic_text',
-          inference_id: ELSER_ON_ML_NODE_INFERENCE_ENDPOINT_ID,
+          inference_id: defaultInferenceEndpoints.ELSER,
         },
         childFieldsName: 'fields',
         canHaveChildFields: false,
@@ -882,7 +879,7 @@ describe('prepareFieldsForEisUpdate', () => {
         source: {
           name: 'name',
           type: 'semantic_text',
-          inference_id: ELSER_ON_ML_NODE_INFERENCE_ENDPOINT_ID,
+          inference_id: defaultInferenceEndpoints.ELSER,
         },
         childFieldsName: 'fields',
         canHaveChildFields: false,
@@ -900,7 +897,7 @@ describe('prepareFieldsForEisUpdate', () => {
         source: {
           name: 'species',
           type: 'semantic_text',
-          inference_id: ELSER_ON_ML_NODE_INFERENCE_ENDPOINT_ID,
+          inference_id: defaultInferenceEndpoints.ELSER,
         },
         childFieldsName: 'fields',
         canHaveChildFields: false,
@@ -933,7 +930,9 @@ describe('prepareFieldsForEisUpdate', () => {
     // The selected option is in the result
     expect(Object.keys(result.byId)).toContain('1');
     // The selected option has the EIS endpoint set as the inference_id
-    expect(result.byId['1'].source.inference_id).toBe(ELSER_ON_EIS_INFERENCE_ENDPOINT_ID);
+    expect(result.byId['1'].source.inference_id).toBe(
+      defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID
+    );
     // The selected option has a parent id set
     expect(result.byId['1'].parentId).toEqual('2');
     // The selected option's parent is in the result

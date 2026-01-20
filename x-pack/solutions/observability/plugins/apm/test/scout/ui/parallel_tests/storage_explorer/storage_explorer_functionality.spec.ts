@@ -8,6 +8,7 @@
 import { expect } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
 import { waitForApmSettingsHeaderLink } from '../../fixtures/page_helpers';
+import { PRODUCTION_ENVIRONMENT } from '../../fixtures/constants';
 
 const timeRange = {
   rangeFrom: testData.START_DATE,
@@ -42,7 +43,7 @@ test.describe('Storage Explorer - Admin User', { tag: ['@ess'] }, () => {
       await expect(storageExplorerPage.servicesTableLoadedIndicator).toBeVisible();
 
       // Change the environment to production to work better in MKI environment
-      await page.getByTestId('comboBoxSearchInput').fill('production');
+      await page.getByTestId('comboBoxSearchInput').fill(PRODUCTION_ENVIRONMENT);
       await page.getByTestId('comboBoxSearchInput').press('Enter');
       await expect(page.getByTestId('StorageExplorerDownloadReportButton')).toBeEnabled();
 
@@ -88,13 +89,13 @@ test.describe('Storage Explorer - Admin User', { tag: ['@ess'] }, () => {
       const urlParams = new URLSearchParams({
         rangeFrom: timeRange.rangeFrom,
         rangeTo: timeRange.rangeTo,
-        environment: 'production',
+        environment: PRODUCTION_ENVIRONMENT,
       });
 
       await page.goto(`${baseUrl}?${urlParams.toString()}`);
       await waitForApmSettingsHeaderLink(page);
 
-      await expect(page).toHaveURL(/.*environment=production.*/);
+      await expect(page).toHaveURL(new RegExp(`.*environment=${PRODUCTION_ENVIRONMENT}.*`));
       await expect(storageExplorerPage.pageTitle).toBeVisible();
     });
   });

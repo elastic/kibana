@@ -21,6 +21,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
+        "lineNumber": 109,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -35,6 +37,8 @@
               "unknown"
             ],
             "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -56,6 +60,8 @@
           ">"
         ],
         "path": "src/platform/plugins/shared/discover/public/index.ts",
+        "lineNumber": 43,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -83,6 +89,8 @@
           "DataMsg"
         ],
         "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_data_state_container.ts",
+        "lineNumber": 71,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -104,6 +112,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_data_state_container.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -125,6 +135,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_data_state_container.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -139,6 +151,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_data_state_container.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -154,6 +168,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_data_state_container.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -168,6 +184,8 @@
         "label": "DiscoverAppState",
         "description": [],
         "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
+        "lineNumber": 48,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -184,6 +202,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -207,6 +227,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -230,6 +252,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -246,6 +270,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -263,6 +289,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -279,6 +307,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -310,6 +340,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -326,6 +358,8 @@
               "string[][] | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -342,6 +376,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -365,6 +401,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -381,6 +419,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -397,6 +437,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -413,6 +455,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -429,6 +473,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -445,6 +491,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -461,6 +509,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -484,6 +534,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -498,6 +550,8 @@
         "label": "DiscoverCustomizationService",
         "description": [],
         "path": "src/platform/plugins/shared/discover/public/customizations/customization_service.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -520,6 +574,8 @@
               ") => void"
             ],
             "path": "src/platform/plugins/shared/discover/public/customizations/customization_service.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -540,6 +596,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/discover/public/customizations/customization_service.ts",
+                "lineNumber": 32,
+                "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -594,6 +652,8 @@
               ", { id: TCustomizationId; }> | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/customizations/customization_service.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -608,6 +668,8 @@
                   "TCustomizationId"
                 ],
                 "path": "src/platform/plugins/shared/discover/public/customizations/customization_service.ts",
+                "lineNumber": 34,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -664,6 +726,8 @@
               ", { id: TCustomizationId; }> | undefined>"
             ],
             "path": "src/platform/plugins/shared/discover/public/customizations/customization_service.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -678,6 +742,8 @@
                   "TCustomizationId"
                 ],
                 "path": "src/platform/plugins/shared/discover/public/customizations/customization_service.ts",
+                "lineNumber": 37,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -696,6 +762,8 @@
               "(id: \"flyout\" | \"search_bar\" | \"top_nav\" | \"unified_histogram\" | \"data_table\" | \"field_list\") => void"
             ],
             "path": "src/platform/plugins/shared/discover/public/customizations/customization_service.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -710,6 +778,8 @@
                   "\"flyout\" | \"search_bar\" | \"top_nav\" | \"unified_histogram\" | \"data_table\" | \"field_list\""
                 ],
                 "path": "src/platform/plugins/shared/discover/public/customizations/customization_service.ts",
+                "lineNumber": 39,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -728,6 +798,8 @@
               "(id: \"flyout\" | \"search_bar\" | \"top_nav\" | \"unified_histogram\" | \"data_table\" | \"field_list\") => void"
             ],
             "path": "src/platform/plugins/shared/discover/public/customizations/customization_service.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -742,6 +814,8 @@
                   "\"flyout\" | \"search_bar\" | \"top_nav\" | \"unified_histogram\" | \"data_table\" | \"field_list\""
                 ],
                 "path": "src/platform/plugins/shared/discover/public/customizations/customization_service.ts",
+                "lineNumber": 40,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -760,6 +834,8 @@
         "label": "DiscoverServices",
         "description": [],
         "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+        "lineNumber": 90,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -781,6 +857,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -795,6 +873,8 @@
               "ApplicationStart"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -809,6 +889,8 @@
               "(path: string) => string"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -823,6 +905,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+                "lineNumber": 93,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -847,6 +931,8 @@
               ">; }"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -861,6 +947,8 @@
               "I18nStart"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -875,6 +963,8 @@
               "{ [key: string]: Record<string, boolean | Record<string, boolean>>; navLinks: Record<string, boolean>; management: { [sectionId: string]: Record<string, boolean>; }; catalogue: Record<string, boolean>; } & { discover?: {} | undefined; dashboard?: {} | undefined; maps?: {} | undefined; visualize?: {} | undefined; }"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -889,6 +979,8 @@
               "ChromeStart"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -909,6 +1001,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -923,6 +1017,8 @@
               "CoreStart"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 99,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -943,6 +1039,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 100,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -963,6 +1061,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -974,9 +1074,11 @@
             "label": "discoverFeatureFlags",
             "description": [],
             "signature": [
-              "DiscoverFeatureFlags"
+              "{ [x: string]: never; }"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -991,6 +1093,8 @@
               "DocLinksStart"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1011,6 +1115,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1028,6 +1134,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1044,6 +1152,8 @@
               "<T | undefined> | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1062,6 +1172,8 @@
               "<HTMLElement> | undefined) => void"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1078,6 +1190,8 @@
                   "<HTMLElement> | undefined"
                 ],
                 "path": "src/core/packages/application/browser/src/app_mount.ts",
+                "lineNumber": 206,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1094,6 +1208,8 @@
               "ThemeServiceSetup"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1108,6 +1224,8 @@
               "UserProfileService"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1128,6 +1246,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1158,6 +1278,8 @@
               "; }"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 111,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1178,6 +1300,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1198,6 +1322,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1212,6 +1338,8 @@
               "{ branch: string; }"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1232,6 +1360,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 115,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1253,6 +1383,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 116,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1275,6 +1407,8 @@
               "[]; }"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1289,6 +1423,8 @@
               "UrlTracker"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1455,6 +1591,8 @@
               "; getRefreshIntervalDefaults: () => Readonly<{} & { value: number; pause: boolean; }>; }"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 119,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1469,6 +1607,8 @@
               "IToasts"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 120,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1483,6 +1623,8 @@
               "NotificationsStart"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 121,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1497,6 +1639,8 @@
               "IUiSettingsClient"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 122,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1511,6 +1655,8 @@
               "SettingsStart"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 123,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1525,6 +1671,8 @@
               "((metricType: string, eventName: string | string[]) => void) | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 124,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1539,6 +1687,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+                "lineNumber": 124,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1554,6 +1704,8 @@
                   "string | string[]"
                 ],
                 "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+                "lineNumber": 124,
+                "columnNumber": 53,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1578,6 +1730,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 125,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1598,6 +1752,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 126,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1618,6 +1774,8 @@
               " & React.RefAttributes<{}>>; } | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 127,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1632,6 +1790,8 @@
               "HttpSetup"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 128,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1652,6 +1812,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1673,6 +1835,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 130,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1693,6 +1857,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 131,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1722,6 +1888,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 132,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1745,6 +1913,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 133,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1768,6 +1938,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 134,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1788,6 +1960,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 135,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1811,6 +1985,8 @@
               "; }"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 136,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1831,6 +2007,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 137,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1852,6 +2030,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 138,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1872,6 +2052,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 139,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1892,6 +2074,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 140,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1912,6 +2096,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 141,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2010,6 +2196,8 @@
               "; }"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 142,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2030,6 +2218,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 143,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2051,6 +2241,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 144,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2072,6 +2264,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 145,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2086,6 +2280,8 @@
               "ProfilesManager"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 146,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2100,6 +2296,8 @@
               "DiscoverEBTManager"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 147,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2121,6 +2319,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 148,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2139,6 +2339,8 @@
               "; }; } | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 149,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2160,6 +2362,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 150,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2181,6 +2385,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "lineNumber": 151,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2206,6 +2412,8 @@
           "DiscoverStateContainer"
         ],
         "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2235,6 +2443,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2255,6 +2465,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
+                "lineNumber": 19,
+                "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2273,6 +2485,8 @@
         "label": "FlyoutCustomization",
         "description": [],
         "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/flyout_customization.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2287,6 +2501,8 @@
               "\"flyout\""
             ],
             "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/flyout_customization.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2302,6 +2518,8 @@
               ".Width<string | number> | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/flyout_customization.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2316,6 +2534,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/flyout_customization.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2334,6 +2554,8 @@
               "[]) | undefined; }"
             ],
             "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/flyout_customization.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2350,6 +2572,8 @@
               "> | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/flyout_customization.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2387,6 +2611,8 @@
               ") | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/flyout_customization.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2401,6 +2627,8 @@
         "label": "HasTimeRange",
         "description": [],
         "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
+        "lineNumber": 116,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2415,6 +2643,8 @@
               "() => boolean"
             ],
             "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2431,6 +2661,8 @@
         "label": "PublishesSavedSearch",
         "description": [],
         "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
+        "lineNumber": 101,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2795,6 +3027,8 @@
               " | undefined>; }; }"
             ],
             "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2826,6 +3060,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
+        "lineNumber": 105,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2840,6 +3076,8 @@
               "(columns: string[] | undefined) => void"
             ],
             "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2854,6 +3092,8 @@
                   "string[] | undefined"
                 ],
                 "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
+                "lineNumber": 106,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2872,6 +3112,8 @@
         "label": "SearchBarCustomization",
         "description": [],
         "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/search_bar_customization.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2886,6 +3128,8 @@
               "\"search_bar\""
             ],
             "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/search_bar_customization.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2900,6 +3144,8 @@
               "React.ComponentType<{}> | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/search_bar_customization.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2914,6 +3160,8 @@
               "React.ComponentType<{}> | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/search_bar_customization.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2944,6 +3192,8 @@
               ">> | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/search_bar_customization.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2958,6 +3208,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/search_bar_customization.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2972,6 +3224,8 @@
         "label": "TopNavCustomization",
         "description": [],
         "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/top_nav_customization.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2986,6 +3240,8 @@
               "\"top_nav\""
             ],
             "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/top_nav_customization.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3001,6 +3257,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/top_nav_customization.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3016,6 +3274,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/top_nav_customization.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3038,6 +3298,8 @@
           ") => void | (() => void) | Promise<void | (() => void)>"
         ],
         "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -3053,6 +3315,8 @@
               "CustomizationCallbackContext"
             ],
             "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3096,6 +3360,8 @@
           " | undefined; }"
         ],
         "path": "src/platform/plugins/shared/discover/public/components/discover_container/index.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3145,6 +3411,8 @@
           "FieldListCustomization"
         ],
         "path": "src/platform/plugins/shared/discover/public/customizations/customization_service.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3160,6 +3428,8 @@
           "\"SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID\""
         ],
         "path": "src/platform/plugins/shared/discover/public/embeddable/constants.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3175,6 +3445,8 @@
           "\"search\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3420,6 +3692,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
+        "lineNumber": 84,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3473,6 +3747,8 @@
           " | undefined; }"
         ],
         "path": "src/platform/plugins/shared/discover/public/embeddable/types.ts",
+        "lineNumber": 73,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3496,6 +3772,8 @@
           ", \"onBrushEnd\" | \"onFilter\" | \"withDefaultActions\" | \"disabledActions\">"
         ],
         "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/histogram_customization.tsx",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3510,6 +3788,8 @@
       "label": "DiscoverSetup",
       "description": [],
       "path": "src/platform/plugins/shared/discover/public/types.ts",
+      "lineNumber": 54,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -3533,6 +3813,8 @@
             " | undefined"
           ],
           "path": "src/platform/plugins/shared/discover/public/types.ts",
+          "lineNumber": 58,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -3548,6 +3830,8 @@
       "label": "DiscoverStart",
       "description": [],
       "path": "src/platform/plugins/shared/discover/public/types.ts",
+      "lineNumber": 91,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -3571,6 +3855,8 @@
             " | undefined"
           ],
           "path": "src/platform/plugins/shared/discover/public/types.ts",
+          "lineNumber": 92,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -3603,6 +3889,8 @@
             ">"
           ],
           "path": "src/platform/plugins/shared/discover/public/types.ts",
+          "lineNumber": 123,
+          "columnNumber": 3,
           "deprecated": true,
           "trackAdoption": false,
           "references": [
@@ -3629,6 +3917,8 @@
         "label": "DiscoverServerPluginLocatorService",
         "description": [],
         "path": "src/platform/plugins/shared/discover/server/index.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3653,6 +3943,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/discover/server/index.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3668,6 +3960,8 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "src/platform/plugins/shared/discover/server/index.ts",
+                "lineNumber": 35,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3686,6 +3980,8 @@
         "label": "DiscoverServerPluginStartDeps",
         "description": [],
         "path": "src/platform/plugins/shared/discover/server/index.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3706,6 +4002,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/discover/server/index.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3720,6 +4018,8 @@
         "label": "LocatorServiceScopedClient",
         "description": [],
         "path": "src/platform/plugins/shared/discover/server/index.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3742,6 +4042,8 @@
               ") => Promise<string[] | undefined>"
             ],
             "path": "src/platform/plugins/shared/discover/server/index.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -3763,6 +4065,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/discover/server/locator/columns_from_locator.ts",
+                "lineNumber": 75,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3795,6 +4099,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/discover/server/index.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -3816,6 +4122,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/discover/server/locator/searchsource_from_locator.ts",
+                "lineNumber": 111,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3840,6 +4148,8 @@
               ") => Promise<string>"
             ],
             "path": "src/platform/plugins/shared/discover/server/index.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -3861,6 +4171,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/discover/server/locator/title_from_locator.ts",
+                "lineNumber": 26,
+                "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3901,6 +4213,8 @@
               " | undefined>"
             ],
             "path": "src/platform/plugins/shared/discover/server/index.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -3922,6 +4236,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/discover/server/locator/query_from_locator.ts",
+                "lineNumber": 22,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3954,6 +4270,8 @@
               "[]>"
             ],
             "path": "src/platform/plugins/shared/discover/server/index.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -3975,6 +4293,57 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/discover/server/locator/filters_from_locator.ts",
+                "lineNumber": 21,
+                "columnNumber": 37,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-server.LocatorServiceScopedClient.timeFieldNameFromLocator",
+            "type": "Function",
+            "tags": [],
+            "label": "timeFieldNameFromLocator",
+            "description": [],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "discover",
+                "scope": "common",
+                "docId": "kibDiscoverPluginApi",
+                "section": "def-common.DiscoverAppLocatorParams",
+                "text": "DiscoverAppLocatorParams"
+              },
+              ") => Promise<string | undefined>"
+            ],
+            "path": "src/platform/plugins/shared/discover/server/index.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "discover",
+                "id": "def-server.LocatorServiceScopedClient.timeFieldNameFromLocator.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "discover",
+                    "scope": "common",
+                    "docId": "kibDiscoverPluginApi",
+                    "section": "def-common.DiscoverAppLocatorParams",
+                    "text": "DiscoverAppLocatorParams"
+                  }
+                ],
+                "path": "src/platform/plugins/shared/discover/server/locator/time_field_name_from_locator.ts",
+                "lineNumber": 21,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3995,6 +4364,8 @@
       "label": "DiscoverServerPluginStart",
       "description": [],
       "path": "src/platform/plugins/shared/discover/server/index.ts",
+      "lineNumber": 38,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -4015,6 +4386,8 @@
             }
           ],
           "path": "src/platform/plugins/shared/discover/server/index.ts",
+          "lineNumber": 39,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -4052,6 +4425,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4068,6 +4443,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4084,6 +4461,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4102,6 +4481,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
             "references": [
@@ -4149,6 +4530,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4172,6 +4555,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4196,6 +4581,8 @@
               ") | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4219,6 +4606,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4250,6 +4639,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4266,6 +4657,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4282,6 +4675,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4298,6 +4693,8 @@
               "{ id: string; label?: string | undefined; } | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4314,6 +4711,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4337,6 +4736,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4353,6 +4754,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4369,6 +4772,8 @@
               "string[][] | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4385,6 +4790,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4402,6 +4809,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4418,6 +4827,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4434,6 +4845,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4450,6 +4863,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4466,6 +4881,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4482,6 +4899,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+            "lineNumber": 122,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4522,6 +4941,8 @@
               ") | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+            "lineNumber": 126,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4538,6 +4959,8 @@
           "\nLocation state of scoped history (history instance of Kibana Platform application service)"
         ],
         "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+        "lineNumber": 134,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4559,6 +4982,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+            "lineNumber": 138,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4597,6 +5022,8 @@
               ") | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+            "lineNumber": 139,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4611,6 +5038,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+            "lineNumber": 140,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4625,6 +5054,8 @@
         "label": "NonPersistedDisplayOptions",
         "description": [],
         "path": "src/platform/plugins/shared/discover/common/embeddable/types.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4639,6 +5070,8 @@
               "\"search\" | \"security\" | \"oblt\" | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/common/embeddable/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4653,6 +5086,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/common/embeddable/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4667,6 +5102,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/common/embeddable/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4687,6 +5124,8 @@
           "\"discoverApp\""
         ],
         "path": "src/platform/plugins/shared/discover/common/index.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4704,6 +5143,8 @@
           "\"_a\""
         ],
         "path": "src/platform/plugins/shared/discover/common/constants.ts",
+        "lineNumber": 39,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4719,6 +5160,8 @@
           "\"DISCOVER_APP_LOCATOR\""
         ],
         "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4749,6 +5192,8 @@
           ">"
         ],
         "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+        "lineNumber": 132,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4779,6 +5224,8 @@
           ">"
         ],
         "path": "src/platform/plugins/shared/discover/common/esql_locator.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4800,6 +5247,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/discover/common/esql_locator.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4815,6 +5264,8 @@
           "\"discover\""
         ],
         "path": "src/platform/plugins/shared/discover/common/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4832,6 +5283,8 @@
           "SearchEmbeddableByReferenceState"
         ],
         "path": "src/platform/plugins/shared/discover/common/embeddable/types.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

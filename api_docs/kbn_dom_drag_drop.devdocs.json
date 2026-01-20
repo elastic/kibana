@@ -34,6 +34,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/providers/providers.tsx",
+        "lineNumber": 329,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -48,6 +50,8 @@
               "ProviderProps"
             ],
             "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/providers/providers.tsx",
+            "lineNumber": 336,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -71,6 +75,8 @@
           "({ reorderableGroup, ...props }: DraggableProps) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/draggable.tsx",
+        "lineNumber": 108,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -85,6 +91,8 @@
               "DraggableProps"
             ],
             "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/draggable.tsx",
+            "lineNumber": 108,
+            "columnNumber": 27,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -116,6 +124,8 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/drop_overlay_wrapper.tsx",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -138,6 +148,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/drop_overlay_wrapper.tsx",
+            "lineNumber": 32,
+            "columnNumber": 90,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -169,6 +181,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/droppable.tsx",
+        "lineNumber": 105,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -189,6 +203,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/droppable.tsx",
+            "lineNumber": 105,
+            "columnNumber": 27,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -208,6 +224,8 @@
           "({\n  children,\n  className,\n  dataTestSubj = DEFAULT_DATA_TEST_SUBJ,\n}: { children: React.ReactNode; className?: string | undefined; dataTestSubj?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/providers/reorder_provider.tsx",
+        "lineNumber": 145,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -219,6 +237,8 @@
             "label": "{\n  children,\n  className,\n  dataTestSubj = DEFAULT_DATA_TEST_SUBJ,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/providers/reorder_provider.tsx",
+            "lineNumber": 149,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -233,6 +253,8 @@
                   "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/providers/reorder_provider.tsx",
+                "lineNumber": 150,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -247,6 +269,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/providers/reorder_provider.tsx",
+                "lineNumber": 151,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -261,6 +285,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/providers/reorder_provider.tsx",
+                "lineNumber": 152,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -291,6 +317,8 @@
           "> | undefined; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/providers/providers.tsx",
+        "lineNumber": 225,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -302,6 +330,8 @@
             "label": "{\n  children,\n  customMiddleware,\n  initialState = {},\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/providers/providers.tsx",
+            "lineNumber": 229,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -316,6 +346,8 @@
                   "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/providers/providers.tsx",
+                "lineNumber": 230,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -331,6 +363,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/providers/providers.tsx",
+                "lineNumber": 231,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -353,6 +387,8 @@
                   "> | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/providers/providers.tsx",
+                "lineNumber": 232,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -380,6 +416,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/providers/providers.tsx",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -396,6 +434,8 @@
         "label": "DragContextState",
         "description": [],
         "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/providers/types.tsx",
+        "lineNumber": 63,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -419,6 +459,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/providers/types.tsx",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -432,6 +474,8 @@
               "\nkeyboard mode"
             ],
             "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/providers/types.tsx",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -449,6 +493,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/providers/types.tsx",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -467,6 +513,8 @@
               "> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/providers/types.tsx",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -480,6 +528,8 @@
               "\nCustomizable data-test-subj prefix"
             ],
             "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/providers/types.tsx",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -496,6 +546,8 @@
           "\nDropOverlayWrapper Props"
         ],
         "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/drop_overlay_wrapper.tsx",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -507,6 +559,8 @@
             "label": "isVisible",
             "description": [],
             "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/drop_overlay_wrapper.tsx",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -521,6 +575,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/drop_overlay_wrapper.tsx",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -535,6 +591,8 @@
               "object | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/drop_overlay_wrapper.tsx",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -551,6 +609,8 @@
           "\nThe base props to the Droppable component."
         ],
         "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/droppable.tsx",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -567,6 +627,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/droppable.tsx",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -584,6 +646,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/droppable.tsx",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -602,6 +666,8 @@
               "; }"
             ],
             "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/droppable.tsx",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -618,6 +684,8 @@
               "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
             ],
             "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/droppable.tsx",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -634,6 +702,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/droppable.tsx",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -658,6 +728,8 @@
               " | undefined) => string | undefined) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/droppable.tsx",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -679,6 +751,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/droppable.tsx",
+                "lineNumber": 61,
+                "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -707,6 +781,8 @@
               " | undefined) => string | undefined) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/droppable.tsx",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -728,6 +804,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/droppable.tsx",
+                "lineNumber": 65,
+                "columnNumber": 38,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -748,6 +826,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/droppable.tsx",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -764,6 +844,8 @@
               "{ id: string; }[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/droppable.tsx",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -787,6 +869,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/droppable.tsx",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -803,6 +887,8 @@
               "number[]"
             ],
             "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/droppable.tsx",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -827,6 +913,8 @@
               ") => React.ReactElement<any, string | React.JSXElementConstructor<any>> | null) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/droppable.tsx",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -847,6 +935,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/droppable.tsx",
+                "lineNumber": 89,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -889,6 +979,8 @@
           " | undefined]"
         ],
         "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/providers/types.tsx",
+        "lineNumber": 89,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -904,6 +996,8 @@
           "ResetStateAction | RegisterDropTargetAction | LeaveDropTargetAction | SelectDropTargetAction | DragToTargetAction | StartDraggingAction | EndDraggingAction"
         ],
         "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/providers/providers.tsx",
+        "lineNumber": 114,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -923,6 +1017,8 @@
           "; }"
         ],
         "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/providers/types.tsx",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -944,6 +1040,8 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/providers/types.tsx",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -961,6 +1059,8 @@
           "\"reorder\" | \"field_add\" | \"field_replace\" | \"move_compatible\" | \"replace_compatible\" | \"move_incompatible\" | \"replace_incompatible\" | \"replace_duplicate_compatible\" | \"duplicate_compatible\" | \"swap_compatible\" | \"replace_duplicate_incompatible\" | \"duplicate_incompatible\" | \"swap_incompatible\" | \"field_combine\" | \"combine_compatible\" | \"combine_incompatible\""
         ],
         "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -977,6 +1077,8 @@
           "\nHelpers for swap/duplicate/combine extra drops"
         ],
         "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/drop_targets/index.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -999,6 +1101,8 @@
               ") => React.ReactElement<any, string | React.JSXElementConstructor<any>> | null"
             ],
             "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/drop_targets/index.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1014,6 +1118,8 @@
                   "\"reorder\" | \"field_add\" | \"field_replace\" | \"move_compatible\" | \"replace_compatible\" | \"move_incompatible\" | \"replace_incompatible\" | \"replace_duplicate_compatible\" | \"duplicate_compatible\" | \"swap_compatible\" | \"replace_duplicate_incompatible\" | \"duplicate_incompatible\" | \"swap_incompatible\" | \"field_combine\" | \"combine_compatible\" | \"combine_incompatible\""
                 ],
                 "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/drop_targets/swap_duplicate_combine.tsx",
+                "lineNumber": 103,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1030,6 +1136,8 @@
               "(dropType?: string | undefined) => \"domDroppable--incompatible\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/drop_targets/index.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1045,6 +1153,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/drop_targets/swap_duplicate_combine.tsx",
+                "lineNumber": 120,
+                "columnNumber": 49,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1061,6 +1171,8 @@
               "(dropType?: string | undefined) => \"domDroppable--replacing\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/drop_targets/index.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1076,6 +1188,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/drop_targets/swap_duplicate_combine.tsx",
+                "lineNumber": 105,
+                "columnNumber": 45,
                 "deprecated": false,
                 "trackAdoption": false
               }

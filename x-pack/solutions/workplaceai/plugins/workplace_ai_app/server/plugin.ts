@@ -65,7 +65,7 @@ export class WorkplaceAIAppPlugin
     registerFeatures({ features: setupDeps.features });
 
     // Register custom data types with the data sources registry
-    registerWorkplaceAIDataTypes({ dataSourcesRegistry: setupDeps.dataSourcesRegistry });
+    registerWorkplaceAIDataTypes({ dataCatalog: setupDeps.dataCatalog });
 
     return {};
   }

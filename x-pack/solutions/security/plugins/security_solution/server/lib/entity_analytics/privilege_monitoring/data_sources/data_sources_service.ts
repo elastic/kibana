@@ -10,7 +10,6 @@ import { POST_EXCLUDE_INDICES, PRE_EXCLUDE_INDICES } from '../constants';
 import type { PrivilegeMonitoringDataClient } from '../engine/data_client';
 import { PRIVILEGED_MONITOR_IMPORT_USERS_INDEX_MAPPING } from '../engine/elasticsearch/mappings';
 import { createIndexSyncService } from './sync/index_sync';
-import { createIndexSyncServiceWiP } from './sync/index_sync_v1';
 import { createIntegrationsSyncService } from './sync/integrations_sync';
 
 export const createDataSourcesService = (
@@ -19,16 +18,9 @@ export const createDataSourcesService = (
   maxUsersAllowed: number // NOTE: This parameter is required for the legacy index sync service. Remove it (and use a const) only when the old sync service and its feature flag are deleted.
   // related issue: https://github.com/elastic/kibana/pull/243965#discussion_r2642244800
 ) => {
-  const newIndexSync =
-    dataClient.deps.experimentalFeatures?.privilegedMonitoringNewIndexSyncUpdateDetectionEnabled;
   const esClient = dataClient.deps.clusterClient.asCurrentUser;
   const integrationsSyncService = createIntegrationsSyncService(dataClient, soClient);
-  let indexSyncService;
-  if (newIndexSync) {
-    indexSyncService = createIndexSyncServiceWiP(dataClient, soClient);
-  } else {
-    indexSyncService = createIndexSyncService(dataClient, maxUsersAllowed);
-  }
+  const indexSyncService = createIndexSyncService(dataClient, soClient);
 
   /**
    * This creates an index for the user to populate privileged users.
@@ -70,7 +62,7 @@ export const createDataSourcesService = (
     );
   };
   const syncAllSources = async () => {
-    const jobs = [indexSyncService.plainIndexSync(soClient)];
+    const jobs = [indexSyncService.plainIndexSync()];
     jobs.push(integrationsSyncService.integrationsSync());
 
     const settled = await Promise.allSettled(jobs);

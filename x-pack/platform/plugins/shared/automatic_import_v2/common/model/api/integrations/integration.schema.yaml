@@ -21,10 +21,14 @@ paths:
               type: object
               additionalProperties: false
               required:
+                - connectorId
                 - integrationId
                 - title
                 - description
               properties:
+                connectorId:
+                  description: The connector id
+                  $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
                 integrationId:
                   description: The integration id
                   $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"

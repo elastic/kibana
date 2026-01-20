@@ -10,9 +10,11 @@ import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { platformCoreTools, type ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
 import type { ProcessedAttachmentType } from '../../utils/prepare_conversation';
+import type { AttachmentPresentation } from '../../utils/attachment_presentation';
+import { getConversationAttachmentsSystemMessages } from '../../utils/attachment_presentation';
 import type { ResearchAgentAction } from '../actions';
 import { attachmentTypeInstructions } from './utils/attachments';
-import { customInstructionsBlock } from './utils/custom_instructions';
+import { customInstructionsBlock, structuredOutputDescription } from './utils/custom_instructions';
 import { formatResearcherActionHistory } from './utils/actions';
 import { formatDate } from './utils/helpers';
 
@@ -28,7 +30,9 @@ interface ResearchAgentPromptParams {
   initialMessages: BaseMessageLike[];
   actions: ResearchAgentAction[];
   attachmentTypes: ProcessedAttachmentType[];
+  versionedAttachmentPresentation?: AttachmentPresentation;
   clearSystemMessage?: boolean;
+  outputSchema?: Record<string, unknown>;
 }
 
 export const getResearchAgentPrompt = (params: ResearchAgentPromptParams): BaseMessageLike[] => {
@@ -38,6 +42,7 @@ export const getResearchAgentPrompt = (params: ResearchAgentPromptParams): BaseM
       'system',
       clearSystemMessage ? getBaseSystemMessage(params) : getResearchSystemMessage(params),
     ],
+    ...getConversationAttachmentsSystemMessages(params.versionedAttachmentPresentation),
     ...initialMessages,
     ...formatResearcherActionHistory({ actions }),
   ];
@@ -46,6 +51,7 @@ export const getResearchAgentPrompt = (params: ResearchAgentPromptParams): BaseM
 export const getBaseSystemMessage = ({
   customInstructions,
   attachmentTypes,
+  outputSchema,
 }: ResearchAgentPromptParams): string => {
   return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
@@ -62,6 +68,8 @@ That answering agent will have access to the conversation history and to all inf
 
 ${customInstructions}
 
+${structuredOutputDescription(outputSchema)}
+
 ${attachmentTypeInstructions(attachmentTypes)}
 
 ## ADDITIONAL INFO
@@ -76,6 +84,7 @@ ${attachmentTypeInstructions(attachmentTypes)}
 export const getResearchSystemMessage = ({
   customInstructions,
   attachmentTypes,
+  outputSchema,
 }: ResearchAgentPromptParams): string => {
   return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
@@ -163,6 +172,8 @@ Constraints:
       - Keep the note concise and focused on insights that are not obvious from the data.
 
 ${customInstructionsBlock(customInstructions)}
+
+${structuredOutputDescription(outputSchema)}
 
 ${attachmentTypeInstructions(attachmentTypes)}
 

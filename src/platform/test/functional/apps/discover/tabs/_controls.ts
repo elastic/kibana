@@ -27,8 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const comboBox = getService('comboBox');
   const dataGrid = getService('dataGrid');
 
-  // Failing: See https://github.com/elastic/kibana/issues/245197
-  describe.skip('discover - ES|QL controls', function () {
+  describe('discover - ES|QL controls', function () {
     it('should add an ES|QL value control', async () => {
       await discover.selectTextBaseLang();
       await discover.waitUntilTabIsLoaded();

@@ -182,7 +182,6 @@ export const esqlFunctionNames = [
   'TANH',
   'TAU',
   'TBUCKET',
-  'TERM',
   'TEXT_EMBEDDING',
   'TO_AGGREGATE_METRIC_DOUBLE',
   'TO_BASE64',

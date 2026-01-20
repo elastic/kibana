@@ -25,8 +25,11 @@ export function timeRangeSchemaOptional(defaultTimeRange: { start: string; end: 
     start: z
       .string()
       .describe(`${startDescription} Defaults to ${defaultTimeRange.start}.`)
-      .optional(),
+      .default(defaultTimeRange.start),
 
-    end: z.string().describe(`${endDescription} Defaults to ${defaultTimeRange.end}.`).optional(),
+    end: z
+      .string()
+      .describe(`${endDescription} Defaults to ${defaultTimeRange.end}.`)
+      .default(defaultTimeRange.end),
   };
 }

@@ -111,6 +111,17 @@ const absentDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'dense_vector',
+          optional: false,
+          description: 'Expression that outputs values to be checked for absence.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'double',
           optional: false,
           description: 'Expression that outputs values to be checked for absence.',
@@ -827,6 +838,18 @@ const countDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'date_nanos',
+          optional: true,
+          description:
+            'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'dense_vector',
           optional: true,
           description:
             'Expression that outputs values to be counted. If omitted, equivalent to `COUNT(*)` (the number of rows).',
@@ -2895,6 +2918,17 @@ const presentDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'date_nanos',
+          optional: false,
+          description: 'Expression that outputs values to be checked for presence.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'dense_vector',
           optional: false,
           description: 'Expression that outputs values to be checked for presence.',
         },

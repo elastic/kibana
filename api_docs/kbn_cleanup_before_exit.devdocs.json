@@ -26,6 +26,8 @@
           ") => () => void"
         ],
         "path": "src/platform/packages/shared/kbn-cleanup-before-exit/src/cleanup_before_exit.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -41,6 +43,8 @@
               "() => void | Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-cleanup-before-exit/src/create_cleanup_before_exit.ts",
+            "lineNumber": 60,
+            "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -57,6 +61,8 @@
               "CleanupBeforeExitOptions"
             ],
             "path": "src/platform/packages/shared/kbn-cleanup-before-exit/src/create_cleanup_before_exit.ts",
+            "lineNumber": 61,
+            "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
           }

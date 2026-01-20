@@ -19,9 +19,7 @@ export const registerMyEmbeddableSavedObject = (embeddableSetup: EmbeddableSetup
       container.addNewPanel(
         {
           panelType: MY_EMBEDDABLE_TYPE,
-          serializedState: {
-            rawState: savedObject.attributes,
-          },
+          serializedState: savedObject.attributes,
         },
         {
           displaySuccessMessage: true, // shows a toast and scrolls to panel

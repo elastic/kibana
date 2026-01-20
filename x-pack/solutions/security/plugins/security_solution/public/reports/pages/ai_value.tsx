@@ -122,6 +122,9 @@ const BaseComponent = () => {
         margin: 0 auto;
       `}
       data-shared-items-container
+      // This indicate the number of elements that the export logic should wait for before taking a screenshot of the page
+      // 6 lens components and 1 AI generated key insight
+      data-shared-items-count="7"
     >
       {!isExportMode && (
         <HeaderPage

@@ -253,7 +253,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
       (pkg) => pkg.type === 'lens'
     ) as LensIncomingEmbeddablePackage;
 
-    if (lensEmbeddablePackage && lensEmbeddablePackage?.serializedState?.rawState?.attributes) {
+    if (lensEmbeddablePackage && lensEmbeddablePackage?.serializedState?.attributes) {
       const lensTime = timefilter.getTime();
       const newTimeRange =
         lensTime?.from && lensTime?.to
@@ -268,7 +268,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
 
       if (draftComment?.position) {
         handleUpdate(
-          lensEmbeddablePackage.serializedState.rawState.attributes,
+          lensEmbeddablePackage.serializedState.attributes,
           newTimeRange,
           draftComment.position
         );
@@ -276,7 +276,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
       }
 
       if (draftComment) {
-        handleAdd(lensEmbeddablePackage.serializedState.rawState.attributes, newTimeRange);
+        handleAdd(lensEmbeddablePackage.serializedState.attributes, newTimeRange);
       }
     }
   }, [embeddable, storage, timefilter, currentAppId, handleAdd, handleUpdate, draftComment]);

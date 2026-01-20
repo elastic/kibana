@@ -57,7 +57,7 @@ export async function cleanUpDuplicatedPackagePolicies(
             const policyId = privateLocationAPI.getPolicyId(
               {
                 origin: monitor.attributes.origin,
-                id: monitor.id,
+                id: monitor.attributes.id,
               },
               location.id,
               spaceId

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
-import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
+import { pick } from 'lodash';
+import type { CoreSetup, KibanaRequest } from '@kbn/core/server';
 import {
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
@@ -17,70 +17,34 @@ import type {
   ObservabilityAgentBuilderPluginStart,
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
-import { getRelevantAlertFields } from './get_relevant_alert_fields';
 import { getTotalHits } from '../../utils/get_total_hits';
 import { kqlFilter as buildKqlFilter } from '../../utils/dsl_filters';
-import { getDefaultConnectorId } from '../../utils/get_default_connector_id';
-
-const OMITTED_ALERT_FIELDS = [
-  'event.action',
-  'event.kind',
-  'kibana.alert.rule.execution.uuid',
-  'kibana.alert.rule.revision',
-  'kibana.alert.rule.tags',
-  'kibana.alert.rule.uuid',
-  'kibana.alert.workflow_status',
-  'kibana.space_ids',
-  'kibana.alert.time_range',
-  'kibana.version',
-] as const;
+import { defaultFields } from './tool';
 
 export async function getToolHandler({
   core,
   request,
-  logger,
   start,
   end,
-  query,
   kqlFilter,
   includeRecovered,
+  fields,
 }: {
   core: CoreSetup<
     ObservabilityAgentBuilderPluginStartDependencies,
     ObservabilityAgentBuilderPluginStart
   >;
   request: KibanaRequest;
-  logger: Logger;
   start: string;
   end: string;
-  query: string;
   kqlFilter?: string;
   includeRecovered?: boolean;
+  fields?: string[];
 }) {
-  const [coreStart, pluginStart] = await core.getStartServices();
-  const { inference, ruleRegistry } = pluginStart;
+  const [, pluginStart] = await core.getStartServices();
+  const { ruleRegistry } = pluginStart;
 
   const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
-  const connectorId = await getDefaultConnectorId({
-    coreStart,
-    inference,
-    request,
-    logger,
-  });
-
-  const boundInferenceClient = inference.getClient({
-    request,
-    bindTo: { connectorId },
-  });
-
-  const selectedFields = await getRelevantAlertFields({
-    coreStart,
-    pluginStart,
-    request,
-    inferenceClient: boundInferenceClient,
-    logger,
-    query,
-  });
 
   const response = await alertsClient.find({
     ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
@@ -113,7 +77,8 @@ export async function getToolHandler({
   });
 
   const total = getTotalHits(response);
-  const alerts = response.hits.hits.map((hit) => omit(hit._source ?? {}, ...OMITTED_ALERT_FIELDS));
+  const fieldsToReturn = fields ?? defaultFields;
+  const alerts = response.hits.hits.map((hit) => pick(hit._source ?? {}, fieldsToReturn));
 
-  return { alerts, selectedFields, total };
+  return { alerts, total };
 }

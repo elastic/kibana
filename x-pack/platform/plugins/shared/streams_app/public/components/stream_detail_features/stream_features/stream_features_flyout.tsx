@@ -17,7 +17,7 @@ import {
   EuiFlyoutHeader,
   EuiTitle,
 } from '@elastic/eui';
-import type { Streams, Feature } from '@kbn/streams-schema';
+import type { Streams, System } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
@@ -34,8 +34,8 @@ export const StreamFeaturesFlyout = ({
   onFeaturesDiscarded,
 }: {
   definition: Streams.all.Definition;
-  features: Feature[];
-  setFeatures: React.Dispatch<React.SetStateAction<Feature[]>>;
+  features: System[];
+  setFeatures: React.Dispatch<React.SetStateAction<System[]>>;
   closeFlyout: () => void;
   onFeaturesAdded: () => void;
   onFeaturesDiscarded: () => void;
@@ -45,7 +45,7 @@ export const StreamFeaturesFlyout = ({
   } = useKibana();
 
   const [selectedFeatureNames, setSelectedFeatureNames] = useState<Set<string>>(new Set());
-  const { addFeaturesToStream } = useStreamFeaturesApi(definition);
+  const { addSystemsToStream } = useStreamFeaturesApi(definition);
   const [isUpdating, setIsUpdating] = useState(false);
 
   const selectedFeatures = useMemo(
@@ -128,7 +128,7 @@ export const StreamFeaturesFlyout = ({
                   isLoading={isUpdating}
                   onClick={() => {
                     setIsUpdating(true);
-                    addFeaturesToStream(selectedFeatures).finally(() => {
+                    addSystemsToStream(selectedFeatures).finally(() => {
                       notifications.toasts.addSuccess({
                         title: i18n.translate(
                           'xpack.streams.streamFeaturesFlyout.addFeaturesSuccessToastTitle',

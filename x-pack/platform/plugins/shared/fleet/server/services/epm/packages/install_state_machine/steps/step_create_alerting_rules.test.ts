@@ -54,7 +54,7 @@ describe('createAlertingRuleFromTemplate', () => {
     expect(rulesClient.get).toHaveBeenCalledWith({ id: 'fleet-default-test-package-template-id' });
     expect(rulesClient.create).toHaveBeenCalledWith({
       data: {
-        enabled: true,
+        enabled: false,
         alertTypeId: 'rule-type-id',
         name: 'Template Rule',
         consumer: 'alerts',

@@ -16,6 +16,8 @@
           "(element: HTMLElement | null | undefined) => boolean"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+        "lineNumber": 164,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -30,6 +32,8 @@
               "HTMLElement | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+            "lineNumber": 164,
+            "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -51,6 +55,8 @@
           "({ colindexAttribute, containerElement, ariaColindex, ariaRowindex, rowindexAttribute, }: { colindexAttribute: string; containerElement: Element | null; ariaColindex: number; ariaRowindex: number; rowindexAttribute: string; }) => FocusColumnResult"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+        "lineNumber": 101,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -62,6 +68,8 @@
             "label": "{\n  colindexAttribute,\n  containerElement,\n  ariaColindex,\n  ariaRowindex,\n  rowindexAttribute,\n}",
             "description": [],
             "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+            "lineNumber": 107,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -73,6 +81,8 @@
                 "label": "colindexAttribute",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+                "lineNumber": 108,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -87,6 +97,8 @@
                   "Element | null"
                 ],
                 "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+                "lineNumber": 109,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -98,6 +110,8 @@
                 "label": "ariaColindex",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+                "lineNumber": 110,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -109,6 +123,8 @@
                 "label": "ariaRowindex",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+                "lineNumber": 111,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -120,6 +136,8 @@
                 "label": "rowindexAttribute",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+                "lineNumber": 112,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -142,6 +160,8 @@
           "({ containerElement, tableClassName, }: { containerElement: HTMLElement | null; tableClassName: string; }) => HTMLDivElement | null"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+        "lineNumber": 334,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -153,6 +173,8 @@
             "label": "{\n  containerElement,\n  tableClassName,\n}",
             "description": [],
             "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+            "lineNumber": 337,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -167,6 +189,8 @@
                   "HTMLElement | null"
                 ],
                 "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+                "lineNumber": 338,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -178,6 +202,8 @@
                 "label": "tableClassName",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+                "lineNumber": 339,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -198,6 +224,8 @@
           "(ariaRowindex: number) => string"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+        "lineNumber": 151,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -212,6 +240,8 @@
               "number"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+            "lineNumber": 151,
+            "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -233,6 +263,8 @@
           "({ containerElement, getFocusedCell, shiftKey, tableHasFocus, tableClassName, }: { containerElement: HTMLElement | null; getFocusedCell: GetFocusedCell; shiftKey: boolean; tableHasFocus: (containerElement: HTMLElement | null) => boolean; tableClassName: string; }) => SkipFocus"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+        "lineNumber": 294,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -244,6 +276,8 @@
             "label": "{\n  containerElement,\n  getFocusedCell,\n  shiftKey,\n  tableHasFocus,\n  tableClassName,\n}",
             "description": [],
             "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+            "lineNumber": 300,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -258,6 +292,8 @@
                   "HTMLElement | null"
                 ],
                 "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+                "lineNumber": 301,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -272,6 +308,8 @@
                   "({ containerElement, tableClassName, }: { containerElement: HTMLElement | null; tableClassName: string; }) => HTMLDivElement | null"
                 ],
                 "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+                "lineNumber": 302,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "returnComment": [],
@@ -287,6 +325,8 @@
                       "{ containerElement: HTMLElement | null; tableClassName: string; }"
                     ],
                     "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+                    "lineNumber": 270,
+                    "columnNumber": 24,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -300,6 +340,8 @@
                 "label": "shiftKey",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+                "lineNumber": 303,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -314,6 +356,8 @@
                   "(containerElement: HTMLElement | null) => boolean"
                 ],
                 "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+                "lineNumber": 304,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -328,6 +372,8 @@
                       "HTMLElement | null"
                     ],
                     "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+                    "lineNumber": 304,
+                    "columnNumber": 19,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": false
@@ -343,6 +389,8 @@
                 "label": "tableClassName",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+                "lineNumber": 305,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -365,6 +413,8 @@
           "({ onSkipFocusBackwards, onSkipFocusForward, skipFocus, }: { onSkipFocusBackwards: () => void; onSkipFocusForward: () => void; skipFocus: SkipFocus; }) => void"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+        "lineNumber": 204,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -376,6 +426,8 @@
             "label": "{\n  onSkipFocusBackwards,\n  onSkipFocusForward,\n  skipFocus,\n}",
             "description": [],
             "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+            "lineNumber": 208,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -390,6 +442,8 @@
                   "() => void"
                 ],
                 "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+                "lineNumber": 209,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [],
@@ -406,6 +460,8 @@
                   "() => void"
                 ],
                 "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+                "lineNumber": 210,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [],
@@ -422,6 +478,8 @@
                   "\"SKIP_FOCUS_BACKWARDS\" | \"SKIP_FOCUS_FORWARD\" | \"SKIP_FOCUS_NOOP\""
                 ],
                 "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+                "lineNumber": 211,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -444,6 +502,8 @@
           "(event: React.KeyboardEvent<Element>) => boolean"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+        "lineNumber": 54,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -458,6 +518,8 @@
               "React.KeyboardEvent<Element>"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+            "lineNumber": 54,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -479,6 +541,8 @@
           "(event: React.KeyboardEvent<Element>) => boolean"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+        "lineNumber": 51,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -493,6 +557,8 @@
               "React.KeyboardEvent<Element>"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+            "lineNumber": 51,
+            "columnNumber": 27,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -514,6 +580,8 @@
           "(event: React.KeyboardEvent<Element>) => boolean"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+        "lineNumber": 58,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -528,6 +596,8 @@
               "React.KeyboardEvent<Element>"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+            "lineNumber": 58,
+            "columnNumber": 26,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -549,6 +619,8 @@
           "(event: React.KeyboardEvent<Element>) => boolean"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+        "lineNumber": 61,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -563,6 +635,8 @@
               "React.KeyboardEvent<Element>"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+            "lineNumber": 61,
+            "columnNumber": 23,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -584,6 +658,8 @@
           "(event: React.KeyboardEvent<Element>) => void"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+        "lineNumber": 158,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -598,6 +674,8 @@
               "React.KeyboardEvent<Element>"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+            "lineNumber": 158,
+            "columnNumber": 50,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -627,6 +705,8 @@
           "HoverActionComponentProps"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
+        "lineNumber": 62,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -675,6 +755,8 @@
               " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; })> | React.FunctionComponent<Props> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -689,6 +771,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -718,6 +802,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -732,6 +818,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -752,6 +840,8 @@
               "; }"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -774,6 +864,8 @@
           "\"aria-colindex\""
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -791,6 +883,8 @@
           "\"aria-rowindex\""
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+        "lineNumber": 34,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -808,6 +902,8 @@
           "\"data-colindex\""
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -825,6 +921,8 @@
           "\"data-rowindex\""
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+        "lineNumber": 42,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -842,6 +940,8 @@
           "1"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+        "lineNumber": 45,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -857,6 +957,8 @@
           "({ newFocusedColumn, newFocusedColumnAriaColindex, }: { newFocusedColumn: HTMLDivElement | null; newFocusedColumnAriaColindex: number | null; }) => void"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+        "lineNumber": 143,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -872,6 +974,8 @@
               "{ newFocusedColumn: HTMLDivElement | null; newFocusedColumnAriaColindex: number | null; }"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
+            "lineNumber": 143,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -895,6 +999,8 @@
           "; }"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/public/index.ts",
+        "lineNumber": 51,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -909,6 +1015,8 @@
       "label": "TimelinesUIStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/timelines/public/types.ts",
+      "lineNumber": 19,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -926,6 +1034,8 @@
             "HoverActionsConfig"
           ],
           "path": "x-pack/platform/plugins/shared/timelines/public/types.ts",
+          "lineNumber": 20,
+          "columnNumber": 3,
           "deprecated": true,
           "trackAdoption": false,
           "references": [
@@ -956,6 +1066,8 @@
             "() => any"
           ],
           "path": "x-pack/platform/plugins/shared/timelines/public/types.ts",
+          "lineNumber": 25,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -976,6 +1088,8 @@
             ", string | React.JSXElementConstructor<any>>"
           ],
           "path": "x-pack/platform/plugins/shared/timelines/public/types.ts",
+          "lineNumber": 26,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -990,6 +1104,8 @@
                 "LastUpdatedAtProps"
               ],
               "path": "x-pack/platform/plugins/shared/timelines/public/types.ts",
+              "lineNumber": 26,
+              "columnNumber": 20,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1011,6 +1127,8 @@
             "UseAddToTimeline"
           ],
           "path": "x-pack/platform/plugins/shared/timelines/public/types.ts",
+          "lineNumber": 27,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -1029,6 +1147,8 @@
             "<string>) => void"
           ],
           "path": "x-pack/platform/plugins/shared/timelines/public/types.ts",
+          "lineNumber": 28,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -1049,6 +1169,8 @@
             ">) => void"
           ],
           "path": "x-pack/platform/plugins/shared/timelines/public/types.ts",
+          "lineNumber": 29,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1066,6 +1188,8 @@
                 ">"
               ],
               "path": "x-pack/platform/plugins/shared/timelines/public/types.ts",
+              "lineNumber": 29,
+              "columnNumber": 30,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1093,6 +1217,8 @@
       "label": "TimelinesPluginUI",
       "description": [],
       "path": "x-pack/platform/plugins/shared/timelines/server/types.ts",
+      "lineNumber": 13,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -1107,6 +1233,8 @@
       "label": "TimelinesPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/timelines/server/types.ts",
+      "lineNumber": 15,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -1138,6 +1266,8 @@
           "[]"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/utils/field_formatters.ts",
+        "lineNumber": 117,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1153,6 +1283,8 @@
               "<unknown[]>"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/utils/field_formatters.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1168,6 +1300,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/utils/field_formatters.ts",
+            "lineNumber": 119,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1183,6 +1317,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/utils/field_formatters.ts",
+            "lineNumber": 120,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1202,6 +1338,8 @@
           "(field: string) => boolean"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/utils/field_formatters.ts",
+        "lineNumber": 47,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1216,6 +1354,8 @@
               "string"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/utils/field_formatters.ts",
+            "lineNumber": 47,
+            "columnNumber": 28,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1235,6 +1375,8 @@
           "<T>(value: T | T[] | null | undefined) => T[]"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/utils/to_array.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1249,6 +1391,8 @@
               "T | T[] | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/utils/to_array.ts",
+            "lineNumber": 8,
+            "columnNumber": 28,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1268,6 +1412,8 @@
           "<T>(value: T | T[] | null) => { str: string; isObjectArray?: boolean | undefined; }[]"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/utils/to_array.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1282,6 +1428,8 @@
               "T | T[] | null"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/utils/to_array.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1300,6 +1448,8 @@
         "label": "CursorType",
         "description": [],
         "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1315,6 +1465,8 @@
               "<string> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1330,6 +1482,8 @@
               "<string> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1344,6 +1498,8 @@
         "label": "DataProvider",
         "description": [],
         "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1357,6 +1513,8 @@
               "Uniquely identifies a data provider"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1370,6 +1528,8 @@
               "Human readable"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1383,6 +1543,8 @@
               "\nWhen `false`, a data provider is temporarily disabled, but not removed from\nthe timeline. default: `true`"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1396,6 +1558,8 @@
               "\nWhen `true`, a data provider is excluding the match, but not removed from\nthe timeline. default: `false`"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1409,6 +1573,8 @@
               "\nReturns the KQL query who have been added by user"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1431,6 +1597,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1454,6 +1622,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1470,6 +1640,8 @@
               "\"default\" | \"template\" | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1488,6 +1660,8 @@
           "\nThis interface should not be used anymore.\nUse the one from `solutions/security/plugins/security_solution/common/types/timeline`."
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/rows/index.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": true,
         "trackAdoption": false,
         "references": [
@@ -1528,6 +1702,8 @@
               "DeprecatedRowRendererId"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/rows/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1550,6 +1726,8 @@
               ") => boolean"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/rows/index.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1570,6 +1748,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/rows/index.ts",
+                "lineNumber": 18,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1596,6 +1776,8 @@
               "; scopeId: string; }) => React.ReactNode"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/rows/index.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1607,6 +1789,8 @@
                 "label": "{\n    contextId,\n    data,\n    scopeId,\n  }",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/rows/index.ts",
+                "lineNumber": 23,
+                "columnNumber": 6,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1621,6 +1805,8 @@
                       "string | undefined"
                     ],
                     "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/rows/index.ts",
+                    "lineNumber": 24,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -1641,6 +1827,8 @@
                       }
                     ],
                     "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/rows/index.ts",
+                    "lineNumber": 25,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -1652,6 +1840,8 @@
                     "label": "scopeId",
                     "description": [],
                     "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/rows/index.ts",
+                    "lineNumber": 26,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -1671,6 +1861,8 @@
         "label": "EqlFieldsComboBoxOptions",
         "description": [],
         "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/eql/index.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1686,6 +1878,8 @@
               "<string | number | string[] | undefined>[]"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1701,6 +1895,8 @@
               "<string | number | string[] | undefined>[]"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1716,6 +1912,8 @@
               "<string | number | string[] | undefined>[]"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1730,6 +1928,8 @@
         "label": "EqlOptions",
         "description": [],
         "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/eql/index.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1744,6 +1944,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1758,6 +1960,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1772,6 +1976,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1786,6 +1992,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1800,6 +2008,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1814,6 +2024,8 @@
         "label": "FieldInfo",
         "description": [],
         "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1825,6 +2037,8 @@
             "label": "category",
             "description": [],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1839,6 +2053,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1853,6 +2069,8 @@
               "string | number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1867,6 +2085,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1878,6 +2098,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1892,6 +2114,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1924,6 +2148,8 @@
           ", \"format\">"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1937,6 +2163,8 @@
               "Where the field belong"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1954,6 +2182,8 @@
               "<string | number> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1971,6 +2201,8 @@
               "<string>[]"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1988,6 +2220,8 @@
               "<string> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2003,6 +2237,8 @@
               "<string> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2037,6 +2273,8 @@
           "<any>"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+        "lineNumber": 59,
+        "columnNumber": 1,
         "deprecated": true,
         "trackAdoption": false,
         "references": [
@@ -2084,6 +2322,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2098,6 +2338,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2114,6 +2356,8 @@
               "; }"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2128,6 +2372,8 @@
         "label": "Inspect",
         "description": [],
         "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2142,6 +2388,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2156,6 +2404,8 @@
         "label": "LastTimeDetails",
         "description": [],
         "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2171,6 +2421,8 @@
               "<string> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2186,6 +2438,8 @@
               "<string> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2201,6 +2455,8 @@
               "<string> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2215,6 +2471,8 @@
         "label": "PaginationInputPaginated",
         "description": [],
         "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2228,6 +2486,8 @@
               "The activePage parameter defines the page of results you want to fetch"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2241,6 +2501,8 @@
               "The cursorStart parameter defines the start of the results to be displayed"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2254,6 +2516,8 @@
               "The fakePossibleCount parameter determines the total count in order to show 5 additional pages"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2267,6 +2531,8 @@
               "The querySize parameter is the number of items to be returned"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2281,6 +2547,8 @@
         "label": "QueryMatch",
         "description": [],
         "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2292,6 +2560,8 @@
             "label": "field",
             "description": [],
             "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2306,6 +2576,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2320,6 +2592,8 @@
               "string | number | boolean | (string | number | boolean)[]"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2334,6 +2608,8 @@
               "string | number | boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2348,6 +2624,8 @@
               "\"includes\" | \":\" | \":*\""
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2372,6 +2650,8 @@
           "<Field>"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2386,6 +2666,8 @@
               "Field"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2406,6 +2688,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2420,6 +2704,8 @@
         "label": "TimelineEdges",
         "description": [],
         "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/all/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2440,6 +2726,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2460,6 +2748,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2494,6 +2784,8 @@
           "<unknown>>"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/eql/index.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2515,6 +2807,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2526,6 +2820,8 @@
             "label": "totalCount",
             "description": [],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2540,6 +2836,8 @@
               "{ activePage: number; querySize: number; }"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2561,6 +2859,8 @@
               " | null"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2593,6 +2893,8 @@
           "<any>"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/all/index.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2607,6 +2909,8 @@
               "{ [x: string]: number; }"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2628,6 +2932,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2639,6 +2945,8 @@
             "label": "totalCount",
             "description": [],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2653,6 +2961,8 @@
               "{ activePage: number; querySize: number; }"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2676,6 +2986,8 @@
               "> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2690,6 +3002,8 @@
         "label": "TimelineEventsDetailsItem",
         "description": [],
         "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/details/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2705,6 +3019,8 @@
               "<number> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/details/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2719,6 +3035,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/details/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2730,6 +3048,8 @@
             "label": "field",
             "description": [],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/details/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2745,6 +3065,8 @@
               "<string[]> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/details/index.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2759,6 +3081,8 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/details/index.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2770,6 +3094,8 @@
             "label": "isObjectArray",
             "description": [],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/details/index.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2802,6 +3128,8 @@
           "<any>"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/details/index.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2825,6 +3153,8 @@
               "[]> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/details/index.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2848,6 +3178,8 @@
               "> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/details/index.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2871,6 +3203,8 @@
               "> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/details/index.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2886,6 +3220,8 @@
               "<object> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/details/index.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2918,6 +3254,8 @@
           "<any>"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2932,6 +3270,8 @@
               "string | null"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2955,6 +3295,8 @@
               "> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2969,6 +3311,8 @@
         "label": "TimelineItem",
         "description": [],
         "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/all/index.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2980,6 +3324,8 @@
             "label": "_id",
             "description": [],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2995,6 +3341,8 @@
               "<string> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3016,6 +3364,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3036,6 +3386,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3068,6 +3420,8 @@
           "<any>"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3079,6 +3433,8 @@
             "label": "destinationIpCount",
             "description": [],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3102,6 +3458,8 @@
               "> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3113,6 +3471,8 @@
             "label": "hostCount",
             "description": [],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3124,6 +3484,8 @@
             "label": "processCount",
             "description": [],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3135,6 +3497,8 @@
             "label": "sourceIpCount",
             "description": [],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3146,6 +3510,8 @@
             "label": "userCount",
             "description": [],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3160,6 +3526,8 @@
         "label": "TimelineNonEcsData",
         "description": [],
         "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/all/index.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3171,6 +3539,8 @@
             "label": "field",
             "description": [],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3186,6 +3556,8 @@
               "<string[]> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3200,6 +3572,8 @@
         "label": "TimerangeInput",
         "description": [],
         "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3213,6 +3587,8 @@
               "The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan."
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3226,6 +3602,8 @@
               "The end of the timerange"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3239,6 +3617,8 @@
               "The beginning of the timerange"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3253,6 +3633,8 @@
         "label": "TotalValue",
         "description": [],
         "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3264,6 +3646,8 @@
             "label": "value",
             "description": [],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3275,6 +3659,8 @@
             "label": "relation",
             "description": [],
             "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3291,6 +3677,8 @@
         "label": "Direction",
         "description": [],
         "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3303,6 +3691,8 @@
         "label": "LastEventIndexKey",
         "description": [],
         "path": "x-pack/platform/plugins/shared/timelines/common/api/search_strategy/timeline/events_last_event_time.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3315,6 +3705,8 @@
         "label": "TimelineEventsQueries",
         "description": [],
         "path": "x-pack/platform/plugins/shared/timelines/common/api/search_strategy/model/timeline_events_queries.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3342,6 +3734,8 @@
           "; }"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": true,
         "trackAdoption": false,
         "references": [
@@ -3379,6 +3773,8 @@
           "; }"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+        "lineNumber": 74,
+        "columnNumber": 1,
         "deprecated": true,
         "trackAdoption": false,
         "references": [
@@ -3848,6 +4244,8 @@
           " | undefined; type?: string | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/actions/index.ts",
+        "lineNumber": 63,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3871,6 +4269,8 @@
           "; }"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+        "lineNumber": 63,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3886,6 +4286,8 @@
           "\"DELETED_SECURITY_SOLUTION_DATA_VIEW\""
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3954,6 +4356,8 @@
           "[] | undefined; setFlyoutAlert?: ((alertId: string) => void) | undefined; scopeId: string; truncate?: boolean | undefined; key?: string | undefined; closeCellPopover?: (() => void) | undefined; enableActions?: boolean | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/cells/index.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": true,
         "trackAdoption": false,
         "references": [
@@ -3987,6 +4391,8 @@
           "\"events\" | \"sessions\""
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/index.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4004,6 +4410,8 @@
           "\":*\""
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4026,6 +4434,8 @@
           }
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/eql/index.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4046,6 +4456,8 @@
           "IndexFieldsStrategyRequestByIndices"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": true,
         "trackAdoption": false,
         "references": [
@@ -4089,6 +4501,8 @@
           "\":\""
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4106,6 +4520,8 @@
           "\"includes\" | \":\" | \":*\""
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/data_provider/index.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4141,6 +4557,8 @@
           ", \"passthrough\"> | undefined; filterQuery?: string | Record<string, any> | { range: Record<string, { format: string; gte: number; lte: number; }>; } | { query_string: { query: string; analyze_wildcard: boolean; }; } | { match: Record<string, { operator: string; query: string; zero_terms_query: string; }>; } | { term: Record<string, string>; } | { bool: { filter: {}[]; should: {}[]; must: {}[]; must_not: {}[]; }; } | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; eventCategoryField?: string | undefined; tiebreakerField?: string | undefined; runTimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; format?: string | undefined; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/api/search_strategy/timeline/eql.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4184,6 +4602,8 @@
           ", \"passthrough\"> | undefined; filterQuery?: any; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; authFilter?: {} | undefined; excludeEcsData?: boolean | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/api/search_strategy/timeline/events_all.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4219,6 +4639,8 @@
           ", \"passthrough\"> | undefined; filterQuery?: string | Record<string, any> | { range: Record<string, { format: string; gte: number; lte: number; }>; } | { query_string: { query: string; analyze_wildcard: boolean; }; } | { match: Record<string, { operator: string; query: string; zero_terms_query: string; }>; } | { term: Record<string, string>; } | { bool: { filter: {}[]; should: {}[]; must: {}[]; must_not: {}[]; }; } | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; authFilter?: {} | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/api/search_strategy/timeline/events_details.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4250,6 +4672,8 @@
           "; params?: any; id?: string | undefined; indexType?: string | undefined; defaultIndex?: string[] | undefined; entityType?: \"events\" | \"sessions\" | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/api/search_strategy/timeline/events_last_event_time.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4273,6 +4697,8 @@
           ".kpi; params?: any; id?: string | undefined; runtimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; format?: string | undefined; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; indexType?: string | undefined; timerange?: { from: string; to: string; interval: string; } | undefined; defaultIndex?: string[] | undefined; entityType?: \"events\" | \"sessions\" | undefined; filterQuery?: string | Record<string, any> | { range: Record<string, { format: string; gte: number; lte: number; }>; } | { query_string: { query: string; analyze_wildcard: boolean; }; } | { match: Record<string, { operator: string; query: string; zero_terms_query: string; }>; } | { term: Record<string, string>; } | { bool: { filter: {}[]; should: {}[]; must: {}[]; must_not: {}[]; }; } | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/api/search_strategy/timeline/kpi.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4287,6 +4713,8 @@
         "label": "EMPTY_BROWSER_FIELDS",
         "description": [],
         "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/index_fields/index.ts",
+        "lineNumber": 83,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -4303,6 +4731,8 @@
           "{ readonly EVENTS: \"events\"; readonly SESSIONS: \"sessions\"; }"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/timeline/events/index.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

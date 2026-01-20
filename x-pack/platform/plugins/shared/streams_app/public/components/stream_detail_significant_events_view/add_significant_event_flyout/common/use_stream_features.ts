@@ -20,7 +20,7 @@ export const useStreamFeatures = (definition: Streams.all.Definition) => {
 
   return useStreamsAppFetch(
     ({ signal }) => {
-      return streamsRepositoryClient.fetch(`GET /internal/streams/{name}/features`, {
+      return streamsRepositoryClient.fetch(`GET /internal/streams/{name}/systems`, {
         signal,
         params: {
           path: {

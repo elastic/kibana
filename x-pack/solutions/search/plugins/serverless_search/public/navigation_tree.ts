@@ -69,7 +69,6 @@ export function createNavigationTree({
       },
       {
         link: 'workflows',
-        badgeType: 'techPreview' as const,
       },
       {
         children: [

@@ -8,7 +8,7 @@
 import type { Filter, RangeFilter, Query, TimeRange } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { type Context, EmbeddableToDashboardDrilldown } from './embeddable_to_dashboard_drilldown';
-import type { AbstractDashboardDrilldownConfig as Config } from '../abstract_dashboard_drilldown';
+import type { DashboardDrilldownConfig } from '../abstract_dashboard_drilldown';
 import { dashboardPluginMock } from '@kbn/dashboard-plugin/public/mocks';
 import type { StartDependencies } from '../../../plugin';
 import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public/core';
@@ -59,15 +59,9 @@ test('getHref is defined', () => {
   expect(drilldown.getHref).toBeDefined();
 });
 
-test('inject/extract are defined', () => {
-  const drilldown = new EmbeddableToDashboardDrilldown({} as any);
-  expect(drilldown.extract).toBeDefined();
-  expect(drilldown.inject).toBeDefined();
-});
-
 describe('.execute() & getHref', () => {
   async function setupTestBed(
-    config: Partial<Config>,
+    config: Partial<DashboardDrilldownConfig>,
     embeddableInput: { filters?: Filter[]; timeRange?: TimeRange; query?: Query },
     filtersFromEvent: Filter[],
     timeFieldName?: string
@@ -108,7 +102,7 @@ describe('.execute() & getHref', () => {
       >,
     });
 
-    const completeConfig: Config = {
+    const completeConfig: DashboardDrilldownConfig = {
       dashboardId: 'id',
       useCurrentFilters: false,
       useCurrentDateRange: false,

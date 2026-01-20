@@ -34,6 +34,13 @@ fi
 if [ "$KBN_ENABLE_POINTER_COMPRESSION" = 'true' ]; then
   NODE="${DIR}/node/pointer-compression/bin/node"
 fi
+if [ "$KBN_ENABLE_JEMALLOC" = 'true' ]; then
+  export LD_PRELOAD='/usr/lib/libjemalloc.so.2'
+  if [ ! -f "$LD_PRELOAD" ]; then
+    echo "unable to find jemalloc at $LD_PRELOAD"
+    exit 1
+  fi
+fi
 {{/serverless}}
 {{#forcePointerCompression}}
 NODE="${DIR}/node/pointer-compression/bin/node"

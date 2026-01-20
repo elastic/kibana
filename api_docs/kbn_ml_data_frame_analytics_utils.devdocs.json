@@ -41,6 +41,8 @@
           }
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/analytics_utils.ts",
+        "lineNumber": 137,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -57,6 +59,8 @@
               "MlDataframeAnalysisContainer"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/analytics_utils.ts",
+            "lineNumber": 138,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -80,6 +84,8 @@
           ") => string"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/analytics_utils.ts",
+        "lineNumber": 106,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -96,6 +102,8 @@
               "MlDataframeAnalysisContainer"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/analytics_utils.ts",
+            "lineNumber": 106,
+            "columnNumber": 47,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -119,6 +127,8 @@
           ") => string"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/analytics_utils.ts",
+        "lineNumber": 59,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -135,6 +145,8 @@
               "MlDataframeAnalysisContainer"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/analytics_utils.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -158,6 +170,8 @@
           ") => number | undefined"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/get_num_top_classes.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -174,6 +188,8 @@
               "MlDataframeAnalysisContainer"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/get_num_top_classes.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -197,6 +213,8 @@
           ") => number | undefined"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/get_num_top_feature_importance_values.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -213,6 +231,8 @@
               "MlDataframeAnalysisContainer"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/get_num_top_feature_importance_values.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -236,6 +256,8 @@
           ") => string | undefined"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/analytics_utils.ts",
+        "lineNumber": 82,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -252,6 +274,8 @@
               "MlDataframeAnalysisContainer"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/analytics_utils.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -275,6 +299,8 @@
           ") => number | undefined"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/analytics_utils.ts",
+        "lineNumber": 155,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -291,6 +317,8 @@
               "MlDataframeAnalysisContainer"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/analytics_utils.ts",
+            "lineNumber": 156,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -319,6 +347,8 @@
           }
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/analytics_utils.ts",
+        "lineNumber": 47,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -335,6 +365,8 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/analytics_utils.ts",
+            "lineNumber": 47,
+            "columnNumber": 42,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -356,6 +388,8 @@
           "(arg: unknown) => boolean"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "lineNumber": 205,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -372,6 +406,8 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "lineNumber": 212,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -393,6 +429,8 @@
           "(arg: unknown) => boolean"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "lineNumber": 181,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -409,6 +447,8 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "lineNumber": 188,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -430,6 +470,8 @@
           "(arg: unknown) => boolean"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+        "lineNumber": 199,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -446,6 +488,8 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 205,
+            "columnNumber": 45,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -474,6 +518,8 @@
           }
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/analytics_utils.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -490,6 +536,8 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/analytics_utils.ts",
+            "lineNumber": 23,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -518,6 +566,8 @@
           }
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/analytics_utils.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -534,6 +584,8 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/analytics_utils.ts",
+            "lineNumber": 35,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -555,6 +607,8 @@
           "(arg: unknown) => boolean"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "lineNumber": 217,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -571,6 +625,8 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "lineNumber": 224,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -592,6 +648,8 @@
           "(arg: unknown) => boolean"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "lineNumber": 193,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -608,6 +666,8 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "lineNumber": 200,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -637,6 +697,8 @@
           ") => number"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/fields.ts",
+        "lineNumber": 104,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -653,6 +715,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/fields.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -670,6 +734,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/fields.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -693,6 +759,8 @@
               }
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/fields.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -713,6 +781,8 @@
           "\nInterface for an edge element for the map view"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+        "lineNumber": 385,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -729,6 +799,8 @@
               "{ id: string; source: string; target: string; }"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 389,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -745,6 +817,8 @@
           "\nInterface for a node element for the map view"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+        "lineNumber": 369,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -761,6 +835,8 @@
               "{ id: string; label: string; type: string; analysisType?: string | undefined; isRoot?: boolean | undefined; }"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 373,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -777,6 +853,8 @@
           "\nInterface for DFA map return type"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+        "lineNumber": 404,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -800,6 +878,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 408,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -816,6 +896,8 @@
               "{ [x: string]: any; }"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 412,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -832,6 +914,8 @@
               "any"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 416,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -848,6 +932,8 @@
           "\nES result class feature importance"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -864,6 +950,8 @@
               "string | number | boolean"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -877,6 +965,8 @@
               "\nThe importance"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -893,6 +983,8 @@
           "\nES result for class feature importance summary"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "lineNumber": 72,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -909,6 +1001,8 @@
               "string | number | boolean"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -925,6 +1019,8 @@
               "{ max: number; min: number; mean_magnitude: number; }"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -941,6 +1037,8 @@
           "\nInterface for classification job configuation"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+        "lineNumber": 124,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -957,6 +1055,8 @@
               "[key: string]:  Classification"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 128,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -973,6 +1073,8 @@
               "Classification"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 133,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -989,6 +1091,8 @@
           "\nInterface for classification evaluate response"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+        "lineNumber": 307,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1021,6 +1125,8 @@
               "[] | undefined; value: number; } | undefined; }"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 311,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1037,6 +1143,8 @@
           "\nBaseline interface for ES result classification feature importance"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "lineNumber": 154,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1060,6 +1168,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "lineNumber": 158,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1076,6 +1186,8 @@
           "\nES result classification total feature importance"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "lineNumber": 89,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1089,6 +1201,8 @@
               "\nThe feature name"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1112,6 +1226,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1128,6 +1244,8 @@
           "\nInterface for confusion matrix"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+        "lineNumber": 253,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1141,6 +1259,8 @@
               "\nActual class"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 257,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1154,6 +1274,8 @@
               "\nActual class doc count"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 261,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1177,6 +1299,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 265,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1190,6 +1314,8 @@
               "\nDoc count of other predicted classes"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 269,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1218,6 +1344,8 @@
           ", \"analyzed_fields\">"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+        "lineNumber": 158,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1235,6 +1363,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 163,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1258,6 +1388,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 167,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1274,6 +1406,8 @@
           "\nMeta data for a DFA job"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+        "lineNumber": 144,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1297,6 +1431,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 148,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1313,6 +1449,8 @@
               "[key: string]:  any"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 152,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1341,6 +1479,8 @@
           ", \"state\">"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+        "lineNumber": 220,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1357,6 +1497,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 224,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1374,6 +1516,8 @@
               "MlDataframeState"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 228,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1390,6 +1534,8 @@
           "\nInterface for DFA API response for deletion status"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1403,6 +1549,8 @@
               "\nSuccess"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1422,6 +1570,8 @@
               "<any> | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1438,6 +1588,8 @@
           "\nInterface for evalute metrics"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+        "lineNumber": 333,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1454,6 +1606,8 @@
               "{ accuracy?: object | undefined; recall?: object | undefined; multiclass_confusion_matrix?: object | undefined; auc_roc?: { include_curve: boolean; class_name: string; } | undefined; }"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 337,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1470,6 +1624,8 @@
               "{ r_squared: object; mse: object; msle: object; huber: object; }"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 346,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1486,6 +1642,8 @@
           "\nES result feature importance interface\nTODO We should separate the interface because classes/importance\nisn't both optional but either/or."
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1499,6 +1657,8 @@
               "\nThe feature name"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1522,6 +1682,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1538,6 +1700,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1554,6 +1718,8 @@
           "\nBaseline interface for ES result feature importance class"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "lineNumber": 141,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1570,6 +1736,8 @@
               "string | number | boolean"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "lineNumber": 145,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1583,6 +1751,8 @@
               "\nBaseline"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "lineNumber": 149,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1611,6 +1781,8 @@
           ", \"mapping_types\">"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+        "lineNumber": 357,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1629,6 +1801,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 362,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1645,6 +1819,8 @@
           "\nInterface for outlier analysis job configuation"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1661,6 +1837,8 @@
               "[key: string]:  {}"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1677,6 +1855,8 @@
               "{ compute_feature_influence?: boolean | undefined; }"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1693,6 +1873,8 @@
           "\nInterface for predicted class"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+        "lineNumber": 239,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1706,6 +1888,8 @@
               "\nPredicted class"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 243,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1719,6 +1903,8 @@
               "\nCount"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 247,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1735,6 +1921,8 @@
           "\nInterface for regression analysis job configuation"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+        "lineNumber": 109,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1751,6 +1939,8 @@
               "[key: string]:  Regression"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1767,6 +1957,8 @@
               "Regression"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1783,6 +1975,8 @@
           "\nBaseline interface for ES result regression feature importance"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "lineNumber": 164,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1796,6 +1990,8 @@
               "\nBaseline"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "lineNumber": 168,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1812,6 +2008,8 @@
           "\nES result regression feature importance summary"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "lineNumber": 103,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1825,6 +2023,8 @@
               "\nMax feature importance"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1838,6 +2038,8 @@
               "\nMin feature importance"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "lineNumber": 111,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1851,6 +2053,8 @@
               "\nMean magnitude"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "lineNumber": 115,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1867,6 +2071,8 @@
           "\nES result for regression total feature importance"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "lineNumber": 121,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1880,6 +2086,8 @@
               "\nFeature name"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "lineNumber": 125,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1902,6 +2110,8 @@
               }
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1918,6 +2128,8 @@
           "\nData item for ROC curve"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+        "lineNumber": 275,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1931,6 +2143,8 @@
               "\nFPR"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 279,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1944,6 +2158,8 @@
               "\nThreshold"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 283,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1957,6 +2173,8 @@
               "\nTPR"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 287,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1973,6 +2191,8 @@
           "\nES result top class interface"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1989,6 +2209,8 @@
               "string | number | boolean"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2002,6 +2224,8 @@
               "\nThe class probability"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2015,6 +2239,8 @@
               "\nThe class score"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2031,6 +2257,8 @@
           "\nInterface for a search response's track total hits option"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+        "lineNumber": 427,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2047,6 +2275,8 @@
               "{ total: { value: number; relation: string; }; hits: any[]; }"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 431,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2063,6 +2293,8 @@
           "\nInterface for a requect object to update a DFA job"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+        "lineNumber": 173,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2079,6 +2311,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 177,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2095,6 +2329,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 181,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2111,6 +2347,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 185,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2127,6 +2365,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 189,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2150,6 +2390,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+            "lineNumber": 193,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2168,6 +2410,8 @@
           "\nEnum for a DFA configuration's advanced fields"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/constants.ts",
+        "lineNumber": 79,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2182,6 +2426,8 @@
           "\nEnum for a DFA configuration's outlier analysis method"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/constants.ts",
+        "lineNumber": 103,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2201,6 +2447,8 @@
           "MlDataframeAnalysisContainer"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+        "lineNumber": 139,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2218,6 +2466,8 @@
           "\"outlier_detection\" | \"regression\" | \"classification\""
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+        "lineNumber": 209,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2235,6 +2485,8 @@
           "string"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2253,6 +2505,8 @@
           "MlDataframeState"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+        "lineNumber": 215,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2270,6 +2524,8 @@
           "8"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/fields.ts",
+        "lineNumber": 57,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2287,6 +2543,8 @@
           "\"ml\""
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/constants.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2304,6 +2562,8 @@
           "MlExplainDataFrameAnalyticsResponse"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+        "lineNumber": 234,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2321,6 +2581,8 @@
           "\"feature_importance\""
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/constants.ts",
+        "lineNumber": 62,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2338,6 +2600,8 @@
           "\"feature_influence\""
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/constants.ts",
+        "lineNumber": 67,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2369,6 +2633,8 @@
           }
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "lineNumber": 174,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2386,6 +2652,8 @@
           "string | number | boolean"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2403,6 +2671,8 @@
           "MlDataframeAnalysisFeatureProcessor"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+        "lineNumber": 422,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2420,6 +2690,8 @@
           "\"index\" | \"transform\" | \"analytics\" | \"ingestPipeline\" | \"analytics-job-missing\" | \"trainedModel\""
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/constants.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2451,6 +2723,8 @@
           }
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
+        "lineNumber": 399,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2468,6 +2742,8 @@
           "\"ml__id_copy\""
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/fields.ts",
+        "lineNumber": 84,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2485,6 +2761,8 @@
           "\"ml__incremental_id\""
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/fields.ts",
+        "lineNumber": 90,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2502,6 +2780,8 @@
           "0"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/constants.ts",
+        "lineNumber": 116,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2519,6 +2799,8 @@
           "\"outlier_score\""
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/constants.ts",
+        "lineNumber": 77,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2536,6 +2818,8 @@
           "\"top_classes\""
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/constants.ts",
+        "lineNumber": 72,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2560,6 +2844,8 @@
           "[]"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "lineNumber": 67,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2591,6 +2877,8 @@
           }
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/feature_importance.ts",
+        "lineNumber": 134,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2608,6 +2896,8 @@
           "100"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/constants.ts",
+        "lineNumber": 126,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2625,6 +2915,8 @@
           "1"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/constants.ts",
+        "lineNumber": 121,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2644,6 +2936,8 @@
           "{ readonly OUTLIER_DETECTION: \"outlier_detection\"; readonly REGRESSION: \"regression\"; readonly CLASSIFICATION: \"classification\"; }"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2669,6 +2963,8 @@
           ">"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/fields.ts",
+        "lineNumber": 62,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2686,6 +2982,8 @@
           "{ readonly ANALYZING: \"analyzing\"; readonly FAILED: \"failed\"; readonly REINDEXING: \"reindexing\"; readonly STARTED: \"started\"; readonly STARTING: \"starting\"; readonly STOPPED: \"stopped\"; }"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/constants.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2711,6 +3009,8 @@
           ">"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/fields.ts",
+        "lineNumber": 73,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2728,6 +3028,8 @@
           "{ readonly FILE_DATA_VISUALIZER: \"file-data-visualizer\"; readonly DATA_FRAME_ANALYTICS: \"data-frame-analytics\"; }"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/constants.ts",
+        "lineNumber": 54,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2745,6 +3047,8 @@
           "{ readonly ANALYTICS: \"analytics\"; readonly ANALYTICS_JOB_MISSING: \"analytics-job-missing\"; readonly TRANSFORM: \"transform\"; readonly INDEX: \"index\"; readonly TRAINED_MODEL: \"trainedModel\"; readonly INGEST_PIPELINE: \"ingestPipeline\"; }"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/constants.ts",
+        "lineNumber": 37,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

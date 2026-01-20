@@ -123,7 +123,7 @@ describe('Dynamic validation system behavior', () => {
       const yamlDocument = parseDocument(`
   steps:
     - name: createCase
-      type: kibana.createCaseDefaultSpace
+      type: kibana.createCase
       with:
         title: "Test Case"
         description: "Test Description"
@@ -157,7 +157,7 @@ describe('Dynamic validation system behavior', () => {
       const yamlDocument = parseDocument(`
   steps:
     - name: createCase
-      type: kibana.createCaseDefaultSpace
+      type: kibana.createCase
       with:
         title: "Test Case"
         description: "Test Description"

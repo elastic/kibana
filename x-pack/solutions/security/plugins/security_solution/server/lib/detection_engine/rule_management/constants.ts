@@ -106,3 +106,5 @@ export const FUNCTIONAL_FIELD_MAP: Record<AllKeys<RuleResponse>, boolean> = {
   created_at: false,
   created_by: false,
 };
+
+export const EXPECTED_MAX_TAGS = 65536;

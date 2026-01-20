@@ -268,6 +268,7 @@ export class CsvGenerator {
       ),
       createSearchSource(),
     ]);
+    searchSource.setField('timezone', settings.timezone);
 
     const { startedAt, retryAt } = this.taskInstanceFields;
     if (startedAt) {

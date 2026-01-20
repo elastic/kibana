@@ -33,6 +33,18 @@ export function RollbackButton({ packageInfo, isCustomPackage }: RollbackButtonP
   const isRollbackTTLExpired = !!packageInfo.installationInfo?.is_rollback_ttl_expired;
   const isUploadedPackage = packageInfo.installationInfo?.install_source === 'upload';
   const isRegistryPackage = packageInfo.installationInfo?.install_source === 'registry';
+
+  const {
+    actions: { bulkRollbackIntegrationsWithConfirmModal },
+  } = useInstalledIntegrationsActions();
+  const rollbackPackage = useRollbackPackage();
+  const getPackageInstallStatus = useGetPackageInstallStatus();
+  const { status: installationStatus } = getPackageInstallStatus(packageInfo.name);
+  const isRollingBack = installationStatus === InstallStatus.rollingBack;
+  const isReinstalling = installationStatus === InstallStatus.reinstalling;
+  const isUninstalling = installationStatus === InstallStatus.uninstalling;
+  const isInstalling = installationStatus === InstallStatus.installing;
+
   const isDisabled =
     !canRollbackPackages ||
     !hasPreviousVersion ||
@@ -41,14 +53,10 @@ export function RollbackButton({ packageInfo, isCustomPackage }: RollbackButtonP
     isCustomPackage ||
     !licenseService.isEnterprise() ||
     isRollbackTTLExpired ||
-    !isAvailable;
-  const {
-    actions: { bulkRollbackIntegrationsWithConfirmModal },
-  } = useInstalledIntegrationsActions();
-  const rollbackPackage = useRollbackPackage();
-  const getPackageInstallStatus = useGetPackageInstallStatus();
-  const { status: installationStatus } = getPackageInstallStatus(packageInfo.name);
-  const isRollingBack = installationStatus === InstallStatus.rollingBack;
+    !isAvailable ||
+    isReinstalling ||
+    isUninstalling ||
+    isInstalling;
 
   const openRollbackModal = useCallback(async () => {
     await rollbackPackage(packageInfo, bulkRollbackIntegrationsWithConfirmModal);

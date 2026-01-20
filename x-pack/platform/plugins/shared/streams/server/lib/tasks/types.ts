@@ -5,19 +5,28 @@
  * 2.0.
  */
 
-export type TaskStatus =
-  | 'not_started'
-  | 'in_progress'
-  | 'completed'
-  | 'acknowledged'
-  | 'failed'
-  | 'being_canceled'
-  | 'canceled';
+import type { TaskStatus } from '@kbn/streams-schema';
+
+/**
+ * Generic result type for task status/actions endpoints.
+ * Uses discriminated union based on status to properly type the payload.
+ */
+export type TaskResult<TPayload> =
+  | {
+      status:
+        | TaskStatus.NotStarted
+        | TaskStatus.InProgress
+        | TaskStatus.Stale
+        | TaskStatus.BeingCanceled
+        | TaskStatus.Canceled;
+    }
+  | { status: TaskStatus.Failed; error: string }
+  | ({ status: TaskStatus.Completed | TaskStatus.Acknowledged } & TPayload);
 
 interface PersistedTaskBase<TParams extends {} = {}> {
   id: string;
   type: string;
-  status: TaskStatus;
+  status: Exclude<TaskStatus, TaskStatus.Stale>;
   stream: string;
   space: string;
   created_at: string;
@@ -27,33 +36,33 @@ interface PersistedTaskBase<TParams extends {} = {}> {
 }
 
 interface NotStartedTask<TParams extends {} = {}> extends PersistedTaskBase<TParams> {
-  status: 'not_started';
+  status: TaskStatus.NotStarted;
 }
 interface InProgressTask<TParams extends {} = {}> extends PersistedTaskBase<TParams> {
-  status: 'in_progress';
+  status: TaskStatus.InProgress;
 }
 interface BeingCanceledTask<TParams extends {} = {}> extends PersistedTaskBase<TParams> {
-  status: 'being_canceled';
+  status: TaskStatus.BeingCanceled;
 }
 interface CanceledTask<TParams extends {} = {}> extends PersistedTaskBase<TParams> {
-  status: 'canceled';
+  status: TaskStatus.Canceled;
 }
 interface CompletedTask<TParams extends {} = {}, TPayload extends {} = {}>
   extends PersistedTaskBase<TParams> {
-  status: 'completed';
+  status: TaskStatus.Completed;
   task: PersistedTaskBase<TParams>['task'] & {
     payload: TPayload;
   };
 }
 interface AcknowledgedTask<TParams extends {} = {}, TPayload extends {} = {}>
   extends PersistedTaskBase<TParams> {
-  status: 'acknowledged';
+  status: TaskStatus.Acknowledged;
   task: PersistedTaskBase<TParams>['task'] & {
     payload: TPayload;
   };
 }
 interface FailedTask<TParams extends {} = {}> extends PersistedTaskBase<TParams> {
-  status: 'failed';
+  status: TaskStatus.Failed;
   task: PersistedTaskBase<TParams>['task'] & {
     error: string;
   };

@@ -7,27 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiBadge,
-  EuiLink,
-  EuiFlyout,
-  EuiFlexGroup,
-  EuiSpacer,
-  EuiCodeBlock,
-  EuiTitle,
-  EuiButton,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlyout, EuiLink } from '@elastic/eui';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { RowControlColumn } from '@kbn/discover-utils';
 import { AppMenuActionId, AppMenuActionType, getFieldValue } from '@kbn/discover-utils';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { capitalize } from 'lodash';
 import React from 'react';
 import type { DataSourceProfileProvider } from '../../../profiles';
-import { ChartWithCustomButtons } from './components';
 import { DataSourceCategory } from '../../../profiles';
-import { useExampleContext } from '../example_context';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
+import { useExampleContext } from '../example_context';
+import { ChartWithCustomButtons } from './components';
+import { CustomDocView } from './components/custom_doc_view';
+import { RestorableStateDocView } from './components/restorable_state_doc_view';
 
 export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvider<{
   formatRecord: (flattenedRecord: Record<string, unknown>) => string;
@@ -98,63 +90,20 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
               id: 'doc_view_example',
               title: 'Example',
               order: 0,
-              component: () => (
-                <>
-                  <EuiSpacer size="s" />
-                  <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-                    <EuiFlexGroup
-                      direction="row"
-                      gutterSize="s"
-                      justifyContent="spaceBetween"
-                      alignItems="flexEnd"
-                      responsive={false}
-                    >
-                      <EuiTitle size="xs">
-                        <h3 data-test-subj="exampleDataSourceProfileDocView">Example doc view</h3>
-                      </EuiTitle>
-                      {(openInNewTab || updateESQLQuery) && (
-                        <EuiFlexItem grow={false}>
-                          <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
-                            {updateESQLQuery && (
-                              <EuiButton
-                                color="text"
-                                size="s"
-                                onClick={() => {
-                                  updateESQLQuery('FROM my-example-logs | LIMIT 5');
-                                }}
-                                data-test-subj="exampleDataSourceProfileDocViewUpdateEsqlQuery"
-                              >
-                                Update ES|QL query
-                              </EuiButton>
-                            )}
-                            {openInNewTab && (
-                              <EuiButton
-                                color="text"
-                                size="s"
-                                onClick={() => {
-                                  openInNewTab({
-                                    tabLabel: 'My new tab',
-                                    query: { esql: 'FROM my-example-logs | LIMIT 5' },
-                                  });
-                                }}
-                                data-test-subj="exampleDataSourceProfileDocViewOpenNewTab"
-                              >
-                                Open new tab
-                              </EuiButton>
-                            )}
-                          </EuiFlexGroup>
-                        </EuiFlexItem>
-                      )}
-                    </EuiFlexGroup>
-                    <EuiCodeBlock
-                      language="json"
-                      data-test-subj="exampleDataSourceProfileDocViewRecord"
-                    >
-                      {context.formatRecord(params.record.flattened)}
-                    </EuiCodeBlock>
-                  </EuiFlexGroup>
-                </>
+              render: () => (
+                <CustomDocView
+                  formattedRecord={context.formatRecord(params.record.flattened)}
+                  openInNewTab={openInNewTab}
+                  updateESQLQuery={updateESQLQuery}
+                />
               ),
+            });
+
+            registry.add({
+              id: 'doc_view_restorable_state_example',
+              title: 'Restorable State Example',
+              order: 1,
+              render: (props) => <RestorableStateDocView {...props} />,
             });
 
             return prevValue.docViewsRegistry(registry);

@@ -68,7 +68,7 @@ export const AppMenuOverflowButton = ({
       onClick={handleClick}
       isSelected={isPopoverOpen}
       css={buttonCss}
-      data-test-subj="top-nav-menu-overflow-button"
+      data-test-subj="app-menu-overflow-button"
     />
   );
 

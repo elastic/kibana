@@ -16,6 +16,8 @@
           "(props: BackgroundSearchRestoredCalloutProps) => React.JSX.Element | null"
         ],
         "path": "src/platform/packages/shared/kbn-background-search/src/components/background_search_restored_callout.tsx",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -32,6 +34,8 @@
               "BackgroundSearchRestoredCalloutProps"
             ],
             "path": "src/platform/packages/shared/kbn-background-search/src/components/background_search_restored_callout.tsx",
+            "lineNumber": 42,
+            "columnNumber": 49,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

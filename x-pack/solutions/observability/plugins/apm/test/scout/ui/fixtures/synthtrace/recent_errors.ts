@@ -7,6 +7,7 @@
 
 import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { apm, timerange } from '@kbn/synthtrace-client';
+import { PRODUCTION_ENVIRONMENT } from '../constants';
 
 export function serviceDataWithRecentErrors(): SynthtraceGenerator<ApmFields> {
   const start = Date.now() - 1000 * 60 * 15;
@@ -16,7 +17,7 @@ export function serviceDataWithRecentErrors(): SynthtraceGenerator<ApmFields> {
   const synthJava = apm
     .service({
       name: 'unstable-java',
-      environment: 'production',
+      environment: PRODUCTION_ENVIRONMENT,
       agentName: 'java',
     })
     .instance('my-instance');

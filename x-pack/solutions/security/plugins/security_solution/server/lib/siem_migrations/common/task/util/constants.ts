@@ -14,6 +14,7 @@ export const SYSTEM_INSTRUCTIONS = `
 ### General Guidelines
 1. Do not use quotes for variables or aliases, replace any in the original with snake cased aliases. Only use quotes when necessary as a string literal.
 2. Never add quotes or ticks to index names.
+3. Whenever you are asked to search in Event payload, source payload and no specific field is specified, ALWAYS do the search with the help of KQL or QSTR command. For example, if instruction is search for "malware*" in event payload when use KQL command like so: \`where kql\("malware*"\)\`.
 
 \`\`\`
 

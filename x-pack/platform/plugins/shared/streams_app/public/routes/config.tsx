@@ -40,7 +40,20 @@ const streamsAppRoutes = {
         element: <StreamListView />,
       },
       '/_discovery': {
-        element: <SignificantEventsDiscoveryPage />,
+        element: <Outlet />,
+        children: {
+          '/_discovery': {
+            element: <RedirectTo path="/_discovery/{tab}" params={{ path: { tab: 'streams' } }} />,
+          },
+          '/_discovery/{tab}': {
+            element: <SignificantEventsDiscoveryPage />,
+            params: t.type({
+              path: t.type({
+                tab: t.string,
+              }),
+            }),
+          },
+        },
       },
       '/{key}': {
         element: (

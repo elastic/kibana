@@ -6,7 +6,10 @@
  */
 
 import { RULES_API_READ } from '@kbn/security-solution-features/constants';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import type { Logger } from '@kbn/core/server';
 import { REVIEW_RULE_INSTALLATION_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import { ReviewRuleInstallationRequestBody as ReviewRuleInstallationRequestBodySchema } from '../../../../../../common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 import {
@@ -15,7 +18,10 @@ import {
 } from '../../constants';
 import { reviewRuleInstallationHandler } from './review_rule_installation_handler';
 
-export const reviewRuleInstallationRoute = (router: SecuritySolutionPluginRouter) => {
+export const reviewRuleInstallationRoute = (
+  router: SecuritySolutionPluginRouter,
+  logger: Logger
+) => {
   router.versioned
     .post({
       access: 'internal',
@@ -35,8 +41,17 @@ export const reviewRuleInstallationRoute = (router: SecuritySolutionPluginRouter
     .addVersion(
       {
         version: '1',
-        validate: {},
+        validate: {
+          request: {
+            body: buildRouteValidationWithZod(
+              // Since the HTTP service converts `undefined` request bodies to null, we need to allow null values.
+              // This will be removed in the next release when we make pagination parameters required.
+              ReviewRuleInstallationRequestBodySchema.nullable()
+            ),
+          },
+        },
       },
-      reviewRuleInstallationHandler
+      (context, request, response) =>
+        reviewRuleInstallationHandler(context, request, response, logger)
     );
 };

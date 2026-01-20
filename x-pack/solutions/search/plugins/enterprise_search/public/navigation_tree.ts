@@ -72,7 +72,6 @@ export const getNavigationTreeDefinition = ({
               link: 'agent_builder',
             },
             {
-              badgeType: 'techPreview' as const,
               link: 'workflows',
             },
             {

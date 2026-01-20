@@ -6,7 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
-import { platformCoreTools, ToolType, ToolResultType } from '@kbn/agent-builder-common';
+import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server';
 import type { AttachmentToolsOptions } from './types';
@@ -30,35 +31,43 @@ export const createAttachmentDiffTool = ({
     'Compare two versions of an attachment to see what changed. Use this to understand the history of modifications.',
   schema: attachmentDiffSchema,
   tags: ['attachment'],
-  handler: async ({ attachment_id, from_version, to_version }, _context) => {
-    const attachment = attachmentManager.get(attachment_id);
+  handler: async ({
+    attachment_id: attachmentId,
+    from_version: fromVersion,
+    to_version: toVersion,
+  }) => {
+    const attachment = attachmentManager.get(attachmentId);
 
     if (!attachment) {
       return {
         results: [
           createErrorResult({
-            message: `Attachment with ID '${attachment_id}' not found`,
-            metadata: { attachment_id },
+            message: `Attachment with ID '${attachmentId}' not found`,
+            metadata: { attachment_id: attachmentId },
           }),
         ],
       };
     }
 
-    const diff = attachmentManager.getDiff(attachment_id, from_version, to_version);
+    const diff = attachmentManager.getDiff(attachmentId, fromVersion, toVersion);
 
     if (!diff) {
       return {
         results: [
           createErrorResult({
-            message: `Could not compute diff between versions ${from_version} and ${to_version} for attachment '${attachment_id}'`,
-            metadata: { attachment_id, from_version, to_version },
+            message: `Could not compute diff between versions ${fromVersion} and ${toVersion} for attachment '${attachmentId}'`,
+            metadata: {
+              attachment_id: attachmentId,
+              from_version: fromVersion,
+              to_version: toVersion,
+            },
           }),
         ],
       };
     }
 
-    const fromVersionData = attachmentManager.getVersion(attachment_id, from_version);
-    const toVersionData = attachmentManager.getVersion(attachment_id, to_version);
+    const fromVersionData = attachmentManager.getVersion(attachmentId, fromVersion);
+    const toVersionData = attachmentManager.getVersion(attachmentId, toVersion);
 
     return {
       results: [
@@ -66,9 +75,10 @@ export const createAttachmentDiffTool = ({
           tool_result_id: getToolResultId(),
           type: ToolResultType.other,
           data: {
-            attachment_id,
-            from_version,
-            to_version,
+            __attachment_operation__: 'diff',
+            attachment_id: attachmentId,
+            from_version: fromVersion,
+            to_version: toVersion,
             change_type: diff.change_type,
             summary: diff.summary,
             changed_fields: diff.changed_fields,
@@ -78,5 +88,27 @@ export const createAttachmentDiffTool = ({
         },
       ],
     };
+  },
+  summarizeToolReturn: (toolReturn) => {
+    if (toolReturn.results.length === 0) return undefined;
+    const result = toolReturn.results[0];
+    if (!isOtherResult(result)) return undefined;
+    const data = result.data as Record<string, unknown>;
+    if (data.__attachment_operation__ !== 'diff') return undefined;
+
+    return [
+      {
+        ...result,
+        data: {
+          summary: `Compared attachment "${data.attachment_id}" v${data.from_version} to v${
+            data.to_version
+          }: ${data.change_type || 'changes found'}`,
+          attachment_id: data.attachment_id,
+          from_version: data.from_version,
+          to_version: data.to_version,
+          change_type: data.change_type,
+        },
+      },
+    ];
   },
 });

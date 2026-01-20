@@ -12,6 +12,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
 import { serverlessMock } from '@kbn/serverless/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
@@ -31,4 +32,5 @@ export const createStartServicesMock = () => ({
   spaces: spacesPluginMock.createStartContract(),
   triggersActionsUi: triggersActionsUiMock.createStart(),
   workflowsExtensions: workflowsExtensionsMock.createStart(),
+  licensing: licensingMock.createStart(),
 });

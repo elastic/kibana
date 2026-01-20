@@ -11,6 +11,7 @@ import type {
   SavedObjectsClosePointInTimeResponse,
   SavedObjectsOpenPointInTimeResponse,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type {
   ExceptionListItemSchema,
   ExceptionListSchema,
@@ -1075,7 +1076,16 @@ export class ExceptionListClient {
     sortOrder,
   }: FindEndpointListItemOptions): Promise<FoundExceptionListItemSchema | null> => {
     const { savedObjectsClient } = this;
-    await this.createEndpointList();
+
+    // Attempt to auto-create the endpoint list for users with write access.
+    // Silently ignore forbidden errors for read-only users - they can still query existing lists.
+    try {
+      await this.createEndpointList();
+    } catch (err) {
+      if (!SavedObjectsErrorHelpers.isForbiddenError(err)) {
+        throw err;
+      }
+    }
 
     const findOptions = {
       filter,

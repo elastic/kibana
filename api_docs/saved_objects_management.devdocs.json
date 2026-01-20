@@ -10,6 +10,8 @@
         "label": "SavedObjectsManagementAction",
         "description": [],
         "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/action.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -24,6 +26,8 @@
               "() => React.ReactNode"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/action.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -37,6 +41,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/action.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -83,6 +89,8 @@
               ") => any) | undefined; }"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/action.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -97,6 +105,8 @@
               "(() => { type: string; id: string; }[]) | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/action.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -111,6 +121,8 @@
               "ActionContext | null"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/action.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -132,6 +144,8 @@
               " | null"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/action.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -146,6 +160,8 @@
               "(actionContext: ActionContext) => void"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/action.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -160,6 +176,8 @@
                   "ActionContext"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/action.ts",
+                "lineNumber": 38,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -178,6 +196,8 @@
               "(callback: Function) => void"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/action.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -192,6 +212,8 @@
                   "Function"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/action.ts",
+                "lineNumber": 42,
+                "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -218,6 +240,8 @@
               ") => void"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/action.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -238,6 +262,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/action.ts",
+                "lineNumber": 46,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -256,6 +282,8 @@
               "() => void"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/action.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -272,6 +300,8 @@
         "label": "SavedObjectsManagementColumn",
         "description": [],
         "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/column.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -283,6 +313,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/column.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -343,6 +375,8 @@
               ") => React.ReactNode) | undefined; }) | undefined; isExpander?: boolean | undefined; }"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/column.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -357,6 +391,8 @@
               "(() => { type: string; id: string; }[]) | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/column.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -371,6 +407,8 @@
               "ColumnContext | null"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/column.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -385,6 +423,8 @@
               "(columnContext: ColumnContext) => void"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/column.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -399,6 +439,8 @@
                   "ColumnContext"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/column.ts",
+                "lineNumber": 30,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -417,6 +459,8 @@
               "(callback: Function) => void"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/column.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -431,6 +475,8 @@
                   "Function"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/column.ts",
+                "lineNumber": 34,
+                "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -449,6 +495,8 @@
               "() => void"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/column.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -480,6 +528,8 @@
           "[] | undefined"
         ],
         "path": "src/platform/plugins/shared/saved_objects_management/public/lib/get_tag_references.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -491,6 +541,8 @@
             "label": "{\n  selectedTags,\n  taggingApi,\n}",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/public/lib/get_tag_references.ts",
+            "lineNumber": 16,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -505,6 +557,8 @@
                   "string[] | undefined"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_management/public/lib/get_tag_references.ts",
+                "lineNumber": 17,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -526,6 +580,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_management/public/lib/get_tag_references.ts",
+                "lineNumber": 18,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -556,6 +612,8 @@
           "[]) => ParsedQuery"
         ],
         "path": "src/platform/plugins/shared/saved_objects_management/public/lib/parse_query.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -570,6 +628,8 @@
               "Query"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/lib/parse_query.ts",
+            "lineNumber": 19,
+            "columnNumber": 28,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -592,6 +652,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/lib/parse_query.ts",
+            "lineNumber": 19,
+            "columnNumber": 42,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -620,6 +682,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/saved_objects_management/public/lib/process_import_response.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -634,6 +698,8 @@
               "SavedObjectsImportResponse"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/lib/process_import_response.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -652,6 +718,8 @@
         "label": "FailedImport",
         "description": [],
         "path": "src/platform/plugins/shared/saved_objects_management/public/lib/process_import_response.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -666,6 +734,8 @@
               "{ id: string; meta: { title?: string | undefined; icon?: string | undefined; }; type: string; managed?: boolean | undefined; overwrite?: boolean | undefined; }"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/lib/process_import_response.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -690,6 +760,8 @@
               "SavedObjectsImportUnexpectedAccessControlMetadataError"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/lib/process_import_response.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -704,6 +776,8 @@
         "label": "ProcessedImportResponse",
         "description": [],
         "path": "src/platform/plugins/shared/saved_objects_management/public/lib/process_import_response.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -725,6 +799,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/lib/process_import_response.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -740,6 +816,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/lib/process_import_response.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -754,6 +832,8 @@
               "UnmatchedReference[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/lib/process_import_response.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -768,6 +848,8 @@
               "\"success\" | \"idle\""
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/lib/process_import_response.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -779,6 +861,8 @@
             "label": "importCount",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/public/lib/process_import_response.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -794,6 +878,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/lib/process_import_response.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -808,6 +894,8 @@
         "label": "SavedObjectManagementTypeInfo",
         "description": [],
         "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+        "lineNumber": 80,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -819,6 +907,8 @@
             "label": "name",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -833,6 +923,8 @@
               "\"multiple\" | \"single\" | \"agnostic\" | \"multiple-isolated\""
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -844,6 +936,8 @@
             "label": "hidden",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -855,6 +949,8 @@
             "label": "displayName",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -871,6 +967,8 @@
           "Domain interfaces\n\nSaved Object Management metadata associated with a saved object. See\n{@link SavedObjectWithMetadata}."
         ],
         "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -885,6 +983,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -899,6 +999,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -913,6 +1015,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -927,6 +1031,8 @@
               "{ path: string; uiCapabilitiesPath: string; } | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -942,6 +1048,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -956,6 +1064,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -972,6 +1082,8 @@
           "\nRepresents a relation between two {@link SavedObjectWithMetadata | saved objects}."
         ],
         "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+        "lineNumber": 58,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -983,6 +1095,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -994,6 +1108,8 @@
             "label": "type",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1008,6 +1124,8 @@
               "\"child\" | \"parent\""
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1028,6 +1146,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1039,6 +1159,8 @@
             "label": "managed",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1054,6 +1176,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1068,6 +1192,8 @@
         "label": "SavedObjectsManagementRecord",
         "description": [],
         "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/record.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1079,6 +1205,8 @@
             "label": "type",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/record.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1090,6 +1218,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/record.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1106,6 +1236,8 @@
               "; hiddenType: boolean; }"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/record.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1121,6 +1253,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/record.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1135,6 +1269,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/record.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1163,6 +1299,8 @@
           "<T>"
         ],
         "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1174,6 +1312,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1185,6 +1325,8 @@
             "label": "type",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1205,6 +1347,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1220,6 +1364,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1234,6 +1380,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1248,6 +1396,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1262,6 +1412,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1276,6 +1428,8 @@
               "T"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1290,6 +1444,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1305,6 +1461,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1323,6 +1481,8 @@
       "label": "SavedObjectsManagementPluginSetup",
       "description": [],
       "path": "src/platform/plugins/shared/saved_objects_management/public/plugin.ts",
+      "lineNumber": 41,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -1337,6 +1497,8 @@
       "label": "SavedObjectsManagementPluginStart",
       "description": [],
       "path": "src/platform/plugins/shared/saved_objects_management/public/plugin.ts",
+      "lineNumber": 43,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1359,6 +1521,8 @@
             "[]>"
           ],
           "path": "src/platform/plugins/shared/saved_objects_management/public/plugin.ts",
+          "lineNumber": 44,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -1377,6 +1541,8 @@
             ">"
           ],
           "path": "src/platform/plugins/shared/saved_objects_management/public/plugin.ts",
+          "lineNumber": 45,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1391,6 +1557,8 @@
                 "string"
               ],
               "path": "src/platform/plugins/shared/saved_objects_management/public/plugin.ts",
+              "lineNumber": 46,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1406,6 +1574,8 @@
                 "string"
               ],
               "path": "src/platform/plugins/shared/saved_objects_management/public/plugin.ts",
+              "lineNumber": 47,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1421,6 +1591,8 @@
                 "string[]"
               ],
               "path": "src/platform/plugins/shared/saved_objects_management/public/plugin.ts",
+              "lineNumber": 48,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1436,6 +1608,8 @@
                 "number | undefined"
               ],
               "path": "src/platform/plugins/shared/saved_objects_management/public/plugin.ts",
+              "lineNumber": 49,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -1462,6 +1636,8 @@
             "[]) => string"
           ],
           "path": "src/platform/plugins/shared/saved_objects_management/public/plugin.ts",
+          "lineNumber": 51,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -1474,6 +1650,8 @@
               "label": "type",
               "description": [],
               "path": "src/platform/plugins/shared/saved_objects_management/public/lib/get_saved_object_label.ts",
+              "lineNumber": 15,
+              "columnNumber": 37,
               "deprecated": false,
               "trackAdoption": false
             },
@@ -1495,6 +1673,8 @@
                 "[]"
               ],
               "path": "src/platform/plugins/shared/saved_objects_management/public/lib/get_saved_object_label.ts",
+              "lineNumber": 15,
+              "columnNumber": 51,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -1511,6 +1691,8 @@
             "(object: { id: string; type: string; }) => string"
           ],
           "path": "src/platform/plugins/shared/saved_objects_management/public/plugin.ts",
+          "lineNumber": 52,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -1526,6 +1708,8 @@
                 "{ id: string; type: string; }"
               ],
               "path": "src/platform/plugins/shared/saved_objects_management/public/lib/get_default_title.ts",
+              "lineNumber": 10,
+              "columnNumber": 33,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -1552,6 +1736,8 @@
             "[]) => ParsedQuery"
           ],
           "path": "src/platform/plugins/shared/saved_objects_management/public/plugin.ts",
+          "lineNumber": 53,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -1567,6 +1753,8 @@
                 "Query"
               ],
               "path": "src/platform/plugins/shared/saved_objects_management/public/lib/parse_query.ts",
+              "lineNumber": 19,
+              "columnNumber": 28,
               "deprecated": false,
               "trackAdoption": false
             },
@@ -1588,6 +1776,8 @@
                 "[]"
               ],
               "path": "src/platform/plugins/shared/saved_objects_management/public/lib/parse_query.ts",
+              "lineNumber": 19,
+              "columnNumber": 42,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -1614,6 +1804,8 @@
             "[] | undefined"
           ],
           "path": "src/platform/plugins/shared/saved_objects_management/public/plugin.ts",
+          "lineNumber": 54,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -1637,6 +1829,8 @@
                 " | undefined; }"
               ],
               "path": "src/platform/plugins/shared/saved_objects_management/public/lib/get_tag_references.ts",
+              "lineNumber": 13,
+              "columnNumber": 38,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -1661,6 +1855,8 @@
           "Domain interfaces\n\nSaved Object Management metadata associated with a saved object. See\n{@link SavedObjectWithMetadata}."
         ],
         "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1675,6 +1871,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1689,6 +1887,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1703,6 +1903,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1717,6 +1919,8 @@
               "{ path: string; uiCapabilitiesPath: string; } | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1732,6 +1936,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1746,6 +1952,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1774,6 +1982,8 @@
           "<T>"
         ],
         "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1785,6 +1995,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1796,6 +2008,8 @@
             "label": "type",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1816,6 +2030,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1831,6 +2047,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1845,6 +2063,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1859,6 +2079,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1873,6 +2095,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1887,6 +2111,8 @@
               "T"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1901,6 +2127,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1916,6 +2144,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1934,6 +2164,8 @@
       "label": "SavedObjectsManagementPluginSetup",
       "description": [],
       "path": "src/platform/plugins/shared/saved_objects_management/server/types.ts",
+      "lineNumber": 11,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -1948,6 +2180,8 @@
       "label": "SavedObjectsManagementPluginStart",
       "description": [],
       "path": "src/platform/plugins/shared/saved_objects_management/server/types.ts",
+      "lineNumber": 14,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -1969,6 +2203,8 @@
           "\nRepresents a relation between two {@link SavedObjectWithMetadata | saved objects}."
         ],
         "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+        "lineNumber": 70,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1980,6 +2216,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1991,6 +2229,8 @@
             "label": "type",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2005,6 +2245,8 @@
               "\"child\" | \"parent\""
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2016,6 +2258,8 @@
             "label": "error",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2030,6 +2274,8 @@
         "label": "SavedObjectManagementTypeInfo",
         "description": [],
         "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+        "lineNumber": 80,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2041,6 +2287,8 @@
             "label": "name",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2055,6 +2303,8 @@
               "\"multiple\" | \"single\" | \"agnostic\" | \"multiple-isolated\""
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2066,6 +2316,8 @@
             "label": "hidden",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2077,6 +2329,8 @@
             "label": "displayName",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2093,6 +2347,8 @@
           "Domain interfaces\n\nSaved Object Management metadata associated with a saved object. See\n{@link SavedObjectWithMetadata}."
         ],
         "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2107,6 +2363,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2121,6 +2379,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2135,6 +2395,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2149,6 +2411,8 @@
               "{ path: string; uiCapabilitiesPath: string; } | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2164,6 +2428,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2178,6 +2444,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2194,6 +2462,8 @@
           "\nRepresents a relation between two {@link SavedObjectWithMetadata | saved objects}."
         ],
         "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+        "lineNumber": 58,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2205,6 +2475,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2216,6 +2488,8 @@
             "label": "type",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2230,6 +2504,8 @@
               "\"child\" | \"parent\""
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2250,6 +2526,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2261,6 +2539,8 @@
             "label": "managed",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2276,6 +2556,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2304,6 +2586,8 @@
           "<T>"
         ],
         "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2315,6 +2599,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2326,6 +2612,8 @@
             "label": "type",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2346,6 +2634,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2361,6 +2651,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2375,6 +2667,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2389,6 +2683,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2403,6 +2699,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2417,6 +2715,8 @@
               "T"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2431,6 +2731,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2446,6 +2748,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2466,6 +2770,8 @@
           "\"child\" | \"parent\""
         ],
         "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+        "lineNumber": 56,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

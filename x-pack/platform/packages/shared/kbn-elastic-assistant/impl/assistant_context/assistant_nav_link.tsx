@@ -12,9 +12,8 @@ import { i18n } from '@kbn/i18n';
 import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
+import { isMac } from '@kbn/shared-ux-utility';
 import { useAssistantContext } from '../..';
-
-const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
 const TOOLTIP_CONTENT = i18n.translate(
   'xpack.elasticAssistant.assistantContext.assistantNavLinkShortcutTooltip',
