@@ -19,27 +19,30 @@ import { i18n } from '@kbn/i18n';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
-import type { ResponseActionExecuteOutputContent } from '../../../../common/endpoint/types';
+import type {
+  ResponseActionEndpointRunScriptOutputContent,
+  ResponseActionExecuteOutputContent,
+} from '../../../../common/endpoint/types';
 import { getEmptyValue } from '../../../common/components/empty_value';
 
 const emptyValue = getEmptyValue();
 
 const ACCORDION_BUTTON_TEXT = Object.freeze({
   context: i18n.translate(
-    'xpack.securitySolution.responseActionExecuteAccordion.executionContext',
+    'xpack.securitySolution.EndpointHostExecutionResponseOutput.executionContext',
     {
       defaultMessage: 'Execution context',
     }
   ),
   output: {
     regular: i18n.translate(
-      'xpack.securitySolution.responseActionExecuteAccordion.outputButtonTextRegular',
+      'xpack.securitySolution.EndpointHostExecutionResponseOutput.outputButtonTextRegular',
       {
         defaultMessage: 'Execution output',
       }
     ),
     truncated: i18n.translate(
-      'xpack.securitySolution.responseActionExecuteAccordion.outputButtonTextTruncated',
+      'xpack.securitySolution.EndpointHostExecutionResponseOutput.outputButtonTextTruncated',
       {
         defaultMessage: 'Execution output (truncated)',
       }
@@ -47,13 +50,13 @@ const ACCORDION_BUTTON_TEXT = Object.freeze({
   },
   error: {
     regular: i18n.translate(
-      'xpack.securitySolution.responseActionExecuteAccordion.errorButtonTextRegular',
+      'xpack.securitySolution.EndpointHostExecutionResponseOutput.errorButtonTextRegular',
       {
         defaultMessage: 'Execution error',
       }
     ),
     truncated: i18n.translate(
-      'xpack.securitySolution.responseActionExecuteAccordion.errorButtonTextTruncated',
+      'xpack.securitySolution.EndpointHostExecutionResponseOutput.errorButtonTextTruncated',
       {
         defaultMessage: 'Execution error (truncated)',
       }
@@ -62,18 +65,21 @@ const ACCORDION_BUTTON_TEXT = Object.freeze({
 });
 
 const SHELL_INFO = Object.freeze({
-  shell: i18n.translate('xpack.securitySolution.responseActionExecuteAccordion.shellInformation', {
-    defaultMessage: 'Shell',
-  }),
+  shell: i18n.translate(
+    'xpack.securitySolution.EndpointHostExecutionResponseOutput.shellInformation',
+    {
+      defaultMessage: 'Shell',
+    }
+  ),
 
   returnCode: i18n.translate(
-    'xpack.securitySolution.responseActionExecuteAccordion.shellReturnCode',
+    'xpack.securitySolution.EndpointHostExecutionResponseOutput.shellReturnCode',
     {
       defaultMessage: 'Return code',
     }
   ),
   currentDir: i18n.translate(
-    'xpack.securitySolution.responseActionExecuteAccordion.currentWorkingDirectory',
+    'xpack.securitySolution.EndpointHostExecutionResponseOutput.currentWorkingDirectory',
     {
       defaultMessage: 'Executed from',
     }
@@ -175,14 +181,19 @@ const ExecutionActionOutputAccordion = memo<ExecuteActionOutputProps>(
 );
 ExecutionActionOutputAccordion.displayName = 'ExecutionActionOutputAccordion';
 
-export interface ExecuteActionHostResponseOutputProps {
-  outputContent: ResponseActionExecuteOutputContent;
+export interface EndpointHostExecutionResponseOutputProps {
+  outputContent: ResponseActionExecuteOutputContent | ResponseActionEndpointRunScriptOutputContent;
   'data-test-subj'?: string;
+  /** Default is `xs` (normally used in the Action History log) */
   textSize?: 's' | 'xs';
 }
 
-// Note: also used for RunScript command
-export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOutputProps>(
+/**
+ * Displays output from Elastic Defend Endpoint host execution actions (like `runscript` and `execute`) where
+ * the response will include some output that may be truncated along with a file that includes all of the
+ * output from the execution.
+ */
+export const EndpointHostExecutionResponseOutput = memo<EndpointHostExecutionResponseOutputProps>(
   ({ outputContent, 'data-test-subj': dataTestSubj, textSize = 'xs' }) => {
     const contextContent = useMemo(
       () => (
@@ -217,7 +228,7 @@ export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOut
     );
 
     return (
-      <>
+      <div data-test-subj={dataTestSubj}>
         <EuiFlexItem>
           <ExecutionActionOutputAccordion
             content={contextContent}
@@ -252,8 +263,8 @@ export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOut
             type="output"
           />
         </EuiFlexItem>
-      </>
+      </div>
     );
   }
 );
-ExecuteActionHostResponseOutput.displayName = 'ExecuteActionHostResponseOutput';
+EndpointHostExecutionResponseOutput.displayName = 'EndpointHostExecutionResponseOutput';

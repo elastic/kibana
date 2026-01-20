@@ -19,6 +19,7 @@ import { createServices } from './services/create_services';
 import type { WorkplaceAIAppConfig } from './config';
 import { AppLogger } from './utils';
 import { registerWorkplaceAIDataTypes } from './data_types';
+import { rerankStepDefinition } from './steps';
 import type {
   WorkplaceAIAppPluginSetup,
   WorkplaceAIAppPluginStart,
@@ -49,6 +50,8 @@ export class WorkplaceAIAppPlugin
     core: CoreSetup<WorkplaceAIAppPluginStartDependencies>,
     setupDeps: WorkplaceAIAppPluginSetupDependencies
   ): WorkplaceAIAppPluginSetup {
+    setupDeps.workflowsExtensions.registerStepDefinition(rerankStepDefinition);
+
     const router = core.http.createRouter();
     registerRoutes({
       core,
