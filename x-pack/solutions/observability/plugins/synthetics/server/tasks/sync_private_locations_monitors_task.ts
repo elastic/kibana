@@ -16,7 +16,6 @@ import type {
 import moment from 'moment';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-plugin/common';
 import pRetry from 'p-retry';
-import { v4 as uuidv4 } from 'uuid';
 import {
   legacyMonitorAttributes,
   syntheticsMonitorAttributes,
@@ -430,7 +429,7 @@ export const runTaskPerPrivateLocation = async ({
   } = server;
 
   await taskManager.ensureScheduled({
-    id: `${TASK_TYPE}:${uuidv4()}`,
+    id: `${TASK_TYPE}:${privateLocationId}`,
     params: {},
     taskType: TASK_TYPE,
     runAt: new Date(Date.now() + 3 * 1000),
