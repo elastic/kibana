@@ -72,6 +72,7 @@ import { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
 import {
   clearCacheWhenOld,
   filterDataErrors,
+  filterOutWarningsOverlappingWithErrors,
   getEditorOverwrites,
   onKeyDownResizeHandler,
   onMouseDownResizeHandler,
@@ -819,14 +820,19 @@ const ESQLEditorInternal = function ESQLEditor({
         allWarnings = [...parserWarnings, ...externalErrorsParsedWarnings];
       }
 
+      const unerlinedWarnings = allWarnings.filter((warning) => warning.underlinedWarning);
+      const nonOverlappingWarnings = filterOutWarningsOverlappingWithErrors(
+        allErrors,
+        unerlinedWarnings
+      );
+
+      const underlinedMessages = [...allErrors, ...nonOverlappingWarnings];
       const markers = [];
 
-      if (allErrors.length) {
-        if (dataErrorsControl?.enabled === false) {
-          markers.push(...filterDataErrors(allErrors));
-        } else {
-          markers.push(...allErrors);
-        }
+      if (dataErrorsControl?.enabled === false) {
+        markers.push(...filterDataErrors(underlinedMessages));
+      } else {
+        markers.push(...underlinedMessages);
       }
 
       trackValidationLatencyEnd(active);
@@ -1284,7 +1290,6 @@ const ESQLEditorInternal = function ESQLEditor({
           query={code}
           isSpaceReduced={Boolean(editorIsInline) || measuredEditorWidth < BREAKPOINT_WIDTH}
           isVisible={isVisorOpen}
-          onClose={() => setIsVisorOpen(false)}
           onUpdateAndSubmitQuery={(newQuery) =>
             onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH)
           }
