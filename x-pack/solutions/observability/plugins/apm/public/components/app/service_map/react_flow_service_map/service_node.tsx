@@ -26,6 +26,7 @@ export interface ServiceMapNodeData {
     healthStatus?: ServiceHealthStatus;
   };
   isService: boolean;
+  groupedConnections?: Array<any>; // For grouped resource nodes (e.g., Kafka topics)
   [key: string]: unknown; // Allow additional properties for popover content
 }
 

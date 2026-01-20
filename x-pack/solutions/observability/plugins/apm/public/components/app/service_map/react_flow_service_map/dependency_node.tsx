@@ -17,6 +17,7 @@ export interface DependencyMapNodeData extends Record<string, any> {
   label: string;
   spanType: string;
   spanSubtype: string;
+  groupedConnections?: Array<any>;
 }
 
 // Diamond dimensions
@@ -37,6 +38,8 @@ export const DependencyNode = memo(
       return null;
     }, [data.spanType, data.spanSubtype]);
 
+    const isGroupedNode = data.groupedConnections && data.groupedConnections.length > 0;
+
     const ariaLabel = useMemo(() => {
       const parts = [
         i18n.translate('xpack.apm.serviceMap.dependencyNode', {
@@ -44,6 +47,15 @@ export const DependencyNode = memo(
           values: { dependencyName: data.label },
         }),
       ];
+
+      if (isGroupedNode) {
+        parts.push(
+          i18n.translate('xpack.apm.serviceMap.groupedResourceCount', {
+            defaultMessage: 'Contains {count} resources',
+            values: { count: data.groupedConnections?.length ?? 0 },
+          })
+        );
+      }
 
       if (data.spanType) {
         parts.push(
@@ -72,7 +84,14 @@ export const DependencyNode = memo(
       }
 
       return parts.join(', ');
-    }, [data.label, data.spanType, data.spanSubtype, selected]);
+    }, [
+      data.label,
+      data.spanType,
+      data.spanSubtype,
+      selected,
+      isGroupedNode,
+      data.groupedConnections,
+    ]);
 
     return (
       <EuiFlexGroup
