@@ -7,46 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Reference } from '@kbn/content-management-utils';
+import { generateRefName } from './dynamic_actions/dashboard_drilldown_persistable_state';
 import type { DynamicActionsState, SerializedEvent } from './dynamic_actions/types';
 
 export function transformEnhancementsOut(
   enhancementsState: { dynamicActions?: DynamicActionsState },
-  references: Reference[]
 ) {
   if (!enhancementsState?.dynamicActions?.events) return {};
 
   return enhancementsState.dynamicActions.events.map((event) => {
-    if (event.action.factoryId !== 'DASHBOARD_TO_DASHBOARD_DRILLDOWN') {
-      return event;
+    if (event.action.factoryId === 'DASHBOARD_TO_DASHBOARD_DRILLDOWN') {
+      return transformDashboardDrilldown(event);
     }
-
-    const { openInNewTab, useCurrentDateRange, useCurrentFilters, ...restOfConfig } =
-      event.action.config;
-
-    return {
-      ...event,
-      action: {
-        ...event.action,
-        config: {
-          ...restOfConfig,
-          ...(typeof openInNewTab === 'boolean' ? { open_in_new_tab: openInNewTab } : {}),
-          ...(typeof useCurrentDateRange === 'boolean'
-            ? { use_time_range: useCurrentDateRange }
-            : {}),
-          ...(typeof useCurrentFilters === 'boolean' ? { use_filters: useCurrentFilters } : {}),
-        },
-      },
-    };
   });
 }
 
 function transformDashboardDrilldown(event: SerializedEvent) {
+  const { openInNewTab, useCurrentDateRange, useCurrentFilters, ...restOfConfig } =
+      event.action.config;
+
   return {
     label: event.action.name,
     triggers: event.triggers,
     config: {
-      type: '',
+      type: 'dashboard_drilldown',
+      dashboardRefName: generateRefName(event.eventId),
+      ...restOfConfig,
+      ...(typeof openInNewTab === 'boolean' ? { open_in_new_tab: openInNewTab } : {}),
+      ...(typeof useCurrentDateRange === 'boolean'
+        ? { use_time_range: useCurrentDateRange }
+        : {}),
+      ...(typeof useCurrentFilters === 'boolean' ? { use_filters: useCurrentFilters } : {}),
     },
   };
 }
