@@ -33,7 +33,8 @@ const getTraceChangePointsSchema = z.object({
     .string()
     .default('service.name')
     .describe(
-      dedent(`Field to group results by. Use low-cardinality fields:
+      dedent(`Field to group results by. Use low-cardinality fields. 
+      Examples:
         - Service level: service.name, service.environment, service.version
         - Transaction level: transaction.name, transaction.type
         - Infrastructure level: host.name, container.id, kubernetes.pod.name       
