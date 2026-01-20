@@ -31,8 +31,12 @@ import type {
   TransformEnhancementsOut,
 } from '../common';
 import { enhancementsPersistableState } from '../common/bwc/enhancements/enhancements_persistable_state';
+<<<<<<< HEAD
 import type { Drilldown } from './drilldowns/types';
 import { DrilldownRegistry } from './drilldowns/registry';
+=======
+import { transformEnhancementsOut } from '../common/bwc/enhancements/transform_enhancements_out';
+>>>>>>> upstream/main
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
@@ -82,7 +86,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
         this.transformsRegistry[type] = transforms;
       },
       transformEnhancementsIn: enhancementsPersistableState.extract,
-      transformEnhancementsOut: enhancementsPersistableState.inject,
+      transformEnhancementsOut,
       telemetry: getTelemetryFunction(this.getEmbeddableFactory),
       extract: getExtractFunction(this.getEmbeddableFactory),
       inject: getInjectFunction(this.getEmbeddableFactory),
