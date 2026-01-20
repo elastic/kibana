@@ -35,17 +35,17 @@ const CURRENT_WINDOW_MINUTES = 15;
 export function extractInsightsFromResponse(
   response: { toolCalls?: Array<{ function: { name: string; arguments: unknown } }> },
   logger: Logger
-): Insight[] | undefined {
+): Insight[] {
   if (!response.toolCalls || response.toolCalls.length === 0) {
     logger.warn('LLM response has no tool calls');
-    return undefined;
+    return [];
   }
 
   const toolCall = response.toolCalls.find((tc) => tc.function?.name === SUBMIT_INSIGHTS_TOOL_NAME);
 
   if (!toolCall || !toolCall.function?.arguments) {
     logger.warn(`${SUBMIT_INSIGHTS_TOOL_NAME} tool call missing arguments`);
-    return undefined;
+    return [];
   }
 
   const { insights, errors: validationErrors } = parseInsightsWithErrors(
@@ -56,7 +56,7 @@ export function extractInsightsFromResponse(
     logger.warn(`Insights validation failed: ${validationErrors.message}`);
   }
 
-  return insights.length > 0 ? insights : undefined;
+  return insights;
 }
 
 export async function collectQueryData({

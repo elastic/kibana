@@ -79,7 +79,7 @@ export async function generateSignificantEventsSummary({
     const insights = extractInsightsFromResponse(response, logger);
 
     return {
-      insights: insights ?? [],
+      insights,
       tokensUsed: sumTokens(tokensUsed, response.tokens),
     };
   } catch (error) {
@@ -147,7 +147,7 @@ async function generateStreamInsights({
     const insights = extractInsightsFromResponse(response, logger);
 
     return {
-      insights: insights ?? [],
+      insights,
       tokensUsed: response.tokens ?? { prompt: 0, completion: 0, total: 0 },
     };
   } catch (error) {
