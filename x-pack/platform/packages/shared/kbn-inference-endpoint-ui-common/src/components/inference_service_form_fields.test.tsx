@@ -42,38 +42,44 @@ const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
   );
 };
 
+interface RenderFormOptions {
+  enforceAdaptiveAllocations?: boolean;
+}
+
+const renderForm = (options: RenderFormOptions = {}) => {
+  const { enforceAdaptiveAllocations } = options;
+
+  return render(
+    <MockFormProvider>
+      <InferenceServiceFormFields
+        http={httpMock}
+        toasts={notificationsMock.toasts}
+        config={{ enforceAdaptiveAllocations }}
+      />
+    </MockFormProvider>
+  );
+};
+
 describe('Inference Services', () => {
   // Reset cloned providers before each test to prevent mutation pollution
   beforeEach(() => {
     mockClonedProviders = JSON.parse(JSON.stringify(mockProviders));
   });
   it('renders', () => {
-    render(
-      <MockFormProvider>
-        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} config={{}} />
-      </MockFormProvider>
-    );
+    renderForm();
 
     expect(screen.getByTestId('provider-select')).toBeInTheDocument();
   });
 
   it('renders Selectable', async () => {
-    render(
-      <MockFormProvider>
-        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} config={{}} />
-      </MockFormProvider>
-    );
+    renderForm();
 
     await userEvent.click(screen.getByTestId('provider-select'));
     expect(screen.getByTestId('euiSelectableList')).toBeInTheDocument();
   });
 
   it('renders Elastic at top', async () => {
-    render(
-      <MockFormProvider>
-        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} config={{}} />
-      </MockFormProvider>
-    );
+    renderForm();
 
     await userEvent.click(screen.getByTestId('provider-select'));
     const listItems = screen.getAllByTestId('provider');
@@ -81,11 +87,7 @@ describe('Inference Services', () => {
   });
 
   it('renders selected provider fields - hugging_face', async () => {
-    render(
-      <MockFormProvider>
-        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} config={{}} />
-      </MockFormProvider>
-    );
+    renderForm();
 
     await userEvent.click(screen.getByTestId('provider-select'));
     await userEvent.click(screen.getByText('Hugging Face'));
@@ -101,11 +103,7 @@ describe('Inference Services', () => {
   });
 
   it('re-renders fields when selected to anthropic from hugging_face', async () => {
-    render(
-      <MockFormProvider>
-        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} config={{}} />
-      </MockFormProvider>
-    );
+    renderForm();
 
     await userEvent.click(screen.getByTestId('provider-select'));
     await userEvent.click(screen.getByText('Hugging Face'));
@@ -142,15 +140,7 @@ describe('Inference Services', () => {
   describe('Serverless adaptive allocations', () => {
     describe('when enforceAdaptiveAllocations is true (serverless)', () => {
       it('shows max_number_of_allocations field for Elasticsearch provider', async () => {
-        render(
-          <MockFormProvider>
-            <InferenceServiceFormFields
-              http={httpMock}
-              toasts={notificationsMock.toasts}
-              config={{ enforceAdaptiveAllocations: true }}
-            />
-          </MockFormProvider>
-        );
+        renderForm({ enforceAdaptiveAllocations: true });
 
         await userEvent.click(screen.getByTestId('provider-select'));
         await userEvent.click(screen.getByText('Elasticsearch'));
@@ -161,15 +151,7 @@ describe('Inference Services', () => {
       });
 
       it('hides num_allocations field for Elasticsearch provider', async () => {
-        render(
-          <MockFormProvider>
-            <InferenceServiceFormFields
-              http={httpMock}
-              toasts={notificationsMock.toasts}
-              config={{ enforceAdaptiveAllocations: true }}
-            />
-          </MockFormProvider>
-        );
+        renderForm({ enforceAdaptiveAllocations: true });
 
         await userEvent.click(screen.getByTestId('provider-select'));
         await userEvent.click(screen.getByText('Elasticsearch'));
@@ -180,15 +162,7 @@ describe('Inference Services', () => {
       });
 
       it('hides num_threads field for Elasticsearch provider', async () => {
-        render(
-          <MockFormProvider>
-            <InferenceServiceFormFields
-              http={httpMock}
-              toasts={notificationsMock.toasts}
-              config={{ enforceAdaptiveAllocations: true }}
-            />
-          </MockFormProvider>
-        );
+        renderForm({ enforceAdaptiveAllocations: true });
 
         await userEvent.click(screen.getByTestId('provider-select'));
         await userEvent.click(screen.getByText('Elasticsearch'));
@@ -199,15 +173,7 @@ describe('Inference Services', () => {
       });
 
       it('shows adaptive resources title for Elasticsearch provider', async () => {
-        render(
-          <MockFormProvider>
-            <InferenceServiceFormFields
-              http={httpMock}
-              toasts={notificationsMock.toasts}
-              config={{ enforceAdaptiveAllocations: true }}
-            />
-          </MockFormProvider>
-        );
+        renderForm({ enforceAdaptiveAllocations: true });
 
         await userEvent.click(screen.getByTestId('provider-select'));
         await userEvent.click(screen.getByText('Elasticsearch'));
@@ -220,15 +186,7 @@ describe('Inference Services', () => {
 
     describe('when enforceAdaptiveAllocations is false (non-serverless)', () => {
       it('shows num_allocations field for Elasticsearch provider', async () => {
-        render(
-          <MockFormProvider>
-            <InferenceServiceFormFields
-              http={httpMock}
-              toasts={notificationsMock.toasts}
-              config={{ enforceAdaptiveAllocations: false }}
-            />
-          </MockFormProvider>
-        );
+        renderForm({ enforceAdaptiveAllocations: false });
 
         await userEvent.click(screen.getByTestId('provider-select'));
         await userEvent.click(screen.getByText('Elasticsearch'));
@@ -239,15 +197,7 @@ describe('Inference Services', () => {
       });
 
       it('shows num_threads field for Elasticsearch provider', async () => {
-        render(
-          <MockFormProvider>
-            <InferenceServiceFormFields
-              http={httpMock}
-              toasts={notificationsMock.toasts}
-              config={{ enforceAdaptiveAllocations: false }}
-            />
-          </MockFormProvider>
-        );
+        renderForm({ enforceAdaptiveAllocations: false });
 
         await userEvent.click(screen.getByTestId('provider-select'));
         await userEvent.click(screen.getByText('Elasticsearch'));
@@ -258,15 +208,7 @@ describe('Inference Services', () => {
       });
 
       it('does not show max_number_of_allocations field for Elasticsearch provider', async () => {
-        render(
-          <MockFormProvider>
-            <InferenceServiceFormFields
-              http={httpMock}
-              toasts={notificationsMock.toasts}
-              config={{ enforceAdaptiveAllocations: false }}
-            />
-          </MockFormProvider>
-        );
+        renderForm({ enforceAdaptiveAllocations: false });
 
         await userEvent.click(screen.getByTestId('provider-select'));
         await userEvent.click(screen.getByText('Elasticsearch'));
@@ -277,15 +219,7 @@ describe('Inference Services', () => {
       });
 
       it('does not show adaptive resources title for Elasticsearch provider', async () => {
-        render(
-          <MockFormProvider>
-            <InferenceServiceFormFields
-              http={httpMock}
-              toasts={notificationsMock.toasts}
-              config={{ enforceAdaptiveAllocations: false }}
-            />
-          </MockFormProvider>
-        );
+        renderForm({ enforceAdaptiveAllocations: false });
 
         await userEvent.click(screen.getByTestId('provider-select'));
         await userEvent.click(screen.getByText('Elasticsearch'));
@@ -298,15 +232,7 @@ describe('Inference Services', () => {
 
     describe('when enforceAdaptiveAllocations is not provided (defaults to false)', () => {
       it('shows num_allocations field for Elasticsearch provider', async () => {
-        render(
-          <MockFormProvider>
-            <InferenceServiceFormFields
-              http={httpMock}
-              toasts={notificationsMock.toasts}
-              config={{}}
-            />
-          </MockFormProvider>
-        );
+        renderForm();
 
         await userEvent.click(screen.getByTestId('provider-select'));
         await userEvent.click(screen.getByText('Elasticsearch'));
@@ -317,15 +243,7 @@ describe('Inference Services', () => {
       });
 
       it('does not show max_number_of_allocations field for Elasticsearch provider', async () => {
-        render(
-          <MockFormProvider>
-            <InferenceServiceFormFields
-              http={httpMock}
-              toasts={notificationsMock.toasts}
-              config={{}}
-            />
-          </MockFormProvider>
-        );
+        renderForm();
 
         await userEvent.click(screen.getByTestId('provider-select'));
         await userEvent.click(screen.getByText('Elasticsearch'));
