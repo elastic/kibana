@@ -133,7 +133,7 @@ describe('UnifiedFieldList FieldStats', () => {
       return Promise.resolve(dataView);
     });
     mockedLoadFieldStats.mockReset();
-    mockedLoadFieldStats.mockImplementation(() => Promise.resolve({}));
+    mockedLoadFieldStats.mockResolvedValue({});
   });
 
   it('should request field stats with correct params', async () => {

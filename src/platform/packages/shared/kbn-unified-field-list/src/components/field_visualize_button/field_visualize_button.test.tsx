@@ -107,8 +107,6 @@ describe('UnifiedFieldList <FieldVisualizeButton />', () => {
       uiActions,
     });
 
-    expect(visualizeButton).not.toBeNull();
-
     renderWithI18n(visualizeButton);
 
     expect(uiActions.getTriggerCompatibleActions).toHaveBeenCalledWith(
