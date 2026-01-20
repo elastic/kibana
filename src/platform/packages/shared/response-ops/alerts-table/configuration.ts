@@ -111,9 +111,12 @@ const columns = [
     initialWidth: 260,
   },
   {
-    displayAsText: i18n.translate('xpack.observability.alertsTGrid.workflowTagsColumnDescription', {
-      defaultMessage: 'Workflow Tags',
-    }),
+    displayAsText: i18n.translate(
+      'xpack.triggersActionsUI.alertsTable.workflowTagsColumnDescription',
+      {
+        defaultMessage: 'Workflow tags',
+      }
+    ),
     id: ALERT_WORKFLOW_TAGS,
     initialWidth: 150,
   },
