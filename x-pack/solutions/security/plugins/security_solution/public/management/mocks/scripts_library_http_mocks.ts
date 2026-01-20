@@ -23,6 +23,7 @@ import {
 export type ScriptsLibraryHttpMocksInterface = ResponseProvidersInterface<{
   getScriptsList: () => EndpointScriptListApiResponse;
   getScriptById: (options: HttpFetchOptionsWithPath) => EndpointScriptApiResponse;
+  deleteScriptById: (options: HttpFetchOptionsWithPath) => void;
 }>;
 
 export const scriptsLibraryHttpMocks = httpHandlerMockFactory<ScriptsLibraryHttpMocksInterface>([
@@ -52,6 +53,14 @@ export const scriptsLibraryHttpMocks = httpHandlerMockFactory<ScriptsLibraryHttp
       const response = new EndpointScriptsGenerator('seed').generate();
       response.id = path.substring(path.lastIndexOf('/') + 1) || response.id;
       return { data: response };
+    },
+  },
+  {
+    id: 'deleteScriptById',
+    method: 'delete',
+    path: SCRIPTS_LIBRARY_ROUTE_ITEM,
+    handler: ({ path }) => {
+      return path.substring(path.lastIndexOf('/') + 1) || 'unknown-id';
     },
   },
 ]);
