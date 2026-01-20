@@ -257,13 +257,24 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   };
 
   const onEditRuleClick = () => {
-    navigateToApp('management', {
-      path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(rule.id)}`,
-      state: {
-        returnApp: 'management',
-        returnPath: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(rule.id)}`,
-      },
-    });
+    if (isInRulesApp) {
+      // Navigate within the rules app using history
+      history.push({
+        pathname: getEditRuleRoute(rule.id),
+        state: {
+          returnPath: history.location.pathname + history.location.search + history.location.hash,
+        },
+      });
+    } else {
+      // Navigate to Stack Management for other apps
+      navigateToApp('management', {
+        path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(rule.id)}`,
+        state: {
+          returnApp: 'management',
+          returnPath: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(rule.id)}`,
+        },
+      });
+    }
   };
 
   const editButton = hasEditButton ? (
