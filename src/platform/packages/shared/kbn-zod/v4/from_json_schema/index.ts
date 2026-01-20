@@ -8,16 +8,10 @@
  */
 
 /**
- * @fileoverview Temporary JSON Schema to Zod v4 parser.
- *
  * This folder contains a custom JSON Schema → Zod converter that serves as
  * a polyfill until Kibana fully migrates to Zod v4, which has native
  * fromJSONSchema support.
- *
- * MIGRATION: When Zod v4 migration is complete, consumers can switch
- * from @kbn/zod/v4 to @kbn/zod and use the native implementation.
  */
-
 import { z } from 'zod/v4';
 import type { JsonSchema } from './types';
 import { extractMeta } from './meta_utils';
