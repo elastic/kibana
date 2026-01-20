@@ -60,6 +60,9 @@ describe('Agents CRUD test', () => {
 
   beforeEach(() => {
     searchMock = jest.fn();
+    jest
+      .spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension')
+      .mockReturnValue(soClientMock);
     soClientMock.find = jest.fn().mockResolvedValue({ saved_objects: [] });
     esClientMock = {
       search: searchMock,

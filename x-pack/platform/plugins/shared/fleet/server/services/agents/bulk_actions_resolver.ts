@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { type SavedObjectsClientContract } from '@kbn/core/server';
 import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
@@ -40,7 +40,7 @@ export class BulkActionsResolver {
         const [coreStart] = await core.getStartServices();
         return {
           esClient: coreStart.elasticsearch.client.asInternalUser,
-          soClient: coreStart.savedObjects.getUnsafeInternalClient(),
+          soClient: appContextService.getInternalUserSOClientWithoutSpaceExtension(),
         };
       };
 

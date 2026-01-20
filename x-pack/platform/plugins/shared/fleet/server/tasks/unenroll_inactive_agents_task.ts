@@ -24,7 +24,7 @@ import { errors } from '@elastic/elasticsearch';
 import { AGENTS_PREFIX, AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import { getAgentsByKuery } from '../services/agents';
 import { unenrollBatch } from '../services/agents/unenroll_action_runner';
-import { agentPolicyService, auditLoggingService } from '../services';
+import { agentPolicyService, appContextService, auditLoggingService } from '../services';
 import type { AgentPolicy } from '../types';
 
 export const TYPE = 'fleet:unenroll-inactive-agents-task';
@@ -199,7 +199,7 @@ export class UnenrollInactiveAgentsTask {
 
     const [coreStart] = await core.getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
-    const soClient = coreStart.savedObjects.getUnsafeInternalClient();
+    const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
 
     try {
       await this.unenrollInactiveAgents(esClient, soClient);

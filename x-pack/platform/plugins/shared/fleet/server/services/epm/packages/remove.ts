@@ -12,7 +12,7 @@ import type { SavedObject } from '@kbn/core/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
-import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SavedObjectsUtils, SavedObjectsErrorHelpers, SPACES_EXTENSION_ID } from '@kbn/core/server';
 import minVersion from 'semver/ranges/min-version';
 
 import pMap from 'p-map';
@@ -157,6 +157,7 @@ export async function deleteKibanaAssets({
       KibanaSavedObjectType.alertingRuleTemplate,
       KibanaSavedObjectType.sloTemplate,
     ],
+    excludedExtensions: [SPACES_EXTENSION_ID],
   });
 
   const namespace = SavedObjectsUtils.namespaceStringToId(spaceId);

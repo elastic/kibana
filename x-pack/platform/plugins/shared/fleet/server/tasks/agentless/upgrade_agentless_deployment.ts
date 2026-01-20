@@ -279,7 +279,7 @@ export class UpgradeAgentlessDeploymentsTask {
     this.logger.info(`[runTask()] started`);
     const [coreStart] = await core.getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
-    const soClient = coreStart.savedObjects.getUnsafeInternalClient();
+    const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
     await this.processUpgradeAgentlessDeployments(esClient, soClient, abortController);
   };
 }

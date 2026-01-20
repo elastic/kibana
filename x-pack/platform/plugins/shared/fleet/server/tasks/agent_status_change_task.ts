@@ -153,8 +153,7 @@ export class AgentStatusChangeTask {
 
     const [coreStart, _startDeps] = (await core.getStartServices()) as any;
     const esClient = coreStart.elasticsearch.client.asInternalUser;
-    const soClient = coreStart.savedObjects.getUnsafeInternalClient();
-
+    const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
     try {
       await this.persistAgentStatusChanges(esClient, soClient, abortController);
 

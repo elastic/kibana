@@ -21,7 +21,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
-import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
@@ -200,13 +200,15 @@ class AppContextService {
   }
   public getInternalUserSOClientForSpaceId(spaceId?: string) {
     // soClient as kibana internal users, be careful on how you use it, security is not enabled
-    let soClient = appContextService.getSavedObjects().getUnsafeInternalClient({
-      includedHiddenTypes: this.includedHiddenTypes,
-    });
     if (spaceId && spaceId !== DEFAULT_SPACE_ID && spaceId !== ALL_SPACES_ID) {
-      soClient = soClient.asScopedToNamespace(spaceId);
+      return appContextService
+        .getSavedObjects()
+        .getUnsafeInternalClient({
+          includedHiddenTypes: this.includedHiddenTypes,
+        })
+        .asScopedToNamespace(spaceId);
     }
-    return soClient;
+    return this.getInternalUserSOClientWithoutSpaceExtension();
   }
 
   public getInternalUserSOClient(request?: KibanaRequest) {
@@ -217,10 +219,7 @@ class AppContextService {
     }
 
     // soClient as kibana internal users, be careful on how you use it, security is not enabled
-    return appContextService.getSavedObjects().getScopedClient(request, {
-      includedHiddenTypes: this.includedHiddenTypes,
-      excludedExtensions: [SECURITY_EXTENSION_ID],
-    });
+    return this.getInternalUserSOClientWithoutSpaceExtension();
   }
 
   public getInternalUserSOClientWithoutSpaceExtension() {

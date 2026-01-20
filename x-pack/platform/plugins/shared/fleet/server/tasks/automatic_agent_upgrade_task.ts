@@ -172,7 +172,7 @@ export class AutomaticAgentUpgradeTask {
 
     const [coreStart] = await core.getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
-    const soClient = coreStart.savedObjects.getUnsafeInternalClient();
+    const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
 
     try {
       await this.checkAgentPoliciesForAutomaticUpgrades(esClient, soClient, abortController);

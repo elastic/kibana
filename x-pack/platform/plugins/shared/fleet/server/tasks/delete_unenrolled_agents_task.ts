@@ -22,7 +22,7 @@ import { errors } from '@elastic/elasticsearch';
 
 import { AGENTS_INDEX } from '../../common/constants';
 
-import { settingsService } from '../services';
+import { appContextService, settingsService } from '../services';
 
 export const TYPE = 'fleet:delete-unenrolled-agents-task';
 export const VERSION = '1.0.1';
@@ -168,7 +168,7 @@ export class DeleteUnenrolledAgentsTask {
 
     const [coreStart] = await core.getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
-    const soClient = coreStart.savedObjects.getUnsafeInternalClient();
+    const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
 
     try {
       if (!(await this.isDeleteUnenrolledAgentsEnabled(soClient))) {

@@ -145,7 +145,7 @@ export class AutoInstallContentPackagesTask {
     const [coreStart, _startDeps, { packageService }] = (await core.getStartServices()) as any;
     const packageClient = packageService.asInternalUser;
     const esClient = coreStart.elasticsearch.client.asInternalUser;
-    const soClient = coreStart.savedObjects.getUnsafeInternalClient();
+    const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
 
     const prerelease = await getPrereleaseFromSettings(soClient);
 
