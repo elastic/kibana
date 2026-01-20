@@ -4716,15 +4716,13 @@
         "dotenv"
       ],
       "reviewers": [
-        "team:obs-onboarding-team",
-        "team:appex-qa"
+        "team:kibana-operations"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:obs-onboarding",
-        "Team:QA",
+        "Team:Operations",
         "release_note:skip",
         "backport:all-open"
       ],
