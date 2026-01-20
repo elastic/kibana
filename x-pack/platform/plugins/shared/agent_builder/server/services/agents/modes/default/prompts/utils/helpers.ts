@@ -7,6 +7,6 @@
 
 import moment from 'moment';
 
-export const formatDate = (date: Date = new Date()): string => {
-  return moment(date).utc().format('YYYY-MM-DDTHH:mm:ss[Z]');
+export const formatDate = (timestamp: string): string => {
+  return moment(timestamp).utc().format('YYYY-MM-DDTHH:mm:ss[Z]');
 };

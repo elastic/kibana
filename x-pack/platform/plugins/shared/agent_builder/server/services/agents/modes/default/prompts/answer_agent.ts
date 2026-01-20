@@ -77,7 +77,7 @@ ${attachmentTypeInstructions(attachmentTypes)}
 ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
 
 ## ADDITIONAL INFO
-- Current date: ${formatDate(new Date(conversationTimestamp))}
+- Current date: ${formatDate(conversationTimestamp)}
 
 ## PRE-RESPONSE COMPLIANCE CHECK
 - [ ] I answered with a text response
@@ -143,7 +143,7 @@ ${attachmentTypeInstructions(attachmentTypes)}
 ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
 
 ## ADDITIONAL INFO
-- Current date: ${formatDate(new Date(conversationTimestamp))}
+- Current date: ${formatDate(conversationTimestamp)}
 
 ## PRE-RESPONSE COMPLIANCE CHECK
 - [ ] I responded using the structured output format with all required fields filled

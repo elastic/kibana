@@ -71,7 +71,7 @@ ${structuredOutputDescription(outputSchema)}
 ${attachmentTypeInstructions(attachmentTypes)}
 
 ## ADDITIONAL INFO
-- Current date: ${formatDate(new Date(conversationTimestamp))}
+- Current date: ${formatDate(conversationTimestamp)}
 
 ## PRE-RESPONSE COMPLIANCE CHECK
 - [ ] Have I gathered all necessary information or performed the requested task? If NO, my response MUST be a tool call.
@@ -177,7 +177,7 @@ ${structuredOutputDescription(outputSchema)}
 ${attachmentTypeInstructions(attachmentTypes)}
 
 ## ADDITIONAL INFO
-- Current date: ${formatDate(new Date(conversationTimestamp))}
+- Current date: ${formatDate(conversationTimestamp)}
 
 ## PRE-RESPONSE COMPLIANCE CHECK
 - [ ] Have I gathered all necessary information? If NO, my response MUST be a tool call (see OPERATING PROTOCOL and TOOL SELECTION POLICY).

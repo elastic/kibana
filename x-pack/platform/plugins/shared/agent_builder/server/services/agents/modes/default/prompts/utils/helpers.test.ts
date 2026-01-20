@@ -5,17 +5,9 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { formatDate } from './helpers';
 
 describe('formatDate', () => {
-  it('should format the current date when no argument is provided', () => {
-    const result = formatDate();
-
-    expect(result).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/);
-    expect(moment(result).isValid()).toBe(true);
-  });
-
   it('should format dates correctly and remove milliseconds', () => {
     const testCases = [
       { input: '2024-01-15T10:30:45.123Z', expected: '2024-01-15T10:30:45Z' },
@@ -24,7 +16,7 @@ describe('formatDate', () => {
     ];
 
     testCases.forEach(({ input, expected }) => {
-      const result = formatDate(new Date(input));
+      const result = formatDate(input);
       expect(result).toBe(expected);
     });
   });
