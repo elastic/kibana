@@ -99,7 +99,13 @@ export const ServiceNode = memo(
     }, [data.label, data.agentName, data.serviceAnomalyStats?.healthStatus, selected]);
 
     return (
-      <EuiFlexGroup direction="column" alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexGroup
+        direction="column"
+        alignItems="center"
+        gutterSize="s"
+        responsive={false}
+        data-test-subj={`serviceMapNode-service-${data.id}`}
+      >
         {/* Circle container with handles inside for proper edge positioning */}
         <EuiFlexItem
           grow={false}

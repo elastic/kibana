@@ -151,8 +151,14 @@ export function ReactFlowPopover({
         isOpen={isOpen}
         ref={popoverRef}
         zIndex={1000}
+        data-test-subj="serviceMapPopover"
       >
-        <EuiFlexGroup direction="column" gutterSize="s" style={{ minWidth: popoverWidth }}>
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="s"
+          style={{ minWidth: popoverWidth }}
+          data-test-subj="serviceMapPopoverContent"
+        >
           <EuiFlexItem>
             <EuiTitle size="xxs">
               <h3 style={{ wordBreak: 'break-all' }}>

@@ -12,7 +12,7 @@ import { getSpanIcon } from '@kbn/apm-ui-shared';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
-interface DependencyMapNodeData extends Record<string, any> {
+export interface DependencyMapNodeData extends Record<string, any> {
   id: string;
   label: string;
   spanType: string;
@@ -75,7 +75,13 @@ export const DependencyNode = memo(
     }, [data.label, data.spanType, data.spanSubtype, selected]);
 
     return (
-      <EuiFlexGroup direction="column" alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexGroup
+        direction="column"
+        alignItems="center"
+        gutterSize="s"
+        responsive={false}
+        data-test-subj={`serviceMapNode-dependency-${data.id}`}
+      >
         {/* Container sized for the rotated diamond visual */}
         <EuiFlexItem
           grow={false}

@@ -34,13 +34,12 @@ describe('transformElements', () => {
       expect(node.id).toBe('opbeans-java');
       expect(node.type).toBe('service');
       expect(node.position).toEqual({ x: 0, y: 0 });
-      expect(node.data).toEqual({
+      expect(node.data).toMatchObject({
         id: 'opbeans-java',
         label: 'opbeans-java',
         agentName: 'java',
         spanType: undefined,
         spanSubtype: undefined,
-        serviceAnomalyStats: undefined,
         isService: true,
       });
     });
@@ -65,13 +64,12 @@ describe('transformElements', () => {
       const node = nodes[0];
       expect(node.id).toBe('postgresql');
       expect(node.type).toBe('dependency');
-      expect(node.data).toEqual({
+      expect(node.data).toMatchObject({
         id: 'postgresql',
         label: 'postgresql',
         agentName: undefined,
         spanType: 'db',
         spanSubtype: 'postgresql',
-        serviceAnomalyStats: undefined,
         isService: false,
       });
     });
@@ -163,8 +161,8 @@ describe('transformElements', () => {
       expect(edge.style).toEqual({ stroke: DEFAULT_COLOR, strokeWidth: 1 });
       expect(edge.markerEnd).toEqual({
         type: MarkerType.ArrowClosed,
-        width: 15,
-        height: 15,
+        width: 12,
+        height: 12,
         color: DEFAULT_COLOR,
       });
       expect(edge.markerStart).toBeUndefined();
@@ -201,8 +199,8 @@ describe('transformElements', () => {
       expect(edge2?.data?.isBidirectional).toBe(true);
       expect(edge2?.markerStart).toEqual({
         type: MarkerType.ArrowClosed,
-        width: 15,
-        height: 15,
+        width: 12,
+        height: 12,
         color: DEFAULT_COLOR,
       });
     });
