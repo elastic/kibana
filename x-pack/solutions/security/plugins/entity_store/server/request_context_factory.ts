@@ -16,7 +16,7 @@ import type {
 } from './types';
 import { AssetManager } from './domain/asset_manager';
 import { FeatureFlags } from './infra/feature_flags';
-import { DEFAULT_NAMESPACE } from './domain/constants';
+import { DEFAULT_NAMESPACE } from '../common';
 
 interface EntityStoreApiRequestHandlerContextDeps {
   coreSetup: CoreSetup<EntityStoreStartPlugins, void>;
