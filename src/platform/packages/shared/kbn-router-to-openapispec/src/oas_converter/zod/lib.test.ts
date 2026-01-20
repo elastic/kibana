@@ -222,7 +222,9 @@ describe.skip('zod', () => {
         convertQuery(
           z.object({
             // temporarily casting while waiting for the owners of boolean_from_string to update to Zod v4
-            a: z.optional(BooleanFromString as unknown as z.ZodTypeAny).describe('string or boolean flag'),
+            a: z
+              .optional(BooleanFromString as unknown as z.ZodTypeAny)
+              .describe('string or boolean flag'),
           })
         )
       ).toEqual({

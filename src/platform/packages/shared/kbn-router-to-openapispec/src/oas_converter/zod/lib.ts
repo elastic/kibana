@@ -27,7 +27,10 @@ function assertInstanceOfZodType(schema: unknown): asserts schema is z.ZodTypeAn
   }
 }
 
-const instanceofZodTypeKind = (type: z.ZodTypeAny | z.core.$ZodType, zodTypeKind: z.core.$ZodTypeDef['type']) => {
+const instanceofZodTypeKind = (
+  type: z.ZodTypeAny | z.core.$ZodType,
+  zodTypeKind: z.core.$ZodTypeDef['type']
+) => {
   if (type instanceof z.ZodType) {
     return type.def.type === zodTypeKind;
   }
@@ -36,7 +39,9 @@ const instanceofZodTypeKind = (type: z.ZodTypeAny | z.core.$ZodType, zodTypeKind
 
 type ZodTypeLikeVoid = z.ZodVoid | z.ZodUndefined | z.ZodNever;
 
-const instanceofZodTypeLikeVoid = (type: z.ZodTypeAny | z.core.$ZodType): type is ZodTypeLikeVoid => {
+const instanceofZodTypeLikeVoid = (
+  type: z.ZodTypeAny | z.core.$ZodType
+): type is ZodTypeLikeVoid => {
   return (
     instanceofZodTypeKind(type, 'void') ||
     instanceofZodTypeKind(type, 'undefined') ||
@@ -88,10 +93,7 @@ const unwrapZodType = (type: z.core.$ZodType, unwrapPreprocess: boolean): z.core
     return unwrapZodType(unwrapZodLazy(type), unwrapPreprocess);
   }
 
-  if (
-    instanceofZodTypeKind(type, 'optional') ||
-    instanceofZodTypeKind(type, 'default')
-  ) {
+  if (instanceofZodTypeKind(type, 'optional') || instanceofZodTypeKind(type, 'default')) {
     const { innerType } = unwrapZodOptionalDefault(type);
     return unwrapZodType(innerType, unwrapPreprocess);
   }
@@ -171,7 +173,7 @@ const instanceofZodTypeLikeString = (
     return true;
   }
   if (instanceofZodTypeKind(type, 'enum')) {
-    return !Object.values((type as z.ZodEnum).enum).some(value => typeof value === 'number')
+    return !Object.values((type as z.ZodEnum).enum).some((value) => typeof value === 'number');
   }
   return instanceofZodTypeKind(type, 'string');
 };
@@ -225,7 +227,10 @@ const convertObjectMembersToParameterObjects = (
 const getPassThroughShape = (knownParameters: KnownParameters, isPathParameter = false) => {
   let passThroughShape: z.ZodRawShape = {};
   for (const [key, { optional }] of Object.entries(knownParameters)) {
-    passThroughShape = { ...passThroughShape, [key]: optional && !isPathParameter ? z.string().optional() : z.string() };
+    passThroughShape = {
+      ...passThroughShape,
+      [key]: optional && !isPathParameter ? z.string().optional() : z.string(),
+    };
   }
   return passThroughShape;
 };
