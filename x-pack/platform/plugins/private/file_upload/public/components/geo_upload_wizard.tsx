@@ -374,7 +374,7 @@ export class GeoUploadWizard extends Component<GeoUploadWizardProps, State> {
     } catch (error) {
       const sessionTimeMs = this._getSessionTimeMs();
       this._trackUploadSession(false, false, sessionTimeMs);
-      this._trackUploadFiles(importResults, sessionTimeMs, false);
+      this._trackUploadFiles(importResults, uploadTimeMs, false);
       if (this._isMounted) {
         this.setState({
           importStatus: i18n.translate('xpack.fileUpload.geoUploadWizard.dataViewError', {
