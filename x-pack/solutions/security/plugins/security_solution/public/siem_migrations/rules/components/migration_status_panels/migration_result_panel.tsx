@@ -42,6 +42,7 @@ import { RuleMigrationsUploadMissingPanel } from './upload_missing_panel';
 import { MigrationsLastError } from '../../../common/components/migration_panels/last_error';
 import { MigrationPanelTitle } from '../../../common/components/migration_panels/migration_title';
 import { TotalExecutionTime } from '../../../common/components/total_execution_time';
+import { RULE_MIGRATION_SUMMARY_TITLE } from './translations';
 
 const headerStyle = css`
   &:hover {
@@ -309,6 +310,7 @@ const TranslationResultsTable = React.memo<{
       data-test-subj="translatedResultsTable"
       items={items}
       columns={columns}
+      tableCaption={i18n.RULE_MIGRATION_SUMMARY_TITLE}
       compressed
     />
   );

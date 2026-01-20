@@ -54,6 +54,7 @@ import {
 } from '../../../../common/components/utility_bar';
 import { useStartRulesMigrationModal } from '../../hooks/use_start_rules_migration_modal';
 import { useStartMigration } from '../../logic/use_start_migration';
+import { RULES_MIGRAION_TABLE_CAPTION, RULES_MIGRATION_TABLE_CAPTION } from './translations';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';
@@ -452,6 +453,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                   itemId={'id'}
                   data-test-subj={'rules-translation-table'}
                   columns={rulesColumns}
+                  tableCaption={i18n.RULES_MIGRATION_TABLE_CAPTION}
                 />
               </>
             )

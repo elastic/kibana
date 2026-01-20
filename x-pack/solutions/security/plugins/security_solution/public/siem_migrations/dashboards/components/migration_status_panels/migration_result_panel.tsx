@@ -41,6 +41,7 @@ import { MigrationsLastError } from '../../../common/components/migration_panels
 import { MigrationPanelTitle } from '../../../common/components/migration_panels/migration_title';
 import { useCompleteBadgeStyles } from '../../../common/hooks/use_complete_status_badge_styles';
 import { TotalExecutionTime } from '../../../common/components/total_execution_time';
+import { DASHBOARD_MIGRATION_SUMMARY_TITLE } from './translations';
 
 const headerStyle = css`
   &:hover {
@@ -306,6 +307,7 @@ const TranslationResultsTable = React.memo<{
       items={items}
       columns={columns}
       compressed
+      tableCaption={i18n.DASHBOARD_MIGRATION_SUMMARY_TITLE}
     />
   );
 });
