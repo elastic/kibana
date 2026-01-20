@@ -338,7 +338,7 @@ export const createTabsStorageManager = ({
       spaceId: sessionInfo.spaceId,
       discoverSessionId,
       openTabs,
-      closedTabs, // wil be used for "Recently closed tabs" feature
+      closedTabs, // will be used for "Recently closed tabs" feature
     };
 
     const storageKey = getTabsStorageKey(sessionInfo.spaceId, sessionInfo.userId);
