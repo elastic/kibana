@@ -13,7 +13,7 @@ import type {
   EntityStoreRequestHandlerContext,
   EntityStoreStartPlugins,
 } from './types';
-import { AssetManager } from './domain/asst_manager';
+import { AssetManager } from './domain/asset_manager';
 import { FeatureFlags } from './infra/feature_flags';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core/packages/saved-objects/utils-server';
 import { KibanaRequest } from '@kbn/core/server';
@@ -49,7 +49,12 @@ export async function createRequestHandlerContext({
   return {
     core,
     logger,
-    assetManager: new AssetManager(logger, taskManagerStart, namespace),
+    assetManager: new AssetManager(
+      logger,
+      core.elasticsearch.client.asCurrentUser,
+      taskManagerStart,
+      namespace
+    ),
     featureFlags: new FeatureFlags(core.uiSettings.client),
   };
 }

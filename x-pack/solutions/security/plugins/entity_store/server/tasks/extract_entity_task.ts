@@ -6,44 +6,15 @@
  */
 
 import type {
-  ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { RunResult, TaskRunCreatorFunction } from '@kbn/task-manager-plugin/server/task';
+import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
 import type { Logger } from '@kbn/logging';
-import type { EntityType } from '../domain/definitions/entity_type';
 import { TasksConfig } from './config';
 import { EntityStoreTaskType } from './constants';
-import type { AssetManager } from '../domain/asst_manager';
-
-interface ExtractEntityTaskParams {
-  assetManager: AssetManager;
-}
-
-interface ExtractEntityTaskBaseState {
-  runs: number;
-  lastExecutionTimestamp: string;
-  namespace: string;
-  entityType: EntityType;
-}
-
-interface ExtractEntityTaskSuccessState extends ExtractEntityTaskBaseState {
-  status: 'success';
-}
-
-interface ExtractEntityTaskErrorState extends ExtractEntityTaskBaseState {
-  status: 'error';
-  lastError: string;
-  lastErrorTimestamp: string;
-}
-
-type ExtractEntityTaskState = ExtractEntityTaskSuccessState | ExtractEntityTaskErrorState;
-
-interface ExtractEntityTaskInstance extends Omit<ConcreteTaskInstance, 'params' | 'state'> {
-  params: ExtractEntityTaskParams;
-  state: ExtractEntityTaskState;
-}
+import type * as types from '../types';
+import type { EntityType } from '../domain/definitions/entity_schema';
 
 function getTaskName(entityType: EntityType): string {
   const config = TasksConfig[EntityStoreTaskType.Values.extractEntity];
@@ -54,54 +25,31 @@ function getTaskId(entityType: EntityType, namespace: string): string {
   return `${getTaskName(entityType)}:${namespace}`;
 }
 
-function createRunnerFactory(entityType: EntityType, logger: Logger): TaskRunCreatorFunction {
-  return ({
-    taskInstance,
-    abortController,
-  }: {
-    taskInstance: ConcreteTaskInstance;
-    abortController: AbortController;
-  }) => {
-    const taskLogger = logger.get(taskInstance.id);
-    return {
-      run: async () =>
-        await run({
-          taskInstance: taskInstance as ExtractEntityTaskInstance,
-          abortController,
-          entityType,
-          logger: taskLogger,
-        }),
-    };
-  };
-}
-
-async function run({
+async function runTask({
   taskInstance,
   abortController,
   entityType,
   logger,
-}: {
-  taskInstance: ExtractEntityTaskInstance;
-  abortController: AbortController;
+  core,
+}: RunContext & {
   entityType: EntityType;
   logger: Logger;
+  core: types.EntityStoreCoreSetup;
 }): Promise<RunResult> {
+  logger.info(`Running extract entity task`);
+
   const currentState = taskInstance.state;
   const runs = currentState.runs || 0;
   const namespace = currentState.namespace;
+  // const [coreStart, pluginsStart] = await core.getStartServices();
+  // const esqlService = new ESQLService(logger, coreStart.elasticsearch.client.asInternalUser, abortController);
 
-  const { assetManager } = taskInstance.params;
-
-  logger.info(
-    `Running extract entity task, runs: ${runs}, assetManager: ${assetManager}, abortController: ${abortController}, namespace: ${namespace}`
-  );
   try {
     const updatedState = {
       namespace,
       lastExecutionTimestamp: new Date().toISOString(),
       runs: runs + 1,
       entityType,
-      status: 'success',
     };
 
     return {
@@ -124,7 +72,9 @@ export function registerExtractEntityTasks({
   taskManager,
   logger,
   entityTypes,
+  core,
 }: {
+  core: types.EntityStoreCoreSetup;
   taskManager: TaskManagerSetupContract;
   logger: Logger;
   entityTypes: EntityType[];
@@ -137,10 +87,18 @@ export function registerExtractEntityTasks({
         [taskName]: {
           title: config.title,
           timeout: config.timeout,
-          createTaskRunner: createRunnerFactory(type, logger),
-          stateSchemaByVersion: {},
+          createTaskRunner: ({ taskInstance, abortController }) => ({
+            run: () =>
+              runTask({
+                taskInstance,
+                abortController,
+                logger: logger.get(taskInstance.id),
+                core,
+                entityType: type,
+              }),
+          }),
         },
-      });
+      })
     });
   } catch (e) {
     logger.error(`Error registering extract entity tasks, received ${e.message}`);
@@ -148,59 +106,48 @@ export function registerExtractEntityTasks({
   }
 }
 
-export async function scheduleExtractEntityTasks({
-  taskManager,
-  entityTypes,
-  assetManager,
+export async function scheduleExtractEntityTask({
   logger,
+  taskManager,
   frequency,
+  type,
   namespace,
 }: {
-  taskManager: TaskManagerStartContract;
-  entityTypes: EntityType[];
-  assetManager: AssetManager;
   logger: Logger;
+  taskManager: TaskManagerStartContract;
+  type: EntityType;
   frequency?: string;
   namespace: string;
 }): Promise<void> {
   try {
-    const config = TasksConfig[EntityStoreTaskType.Values.extractEntity];
-    const interval = frequency || config.interval;
-    for (const type of entityTypes) {
-      const taskName = getTaskName(type);
-      const taskId = getTaskId(type, namespace);
-      await taskManager.ensureScheduled({
-        id: taskId,
-        taskType: taskName,
-        schedule: {
-          interval,
-        },
-        params: { assetManager },
-        state: { namespace },
-      });
-    }
+    const taskName = getTaskName(type);
+    const taskId = getTaskId(type, namespace);
+    const interval = frequency || TasksConfig[EntityStoreTaskType.Values.extractEntity].interval;
+    await taskManager.ensureScheduled({
+      id: taskId,
+      taskType: taskName,
+      schedule: { interval },
+      state: { namespace },
+      params: {},
+    });
   } catch (e) {
     logger.error(`Error scheduling extract entity tasks, received ${e.message}`);
     throw e;
   }
 }
 
-export async function stopExtractEntityTasks({
+export async function stopExtractEntityTask({
   taskManager,
   logger,
-  entityTypes,
+  type,
   namespace,
 }: {
   taskManager: TaskManagerStartContract;
   logger: Logger;
-  entityTypes: EntityType[];
+  type: EntityType;
   namespace: string;
-}): Promise<string[]> {
-  const taskIds = entityTypes.map((entityType) => getTaskId(entityType, namespace));
-
-  const { statuses } = await taskManager.bulkRemove(taskIds);
-  const stoppedTasksIds = statuses.filter((status) => status.success).map((status) => status.id);
-  logger.debug(`Successfully stopped ${stoppedTasksIds.length} task(s)`);
-
-  return stoppedTasksIds;
+}): Promise<void> {
+  const taskId = getTaskId(type, namespace);
+  await taskManager.removeIfExists(taskId);
+  logger.debug(`removed task: ${taskId}`);
 }

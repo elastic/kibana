@@ -15,9 +15,10 @@ import type {
 } from '@kbn/core-http-request-handler-context-server';
 import type { IRouter } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
-import type { AssetManager } from './domain/asst_manager';
+import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { FeatureFlags } from './infra/feature_flags';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { AssetManager } from './domain/asset_manager';
 
 export interface EntityStoreSetupPlugins {
   taskManager: TaskManagerSetupContract;
@@ -41,3 +42,8 @@ export type EntityStoreRequestHandlerContext = CustomRequestHandlerContext<{
 }>;
 
 export type EntityStorePluginRouter = IRouter<EntityStoreRequestHandlerContext>;
+
+export type PluginStartContract = void;
+export type PluginSetupContract = void;
+
+export type EntityStoreCoreSetup = CoreSetup<EntityStoreStartPlugins, PluginStartContract>;
