@@ -269,8 +269,7 @@ export function transformPartialSLODataToFormState(
 
   if (values.artifacts?.dashboards) {
     state.artifacts = {
-      dashboards: values.artifacts.dashboards
-        .filter(d => !!d?.id) as { id: string }[]
+      dashboards: values.artifacts.dashboards.filter((d) => !!d?.id) as { id: string }[],
     };
   }
 
