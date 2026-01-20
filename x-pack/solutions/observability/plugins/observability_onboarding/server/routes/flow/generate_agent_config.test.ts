@@ -6,6 +6,9 @@
  */
 
 import * as tar from 'tar';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 import { load as loadYaml } from 'js-yaml';
 import type { Output } from '@kbn/fleet-plugin/common/types';
 import { generateAgentConfigTar } from './generate_agent_config';
@@ -21,6 +24,16 @@ jest.mock('@kbn/fleet-plugin/server/services/output_client', () => ({
 }));
 
 describe('generateAgentConfigTar', () => {
+  let tempDir: string;
+
+  beforeEach(() => {
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'generate-agent-config-test-'));
+  });
+
+  afterEach(() => {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  });
+
   const mockOutput: Output = {
     id: 'default',
     name: 'default',
@@ -56,6 +69,7 @@ describe('generateAgentConfigTar', () => {
     tar
       .extract({
         sync: true,
+        cwd: tempDir,
         onReadEntry: (readEntry) => {
           let data = '';
           readEntry.on('data', (buffer) => {

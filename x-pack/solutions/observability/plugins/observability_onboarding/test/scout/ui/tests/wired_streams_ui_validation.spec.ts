@@ -8,8 +8,7 @@
 import { expect } from '@kbn/scout-oblt';
 import { test } from '../fixtures';
 
-// Failing: See https://github.com/elastic/kibana/issues/247685
-test.describe.skip('Wired Streams Ingestion Selector', () => {
+test.describe('Wired Streams Ingestion Selector', () => {
   test.beforeEach(async ({ pageObjects, browserAuth, apiServices }) => {
     await browserAuth.loginAsAdmin();
 
@@ -181,6 +180,50 @@ test.describe.skip('Wired Streams Ingestion Selector', () => {
           'aria-pressed',
           'true'
         );
+      }
+    );
+
+    test(
+      'command includes wired streams flag when Wired Streams mode is selected',
+      { tag: ['@ess', '@svlOblt'] },
+      async ({ pageObjects }) => {
+        await pageObjects.onboarding.selectHostUseCase();
+        await pageObjects.onboarding.clickIntegrationCard('integration-card:auto-detect-logs');
+
+        await test.step('command does NOT include wired streams flag in Classic mode', async () => {
+          const classicCommand = await pageObjects.onboarding.getAutoDetectCommandContent();
+          expect(classicCommand).not.toContain('--write-to-logs-streams');
+        });
+
+        await test.step('command includes wired streams flag after switching to Wired Streams', async () => {
+          await pageObjects.onboarding.selectWiredStreams();
+          const wiredCommand = await pageObjects.onboarding.getAutoDetectCommandContent();
+          expect(wiredCommand).toContain('--write-to-logs-streams=true');
+        });
+      }
+    );
+  });
+
+  test.describe('Elastic Agent Kubernetes Flow - Command Verification', () => {
+    test(
+      'command includes wired streams config when Wired Streams mode is selected',
+      { tag: ['@ess', '@svlOblt'] },
+      async ({ pageObjects }) => {
+        await pageObjects.onboarding.selectKubernetesUseCase();
+        await pageObjects.onboarding.clickIntegrationCard(
+          'integration-card:kubernetes-quick-start'
+        );
+
+        await test.step('command does NOT include wired streams config in Classic mode', async () => {
+          const classicCommand = await pageObjects.onboarding.getKubernetesCommandContent();
+          expect(classicCommand).not.toContain('_write_to_logs_streams');
+        });
+
+        await test.step('command includes wired streams config after switching to Wired Streams', async () => {
+          await pageObjects.onboarding.selectWiredStreams();
+          const wiredCommand = await pageObjects.onboarding.getKubernetesCommandContent();
+          expect(wiredCommand).toContain('_write_to_logs_streams=true');
+        });
       }
     );
   });

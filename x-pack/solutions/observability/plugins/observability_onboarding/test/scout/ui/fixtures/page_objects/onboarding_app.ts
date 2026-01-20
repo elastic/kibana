@@ -143,6 +143,13 @@ export class OnboardingApp {
         /.*\/(auto-detect|kubernetes|otel-logs|otel-kubernetes|apm-virtual|otel-virtual|synthetics-virtual)/
       );
     }
+
+    // For flows that have the ingestion selector, wait for it to be visible
+    const flowsWithIngestionSelector =
+      /(auto-detect-logs|kubernetes-quick-start|otel-logs|otel-kubernetes)/;
+    if (flowsWithIngestionSelector.test(cardSelector)) {
+      await this.ingestionModeSelector.waitFor({ state: 'visible', timeout: 30000 });
+    }
   }
 
   async getGridColumnCount() {
@@ -193,7 +200,7 @@ export class OnboardingApp {
   }
 
   public get techPreviewBadge() {
-    return this.ingestionModeSelector.locator('.euiBetaBadge');
+    return this.ingestionModeSelector.locator('.euiBetaBadge', { hasText: 'Tech Preview' });
   }
 
   async selectWiredStreams() {
@@ -202,5 +209,21 @@ export class OnboardingApp {
 
   async selectClassicIngestion() {
     await this.classicIngestionOption.click();
+  }
+
+  public get autoDetectCodeSnippet() {
+    return this.page.getByTestId('observabilityOnboardingAutoDetectPanelCodeSnippet');
+  }
+
+  public get kubernetesCodeSnippet() {
+    return this.page.getByTestId('observabilityOnboardingKubernetesPanelCodeSnippet');
+  }
+
+  async getAutoDetectCommandContent(): Promise<string> {
+    return (await this.autoDetectCodeSnippet.textContent()) ?? '';
+  }
+
+  async getKubernetesCommandContent(): Promise<string> {
+    return (await this.kubernetesCodeSnippet.textContent()) ?? '';
   }
 }
