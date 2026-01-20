@@ -37,7 +37,6 @@ export class AssetManager {
       frequency: logExtractionFrequency,
       namespace: this.namespace,
     });
-
   }
 
   public async stop(type: EntityType) {
