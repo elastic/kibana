@@ -52,10 +52,9 @@ function getMatchingDimension(
   dimensions: Dimension[],
   selectedDimensions: Dimension[]
 ): Dimension | undefined {
-  const breakdownFieldOrDimensionsMissing = !breakdownField || dimensions.length === 0;
-  const missingDimension = dimensions.find((d) => d.name === breakdownField);
-  const dimensionAlreadySelected = selectedDimensions.some((d) => d.name === breakdownField);
-  return breakdownFieldOrDimensionsMissing || dimensionAlreadySelected || !missingDimension
+  if (!breakdownField || dimensions.length === 0) return;
+  const matchingDimension = dimensions.find((d) => d.name === breakdownField);
+  return matchingDimension && selectedDimensions.some((d) => d.name === breakdownField)
     ? undefined
-    : missingDimension;
+    : matchingDimension;
 }
