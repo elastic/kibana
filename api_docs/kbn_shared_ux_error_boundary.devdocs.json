@@ -32,6 +32,8 @@
           "(props: { children?: React.ReactNode; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/error_boundary/src/ui/error_boundary.tsx",
+        "lineNumber": 84,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -48,6 +50,8 @@
               "{ children?: React.ReactNode; }"
             ],
             "path": "src/platform/packages/shared/shared-ux/error_boundary/src/ui/error_boundary.tsx",
+            "lineNumber": 84,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -71,6 +75,8 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/error_boundary/src/services/error_boundary_provider.tsx",
+        "lineNumber": 33,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -87,6 +93,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/shared-ux/error_boundary/src/services/error_boundary_provider.tsx",
+            "lineNumber": 35,
+            "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -108,6 +116,8 @@
           "(props: React.PropsWithChildren<SectionErrorBoundaryProps>) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/error_boundary/src/ui/section_error_boundary.tsx",
+        "lineNumber": 52,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -122,6 +132,8 @@
               "React.PropsWithChildren<SectionErrorBoundaryProps>"
             ],
             "path": "src/platform/packages/shared/shared-ux/error_boundary/src/ui/section_error_boundary.tsx",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -143,6 +155,8 @@
           "({ error }: { error: Error | null; }) => null"
         ],
         "path": "src/platform/packages/shared/shared-ux/error_boundary/src/ui/throw_if_error.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -157,6 +171,8 @@
               "{ error: Error | null; }"
             ],
             "path": "src/platform/packages/shared/shared-ux/error_boundary/src/ui/throw_if_error.ts",
+            "lineNumber": 19,
+            "columnNumber": 59,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
