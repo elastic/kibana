@@ -65,8 +65,8 @@ export function UnifiedWaterfallFlyout({ waterfallItemId, traceItems, toggleFlyo
           traceId={currentItem.traceId}
           onClose={() => toggleFlyout({ history })}
           spanLinksCount={{
-            linkedChildren: currentItem.spanLinksCount.outgoing,
-            linkedParents: currentItem.spanLinksCount.incoming,
+            linkedChildren: currentItem.spanLinksCount.incoming,
+            linkedParents: currentItem.spanLinksCount.outgoing,
           }}
           flyoutDetailTab={flyoutDetailTab}
           start={start}
@@ -82,8 +82,8 @@ export function UnifiedWaterfallFlyout({ waterfallItemId, traceItems, toggleFlyo
           rootTransactionDuration={rootTransactionDuration}
           errorCount={currentItem.errors.length}
           spanLinksCount={{
-            linkedChildren: currentItem.spanLinksCount.outgoing,
-            linkedParents: currentItem.spanLinksCount.incoming,
+            linkedChildren: currentItem.spanLinksCount.incoming,
+            linkedParents: currentItem.spanLinksCount.outgoing,
           }}
           flyoutDetailTab={flyoutDetailTab}
           start={start}

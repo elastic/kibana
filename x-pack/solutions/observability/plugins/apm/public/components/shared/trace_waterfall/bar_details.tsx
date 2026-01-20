@@ -38,7 +38,7 @@ const ORPHAN_CONTENT = i18n.translate(
 
 export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: number }) {
   const theme = useEuiTheme();
-  const { getRelatedErrorsHref, onErrorClick } = useTraceWaterfallContext();
+  const { getRelatedErrorsHref, onErrorClick, onClick } = useTraceWaterfallContext();
   const itemStatusIsFailureOrError = isFailureOrError(item.status?.value);
   const errorCount = item.errors.length;
 
@@ -171,6 +171,9 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
           outgoingCount={item.spanLinksCount.outgoing}
           incomingCount={item.spanLinksCount.incoming}
           id={item.id}
+          onClick={
+            onClick ? (flyoutTab) => onClick(item.id, { flyoutDetailTab: flyoutTab }) : undefined
+          }
         />
         {item.coldstart && <ColdStartBadge />}
       </EuiFlexGroup>

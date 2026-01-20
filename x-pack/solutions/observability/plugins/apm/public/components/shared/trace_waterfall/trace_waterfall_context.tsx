@@ -80,7 +80,10 @@ export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
   agentMarks: [],
 });
 
-export type OnNodeClick = (id: string) => void;
+export interface OnNodeClickOptions {
+  flyoutDetailTab?: string;
+}
+export type OnNodeClick = (id: string, options?: OnNodeClickOptions) => void;
 export type OnErrorClick = (params: {
   traceId: string;
   docId: string;

@@ -59,8 +59,12 @@ export function UnifiedWaterfallContainer({
   const history = useHistory();
   const handleErrorClick = useErrorClickHandler(traceItems);
 
-  const handleNodeClick = (id: string) => {
-    toggleFlyout({ history, waterfallItemId: id, flyoutDetailTab: 'metadata' });
+  const handleNodeClick = (id: string, options?: { flyoutDetailTab?: string }) => {
+    toggleFlyout({
+      history,
+      waterfallItemId: id,
+      flyoutDetailTab: options?.flyoutDetailTab ?? 'metadata',
+    });
   };
 
   return (
