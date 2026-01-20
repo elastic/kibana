@@ -7,6 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * SCENARIO: Trace change points
+ *
+ * Story: Generates APM transaction data with increase in durations in a spike window.
+ * This produces a clear change point in the trace duration distribution so the
+ * `get_trace_change_points` tool should detect the change.
+ *
+ * Baseline: shorter transaction and span durations.
+ * Spike window: (`TRACE_CHANGE_POINTS_ANALYSIS_SPIKE_WINDOW`): longer
+ *
+ * Validate via:
+ *
+ * ```
+ * POST kbn:///api/agent_builder/tools/_execute
+ * {
+ *   "tool_id": "observability.get_trace_change_points",
+ *   "tool_params": {
+ *     "start": "now-60m",
+ *     "end": "now",
+ *   }
+ * }
+ * ```
+ */
+
 import datemath from '@elastic/datemath';
 import { apm, timerange } from '@kbn/synthtrace-client';
 import type { ApmFields, Timerange } from '@kbn/synthtrace-client';
@@ -16,7 +40,6 @@ import { withClient } from '../../../../lib/utils/with_client';
 import type { ScenarioReturnType } from '../../../../lib/utils/with_client';
 
 export const TRACE_CHANGE_POINTS_SERVICE_NAME = 'test-service';
-export const TRACE_CHANGE_POINTS_INDEX = `traces-apm.app.${TRACE_CHANGE_POINTS_SERVICE_NAME}-default`;
 export const TRACE_CHANGE_POINTS_ANALYSIS_WINDOW = {
   start: 'now-60m',
   end: 'now',
@@ -26,9 +49,6 @@ export const TRACE_CHANGE_POINTS_ANALYSIS_SPIKE_WINDOW = {
   end: 'now-28m',
 };
 
-/**
- * Generates trace data with SPIKE pattern.
- */
 export function generateTraceChangePointsData({
   range,
   apmEsClient,

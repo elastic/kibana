@@ -7,6 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * SCENARIO: Log change points (spike)
+ *
+ * Story: Emits baseline logs with a message "Normal operation completed successfully".
+ * In a spike window, new error pattern with message "Database connection error: timeout after 30000ms" appears.
+ * This produces a clear change point in the error log volume so the
+ * `get_log_change_points` tool can detect the change.
+ *
+ * Baseline:
+ * - 5 info logs/minute
+ * - 5 error logs/minute
+ *
+ * Spike window (`LOG_CHANGE_POINTS_ANALYSIS_SPIKE_WINDOW`):
+ * - 5 info logs/minute
+ * - 1000 error logs/minute
+ *
+ * Validate via:
+ *
+ * ```
+ * POST kbn:///api/agent_builder/tools/_execute
+ * {
+ *   "tool_id": "observability.get_log_change_points",
+ *   "tool_params": {
+ *     "start": "now-60m",
+ *     "end": "now",
+ *   }
+ * }
+ * ```
+ */
+
 import datemath from '@elastic/datemath';
 import type { LogDocument, Timerange } from '@kbn/synthtrace-client';
 import { log, timerange } from '@kbn/synthtrace-client';
@@ -27,9 +57,6 @@ export const LOG_CHANGE_POINTS_ANALYSIS_SPIKE_WINDOW = {
   end: 'now-25m',
 };
 
-/**
- * Generates log data with SPIKE pattern.
- */
 export function generateLogChangePointsData({
   logsEsClient,
   range,

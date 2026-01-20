@@ -7,6 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * SCENARIO: Metric change points
+ *
+ * Story: Generates metric data with an increase in document count and memory free values in a spike window,
+ * producing a clear change point that the `get_metric_change_points` tool can detect.
+ *
+ * Baseline: low document count per minute and lower memory free values.
+ * Spike window (`METRIC_CHANGE_POINTS_ANALYSIS_SPIKE_WINDOW`): higher document
+ * count per minute and higher memory free values.
+ *
+ * Validate via:
+ *
+ * ```
+ * POST kbn:///api/agent_builder/tools/_execute
+ * {
+ *   "tool_id": "observability.get_metric_change_points",
+ *   "tool_params": {
+ *     "start": "now-60m",
+ *     "end": "now",
+ *   }
+ * }
+ * ```
+ */
+
 import datemath from '@elastic/datemath';
 import { apm, timerange } from '@kbn/synthtrace-client';
 import type { ApmFields, Timerange } from '@kbn/synthtrace-client';
@@ -26,9 +50,6 @@ export const METRIC_CHANGE_POINTS_ANALYSIS_SPIKE_WINDOW = {
   end: 'now-28m',
 };
 
-/**
- * Generates metric data with SPIKE pattern.
- */
 export function generateMetricChangePointsData({
   range,
   apmEsClient,
