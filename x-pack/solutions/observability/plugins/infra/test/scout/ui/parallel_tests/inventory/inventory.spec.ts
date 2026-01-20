@@ -115,7 +115,7 @@ test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
     });
   });
 
-  test('K8s pods waffle map redirect to pod details page', async ({
+  test('K8s pods waffle map node redirects to pod details page', async ({
     page,
     pageObjects: { inventoryPage },
   }) => {
