@@ -13,7 +13,7 @@ import type { EuiTabbedContentTab } from '@elastic/eui';
 import { EuiTabbedContent } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { DocViewerTab } from './doc_viewer_tab';
-import type { DocView, DocViewRenderProps } from '../../types';
+import type { DocView, DocViewRenderProps, DocViewerRestorableState } from '../../types';
 
 export const INITIAL_TAB = 'unifiedDocViewer:initialTab';
 
@@ -24,6 +24,8 @@ export interface DocViewerApi {
 export interface DocViewerProps extends DocViewRenderProps, RefAttributes<DocViewerApi> {
   docViews: DocView[];
   initialTabId?: DocView['id'];
+  initialDocViewerState?: DocViewerRestorableState;
+  onInitialDocViewerStateChange?: (state: DocViewerRestorableState) => void;
   onUpdateSelectedTabId?: (tabId: string | undefined) => void;
 }
 
@@ -37,22 +39,32 @@ const getOriginalTabId = (fullTabId: string) => fullTabId.replace('kbn_doc_viewe
  * a `render` function.
  */
 export const DocViewer = forwardRef<DocViewerApi, DocViewerProps>(
-  ({ docViews, initialTabId, onUpdateSelectedTabId, ...renderProps }, ref) => {
+  (
+    {
+      docViews,
+      initialTabId,
+      initialDocViewerState,
+      onInitialDocViewerStateChange,
+      onUpdateSelectedTabId,
+      ...renderProps
+    },
+    ref
+  ) => {
     const tabs = docViews
       .filter(({ enabled }) => enabled) // Filter out disabled doc views
-      .map(({ id, title, component }: DocView) => ({
-        id: getFullTabId(id), // `id` value is used to persist the selected tab in localStorage
-        name: title,
+      .map((docView: DocView) => ({
+        id: getFullTabId(docView.id), // `id` value is used to persist the selected tab in localStorage
+        name: docView.title,
         content: (
           <DocViewerTab
-            key={id}
-            id={id}
-            title={title}
-            component={component}
+            key={`${renderProps.hit.id}_${docView.id}`}
+            docView={docView}
             renderProps={renderProps}
+            initialDocViewerState={initialDocViewerState}
+            onInitialDocViewerStateChange={onInitialDocViewerStateChange}
           />
         ),
-        ['data-test-subj']: `docViewerTab-${id}`,
+        ['data-test-subj']: `docViewerTab-${docView.id}`,
       }));
 
     const [storedInitialTabId, setInitialTabId] = useLocalStorage<string>(INITIAL_TAB);
