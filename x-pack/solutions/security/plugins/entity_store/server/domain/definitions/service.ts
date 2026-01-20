@@ -33,19 +33,19 @@ export const serviceEntityDefinition: EntityDefinitionWithoutId = {
     collect({
       source: `service.entity.relationships.Communicates_with`,
       destination: 'entity.relationships.Communicates_with',
-      mapping: { type: 'date' },
+      mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
     collect({
       source: `service.entity.relationships.Depends_on`,
       destination: 'entity.relationships.Depends_on',
-      mapping: { type: 'date' },
+      mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
     collect({
       source: `service.entity.relationships.Dependent_of`,
       destination: 'entity.relationships.Dependent_of',
-      mapping: { type: 'date' },
+      mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
   ],

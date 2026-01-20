@@ -57,7 +57,6 @@ export const genericEntityDefinition: EntityDefinitionWithoutId = {
 
     newestValue({ source: 'user.domain' }),
     newestValue({ source: 'user.email' }),
-    newestValue({ source: 'user.full_name' }),
     newestValue({ source: 'user.roles' }),
     newestValue({ source: 'user.hash' }),
     newestValue({ source: 'user.id' }),
