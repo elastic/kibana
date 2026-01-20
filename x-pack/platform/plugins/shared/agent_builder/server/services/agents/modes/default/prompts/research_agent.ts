@@ -26,6 +26,7 @@ interface ResearchAgentPromptParams {
   customInstructions?: string;
   capabilities: ResolvedAgentCapabilities;
   initialMessages: BaseMessageLike[];
+  conversationTimestamp: string;
   actions: ResearchAgentAction[];
   attachmentTypes: ProcessedAttachmentType[];
   clearSystemMessage?: boolean;
@@ -46,6 +47,7 @@ export const getResearchAgentPrompt = (params: ResearchAgentPromptParams): BaseM
 
 export const getBaseSystemMessage = ({
   customInstructions,
+  conversationTimestamp,
   attachmentTypes,
   outputSchema,
 }: ResearchAgentPromptParams): string => {
@@ -69,7 +71,7 @@ ${structuredOutputDescription(outputSchema)}
 ${attachmentTypeInstructions(attachmentTypes)}
 
 ## ADDITIONAL INFO
-- Current date: ${formatDate()}
+- Current date: ${formatDate(new Date(conversationTimestamp))}
 
 ## PRE-RESPONSE COMPLIANCE CHECK
 - [ ] Have I gathered all necessary information or performed the requested task? If NO, my response MUST be a tool call.
@@ -79,6 +81,7 @@ ${attachmentTypeInstructions(attachmentTypes)}
 
 export const getResearchSystemMessage = ({
   customInstructions,
+  conversationTimestamp,
   attachmentTypes,
   outputSchema,
 }: ResearchAgentPromptParams): string => {
@@ -174,7 +177,7 @@ ${structuredOutputDescription(outputSchema)}
 ${attachmentTypeInstructions(attachmentTypes)}
 
 ## ADDITIONAL INFO
-- Current date: ${formatDate()}
+- Current date: ${formatDate(new Date(conversationTimestamp))}
 
 ## PRE-RESPONSE COMPLIANCE CHECK
 - [ ] Have I gathered all necessary information? If NO, my response MUST be a tool call (see OPERATING PROTOCOL and TOOL SELECTION POLICY).
