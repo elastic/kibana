@@ -281,7 +281,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.selectTextBaseLang();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await testSubjects.click('switch-to-dataviews');
+        await PageObjects.discover.selectDataViewMode();
         await retry.try(async () => {
           await testSubjects.existOrFail('discover-esql-to-dataview-modal');
         });
@@ -296,7 +296,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('querySubmitButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await testSubjects.click('switch-to-dataviews');
+        await PageObjects.discover.selectDataViewMode();
         await retry.try(async () => {
           await testSubjects.existOrFail('discover-esql-to-dataview-modal');
         });
@@ -307,7 +307,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.missingOrFail('discover-esql-to-dataview-modal');
         });
         await PageObjects.discover.saveSearch('esql_test');
-        await testSubjects.click('switch-to-dataviews');
+        await PageObjects.discover.selectDataViewMode();
         await testSubjects.missingOrFail('discover-esql-to-dataview-modal');
       });
 
@@ -323,7 +323,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('querySubmitButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await testSubjects.click('switch-to-dataviews');
+        await PageObjects.discover.selectDataViewMode();
         await retry.try(async () => {
           await testSubjects.existOrFail('discover-esql-to-dataview-modal');
         });

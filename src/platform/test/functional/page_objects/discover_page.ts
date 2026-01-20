@@ -665,6 +665,23 @@ export class DiscoverPageObject extends FtrService {
     }
   }
 
+  public async selectDataViewMode() {
+    // Get tab elements and open the menu for the first tab
+    const tabElements = await this.find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]');
+    if (tabElements.length > 0) {
+      const menuButton = await tabElements[0].findByCssSelector(
+        '[data-test-subj^="unifiedTabs_tabMenuBtn_"]'
+      );
+      await menuButton.click();
+      await this.retry.waitFor('tab menu to open', async () => {
+        return await this.testSubjects.exists('unifiedTabs_tabMenuItem_switchToClassic');
+      });
+      await this.testSubjects.click('unifiedTabs_tabMenuItem_switchToClassic');
+      await this.header.waitUntilLoadingHasFinished();
+      await this.waitUntilSearchingHasFinished();
+    }
+  }
+
   public async removeHeaderColumn(name: string) {
     await this.dataGrid.clickRemoveColumn(name);
   }
