@@ -1079,9 +1079,25 @@ export class ExceptionListClient {
 
     // Attempt to auto-create the endpoint list for users with write access.
     // Silently ignore forbidden errors for read-only users - they can still query existing lists.
+    // eslint-disable-next-line no-console
+    console.log(
+      `[DEBUG] findEndpointListItem: attempting createEndpointList for user: ${this.user}`
+    );
     try {
-      await this.createEndpointList();
+      const createResult = await this.createEndpointList();
+      // eslint-disable-next-line no-console
+      console.log(
+        `[DEBUG] findEndpointListItem: createEndpointList succeeded, result: ${JSON.stringify(
+          createResult
+        )}`
+      );
     } catch (err) {
+      // eslint-disable-next-line no-console
+      console.log(
+        `[DEBUG] findEndpointListItem: createEndpointList failed with error: ${
+          err.message
+        }, isForbidden: ${SavedObjectsErrorHelpers.isForbiddenError(err)}`
+      );
       if (!SavedObjectsErrorHelpers.isForbiddenError(err)) {
         throw err;
       }

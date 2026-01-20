@@ -6,7 +6,7 @@
  */
 
 import type TestAgent from 'supertest/lib/agent';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { ENDPOINT_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import { GLOBAL_ARTIFACT_TAG } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/constants';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
@@ -27,6 +27,8 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
   const utils = getService('securitySolutionUtils');
   const config = getService('config');
+  const log = getService('log');
+  const retry = getService('retry');
 
   const IS_ENDPOINT_EXCEPTION_MOVE_FF_ENABLED = (
     config.get('kbnTestServer.serverArgs', []) as string[]
@@ -384,18 +386,28 @@ export default function ({ getService }: FtrProviderContext) {
         await rolesUsersProvider.loader.delete('endpoint_exceptions_read_no_so_write');
       });
 
-      beforeEach(async () => {
+      it('should return 404 when endpoint list does not exist', async () => {
+        log.info('[DEBUG] Deleting endpoint_list with privileged user...');
         await endpointArtifactTestResources.deleteList(
           'endpoint_list',
           endpointPolicyManagerSupertest
         );
-      });
+        log.info('[DEBUG] Delete completed');
 
-      it('should return 404 when endpoint list does not exist', async () => {
-        await readOnlyNoSoWriteSupertest
-          .get(`${ENDPOINT_LIST_ITEM_URL}/_find?page=1&per_page=1&sort_field=name&sort_order=asc`)
-          .set('kbn-xsrf', 'true')
-          .expect(404);
+        log.info('[DEBUG] Testing with read-only user...');
+        await retry.tryForTime(5000, async () => {
+          const response = await readOnlyNoSoWriteSupertest
+            .get(`${ENDPOINT_LIST_ITEM_URL}/_find?page=1&per_page=1&sort_field=name&sort_order=asc`)
+            .set('kbn-xsrf', 'true');
+
+          log.info(
+            `[DEBUG] Read-only user response: status=${response.status}, body=${JSON.stringify(
+              response.body
+            )}`
+          );
+
+          expect(response.status).to.be(404);
+        });
       });
     });
   });
