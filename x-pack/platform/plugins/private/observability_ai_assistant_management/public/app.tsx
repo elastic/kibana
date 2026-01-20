@@ -48,7 +48,7 @@ export const mountManagementSection = async ({ core, mountParams, config }: Moun
 
   ReactDOM.render(
     wrapWithTheme(
-      <RedirectToHomeIfUnauthorized coreStart={coreStart}>
+      <RedirectToHomeIfUnauthorized coreStart={coreStart} cloud={startDeps?.cloud}>
         <I18nProvider>
           <KibanaContextProvider services={{ ...coreStart, ...startDeps }}>
             <AppContextProvider value={{ setBreadcrumbs, config }}>

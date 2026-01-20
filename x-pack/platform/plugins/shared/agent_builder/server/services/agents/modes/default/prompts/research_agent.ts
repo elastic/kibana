@@ -10,6 +10,8 @@ import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { platformCoreTools, type ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
 import type { ProcessedAttachmentType } from '../../utils/prepare_conversation';
+import type { AttachmentPresentation } from '../../utils/attachment_presentation';
+import { getConversationAttachmentsSystemMessages } from '../../utils/attachment_presentation';
 import type { ResearchAgentAction } from '../actions';
 import { attachmentTypeInstructions } from './utils/attachments';
 import { customInstructionsBlock, structuredOutputDescription } from './utils/custom_instructions';
@@ -29,6 +31,7 @@ interface ResearchAgentPromptParams {
   conversationTimestamp: string;
   actions: ResearchAgentAction[];
   attachmentTypes: ProcessedAttachmentType[];
+  versionedAttachmentPresentation?: AttachmentPresentation;
   clearSystemMessage?: boolean;
   outputSchema?: Record<string, unknown>;
 }
@@ -40,6 +43,7 @@ export const getResearchAgentPrompt = (params: ResearchAgentPromptParams): BaseM
       'system',
       clearSystemMessage ? getBaseSystemMessage(params) : getResearchSystemMessage(params),
     ],
+    ...getConversationAttachmentsSystemMessages(params.versionedAttachmentPresentation),
     ...initialMessages,
     ...formatResearcherActionHistory({ actions }),
   ];
