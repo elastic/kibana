@@ -14,8 +14,11 @@
  * in * as Code APIs.
  */
 
-import { schema } from '@kbn/config-schema';
-import { ASCODE_FILTER_OPERATOR } from '@kbn/as-code-filters-constants';
+import { schema, type TypeOf } from '@kbn/config-schema';
+import {
+  ASCODE_FILTER_OPERATOR,
+  ASCODE_GROUPED_CONDITION_TYPE,
+} from '@kbn/as-code-filters-constants';
 
 // ====================================================================
 // CORE FILTER OPERATOR AND VALUE SCHEMAS
@@ -193,8 +196,10 @@ const conditionSchema = schema.oneOf(
 // ====================================================================
 
 interface RecursiveType {
-  name: string;
-  self: undefined | RecursiveType;
+  group: {
+    type: typeof ASCODE_GROUPED_CONDITION_TYPE.AND | typeof ASCODE_GROUPED_CONDITION_TYPE.OR;
+    conditions: Array<TypeOf<typeof conditionSchema> | RecursiveType>;
+  };
 }
 
 /**
@@ -216,7 +221,10 @@ export const asCodeGroupFilterSchema = commonBasePropertiesSchema.extends(
   {
     group: schema.object(
       {
-        type: schema.oneOf([schema.literal('and'), schema.literal('or')]),
+        type: schema.oneOf([
+          schema.literal(ASCODE_GROUPED_CONDITION_TYPE.AND),
+          schema.literal(ASCODE_GROUPED_CONDITION_TYPE.OR),
+        ]),
         conditions: schema.arrayOf(
           schema.oneOf([
             conditionSchema,
