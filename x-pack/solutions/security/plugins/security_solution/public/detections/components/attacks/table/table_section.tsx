@@ -228,7 +228,18 @@ export const TableSection = React.memo(
     const getAdditionalActionButtons = useCallback(
       (selectedGroup: string, fieldBucket: RawBucket<AlertsGroupingAggregation>) => {
         return !isGroupingBucket(fieldBucket) || fieldBucket.isNullGroup
-          ? []
+          ? [
+              <EuiButtonIcon
+                key="expand-attack-button"
+                aria-label={i18n.EXPAND_BUTTON_ARIAL_LABEL}
+                data-test-subj={EXPAND_ATTACK_BUTTON_TEST_ID}
+                disabled={true}
+                iconType="expand"
+                onClick={() => openAttackDetailsFlyout(selectedGroup, fieldBucket)}
+                size="s"
+                color="text"
+              />,
+            ]
           : [
               <EuiButtonIcon
                 key="expand-attack-button"
