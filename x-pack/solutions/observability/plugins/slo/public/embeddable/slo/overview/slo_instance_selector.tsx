@@ -32,7 +32,6 @@ export function SloInstanceSelector({ sloId, remoteName, onSelected, hasError }:
     []
   );
   const [searchValue, setSearchValue] = useState<string>('');
-  const [searchAfter, setSearchAfter] = useState<string | undefined>();
   const selectedOptionsRef = useRef(selectedOptions);
   const onSelectedRef = useRef(onSelected);
 
@@ -50,7 +49,6 @@ export function SloInstanceSelector({ sloId, remoteName, onSelected, hasError }:
     remoteName,
     search: searchValue.trim() || undefined,
     size: 100,
-    searchAfter,
   });
 
   const options = useMemo(() => {
@@ -94,7 +92,6 @@ export function SloInstanceSelector({ sloId, remoteName, onSelected, hasError }:
       onSelectedRef.current(undefined);
     }
     setSearchValue(value);
-    setSearchAfter(undefined); // Reset pagination when search changes
   }, []);
 
   const onSearchChange = useMemo(() => debounce(handleSearchChange, 300), [handleSearchChange]);
