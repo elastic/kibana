@@ -12,10 +12,5 @@ export type {
   ControlsRendererParentApi,
   HasPrependWrapperRef,
   PublishesControlsLayout,
-  PublishesFocusedPanelId,
 } from './src/types';
-export {
-  apiHasPrependWrapperRef,
-  apiPublishesControlsLayout,
-  apiPublishesFocusedPanelId,
-} from './src/utils';
+export { apiHasPrependWrapperRef, apiPublishesControlsLayout } from './src/utils';
