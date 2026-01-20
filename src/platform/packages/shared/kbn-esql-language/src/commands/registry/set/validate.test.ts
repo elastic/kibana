@@ -34,10 +34,13 @@ describe('SET Validation', () => {
       setExpectErrors('set time_zone="value"', []);
     });
 
-    test('no errors on valid setting with different value types', () => {
+    test('no errors on valid setting with correct value type', () => {
       setExpectErrors('set time_zone = "string_value"', []);
-      setExpectErrors('set time_zone = 123', []);
-      setExpectErrors('set time_zone = true', []);
+    });
+
+    test('errors on valid setting with incorrect value type', () => {
+      setExpectErrors('set time_zone = 123', ['Invalid value "123" for setting "time_zone".']);
+      setExpectErrors('set time_zone = true', ['Invalid value "true" for setting "time_zone".']);
     });
 
     test('errors on unknown setting names', () => {
@@ -56,6 +59,39 @@ describe('SET Validation', () => {
       setExpectErrors('set TIME_ZONE = "value"', ['Unknown setting TIME_ZONE']);
 
       setExpectErrors('set Project_Routing = "value"', ['Unknown setting Project_Routing']);
+
+      setExpectErrors('set Approximate = "value"', ['Unknown setting Approximate']);
+
+      setExpectErrors('set APPROXIMATE = "value"', ['Unknown setting APPROXIMATE']);
+    });
+  });
+
+  describe('Setting: approximate', () => {
+    test('no errors on approximate setting with boolean value', () => {
+      setExpectErrors('set approximate = true', []);
+      setExpectErrors('set approximate = false', []);
+    });
+
+    test('no errors on approximate setting with map_param value and valid parameters', () => {
+      setExpectErrors('set approximate = { "num_rows": 1000, "confidence_level": 0.95 }', []);
+    });
+
+    test('errors on approximate setting with map_param value and invalid parameter name', () => {
+      setExpectErrors('set approximate = { "invalid_param": 1000 }', [
+        'Unknown map parameter "invalid_param". Available parameters are: {"num_rows":["integer"],"confidence_level":["double"]}.',
+      ]);
+    });
+
+    test('errors on approximate setting with map_param value and invalid parameter type', () => {
+      setExpectErrors('set approximate = { "num_rows": "not_an_integer" }', [
+        'Invalid value type for map parameter "num_rows". Expected types: integer. Actual type: keyword.',
+      ]);
+    });
+
+    test('errors on approximate setting with invalid value type', () => {
+      setExpectErrors('set approximate = "not_a_boolean_or_map"', [
+        'Invalid value "not_a_boolean_or_map" for setting "approximate".',
+      ]);
     });
   });
 });

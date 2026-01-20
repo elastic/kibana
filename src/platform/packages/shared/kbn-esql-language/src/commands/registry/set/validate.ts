@@ -90,9 +90,12 @@ function validateSettingValues(
 
     // validate literal values types
     if (!expectedTypes.includes(valueType)) {
+      const paramKey =
+        'valueUnquoted' in settingValue ? settingValue.valueUnquoted : settingValue.text;
+
       return getMessageFromId({
         messageId: 'invalidSettingValueType',
-        values: { value: settingValue.text, setting: setting.name },
+        values: { value: paramKey, setting: setting.name },
         locations: settingValue.location,
       });
     }

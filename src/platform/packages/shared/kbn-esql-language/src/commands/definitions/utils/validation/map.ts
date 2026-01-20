@@ -37,8 +37,8 @@ export function validateMap(
   mapValue: ESQLSingleAstItem,
   mapDefinition: string
 ): ESQLMessage | null {
-  const settingValueType = getExpressionType(mapValue);
-  const valueType = TypeMap[settingValueType] || settingValueType;
+  const expressionType = getExpressionType(mapValue);
+  const valueType = TypeMap[expressionType] || expressionType;
 
   if (valueType === 'map_param' && isMap(mapValue) && mapDefinition) {
     const mapParamsDefinition = getValuesTypeFromMapParamDefinition(mapDefinition);
