@@ -355,11 +355,7 @@ resolve: async (value: string, context: SelectionContext) => {
 **3. `getDetails`** - Provides detailed information for decoration and metadata:
 
 ```typescript
-getDetails: async (
-  value: unknown,
-  context: SelectionContext,
-  option: SelectionOption | null
-) => {
+getDetails: async (value, context, option) => {
   if (option) {
     return {
       message: `Successfully connected to ${option.label}`,
