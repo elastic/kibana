@@ -7,10 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Use dev build of Emotion to enable runtime labeling
-// eslint-disable-next-line no-undef
-globalThis.EMOTION_RUNTIME_AUTO_LABEL = true;
-
 const MutationObserver = require('mutation-observer');
 Object.defineProperty(window, 'MutationObserver', { value: MutationObserver });
 

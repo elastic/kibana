@@ -15,10 +15,6 @@ import { ApmSystem } from './apm_system';
 
 import { LOAD_BOOTSTRAP_START } from './events';
 
-// Enable Emotion runtime auto-labeling for browser debugging in development
-// This must be set before any Emotion code runs to enable readable class names in DevTools.
-(globalThis as any).EMOTION_RUNTIME_AUTO_LABEL = true;
-
 /** @internal */
 export async function __kbnBootstrap__() {
   performance.mark(KBN_LOAD_MARKS, {

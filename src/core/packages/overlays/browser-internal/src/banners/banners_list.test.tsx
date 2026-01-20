@@ -42,7 +42,6 @@ describe('BannersList', () => {
         <BannersList banners$={banners$} />
       </Wrapper>
     );
-    // The Jest-loaded dev build of Emotion has runtime labeling to add the component name from stack trace
     expect(container.innerHTML).toMatchInlineSnapshot(
       `"<div class=\\"kbnGlobalBannerList\\"><div data-test-priority=\\"0\\" data-test-subj=\\"global-banner-item\\" class=\\"css-rhtlbg-BannerItem\\"><h1>Hello!</h1></div></div>"`
     );
@@ -91,7 +90,7 @@ describe('BannersList', () => {
       expect(container.innerHTML).toContain('First Banner!');
     });
 
-    // Two new banners should be rendered (runtime labeling adds component name from the stack trace)
+    // Two new banners should be rendered
     expect(container.innerHTML).toMatchInlineSnapshot(
       `"<div class=\\"kbnGlobalBannerList\\"><div data-test-priority=\\"1\\" data-test-subj=\\"global-banner-item\\" class=\\"css-rhtlbg-BannerItem\\"><h1>First Banner!</h1></div><div data-test-priority=\\"0\\" data-test-subj=\\"global-banner-item\\" class=\\"css-rhtlbg-BannerItem\\"><h1>Second banner!</h1></div></div>"`
     );
