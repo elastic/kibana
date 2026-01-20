@@ -22,6 +22,7 @@ import type {
 import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
 import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
 import type { AttachmentServiceSetup } from './services/attachments';
+import type { HookRegistration } from './services/hooks';
 
 export interface AgentBuilderSetupDependencies {
   cloud?: CloudSetup;
@@ -96,6 +97,12 @@ export interface AgentBuilderPluginSetup {
    * Attachments setup contract, which can be used to register attachment types.
    */
   attachments: AttachmentsSetup;
+  /**
+   * Hooks setup contract, which can be used to register lifecycle event hooks.
+   */
+  hooks: {
+    register: (registration: HookRegistration) => void;
+  };
 }
 
 /**

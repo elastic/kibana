@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import { tap } from 'rxjs';
-import { filter, of, defer, shareReplay, switchMap, merge, EMPTY } from 'rxjs';
+import { concatMap, filter, finalize, of, defer, shareReplay, switchMap, merge, EMPTY } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
@@ -37,6 +37,12 @@ import {
 import { createConversationIdSetEvent } from './utils/events';
 import type { ChatService, ChatConverseParams } from './types';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
+import { HookEvent } from '../hooks';
+import type { HooksServiceStart } from '../hooks';
+import type {
+  ConversationRoundEndHookContext,
+  ConversationRoundStartHookContext,
+} from '../hooks/types';
 
 interface ChatServiceDeps {
   logger: Logger;
@@ -47,6 +53,7 @@ interface ChatServiceDeps {
   savedObjects: SavedObjectsServiceStart;
   trackingService?: TrackingService;
   analyticsService?: AnalyticsService;
+  hooks: HooksServiceStart;
 }
 
 export const createChatService = (options: ChatServiceDeps): ChatService => {
@@ -118,76 +125,179 @@ class ChatServiceImpl implements ChatService {
               ? of(createConversationIdSetEvent(context.conversation.id))
               : EMPTY;
 
-          // Execute agent
-          const agentEvents$ = executeAgent$({
-            agentId,
-            request,
-            nextInput,
-            capabilities,
-            abortSignal,
-            conversation: context.conversation,
-            defaultConnectorId: context.selectedConnectorId,
-            agentService: this.dependencies.agentService,
-            browserApiTools,
-          });
+          const effectiveConversationId = context.conversation.id;
+          const hookAbortController = new AbortController();
+          const combinedAbortController = new AbortController();
 
-          // Generate title (for CREATE) or use existing title (for UPDATE)
-          const title$ =
-            context.conversation.operation === 'CREATE'
-              ? generateTitle({
-                  chatModel: context.chatModel,
-                  conversation: context.conversation,
-                  nextInput,
-                })
-              : of(context.conversation.title);
+          const abortWith = (reason?: unknown) => {
+            if (!combinedAbortController.signal.aborted) {
+              combinedAbortController.abort(reason);
+            }
+          };
 
-          // Persist conversation
-          const persistenceEvents$ = persistConversation({
-            agentId,
-            conversation: context.conversation,
-            conversationClient: context.conversationClient,
-            conversationId,
-            title$,
-            agentEvents$,
-          });
+          const onExternalAbort = () => abortWith((abortSignal as any)?.reason);
+          const onHookAbort = () => abortWith((hookAbortController.signal as any)?.reason);
 
-          // Merge all event streams
-          const effectiveConversationId =
-            context.conversation.operation === 'CREATE' ? context.conversation.id : conversationId;
-          const modelProvider = getConnectorProvider(context.chatModel.getConnector());
-          return merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
-            handleCancellation(abortSignal),
-            convertErrors({
+          if (abortSignal) {
+            if (abortSignal.aborted) {
+              abortWith((abortSignal as any).reason);
+            } else {
+              abortSignal.addEventListener('abort', onExternalAbort);
+            }
+          }
+          hookAbortController.signal.addEventListener('abort', onHookAbort);
+
+          const effectiveAbortSignal = combinedAbortController.signal;
+
+          const nextInputWithHooks$ = defer(async () => {
+            const hookContext: ConversationRoundStartHookContext = {
+              event: HookEvent.onConversationRoundStart as const,
               agentId,
-              logger: this.dependencies.logger,
-              analyticsService,
-              trackingService,
-              modelProvider,
               conversationId: effectiveConversationId,
-            }),
-            tap((event) => {
-              // Track round completion and query-to-result time
-              try {
-                if (isRoundCompleteEvent(event)) {
-                  if (requestId) trackingService?.trackQueryEnd(requestId);
-                  const currentRoundCount = (context.conversation.rounds?.length ?? 0) + 1;
-                  if (conversationId) {
-                    trackingService?.trackConversationRound(conversationId, currentRoundCount);
+              conversation: context.conversation,
+              nextInput,
+              capabilities,
+              request,
+              abortSignal: effectiveAbortSignal,
+              abortController: hookAbortController,
+            };
+
+            const updatedHookContext = await this.dependencies.hooks.runBlocking(
+              HookEvent.onConversationRoundStart,
+              hookContext
+            );
+
+            this.dependencies.hooks.runParallel(
+              HookEvent.onConversationRoundStart,
+              updatedHookContext
+            );
+
+            return updatedHookContext.nextInput;
+          });
+
+          return nextInputWithHooks$.pipe(
+            switchMap((effectiveNextInput) => {
+              // Execute agent
+              const rawAgentEvents$ = executeAgent$({
+                agentId,
+                request,
+                nextInput: effectiveNextInput,
+                capabilities,
+                abortSignal: effectiveAbortSignal,
+                conversation: context.conversation,
+                defaultConnectorId: context.selectedConnectorId,
+                agentService: this.dependencies.agentService,
+                browserApiTools,
+              });
+
+              // Gate/augment the round completion event with onConversationRoundEnd hooks.
+              const agentEvents$ = rawAgentEvents$.pipe(
+                concatMap((event) => {
+                  if (!isRoundCompleteEvent(event)) {
+                    return of(event);
                   }
 
-                  analyticsService?.reportRoundComplete({
-                    conversationId: effectiveConversationId,
-                    roundCount: currentRoundCount,
-                    agentId,
-                    round: event.data.round,
-                    modelProvider,
+                  return defer(async () => {
+                    const hookContext: ConversationRoundEndHookContext = {
+                      event: HookEvent.onConversationRoundEnd as const,
+                      agentId,
+                      conversationId: effectiveConversationId,
+                      conversation: context.conversation,
+                      round: event.data.round,
+                      resumed: !!event.data.resumed,
+                      capabilities,
+                      request,
+                      abortSignal: effectiveAbortSignal,
+                      abortController: hookAbortController,
+                    };
+
+                    const updated = await this.dependencies.hooks.runBlocking(
+                      HookEvent.onConversationRoundEnd,
+                      hookContext
+                    );
+                    this.dependencies.hooks.runParallel(HookEvent.onConversationRoundEnd, updated);
+
+                    return {
+                      ...event,
+                      data: {
+                        ...event.data,
+                        round: updated.round,
+                      },
+                    };
                   });
-                }
-              } catch (error) {
-                this.dependencies.logger.error(error);
-              }
-            }),
-            shareReplay()
+                })
+              );
+
+              // Generate title (for CREATE) or use existing title (for UPDATE)
+              const title$ =
+                context.conversation.operation === 'CREATE'
+                  ? generateTitle({
+                      chatModel: context.chatModel,
+                      conversation: context.conversation,
+                      nextInput: effectiveNextInput,
+                    })
+                  : of(context.conversation.title);
+
+              // Persist conversation
+              const persistenceEvents$ = persistConversation({
+                agentId,
+                conversation: context.conversation,
+                conversationClient: context.conversationClient,
+                conversationId,
+                title$,
+                agentEvents$,
+              });
+
+              // Merge all event streams
+              const modelProvider = getConnectorProvider(context.chatModel.getConnector());
+              return merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
+                handleCancellation(effectiveAbortSignal),
+                convertErrors({
+                  agentId,
+                  logger: this.dependencies.logger,
+                  analyticsService,
+                  trackingService,
+                  modelProvider,
+                  conversationId: effectiveConversationId,
+                }),
+                tap((event) => {
+                  // Track round completion and query-to-result time
+                  try {
+                    if (isRoundCompleteEvent(event)) {
+                      if (requestId) trackingService?.trackQueryEnd(requestId);
+                      const currentRoundCount = (context.conversation.rounds?.length ?? 0) + 1;
+                      if (conversationId) {
+                        trackingService?.trackConversationRound(conversationId, currentRoundCount);
+                      }
+
+                      analyticsService?.reportRoundComplete({
+                        conversationId: effectiveConversationId,
+                        roundCount: currentRoundCount,
+                        agentId,
+                        round: event.data.round,
+                        modelProvider,
+                      });
+                    }
+                  } catch (error) {
+                    this.dependencies.logger.error(error);
+                  }
+                }),
+                finalize(() => {
+                  // Avoid leaking abort listeners for long-lived signals in tests and real usage.
+                  try {
+                    abortSignal?.removeEventListener('abort', onExternalAbort);
+                  } catch (_) {
+                    // ignore
+                  }
+                  try {
+                    hookAbortController.signal.removeEventListener('abort', onHookAbort);
+                  } catch (_) {
+                    // ignore
+                  }
+                }),
+                shareReplay()
+              );
+            })
           );
         })
       );

@@ -7,7 +7,7 @@
 
 import type { OperatorFunction } from 'rxjs';
 import { Observable, Subject, takeUntil } from 'rxjs';
-import { createRequestAbortedError } from '@kbn/agent-builder-common';
+import { createRequestAbortedError, isAgentBuilderError } from '@kbn/agent-builder-common';
 
 /**
  * Handles cancellation by unsubscribing to the observable and emitting an error if the request is aborted.
@@ -37,7 +37,18 @@ export function handleCancellation<T>(abortSignal?: AbortSignal): OperatorFuncti
         },
         complete: () => {
           if (abortSignal.aborted) {
-            subscriber.error(createRequestAbortedError('Converse request was aborted'));
+            // Prefer propagating the abort reason when present (e.g. hooks aborting with a specific error).
+            const reason = (abortSignal as any).reason;
+            if (reason) {
+              if (isAgentBuilderError(reason)) {
+                subscriber.error(reason);
+              } else {
+                // For non-agentBuilder reasons (including generic AbortError), normalize to requestAborted.
+                subscriber.error(createRequestAbortedError('Converse request was aborted'));
+              }
+            } else {
+              subscriber.error(createRequestAbortedError('Converse request was aborted'));
+            }
           } else {
             subscriber.complete();
           }

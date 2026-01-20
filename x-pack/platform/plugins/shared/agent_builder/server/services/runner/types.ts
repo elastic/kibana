@@ -15,6 +15,7 @@ import type { Runner } from '@kbn/agent-builder-server';
 import type { ToolsServiceStart } from '../tools';
 import type { AgentsServiceStart } from '../agents';
 import type { AttachmentServiceStart } from '../attachments';
+import type { HooksServiceStart } from '../hooks';
 import type { TrackingService } from '../../telemetry';
 
 export interface RunnerFactoryDeps {
@@ -31,6 +32,7 @@ export interface RunnerFactoryDeps {
   agentsService: AgentsServiceStart;
   attachmentsService: AttachmentServiceStart;
   trackingService?: TrackingService;
+  hooks?: HooksServiceStart;
 }
 
 export interface RunnerFactory {
