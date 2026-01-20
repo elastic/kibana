@@ -39,6 +39,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { StatsCommandSummary } from '@kbn/esql-language/src/ast/mutate/commands/stats';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { type UpdateESQLQueryFn } from '../../../../../../context_awareness';
 import { getPatternCellRenderer } from '../../../../../../context_awareness/profile_providers/common/patterns_data_source_profile/pattern_cell_renderer';
 
 import type { ESQLDataGroupNode } from './types';
@@ -47,7 +48,6 @@ import {
   internalStateActions,
   useInternalStateDispatch,
 } from '../../../../state_management/redux';
-import type { DiscoverStateContainer } from '../../../../state_management/discover_state';
 
 interface RowContext {
   groupId: string;
@@ -64,7 +64,7 @@ interface RowClickActionContext {
   closeActionMenu: () => void;
   globalState: TabStateGlobalState;
   openInNewTab: (...args: Parameters<typeof internalStateActions.openInNewTab>) => void;
-  updateESQLQuery: DiscoverStateContainer['actions']['updateESQLQuery'];
+  updateESQLQuery: UpdateESQLQueryFn;
 }
 
 /**
