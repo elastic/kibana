@@ -28,9 +28,10 @@ describe('stripUnmappedKeys', () => {
   it('should not drop mapped panel types', () => {
     mockGetTransforms.mockImplementation(() => {
       return {
-        schema: schema.object({
-          foo: schema.string(),
-        }),
+        getSchema: () =>
+          schema.object({
+            foo: schema.string(),
+          }),
       };
     });
     const dashboardState = {
@@ -109,7 +110,7 @@ describe('stripUnmappedKeys', () => {
   it('should drop unmapped panel types when throwOnUnmappedPanel throws', () => {
     mockGetTransforms.mockImplementation(() => {
       return {
-        schema: schema.any(),
+        getSchema: () => schema.any(),
         throwOnUnmappedPanel: () => {
           throw new Error('Unmapped panel type');
         },
@@ -149,9 +150,10 @@ describe('stripUnmappedKeys', () => {
   it('should drop panel enhancements', () => {
     mockGetTransforms.mockImplementation(() => {
       return {
-        schema: schema.object({
-          foo: schema.string(),
-        }),
+        getSchema: () =>
+          schema.object({
+            foo: schema.string(),
+          }),
       };
     });
     const dashboardState = {
@@ -160,7 +162,11 @@ describe('stripUnmappedKeys', () => {
         {
           config: {
             title: 'panel',
-            enhancements: {},
+            enhancements: {
+              dynamicActions: {
+                events: [],
+              },
+            },
           },
           grid: {
             h: 15,
@@ -177,7 +183,11 @@ describe('stripUnmappedKeys', () => {
             {
               config: {
                 title: 'panel in section',
-                enhancements: {},
+                enhancements: {
+                  dynamicActions: {
+                    events: [{}],
+                  },
+                },
               },
               grid: {
                 h: 15,
@@ -235,16 +245,15 @@ describe('stripUnmappedKeys', () => {
           "title": "my dashboard",
         },
         "warnings": Array [
-          "Dropped unmapped panel config key 'enhancements' from panel panel1",
           "Dropped unmapped panel config key 'enhancements' from panel panelInSection1",
         ],
       }
     `);
   });
 
-  it('should drop controlGroupInput', () => {
+  it('should drop pinned_panels', () => {
     const dashboardState = {
-      controlGroupInput: {} as unknown as DashboardState['controlGroupInput'],
+      pinned_panels: {} as unknown as DashboardState['pinned_panels'],
       title: 'my dashboard',
     };
     expect(stripUnmappedKeys(dashboardState)).toMatchInlineSnapshot(`
@@ -254,7 +263,7 @@ describe('stripUnmappedKeys', () => {
           "title": "my dashboard",
         },
         "warnings": Array [
-          "Dropped unmapped key 'controlGroupInput' from dashboard",
+          "Dropped unmapped key 'pinned_panels' from dashboard",
         ],
       }
     `);
@@ -265,9 +274,10 @@ describe('throwOnUnmappedKeys', () => {
   it('should not throw when there are no unmapped keys', () => {
     mockGetTransforms.mockImplementation(() => {
       return {
-        schema: schema.object({
-          foo: schema.string(),
-        }),
+        getSchema: () =>
+          schema.object({
+            foo: schema.string(),
+          }),
       };
     });
     const dashboardState = {
@@ -314,7 +324,7 @@ describe('throwOnUnmappedKeys', () => {
   it('should throw when dashboard contains a panel with enhancements', () => {
     mockGetTransforms.mockImplementation(() => {
       return {
-        schema: schema.object({}),
+        getSchema: () => schema.object({}),
       };
     });
     const dashboardState = {
@@ -337,9 +347,9 @@ describe('throwOnUnmappedKeys', () => {
     expect(() => throwOnUnmappedKeys(dashboardState)).toThrow();
   });
 
-  it('should throw when dashboard contains controlGroupInput', () => {
+  it('should throw when dashboard contains pinned_panels', () => {
     const dashboardState = {
-      controlGroupInput: {} as unknown as DashboardState['controlGroupInput'],
+      pinned_panels: {} as unknown as DashboardState['pinned_panels'],
       title: 'my dashboard',
     };
     expect(() => throwOnUnmappedKeys(dashboardState)).toThrow();
