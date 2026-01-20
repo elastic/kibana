@@ -28,7 +28,7 @@ import {
   savedSearchMockWithESQL,
 } from '../../../__mocks__/saved_search';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
-import { dataViewMock, dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { getInitialAppState } from './utils/get_initial_app_state';
 import { waitFor } from '@testing-library/react';
 import { FetchStatus } from '../../types';
@@ -1241,49 +1241,6 @@ describe('Discover state', () => {
         state.getCurrentTab().id
       );
       expect(persistedDataViewId).toBe(currentDataView$.getValue()?.id);
-    });
-
-    test('transitionFromDataViewToESQL', async () => {
-      const savedSearchWithQuery = copySavedSearch(savedSearchMock);
-      const query = { query: "foo: 'bar'", language: 'kuery' };
-      const filters = [{ meta: { index: 'the-data-view-id' }, query: { match_all: {} } }];
-      savedSearchWithQuery.searchSource.setField('query', query);
-      savedSearchWithQuery.searchSource.setField('filter', filters);
-      const { state } = await getState('/', { savedSearch: savedSearchWithQuery });
-      state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.setGlobalState)({
-          globalState: { filters },
-        })
-      );
-      state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.setAppState)({
-          appState: {
-            query,
-            sort: [
-              ['@timestamp', 'asc'],
-              ['bytes', 'desc'],
-            ],
-          },
-        })
-      );
-      await state.actions.transitionFromDataViewToESQL(dataViewMockWithTimeField);
-      expect(state.getCurrentTab().appState.query).toStrictEqual({
-        esql: 'FROM the-data-view-title | WHERE KQL("""foo: \'bar\'""")',
-      });
-      expect(state.getCurrentTab().appState.sort).toEqual([['bytes', 'desc']]);
-      expect(state.getCurrentTab().globalState.filters).toStrictEqual([]);
-      expect(state.getCurrentTab().appState.filters).toStrictEqual([]);
-    });
-
-    test('transitionFromESQLToDataView', async () => {
-      const savedSearchWithQuery = copySavedSearch(savedSearchMock);
-      const query = {
-        esql: 'FROM the-data-view-title',
-      };
-      savedSearchWithQuery.searchSource.setField('query', query);
-      const { state } = await getState('/', { savedSearch: savedSearchWithQuery });
-      await state.actions.transitionFromESQLToDataView('the-data-view-id');
-      expect(state.getCurrentTab().appState.query).toStrictEqual({ query: '', language: 'kuery' });
     });
 
     test('onChangeDataView', async () => {
