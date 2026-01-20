@@ -17,6 +17,7 @@ import {
 } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
+import { withMinimumLicense } from '../../utils/with_minimum_license';
 
 export const disablePrivilegeMonitoringEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -44,31 +45,33 @@ export const disablePrivilegeMonitoringEngineRoute = (
         version: API_VERSIONS.public.v1,
         validate: {},
       },
+      withMinimumLicense(
+        async (
+          context,
+          request,
+          response
+        ): Promise<IKibanaResponse<DisableMonitoringEngineResponse>> => {
+          const siemResponse = buildSiemResponse(response);
+          const secSol = await context.securitySolution;
 
-      async (
-        context,
-        request,
-        response
-      ): Promise<IKibanaResponse<DisableMonitoringEngineResponse>> => {
-        const siemResponse = buildSiemResponse(response);
-        const secSol = await context.securitySolution;
+          await assertAdvancedSettingsEnabled(
+            await context.core,
+            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
+          );
 
-        await assertAdvancedSettingsEnabled(
-          await context.core,
-          ENABLE_PRIVILEGED_USER_MONITORING_SETTING
-        );
-
-        try {
-          const body = await secSol.getPrivilegeMonitoringDataClient().disable();
-          return response.ok({ body });
-        } catch (e) {
-          const error = transformError(e);
-          logger.error(`Error disabling privilege monitoring engine: ${error.message}`);
-          return siemResponse.error({
-            statusCode: error.statusCode,
-            body: error.message,
-          });
-        }
-      }
+          try {
+            const body = await secSol.getPrivilegeMonitoringDataClient().disable();
+            return response.ok({ body });
+          } catch (e) {
+            const error = transformError(e);
+            logger.error(`Error disabling privilege monitoring engine: ${error.message}`);
+            return siemResponse.error({
+              statusCode: error.statusCode,
+              body: error.message,
+            });
+          }
+        },
+        'platinum'
+      )
     );
 };
