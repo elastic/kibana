@@ -125,7 +125,7 @@ function getKqlInstructions() {
     - Range: \`field > 100\`, \`field >= 10 AND field <= 20\`
     - Wildcards: \`field: prefix*\` (trailing only)
     - Negation: \`NOT field: value\`
-    - Combine with \`AND\`/\`OR\`, use parentheses for precedence
+    - Logical operators: Combine with \`AND\`/\`OR\`, \`(field: value OR field: value) AND field: value\`, use parentheses for precedence
     - Use quotes for exact phrases in text fields: \`message: "connection refused"\`
   `);
 }
