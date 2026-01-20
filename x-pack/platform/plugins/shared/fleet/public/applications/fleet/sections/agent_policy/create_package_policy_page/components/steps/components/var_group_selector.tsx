@@ -207,14 +207,6 @@ export const VarGroupSelector: React.FC<VarGroupSelectorProps> = ({
     return null;
   }
 
-  // eslint-disable-next-line no-console
-  console.log(
-    'varGroup.description:',
-    varGroup.description,
-    'selectedOptionName:',
-    selectedOptionName
-  );
-
   return (
     <>
       {/* Section title */}
