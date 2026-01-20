@@ -20,7 +20,6 @@ project:
 dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/core-pricing-common'
-  - '@kbn/kql'
 tags:
   - shared-common
   - package
