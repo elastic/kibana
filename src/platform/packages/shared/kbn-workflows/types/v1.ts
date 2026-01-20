@@ -507,7 +507,7 @@ export interface PropertyValidationContext {
   propertyKey: string;
 }
 
-export interface SelectionContext extends PropertyValidationContext {}
+export type SelectionContext = PropertyValidationContext;
 
 export interface ConnectorExamples {
   params?: Record<string, string>;

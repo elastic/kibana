@@ -79,25 +79,33 @@ describe('validateCustomProperties', () => {
       scope: 'config',
       propertyKey: '1',
     });
-    expect(selectionHandler1.getDetails).toHaveBeenCalledWith('1', {
-      stepType: '1',
-      scope: 'config',
-      propertyKey: '1',
-    }, null);
+    expect(selectionHandler1.getDetails).toHaveBeenCalledWith(
+      '1',
+      {
+        stepType: '1',
+        scope: 'config',
+        propertyKey: '1',
+      },
+      null
+    );
     expect(selectionHandler2.resolve).toHaveBeenCalledWith('2', {
       stepType: '2',
       scope: 'input',
       propertyKey: '2',
     });
-    expect(selectionHandler2.getDetails).toHaveBeenCalledWith('2', {
-      stepType: '2',
-      scope: 'input',
-      propertyKey: '2',
-    }, {
-      value: '2',
-      label: 'Option 2',
-      description: 'Description 2',
-    });
+    expect(selectionHandler2.getDetails).toHaveBeenCalledWith(
+      '2',
+      {
+        stepType: '2',
+        scope: 'input',
+        propertyKey: '2',
+      },
+      {
+        value: '2',
+        label: 'Option 2',
+        description: 'Description 2',
+      }
+    );
     expect(validationResults).toHaveLength(2);
     expect(validationResults[0]).toMatchObject({
       id: '1',
