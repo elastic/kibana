@@ -144,7 +144,7 @@ export const GAP_AUTO_FILL_STATUS_NO_GAPS = i18n.translate(
 export const GAP_AUTO_FILL_STATUS_SUCCESS_TOOLTIP = i18n.translate(
   'xpack.securitySolution.gapAutoFillLogs.statusSuccessTooltip',
   {
-    defaultMessage: 'Gap fill tasks were scheduled for all rules.',
+    defaultMessage: 'Gap fill tasks were scheduled successfully for processed rules.',
   }
 );
 
