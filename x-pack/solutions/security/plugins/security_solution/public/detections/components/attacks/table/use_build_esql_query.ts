@@ -42,21 +42,32 @@ export const useBuildEsqlQuery = (props: UseBuildEsqlQueryProps): string => {
     // Using string syntax to avoid column name quoting issues
     query = query.pipe(
       `EVAL ${ESQL_GROUPING_KEY_COLUMN} = CASE(
-        kibana.alert.attack_ids IS NULL, "NO_ATTACK_ID",
+        kibana.alert.attack_ids IS NULL, "-",
         kibana.alert.attack_ids
       )`
+    );
+
+    query = query.pipe(
+      `EVAL is_detection_alert = kibana.alert.rule.rule_type_id != "attack-discovery"`
     );
 
     // Add STATS command to aggregate by grouping key
     query = query.pipe(
       `STATS
-        ${ESQL_GROUPING_COUNT_COLUMN} = COUNT(*),
-        latest_timestamp = MAX(@timestamp)
+        // Detection alerts count
+        ${ESQL_GROUPING_COUNT_COLUMN} = COUNT(CASE(is_detection_alert == true, 1, NULL)),
+
+        // Sorting criteria
+        sorting_criteria = MAX(@timestamp)
+        // sorting_criteria = MAX(kibana.alert.attack_discovery.title)
+        // sorting_criteria = COUNT(CASE(is_detection_alert == true, 1, NULL))
+        // detection_alert_count = COUNT(CASE(is_detection_alert == true, 1, NULL))
+
         BY ${ESQL_GROUPING_KEY_COLUMN}`
     );
 
     // Add SORT command
-    query = query.sort(['latest_timestamp', 'DESC']);
+    query = query.sort(['sorting_criteria', 'DESC']);
 
     // Add LIMIT command
     query = query.limit(1000);
