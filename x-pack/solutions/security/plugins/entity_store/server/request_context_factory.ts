@@ -8,7 +8,6 @@
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { Logger } from '@kbn/logging';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type {
   EntityStoreApiRequestHandlerContext,
@@ -17,24 +16,13 @@ import type {
 } from './types';
 import { AssetManager } from './domain/asset_manager';
 import { FeatureFlags } from './infra/feature_flags';
+import { DEFAULT_NAMESPACE } from './domain/constants';
 
 interface EntityStoreApiRequestHandlerContextDeps {
   coreSetup: CoreSetup<EntityStoreStartPlugins, void>;
   context: Omit<EntityStoreRequestHandlerContext, 'entityStore'>;
   logger: Logger;
   request: KibanaRequest;
-}
-
-async function fetchPluginDepsForContext(
-  core: CoreSetup<EntityStoreStartPlugins, void>,
-  request: KibanaRequest
-): Promise<{ taskManagerStart: TaskManagerStartContract; namespace: string }> {
-  const [_, startPlugins] = await core.getStartServices();
-
-  return {
-    taskManagerStart: startPlugins.taskManager,
-    namespace: startPlugins.spaces.spacesService.getSpaceId(request) || DEFAULT_NAMESPACE_STRING,
-  };
 }
 
 export async function createRequestHandlerContext({
@@ -44,7 +32,9 @@ export async function createRequestHandlerContext({
   request,
 }: EntityStoreApiRequestHandlerContextDeps): Promise<EntityStoreApiRequestHandlerContext> {
   const core = await context.core;
-  const { taskManagerStart, namespace } = await fetchPluginDepsForContext(coreSetup, request);
+  const [_, startPlugins] = await coreSetup.getStartServices();
+  const taskManagerStart = startPlugins.taskManager;
+  const namespace = startPlugins.spaces.spacesService.getSpaceId(request) || DEFAULT_NAMESPACE;
 
   return {
     core,
