@@ -18,6 +18,8 @@ import type { WorkflowDetailState } from '../../../../../entities/workflows/stor
 import { performComputation } from '../../../../../entities/workflows/store/workflow_detail/utils/computation';
 import { findStepByLine } from '../../../../../entities/workflows/store/workflow_detail/utils/step_finder';
 
+jest.mock('../../../../../features/workflow_context/lib/get_output_schema_for_step_type');
+
 export function getFakeAutocompleteContextParams(
   yamlContent: string,
   customConnectorTypes?: Record<string, ConnectorTypeInfo>
@@ -63,20 +65,9 @@ export function getFakeAutocompleteContextParams(
   };
 }
 
-const mockGetOutputSchemaForStepType = jest.fn();
-jest.mock('../../../../../features/workflow_context/lib/get_output_schema_for_step_type', () => ({
-  getOutputSchemaForStepType: (node: unknown) => mockGetOutputSchemaForStepType(node),
-}));
-
 describe('buildAutocompleteContext', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockGetOutputSchemaForStepType.mockImplementation((node) => {
-      if (node.stepType === 'console') {
-        return z.string();
-      }
-      return z.unknown();
-    });
   });
 
   it('should return null if the yaml is empty', () => {
