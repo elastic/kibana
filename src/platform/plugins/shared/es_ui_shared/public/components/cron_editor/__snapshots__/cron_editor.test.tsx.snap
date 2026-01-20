@@ -30,7 +30,7 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
             class="css-yp07d4-wrapper"
           >
             <div
-              class="euiFormPrepend css-1wec0gg-side-uncompressed"
+              class="euiFormPrepend css-7iwqdv-side-uncompressed"
             >
               <label
                 class="euiFormLabel emotion-euiFormLabel"
@@ -134,7 +134,7 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
                 class="css-yp07d4-wrapper"
               >
                 <div
-                  class="euiFormPrepend css-1wec0gg-side-uncompressed"
+                  class="euiFormPrepend css-7iwqdv-side-uncompressed"
                 >
                   <span
                     class="euiFormLabel emotion-euiFormLabel"
@@ -303,7 +303,7 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
                 class="css-yp07d4-wrapper"
               >
                 <div
-                  class="euiFormPrepend css-1wec0gg-side-uncompressed"
+                  class="euiFormPrepend css-7iwqdv-side-uncompressed"
                 >
                   <span
                     class="euiFormLabel emotion-euiFormLabel"
@@ -675,7 +675,7 @@ exports[`CronEditor is rendered with a HOUR frequency 1`] = `
             class="css-yp07d4-wrapper"
           >
             <div
-              class="euiFormPrepend css-1wec0gg-side-uncompressed"
+              class="euiFormPrepend css-7iwqdv-side-uncompressed"
             >
               <label
                 class="euiFormLabel emotion-euiFormLabel"
@@ -772,7 +772,7 @@ exports[`CronEditor is rendered with a HOUR frequency 1`] = `
             class="css-yp07d4-wrapper"
           >
             <div
-              class="euiFormPrepend css-1wec0gg-side-uncompressed"
+              class="euiFormPrepend css-7iwqdv-side-uncompressed"
             >
               <label
                 class="euiFormLabel emotion-euiFormLabel"
@@ -1143,7 +1143,7 @@ exports[`CronEditor is rendered with a MINUTE frequency 1`] = `
             class="css-yp07d4-wrapper"
           >
             <div
-              class="euiFormPrepend css-1wec0gg-side-uncompressed"
+              class="euiFormPrepend css-7iwqdv-side-uncompressed"
             >
               <label
                 class="euiFormLabel emotion-euiFormLabel"
@@ -1244,7 +1244,7 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
             class="css-yp07d4-wrapper"
           >
             <div
-              class="euiFormPrepend css-1wec0gg-side-uncompressed"
+              class="euiFormPrepend css-7iwqdv-side-uncompressed"
             >
               <label
                 class="euiFormLabel emotion-euiFormLabel"
@@ -1341,7 +1341,7 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
             class="css-yp07d4-wrapper"
           >
             <div
-              class="euiFormPrepend css-1wec0gg-side-uncompressed"
+              class="euiFormPrepend css-7iwqdv-side-uncompressed"
             >
               <label
                 class="euiFormLabel emotion-euiFormLabel"
@@ -1570,7 +1570,7 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                 class="css-yp07d4-wrapper"
               >
                 <div
-                  class="euiFormPrepend css-1wec0gg-side-uncompressed"
+                  class="euiFormPrepend css-7iwqdv-side-uncompressed"
                 >
                   <span
                     class="euiFormLabel emotion-euiFormLabel"
@@ -1739,7 +1739,7 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                 class="css-yp07d4-wrapper"
               >
                 <div
-                  class="euiFormPrepend css-1wec0gg-side-uncompressed"
+                  class="euiFormPrepend css-7iwqdv-side-uncompressed"
                 >
                   <span
                     class="euiFormLabel emotion-euiFormLabel"
@@ -2111,7 +2111,7 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
             class="css-yp07d4-wrapper"
           >
             <div
-              class="euiFormPrepend css-1wec0gg-side-uncompressed"
+              class="euiFormPrepend css-7iwqdv-side-uncompressed"
             >
               <label
                 class="euiFormLabel emotion-euiFormLabel"
@@ -2208,7 +2208,7 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
             class="css-yp07d4-wrapper"
           >
             <div
-              class="euiFormPrepend css-1wec0gg-side-uncompressed"
+              class="euiFormPrepend css-7iwqdv-side-uncompressed"
             >
               <label
                 class="euiFormLabel emotion-euiFormLabel"
@@ -2317,7 +2317,7 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                 class="css-yp07d4-wrapper"
               >
                 <div
-                  class="euiFormPrepend css-1wec0gg-side-uncompressed"
+                  class="euiFormPrepend css-7iwqdv-side-uncompressed"
                 >
                   <span
                     class="euiFormLabel emotion-euiFormLabel"
@@ -2486,7 +2486,7 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                 class="css-yp07d4-wrapper"
               >
                 <div
-                  class="euiFormPrepend css-1wec0gg-side-uncompressed"
+                  class="euiFormPrepend css-7iwqdv-side-uncompressed"
                 >
                   <span
                     class="euiFormLabel emotion-euiFormLabel"
@@ -2858,7 +2858,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
             class="css-yp07d4-wrapper"
           >
             <div
-              class="euiFormPrepend css-1wec0gg-side-uncompressed"
+              class="euiFormPrepend css-7iwqdv-side-uncompressed"
             >
               <label
                 class="euiFormLabel emotion-euiFormLabel"
@@ -2955,7 +2955,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
             class="css-yp07d4-wrapper"
           >
             <div
-              class="euiFormPrepend css-1wec0gg-side-uncompressed"
+              class="euiFormPrepend css-7iwqdv-side-uncompressed"
             >
               <label
                 class="euiFormLabel emotion-euiFormLabel"
@@ -3082,7 +3082,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
             class="css-yp07d4-wrapper"
           >
             <div
-              class="euiFormPrepend css-1wec0gg-side-uncompressed"
+              class="euiFormPrepend css-7iwqdv-side-uncompressed"
             >
               <label
                 class="euiFormLabel emotion-euiFormLabel"
@@ -3311,7 +3311,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                 class="css-yp07d4-wrapper"
               >
                 <div
-                  class="euiFormPrepend css-1wec0gg-side-uncompressed"
+                  class="euiFormPrepend css-7iwqdv-side-uncompressed"
                 >
                   <span
                     class="euiFormLabel emotion-euiFormLabel"
@@ -3480,7 +3480,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                 class="css-yp07d4-wrapper"
               >
                 <div
-                  class="euiFormPrepend css-1wec0gg-side-uncompressed"
+                  class="euiFormPrepend css-7iwqdv-side-uncompressed"
                 >
                   <span
                     class="euiFormLabel emotion-euiFormLabel"
