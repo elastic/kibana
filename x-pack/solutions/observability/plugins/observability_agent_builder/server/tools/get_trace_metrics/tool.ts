@@ -103,7 +103,7 @@ Returns an array of items with: group (the groupBy field value), latency (ms), t
       const { request } = context;
 
       try {
-        const { items } = await getToolHandler({
+        const traceMetrics = await getToolHandler({
           core,
           plugins,
           request,
@@ -120,9 +120,7 @@ Returns an array of items with: group (the groupBy field value), latency (ms), t
           results: [
             {
               type: ToolResultType.other,
-              data: {
-                items,
-              },
+              data: traceMetrics,
             },
           ],
         };

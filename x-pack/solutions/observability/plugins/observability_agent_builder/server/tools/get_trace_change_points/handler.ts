@@ -24,6 +24,7 @@ import {
   type LatencyAggregationType,
   type DocumentType,
   getLatencyAggregation,
+  getLatencyValue,
 } from '../../utils/get_latency_aggregation';
 
 interface Bucket {
@@ -41,21 +42,13 @@ interface BucketChangePoints extends Bucket {
   changes_latency: ChangePointResult;
   changes_throughput: ChangePointResult;
   changes_failure_rate: ChangePointResult;
-  time_series: {
-    buckets: Array<
-      Bucket & {
-        latency: {
-          value: number | null;
-        };
-        throughput: {
-          value: number | null;
-        };
-        failure_rate: {
-          value: number | null;
-        };
-      }
-    >;
-  };
+  latency_type: LatencyAggregationType;
+  time_series: Array<{
+    group: string;
+    latency: number | null;
+    throughput: number | null;
+    failure_rate: number | null;
+  }>;
 }
 
 function getChangePointsAggs(bucketsPath: string) {
@@ -198,5 +191,26 @@ export async function getToolHandler({
     },
   });
 
-  return (response.aggregations?.groups?.buckets as BucketChangePoints[]) ?? [];
+  const buckets = response.aggregations?.groups?.buckets ?? [];
+
+  const changePoints = buckets.map((bucket) => {
+    const timeSeries = bucket.time_series.buckets.map((tsBucket) => {
+      return {
+        group: bucket.key as string,
+        latency: getLatencyValue({
+          latencyAggregationType: latencyType,
+          aggregation: tsBucket.latency,
+        }),
+        throughput: tsBucket.throughput.value,
+        failure_rate: tsBucket.failure_rate ? tsBucket.failure_rate.value : null,
+      };
+    });
+    return {
+      ...bucket,
+      time_series: timeSeries,
+      latency_type: latencyType,
+    };
+  });
+
+  return changePoints as BucketChangePoints[];
 }
