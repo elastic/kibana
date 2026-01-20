@@ -20,6 +20,10 @@ uiSettings.overrides:
 ## Enable workplace_ai plugins
 xpack.workplaceAIApp.enabled: true
 
+## EARS (elastic-auth-redirect-service) integration
+xpack.workplaceAIApp.ears.url: https://localhost:8052
+xpack.workplaceAIApp.ears.allow_insecure: true
+
 # Disable spaces
 xpack.spaces.maxSpaces: 1
 
