@@ -102,6 +102,32 @@ export const DefaultParams = z.object({
   comment: z.string().optional(),
 });
 
+export type RunScriptOsConfigValues = z.infer<typeof RunScriptOsConfigValues>;
+export const RunScriptOsConfigValues = z.object({
+  scriptId: z.string().optional(),
+  scriptInput: z.string().optional(),
+  /**
+   * Specify the timeout in seconds for the script execution. Example: "timeout": 60
+   */
+  timeout: z.number().int().optional(),
+});
+
+export type RunscriptParams = z.infer<typeof RunscriptParams>;
+export const RunscriptParams = z.object({
+  command: z.literal('runscript').optional(),
+  /**
+   * Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: "comment": "Check processes"
+   */
+  comment: z.string().optional(),
+  config: z
+    .object({
+      linux: RunScriptOsConfigValues.optional(),
+      macos: RunScriptOsConfigValues.optional(),
+      windows: RunScriptOsConfigValues.optional(),
+    })
+    .optional(),
+});
+
 export type ProcessesParams = z.infer<typeof ProcessesParams>;
 export const ProcessesParams = z.object({
   /**
@@ -127,13 +153,13 @@ export const ProcessesParams = z.object({
 export type EndpointResponseAction = z.infer<typeof EndpointResponseAction>;
 export const EndpointResponseAction = z.object({
   action_type_id: z.literal('.endpoint'),
-  params: z.union([DefaultParams, ProcessesParams]),
+  params: z.union([DefaultParams, ProcessesParams, RunscriptParams]),
 });
 
 export type RuleResponseEndpointAction = z.infer<typeof RuleResponseEndpointAction>;
 export const RuleResponseEndpointAction = z.object({
   actionTypeId: z.literal('.endpoint'),
-  params: z.union([DefaultParams, ProcessesParams]),
+  params: z.union([DefaultParams, ProcessesParams, RunscriptParams]),
 });
 
 export type ResponseAction = z.infer<typeof ResponseAction>;

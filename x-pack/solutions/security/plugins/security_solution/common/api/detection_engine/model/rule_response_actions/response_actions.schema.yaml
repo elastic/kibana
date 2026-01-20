@@ -130,6 +130,38 @@ components:
       required:
         - command
 
+    RunScriptOsConfigValues:
+      type: object
+      properties:
+        scriptId:
+          type: string
+        scriptInput:
+          type: string
+        timeout:
+          type: integer
+          description: 'Specify the timeout in seconds for the script execution. Example: "timeout": 60'
+
+
+    RunscriptParams:
+      type: object
+      properties:
+        command:
+          type: string
+          enum:
+            - runscript
+        comment:
+          type: string
+          description: 'Add a note that explains or describes the action. You can find your comment in the response actions history log. Example: "comment": "Check processes"'
+        config:
+          type: object
+          properties:
+            linux:
+              $ref: '#/components/schemas/RunScriptOsConfigValues'
+            macos:
+              $ref: '#/components/schemas/RunScriptOsConfigValues'
+            windows:
+              $ref: '#/components/schemas/RunScriptOsConfigValues'
+
     ProcessesParams:
       type: object
       properties:
@@ -169,6 +201,7 @@ components:
           oneOf:
             - $ref: '#/components/schemas/DefaultParams'
             - $ref: '#/components/schemas/ProcessesParams'
+            - $ref: '#/components/schemas/RunscriptParams'
       required:
         - action_type_id
         - params
@@ -185,6 +218,7 @@ components:
           oneOf:
             - $ref: '#/components/schemas/DefaultParams'
             - $ref: '#/components/schemas/ProcessesParams'
+            - $ref: '#/components/schemas/RunscriptParams'
       required:
         - actionTypeId
         - params
