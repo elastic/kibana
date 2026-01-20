@@ -137,6 +137,8 @@ export const useEditActiveSourceFlyout = ({
     return triggersActionsUi.getEditConnectorFlyout({
       connector: connectorWithDataSourceName,
       icon: getConnectorIconType(activeSource.iconType),
+      hideRulesTab: true,
+      isTestable: false,
       onClose: closeFlyout,
       onConnectorUpdated: handleConnectorUpdated,
     });

@@ -51,6 +51,8 @@ export interface EditConnectorFlyoutProps {
   onConnectorUpdated?: (connector: ActionConnector) => void;
   isServerless?: boolean;
   icon?: IconType;
+  hideRulesTab?: boolean;
+  isTestable?: boolean;
 }
 
 const getConnectorWithoutSecrets = (
@@ -68,6 +70,8 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   tab = EditConnectorTabs.Configuration,
   onConnectorUpdated,
   icon,
+  hideRulesTab = false,
+  isTestable: isTestableProp,
 }) => {
   const confirmModalTitleId = useGeneratedHtmlId();
 
@@ -339,7 +343,8 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   }, [actionTypeModel, connector]);
 
   const isTestable =
-    !actionTypeModel?.source || actionTypeModel?.source === ACTION_TYPE_SOURCES.stack;
+    isTestableProp ??
+    (!actionTypeModel?.source || actionTypeModel?.source === ACTION_TYPE_SOURCES.stack);
 
   return (
     <>
@@ -361,6 +366,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
           isExperimental={isExperimental}
           subFeature={actionTypeModel?.subFeature}
           isTestable={isTestable}
+          hideRulesTab={hideRulesTab}
         />
         <EuiFlyoutBody>
           {selectedTab === EditConnectorTabs.Configuration && renderConfigurationTab()}
