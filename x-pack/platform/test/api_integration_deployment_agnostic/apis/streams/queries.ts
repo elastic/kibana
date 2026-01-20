@@ -233,7 +233,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('returns 400 when attempting to change the feature of an existing query', async () => {
         const initialFeature = {
           name: 'initial-feature',
-          filter: { field: 'host.name', operator: 'eq' as const, value: 'host1' },
+          filter: { field: 'host.name', eq: 'host1' },
           type: 'system' as const,
         };
         const query = {
@@ -242,18 +242,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           kql: { query: 'test query' },
           feature: initialFeature,
         };
-        await putStream(apiClient, STREAM_NAME, {
-          stream,
-          ...emptyAssets,
-          queries: [query],
-        });
+
+        await apiClient
+          .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
+            params: {
+              path: { name: STREAM_NAME, queryId: query.id },
+              body: {
+                title: query.title,
+                kql: query.kql,
+                feature: initialFeature,
+              },
+            },
+          })
+          .expect(200);
 
         const updatedFeature = {
           name: 'updated-feature',
-          filter: { field: 'host.name', operator: 'eq' as const, value: 'host2' },
+          filter: { field: 'host.name', eq: 'host2' },
           type: 'system' as const,
         };
 
+        // Attempt to update with different feature - should fail
         await apiClient
           .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
             params: {
@@ -275,20 +284,28 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('allows updating a query when the feature remains unchanged', async () => {
         const feature = {
           name: 'test-feature',
-          filter: { field: 'host.name', operator: 'eq' as const, value: 'host1' },
+          filter: { field: 'host.name', eq: 'host1' },
           type: 'system' as const,
         };
         const query = {
-          id: 'feature-query',
+          id: 'feature-query-unchanged',
           title: 'initial title',
           kql: { query: 'initial query' },
           feature,
         };
-        await putStream(apiClient, STREAM_NAME, {
-          stream,
-          ...emptyAssets,
-          queries: [query],
-        });
+
+        await apiClient
+          .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
+            params: {
+              path: { name: STREAM_NAME, queryId: query.id },
+              body: {
+                title: query.title,
+                kql: query.kql,
+                feature,
+              },
+            },
+          })
+          .expect(200);
 
         const upsertQueryResponse = await apiClient
           .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
@@ -440,24 +457,32 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('returns 400 when bulk operation attempts to change the feature of an existing query', async () => {
       const initialFeature = {
         name: 'initial-feature',
-        filter: { field: 'host.name', operator: 'eq' as const, value: 'host1' },
+        filter: { field: 'host.name', eq: 'host1' },
         type: 'system' as const,
       };
       const queryWithFeature = {
-        id: 'feature-query',
+        id: 'feature-query-bulk',
         title: 'query with feature',
         kql: { query: 'test query' },
         feature: initialFeature,
       };
-      await putStream(apiClient, STREAM_NAME, {
-        stream,
-        ...emptyAssets,
-        queries: [queryWithFeature],
-      });
+
+      await apiClient
+        .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
+          params: {
+            path: { name: STREAM_NAME, queryId: queryWithFeature.id },
+            body: {
+              title: queryWithFeature.title,
+              kql: queryWithFeature.kql,
+              feature: initialFeature,
+            },
+          },
+        })
+        .expect(200);
 
       const updatedFeature = {
         name: 'updated-feature',
-        filter: { field: 'host.name', operator: 'eq' as const, value: 'host2' },
+        filter: { field: 'host.name', eq: 'host2' },
         type: 'system' as const,
       };
 
