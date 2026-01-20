@@ -10,7 +10,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type { dashboardDrilldownSchema } from './schemas';
 
-export type DashboardDrilldown = Required<TypeOf<typeof dashboardDrilldownSchema>>;
+export type DashboardDrilldown = TypeOf<typeof dashboardDrilldownSchema>;
 
 export type StoredDashboardDrilldown = Omit<DashboardDrilldown, 'dashboard_id'> & {
   dashboardRefName: string;

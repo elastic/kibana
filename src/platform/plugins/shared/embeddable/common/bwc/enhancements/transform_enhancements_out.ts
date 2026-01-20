@@ -9,7 +9,6 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { DynamicActionsState, SerializedEvent } from './dynamic_actions/types';
-import { enhancementsPersistableState } from './enhancements_persistable_state';
 
 export function transformEnhancementsOut(
   enhancementsState: { dynamicActions?: DynamicActionsState },
@@ -47,7 +46,7 @@ function transformDashboardDrilldown(event: SerializedEvent) {
     label: event.action.name,
     triggers: event.triggers,
     config: {
-      type: ''
-    }
-  }
+      type: '',
+    },
+  };
 }

@@ -13,9 +13,10 @@ import { IMAGE_CLICK_TRIGGER } from '@kbn/image-embeddable-plugin/common';
 import { transformIn, transformOut } from './transforms';
 import { dashboardDrilldownSchema } from './schemas';
 import { DASHBOARD_DRILLDOWN_TYPE } from '@kbn/dashboard-plugin/common/page_bundle_constants';
+import { DashboardDrilldown, StoredDashboardDrilldown } from './types';
 
 export function registerDashboardDrilldown(embeddableSetup: EmbeddableSetup) {
-  embeddableSetup.registerDrilldown<>(DASHBOARD_DRILLDOWN_TYPE, {
+  embeddableSetup.registerDrilldown<StoredDashboardDrilldown, DashboardDrilldown>(DASHBOARD_DRILLDOWN_TYPE, {
     schema: dashboardDrilldownSchema,
     supportedTriggers: [APPLY_FILTER_TRIGGER, IMAGE_CLICK_TRIGGER],
     transformIn,

@@ -40,7 +40,13 @@ export interface EmbeddableSetup extends PersistableStateService<EmbeddableState
   /*
    * Use registerDrilldown to register transforms and schema for a drilldown type.
    */
-  registerDrilldown: (type: string, drilldown: Drilldown) => void;
+  registerDrilldown: <
+    StoredState extends { type: string } = { type: string },
+    State extends { type: string } = { type: string }
+  >(
+    type: string,
+    drilldown: Drilldown<StoredState, State>
+  ) => void;
   /*
    * Use registerTransforms to register transforms and schema for an embeddable type.
    * Transforms decouple REST API state from stored state,
@@ -74,7 +80,8 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
     this.migrateFn = getMigrateFunction(this.getEmbeddableFactory);
     return {
       registerEmbeddableFactory: this.registerEmbeddableFactory,
-      registerDrilldown: this.drilldownRegistry.registerDrilldown,
+      registerDrilldown: this.drilldownRegistry
+        .registerDrilldown as EmbeddableSetup['registerDrilldown'],
       registerTransforms: (type: string, transforms: EmbeddableTransforms<any, any>) => {
         if (this.transformsRegistry[type]) {
           throw new Error(`Embeddable transforms for type "${type}" are already registered.`);
