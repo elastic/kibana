@@ -2932,6 +2932,8 @@ x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/ @elast
 x-pack/solutions/security/plugins/security_solution/common/trial_companion/ @elastic/security-data-analytics
 x-pack/solutions/security/plugins/security_solution/public/trial_companion/ @elastic/security-data-analytics
 x-pack/solutions/security/plugins/security_solution/server/lib/trial_companion/ @elastic/security-data-analytics
+x-pack/solutions/security/test/serverless/functional/test_suites/ftr/trial_companion/ @elastic/security-data-analytics
+x-pack/solutions/security/test/serverless/functional/configs/config.trial_companion.ts @elastic/security-data-analytics
 
 ## Security Solution sub teams - Entity Analytics
 x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics @elastic/security-entity-analytics
