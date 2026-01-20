@@ -5,17 +5,12 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { CreateAlertActionData } from '../../routes/schemas/alert_action_schema';
-import type { QueryService, QueryServiceContract } from '../services/query_service/query_service';
+import type { QueryService } from '../services/query_service/query_service';
 import { createMockQueryService } from '../services/query_service/query_service.mock';
-import type {
-  StorageService,
-  StorageServiceContract,
-} from '../services/storage_service/storage_service';
+import type { StorageService } from '../services/storage_service/storage_service';
 import { createMockStorageService } from '../services/storage_service/storage_service.mock';
 import { AlertActionsClient } from './alert_actions_client';
 import {
@@ -25,19 +20,14 @@ import {
 } from './fixtures/query_responses';
 
 describe('AlertActionsClient', () => {
-  let request: KibanaRequest;
-  let queryService: jest.Mocked<QueryServiceContract>;
-  let storageService: jest.Mocked<StorageServiceContract>;
-  let security: SecurityPluginStart;
+  jest.useFakeTimers().setSystemTime(new Date('2025-01-01T11:12:13.000Z'));
+  const request = httpServerMock.createKibanaRequest();
+  const queryService = createMockQueryService();
+  const storageService = createMockStorageService();
+  const security = securityMock.createStart();
   let client: AlertActionsClient;
 
   beforeEach(() => {
-    jest.useFakeTimers().setSystemTime(new Date('2025-01-01T11:12:13.000Z'));
-    request = httpServerMock.createKibanaRequest();
-    queryService = createMockQueryService();
-    storageService = createMockStorageService();
-    security = securityMock.createStart();
-
     security.authc.getCurrentUser = jest.fn().mockReturnValue({
       username: 'test-user',
     });

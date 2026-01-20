@@ -24,16 +24,16 @@ import type {
   CreateAlertActionData,
 } from '../../routes/schemas/alert_action_schema';
 import { queryResponseToRecords } from '../services/query_service/query_response_to_records';
-import { QueryService } from '../services/query_service/query_service';
-import type { StorageService } from '../services/storage_service/storage_service';
+import { QueryService, type QueryServiceContract } from '../services/query_service/query_service';
+import type { StorageServiceContract } from '../services/storage_service/storage_service';
 import { StorageServiceScopedToken } from '../services/storage_service/tokens';
 
 @injectable()
 export class AlertActionsClient {
   constructor(
     @inject(Request) private readonly request: KibanaRequest,
-    @inject(QueryService) private readonly queryService: QueryService,
-    @inject(StorageServiceScopedToken) private readonly storageService: StorageService,
+    @inject(QueryService) private readonly queryService: QueryServiceContract,
+    @inject(StorageServiceScopedToken) private readonly storageService: StorageServiceContract,
     @optional() @inject(PluginStart('security')) private readonly security?: SecurityPluginStart
   ) {}
 
