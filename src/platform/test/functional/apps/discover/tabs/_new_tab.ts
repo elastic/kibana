@@ -21,8 +21,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataViews = getService('dataViews');
   const esql = getService('esql');
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
 
   describe('opening a new tab', function () {
+    before(async () => {
+      await browser.setWindowSize(1920, 1080);
+    });
+
     it('should create a new tab in classic mode', async () => {
       // tab 0 - with the default data view
 
@@ -104,7 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await timePicker.setAbsoluteRange(fromTime, toTime);
       await discover.waitUntilTabIsLoaded();
 
-      const tabCount = 4;
+      const tabCount = 7;
 
       for (let i = 0; i < tabCount; i++) {
         await testSubjects.click('unifiedTabs_tabsBar_newTabBtn');
