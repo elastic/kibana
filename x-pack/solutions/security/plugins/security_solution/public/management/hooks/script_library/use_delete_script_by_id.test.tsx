@@ -17,8 +17,6 @@ import { resolvePathVariables } from '../../../common/utils/resolve_path_variabl
 import { renderMutation } from '../test_utils';
 import { act } from '@testing-library/react';
 
-jest.mock('../../../../../common/lib/kibana');
-
 describe('useDeleteEndpointScript hook', () => {
   let response: ReturnType<typeof useDeleteEndpointScript>;
   const useHttpMock = useHttp as jest.Mock;
