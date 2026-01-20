@@ -22,6 +22,7 @@ import {
   GetEntitySourceRequestParams,
 } from '../../../../../../common/api/entity_analytics';
 import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
+import { withMinimumLicense } from '../../../utils/with_minimum_license';
 
 export const getMonitoringEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -47,26 +48,29 @@ export const getMonitoringEntitySourceRoute = (
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<GetEntitySourceResponse>> => {
-        const siemResponse = buildSiemResponse(response);
+      withMinimumLicense(
+        async (context, request, response): Promise<IKibanaResponse<GetEntitySourceResponse>> => {
+          const siemResponse = buildSiemResponse(response);
 
-        try {
-          await assertAdvancedSettingsEnabled(
-            await context.core,
-            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
-          );
-          const secSol = await context.securitySolution;
-          const client = secSol.getMonitoringEntitySourceDataClient();
-          const body = await client.get(request.params.id);
-          return response.ok({ body });
-        } catch (e) {
-          const error = transformError(e);
-          logger.error(`Error getting monitoring entity source sync config: ${error.message}`);
-          return siemResponse.error({
-            statusCode: error.statusCode,
-            body: error.message,
-          });
-        }
-      }
+          try {
+            await assertAdvancedSettingsEnabled(
+              await context.core,
+              ENABLE_PRIVILEGED_USER_MONITORING_SETTING
+            );
+            const secSol = await context.securitySolution;
+            const client = secSol.getMonitoringEntitySourceDataClient();
+            const body = await client.get(request.params.id);
+            return response.ok({ body });
+          } catch (e) {
+            const error = transformError(e);
+            logger.error(`Error getting monitoring entity source sync config: ${error.message}`);
+            return siemResponse.error({
+              statusCode: error.statusCode,
+              body: error.message,
+            });
+          }
+        },
+        'platinum'
+      )
     );
 };
