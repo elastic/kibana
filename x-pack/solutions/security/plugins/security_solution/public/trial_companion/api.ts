@@ -6,23 +6,23 @@
  */
 
 import type { Milestone } from '../../common/trial_companion/types';
-import { TRIAL_COMPANION_NBA_URL } from '../../common/trial_companion/constants';
+import {
+  TRIAL_COMPANION_NBA_DISMISS_URL,
+  TRIAL_COMPANION_NBA_URL,
+} from '../../common/trial_companion/constants';
 import { KibanaServices } from '../common/lib/kibana';
 
 export interface GetNBAResponse {
-  milestoneId?: Milestone;
+  openTODOs: Milestone[];
+  dismiss?: boolean;
 }
 
 export const getNBA = async (): Promise<GetNBAResponse> => {
   return KibanaServices.get().http.get<GetNBAResponse>(TRIAL_COMPANION_NBA_URL, { version: '1' });
 };
 
-export const postNBAUserSeen = async (milestoneId: Milestone): Promise<void> => {
-  const body = {
-    milestoneId,
-  };
-  return KibanaServices.get().http.post<void>(TRIAL_COMPANION_NBA_URL, {
+export const postNBADismiss = async (): Promise<void> => {
+  return KibanaServices.get().http.post<void>(TRIAL_COMPANION_NBA_DISMISS_URL, {
     version: '1',
-    body: JSON.stringify(body),
   });
 };

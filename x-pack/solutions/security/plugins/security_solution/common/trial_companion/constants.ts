@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export const TRIAL_COMPANION_NBA_URL = '/internal/security_solution/trial_companion/nba';
+export const TRIAL_COMPANION_NBA_URL = '/internal/security_solution/trial_companion/todo';
+export const TRIAL_COMPANION_NBA_DISMISS_URL =
+  '/internal/security_solution/trial_companion/dismiss';

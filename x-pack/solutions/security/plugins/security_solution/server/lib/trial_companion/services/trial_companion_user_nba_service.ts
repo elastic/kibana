@@ -6,76 +6,39 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { NBATODOList } from '../types';
 import { TrialCompanionMilestoneRepositoryImpl } from './trial_companion_milestone_repository';
-import { Milestone } from '../../../../common/trial_companion/types';
 import type { TrialCompanionUserNBAService } from './trial_companion_user_nba_service.types';
 import type { TrialCompanionMilestoneRepository } from './trial_companion_milestone_repository.types';
-import type { NBAUserSeenSavedObjectAttributes } from '../saved_objects';
-import { NBA_USER_SEEN_SAVED_OBJECT_TYPE } from '../saved_objects';
+
+export const createTrialCompanionUserNBAService = (
+  logger: Logger,
+  soClient: SavedObjectsClientContract
+) => {
+  const aLogger = logger.get('trial_companion_user_nba_service');
+  const repo = new TrialCompanionMilestoneRepositoryImpl(aLogger, soClient);
+  return new TrialCompanionUserNBAServiceImpl(logger, repo);
+};
 
 export class TrialCompanionUserNBAServiceImpl implements TrialCompanionUserNBAService {
   private readonly logger: Logger;
-  private readonly soClient: SavedObjectsClientContract;
   private readonly repo: TrialCompanionMilestoneRepository;
 
-  constructor(logger: Logger, soClient: SavedObjectsClientContract) {
+  constructor(logger: Logger, repo: TrialCompanionMilestoneRepository) {
     this.logger = logger;
-    this.soClient = soClient;
-    this.repo = new TrialCompanionMilestoneRepositoryImpl(logger, soClient);
+    this.repo = repo;
+  }
+  async dismiss(username: string): Promise<void> {
+    this.logger.debug(`Dismiss called by user ${username}`);
+    const result = await this.repo.getCurrent();
+    if (!result) return;
+    await this.repo.update({ ...result, dismiss: true });
   }
 
-  public async markAsSeen(milestoneId: Milestone, userId: string): Promise<void> {
-    const currentSO = await this.getUserNBAStatus(userId);
-    const current = currentSO?.attributes;
-
-    if (currentSO && current) {
-      if (!current.milestoneIds.includes(milestoneId)) {
-        current.milestoneIds.push(milestoneId);
-        const response = await this.soClient.update<NBAUserSeenSavedObjectAttributes>(
-          NBA_USER_SEEN_SAVED_OBJECT_TYPE,
-          currentSO.id,
-          current
-        );
-        this.logger.debug(`Updated user milestone seen SO: ${JSON.stringify(response)}`);
-      } else {
-        this.logger.debug(`User milestone seen SO already exists for user ${userId}`);
-      }
-    } else {
-      const response = await this.soClient.create<NBAUserSeenSavedObjectAttributes>(
-        NBA_USER_SEEN_SAVED_OBJECT_TYPE,
-        {
-          userId,
-          milestoneIds: [milestoneId],
-        }
-      );
-      this.logger.debug(`Created user milestone seen SO: ${JSON.stringify(response)}`);
-    }
-  }
-
-  public async nextNBA(userId: string): Promise<Milestone | undefined> {
-    const milestone = await this.repo.getCurrent();
-    const userStatus = await this.getUserNBAStatus(userId);
-
-    if (
-      !milestone ||
-      (userStatus && userStatus.attributes.milestoneIds.includes(milestone.milestoneId)) ||
-      milestone.milestoneId === Milestone._FINAL // we don't show the final milestone yet, might be changed in the future
-    ) {
-      return undefined;
-    }
-
-    return milestone.milestoneId;
-  }
-
-  private async getUserNBAStatus(
-    userId: string
-  ): Promise<SavedObject<NBAUserSeenSavedObjectAttributes> | undefined> {
-    const result = await this.soClient.find<NBAUserSeenSavedObjectAttributes>({
-      type: NBA_USER_SEEN_SAVED_OBJECT_TYPE,
-      search: userId,
-      searchFields: ['userId'],
-    });
-    return result.saved_objects[0];
+  async openTODOs(): Promise<NBATODOList | undefined> {
+    const result = await this.repo.getCurrent();
+    if (!result) return undefined;
+    return { openTODOs: result.openTODOs, dismiss: result.dismiss };
   }
 }

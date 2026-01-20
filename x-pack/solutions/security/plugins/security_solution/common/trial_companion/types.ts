@@ -12,5 +12,4 @@ export enum Milestone {
   M4 = 4,
   M5 = 5,
   M6 = 6,
-  _FINAL,
 }

@@ -93,12 +93,17 @@ export const detectionRulesInstalledM3 = (deps: UsageCollectorDeps): DetectorF =
 
 export const casesM6 = (deps: UsageCollectorDeps): DetectorF => {
   return async (): Promise<Milestone | undefined> => {
-    const { total } = await deps.collectorContext.soClient.find({
-      type: CASE_SAVED_OBJECT,
-      perPage: 0,
-      page: 0,
-    });
-    return total > 0 ? undefined : Milestone.M6;
+    interface SavedObjectsCountsTelemetry {
+      by_type?: [{ type: string; count: number }];
+    }
+
+    const result = await fetchCollectorResults<SavedObjectsCountsTelemetry>(
+      'saved_objects_counts',
+      deps
+    );
+    const count = result?.by_type?.find((item) => item.type === CASE_SAVED_OBJECT)?.count ?? 0;
+    deps.logger.debug(`casesM6 total: ${count}`);
+    return count > 0 ? undefined : Milestone.M6;
   };
 };
 
@@ -166,6 +171,6 @@ async function fetchCollectorResults<T>(
     return result as T;
   } catch (error) {
     logger.error(`cases: Error fetching security solution telemetry: ${error}`);
-    return undefined;
+    throw error;
   }
 }

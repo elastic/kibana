@@ -16,9 +16,13 @@ export interface NBAAction {
 export interface NBA {
   message: string;
   title: string;
-  apps: NBAAction[] | undefined; // TODO: for two apps - how-to pass text to the buttons?
+  apps: NBAAction[];
 }
 
+export interface NBATODOItem {
+  milestoneId: Milestone;
+  translate: NBA;
+}
 const SUFFIX_MESSAGE = 'message';
 const SUFFIX_TITLE = 'title';
 const SUFFIX_ACTION = 'action';
@@ -79,18 +83,6 @@ const NBA_M3: NBA = toNBA(
   ]
 );
 
-const NBA_M4: NBA = toNBA(
-  Milestone.M4,
-  'Invite a teammate and collaborate on the investigations.',
-  'Keep momentum — collaborate',
-  [
-    {
-      app: '/management/security/users',
-      text: 'Invite a teammate',
-    },
-  ]
-);
-
 const NBA_M5: NBA = toNBA(
   Milestone.M5,
   'Walk a guided triage with tools like AI Assistant and Attack Discovery.',
@@ -115,11 +107,11 @@ const NBA_M6: NBA = toNBA(
   ]
 );
 
-export const ALL_NBA = new Map<Milestone, NBA>([
-  [Milestone.M1, NBA_M1],
-  [Milestone.M2, NBA_M2],
-  [Milestone.M3, NBA_M3],
-  [Milestone.M4, NBA_M4],
-  [Milestone.M5, NBA_M5],
-  [Milestone.M6, NBA_M6],
-]);
+// keep consistent with createTrialCompanionMilestoneServiceDeps from x-pack/solutions/security/plugins/security_solution/server/lib/trial_companion/services/trial_companion_milestone_service.ts:49
+export const NBA_TODO_LIST: NBATODOItem[] = [
+  { milestoneId: Milestone.M1, translate: NBA_M1 },
+  { milestoneId: Milestone.M2, translate: NBA_M2 },
+  { milestoneId: Milestone.M3, translate: NBA_M3 },
+  { milestoneId: Milestone.M5, translate: NBA_M5 },
+  { milestoneId: Milestone.M6, translate: NBA_M6 },
+];

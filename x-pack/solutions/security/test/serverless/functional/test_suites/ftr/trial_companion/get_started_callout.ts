@@ -18,9 +18,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
     it('should show on Get Started for an Admin user', async () => {
       await common.navigateToApp('security', { path: 'get_started' });
-      await testSubjects.existOrFail('trial-companion-callout');
-      await testSubjects.existOrFail('trial-companion-view-button');
-      await testSubjects.existOrFail('euiDismissCalloutButton');
+      await testSubjects.existOrFail('securitySolutionYourTrialCompanion-get-set-up-accordion');
     });
   });
 };

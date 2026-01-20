@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './nba_milestone_user_seen_saved_object';
 export * from './nba_milestone_saved_object';

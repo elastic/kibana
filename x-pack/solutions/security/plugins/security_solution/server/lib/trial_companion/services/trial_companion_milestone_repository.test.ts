@@ -27,25 +27,25 @@ describe('TrialCompanionMilestoneRepositoryImpl', () => {
 
   describe('create', () => {
     it('should return so id', async () => {
-      const id: Milestone = Milestone.M2;
+      const ids: Milestone[] = [Milestone.M1, Milestone.M2];
       const savedObjectId = 'abc';
       soClient.create.mockResolvedValue({
         id: savedObjectId,
         type: NBA_SAVED_OBJECT_TYPE,
-        attributes: { milestoneId: 2 },
+        attributes: { openTODOs: [1, 2] },
         references: [],
       });
-      const result = await repository.create(id);
+      const result = await repository.create(ids);
       expect(result).toEqual({
-        milestoneId: id,
+        openTODOs: ids,
         savedObjectId,
       });
-      expect(soClient.create).toHaveBeenCalledWith(NBA_SAVED_OBJECT_TYPE, { milestoneId: id });
+      expect(soClient.create).toHaveBeenCalledWith(NBA_SAVED_OBJECT_TYPE, { openTODOs: ids });
     });
 
     it('should propagate errors', async () => {
       soClient.create.mockRejectedValue(new Error('test error'));
-      await expect(repository.create(Milestone.M2)).rejects.toThrow('test error');
+      await expect(repository.create([Milestone.M2])).rejects.toThrow('test error');
     });
   });
 
@@ -63,57 +63,100 @@ describe('TrialCompanionMilestoneRepositoryImpl', () => {
       expect(soClient.find).toHaveBeenCalledWith({ type: NBA_SAVED_OBJECT_TYPE });
     });
 
-    it('should return first so id', async () => {
-      const savedObjectId = 'abc';
-      soClient.find.mockResolvedValue({
-        saved_objects: [
+    it.each([
+      [
+        'returns first milestone',
+        [
           {
-            id: savedObjectId,
-            attributes: { milestoneId: 2 },
+            id: 'abc',
+            attributes: { openTODOs: [2] },
             score: 0,
             references: [],
             type: NBA_SAVED_OBJECT_TYPE,
           },
           {
             id: '123',
-            attributes: { milestoneId: 3 },
+            attributes: { milestoneId: [1, 2, 3] },
             score: 0,
             references: [],
             type: NBA_SAVED_OBJECT_TYPE,
           },
         ],
-        total: 2,
+        2,
+        { openTODOs: [Milestone.M2], savedObjectId: 'abc' },
+      ],
+      [
+        'returns dismiss true',
+        [
+          {
+            id: 'a',
+            attributes: { openTODOs: [1, 2, 4], dismiss: true },
+            score: 0,
+            references: [],
+            type: NBA_SAVED_OBJECT_TYPE,
+          },
+        ],
+        1,
+        {
+          openTODOs: [Milestone.M1, Milestone.M2, Milestone.M4],
+          savedObjectId: 'a',
+          dismiss: true,
+        },
+      ],
+      [
+        'returns dismiss false',
+        [
+          {
+            id: 'a',
+            attributes: { openTODOs: [1, 2, 4], dismiss: false },
+            score: 0,
+            references: [],
+            type: NBA_SAVED_OBJECT_TYPE,
+          },
+        ],
+        1,
+        {
+          openTODOs: [Milestone.M1, Milestone.M2, Milestone.M4],
+          savedObjectId: 'a',
+          dismiss: false,
+        },
+      ],
+    ])('should return value', async (_title, savedSO, total, expected) => {
+      soClient.find.mockResolvedValue({
+        saved_objects: savedSO,
+        total,
         per_page: 0,
         page: 0,
       });
       const result = await repository.getCurrent();
       expect(soClient.find).toHaveBeenCalledWith({ type: NBA_SAVED_OBJECT_TYPE });
-      expect(result).toEqual({ milestoneId: Milestone.M2, savedObjectId });
+      expect(result).toEqual(expected);
     });
   });
 
   describe('update', () => {
     it('should update milestoneId', async () => {
-      const milestoneId = Milestone.M2;
+      const openTODOs = [Milestone.M2, Milestone.M4];
       const savedObjectId = 'abc';
       soClient.update.mockResolvedValue({
         id: savedObjectId,
-        attributes: { milestoneId },
+        attributes: { openTODOs },
         type: NBA_SAVED_OBJECT_TYPE,
         references: [],
       });
-      await repository.update({ milestoneId, savedObjectId });
+      await repository.update({ openTODOs, savedObjectId, dismiss: true });
       expect(soClient.update).toHaveBeenCalledWith(NBA_SAVED_OBJECT_TYPE, savedObjectId, {
-        milestoneId,
+        openTODOs,
+        dismiss: true,
       });
     });
     it('should propagate errors', async () => {
-      const milestoneId = Milestone.M2;
+      const openTODOs = [Milestone.M2, Milestone.M4];
       const savedObjectId = 'abc';
       soClient.update.mockRejectedValue(new Error('test error'));
-      await expect(repository.update({ milestoneId, savedObjectId })).rejects.toThrow('test error');
+      await expect(repository.update({ openTODOs, savedObjectId })).rejects.toThrow('test error');
       expect(soClient.update).toHaveBeenCalledWith(NBA_SAVED_OBJECT_TYPE, savedObjectId, {
-        milestoneId,
+        openTODOs,
       });
     });
   });

@@ -16,6 +16,7 @@ import type {
   UsageCollectionSetup,
 } from '@kbn/usage-collection-plugin/server';
 import type { PackageService } from '@kbn/fleet-plugin/server';
+import { difference } from 'lodash';
 import type { UsageCollectorDeps } from './trial_companion_nba_detectors';
 import {
   savedDiscoverySessionsM2,
@@ -32,9 +33,12 @@ import type {
   TrialCompanionMilestoneServiceStart,
 } from './trial_companion_milestone_service.types';
 import { newTelemetryLogger } from '../../telemetry/helpers';
-import { Milestone } from '../../../../common/trial_companion/types';
-import type { TrialCompanionMilestoneRepository } from './trial_companion_milestone_repository.types';
-import type { NBAMilestone, DetectorF } from '../types';
+import type { Milestone } from '../../../../common/trial_companion/types';
+import type {
+  TrialCompanionMilestoneRepository,
+  NBAToBeDone,
+} from './trial_companion_milestone_repository.types';
+import type { DetectorF } from '../types';
 
 const TASK_TYPE = 'security:trial-companion-milestone';
 const TASK_TITLE = 'This task periodically checks currently achieved milestones.';
@@ -53,6 +57,7 @@ export const createTrialCompanionMilestoneServiceDeps: TrialCompanionMilestoneSe
   const soClient = savedObjects.getUnsafeInternalClient();
   const detectorsLogger = logger.get('trial-companion-milestone-detectors');
 
+  // the list of detectors should have minimum all milestones from NBA_TODO_LIST at x-pack/solutions/security/plugins/security_solution/public/trial_companion/nba_translations.ts:131
   const detectors: DetectorF[] = [];
 
   const usageCollectorDeps: UsageCollectorDeps | undefined = usageCollection
@@ -66,7 +71,7 @@ export const createTrialCompanionMilestoneServiceDeps: TrialCompanionMilestoneSe
       }
     : undefined;
 
-  // order matters
+  // order doesn't matter
   detectors.push(installedPackagesM1(detectorsLogger, packageService));
   if (usageCollectorDeps) {
     detectors.push(
@@ -76,10 +81,6 @@ export const createTrialCompanionMilestoneServiceDeps: TrialCompanionMilestoneSe
       casesM6(usageCollectorDeps)
     );
   }
-
-  detectors.push(async () => {
-    return Milestone._FINAL;
-  });
 
   const repo: TrialCompanionMilestoneRepository = new TrialCompanionMilestoneRepositoryImpl(
     logger,
@@ -133,7 +134,7 @@ export class TrialCompanionMilestoneServiceImpl implements TrialCompanionMilesto
       const saved = await this.getMilestoneRepository().getCurrent();
       this.logger.debug(() => `Current milestone from SO: ${JSON.stringify(saved)}`);
 
-      let currentMilestoneId: Milestone | undefined;
+      const openTODOs: Milestone[] = [];
       // potential optimization: stop checking once we reach the final milestone, we could check SO in start function
       // potential optimization: run only detectors for milestones higher than the current one
       for (const d of this.detectors) {
@@ -144,23 +145,23 @@ export class TrialCompanionMilestoneServiceImpl implements TrialCompanionMilesto
 
         const milestoneId = await d();
         if (milestoneId) {
-          currentMilestoneId = milestoneId;
-          break;
+          openTODOs.push(milestoneId);
         }
       }
 
-      this.logger.debug(`Current milestone detected: ${currentMilestoneId}`);
+      this.logger.debug(`Current open TODOs detected: ${openTODOs}`);
 
-      let updated: NBAMilestone | undefined;
-      if (currentMilestoneId) {
-        if (!saved) {
-          this.logger.debug('No previous milestone found, creating it');
-          updated = await this.getMilestoneRepository().create(currentMilestoneId);
-        } else if (saved.milestoneId !== currentMilestoneId) {
-          saved.milestoneId = currentMilestoneId;
-          await this.getMilestoneRepository().update(saved);
-          updated = saved;
-        }
+      let updated: NBAToBeDone | undefined;
+      if (!saved) {
+        this.logger.debug('No previous TODOs found, creating it');
+        updated = await this.getMilestoneRepository().create(openTODOs);
+      } else if (
+        difference(openTODOs, saved.openTODOs).length > 0 ||
+        difference(saved.openTODOs, openTODOs).length > 0
+      ) {
+        saved.openTODOs = openTODOs;
+        await this.getMilestoneRepository().update(saved);
+        updated = saved;
       }
       this.logger.debug(() => `Current milestone updated: ${JSON.stringify(updated)}`);
     } catch (e) {

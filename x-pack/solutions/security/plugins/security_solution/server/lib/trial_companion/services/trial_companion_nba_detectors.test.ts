@@ -28,6 +28,7 @@ import type { PackageClient, PackageService } from '@kbn/fleet-plugin/server';
 import { lazyObject } from '@kbn/lazy-object';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import type { CountResponse } from '@elastic/elasticsearch/lib/api/types';
+import { CASE_SAVED_OBJECT } from '@kbn/cases-plugin/common/constants';
 
 describe('Trial companion NBA detectors', () => {
   const logger = loggingSystemMock.createLogger();
@@ -139,7 +140,9 @@ describe('Trial companion NBA detectors', () => {
       ['0 cases', 0, Milestone.M6],
       ['with cases', 3, undefined],
     ])('compares total count of cases saved objects - %s', async (_tcName, total, expected) => {
-      soClient.find.mockResolvedValueOnce({ saved_objects: [], total, per_page: 0, page: 0 });
+      (collector.fetch as jest.Mock).mockResolvedValue({
+        by_type: [{ type: CASE_SAVED_OBJECT, count: total }],
+      });
       await expect(casesM6(deps)()).resolves.toEqual(expected);
     });
 

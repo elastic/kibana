@@ -67,8 +67,8 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, th
                         <UpsellingProvider upsellingService={upselling}>
                           <DiscoverInTimelineContextProvider>
                             <PageRouter history={history}>
-                              <TrialCompanion />
                               <AssistantProvider>{children}</AssistantProvider>
+                              <TrialCompanion />
                             </PageRouter>
                           </DiscoverInTimelineContextProvider>
                         </UpsellingProvider>

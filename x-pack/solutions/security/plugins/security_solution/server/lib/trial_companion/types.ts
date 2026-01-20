@@ -15,9 +15,9 @@ export interface TrialCompanionRoutesDeps {
   enabled: boolean;
 }
 
-export interface NBAMilestone {
-  milestoneId: Milestone;
-  savedObjectId: string;
+export interface NBATODOList {
+  openTODOs: Milestone[];
+  dismiss?: boolean;
 }
 
 export type DetectorF = () => Promise<Milestone | undefined>;
