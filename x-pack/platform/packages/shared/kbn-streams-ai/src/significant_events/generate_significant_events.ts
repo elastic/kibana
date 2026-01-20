@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import type { Feature, Streams, System } from '@kbn/streams-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, BoundInferenceClient } from '@kbn/inference-common';
@@ -83,7 +84,9 @@ export async function generateSignificantEvents({
         name: system?.name || stream.name,
         dataset_analysis: JSON.stringify(formatDocumentAnalysis(analysis, { dropEmpty: true })),
         description: system?.description || stream.description,
-        features: JSON.stringify(features),
+        features: JSON.stringify(
+          features.map((feature) => omit(feature, ['id', 'status', 'last_seen']))
+        ),
       },
       maxSteps: 4,
       prompt,
