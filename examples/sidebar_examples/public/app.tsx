@@ -19,7 +19,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { useSidebar } from '@kbn/core-chrome-sidebar-components';
+import { useSidebar, useSidebarApp } from '@kbn/core-chrome-sidebar-components';
 import React from 'react';
 import { counterAppId, type CounterSidebarParams } from './counter_app';
 import { textInputAppId, type TextInputSidebarParams } from './text_input_app';
@@ -29,25 +29,27 @@ import { tabSelectionAppId, type TabSelectionSidebarParams } from './tab_selecti
 export interface Props {}
 
 export function App({}: Props) {
-  const { close, setWidth, open, setParams } = useSidebar();
+  const { close, setWidth } = useSidebar();
+
+  // Get app-bound APIs for each sidebar app
+  const textApp = useSidebarApp<TextInputSidebarParams>(textInputAppId);
+  const counterApp = useSidebarApp<CounterSidebarParams>(counterAppId);
+  const tabsApp = useSidebarApp<TabSelectionSidebarParams>(tabSelectionAppId);
 
   // App handlers just for simple demo controls,
   // For real apps, these handlers would be exposed on plugins contracts or as hooks.
   // Text Input App handlers
-  const handleOpenTextApp = () => open(textInputAppId);
-  const handleResetTextInput = () =>
-    setParams<TextInputSidebarParams>(textInputAppId, { userName: '' });
+  const handleOpenTextApp = () => textApp.open();
+  const handleResetTextInput = () => textApp.setParams({ userName: '' });
 
   // Counter App handlers
-  const handleOpenCounterApp = () => open(counterAppId);
-  const handleOpenCounterWithValue = () =>
-    open<CounterSidebarParams>(counterAppId, { counter: 10 });
-  const handleResetCounter = () => setParams<CounterSidebarParams>(counterAppId, { counter: 0 });
+  const handleOpenCounterApp = () => counterApp.open();
+  const handleOpenCounterWithValue = () => counterApp.open({ counter: 10 });
+  const handleResetCounter = () => counterApp.setParams({ counter: 0 });
 
   // Tab Selection App handlers
-  const handleOpenTabsApp = () => open(tabSelectionAppId);
-  const handleResetTabs = () =>
-    setParams<TabSelectionSidebarParams>(tabSelectionAppId, { selectedTab: 'overview' });
+  const handleOpenTabsApp = () => tabsApp.open();
+  const handleResetTabs = () => tabsApp.setParams({ selectedTab: 'overview' });
 
   const handleCloseSidebar = () => close();
 

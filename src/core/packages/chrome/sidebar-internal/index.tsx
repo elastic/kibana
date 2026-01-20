@@ -13,6 +13,7 @@ export type {
   SidebarComponentProps,
   SidebarComponentType,
   SidebarApp,
+  SidebarAppDefinition,
   SidebarSetup,
   SidebarStart,
 } from '@kbn/core-chrome-sidebar';

@@ -10,15 +10,15 @@
 import type { Observable } from 'rxjs';
 import { map, startWith, Subject } from 'rxjs';
 import { memoize } from 'decko';
-import type { SidebarApp, SidebarAppId } from '@kbn/core-chrome-sidebar';
+import type { SidebarAppDefinition, SidebarAppId } from '@kbn/core-chrome-sidebar';
 import { isValidSidebarAppId } from '@kbn/core-chrome-sidebar';
 
 export class SidebarRegistryService {
-  private readonly registeredApps = new Map<string, SidebarApp>();
+  private readonly registeredApps = new Map<string, SidebarAppDefinition>();
   private readonly changed$ = new Subject<void>();
 
   @memoize
-  getApps$(): Observable<SidebarApp[]> {
+  getApps$(): Observable<SidebarAppDefinition[]> {
     return this.changed$.pipe(
       startWith(undefined),
       map(() => Array.from(this.registeredApps.values()))
@@ -32,7 +32,7 @@ export class SidebarRegistryService {
     );
   }
 
-  registerApp<TParams = {}>(app: SidebarApp<TParams>): void {
+  registerApp<TParams = {}>(app: SidebarAppDefinition<TParams>): void {
     if (!isValidSidebarAppId(app.appId)) {
       throw new Error(
         `[Sidebar Registry] Invalid app ID: ${app.appId}. App ID must be either explicitly listed`
@@ -46,15 +46,15 @@ export class SidebarRegistryService {
     this.registeredApps.set(app.appId, {
       ...app,
       available: app.available !== false,
-    } as SidebarApp);
+    } as SidebarAppDefinition);
     this.changed$.next();
   }
 
-  getApps(): SidebarApp[] {
+  getApps(): SidebarAppDefinition[] {
     return Array.from(this.registeredApps.values());
   }
 
-  getApp(appId: SidebarAppId): SidebarApp {
+  getApp(appId: SidebarAppId): SidebarAppDefinition {
     const app = this.registeredApps.get(appId);
     if (!app) {
       throw new Error(`[Sidebar Registry] App not found: ${appId}`);

@@ -59,7 +59,7 @@ export type SidebarComponentType<TParams> = ComponentType<SidebarComponentProps<
 /**
  * Complete app definition for sidebar registration
  */
-export interface SidebarApp<TParams = unknown> {
+export interface SidebarAppDefinition<TParams = unknown> {
   /**
    * Unique identifier for the sidebar app
    */
@@ -109,7 +109,26 @@ export interface SidebarApp<TParams = unknown> {
  */
 export interface SidebarSetup {
   /** Register a new sidebar app */
-  registerApp<TParams = {}>(app: SidebarApp<TParams>): void;
+  registerApp<TParams = {}>(app: SidebarAppDefinition<TParams>): void;
+}
+
+/**
+ * App-bound API for interacting with a specific sidebar app.
+ * Obtained via `sidebar.getApp(appId)`.
+ */
+export interface SidebarApp<TParams = unknown> {
+  /** Open the sidebar to this app, optionally with initial params */
+  open: (params?: Partial<TParams>) => void;
+  /** Close the sidebar (convenience method, equivalent to sidebar.close()) */
+  close: () => void;
+  /** Update params for this app (merges with existing params) */
+  setParams: (params: Partial<TParams>) => void;
+  /** Get current params synchronously */
+  getParams: () => TParams;
+  /** Get observable stream of params */
+  getParams$: () => Observable<TParams>;
+  /** Set the availability status of this app */
+  setAvailable: (available: boolean) => void;
 }
 
 /**
@@ -120,8 +139,6 @@ export interface SidebarStart {
   isOpen$: () => Observable<boolean>;
   /** Get whether the sidebar is currently open */
   isOpen: () => boolean;
-  /** Open the sidebar to a specific app, optionally with initial params */
-  open: <TParams = {}>(appId: SidebarAppId, params?: Partial<TParams>) => void;
   /** Close the sidebar */
   close: () => void;
   /** Observable of the sidebar width */
@@ -134,18 +151,12 @@ export interface SidebarStart {
   getCurrentAppId$: () => Observable<SidebarAppId | null>;
   /** Get the currently open app ID */
   getCurrentAppId: () => SidebarAppId | null;
-  /** Get observable stream of app params */
-  getParams$<T>(appId: SidebarAppId): Observable<T>;
-  /** Get current app params synchronously */
-  getParams<T>(appId: SidebarAppId): T;
-  /** Update params for a sidebar app */
-  setParams<T>(appId: SidebarAppId, params: Partial<T>): void;
-  /** Set the availability status of a sidebar app */
-  setAvailable: (appId: SidebarAppId, available: boolean) => void;
   /** Observable of apps that are currently available */
   getAvailableApps$: () => Observable<string[]>;
   /** Check if an app is registered */
   hasApp: (appId: SidebarAppId) => boolean;
-  /** Get a specific app by ID */
-  getApp: (appId: SidebarAppId) => SidebarApp;
+  /** Get the app-bound API for a specific sidebar app */
+  getApp: <TParams = unknown>(appId: SidebarAppId) => SidebarApp<TParams>;
+  /** Get the registration definition for a specific app */
+  getAppDefinition: (appId: SidebarAppId) => SidebarAppDefinition;
 }

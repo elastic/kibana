@@ -54,4 +54,4 @@ export type {
   RenderAs,
 } from './project_navigation';
 
-export type { SidebarApp, SidebarSetup, SidebarStart } from './sidebar';
+export type { SidebarApp, SidebarAppDefinition, SidebarSetup, SidebarStart } from './sidebar';

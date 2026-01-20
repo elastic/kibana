@@ -63,7 +63,7 @@ export class SidebarExamplesPlugin implements Plugin<void, void, SetupDeps> {
   public start(core: CoreStart) {
     // Simulate async permission check - make tab selection app available after 2 seconds
     setTimeout(() => {
-      core.chrome.sidebar.setAvailable(tabSelectionAppId, true);
+      core.chrome.sidebar.getApp(tabSelectionAppId).setAvailable(true);
       // eslint-disable-next-line no-console
       console.log('[Sidebar Example] Tab Selection app is now available after permission check');
     }, 2000);

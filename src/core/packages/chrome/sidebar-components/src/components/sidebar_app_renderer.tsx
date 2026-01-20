@@ -21,17 +21,18 @@ interface SidebarAppRendererProps {
 
 export function SidebarAppRenderer({ appId, loadComponent, onClose }: SidebarAppRendererProps) {
   const sidebarService = useSidebarService();
+  const appApi = sidebarService.getApp(appId);
 
   const LazyComponent = useMemo(
     () => lazy(() => loadComponent().then((c) => ({ default: c }))),
     [loadComponent]
   );
 
-  const params = useObservable(sidebarService.getParams$(appId), sidebarService.getParams(appId));
+  const params = useObservable(appApi.getParams$(), appApi.getParams());
 
   const setParams = useCallback(
-    (newParams: Record<string, unknown>) => sidebarService.setParams(appId, newParams),
-    [sidebarService, appId]
+    (newParams: Record<string, unknown>) => appApi.setParams(newParams),
+    [appApi]
   );
 
   return (

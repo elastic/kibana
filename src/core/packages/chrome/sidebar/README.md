@@ -3,7 +3,7 @@
 Public types and constants for the Chrome Sidebar API.
 
 This package contains:
-- TypeScript types (`SidebarApp`, `SidebarSetup`, `SidebarStart`, `SidebarComponentProps`, etc.)
+- TypeScript types (`SidebarApp`, `SidebarAppDefinition`, `SidebarSetup`, `SidebarStart`, `SidebarComponentProps`, etc.)
 - Constants (`VALID_SIDEBAR_APP_IDS`)
 - Validation utilities (`isValidSidebarAppId`)
 

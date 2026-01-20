@@ -8,5 +8,6 @@ This package is part of Kibana's shared dependencies (`kbn-ui-shared-deps-src`),
 import { useSidebarService } from '@kbn/core-chrome-sidebar-context';
 
 const sidebar = useSidebarService();
-sidebar.open('myApp');
+const myApp = sidebar.getApp('myApp');
+myApp.open();
 ```

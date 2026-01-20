@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SidebarSetup, SidebarStart } from '@kbn/core-chrome-sidebar';
+import type {
+  SidebarSetup,
+  SidebarStart,
+  SidebarApp,
+  SidebarAppId,
+} from '@kbn/core-chrome-sidebar';
 import { SidebarRegistryService } from './sidebar_registry_service';
 import { SidebarStateService } from './sidebar_state_service';
 import { SidebarAppStateService } from './sidebar_app_state_service';
@@ -43,26 +48,34 @@ export class SidebarService {
     // initialize services on start to make sure all apps are registered
     this.appState.start(basePath);
     (this.state as SidebarStateService).start(basePath);
+
+    const getApp = <TParams = unknown,>(appId: SidebarAppId): SidebarApp<TParams> => {
+      return {
+        open: (params?: Partial<TParams>) => this.state.open(appId, params),
+        close: () => this.state.close(),
+        setParams: (params: Partial<TParams>) => this.appState.setParams(appId, params),
+        getParams: () => this.appState.getParams(appId),
+        getParams$: () => this.appState.getParams$(appId),
+        setAvailable: (available: boolean) => this.registry.setAvailable(appId, available),
+      };
+    };
+
     return {
       // SidebarStateServiceApi
       isOpen$: this.state.isOpen$.bind(this.state),
       isOpen: this.state.isOpen.bind(this.state),
-      open: this.state.open.bind(this.state),
       close: this.state.close.bind(this.state),
       getWidth$: this.state.getWidth$.bind(this.state),
       getWidth: this.state.getWidth.bind(this.state),
       setWidth: this.state.setWidth.bind(this.state),
       getCurrentAppId$: this.state.getCurrentAppId$.bind(this.state),
       getCurrentAppId: this.state.getCurrentAppId.bind(this.state),
-      // SidebarAppStateServiceApi
-      getParams$: this.appState.getParams$.bind(this.appState),
-      getParams: this.appState.getParams.bind(this.appState),
-      setParams: this.appState.setParams.bind(this.appState),
       // SidebarRegistryServiceApi
-      setAvailable: this.registry.setAvailable.bind(this.registry),
       getAvailableApps$: this.registry.getAvailableApps$.bind(this.registry),
       hasApp: this.registry.hasApp.bind(this.registry),
-      getApp: this.registry.getApp.bind(this.registry),
+      // App-bound API
+      getApp,
+      getAppDefinition: this.registry.getApp.bind(this.registry),
     };
   }
 }
