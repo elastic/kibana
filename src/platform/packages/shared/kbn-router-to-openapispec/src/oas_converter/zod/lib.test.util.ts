@@ -7,27 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers';
 
 export function createLargeSchema() {
   return z.object({
     string: z.string().max(10).min(1),
     maybeNumber: z.number().max(1000).min(1).optional(),
-    booleanDefault: z.boolean({ description: 'defaults to to true' }).default(true),
+    booleanDefault: z.boolean().describe('defaults to to true').default(true),
     booleanFromString: BooleanFromString.default(false).describe(
       'boolean or string "true" or "false"'
     ),
-    ipType: z.string().ip({ version: 'v4' }),
+    ipType: z.ipv4(),
     literalType: z.literal('literallythis'),
     neverType: z.never(),
     map: z.map(z.string(), z.string()),
     record: z.record(z.string(), z.string()),
     union: z.union([
-      z.string({ description: 'Union string' }).max(1),
-      z.number({ description: 'Union number' }).min(0),
+      z.string().describe('Union string').max(1),
+      z.number().describe('Union number').min(0),
     ]),
     uri: z.string().url().default('prototest://something'),
-    any: z.any({ description: 'any type' }),
+    any: z.any().describe('any type'),
   });
 }

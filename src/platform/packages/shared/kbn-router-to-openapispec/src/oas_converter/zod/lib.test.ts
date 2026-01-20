@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { BooleanFromString, PassThroughAny } from '@kbn/zod-helpers';
 import { convert, convertPathParameters, convertQuery } from './lib';
 
@@ -219,7 +219,10 @@ describe('zod', () => {
     test('allows mixed union of coercible types', () => {
       expect(
         convertQuery(
-          z.object({ a: z.optional(BooleanFromString).describe('string or boolean flag') })
+          z.object({
+            // temporarily casting while waiting for the owners of boolean_from_string to update to Zod v4
+            a: z.optional(BooleanFromString as unknown as z.ZodTypeAny).describe('string or boolean flag'),
+          })
         )
       ).toEqual({
         query: [
