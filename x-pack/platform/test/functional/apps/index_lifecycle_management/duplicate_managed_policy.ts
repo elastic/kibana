@@ -87,7 +87,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       expect(await testSubjects.exists('editManagedPolicyCallOut')).to.be(false);
-
     });
   });
 };
