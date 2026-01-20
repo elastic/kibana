@@ -20,12 +20,19 @@ export interface ExtendedDiscoverStateContainer extends DiscoverStateContainer {
    * Get updated AppState when given a saved search
    */
   getAppStateFromSavedSearch: (newSavedSearch: SavedSearch) => DiscoverAppState;
+
+  /**
+   * A selection of prodived Redux actions from the internal state
+   */
+  internalActions: {
+    fetchData: typeof internalStateActions.fetchData;
+    openDiscoverSession: typeof internalStateActions.openDiscoverSession;
+  };
 }
 
 export interface CustomizationCallbackContext {
   customizations: DiscoverCustomizationService;
   stateContainer: ExtendedDiscoverStateContainer;
-  internalStateActions: typeof internalStateActions;
 }
 
 export type CustomizationCallback = (

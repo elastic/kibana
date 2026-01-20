@@ -102,7 +102,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
   }
 
   start(core: CoreStart, plugins: DiscoverCustomizationExamplesStartPlugins) {
-    this.customizationCallback = ({ customizations, stateContainer, internalStateActions }) => {
+    this.customizationCallback = ({ customizations, stateContainer }) => {
       customizations.set({
         id: 'top_nav',
         defaultMenu: {
@@ -163,7 +163,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                         name: savedSearch.attributes.title,
                         onClick: () =>
                           stateContainer.internalState.dispatch(
-                            internalStateActions.openDiscoverSession({
+                            stateContainer.internalActions.openDiscoverSession({
                               discoverSessionId: savedSearch.id,
                             })
                           ),
@@ -210,7 +210,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
             const filterSubscription = controlGroupAPI.appliedFilters$.subscribe(
               (newFilters = []) => {
                 stateContainer.internalState.dispatch(
-                  stateContainer.injectCurrentTab(internalStateActions.fetchData)({})
+                  stateContainer.injectCurrentTab(stateContainer.internalActions.fetchData)({})
                 );
               }
             );

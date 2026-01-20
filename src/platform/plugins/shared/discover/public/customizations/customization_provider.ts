@@ -61,6 +61,10 @@ export const getExtendedDiscoverStateContainer = (
       services,
     });
   },
+  internalActions: {
+    fetchData: internalStateActions.fetchData,
+    openDiscoverSession: internalStateActions.openDiscoverSession,
+  },
 });
 
 export const getConnectedCustomizationService = async ({
@@ -75,7 +79,7 @@ export const getConnectedCustomizationService = async ({
   const customizations = createCustomizationService();
   const stateContainer = getExtendedDiscoverStateContainer(originalStateContainer, services);
   const callbacks = customizationCallbacks.map((callback) =>
-    Promise.resolve(callback({ customizations, stateContainer, internalStateActions }))
+    Promise.resolve(callback({ customizations, stateContainer }))
   );
   const initialize = () => Promise.all(callbacks).then((result) => result.filter(isFunction));
 
