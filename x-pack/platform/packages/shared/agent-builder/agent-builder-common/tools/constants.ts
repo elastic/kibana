@@ -34,6 +34,7 @@ export const platformCoreTools = {
   attachmentAdd: platformCoreTool('attachment_add'),
   attachmentList: platformCoreTool('attachment_list'),
   attachmentDiff: platformCoreTool('attachment_diff'),
+  searchSecurityRules: platformCoreTool('search_security_rules'),
 } as const;
 
 /**

@@ -8,10 +8,7 @@
     "id": "agentBuilder",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "agentBuilder"
-    ],
+    "configPath": ["xpack", "agentBuilder"],
     "requiredPlugins": [
       "actions",
       "aiAssistantManagementSelection",
@@ -31,17 +28,10 @@
       "licensing",
       "triggersActionsUi",
       "esUiShared",
-      "workflowsExtensions",
+      "workflowsExtensions"
     ],
-    "requiredBundles": [
-      "kibanaReact"
-    ],
-    "optionalPlugins": [
-      "cloud",
-      "licenseManagement",
-      "workflowsManagement",
-      "usageCollection"
-    ],
+    "requiredBundles": ["kibanaReact"],
+    "optionalPlugins": ["cloud", "licenseManagement", "workflowsManagement", "usageCollection"],
     "extraPublicDirs": []
   }
 }
