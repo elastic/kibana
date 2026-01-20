@@ -9,7 +9,7 @@ import { Agent } from 'undici';
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
 import { EARS_START_OAUTH_ROUTE } from '../../../common/routes';
-import type { StartOAuthResponse, EarsOAuthProvider } from '../../../common/http_api/ears';
+import { EarsOAuthProvider, startOAuthResponseSchema } from '../../../common/http_api/ears';
 import type { WorkplaceAIAppConfig } from '../../config';
 
 // Create an undici Agent that ignores self-signed certificates (for local dev)
@@ -41,7 +41,12 @@ export function registerStartOAuthRoute({
       },
       validate: {
         params: schema.object({
-          provider: schema.oneOf([schema.literal('google')]),
+          provider: schema.oneOf([
+            schema.literal(EarsOAuthProvider.Google),
+            schema.literal(EarsOAuthProvider.GitHub),
+            schema.literal(EarsOAuthProvider.Notion),
+            schema.literal(EarsOAuthProvider.Microsoft),
+          ]),
         }),
         body: schema.object({
           scope: schema.arrayOf(schema.string(), { maxSize: 100 }),
@@ -62,6 +67,16 @@ export function registerStartOAuthRoute({
       }
 
       const provider = request.params.provider as EarsOAuthProvider;
+
+      // Currently only Google is supported
+      if (provider !== EarsOAuthProvider.Google) {
+        return response.customError({
+          statusCode: 400,
+          body: {
+            message: `Provider '${provider}' is not yet supported. Currently only 'google' is supported.`,
+          },
+        });
+      }
       const { scope } = request.body;
 
       try {
@@ -91,10 +106,22 @@ export function registerStartOAuthRoute({
           });
         }
 
-        const data = (await earsResponse.json()) as StartOAuthResponse;
+        const rawData = await earsResponse.json();
+        const parseResult = startOAuthResponseSchema.safeParse(rawData);
+
+        if (!parseResult.success) {
+          const errorMsg = `Invalid response from EARS: ${parseResult.error.message}`;
+          logger.error(errorMsg);
+          return response.customError({
+            statusCode: 502,
+            body: {
+              message: errorMsg,
+            },
+          });
+        }
 
         return response.ok({
-          body: data,
+          body: parseResult.data,
         });
       } catch (error) {
         const errorMsg = `Failed to connect to EARS at ${earsUrl}: ${error.message}`;

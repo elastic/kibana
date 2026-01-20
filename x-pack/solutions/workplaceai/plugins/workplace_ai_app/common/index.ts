@@ -18,8 +18,14 @@ export {
   EARS_FETCH_SECRETS_ROUTE,
 } from './routes';
 
-export type {
+export {
   EarsOAuthProvider,
+  ALL_EARS_OAUTH_PROVIDERS,
+  startOAuthResponseSchema,
+  fetchSecretsResponseSchema,
+} from './http_api/ears';
+
+export type {
   StartOAuthRequest,
   StartOAuthResponse,
   FetchSecretsResponse,

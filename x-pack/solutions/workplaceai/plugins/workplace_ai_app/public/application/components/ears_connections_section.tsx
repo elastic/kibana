@@ -20,7 +20,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { GoogleUserInfo } from '../../../common';
+import { EarsOAuthProvider, type GoogleUserInfo } from '../../../common';
 import { useStartOAuth, useFetchSecrets } from '../hooks/use_ears_oauth';
 
 const GOOGLE_SCOPES = [
@@ -42,7 +42,7 @@ export const EarsConnectionsSection: React.FC = () => {
   const handleConnectGoogle = useCallback(async () => {
     try {
       const result = await startOAuthMutation.mutateAsync({
-        provider: 'google',
+        provider: EarsOAuthProvider.Google,
         scope: GOOGLE_SCOPES,
       });
 

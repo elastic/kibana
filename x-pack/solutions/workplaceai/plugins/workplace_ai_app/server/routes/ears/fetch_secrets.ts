@@ -9,7 +9,7 @@ import { Agent } from 'undici';
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
 import { EARS_FETCH_SECRETS_ROUTE } from '../../../common/routes';
-import type { FetchSecretsResponse } from '../../../common/http_api/ears';
+import { fetchSecretsResponseSchema } from '../../../common/http_api/ears';
 import type { WorkplaceAIAppConfig } from '../../config';
 
 // Create an undici Agent that ignores self-signed certificates (for local dev)
@@ -89,10 +89,22 @@ export function registerFetchSecretsRoute({
           });
         }
 
-        const data = (await earsResponse.json()) as FetchSecretsResponse;
+        const rawData = await earsResponse.json();
+        const parseResult = fetchSecretsResponseSchema.safeParse(rawData);
+
+        if (!parseResult.success) {
+          const errorMsg = `Invalid response from EARS: ${parseResult.error.message}`;
+          logger.error(errorMsg);
+          return response.customError({
+            statusCode: 502,
+            body: {
+              message: errorMsg,
+            },
+          });
+        }
 
         return response.ok({
-          body: data,
+          body: parseResult.data,
         });
       } catch (error) {
         const errorMsg = `EARS fetch secrets error: ${error}`;
