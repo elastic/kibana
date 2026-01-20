@@ -429,7 +429,7 @@ src/platform/packages/shared/controls/controls-schemas @elastic/kibana-presentat
 src/platform/packages/shared/dashboards/dashboards-selector @elastic/actionable-obs-team
 src/platform/packages/shared/deeplinks/agent_builder @elastic/search-kibana
 src/platform/packages/shared/deeplinks/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
-src/platform/packages/shared/deeplinks/data_connectors @elastic/search-kibana
+src/platform/packages/shared/deeplinks/data_sources @elastic/search-kibana
 src/platform/packages/shared/deeplinks/devtools @elastic/kibana-management
 src/platform/packages/shared/deeplinks/fleet @elastic/fleet
 src/platform/packages/shared/deeplinks/management @elastic/kibana-management
@@ -460,7 +460,7 @@ src/platform/packages/shared/kbn-avc-banner @elastic/security-defend-workflows
 src/platform/packages/shared/kbn-axe-config @elastic/appex-qa
 src/platform/packages/shared/kbn-babel-register @elastic/kibana-operations
 src/platform/packages/shared/kbn-background-search @elastic/kibana-data-discovery
-src/platform/packages/shared/kbn-bench @elastic/obs-ui-devex-team
+src/platform/packages/shared/kbn-bench @elastic/observability-ui
 src/platform/packages/shared/kbn-cache-cli @elastic/kibana-operations
 src/platform/packages/shared/kbn-calculate-auto @elastic/actionable-obs-team
 src/platform/packages/shared/kbn-calculate-width-from-char-count @elastic/kibana-visualizations
@@ -525,14 +525,15 @@ src/platform/packages/shared/kbn-field-utils @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-flot-charts @elastic/kibana-presentation @elastic/stack-monitoring
 src/platform/packages/shared/kbn-ftr-common-functional-services @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-ftr-common-functional-ui-services @elastic/appex-qa
+src/platform/packages/shared/kbn-ftr-llm-proxy @elastic/appex-ai-infra
 src/platform/packages/shared/kbn-grok-ui @elastic/obs-onboarding-team
 src/platform/packages/shared/kbn-grouping @elastic/response-ops
 src/platform/packages/shared/kbn-i18n @elastic/kibana-core
 src/platform/packages/shared/kbn-i18n-react @elastic/kibana-core
 src/platform/packages/shared/kbn-interpreter @elastic/kibana-visualizations
-src/platform/packages/shared/kbn-io-ts-utils @elastic/obs-knowledge-team
-src/platform/packages/shared/kbn-jest-benchmarks @elastic/obs-ui-devex-team
-src/platform/packages/shared/kbn-lazy-object @elastic/kibana-operations
+src/platform/packages/shared/kbn-io-ts-utils @elastic/observability-ui
+src/platform/packages/shared/kbn-jest-benchmarks @elastic/observability-ui
+src/platform/packages/shared/kbn-lazy-object @elastic/kibana-operations @elastic/observability-ui
 src/platform/packages/shared/kbn-lens-common @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-lens-common-2 @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-lens-embeddable-utils @elastic/kibana-visualizations
@@ -633,7 +634,7 @@ src/platform/packages/shared/kbn-unified-data-table @elastic/kibana-data-discove
 src/platform/packages/shared/kbn-unified-doc-viewer @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-unified-field-list @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-unified-histogram @elastic/kibana-data-discovery
-src/platform/packages/shared/kbn-unified-metrics-grid @elastic/obs-presentation-team
+src/platform/packages/shared/kbn-unified-metrics-grid @elastic/obs-exploration-team
 src/platform/packages/shared/kbn-unified-tabs @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-unsaved-changes-prompt @elastic/kibana-management
 src/platform/packages/shared/kbn-use-tracked-promise @elastic/obs-onboarding-team
@@ -646,7 +647,7 @@ src/platform/packages/shared/kbn-visualization-utils @elastic/kibana-visualizati
 src/platform/packages/shared/kbn-visualizations-common @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-workflows @elastic/workflows-eng
 src/platform/packages/shared/kbn-workflows-ui @elastic/workflows-eng
-src/platform/packages/shared/kbn-workspaces @elastic/obs-ui-devex-team
+src/platform/packages/shared/kbn-workspaces @elastic/observability-ui
 src/platform/packages/shared/kbn-xstate-utils @elastic/obs-onboarding-team
 src/platform/packages/shared/kbn-zod @elastic/kibana-core
 src/platform/packages/shared/kbn-zod-helpers @elastic/security-detection-rule-management
@@ -1059,9 +1060,9 @@ x-pack/platform/plugins/shared/cloud_connect @elastic/kibana-management
 x-pack/platform/plugins/shared/content_connectors @elastic/search-kibana
 x-pack/platform/plugins/shared/dashboard_agent @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/dashboard_enhanced @elastic/kibana-presentation
-x-pack/platform/plugins/shared/data_connectors @elastic/workchat-eng
+x-pack/platform/plugins/shared/data_catalog @elastic/workchat-eng
 x-pack/platform/plugins/shared/data_quality @elastic/obs-onboarding-team
-x-pack/platform/plugins/shared/data_sources_registry @elastic/workchat-eng
+x-pack/platform/plugins/shared/data_sources @elastic/workchat-eng
 x-pack/platform/plugins/shared/dataset_quality @elastic/obs-onboarding-team
 x-pack/platform/plugins/shared/embeddable_alerts_table @elastic/response-ops
 x-pack/platform/plugins/shared/embeddable_enhanced @elastic/kibana-presentation
@@ -1360,7 +1361,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 
 # Discover Profile Providers
 # TODO: this deprecation_logs folder should be owned by kibana management team after 9.0
-/src/platform/plugins/shared/discover/public/context_awareness/profile_providers/common/metrics_data_source_profile @elastic/obs-presentation-team
+/src/platform/plugins/shared/discover/public/context_awareness/profile_providers/common/metrics_data_source_profile @elastic/obs-exploration-team
 /src/platform/plugins/shared/discover/public/context_awareness/profile_providers/common/deprecation_logs_data_source_profile @elastic/kibana-data-discovery @elastic/kibana-core
 /src/platform/plugins/shared/discover/public/context_awareness/profile_providers/common/patterns_data_source_profile @elastic/ml-ui
 /src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability @elastic/kibana-data-discovery @elastic/obs-exploration-team
@@ -1513,7 +1514,6 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/observability_ai_assistant_functional @elastic/obs-ai-team
 /x-pack/solutions/observability/test/fixtures/es_archives/observability/ai_assistant @elastic/obs-ai-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant @elastic/obs-ai-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/observability_agent_builder @elastic/obs-ai-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_assistant.index.ts @elastic/obs-ai-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_assistant.serverless.config.ts @elastic/obs-ai-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_assistant.index.ts @elastic/obs-ai-team
@@ -1524,10 +1524,11 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_assistant_local.stateful.config.ts  @elastic/obs-ai-team
 
 # Observability Agent Builder
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/stateful/oblt.ai_agent.index.ts @elastic/obs-ai-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/stateful/oblt.ai_agent.stateful.config.ts @elastic/obs-ai-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/serverless/oblt.ai_agent.index.ts @elastic/obs-ai-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/serverless/oblt.ai_agent.serverless.config.ts @elastic/obs-ai-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/observability_agent_builder @elastic/obs-ai-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_agent.index.ts @elastic/obs-ai-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_agent.serverless.config.ts @elastic/obs-ai-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_agent.index.ts @elastic/obs-ai-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_agent.stateful.config.ts @elastic/obs-ai-team
 
 # Infra Obs
 ## This plugin mostly contains the codebase for the infra services, but also includes some code for the Logs UI app.
@@ -1617,6 +1618,9 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/plugins/shared/streams/server/routes/streams/processing @elastic/obs-onboarding-team
 /x-pack/platform/plugins/shared/streams/server/routes/streams/schema @elastic/obs-onboarding-team
 /x-pack/platform/plugins/shared/streams_app/public/components/data_management @elastic/obs-onboarding-team
+
+# Streams parts owned by Kibana Management
+x-pack/platform/plugins/shared/streams_app/public/components/data_management/stream_detail_lifecycle/downsampling @elastic/kibana-management
 
 # Infra Monitoring tests
 /x-pack/solutions/observability/test/functional/apps/infra @elastic/obs-presentation-team
@@ -1884,7 +1888,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /.eslintrc.js @elastic/kibana-operations
 /.eslintignore @elastic/kibana-operations
 /.ci/.storybook @elastic/kibana-operations
-/src/platform/packages/shared/kbn-lazy-object @elastic/kibana-operations @elastic/obs-ui-devex-team
+/src/platform/packages/shared/kbn-lazy-object @elastic/kibana-operations @elastic/observability-ui
 
 # QA - Appex QA
 .buildkite/scout_ci_config.yml @elastic/appex-qa
@@ -2163,8 +2167,10 @@ x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kiban
 
 # Exclude OAS error baseline file from @elastic/kibana-core ownership
 !/src/platform/packages/private/kbn-validate-oas/oas_error_baseline.json
-# Exclude usage collection schema from @elastic/kibana-core ownership
+# Exclude usage collection schemas from @elastic/kibana-core ownership
 !/src/platform/plugins/private/kibana_usage_collection/server/collectors/application_usage/schema.ts
+!/src/platform/plugins/private/kibana_usage_collection/server/collectors/management/schema.ts
+!/src/platform/plugins/private/kibana_usage_collection/server/collectors/management/types.ts
 
 # Kibana Telemetry
 /.telemetryrc.json @elastic/kibana-core
@@ -2224,6 +2230,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /.github/workflows/codeql-pr.yml @elastic/kibana-security
 /.github/workflows/codeql-stats.yml @elastic/kibana-security
 /.github/instructions/security.instructions.md @elastic/kibana-security
+/.github/instructions/codeql.instructions.md @elastic/kibana-security
 /.github/workflows/evaluate-dependency-health.yml @elastic/kibana-security
 /src/dev/eslint/security_eslint_rule_tests.ts @elastic/kibana-security
 /src/core/server/integration_tests/config/check_dynamic_config.test.ts @elastic/kibana-security
@@ -2325,6 +2332,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/abuseipdb/** @elastic
 src/platform/packages/shared/kbn-connector-specs/src/specs/alienvault_otx/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/brave_search/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/greynoise/** @elastic/workflows-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/jina/** @elastic/jinastic
 src/platform/packages/shared/kbn-connector-specs/src/specs/notion/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/shodan/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/urlvoid/** @elastic/workflows-eng

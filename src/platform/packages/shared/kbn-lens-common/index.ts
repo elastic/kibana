@@ -382,3 +382,10 @@ export {
   getLensLayerTypeTabDisplayName,
   lensLayerTypeTabDisplayNames,
 } from './visualizations/layer_type_tab_display_name';
+
+export {
+  hasStateFormulaColumn,
+  getFormulaColumnsFromLayer,
+  getReferencedColumnIds,
+  cleanupFormulaReferenceColumns,
+} from './datasources/form_based/helpers';

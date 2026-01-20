@@ -194,7 +194,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    *  Enables the QRadar rules import feature
    */
-  qradarRulesMigration: false,
+  qradarRulesMigration: true,
   /**
    * Enables the Kubernetes Dashboard in Security Solution
    */

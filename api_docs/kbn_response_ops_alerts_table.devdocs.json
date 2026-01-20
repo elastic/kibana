@@ -22,6 +22,8 @@
           ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
         ],
         "path": "src/platform/packages/shared/response-ops/alerts-table/components/alerts_table.tsx",
+        "lineNumber": 159,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -37,6 +39,8 @@
               "P & React.RefAttributes<T>"
             ],
             "path": "src/platform/packages/shared/response-ops/alerts-table/utils/react.ts",
+            "lineNumber": 24,
+            "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -62,6 +66,8 @@
           ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
         ],
         "path": "src/platform/packages/shared/response-ops/alerts-table/components/alerts_table.tsx",
+        "lineNumber": 159,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -77,6 +83,8 @@
               "P & React.RefAttributes<T>"
             ],
             "path": "src/platform/packages/shared/response-ops/alerts-table/utils/react.ts",
+            "lineNumber": 24,
+            "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -104,6 +112,8 @@
           ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
         ],
         "path": "src/platform/packages/shared/response-ops/alerts-table/components/alerts_table.tsx",
+        "lineNumber": 700,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -119,6 +129,8 @@
               "P & React.RefAttributes<T>"
             ],
             "path": "src/platform/packages/shared/response-ops/alerts-table/utils/react.ts",
+            "lineNumber": 24,
+            "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -142,6 +154,8 @@
           ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
         ],
         "path": "src/platform/packages/shared/response-ops/alerts-table/components/alerts_table.tsx",
+        "lineNumber": 700,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -157,6 +171,8 @@
               "P & React.RefAttributes<T>"
             ],
             "path": "src/platform/packages/shared/response-ops/alerts-table/utils/react.ts",
+            "lineNumber": 24,
+            "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
           }
