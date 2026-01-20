@@ -213,13 +213,7 @@ function convertFromSimpleCondition(
       query: { range: { [condition.field]: rangeQuery } },
       meta: {
         ...baseMeta,
-        params: {
-          ...(condition.value.gte !== undefined && { gte: condition.value.gte }),
-          ...(condition.value.lte !== undefined && { lte: condition.value.lte }),
-          ...(condition.value.gt !== undefined && { gt: condition.value.gt }),
-          ...(condition.value.lt !== undefined && { lt: condition.value.lt }),
-          ...(format && { format }),
-        },
+        params: rangeQuery,
         ...(shouldNegate ? { negate: true } : {}),
       },
     };
