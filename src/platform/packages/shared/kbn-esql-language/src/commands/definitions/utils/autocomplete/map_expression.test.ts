@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { SuggestionCategory } from '@kbn/esql-language/src/shared/sorting/types';
+import { SuggestionCategory } from '../../../../shared/sorting/types';
 import type { MapParameters } from './map_expression';
 import { getCommandMapExpressionSuggestions, parseMapValues } from './map_expression';
 

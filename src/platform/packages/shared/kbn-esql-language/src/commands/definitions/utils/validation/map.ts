@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLMessage, ESQLSingleAstItem } from '@kbn/esql-language/src/types';
+import type { ESQLMessage, ESQLSingleAstItem } from '../../../../types';
 import type { SupportedDataType } from '../../..';
 import { MAP_PARAMS_REGEX } from '../autocomplete/expressions/signature_analyzer';
 import { getExpressionType } from '../expressions';
