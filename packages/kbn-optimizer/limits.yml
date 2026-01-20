@@ -22,22 +22,21 @@ pageLoadAssetSize:
   cloudFullStory: 4752
   cloudLinks: 36333
   cloudSecurityPosture: 19745
-  console: 31192
+  console: 31191
   contentConnectors: 33014
   contentManagement: 8350
-  controls: 12234
+  controls: 10786
   core: 559233
   cps: 5918
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 19000
   dashboardEnhanced: 12500
-  dashboardMarkdown: 5056
-  data: 453742
-  dataConnectors: 6605
+  dashboardMarkdown: 4994
+  data: 454000
   dataQuality: 11469
   datasetQuality: 49315
-  dataSourcesRegistry: 4803
+  dataSources: 6748
   dataUsage: 8743
   dataViewEditor: 7735
   dataViewFieldEditor: 26024
@@ -46,14 +45,14 @@ pageLoadAssetSize:
   dataVisualizer: 32797
   developerToolbar: 4467
   devTools: 8109
-  discover: 28752
+  discover: 28617
   discoverEnhanced: 5660
   discoverShared: 2322
   elasticAssistant: 338870
   elasticAssistantSharedState: 4881
   embeddable: 18432
   embeddableAlertsTable: 6524
-  embeddableEnhanced: 8448
+  embeddableEnhanced: 7912
   enterpriseSearch: 40244
   entityStore: 1755
   esql: 18224
@@ -117,7 +116,7 @@ pageLoadAssetSize:
   ml: 89000
   mockIdpPlugin: 7544
   monitoring: 28983
-  navigation: 15639
+  navigation: 12376
   newsfeed: 12371
   noDataPage: 1749
   observability: 107797
@@ -166,8 +165,8 @@ pageLoadAssetSize:
   securitySolutionServerless: 52082
   serverless: 7451
   serverlessObservability: 19472
-  serverlessSearch: 26314
-  serverlessWorkplaceAI: 6645
+  serverlessSearch: 26287
+  serverlessWorkplaceAI: 6608
   sessionView: 47912
   share: 58677
   slo: 36645
@@ -176,7 +175,7 @@ pageLoadAssetSize:
   stackAlerts: 31499
   stackConnectors: 85421
   streams: 10000
-  streamsApp: 27134
+  streamsApp: 25991
   synthetics: 31571
   telemetry: 25755
   telemetryManagementSection: 5522
@@ -208,6 +207,6 @@ pageLoadAssetSize:
   visTypeXy: 32342
   visualizations: 38375
   watcher: 10485
-  workflowsExtensions: 77926
+  workflowsExtensions: 76704
   workflowsManagement: 8497
-  workplaceAIApp: 6135
+  workplaceAIApp: 6112

@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout-search';
 import { test } from '../fixtures';
 
-test.describe('Homepage - Admin', { tag: ['@svlSearch'] }, () => {
+test.describe('Homepage - Admin', { tag: ['@svlSearch', '@ess'] }, () => {
   test.beforeEach(async ({ page, browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await page.addInitScript(() => {
@@ -54,5 +54,164 @@ test.describe('Homepage - Admin', { tag: ['@svlSearch'] }, () => {
 
     const apiKeyValueRow = await pageObjects.homepage.getApiKeyValueRow();
     await expect(apiKeyValueRow).toBeVisible();
+  });
+
+  // === Embedded Console Tests ===
+  test('should have embedded dev console that can be toggled', async ({ pageObjects }) => {
+    await pageObjects.homepage.expectEmbeddedConsoleControlBarExists();
+
+    // Console body should be hidden initially
+    const consoleBodyInitial = await pageObjects.homepage.getEmbeddedConsoleBody();
+    await expect(consoleBodyInitial).toBeHidden();
+
+    // Click to open console
+    await pageObjects.homepage.clickEmbeddedConsoleControlBar();
+
+    // Verify console is open and fullscreen toggle is visible
+    const fullscreenToggle = await pageObjects.homepage.getFullscreenToggleButton();
+    await expect(fullscreenToggle).toBeVisible();
+
+    const consoleBodyOpen = await pageObjects.homepage.getEmbeddedConsoleBody();
+    await expect(consoleBodyOpen).toBeVisible();
+
+    // Click to close console
+    await pageObjects.homepage.clickEmbeddedConsoleControlBar();
+
+    const consoleBodyClosed = await pageObjects.homepage.getEmbeddedConsoleBody();
+    await expect(consoleBodyClosed).toBeHidden();
+  });
+
+  // === Endpoint Copy Functionality Tests ===
+  test('should show Elasticsearch endpoint with copy functionality', async ({ pageObjects }) => {
+    const endpointValueField = await pageObjects.homepage.getEndpointValueField();
+    await expect(endpointValueField).toBeVisible();
+
+    const copyEndpointButton = await pageObjects.homepage.getCopyEndpointButton();
+    await expect(copyEndpointButton).toBeVisible();
+  });
+
+  test('should show checkmark feedback when copy button is clicked', async ({ pageObjects }) => {
+    const copyEndpointButton = await pageObjects.homepage.getCopyEndpointButton();
+    await expect(copyEndpointButton).toBeVisible();
+
+    await copyEndpointButton.click();
+
+    // After clicking, the button should show copied state
+    const copiedButton = await pageObjects.homepage.getCopyEndpointButtonCopied();
+    await expect(copiedButton).toBeVisible();
+
+    // After a short delay, it should revert back to normal state
+    const normalButton = await pageObjects.homepage.getCopyEndpointButton();
+    await expect(normalButton).toBeVisible();
+  });
+
+  // === Navigation Cards Tests ===
+  test('navigation cards should navigate to correct places', async ({ pageObjects, page }) => {
+    const navigationCards = await pageObjects.homepage.getNavigationCards();
+    await expect(navigationCards).toHaveCount(5);
+
+    const navCardTests = [
+      {
+        cardTestId: 'searchHomepageNavLinks-discover',
+        expectedUrl: 'discover',
+      },
+      {
+        cardTestId: 'searchHomepageNavLinks-dashboards',
+        expectedUrl: 'dashboards',
+      },
+      {
+        cardTestId: 'searchHomepageNavLinks-agentBuilder',
+        expectedUrl: 'agent_builder',
+      },
+      {
+        cardTestId: 'searchHomepageNavLinks-machineLearning',
+        expectedUrl: 'ml/overview',
+      },
+      {
+        cardTestId: 'searchHomepageNavLinks-dataManagement',
+        expectedUrl: 'index_management',
+      },
+    ];
+
+    for (const { cardTestId, expectedUrl } of navCardTests) {
+      await pageObjects.homepage.clickNavigationCard(cardTestId);
+      await expect(page).toHaveURL(new RegExp(expectedUrl));
+      await pageObjects.homepage.goto();
+    }
+  });
+
+  // === Getting Started Banner Tests ===
+  test('should display Getting Started banner with title and button', async ({ pageObjects }) => {
+    const gettingStartedButton = await pageObjects.homepage.getGettingStartedButton();
+    await expect(gettingStartedButton).toBeVisible();
+    await expect(gettingStartedButton).toContainText('Get started with Elasticsearch');
+  });
+
+  test('Get started button should navigate to getting started page', async ({
+    pageObjects,
+    page,
+  }) => {
+    await pageObjects.homepage.clickGettingStartedButton();
+    await expect(page).toHaveURL(new RegExp('getting_started'));
+  });
+
+  // === Body Links Tests ===
+  test('should display all body links with external documentation', async ({ pageObjects }) => {
+    const bodyLinks = await pageObjects.homepage.getBodyLinks();
+    await expect(bodyLinks).toHaveCount(3);
+
+    // Verify specific links exist
+    const askExpertLink = await pageObjects.homepage.getBodyLinkByText(
+      'Contact customer engineering'
+    );
+    await expect(askExpertLink).toBeVisible();
+
+    const trainingLink = await pageObjects.homepage.getBodyLinkByText('Elastic Training');
+    await expect(trainingLink).toBeVisible();
+
+    const docsLink = await pageObjects.homepage.getBodyLinkByText('View documentation');
+    await expect(docsLink).toBeVisible();
+  });
+
+  test('body links should have external target attribute', async ({ pageObjects }) => {
+    const bodyLinks = await pageObjects.homepage.getBodyLinks();
+    const allLinks = await bodyLinks.all();
+
+    for (const link of allLinks) {
+      await expect(link).toHaveAttribute('target', '_blank');
+      await expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+    }
+  });
+
+  test('body links should navigate to correct URLs when clicked', async ({ pageObjects, page }) => {
+    const bodyLinkTests = [
+      {
+        linkText: 'Contact customer engineering',
+        expectedUrlPattern: /contact\/ce-help/,
+      },
+      {
+        linkText: 'Elastic Training',
+        expectedUrlPattern: /training/,
+      },
+      {
+        linkText: 'View documentation',
+        expectedUrlPattern: /solutions\/search\/get-started/,
+      },
+    ];
+
+    for (const { linkText, expectedUrlPattern } of bodyLinkTests) {
+      const link = await pageObjects.homepage.getBodyLinkByText(linkText);
+      await expect(link).toBeVisible();
+
+      // Click the link and wait for new page to open
+      const context = page.context();
+      const [newPage] = await Promise.all([context.waitForEvent('page'), link.click()]);
+
+      // Verify the new page URL matches expected pattern
+      await expect(newPage).toHaveURL(expectedUrlPattern);
+
+      // Close the new page and continue with the original page
+      await newPage.close();
+    }
   });
 });
