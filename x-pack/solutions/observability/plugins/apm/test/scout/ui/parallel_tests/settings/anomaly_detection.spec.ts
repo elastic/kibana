@@ -40,7 +40,6 @@ test.describe('Anomaly Detection', { tag: ['@ess', '@svlOblt'] }, () => {
   });
 
   test('Admin should be able to modify settings', async ({
-    page,
     pageObjects: { anomalyDetectionPage },
     browserAuth,
   }) => {
