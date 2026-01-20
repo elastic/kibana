@@ -1110,6 +1110,9 @@
   "data_connector": {
     "dynamic": false,
     "properties": {
+      "iconType": {
+        "type": "keyword"
+      },
       "kscIds": {
         "type": "keyword"
       },
