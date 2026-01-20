@@ -6,8 +6,8 @@
  */
 
 import type TestAgent from 'supertest/lib/agent';
-import expect from '@kbn/expect';
-import { ENDPOINT_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import expect from '@kbn/expect/expect';
+import { ENDPOINT_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { GLOBAL_ARTIFACT_TAG } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/constants';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -27,7 +27,6 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
   const utils = getService('securitySolutionUtils');
   const config = getService('config');
-  const log = getService('log');
   const retry = getService('retry');
 
   const IS_ENDPOINT_EXCEPTION_MOVE_FF_ENABLED = (
@@ -387,20 +386,33 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should return 404 when endpoint list does not exist', async () => {
-        log.info('[DEBUG] Deleting endpoint_list with privileged user...');
-        await endpointArtifactTestResources.deleteList(
-          'endpoint_list',
-          endpointPolicyManagerSupertest
-        );
-        log.info('[DEBUG] Delete completed');
+        // Delete ALL instances of the endpoint_list (there may be duplicates with different saved object IDs)
+        // eslint-disable-next-line no-console
+        console.log('[DEBUG] Deleting ALL endpoint_list instances with privileged user...');
+        let deleteResponse;
+        let deleteCount = 0;
+        do {
+          deleteResponse = await endpointPolicyManagerSupertest
+            .delete(`${EXCEPTION_LIST_URL}?list_id=endpoint_list&namespace_type=agnostic`)
+            .set('kbn-xsrf', 'true');
+          if (deleteResponse.status === 200) {
+            deleteCount++;
+            // eslint-disable-next-line no-console
+            console.log(`[DEBUG] Deleted endpoint_list instance #${deleteCount}`);
+          }
+        } while (deleteResponse.status === 200);
+        // eslint-disable-next-line no-console
+        console.log(`[DEBUG] Delete completed. Total deleted: ${deleteCount}`);
 
-        log.info('[DEBUG] Testing with read-only user...');
+        // eslint-disable-next-line no-console
+        console.log('[DEBUG] Testing with read-only user...');
         await retry.tryForTime(5000, async () => {
           const response = await readOnlyNoSoWriteSupertest
             .get(`${ENDPOINT_LIST_ITEM_URL}/_find?page=1&per_page=1&sort_field=name&sort_order=asc`)
             .set('kbn-xsrf', 'true');
 
-          log.info(
+          // eslint-disable-next-line no-console
+          console.log(
             `[DEBUG] Read-only user response: status=${response.status}, body=${JSON.stringify(
               response.body
             )}`
