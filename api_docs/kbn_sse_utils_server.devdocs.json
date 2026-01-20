@@ -40,6 +40,8 @@
           ", \"error\" | \"debug\">; signal: AbortSignal; flushThrottleMs?: number | undefined; flushMinBytes?: number | undefined; }) => ResponseStream"
         ],
         "path": "src/platform/packages/shared/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -55,6 +57,8 @@
               "<Record<string, unknown> & { type: string; }>"
             ],
             "path": "src/platform/packages/shared/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -67,6 +71,8 @@
             "label": "{\n    logger,\n    signal,\n    flushThrottleMs = 100,\n    flushMinBytes,\n  }",
             "description": [],
             "path": "src/platform/packages/shared/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
+            "lineNumber": 40,
+            "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -129,6 +135,8 @@
                   ", meta?: Meta | undefined) => void; }"
                 ],
                 "path": "src/platform/packages/shared/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
+                "lineNumber": 41,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -143,6 +151,8 @@
                   "AbortSignal"
                 ],
                 "path": "src/platform/packages/shared/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
+                "lineNumber": 42,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -161,6 +171,8 @@
                   "number | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
+                "lineNumber": 43,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -177,6 +189,8 @@
                   "number | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
+                "lineNumber": 50,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -203,6 +217,8 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/kbn-sse-utils-server/src/supertest_to_observable.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -217,6 +233,8 @@
               "Test"
             ],
             "path": "src/platform/packages/shared/kbn-sse-utils-server/src/supertest_to_observable.ts",
+            "lineNumber": 32,
+            "columnNumber": 48,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -240,6 +258,8 @@
           "4096"
         ],
         "path": "src/platform/packages/shared/kbn-sse-utils-server/src/observable_into_event_source_stream.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
