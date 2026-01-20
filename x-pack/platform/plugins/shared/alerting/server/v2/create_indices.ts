@@ -28,24 +28,18 @@ export async function createIndices({ esClient }: CreateIndicesOpts) {
       dynamic: false,
       properties: {
         '@timestamp': { type: 'date' },
+        scheduled_timestamp: { type: 'date' },
         rule: {
           properties: {
             id: { type: 'keyword' },
-            tags: { type: 'keyword' },
+            version: { type: 'long' },
             breach_count: { type: 'long' },
             recover_count: { type: 'long' },
           },
         },
-        grouping: {
-          properties: {
-            key: { type: 'keyword' },
-            value: { type: 'keyword' },
-          },
-        },
         data: { type: 'flattened' },
-        parent_rule_id: { type: 'keyword' },
         status: { type: 'keyword' },
-        alert_series_id: { type: 'keyword' },
+        group_hash: { type: 'keyword' },
         source: { type: 'keyword' },
       },
     },
@@ -64,7 +58,7 @@ export async function createIndices({ esClient }: CreateIndicesOpts) {
         '@timestamp': { type: 'date' },
         // Tuple
         rule_id: { type: 'keyword' },
-        alert_series_id: { type: 'keyword' },
+        group_hash: { type: 'keyword' },
         episode_id: { type: 'keyword' },
         // Other fields
         actor: { type: 'keyword' },
@@ -94,11 +88,11 @@ export async function createIndices({ esClient }: CreateIndicesOpts) {
         '@timestamp': { type: 'date' },
         // Tuple
         rule_id: { type: 'keyword' },
-        alert_series_id: { type: 'keyword' },
+        group_hash: { type: 'keyword' },
         episode_id: { type: 'keyword' },
         // Other fields
-        start_state: { type: 'keyword' },
-        end_state: { type: 'keyword' },
+        from_state: { type: 'keyword' },
+        to_state: { type: 'keyword' },
         last_event_timestamp: { type: 'date' },
       },
     },

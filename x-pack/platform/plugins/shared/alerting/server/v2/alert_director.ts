@@ -23,9 +23,9 @@ export const DIRECTOR_QUERY = `FROM .kibana_alert_events, .kibana_alert_transiti
         _index == ".kibana_alert_events" AND status == "breach",
       last_recover_timestamp = MAX(@timestamp) WHERE
         _index == ".kibana_alert_events" AND status == "recover"
-        BY rule_id, alert_series_id
+        BY rule_id, group_hash
   | STATS
-      last_tracked_state = COALESCE(LAST(end_state, @timestamp), "inactive"),
+      last_tracked_state = COALESCE(LAST(to_state, @timestamp), "inactive"),
       last_event_timestamp = MAX(@timestamp) WHERE
         _index == ".kibana_alert_events",
       last_transition = MAX(@timestamp) WHERE
@@ -42,7 +42,7 @@ export const DIRECTOR_QUERY = `FROM .kibana_alert_events, .kibana_alert_transiti
           (@timestamp > last_breach_timestamp OR last_breach_timestamp IS NULL),
       breach_count_threshold = LAST(rule.breach_count, @timestamp),
       recover_count_threshold = LAST(rule.recover_count, @timestamp)
-        BY rule_id, alert_series_id
+        BY rule_id, group_hash
   | EVAL
       next_state =
         CASE(
@@ -62,7 +62,7 @@ export const DIRECTOR_QUERY = `FROM .kibana_alert_events, .kibana_alert_transiti
           "inactive",
           NULL)
   | WHERE next_state IS NOT NULL
-  | RENAME next_state AS end_state, last_tracked_state AS start_state
+  | RENAME next_state AS to_state, last_tracked_state AS from_state
   | DROP last_status, last_transition
   | LIMIT 10000`;
 
@@ -113,14 +113,12 @@ async function createAlertTransitions(
     return {
       '@timestamp': new Date().toISOString(),
       rule_id: row.rule_id,
-      alert_series_id: row.alert_series_id,
+      group_hash: row.group_hash,
       // TODO: Find last episode..
       episode_id:
-        row.start_state === 'inactive' && row.end_state === 'pending'
-          ? v4()
-          : row.episode_id || v4(),
-      start_state: row.start_state,
-      end_state: row.end_state,
+        row.from_state === 'inactive' && row.to_state === 'pending' ? v4() : row.episode_id || v4(),
+      from_state: row.from_state,
+      to_state: row.to_state,
       last_event_timestamp: row.last_event_timestamp,
     };
   });

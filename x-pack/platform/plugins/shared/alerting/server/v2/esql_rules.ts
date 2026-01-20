@@ -94,21 +94,17 @@ async function createAlertEvents(
   const alertEvents = rows.map((row) => {
     return {
       '@timestamp': now,
+      scheduled_timestamp: now,
       rule: {
         id: rule.id,
-        tags: [],
         breach_count: rule.breachCount,
         recover_count: rule.recoverCount,
+        version: 1,
       },
-      grouping: rule.groupingFields.map((field) => ({
-        key: field,
-        value: row[field],
-      })),
       data: row,
       status: 'breach',
-      // Can't have timestamp in here..
-      alert_series_id: rule.groupingFields.map((field) => row[field]).join(':'),
-      source: 'rule',
+      group_hash: rule.groupingFields.map((field) => row[field]).join(':'),
+      source: 'internal',
     };
   });
   const bulkRequest = [];

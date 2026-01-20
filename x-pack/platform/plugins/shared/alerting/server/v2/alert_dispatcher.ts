@@ -19,14 +19,14 @@ export const ADDITIONAL_LOOKBACK_MS = 5000;
 //  - alert events that have been reported since the last time the dispatcher fired them
 export const DISPATCHER_EVENTS_QUERY = `FROM ${ALERT_EVENTS_INDEX}
   {timeFilter}
-  | RENAME alert_series_id AS event_alert_series_id, @timestamp AS event_timestamp
+  | RENAME group_hash AS event_group_hash, @timestamp AS event_timestamp
   | LOOKUP JOIN ${ALERT_ACTIONS_INDEX}
       ON
         rule.id == rule_id AND
-          alert_series_id == event_alert_series_id AND
+          group_hash == event_group_hash AND
           action_type == "fire-event"
   | STATS last_fire = MAX(max_source_timestmap), max_event_timestamp = MAX(event_timestamp)
-        BY rule.id, event_alert_series_id
+        BY rule.id, event_group_hash
   | WHERE last_fire IS NULL OR max_event_timestamp > last_fire
   | LIMIT 10000`;
 
@@ -35,15 +35,15 @@ export const DISPATCHER_EVENTS_QUERY = `FROM ${ALERT_EVENTS_INDEX}
 export const DISPATCHER_ACTIONS_QUERY = `FROM ${ALERT_ACTIONS_INDEX}
   {timeFilter}
   | WHERE action_type != "fire-action" AND action_type != "fire-event"
-  | RENAME alert_series_id AS action_alert_series_id, @timestamp AS action_timestamp,
+  | RENAME group_hash AS action_group_hash, @timestamp AS action_timestamp,
       action_type AS action_action_type, rule_id AS action_rule_id
   | LOOKUP JOIN ${ALERT_ACTIONS_INDEX}
         ON
           action_rule_id == rule_id AND
-            action_alert_series_id == alert_series_id AND
+            action_group_hash == group_hash AND
             action_type == "fire-action"
   | STATS last_fire = MAX(max_source_timestmap), max_action_timestamp = MAX(action_timestamp)
-        BY action_rule_id, action_alert_series_id
+        BY action_rule_id, action_group_hash
   | WHERE last_fire IS NULL OR max_action_timestamp > last_fire
   | LIMIT 10000`;
 
@@ -156,7 +156,7 @@ async function dispatchEventsAndActions(
     bulkRequest.push({
       '@timestamp': now,
       rule_id: row['rule.id'],
-      alert_series_id: row.event_alert_series_id,
+      group_hash: row.event_group_hash,
       action_type: `fire-${source}`,
       max_source_timestamp: row[`max_${source}_timestamp`],
     });
