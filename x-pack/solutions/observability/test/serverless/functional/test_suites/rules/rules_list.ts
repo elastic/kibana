@@ -665,49 +665,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       );
     });
 
-    it('should filter rules by the rule type', async () => {
-      const rule1 = await alertingApi.helpers.createAnomalyRule({
-        roleAuthc,
-      });
-
-      const rule2 = await alertingApi.helpers.createLatencyThresholdRule({
-        roleAuthc,
-      });
-
-      ruleIdList = [rule1.id, rule2.id];
-
-      await refreshRulesList();
-      await testSubjects.click('dataGridColumnSelectorButton');
-      await testSubjects.click('dataGridColumnSelectorShowAllButton');
-
-      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
-      await testSubjects.click('ruleTypeFilterButton');
-
-      await retry.try(async () => {
-        const isOpen = await testSubjects.exists('ruleType0Group');
-        if (!isOpen) {
-          await testSubjects.click('ruleTypeFilterButton');
-        }
-
-        expect(await (await testSubjects.find('ruleType0Group')).getVisibleText()).toEqual('Apm');
-      });
-
-      await testSubjects.click('ruleTypeapm.anomalyFilterOption');
-
-      await retry.try(async () => {
-        const filterInventoryRuleOnlyResults = await svlTriggersActionsUI.getRulesList();
-        expect(filterInventoryRuleOnlyResults.length).toEqual(1);
-        expect(filterInventoryRuleOnlyResults[0].name).toEqual(`${rule1.name}APM Anomaly`);
-        expect(filterInventoryRuleOnlyResults[0].interval).toEqual('1 min');
-        expect(filterInventoryRuleOnlyResults[0].duration).toMatch(/\d{2,}:\d{2}/);
-      });
-
-      // Clear it again because it is still selected
-      await testSubjects.click('rules-list-clear-filter');
-      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
-      await assertRulesLength(2);
-    });
-
     it('should filter rules by the rule status', async () => {
       const setRuleStatus = async (testSubj: string, checked: boolean) => {
         const readAriaChecked = async (): Promise<boolean> => {

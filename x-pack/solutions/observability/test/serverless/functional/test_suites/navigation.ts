@@ -106,18 +106,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Cases', 'Settings']);
     });
 
-    it('navigates to alerts app', async () => {
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:alerts' });
-      await svlCommonNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'observability-overview:alerts',
-      });
-      await testSubjects.click('manageRulesPageButton');
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Alerts', 'Rules']);
-      await svlCommonNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'observability-overview:alerts',
-      });
-    });
-
     it('navigates to integrations', async () => {
       await svlCommonNavigation.sidenav.openPanel('data_management');
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'integrations' });
