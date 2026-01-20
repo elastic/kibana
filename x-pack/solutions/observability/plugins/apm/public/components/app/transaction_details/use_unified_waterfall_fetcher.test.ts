@@ -112,7 +112,7 @@ describe('useUnifiedWaterfallFetcher', () => {
     const fetcherFn = mockUseFetcher.mock.calls[0][0];
     const mockCallApmApi = jest.fn();
 
-    const result = fetcherFn(mockCallApmApi);
+    const result = fetcherFn(mockCallApmApi, {} as AbortSignal);
 
     expect(result).toBeUndefined();
     expect(mockCallApmApi).not.toHaveBeenCalled();
@@ -146,7 +146,7 @@ describe('useUnifiedWaterfallFetcher', () => {
     const fetcherFn = mockUseFetcher.mock.calls[0][0];
     const mockCallApmApi = jest.fn();
 
-    const result = fetcherFn(mockCallApmApi);
+    const result = fetcherFn(mockCallApmApi, {} as AbortSignal);
 
     expect(result).toBeUndefined();
     expect(mockCallApmApi).not.toHaveBeenCalled();
@@ -173,7 +173,7 @@ describe('useUnifiedWaterfallFetcher', () => {
     const fetcherFn = mockUseFetcher.mock.calls[0][0];
     const mockCallApmApi = jest.fn().mockResolvedValue({});
 
-    fetcherFn(mockCallApmApi);
+    fetcherFn(mockCallApmApi, {} as AbortSignal);
 
     expect(mockCallApmApi).toHaveBeenCalledWith('GET /internal/apm/unified_traces/{traceId}', {
       params: {
