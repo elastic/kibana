@@ -32,6 +32,17 @@ export type FilterControlConfig = Omit<OptionsListDSLControlState, 'data_view_id
   persist?: boolean;
 };
 
+export interface CamelCaseFilterControlConfig {
+  title: OptionsListDSLControlState['title'];
+  fieldName: OptionsListDSLControlState['field_name'];
+  selectedOptions: OptionsListDSLControlState['selected_options'];
+  displaySettings: {
+    hideActionBar: Required<OptionsListDSLControlState>['display_settings']['hide_action_bar'];
+    hideExists: Required<OptionsListDSLControlState>['display_settings']['hide_exists'];
+  };
+  persist?: boolean;
+}
+
 export type FilterGroupHandler = ControlGroupRendererApi;
 
 export interface FilterGroupProps {
