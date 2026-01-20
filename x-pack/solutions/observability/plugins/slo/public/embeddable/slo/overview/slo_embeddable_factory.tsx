@@ -249,7 +249,13 @@ export const getOverviewEmbeddableFactory = ({
                 }}
               >
                 <QueryClientProvider client={queryClient}>
-                  {showAllGroupByInstances ? <SloCardChartList sloId={sloId!} /> : renderOverview()}
+                  {overviewMode === 'groups' ? (
+                    renderOverview()
+                  ) : showAllGroupByInstances ? (
+                    <SloCardChartList sloId={sloId!} />
+                  ) : (
+                    renderOverview()
+                  )}
                 </QueryClientProvider>
               </PluginContext.Provider>
             </KibanaContextProvider>
