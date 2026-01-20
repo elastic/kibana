@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiCodeBlock,
@@ -110,65 +110,68 @@ export const OtelLogsPanel: React.FC = () => {
     getDeeplinks();
   }, [getDeeplinks]);
 
-  const installTabContents = [
-    {
-      id: 'linux',
-      name: 'Linux',
-      firstStepTitle: HOST_COMMAND,
-      content: setupData
-        ? buildInstallCommand({
-            platform: 'linux',
-            isMetricsOnboardingEnabled,
-            isManagedOtlpServiceAvailable,
-            managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
-            elasticsearchUrl: setupData.elasticsearchUrl,
-            apiKeyEncoded: setupData.apiKeyEncoded,
-            agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
-            useWiredStreams,
-          })
-        : '',
-      start: 'sudo ./otelcol --config otel.yml',
-      codeLanguage: 'sh',
-    },
-    {
-      id: 'mac',
-      name: 'Mac',
-      firstStepTitle: HOST_COMMAND,
-      content: setupData
-        ? buildInstallCommand({
-            platform: 'mac',
-            isMetricsOnboardingEnabled,
-            isManagedOtlpServiceAvailable,
-            managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
-            elasticsearchUrl: setupData.elasticsearchUrl,
-            apiKeyEncoded: setupData.apiKeyEncoded,
-            agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
-            useWiredStreams,
-          })
-        : '',
-      start: './otelcol --config otel.yml',
-      codeLanguage: 'sh',
-    },
-    {
-      id: 'windows',
-      name: 'Windows',
-      firstStepTitle: HOST_COMMAND,
-      content: setupData
-        ? buildInstallCommand({
-            platform: 'windows',
-            isMetricsOnboardingEnabled,
-            isManagedOtlpServiceAvailable,
-            managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
-            elasticsearchUrl: setupData.elasticsearchUrl,
-            apiKeyEncoded: setupData.apiKeyEncoded,
-            agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
-            useWiredStreams,
-          })
-        : '',
-      start: '.\\otelcol.ps1 --config otel.yml',
-      codeLanguage: 'powershell',
-    },
-  ];
+  const installTabContents = useMemo(
+    () => [
+      {
+        id: 'linux',
+        name: 'Linux',
+        firstStepTitle: HOST_COMMAND,
+        content: setupData
+          ? buildInstallCommand({
+              platform: 'linux',
+              isMetricsOnboardingEnabled,
+              isManagedOtlpServiceAvailable,
+              managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
+              elasticsearchUrl: setupData.elasticsearchUrl,
+              apiKeyEncoded: setupData.apiKeyEncoded,
+              agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
+              useWiredStreams,
+            })
+          : '',
+        start: 'sudo ./otelcol --config otel.yml',
+        codeLanguage: 'sh',
+      },
+      {
+        id: 'mac',
+        name: 'Mac',
+        firstStepTitle: HOST_COMMAND,
+        content: setupData
+          ? buildInstallCommand({
+              platform: 'mac',
+              isMetricsOnboardingEnabled,
+              isManagedOtlpServiceAvailable,
+              managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
+              elasticsearchUrl: setupData.elasticsearchUrl,
+              apiKeyEncoded: setupData.apiKeyEncoded,
+              agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
+              useWiredStreams,
+            })
+          : '',
+        start: './otelcol --config otel.yml',
+        codeLanguage: 'sh',
+      },
+      {
+        id: 'windows',
+        name: 'Windows',
+        firstStepTitle: HOST_COMMAND,
+        content: setupData
+          ? buildInstallCommand({
+              platform: 'windows',
+              isMetricsOnboardingEnabled,
+              isManagedOtlpServiceAvailable,
+              managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
+              elasticsearchUrl: setupData.elasticsearchUrl,
+              apiKeyEncoded: setupData.apiKeyEncoded,
+              agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
+              useWiredStreams,
+            })
+          : '',
+        start: '.\\otelcol.ps1 --config otel.yml',
+        codeLanguage: 'powershell',
+      },
+    ],
+    [setupData, isMetricsOnboardingEnabled, isManagedOtlpServiceAvailable, useWiredStreams]
+  );
 
   const [selectedTab, setSelectedTab] = React.useState(installTabContents[0].id);
 
