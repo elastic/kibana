@@ -54,7 +54,8 @@ export const UserDetailsPanel = ({
     isRiskScoreExist,
     scopeId,
     hasMisconfigurationFindings,
-    hasNonClosedAlerts
+    hasNonClosedAlerts,
+    entityIdentifiers
   );
 
   const { selectedTabId, setSelectedTabId } = useSelectedTab(

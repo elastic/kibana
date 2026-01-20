@@ -25,14 +25,12 @@ export const useOpenGenericEntityDetailsLeftPanel = (
 ) => {
   const { insightsField, insightsValue, entityDocId, entityId, scopeId } = params;
   const { openLeftPanel } = useExpandableFlyoutApi();
-  const { hasMisconfigurationFindings } = useHasMisconfigurations({
-    [insightsField]: insightsValue,
-  });
-  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(insightsField, insightsValue);
+  const entityIdentifiers = { [insightsField]: insightsValue };
+  const { hasMisconfigurationFindings } = useHasMisconfigurations(entityIdentifiers);
+  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(entityIdentifiers);
   const { to, from } = useGlobalTime();
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    field: insightsField as 'related.entity',
-    value: insightsValue,
+    entityIdentifiers,
     to,
     from,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-generic-entity-alerts`,

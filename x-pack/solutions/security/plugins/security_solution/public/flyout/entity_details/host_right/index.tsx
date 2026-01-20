@@ -33,7 +33,7 @@ import { useObservedHost } from './hooks/use_observed_host';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { HostPreviewPanelFooter } from '../host_preview/footer';
 import { useNavigateToHostDetails } from './hooks/use_navigate_to_host_details';
-import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
 import type { EntityIdentifiers } from '../../document_details/shared/utils';
@@ -114,8 +114,7 @@ export const HostPanel = ({
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities(entityIdentifiers);
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    field: EntityIdentifierFields.hostName,
-    value: effectiveHostName,
+    entityIdentifiers,
     to,
     from,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}HOST_NAME_RIGHT`,
@@ -192,7 +191,7 @@ export const HostPanel = ({
               observedHost={observedHostWithAnomalies}
             />
             <HostPanelContent
-              hostName={effectiveHostName}
+              entityIdentifiers={entityIdentifiers}
               observedHost={observedHostWithAnomalies}
               riskScoreState={riskScoreState}
               contextID={contextID}
