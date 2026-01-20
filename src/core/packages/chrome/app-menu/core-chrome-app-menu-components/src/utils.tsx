@@ -242,7 +242,9 @@ export const getPopoverPanels = ({
       panelIdToTestId[String(panelId)] = parentPopoverTestId;
     }
 
-    itemsToProcess.forEach((item) => {
+    const sortedItems = [...itemsToProcess].sort((a, b) => a.order - b.order);
+
+    sortedItems.forEach((item) => {
       if (item.separator === 'above') {
         panelItems.push(createSeparatorItem(`separator-${item.id}`));
       }
