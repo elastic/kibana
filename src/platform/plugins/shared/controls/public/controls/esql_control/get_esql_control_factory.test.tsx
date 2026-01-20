@@ -91,7 +91,7 @@ describe('ESQLControlApi', () => {
       title: '',
       variable_name: 'variable1',
       variable_type: 'values',
-      singleSelect: true,
+      single_select: true,
     });
   });
 

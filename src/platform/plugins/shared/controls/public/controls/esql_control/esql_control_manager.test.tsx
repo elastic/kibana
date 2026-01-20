@@ -64,15 +64,15 @@ describe('initializeESQLControlManager', () => {
       expect('availableOptions' in latestState).toBeFalsy();
       expect(latestState).toMatchInlineSnapshot(`
         Object {
-          "controlType": "VALUES_FROM_QUERY",
-          "esqlQuery": "FROM foo | STATS BY column",
-          "selectedOptions": Array [
+          "control_type": "VALUES_FROM_QUERY",
+          "esql_query": "FROM foo | STATS BY column",
+          "selected_options": Array [
             "option1",
           ],
-          "singleSelect": true,
+          "single_select": true,
           "title": "",
-          "variableName": "variable1",
-          "variableType": "values",
+          "variable_name": "variable1",
+          "variable_type": "values",
         }
       `);
     });
@@ -98,19 +98,19 @@ describe('initializeESQLControlManager', () => {
       const latestState = selections.getLatestState();
       expect(latestState).toMatchInlineSnapshot(`
         Object {
-          "availableOptions": Array [
+          "available_options": Array [
             "option1",
             "option2",
           ],
-          "controlType": "STATIC_VALUES",
-          "esqlQuery": "",
-          "selectedOptions": Array [
+          "control_type": "STATIC_VALUES",
+          "esql_query": "",
+          "selected_options": Array [
             "option1",
           ],
-          "singleSelect": true,
+          "single_select": true,
           "title": "",
-          "variableName": "variable1",
-          "variableType": "values",
+          "variable_name": "variable1",
+          "variable_type": "values",
         }
       `);
     });
