@@ -8,6 +8,8 @@
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { Logger } from '@kbn/logging';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import type { KibanaRequest } from '@kbn/core/server';
 import type {
   EntityStoreApiRequestHandlerContext,
   EntityStoreRequestHandlerContext,
@@ -15,8 +17,6 @@ import type {
 } from './types';
 import { AssetManager } from './domain/asset_manager';
 import { FeatureFlags } from './infra/feature_flags';
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core/packages/saved-objects/utils-server';
-import { KibanaRequest } from '@kbn/core/server';
 
 interface EntityStoreApiRequestHandlerContextDeps {
   coreSetup: CoreSetup<EntityStoreStartPlugins, void>;
