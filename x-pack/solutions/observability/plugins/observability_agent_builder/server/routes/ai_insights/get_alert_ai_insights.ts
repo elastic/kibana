@@ -45,8 +45,6 @@ interface GetAlertAiInsightParams {
   logger: Logger;
 }
 
-export type AlertAiInsightResult = AiInsightResult;
-
 export async function getAlertAiInsight({
   alertDoc,
   inferenceClient,
@@ -54,7 +52,7 @@ export async function getAlertAiInsight({
   dataRegistry,
   request,
   logger,
-}: GetAlertAiInsightParams): Promise<AlertAiInsightResult> {
+}: GetAlertAiInsightParams): Promise<AiInsightResult> {
   const relatedContext = await fetchAlertContext({ alertDoc, dataRegistry, request, logger });
   const events$: Observable<ChatCompletionEvent> = generateAlertSummary({
     inferenceClient,

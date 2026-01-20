@@ -24,8 +24,6 @@ export interface GetLogAiInsightsParams {
   esClient: IScopedClusterClient;
 }
 
-export type GetLogAiInsightsResult = AiInsightResult;
-
 export async function getLogAiInsights({
   index,
   id,
@@ -34,7 +32,7 @@ export async function getLogAiInsights({
   dataRegistry,
   inferenceClient,
   connectorId,
-}: GetLogAiInsightsParams): Promise<GetLogAiInsightsResult> {
+}: GetLogAiInsightsParams): Promise<AiInsightResult> {
   const systemPrompt = dedent(`
     You are assisting an SRE who is viewing a log entry in the Kibana Logs UI.
     Using the provided data produce a concise, action-oriented response.`);

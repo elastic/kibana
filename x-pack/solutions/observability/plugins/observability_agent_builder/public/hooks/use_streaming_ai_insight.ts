@@ -6,7 +6,7 @@
  */
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { scan, takeUntil, finalize, Observable, type Subscription } from 'rxjs';
+import { scan, takeUntil, finalize, Observable } from 'rxjs';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 
 interface ContextEvent {
@@ -34,6 +34,13 @@ export interface InsightResponse {
   context: string;
 }
 
+const handleStreamError = (err: unknown, setError: (error: string | undefined) => void): void => {
+  if (err instanceof AbortError) {
+    return;
+  }
+  setError(err instanceof Error ? err.message : 'Failed to load AI insight');
+};
+
 export function useStreamingAiInsight(
   createStream: (signal: AbortSignal) => Observable<InsightStreamEvent>
 ) {
@@ -43,7 +50,7 @@ export function useStreamingAiInsight(
   const [context, setContext] = useState('');
   const [wasStopped, setWasStopped] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const subscriptionRef = useRef<Subscription | undefined>(undefined);
+  const cleanupRef = useRef<() => void>();
 
   const stop = useCallback(() => {
     if (abortControllerRef.current) {
@@ -53,14 +60,7 @@ export function useStreamingAiInsight(
   }, []);
 
   const fetch = useCallback(() => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-
-    if (subscriptionRef.current) {
-      subscriptionRef.current.unsubscribe();
-      subscriptionRef.current = undefined;
-    }
+    cleanupRef.current?.();
 
     setIsLoading(true);
     setError(undefined);
@@ -108,36 +108,24 @@ export function useStreamingAiInsight(
         })
       );
 
-      subscriptionRef.current = observable$.subscribe({
+      const subscription = observable$.subscribe({
         next: (state: InsightResponse) => {
           setSummary(state.summary);
           setContext(state.context);
         },
-        error: (err: unknown) => {
-          if (err instanceof AbortError) {
-            return;
-          }
-          setError(err instanceof Error ? err.message : 'Failed to load AI insight');
-        },
+        error: (err: unknown) => handleStreamError(err, setError),
       });
+
+      cleanupRef.current = () => {
+        abortController.abort();
+        subscription.unsubscribe();
+      };
     } catch (e) {
-      if (e instanceof AbortError) {
-        return;
-      }
-      setError(e instanceof Error ? e.message : 'Failed to load AI insight');
+      handleStreamError(e, setError);
     }
   }, [createStream]);
 
-  useEffect(() => {
-    return () => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-      if (subscriptionRef.current) {
-        subscriptionRef.current.unsubscribe();
-      }
-    };
-  }, []);
+  useEffect(() => () => cleanupRef.current?.(), []);
 
   return {
     isLoading,

@@ -79,8 +79,6 @@ export interface GenerateErrorAiInsightParams {
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
 }
 
-export type GenerateErrorAiInsightResult = AiInsightResult;
-
 export async function generateErrorAiInsight({
   core,
   plugins,
@@ -93,7 +91,7 @@ export async function generateErrorAiInsight({
   request,
   inferenceClient,
   dataRegistry,
-}: GenerateErrorAiInsightParams): Promise<GenerateErrorAiInsightResult> {
+}: GenerateErrorAiInsightParams): Promise<AiInsightResult> {
   const errorContext = await fetchApmErrorContext({
     core,
     plugins,
