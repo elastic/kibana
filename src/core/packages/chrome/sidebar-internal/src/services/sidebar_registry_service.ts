@@ -18,7 +18,7 @@ export class SidebarRegistryService {
   private readonly changed$ = new Subject<void>();
 
   @memoize
-  getApps$(): Observable<SidebarAppDefinition[]> {
+  private getApps$(): Observable<SidebarAppDefinition[]> {
     return this.changed$.pipe(
       startWith(undefined),
       map(() => Array.from(this.registeredApps.values()))
@@ -26,7 +26,7 @@ export class SidebarRegistryService {
   }
 
   @memoize
-  getAvailableApps$(): Observable<string[]> {
+  private getAvailableApps$(): Observable<string[]> {
     return this.getApps$().pipe(
       map((apps) => apps.map((app) => app.appId).filter((appId) => this.isAvailable(appId)))
     );
@@ -48,10 +48,6 @@ export class SidebarRegistryService {
       available: app.available !== false,
     } as SidebarAppDefinition);
     this.changed$.next();
-  }
-
-  getApps(): SidebarAppDefinition[] {
-    return Array.from(this.registeredApps.values());
   }
 
   getApp(appId: SidebarAppId): SidebarAppDefinition {

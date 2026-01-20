@@ -13,6 +13,7 @@ import type {
   SidebarApp,
   SidebarAppId,
 } from '@kbn/core-chrome-sidebar';
+import { memoize } from 'decko';
 import { SidebarRegistryService } from './sidebar_registry_service';
 import { SidebarStateService } from './sidebar_state_service';
 import { SidebarAppStateService } from './sidebar_app_state_service';
@@ -47,17 +48,6 @@ export class SidebarService {
     this.appState.start(basePath);
     this.state.start(basePath);
 
-    const getApp = <TParams = unknown,>(appId: SidebarAppId): SidebarApp<TParams> => {
-      return {
-        open: (params?: Partial<TParams>) => this.state.open(appId, params),
-        close: () => this.state.close(),
-        setParams: (params: Partial<TParams>) => this.appState.setParams(appId, params),
-        getParams: () => this.appState.getParams(appId),
-        getParams$: () => this.appState.getParams$(appId),
-        setAvailable: (available: boolean) => this.registry.setAvailable(appId, available),
-      };
-    };
-
     return {
       // SidebarStateServiceApi
       isOpen$: this.state.isOpen$.bind(this.state),
@@ -69,11 +59,26 @@ export class SidebarService {
       getCurrentAppId$: this.state.getCurrentAppId$.bind(this.state),
       getCurrentAppId: this.state.getCurrentAppId.bind(this.state),
       // SidebarRegistryServiceApi
-      getAvailableApps$: this.registry.getAvailableApps$.bind(this.registry),
       hasApp: this.registry.hasApp.bind(this.registry),
       // App-bound API
-      getApp,
+      getApp: this.getApp.bind(this),
       getAppDefinition: this.registry.getApp.bind(this.registry),
+    };
+  }
+
+  @memoize()
+  private getApp<TParams = unknown>(appId: SidebarAppId): SidebarApp<TParams> {
+    return {
+      open: (params?: Partial<TParams>) => this.state.open(appId, params),
+      close: () => {
+        if (this.state.getCurrentAppId() === appId) {
+          this.state.close();
+        }
+      },
+      setParams: (params: Partial<TParams>) => this.appState.setParams(appId, params),
+      getParams: () => this.appState.getParams(appId),
+      getParams$: () => this.appState.getParams$(appId),
+      setAvailable: (available: boolean) => this.registry.setAvailable(appId, available),
     };
   }
 }

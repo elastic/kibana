@@ -41,7 +41,6 @@ const createStartContractMock = (): jest.Mocked<SidebarStart> => {
     getCurrentAppId$: jest.fn().mockReturnValue(new BehaviorSubject<string | null>(null)),
     getCurrentAppId: jest.fn().mockReturnValue(null),
     // Registry
-    getAvailableApps$: jest.fn().mockReturnValue(new BehaviorSubject<string[]>([])),
     hasApp: jest.fn().mockReturnValue(false),
     // App-bound API
     getApp: jest.fn().mockReturnValue(createAppMock()),

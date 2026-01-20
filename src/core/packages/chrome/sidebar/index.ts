@@ -151,8 +151,6 @@ export interface SidebarStart {
   getCurrentAppId$: () => Observable<SidebarAppId | null>;
   /** Get the currently open app ID */
   getCurrentAppId: () => SidebarAppId | null;
-  /** Observable of apps that are currently available */
-  getAvailableApps$: () => Observable<string[]>;
   /** Check if an app is registered */
   hasApp: (appId: SidebarAppId) => boolean;
   /** Get the app-bound API for a specific sidebar app */
