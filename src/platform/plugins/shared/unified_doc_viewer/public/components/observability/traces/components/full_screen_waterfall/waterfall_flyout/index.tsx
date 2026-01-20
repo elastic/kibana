@@ -95,7 +95,7 @@ export function WaterfallFlyout({
   return (
     <EuiFlyout
       // Temporarily opt out from the flyout system, until the waterfall is migrated to properly use it
-      // TODO: Remove this once we migrate to the new flyout system: https://github.com/elastic/observability-dev/issues/4980
+      // TODO: Remove this once we migrate to the new flyout system: https://github.com/elastic/kibana/pull/247451
       session="never"
       includeFixedHeadersInFocusTrap={false}
       ownFocus={false}
