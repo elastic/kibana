@@ -24,4 +24,4 @@ export const APM_AGENT_POLICY_ID = 'policy-elastic-agent-on-cloud';
 export const COLLECTOR_PACKAGE_POLICY_NAME = 'elastic-universal-profiling-collector';
 export const SYMBOLIZER_PACKAGE_POLICY_NAME = 'elastic-universal-profiling-symbolizer';
 export const esArchiversPath = Path.join(__dirname, 'es_archiver', 'profiling', 'data.json');
-export const esResourcesEndpoint = 'api/profiling/setup/es_resources';
+export const esResourcesEndpoint = 'internal/profiling/setup/es_resources';
