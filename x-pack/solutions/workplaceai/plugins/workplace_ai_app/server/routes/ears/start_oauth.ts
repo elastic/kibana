@@ -44,7 +44,7 @@ export function registerStartOAuthRoute({
           provider: schema.oneOf([schema.literal('google')]),
         }),
         body: schema.object({
-          scope: schema.arrayOf(schema.string()),
+          scope: schema.arrayOf(schema.string(), { maxSize: 100 }),
         }),
       },
     },
