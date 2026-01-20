@@ -13,4 +13,3 @@
  */
 export const ATTACK_DISCOVERY_DATA_GENERATOR_RULE_TYPE_ID =
   'security.attack_discovery.data_generator' as const;
-

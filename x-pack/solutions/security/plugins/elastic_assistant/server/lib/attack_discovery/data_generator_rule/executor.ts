@@ -7,14 +7,21 @@
 
 import type { Logger } from '@kbn/core/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
-import type { AlertInstanceContext, RuleExecutorOptions, RuleTypeState } from '@kbn/alerting-plugin/server';
+import type {
+  AlertInstanceContext,
+  RuleExecutorOptions,
+  RuleTypeState,
+} from '@kbn/alerting-plugin/server';
 import {
   CreateAttackDiscoveryAlertsParams as CreateAttackDiscoveryAlertsParamsSchema,
   type CreateAttackDiscoveryAlertsParams,
 } from '@kbn/elastic-assistant-common';
 
 import type { AttackDiscoveryAlertDocument } from '../schedules/types';
-import { generateAttackDiscoveryAlertHash, transformToBaseAlertDocument } from '../persistence/transforms/transform_to_alert_documents';
+import {
+  generateAttackDiscoveryAlertHash,
+  transformToBaseAlertDocument,
+} from '../persistence/transforms/transform_to_alert_documents';
 
 export interface AttackDiscoveryDataGeneratorExecutorParams {
   logger: Logger;
@@ -87,4 +94,3 @@ export const attackDiscoveryDataGeneratorExecutor = async ({
 
   return { state: {} };
 };
-

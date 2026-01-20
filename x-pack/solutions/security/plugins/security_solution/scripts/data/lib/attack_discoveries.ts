@@ -271,13 +271,15 @@ const createAttackDiscoveriesViaKibana = async ({
       const response = isRecord(e) ? e.response : undefined;
       const data = isRecord(response) ? response.data : undefined;
       if (isRecord(data) && isString(data.message)) return data.message;
-      if (isRecord(data) && isRecord(data.error) && isString(data.error.message)) return data.error.message;
+      if (isRecord(data) && isRecord(data.error) && isString(data.error.message))
+        return data.error.message;
 
       // ES-style meta.body (used in other helpers in this scripts folder)
       const meta = isRecord(e) ? e.meta : undefined;
       const body = isRecord(meta) ? meta.body : undefined;
       if (isRecord(body) && isString(body.message)) return body.message;
-      if (isRecord(body) && isRecord(body.error) && isString(body.error.message)) return body.error.message;
+      if (isRecord(body) && isRecord(body.error) && isString(body.error.message))
+        return body.error.message;
 
       return undefined;
     })();

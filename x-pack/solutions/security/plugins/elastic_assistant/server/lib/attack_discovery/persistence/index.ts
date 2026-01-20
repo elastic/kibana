@@ -22,9 +22,7 @@ import type { AIAssistantDataClientParams } from '../../../ai_assistant_data_cli
 import { AIAssistantDataClient } from '../../../ai_assistant_data_clients';
 import { findDocuments } from '../../../ai_assistant_data_clients/find';
 import { combineFindAttackDiscoveryFilters } from './combine_find_attack_discovery_filters';
-import {
-  createAttackDiscoveryAlerts,
-} from './create_attack_discovery_alerts';
+import { createAttackDiscoveryAlerts } from './create_attack_discovery_alerts';
 import { getAttackDiscoveryGenerations } from './get_attack_discovery_generations';
 import { getAttackDiscoveryGenerationByIdQuery } from './get_attack_discovery_generation_by_id_query';
 import { getAttackDiscoveryGenerationsQuery } from './get_attack_discovery_generations_query';
