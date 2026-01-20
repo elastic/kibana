@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { debounce } from 'lodash';
 import { ALL_VALUE } from '@kbn/slo-schema';
+import useDebounce from 'react-use/lib/useDebounce';
 import { useFetchSloInstances } from '../../../hooks/use_fetch_slo_instances';
 
 interface Props {
@@ -31,75 +31,40 @@ export function SloInstanceSelector({ sloId, remoteName, onSelected, hasError }:
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
     []
   );
-  const [searchValue, setSearchValue] = useState<string>('');
-  const selectedOptionsRef = useRef(selectedOptions);
-  const onSelectedRef = useRef(onSelected);
-
-  // Keep refs in sync
-  useEffect(() => {
-    selectedOptionsRef.current = selectedOptions;
-  }, [selectedOptions]);
+  const [search, setSearch] = useState<string>();
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
+  const [searchAfter, setSearchAfter] = useState<string | undefined>(undefined);
+  useDebounce(() => setDebouncedSearch(search), 500, [search]);
 
   useEffect(() => {
-    onSelectedRef.current = onSelected;
-  }, [onSelected]);
+    setSearchAfter(undefined);
+  }, [debouncedSearch]);
 
   const { isLoading, data: instancesData } = useFetchSloInstances({
     sloId,
     remoteName,
-    search: searchValue.trim() || undefined,
+    search: debouncedSearch?.trim(),
     size: 100,
   });
 
-  const options = useMemo(() => {
-    const instanceOptions =
-      instancesData?.results.map((instance) => ({
-        label: instance.instanceId,
-        value: instance.instanceId,
-      })) ?? [];
-
-    return [ALL_OPTION, ...instanceOptions];
-  }, [instancesData]);
+  const options = [
+    ALL_OPTION,
+    ...(instancesData?.results.map((instance) => ({
+      label: instance.instanceId,
+      value: instance.instanceId,
+    })) ?? []),
+  ];
 
   const onChange = (opts: Array<EuiComboBoxOptionOption<string>>) => {
-    // Allow clearing selection to enable searching
     if (opts.length === 0) {
       setSelectedOptions([]);
       onSelected(undefined);
       return;
     }
-
-    const isAllSelected = opts.find((opt) => opt.value === ALL_VALUE);
-    const prevIsAllSelected = selectedOptions.find((opt) => opt.value === ALL_VALUE);
-
-    if (isAllSelected && !prevIsAllSelected) {
-      setSelectedOptions([ALL_OPTION]);
-      onSelected(ALL_VALUE);
-    } else if (isAllSelected && prevIsAllSelected) {
-      // If "All" is already selected and user tries to select it again, do nothing
-      return;
-    } else {
-      setSelectedOptions(opts);
-      const selectedInstanceId = opts.length > 0 ? opts[0].value : undefined;
-      onSelected(selectedInstanceId);
-    }
+    setSelectedOptions(opts);
+    const selectedInstanceId = opts.length > 0 ? opts[0].value : undefined;
+    onSelected(selectedInstanceId);
   };
-
-  const handleSearchChange = useCallback((value: string) => {
-    // When user starts typing, clear selection to allow free searching
-    if (value && selectedOptionsRef.current.length > 0) {
-      setSelectedOptions([]);
-      onSelectedRef.current(undefined);
-    }
-    setSearchValue(value);
-  }, []);
-
-  const onSearchChange = useMemo(() => debounce(handleSearchChange, 300), [handleSearchChange]);
-  useEffect(() => {
-    return () => {
-      onSearchChange.cancel();
-    };
-  }, [onSearchChange]);
 
   return (
     <EuiFormRow
@@ -115,9 +80,7 @@ export function SloInstanceSelector({ sloId, remoteName, onSelected, hasError }:
         })}
         placeholder={i18n.translate(
           'xpack.slo.sloEmbeddable.config.sloInstanceSelector.placeholder',
-          {
-            defaultMessage: 'Select an instance or choose all',
-          }
+          { defaultMessage: 'Select an instance or choose all' }
         )}
         data-test-subj="sloInstanceSelector"
         options={options}
@@ -126,9 +89,9 @@ export function SloInstanceSelector({ sloId, remoteName, onSelected, hasError }:
         isLoading={isLoading}
         onChange={onChange}
         fullWidth
-        onSearchChange={onSearchChange}
+        onSearchChange={(searchValue) => setSearch(searchValue)}
         isInvalid={hasError}
-        singleSelection={{ asPlainText: true }}
+        singleSelection={true}
       />
     </EuiFormRow>
   );
