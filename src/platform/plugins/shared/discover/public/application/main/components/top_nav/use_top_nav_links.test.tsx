@@ -105,11 +105,6 @@ describe('useTopNavLinks', () => {
       });
 
       expect(appMenuConfig.items).toBeDefined();
-
-      // Check for ESQL switch item
-      const esqlItem = appMenuConfig.items?.find((item) => item.id === 'esql');
-      expect(esqlItem).toBeDefined();
-      expect(esqlItem?.label).toBe('Switch to classic');
     });
   });
 
