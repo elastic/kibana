@@ -31,6 +31,7 @@ import type {
   TabPreviewData,
   TabsEBTEvent,
   RecentlyClosedTabItem,
+  TabMenuItem,
 } from '../../types';
 import { TabsEventName } from '../../types';
 import { getNextTabNumber } from '../../utils/get_next_tab_number';
@@ -62,6 +63,8 @@ export interface TabbedContentProps
   onEBTEvent: (event: TabsEBTEvent) => void;
   tabContentIdOverride?: string;
   appendRight?: React.ReactNode;
+  /** Optional function to provide additional menu items for tabs */
+  getAdditionalTabMenuItems?: (item: TabItem) => TabMenuItem[];
 }
 
 export interface TabbedContentState {
@@ -104,6 +107,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   disableDragAndDrop = false,
   disableTabsBarMenu = false,
   appendRight,
+  getAdditionalTabMenuItems,
 }) => {
   const { euiTheme } = useEuiTheme();
   const tabsBarApi = useRef<TabsBarApi | null>(null);
@@ -343,8 +347,16 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       onDuplicate,
       onCloseOtherTabs,
       onCloseTabsToTheRight,
+      getAdditionalTabMenuItems,
     });
-  }, [state, maxItemsCount, onDuplicate, onCloseOtherTabs, onCloseTabsToTheRight]);
+  }, [
+    state,
+    maxItemsCount,
+    onDuplicate,
+    onCloseOtherTabs,
+    onCloseTabsToTheRight,
+    getAdditionalTabMenuItems,
+  ]);
 
   const tabsBarContainerCss = css`
     background-color: ${euiTheme.colors.lightestShade};

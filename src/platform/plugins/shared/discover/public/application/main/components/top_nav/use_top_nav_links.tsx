@@ -27,7 +27,6 @@ import useObservable from 'react-use/lib/useObservable';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { useI18n } from '@kbn/i18n-react';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
-import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import type { AppMenuDiscoverParams } from './app_menu_actions';
@@ -66,7 +65,6 @@ export const useTopNavLinks = ({
   isEsqlMode,
   adHocDataViews,
   topNavCustomization,
-  shouldShowESQLToDataViewTransitionModal,
   hasShareIntegration,
   persistedDiscoverSession,
 }: {
@@ -78,7 +76,6 @@ export const useTopNavLinks = ({
   isEsqlMode: boolean;
   adHocDataViews: DataView[];
   topNavCustomization: TopNavCustomization | undefined;
-  shouldShowESQLToDataViewTransitionModal: boolean;
   hasShareIntegration: boolean;
   persistedDiscoverSession: DiscoverSession | undefined;
 }): DiscoverAppMenuConfig => {
@@ -227,9 +224,6 @@ export const useTopNavLinks = ({
     intl,
   ]);
 
-  const transitionFromESQLToDataView = useCurrentTabAction(
-    internalStateActions.transitionFromESQLToDataView
-  );
   const transitionFromDataViewToESQL = useCurrentTabAction(
     internalStateActions.transitionFromDataViewToESQL
   );
@@ -240,44 +234,26 @@ export const useTopNavLinks = ({
 
     newAppMenuRegistry.registerItems(appMenuItems);
 
-    if (services.uiSettings.get(ENABLE_ESQL)) {
+    // Only show the ES|QL button in classic mode (not in ES|QL mode)
+    // The "Switch to Classic" option is now in the tab menu when in ES|QL mode
+    if (services.uiSettings.get(ENABLE_ESQL) && !isEsqlMode) {
       newAppMenuRegistry.setSecondaryActionItem({
         id: 'esql',
-        label: isEsqlMode
-          ? i18n.translate('discover.localMenu.switchToClassicTitle', {
-              defaultMessage: 'Classic',
-            })
-          : i18n.translate('discover.localMenu.tryESQLTitle', {
-              defaultMessage: 'ES|QL',
-            }),
+        label: i18n.translate('discover.localMenu.tryESQLTitle', {
+          defaultMessage: 'ES|QL',
+        }),
         iconType: 'editorCodeBlock',
         color: 'text',
-        tooltipContent: isEsqlMode
-          ? i18n.translate('discover.localMenu.switchToClassicTooltipLabel', {
-              defaultMessage: 'Switch to KQL or Lucene syntax.',
-            })
-          : i18n.translate('discover.localMenu.esqlTooltipLabel', {
-              defaultMessage: `ES|QL is Elastic's powerful new piped query language.`,
-            }),
+        tooltipContent: i18n.translate('discover.localMenu.esqlTooltipLabel', {
+          defaultMessage: `ES|QL is Elastic's powerful new piped query language.`,
+        }),
         run: () => {
           if (dataView) {
-            if (isEsqlMode) {
-              services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:back_to_classic_clicked`);
-              if (
-                shouldShowESQLToDataViewTransitionModal &&
-                !services.storage.get(ESQL_TRANSITION_MODAL_KEY)
-              ) {
-                dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(true));
-              } else {
-                dispatch(transitionFromESQLToDataView({ dataViewId: dataView.id ?? '' }));
-              }
-            } else {
-              dispatch(transitionFromDataViewToESQL({ dataView }));
-              services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:try_btn_clicked`);
-            }
+            dispatch(transitionFromDataViewToESQL({ dataView }));
+            services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:try_btn_clicked`);
           }
         },
-        testId: isEsqlMode ? 'switch-to-dataviews' : 'select-text-based-language-btn',
+        testId: 'select-text-based-language-btn',
       });
     }
 
@@ -364,12 +340,10 @@ export const useTopNavLinks = ({
     services,
     isEsqlMode,
     dataView,
-    shouldShowESQLToDataViewTransitionModal,
     dispatch,
     state,
     defaultMenu?.saveItem?.disabled,
     hasUnsavedChanges,
-    transitionFromESQLToDataView,
     transitionFromDataViewToESQL,
   ]);
 

@@ -20,7 +20,6 @@ import { useTopNavLinks } from './use_top_nav_links';
 import {
   useAdHocDataViews,
   useCurrentDataView,
-  useCurrentTabSelector,
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { useHasShareIntegration } from '../../hooks/use_has_share_integration';
@@ -54,10 +53,6 @@ export const useDiscoverTopNav = ({
     };
   }, [topNavBadges, services.chrome]);
 
-  const unsavedTabIds = useInternalStateSelector((state) => state.tabs.unsavedIds);
-  const currentTabId = useCurrentTabSelector((tab) => tab.id);
-  const shouldShowESQLToDataViewTransitionModal =
-    !persistedDiscoverSession || unsavedTabIds.includes(currentTabId);
   const dataView = useCurrentDataView();
   const adHocDataViews = useAdHocDataViews();
   const isEsqlMode = useIsEsqlMode();
@@ -76,7 +71,6 @@ export const useDiscoverTopNav = ({
     isEsqlMode,
     adHocDataViews,
     topNavCustomization,
-    shouldShowESQLToDataViewTransitionModal,
     hasShareIntegration,
     persistedDiscoverSession,
   });

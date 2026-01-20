@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { EuiResizeObserver, type EuiResizeObserverProps } from '@elastic/eui';
-import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
+import { UnifiedTabs, type UnifiedTabsProps, type TabMenuItem } from '@kbn/unified-tabs';
 import useObservable from 'react-use/lib/useObservable';
 import { AppMenuComponent, type AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { SingleTabView, type SingleTabViewProps } from '../single_tab_view';
 import { discoverTopNavMenuContext } from '../top_nav/discover_topnav_menu';
 import {
@@ -24,9 +27,12 @@ import {
   useInternalStateDispatch,
   useInternalStateSelector,
   useCurrentTabRuntimeState,
+  useCurrentTabAction,
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { usePreviewData } from './use_preview_data';
+import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
+import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 
 const MAX_TABS_COUNT = 25;
 const APP_MENU_COLLAPSE_THRESHOLD = 800;
@@ -41,6 +47,22 @@ export const TabsView = (props: SingleTabViewProps) => {
   const { getPreviewData } = usePreviewData(props.runtimeStateManager);
   const hideTabsBar = useInternalStateSelector(selectIsTabsBarHidden);
   const unsavedTabIds = useInternalStateSelector((state) => state.tabs.unsavedIds);
+  const isEsqlMode = useIsEsqlMode();
+  const currentDataView = useCurrentTabRuntimeState(
+    props.runtimeStateManager,
+    (tab) => tab.currentDataView$
+  );
+
+  const transitionFromESQLToDataView = useCurrentTabAction(
+    internalStateActions.transitionFromESQLToDataView
+  );
+
+  // Determine if we should show the ES|QL to Data View transition modal
+  const persistedDiscoverSession = useInternalStateSelector(
+    (state) => state.persistedDiscoverSession
+  );
+  const shouldShowESQLToDataViewTransitionModal =
+    !persistedDiscoverSession || unsavedTabIds.includes(currentTabId);
 
   const scopedEbtManager = useCurrentTabRuntimeState(
     props.runtimeStateManager,
@@ -79,6 +101,41 @@ export const TabsView = (props: SingleTabViewProps) => {
     [currentTabId, props]
   );
 
+  // Provide "Switch to Classic" menu item for tabs when in ES|QL mode
+  const getAdditionalTabMenuItems: UnifiedTabsProps['getAdditionalTabMenuItems'] = useMemo(() => {
+    if (!isEsqlMode || !services.uiSettings.get(ENABLE_ESQL)) {
+      return undefined;
+    }
+
+    return (): TabMenuItem[] => [
+      {
+        'data-test-subj': 'unifiedTabs_tabMenuItem_switchToClassic',
+        name: 'switchToClassic',
+        label: i18n.translate('discover.tabMenu.switchToClassicTitle', {
+          defaultMessage: 'Switch to classic',
+        }),
+        onClick: () => {
+          services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:back_to_classic_clicked`);
+          if (
+            shouldShowESQLToDataViewTransitionModal &&
+            !services.storage.get(ESQL_TRANSITION_MODAL_KEY)
+          ) {
+            dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(true));
+          } else {
+            dispatch(transitionFromESQLToDataView({ dataViewId: currentDataView?.id ?? '' }));
+          }
+        },
+      },
+    ];
+  }, [
+    isEsqlMode,
+    services,
+    shouldShowESQLToDataViewTransitionModal,
+    dispatch,
+    transitionFromESQLToDataView,
+    currentDataView,
+  ]);
+
   const { topNavMenu$ } = useContext(discoverTopNavMenuContext);
   const topNavMenuItems = useObservable(topNavMenu$, topNavMenu$.getValue());
 
@@ -111,6 +168,7 @@ export const TabsView = (props: SingleTabViewProps) => {
             onChanged={onChanged}
             onEBTEvent={onEvent}
             onClearRecentlyClosed={onClearRecentlyClosed}
+            getAdditionalTabMenuItems={getAdditionalTabMenuItems}
             appendRight={
               <AppMenuComponent
                 config={topNavMenuItems as AppMenuConfig}
