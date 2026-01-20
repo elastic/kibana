@@ -23,11 +23,13 @@ export class RulesPage {
   /**
    * Navigates to the rules list page (Observability)
    */
-  async goto() {
-    await this.page.gotoApp('observability/alerts/rules');
-    await this.page.testSubj.waitForSelector(RULES_SETTINGS_TEST_SUBJECTS.RULE_PAGE_TAB, {
-      timeout: BIGGER_TIMEOUT,
-    });
+  async goto(ruleId: string = '') {
+    await this.page.gotoApp(`observability/alerts/rules/${ruleId}`);
+    if (!ruleId) {
+      await this.page.testSubj.waitForSelector(RULES_SETTINGS_TEST_SUBJECTS.RULE_PAGE_TAB, {
+        timeout: BIGGER_TIMEOUT,
+      });
+    }
   }
 
   /**
