@@ -5,10 +5,23 @@
  * 2.0.
  */
 
-import { getPrivilegedMonitorUsersIndex } from '../../../../../../../common/entity_analytics/privileged_user_monitoring/utils';
+import type { Filter } from '@kbn/es-query';
 
-export const getPrivilegedUsersEsqlCount = (
-  namespace: string
-) => `FROM ${getPrivilegedMonitorUsersIndex(namespace)}
-      | WHERE user.is_privileged == true
-      | STATS count = COUNT_DISTINCT(user.name)`;
+export const getPrivilegedUsersDslFilter = (dataViewId: string): Filter => ({
+  meta: {
+    alias: null,
+    disabled: false,
+    index: dataViewId,
+    key: 'user.is_privileged',
+    negate: false,
+    params: {
+      query: true,
+    },
+    type: 'phrase',
+  },
+  query: {
+    term: {
+      'user.is_privileged': true,
+    },
+  },
+});
