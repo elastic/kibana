@@ -23,7 +23,7 @@ import type {
   AppMenuPrimaryActionItem,
   AppMenuSecondaryActionItem,
 } from './types';
-import { APP_MENU_ITEM_LIMIT } from './constants';
+import { APP_MENU_ITEM_LIMIT, DEFAULT_POPOVER_WIDTH } from './constants';
 
 /**
  * Calculate how many items can be displayed based on the presence of action buttons.
@@ -212,6 +212,7 @@ export const getPopoverPanels = ({
   primaryActionItem,
   secondaryActionItem,
   startPanelId = 0,
+  rootPanelWidth = DEFAULT_POPOVER_WIDTH,
   onClose,
   onCloseOverflowButton,
 }: {
@@ -219,6 +220,7 @@ export const getPopoverPanels = ({
   primaryActionItem?: AppMenuPrimaryActionItem;
   secondaryActionItem?: AppMenuSecondaryActionItem;
   startPanelId?: number;
+  rootPanelWidth?: number;
   onClose?: () => void;
   onCloseOverflowButton?: () => void;
 }): { panels: EuiContextMenuPanelDescriptor[]; panelIdToTestId: Record<string, string> } => {
@@ -231,7 +233,8 @@ export const getPopoverPanels = ({
     itemsToProcess: AppMenuPopoverItem[],
     panelId: number,
     parentTitle?: string,
-    parentPopoverTestId?: string
+    parentPopoverTestId?: string,
+    parentPopoverWidth?: number
   ) => {
     const panelItems: EuiContextMenuPanelItemDescriptor[] = [];
 
@@ -248,7 +251,16 @@ export const getPopoverPanels = ({
         currentPanelId++;
         const childPanelId = currentPanelId;
 
-        processItems(item.items, childPanelId, item.label, item.popoverTestId);
+        // popoverWidth may exist on items that are AppMenuItemType (e.g., overflow items)
+        const itemPopoverWidth =
+          'popoverWidth' in item ? (item as { popoverWidth?: number }).popoverWidth : undefined;
+        processItems(
+          item.items,
+          childPanelId,
+          item.label,
+          item.popoverTestId,
+          itemPopoverWidth ?? DEFAULT_POPOVER_WIDTH
+        );
         panelItems.push(
           mapAppMenuItemToPanelItem(item, childPanelId, onClose, onCloseOverflowButton)
         );
@@ -264,11 +276,12 @@ export const getPopoverPanels = ({
     panels.push({
       id: panelId,
       ...(parentTitle && { title: upperFirst(parentTitle) }),
+      ...(parentPopoverWidth && { width: parentPopoverWidth }),
       items: panelItems,
     });
   };
 
-  processItems(items, startPanelId);
+  processItems(items, startPanelId, undefined, undefined, rootPanelWidth);
 
   /**
    * Action items are only added to the main panel and only in lower breakpoints (below "m").
