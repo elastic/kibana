@@ -153,6 +153,6 @@ function normalizeGroupBy(rawGroupBy: unknown): string[] {
       .filter((g) => g !== ALL_VALUE)
       .map((g) => String(g));
   }
-  if (typeof rawGroupBy === 'string') return rawGroupBy === ALL_VALUE ? [] : [rawGroupBy];
+  if (typeof rawGroupBy === 'string') return [rawGroupBy];
   return [];
 }
