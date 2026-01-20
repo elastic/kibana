@@ -248,12 +248,9 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
     <EuiBasicTable
       data-test-subj="aiopsLogRateAnalysisResultsTable"
       compressed
-      tableCaption={i18n.translate(
-        'xpack.aiops.logRateAnalysisResultsTable.tableCaption',
-        {
-          defaultMessage: 'Log rate analysis results',
-        }
-      )}
+      tableCaption={i18n.translate('xpack.aiops.logRateAnalysisResultsTable.tableCaption', {
+        defaultMessage: 'Log rate analysis results',
+      })}
       items={pageOfItems}
       columns={columns}
       pagination={pagination.totalItemCount > pagination.pageSize ? pagination : undefined}

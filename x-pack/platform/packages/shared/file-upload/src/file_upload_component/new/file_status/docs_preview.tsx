@@ -11,8 +11,8 @@ import { type DataTableRecord } from '@kbn/discover-utils';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import { FieldTypeIcon } from '../field_type_icon';
 import { i18n } from '@kbn/i18n';
+import { FieldTypeIcon } from '../field_type_icon';
 
 interface ResultsPreviewProps {
   sampleDocs: DataTableRecord[];
