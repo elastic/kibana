@@ -74,7 +74,7 @@ describe('migration v2', () => {
         '..',
         'archives',
         willRunESv9
-          ? '8.18.0_xpack_sample_saved_objects.zip'
+          ? '8.19.0_xpack_sample_saved_objects.zip'
           : '7.14.0_xpack_sample_saved_objects.zip'
       );
       await removeLogFile();
