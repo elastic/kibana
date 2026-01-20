@@ -7,7 +7,6 @@
 
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { Logger } from '@kbn/logging';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type {
   EntityStoreApiRequestHandlerContext,
