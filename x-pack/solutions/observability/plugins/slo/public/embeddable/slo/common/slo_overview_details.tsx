@@ -32,14 +32,18 @@ import { useKibana } from '../../../hooks/use_kibana';
 
 export interface SloOverviewDetailsContentProps {
   slo: SLOWithSummaryResponse;
+  initialTabId?: SloTabId;
 }
 
 /**
  * Content component for SLO overview details (without flyout wrapper).
  * Use this when you need to render the SLO details content inside your own flyout.
  */
-export function SloOverviewDetailsContent({ slo }: SloOverviewDetailsContentProps) {
-  const [selectedTabId, setSelectedTabId] = useState<SloTabId>(OVERVIEW_TAB_ID);
+export function SloOverviewDetailsContent({
+  slo,
+  initialTabId = OVERVIEW_TAB_ID,
+}: SloOverviewDetailsContentProps) {
+  const [selectedTabId, setSelectedTabId] = useState<SloTabId>(initialTabId);
 
   const { tabs } = useSloDetailsTabs({
     slo,

@@ -14,13 +14,17 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiLink,
   EuiLoadingSpinner,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import type { SloTabId } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React from 'react';
 import { useFetchSloDetails } from '../../../hooks/use_fetch_slo_details';
+import { useKibana } from '../../../hooks/use_kibana';
 import {
   SloOverviewDetailsContent,
   SloOverviewDetailsFlyoutFooter,
@@ -33,6 +37,7 @@ export interface SLODetailsFlyoutProps {
   size?: EuiFlyoutProps['size'];
   hideFooter?: boolean;
   session?: 'start' | 'inherit';
+  initialTabId?: SloTabId;
 }
 
 // eslint-disable-next-line import/no-default-export
@@ -43,7 +48,12 @@ export default function SLODetailsFlyout({
   size = 'm',
   hideFooter = false,
   session = 'inherit',
+  initialTabId,
 }: SLODetailsFlyoutProps) {
+  const {
+    http: { basePath },
+  } = useKibana().services;
+
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'sloDetailsFlyout',
   });
@@ -61,6 +71,10 @@ export default function SLODetailsFlyout({
 
   const isNotFound = isSuccess && !slo;
 
+  const sloDetailsUrl = slo
+    ? basePath.prepend(paths.sloDetails(slo.id, slo.instanceId))
+    : undefined;
+
   const getTitle = () => {
     if (isError) {
       return i18n.translate('xpack.slo.sloDetailsFlyout.errorTitle', {
@@ -76,6 +90,13 @@ export default function SLODetailsFlyout({
       return i18n.translate('xpack.slo.sloDetailsFlyout.loadingTitle', {
         defaultMessage: 'Loading SLO...',
       });
+    }
+    if (slo && sloDetailsUrl) {
+      return (
+        <EuiLink href={sloDetailsUrl} data-test-subj="sloDetailsFlyoutTitleLink" target="_blank">
+          {slo.name}
+        </EuiLink>
+      );
     }
     return slo?.name ?? '';
   };
@@ -130,7 +151,7 @@ export default function SLODetailsFlyout({
       return null;
     }
 
-    return <SloOverviewDetailsContent slo={slo} />;
+    return <SloOverviewDetailsContent slo={slo} initialTabId={initialTabId} />;
   };
 
   const renderFooter = () => {
