@@ -55,7 +55,7 @@ const CaseContainerComponent: React.FC = () => {
     timelinePrivileges: { read: canSeeTimeline },
     rulesPrivileges: { read: canReadRules },
   } = useUserPrivileges();
-  const { hasAlertsRead } = useAlertsPrivileges();
+  const { hasAlertsRead, hasAlertsAll } = useAlertsPrivileges();
 
   const interactionsUpsellingMessage = useUpsellingMessage('investigation_guide_interactions');
 
@@ -160,7 +160,11 @@ const CaseContainerComponent: React.FC = () => {
               CaseMetricsFeature.CONNECTORS,
               CaseMetricsFeature.LIFESPAN,
             ],
-            alerts: { isExperimental: false },
+            alerts: {
+              isExperimental: false,
+              read: hasAlertsRead,
+              all: hasAlertsAll,
+            },
             events: { enabled: true },
           },
           refreshRef,
@@ -178,9 +182,13 @@ const CaseContainerComponent: React.FC = () => {
               });
             },
           },
-          ruleDetailsNavigation: {
-            onClick: onRuleDetailsClick,
-          },
+          ...(canReadRules
+            ? {
+                ruleDetailsNavigation: {
+                  onClick: onRuleDetailsClick,
+                },
+              }
+            : {}),
           showAlertDetails,
           timelineIntegration: {
             editor_plugins: {
