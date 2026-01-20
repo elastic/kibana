@@ -62,12 +62,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed = async (
         menuButtonTestSubject: string,
-        isInOverflowMenu: boolean = false
+        isInOverflowMenu: boolean = false,
+        hasPopoverItems: boolean = false
       ) => {
         if (isInOverflowMenu) {
           await focusAndPressButton('app-menu-overflow-button');
         }
-        await focusAndPressButton(menuButtonTestSubject);
+        if (!hasPopoverItems) {
+          await focusAndPressButton(menuButtonTestSubject);
+        }
+
         await retry.try(async () => {
           expect(await hasFocus(menuButtonTestSubject)).to.be(false);
         });
@@ -85,7 +89,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('discoverOpenButton'));
 
       it('should return focus to the alerts button when dismissing the alerts popover', () =>
-        expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('discoverAlertsButton'));
+        expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed(
+          'discoverAlertsButton',
+          true,
+          true
+        ));
 
       it('should return focus to the alerts button when dismissing the create rule flyout', async () => {
         await testSubjects.click('app-menu-overflow-button');

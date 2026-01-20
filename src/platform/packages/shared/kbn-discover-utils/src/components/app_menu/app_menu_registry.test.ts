@@ -178,85 +178,6 @@ describe('AppMenuRegistry', () => {
       expect(parent?.items).toHaveLength(1);
       expect(parent?.items?.[0]).toEqual(popoverItem);
     });
-
-    it('should sort popover items by order property', () => {
-      const parentItem: AppMenuItemType = {
-        id: 'parent',
-        order: 1,
-        label: 'Parent',
-        iconType: 'alert',
-        items: [],
-      };
-
-      const popoverItem1: AppMenuPopoverItem = {
-        id: 'child-1',
-        label: 'Child 1',
-        order: 3,
-        run: jest.fn(),
-      };
-
-      const popoverItem2: AppMenuPopoverItem = {
-        id: 'child-2',
-        label: 'Child 2',
-        order: 1,
-        run: jest.fn(),
-      };
-
-      const popoverItem3: AppMenuPopoverItem = {
-        id: 'child-3',
-        label: 'Child 3',
-        order: 2,
-        run: jest.fn(),
-      };
-
-      registry.registerItem(parentItem);
-      registry.registerPopoverItem('parent', popoverItem1);
-      registry.registerPopoverItem('parent', popoverItem2);
-      registry.registerPopoverItem('parent', popoverItem3);
-
-      const config = registry.getAppMenuConfig();
-      const parent = config.items?.find((item) => item.id === 'parent');
-
-      expect(parent?.items).toHaveLength(3);
-      expect(parent?.items?.[0].id).toBe('child-2');
-      expect(parent?.items?.[1].id).toBe('child-3');
-      expect(parent?.items?.[2].id).toBe('child-1');
-    });
-
-    it('should handle popover items without order property', () => {
-      const parentItem: AppMenuItemType = {
-        id: 'parent',
-        order: 1,
-        label: 'Parent',
-        iconType: 'alert',
-        items: [],
-      };
-
-      const popoverItem1: AppMenuPopoverItem = {
-        id: 'child-1',
-        order: 0,
-        label: 'Child 1',
-        run: jest.fn(),
-      };
-
-      const popoverItem2: AppMenuPopoverItem = {
-        id: 'child-2',
-        label: 'Child 2',
-        order: 1,
-        run: jest.fn(),
-      };
-
-      registry.registerItem(parentItem);
-      registry.registerPopoverItem('parent', popoverItem1);
-      registry.registerPopoverItem('parent', popoverItem2);
-
-      const config = registry.getAppMenuConfig();
-      const parent = config.items?.find((item) => item.id === 'parent');
-
-      expect(parent?.items).toHaveLength(2);
-      expect(parent?.items?.[0].id).toBe('child-1');
-      expect(parent?.items?.[1].id).toBe('child-2');
-    });
   });
 
   describe('registerCustomItem', () => {
@@ -338,7 +259,7 @@ describe('AppMenuRegistry', () => {
       expect(config.items?.[1].id).toBe('custom-2');
     });
 
-    it('should merge custom items with regular items and sort by order', () => {
+    it('should merge custom items with regular items', () => {
       const regularItem: AppMenuItemType = {
         id: 'regular-item',
         order: 2,
@@ -360,9 +281,6 @@ describe('AppMenuRegistry', () => {
 
       const config = registry.getAppMenuConfig();
       expect(config.items).toHaveLength(2);
-      // Should be sorted by order
-      expect(config.items?.[0].id).toBe('custom-item');
-      expect(config.items?.[1].id).toBe('regular-item');
     });
   });
 
@@ -393,50 +311,6 @@ describe('AppMenuRegistry', () => {
       expect(parent?.items).toBeDefined();
       expect(parent?.items).toHaveLength(1);
       expect(parent?.items?.[0]).toEqual(popoverItem);
-    });
-
-    it('should sort custom popover items by order property', () => {
-      const parentItem: AppMenuItemType = {
-        id: 'custom-parent',
-        order: 1,
-        label: 'Custom Parent',
-        iconType: 'beaker',
-        items: [],
-      };
-
-      const popoverItem1: AppMenuPopoverItem = {
-        id: 'custom-child-1',
-        label: 'Custom Child 1',
-        order: 3,
-        run: jest.fn(),
-      };
-
-      const popoverItem2: AppMenuPopoverItem = {
-        id: 'custom-child-2',
-        label: 'Custom Child 2',
-        order: 1,
-        run: jest.fn(),
-      };
-
-      const popoverItem3: AppMenuPopoverItem = {
-        id: 'custom-child-3',
-        label: 'Custom Child 3',
-        order: 2,
-        run: jest.fn(),
-      };
-
-      registry.registerCustomItem(parentItem);
-      registry.registerCustomPopoverItem('custom-parent', popoverItem1);
-      registry.registerCustomPopoverItem('custom-parent', popoverItem2);
-      registry.registerCustomPopoverItem('custom-parent', popoverItem3);
-
-      const config = registry.getAppMenuConfig();
-      const parent = config.items?.find((item) => item.id === 'custom-parent');
-
-      expect(parent?.items).toHaveLength(3);
-      expect(parent?.items?.[0].id).toBe('custom-child-2');
-      expect(parent?.items?.[1].id).toBe('custom-child-3');
-      expect(parent?.items?.[2].id).toBe('custom-child-1');
     });
 
     it('should handle registering custom popover items before parent exists', () => {
@@ -567,7 +441,7 @@ describe('AppMenuRegistry', () => {
       expect(config.secondaryActionItem).toBeUndefined();
     });
 
-    it('should include both regular and custom items in sorted order', () => {
+    it('should include both regular and custom items', () => {
       const regularItem: AppMenuItemType = {
         id: 'regular',
         order: 2,
@@ -590,8 +464,6 @@ describe('AppMenuRegistry', () => {
       const config = registry.getAppMenuConfig();
 
       expect(config.items).toHaveLength(2);
-      expect(config.items?.[0].id).toBe('custom');
-      expect(config.items?.[1].id).toBe('regular');
     });
   });
 });

@@ -236,7 +236,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     } else {
       await testSubjects.click('discoverAppMenuCustomThresholdRule');
     }
-    await testSubjects.click('app-menu-overflow-button');
   };
 
   const openManagementAlertFlyout = async () => {
