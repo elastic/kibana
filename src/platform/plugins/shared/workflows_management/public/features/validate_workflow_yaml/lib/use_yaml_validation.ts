@@ -162,48 +162,6 @@ export function useYamlValidation(
   };
 }
 
-function createRange(validationResult: YamlValidationResult): monaco.Range {
-  return new monaco.Range(
-    validationResult.startLineNumber,
-    validationResult.startColumn,
-    validationResult.endLineNumber,
-    validationResult.endColumn
-  );
-}
-
-function createMarkdownContent(content: string): monaco.IMarkdownString {
-  return {
-    value: content,
-    isTrusted: true,
-    supportHtml: true,
-  };
-}
-
-// Create decoration options for completion
-// Including hover message popover and the badge in the before message
-function createSelectionDecoration(
-  validationResult: YamlValidationResult
-): monaco.editor.IModelDecorationOptions {
-  const decorationOptions: monaco.editor.IModelDecorationOptions = {
-    stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-    hoverMessage: validationResult.hoverMessage
-      ? createMarkdownContent(validationResult.hoverMessage)
-      : null,
-    before: validationResult.beforeMessage
-      ? {
-          content: validationResult.beforeMessage,
-          cursorStops: monaco.editor.InjectedTextCursorStops.None,
-          inlineClassName: `connector-name-badge`,
-        }
-      : null,
-  };
-  // Only add inlineClassName for errors, not for valid connectors
-  if (validationResult.severity !== null) {
-    decorationOptions.inlineClassName = `template-variable-${validationResult.severity}`;
-  }
-  return decorationOptions;
-}
-
 // create markers and decorations for the validation results
 function createMarkersAndDecorations(validationResults: YamlValidationResult[]): {
   markers: monaco.editor.IMarkerData[];
@@ -328,4 +286,44 @@ function createMarkersAndDecorations(validationResults: YamlValidationResult[]):
     }
   }
   return { markers, decorations };
+}
+
+function createRange(validationResult: YamlValidationResult): monaco.Range {
+  return new monaco.Range(
+    validationResult.startLineNumber,
+    validationResult.startColumn,
+    validationResult.endLineNumber,
+    validationResult.endColumn
+  );
+}
+
+function createMarkdownContent(content: string): monaco.IMarkdownString {
+  return {
+    value: content,
+    isTrusted: true,
+    supportHtml: true,
+  };
+}
+
+function createSelectionDecoration(
+  validationResult: YamlValidationResult
+): monaco.editor.IModelDecorationOptions {
+  const decorationOptions: monaco.editor.IModelDecorationOptions = {
+    stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+    hoverMessage: validationResult.hoverMessage
+      ? createMarkdownContent(validationResult.hoverMessage)
+      : null,
+    before: validationResult.beforeMessage
+      ? {
+          content: validationResult.beforeMessage,
+          cursorStops: monaco.editor.InjectedTextCursorStops.None,
+          inlineClassName: `connector-name-badge`,
+        }
+      : null,
+  };
+  // Only add inlineClassName for errors, not for valid connectors
+  if (validationResult.severity !== null) {
+    decorationOptions.inlineClassName = `template-variable-${validationResult.severity}`;
+  }
+  return decorationOptions;
 }
