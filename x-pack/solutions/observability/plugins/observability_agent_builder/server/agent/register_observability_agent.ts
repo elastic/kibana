@@ -82,12 +82,12 @@ function getToolSelectionInstructions() {
     - \`get_hosts\`: Infrastructure health (CPU, memory, disk, network)
     
     **Drill-down (narrow the scope)**
-    - \`get_trace_metrics\`: RED metrics with flexible groupBy (service → transaction → host)
+    - \`get_trace_metrics\`: RED metrics with flexible grouping and filtering (service → transaction → host)
     - \`get_downstream_dependencies\`: Service topology and blast radius
     - \`get_log_categories\`: Summarize log patterns into categories
     
     **Timeline (when did it change?)**
-    - \`get_trace_change_points\`: Detect changes in latency/throughput/failure rate
+    - \`get_trace_change_points\`: Detect changes in latency/throughput/error rate
     - \`get_log_change_points\`: Detect changes in log message patterns
     - \`get_metric_change_points\`: Detect changes in infrastructure metrics
     - \`run_log_rate_analysis\`: Correlate log volume spikes/drops with field values

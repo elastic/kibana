@@ -32,7 +32,7 @@ const getCorrelatedLogsSchema = z.object({
     .string()
     .optional()
     .describe(
-      'ID of a specific log entry to use as anchor. When provided, other filter parameters are ignored.'
+      'ID of a specific log entry to use as an anchor. When provided, other filter parameters are ignored.'
     ),
   kqlFilter: z
     .string()
