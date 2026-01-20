@@ -111,7 +111,7 @@ export const TabsView = (props: SingleTabViewProps) => {
       {
         'data-test-subj': 'unifiedTabs_tabMenuItem_switchToClassic',
         name: 'switchToClassic',
-        label: i18n.translate('discover.tabMenu.switchToClassicTitle', {
+        label: i18n.translate('discover.localMenu.switchToClassicTitle', {
           defaultMessage: 'Switch to classic',
         }),
         onClick: () => {
