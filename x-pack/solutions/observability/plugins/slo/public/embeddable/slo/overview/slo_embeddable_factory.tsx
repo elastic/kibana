@@ -235,7 +235,6 @@ export const getOverviewEmbeddableFactory = ({
         };
 
         const queryClient = new QueryClient();
-
         return (
           <EuiThemeProvider darkMode={true}>
             <KibanaContextProvider services={deps}>
@@ -252,7 +251,13 @@ export const getOverviewEmbeddableFactory = ({
                   {overviewMode === 'groups' ? (
                     renderOverview()
                   ) : showAllGroupByInstances ? (
-                    <SloCardChartList sloId={sloId!} />
+                    <div
+                      data-test-subj="sloSingleOverviewPanel"
+                      data-shared-item=""
+                      style={{ width: '100%' }}
+                    >
+                      <SloCardChartList data-test-subj="sloSingleOverviewPanel" sloId={sloId!} />
+                    </div>
                   ) : (
                     renderOverview()
                   )}
