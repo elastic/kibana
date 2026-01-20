@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -62,14 +62,9 @@ function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConf
   const [hasError, setHasError] = useState(false);
   const showAllGroupByInstances = selectedInstanceId === ALL_VALUE;
 
-  const hasGroupBy = useMemo(() => {
-    if (!selectedSloDefinition?.groupBy) {
-      return false;
-    }
-    const groupBy = selectedSloDefinition.groupBy;
-    // groupBy is always string[] in SearchSLODefinitionResponse
-    return groupBy.length > 0 && !groupBy.includes(ALL_VALUE);
-  }, [selectedSloDefinition]);
+  const hasGroupBy = selectedSloDefinition?.groupBy
+    ? selectedSloDefinition.groupBy.length > 0 && !selectedSloDefinition.groupBy.includes(ALL_VALUE)
+    : false;
 
   const onConfirmClick = () => {
     if (!selectedSloDefinition) {
