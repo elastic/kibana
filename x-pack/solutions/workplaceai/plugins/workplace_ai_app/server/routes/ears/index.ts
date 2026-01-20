@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-import type { WorkplaceAIClientConfig } from '../types';
-
-export interface WorkplaceAIServices {
-  config: WorkplaceAIClientConfig;
-}
+export { registerStartOAuthRoute } from './start_oauth';
+export { registerFetchSecretsRoute } from './fetch_secrets';
