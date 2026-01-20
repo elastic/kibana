@@ -32,6 +32,8 @@
           "; isRemote?: boolean | undefined; username?: string | undefined; password?: string | undefined; }) => { waitForLoadingToFinish(): Promise<void>; loginToKibana(usernameT?: \"editor\" | \"viewer\" | undefined, passwordT?: string | undefined): Promise<void>; }"
         ],
         "path": "x-pack/solutions/observability/plugins/synthetics/e2e/page_objects/login.tsx",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,6 +45,8 @@
             "label": "{\n  page,\n  isRemote = false,\n  username = 'elastic',\n  password = 'changeme',\n}",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/synthetics/e2e/page_objects/login.tsx",
+            "lineNumber": 15,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -57,6 +61,8 @@
                   "Page"
                 ],
                 "path": "x-pack/solutions/observability/plugins/synthetics/e2e/page_objects/login.tsx",
+                "lineNumber": 16,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -71,6 +77,8 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/solutions/observability/plugins/synthetics/e2e/page_objects/login.tsx",
+                "lineNumber": 17,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -85,6 +93,8 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/solutions/observability/plugins/synthetics/e2e/page_objects/login.tsx",
+                "lineNumber": 18,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -99,6 +109,8 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/solutions/observability/plugins/synthetics/e2e/page_objects/login.tsx",
+                "lineNumber": 19,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -125,6 +137,8 @@
           "<SVGElement | HTMLElement>>; }"
         ],
         "path": "x-pack/solutions/observability/plugins/synthetics/e2e/page_objects/utils.tsx",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -136,6 +150,8 @@
             "label": "{ page }",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/synthetics/e2e/page_objects/utils.tsx",
+            "lineNumber": 10,
+            "columnNumber": 45,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -150,6 +166,8 @@
                   "Page"
                 ],
                 "path": "x-pack/solutions/observability/plugins/synthetics/e2e/page_objects/utils.tsx",
+                "lineNumber": 10,
+                "columnNumber": 47,
                 "deprecated": false,
                 "trackAdoption": false
               }
