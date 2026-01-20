@@ -1071,4 +1071,118 @@ describe('AutomaticImportSavedObjectService', () => {
       await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, integrationId);
     });
   });
+
+  describe('updateDataStreamSavedObjectAttributes', () => {
+    let savedObjectsClient: SavedObjectsClientContract;
+    let savedObjectService: AutomaticImportSavedObjectService;
+
+    beforeEach(async () => {
+      const internalRepo = coreStart.savedObjects.createInternalRepository();
+      savedObjectsClient = internalRepo as SavedObjectsClientContract;
+
+      const mockLoggerFactory = loggerMock.create();
+      savedObjectService = new AutomaticImportSavedObjectService(
+        mockLoggerFactory,
+        savedObjectsClient as unknown as SavedObjectsClient
+      );
+    });
+
+    it('should update data stream saved object attributes with ingest pipeline and status', async () => {
+      // Create integration first
+      const integrationParams: IntegrationParams = {
+        ...mockIntegrationParams,
+        integrationId: 'test-update-ds-integration',
+      };
+      await savedObjectService.insertIntegration(integrationParams, authenticatedUser);
+
+      // Create data stream
+      const dataStreamParams: DataStreamParams = {
+        ...mockDataStreamParams,
+        integrationId: 'test-update-ds-integration',
+        dataStreamId: 'test-update-ds',
+        jobInfo: {
+          jobId: 'test-job-id',
+          jobType: 'autoImport-dataStream-task',
+          status: TASK_STATUSES.pending,
+        },
+      };
+      await savedObjectService.insertDataStream(dataStreamParams, authenticatedUser);
+
+      // Verify initial state
+      const initialDataStream = await savedObjectService.getDataStream(
+        'test-update-ds',
+        'test-update-ds-integration'
+      );
+      expect(initialDataStream.attributes.job_info.status).toBe(TASK_STATUSES.pending);
+      expect(initialDataStream.attributes.result).toBeUndefined();
+
+      // Update the data stream with ingest pipeline and completed status
+      const ingestPipeline = JSON.stringify({
+        processors: [
+          {
+            set: {
+              field: 'processed',
+              value: true,
+            },
+          },
+        ],
+      });
+
+      await savedObjectService.updateDataStreamSavedObjectAttributes({
+        integrationId: 'test-update-ds-integration',
+        dataStreamId: 'test-update-ds',
+        ingestPipeline,
+        status: TASK_STATUSES.completed,
+      });
+
+      // Verify the update
+      const updatedDataStream = await savedObjectService.getDataStream(
+        'test-update-ds',
+        'test-update-ds-integration'
+      );
+      expect(updatedDataStream.attributes.job_info.status).toBe(TASK_STATUSES.completed);
+      expect(updatedDataStream.attributes.result).toBeDefined();
+      expect(updatedDataStream.attributes.result?.ingest_pipeline).toBe(ingestPipeline);
+
+      // Cleanup
+      await savedObjectsClient.delete(
+        DATA_STREAM_SAVED_OBJECT_TYPE,
+        'test-update-ds-integration-test-update-ds'
+      );
+      await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, 'test-update-ds-integration');
+    });
+
+    it('should throw error when integration ID is missing', async () => {
+      await expect(
+        savedObjectService.updateDataStreamSavedObjectAttributes({
+          integrationId: '',
+          dataStreamId: 'test-ds',
+          ingestPipeline: '{}',
+          status: TASK_STATUSES.completed,
+        })
+      ).rejects.toThrow('Integration ID is required');
+    });
+
+    it('should throw error when data stream ID is missing', async () => {
+      await expect(
+        savedObjectService.updateDataStreamSavedObjectAttributes({
+          integrationId: 'test-integration',
+          dataStreamId: '',
+          ingestPipeline: '{}',
+          status: TASK_STATUSES.completed,
+        })
+      ).rejects.toThrow('Data stream ID is required');
+    });
+
+    it('should throw error when data stream does not exist', async () => {
+      await expect(
+        savedObjectService.updateDataStreamSavedObjectAttributes({
+          integrationId: 'non-existent-integration',
+          dataStreamId: 'non-existent-ds',
+          ingestPipeline: '{}',
+          status: TASK_STATUSES.completed,
+        })
+      ).rejects.toThrow('Data stream non-existent-ds not found');
+    });
+  });
 });

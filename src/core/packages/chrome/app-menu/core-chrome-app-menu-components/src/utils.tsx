@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { type MouseEvent } from 'react';
 import { isArray, isFunction, upperFirst } from 'lodash';
 import {
   type EuiButtonColor,
@@ -117,15 +117,14 @@ export const mapAppMenuItemToPanelItem = (
     tooltipTitle: item?.tooltipTitle,
   });
 
-  const handleClick = () => {
+  const handleClick = (event: MouseEvent) => {
     if (isDisabled(item?.disableButton)) {
       return;
     }
 
-    const shouldClosePopover =
-      !item?.href && childPanelId === undefined && item.run?.length === 0 && onClose;
+    const shouldClosePopover = !item?.href && childPanelId === undefined && onClose;
 
-    item.run?.();
+    item.run?.({ triggerElement: event?.currentTarget as HTMLElement });
 
     if (shouldClosePopover) {
       onClose();
