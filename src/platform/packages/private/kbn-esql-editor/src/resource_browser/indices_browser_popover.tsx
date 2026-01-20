@@ -76,11 +76,7 @@ export const IndicesBrowserPopover: React.FC<IndicesBrowserPopoverProps> = ({
         key: source.name,
         label: source.name,
         checked: selectedIndices.includes(source.name) ? ('on' as const) : undefined,
-        append: (
-          <EuiTextColor color="subdued">
-            {getSourceTypeLabel(source.type)}
-          </EuiTextColor>
-        ),
+        append: <EuiTextColor color="subdued">{getSourceTypeLabel(source.type)}</EuiTextColor>,
         data: {
           type: source.type,
           typeKey: getSourceTypeKey(source.type),
