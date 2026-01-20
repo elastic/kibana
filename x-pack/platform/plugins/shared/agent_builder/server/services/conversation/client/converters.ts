@@ -23,6 +23,7 @@ import type {
   PersistentConversationRoundStep,
 } from './types';
 import type { ConversationProperties } from './storage';
+import { migrateRoundAttachments, needsMigration } from './migrate_attachments';
 
 export type Document = Pick<
   GetResponse<ConversationProperties>,
@@ -98,12 +99,30 @@ export const fromEs = (document: Document): Conversation => {
   const base = convertBaseFromEs(document);
 
   // Migration: prefer legacy 'rounds' field, fallback to new 'conversation_rounds' field
-  const rounds = document._source!.rounds ?? document._source!.conversation_rounds;
+  const rawRounds = document._source!.rounds ?? document._source!.conversation_rounds;
+  const deserializedRounds = deserializeStepResults(rawRounds);
+
+  const existingAttachments = document._source!.attachments;
+  if (existingAttachments && existingAttachments.length > 0) {
+    return {
+      ...base,
+      rounds: deserializedRounds,
+      attachments: existingAttachments,
+    };
+  }
+
+  if (needsMigration(false, deserializedRounds)) {
+    const migratedAttachments = migrateRoundAttachments(deserializedRounds);
+    return {
+      ...base,
+      rounds: deserializedRounds,
+      ...(migratedAttachments.length > 0 && { attachments: migratedAttachments }),
+    };
+  }
 
   return {
     ...base,
-    rounds: deserializeStepResults(rounds),
-    ...(document._source!.attachments && { attachments: document._source!.attachments }),
+    rounds: deserializedRounds,
     ...(document._source!.state && { state: document._source!.state }),
   };
 };
