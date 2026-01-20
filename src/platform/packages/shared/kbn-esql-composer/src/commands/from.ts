@@ -32,9 +32,17 @@ function buildPipeline(
     params: [],
   });
 }
+
+/**
+ * @deprecated Migrate to `@kbn/esql-language` composer.
+ */
 export function timeseries(...patterns: Array<string | string[]>): QueryPipeline {
   return buildPipeline('TS', ...patterns);
 }
+
+/**
+ * @deprecated Migrate to `@kbn/esql-language` composer.
+ */
 export function from(...patterns: Array<string | string[]>): QueryPipeline {
   return buildPipeline('FROM', ...patterns);
 }

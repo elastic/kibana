@@ -6,94 +6,45 @@
  */
 
 import type {
-  ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { RunResult, TaskRunCreatorFunction } from '@kbn/task-manager-plugin/server/task';
+import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
 import type { Logger } from '@kbn/logging';
-import type { EntityType } from '../domain/definitions/entity_type';
+import type { EntityStoreTaskConfig } from './config';
 import { TasksConfig } from './config';
 import { EntityStoreTaskType } from './constants';
-import type { ResourcesService } from '../domain/resources_service';
-
-interface ExtractEntityTaskParams {
-  resourcesService: ResourcesService;
-}
-
-interface ExtractEntityTaskBaseState {
-  runs: number;
-  lastExecutionTimestamp: string;
-  entityType: EntityType;
-}
-
-interface ExtractEntityTaskSuccessState extends ExtractEntityTaskBaseState {
-  status: 'success';
-}
-
-interface ExtractEntityTaskErrorState extends ExtractEntityTaskBaseState {
-  status: 'error';
-  lastError: string;
-  lastErrorTimestamp: string;
-}
-
-type ExtractEntityTaskState = ExtractEntityTaskSuccessState | ExtractEntityTaskErrorState;
-
-interface ExtractEntityTaskInstance extends Omit<ConcreteTaskInstance, 'params' | 'state'> {
-  params: ExtractEntityTaskParams;
-  state: ExtractEntityTaskState;
-}
+import type * as types from '../types';
+import type { EntityType } from '../domain/definitions/entity_schema';
 
 function getTaskId(entityType: EntityType): string {
   const config = TasksConfig[EntityStoreTaskType.Values.extractEntity];
   return `${config.type}:${entityType}`;
 }
 
-function createRunnerFactory(entityType: EntityType, logger: Logger): TaskRunCreatorFunction {
-  return ({
-    taskInstance,
-    abortController,
-  }: {
-    taskInstance: ConcreteTaskInstance;
-    abortController: AbortController;
-  }) => {
-    const taskLogger = logger.get(taskInstance.id);
-    return {
-      run: async () =>
-        await run({
-          taskInstance: taskInstance as ExtractEntityTaskInstance,
-          abortController,
-          entityType,
-          logger: taskLogger,
-        }),
-    };
-  };
-}
-
-async function run({
+async function runTask({
   taskInstance,
   abortController,
   entityType,
   logger,
-}: {
-  taskInstance: ExtractEntityTaskInstance;
-  abortController: AbortController;
+  core,
+}: RunContext & {
   entityType: EntityType;
   logger: Logger;
+  core: types.EntityStoreCoreSetup;
 }): Promise<RunResult> {
+  logger.info(`Running extract entity task`);
+
   const currentState = taskInstance.state;
   const runs = currentState.runs || 0;
-  const { resourcesService } = taskInstance.params;
+  // const [coreStart, pluginsStart] = await core.getStartServices();
+  // const esqlService = new ESQLService(logger, coreStart.elasticsearch.client.asInternalUser, abortController);
 
-  logger.info(
-    `Running extract entity task, runs: ${runs}, resourcesService: ${resourcesService}, abortController: ${abortController}`
-  );
   try {
     const updatedState = {
       lastExecutionTimestamp: new Date().toISOString(),
       runs: runs + 1,
       entityType,
-      status: 'success',
     };
 
     return {
@@ -116,60 +67,74 @@ export function registerExtractEntityTasks({
   taskManager,
   logger,
   entityTypes,
+  core,
 }: {
+  core: types.EntityStoreCoreSetup;
   taskManager: TaskManagerSetupContract;
   logger: Logger;
   entityTypes: EntityType[];
 }): void {
   try {
     const config = TasksConfig[EntityStoreTaskType.Values.extractEntity];
-    entityTypes.forEach((type) => {
-      const taskId = getTaskId(type);
+    entityTypes.forEach((type) =>
       taskManager.registerTaskDefinitions({
-        [taskId]: {
+        [getTaskId(type)]: {
           title: config.title,
           timeout: config.timeout,
-          createTaskRunner: createRunnerFactory(type, logger),
-          stateSchemaByVersion: {},
+          createTaskRunner: ({ taskInstance, abortController }) => ({
+            run: () =>
+              runTask({
+                taskInstance,
+                abortController,
+                logger: logger.get(taskInstance.id),
+                core,
+                entityType: type,
+              }),
+          }),
         },
-      });
-    });
+      })
+    );
   } catch (e) {
     logger.error(`Error registering extract entity tasks, received ${e.message}`);
     throw e;
   }
 }
 
-export async function scheduleExtractEntityTasks({
-  taskManager,
-  entityTypes,
-  resourcesService,
+export async function scheduleExtractEntityTask({
   logger,
-  frequency,
+  taskManager,
+  task,
+  type,
 }: {
-  taskManager: TaskManagerStartContract;
-  entityTypes: EntityType[];
-  resourcesService: ResourcesService;
   logger: Logger;
-  frequency?: string;
+  taskManager: TaskManagerStartContract;
+  task: EntityStoreTaskConfig;
+  type: EntityType;
 }): Promise<void> {
   try {
-    const config = TasksConfig[EntityStoreTaskType.Values.extractEntity];
-    const interval = frequency || config.interval;
-    for (const type of entityTypes) {
-      const taskId = getTaskId(type);
-      await taskManager.ensureScheduled({
-        id: taskId,
-        taskType: taskId,
-        schedule: {
-          interval,
-        },
-        params: { resourcesService },
-        state: {},
-      });
-    }
+    const taskId = getTaskId(type);
+    await taskManager.ensureScheduled({
+      id: taskId,
+      taskType: taskId,
+      schedule: { interval: task.interval },
+      state: {},
+      params: {},
+    });
   } catch (e) {
     logger.error(`Error scheduling extract entity tasks, received ${e.message}`);
     throw e;
   }
+}
+
+export async function stopExtractEntityTask({
+  taskManager,
+  logger,
+  type,
+}: {
+  taskManager: TaskManagerStartContract;
+  logger: Logger;
+  type: EntityType;
+}): Promise<void> {
+  await taskManager.removeIfExists(getTaskId(type));
+  logger.debug(`removed task: ${getTaskId(type)}`);
 }
