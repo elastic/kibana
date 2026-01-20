@@ -16,6 +16,13 @@ export const DOCUMENTATION_DESCRIPTION = i18n.translate('genAiSettings.documenta
     'Help improve Agent Builder responses to your prompts by installing product documentation. All entries are global to the cluster.',
 });
 
+export const DOCUMENTATION_TABLE_CAPTION = i18n.translate(
+  'genAiSettings.documentation.tableCaption',
+  {
+    defaultMessage: 'Documentation status and installation management actions',
+  }
+);
+
 export const LEARN_MORE = i18n.translate('genAiSettings.documentation.learnMore', {
   defaultMessage: 'Learn more',
 });

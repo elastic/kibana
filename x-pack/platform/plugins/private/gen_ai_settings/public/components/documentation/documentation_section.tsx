@@ -49,7 +49,7 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
 
   const queryClient = useQueryClient();
 
-  const docsConfig = useMemo(() => DOCUMENTATION_ITEMS_CONFIG, []);
+  const docsConfig = DOCUMENTATION_ITEMS_CONFIG;
 
   const statusQueries = useQueries({
     queries: docsConfig.map((doc) => {
@@ -202,6 +202,7 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
           columns={columns}
           loading={isLoading}
           data-test-subj="documentationTable"
+          tableCaption={i18n.DOCUMENTATION_TABLE_CAPTION}
         />
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
