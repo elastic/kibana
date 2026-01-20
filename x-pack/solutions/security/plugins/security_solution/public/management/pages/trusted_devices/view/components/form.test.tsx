@@ -181,7 +181,6 @@ describe('Trusted devices form', () => {
     mockedContext = createAppRootMockRenderer();
     latestUpdatedItem = createItem();
 
-    // Mock useFetchIndex to return index with fields by default
     (useFetchIndex as jest.Mock).mockReturnValue([
       false, // isLoading
       {
@@ -192,7 +191,6 @@ describe('Trusted devices form', () => {
       },
     ]);
 
-    // Mock the useGetTrustedDeviceSuggestions hook
     (useGetTrustedDeviceSuggestions as jest.Mock).mockReturnValue({
       data: [],
       isLoading: false,
