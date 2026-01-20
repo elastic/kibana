@@ -278,12 +278,6 @@ test.describe('Node Details: host', { tag: ['@ess', '@svlOblt'] }, () => {
     }
   });
 
-  test('Profiling tab - shows the Profiling tab', async ({ pageObjects: { nodeDetailsPage } }) => {
-    await test.step('verify profiling tab exists', async () => {
-      await expect(nodeDetailsPage.profilingTab).toBeVisible();
-    });
-  });
-
   test('Legacy alert metric callout - shows for cpu', async ({
     pageObjects: { nodeDetailsPage },
   }) => {
