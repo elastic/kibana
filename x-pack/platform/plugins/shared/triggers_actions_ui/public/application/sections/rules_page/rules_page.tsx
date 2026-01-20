@@ -91,16 +91,16 @@ const RulesPage = () => {
       const { pathname, search, hash } = locationRef.current;
       const returnPath = `${pathname}${search}${hash}`;
 
-      const returnApp = 'rules';
-      navigateToApp('management', {
-        path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(ruleId)}`,
+      history.push({
+        pathname: getEditRuleRoute(ruleId),
+        search,
+        hash,
         state: {
-          returnApp,
           returnPath,
         },
       });
     },
-    [navigateToApp]
+    [history]
   );
 
   const navigateToCreateRuleForm = useCallback(
