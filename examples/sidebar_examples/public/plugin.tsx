@@ -23,16 +23,12 @@ export class SidebarExamplesPlugin implements Plugin<void, void, SetupDeps> {
   public setup(core: CoreSetup, deps: SetupDeps) {
     core.chrome.sidebar.registerApp({
       appId: textInputAppId,
-      iconType: 'editorAlignLeft',
-      title: 'Text Input Example',
       getParamsSchema: getTextInputParamsSchema,
       loadComponent: () => import('./text_input_app').then((m) => m.TextInputApp),
     });
 
     core.chrome.sidebar.registerApp({
       appId: counterAppId,
-      iconType: 'number',
-      title: 'Counter Example',
       getParamsSchema: getCounterParamsSchema,
       loadComponent: () => import('./counter_app').then((m) => m.CounterApp),
     });
@@ -40,8 +36,6 @@ export class SidebarExamplesPlugin implements Plugin<void, void, SetupDeps> {
     // Register tab selection app as initially unavailable (simulating permission check)
     core.chrome.sidebar.registerApp({
       appId: tabSelectionAppId,
-      iconType: 'documents',
-      title: 'Tab Selection Example',
       available: false, // Initially unavailable
       getParamsSchema: getTabSelectionParamsSchema,
       loadComponent: () => import('./tab_selection_app').then((m) => m.TabSelectionApp),

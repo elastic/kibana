@@ -53,8 +53,6 @@ export type {
   RenderAs,
   SolutionId,
   SidebarApp,
-  SidebarAppContent,
-  SidebarAppButton,
   SidebarSetup,
   SidebarStart,
 } from './src';

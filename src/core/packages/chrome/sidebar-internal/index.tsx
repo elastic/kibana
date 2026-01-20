@@ -12,8 +12,6 @@ export type {
   SidebarAppId,
   SidebarComponentProps,
   SidebarComponentType,
-  SidebarAppContent,
-  SidebarAppButton,
   SidebarApp,
   SidebarSetup,
   SidebarStart,

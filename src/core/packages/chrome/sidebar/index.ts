@@ -57,14 +57,19 @@ export interface SidebarComponentProps<TParams> {
 export type SidebarComponentType<TParams> = ComponentType<SidebarComponentProps<TParams>>;
 
 /**
- * Content configuration for a sidebar app panel
+ * Complete app definition for sidebar registration
  */
-export interface SidebarAppContent<TParams = unknown> {
+export interface SidebarApp<TParams = unknown> {
   /**
-   * Title for the sidebar app, used for button tooltip and accessibility.
-   * Apps can render their own header using the SidebarHeader component.
+   * Unique identifier for the sidebar app
    */
-  title: string;
+  appId: SidebarAppId;
+  /**
+   * Whether the app is available. Defaults to true.
+   * Unavailable apps will have their buttons hidden from the sidebar.
+   * Use `setAvailable()` to update availability after registration (e.g., after permission checks).
+   */
+  available?: boolean;
   /**
    * Asynchronously loads the main component for the sidebar app
    */
@@ -97,38 +102,6 @@ export interface SidebarAppContent<TParams = unknown> {
    * ```
    */
   getParamsSchema: () => z.ZodType<TParams>;
-}
-
-/**
- * Button configuration for a sidebar app
- */
-export interface SidebarAppButton {
-  /**
-   * Type of icon to display on the sidebar button (e.g., 'search', 'settings', etc.)
-   */
-  iconType: string;
-  /**
-   * Optional title for the sidebar button (used for accessibility and tooltips), defaults to app title if not provided
-   */
-  buttonTitle?: string;
-}
-
-/**
- * Complete app definition for sidebar registration
- */
-export interface SidebarApp<TParams = unknown>
-  extends SidebarAppButton,
-    SidebarAppContent<TParams> {
-  /**
-   * Unique identifier for the sidebar app
-   */
-  appId: SidebarAppId;
-  /**
-   * Whether the app is available. Defaults to true.
-   * Unavailable apps will have their buttons hidden from the sidebar.
-   * Use `setAvailable()` to update availability after registration (e.g., after permission checks).
-   */
-  available?: boolean;
 }
 
 /**
