@@ -395,6 +395,7 @@ export const QualityTab: React.FC = () => {
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
+
       <div style={{ border: '1px solid #D3DAE6', padding: '16px 0', borderRadius: '4px' }}>
         {filteredCategories.map((category, index) => {
           const stats = getCategoryStats(category);
@@ -403,10 +404,10 @@ export const QualityTab: React.FC = () => {
           return (
             <React.Fragment key={category.category}>
               <EuiAccordion
-                style={{ padding: '0 16px' }}
+                style={{ padding: '0 16px' }} // distance between the accordions' wrapper sides and button
                 id={`accordion-${category.category}`}
                 buttonContent={
-                  <EuiText size="m">
+                  <EuiText size="m" style={{ padding: '16px 0' }}>
                     <strong>{category.category}</strong>
                   </EuiText>
                 }
@@ -469,32 +470,32 @@ export const QualityTab: React.FC = () => {
                 borders="none"
                 forceState={openAccordions[category.category] ? 'open' : 'closed'}
                 onToggle={() => toggleAccordion(category.category)}
-                buttonProps={{ paddingSize: 'l' }}
               >
-                <div style={{ border: '1px solid #D3DAE6', padding: '16px', borderRadius: '4px' }}>
-                  <EuiInMemoryTable
-                    items={category.indices}
-                    columns={columns}
-                    sorting={{
-                      sort: {
-                        field: 'indexName',
-                        direction: 'asc',
-                      },
-                    }}
-                    pagination={{
-                      pageSizeOptions: [5, 10, 20],
-                      initialPageSize: 10,
-                    }}
-                    tableCaption={i18n.translate(
-                      'xpack.securitySolution.siemReadiness.quality.table.caption',
-                      {
-                        defaultMessage: 'Indices for {category} category',
-                        values: { category: category.category },
-                      }
-                    )}
-                    tableLayout="auto"
-                  />
-                </div>
+                <EuiSpacer size="m" />
+
+                <EuiInMemoryTable
+                  style={{ border: '1px solid #D3DAE6', padding: '24px', borderRadius: '4px' }}
+                  items={category.indices}
+                  columns={columns}
+                  sorting={{
+                    sort: {
+                      field: 'indexName',
+                      direction: 'asc',
+                    },
+                  }}
+                  pagination={{
+                    pageSizeOptions: [5, 10, 20],
+                    initialPageSize: 10,
+                  }}
+                  tableCaption={i18n.translate(
+                    'xpack.securitySolution.siemReadiness.quality.table.caption',
+                    {
+                      defaultMessage: 'Indices for {category} category',
+                      values: { category: category.category },
+                    }
+                  )}
+                  tableLayout="auto"
+                />
               </EuiAccordion>
               {index < mainCategories.length - 1 && <EuiHorizontalRule margin="m" />}
             </React.Fragment>
