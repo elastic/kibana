@@ -69,7 +69,11 @@ function checkInvalidCastValue(node: ESQLInlineCast, context: ICommandContext) {
     return;
   }
 
-  const valueTypeBeforeCast = getExpressionType(node.value, context.columns);
+  const valueTypeBeforeCast = getExpressionType(
+    node.value,
+    context.columns,
+    context.unmappedFieldsStrategy
+  );
 
   const matchingSignatures = getMatchingSignatures(
     castFunctionDef.signatures,
