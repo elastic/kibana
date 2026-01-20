@@ -223,14 +223,6 @@ export const PreviewFieldList: React.FC<Props> = ({ clearSearch, searchValue = '
     [controller, pinnedFields, fieldList, showAllFields, toggleShowAllFields, listRef]
   );
 
-  const rowProps = useMemo<RowProps>(
-    () => ({
-      filteredFields,
-      toggleIsPinned: toggleIsPinnedItem,
-    }),
-    [filteredFields, toggleIsPinnedItem]
-  );
-
   if (currentDocument === undefined) {
     return null;
   }
@@ -246,7 +238,10 @@ export const PreviewFieldList: React.FC<Props> = ({ clearSearch, searchValue = '
             rowComponent={Row}
             rowCount={filteredFields.length}
             rowHeight={ITEM_HEIGHT}
-            rowProps={rowProps}
+            rowProps={{
+              filteredFields,
+              toggleIsPinned: toggleIsPinnedItem,
+            }}
             className="eui-yScrollWithShadows"
           />
         )}
@@ -262,6 +257,6 @@ const componentStyles = {
       fontWeight: euiTheme.font.weight.medium,
     }),
   previewFieldList: css({
-    minHeight: 0,
+    minHeight: 150,
   }),
 };
