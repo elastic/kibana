@@ -255,7 +255,7 @@ if (false || allPresent) {
       },
     },
     Object {
-      "set": Object {
+      "script": Object {
         "description": undefined,
         "if": undefined,
         "ignore_failure": undefined,
