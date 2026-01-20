@@ -8,7 +8,7 @@
  */
 
 import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiText } from '@elastic/eui';
+import { EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useCallback } from 'react';
 import type { ESQLSourceResult } from '@kbn/esql-types';
@@ -77,9 +77,9 @@ export const IndicesBrowserPopover: React.FC<IndicesBrowserPopoverProps> = ({
         label: source.name,
         checked: selectedIndices.includes(source.name) ? ('on' as const) : undefined,
         append: (
-          <EuiText size="xs" color="subdued">
+          <EuiTextColor color="subdued">
             {getSourceTypeLabel(source.type)}
-          </EuiText>
+          </EuiTextColor>
         ),
         data: {
           type: source.type,

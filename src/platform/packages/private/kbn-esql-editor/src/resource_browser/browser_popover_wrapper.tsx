@@ -12,7 +12,6 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectable,
-  EuiFilterButton,
   EuiNotificationBadge,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -355,14 +354,12 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
   }, []);
 
   const filterButton = (
-    <EuiFilterButton
+    <EuiButtonIcon
       iconType="filter"
-      isSelected={isFilterPopoverOpen}
-      hasActiveFilters={selectedTypes.length > 0}
       onClick={() => setIsFilterPopoverOpen(!isFilterPopoverOpen)}
       aria-label={i18nKeys.filterTitle}
       buttonRef={setFilterButtonRef}
-      grow={false}
+      size="s"
     />
   );
 
@@ -495,7 +492,7 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPopoverTitle>
-            {search}
+            <div style={{ padding: euiTheme.size.s }}>{search}</div>
             <div style={{ maxHeight: BROWSER_POPOVER_HEIGHT - 100, overflowY: 'auto' }}>{list}</div>
           </div>
         )}
