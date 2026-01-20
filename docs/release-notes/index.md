@@ -131,6 +131,7 @@ For the Elastic Observability 9.3.0 release information, refer to [Elastic Obser
 For the Elastic Security 9.3.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 **Kibana platform**:
+* Adds buttons to the time picker component to quickly shift the selected time range backward and forward, and adds timezone information to the time picker popover [#243020]({{kib-pull}}243020).
 * Adds cross-tab syncing for recently used time ranges [#242467]({{kib-pull}}242467).
 * The `defaultRoute` advanced setting now controls the target of the Elastic logo link for spaces using a solution view [#241571]({{kib-pull}}241571).
 * The name of the deployment now appears in the navigation breadcrumb on {{ech}} [#238078]({{kib-pull}}238078).
