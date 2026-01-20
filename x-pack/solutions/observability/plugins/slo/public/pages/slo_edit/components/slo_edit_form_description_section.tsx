@@ -167,7 +167,10 @@ export function SloEditFormDescriptionSection() {
               uiActions={uiActions}
               dashboardsFormData={field.value ?? []}
               placeholder={DASHBOARDS_COMBOBOX_PLACEHOLDER}
-              onChange={useCallback((selected) => field.onChange(selected.map((d) => ({ id: d.value }))), [field.onChange])}
+              onChange={useCallback(
+                (selected) => field.onChange(selected.map((d) => ({ id: d.value }))),
+                [field.onChange]
+              )}
             />
           )}
         />
