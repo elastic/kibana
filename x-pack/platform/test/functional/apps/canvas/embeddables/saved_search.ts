@@ -45,6 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('edits saved search by-reference embeddable', async () => {
         await dashboardPanelActions.editPanelByTitle('Rendering Test: saved search');
         await discover.saveSearch('Rendering Test: saved search v2');
+        await canvas.goToListingPage();
         await canvas.loadFirstWorkpad('saved search tests');
         await testSubjects.existOrFail('embeddablePanelHeading-RenderingTest:savedsearchv2');
       });
