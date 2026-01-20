@@ -12,16 +12,13 @@ import { useKibana } from '../../../common/lib/kibana';
 import { FLYOUT_PREVIEW_LINK_TEST_ID } from './test_ids';
 import { DocumentEventTypes } from '../../../common/lib/telemetry';
 import { getPreviewPanelParams } from '../utils/link_utils';
+import type { EntityIdentifiers } from '../../document_details/shared/utils';
 
 interface PreviewLinkProps {
   /**
-   * Field name
+   * Entity identifiers - key-value pairs of field names and their values
    */
-  field: string;
-  /**
-   * Value to display in EuiLink
-   */
-  value: string;
+  entityIdentifiers: EntityIdentifiers;
   /**
    * Scope id to use for the preview panel
    */
@@ -50,8 +47,7 @@ interface PreviewLinkProps {
  * If the field is not previewable, the link will not be rendered
  */
 export const PreviewLink: FC<PreviewLinkProps> = ({
-  field,
-  value,
+  entityIdentifiers,
   scopeId,
   ruleId,
   children,
@@ -61,16 +57,26 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
   const { openPreviewPanel } = useExpandableFlyoutApi();
   const { telemetry } = useKibana().services;
 
+  // Extract primary field and value from entityIdentifiers
+  const primaryField = useMemo(() => {
+    if (entityIdentifiers['host.name']) return 'host.name';
+    if (entityIdentifiers['user.name']) return 'user.name';
+    return Object.keys(entityIdentifiers)[0];
+  }, [entityIdentifiers]);
+
+  const primaryValue = useMemo(() => {
+    return primaryField ? entityIdentifiers[primaryField] : '';
+  }, [entityIdentifiers, primaryField]);
+
   const previewParams = useMemo(
     () =>
       getPreviewPanelParams({
-        value,
-        field,
+        entityIdentifiers,
         scopeId,
         ruleId,
         ancestorsIndexName,
       }),
-    [value, field, scopeId, ruleId, ancestorsIndexName]
+    [entityIdentifiers, scopeId, ruleId, ancestorsIndexName]
   );
 
   const onClick = useCallback(() => {
@@ -88,9 +94,9 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
 
   return previewParams ? (
     <EuiLink onClick={onClick} data-test-subj={dataTestSubj}>
-      {children ?? value}
+      {children ?? primaryValue}
     </EuiLink>
   ) : (
-    <>{children ?? value}</>
+    <>{children ?? primaryValue}</>
   );
 };

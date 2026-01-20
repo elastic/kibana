@@ -5,24 +5,19 @@
  * 2.0.
  */
 
-import { getOr, noop } from 'lodash/fp';
+import { getOr } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import type { UsersComponentsQueryProps } from './types';
 
 import { manageQuery } from '../../../../common/components/page/manage_query';
 import { UsersTable } from '../../components/all_users';
-import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
-import { UsersQueries } from '../../../../../common/search_strategy/security_solution/users';
-import * as i18n from './translations';
-import { generateTablePaginationOptions } from '../../../components/paginated_table/helpers';
+import { useAllUser, ID } from '../../containers/users';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { usersSelectors } from '../../store';
-import { useQueryToggle } from '../../../../common/containers/query_toggle';
 
 const UsersTableManage = manageQuery(UsersTable);
-
-const QUERY_ID = 'UsersTable';
 
 export const AllUsersQueryTabBody = ({
   endDate,
@@ -34,61 +29,32 @@ export const AllUsersQueryTabBody = ({
   type,
   deleteQuery,
 }: UsersComponentsQueryProps) => {
-  const { toggleStatus } = useQueryToggle(QUERY_ID);
+  const { toggleStatus } = useQueryToggle(ID);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
   useEffect(() => {
     setQuerySkip(skip || !toggleStatus);
   }, [skip, toggleStatus]);
 
-  const getUsersSelector = useMemo(() => usersSelectors.allUsersSelector(), []);
-  const { activePage, limit, sort } = useDeepEqualSelector((state) => getUsersSelector(state));
-
-  const {
-    loading,
-    result: { users, pageInfo, totalCount },
-    search,
-    refetch,
-    inspect,
-  } = useSearchStrategy<UsersQueries.users>({
-    factoryQueryType: UsersQueries.users,
-    initialResult: {
-      users: [],
-      totalCount: 0,
-      pageInfo: {
-        activePage: 0,
-        fakeTotalCount: 0,
-        showMorePagesIndicator: false,
-      },
-    },
-    errorMessage: i18n.ERROR_FETCHING_USERS_DATA,
-    abort: querySkip,
+  const [loading, { users, totalCount, pageInfo, loadPage, id, inspect, refetch }] = useAllUser({
+    endDate,
+    filterQuery,
+    skip: querySkip,
+    startDate,
+    type,
   });
 
-  useEffect(() => {
-    if (!querySkip) {
-      search({
-        filterQuery,
-        defaultIndex: indexNames,
-        timerange: {
-          interval: '12h',
-          from: startDate,
-          to: endDate,
-        },
-        pagination: generateTablePaginationOptions(activePage, limit),
-        sort,
-      });
-    }
-  }, [search, startDate, endDate, filterQuery, indexNames, querySkip, activePage, limit, sort]);
+  const getUsersSelector = useMemo(() => usersSelectors.allUsersSelector(), []);
+  const { sort } = useDeepEqualSelector((state) => getUsersSelector(state));
 
   return (
     <UsersTableManage
       users={users}
       deleteQuery={deleteQuery}
       fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-      id={QUERY_ID}
+      id={id}
       inspect={inspect}
       loading={loading}
-      loadPage={noop} // It isn't necessary because PaginatedTable updates redux store and we load the page when activePage updates on the store
+      loadPage={loadPage}
       refetch={refetch}
       showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
       setQuery={setQuery}

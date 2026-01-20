@@ -58,7 +58,7 @@ const UserNameComponent: React.FC<Props> = ({
         right: {
           id: UserPanelKey,
           params: {
-            userName,
+            entityIdentifiers: { 'user.name': userName },
             contextID: contextId,
             scopeId: timelineID,
           },

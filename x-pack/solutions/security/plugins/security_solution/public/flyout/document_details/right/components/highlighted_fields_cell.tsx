@@ -124,8 +124,7 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
       <div key={`${i}-${value}`} data-test-subj={`${value}-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`}>
         {showPreview && isFlyoutLink({ field, scopeId }) ? (
           <PreviewLink
-            field={field}
-            value={value}
+            entityIdentifiers={{ [field]: value }}
             scopeId={scopeId}
             data-test-subj={HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID}
             ancestorsIndexName={ancestorsIndexName}

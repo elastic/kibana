@@ -95,8 +95,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
         />
       ) : (
         <FlyoutLink
-          field={fieldName}
-          value={address}
+          entityIdentifiers={{ [fieldName]: address }}
           scopeId={eventContext?.timelineID ?? ''}
           data-test-subj="network-details"
         />

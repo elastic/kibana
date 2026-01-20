@@ -25,7 +25,6 @@ import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use
 import { buildUserNamesFilter } from '../../../../../common/search_strategy';
 import { useDocumentDetailsContext } from '../../shared/context';
 import type { DescriptionList } from '../../../../../common/utility_types';
-import { USER_NAME_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
 import { getField } from '../../shared/utils';
 import { CellActions } from '../../shared/components/cell_actions';
 import {
@@ -137,7 +136,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ entityId
   });
 
   const openDetailsPanel = useNavigateToUserDetails({
-    userName: entityIdentifiers['user.name'],
+    entityIdentifiers,
     scopeId,
     isRiskScoreExist,
     hasMisconfigurationFindings,
@@ -224,8 +223,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ entityId
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <PreviewLink
-              field={USER_NAME_FIELD_NAME}
-              value={entityIdentifiers['user.name']}
+              entityIdentifiers={entityIdentifiers}
               scopeId={scopeId}
               data-test-subj={ENTITIES_USER_OVERVIEW_LINK_TEST_ID}
             >

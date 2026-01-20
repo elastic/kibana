@@ -41,7 +41,7 @@ export const UsersContainer = React.memo(() => {
         }) => (
           <UsersDetails
             usersDetailsPagePath={usersDetailsPagePath}
-            detailName={decodeURIComponent(detailName)}
+            entityIdentifiers={{ 'user.name': decodeURIComponent(detailName) }}
           />
         )}
       />
