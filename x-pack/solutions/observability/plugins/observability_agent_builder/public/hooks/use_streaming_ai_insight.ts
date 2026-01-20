@@ -6,14 +6,8 @@
  */
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { filter, map, scan, takeUntil, finalize, Observable, type Subscription } from 'rxjs';
+import { scan, takeUntil, finalize, Observable, type Subscription } from 'rxjs';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
-
-interface ParsedEvent {
-  type: 'context' | 'chunk' | 'message';
-  context?: string;
-  content?: string;
-}
 
 interface ContextEvent {
   type: 'context';
@@ -83,39 +77,26 @@ export function useStreamingAiInsight(
         subscriber.complete();
         return;
       }
-      abortController.signal.addEventListener('abort', () => {
+      const handler = () => {
         subscriber.next();
         subscriber.complete();
-      });
+      };
+      abortController.signal.addEventListener('abort', handler);
+      return () => abortController.signal.removeEventListener('abort', handler);
     });
 
     try {
       const observable$ = createStream(abortController.signal).pipe(
-        filter(
-          (event: InsightStreamEvent): event is InsightStreamEvent =>
-            event.type === 'context' ||
-            event.type === 'chatCompletionChunk' ||
-            event.type === 'chatCompletionMessage'
-        ),
-        map((event: InsightStreamEvent): ParsedEvent => {
-          if (event.type === 'context') {
-            return { type: 'context', context: event.context };
-          }
-          if (event.type === 'chatCompletionChunk') {
-            return { type: 'chunk', content: event.content };
-          }
-          return { type: 'message', content: event.content };
-        }),
-        scan<ParsedEvent, InsightResponse>(
+        scan<InsightStreamEvent, InsightResponse>(
           (acc, event) => {
             if (event.type === 'context') {
-              return { ...acc, context: event.context || '' };
+              return { ...acc, context: event.context };
             }
-            if (event.type === 'chunk') {
-              return { ...acc, summary: acc.summary + (event.content || '') };
+            if (event.type === 'chatCompletionChunk') {
+              return { ...acc, summary: acc.summary + event.content };
             }
-            if (event.type === 'message') {
-              return { ...acc, summary: event.content || '' };
+            if (event.type === 'chatCompletionMessage') {
+              return { ...acc, summary: event.content };
             }
             return acc;
           },

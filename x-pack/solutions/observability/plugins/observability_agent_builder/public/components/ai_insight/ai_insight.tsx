@@ -207,18 +207,6 @@ export function AiInsight({ title, createStream, buildAttachments }: AiInsightPr
               <EuiSpacer size="s" />
               <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    data-test-subj="observabilityAgentBuilderRegenerateButton"
-                    size="s"
-                    iconType="sparkles"
-                    onClick={regenerate}
-                  >
-                    {i18n.translate('xpack.observabilityAgentBuilder.aiInsight.regenerateButton', {
-                      defaultMessage: 'Regenerate',
-                    })}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
                   <StartConversationButton onClick={handleStartConversation} />
                 </EuiFlexItem>
               </EuiFlexGroup>

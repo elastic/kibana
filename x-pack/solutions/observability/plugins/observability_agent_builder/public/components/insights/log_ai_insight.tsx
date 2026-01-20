@@ -44,15 +44,12 @@ export function LogAiInsight({ doc }: LogAiInsightProps) {
 
   const createStream = useCallback(
     (signal: AbortSignal) => {
-      if (typeof index !== 'string' || typeof id !== 'string') {
-        throw new Error('Index and id must be strings');
-      }
       return apiClient.stream('POST /internal/observability_agent_builder/ai_insights/log', {
         signal,
         params: {
           body: {
-            index,
-            id,
+            index: index as string,
+            id: id as string,
           },
         },
       });

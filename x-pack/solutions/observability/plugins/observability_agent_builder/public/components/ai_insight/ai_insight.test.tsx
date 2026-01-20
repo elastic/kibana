@@ -104,41 +104,101 @@ describe('AiInsight', () => {
     unmount();
   });
 
-  it('shows error banner and retries on click', () => {
-    const fetch = jest.fn();
-    mockUseStreamingAiInsight.mockReturnValue(createStreamingState({ error: 'Boom', fetch }));
+  describe('when an error occurs', () => {
+    it('displays an error banner', () => {
+      mockUseStreamingAiInsight.mockReturnValue(createStreamingState({ error: 'Boom' }));
 
-    const { container, unmount } = renderComponent();
-    const toggle = container.querySelector('[data-test-subj="agentBuilderAiInsight"]');
-    fireEvent.click(toggle!);
+      const { container, unmount } = renderComponent();
+      const toggle = container.querySelector('[data-test-subj="agentBuilderAiInsight"]');
+      fireEvent.click(toggle!);
 
-    const retryButton = container.querySelector(
-      '[data-test-subj="AiInsightErrorBannerRetryButton"]'
-    );
+      const retryButton = container.querySelector(
+        '[data-test-subj="AiInsightErrorBannerRetryButton"]'
+      );
+      expect(retryButton).toBeTruthy();
 
-    expect(retryButton).toBeTruthy();
-    fireEvent.click(retryButton!);
+      unmount();
+    });
 
-    expect(fetch).toHaveBeenCalledTimes(1);
-    unmount();
+    it('refetches insights when retry button is clicked', () => {
+      const fetch = jest.fn();
+      mockUseStreamingAiInsight.mockReturnValue(createStreamingState({ error: 'Boom', fetch }));
+
+      const { container, unmount } = renderComponent();
+      const toggle = container.querySelector('[data-test-subj="agentBuilderAiInsight"]');
+      fireEvent.click(toggle!);
+
+      const retryButton = container.querySelector(
+        '[data-test-subj="AiInsightErrorBannerRetryButton"]'
+      );
+      fireEvent.click(retryButton!);
+
+      expect(fetch).toHaveBeenCalledTimes(1);
+
+      unmount();
+    });
   });
 
-  it('renders regenerate and start conversation actions when summary exists', () => {
+  describe('when a summary has been generated', () => {
+    it('displays start conversation button', () => {
+      mockUseStreamingAiInsight.mockReturnValue(
+        createStreamingState({ summary: 'Hello world', context: 'context' })
+      );
+
+      const { container, unmount } = renderComponent();
+      const toggle = container.querySelector('[data-test-subj="agentBuilderAiInsight"]');
+      fireEvent.click(toggle!);
+
+      const startConversationButton = container.querySelector(
+        '[data-test-subj="aiAgentStartConversationButton"]'
+      );
+
+      expect(startConversationButton).toBeTruthy();
+
+      unmount();
+    });
+
+    it('opens the conversation flyout with correct attachments when start conversation is clicked', () => {
+      const buildAttachments = jest.fn().mockReturnValue([{ type: 'test', data: {} }]);
+      mockUseStreamingAiInsight.mockReturnValue(
+        createStreamingState({ summary: 'Hello world', context: 'context' })
+      );
+
+      const { container, unmount } = render(
+        <EuiThemeProvider>
+          <AiInsightTest
+            title="AI Insight"
+            createStream={mockCreateStream}
+            buildAttachments={buildAttachments}
+          />
+        </EuiThemeProvider>
+      );
+
+      const toggle = container.querySelector('[data-test-subj="agentBuilderAiInsight"]');
+      fireEvent.click(toggle!);
+
+      const startConversationButton = container.querySelector(
+        '[data-test-subj="aiAgentStartConversationButton"]'
+      );
+      fireEvent.click(startConversationButton!);
+
+      expect(buildAttachments).toHaveBeenCalledWith('Hello world', 'context');
+      expect(mockOpenConversationFlyout).toHaveBeenCalledWith({
+        newConversation: true,
+        attachments: [{ type: 'test', data: {} }],
+      });
+
+      unmount();
+    });
+  });
+
+  it('shows regenerate button after stream is stopped', () => {
     const regenerate = jest.fn();
-    const buildAttachments = jest.fn().mockReturnValue([{ type: 'test', data: {} }]);
     mockUseStreamingAiInsight.mockReturnValue(
-      createStreamingState({ summary: 'Hello world', context: 'context', regenerate })
+      createStreamingState({ summary: 'Partial response', wasStopped: true, regenerate })
     );
 
-    const { container, unmount } = render(
-      <EuiThemeProvider>
-        <AiInsightTest
-          title="AI Insight"
-          createStream={mockCreateStream}
-          buildAttachments={buildAttachments}
-        />
-      </EuiThemeProvider>
-    );
+    const { container, unmount } = renderComponent();
 
     const toggle = container.querySelector('[data-test-subj="agentBuilderAiInsight"]');
     fireEvent.click(toggle!);
@@ -146,19 +206,11 @@ describe('AiInsight', () => {
     const regenerateButton = container.querySelector(
       '[data-test-subj="observabilityAgentBuilderRegenerateButton"]'
     );
+    expect(regenerateButton).toBeTruthy();
+
     fireEvent.click(regenerateButton!);
     expect(regenerate).toHaveBeenCalledTimes(1);
 
-    const startConversationButton = container.querySelector(
-      '[data-test-subj="aiAgentStartConversationButton"]'
-    );
-    fireEvent.click(startConversationButton!);
-
-    expect(buildAttachments).toHaveBeenCalledWith('Hello world', 'context');
-    expect(mockOpenConversationFlyout).toHaveBeenCalledWith({
-      newConversation: true,
-      attachments: [{ type: 'test', data: {} }],
-    });
     unmount();
   });
 });
