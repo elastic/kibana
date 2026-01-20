@@ -10,5 +10,6 @@ export interface InsightsResult {
   tokenUsage: {
     prompt: number;
     completion: number;
+    cached: number;
   };
 }

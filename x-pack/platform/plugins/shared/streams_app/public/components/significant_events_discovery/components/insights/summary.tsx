@@ -8,6 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -26,22 +27,25 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { ConnectorListButton } from '../../../connector_list_button/connector_list_button';
 import { FeedbackButtons } from './feedback_buttons';
 
-const streamNames = ['logs'];
-
 export function Summary({ count }: { count: number }) {
   const aiFeatures = useAIFeatures();
   const {
     core: { notifications },
   } = useKibana();
 
-  const { scheduleInsightsIdentificationTask, getInsightsIdentificationTaskStatus } =
-    useInsightsApi();
+  const {
+    scheduleInsightsIdentificationTask,
+    getInsightsIdentificationTaskStatus,
+    cancelInsightsIdentificationTask,
+  } = useInsightsApi();
 
   const [{ value: task }, getTaskStatus] = useAsyncFn(getInsightsIdentificationTaskStatus);
-  const [, scheduleTask] = useAsyncFn(scheduleInsightsIdentificationTask);
+  const [{ loading: isSchedulingTask }, scheduleTask] = useAsyncFn(
+    scheduleInsightsIdentificationTask
+  );
 
   useEffect(() => {
-    getTaskStatus(streamNames);
+    getTaskStatus();
   }, [getTaskStatus]);
 
   useEffect(() => {
@@ -59,11 +63,7 @@ export function Summary({ count }: { count: number }) {
     }
   }, [task, notifications.toasts]);
 
-  useTaskPolling(
-    task,
-    () => getInsightsIdentificationTaskStatus(streamNames),
-    () => getTaskStatus(streamNames)
-  );
+  useTaskPolling(task, getInsightsIdentificationTaskStatus, getTaskStatus);
 
   const [summary, setSummary] = useState<string | null>(null);
 
@@ -72,8 +72,12 @@ export function Summary({ count }: { count: number }) {
       return;
     }
 
-    await scheduleTask(streamNames, aiFeatures?.genAiConnectors.selectedConnector);
-    getTaskStatus(streamNames);
+    await scheduleTask(aiFeatures?.genAiConnectors.selectedConnector);
+    getTaskStatus();
+  };
+
+  const onCancelClick = async () => {
+    await cancelInsightsIdentificationTask();
   };
 
   if (summary) {
@@ -147,33 +151,46 @@ export function Summary({ count }: { count: number }) {
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <ConnectorListButton
-                buttonProps={{
-                  fill: true,
-                  size: 'm',
-                  iconType: 'sparkles',
-                  children:
-                    task?.status === 'in_progress'
-                      ? i18n.translate(
-                          'xpack.streams.significantEventsSummary.generatingInsightsButtonLabel',
-                          {
-                            defaultMessage: 'Generating insights',
-                          }
-                        )
-                      : i18n.translate(
-                          'xpack.streams.significantEventsSummary.generateSummaryButtonLabel',
-                          {
-                            defaultMessage: 'Generate insights',
-                          }
-                        ),
-                  onClick: () => {
-                    onGenerateSummaryClick();
-                  },
-                  isDisabled: summary !== null || task?.status === 'in_progress',
-                  isLoading: task?.status === 'in_progress',
-                  'data-test-subj': 'significant_events_generate_summary_button',
-                }}
-              />
+              <EuiFlexGroup>
+                <ConnectorListButton
+                  buttonProps={{
+                    fill: true,
+                    size: 'm',
+                    iconType: 'sparkles',
+                    children:
+                      task?.status === TaskStatus.InProgress
+                        ? i18n.translate(
+                            'xpack.streams.significantEventsSummary.generatingInsightsButtonLabel',
+                            {
+                              defaultMessage: 'Generating insights',
+                            }
+                          )
+                        : i18n.translate(
+                            'xpack.streams.significantEventsSummary.generateSummaryButtonLabel',
+                            {
+                              defaultMessage: 'Generate insights',
+                            }
+                          ),
+                    onClick: () => {
+                      onGenerateSummaryClick();
+                    },
+                    isDisabled:
+                      summary !== null ||
+                      task?.status === TaskStatus.InProgress ||
+                      isSchedulingTask,
+                    isLoading: task?.status === TaskStatus.InProgress,
+                    'data-test-subj': 'significant_events_generate_summary_button',
+                  }}
+                />
+
+                {task?.status === TaskStatus.InProgress && (
+                  <EuiButton onClick={onCancelClick}>
+                    {i18n.translate('xpack.streams.summary.cancelButtonLabel', {
+                      defaultMessage: 'Cancel',
+                    })}
+                  </EuiButton>
+                )}
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>

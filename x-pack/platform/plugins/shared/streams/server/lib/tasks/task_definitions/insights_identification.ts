@@ -8,7 +8,6 @@
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import type { InsightsResult } from '@kbn/streams-schema';
-import { createHash } from 'node:crypto';
 import type { TaskContext } from '.';
 import { cancellableTask } from '../cancellable_task';
 import type { TaskParams } from '../types';
@@ -16,21 +15,10 @@ import { generateSignificantEventsSummary } from '../../significant_events/insig
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 
 export interface InsightsIdentificationTaskParams {
-  streamNames: string[];
   connectorId: string;
-  start: number;
-  end: number;
 }
 
 export const STREAMS_INSIGHTS_IDENTIFICATION_TASK_TYPE = 'streams_insights_identification';
-
-export function getStreamsInsightsIdentificationTaskId(streamNames: string[]) {
-  const hash = createHash('sha256');
-
-  hash.update(streamNames.sort().join(','));
-
-  return `${STREAMS_INSIGHTS_IDENTIFICATION_TASK_TYPE}_${hash.digest('hex')}`;
-}
 
 export function createStreamsInsightsIdentificationTask(taskContext: TaskContext) {
   return {
@@ -43,7 +31,7 @@ export function createStreamsInsightsIdentificationTask(taskContext: TaskContext
                 throw new Error('Request is required to run this task');
               }
 
-              const { streamNames, connectorId, start, end, _task } = runContext.taskInstance
+              const { connectorId, _task } = runContext.taskInstance
                 .params as TaskParams<InsightsIdentificationTaskParams>;
 
               const {
@@ -70,7 +58,7 @@ export function createStreamsInsightsIdentificationTask(taskContext: TaskContext
 
                 await taskClient.complete<InsightsIdentificationTaskParams, InsightsResult>(
                   _task,
-                  { streamNames, connectorId, start, end },
+                  { connectorId },
                   result
                 );
               } catch (error) {
@@ -94,7 +82,7 @@ export function createStreamsInsightsIdentificationTask(taskContext: TaskContext
 
                 await taskClient.fail<InsightsIdentificationTaskParams>(
                   _task,
-                  { streamNames, connectorId, start, end },
+                  { connectorId },
                   errorMessage
                 );
               }

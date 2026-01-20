@@ -7,7 +7,6 @@
 
 import { useAbortController } from '@kbn/react-hooks';
 import { useKibana } from './use_kibana';
-import { getLast24HoursTimeRange } from '../util/time_range';
 
 export function useInsightsApi() {
   const {
@@ -21,47 +20,38 @@ export function useInsightsApi() {
   const { signal } = useAbortController();
 
   return {
-    scheduleInsightsIdentificationTask: async (streamNames: string[], connectorId: string) => {
-      const { from, to } = getLast24HoursTimeRange();
+    scheduleInsightsIdentificationTask: async (connectorId: string) => {
       await streamsRepositoryClient.fetch('POST /internal/streams/_insights/_task', {
         signal,
         params: {
           body: {
             action: 'schedule',
-            from,
-            to,
             connectorId,
-            streamNames,
           },
         },
       });
     },
-    getInsightsIdentificationTaskStatus: async (streamNames: string[]) => {
+    getInsightsIdentificationTaskStatus: async () => {
       return streamsRepositoryClient.fetch('POST /internal/streams/_insights/_status', {
         signal,
-        params: {
-          body: { streamNames },
-        },
       });
     },
-    cancelInsightsIdentificationTask: async (streamNames: string[]) => {
+    cancelInsightsIdentificationTask: async () => {
       return streamsRepositoryClient.fetch('POST /internal/streams/_insights/_task', {
         signal,
         params: {
           body: {
             action: 'cancel' as const,
-            streamNames,
           },
         },
       });
     },
-    acknowledgeInsightsIdentificationTask: async (streamNames: string[]) => {
+    acknowledgeInsightsIdentificationTask: async () => {
       return streamsRepositoryClient.fetch('POST /internal/streams/_insights/_task', {
         signal,
         params: {
           body: {
             action: 'acknowledge' as const,
-            streamNames,
           },
         },
       });

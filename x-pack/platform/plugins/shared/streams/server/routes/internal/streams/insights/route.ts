@@ -8,18 +8,13 @@
 import { z } from '@kbn/zod';
 import type { InsightsResult } from '@kbn/streams-schema';
 import type { InsightsIdentificationTaskParams } from '../../../../lib/tasks/task_definitions/insights_identification';
-import {
-  getStreamsInsightsIdentificationTaskId,
-  STREAMS_INSIGHTS_IDENTIFICATION_TASK_TYPE,
-} from '../../../../lib/tasks/task_definitions/insights_identification';
+import { STREAMS_INSIGHTS_IDENTIFICATION_TASK_TYPE } from '../../../../lib/tasks/task_definitions/insights_identification';
 import type { TaskResult } from '../../../../lib/tasks/types';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { handleTaskAction } from '../../../utils/task_helpers';
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
-
-const dateFromString = z.string().transform((input) => new Date(input));
 
 export type InsightsTaskResult = TaskResult<InsightsResult>;
 
@@ -39,9 +34,6 @@ const insightsTaskRoute = createServerRoute({
     body: z.discriminatedUnion('action', [
       z.object({
         action: z.literal('schedule').describe('Schedule a new generation task'),
-        from: dateFromString.describe('Start of the time range'),
-        to: dateFromString.describe('End of the time range'),
-        streamNames: z.array(z.string()).describe('Names of the streams to identify insights in'),
         connectorId: z
           .string()
           .optional()
@@ -51,11 +43,9 @@ const insightsTaskRoute = createServerRoute({
       }),
       z.object({
         action: z.literal('cancel').describe('Cancel an in-progress generation task'),
-        streamNames: z.array(z.string()).describe('Names of the streams to identify insights in'),
       }),
       z.object({
         action: z.literal('acknowledge').describe('Acknowledge a completed generation task'),
-        streamNames: z.array(z.string()).describe('Names of the streams to identify insights in'),
       }),
     ]),
   }),
@@ -74,15 +64,13 @@ const insightsTaskRoute = createServerRoute({
 
     const { body } = params;
 
-    const taskId = getStreamsInsightsIdentificationTaskId(body.streamNames);
-
     const actionParams =
       body.action === 'schedule'
         ? ({
             action: body.action,
             scheduleConfig: {
               taskType: STREAMS_INSIGHTS_IDENTIFICATION_TASK_TYPE,
-              taskId,
+              taskId: STREAMS_INSIGHTS_IDENTIFICATION_TASK_TYPE,
               params: await (async (): Promise<InsightsIdentificationTaskParams> => {
                 const connectorId = await resolveConnectorId({
                   connectorId: body.connectorId,
@@ -92,9 +80,6 @@ const insightsTaskRoute = createServerRoute({
 
                 return {
                   connectorId,
-                  start: body.from.getTime(),
-                  end: body.to.getTime(),
-                  streamNames: body.streamNames,
                 };
               })(),
               request,
@@ -104,7 +89,7 @@ const insightsTaskRoute = createServerRoute({
 
     return handleTaskAction<InsightsIdentificationTaskParams, InsightsResult>({
       taskClient,
-      taskId,
+      taskId: STREAMS_INSIGHTS_IDENTIFICATION_TASK_TYPE,
       ...actionParams,
     });
   },
@@ -122,21 +107,14 @@ const insightsStatusRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
-    body: z.object({
-      streamNames: z.array(z.string()).describe('Names of the streams to check the status of'),
-    }),
-  }),
-  handler: async ({ params, request, getScopedClients, server }): Promise<InsightsTaskResult> => {
+  handler: async ({ request, getScopedClients, server }): Promise<InsightsTaskResult> => {
     const { licensing, uiSettingsClient, taskClient } = await getScopedClients({
       request,
     });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const { body } = params;
-
     return taskClient.getStatus<InsightsIdentificationTaskParams, InsightsResult>(
-      getStreamsInsightsIdentificationTaskId(body.streamNames)
+      STREAMS_INSIGHTS_IDENTIFICATION_TASK_TYPE
     );
   },
 });
