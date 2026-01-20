@@ -10,7 +10,6 @@
 // TODO: Remove eslint exceptions comments
 /* eslint-disable @typescript-eslint/no-explicit-any,  */
 
-import type { Refresh } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { buildElasticsearchRequest } from '@kbn/workflows';
 import type { BaseStep, RunStepResult } from './node_implementation';
@@ -113,6 +112,7 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
         path,
         body: requestBody,
         query: queryParams,
+        bulkBody,
       } = buildElasticsearchRequest(stepType, params);
 
       // Build query string manually if needed
@@ -125,34 +125,10 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
       const requestOptions = {
         method,
         path: finalPath,
-        body: requestBody,
+        body: !bulkBody ? requestBody : undefined,
+        bulkBody: bulkBody ? bulkBody : undefined,
       };
 
-      // TODO: This is a hack to handle bulk requests. We should refactor this to use the bulk API properly.
-      if (requestOptions.path.endsWith('/_bulk')) {
-        // Further processing for bulk requests can be added here
-        // SG: ugly hack cuz _bulk is special
-        const docs = requestOptions.body?.operations as Array<Record<string, unknown>> | undefined; // your 3 doc objects
-        // If the index is in the path `/tin-workflows/_bulk`, pass it explicitly:
-        const pathIndex = requestOptions.path.split('/')[1]; // "tin-workflows"
-
-        // Optional: forward query flags like refresh if you have them
-        const refresh = queryParams?.refresh ?? false;
-
-        // Turn each doc into an action+doc pair
-        const bulkBody = docs?.flatMap((doc) => {
-          // If you have ids, use: { index: { _id: doc._id } }
-          return [{ index: {} }, doc];
-        });
-
-        if (bulkBody?.length) {
-          return esClient.bulk({
-            index: pathIndex, // default index for all actions
-            refresh: refresh as Refresh, // true | false | 'wait_for'
-            body: bulkBody, // [ {index:{}}, doc, {index:{}}, doc, ... ]
-          });
-        }
-      }
       return esClient.transport.request(requestOptions);
     }
   }

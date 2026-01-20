@@ -72,7 +72,8 @@ export function buildElasticsearchRequest(
     }
 
     // Build body and query parameters
-    const body: Record<string, unknown> = {};
+    let body: Record<string, unknown> = {};
+    let bulkBody: Array<Record<string, unknown>> | undefined;
     const queryParams: Record<string, string> = {};
 
     for (const [key, value] of Object.entries(params)) {
@@ -105,11 +106,21 @@ export function buildElasticsearchRequest(
       }
     }
 
+    if (stepType === 'elasticsearch.index' && 'document' in params) {
+      body = params.document as Record<string, unknown>;
+    }
+
+    if (stepType === 'elasticsearch.bulk' && 'operations' in params) {
+      bulkBody = params.operations as Array<Record<string, unknown>>;
+      body = {};
+    }
+
     const result: RequestOptions = {
       method,
       path: `/${selectedPattern}`,
       body: Object.keys(body).length > 0 ? body : undefined,
       query: Object.keys(queryParams).length > 0 ? queryParams : undefined,
+      bulkBody: bulkBody ? bulkBody : undefined,
     };
 
     // console.log('DEBUG - Final request:', JSON.stringify(result, null, 2));
