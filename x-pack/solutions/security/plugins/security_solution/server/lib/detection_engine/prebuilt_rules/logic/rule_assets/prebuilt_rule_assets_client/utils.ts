@@ -26,8 +26,8 @@ export function prepareQueryDslFilter(
     });
   }
 
-  if (filter?.fields?.name?.include) {
-    filter.fields.name.include.forEach((name) => {
+  if (filter?.fields?.name?.include?.values) {
+    filter.fields.name.include.values.forEach((name) => {
       queryFilter.push({
         wildcard: {
           [`${PREBUILT_RULE_ASSETS_SO_TYPE}.name.keyword`]: `*${name}*`,
@@ -36,8 +36,8 @@ export function prepareQueryDslFilter(
     });
   }
 
-  if (filter?.fields.tags?.include) {
-    filter.fields.tags.include.forEach((tag) => {
+  if (filter?.fields.tags?.include?.values) {
+    filter.fields.tags.include.values.forEach((tag) => {
       queryFilter.push({
         term: {
           [`${PREBUILT_RULE_ASSETS_SO_TYPE}.tags`]: tag,

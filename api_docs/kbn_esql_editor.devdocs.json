@@ -10,6 +10,8 @@
         "label": "ESQLEditorTelemetryService",
         "description": [],
         "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -24,6 +26,8 @@
               "any"
             ],
             "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -38,6 +42,8 @@
                   "AnalyticsServiceStart"
                 ],
                 "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "lineNumber": 39,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -58,6 +64,8 @@
               "(hoverMessage: string) => void"
             ],
             "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -74,6 +82,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "lineNumber": 84,
+                "columnNumber": 42,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -92,6 +102,8 @@
               "(commandIds: string[]) => void"
             ],
             "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+            "lineNumber": 116,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -106,6 +118,8 @@
                   "string[]"
                 ],
                 "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "lineNumber": 116,
+                "columnNumber": 49,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -124,6 +138,8 @@
               "(isOpen: boolean) => void"
             ],
             "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -138,6 +154,8 @@
                   "boolean"
                 ],
                 "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "lineNumber": 129,
+                "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -156,6 +174,8 @@
               "(isStarredQuery?: boolean) => void"
             ],
             "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+            "lineNumber": 135,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -170,6 +190,8 @@
                   "boolean"
                 ],
                 "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "lineNumber": 135,
+                "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -196,6 +218,8 @@
               ") => void"
             ],
             "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+            "lineNumber": 143,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -216,6 +240,8 @@
                   }
                 ],
                 "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "lineNumber": 143,
+                "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -250,6 +276,8 @@
               ".AUTOCOMPLETE, label: string) => void"
             ],
             "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+            "lineNumber": 165,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -279,6 +307,8 @@
                   ".AUTOCOMPLETE"
                 ],
                 "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "lineNumber": 166,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -294,6 +324,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "lineNumber": 167,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -328,6 +360,8 @@
               ", query: string) => void"
             ],
             "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+            "lineNumber": 175,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -342,6 +376,8 @@
                   "boolean"
                 ],
                 "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "lineNumber": 176,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -363,6 +399,8 @@
                   }
                 ],
                 "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "lineNumber": 177,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -384,6 +422,8 @@
                   }
                 ],
                 "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "lineNumber": 178,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -399,6 +439,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "lineNumber": 179,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -433,6 +475,8 @@
               ") => void"
             ],
             "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+            "lineNumber": 195,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -453,6 +497,8 @@
                   }
                 ],
                 "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "lineNumber": 196,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -474,6 +520,8 @@
                   }
                 ],
                 "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "lineNumber": 197,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -500,6 +548,8 @@
               ", reason: string) => void"
             ],
             "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+            "lineNumber": 205,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -520,6 +570,8 @@
                   }
                 ],
                 "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "lineNumber": 205,
+                "columnNumber": 42,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -535,6 +587,211 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "lineNumber": 205,
+                "columnNumber": 73,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-editor",
+            "id": "def-public.ESQLEditorTelemetryService.trackInitLatency",
+            "type": "Function",
+            "tags": [],
+            "label": "trackInitLatency",
+            "description": [],
+            "signature": [
+              "(duration: number, sessionId?: string | undefined) => void"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+            "lineNumber": 212,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-editor",
+                "id": "def-public.ESQLEditorTelemetryService.trackInitLatency.$1",
+                "type": "number",
+                "tags": [],
+                "label": "duration",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "lineNumber": 212,
+                "columnNumber": 27,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-editor",
+                "id": "def-public.ESQLEditorTelemetryService.trackInitLatency.$2",
+                "type": "string",
+                "tags": [],
+                "label": "sessionId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "lineNumber": 212,
+                "columnNumber": 45,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-editor",
+            "id": "def-public.ESQLEditorTelemetryService.trackInputLatency",
+            "type": "Function",
+            "tags": [],
+            "label": "trackInputLatency",
+            "description": [],
+            "signature": [
+              "(payload: ",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.TelemetryLatencyProps",
+                "text": "TelemetryLatencyProps"
+              },
+              ") => void"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+            "lineNumber": 222,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-editor",
+                "id": "def-public.ESQLEditorTelemetryService.trackInputLatency.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "payload",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-types",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlTypesPluginApi",
+                    "section": "def-common.TelemetryLatencyProps",
+                    "text": "TelemetryLatencyProps"
+                  }
+                ],
+                "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "lineNumber": 222,
+                "columnNumber": 28,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-editor",
+            "id": "def-public.ESQLEditorTelemetryService.trackSuggestionsLatency",
+            "type": "Function",
+            "tags": [],
+            "label": "trackSuggestionsLatency",
+            "description": [],
+            "signature": [
+              "(payload: ",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.TelemetryLatencyProps",
+                "text": "TelemetryLatencyProps"
+              },
+              ") => void"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+            "lineNumber": 226,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-editor",
+                "id": "def-public.ESQLEditorTelemetryService.trackSuggestionsLatency.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "payload",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-types",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlTypesPluginApi",
+                    "section": "def-common.TelemetryLatencyProps",
+                    "text": "TelemetryLatencyProps"
+                  }
+                ],
+                "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "lineNumber": 226,
+                "columnNumber": 34,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-editor",
+            "id": "def-public.ESQLEditorTelemetryService.trackValidationLatency",
+            "type": "Function",
+            "tags": [],
+            "label": "trackValidationLatency",
+            "description": [],
+            "signature": [
+              "(payload: ",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.TelemetryLatencyProps",
+                "text": "TelemetryLatencyProps"
+              },
+              ") => void"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+            "lineNumber": 231,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-editor",
+                "id": "def-public.ESQLEditorTelemetryService.trackValidationLatency.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "payload",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-types",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlTypesPluginApi",
+                    "section": "def-common.TelemetryLatencyProps",
+                    "text": "TelemetryLatencyProps"
+                  }
+                ],
+                "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "lineNumber": 231,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -582,6 +839,8 @@
           ">, \"initialState\" | \"onInitialStateChange\"> & React.RefAttributes<never>>"
         ],
         "path": "src/platform/packages/private/kbn-esql-editor/src/esql_editor.tsx",
+        "lineNumber": 1406,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -597,6 +856,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -618,6 +879,8 @@
           ") => void"
         ],
         "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/events_registration.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -649,6 +912,8 @@
               "<Context>) => void; removeContextProvider: (contextProviderName: string) => void; }"
             ],
             "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/events_registration.ts",
+            "lineNumber": 32,
+            "columnNumber": 56,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -665,6 +930,8 @@
         "label": "DataErrorsControl",
         "description": [],
         "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -676,6 +943,8 @@
             "label": "enabled",
             "description": [],
             "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -690,6 +959,8 @@
               "(value: boolean) => void"
             ],
             "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -704,6 +975,8 @@
                   "boolean"
                 ],
                 "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+                "lineNumber": 33,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -722,6 +995,8 @@
         "label": "ESQLEditorRestorableState",
         "description": [],
         "path": "src/platform/packages/private/kbn-esql-editor/src/restorable_state.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -733,6 +1008,8 @@
             "label": "editorHeight",
             "description": [],
             "path": "src/platform/packages/private/kbn-esql-editor/src/restorable_state.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -744,6 +1021,8 @@
             "label": "resizableContainerHeight",
             "description": [],
             "path": "src/platform/packages/private/kbn-esql-editor/src/restorable_state.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -755,6 +1034,8 @@
             "label": "isHistoryOpen",
             "description": [],
             "path": "src/platform/packages/private/kbn-esql-editor/src/restorable_state.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -769,6 +1050,8 @@
               "HistoryTabId"
             ],
             "path": "src/platform/packages/private/kbn-esql-editor/src/restorable_state.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -812,6 +1095,8 @@
           ">, \"initialState\" | \"onInitialStateChange\"> & React.RefAttributes<never>"
         ],
         "path": "src/platform/packages/private/kbn-esql-editor/src/esql_editor.tsx",
+        "lineNumber": 1407,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
