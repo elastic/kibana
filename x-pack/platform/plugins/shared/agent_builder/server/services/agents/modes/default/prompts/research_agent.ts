@@ -10,6 +10,8 @@ import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { platformCoreTools, type ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
 import type { ProcessedAttachmentType } from '../../utils/prepare_conversation';
+import type { AttachmentPresentation } from '../../utils/attachment_presentation';
+import { getConversationAttachmentsSystemMessages } from '../../utils/attachment_presentation';
 import type { ResearchAgentAction } from '../actions';
 import { attachmentTypeInstructions } from './utils/attachments';
 import { customInstructionsBlock, structuredOutputDescription } from './utils/custom_instructions';
@@ -26,8 +28,10 @@ interface ResearchAgentPromptParams {
   customInstructions?: string;
   capabilities: ResolvedAgentCapabilities;
   initialMessages: BaseMessageLike[];
+  conversationTimestamp: string;
   actions: ResearchAgentAction[];
   attachmentTypes: ProcessedAttachmentType[];
+  versionedAttachmentPresentation?: AttachmentPresentation;
   clearSystemMessage?: boolean;
   outputSchema?: Record<string, unknown>;
 }
@@ -39,6 +43,7 @@ export const getResearchAgentPrompt = (params: ResearchAgentPromptParams): BaseM
       'system',
       clearSystemMessage ? getBaseSystemMessage(params) : getResearchSystemMessage(params),
     ],
+    ...getConversationAttachmentsSystemMessages(params.versionedAttachmentPresentation),
     ...initialMessages,
     ...formatResearcherActionHistory({ actions }),
   ];
@@ -46,6 +51,7 @@ export const getResearchAgentPrompt = (params: ResearchAgentPromptParams): BaseM
 
 export const getBaseSystemMessage = ({
   customInstructions,
+  conversationTimestamp,
   attachmentTypes,
   outputSchema,
 }: ResearchAgentPromptParams): string => {
@@ -69,7 +75,7 @@ ${structuredOutputDescription(outputSchema)}
 ${attachmentTypeInstructions(attachmentTypes)}
 
 ## ADDITIONAL INFO
-- Current date: ${formatDate()}
+- Current date: ${formatDate(conversationTimestamp)}
 
 ## PRE-RESPONSE COMPLIANCE CHECK
 - [ ] Have I gathered all necessary information or performed the requested task? If NO, my response MUST be a tool call.
@@ -79,6 +85,7 @@ ${attachmentTypeInstructions(attachmentTypes)}
 
 export const getResearchSystemMessage = ({
   customInstructions,
+  conversationTimestamp,
   attachmentTypes,
   outputSchema,
 }: ResearchAgentPromptParams): string => {
@@ -174,7 +181,7 @@ ${structuredOutputDescription(outputSchema)}
 ${attachmentTypeInstructions(attachmentTypes)}
 
 ## ADDITIONAL INFO
-- Current date: ${formatDate()}
+- Current date: ${formatDate(conversationTimestamp)}
 
 ## PRE-RESPONSE COMPLIANCE CHECK
 - [ ] Have I gathered all necessary information? If NO, my response MUST be a tool call (see OPERATING PROTOCOL and TOOL SELECTION POLICY).
