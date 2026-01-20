@@ -14,11 +14,13 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { MonitoringStartServices } from '../types';
 import { useAlertsModal } from '../application/hooks/use_alerts_modal';
 import { WatcherMigrationStep } from './enable_alerts_modal';
-
 export const AlertsDropdown: React.FC<{}> = () => {
   const [shouldShowModal, setShouldShowModal] = useState(false);
   const alertsEnableModalProvider = useAlertsModal();
-  const { navigateToApp } = useKibana<MonitoringStartServices>().services.application;
+  const { navigateToApp, isAppRegistered } =
+    useKibana<MonitoringStartServices>().services.application;
+
+  const unifiedRulesPageEnabled = isAppRegistered('rules');
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -65,7 +67,10 @@ export const AlertsDropdown: React.FC<{}> = () => {
         defaultMessage: 'Manage rules',
       }),
       icon: 'tableOfContents',
-      onClick: () => navigateToApp('rules'),
+      onClick: () =>
+        unifiedRulesPageEnabled
+          ? navigateToApp('rules')
+          : navigateToApp('management', { path: '/insightsAndAlerting/triggersActions/rules' }),
     },
   ];
 
