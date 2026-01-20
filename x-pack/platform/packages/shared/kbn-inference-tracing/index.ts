@@ -13,6 +13,6 @@ export { GenAISemanticConventions, ElasticGenAIAttributes } from './src/types';
 export { LangfuseSpanProcessor } from './src/langfuse/langfuse_span_processor';
 export { PhoenixSpanProcessor } from './src/phoenix/phoenix_span_processor';
 export {
-  ElasticsearchSpanProcessor,
-  type ElasticsearchSpanProcessorConfig,
+  AgentBuilderTraceSpanProcessor,
+  type AgentBuilderTraceSpanProcessorConfig,
 } from './src/elasticsearch/elasticsearch_span_processor';

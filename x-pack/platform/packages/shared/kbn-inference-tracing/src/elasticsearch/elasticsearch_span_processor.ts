@@ -11,7 +11,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { diag } from '@opentelemetry/api';
 import { GenAISemanticConventions } from '../types';
 
-export interface ElasticsearchSpanProcessorConfig {
+export interface AgentBuilderTraceSpanProcessorConfig {
   indexName: string;
   flushIntervalMs?: number;
   maxBatchSize?: number;
@@ -21,7 +21,7 @@ export interface ElasticsearchSpanProcessorConfig {
  * Span processor that ingests gen_ai spans into Elasticsearch.
  * Only processes spans that have gen_ai.* or elastic.inference.* attributes.
  */
-export class ElasticsearchSpanProcessor implements tracing.SpanProcessor {
+export class AgentBuilderTraceSpanProcessor implements tracing.SpanProcessor {
   private pendingSpans: tracing.ReadableSpan[] = [];
   private flushTimer: NodeJS.Timeout | null = null;
   private esClient: ElasticsearchClient | null = null;
@@ -30,7 +30,7 @@ export class ElasticsearchSpanProcessor implements tracing.SpanProcessor {
   private readonly flushIntervalMs: number;
   private readonly maxBatchSize: number;
 
-  constructor(config: ElasticsearchSpanProcessorConfig) {
+  constructor(config: AgentBuilderTraceSpanProcessorConfig) {
     this.indexName = config.indexName;
     this.flushIntervalMs = config.flushIntervalMs ?? 5000;
     this.maxBatchSize = config.maxBatchSize ?? 100;
