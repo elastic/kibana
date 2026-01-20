@@ -6878,6 +6878,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ftr-llm-proxy@link:src/platform/packages/shared/kbn-ftr-llm-proxy":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ftr-screenshot-filename@link:src/platform/packages/private/kbn-ftr-screenshot-filename":
   version "0.0.0"
   uid ""
