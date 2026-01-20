@@ -6,7 +6,7 @@
  */
 
 import type TestAgent from 'supertest/lib/agent';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { ENDPOINT_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { GLOBAL_ARTIFACT_TAG } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/constants';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
