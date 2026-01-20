@@ -17,13 +17,14 @@ import {
   getRelationshipColors,
 } from '../styles';
 import type { RelationshipNodeViewModel, NodeProps } from '../../types';
-import { GRAPH_RELATIONSHIP_NODE_ID } from '../../test_ids';
-
-export const TEST_SUBJ_SHAPE = 'relationship-node-shape';
-export const TEST_SUBJ_HANDLE = 'relationship-node-handle';
-export const TEST_SUBJ_HOVER_OUTLINE = 'relationship-node-hover-outline';
-export const TEST_SUBJ_TOOLTIP = 'relationship-node-tooltip';
-export const TEST_SUBJ_LABEL_TEXT = 'relationship-node-text';
+import {
+  GRAPH_RELATIONSHIP_NODE_ID,
+  GRAPH_RELATIONSHIP_NODE_SHAPE_ID,
+  GRAPH_RELATIONSHIP_NODE_HANDLE_ID,
+  GRAPH_RELATIONSHIP_NODE_HOVER_OUTLINE_ID,
+  GRAPH_RELATIONSHIP_NODE_TOOLTIP_ID,
+  GRAPH_RELATIONSHIP_NODE_LABEL_TEXT_ID,
+} from '../../test_ids';
 
 const MAX_LABEL_LENGTH = 27;
 
@@ -43,10 +44,13 @@ export const RelationshipNode = memo<NodeProps>((props: NodeProps) => {
   return (
     <LabelNodeContainer data-test-subj={GRAPH_RELATIONSHIP_NODE_ID}>
       {interactive && (
-        <LabelShapeOnHover data-test-subj={TEST_SUBJ_HOVER_OUTLINE} color="primary" />
+        <LabelShapeOnHover
+          data-test-subj={GRAPH_RELATIONSHIP_NODE_HOVER_OUTLINE_ID}
+          color="primary"
+        />
       )}
       <LabelShape
-        data-test-subj={TEST_SUBJ_SHAPE}
+        data-test-subj={GRAPH_RELATIONSHIP_NODE_SHAPE_ID}
         backgroundColor={backgroundColor}
         borderColor={borderColor}
         textAlign="center"
@@ -71,16 +75,20 @@ export const RelationshipNode = memo<NodeProps>((props: NodeProps) => {
             `}
           >
             {text.length > MAX_LABEL_LENGTH ? (
-              <EuiToolTip content={text} display="block" data-test-subj={TEST_SUBJ_TOOLTIP}>
+              <EuiToolTip
+                content={text}
+                display="block"
+                data-test-subj={GRAPH_RELATIONSHIP_NODE_TOOLTIP_ID}
+              >
                 <EuiTextTruncate
-                  data-test-subj={TEST_SUBJ_LABEL_TEXT}
+                  data-test-subj={GRAPH_RELATIONSHIP_NODE_LABEL_TEXT_ID}
                   truncation="middle"
                   text={text}
                 />
               </EuiToolTip>
             ) : (
               <EuiTextTruncate
-                data-test-subj={TEST_SUBJ_LABEL_TEXT}
+                data-test-subj={GRAPH_RELATIONSHIP_NODE_LABEL_TEXT_ID}
                 truncation="middle"
                 text={text}
               />
@@ -89,7 +97,7 @@ export const RelationshipNode = memo<NodeProps>((props: NodeProps) => {
         </div>
       </LabelShape>
       <Handle
-        data-test-subj={TEST_SUBJ_HANDLE}
+        data-test-subj={GRAPH_RELATIONSHIP_NODE_HANDLE_ID}
         type="target"
         isConnectable={false}
         position={Position.Left}
@@ -97,7 +105,7 @@ export const RelationshipNode = memo<NodeProps>((props: NodeProps) => {
         style={HandleStyleOverride}
       />
       <Handle
-        data-test-subj={TEST_SUBJ_HANDLE}
+        data-test-subj={GRAPH_RELATIONSHIP_NODE_HANDLE_ID}
         type="source"
         isConnectable={false}
         position={Position.Right}

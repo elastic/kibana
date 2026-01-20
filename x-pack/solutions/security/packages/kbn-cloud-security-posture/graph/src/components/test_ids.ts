@@ -105,3 +105,15 @@ export const GRAPH_POPOVER_PREVIEW_PANEL =
 
 export const GRAPH_CALLOUT_TEST_ID = `${GRAPH_INVESTIGATION_TEST_ID}Callout` as const;
 export const GRAPH_CALLOUT_LINK_TEST_ID = `${GRAPH_INVESTIGATION_TEST_ID}CalloutLink` as const;
+
+// Relationship node test IDs
+export const GRAPH_RELATIONSHIP_NODE_SHAPE_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}RelationshipNodeShape` as const;
+export const GRAPH_RELATIONSHIP_NODE_HANDLE_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}RelationshipNodeHandle` as const;
+export const GRAPH_RELATIONSHIP_NODE_HOVER_OUTLINE_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}RelationshipNodeHoverOutline` as const;
+export const GRAPH_RELATIONSHIP_NODE_TOOLTIP_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}RelationshipNodeTooltip` as const;
+export const GRAPH_RELATIONSHIP_NODE_LABEL_TEXT_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}RelationshipNodeLabelText` as const;

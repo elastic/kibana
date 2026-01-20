@@ -12,14 +12,15 @@ import { ReactFlow, Position } from '@xyflow/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import type { NodeProps } from '../../types';
 import { getRelationshipColors, getLabelColors } from '../styles';
-import { GRAPH_RELATIONSHIP_NODE_ID } from '../../test_ids';
 import {
-  RelationshipNode,
-  TEST_SUBJ_HANDLE,
-  TEST_SUBJ_HOVER_OUTLINE,
-  TEST_SUBJ_LABEL_TEXT,
-  TEST_SUBJ_TOOLTIP,
-} from './relationship_node';
+  GRAPH_RELATIONSHIP_NODE_ID,
+  GRAPH_RELATIONSHIP_NODE_SHAPE_ID,
+  GRAPH_RELATIONSHIP_NODE_HANDLE_ID,
+  GRAPH_RELATIONSHIP_NODE_HOVER_OUTLINE_ID,
+  GRAPH_RELATIONSHIP_NODE_TOOLTIP_ID,
+  GRAPH_RELATIONSHIP_NODE_LABEL_TEXT_ID,
+} from '../../test_ids';
+import { RelationshipNode } from './relationship_node';
 
 describe('RelationshipNode', () => {
   const baseProps: NodeProps = {
@@ -55,7 +56,8 @@ describe('RelationshipNode', () => {
     );
 
     expect(screen.getByText('Owns')).toBeInTheDocument();
-    expect(screen.getAllByTestId(TEST_SUBJ_HANDLE)).toHaveLength(2);
+    expect(screen.getAllByTestId(GRAPH_RELATIONSHIP_NODE_HANDLE_ID)).toHaveLength(2);
+    expect(screen.getByTestId(GRAPH_RELATIONSHIP_NODE_SHAPE_ID)).toBeInTheDocument();
   });
 
   test('renders with node id when label is not provided', () => {
@@ -86,7 +88,7 @@ describe('RelationshipNode', () => {
     await userEvent.hover(screen.getByTestId(GRAPH_RELATIONSHIP_NODE_ID));
 
     await waitFor(() => {
-      expect(screen.queryByTestId(TEST_SUBJ_HOVER_OUTLINE)).toBeInTheDocument();
+      expect(screen.queryByTestId(GRAPH_RELATIONSHIP_NODE_HOVER_OUTLINE_ID)).toBeInTheDocument();
     });
   });
 
@@ -108,7 +110,9 @@ describe('RelationshipNode', () => {
     await userEvent.hover(screen.getByTestId(GRAPH_RELATIONSHIP_NODE_ID));
 
     await waitFor(() => {
-      expect(screen.queryByTestId(TEST_SUBJ_HOVER_OUTLINE)).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId(GRAPH_RELATIONSHIP_NODE_HOVER_OUTLINE_ID)
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -128,10 +132,10 @@ describe('RelationshipNode', () => {
         </ReactFlow>
       );
 
-      await userEvent.hover(screen.getByTestId(TEST_SUBJ_LABEL_TEXT));
+      await userEvent.hover(screen.getByTestId(GRAPH_RELATIONSHIP_NODE_LABEL_TEXT_ID));
 
       await waitFor(() => {
-        expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP)).toBeInTheDocument();
+        expect(screen.queryByTestId(GRAPH_RELATIONSHIP_NODE_TOOLTIP_ID)).toBeInTheDocument();
       });
     });
 
@@ -152,11 +156,13 @@ describe('RelationshipNode', () => {
         </ReactFlow>
       );
 
-      await userEvent.hover(screen.getByTestId(TEST_SUBJ_LABEL_TEXT));
+      await userEvent.hover(screen.getByTestId(GRAPH_RELATIONSHIP_NODE_LABEL_TEXT_ID));
 
       await waitFor(() => {
-        expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP)).toBeInTheDocument();
-        expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP)).toHaveTextContent(longText);
+        expect(screen.queryByTestId(GRAPH_RELATIONSHIP_NODE_TOOLTIP_ID)).toBeInTheDocument();
+        expect(screen.queryByTestId(GRAPH_RELATIONSHIP_NODE_TOOLTIP_ID)).toHaveTextContent(
+          longText
+        );
       });
     });
 
@@ -167,10 +173,10 @@ describe('RelationshipNode', () => {
         </ReactFlow>
       );
 
-      await userEvent.hover(screen.getByTestId(TEST_SUBJ_LABEL_TEXT));
+      await userEvent.hover(screen.getByTestId(GRAPH_RELATIONSHIP_NODE_LABEL_TEXT_ID));
 
       await waitFor(() => {
-        expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP)).not.toBeInTheDocument();
+        expect(screen.queryByTestId(GRAPH_RELATIONSHIP_NODE_TOOLTIP_ID)).not.toBeInTheDocument();
       });
     });
   });
