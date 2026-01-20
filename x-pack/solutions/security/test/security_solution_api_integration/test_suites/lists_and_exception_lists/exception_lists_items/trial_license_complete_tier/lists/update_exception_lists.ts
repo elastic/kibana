@@ -61,7 +61,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should update a single exception list property of name using an auto-generated list_id', async () => {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { list_id, ...listNoId } = getCreateExceptionListMinimalSchemaMock();
 
         // create a simple exception list
@@ -164,7 +163,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should give a 404 if both id and list_id is null', async () => {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { list_id, ...listNoId } = getUpdateMinimalExceptionListSchemaMock();
 
         const { body } = await supertest
