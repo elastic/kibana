@@ -41,6 +41,7 @@ import { HostOverview } from '../../../../overview/components/host_overview';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
 import { EntityIdentifierFields, EntityType } from '../../../../../common/entity_analytics/types';
+import type { EntityIdentifiers } from '../../shared/utils';
 import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/default_renderer';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
@@ -92,9 +93,9 @@ const RelatedUsersManage = manageQuery(InspectButtonContainer);
 
 export interface HostDetailsProps {
   /**
-   * Host name for the entities details
+   * Entity identifiers for the host (following entity store EUID logic)
    */
-  hostName: string;
+  entityIdentifiers: EntityIdentifiers;
   /**
    * timestamp of alert or event
    */
@@ -108,7 +109,15 @@ export interface HostDetailsProps {
 /**
  * Host details and related users, displayed in the document details expandable flyout left section under the Insights tab, Entities tab
  */
-export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, scopeId }) => {
+export const HostDetails: React.FC<HostDetailsProps> = ({
+  entityIdentifiers,
+  timestamp,
+  scopeId,
+}) => {
+  // Get the primary field value (first key in priority order, following EUID logic)
+  const primaryField = Object.keys(entityIdentifiers)[0] || 'host.name';
+  const hostName = entityIdentifiers[primaryField] || '';
+
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
 
@@ -156,7 +165,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
     openPreviewPanel({
       id: HostPreviewPanelKey,
       params: {
-        hostName,
+        entityIdentifiers,
         scopeId,
         banner: HOST_PREVIEW_BANNER,
       },
@@ -165,13 +174,13 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
       location: scopeId,
       panel: 'preview',
     });
-  }, [openPreviewPanel, hostName, scopeId, telemetry]);
+  }, [openPreviewPanel, entityIdentifiers, scopeId, telemetry]);
 
   const [isHostLoading, { inspect, hostDetails, refetch }] = useHostDetails({
     id: hostDetailsQueryId,
     startDate: from,
     endDate: to,
-    hostName,
+    entityIdentifiers,
     indexNames: selectedPatterns,
     skip: selectedPatterns.length === 0,
   });
@@ -189,18 +198,20 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
   const hostRiskData = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
   const isRiskScoreExist = !!hostRiskData?.host.risk;
 
+  const identifierField: EntityIdentifierFields = EntityIdentifierFields.hostName;
+
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    field: EntityIdentifierFields.hostName,
+    field: identifierField,
     value: hostName,
     to,
     from,
     queryId: 'HostEntityOverview',
   });
-  const { hasMisconfigurationFindings } = useHasMisconfigurations('host.name', hostName);
-  const { hasVulnerabilitiesFindings } = useHasVulnerabilities('host.name', hostName);
+  const { hasMisconfigurationFindings } = useHasMisconfigurations(entityIdentifiers);
+  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(entityIdentifiers);
 
   const openDetailsPanel = useNavigateToHostDetails({
-    hostName,
+    entityIdentifiers,
     scopeId,
     isRiskScoreExist,
     hasMisconfigurationFindings,
@@ -217,7 +228,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
     totalCount,
     refetch: refetchRelatedUsers,
   } = useHostRelatedUsers({
-    hostName,
+    entityIdentifiers,
     indexNames: selectedPatterns,
     from: timestamp, // related users are users who were successfully authenticated onto this host AFTER alert time
     skip: selectedPatterns.length === 0,
@@ -375,7 +386,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
           {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => (
             <HostOverviewManage
               id={hostDetailsQueryId}
-              hostName={hostName}
+              entityIdentifiers={entityIdentifiers}
               data={hostDetails}
               indexNames={selectedPatterns}
               jobNameById={jobNameById}
@@ -400,22 +411,20 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
         <EuiHorizontalRule margin="s" />
         <EuiFlexGrid responsive={false} columns={3} gutterSize="xl">
           <AlertCountInsight
-            fieldName={'host.name'}
-            name={hostName}
+            entityIdentifiers={entityIdentifiers}
             direction="column"
             openDetailsPanel={openDetailsPanel}
             data-test-subj={HOST_DETAILS_ALERT_COUNT_TEST_ID}
           />
           <MisconfigurationsInsight
-            fieldName={'host.name'}
-            name={hostName}
+            entityIdentifiers={entityIdentifiers}
             direction="column"
             openDetailsPanel={openDetailsPanel}
             data-test-subj={HOST_DETAILS_MISCONFIGURATIONS_TEST_ID}
             telemetryKey={MISCONFIGURATION_INSIGHT_HOST_DETAILS}
           />
           <VulnerabilitiesInsight
-            hostName={hostName}
+            entityIdentifiers={entityIdentifiers}
             direction="column"
             openDetailsPanel={openDetailsPanel}
             data-test-subj={HOST_DETAILS_VULNERABILITIES_TEST_ID}

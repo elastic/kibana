@@ -80,7 +80,7 @@ export const UserPanel = ({
   const { inspect, refetch, loading } = riskScoreState;
   const { to, from, isInitializing, setQuery, deleteQuery } = useGlobalTime();
 
-  const observedUser = useObservedUser(userName, scopeId);
+  const observedUser = useObservedUser({ 'user.name': userName }, scopeId);
   const email = observedUser.details.user?.email;
   const managedUser = useManagedUser();
 
@@ -100,7 +100,7 @@ export const UserPanel = ({
     { onSuccess: refetchRiskScore }
   );
 
-  const { hasMisconfigurationFindings } = useHasMisconfigurations('user.name', userName);
+  const { hasMisconfigurationFindings } = useHasMisconfigurations({ 'user.name': userName });
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     field: EntityIdentifierFields.userName,
@@ -151,7 +151,7 @@ export const UserPanel = ({
 
   return (
     <AnomalyTableProvider
-      criteriaFields={getCriteriaFromUsersType(UsersType.details, userName)}
+      criteriaFields={getCriteriaFromUsersType(UsersType.details, { 'user.name': userName })}
       startDate={from}
       endDate={to}
       skip={isInitializing}

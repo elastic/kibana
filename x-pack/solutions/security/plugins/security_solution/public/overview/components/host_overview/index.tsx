@@ -53,7 +53,7 @@ interface HostSummaryProps {
   startDate: string;
   endDate: string;
   narrowDateRange: NarrowDateRange;
-  hostName: string;
+  entityIdentifiers: Record<string, string>;
   jobNameById: Record<string, string | undefined>;
   isFlyoutOpen?: boolean;
 }
@@ -81,7 +81,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
     loading,
     narrowDateRange,
     startDate,
-    hostName,
+    entityIdentifiers,
     jobNameById,
     isFlyoutOpen = false,
   }) => {
@@ -89,8 +89,11 @@ export const HostOverview = React.memo<HostSummaryProps>(
     const userPermissions = hasMlUserPermissions(capabilities);
     const darkMode = useKibanaIsDarkMode();
     const filterQuery = useMemo(
-      () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
-      [hostName]
+      () =>
+        entityIdentifiers['host.name']
+          ? buildHostNamesFilter([entityIdentifiers['host.name']])
+          : undefined,
+      [entityIdentifiers]
     );
     const { deleteQuery, setQuery } = useGlobalTime();
 
@@ -103,7 +106,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
     } = useRiskScore({
       filterQuery,
       riskEntity: EntityType.host,
-      skip: hostName == null,
+      skip: entityIdentifiers['host.name'] == null,
       onlyLatest: false,
       pagination: FIRST_RECORD_PAGINATION,
     });
@@ -193,8 +196,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           description: (
             <FirstLastSeen
               indexPatterns={indexNames}
-              field={'host.name'}
-              value={hostName}
+              entityIdentifiers={entityIdentifiers}
               type={FirstLastSeenType.FIRST_SEEN}
             />
           ),
@@ -204,14 +206,13 @@ export const HostOverview = React.memo<HostSummaryProps>(
           description: (
             <FirstLastSeen
               indexPatterns={indexNames}
-              field={'host.name'}
-              value={hostName}
+              entityIdentifiers={entityIdentifiers}
               type={FirstLastSeenType.LAST_SEEN}
             />
           ),
         },
       ],
-      [data, scopeId, indexNames, hostName, isFlyoutOpen]
+      [data, scopeId, indexNames, entityIdentifiers, isFlyoutOpen]
     );
     const firstColumn = useMemo(
       () =>

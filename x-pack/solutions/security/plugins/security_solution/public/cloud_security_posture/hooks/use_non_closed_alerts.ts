@@ -27,10 +27,10 @@ export const useNonClosedAlerts = ({
 }) => {
   const { signalIndexName } = useSignalIndex();
 
-  const entityFilter = useMemo(() => ({ field, value }), [field, value]);
+  const entityIdentifiers = useMemo(() => ({ [field]: value }), [field, value]);
 
   const { items: alertsData } = useAlertsByStatus({
-    entityFilter,
+    entityIdentifiers,
     signalIndexName,
     queryId,
     to,

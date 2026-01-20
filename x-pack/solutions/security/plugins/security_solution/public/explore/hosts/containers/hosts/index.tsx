@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import deepEqual from 'fast-deep-equal';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 
-import type { HostsRequestOptionsInput } from '../../../../../common/api/search_strategy';
 import type { inputsModel, State } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import type { hostsModel } from '../../store';
 import { hostsSelectors } from '../../store';
-import { generateTablePaginationOptions } from '../../../components/paginated_table/helpers';
-import type { HostsEdges, PageInfoPaginated } from '../../../../../common/search_strategy';
-import { HostsQueries } from '../../../../../common/search_strategy';
+import type {
+  HostsEdges,
+  PageInfoPaginated,
+  CursorType,
+} from '../../../../../common/search_strategy';
 import type { ESTermQuery } from '../../../../../common/typed_json';
+import type { HostEntity } from '../../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 
-import * as i18n from './translations';
 import type { InspectResponse } from '../../../../types';
-import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
+import { useEntitiesListQuery } from '../../../../entity_analytics/components/entity_store/hooks/use_entities_list_query';
 
 export const ID = 'hostsAllQuery';
 
@@ -42,16 +42,44 @@ export interface HostsArgs {
 interface UseAllHost {
   endDate: string;
   filterQuery?: ESTermQuery | string;
-  indexNames: string[];
   skip?: boolean;
   startDate: string;
   type: hostsModel.HostsType;
 }
 
+/**
+ * Maps Entity Store HostEntity to HostsEdges format
+ */
+const mapEntityToHostsEdge = (entity: HostEntity, index: number): HostsEdges => {
+  const hostId = entity.entity?.id || entity.host?.id?.[0] || '';
+
+  return {
+    node: {
+      _id: hostId,
+      host: {
+        id: entity.host?.id,
+        name: entity.host?.name ? [entity.host.name] : undefined,
+        ip: entity.host?.ip,
+        type: entity.host?.type,
+        mac: entity.host?.mac,
+        architecture: entity.host?.architecture,
+      },
+      risk: entity.entity?.risk?.calculated_level,
+      criticality: entity.asset?.criticality,
+      lastSeen: entity.entity?.lifecycle?.last_activity
+        ? [entity.entity.lifecycle.last_activity]
+        : undefined,
+    },
+    cursor: {
+      value: hostId || String(index),
+      tiebreaker: null,
+    } as CursorType,
+  };
+};
+
 export const useAllHost = ({
   endDate,
   filterQuery,
-  indexNames,
   skip = false,
   startDate,
   type,
@@ -61,100 +89,81 @@ export const useAllHost = ({
     getHostsSelector(state, type)
   );
 
-  const [hostsRequest, setHostRequest] = useState<HostsRequestOptionsInput | null>(null);
+  // Map sort field to Entity Store format if needed
+  const entitySortField = useMemo(() => {
+    // Map common host sort fields to entity store fields
+    const fieldMap: Record<string, string> = {
+      'host.name': 'host.name',
+      'host.ip': 'host.ip',
+      '@timestamp': '@timestamp',
+    };
+    return fieldMap[sortField] || sortField;
+  }, [sortField]);
 
-  const wrappedLoadMore = useCallback(
-    (newActivePage: number) => {
-      setHostRequest((prevRequest) => {
-        if (!prevRequest) {
-          return prevRequest;
-        }
+  // Convert filter query to Entity Store format
+  const entityFilterQuery = useMemo(() => {
+    const filter = createFilter(filterQuery);
+    if (!filter) {
+      return undefined;
+    }
+    return JSON.stringify(filter);
+  }, [filterQuery]);
 
-        return {
-          ...prevRequest,
-          pagination: generateTablePaginationOptions(newActivePage, limit),
-        };
-      });
-    },
-    [limit]
-  );
+  const wrappedLoadMore = useCallback((newActivePage: number) => {
+    // Entity Store query will be refetched with new page via activePage dependency
+    // This callback is kept for API compatibility
+  }, []);
 
-  const {
-    loading,
-    result: response,
-    search,
-    refetch,
-    inspect,
-  } = useSearchStrategy<HostsQueries.hosts>({
-    factoryQueryType: HostsQueries.hosts,
-    initialResult: {
-      edges: [],
-      totalCount: -1,
-      pageInfo: {
-        activePage: 0,
-        fakeTotalCount: 0,
-        showMorePagesIndicator: false,
-      },
-    },
-    errorMessage: i18n.FAIL_ALL_HOST,
-    abort: skip,
+  const { data, isLoading, refetch } = useEntitiesListQuery({
+    entityTypes: ['host'],
+    page: activePage + 1, // Entity Store uses 1-based pagination
+    perPage: limit,
+    sortField: entitySortField,
+    sortOrder: direction,
+    filterQuery: entityFilterQuery,
+    skip,
   });
 
-  const hostsResponse = useMemo(
-    () => ({
+  // Map Entity Store response to HostsArgs format
+  const hostsResponse = useMemo(() => {
+    const edges: HostsEdges[] = (data?.records || [])
+      .filter((entity): entity is HostEntity => 'host' in entity)
+      .map((entity, index) => mapEntityToHostsEdge(entity, index));
+
+    const totalCount = data?.total ?? 0;
+    const currentPage = data?.page ?? 1;
+    const perPage = data?.per_page ?? limit;
+    const totalPages = Math.ceil(totalCount / perPage);
+
+    const pageInfo: PageInfoPaginated = {
+      activePage: currentPage - 1, // Convert back to 0-based
+      fakeTotalCount: totalCount,
+      showMorePagesIndicator: currentPage < totalPages,
+    };
+
+    const inspect: InspectResponse = data?.inspect
+      ? {
+          dsl: data.inspect.dsl || [],
+          response: data.inspect.response || [],
+        }
+      : {
+          dsl: [],
+          response: [],
+        };
+
+    return {
       endDate,
-      hosts: response.edges,
+      hosts: edges,
       id: ID,
       inspect,
       isInspected: false,
       loadPage: wrappedLoadMore,
-      pageInfo: response.pageInfo,
-      refetch,
+      pageInfo,
+      refetch: refetch as inputsModel.Refetch,
       startDate,
-      totalCount: response.totalCount,
-    }),
-    [
-      endDate,
-      inspect,
-      refetch,
-      response.edges,
-      response.pageInfo,
-      response.totalCount,
-      startDate,
-      wrappedLoadMore,
-    ]
-  );
+      totalCount,
+    };
+  }, [data, endDate, limit, startDate, wrappedLoadMore, refetch]);
 
-  useEffect(() => {
-    setHostRequest((prevRequest) => {
-      const myRequest: HostsRequestOptionsInput = {
-        ...(prevRequest ?? {}),
-        defaultIndex: indexNames,
-        factoryQueryType: HostsQueries.hosts,
-        filterQuery: createFilter(filterQuery),
-        pagination: generateTablePaginationOptions(activePage, limit),
-        timerange: {
-          interval: '12h',
-          from: startDate,
-          to: endDate,
-        },
-        sort: {
-          direction,
-          field: sortField,
-        },
-      };
-      if (!deepEqual(prevRequest, myRequest)) {
-        return myRequest;
-      }
-      return prevRequest;
-    });
-  }, [activePage, direction, endDate, filterQuery, indexNames, limit, startDate, sortField]);
-
-  useEffect(() => {
-    if (!skip && hostsRequest) {
-      search(hostsRequest);
-    }
-  }, [hostsRequest, search, skip]);
-
-  return [loading, hostsResponse];
+  return [isLoading, hostsResponse];
 };

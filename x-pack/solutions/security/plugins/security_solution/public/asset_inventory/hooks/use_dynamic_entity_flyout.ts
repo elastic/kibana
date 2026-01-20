@@ -68,7 +68,15 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
         break;
       case 'host':
         openFlyout({
-          right: { id: HostPanelKey, params: { hostName: entityName, scopeId, contextId } },
+          right: {
+            id: HostPanelKey,
+            params: {
+              entityIdentifiers: { 'host.name': entityName },
+              scopeId,
+              contextID: contextId,
+              isPreviewMode: false,
+            },
+          },
         });
         break;
       case 'service':

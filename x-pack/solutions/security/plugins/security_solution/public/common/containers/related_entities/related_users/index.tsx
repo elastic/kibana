@@ -12,6 +12,7 @@ import { RelatedEntitiesQueries } from '../../../../../common/search_strategy/se
 import type { RelatedUser } from '../../../../../common/search_strategy/security_solution/related_entities/related_users';
 import { useSearchStrategy } from '../../use_search_strategy';
 import { FAIL_RELATED_USERS } from './translations';
+import type { EntityIdentifiers } from '../../../../flyout/document_details/shared/utils';
 
 export interface UseHostRelatedUsersResult {
   inspect: InspectResponse;
@@ -22,14 +23,14 @@ export interface UseHostRelatedUsersResult {
 }
 
 interface UseHostRelatedUsersParam {
-  hostName: string;
+  entityIdentifiers: EntityIdentifiers;
   indexNames: string[];
   from: string;
   skip?: boolean;
 }
 
 export const useHostRelatedUsers = ({
-  hostName,
+  entityIdentifiers,
   indexNames,
   from,
   skip = false,
@@ -65,10 +66,10 @@ export const useHostRelatedUsers = ({
     () => ({
       defaultIndex: indexNames,
       factoryQueryType: RelatedEntitiesQueries.relatedUsers,
-      hostName,
+      entityIdentifiers,
       from,
     }),
-    [indexNames, from, hostName]
+    [indexNames, from, entityIdentifiers]
   );
 
   useEffect(() => {

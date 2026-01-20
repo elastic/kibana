@@ -25,7 +25,9 @@ export const useOpenGenericEntityDetailsLeftPanel = (
 ) => {
   const { insightsField, insightsValue, entityDocId, entityId, scopeId } = params;
   const { openLeftPanel } = useExpandableFlyoutApi();
-  const { hasMisconfigurationFindings } = useHasMisconfigurations(insightsField, insightsValue);
+  const { hasMisconfigurationFindings } = useHasMisconfigurations({
+    [insightsField]: insightsValue,
+  });
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities(insightsField, insightsValue);
   const { to, from } = useGlobalTime();
   const { hasNonClosedAlerts } = useNonClosedAlerts({

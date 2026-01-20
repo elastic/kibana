@@ -144,13 +144,13 @@ export const MisconfigurationFindingsDetailsTable = memo(
     sortFieldDirection[sortField] = sortDirection;
 
     const { data, isLoading } = useMisconfigurationFindings({
-      query: buildMisconfigurationEntityFlyoutPreviewQuery(field, value, currentFilter),
+      query: buildMisconfigurationEntityFlyoutPreviewQuery({ [field]: value }, currentFilter),
       sort: [sortFieldDirection],
       enabled: true,
       pageSize: 1,
     });
 
-    const { passedFindings, failedFindings } = useHasMisconfigurations(field, value);
+    const { passedFindings, failedFindings } = useHasMisconfigurations({ [field]: value });
 
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(10);

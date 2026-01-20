@@ -40,7 +40,7 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
       setQuery,
       startDate: from,
       type,
-      userName: detailName,
+      entityIdentifiers: detailName ? { 'user.name': detailName } : undefined,
     };
 
     return (
@@ -59,11 +59,7 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
           />
         </Route>
         <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.risk})`}>
-          <RiskDetailsTabBody
-            {...tabProps}
-            riskEntity={EntityType.user}
-            entityName={tabProps.userName}
-          />
+          <RiskDetailsTabBody {...tabProps} riskEntity={EntityType.user} entityName={detailName} />
         </Route>
       </Routes>
     );

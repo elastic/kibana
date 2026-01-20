@@ -37,6 +37,7 @@ import { UserOverview } from '../../../../overview/components/user_overview';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
 import { EntityIdentifierFields, EntityType } from '../../../../../common/entity_analytics/types';
+import type { EntityIdentifiers } from '../../shared/utils';
 import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/default_renderer';
 import { CellActions } from '../../shared/components/cell_actions';
@@ -86,9 +87,9 @@ const RelatedHostsManage = manageQuery(InspectButtonContainer);
 
 export interface UserDetailsProps {
   /**
-   * User name for the entities details
+   * Entity identifiers for the user (following entity store EUID logic)
    */
-  userName: string;
+  entityIdentifiers: EntityIdentifiers;
   /**
    * timestamp of alert or event
    */
@@ -102,7 +103,18 @@ export interface UserDetailsProps {
 /**
  * User details and related users, displayed in the document details expandable flyout left section under the Insights tab, Entities tab
  */
-export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, scopeId }) => {
+export const UserDetails: React.FC<UserDetailsProps> = ({
+  entityIdentifiers,
+  timestamp,
+  scopeId,
+}) => {
+  // Get the primary field value (first key in priority order, following EUID logic)
+  const primaryField = Object.keys(entityIdentifiers)[0] || 'user.name';
+  const userName = entityIdentifiers[primaryField] || '';
+
+  // For filtering, prefer user.name if available, otherwise use the primary field
+  const filterField = 'user.name' in entityIdentifiers ? 'user.name' : primaryField;
+  const filterValue = entityIdentifiers[filterField] || userName;
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
 
@@ -162,8 +174,8 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
   }, [openPreviewPanel, userName, scopeId, telemetry]);
 
   const filterQuery = useMemo(
-    () => (userName ? buildUserNamesFilter([userName]) : undefined),
-    [userName]
+    () => (filterValue ? buildUserNamesFilter([filterValue]) : undefined),
+    [filterValue]
   );
 
   const { data: userRisk } = useRiskScore({
@@ -174,12 +186,11 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
   const isRiskScoreExist = !!userRiskData?.user.risk;
 
-  const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    EntityIdentifierFields.userName,
-    userName
-  );
+  const identifierField: EntityIdentifierFields = EntityIdentifierFields.userName;
+
+  const { hasMisconfigurationFindings } = useHasMisconfigurations(entityIdentifiers);
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    field: EntityIdentifierFields.userName,
+    field: identifierField,
     value: userName,
     to,
     from,
@@ -200,7 +211,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
     id: userDetailsQueryId,
     startDate: from,
     endDate: to,
-    userName,
+    entityIdentifiers,
     indexNames: selectedPatterns,
     skip: selectedPatterns.length === 0,
   });
@@ -212,8 +223,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
     totalCount,
     refetch: refetchRelatedHosts,
   } = useUserRelatedHosts({
-    userName,
-    indexNames: selectedPatterns,
+    entityIdentifiers,
     from: timestamp, // related hosts are hosts this user has successfully authenticated onto AFTER alert time
     skip: selectedPatterns.length === 0,
   });
@@ -384,7 +394,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
               setQuery={setQuery}
               refetch={refetch}
               inspect={inspect}
-              userName={userName}
+              entityIdentifiers={entityIdentifiers}
               indexPatterns={selectedPatterns}
               jobNameById={jobNameById}
               scopeId={scopeId}
@@ -396,15 +406,13 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
         <EuiHorizontalRule margin="s" />
         <EuiFlexGrid responsive={false} columns={3} gutterSize="xl">
           <AlertCountInsight
-            fieldName={'user.name'}
-            name={userName}
+            entityIdentifiers={entityIdentifiers}
             direction="column"
             openDetailsPanel={openDetailsPanel}
             data-test-subj={USER_DETAILS_ALERT_COUNT_TEST_ID}
           />
           <MisconfigurationsInsight
-            fieldName={'user.name'}
-            name={userName}
+            entityIdentifiers={entityIdentifiers}
             direction="column"
             openDetailsPanel={openDetailsPanel}
             data-test-subj={USER_DETAILS_MISCONFIGURATIONS_TEST_ID}
@@ -430,7 +438,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
                   <FormattedMessage
                     id="xpack.securitySolution.flyout.left.insights.entities.relatedHostsTooltip"
                     defaultMessage="After this event, {userName} logged into these hosts. Check if this activity is normal."
-                    values={{ userName }}
+                    values={{ userName: filterValue }}
                   />
                 }
                 type="info"

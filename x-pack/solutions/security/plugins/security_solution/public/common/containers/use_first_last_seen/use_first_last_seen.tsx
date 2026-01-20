@@ -12,6 +12,7 @@ import { useSearchStrategy } from '../use_search_strategy';
 import { FirstLastSeenQuery } from '../../../../common/search_strategy';
 import type { Direction } from '../../../../common/search_strategy';
 import type { ESQuery } from '../../../../common/typed_json';
+import type { EntityIdentifiers } from '../../../flyout/document_details/shared/utils';
 
 export interface FirstLastSeenArgs {
   errorMessage: string | null;
@@ -19,16 +20,14 @@ export interface FirstLastSeenArgs {
   lastSeen?: string | null;
 }
 export interface UseFirstLastSeen {
-  field: string;
-  value: string;
+  entityIdentifiers: EntityIdentifiers;
   order: Direction.asc | Direction.desc;
   defaultIndex: string[];
   filterQuery?: ESQuery | string;
 }
 
 export const useFirstLastSeen = ({
-  field,
-  value,
+  entityIdentifiers,
   order,
   defaultIndex,
   filterQuery,
@@ -45,12 +44,11 @@ export const useFirstLastSeen = ({
   useEffect(() => {
     search({
       defaultIndex,
-      field,
-      value,
+      entityIdentifiers,
       order,
       filterQuery,
     });
-  }, [defaultIndex, field, value, order, search, filterQuery]);
+  }, [defaultIndex, entityIdentifiers, order, search, filterQuery]);
 
   const setFirstLastSeenResponse: FirstLastSeenArgs = useMemo(
     () => ({

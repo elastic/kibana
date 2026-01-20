@@ -46,7 +46,7 @@ export const useNavigateEntityInsight = ({
     field,
     value,
   });
-  const { hasMisconfigurationFindings } = useHasMisconfigurations(field, value);
+  const { hasMisconfigurationFindings } = useHasMisconfigurations({ [field]: value });
   const { openLeftPanel } = useExpandableFlyoutApi();
 
   const goToEntityInsightTab = useCallback(() => {

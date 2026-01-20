@@ -28,8 +28,7 @@ const AnomaliesQueryTabBodyComponent: React.FC<AnomaliesQueryTabBodyProps> = ({
   AnomaliesTableComponent,
   flowTarget,
   ip,
-  hostName,
-  userName,
+  entityIdentifiers,
 }) => {
   const { jobs } = useInstalledSecurityJobs();
   const [anomalyScore] = useUiSetting$<number>(DEFAULT_ANOMALY_SCORE);
@@ -68,8 +67,7 @@ const AnomaliesQueryTabBodyComponent: React.FC<AnomaliesQueryTabBodyProps> = ({
         type={type}
         flowTarget={flowTarget}
         ip={ip}
-        hostName={hostName}
-        userName={userName}
+        entityIdentifiers={entityIdentifiers}
       />
     </>
   );

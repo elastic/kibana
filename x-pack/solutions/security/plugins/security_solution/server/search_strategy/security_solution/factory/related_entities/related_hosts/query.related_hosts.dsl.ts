@@ -7,15 +7,17 @@
 
 import type { ISearchRequestParams } from '@kbn/search-types';
 import type { RelatedHostsRequestOptions } from '../../../../../../common/api/search_strategy';
+import { buildEntityFiltersFromEntityIdentifiers } from '../../../../../../common/search_strategy/security_solution/risk_score/common';
 
 export const buildRelatedHostsQuery = ({
-  userName,
+  entityIdentifiers,
   defaultIndex,
   from,
 }: RelatedHostsRequestOptions): ISearchRequestParams => {
   const now = new Date();
+  const entityFilters = buildEntityFiltersFromEntityIdentifiers(entityIdentifiers);
   const filter = [
-    { term: { 'user.name': userName } },
+    ...entityFilters,
     { term: { 'event.category': 'authentication' } },
     { term: { 'event.outcome': 'success' } },
     {

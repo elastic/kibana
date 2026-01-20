@@ -40,6 +40,7 @@ import { OverviewDescriptionList } from '../../../common/components/overview_des
 import { RiskScoreLevel } from '../../../entity_analytics/components/severity/common';
 import type { UserItem } from '../../../../common/search_strategy/security_solution/users/common';
 import { RiskScoreDocTooltip } from '../common';
+import type { EntityIdentifiers } from '../../../flyout/document_details/shared/utils';
 
 export interface UserSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
@@ -53,7 +54,7 @@ export interface UserSummaryProps {
   startDate: string;
   endDate: string;
   narrowDateRange: NarrowDateRange;
-  userName: string;
+  entityIdentifiers: EntityIdentifiers;
   indexPatterns: string[];
   jobNameById: Record<string, string | undefined>;
   isFlyoutOpen?: boolean;
@@ -81,7 +82,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
     narrowDateRange,
     startDate,
     endDate,
-    userName,
+    entityIdentifiers,
     indexPatterns,
     jobNameById,
     isFlyoutOpen = false,
@@ -89,6 +90,20 @@ export const UserOverview = React.memo<UserSummaryProps>(
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
     const darkMode = useKibanaIsDarkMode();
+
+    // Extract user name from entityIdentifiers for buildUserNamesFilter
+    // Priority: user.name > user.id > user.email > user.entity.id > first available value
+    const userName = useMemo(() => {
+      return (
+        entityIdentifiers['user.name'] ||
+        entityIdentifiers['user.id'] ||
+        entityIdentifiers['user.email'] ||
+        entityIdentifiers['user.entity.id'] ||
+        Object.values(entityIdentifiers)[0] ||
+        ''
+      );
+    }, [entityIdentifiers]);
+
     const filterQuery = useMemo(
       () => (userName ? buildUserNamesFilter([userName]) : undefined),
       [userName]
@@ -103,7 +118,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
       refetch: refetchRiskScore,
     } = useRiskScore({
       filterQuery,
-      skip: userName == null,
+      skip: !userName || Object.keys(entityIdentifiers).length === 0,
       riskEntity: EntityType.user,
       onlyLatest: false,
       pagination: FIRST_RECORD_PAGINATION,
@@ -231,8 +246,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
             description: (
               <FirstLastSeen
                 indexPatterns={indexPatterns}
-                field={'user.name'}
-                value={userName}
+                entityIdentifiers={entityIdentifiers}
                 type={FirstLastSeenType.FIRST_SEEN}
               />
             ),
@@ -242,8 +256,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
             description: (
               <FirstLastSeen
                 indexPatterns={indexPatterns}
-                field={'user.name'}
-                value={userName}
+                entityIdentifiers={entityIdentifiers}
                 type={FirstLastSeenType.LAST_SEEN}
               />
             ),
@@ -290,7 +303,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
         getDefaultRenderer,
         contextID,
         scopeId,
-        userName,
+        entityIdentifiers,
         firstColumn,
         isFlyoutOpen,
       ]

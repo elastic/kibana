@@ -43,12 +43,11 @@ export const EntityInsight = <T,>({
   const { euiTheme } = useEuiTheme();
   const insightContent: React.ReactElement[] = [];
 
-  const { hasMisconfigurationFindings: showMisconfigurationsPreview } = useHasMisconfigurations(
-    field,
-    value
-  );
+  const { hasMisconfigurationFindings: showMisconfigurationsPreview } = useHasMisconfigurations({
+    [field]: value,
+  });
 
-  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(field, value);
+  const { hasVulnerabilitiesFindings } = useHasVulnerabilities({ [field]: value });
 
   const showVulnerabilitiesPreview = hasVulnerabilitiesFindings && field === 'host.name';
 

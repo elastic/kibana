@@ -201,7 +201,11 @@ const UsersComponent = () => {
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
             <HeaderPage
               subtitle={
-                <LastEventTime indexKey={LastEventIndexKey.users} indexNames={selectedPatterns} />
+                <LastEventTime
+                  entityIdentifiers={{}}
+                  indexKey={LastEventIndexKey.users}
+                  indexNames={selectedPatterns}
+                />
               }
               border
               title={i18n.PAGE_TITLE}

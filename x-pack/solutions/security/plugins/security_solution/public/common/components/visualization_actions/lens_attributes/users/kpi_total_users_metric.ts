@@ -7,50 +7,69 @@
 
 import type { LensAttributes } from '../../types';
 
-export const kpiTotalUsersMetricLensAttributes: LensAttributes = {
-  description: '',
-  state: {
-    datasourceStates: {
-      formBased: {
-        layers: {
-          '416b6fad-1923-4f6a-a2df-b223bb287e30': {
-            columnOrder: ['3e51b035-872c-4b44-824b-fe069c222e91'],
-            columns: {
-              '3e51b035-872c-4b44-824b-fe069c222e91': {
-                dataType: 'number',
-                isBucketed: false,
-                label: ' ',
-                operationType: 'unique_count',
-                scale: 'ratio',
-                sourceField: 'user.name',
-                customLabel: true,
+const LAYER_ID = '416b6fad-1923-4f6a-a2df-b223bb287e30';
+const COLUMN_ID = '3e51b035-872c-4b44-824b-fe069c222e91';
+const DATA_VIEW_ID = 'entity-store-user-data-view';
+
+export const getKpiTotalUsersMetricLensAttributes = (spaceId?: string): LensAttributes => {
+  const namespace = spaceId || 'default';
+  const entityStoreIndexPattern = `.entities.v1.latest.security_user_${namespace}`;
+
+  return {
+    description: '',
+    state: {
+      adHocDataViews: {
+        [DATA_VIEW_ID]: {
+          id: DATA_VIEW_ID,
+          title: entityStoreIndexPattern,
+          timeFieldName: '@timestamp',
+        },
+      },
+      datasourceStates: {
+        formBased: {
+          layers: {
+            [LAYER_ID]: {
+              columnOrder: [COLUMN_ID],
+              columns: {
+                [COLUMN_ID]: {
+                  customLabel: true,
+                  dataType: 'number',
+                  isBucketed: false,
+                  label: ' ',
+                  operationType: 'unique_count',
+                  scale: 'ratio',
+                  sourceField: 'user.entity.id',
+                },
               },
+              incompleteColumns: {},
             },
-            incompleteColumns: {},
           },
         },
       },
+      filters: [],
+      query: { language: 'kuery', query: '' },
+      visualization: {
+        accessor: COLUMN_ID,
+        layerId: LAYER_ID,
+        layerType: 'data',
+      },
     },
-    filters: [],
-    query: { language: 'kuery', query: '' },
-    visualization: {
-      accessor: '3e51b035-872c-4b44-824b-fe069c222e91',
-      layerId: '416b6fad-1923-4f6a-a2df-b223bb287e30',
-      layerType: 'data',
-    },
-  },
-  title: '[User] Users - metric',
-  visualizationType: 'lnsLegacyMetric',
-  references: [
-    {
-      id: '{dataViewId}',
-      name: 'indexpattern-datasource-current-indexpattern',
-      type: 'index-pattern',
-    },
-    {
-      id: '{dataViewId}',
-      name: 'indexpattern-datasource-layer-416b6fad-1923-4f6a-a2df-b223bb287e30',
-      type: 'index-pattern',
-    },
-  ],
-} as LensAttributes;
+    title: '[User] Users - metric',
+    visualizationType: 'lnsLegacyMetric',
+    references: [
+      {
+        id: DATA_VIEW_ID,
+        name: 'indexpattern-datasource-current-indexpattern',
+        type: 'index-pattern',
+      },
+      {
+        id: DATA_VIEW_ID,
+        name: `indexpattern-datasource-layer-${LAYER_ID}`,
+        type: 'index-pattern',
+      },
+    ],
+  } as LensAttributes;
+};
+
+// Keep the old export for backward compatibility, but it will use default space
+export const kpiTotalUsersMetricLensAttributes = getKpiTotalUsersMetricLensAttributes();

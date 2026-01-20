@@ -34,9 +34,8 @@ export const timelineEventsLastEventTimeRequestSchema = timelineRequestBasicOpti
       LastEventIndexKey.network,
     ]),
     details: z.object({
-      hostName: z.string().nullable().optional(),
-      userName: z.string().nullable().optional(),
       ip: z.string().nullable().optional(),
+      entityIdentifiers: z.record(z.string(), z.string()).optional(),
     }),
     factoryQueryType: z.literal(TimelineEventsQueries.lastEventTime),
   });

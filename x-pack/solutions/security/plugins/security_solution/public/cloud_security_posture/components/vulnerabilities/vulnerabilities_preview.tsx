@@ -79,7 +79,7 @@ export const VulnerabilitiesPreview = ({
   }, []);
 
   const { data } = useVulnerabilitiesPreview({
-    query: buildGenericEntityFlyoutPreviewQuery(field, value),
+    query: buildGenericEntityFlyoutPreviewQuery({ [field]: value }),
     sort: [],
     enabled: true,
     pageSize: 1,

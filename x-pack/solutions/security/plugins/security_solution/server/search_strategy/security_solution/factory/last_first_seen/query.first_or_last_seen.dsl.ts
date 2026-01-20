@@ -6,13 +6,16 @@
  */
 
 import type { FirstLastSeenRequestOptions } from '../../../../../common/api/search_strategy';
+import type { ESQuery } from '../../../../../common/typed_json';
+import { buildEntityFiltersFromEntityIdentifiers } from '../../../../../common/search_strategy/security_solution/risk_score/common';
 
 import { createQueryFilterClauses } from '../../../../utils/build_query';
 
 export const buildFirstOrLastSeenQuery = (options: FirstLastSeenRequestOptions) => {
-  const { field, value, defaultIndex, order, filterQuery } = options;
+  const { entityIdentifiers, defaultIndex, order, filterQuery } = options;
 
-  const filter = [...createQueryFilterClauses(filterQuery), { term: { [field]: value } }];
+  const entityFilters = buildEntityFiltersFromEntityIdentifiers(entityIdentifiers) as ESQuery[];
+  const filter = [...createQueryFilterClauses(filterQuery), ...entityFilters];
 
   const dslQuery = {
     allow_no_indices: true,

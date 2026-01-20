@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { INSIGHTS_ENTITIES_TEST_ID } from './test_ids';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { getField } from '../../shared/utils';
+import { getHostEntityIdentifiers, getUserEntityIdentifiers } from '../../shared/utils';
 import { HostEntityOverview } from './host_entity_overview';
 import { UserEntityOverview } from './user_entity_overview';
 import { LeftPanelInsightsTab } from '../../left';
@@ -22,9 +22,9 @@ import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_
  * Entities section under Insights section, overview tab. It contains a preview of host and user information.
  */
 export const EntitiesOverview: React.FC = () => {
-  const { getFieldsData, isPreviewMode } = useDocumentDetailsContext();
-  const hostName = getField(getFieldsData('host.name'));
-  const userName = getField(getFieldsData('user.name'));
+  const { getFieldsData, dataAsNestedObject, isPreviewMode } = useDocumentDetailsContext();
+  const hostEntityIdentifiers = getHostEntityIdentifiers(dataAsNestedObject, getFieldsData);
+  const userEntityIdentifiers = getUserEntityIdentifiers(dataAsNestedObject, getFieldsData);
 
   const navigateToLeftPanel = useNavigateToLeftPanel({
     tab: LeftPanelInsightsTab,
@@ -59,19 +59,19 @@ export const EntitiesOverview: React.FC = () => {
         }}
         data-test-subj={INSIGHTS_ENTITIES_TEST_ID}
       >
-        {userName || hostName ? (
+        {userEntityIdentifiers || hostEntityIdentifiers ? (
           <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-            {userName && (
+            {userEntityIdentifiers && (
               <>
                 <EuiFlexItem>
-                  <UserEntityOverview userName={userName} />
+                  <UserEntityOverview entityIdentifiers={userEntityIdentifiers} />
                 </EuiFlexItem>
                 <EuiSpacer size="s" />
               </>
             )}
-            {hostName && (
+            {hostEntityIdentifiers && (
               <EuiFlexItem>
-                <HostEntityOverview hostName={hostName} />
+                <HostEntityOverview entityIdentifiers={hostEntityIdentifiers} />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

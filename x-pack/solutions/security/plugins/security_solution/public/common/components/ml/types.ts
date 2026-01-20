@@ -12,6 +12,8 @@ import type { HostsType } from '../../../explore/hosts/store/model';
 import type { NetworkType } from '../../../explore/network/store/model';
 import type { UsersType } from '../../../explore/users/store/model';
 
+export type EntityIdentifiers = Record<string, string>;
+
 export interface Source {
   job_id: string;
   result_type: string;
@@ -69,7 +71,7 @@ export interface AnomaliesBy {
 }
 
 export interface AnomaliesByHost extends AnomaliesBy {
-  hostName: string;
+  entityIdentifiers: EntityIdentifiers;
 }
 
 export type DestinationOrSource = 'source.ip' | 'destination.ip';
@@ -80,7 +82,7 @@ export interface AnomaliesByNetwork extends AnomaliesBy {
 }
 
 export interface AnomaliesByUser extends AnomaliesBy {
-  userName: string;
+  entityIdentifiers: EntityIdentifiers;
 }
 
 export interface AnomaliesTableCommonProps {
@@ -91,7 +93,7 @@ export interface AnomaliesTableCommonProps {
 }
 
 export type AnomaliesHostTableProps = AnomaliesTableCommonProps & {
-  hostName?: string;
+  entityIdentifiers?: EntityIdentifiers;
   type: HostsType;
 };
 
@@ -102,7 +104,7 @@ export type AnomaliesNetworkTableProps = AnomaliesTableCommonProps & {
 };
 
 export type AnomaliesUserTableProps = AnomaliesTableCommonProps & {
-  userName?: string;
+  entityIdentifiers?: EntityIdentifiers;
   type: UsersType;
 };
 

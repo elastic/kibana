@@ -18,7 +18,6 @@ import { useDispatch } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
-import { LastEventIndexKey } from '@kbn/timelines-plugin/common';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { dataViewSpecToViewBase } from '../../../../common/lib/kuery';
@@ -57,6 +56,7 @@ import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { LastEventTime } from '../../../../common/components/last_event_time';
+import { LastEventIndexKey } from '../../../../../common/search_strategy';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import type { UserSummaryProps } from '../../../../overview/components/user_overview';
@@ -78,7 +78,6 @@ import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_sel
 import { PageLoader } from '../../../../common/components/page_loader';
 
 const QUERY_ID = 'UsersDetailsQueryId';
-const ES_USER_FIELD = 'user.name';
 
 const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   detailName,
@@ -170,7 +169,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     id: QUERY_ID,
     endDate: to,
     startDate: from,
-    userName: detailName,
+    entityIdentifiers: { 'user.name': detailName },
     indexNames: selectedPatterns,
     skip: selectedPatterns.length === 0,
   });
@@ -193,10 +192,9 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     [dispatch]
   );
 
-  const entityFilter = useMemo(
+  const entityIdentifiers = useMemo(
     () => ({
-      field: ES_USER_FIELD,
-      value: detailName,
+      'user.name': detailName,
     }),
     [detailName]
   );
@@ -242,9 +240,11 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
             <HeaderPage
               subtitle={
                 <LastEventTime
+                  entityIdentifiers={{
+                    'user.name': detailName,
+                  }}
                   indexKey={LastEventIndexKey.userDetails}
                   indexNames={selectedPatterns}
-                  userName={detailName}
                 />
               }
               title={detailName}
@@ -261,14 +261,16 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
             )}
 
             <AnomalyTableProvider
-              criteriaFields={getCriteriaFromUsersType(UsersType.details, detailName)}
+              criteriaFields={getCriteriaFromUsersType(UsersType.details, {
+                'user.name': detailName,
+              })}
               startDate={from}
               endDate={to}
               skip={isInitializing}
             >
               {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => (
                 <UserOverview
-                  userName={detailName}
+                  entityIdentifiers={entityIdentifiers}
                   id={QUERY_ID}
                   isInDetailsSidePanel={false}
                   data={userDetails}
@@ -293,13 +295,13 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                   <EuiFlexItem>
                     <AlertsByStatus
                       signalIndexName={signalIndexName}
-                      entityFilter={entityFilter}
+                      entityIdentifiers={entityIdentifiers}
                       additionalFilters={additionalFilters}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <AlertCountByRuleByStatus
-                      entityFilter={entityFilter}
+                      entityIdentifiers={entityIdentifiers}
                       signalIndexName={signalIndexName}
                       additionalFilters={additionalFilters}
                     />
