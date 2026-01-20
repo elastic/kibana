@@ -14,6 +14,8 @@ import type {
 import { CONNECTOR_ID } from '@kbn/connector-schemas/server_log/constants';
 import type { ServerLogActionParams } from '../types';
 
+const DEFAULT_PARAMS = { level: 'info', message: undefined };
+
 export function getConnectorType(): ConnectorTypeModel<unknown, unknown, ServerLogActionParams> {
   return {
     id: CONNECTOR_ID,
@@ -48,5 +50,7 @@ export function getConnectorType(): ConnectorTypeModel<unknown, unknown, ServerL
     },
     actionConnectorFields: null,
     actionParamsFields: lazy(() => import('./server_log_params')),
+    defaultActionParams: DEFAULT_PARAMS,
+    defaultRecoveredActionParams: DEFAULT_PARAMS,
   };
 }

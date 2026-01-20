@@ -14,6 +14,8 @@ import type {
 import { CONNECTOR_ID } from '@kbn/connector-schemas/teams/constants';
 import type { TeamsActionParams, TeamsSecrets } from '../types';
 
+const DEFAULT_PARAMS = { message: undefined };
+
 export function getConnectorType(): ConnectorTypeModel<unknown, TeamsSecrets, TeamsActionParams> {
   return {
     id: CONNECTOR_ID,
@@ -39,5 +41,7 @@ export function getConnectorType(): ConnectorTypeModel<unknown, TeamsSecrets, Te
     },
     actionConnectorFields: lazy(() => import('./teams_connectors')),
     actionParamsFields: lazy(() => import('./teams_params')),
+    defaultActionParams: DEFAULT_PARAMS,
+    defaultRecoveredActionParams: DEFAULT_PARAMS,
   };
 }
