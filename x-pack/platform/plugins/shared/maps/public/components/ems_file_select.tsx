@@ -18,6 +18,7 @@ interface Props {
   isColumnCompressed?: boolean;
   onChange: (emsFileId: string) => void;
   value: string | null;
+  fullWidth?: boolean;
 }
 
 interface State {
@@ -112,6 +113,7 @@ export class EMSFileSelect extends Component<Props, State> {
         })}
         helpText={this.state.emsFileOptions.length === 0 ? getEmsUnavailableMessage() : null}
         display={this.props.isColumnCompressed ? 'columnCompressed' : 'row'}
+        fullWidth={this.props.fullWidth}
       >
         {this._renderSelect()}
       </EuiFormRow>

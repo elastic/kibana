@@ -293,7 +293,7 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
     category = SuggestionCategory.FUNCTION_SCALAR;
   }
 
-  return withAutoSuggest({
+  return {
     label: fn.name.toUpperCase(),
     text,
     asSnippet: true,
@@ -319,7 +319,7 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
       id: 'editor.action.triggerParameterHints',
       title: '',
     },
-  });
+  };
 }
 
 export function checkFunctionInvocationComplete(
@@ -442,7 +442,14 @@ export const buildColumnSuggestions = (
 ): ISuggestionItem[] => {
   const fieldsSuggestions = columns.map((column) => {
     const fieldType = column.type.charAt(0).toUpperCase() + column.type.slice(1);
-    const titleCaseType = `${column.name} (${fieldType})`;
+    const unmmapedSuffix = column.isUnmappedField
+      ? i18n.translate('kbn-esql-language.esql.autocomplete.unmappedFieldTypeSuffix', {
+          defaultMessage: ' - Unmapped Field',
+        })
+      : '';
+
+    const titleCaseType = `${column.name} (${fieldType})${unmmapedSuffix}`;
+
     // Check if the field is in the recommended fields from extensions list
     // and if so, mark it as recommended. This also ensures that recommended fields
     // that are registered wrongly, won't be shown as suggestions.

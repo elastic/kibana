@@ -93,8 +93,8 @@ export const getSearchEmbeddableFactory = ({
       const fetchWarnings$ = new BehaviorSubject<SearchResponseIncompleteWarning[]>([]);
 
       /** Build API */
-      const titleManager = initializeTitleManager(initialState.rawState);
-      const timeRangeManager = initializeTimeRangeManager(initialState.rawState);
+      const titleManager = initializeTitleManager(initialState);
+      const timeRangeManager = initializeTimeRangeManager(initialState);
       const dynamicActionsManager =
         discoverServices.embeddableEnhanced?.initializeEmbeddableDynamicActions(
           uuid,
@@ -150,9 +150,9 @@ export const getSearchEmbeddableFactory = ({
           };
         },
         onReset: async (lastSaved) => {
-          dynamicActionsManager?.reinitializeState(lastSaved?.rawState ?? {});
-          timeRangeManager.reinitializeState(lastSaved?.rawState);
-          titleManager.reinitializeState(lastSaved?.rawState);
+          dynamicActionsManager?.reinitializeState(lastSaved ?? {});
+          timeRangeManager.reinitializeState(lastSaved);
+          titleManager.reinitializeState(lastSaved);
           if (lastSaved) {
             const lastSavedRuntimeState = await deserializeState({
               serializedState: lastSaved,

@@ -120,9 +120,14 @@ function buildContext(params: SuggestForExpressionParams): ExpressionContext {
   const { query, cursorPosition } = params;
   const innerText = query.slice(0, cursorPosition);
   const isCursorFollowedByComma = query.slice(cursorPosition).trimStart().startsWith(',');
+  const isCursorFollowedByParens = query.slice(cursorPosition).trimStart().startsWith('(');
 
   const baseOptions: ExpressionContextOptions = params.options ?? ({} as ExpressionContextOptions);
-  const options: ExpressionContextOptions = { ...baseOptions, isCursorFollowedByComma };
+  const options: ExpressionContextOptions = {
+    ...baseOptions,
+    isCursorFollowedByComma,
+    isCursorFollowedByParens,
+  };
 
   return {
     query,
@@ -141,7 +146,11 @@ function buildContext(params: SuggestForExpressionParams): ExpressionContext {
 function computeDerivedState(ctx: ExpressionContext): ExpressionComputedMetadata {
   const { expressionRoot, innerText, cursorPosition, context } = ctx;
   const position: ExpressionPosition = getPosition(innerText, expressionRoot);
-  const expressionType = getExpressionType(expressionRoot, context?.columns);
+  const expressionType = getExpressionType(
+    expressionRoot,
+    context?.columns,
+    context?.unmappedFieldsStrategy
+  );
   const isComplete = isExpressionComplete(expressionType, innerText);
   const insideFunction =
     (expressionRoot &&
