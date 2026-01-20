@@ -27,7 +27,6 @@ import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { buildHostNamesFilter } from '../../../../../common/search_strategy';
-import { HOST_NAME_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useDocumentDetailsContext } from '../../shared/context';
 import type { DescriptionList } from '../../../../../common/utility_types';
@@ -235,8 +234,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ entityId
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <PreviewLink
-              field={HOST_NAME_FIELD_NAME}
-              value={hostName}
+              entityIdentifiers={entityIdentifiers}
               scopeId={scopeId}
               data-test-subj={ENTITIES_HOST_OVERVIEW_LINK_TEST_ID}
             >

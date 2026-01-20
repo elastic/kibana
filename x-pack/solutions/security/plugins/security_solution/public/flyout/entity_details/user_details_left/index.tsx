@@ -16,15 +16,11 @@ import type {
 } from '../shared/components/left_panel/left_panel_header';
 import { LeftPanelHeader } from '../shared/components/left_panel/left_panel_header';
 import { LeftPanelContent } from '../shared/components/left_panel/left_panel_content';
-
-interface UserParam {
-  name: string;
-  email: string[];
-}
+import type { EntityIdentifiers } from '../../document_details/shared/utils';
 
 export interface UserDetailsPanelProps extends Record<string, unknown> {
   isRiskScoreExist: boolean;
-  user: UserParam;
+  entityIdentifiers: EntityIdentifiers;
   path?: PanelPath;
   scopeId: string;
   hasMisconfigurationFindings?: boolean;
@@ -38,16 +34,23 @@ export const UserDetailsPanelKey: UserDetailsExpandableFlyoutProps['key'] = 'use
 
 export const UserDetailsPanel = ({
   isRiskScoreExist,
-  user,
+  entityIdentifiers,
   path,
   scopeId,
   hasMisconfigurationFindings,
   hasNonClosedAlerts,
 }: UserDetailsPanelProps) => {
   const managedUser = useManagedUser();
+
+  // Extract name from entityIdentifiers
+  // Priority: entityIdentifiers['user.name'] > entityIdentifiers[first key]
+  const name = useMemo(() => {
+    return entityIdentifiers['user.name'] || Object.values(entityIdentifiers)[0] || '';
+  }, [entityIdentifiers]);
+
   const tabs = useTabs(
     managedUser.data,
-    user.name,
+    name || '',
     isRiskScoreExist,
     scopeId,
     hasMisconfigurationFindings,
@@ -56,7 +59,7 @@ export const UserDetailsPanel = ({
 
   const { selectedTabId, setSelectedTabId } = useSelectedTab(
     isRiskScoreExist,
-    user,
+    entityIdentifiers,
     tabs,
     path,
     scopeId,
@@ -64,7 +67,8 @@ export const UserDetailsPanel = ({
     hasNonClosedAlerts
   );
 
-  if (!selectedTabId) {
+  // Safety check: return null if name is missing or no tab selected
+  if (!name || !selectedTabId) {
     return null;
   }
 
@@ -82,7 +86,7 @@ export const UserDetailsPanel = ({
 
 const useSelectedTab = (
   isRiskScoreExist: boolean,
-  user: UserParam,
+  entityIdentifiers: EntityIdentifiers,
   tabs: LeftPanelTabsType,
   path: PanelPath | undefined,
   scopeId: string,
@@ -102,7 +106,7 @@ const useSelectedTab = (
     openLeftPanel({
       id: UserDetailsPanelKey,
       params: {
-        user,
+        entityIdentifiers,
         isRiskScoreExist,
         hasMisconfigurationFindings,
         hasNonClosedAlerts,

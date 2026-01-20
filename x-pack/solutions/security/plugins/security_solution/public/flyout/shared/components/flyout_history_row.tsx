@@ -88,7 +88,12 @@ export const FlyoutHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item, index }
         <GenericHistoryRow
           item={item}
           index={index}
-          title={String(item.panel.params?.userName)}
+          title={String(
+            (item.panel.params?.entityIdentifiers as Record<string, string>)?.['user.name'] ||
+              Object.values(
+                (item.panel.params?.entityIdentifiers as Record<string, string>) || {}
+              )[0]
+          )}
           icon={'user'}
           name={'User'}
           dataTestSubj={USER_HISTORY_ROW_TEST_ID}

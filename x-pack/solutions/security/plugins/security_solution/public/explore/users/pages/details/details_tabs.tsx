@@ -29,6 +29,7 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
     to,
     type,
     detailName,
+    entityIdentifiers,
     userDetailFilter,
   }) => {
     const tabProps = {
@@ -40,7 +41,7 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
       setQuery,
       startDate: from,
       type,
-      entityIdentifiers: detailName ? { 'user.name': detailName } : undefined,
+      entityIdentifiers,
     };
 
     return (

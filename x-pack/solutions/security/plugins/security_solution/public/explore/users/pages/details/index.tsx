@@ -80,9 +80,10 @@ import { PageLoader } from '../../../../common/components/page_loader';
 const QUERY_ID = 'UsersDetailsQueryId';
 
 const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
-  detailName,
+  entityIdentifiers,
   usersDetailsPagePath,
 }) => {
+  const detailName = useMemo(() => entityIdentifiers['user.name'], [entityIdentifiers]);
   const dispatch = useDispatch();
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -104,8 +105,8 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   } = useKibana();
 
   const usersDetailsPageFilters: Filter[] = useMemo(
-    () => getUsersDetailsPageFilters(detailName),
-    [detailName]
+    () => getUsersDetailsPageFilters(entityIdentifiers),
+    [entityIdentifiers]
   );
 
   const {
@@ -169,7 +170,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     id: QUERY_ID,
     endDate: to,
     startDate: from,
-    entityIdentifiers: { 'user.name': detailName },
+    entityIdentifiers,
     indexNames: selectedPatterns,
     skip: selectedPatterns.length === 0,
   });
@@ -190,13 +191,6 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
       );
     },
     [dispatch]
-  );
-
-  const entityIdentifiers = useMemo(
-    () => ({
-      'user.name': detailName,
-    }),
-    [detailName]
   );
 
   const entity = useMemo(() => ({ type: EntityType.user, name: detailName }), [detailName]);
@@ -240,9 +234,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
             <HeaderPage
               subtitle={
                 <LastEventTime
-                  entityIdentifiers={{
-                    'user.name': detailName,
-                  }}
+                  entityIdentifiers={entityIdentifiers}
                   indexKey={LastEventIndexKey.userDetails}
                   indexNames={selectedPatterns}
                 />
@@ -261,9 +253,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
             )}
 
             <AnomalyTableProvider
-              criteriaFields={getCriteriaFromUsersType(UsersType.details, {
-                'user.name': detailName,
-              })}
+              criteriaFields={getCriteriaFromUsersType(UsersType.details, entityIdentifiers)}
               startDate={from}
               endDate={to}
               skip={isInitializing}
@@ -318,6 +308,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
             <UsersDetailsTabs
               deleteQuery={deleteQuery}
               detailName={detailName}
+              entityIdentifiers={entityIdentifiers}
               filterQuery={stringifiedAdditionalFilters}
               from={from}
               indexNames={selectedPatterns}

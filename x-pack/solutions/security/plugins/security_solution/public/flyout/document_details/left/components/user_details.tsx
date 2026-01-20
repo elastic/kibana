@@ -162,7 +162,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
     openPreviewPanel({
       id: UserPreviewPanelKey,
       params: {
-        userName,
+        entityIdentifiers,
         scopeId,
         banner: USER_PREVIEW_BANNER,
       },
@@ -171,7 +171,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
       location: scopeId,
       panel: 'preview',
     });
-  }, [openPreviewPanel, userName, scopeId, telemetry]);
+  }, [openPreviewPanel, entityIdentifiers, scopeId, telemetry]);
 
   const filterQuery = useMemo(
     () => (filterValue ? buildUserNamesFilter([filterValue]) : undefined),
@@ -198,7 +198,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
   });
 
   const openDetailsPanel = useNavigateToUserDetails({
-    userName,
+    entityIdentifiers,
     scopeId,
     isRiskScoreExist,
     hasMisconfigurationFindings,
@@ -242,8 +242,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
           <EuiText grow={false} size="xs">
             <CellActions field={HOST_NAME_FIELD_NAME} value={host}>
               <PreviewLink
-                field={HOST_NAME_FIELD_NAME}
-                value={host}
+                entityIdentifiers={entityIdentifiers}
                 scopeId={scopeId}
                 data-test-subj={USER_DETAILS_RELATED_HOSTS_LINK_TEST_ID}
               />
@@ -270,8 +269,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
                   getEmptyTagValue()
                 ) : (
                   <PreviewLink
-                    field={HOST_IP_FIELD_NAME}
-                    value={ip}
+                    entityIdentifiers={{ ...entityIdentifiers, [HOST_IP_FIELD_NAME]: ip }}
                     scopeId={scopeId}
                     data-test-subj={USER_DETAILS_RELATED_HOSTS_IP_LINK_TEST_ID}
                   />
@@ -300,7 +298,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
           ]
         : []),
     ],
-    [isEntityAnalyticsAuthorized, scopeId]
+    [entityIdentifiers, isEntityAnalyticsAuthorized, scopeId]
   );
 
   const relatedHostsCount = useMemo(
