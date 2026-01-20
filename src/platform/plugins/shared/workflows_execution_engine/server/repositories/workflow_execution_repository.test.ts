@@ -210,6 +210,7 @@ describe('WorkflowExecutionRepository', () => {
         size: 0,
         terminate_after: 1,
         track_total_hits: true,
+        _source: false,
         query: {
           bool: {
             filter: [
@@ -249,6 +250,7 @@ describe('WorkflowExecutionRepository', () => {
         size: 0,
         terminate_after: 1,
         track_total_hits: true,
+        _source: false,
         query: {
           bool: {
             filter: [
