@@ -8,6 +8,10 @@
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { RequestHandlerContext } from '@kbn/core/server';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { registerRoutes, type RouteDependencies } from '.';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import * as helpers from './data_sources_helpers';
@@ -849,6 +853,368 @@ describe('registerRoutes', () => {
         },
       });
       expect(mockDeleteDataSourceAndRelatedResources).not.toHaveBeenCalled();
+    });
+  });
+});
+
+describe('DELETE /api/data_sources', () => {
+  const mockLogger = loggingSystemMock.createLogger().get();
+  let context: jest.Mocked<RequestHandlerContext>;
+  let mockRouter: ReturnType<typeof httpServiceMock.createRouter>;
+  let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
+  let routeHandler: any;
+  let mockTaskManager: ReturnType<typeof taskManagerMock.createStart>;
+  let mockGetStartServices: jest.Mock;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    mockTaskManager = taskManagerMock.createStart();
+    mockGetStartServices = jest.fn().mockResolvedValue([
+      {} as any, // coreStart
+      {
+        actions: {} as any,
+        dataCatalog: {} as any,
+        agentBuilder: {} as any,
+        taskManager: mockTaskManager,
+      },
+    ]);
+
+    context = {
+      core: Promise.resolve({
+        savedObjects: { client: {} },
+      }),
+    } as unknown as jest.Mocked<RequestHandlerContext>;
+
+    mockRouter = httpServiceMock.createRouter();
+    mockResponse = httpServerMock.createResponseFactory();
+
+    const dependencies: RouteDependencies = {
+      router: mockRouter,
+      logger: mockLogger,
+      getStartServices: mockGetStartServices,
+      workflowManagement: {} as any,
+    };
+
+    registerRoutes(dependencies);
+
+    const deleteCall = (mockRouter.delete as jest.Mock).mock.calls.find(
+      (call) => call[0].path === '/api/data_sources'
+    );
+    routeHandler = deleteCall?.[1];
+  });
+
+  describe('success', () => {
+    it('should schedule task and return taskId immediately', async () => {
+      const mockTaskInstance = {
+        id: 'test-task-id',
+        taskType: 'data-sources:bulk-delete-task',
+        state: { isDone: false, deletedCount: 0, errors: [] },
+      };
+      mockTaskManager.ensureScheduled.mockResolvedValue(mockTaskInstance as any);
+
+      await routeHandler(
+        context,
+        httpServerMock.createKibanaRequest(),
+        mockResponse
+      );
+
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith(
+        expect.objectContaining({
+          taskType: 'data-sources:bulk-delete-task',
+          scope: ['dataSources'],
+          state: { isDone: false, deletedCount: 0, errors: [] },
+        }),
+        expect.objectContaining({
+          request: expect.any(Object),
+        })
+      );
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: expect.objectContaining({
+          taskId: expect.any(String),
+        }),
+      });
+    });
+
+    it('should pass request context to ensureScheduled', async () => {
+      const mockTaskInstance = {
+        id: 'test-task-id',
+        taskType: 'data-sources:bulk-delete-task',
+        state: { isDone: false, deletedCount: 0, errors: [] },
+      };
+      mockTaskManager.ensureScheduled.mockResolvedValue(mockTaskInstance as any);
+
+      const mockRequest = httpServerMock.createKibanaRequest();
+
+      await routeHandler(context, mockRequest, mockResponse);
+
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith(
+        expect.any(Object),
+        { request: mockRequest }
+      );
+    });
+  });
+
+  describe('task manager unavailable', () => {
+    it('should return 503 error when task manager is not available', async () => {
+      mockGetStartServices.mockResolvedValue([
+        {} as any,
+        {
+          actions: {} as any,
+          dataCatalog: {} as any,
+          agentBuilder: {} as any,
+          taskManager: undefined,
+        },
+      ]);
+
+      await routeHandler(
+        context,
+        httpServerMock.createKibanaRequest(),
+        mockResponse
+      );
+
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 503,
+        body: {
+          message: 'Task Manager is not available',
+        },
+      });
+    });
+  });
+
+  describe('task scheduling failure', () => {
+    it('should return 500 error when task scheduling fails', async () => {
+      const error = new Error('Failed to schedule task');
+      mockTaskManager.ensureScheduled.mockRejectedValue(error);
+
+      await routeHandler(
+        context,
+        httpServerMock.createKibanaRequest(),
+        mockResponse
+      );
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to schedule bulk delete task')
+      );
+
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: {
+          message: expect.stringContaining('Failed to schedule bulk delete task'),
+        },
+      });
+    });
+  });
+});
+
+describe('GET /api/data_sources/_bulk_delete/{taskId}', () => {
+  const mockLogger = loggingSystemMock.createLogger().get();
+  let context: jest.Mocked<RequestHandlerContext>;
+  let mockRouter: ReturnType<typeof httpServiceMock.createRouter>;
+  let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
+  let routeHandler: any;
+  let mockTaskManager: ReturnType<typeof taskManagerMock.createStart>;
+  let mockGetStartServices: jest.Mock;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    mockTaskManager = taskManagerMock.createStart();
+    mockGetStartServices = jest.fn().mockResolvedValue([
+      {} as any,
+      {
+        actions: {} as any,
+        dataCatalog: {} as any,
+        agentBuilder: {} as any,
+        taskManager: mockTaskManager,
+      },
+    ]);
+
+    context = {
+      core: Promise.resolve({
+        savedObjects: { client: {} },
+      }),
+    } as unknown as jest.Mocked<RequestHandlerContext>;
+
+    mockRouter = httpServiceMock.createRouter();
+    mockResponse = httpServerMock.createResponseFactory();
+
+    const dependencies: RouteDependencies = {
+      router: mockRouter,
+      logger: mockLogger,
+      getStartServices: mockGetStartServices,
+      workflowManagement: {} as any,
+    };
+
+    registerRoutes(dependencies);
+
+    const getCall = (mockRouter.get as jest.Mock).mock.calls.find(
+      (call) => call[0].path === '/api/data_sources/_bulk_delete/{taskId}'
+    );
+    routeHandler = getCall?.[1];
+  });
+
+  describe('task in progress', () => {
+    it('should return current state when task is in progress', async () => {
+      const mockTask = {
+        id: 'test-task-id',
+        state: {
+          isDone: false,
+          deletedCount: 50,
+          errors: [],
+        },
+      };
+      mockTaskManager.get.mockResolvedValue(mockTask as any);
+
+      await routeHandler(
+        context,
+        httpServerMock.createKibanaRequest({ params: { taskId: 'test-task-id' } }),
+        mockResponse
+      );
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: {
+          isDone: false,
+          deletedCount: 50,
+          errors: [],
+        },
+      });
+    });
+  });
+
+  describe('task completed', () => {
+    it('should return final state when task is completed successfully', async () => {
+      const mockTask = {
+        id: 'test-task-id',
+        state: {
+          isDone: true,
+          deletedCount: 100,
+          errors: [],
+        },
+      };
+      mockTaskManager.get.mockResolvedValue(mockTask as any);
+
+      await routeHandler(
+        context,
+        httpServerMock.createKibanaRequest({ params: { taskId: 'test-task-id' } }),
+        mockResponse
+      );
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: {
+          isDone: true,
+          deletedCount: 100,
+          errors: [],
+        },
+      });
+    });
+
+    it('should return errors when task completed with errors', async () => {
+      const mockTask = {
+        id: 'test-task-id',
+        state: {
+          isDone: true,
+          deletedCount: 95,
+          errors: [
+            { dataSourceId: 'data-source-1', error: 'Failed to delete' },
+            { dataSourceId: 'data-source-2', error: 'Not found' },
+          ],
+        },
+      };
+      mockTaskManager.get.mockResolvedValue(mockTask as any);
+
+      await routeHandler(
+        context,
+        httpServerMock.createKibanaRequest({ params: { taskId: 'test-task-id' } }),
+        mockResponse
+      );
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: {
+          isDone: true,
+          deletedCount: 95,
+          errors: [
+            { dataSourceId: 'data-source-1', error: 'Failed to delete' },
+            { dataSourceId: 'data-source-2', error: 'Not found' },
+          ],
+        },
+      });
+    });
+  });
+
+  describe('task not found', () => {
+    it('should return error when task is not found', async () => {
+      const notFoundError = SavedObjectsErrorHelpers.createGenericNotFoundError(
+        'task',
+        'non-existent'
+      );
+      mockTaskManager.get.mockRejectedValue(notFoundError);
+
+      await routeHandler(
+        context,
+        httpServerMock.createKibanaRequest({ params: { taskId: 'non-existent' } }),
+        mockResponse
+      );
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: {
+          isDone: true,
+          deletedCount: 0,
+          error: 'Task not found',
+        },
+      });
+    });
+  });
+
+  describe('task manager unavailable', () => {
+    it('should return 503 error when task manager is not available', async () => {
+      mockGetStartServices.mockResolvedValue([
+        {} as any,
+        {
+          actions: {} as any,
+          dataCatalog: {} as any,
+          agentBuilder: {} as any,
+          taskManager: undefined,
+        },
+      ]);
+
+      await routeHandler(
+        context,
+        httpServerMock.createKibanaRequest({ params: { taskId: 'test-task-id' } }),
+        mockResponse
+      );
+
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 503,
+        body: {
+          message: 'Task Manager is not available',
+        },
+      });
+    });
+  });
+
+  describe('error handling', () => {
+    it('should handle errors when getting task status', async () => {
+      const error = new Error('Internal error');
+      mockTaskManager.get.mockRejectedValue(error);
+
+      await routeHandler(
+        context,
+        httpServerMock.createKibanaRequest({ params: { taskId: 'test-task-id' } }),
+        mockResponse
+      );
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to get bulk delete status')
+      );
+
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: {
+          message: expect.stringContaining('Failed to get bulk delete status'),
+        },
+      });
     });
   });
 });
