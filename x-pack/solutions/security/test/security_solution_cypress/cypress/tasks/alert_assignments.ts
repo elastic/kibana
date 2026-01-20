@@ -123,7 +123,7 @@ export const alertDetailsFlyoutShowsAssignees = (users: string[]) => {
   users.forEach((user) => {
     cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES_VALUE)
       .find(`.euiAvatar${ALERT_USER_AVATAR(user)}`)
-      .should('exist');
+      .should('be.visible');
   });
 };
 
