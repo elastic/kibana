@@ -264,6 +264,12 @@ export const labels = {
     loadToolsErrorToast: i18n.translate('xpack.agentBuilder.tools.loadToolsErrorToast', {
       defaultMessage: 'Unable to load tools',
     }),
+    conversationNotFoundErrorToast: i18n.translate(
+      'xpack.agentBuilder.tools.conversationNotFoundErrorToast',
+      {
+        defaultMessage: 'Conversation not found',
+      }
+    ),
 
     // Delete modals
     deleteEsqlToolTitle: (toolId: string) =>
