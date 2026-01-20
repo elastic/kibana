@@ -488,18 +488,18 @@ export const EditPackagePolicyForm = memo<{
       ) : null,
     [
       agentPolicies,
+      extensionView,
+      formState,
+      handleExtensionViewOnChange,
+      hasAgentlessAgentPolicy,
+      originalPackagePolicy,
       packageInfo,
-      selectedTab,
       packagePolicy,
+      selectedTab,
+      tabsViews,
       updatePackagePolicy,
       validationResults,
-      formState,
-      hasAgentlessAgentPolicy,
-      extensionView,
       varGroupSelections,
-      originalPackagePolicy,
-      tabsViews,
-      handleExtensionViewOnChange,
     ]
   );
 
