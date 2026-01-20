@@ -7,19 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import type { FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
-import type { ConfigSchema } from '../server/config';
 import { UnifiedSearchPublicPlugin } from './plugin';
 
-export type {
-  QuerySuggestion,
-  QuerySuggestionGetFn,
-  QuerySuggestionGetFnArgs,
-  AutocompleteStart,
-} from './autocomplete';
 export type { IndexPatternSelectProps } from './index_pattern_select';
-export type { QueryStringInputProps } from './query_string_input';
 export type { StatefulSearchBarProps, SearchBarProps } from './search_bar';
 export type {
   UnifiedSearchPublicPluginStart,
@@ -31,8 +23,6 @@ export type { FilterItemsProps } from './filter_bar';
 export type { DataViewPickerProps } from './dataview_picker';
 export type { ApplyGlobalFilterActionContext } from './actions/apply_filter_action/apply_filter_action';
 
-export { QueryStringInput } from './query_string_input';
-export { QuerySuggestionTypes } from './autocomplete/providers/query_suggestion_provider';
 export { SearchBar } from './search_bar';
 export { createSearchBar } from './search_bar/create_search_bar';
 export { FilterItem, FilterItems } from './filter_bar';
@@ -52,6 +42,6 @@ export async function createFilterAction(
   return createAction(filterManager, timeFilter, coreStart, id, type);
 }
 
-export function plugin(initializerContext: PluginInitializerContext<ConfigSchema>) {
-  return new UnifiedSearchPublicPlugin(initializerContext);
+export function plugin() {
+  return new UnifiedSearchPublicPlugin();
 }

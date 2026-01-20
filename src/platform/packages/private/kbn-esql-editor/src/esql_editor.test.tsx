@@ -11,6 +11,7 @@ import type { SerializedStyles } from '@emotion/react';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { waitFor } from '@testing-library/dom';
@@ -67,6 +68,9 @@ describe('ESQLEditor', () => {
     return Promise.resolve([]);
   });
 
+  const kqlMock = kqlPluginMock.createStartContract();
+  (kqlMock.autocomplete.hasQuerySuggestions as jest.Mock).mockReturnValue(true);
+
   const services = {
     uiSettings,
     settings: {
@@ -74,6 +78,7 @@ describe('ESQLEditor', () => {
     },
     core: corePluginMock,
     data: dataPluginMock.createStartContract(),
+    kql: kqlMock,
   };
 
   function renderESQLEditorComponent(testProps: ESQLEditorProps) {
@@ -323,6 +328,56 @@ describe('ESQLEditor', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Client warning example')).toBeInTheDocument();
+    });
+  });
+
+  describe('openVisorOnSourceCommands', () => {
+    it('should open the visor on mount when prop is true and query has only source commands', async () => {
+      const newProps = {
+        ...props,
+        query: { esql: 'FROM test_index' },
+        openVisorOnSourceCommands: true,
+      };
+      const { getByTestId } = renderWithI18n(renderESQLEditorComponent(newProps));
+
+      await waitFor(() => {
+        const visor = getByTestId('ESQLEditor-quick-search-visor');
+        expect(visor).toBeInTheDocument();
+        // Visor is visible
+        expect(visor.firstChild).toHaveStyle({ opacity: 1 });
+      });
+    });
+
+    it('should not open the visor when prop is false even if query has only source commands', async () => {
+      const newProps = {
+        ...props,
+        query: { esql: 'FROM test_index' },
+        openVisorOnSourceCommands: false,
+      };
+      const { getByTestId } = renderWithI18n(renderESQLEditorComponent(newProps));
+
+      await waitFor(() => {
+        const visor = getByTestId('ESQLEditor-quick-search-visor');
+        expect(visor).toBeInTheDocument();
+        // Visor is hidden
+        expect(visor.firstChild).toHaveStyle({ opacity: 0 });
+      });
+    });
+
+    it('should not open the visor when prop is true but query has transformational commands', async () => {
+      const newProps = {
+        ...props,
+        query: { esql: 'FROM test_index | STATS count()' },
+        openVisorOnSourceCommands: true,
+      };
+      const { getByTestId } = renderWithI18n(renderESQLEditorComponent(newProps));
+
+      await waitFor(() => {
+        const visor = getByTestId('ESQLEditor-quick-search-visor');
+        expect(visor).toBeInTheDocument();
+        // Visor is hidden
+        expect(visor.firstChild).toHaveStyle({ opacity: 0 });
+      });
     });
   });
 });

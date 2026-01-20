@@ -31,10 +31,9 @@ import { useAIFeatures } from '../../hooks/use_ai_features';
 
 interface Props {
   definition: Streams.all.GetResponse;
-  refreshDefinition: () => void;
 }
 
-export function StreamDetailSignificantEventsView({ definition, refreshDefinition }: Props) {
+export function StreamDetailSignificantEventsView({ definition }: Props) {
   const { timeState, setTime, refresh } = useTimefilter();
   const {
     dependencies: {
@@ -98,7 +97,6 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
       setIsEditFlyoutOpen={setIsEditFlyoutOpen}
       isEditFlyoutOpen={isEditFlyoutOpen}
       definition={definition}
-      refreshDefinition={refreshDefinition}
       refresh={significantEventsFetchState.refetch}
       queryToEdit={queryToEdit}
       setQueryToEdit={setQueryToEdit}
@@ -180,6 +178,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
                 size="s"
                 color="primary"
                 onClick={() => {
+                  setSelectedFeatures([]);
                   setIsEditFlyoutOpen(true);
                   setQueryToEdit(undefined);
                 }}
@@ -250,7 +249,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {editFlyout(false)}
+      {editFlyout(selectedFeatures.length > 0)}
     </>
   );
 }
