@@ -91,7 +91,7 @@ describe('IngestionCard', () => {
     });
 
     it('shows dash when stats missing', () => {
-      renderWithI18n(<IngestionCard period="monthly" hasPrivileges={true} />);
+      renderWithI18n(<IngestionCard period="monthly" hasPrivileges />);
 
       expect(screen.getByTestId('failureStoreIngestion-monthly-metric')).toHaveTextContent('-');
     });
