@@ -32,6 +32,7 @@ import {
 } from '@kbn/discover-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { createRestorableStateProvider } from '@kbn/restorable-state';
 
 import { getUnifiedDocViewerServices } from '../../plugin';
 import {
@@ -42,6 +43,11 @@ import type { TableFiltersProps } from './table_filters';
 import { LOCAL_STORAGE_KEY_SEARCH_TERM, TableFilters, useTableFilters } from './table_filters';
 import { FieldRow } from './field_row';
 import { TableGrid } from './table_grid';
+
+export interface DocViewerTableRestorableState {}
+
+const { withRestorableState, useRestorableState } =
+  createRestorableStateProvider<DocViewerTableRestorableState>();
 
 interface ItemsEntry {
   pinnedRows: FieldRow[];
@@ -86,7 +92,7 @@ const updatePageSize = (newPageSize: number, storage: Storage) => {
   storage.set(PAGE_SIZE, newPageSize);
 };
 
-export const DocViewerTable = ({
+const InternalDocViewerTable = ({
   columns,
   columnsMeta,
   hit,
@@ -389,6 +395,8 @@ export const DocViewerTable = ({
     </EuiFlexGroup>
   );
 };
+
+export const DocViewerTable = withRestorableState(InternalDocViewerTable);
 
 const componentStyles = {
   fieldsGridWrapper: () =>
