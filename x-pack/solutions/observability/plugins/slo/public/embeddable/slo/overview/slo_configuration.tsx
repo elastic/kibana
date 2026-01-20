@@ -99,7 +99,7 @@ function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConf
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="m">
-              <EuiFlexItem data-test-subj="singleSloDefinitionSelector" grow>
+              <EuiFlexItem data-test-subj="singleSloSelector" grow>
                 <SloDefinitionSelector
                   hasError={hasError && !selectedSloDefinition}
                   onSelected={(slo) => {
