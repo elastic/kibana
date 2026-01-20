@@ -144,6 +144,11 @@ export function getESQLForLayer(
     ([colId, col], index) => {
       const def = operationDefinitionMap[col.operationType];
 
+      // Check for specific unsupported operations before general toESQL check
+      if (col.operationType === 'formula') {
+        return getEsqlQueryFailedResult('formula_not_supported');
+      }
+
       if (!def.toESQL) {
         return getEsqlQueryFailedResult('function_not_supported', col.operationType);
       }
@@ -248,13 +253,13 @@ export function getESQLForLayer(
     ([colId, col], index) => {
       const def = operationDefinitionMap[col.operationType];
 
-      if (!def.toESQL) {
-        return getEsqlQueryFailedResult('function_not_supported', col.operationType);
-      }
-
-      // Check for terms operation which is not supported
+      // Check for specific unsupported operations before general toESQL check
       if (col.operationType === 'terms') {
         return getEsqlQueryFailedResult('terms_not_supported');
+      }
+
+      if (!def.toESQL) {
+        return getEsqlQueryFailedResult('function_not_supported', col.operationType);
       }
 
       const aggId = String(index);
