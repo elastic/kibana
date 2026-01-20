@@ -3180,7 +3180,7 @@
           "(esql: string | undefined) => string[] | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-        "lineNumber": 36,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3196,7 +3196,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-            "lineNumber": 36,
+            "lineNumber": 37,
             "columnNumber": 48,
             "deprecated": false,
             "trackAdoption": false,
@@ -3589,7 +3589,7 @@
           "(esql: string | undefined) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-        "lineNumber": 74,
+        "lineNumber": 75,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3607,7 +3607,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-            "lineNumber": 92,
+            "lineNumber": 93,
             "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
