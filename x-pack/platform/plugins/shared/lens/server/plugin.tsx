@@ -136,6 +136,10 @@ export class LensServerPlugin
           LENS_EMBEDDABLE_TYPE,
           getLensServerTransforms(builder, plugins.embeddable)
         );
+
+        flags.apiFormat$.subscribe((value) => {
+          builder.setEnabled(value);
+        });
       })
       .catch((error) => {
         this.logger.error(error);
