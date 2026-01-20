@@ -312,6 +312,34 @@ export interface ValidationErrors {
     message: string;
     type: { value: string; availableFields: string };
   };
+  promqlMissingParam: {
+    message: string;
+    type: { param: string };
+  };
+  promqlMissingParamValue: {
+    message: string;
+    type: { param: string };
+  };
+  promqlInvalidDateParam: {
+    message: string;
+    type: { param: string };
+  };
+  promqlInvalidDateRange: {
+    message: string;
+    type: {};
+  };
+  promqlInvalidStepParam: {
+    message: string;
+    type: {};
+  };
+  promqlMissingQuery: {
+    message: string;
+    type: {};
+  };
+  promqlMissingParensInAlias: {
+    message: string;
+    type: {};
+  };
   wrongDissectOptionArgumentType: {
     message: string;
     type: { value: string | number };

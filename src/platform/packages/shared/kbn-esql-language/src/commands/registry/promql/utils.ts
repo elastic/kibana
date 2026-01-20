@@ -23,7 +23,12 @@ interface PromqlPosition {
   currentParam?: string;
 }
 
-const TRAILING_PARAM_NAME_REGEX = /([A-Za-z_][A-Za-z0-9_]*)\s*$/;
+// Shared identifier pattern for param names, column names, etc.
+export const IDENTIFIER_PATTERN = '[A-Za-z_][A-Za-z0-9_]*';
+
+const TRAILING_PARAM_NAME_REGEX = new RegExp(`(${IDENTIFIER_PATTERN})\\s*$`);
+const IDENTIFIER_CHAR_REGEX = /[a-z0-9_]/;
+const WHITESPACE_CHAR_REGEX = /[ \t\n\r]/;
 
 export function getPosition(innerText: string, command: ESQLAstAllCommands): PromqlPosition {
   const promqlCommand = command as ESQLAstPromqlCommand;
@@ -153,6 +158,8 @@ function getTrailingIdentifier(text: string): string | undefined {
 // Param definitions
 // ============================================================================
 
+export const PROMQL_KEYWORD = 'promql';
+
 export enum PromqlParamValueType {
   TimeseriesSources = 'timeseries_sources',
   DateLiterals = 'date_literals',
@@ -168,7 +175,7 @@ export interface PromqlParamDefinition {
   suggestedValues?: string[];
 }
 
-const PROMQL_REQUIRED_PARAMS: PromqlParamName[] = ['step', 'start', 'end'];
+export const PROMQL_REQUIRED_PARAMS: PromqlParamName[] = ['step', 'start', 'end'];
 
 const PROMQL_PARAMS: PromqlParamDefinition[] = [
   {
@@ -237,21 +244,37 @@ export function looksLikePromqlParamAssignment(text: string): boolean {
  */
 export function getUsedPromqlParamNames(commandText: string): Set<string> {
   const used = new Set<string>();
-  const tokens = commandText.toLowerCase().split(/\s+/);
+  let text = commandText.toLowerCase();
+
+  if (text.startsWith(PROMQL_KEYWORD)) {
+    text = text.slice(PROMQL_KEYWORD.length);
+  }
 
   for (const param of PROMQL_PARAM_NAMES) {
-    if (tokens.some((token) => token === param || token.startsWith(`${param}=`))) {
-      used.add(param);
+    let index = text.indexOf(param);
+
+    while (index !== -1) {
+      if (index === 0 || !IDENTIFIER_CHAR_REGEX.test(text[index - 1])) {
+        let cursor = index + param.length;
+
+        while (cursor < text.length && WHITESPACE_CHAR_REGEX.test(text[cursor])) {
+          cursor += 1;
+        }
+
+        if (cursor < text.length && text[cursor] === '=') {
+          used.add(param);
+          break;
+        }
+      }
+
+      index = text.indexOf(param, index + param.length);
     }
   }
 
   return used;
 }
 
-/*
- * Prevents value suggestions when a concrete value already follows the cursor.
- * This keeps us from suggesting values in the middle of existing assignments.
- */
+/* Prevents value suggestions when a concrete value already follows the cursor. */
 export function isParamValueComplete(
   fullQuery: string,
   cursorPosition: number,
@@ -269,7 +292,7 @@ export function isParamValueComplete(
     return false;
   }
 
-  // Cache the type guard result to avoid narrowing firstToken to never.
+  /* Cache the type guard result to avoid narrowing firstToken to never. */
   const isParamToken = isPromqlParamName(firstToken);
   if (isParamToken) {
     return false;
