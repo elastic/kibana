@@ -19,25 +19,25 @@ import type { ConnectorIdItem, YamlValidationResult } from '../model/types';
 export function validateConnectorIds(
   connectorIdItems: ConnectorIdItem[],
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo> | null,
-  connectorsManagementUrl: string | null
+  connectorsManagementUrl: string
 ): YamlValidationResult[] {
   const results: YamlValidationResult[] = [];
 
   if (!dynamicConnectorTypes) {
-    return [
-      {
-        id: 'connector-id-validation',
-        severity: 'error',
-        message: 'Dynamic connector types not found',
-        owner: 'connector-id-validation',
-        startLineNumber: 0,
-        startColumn: 0,
-        endLineNumber: 0,
-        endColumn: 0,
-        afterMessage: null,
-        hoverMessage: null,
-      },
-    ];
+    const errorResult: YamlValidationResult = {
+      id: 'connector-id-validation',
+      severity: 'error',
+      message: 'Dynamic connector types not found',
+      owner: 'connector-id-validation',
+      startLineNumber: 0,
+      startColumn: 0,
+      endLineNumber: 0,
+      endColumn: 0,
+      afterMessage: null,
+      beforeMessage: null,
+      hoverMessage: null,
+    };
+    return [errorResult];
   }
 
   const notReferenceConnectorIds = connectorIdItems.filter(
@@ -54,13 +54,11 @@ export function validateConnectorIds(
       dynamicConnectorTypes
     );
 
-    const instance = instances.find(
-      (ins) => ins.id === connectorIdItem.key || ins.name === connectorIdItem.key
-    );
+    const instance = instances.find((ins) => ins.id === connectorIdItem.key);
 
     const createConnectorMessage = i18n.translate(
       'workflows.validateConnectorIds.createConnectorMessage',
-      { defaultMessage: 'Create a new {displayName} connector', values: { displayName } }
+      { defaultMessage: 'Create connector' }
     );
 
     const actionType = getActionTypeFromStepType(connectorIdItem.connectorType);
@@ -70,12 +68,10 @@ export function validateConnectorIds(
       text: createConnectorMessage,
     });
 
-    const manageConnectorLink = connectorsManagementUrl
-      ? `<a href="${connectorsManagementUrl}" target="_blank">${i18n.translate(
-          'workflows.validateConnectorIds.manageConnectorMessage',
-          { defaultMessage: 'Manage connectors ↗' }
-        )}</a>`
-      : '';
+    const manageConnectorText = i18n.translate('workflows.validateConnectorIds.manageConnector', {
+      defaultMessage: 'Manage connectors',
+    });
+    const manageConnectorLink = `[${manageConnectorText}](${connectorsManagementUrl})`;
 
     if (!instance) {
       results.push({
@@ -83,7 +79,7 @@ export function validateConnectorIds(
         severity: 'error',
         message: i18n.translate('workflows.validateConnectorIds.connectorNotFoundMessage', {
           defaultMessage:
-            '{displayName} connector "{key}" not found. Add a new connector or choose an existing one',
+            '{displayName} connector UUID "{key}" not found. Add a new connector or choose an existing one',
           values: { displayName, key: connectorIdItem.key },
         }),
         owner: 'connector-id-validation',
@@ -92,15 +88,12 @@ export function validateConnectorIds(
         endLineNumber: connectorIdItem.endLineNumber,
         endColumn: connectorIdItem.endColumn,
         afterMessage: null,
-        hoverMessage: `${createConnectorLink} <br /> ${manageConnectorLink}`,
+        hoverMessage: `${createConnectorLink} | ${manageConnectorLink}`,
       });
     } else {
       const editConnectorMessage = i18n.translate(
         'workflows.validateConnectorIds.editConnectorMessage',
-        {
-          defaultMessage: 'Edit "{connectorName}" connector',
-          values: { connectorName: `${instance.name}` },
-        }
+        { defaultMessage: 'Edit connector' }
       );
       const editConnectorLink = createHoverClickActionLink({
         action: WorkflowAction.OpenConnectorEditFlyout,
@@ -120,8 +113,9 @@ export function validateConnectorIds(
         startColumn: connectorIdItem.startColumn,
         endLineNumber: connectorIdItem.endLineNumber,
         endColumn: connectorIdItem.endColumn,
-        afterMessage: `✓ Connected (${displayName} connector, ID: ${instance.id})`,
-        hoverMessage: `${editConnectorLink} <br /> ${createConnectorLink} <br /> ${manageConnectorLink}`,
+        beforeMessage: `✓ ${instance.name}`,
+        afterMessage: null,
+        hoverMessage: `${editConnectorLink} | ${createConnectorLink} | ${manageConnectorLink}`,
       });
     }
   }
