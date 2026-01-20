@@ -25,6 +25,7 @@ import type {
   Query,
   ContextVarsObject,
 } from './types';
+import { CONTEXT, getRequestName, TIMEFIELD } from './parser_utils';
 
 const TIMEFILTER: string = '%timefilter%';
 const AUTOINTERVAL: string = '%autointerval%';
@@ -34,15 +35,6 @@ const FILTER_CLAUSE: string = '%dashboard_context-filter_clause%';
 
 // These values may appear in the  'url': { ... }  object
 const LEGACY_CONTEXT: string = '%context_query%';
-const CONTEXT: string = '%context%';
-const TIMEFIELD: string = '%timefield%';
-
-const getRequestName = (request: EsQueryRequest, index: number) =>
-  request.dataObject.name ||
-  i18n.translate('visTypeVega.esQueryParser.unnamedRequest', {
-    defaultMessage: 'Unnamed request #{index}',
-    values: { index },
-  });
 
 /**
  * This class parses ES requests specified in the data.url objects.
@@ -207,7 +199,7 @@ export class EsQueryParser {
   async populateData(requests: EsQueryRequest[]) {
     const esSearches = requests.map((r: EsQueryRequest, index: number) => ({
       ...r.url,
-      name: getRequestName(r, index),
+      name: getRequestName(r.dataObject.name, index),
     }));
 
     const data$ = this._searchAPI.search(esSearches);
@@ -215,7 +207,9 @@ export class EsQueryParser {
     const results = await data$.toPromise();
 
     results.forEach((data, index) => {
-      const requestObject = requests.find((item) => getRequestName(item, index) === data.name);
+      const requestObject = requests.find(
+        (item) => getRequestName(item.dataObject.name, index) === data.name
+      );
 
       if (requestObject) {
         requestObject.dataObject.url = requestObject.url;
