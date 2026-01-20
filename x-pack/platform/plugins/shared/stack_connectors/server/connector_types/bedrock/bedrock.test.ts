@@ -19,6 +19,7 @@ import {
   RunActionResponseSchema,
   RunApiLatestResponseSchema,
   StreamingResponseSchema,
+  ConverseResponseSchema,
 } from '@kbn/connector-schemas/bedrock';
 import { DEFAULT_BODY } from '../../../public/connector_types/bedrock/constants';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
@@ -61,7 +62,7 @@ const DEFAULT_PAYLOAD = {
 const DEFAULT_CONVERSE_REQUEST_PAYLOAD = {
   messages: DEFAULT_MESSAGES,
   inferenceConfig: { stopSequences: ['\n\nHuman:'] },
-  toolConfig: { toolChoice: {} },
+  toolConfig: {},
   modelId: DEFAULT_MODEL,
 };
 
@@ -740,6 +741,23 @@ describe('BedrockConnector', () => {
     describe('converse', () => {
       const aiAssistantBody = DEFAULT_PAYLOAD;
 
+      const converseResponse = {
+        output: {
+          message: {
+            role: 'assistant',
+            content: [{ type: 'text', text: mockResponseString }],
+          },
+        },
+        stopReason: 'end_turn',
+        usage: { inputTokens: 41, outputTokens: 64 },
+      };
+
+      beforeEach(() => {
+        mockRequest = jest.fn().mockResolvedValue({ headers: {}, data: converseResponse });
+        // @ts-ignore
+        connector.request = mockRequest;
+      });
+
       it('the API call is successful with correct parameters', async () => {
         const response = await connector.converse(aiAssistantBody, connectorUsageCollector);
         expect(mockRequest).toBeCalledTimes(1);
@@ -749,12 +767,13 @@ describe('BedrockConnector', () => {
             timeout: DEFAULT_TIMEOUT_MS,
             url: `${DEFAULT_URL}/model/${encodedModel}/converse`,
             method: 'post',
-            responseSchema: RunApiLatestResponseSchema,
+            responseSchema: ConverseResponseSchema,
             data: JSON.stringify(DEFAULT_CONVERSE_REQUEST_PAYLOAD),
           },
           connectorUsageCollector
         );
-        expect(response.completion).toEqual(mockResponseString);
+        // @ts-expect-error shape is complex and linter forbid to use 'as any'
+        expect(response.output.message!.content[0].text).toEqual(mockResponseString);
       });
 
       it('formats messages from user, assistant, and system', async () => {
@@ -776,7 +795,7 @@ describe('BedrockConnector', () => {
             timeout: DEFAULT_TIMEOUT_MS,
             url: `${DEFAULT_URL}/model/${encodedModel}/converse`,
             method: 'post',
-            responseSchema: RunApiLatestResponseSchema,
+            responseSchema: ConverseResponseSchema,
             data: JSON.stringify({
               ...DEFAULT_CONVERSE_REQUEST_PAYLOAD,
               messages: [
@@ -787,10 +806,12 @@ describe('BedrockConnector', () => {
               ],
               inferenceConfig: {},
             }),
+            signal: undefined,
           },
           connectorUsageCollector
         );
-        expect(response.completion).toEqual(mockResponseString);
+        // @ts-expect-error shape is complex and linter forbid to use 'as any'
+        expect(response.output.message.content[0].text).toEqual(mockResponseString);
       });
 
       it('adds system message from argument', async () => {
@@ -821,7 +842,7 @@ describe('BedrockConnector', () => {
             timeout: DEFAULT_TIMEOUT_MS,
             url: `${DEFAULT_URL}/model/${encodedModel}/converse`,
             method: 'post',
-            responseSchema: RunApiLatestResponseSchema,
+            responseSchema: ConverseResponseSchema,
             data: JSON.stringify({
               messages: [
                 {
@@ -838,16 +859,16 @@ describe('BedrockConnector', () => {
                 },
               ],
               inferenceConfig: {},
-              toolConfig: {
-                toolChoice: {},
-              },
+              toolConfig: {},
               system: [{ type: 'text', text: 'This is a system message' }],
               modelId: DEFAULT_MODEL,
             }),
+            signal: undefined,
           },
           connectorUsageCollector
         );
-        expect(response.completion).toEqual(mockResponseString);
+        // @ts-expect-error shape is complex and linter forbid to use 'as any'
+        expect(response.output.message.content[0].text).toEqual(mockResponseString);
       });
 
       it('combines argument system message with conversation system message', async () => {
@@ -882,7 +903,7 @@ describe('BedrockConnector', () => {
             timeout: DEFAULT_TIMEOUT_MS,
             url: `${DEFAULT_URL}/model/${encodedModel}/converse`,
             method: 'post',
-            responseSchema: RunApiLatestResponseSchema,
+            responseSchema: ConverseResponseSchema,
             data: JSON.stringify({
               messages: [
                 {
@@ -903,16 +924,16 @@ describe('BedrockConnector', () => {
                 },
               ],
               inferenceConfig: {},
-              toolConfig: {
-                toolChoice: {},
-              },
+              toolConfig: {},
               system: [{ type: 'text', text: 'This is a system message' }],
               modelId: DEFAULT_MODEL,
             }),
+            signal: undefined,
           },
           connectorUsageCollector
         );
-        expect(response.completion).toEqual(mockResponseString);
+        // @ts-expect-error shape is complex and linter forbid to use 'as any'
+        expect(response.output.message.content[0].text).toEqual(mockResponseString);
       });
       it('signal and timeout is properly passed to runApi', async () => {
         const signal = jest.fn();
@@ -924,11 +945,11 @@ describe('BedrockConnector', () => {
             signed: true,
             url: `${DEFAULT_URL}/model/${encodedModel}/converse`,
             method: 'post',
-            responseSchema: RunApiLatestResponseSchema,
+            responseSchema: ConverseResponseSchema,
             data: JSON.stringify({
               messages: [{ role: 'user', content: 'Hello world' }],
               inferenceConfig: { stopSequences: ['\n\nHuman:'] },
-              toolConfig: { toolChoice: {} },
+              toolConfig: {},
               modelId: DEFAULT_MODEL,
             }),
             timeout,

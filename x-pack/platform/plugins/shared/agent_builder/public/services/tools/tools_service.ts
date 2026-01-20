@@ -168,10 +168,10 @@ export class ToolsService {
     );
   }
 
-  async validateNamespace({ namespace }: { namespace: string }) {
+  async validateNamespace({ namespace, connectorId }: { namespace: string; connectorId?: string }) {
     return await this.http.get<ValidateNamespaceResponse>(
       `${internalApiPath}/tools/_validate_namespace`,
-      { query: { namespace } }
+      { query: { namespace, connector_id: connectorId } }
     );
   }
 }
