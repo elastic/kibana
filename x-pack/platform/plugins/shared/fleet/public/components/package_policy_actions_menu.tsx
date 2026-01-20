@@ -132,6 +132,15 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         !canWriteIntegrationPolicies ||
         EXCLUDED_FROM_PACKAGE_POLICY_COPY_PACKAGES.includes(packagePolicy.package?.name || '')
       }
+      toolTipContent={
+        EXCLUDED_FROM_PACKAGE_POLICY_COPY_PACKAGES.includes(packagePolicy.package?.name || '') ? (
+          <FormattedMessage
+            id="xpack.fleet.policyDetails.packagePoliciesTable.copyActionDisabledTooltip"
+            defaultMessage="Copying a {packageName} integration policy is not supported."
+            values={{ packageName: packagePolicy.package?.name || '' }}
+          />
+        ) : undefined
+      }
       href={
         isOrphanedPolicy || isAgentlessPolicy
           ? getHref('integration_policy_copy', {
