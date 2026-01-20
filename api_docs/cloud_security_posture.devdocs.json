@@ -26,6 +26,8 @@
           ") => CloudSecurityPostureLinkItem<TId>"
         ],
         "path": "x-pack/solutions/security/plugins/cloud_security_posture/public/common/navigation/security_solution_links.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,6 +44,8 @@
               "CspPage"
             ],
             "path": "x-pack/solutions/security/plugins/cloud_security_posture/public/common/navigation/security_solution_links.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -62,6 +66,8 @@
           "\nMethods exposed from the security solution to the cloud security posture application."
         ],
         "path": "x-pack/solutions/security/plugins/cloud_security_posture/public/types.ts",
+        "lineNumber": 82,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -78,6 +84,8 @@
               "() => React.ComponentType<{ children: React.ReactNode; }>"
             ],
             "path": "x-pack/solutions/security/plugins/cloud_security_posture/public/types.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -104,6 +112,8 @@
               "; state?: Record<string, string | undefined> | undefined; }>"
             ],
             "path": "x-pack/solutions/security/plugins/cloud_security_posture/public/types.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -128,6 +138,8 @@
               ") | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/cloud_security_posture/public/types.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -146,6 +158,8 @@
               ") => void) | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/cloud_security_posture/public/types.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -160,6 +174,8 @@
                   "UseOnCloseParams"
                 ],
                 "path": "x-pack/solutions/security/plugins/cloud_security_posture/public/types.ts",
+                "lineNumber": 94,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -186,6 +202,8 @@
           "\"cloud_security_posture-dashboard\" | \"cloud_security_posture-cspm-dashboard\" | \"cloud_security_posture-kspm-dashboard\" | \"cloud_security_posture-vulnerability_dashboard\" | \"cloud_security_posture-findings\" | \"cloud_security_posture-benchmarks\" | \"cloud_security_posture-benchmarks-rules\""
         ],
         "path": "x-pack/solutions/security/plugins/cloud_security_posture/public/common/navigation/types.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -202,6 +220,8 @@
         "\nThe cloud security posture's public plugin setup interface."
       ],
       "path": "x-pack/solutions/security/plugins/cloud_security_posture/public/types.ts",
+      "lineNumber": 38,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -218,6 +238,8 @@
         "\nThe cloud security posture's public plugin start interface."
       ],
       "path": "x-pack/solutions/security/plugins/cloud_security_posture/public/types.ts",
+      "lineNumber": 44,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -236,6 +258,8 @@
             ">"
           ],
           "path": "x-pack/solutions/security/plugins/cloud_security_posture/public/types.ts",
+          "lineNumber": 48,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -284,6 +308,8 @@
             ">; }"
           ],
           "path": "x-pack/solutions/security/plugins/cloud_security_posture/public/types.ts",
+          "lineNumber": 50,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -332,6 +358,8 @@
             ">; }"
           ],
           "path": "x-pack/solutions/security/plugins/cloud_security_posture/public/types.ts",
+          "lineNumber": 60,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -357,6 +385,8 @@
       "label": "CspServerPluginSetup",
       "description": [],
       "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/types.ts",
+      "lineNumber": 42,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -371,6 +401,8 @@
       "label": "CspServerPluginStart",
       "description": [],
       "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/types.ts",
+      "lineNumber": 45,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -397,6 +429,8 @@
           "\"csp\""
         ],
         "path": "x-pack/solutions/security/plugins/cloud_security_posture/common/index.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -414,6 +448,8 @@
           "\"Cloud Security\""
         ],
         "path": "x-pack/solutions/security/plugins/cloud_security_posture/common/index.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
