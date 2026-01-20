@@ -12,6 +12,7 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import type { SearchHit } from '@kbn/es-types';
 import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
 import type { DocumentWithIgnoredFields } from '@kbn/streams-schema/src/shared/record_types';
+import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { LOGS_ROOT_STREAM_NAME } from '../../../../lib/streams/root_stream_definition';
 import { MAX_PRIORITY } from '../../../../lib/streams/index_templates/generate_index_template';
 import { getProcessingPipelineName } from '../../../../lib/streams/ingest_pipelines/name';
@@ -25,7 +26,6 @@ import {
   rebuildGeoPointsFromFlattened,
   collectFieldsWithGeoPoints,
 } from '../../../../lib/streams/helpers/normalize_geo_points';
-import { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 
 const UNMAPPED_SAMPLE_SIZE = 500;
 const FIELD_SIMULATION_TIMEOUT = '1s';
@@ -212,7 +212,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       timeout: FIELD_SIMULATION_TIMEOUT,
     };
 
-    let sampleResults: SearchResponse<unknown, Record<string, AggregationsAggregate>> | undefined = undefined
+    let sampleResults: SearchResponse<unknown, Record<string, AggregationsAggregate>> | undefined;
     try {
       sampleResults = await scopedClusterClient.asCurrentUser.search({
         index: params.path.name,
@@ -220,15 +220,14 @@ export const schemaFieldsSimulationRoute = createServerRoute({
         runtime_mappings: propertiesForSample,
         ...documentSamplesSearchBody,
       });
-
     } catch (error) {
       /**
        * If the error is due to time_series_dimension shadowing, we need to retry the request for sample documents without runtime_mappings
        * because the runtime_mappings collides for time_series_dimension.
        * See https://github.com/elastic/elasticsearch/issues/140882
-       * 
+       *
        * N.B. THIS IS A BANDAID FIX THAT SHOULD BE REMOVED AS QUICKLY AS POSSIBLE WHEN THE ISSUE IS FIXED.
-       * 
+       *
        */
       if (error.message.includes('time_series_dimension')) {
         sampleResults = await scopedClusterClient.asCurrentUser.search({
@@ -236,7 +235,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
           ...documentSamplesSearchBody,
         });
       } else {
-        throw error
+        throw error;
       }
     }
 
@@ -255,16 +254,11 @@ export const schemaFieldsSimulationRoute = createServerRoute({
     const fieldDefinitionKeys = Object.keys(propertiesForSimulation);
 
     const geoPointFields = new Set(
-      userFieldDefinitions
-        .filter((field) => field.type === 'geo_point')
-        .map((field) => field.name)
+      userFieldDefinitions.filter((field) => field.type === 'geo_point').map((field) => field.name)
     );
 
     const sampleResultsAsSimulationDocs = sampleResults.hits.hits.map((hit) => {
-      const normalized = normalizeGeoPointsInObject(
-        hit._source as SampleDocument,
-        geoPointFields
-      );
+      const normalized = normalizeGeoPointsInObject(hit._source as SampleDocument, geoPointFields);
       const flattenedSource = getFlattenedObject(normalized);
 
       const sourceWithGeoPoints = rebuildGeoPointsFromFlattened(
