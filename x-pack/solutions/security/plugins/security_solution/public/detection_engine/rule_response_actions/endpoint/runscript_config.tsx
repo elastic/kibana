@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, type ComponentProps, useEffect } from 'react';
+import React, { memo, useMemo, type ComponentProps, useCallback } from 'react';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
@@ -163,8 +163,8 @@ export const AutomatedRunScriptConfiguration = memo<AutomatedRunScriptConfigurat
     const [data] = useFormData();
     const userHasRunScriptAuthz = useUserPrivileges().endpointPrivileges.canWriteExecuteOperations;
 
-    useEffect(() => {
-      if (!value.linux.scriptId) {
+    const emitChange = useCallback(
+      (newValue: RunScriptUseFieldDataType) => {
         const event = new Event('change', {
           bubbles: true,
         }) as unknown as React.ChangeEvent<HTMLInputElement>;
@@ -172,20 +172,15 @@ export const AutomatedRunScriptConfiguration = memo<AutomatedRunScriptConfigurat
         Object.defineProperty(event, 'target', {
           writable: false,
           value: {
-            value: {
-              ...value,
-              linux: {
-                ...value.linux,
-                scriptId: 'runscript-linux-script-id-here',
-              },
-            },
+            value: newValue,
             name: field.path,
           },
         });
 
         onChange(event);
-      }
-    }, [field.path, onChange, value]);
+      },
+      [field.path, onChange]
+    );
 
     if (!userHasRunScriptAuthz) {
       return null;
@@ -223,7 +218,19 @@ export const AutomatedRunScriptConfiguration = memo<AutomatedRunScriptConfigurat
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiFormRow label={index === 0 ? 'Script' : undefined}>
-                      <EndpointRunscriptScriptSelector />
+                      <EndpointRunscriptScriptSelector
+                        selectedScriptId={currentConfig.scriptId}
+                        osType={osType}
+                        onChange={(script) => {
+                          emitChange({
+                            ...value,
+                            [osType]: {
+                              ...value[osType],
+                              scriptId: script?.id ?? '',
+                            },
+                          });
+                        }}
+                      />
                     </EuiFormRow>
                   </EuiFlexItem>
                   <EuiFlexItem>
