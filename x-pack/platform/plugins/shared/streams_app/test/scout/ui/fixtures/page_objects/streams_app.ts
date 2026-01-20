@@ -750,6 +750,13 @@ export class StreamsApp {
     await expect(this.page.getByTestId('streamsAppSchemaEditorFieldsTableLoaded')).toBeVisible();
   }
 
+  async typeFieldName(value: string) {
+    await this.page.testSubj.typeWithDelay('streamsAppSchemaEditorAddFieldFlyoutFieldName', value, {
+      delay: 75,
+    });
+    await this.page.keyboard.press('Enter');
+  }
+
   async searchFields(searchTerm: string) {
     const searchBox = this.page
       .getByTestId('streamsAppSchemaEditorControls')
