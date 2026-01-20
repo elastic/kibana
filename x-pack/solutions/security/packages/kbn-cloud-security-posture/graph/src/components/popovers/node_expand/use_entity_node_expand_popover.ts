@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type React from 'react';
 import { useCallback } from 'react';
-import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useNodeExpandPopover } from './use_node_expand_popover';
 import type { NodeProps } from '../../types';
@@ -19,7 +17,8 @@ import type {
   ItemExpandPopoverListItemProps,
   SeparatorExpandPopoverListItemProps,
 } from '../primitives/list_graph_popover';
-import { addFilter, containsFilter, removeFilter } from '../../graph_investigation/search_filters';
+import { useFilterState } from '../../graph_investigation/filter_state';
+import { emitFilterAction } from '../../graph_investigation/filter_actions';
 import { getEntityExpandItems, createEntityExpandInput } from './get_entity_expand_items';
 
 const DISABLED_TOOLTIP = i18n.translate(
@@ -32,17 +31,16 @@ const DISABLED_TOOLTIP = i18n.translate(
  * This hook is used to show the popover when the user clicks on the expand button of an entity node.
  * The popover contains the actions to show/hide the actions by entity, actions on entity, and related entities.
  *
- * @param setSearchFilters - Function to set the search filters.
- * @param dataViewId - The data view id.
- * @param searchFilters - The search filters.
+ * Uses pub-sub pattern for filter state management - reads from filterState$ and emits to filterAction$.
+ *
+ * @param onShowEntityDetailsClick - Optional callback when entity details is clicked.
  * @returns The entity node expand popover.
  */
 export const useEntityNodeExpandPopover = (
-  setSearchFilters: React.Dispatch<React.SetStateAction<Filter[]>>,
-  dataViewId: string,
-  searchFilters: Filter[],
   onShowEntityDetailsClick?: (node: NodeProps) => void
 ) => {
+  const { isFilterActive } = useFilterState();
+
   const itemsFn = useCallback(
     (
       node: NodeProps
@@ -51,9 +49,7 @@ export const useEntityNodeExpandPopover = (
       const input = createEntityExpandInput(node.id, node.data, Boolean(onShowEntityDetailsClick));
 
       // Generate items with labels using pure function
-      const popoverItems = getEntityExpandItems(input, (field, value) =>
-        containsFilter(searchFilters, field, value)
-      );
+      const popoverItems = getEntityExpandItems(input, isFilterActive);
 
       if (popoverItems.length === 0) {
         return [];
@@ -76,17 +72,19 @@ export const useEntityNodeExpandPopover = (
             onClick: () => {
               if (popoverItem.type === 'show-entity-details') {
                 onShowEntityDetailsClick?.(node);
-              } else if (popoverItem.field && popoverItem.value && popoverItem.currentAction) {
-                // Handle filter toggle actions
-                const action = popoverItem.currentAction;
-                const field = popoverItem.field;
-                const value = popoverItem.value;
-
-                if (action === 'show') {
-                  setSearchFilters((prev) => addFilter(dataViewId, prev, field, value));
-                } else {
-                  setSearchFilters((prev) => removeFilter(prev, field, value));
-                }
+              } else if (
+                popoverItem.field &&
+                popoverItem.value &&
+                popoverItem.currentAction &&
+                popoverItem.filterActionType
+              ) {
+                // Emit filter action via pub-sub
+                emitFilterAction({
+                  type: popoverItem.filterActionType,
+                  field: popoverItem.field,
+                  value: popoverItem.value,
+                  action: popoverItem.currentAction,
+                });
               }
             },
             showToolTip: popoverItem.disabled,
@@ -101,7 +99,7 @@ export const useEntityNodeExpandPopover = (
         }
       );
     },
-    [onShowEntityDetailsClick, searchFilters, dataViewId, setSearchFilters]
+    [onShowEntityDetailsClick, isFilterActive]
   );
   const entityNodeExpandPopover = useNodeExpandPopover({
     id: 'entity-node-expand-popover',

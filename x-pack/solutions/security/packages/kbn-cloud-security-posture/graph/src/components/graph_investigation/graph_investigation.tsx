@@ -57,18 +57,8 @@ const useGraphPopovers = ({
     null
   );
   const [currentEventText, setCurrentEventText] = useState<string>('');
-  const nodeExpandPopover = useEntityNodeExpandPopover(
-    setSearchFilters,
-    dataViewId,
-    searchFilters,
-    nodeDetailsClickHandler
-  );
-  const labelExpandPopover = useLabelNodeExpandPopover(
-    setSearchFilters,
-    dataViewId,
-    searchFilters,
-    nodeDetailsClickHandler
-  );
+  const nodeExpandPopover = useEntityNodeExpandPopover(nodeDetailsClickHandler);
+  const labelExpandPopover = useLabelNodeExpandPopover(nodeDetailsClickHandler);
   const ipPopover = useIpPopover(currentIps, GRAPH_SCOPE_ID);
   const countryFlagsPopover = useCountryFlagsPopover(currentCountryCodes);
   const eventPopover = useEventDetailsPopover(currentEventAnalysis, currentEventText);

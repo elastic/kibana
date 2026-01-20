@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type React from 'react';
 import { useCallback } from 'react';
-import type { Filter } from '@kbn/es-query';
 import { useNodeExpandPopover } from './use_node_expand_popover';
 import type { NodeProps } from '../../types';
 import { GRAPH_LABEL_EXPAND_POPOVER_TEST_ID } from '../../test_ids';
@@ -15,7 +13,8 @@ import type {
   ItemExpandPopoverListItemProps,
   SeparatorExpandPopoverListItemProps,
 } from '../primitives/list_graph_popover';
-import { addFilter, containsFilter, removeFilter } from '../../graph_investigation/search_filters';
+import { useFilterState } from '../../graph_investigation/filter_state';
+import { emitFilterAction } from '../../graph_investigation/filter_actions';
 import { getLabelExpandItems, createLabelExpandInput } from './get_label_expand_items';
 
 /**
@@ -23,17 +22,14 @@ import { getLabelExpandItems, createLabelExpandInput } from './get_label_expand_
  * This hook is used to show the popover when the user clicks on the expand button of a label node.
  * The popover contains the actions to show/hide the events with this action.
  *
- * @param setSearchFilters - Function to set the search filters.
- * @param dataViewId - The data view id.
- * @param searchFilters - The search filters.
+ * Uses pub-sub pattern for filter state management - reads from filterState$ and emits to filterAction$.
+ *
+ * @param onShowEventDetailsClick - Optional callback when event details is clicked.
  * @returns The label node expand popover.
  */
-export const useLabelNodeExpandPopover = (
-  setSearchFilters: React.Dispatch<React.SetStateAction<Filter[]>>,
-  dataViewId: string,
-  searchFilters: Filter[],
-  onShowEventDetailsClick?: (node: NodeProps) => void
-) => {
+export const useLabelNodeExpandPopover = (onShowEventDetailsClick?: (node: NodeProps) => void) => {
+  const { isFilterActive } = useFilterState();
+
   const itemsFn = useCallback(
     (
       node: NodeProps
@@ -44,7 +40,7 @@ export const useLabelNodeExpandPopover = (
       // Generate items with labels using pure function
       const popoverItems = getLabelExpandItems(
         input,
-        (field, value) => containsFilter(searchFilters, field, value),
+        isFilterActive,
         Boolean(onShowEventDetailsClick)
       );
 
@@ -68,24 +64,26 @@ export const useLabelNodeExpandPopover = (
             onClick: () => {
               if (popoverItem.type === 'show-event-details') {
                 onShowEventDetailsClick?.(node);
-              } else if (popoverItem.field && popoverItem.value && popoverItem.currentAction) {
-                // Handle filter toggle actions
-                const action = popoverItem.currentAction;
-                const field = popoverItem.field;
-                const value = popoverItem.value;
-
-                if (action === 'show') {
-                  setSearchFilters((prev) => addFilter(dataViewId, prev, field, value));
-                } else {
-                  setSearchFilters((prev) => removeFilter(prev, field, value));
-                }
+              } else if (
+                popoverItem.field &&
+                popoverItem.value &&
+                popoverItem.currentAction &&
+                popoverItem.filterActionType
+              ) {
+                // Emit filter action via pub-sub
+                emitFilterAction({
+                  type: popoverItem.filterActionType,
+                  field: popoverItem.field,
+                  value: popoverItem.value,
+                  action: popoverItem.currentAction,
+                });
               }
             },
           };
         }
       );
     },
-    [onShowEventDetailsClick, searchFilters, dataViewId, setSearchFilters]
+    [onShowEventDetailsClick, isFilterActive]
   );
 
   const labelNodeExpandPopover = useNodeExpandPopover({

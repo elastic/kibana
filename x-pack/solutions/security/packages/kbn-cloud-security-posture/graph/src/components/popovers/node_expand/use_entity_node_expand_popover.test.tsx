@@ -6,7 +6,6 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import type { Filter } from '@kbn/es-query';
 import { useEntityNodeExpandPopover } from './use_entity_node_expand_popover';
 import type { NodeProps } from '../../types';
 import type {
@@ -19,13 +18,25 @@ import {
   GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
 } from '../../test_ids';
-import { addFilter } from '../../graph_investigation/search_filters';
 import { RELATED_ENTITY } from '../../../common/constants';
 
-const mockSetSearchFilters = jest.fn();
 const mockOnShowEntityDetailsClick = jest.fn();
 
-const dataViewId = 'test-data-view';
+// Mock useFilterState to control filter state in tests
+const mockIsFilterActive = jest.fn();
+jest.mock('../../graph_investigation/filter_state', () => ({
+  useFilterState: jest.fn(() => ({
+    filters: [],
+    dataViewId: 'test-data-view',
+    isFilterActive: mockIsFilterActive,
+  })),
+}));
+
+// Mock emitFilterAction to verify filter emissions
+const mockEmitFilterAction = jest.fn();
+jest.mock('../../graph_investigation/filter_actions', () => ({
+  emitFilterAction: (...args: unknown[]) => mockEmitFilterAction(...args),
+}));
 
 // Mock useNodeExpandGraphPopover to capture and expose itemsFn
 let capturedItemsFn:
@@ -132,25 +143,16 @@ const createMockNode = (
 };
 
 describe('useEntityNodeExpandPopover', () => {
-  let searchFilters: Filter[];
-
   beforeEach(() => {
     jest.clearAllMocks();
-    searchFilters = [];
     capturedItemsFn = null;
+    mockIsFilterActive.mockReturnValue(false);
   });
 
   describe('itemsFn - single-entity mode', () => {
     it('should return all 4 menu items when docMode is single-entity and onShowEntityDetailsClick is provided', () => {
       const node = createMockNode('single-entity', 'user');
-      renderHook(() =>
-        useEntityNodeExpandPopover(
-          mockSetSearchFilters,
-          dataViewId,
-          searchFilters,
-          mockOnShowEntityDetailsClick
-        )
-      );
+      renderHook(() => useEntityNodeExpandPopover(mockOnShowEntityDetailsClick));
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
@@ -182,14 +184,7 @@ describe('useEntityNodeExpandPopover', () => {
   describe('itemsFn - grouped-entities mode', () => {
     it('should return only entity details item when docMode is grouped-entities', () => {
       const node = createMockNode('grouped-entities', 'user');
-      renderHook(() =>
-        useEntityNodeExpandPopover(
-          mockSetSearchFilters,
-          dataViewId,
-          searchFilters,
-          mockOnShowEntityDetailsClick
-        )
-      );
+      renderHook(() => useEntityNodeExpandPopover(mockOnShowEntityDetailsClick));
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
@@ -204,14 +199,7 @@ describe('useEntityNodeExpandPopover', () => {
 
     it('should not show filter actions in grouped-entities mode', () => {
       const node = createMockNode('grouped-entities', 'user');
-      renderHook(() =>
-        useEntityNodeExpandPopover(
-          mockSetSearchFilters,
-          dataViewId,
-          searchFilters,
-          mockOnShowEntityDetailsClick
-        )
-      );
+      renderHook(() => useEntityNodeExpandPopover(mockOnShowEntityDetailsClick));
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
@@ -238,7 +226,7 @@ describe('useEntityNodeExpandPopover', () => {
   describe('shouldDisableEntityDetailsListItem', () => {
     it('should disable entity details when onShowEntityDetailsClick is not provided in single-entity mode', () => {
       const node = createMockNode('single-entity', 'user');
-      renderHook(() => useEntityNodeExpandPopover(mockSetSearchFilters, dataViewId, searchFilters));
+      renderHook(() => useEntityNodeExpandPopover());
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
@@ -256,7 +244,7 @@ describe('useEntityNodeExpandPopover', () => {
 
     it('should disable entity details item when onShowEntityDetailsClick is not provided in grouped-entities mode', () => {
       const node = createMockNode('grouped-entities', 'user');
-      renderHook(() => useEntityNodeExpandPopover(mockSetSearchFilters, dataViewId, searchFilters));
+      renderHook(() => useEntityNodeExpandPopover());
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
@@ -272,14 +260,7 @@ describe('useEntityNodeExpandPopover', () => {
 
     it('should enable entity details when onShowEntityDetailsClick is provided and docMode is grouped-entities', () => {
       const node = createMockNode('grouped-entities', 'user');
-      renderHook(() =>
-        useEntityNodeExpandPopover(
-          mockSetSearchFilters,
-          dataViewId,
-          searchFilters,
-          mockOnShowEntityDetailsClick
-        )
-      );
+      renderHook(() => useEntityNodeExpandPopover(mockOnShowEntityDetailsClick));
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
@@ -296,14 +277,7 @@ describe('useEntityNodeExpandPopover', () => {
 
     it('should disable entity details when documentsData does not contain entity field', () => {
       const node = createMockNode('single-entity', 'user', false);
-      renderHook(() =>
-        useEntityNodeExpandPopover(
-          mockSetSearchFilters,
-          dataViewId,
-          searchFilters,
-          mockOnShowEntityDetailsClick
-        )
-      );
+      renderHook(() => useEntityNodeExpandPopover(mockOnShowEntityDetailsClick));
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
@@ -322,14 +296,7 @@ describe('useEntityNodeExpandPopover', () => {
 
     it('should not disable entity details in grouped-entities mode even when documentsData does not contain entity field', () => {
       const node = createMockNode('grouped-entities', 'user', false);
-      renderHook(() =>
-        useEntityNodeExpandPopover(
-          mockSetSearchFilters,
-          dataViewId,
-          searchFilters,
-          mockOnShowEntityDetailsClick
-        )
-      );
+      renderHook(() => useEntityNodeExpandPopover(mockOnShowEntityDetailsClick));
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
@@ -345,15 +312,10 @@ describe('useEntityNodeExpandPopover', () => {
 
   describe('action labels', () => {
     it('should show "Show" labels when filters are not active', () => {
+      mockIsFilterActive.mockReturnValue(false);
+
       const node = createMockNode('single-entity', 'user');
-      renderHook(() =>
-        useEntityNodeExpandPopover(
-          mockSetSearchFilters,
-          dataViewId,
-          [],
-          mockOnShowEntityDetailsClick
-        )
-      );
+      renderHook(() => useEntityNodeExpandPopover(mockOnShowEntityDetailsClick));
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
@@ -383,23 +345,10 @@ describe('useEntityNodeExpandPopover', () => {
     });
 
     it('should show "Hide" labels when filters are active', () => {
+      mockIsFilterActive.mockReturnValue(true);
+
       const node = createMockNode('single-entity', 'user');
-
-      // Create filters that match the node ID for all three filter types
-      // This simulates filters being active for this node
-      let activeFilters: Filter[] = [];
-      activeFilters = addFilter(dataViewId, activeFilters, 'user.entity.id', node.id);
-      activeFilters = addFilter(dataViewId, activeFilters, 'user.target.entity.id', node.id);
-      activeFilters = addFilter(dataViewId, activeFilters, RELATED_ENTITY, node.id);
-
-      renderHook(() =>
-        useEntityNodeExpandPopover(
-          mockSetSearchFilters,
-          dataViewId,
-          activeFilters,
-          mockOnShowEntityDetailsClick
-        )
-      );
+      renderHook(() => useEntityNodeExpandPopover(mockOnShowEntityDetailsClick));
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
@@ -426,6 +375,55 @@ describe('useEntityNodeExpandPopover', () => {
       if (relatedItem?.type === 'item') {
         expect(relatedItem.label).toContain('Hide');
       }
+    });
+  });
+
+  describe('filter action emission via pub-sub', () => {
+    it('should emit filter action when filter item is clicked', () => {
+      mockIsFilterActive.mockReturnValue(false);
+
+      const node = createMockNode('single-entity', 'user');
+      renderHook(() => useEntityNodeExpandPopover(mockOnShowEntityDetailsClick));
+
+      expect(capturedItemsFn).not.toBeNull();
+      const items = capturedItemsFn!(node);
+
+      const relatedItem = items.find(
+        (item) =>
+          item.type === 'item' && item.testSubject === GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID
+      );
+
+      if (relatedItem?.type === 'item' && relatedItem.onClick) {
+        relatedItem.onClick();
+      }
+
+      expect(mockEmitFilterAction).toHaveBeenCalledWith({
+        type: 'TOGGLE_RELATED_EVENTS',
+        field: RELATED_ENTITY,
+        value: node.id,
+        action: 'show',
+      });
+    });
+
+    it('should call onShowEntityDetailsClick when entity details item is clicked', () => {
+      const node = createMockNode('single-entity', 'user');
+      renderHook(() => useEntityNodeExpandPopover(mockOnShowEntityDetailsClick));
+
+      expect(capturedItemsFn).not.toBeNull();
+      const items = capturedItemsFn!(node);
+
+      const entityDetailsItem = items.find(
+        (item) =>
+          item.type === 'item' &&
+          item.testSubject === GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID
+      );
+
+      if (entityDetailsItem?.type === 'item' && entityDetailsItem.onClick) {
+        entityDetailsItem.onClick();
+      }
+
+      expect(mockOnShowEntityDetailsClick).toHaveBeenCalledWith(node);
+      expect(mockEmitFilterAction).not.toHaveBeenCalled();
     });
   });
 });

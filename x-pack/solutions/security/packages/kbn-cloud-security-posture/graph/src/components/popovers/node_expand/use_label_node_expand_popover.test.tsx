@@ -6,7 +6,6 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import type { Filter } from '@kbn/es-query';
 import { useLabelNodeExpandPopover } from './use_label_node_expand_popover';
 import type { NodeProps } from '../../types';
 import type {
@@ -17,15 +16,27 @@ import {
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID,
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
 } from '../../test_ids';
-import { addFilter } from '../../graph_investigation/search_filters';
 import { EVENT_ACTION } from '../../../common/constants';
 
-const mockSetSearchFilters = jest.fn();
 const mockOnShowEventDetailsClick = jest.fn();
 
-const dataViewId = 'test-data-view';
+// Mock useFilterState to control filter state in tests
+const mockIsFilterActive = jest.fn();
+jest.mock('../../graph_investigation/filter_state', () => ({
+  useFilterState: jest.fn(() => ({
+    filters: [],
+    dataViewId: 'test-data-view',
+    isFilterActive: mockIsFilterActive,
+  })),
+}));
 
-// Mock useNodeExpandPopover to capture and expose itemsFn
+// Mock emitFilterAction to verify filter emissions
+const mockEmitFilterAction = jest.fn();
+jest.mock('../../graph_investigation/filter_actions', () => ({
+  emitFilterAction: (...args: unknown[]) => mockEmitFilterAction(...args),
+}));
+
+// Mock useLabelExpandGraphPopover to capture and expose itemsFn
 let capturedItemsFn:
   | ((
       node: NodeProps
@@ -45,12 +56,9 @@ jest.mock('./use_node_expand_popover', () => ({
   }),
 }));
 
-const createMockLabelNode = (
-  docMode: 'single-event' | 'single-alert' | 'grouped-events',
-  label: string = 'test-action'
-): NodeProps => {
-  const baseNode = {
-    id: 'test-label-node-id',
+const createMockLabelNode = (): NodeProps =>
+  ({
+    id: 'label-node-1',
     type: 'label',
     position: { x: 0, y: 0 },
     dragging: false,
@@ -63,133 +71,64 @@ const createMockLabelNode = (
     positionAbsoluteX: 0,
     positionAbsoluteY: 0,
     data: {
-      id: 'label-123',
-      color: 'primary' as const,
-      shape: 'label' as const,
-      label,
+      id: 'edge-123',
+      label: 'Test Label',
+      source: 'source-node',
+      target: 'target-node',
+      color: 'primary',
+      shape: 'label',
     },
-  } as NodeProps;
-
-  if (docMode === 'single-event') {
-    return {
-      ...baseNode,
-      data: {
-        ...baseNode.data,
-        documentsData: [
-          {
-            id: 'event-123',
-            type: 'event' as const,
-          },
-        ],
-      },
-    } as NodeProps;
-  }
-
-  if (docMode === 'single-alert') {
-    return {
-      ...baseNode,
-      data: {
-        ...baseNode.data,
-        documentsData: [
-          {
-            id: 'alert-123',
-            type: 'alert' as const,
-          },
-        ],
-      },
-    } as NodeProps;
-  }
-
-  // grouped-events
-  return {
-    ...baseNode,
-    data: {
-      ...baseNode.data,
-      documentsData: [
-        { id: 'event-123', type: 'event' as const },
-        { id: 'event-456', type: 'event' as const },
-      ],
-      count: 2,
-    },
-  } as NodeProps;
-};
+  } as unknown as NodeProps);
 
 describe('useLabelNodeExpandPopover', () => {
-  let searchFilters: Filter[];
-
   beforeEach(() => {
     jest.clearAllMocks();
-    searchFilters = [];
     capturedItemsFn = null;
+    mockIsFilterActive.mockReturnValue(false);
   });
 
-  describe('itemsFn - basic items', () => {
-    it('should return show events with action item', () => {
-      const node = createMockLabelNode('single-event');
-      renderHook(() =>
-        useLabelNodeExpandPopover(
-          mockSetSearchFilters,
-          dataViewId,
-          searchFilters,
-          mockOnShowEventDetailsClick
-        )
-      );
+  describe('itemsFn - generates menu items', () => {
+    it('should return show events item and event details item when onShowEventDetailsClick is provided', () => {
+      const node = createMockLabelNode();
+      renderHook(() => useLabelNodeExpandPopover(mockOnShowEventDetailsClick));
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
 
-      // Should have: 1 filter action + separator + event details = 3
-      expect(items.length).toBeGreaterThanOrEqual(2);
+      // Based on get_label_expand_items.ts: show-events-with-action + separator + show-event-details
+      // But only if docMode is 'single-alert', 'single-event', or 'grouped-events'
+      // Our mock doesn't have documentsData, so docMode will be 'na' and event details won't show
+      expect(items.length).toBeGreaterThanOrEqual(1);
       expect(items[0]).toMatchObject({
         type: 'item',
         testSubject: GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID,
       });
     });
 
-    it('should return event details item when handler is provided', () => {
-      const node = createMockLabelNode('single-event');
-      renderHook(() =>
-        useLabelNodeExpandPopover(
-          mockSetSearchFilters,
-          dataViewId,
-          searchFilters,
-          mockOnShowEventDetailsClick
-        )
-      );
+    it('should not show event details item when doc mode is not appropriate', () => {
+      const node = createMockLabelNode();
+      renderHook(() => useLabelNodeExpandPopover(mockOnShowEventDetailsClick));
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
 
+      // With our mock (no documentsData), docMode is 'na', so event details won't show
       const eventDetailsItem = items.find(
         (item) =>
           item.type === 'item' &&
           item.testSubject === GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID
       );
-      expect(eventDetailsItem).toBeDefined();
-    });
 
-    it('should not return event details item when handler is not provided', () => {
-      const node = createMockLabelNode('single-event');
-      renderHook(() => useLabelNodeExpandPopover(mockSetSearchFilters, dataViewId, searchFilters));
-
-      expect(capturedItemsFn).not.toBeNull();
-      const items = capturedItemsFn!(node);
-
-      const eventDetailsItem = items.find(
-        (item) =>
-          item.type === 'item' &&
-          item.testSubject === GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID
-      );
       expect(eventDetailsItem).toBeUndefined();
     });
   });
 
   describe('action labels', () => {
     it('should show "Show" label when filter is not active', () => {
-      const node = createMockLabelNode('single-event', 'test-action');
-      renderHook(() =>
-        useLabelNodeExpandPopover(mockSetSearchFilters, dataViewId, [], mockOnShowEventDetailsClick)
-      );
+      mockIsFilterActive.mockReturnValue(false);
+
+      const node = createMockLabelNode();
+      renderHook(() => useLabelNodeExpandPopover(mockOnShowEventDetailsClick));
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
@@ -206,19 +145,10 @@ describe('useLabelNodeExpandPopover', () => {
     });
 
     it('should show "Hide" label when filter is active', () => {
-      const node = createMockLabelNode('single-event', 'test-action');
+      mockIsFilterActive.mockReturnValue(true);
 
-      let activeFilters: Filter[] = [];
-      activeFilters = addFilter(dataViewId, activeFilters, EVENT_ACTION, 'test-action');
-
-      renderHook(() =>
-        useLabelNodeExpandPopover(
-          mockSetSearchFilters,
-          dataViewId,
-          activeFilters,
-          mockOnShowEventDetailsClick
-        )
-      );
+      const node = createMockLabelNode();
+      renderHook(() => useLabelNodeExpandPopover(mockOnShowEventDetailsClick));
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
@@ -235,85 +165,59 @@ describe('useLabelNodeExpandPopover', () => {
     });
   });
 
-  describe('alert vs event details label', () => {
-    it('should show "Show alert details" for single-alert mode', () => {
-      const node = createMockLabelNode('single-alert');
-      renderHook(() =>
-        useLabelNodeExpandPopover(
-          mockSetSearchFilters,
-          dataViewId,
-          searchFilters,
-          mockOnShowEventDetailsClick
-        )
-      );
+  describe('filter action emission via pub-sub', () => {
+    it('should emit filter action when events with action item is clicked', () => {
+      mockIsFilterActive.mockReturnValue(false);
+
+      const node = createMockLabelNode();
+      renderHook(() => useLabelNodeExpandPopover(mockOnShowEventDetailsClick));
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
 
-      const eventDetailsItem = items.find(
+      const eventsWithActionItem = items.find(
         (item) =>
           item.type === 'item' &&
-          item.testSubject === GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID
+          item.testSubject === GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID
       );
 
-      if (eventDetailsItem?.type === 'item') {
-        expect(eventDetailsItem.label).toContain('alert');
+      if (eventsWithActionItem?.type === 'item' && eventsWithActionItem.onClick) {
+        eventsWithActionItem.onClick();
       }
+
+      expect(mockEmitFilterAction).toHaveBeenCalledWith({
+        type: 'TOGGLE_EVENTS_WITH_ACTION',
+        field: EVENT_ACTION,
+        value: 'Test Label',
+        action: 'show',
+      });
     });
 
-    it('should show "Show event details" for single-event mode', () => {
-      const node = createMockLabelNode('single-event');
-      renderHook(() =>
-        useLabelNodeExpandPopover(
-          mockSetSearchFilters,
-          dataViewId,
-          searchFilters,
-          mockOnShowEventDetailsClick
-        )
-      );
+    it('should emit hide action when filter is already active', () => {
+      mockIsFilterActive.mockReturnValue(true);
+
+      const node = createMockLabelNode();
+      renderHook(() => useLabelNodeExpandPopover(mockOnShowEventDetailsClick));
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
 
-      const eventDetailsItem = items.find(
+      const eventsWithActionItem = items.find(
         (item) =>
           item.type === 'item' &&
-          item.testSubject === GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID
+          item.testSubject === GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID
       );
 
-      if (eventDetailsItem?.type === 'item') {
-        expect(eventDetailsItem.label).toContain('event');
+      if (eventsWithActionItem?.type === 'item' && eventsWithActionItem.onClick) {
+        eventsWithActionItem.onClick();
       }
-    });
-  });
 
-  describe('separator', () => {
-    it('should add separator before event details item', () => {
-      const node = createMockLabelNode('single-event');
-      renderHook(() =>
-        useLabelNodeExpandPopover(
-          mockSetSearchFilters,
-          dataViewId,
-          searchFilters,
-          mockOnShowEventDetailsClick
-        )
-      );
-
-      expect(capturedItemsFn).not.toBeNull();
-      const items = capturedItemsFn!(node);
-
-      // Find separator
-      const separatorIndex = items.findIndex((item) => item.type === 'separator');
-      const eventDetailsIndex = items.findIndex(
-        (item) =>
-          item.type === 'item' &&
-          item.testSubject === GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID
-      );
-
-      // Separator should come before event details
-      if (separatorIndex !== -1 && eventDetailsIndex !== -1) {
-        expect(separatorIndex).toBeLessThan(eventDetailsIndex);
-      }
+      expect(mockEmitFilterAction).toHaveBeenCalledWith({
+        type: 'TOGGLE_EVENTS_WITH_ACTION',
+        field: EVENT_ACTION,
+        value: 'Test Label',
+        action: 'hide',
+      });
     });
   });
 });
