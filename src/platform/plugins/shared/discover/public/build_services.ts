@@ -71,9 +71,7 @@ import type { DiscoverSingleDocLocator } from './application/doc/locator';
 import type { DiscoverAppLocator } from '../common';
 import type { ProfilesManager } from './context_awareness';
 import type { DiscoverEBTManager } from './ebt_manager';
-import {
-  CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY,
-} from './constants';
+import { CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY } from './constants';
 
 /**
  * Location state of internal Discover history instance
