@@ -23,9 +23,6 @@ import { EndpointScriptsGenerator } from '../../../../../../common/endpoint/data
 jest.mock('../../../../../common/components/user_privileges');
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
-const createFileHash = () =>
-  Array.from(Array(64), () => Math.floor(Math.random() * 36).toString(36)).join('');
-
 describe('ScriptsLibraryTable', () => {
   let userEve: UserEvent;
   let render: (props?: ScriptsLibraryTableProps) => ReturnType<AppContextTestRender['render']>;
