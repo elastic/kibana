@@ -47,7 +47,7 @@ const PoliciesBreadcrumb: React.FunctionComponent<{
 const InstalledIntegrationsBreadcrumb = memo<{
   policyName: string;
 }>(({ policyName }) => {
-  useIntegrationsBreadcrumbs('integration_policy_edit_from_installed', { policyName });
+  useIntegrationsBreadcrumbs('integration_policy_copy_from_installed', { policyName });
   return null;
 });
 
@@ -70,8 +70,19 @@ export const CopyPackagePolicyPage = memo(() => {
 
   // Parse the 'from' query parameter to determine navigation after save
   const { search } = useLocation();
-  const qs = new URLSearchParams(search);
-  const fromQs = (qs.get('from') as EditPackagePolicyFrom | null) ?? 'fleet-policy-list';
+
+  const from = useMemo(() => {
+    const qs = new URLSearchParams(search);
+    const qsFrom = (qs.get('from') as EditPackagePolicyFrom | null) ?? 'fleet-policy-list';
+
+    if (qsFrom === 'fleet-policy-list') {
+      return 'copy-from-fleet-policy-list';
+    } else if (qsFrom === 'installed-integrations') {
+      return 'copy-from-installed-integrations';
+    } else {
+      return 'copy-from-integrations-policy-list';
+    }
+  }, [search]);
 
   if (packagePolicy.isLoading || !packagePolicy.data) {
     return (
@@ -82,9 +93,9 @@ export const CopyPackagePolicyPage = memo(() => {
   }
 
   const breadcrumb =
-    fromQs === 'fleet-policy-list' && policyId ? (
+    from === 'copy-from-fleet-policy-list' && policyId ? (
       <PoliciesBreadcrumb policyName={agentPolicy.data?.item?.name || ''} policyId={policyId} />
-    ) : fromQs === 'installed-integrations' ? (
+    ) : from === 'copy-from-installed-integrations' ? (
       <InstalledIntegrationsBreadcrumb policyName={packagePolicy.data?.item?.name || ''} />
     ) : (
       <IntegrationsBreadcrumb
@@ -118,7 +129,7 @@ export const CopyPackagePolicyPage = memo(() => {
     <>
       {breadcrumb}
       <CreatePackagePolicySinglePage
-        from={fromQs || ('copy-from-integrations-policy-list' as EditPackagePolicyFrom)}
+        from={from}
         pkgName={packagePolicy.data!.item!.package!.name}
         pkgVersion={packagePolicy.data!.item!.package!.version}
         defaultPolicyData={packagePolicyData}

@@ -84,7 +84,7 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
         [
           'copy-from-fleet-policy-list',
           'copy-from-integrations-policy-list',
-          'copy-from-extension',
+          'copy-from-installed-integrations',
         ].includes(from),
       [from]
     );

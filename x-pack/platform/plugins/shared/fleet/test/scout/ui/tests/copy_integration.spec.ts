@@ -135,7 +135,7 @@ test.describe('Copy integration', { tag: ['@ess'] }, () => {
     await browserAuth.loginAsPrivilegedUser();
     const { copyIntegration } = pageObjects;
 
-    await copyIntegration.navigateTo(packagePolicyId);
+    await copyIntegration.navigateTo(agentPolicyId, packagePolicyId);
     await copyIntegration.waitForPageToLoad();
 
     const nameInput = copyIntegration.getPackagePolicyNameInput();

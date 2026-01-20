@@ -10,8 +10,8 @@ import { type ScoutPage } from '@kbn/scout';
 export class CopyIntegrationPage {
   constructor(private readonly page: ScoutPage) {}
 
-  async navigateTo(packagePolicyId: string) {
-    await this.page.gotoApp(`fleet/policies/copy-integration/${packagePolicyId}`);
+  async navigateTo(agentPolicyId: string, packagePolicyId: string) {
+    await this.page.gotoApp(`fleet/policies/${agentPolicyId}/copy-integration/${packagePolicyId}`);
   }
 
   async waitForPageToLoad() {
