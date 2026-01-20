@@ -22,7 +22,7 @@ interface BaseAction {
 export type Target = '_blank' | '_self';
 
 export type Action =
-  | (BaseAction & { onClick: () => void; href?: never; target?: never })
+  | (BaseAction & { onClick: () => void; href?: never })
   | (BaseAction & { href: string; onClick?: never; target?: Target });
 
 export interface SectionActionsProps {

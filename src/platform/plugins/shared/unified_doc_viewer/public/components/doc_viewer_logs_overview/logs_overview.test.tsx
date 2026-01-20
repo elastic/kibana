@@ -402,14 +402,12 @@ describe('LogsOverview with APM links', () => {
         ).not.toBeInTheDocument();
       });
 
-      it('should not render trace id highlight link', () => {
-        expect(
-          screen.queryByTestId('unifiedDocViewLogsOverviewTraceIdHighlightLink')
-        ).not.toBeInTheDocument();
-      });
+      it('should render trace id without a link', () => {
+        const traceId = screen.getByTestId('unifiedDocViewLogsOverviewTraceID');
+        expect(traceId).toBeInTheDocument();
 
-      it('should still display the trace id value', () => {
-        expect(screen.queryByTestId('unifiedDocViewLogsOverviewTraceID')).toBeInTheDocument();
+        const traceLink = traceId.querySelector('a');
+        expect(traceLink).toBeNull();
       });
     });
   });
