@@ -16,10 +16,6 @@ import {
 } from '../../fixtures/constants';
 import type { MetricsTabQuickAccessItem } from '../../fixtures/page_objects/asset_details/metrics_tab';
 
-test.use({
-  timezoneId: 'GMT',
-});
-
 test.describe(
   'Infrastructure Inventory - Host Asset Details Flyout',
   { tag: ['@ess', '@svlOblt'] },

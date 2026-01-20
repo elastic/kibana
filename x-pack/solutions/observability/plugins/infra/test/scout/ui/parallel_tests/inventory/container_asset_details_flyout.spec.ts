@@ -18,10 +18,6 @@ import {
 } from '../../fixtures/constants';
 import type { MetricsTabQuickAccessItem } from '../../fixtures/page_objects/asset_details/metrics_tab';
 
-test.use({
-  timezoneId: 'GMT',
-});
-
 const CONTAINER_NAME = CONTAINER_NAMES[CONTAINER_COUNT - 1];
 const CONTAINER_ID = CONTAINER_IDS[CONTAINER_COUNT - 1];
 

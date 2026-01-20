@@ -9,10 +9,6 @@ import { expect } from '@kbn/scout-oblt';
 import { test } from '../../fixtures';
 import { DATE_WITH_HOSTS_DATA } from '../../fixtures/constants';
 
-test.use({
-  timezoneId: 'GMT',
-});
-
 test.describe('Infrastructure Inventory - K8s Tour', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects: { inventoryPage } }) => {
     await browserAuth.loginAsViewer();

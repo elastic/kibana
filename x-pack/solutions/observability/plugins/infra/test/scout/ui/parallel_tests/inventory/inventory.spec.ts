@@ -20,10 +20,6 @@ import {
 
 const POD_NAME = POD_NAMES[POD_COUNT - 1];
 
-test.use({
-  timezoneId: 'GMT',
-});
-
 test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects: { inventoryPage } }) => {
     await browserAuth.loginAsViewer();
