@@ -7,6 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const IMAGE_EMBEDDABLE_TYPE = 'image';
-export const ADD_IMAGE_EMBEDDABLE_ACTION_ID = 'create_image_embeddable';
-export const IMAGE_CLICK_TRIGGER = 'IMAGE_CLICK_TRIGGER';
+import { schema } from '@kbn/config-schema';
+import { DASHBOARD_DRILLDOWN_TYPE } from '../../common/page_bundle_constants';
+import { dashboardNavigationOptionsSchema } from '../dashboard_navigation';
+
+export const dashboardDrilldownSchema = dashboardNavigationOptionsSchema.extends({
+  dashboard_id: schema.string(),
+  type: schema.literal(DASHBOARD_DRILLDOWN_TYPE)
+});

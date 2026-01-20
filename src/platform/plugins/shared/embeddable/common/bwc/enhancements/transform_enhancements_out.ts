@@ -8,7 +8,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { DynamicActionsState } from './dynamic_actions/types';
+import type { DynamicActionsState, SerializedEvent } from './dynamic_actions/types';
 import { enhancementsPersistableState } from './enhancements_persistable_state';
 
 export function transformEnhancementsOut(
@@ -17,7 +17,7 @@ export function transformEnhancementsOut(
 ) {
   if (!enhancementsState?.dynamicActions?.events) return {};
 
-  const events = enhancementsState.dynamicActions.events.map((event) => {
+  return enhancementsState.dynamicActions.events.map((event) => {
     if (event.action.factoryId !== 'DASHBOARD_TO_DASHBOARD_DRILLDOWN') {
       return event;
     }
@@ -40,13 +40,14 @@ export function transformEnhancementsOut(
       },
     };
   });
+}
 
-  return enhancementsPersistableState.inject(
-    {
-      dynamicActions: {
-        events,
-      },
-    },
-    references
-  );
+function transformDashboardDrilldown(event: SerializedEvent) {
+  return {
+    label: event.action.name,
+    triggers: event.triggers,
+    config: {
+      type: ''
+    }
+  }
 }

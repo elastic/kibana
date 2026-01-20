@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ObjectType, Type } from '@kbn/config-schema';
+import type { Type } from '@kbn/config-schema';
 import type { Reference } from '@kbn/content-management-utils';
 
 export type Drilldown<
-  StoredState extends { type: Type<string> } = { type: Type<string> },
-  State extends { type: Type<string> } = { type: Type<string> }
+  StoredState extends { type: string } = { type: string },
+  State extends { type: string } = { type: string }
 > = {
-  schema: ObjectType<State>;
+  schema: Type<State>;
   supportedTriggers: string[];
   /**
    * Called on REST read routes to inject references and convert Stored State into API State

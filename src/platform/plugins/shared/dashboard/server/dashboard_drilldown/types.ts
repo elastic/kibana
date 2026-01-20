@@ -7,6 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const IMAGE_EMBEDDABLE_TYPE = 'image';
-export const ADD_IMAGE_EMBEDDABLE_ACTION_ID = 'create_image_embeddable';
-export const IMAGE_CLICK_TRIGGER = 'IMAGE_CLICK_TRIGGER';
+import type { TypeOf } from '@kbn/config-schema';
+import type { dashboardDrilldownSchema } from './schemas';
+
+export type DashboardDrilldown = Required<TypeOf<typeof dashboardDrilldownSchema>>;
+
+export type StoredDashboardDrilldown = Omit<DashboardDrilldown, 'dashboard_id'> & {
+  dashboardRefName: string;
+}
