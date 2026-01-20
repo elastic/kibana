@@ -179,3 +179,9 @@ export function getCallbackMocks(): ESQLCallbacks {
     getInferenceEndpoints: jest.fn(async (taskType: InferenceTaskType) => ({ inferenceEndpoints })),
   };
 }
+
+export const additionalFieldsMock = {
+  fromJoin: () => Promise.resolve([]),
+  fromEnrich: () => Promise.resolve([]),
+  fromFrom: () => Promise.resolve([]),
+};

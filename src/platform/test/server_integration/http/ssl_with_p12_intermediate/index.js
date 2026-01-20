@@ -10,8 +10,7 @@
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  // Failing: See https://github.com/elastic/kibana/issues/248579
-  describe.skip('kibana server with ssl', function () {
+  describe('kibana server with ssl', function () {
     this.tags('skipFIPS');
     it('handles requests using ssl with a P12 keystore that uses an intermediate CA', async () => {
       await supertest.get('/').expect(302);
