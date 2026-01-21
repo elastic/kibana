@@ -12,10 +12,16 @@ import type {
   RuleResponseEndpointAction,
   ProcessesParams,
 } from '../../../../common/api/detection_engine';
-import { getErrorProcessAlerts, getIsolateAlerts, getProcessAlerts } from './utils';
+import {
+  getErrorProcessAlerts,
+  getIsolateAlerts,
+  getProcessAlerts,
+  getResponseActionDataFromAlert,
+} from './utils';
 import type { AlertsAction, ResponseActionAlerts } from './types';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import type {
+  AutomatedRunScriptConfig,
   ResponseActionParametersWithEntityId,
   ResponseActionParametersWithPid,
 } from '../../../../common/endpoint/types';
@@ -50,6 +56,8 @@ export const endpointResponseAction = async (
     username: 'unknown',
     spaceId,
   });
+
+  logger.debug(() => `Processing automated response action: ${stringify(responseAction)}`);
 
   const processResponseActionClientError = (err: Error, endpointIds: string[]): Promise<void> => {
     errors.push(
@@ -149,6 +157,65 @@ export const endpointResponseAction = async (
 
       response.push(Promise.all([processActions, processActionsWithError]));
 
+      break;
+
+    case 'runscript':
+      {
+        const processedAgentIds = new Set<string>();
+
+        for (const alert of alerts) {
+          const alertData = getResponseActionDataFromAlert(alert);
+
+          logger.debug(
+            () => `${logMsgPrefix}: Alert data for use with runscript: ${stringify(alertData)}`
+          );
+
+          if (
+            alertData.agentId &&
+            alertData.hostOsType &&
+            !processedAgentIds.has(alertData.agentId)
+          ) {
+            processedAgentIds.add(alert.agent.id);
+            const ruleScriptConfig = (
+              responseAction.params.config as AutomatedRunScriptConfig | undefined
+            )?.[alertData.hostOsType];
+
+            logger.debug(
+              () =>
+                `${logMsgPrefix}: Rule runscript configuration for OS type [${
+                  alertData.hostOsType
+                }]: ${stringify(ruleScriptConfig)}`
+            );
+
+            if (ruleScriptConfig && ruleScriptConfig.scriptId) {
+              response.push(
+                responseActionsClient.runscript(
+                  {
+                    endpoint_ids: [alertData.agentId],
+                    alert_ids: [alertData.alertId],
+                    comment: responseAction.params.comment,
+                    parameters: {
+                      scriptId: ruleScriptConfig.scriptId,
+                      scriptInput: ruleScriptConfig.scriptInput,
+                      timeout: ruleScriptConfig.timeout,
+                    },
+                  },
+                  {
+                    hosts: { [alertData.agentId]: { name: alertData.hostName } },
+                    ruleId: alertData.ruleId,
+                    ruleName: alertData.ruleName,
+                    // FIXME:PT handle local errors
+                    // error,
+                  }
+                )
+              );
+            }
+            // FIXME:PT should  we log anything if the user did not define a script for this OS type?
+          }
+
+          // FIXME:PT should we still create a response action wtih error if we cant determine osType from alert?
+        }
+      }
       break;
 
     default:
