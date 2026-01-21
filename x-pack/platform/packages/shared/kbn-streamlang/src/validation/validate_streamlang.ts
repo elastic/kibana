@@ -239,6 +239,12 @@ function extractModifiedFields(processor: StreamlangProcessorDefinition): string
       }
       break;
 
+    case 'join':
+      if (processor.to) {
+        fields.push(processor.to);
+      }
+      break;
+
     case 'remove':
     case 'remove_by_prefix':
     case 'drop_document':
@@ -379,6 +385,9 @@ function getProcessorOutputType(
       // All other expressions return number
       return inferMathExpressionReturnType(processor.expression);
 
+    case 'join':
+      return 'string';
+
     case 'remove':
     case 'remove_by_prefix':
     case 'drop_document':
@@ -446,6 +455,12 @@ function getExpectedInputType(
     case 'trim':
       // Uppercase, lowercase, and trim require string input
       if (processor.from === fieldName) {
+        return ['string'];
+      }
+      return null;
+
+    case 'join':
+      if (processor.from.some((from) => from === fieldName)) {
         return ['string'];
       }
       return null;
@@ -524,6 +539,9 @@ function trackFieldTypesAndValidate(flattenedSteps: StreamlangProcessorDefinitio
       case 'math':
         // Math expressions expect numeric inputs for all field references
         fieldsUsed.push(...extractFieldsFromMathExpression(step.expression));
+        break;
+      case 'join':
+        fieldsUsed.push(...step.from);
         break;
       case 'append':
       case 'drop_document':
@@ -748,6 +766,7 @@ function validateProcessorValues(
     case 'uppercase':
     case 'lowercase':
     case 'trim':
+    case 'join':
     case 'manual_ingest_pipeline':
       // No value validation implemented for these processors yet
       break;

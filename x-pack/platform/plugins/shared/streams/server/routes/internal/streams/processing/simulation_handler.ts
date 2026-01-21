@@ -284,7 +284,6 @@ const preparePipelineSimulationBody = (
 
   return {
     docs,
-    // @ts-expect-error field_access_pattern not supported by typing yet
     pipeline: { processors, field_access_pattern: 'flexible' },
     verbose: true,
   };
@@ -308,7 +307,6 @@ const prepareIngestSimulationBody = (
   if (defaultPipelineName) {
     pipelineSubstitutions[defaultPipelineName] = {
       processors,
-      // @ts-expect-error field_access_pattern not supported by typing yet
       field_access_pattern: 'flexible',
     };
   }
