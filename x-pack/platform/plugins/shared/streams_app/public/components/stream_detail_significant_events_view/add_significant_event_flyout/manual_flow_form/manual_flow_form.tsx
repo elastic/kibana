@@ -18,7 +18,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { StreamQueryKql, Streams, System } from '@kbn/streams-schema';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useDebounceFn } from '@kbn/react-hooks';
 import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar/uncontrolled_streams_app_bar';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { validateQuery } from '../common/validate_query';
@@ -29,11 +30,15 @@ interface Props {
   definition: Streams.all.Definition;
   query: StreamQueryKql;
   isSubmitting: boolean;
+  isEditMode: boolean;
   setQuery: (query: StreamQueryKql) => void;
   setCanSave: (canSave: boolean) => void;
   systems: System[];
   dataViews: DataView[];
 }
+
+const DEBOUNCE_DELAY_MS = 300;
+const DEBOUNCE_OPTIONS = { wait: DEBOUNCE_DELAY_MS };
 
 export function ManualFlowForm({
   definition,
@@ -41,6 +46,7 @@ export function ManualFlowForm({
   setQuery,
   setCanSave,
   isSubmitting,
+  isEditMode,
   systems,
   dataViews,
 }: Props) {
@@ -50,6 +56,23 @@ export function ManualFlowForm({
     kql: false,
     severity: false,
   });
+
+  // Debounced KQL query for preview chart API calls
+  const [debouncedKqlQuery, setDebouncedKqlQuery] = useState(query.kql.query);
+
+  const { run: updateDebouncedKqlQuery } = useDebounceFn(
+    (kqlQuery: string) => setDebouncedKqlQuery(kqlQuery),
+    DEBOUNCE_OPTIONS
+  );
+
+  // Create a query object with debounced KQL for the preview chart
+  const debouncedQuery = useMemo(
+    (): StreamQueryKql => ({
+      ...query,
+      kql: { query: debouncedKqlQuery },
+    }),
+    [query, debouncedKqlQuery]
+  );
 
   const validation = validateQuery(query);
 
@@ -144,7 +167,7 @@ export function ManualFlowForm({
                 'xpack.streams.addSignificantEventFlyout.manualFlow.systemPlaceholder',
                 { defaultMessage: 'Select system' }
               )}
-              disabled={isSubmitting || systems.length === 0}
+              disabled={isSubmitting || systems.length === 0 || isEditMode}
               onBlur={() => {
                 setTouched((prev) => ({ ...prev, feature: true }));
               }}
@@ -182,17 +205,15 @@ export function ManualFlowForm({
               showQueryInput
               showSubmitButton={false}
               isDisabled={isSubmitting}
-              onQueryChange={() => {
-                setTouched((prev) => ({ ...prev, kql: true }));
-              }}
-              onQuerySubmit={(next) => {
+              onQueryChange={(next) => {
+                // Immediately sync query state so it's always up-to-date for save
+                const nextKqlQuery = typeof next.query?.query === 'string' ? next.query.query : '';
                 setQuery({
                   ...query,
-                  kql: {
-                    query: typeof next.query?.query === 'string' ? next.query.query : '',
-                  },
+                  kql: { query: nextKqlQuery },
                 });
-
+                // Debounce the preview chart update
+                updateDebouncedKqlQuery(nextKqlQuery);
                 setTouched((prev) => ({ ...prev, kql: true }));
               }}
               placeholder={i18n.translate(
@@ -200,7 +221,6 @@ export function ManualFlowForm({
                 { defaultMessage: 'Enter query' }
               )}
               indexPatterns={dataViews}
-              submitOnBlur
             />
           </EuiFormRow>
         </EuiForm>
@@ -209,7 +229,7 @@ export function ManualFlowForm({
 
         <PreviewDataSparkPlot
           definition={definition}
-          query={query}
+          query={debouncedQuery}
           isQueryValid={!validation.kql.isInvalid}
         />
       </EuiFlexGroup>
