@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ByteSizeValue } from '@kbn/config-schema';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
 import type { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
