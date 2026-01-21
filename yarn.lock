@@ -6870,6 +6870,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ftr-benchmarks@link:src/platform/packages/shared/kbn-ftr-benchmarks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ftr-common-functional-services@link:src/platform/packages/shared/kbn-ftr-common-functional-services":
   version "0.0.0"
   uid ""
