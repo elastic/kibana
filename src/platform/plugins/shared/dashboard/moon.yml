@@ -113,6 +113,7 @@ dependsOn:
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/core-chrome-app-menu'
   - '@kbn/test-jest-helpers'
+  - '@kbn/image-embeddable-plugin'
 tags:
   - plugin
   - prod
