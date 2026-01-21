@@ -85,6 +85,8 @@ test.describe('Node Details: host with kubernetes section', { tag: ['@ess', '@sv
       timeout: EXTENDED_TIMEOUT,
     });
 
+    await nodeDetailsPage.waitForChartsToLoad();
+
     await nodeDetailsPage.expectChartsCount('infraAssetDetailsHostChartsSection', 9);
     await nodeDetailsPage.expectChartsCount('infraAssetDetailsHostChartsChart', 17);
   });
