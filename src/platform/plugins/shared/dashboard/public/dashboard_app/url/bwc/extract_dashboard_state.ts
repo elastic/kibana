@@ -18,6 +18,7 @@ export function extractDashboardState(
   state?: unknown
 ): ReturnType<NonNullable<DashboardCreationOptions['getInitialInput']>> {
   let dashboardState: ReturnType<NonNullable<DashboardCreationOptions['getInitialInput']>> = {};
+
   if (state && typeof state === 'object') {
     const stateAsObject = state as { [key: string]: unknown };
 

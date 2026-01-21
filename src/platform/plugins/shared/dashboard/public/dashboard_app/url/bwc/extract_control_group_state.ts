@@ -7,14 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { get } from 'lodash';
-import type { ControlsGroupState } from '@kbn/controls-schemas';
 import {
   DEFAULT_AUTO_APPLY_SELECTIONS,
   DEFAULT_IGNORE_VALIDATIONS,
   DEFAULT_USE_GLOBAL_FILTERS,
+  ESQL_CONTROL,
+  OPTIONS_LIST_CONTROL,
+  RANGE_SLIDER_CONTROL,
+  TIME_SLIDER_CONTROL,
 } from '@kbn/controls-constants';
+import type { ControlsGroupState } from '@kbn/controls-schemas';
+import { get } from 'lodash';
 import type { DashboardState } from '../../../../common';
+import {
+  snakeCaseESQLControl,
+  snakeCaseOptionsList,
+  snakeCaseRangeSlider,
+  snakeCaseTimeSlider,
+} from './snake_case_controls';
 
 export function extractControlGroupState(state: { [key: string]: unknown }): {
   pinned_panels?: DashboardState['pinned_panels'];
@@ -141,6 +151,26 @@ export function extractControlGroupState(state: { [key: string]: unknown }): {
       autoApplySelections = !controlState.showApplySelections;
     }
   }
+
+  // <9.4 convert camel cased control state to snake case
+  standardizedControls = standardizedControls.map((control) => {
+    switch (control.type) {
+      case OPTIONS_LIST_CONTROL: {
+        return { ...control, config: snakeCaseOptionsList(control.config) };
+      }
+      case RANGE_SLIDER_CONTROL: {
+        return { ...control, config: snakeCaseRangeSlider(control.config) };
+      }
+      case ESQL_CONTROL: {
+        return { ...control, config: snakeCaseESQLControl(control.config) };
+      }
+      case TIME_SLIDER_CONTROL: {
+        return { ...control, config: snakeCaseTimeSlider(control.config) };
+      }
+      default:
+        return control;
+    }
+  });
 
   return {
     autoApplyFilters:
