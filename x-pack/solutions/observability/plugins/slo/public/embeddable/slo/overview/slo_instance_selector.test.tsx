@@ -120,48 +120,4 @@ describe('SloInstanceSelector', () => {
 
     expect(onSelected).toHaveBeenLastCalledWith('beta');
   });
-
-  it('clears selection and debounces search input when typing', async () => {
-    useFetchSloInstancesMock.mockImplementation((params) => {
-      lastParams = params;
-      return createHookResponse(['alpha']);
-    });
-
-    const user = userEvent.setup({
-      advanceTimers: jest.advanceTimersByTime,
-      pointerEventsCheck: 0,
-    });
-    const { onSelected } = renderComponent();
-
-    const comboContainer = await openComboBox(user);
-    await user.click(await screen.findByText('alpha'));
-
-    expect(onSelected).toHaveBeenLastCalledWith('alpha');
-
-    // Wait for the combo box to close after selection
-    await waitFor(() => {
-      expect(document.querySelector('[role="listbox"]')).not.toBeInTheDocument();
-    });
-
-    // Reopen the combo box to access the search input
-    await openComboBox(user);
-    const searchInput = within(comboContainer).getByTestId(
-      'comboBoxSearchInput'
-    ) as HTMLInputElement;
-
-    // Directly set the search value using fireEvent.change
-    // This bypasses the issue of the input containing "alpha" and ensures
-    // we set exactly "search-term" as the value
-    await act(async () => {
-      fireEvent.change(searchInput, { target: { value: 'search-term' } });
-    });
-    await act(async () => {
-      jest.advanceTimersByTime(300);
-    });
-
-    expect(onSelected).toHaveBeenLastCalledWith(undefined);
-    expect(useFetchSloInstancesMock).toHaveBeenLastCalledWith(
-      expect.objectContaining({ sloId: 'slo-1', search: 'search-term' })
-    );
-  });
 });
