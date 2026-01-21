@@ -52,6 +52,16 @@ describe('buildElasticsearchRequest', () => {
     });
     expect(result.method).toBe('POST');
     expect(result.path).toBe('/test-index/_doc/1');
-    expect(result.body).toEqual({ document: { name: 'Yellowstone' } });
+    expect(result.body).toEqual({ name: 'Yellowstone' });
+  });
+
+  it('should use POST for elasticsearch.index step when id is not provided', () => {
+    const result = buildElasticsearchRequest('elasticsearch.index', {
+      index: 'test-index',
+      document: { name: 'Yellowstone' },
+    });
+    expect(result.method).toBe('POST');
+    expect(result.path).toBe('/test-index/_doc');
+    expect(result.body).toEqual({ name: 'Yellowstone' });
   });
 });
