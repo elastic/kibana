@@ -5,18 +5,32 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiPanel,
   EuiFlexGroup,
   EuiText,
   EuiLoadingSpinner,
   EuiHealth,
+  EuiPopover,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useSiemReadinessApi, useIndicesDocCounts } from '@kbn/siem-readiness';
+import {
+  useSiemReadinessApi,
+  useIndicesDocCounts,
+  useIntegrationDisplayNames,
+} from '@kbn/siem-readiness';
 import type { SiemReadinessPackageInfo, RelatedIntegrationRuleResponse } from '@kbn/siem-readiness';
+import { useBasePath } from '../../../../../common/lib/kibana';
+import { IntegrationSelectablePopover } from '../../../components/integrations_selectable_popover';
+
+const getIntegrationUrl = (basePath: string, integration: string): string => {
+  const baseUrl = `${basePath}/app/integrations/detail`;
+  return integration ? `${baseUrl}/${integration}` : baseUrl;
+};
+
 interface DetectionRule extends RelatedIntegrationRuleResponse {
   rule_id?: string;
   id?: string;
@@ -73,8 +87,28 @@ interface TreemapDataItem {
 }
 
 export const MitreAttackRuleCoveragePanel: React.FC = () => {
+  const basePath = useBasePath();
   const { euiTheme } = useEuiTheme();
   const { getDetectionRules, getIntegrations } = useSiemReadinessApi();
+  const [popoverOpen, setPopoverOpen] = useState<string | null>(null);
+
+  const integrationDisplayNames = useIntegrationDisplayNames();
+  const getIntegrationDisplayName = useCallback(
+    (packageName: string): string => {
+      return integrationDisplayNames.data?.get(packageName) || packageName;
+    },
+    [integrationDisplayNames.data]
+  );
+
+  const onChangePopOver = (popoverOptions: EuiSelectableOption[]) => {
+    // Find the selected option
+    const selectedOption = popoverOptions.find((option) => option.checked === 'on');
+
+    if (selectedOption) {
+      const integrationUrl = getIntegrationUrl(basePath, selectedOption.key as string);
+      window.open(integrationUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
 
   const getInstalledIntegrationsData = useMemo(() => {
     return (
@@ -406,73 +440,104 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
             }}
           >
             {treemapData.map((item, index) => (
-              <div
+              <EuiPopover
                 key={item.id}
-                style={{
-                  backgroundColor: item.color,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
-                  padding: euiTheme.size.s,
-                  fontSize: euiTheme.size.m,
-                  fontWeight: 'bold',
-                }}
-              >
-                <div style={{ textAlign: 'left', fontSize: euiTheme.size.m, fontWeight: 'bold' }}>
-                  {item.name}
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: euiTheme.size.xxs }}>
-                  {item.missingIntegrationCount > 0 && (
-                    <div
-                      style={{
-                        textAlign: 'left',
-                        fontSize: euiTheme.size.m,
-                      }}
-                    >
-                      <span style={{ fontWeight: 'bold' }}>{item.missingIntegrationCount}</span>{' '}
-                      <span style={{ fontWeight: 'normal' }}>
-                        {i18n.translate(
-                          'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.mitreAttack.missingIntegrations',
-                          {
-                            defaultMessage: 'missing integrations',
-                          }
-                        )}
-                      </span>
-                    </div>
-                  )}
+                button={
                   <div
+                    onClick={() => setPopoverOpen(popoverOpen === item.id ? null : item.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setPopoverOpen(popoverOpen === item.id ? null : item.id);
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Open details for ${item.name} tactic`}
                     style={{
-                      textAlign: 'left',
+                      backgroundColor: item.color,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      padding: euiTheme.size.s,
                       fontSize: euiTheme.size.m,
-                      fontWeight: 'normal',
+                      fontWeight: 'bold',
+                      cursor: 'pointer',
+                      height: '100%',
                     }}
                   >
-                    {item.count > 0 ? (
-                      <>
-                        <span style={{ fontWeight: 'bold' }}>{item.rulesWithoutDocuments}</span>
-                        {`/`}
-                        <span style={{ fontWeight: 'bold' }}>{item.count}</span>{' '}
-                        {i18n.translate(
-                          'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.mitreAttack.rulesMissingData',
-                          {
-                            defaultMessage: 'rules missing data',
-                          }
+                    <div
+                      style={{ textAlign: 'left', fontSize: euiTheme.size.m, fontWeight: 'bold' }}
+                    >
+                      {item.name}
+                    </div>
+                    <div
+                      style={{ display: 'flex', flexDirection: 'column', gap: euiTheme.size.xxs }}
+                    >
+                      {item.missingIntegrationCount > 0 && (
+                        <div
+                          style={{
+                            textAlign: 'left',
+                            fontSize: euiTheme.size.m,
+                          }}
+                        >
+                          <span style={{ fontWeight: 'bold' }}>{item.missingIntegrationCount}</span>{' '}
+                          <span style={{ fontWeight: 'normal' }}>
+                            {i18n.translate(
+                              'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.mitreAttack.missingIntegrations',
+                              {
+                                defaultMessage: 'missing integrations',
+                              }
+                            )}
+                          </span>
+                        </div>
+                      )}
+                      <div
+                        style={{
+                          textAlign: 'left',
+                          fontSize: euiTheme.size.m,
+                          fontWeight: 'normal',
+                        }}
+                      >
+                        {item.count > 0 ? (
+                          <>
+                            <span style={{ fontWeight: 'bold' }}>{item.rulesWithoutDocuments}</span>
+                            {`/`}
+                            <span style={{ fontWeight: 'bold' }}>{item.count}</span>{' '}
+                            {i18n.translate(
+                              'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.mitreAttack.rulesMissingData',
+                              {
+                                defaultMessage: 'rules missing data',
+                              }
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <span style={{ fontWeight: 'bold' }}>{item.count}</span>{' '}
+                            {i18n.translate(
+                              'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.mitreAttack.rules',
+                              {
+                                defaultMessage: 'rules',
+                              }
+                            )}
+                          </>
                         )}
-                      </>
-                    ) : (
-                      <>
-                        <span style={{ fontWeight: 'bold' }}>{item.count}</span>{' '}
-                        {i18n.translate(
-                          'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.mitreAttack.rules',
-                          {
-                            defaultMessage: 'rules',
-                          }
-                        )}
-                      </>
-                    )}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
+                }
+                isOpen={popoverOpen === item.id}
+                closePopover={() => setPopoverOpen(null)}
+                panelPaddingSize="s"
+              >
+                <IntegrationSelectablePopover
+                  options={item.missingIntegrations.map((integration) => ({
+                    label: getIntegrationDisplayName(integration),
+                    key: integration,
+                  }))}
+                  onChange={onChangePopOver}
+                />
+              </EuiPopover>
             ))}
           </div>
         </div>
