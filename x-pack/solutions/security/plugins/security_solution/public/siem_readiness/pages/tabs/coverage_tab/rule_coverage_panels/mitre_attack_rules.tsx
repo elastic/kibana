@@ -106,7 +106,6 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
   );
 
   const onChangePopOver = (popoverOptions: EuiSelectableOption[]) => {
-    // Find the selected option
     const selectedOption = popoverOptions.find((option) => option.checked === 'on');
 
     if (selectedOption) {
@@ -562,6 +561,12 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
                     key: integration,
                   }))}
                   onChange={onChangePopOver}
+                  buttonLabel={i18n.translate(
+                    'xpack.securitySolution.siemReadiness.integrationSelectablePopover.viewMissingIntegrationsLabel',
+                    {
+                      defaultMessage: 'View missing Integrations',
+                    }
+                  )}
                 />
               </EuiPopover>
             ))}

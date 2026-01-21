@@ -19,11 +19,14 @@ import {
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-export const IntegrationSelectablePopover = (
-  props: Pick<EuiSelectableProps, 'options' | 'onChange'>
-) => {
+interface IntegrationSelectablePopoverProps
+  extends Pick<EuiSelectableProps, 'options' | 'onChange'> {
+  buttonLabel?: string;
+}
+
+export const IntegrationSelectablePopover = (props: IntegrationSelectablePopoverProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const { options, onChange } = props;
+  const { options, onChange, buttonLabel } = props;
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -34,12 +37,13 @@ export const IntegrationSelectablePopover = (
           <EuiFlexGroup gutterSize="m" alignItems="center" wrap={true}>
             <EuiFlexItem grow={false}>
               <EuiLink onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
-                {i18n.translate(
-                  'xpack.securitySolution.siemReadiness.integrationSelectablePopover.viewIntegrationsLabel',
-                  {
-                    defaultMessage: 'View Integrations',
-                  }
-                )}
+                {buttonLabel ||
+                  i18n.translate(
+                    'xpack.securitySolution.siemReadiness.integrationSelectablePopover.viewIntegrationsLabel',
+                    {
+                      defaultMessage: 'View Integrations',
+                    }
+                  )}
               </EuiLink>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
