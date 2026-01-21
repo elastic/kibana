@@ -508,7 +508,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
             <p>
               <FormattedMessage
                 id="xpack.cloudConnect.connectedServices.service.missingPrivilegesDescription"
-                defaultMessage="Full LLM functionality requires the save {privilege} Kibana privilege. Without it, some features will be unavailable. Please contact your administrator."
+                defaultMessage="Full LLM functionality requires **Customize sub-feature privileges** to be switched on in the Kibana {privilege} privilege. When it is switched off, some features will be unavailable. Contact your administrator to make this change."
                 values={{
                   privilege: <strong>Actions and Connectors</strong>,
                 }}
