@@ -385,11 +385,7 @@ export class WorkflowsExecutionEnginePlugin
                 workflowExecution.concurrencyGroupKey = concurrencyGroupKey;
               }
 
-              // Use refresh: 'wait_for' to ensure the execution is immediately searchable
-              // for deduplication checks by subsequent scheduled tasks
-              await workflowExecutionRepository.createWorkflowExecution(workflowExecution, {
-                refresh: 'wait_for',
-              });
+              await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
 
               // Check concurrency limits and apply collision strategy if needed
               const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
