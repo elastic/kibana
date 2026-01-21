@@ -7,22 +7,8 @@
 
 import { conditionToESQLAst } from '@kbn/streamlang';
 import { BasicPrettyPrinter, Builder, Parser } from '@kbn/esql-language';
-import type { ESQLSingleAstItem, ESQLCommand } from '@kbn/esql-language';
+import type { ESQLCommand } from '@kbn/esql-language';
 import type { StreamQuery } from '../queries';
-
-/**
- * Builds the WHERE condition AST node for a StreamQuery.
- * Combines the KQL query with the feature filter (if present) using AND.
- */
-const buildWhereConditionAst = (query: Pick<StreamQuery, 'kql' | 'feature'>) => {
-  const kqlQuery = Builder.expression.func.call('KQL', [
-    Builder.expression.literal.string(query.kql.query),
-  ]);
-
-  return query.feature?.filter
-    ? Builder.expression.func.binary('and', [kqlQuery, conditionToESQLAst(query.feature.filter)])
-    : kqlQuery;
-};
 
 /**
  * Builds the WHERE condition for a StreamQuery as an ESQL expression string.
@@ -33,7 +19,15 @@ const buildWhereConditionAst = (query: Pick<StreamQuery, 'kql' | 'feature'>) => 
  * buildEsqlWhereCondition({ kql: { query: 'message: error' }, feature: { filter: { field: 'system.name', eq: 'auth' } } })
  */
 export const buildEsqlWhereCondition = (query: Pick<StreamQuery, 'kql' | 'feature'>): string => {
-  return BasicPrettyPrinter.expression(buildWhereConditionAst(query));
+  const kqlQuery = Builder.expression.func.call('KQL', [
+    Builder.expression.literal.string(query.kql.query),
+  ]);
+
+  const whereConditionAst = query.feature?.filter
+    ? Builder.expression.func.binary('and', [kqlQuery, conditionToESQLAst(query.feature.filter)])
+    : kqlQuery;
+
+  return BasicPrettyPrinter.expression(whereConditionAst);
 };
 
 export const buildEsqlQuery = (
@@ -65,21 +59,10 @@ export const buildEsqlQuery = (
 
   const commands: ESQLCommand[] = [fromCommand];
 
-  // Try to use esql.where when populated, fall back to deprecated kql/feature
-  let whereExpression: ESQLSingleAstItem | undefined;
-
-  if (query.esql?.where) {
-    try {
-      whereExpression = Parser.parseExpression(query.esql.where).root;
-    } catch {
-      // Fall back to deprecated kql/feature on parse error
-    }
-  }
-
   commands.push(
     Builder.command({
       name: 'where',
-      args: [whereExpression ?? buildWhereConditionAst(query)],
+      args: [Parser.parseExpression(query.esql.where).root],
     })
   );
 
