@@ -14,26 +14,33 @@ import {
 
 describe('ScriptNameNavLink component', () => {
   let mockedContext: AppContextTestRender;
-  let render: (props: ScriptNameNavLinkProps) => ReturnType<AppContextTestRender['render']>;
+  let render: (props?: ScriptNameNavLinkProps) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
+  let defaultProps: ScriptNameNavLinkProps;
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
-    render = (props: ScriptNameNavLinkProps) => {
-      renderResult = mockedContext.render(<ScriptNameNavLink {...props} data-test-subj="test" />);
+
+    defaultProps = {
+      name: 'Test Script',
+      onClick: jest.fn(),
+      'data-test-subj': 'test',
+    };
+    render = (props?: ScriptNameNavLinkProps) => {
+      renderResult = mockedContext.render(
+        <ScriptNameNavLink {...(props ?? defaultProps)} data-test-subj="test" />
+      );
       return renderResult;
     };
   });
 
   it('should render correctly', () => {
-    const { getByTestId } = render({ name: 'Test Script', href: '/test-script' });
-    const badgesContainer = getByTestId('test');
-    expect(badgesContainer).toHaveTextContent('Test Script');
-  });
-
-  it('should set the correct href', () => {
-    const { getByTestId } = render({ name: 'Test Script', href: '/test-script?show=details' });
-    const linkElement = getByTestId('test') as HTMLAnchorElement;
-    expect(linkElement.href).toContain('/test-script?show=details');
+    const { getByTestId } = render();
+    const nameElement = getByTestId('test-name-nav-link');
+    expect(nameElement).toHaveTextContent('Test Script');
   });
 });

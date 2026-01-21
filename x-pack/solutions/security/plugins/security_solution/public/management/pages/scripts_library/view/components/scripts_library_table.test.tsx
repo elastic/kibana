@@ -13,9 +13,11 @@ import {
   type AppContextTestRender,
 } from '../../../../../common/mock/endpoint';
 import { ScriptsLibraryTable, type ScriptsLibraryTableProps } from './scripts_library_table';
-import { SCRIPT_TAGS } from '../../../../../../common/endpoint/service/scripts_library/constants';
-import type { EndpointScript } from '../../../../../../common/endpoint/types';
-import { APP_SCRIPTS_LIBRARY_PATH, SCRIPTS_LIBRARY_PATH } from '../../../../../../common/constants';
+import {
+  SCRIPT_TAGS,
+  SORTED_SCRIPT_TAGS_KEYS,
+} from '../../../../../../common/endpoint/service/scripts_library/constants';
+import { SCRIPTS_LIBRARY_PATH } from '../../../../../../common/constants';
 import { useUserPrivileges as _useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
 import { EndpointScriptsGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_scripts_generator';
@@ -33,6 +35,7 @@ describe('ScriptsLibraryTable', () => {
   const defaultProps: ScriptsLibraryTableProps = {
     items: [],
     onChange: jest.fn(),
+    onClickAction: jest.fn(),
     queryParams: {
       page: 1,
       pageSize: 10,
@@ -41,7 +44,6 @@ describe('ScriptsLibraryTable', () => {
     },
     totalItemCount: 1,
     isLoading: false,
-    searchParams: '',
     sort: {
       field: 'name',
       direction: 'asc',
@@ -71,7 +73,7 @@ describe('ScriptsLibraryTable', () => {
       scriptsGenerator.generate({
         id: 'script-1',
         name: 'Script One',
-        tags: Object.keys(SCRIPT_TAGS) as EndpointScript['tags'],
+        tags: [...SORTED_SCRIPT_TAGS_KEYS],
         updatedBy: 'user2',
         updatedAt: '2026-01-13T10:15:00Z',
       }),
@@ -108,7 +110,7 @@ describe('ScriptsLibraryTable', () => {
       const columns = renderResult.getAllByRole('columnheader');
       expect(columns).toHaveLength(7);
       expect(columns.map((column) => column.textContent).join(',')).toEqual(
-        'Name,Platform,Tags,Updated by,Last updated,Size,Actions'
+        'Name,Platforms,Types,Updated by,Last updated,Size,Actions'
       );
     });
 
@@ -143,17 +145,15 @@ describe('ScriptsLibraryTable', () => {
       expect(range).toHaveTextContent(`Showing 1-10 of 11 scripts`);
     });
 
-    it('shows script name as link for opening details flyout', () => {
+    it('shows script name as a button for opening details flyout', () => {
       reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
 
       const { getByTestId } = renderResult;
-      const nameLink = getByTestId('test-column-name-script-1');
-      expect(nameLink).toHaveTextContent('Script One');
-      expect(nameLink).toHaveAttribute(
-        'href',
-        `${APP_SCRIPTS_LIBRARY_PATH}?page=1&pageSize=10&sortField=name&sortDirection=asc&selectedScriptId=script-1&show=details`
-      );
+      const nameButton = getByTestId('test-column-name-script-1-nav-link');
+      expect(nameButton).toHaveTextContent('Script One');
+      // should be a button element
+      expect(nameButton.tagName).toBe('BUTTON');
     });
 
     it('shows platform badges for each script', () => {
@@ -177,19 +177,19 @@ describe('ScriptsLibraryTable', () => {
       });
     });
 
-    it('shows tags for each script', () => {
+    it('shows Types for each script', () => {
       reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
       render();
 
       const { getByTestId } = renderResult;
-      const tagsCell = getByTestId('test-tags');
-      expect(tagsCell.textContent).toEqual('11');
+      const typesCell = getByTestId('test-types');
+      expect(typesCell.textContent).toEqual('11');
 
-      const tagsPopover = getByTestId('test-tagsDisplayPopoverButton');
-      // click on tags cell and verify popover content
-      userEve.click(tagsPopover).then(() => {
-        expect(getByTestId('test-tagsDisplayPopoverTitle')).toHaveTextContent('Tags');
-        const badges = getByTestId('test-tagsDisplayPopoverWrapper').querySelectorAll('.euiBadge');
+      const typesPopover = getByTestId('test-typesDisplayPopoverButton');
+      // click on types cell and verify popover content
+      userEve.click(typesPopover).then(() => {
+        expect(getByTestId('test-typesDisplayPopoverTitle')).toHaveTextContent('Types');
+        const badges = getByTestId('test-typesDisplayPopoverWrapper').querySelectorAll('.euiBadge');
         expect(badges).toHaveLength(11);
         // verify all tags are present and are in sorted order
         const tags = Array.from(badges).map((badge) => badge.textContent);
@@ -219,7 +219,7 @@ describe('ScriptsLibraryTable', () => {
       });
 
       const { getByTestId } = renderResult;
-      const fileSizeCell = getByTestId('test-file-size');
+      const fileSizeCell = getByTestId('test-column-file-size');
       expect(fileSizeCell).toHaveTextContent('784kb');
     });
 
@@ -272,6 +272,24 @@ describe('ScriptsLibraryTable', () => {
         expect.objectContaining({
           sort: {
             field: 'updatedBy',
+            direction: 'asc',
+          },
+        })
+      );
+    });
+
+    it('should sort by column `Size` when header clicked', async () => {
+      reactTestingLibrary.act(() => history.push(SCRIPTS_LIBRARY_PATH));
+      render();
+
+      const { getByText } = renderResult;
+      const sizeHeader = getByText('Size');
+
+      await userEve.click(sizeHeader);
+      expect(defaultProps.onChange).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sort: {
+            field: 'fileSize',
             direction: 'asc',
           },
         })

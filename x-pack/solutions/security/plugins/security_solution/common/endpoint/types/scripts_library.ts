@@ -53,6 +53,8 @@ export interface EndpointScriptListApiResponse {
   sortDirection: 'asc' | 'desc';
 }
 
+// linked to SCRIPT_LIBRARY_SORTABLE_FIELDS at
+// x-pack/solutions/security/plugins/security_solution/public/management/common/constants.ts
 export type SortableScriptLibraryFields = keyof Pick<
   EndpointScript,
   'name' | 'createdAt' | 'createdBy' | 'updatedAt' | 'updatedBy' | 'fileSize'

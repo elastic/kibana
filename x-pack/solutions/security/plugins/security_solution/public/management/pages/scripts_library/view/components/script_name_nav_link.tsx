@@ -10,18 +10,17 @@ import { EuiLink } from '@elastic/eui';
 
 export interface ScriptNameNavLinkProps {
   name: string;
-  href: string;
+  onClick: () => void;
   'data-test-subj'?: string;
 }
 
 export const ScriptNameNavLink = memo<ScriptNameNavLinkProps>(
-  ({ name, href, 'data-test-subj': dataTestSubj }) => {
+  ({ name, onClick, 'data-test-subj': dataTestSubj }) => {
     return (
       <EuiLink
-        data-test-subj={dataTestSubj}
+        data-test-subj={`${dataTestSubj}-nav-link`}
         className="eui-displayInline eui-textTruncate"
-        href={href}
-        target="_self"
+        onClick={onClick}
       >
         {name}
       </EuiLink>
