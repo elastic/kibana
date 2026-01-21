@@ -32,7 +32,7 @@ export const MetadataSchema = z.record(z.string(), z.any());
 export const InputSchema = z.object({
   prompt: z.string(),
   systemPrompt: z.string().optional(),
-  schema: JsonModelSchema.optional(),
+  schema: JsonModelSchema.optional().describe('The schema for the output of the step.'),
   temperature: z.number().min(0).max(1).optional(),
 });
 
