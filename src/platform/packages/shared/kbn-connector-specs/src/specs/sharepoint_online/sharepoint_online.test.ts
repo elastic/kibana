@@ -98,6 +98,7 @@ describe('SharepointOnline', () => {
   const mockClient = {
     get: jest.fn(),
     post: jest.fn(),
+    request: jest.fn(),
   };
 
   const mockContext = {
@@ -136,7 +137,12 @@ describe('SharepointOnline', () => {
       )) as SharePointListResponse<SharePointSite>;
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/getAllSites/'
+        'https://graph.microsoft.com/v1.0/sites/getAllSites/',
+        {
+          params: {
+            $select: 'id,displayName,webUrl,siteCollection',
+          },
+        }
       );
       expect(mockContext.log.debug).toHaveBeenCalledWith('SharePoint listing all sites');
       expect(result).toEqual(mockResponse.data);
@@ -172,7 +178,12 @@ describe('SharepointOnline', () => {
       )) as SharePointListResponse<SharePointSite>;
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/getAllSites/'
+        'https://graph.microsoft.com/v1.0/sites/getAllSites/',
+        {
+          params: {
+            $select: 'id,displayName,webUrl,siteCollection',
+          },
+        }
       );
       expect(result).toEqual(mockResponse.data);
     });
@@ -183,6 +194,40 @@ describe('SharepointOnline', () => {
       await expect(
         SharepointOnline.actions.getAllSites.handler(mockContext, {})
       ).rejects.toThrow('Access denied');
+    });
+
+    it('should pass pagination params', async () => {
+      const mockResponse = {
+        data: { value: [] },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await SharepointOnline.actions.getAllSites.handler(mockContext, {
+        top: 25,
+        skip: 50,
+        skipToken: 'token-123',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/sites/getAllSites/',
+        {
+          params: {
+            $select: 'id,displayName,webUrl,siteCollection',
+            $top: 25,
+            $skip: 50,
+            $skiptoken: 'token-123',
+          },
+        }
+      );
+    });
+
+    it('should reject skip and skipToken together', () => {
+      expect(() =>
+        SharepointOnline.actions.getAllSites.input.parse({
+          skip: 10,
+          skipToken: 'token-123',
+        })
+      ).toThrow('skip and skipToken cannot both be set');
     });
   });
 
@@ -211,7 +256,12 @@ describe('SharepointOnline', () => {
       })) as SharePointListResponse<SharePointPage>;
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/site-123/pages/'
+        'https://graph.microsoft.com/v1.0/sites/site-123/pages/',
+        {
+          params: {
+            $select: 'id,title,description,webUrl,createdDateTime,lastModifiedDateTime',
+          },
+        }
       );
       expect(mockContext.log.debug).toHaveBeenCalledWith(
         'SharePoint listing all pages from siteId site-123'
@@ -247,7 +297,12 @@ describe('SharepointOnline', () => {
       })) as SharePointListResponse<SharePointPage>;
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com,abc-123,def-456/pages/'
+        'https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com,abc-123,def-456/pages/',
+        {
+          params: {
+            $select: 'id,title,description,webUrl,createdDateTime,lastModifiedDateTime',
+          },
+        }
       );
       expect(result.value).toEqual([]);
     });
@@ -260,6 +315,40 @@ describe('SharepointOnline', () => {
           siteId: 'nonexistent-site',
         })
       ).rejects.toThrow('Site not found');
+    });
+
+    it('should pass pagination params', async () => {
+      const mockResponse = {
+        data: { value: [] },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await SharepointOnline.actions.getSitePages.handler(mockContext, {
+        siteId: 'site-123',
+        top: 10,
+        skipToken: 'next-page',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/sites/site-123/pages/',
+        {
+          params: {
+            $select: 'id,title,description,webUrl,createdDateTime,lastModifiedDateTime',
+            $top: 10,
+            $skiptoken: 'next-page',
+          },
+        }
+      );
+    });
+
+    it('should reject skip and skipToken together', () => {
+      expect(() =>
+        SharepointOnline.actions.getSitePages.input.parse({
+          siteId: 'site-123',
+          skip: 10,
+          skipToken: 'next-page',
+        })
+      ).toThrow('skip and skipToken cannot both be set');
     });
   });
 
@@ -290,7 +379,13 @@ describe('SharepointOnline', () => {
       })) as SharePointListResponse<SharePointDrive>;
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/site-123/drives/'
+        'https://graph.microsoft.com/v1.0/sites/site-123/drives/',
+        {
+          params: {
+            $select:
+              'id,name,driveType,webUrl,createdDateTime,lastModifiedDateTime,description,owner',
+          },
+        }
       );
       expect(mockContext.log.debug).toHaveBeenCalledWith(
         'SharePoint getting all drives of site site-123'
@@ -326,7 +421,13 @@ describe('SharepointOnline', () => {
       })) as SharePointListResponse<SharePointDrive>;
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com,abc-123,def-456/drives/'
+        'https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com,abc-123,def-456/drives/',
+        {
+          params: {
+            $select:
+              'id,name,driveType,webUrl,createdDateTime,lastModifiedDateTime,description,owner',
+          },
+        }
       );
       expect(result.value).toEqual([]);
     });
@@ -339,6 +440,41 @@ describe('SharepointOnline', () => {
           siteId: 'nonexistent-site',
         })
       ).rejects.toThrow('Site not found');
+    });
+
+    it('should pass pagination params', async () => {
+      const mockResponse = {
+        data: { value: [] },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await SharepointOnline.actions.getSiteDrives.handler(mockContext, {
+        siteId: 'site-123',
+        top: 5,
+        skip: 15,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/sites/site-123/drives/',
+        {
+          params: {
+            $select:
+              'id,name,driveType,webUrl,createdDateTime,lastModifiedDateTime,description,owner',
+            $top: 5,
+            $skip: 15,
+          },
+        }
+      );
+    });
+
+    it('should reject skip and skipToken together', () => {
+      expect(() =>
+        SharepointOnline.actions.getSiteDrives.input.parse({
+          siteId: 'site-123',
+          skip: 10,
+          skipToken: 'next-page',
+        })
+      ).toThrow('skip and skipToken cannot both be set');
     });
   });
 
@@ -369,7 +505,13 @@ describe('SharepointOnline', () => {
       })) as SharePointListResponse<SharePointList>;
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/site-123/lists/'
+        'https://graph.microsoft.com/v1.0/sites/site-123/lists/',
+        {
+          params: {
+            $select:
+              'id,displayName,name,webUrl,description,createdDateTime,lastModifiedDateTime',
+          },
+        }
       );
       expect(mockContext.log.debug).toHaveBeenCalledWith(
         'SharePoint getting all lists of site site-123'
@@ -405,7 +547,13 @@ describe('SharepointOnline', () => {
       })) as SharePointListResponse<SharePointList>;
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com,abc-123,def-456/lists/'
+        'https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com,abc-123,def-456/lists/',
+        {
+          params: {
+            $select:
+              'id,displayName,name,webUrl,description,createdDateTime,lastModifiedDateTime',
+          },
+        }
       );
       expect(result.value).toEqual([]);
     });
@@ -418,6 +566,39 @@ describe('SharepointOnline', () => {
           siteId: 'nonexistent-site',
         })
       ).rejects.toThrow('Site not found');
+    });
+
+    it('should pass pagination params', async () => {
+      const mockResponse = {
+        data: { value: [] },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await SharepointOnline.actions.getSiteLists.handler(mockContext, {
+        siteId: 'site-123',
+        top: 100,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/sites/site-123/lists/',
+        {
+          params: {
+            $select:
+              'id,displayName,name,webUrl,description,createdDateTime,lastModifiedDateTime',
+            $top: 100,
+          },
+        }
+      );
+    });
+
+    it('should reject skip and skipToken together', () => {
+      expect(() =>
+        SharepointOnline.actions.getSiteLists.input.parse({
+          siteId: 'site-123',
+          skip: 10,
+          skipToken: 'next-page',
+        })
+      ).toThrow('skip and skipToken cannot both be set');
     });
   });
 
@@ -447,7 +628,12 @@ describe('SharepointOnline', () => {
       })) as SharePointListResponse<SharePointListItem>;
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/site-123/lists/list-456/items/'
+        'https://graph.microsoft.com/v1.0/sites/site-123/lists/list-456/items/',
+        {
+          params: {
+            $select: 'id,webUrl,createdDateTime,lastModifiedDateTime,createdBy,lastModifiedBy',
+          },
+        }
       );
       expect(mockContext.log.debug).toHaveBeenCalledWith(
         'SharePoint getting all items of list list-456 of site site-123'
@@ -485,7 +671,12 @@ describe('SharepointOnline', () => {
       })) as SharePointListResponse<SharePointListItem>;
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com,abc-123,def-456/lists/b!xyz-789/items/'
+        'https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com,abc-123,def-456/lists/b!xyz-789/items/',
+        {
+          params: {
+            $select: 'id,webUrl,createdDateTime,lastModifiedDateTime,createdBy,lastModifiedBy',
+          },
+        }
       );
       expect(result.value).toEqual([]);
     });
@@ -511,6 +702,40 @@ describe('SharepointOnline', () => {
         })
       ).rejects.toThrow('Site not found');
     });
+
+    it('should pass pagination params', async () => {
+      const mockResponse = {
+        data: { value: [] },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await SharepointOnline.actions.getSiteListItems.handler(mockContext, {
+        siteId: 'site-123',
+        listId: 'list-456',
+        skipToken: 'next-items',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/sites/site-123/lists/list-456/items/',
+        {
+          params: {
+            $select: 'id,webUrl,createdDateTime,lastModifiedDateTime,createdBy,lastModifiedBy',
+            $skiptoken: 'next-items',
+          },
+        }
+      );
+    });
+
+    it('should reject skip and skipToken together', () => {
+      expect(() =>
+        SharepointOnline.actions.getSiteListItems.input.parse({
+          siteId: 'site-123',
+          listId: 'list-456',
+          skip: 10,
+          skipToken: 'next-items',
+        })
+      ).toThrow('skip and skipToken cannot both be set');
+    });
   });
 
   describe('getSite action', () => {
@@ -529,7 +754,12 @@ describe('SharepointOnline', () => {
       })) as SharePointSite;
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/site-123'
+        'https://graph.microsoft.com/v1.0/sites/site-123',
+        {
+          params: {
+            $select: 'id,displayName,webUrl,siteCollection,createdDateTime,lastModifiedDateTime',
+          },
+        }
       );
       expect(mockContext.log.debug).toHaveBeenCalledWith(
         'SharePoint getting site info via https://graph.microsoft.com/v1.0/sites/site-123'
@@ -554,7 +784,12 @@ describe('SharepointOnline', () => {
       })) as SharePointSite;
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com:/sites/hr:'
+        'https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com:/sites/hr:',
+        {
+          params: {
+            $select: 'id,displayName,webUrl,siteCollection,createdDateTime,lastModifiedDateTime',
+          },
+        }
       );
       expect(mockContext.log.debug).toHaveBeenCalledWith(
         'SharePoint getting site info via https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com:/sites/hr:'
@@ -577,7 +812,11 @@ describe('SharepointOnline', () => {
         siteId: 'root',
       })) as SharePointSite;
 
-      expect(mockClient.get).toHaveBeenCalledWith('https://graph.microsoft.com/v1.0/sites/root');
+      expect(mockClient.get).toHaveBeenCalledWith('https://graph.microsoft.com/v1.0/sites/root', {
+        params: {
+          $select: 'id,displayName,webUrl,siteCollection,createdDateTime,lastModifiedDateTime',
+        },
+      });
       expect(result).toEqual(mockResponse.data);
       expect(result.id).toBe('root');
     });
@@ -774,6 +1013,66 @@ describe('SharepointOnline', () => {
           query: 'test',
         })
       ).rejects.toThrow('Invalid search query');
+    });
+  });
+
+  describe('callGraphAPI action', () => {
+    it('should call a GET endpoint with query params', async () => {
+      const mockResponse = {
+        data: { id: 'user-1', displayName: 'User 1' },
+      };
+      mockClient.request.mockResolvedValue(mockResponse);
+
+      const result = (await SharepointOnline.actions.callGraphAPI.handler(mockContext, {
+        method: 'GET',
+        path: '/v1.0/users',
+        query: { $top: 5, $select: 'id,displayName' },
+      })) as Record<string, unknown>;
+
+      expect(mockClient.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          method: 'GET',
+          url: 'https://graph.microsoft.com/v1.0/users',
+          params: { $top: 5, $select: 'id,displayName' },
+          data: undefined,
+        })
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should call a POST endpoint with a body', async () => {
+      const mockResponse = {
+        data: { id: 'created-item' },
+      };
+      mockClient.request.mockResolvedValue(mockResponse);
+
+      const body = { name: 'New Item' };
+      const result = (await SharepointOnline.actions.callGraphAPI.handler(mockContext, {
+        method: 'POST',
+        path: '/v1.0/sites',
+        body,
+      })) as Record<string, unknown>;
+
+      expect(mockClient.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          method: 'POST',
+          url: 'https://graph.microsoft.com/v1.0/sites',
+          params: undefined,
+          data: body,
+        })
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should propagate API errors', async () => {
+      mockClient.request.mockRejectedValue(new Error('Graph error'));
+
+      await expect(
+        SharepointOnline.actions.callGraphAPI.handler(mockContext, {
+          method: 'GET',
+          path: '/v1.0/me',
+        })
+      ).rejects.toThrow('Graph error');
     });
   });
 
