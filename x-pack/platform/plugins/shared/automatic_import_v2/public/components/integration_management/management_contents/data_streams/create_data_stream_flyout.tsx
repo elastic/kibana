@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiFlyout,
@@ -29,12 +29,17 @@ import {
 } from '@elastic/eui';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { css } from '@emotion/react';
+import { useParams } from 'react-router-dom';
+import type { DataStream, InputType } from '../../../../../common';
 import type { LogsSourceOption } from '../../forms/types';
 import { useIntegrationForm } from '../../forms/integration_form';
 import * as i18n from './translations';
 import { FormStyledLabel } from '../../../../common/components/form_styled_label';
 import { useFetchIndices } from '../../../../common/hooks/use_fetch_indices';
 import { useValidateIndex } from '../../../../common/hooks/use_validate_index';
+import { useCreateIntegration } from '../../../../common/hooks/use_create_integration';
+import { useGetIntegrationById } from '../../../../common/hooks/use_get_integration_by_id';
+import { generateId } from '../../../../common/lib/helper_functions';
 
 interface CreateDataStreamFlyoutProps {
   onClose: () => void;
@@ -106,7 +111,7 @@ const dataCollectionMethodOptions: Array<EuiComboBoxOptionOption<string>> = [
   { value: 'aws-cloudwatch', label: 'AWS Cloudwatch' },
   { value: 'azure-blob-storage', label: 'Azure Blob Storage' },
   { value: 'azure-eventhub', label: 'Azure Event Hub' },
-  { value: 'cel', label: 'API (CEL Input)' },
+  // { value: 'cel', label: 'API (CEL Input)' },
   { value: 'gcp-pubsub', label: 'GCP Pub/Sub' },
   { value: 'gcs', label: 'Google Cloud Storage' },
   { value: 'http_endpoint', label: 'HTTP Endpoint' },
@@ -117,7 +122,11 @@ const dataCollectionMethodOptions: Array<EuiComboBoxOptionOption<string>> = [
 
 export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ onClose }) => {
   const styles = useLayoutStyles();
-  const { form, formData, isNewIntegration } = useIntegrationForm();
+  const { integrationId: currentIntegrationId } = useParams<{ integrationId?: string }>();
+  // React Query has a cache but needs to integration ID to find it.
+  const { integration } = useGetIntegrationById(currentIntegrationId);
+  const { form, formData } = useIntegrationForm();
+
   const { indices, isLoading: isLoadingIndices } = useFetchIndices();
   const {
     isValidating: isValidatingIndex,
@@ -125,6 +134,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
     validateIndex,
     clearValidationError: clearIndexValidationError,
   } = useValidateIndex();
+  const { createIntegrationMutation, isCreating } = useCreateIntegration();
 
   const [isParsing, setIsParsing] = useState(false);
   const [fileError, setFileError] = useState<string | undefined>(undefined);
@@ -133,14 +143,18 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
   const logSample = formData?.logSample;
   const selectedIndex = formData?.selectedIndex ?? '';
 
-  // Build options from fetched indices
-  const indexOptions = [
-    { value: '', label: i18n.SELECT_PLACEHOLDER },
-    ...indices.map((indexName) => ({
-      value: indexName,
-      label: indexName,
-    })),
-  ];
+  const comboBoxOptions = useMemo(() => {
+    const rawOptions = [
+      { value: '', label: i18n.SELECT_PLACEHOLDER },
+      ...indices.map((indexName) => ({
+        value: indexName,
+        label: indexName,
+      })),
+    ];
+
+    // Filter Indices logic here
+    return rawOptions.filter((option) => option.value !== '' && !option.value?.startsWith('.'));
+  }, [indices]);
 
   const onChangeLogFile = useCallback(
     async (files: FileList | null) => {
@@ -195,11 +209,8 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
   );
 
   // Check if integration-level required fields are filled (only when creating new integration)
-  const isIntegrationValid = isNewIntegration
-    ? !!formData?.title?.trim() &&
-      !!formData?.description?.trim() &&
-      !!formData?.connectorId?.trim()
-    : true; // When adding to existing integration, integration fields are pre-populated
+  const isIntegrationFieldsValid =
+    !!formData?.title?.trim() && !!formData?.description?.trim() && !!formData?.connectorId?.trim();
 
   const isDataStreamFieldsValid =
     !!formData?.dataStreamTitle?.trim() &&
@@ -211,15 +222,41 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
     (logsSourceOption === 'index' && !!selectedIndex && !indexValidationError);
 
   const isAnalyzeDisabled =
-    !isIntegrationValid ||
+    !isIntegrationFieldsValid ||
     !isDataStreamFieldsValid ||
     !isLogSourceValid ||
     isParsing ||
-    isValidatingIndex;
+    isValidatingIndex ||
+    isCreating;
 
-  const handleAnalyzeLogs = useCallback(() => {
-    onClose();
-  }, [onClose]);
+  const handleAnalyzeLogs = useCallback(async () => {
+    if (!formData) return;
+
+    const integrationId = currentIntegrationId ?? generateId();
+    const dataStreamId = integrationId + '-' + generateId();
+    const inputTypes: InputType[] = (formData.dataCollectionMethod ?? []).map((method) => ({
+      name: method as InputType['name'],
+    }));
+
+    const formDataStream: DataStream = {
+      dataStreamId,
+      title: formData.dataStreamTitle,
+      description: formData.dataStreamDescription ?? formData.dataStreamTitle,
+      inputTypes,
+    };
+
+    const finalDataStreams = [...(integration?.dataStreams ?? []), formDataStream];
+
+    // TODO: Later have conditional mutation for create or update
+    await createIntegrationMutation.mutateAsync({
+      connectorId: formData.connectorId,
+      integrationId,
+      title: formData.title,
+      description: formData.description,
+      ...(formData.logo ? { logo: formData.logo } : {}),
+      dataStreams: finalDataStreams,
+    });
+  }, [formData, createIntegrationMutation, currentIntegrationId, integration]);
 
   return (
     <EuiFlyout
@@ -231,7 +268,9 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           {/* replace number with variable later */}
-          <h2 id="createDataStreamFlyoutTitle">{i18n.CREATE_DATA_STREAM_TITLE} 1</h2>
+          <h2 id="createDataStreamFlyoutTitle">
+            {i18n.CREATE_DATA_STREAM_TITLE} {(integration?.dataStreams?.length ?? 0) + 1}
+          </h2>
         </EuiTitle>
         <EuiText size="s" color="subdued">
           {i18n.CREATE_DATA_STREAM_DESCRIPTION}
@@ -364,7 +403,6 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
         >
           <UseField<string> path="selectedIndex">
             {(field) => {
-              const comboBoxOptions = indexOptions.filter((opt) => opt.value !== '');
               const selectedOptions = comboBoxOptions.filter((opt) => opt.value === field.value);
               return (
                 <EuiFormRow
@@ -374,6 +412,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
                   aria-label="Select an index"
                 >
                   <EuiComboBox
+                    key={field.value ?? ''}
                     fullWidth
                     singleSelection={{ asPlainText: true }}
                     options={comboBoxOptions}
@@ -409,7 +448,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
               fill
               onClick={handleAnalyzeLogs}
               disabled={isAnalyzeDisabled}
-              isLoading={isParsing}
+              isLoading={isParsing || isCreating}
               data-test-subj="analyzeLogsButton"
             >
               {i18n.ANALYZE_LOGS_BUTTON}

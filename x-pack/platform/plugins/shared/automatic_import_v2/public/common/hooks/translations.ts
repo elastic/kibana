@@ -21,3 +21,23 @@ export const INDEX_VALIDATION_FAILED = i18n.translate(
     defaultMessage: 'Failed to validate index mapping',
   }
 );
+
+export const CREATE_INTEGRATION_SUCCESS = i18n.translate(
+  'xpack.automaticImportV2.createIntegration.success',
+  {
+    defaultMessage: 'Integration created successfully',
+  }
+);
+
+export const CREATE_INTEGRATION_SUCCESS_DESCRIPTION = (integrationId: string) =>
+  i18n.translate('xpack.automaticImportV2.createIntegration.successDescription', {
+    defaultMessage: 'Integration {integrationId} is now being processed.',
+    values: { integrationId },
+  });
+
+export const CREATE_INTEGRATION_ERROR = i18n.translate(
+  'xpack.automaticImportV2.createIntegration.error',
+  {
+    defaultMessage: 'Failed to create integration',
+  }
+);

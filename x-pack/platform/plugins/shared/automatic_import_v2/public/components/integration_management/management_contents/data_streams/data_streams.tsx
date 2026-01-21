@@ -13,13 +13,19 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React from 'react';
+import { useParams } from 'react-router-dom';
 import { useUIState } from '../../contexts';
 import { CreateDataStreamFlyout } from './create_data_stream_flyout';
 import * as i18n from './translations';
+import { useGetIntegrationById } from '../../../../common/hooks/use_get_integration_by_id';
 
-export const DataStreams = () => {
+export const DataStreams = React.memo<{ integrationId?: string }>(() => {
   const { isCreateDataStreamFlyoutOpen, openCreateDataStreamFlyout, closeCreateDataStreamFlyout } =
     useUIState();
+  const { integrationId } = useParams<{ integrationId?: string }>();
+  const { integration } = useGetIntegrationById(integrationId);
+
+  const hasDataStreams = (integration?.dataStreams?.length ?? 0) > 0;
 
   return (
     <>
@@ -37,29 +43,45 @@ export const DataStreams = () => {
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton
-                iconType="plusInCircle"
-                onClick={openCreateDataStreamFlyout}
-                data-test-subj="addDataStreamButton"
-              >
-                {i18n.ADD_DATA_STREAM_BUTTON}
-              </EuiButton>
+              {hasDataStreams && (
+                <EuiButton
+                  iconType="plusInCircle"
+                  onClick={openCreateDataStreamFlyout}
+                  data-test-subj="addDataStreamButton"
+                >
+                  {i18n.ADD_DATA_STREAM_BUTTON}
+                </EuiButton>
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiHorizontalRule margin="m" />
-      {/* zero state */}
-      <EuiFlexGroup direction="column" alignItems="center">
-        <EuiFlexItem grow={false} />
-      </EuiFlexGroup>
+
+      {!hasDataStreams && (
+        <EuiFlexGroup direction="column" alignItems="center">
+          <EuiText size="s" color="subdued">
+            {i18n.ZERO_STATE_DESCRIPTION}
+          </EuiText>
+          <EuiFlexItem grow={false}>
+            {' '}
+            <EuiButton
+              iconType="plusInCircle"
+              onClick={openCreateDataStreamFlyout}
+              data-test-subj="addDataStreamButton"
+            >
+              {i18n.ADD_DATA_STREAM_BUTTON}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
 
       {isCreateDataStreamFlyoutOpen && (
         <CreateDataStreamFlyout onClose={closeCreateDataStreamFlyout} />
       )}
     </>
   );
-};
+});
 
 DataStreams.displayName = 'DataStreams';

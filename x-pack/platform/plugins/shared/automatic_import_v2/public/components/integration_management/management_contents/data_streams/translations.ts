@@ -141,3 +141,10 @@ export const SELECT_PLACEHOLDER = i18n.translate(
     defaultMessage: 'Select...',
   }
 );
+
+export const ZERO_STATE_DESCRIPTION = i18n.translate(
+  'xpack.automaticImportV2.dataStreams.zeroStateDescription',
+  {
+    defaultMessage: 'You have no data streams yet',
+  }
+);

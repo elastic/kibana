@@ -16,7 +16,7 @@ import {
 import { createFormSchema, REQUIRED_FIELDS } from './integration_form_validation';
 import type { IntegrationFormData } from './types';
 import { useKibana } from '../../../common/hooks/use_kibana';
-import { getInstalledPackages } from '../../../../common/lib/api';
+import { getInstalledPackages } from '../../../common/lib/api';
 import * as i18n from './translations';
 import { DEFAULT_DATA_STREAM_VALUES, DEFAULT_INTEGRATION_VALUES } from './constants';
 
@@ -33,8 +33,6 @@ export const IntegrationFormProvider: React.FC<IntegrationFormProviderProps> = (
 }) => {
   const { http, notifications } = useKibana().services;
   const [packageNames, setPackageNames] = useState<Set<string>>();
-
-  const isNewIntegration = !initialValue?.integrationId;
 
   // Load installed package names for duplicate title validation
   useEffect(() => {
@@ -62,7 +60,7 @@ export const IntegrationFormProvider: React.FC<IntegrationFormProviderProps> = (
 
   // For existing integrations, pass the current title to exclude from uniqueness check and
   // avoid validation errors.
-  const currentIntegrationTitle = isNewIntegration ? undefined : initialValue?.title;
+  const currentIntegrationTitle = !initialValue?.integrationId ? undefined : initialValue?.title;
   const schema = useMemo(
     () => createFormSchema(packageNames, currentIntegrationTitle),
     [packageNames, currentIntegrationTitle]
@@ -115,8 +113,6 @@ export const useIntegrationForm = () => {
   const form = useFormContext<IntegrationFormData>();
   const [formData] = useFormData<IntegrationFormData>();
 
-  const isNewIntegration = !formData?.integrationId;
-
   // Check if all required fields for the current context are filled
   const isValid = useMemo(() => {
     if (!formData) return false;
@@ -144,7 +140,6 @@ export const useIntegrationForm = () => {
   return {
     form: form as FormHook<IntegrationFormData>,
     formData,
-    isNewIntegration,
     isValid,
     submit: () => form.submit(),
     reset: () => form.reset(),

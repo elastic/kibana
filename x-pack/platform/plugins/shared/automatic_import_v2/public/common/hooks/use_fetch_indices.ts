@@ -35,9 +35,6 @@ export function useFetchIndices(search: string = '*'): UseFetchIndicesResult {
       );
       return response.indices.map((index) => index.name);
     },
-    retry: false,
-    refetchOnWindowFocus: true,
-    staleTime: 30000, // Cache for 30 seconds
   });
 
   return {
