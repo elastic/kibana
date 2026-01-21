@@ -27,6 +27,8 @@ export interface AttachmentPresentation {
   content: string;
   /** Number of active attachments */
   activeCount: number;
+  /** Whether any attachment content was truncated (only applicable in inline mode) */
+  hasTruncatedContent?: boolean;
 }
 
 /**
@@ -66,10 +68,15 @@ export const prepareAttachmentPresentation = (
   }
 
   if (activeCount <= threshold) {
+    const { content, hasTruncatedContent } = formatInlineAttachments(
+      activeAttachments,
+      maxContentLength
+    );
     return {
       mode: 'inline',
-      content: formatInlineAttachments(activeAttachments, maxContentLength),
+      content,
       activeCount,
+      hasTruncatedContent,
     };
   }
 
@@ -81,12 +88,22 @@ export const prepareAttachmentPresentation = (
 };
 
 /**
+ * Result of formatting inline attachments.
+ */
+interface InlineAttachmentsResult {
+  content: string;
+  hasTruncatedContent: boolean;
+}
+
+/**
  * Formats attachments for inline mode with full content.
  */
 const formatInlineAttachments = (
   attachments: VersionedAttachment[],
   maxContentLength: number
-): string => {
+): InlineAttachmentsResult => {
+  let hasTruncatedContent = false;
+
   const attachmentElements: XmlNode[] = attachments.flatMap((attachment) => {
     const latest = getLatestVersion(attachment);
     if (!latest) {
@@ -97,6 +114,7 @@ const formatInlineAttachments = (
 
     // Truncate if too long
     if (contentStr.length > maxContentLength) {
+      hasTruncatedContent = true;
       contentStr =
         contentStr.substring(0, maxContentLength) +
         '\n... [content truncated, use attachment_read for full content]';
@@ -118,7 +136,7 @@ const formatInlineAttachments = (
     ];
   });
 
-  return generateXmlTree(
+  const content = generateXmlTree(
     {
       tagName: 'conversation-attachments',
       attributes: { count: attachments.length, mode: 'inline' },
@@ -126,6 +144,8 @@ const formatInlineAttachments = (
     },
     { escapeContent: false }
   );
+
+  return { content, hasTruncatedContent };
 };
 
 /**
@@ -190,6 +210,19 @@ export const getAttachmentSystemPrompt = (presentation: AttachmentPresentation):
   }
 
   if (presentation.mode === 'inline') {
+    if (presentation.hasTruncatedContent) {
+      return `## Conversation Attachments
+
+The user has ${presentation.activeCount} attachment(s) in this conversation. The content is shown above in XML format, but some attachments were truncated due to size.
+
+You can:
+- Read attachments using attachment_read(id) to get full content when truncated
+- Update attachments using attachment_update(id, data) to modify content
+- Add new attachments using attachment_add(type, data) to store information
+
+IMPORTANT: If you see "[content truncated, use attachment_read for full content]", you MUST call attachment_read(id) to get the complete content before analyzing or referencing that attachment.`;
+    }
+
     return `## Conversation Attachments
 
 The user has ${presentation.activeCount} attachment(s) in this conversation. The full content is shown above in XML format.
