@@ -153,6 +153,7 @@ describe('MetricsExperienceGrid', () => {
       metricFields: [],
       dimensions: [],
       getSampleRow: jest.fn(() => undefined),
+      whereStatements: [],
     });
 
     useMetricFieldsMock.mockReturnValue({
@@ -172,6 +173,7 @@ describe('MetricsExperienceGrid', () => {
       metricFields: [],
       dimensions: [],
       getSampleRow: jest.fn(() => undefined),
+      whereStatements: [],
     });
 
     useMetricFieldsMock.mockReturnValue({
@@ -192,6 +194,7 @@ describe('MetricsExperienceGrid', () => {
       metricFields: [],
       dimensions: [],
       getSampleRow: jest.fn(() => undefined),
+      whereStatements: [],
     });
 
     useMetricFieldsMock.mockReturnValue({

@@ -11,8 +11,10 @@ import React, { createContext, useCallback, useMemo, type PropsWithChildren } fr
 import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
 import type { DatatableRow } from '@kbn/expressions-plugin/common';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { Dimension, MetricField } from '../../../../../types';
 import { categorizeFields, createSampleRowByField } from './helpers/fields_parser';
+import { extractWhereCommand } from '../../../../../utils/extract_where_command';
 
 export type FieldCapsResponseMap = Record<
   string,
@@ -22,6 +24,7 @@ export type FieldCapsResponseMap = Record<
 export interface MetricsExperienceFieldsContextValue {
   metricFields: MetricField[];
   dimensions: Dimension[];
+  whereStatements: string[];
   getSampleRow: (metricName: string) => DatatableRow | undefined;
 }
 
@@ -29,6 +32,7 @@ const EMPTY_CONTEXT: MetricsExperienceFieldsContextValue = {
   metricFields: [],
   dimensions: [],
   getSampleRow: () => undefined,
+  whereStatements: [],
 };
 
 export const MetricsExperienceFieldsContext =
@@ -42,7 +46,12 @@ export const MetricsExperienceFieldsProvider = ({
   fetchParams,
   children,
 }: PropsWithChildren<MetricsExperienceFieldsProviderProps>) => {
-  const { table, dataView } = fetchParams;
+  const { table, dataView, query } = fetchParams;
+  const esqlQuery = useMemo(
+    () => (query && isOfAggregateQueryType(query) ? query.esql : undefined),
+    [query]
+  );
+  const whereStatements = useMemo(() => extractWhereCommand(esqlQuery), [esqlQuery]);
 
   const { metricFields, dimensions } = useMemo(() => {
     if (!dataView) {
@@ -80,8 +89,9 @@ export const MetricsExperienceFieldsProvider = ({
       metricFields,
       dimensions,
       getSampleRow,
+      whereStatements,
     }),
-    [metricFields, dimensions, getSampleRow]
+    [metricFields, dimensions, getSampleRow, whereStatements]
   );
 
   return (

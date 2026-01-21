@@ -19,6 +19,7 @@ import {
   useEuiTheme,
   type EuiFlexGridProps,
 } from '@elastic/eui';
+
 import type { MetricField, UnifiedMetricsGridProps } from '../../../types';
 import { PAGE_SIZE } from '../../../common/constants';
 import { MetricsGrid } from '../../metrics_grid';
@@ -26,6 +27,7 @@ import { Pagination } from '../../pagination';
 import { usePagination } from './hooks';
 import { MetricsGridLoadingProgress } from '../../empty_state/empty_state';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
+import { useMetricsExperienceFieldsContext } from './context/metrics_experience_fields_provider';
 
 export interface MetricsExperienceGridContentProps
   extends Pick<
@@ -52,6 +54,7 @@ export const MetricsExperienceGridContent = ({
   const { euiTheme } = euiThemeContext;
 
   const { searchTerm, currentPage, selectedDimensions, onPageChange } = useMetricsExperienceState();
+  const { whereStatements } = useMetricsExperienceFieldsContext();
 
   const {
     currentPageItems: currentPageFields = [],
@@ -142,6 +145,7 @@ export const MetricsExperienceGridContent = ({
           discoverFetch$={discoverFetch$}
           fetchParams={fetchParams}
           searchTerm={searchTerm}
+          whereStatements={whereStatements}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

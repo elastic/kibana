@@ -11,9 +11,7 @@ import { KbnClient } from '@kbn/test';
 import pMap from 'p-map';
 import { basename } from 'path';
 import {
-  ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION,
-  ENDPOINT_TRUSTED_APPS_LIST_ID,
-  ENDPOINT_TRUSTED_APPS_LIST_NAME,
+  ENDPOINT_ARTIFACT_LISTS,
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
@@ -140,10 +138,10 @@ const createRunLogger = () => {
 
 const ensureCreateEndpointTrustedAppsList = async (kbn: KbnClient) => {
   const newListDefinition: CreateExceptionListSchema = {
-    description: ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION,
-    list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
+    description: ENDPOINT_ARTIFACT_LISTS.trustedApps.description,
+    list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
     meta: undefined,
-    name: ENDPOINT_TRUSTED_APPS_LIST_NAME,
+    name: ENDPOINT_ARTIFACT_LISTS.trustedApps.name,
     os_types: [],
     tags: [],
     type: 'endpoint',
