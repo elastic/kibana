@@ -22,9 +22,12 @@ You will receive **Features**—structured facts about the environment extracted
 Each feature includes:
 - `type`: `infrastructure`, `technology`, or `dependency`
 - `name`: Generic identifier (e.g., `programming_language`, `database`)
+- `description`: Summary of what the feature represents
 - `value`: Stable properties like `{"language": "java", "version": "11"}`
 - `confidence`: Extraction confidence score
 - `evidence`: Supporting log snippets
+- `tags`: Descriptive tags (array of strings)
+- `meta`: High-cardinality or variable data (e.g., availability zones, API endpoints)
 
 ### Using Features to Generate Queries
 
