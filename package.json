@@ -1357,6 +1357,7 @@
     "mapbox-gl-draw-rectangle-mode": "1.0.4",
     "maplibre-gl": "5.3.0",
     "markdown-it": "14.1.0",
+    "memfs": "^4.56.4",
     "memoize-one": "6.0.0",
     "mime": "2.6.0",
     "mime-types": "2.1.35",
