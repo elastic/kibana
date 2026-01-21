@@ -69,8 +69,6 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
   // 1. Loading has started at least once (hasStartedLoading)
   // 2. Loading is now complete (loading === false)
   // 3. We have no tables (indicating an error)
-  const hasInvalidEsqlQuery = esqlQuery ? isLeft(esqlQuery) : false;
-
   if (
     isLeft(esqlQuery) ||
     (hasStartedLoading &&
