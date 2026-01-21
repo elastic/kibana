@@ -2429,6 +2429,11 @@ components:
             The optional time the attack discovery alert workflow status was
             last updated
           type: string
+        assignees:
+          description: The optional array of user-IDs who have been assigned the attack
+          items:
+            type: string
+          type: array
         connector_id:
           description: The ID of the connector that generated the attack discovery
           type: string
