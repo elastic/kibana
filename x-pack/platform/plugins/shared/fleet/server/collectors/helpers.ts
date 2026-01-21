@@ -14,10 +14,10 @@ export async function getInternalClients(
   core: CoreSetup
 ): Promise<[SavedObjectsClientContract, ElasticsearchClient]> {
   return core.getStartServices().then(async ([coreStart]) => {
-    const savedObjectsRepo = coreStart.savedObjects.getUnsafeInternalClient({
+    const savedObjectsClient = coreStart.savedObjects.getUnsafeInternalClient({
       excludedExtensions: [SPACES_EXTENSION_ID],
     });
     const esClient = coreStart.elasticsearch.client.asInternalUser;
-    return [savedObjectsRepo, esClient];
+    return [savedObjectsClient, esClient];
   });
 }
