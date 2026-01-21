@@ -18,26 +18,35 @@ export function getTransformDrilldownsIn(
       })
     | undefined
 ) {
-  function transformDrilldownsIn(drilldowns: DrilldownState[]) {
+  function transformDrilldownsIn(state: { drilldowns?: DrilldownState[] }) {
+    if (!state.drilldowns) {
+      return {
+        state: {},
+        references: []
+      };
+    }
+    
     const references: Reference[] = [];
     return {
-      state: drilldowns.map((drilldownState) => {
-        const transformIn = getTranformIn(drilldownState.config.type);
-        if (!transformIn) {
-          return drilldownState;
-        }
+      state: {
+        drilldowns: state.drilldowns.map((drilldownState) => {
+          const transformIn = getTranformIn(drilldownState.config.type);
+          if (!transformIn) {
+            return drilldownState;
+          }
 
-        const { state: drilldownConfig, references: drilldownReferences } = transformIn(
-          drilldownState.config
-        );
-        if (drilldownReferences) {
-          references.push(...drilldownReferences);
-        }
-        return {
-          ...drilldownState,
-          config: drilldownConfig,
-        };
-      }),
+          const { state: drilldownConfig, references: drilldownReferences } = transformIn(
+            drilldownState.config
+          );
+          if (drilldownReferences) {
+            references.push(...drilldownReferences);
+          }
+          return {
+            ...drilldownState,
+            config: drilldownConfig,
+          };
+        })
+      },
       references,
     };
   }

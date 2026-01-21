@@ -12,7 +12,7 @@ import type { HasDynamicActions } from './interfaces/has_dynamic_actions';
 
 export interface EmbeddableDynamicActionsManager {
   api: HasDynamicActions;
-  comparators: StateComparators<DynamicActionsSerializedState>;
+  comparators: StateComparators<DynamicActionsSerializedState & { drilldowns: unknown }>;
   anyStateChange$: Observable<void>;
   getLatestState: () => DynamicActionsSerializedState;
   serializeState: () => DynamicActionsSerializedState;

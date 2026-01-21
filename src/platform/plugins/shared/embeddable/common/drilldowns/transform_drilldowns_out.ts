@@ -22,19 +22,22 @@ export function getTransformDrilldownsOut(
       drilldowns?: DrilldownState[];
       enhancements?: { dynamicActions?: DynamicActionsState };
     },
-    references: Reference[]
+    references?: Reference[]
   ) {
-    return [...convertToDrilldowns(state.enhancements ?? {}), ...(state.drilldowns ?? [])].map(
-      (drilldownState) => {
-        const transformOut = getTranformOut(drilldownState.config.type);
-        return transformOut
-          ? {
-              ...drilldownState,
-              config: transformOut(drilldownState.config, references),
-            }
-          : drilldownState;
-      }
-    );
+    return state.enhancements || state.drilldowns
+      ? {
+          drilldowns: [...convertToDrilldowns(state.enhancements ?? {}), ...(state.drilldowns ?? [])].map(
+            (drilldownState) => {
+              const transformOut = getTranformOut(drilldownState.config.type);
+              return transformOut
+                ? {
+                    ...drilldownState,
+                    config: transformOut(drilldownState.config, references),
+                  }
+                : drilldownState;
+            })
+        }
+      : {};
   }
   return transformDrilldownsOut;
 }

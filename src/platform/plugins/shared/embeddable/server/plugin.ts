@@ -30,6 +30,7 @@ import type { DrilldownSetup } from './drilldowns/types';
 import { DrilldownRegistry } from './drilldowns/registry';
 import { getTransformDrilldownsIn } from '../common/drilldowns/transform_drilldowns_in';
 import { getTransformDrilldownsOut } from '../common/drilldowns/transform_drilldowns_out';
+import { getDrilldownsSchema } from './drilldowns/schemas';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
@@ -95,7 +96,11 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
     return {
       getEmbeddableSchemas: () =>
         Object.values(this.transformsRegistry)
-          .map((transforms) => transforms?.getSchema?.())
+          .map((transforms) =>
+            transforms?.getSchema?.((embeddableSupportedTriggers: string[]) =>
+              getDrilldownsSchema(this.drilldownRegistry, embeddableSupportedTriggers)
+            )
+          )
           .filter((schema) => Boolean(schema)) as ObjectType[],
       getTransforms: (embeddableType: string) => {
         const drilldownTransforms = {

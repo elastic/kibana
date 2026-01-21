@@ -9,7 +9,7 @@
 
 import type { Type, TypeOf } from '@kbn/config-schema';
 import type { Reference } from '@kbn/content-management-utils';
-import type { getDrilldownSchema } from './schemas';
+import type { getDrilldownSchema, getDrilldownsSchema } from './schemas';
 
 export type DrilldownSetup<
   StoredState extends { type: string } = { type: string },
@@ -31,3 +31,7 @@ export type DrilldownSetup<
 };
 
 export type DrilldownState = TypeOf<ReturnType<typeof getDrilldownSchema>>;
+
+export type GetDrilldownsSchemaFnType = (
+  embeddableSupportedTriggers: string[]
+) => ReturnType<typeof getDrilldownsSchema>;

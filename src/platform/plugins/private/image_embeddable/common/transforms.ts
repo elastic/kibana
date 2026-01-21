@@ -8,38 +8,26 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type {
-  TransformEnhancementsIn,
-  TransformEnhancementsOut,
-} from '@kbn/embeddable-plugin/common';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import type { ImageEmbeddableState } from '../server';
 
-export function getTransforms(
-  transformEnhancementsIn: TransformEnhancementsIn,
-  transformEnhancementsOut: TransformEnhancementsOut
-) {
+export function getTransforms(drilldownTransforms: DrilldownTransforms) {
   return {
     transformIn: (state: ImageEmbeddableState) => {
-      const enhancementResult = state.enhancements
-        ? transformEnhancementsIn(state.enhancements)
-        : { state: undefined, references: [] };
+      const drilldowns = drilldownTransforms.transformIn(state);
 
       return {
         state: {
           ...state,
-          ...(enhancementResult.state ? { enhancements: enhancementResult.state } : {}),
+          ...drilldowns.state,
         },
-        references: enhancementResult.references,
+        references: drilldowns.references,
       };
     },
     transformOut: (state: ImageEmbeddableState, references?: Reference[]) => {
-      const enhancementsState = state.enhancements
-        ? transformEnhancementsOut(state.enhancements, references ?? [])
-        : undefined;
-
       return {
         ...state,
-        ...(enhancementsState ? { enhancements: enhancementsState } : {}),
+        ...drilldownTransforms.transformOut(state, references),
       };
     },
   };

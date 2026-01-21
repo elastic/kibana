@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Type } from '@kbn/config-schema';
 import type { Reference } from '@kbn/content-management-utils';
+import type { Type } from '@kbn/config-schema';
 import type { getTransformDrilldownsIn } from './drilldowns/transform_drilldowns_in';
 import type { getTransformDrilldownsOut } from './drilldowns/transform_drilldowns_out';
+import type { GetDrilldownsSchemaFnType } from '../server';
 
 export type EmbeddableTransforms<
   StoredEmbeddableState extends object = object,
@@ -43,14 +44,18 @@ export type EmbeddableTransforms<
   };
 };
 
+export type DrilldownTransforms = {
+  transformIn: ReturnType<typeof getTransformDrilldownsIn>;
+  transformOut: ReturnType<typeof getTransformDrilldownsOut>;
+};
+
 export type EmbeddableTransformsSetup<
   StoredEmbeddableState extends object = object,
   EmbeddableState extends object = object
 > = {
-  getTransforms?: (drilldownTransforms: {
-    transformIn: ReturnType<typeof getTransformDrilldownsIn>;
-    transformOut: ReturnType<typeof getTransformDrilldownsOut>;
-  }) => EmbeddableTransforms<StoredEmbeddableState, EmbeddableState>;
+  getTransforms?: (
+    drilldownTransforms: DrilldownTransforms
+  ) => EmbeddableTransforms<StoredEmbeddableState, EmbeddableState>;
   /**
    * Embeddable containers that include embeddable state in REST APIs, such as dashboard,
    * use schemas to
@@ -59,7 +64,7 @@ export type EmbeddableTransformsSetup<
    *
    * When schema is provided, EmbeddableState is expected to be TypeOf<typeof schema>
    */
-  getSchema?: () => Type<object> | undefined;
+  getSchema?: (getDrilldownsSchema: GetDrilldownsSchemaFnType) => Type<object> | undefined;
   /**
    * Throws error when panel config is not supported.
    */

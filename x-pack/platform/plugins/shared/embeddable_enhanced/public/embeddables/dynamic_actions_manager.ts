@@ -50,7 +50,8 @@ export function initializeDynamicActionsManager(
       enhancements: (a, b) => {
         return deepEqual(getDynamicActionsState(a), getDynamicActionsState(b));
       },
-    } as StateComparators<DynamicActionsSerializedState>,
+      drilldowns: 'skip',
+    } as StateComparators<DynamicActionsSerializedState & { drilldowns: unknown }>,
     anyStateChange$: dynamicActionsState$.pipe(map(() => undefined)),
     getLatestState,
     serializeState: () => getLatestState(),
