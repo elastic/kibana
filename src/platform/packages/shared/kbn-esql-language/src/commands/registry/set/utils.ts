@@ -21,7 +21,7 @@ const getProjectRoutingCommonCompletionItems = (): ISuggestionItem[] => {
   return [
     {
       label: '_alias:_origin',
-      text: '"_alias:_origin";',
+      text: '_alias:_origin',
       kind: 'Value',
       detail: i18n.translate(
         'kbn-esql-language.esql.autocomplete.set.projectRouting.currentProjectDoc',
@@ -30,10 +30,11 @@ const getProjectRoutingCommonCompletionItems = (): ISuggestionItem[] => {
         }
       ),
       sortText: '1',
+      category: SuggestionCategory.CONSTANT_VALUE,
     },
     {
       label: '_alias: *',
-      text: '"_alias: *";',
+      text: '_alias: *',
       kind: 'Value',
       detail: i18n.translate(
         'kbn-esql-language.esql.autocomplete.set.projectRouting.allProjectsDoc',
@@ -42,6 +43,7 @@ const getProjectRoutingCommonCompletionItems = (): ISuggestionItem[] => {
         }
       ),
       sortText: '1',
+      category: SuggestionCategory.CONSTANT_VALUE,
     },
   ];
 };
@@ -50,27 +52,30 @@ const getUnmappedFieldsCompletionItems = (): ISuggestionItem[] => {
   return [
     {
       label: UnmappedFieldsStrategy.FAIL,
-      text: `"${UnmappedFieldsStrategy.FAIL}";`,
+      text: UnmappedFieldsStrategy.FAIL,
       kind: 'Value',
       detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.unmappedFields.failDoc', {
         defaultMessage: 'Fails the query if unmapped fields are present',
       }),
+      category: SuggestionCategory.CONSTANT_VALUE,
     },
     {
       label: UnmappedFieldsStrategy.NULLIFY,
-      text: `"${UnmappedFieldsStrategy.NULLIFY}";`,
+      text: UnmappedFieldsStrategy.NULLIFY,
       kind: 'Value',
       detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.unmappedFields.nullifyDoc', {
         defaultMessage: 'Treats unmapped fields as null values',
       }),
+      category: SuggestionCategory.CONSTANT_VALUE,
     },
     {
       label: UnmappedFieldsStrategy.LOAD,
-      text: `"${UnmappedFieldsStrategy.LOAD}";`,
+      text: UnmappedFieldsStrategy.LOAD,
       kind: 'Value',
       detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.unmappedFields.loadDoc', {
         defaultMessage: 'Attempts to load the fields from the source',
       }),
+      category: SuggestionCategory.CONSTANT_VALUE,
     },
   ];
 };

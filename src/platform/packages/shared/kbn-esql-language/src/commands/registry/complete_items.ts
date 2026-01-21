@@ -429,7 +429,7 @@ export const confidenceLevelValueItems: ISuggestionItem[] = [
         defaultMessage: 'High precision (99%)',
       }
     ),
-    category: SuggestionCategory.CONSTANT_VALUE,
+    category: SuggestionCategory.VALUE,
   },
   {
     label: 'Standard',
@@ -441,7 +441,7 @@ export const confidenceLevelValueItems: ISuggestionItem[] = [
         defaultMessage: 'Standard (95%)',
       }
     ),
-    category: SuggestionCategory.CONSTANT_VALUE,
+    category: SuggestionCategory.VALUE,
   },
   {
     label: 'Exploratory',
@@ -464,7 +464,7 @@ export const numOfRowsValueItems: ISuggestionItem[] = [
     detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.approximate.rows100KDetail', {
       defaultMessage: 'Return up to 100,000 rows',
     }),
-    category: SuggestionCategory.CONSTANT_VALUE,
+    category: SuggestionCategory.VALUE,
   },
   {
     label: '500K rows',
@@ -473,7 +473,7 @@ export const numOfRowsValueItems: ISuggestionItem[] = [
     detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.approximate.rows500KDetail', {
       defaultMessage: 'Return up to 500,000 rows',
     }),
-    category: SuggestionCategory.CONSTANT_VALUE,
+    category: SuggestionCategory.VALUE,
   },
   {
     label: '1M rows',

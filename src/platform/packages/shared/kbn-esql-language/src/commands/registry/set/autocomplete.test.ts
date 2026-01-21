@@ -98,11 +98,7 @@ describe('SET Autocomplete', () => {
       });
 
       it('suggests unmapped fields values for partial input', async () => {
-        await setExpectSuggestions('SET unmapped_fields = "N', [
-          '"FAIL";',
-          '"LOAD";',
-          '"NULLIFY";',
-        ]);
+        await setExpectSuggestions('SET unmapped_fields = "N', ['FAIL', 'LOAD', 'NULLIFY']);
       });
     });
 

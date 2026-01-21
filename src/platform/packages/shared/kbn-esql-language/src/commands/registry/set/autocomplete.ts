@@ -15,6 +15,7 @@ import {
   isMap,
   isStringLiteral,
   isUnknownNode,
+  SuggestionCategory,
   within,
 } from '../../../..';
 import { semiColonCompleteItem, assignCompletionItem } from '../complete_items';
@@ -60,12 +61,13 @@ export async function autocomplete(
     !settingRightSide ||
     isUnknownNode(settingRightSide) ||
     (Array.isArray(settingRightSide) && settingRightSide.length === 0) ||
-    isMap(settingRightSide)
+    (isMap(settingRightSide) && settingRightSide.incomplete)
   ) {
-    return settingsValueCompletions.map((item) => ({
-      ...item,
-      text: `${item.text}`,
-    }));
+    return settingsValueCompletions.map((item) => {
+      const text =
+        item.category === SuggestionCategory.CONSTANT_VALUE ? `"${item.text}";` : item.text;
+      return { ...item, text };
+    });
   }
 
   // SET <setting> = "/  --- Within the value quotes.
