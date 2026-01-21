@@ -22,35 +22,35 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useStreamFeaturesApi } from '../../../hooks/use_stream_features_api';
-import { StreamFeaturesTable } from './stream_features_table';
+import { useStreamSystemsApi } from '../../../hooks/use_stream_systems_api';
+import { StreamSystemsTable } from './stream_systems_table';
 
-export const StreamFeaturesFlyout = ({
+export const StreamSystemsFlyout = ({
   definition,
-  features,
-  setFeatures,
+  systems,
+  setSystems,
   closeFlyout,
-  onFeaturesAdded,
-  onFeaturesDiscarded,
+  onSystemsAdded,
+  onSystemsDiscarded,
 }: {
   definition: Streams.all.Definition;
-  features: System[];
-  setFeatures: React.Dispatch<React.SetStateAction<System[]>>;
+  systems: System[];
+  setSystems: React.Dispatch<React.SetStateAction<System[]>>;
   closeFlyout: () => void;
-  onFeaturesAdded: () => void;
-  onFeaturesDiscarded: () => void;
+  onSystemsAdded: () => void;
+  onSystemsDiscarded: () => void;
 }) => {
   const {
     core: { notifications },
   } = useKibana();
 
-  const [selectedFeatureNames, setSelectedFeatureNames] = useState<Set<string>>(new Set());
-  const { addSystemsToStream } = useStreamFeaturesApi(definition);
+  const [selectedSystemNames, setSelectedSystemNames] = useState<Set<string>>(new Set());
+  const { addSystemsToStream } = useStreamSystemsApi(definition);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const selectedFeatures = useMemo(
-    () => features.filter((f) => selectedFeatureNames.has(f.name)),
-    [features, selectedFeatureNames]
+  const selectedSystems = useMemo(
+    () => systems.filter((s) => selectedSystemNames.has(s.name)),
+    [systems, selectedSystemNames]
   );
 
   return (
@@ -58,7 +58,7 @@ export const StreamFeaturesFlyout = ({
       ownFocus
       onClose={closeFlyout}
       hideCloseButton
-      aria-label={i18n.translate('xpack.streams.streamFeaturesFlyout.flyoutAriaLabel', {
+      aria-label={i18n.translate('xpack.streams.streamSystemsFlyout.flyoutAriaLabel', {
         defaultMessage: 'Stream description',
       })}
       size="l"
@@ -67,8 +67,8 @@ export const StreamFeaturesFlyout = ({
         <EuiTitle size="m">
           <h2>
             <FormattedMessage
-              id="xpack.streams.streamFeaturesFlyout.title"
-              defaultMessage="Feature identification"
+              id="xpack.streams.streamSystemsFlyout.title"
+              defaultMessage="System identification"
             />
           </h2>
         </EuiTitle>
@@ -80,12 +80,12 @@ export const StreamFeaturesFlyout = ({
           }
         `}
       >
-        <StreamFeaturesTable
-          features={features}
-          selectedFeatureNames={selectedFeatureNames}
-          setSelectedFeatureNames={setSelectedFeatureNames}
+        <StreamSystemsTable
+          systems={systems}
+          selectedSystemNames={selectedSystemNames}
+          setSelectedSystemNames={setSelectedSystemNames}
           definition={definition}
-          setFeatures={setFeatures}
+          setSystems={setSystems}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -95,16 +95,13 @@ export const StreamFeaturesFlyout = ({
               isDisabled={isUpdating}
               onClick={closeFlyout}
               flush="left"
-              aria-label={i18n.translate(
-                'xpack.streams.streamFeaturesFlyout.closeButtonAriaLabel',
-                {
-                  defaultMessage: 'Close flyout',
-                }
-              )}
-              data-test-subj="feature_identification_close_flyout_button"
+              aria-label={i18n.translate('xpack.streams.streamSystemsFlyout.closeButtonAriaLabel', {
+                defaultMessage: 'Close flyout',
+              })}
+              data-test-subj="system_identification_close_flyout_button"
             >
               <FormattedMessage
-                id="xpack.streams.streamFeaturesFlyout.closeButton"
+                id="xpack.streams.streamSystemsFlyout.closeButton"
                 defaultMessage="Close"
               />
             </EuiButtonEmpty>
@@ -114,11 +111,11 @@ export const StreamFeaturesFlyout = ({
               <EuiFlexItem>
                 <EuiButtonEmpty
                   onClick={() => {
-                    onFeaturesDiscarded();
+                    onSystemsDiscarded();
                   }}
                 >
                   <FormattedMessage
-                    id="xpack.streams.streamFeaturesFlyout.discardButton"
+                    id="xpack.streams.streamSystemsFlyout.discardButton"
                     defaultMessage="Discard"
                   />
                 </EuiButtonEmpty>
@@ -128,26 +125,26 @@ export const StreamFeaturesFlyout = ({
                   isLoading={isUpdating}
                   onClick={() => {
                     setIsUpdating(true);
-                    addSystemsToStream(selectedFeatures).finally(() => {
+                    addSystemsToStream(selectedSystems).finally(() => {
                       notifications.toasts.addSuccess({
                         title: i18n.translate(
-                          'xpack.streams.streamFeaturesFlyout.addFeaturesSuccessToastTitle',
+                          'xpack.streams.streamSystemsFlyout.addSystemsSuccessToastTitle',
                           {
                             defaultMessage:
-                              '{count} {count, plural, one {feature} other {features}} added to stream',
-                            values: { count: selectedFeatures.length },
+                              '{count} {count, plural, one {system} other {systems}} added to stream',
+                            values: { count: selectedSystems.length },
                           }
                         ),
                       });
-                      onFeaturesAdded();
+                      onSystemsAdded();
                       setIsUpdating(false);
                     });
                   }}
                   fill
-                  isDisabled={selectedFeatureNames.size === 0}
+                  isDisabled={selectedSystemNames.size === 0}
                 >
                   <FormattedMessage
-                    id="xpack.streams.streamFeaturesFlyout.addToStreamButton"
+                    id="xpack.streams.streamSystemsFlyout.addToStreamButton"
                     defaultMessage="Add to stream"
                   />
                 </EuiButton>

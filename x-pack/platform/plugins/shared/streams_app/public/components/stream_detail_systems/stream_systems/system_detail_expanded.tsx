@@ -18,44 +18,44 @@ import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
 import { EditableConditionPanel } from '../../data_management/shared';
 
-export const FeatureDetailExpanded = ({
-  feature,
-  setFeatures,
+export const SystemDetailExpanded = ({
+  system,
+  setSystems,
 }: {
-  feature: System;
-  setFeatures: React.Dispatch<React.SetStateAction<System[]>>;
+  system: System;
+  setSystems: React.Dispatch<React.SetStateAction<System[]>>;
 }) => {
   const [isEditingCondition, toggleIsEditingCondition] = useToggle(false);
 
-  const setFeature = (updated: System) => {
-    setFeatures((prev) => prev.map((s) => (s.name === updated.name ? updated : s)));
+  const setSystem = (updated: System) => {
+    setSystems((prev) => prev.map((s) => (s.name === updated.name ? updated : s)));
   };
 
   const handleConditionChange = (newFilter: Condition) => {
-    setFeature({ ...feature, filter: newFilter });
+    setSystem({ ...system, filter: newFilter });
   };
 
   const handleDescriptionChange = (newDescription: string) => {
-    setFeature({ ...feature, description: newDescription });
+    setSystem({ ...system, description: newDescription });
   };
 
   return (
     <EuiFlexGroup direction="column" gutterSize="xs" css={{ padding: '24px 24px 0 0' }}>
       <EuiTitle size="xxs">
         <h3>
-          {i18n.translate('xpack.streams.streamDetailView.featureDetailExpanded.description', {
+          {i18n.translate('xpack.streams.streamDetailView.systemDetailExpanded.description', {
             defaultMessage: 'Description',
           })}
         </h3>
       </EuiTitle>
       <EuiMarkdownEditor
         aria-label={i18n.translate(
-          'xpack.streams.streamDetailView.featureDetailExpanded.markdownEditorAriaLabel',
+          'xpack.streams.streamDetailView.systemDetailExpanded.markdownEditorAriaLabel',
           {
-            defaultMessage: 'Feature description markdown editor',
+            defaultMessage: 'System description markdown editor',
           }
         )}
-        value={feature.description}
+        value={system.description}
         onChange={handleDescriptionChange}
         readOnly={false}
         initialViewMode="viewing"
@@ -67,7 +67,7 @@ export const FeatureDetailExpanded = ({
         <EuiFlexGroup justifyContent="flexStart" gutterSize="xs" alignItems="center">
           <EuiTitle size="xxs">
             <h3>
-              {i18n.translate('xpack.streams.streamDetailView.featureDetailExpanded.filter', {
+              {i18n.translate('xpack.streams.streamDetailView.systemDetailExpanded.filter', {
                 defaultMessage: 'Filter',
               })}
             </h3>
@@ -76,20 +76,20 @@ export const FeatureDetailExpanded = ({
             iconType="pencil"
             onClick={toggleIsEditingCondition}
             aria-label={i18n.translate(
-              'xpack.streams.streamDetailView.featureDetailExpanded.filter.edit',
+              'xpack.streams.streamDetailView.systemDetailExpanded.filter.edit',
               {
                 defaultMessage: 'Edit filter',
               }
             )}
             data-test-subj={
               isEditingCondition
-                ? 'feature_identification_edit_filter_button'
-                : 'feature_identification_save_filter_button'
+                ? 'system_identification_edit_filter_button'
+                : 'system_identification_save_filter_button'
             }
           />
         </EuiFlexGroup>
         <EditableConditionPanel
-          condition={feature.filter}
+          condition={system.filter}
           isEditingCondition={isEditingCondition}
           setCondition={handleConditionChange}
         />
