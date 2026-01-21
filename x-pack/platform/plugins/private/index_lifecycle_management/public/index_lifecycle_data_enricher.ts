@@ -8,8 +8,10 @@
 import type { IlmExplainLifecycleResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { HttpSetup } from '@kbn/core/public';
 import type { EnricherResponse } from '@kbn/index-management-shared-types';
-
-const SOURCE = 'index_lifecycle_data_enricher';
+import { i18n } from '@kbn/i18n';
+const SOURCE = i18n.translate('xpack.indexManagement.indexLifecycleDataEnricher.source', {
+  defaultMessage: 'index lifecycle',
+});
 
 export const indexLifecycleDataEnricher = async (client: HttpSetup): Promise<EnricherResponse> =>
   client
@@ -25,7 +27,7 @@ export const indexLifecycleDataEnricher = async (client: HttpSetup): Promise<Enr
     })
     .catch((error) => {
       return {
-        error: 'Failed to load index lifecycle data',
+        error: true,
         source: SOURCE,
       };
     });

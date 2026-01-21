@@ -8,7 +8,10 @@
 import type { HttpSetup } from '@kbn/core/public';
 import type { CcrFollowInfoResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { EnricherResponse } from '@kbn/index-management-shared-types';
-const SOURCE = 'ccr_data_enricher';
+import { i18n } from '@kbn/i18n';
+const SOURCE = i18n.translate('xpack.indexManagement.ccrDataEnricher.source', {
+  defaultMessage: 'cross cluster replication',
+});
 
 export const ccrDataEnricher = async (client: HttpSetup): Promise<EnricherResponse> =>
   client
@@ -24,7 +27,7 @@ export const ccrDataEnricher = async (client: HttpSetup): Promise<EnricherRespon
     })
     .catch((error) => {
       return {
-        error: 'Failed to load cross cluster replication data',
+        error: true,
         source: SOURCE,
       };
     });

@@ -8,8 +8,10 @@
 import type { HttpSetup } from '@kbn/core/public';
 import type { RollupGetRollupIndexCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { EnricherResponse } from '@kbn/index-management-shared-types';
-
-const SOURCE = 'rollup_data_enricher';
+import { i18n } from '@kbn/i18n';
+const SOURCE = i18n.translate('xpack.indexManagement.rollupDataEnricher.source', {
+  defaultMessage: 'rollup',
+});
 
 // todo
 // look at x-pack/platform/plugins/private/rollup/server/rollup_data_enricher.ts
@@ -33,7 +35,7 @@ export const rollupDataEnricher = async (client: HttpSetup): Promise<EnricherRes
     })
     .catch((error) => {
       return {
-        error: 'Failed to load rollup data',
+        error: true,
         source: SOURCE,
       };
     });

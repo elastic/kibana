@@ -22,7 +22,7 @@ import type { PublicApiServiceSetup } from './services/public_api_service';
 export interface EnricherResponse {
   source: string;
   indices?: Index[];
-  error?: string;
+  error?: boolean;
 }
 export type Enricher = (client: HttpSetup) => Promise<EnricherResponse>;
 

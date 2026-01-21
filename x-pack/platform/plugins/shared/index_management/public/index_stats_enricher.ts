@@ -9,9 +9,11 @@ import type { HttpSetup } from '@kbn/core/public';
 import type { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { EnricherResponse } from '@kbn/index-management-shared-types';
+import { i18n } from '@kbn/i18n';
 import { API_BASE_PATH } from '../common/constants';
-
-const SOURCE = 'index_stats_enricher';
+const SOURCE = i18n.translate('xpack.indexManagement.indexStatsEnricher.source', {
+  defaultMessage: 'index stats',
+});
 
 export const indexStatsEnricher = async (client: HttpSetup): Promise<EnricherResponse> =>
   client
@@ -36,7 +38,7 @@ export const indexStatsEnricher = async (client: HttpSetup): Promise<EnricherRes
     })
     .catch((error) => {
       return {
-        error: 'Failed to load index stats',
+        error: true,
         source: SOURCE,
       };
     });
