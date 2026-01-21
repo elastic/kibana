@@ -15,7 +15,6 @@ import type {
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { connectorsSpecs } from '@kbn/connector-specs';
 import { v4 } from 'uuid';
 import {
   createDataSourceAndRelatedResources,
@@ -30,56 +29,6 @@ import type {
 import { convertSOtoAPIResponse, createDataSourceRequestSchema } from './schema';
 import { API_BASE_PATH } from '../../common/constants';
 import { TYPE } from '../tasks/bulk_delete_task';
-
-// Constants
-// Note: MAX_PAGE_SIZE removed as bulk delete now uses task manager with point-in-time finder
-
-/**
- * Builds the secrets object for a connector based on its spec
- * @param connectorType - The connector type ID (e.g., '.notion')
- * @param token - The authentication token
- * @returns The secrets object to pass to the actions client
- * @throws Error if the connector spec is not found
- * @internal exported for testing
- */
-export function buildSecretsFromConnectorSpec(
-  connectorType: string,
-  token: string
-): Record<string, string> {
-  const connectorSpec = Object.values(connectorsSpecs).find(
-    (spec) => spec.metadata.id === connectorType
-  );
-  if (!connectorSpec) {
-    throw new Error(`Stack connector spec not found for type "${connectorType}"`);
-  }
-
-  const hasBearerAuth = connectorSpec.auth?.types.some((authType) => {
-    const typeId = typeof authType === 'string' ? authType : authType.type;
-    return typeId === 'bearer';
-  });
-
-  const secrets: Record<string, string> = {};
-  if (hasBearerAuth) {
-    secrets.authType = 'bearer';
-    secrets.token = token;
-  } else {
-    const apiKeyHeaderAuth = connectorSpec.auth?.types.find((authType) => {
-      const typeId = typeof authType === 'string' ? authType : authType.type;
-      return typeId === 'api_key_header';
-    });
-
-    const headerField =
-      typeof apiKeyHeaderAuth !== 'string' && apiKeyHeaderAuth?.defaults?.headerField
-        ? String(apiKeyHeaderAuth.defaults.headerField)
-        : 'ApiKey'; // default fallback
-
-    secrets.authType = 'api_key_header';
-    secrets.apiKey = token;
-    secrets.headerField = headerField;
-  }
-
-  return secrets;
-}
 
 function createErrorResponse(
   response: KibanaResponseFactory,
@@ -372,12 +321,12 @@ export function registerRoutes(dependencies: RouteDependencies) {
         });
       } catch (error) {
         logger.error(`Failed to schedule bulk delete task: ${(error as Error).message}`);
-        return response.customError({
-          statusCode: 500,
-          body: {
-            message: `Failed to schedule bulk delete task: ${(error as Error).message}`,
-          },
-        });
+        return createErrorResponse(
+          response,
+          'Failed to schedule bulk delete task',
+          error as Error,
+          500
+        );
       }
     }
   );
@@ -441,12 +390,12 @@ export function registerRoutes(dependencies: RouteDependencies) {
         });
       } catch (error) {
         logger.error(`Failed to get bulk delete status: ${(error as Error).message}`);
-        return response.customError({
-          statusCode: 500,
-          body: {
-            message: `Failed to get bulk delete status: ${(error as Error).message}`,
-          },
-        });
+        return createErrorResponse(
+          response,
+          'Failed to get bulk delete status',
+          error as Error,
+          500
+        );
       }
     }
   );
