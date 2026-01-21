@@ -97,7 +97,7 @@ export class InventoryPage {
       },
     });
 
-    this.page.goto(url);
+    await this.page.goto(url);
 
     await this.waitForPageToLoad();
   }
@@ -120,7 +120,7 @@ export class InventoryPage {
       },
     });
 
-    this.page.goto(url);
+    await this.page.goto(url);
 
     await this.waitForPageToLoad();
   }
