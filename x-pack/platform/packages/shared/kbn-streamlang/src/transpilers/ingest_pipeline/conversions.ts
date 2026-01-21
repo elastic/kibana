@@ -21,6 +21,7 @@ import type { ActionToIngestType } from './processors/processor';
 import { processRemoveByPrefixProcessor } from './processors/remove_by_prefix_processor';
 
 import type { IngestPipelineTranspilationOptions } from '.';
+import { processJoinProcessor } from './processors/join_processor';
 
 export function convertStreamlangDSLActionsToIngestPipelineProcessors(
   actionSteps: StreamlangProcessorDefinition[],
@@ -77,6 +78,12 @@ export function convertStreamlangDSLActionsToIngestPipelineProcessors(
           processorWithCompiledConditions as Parameters<typeof processMathProcessor>[0]
         ),
       ];
+    }
+
+    if (action === 'join') {
+      return processJoinProcessor(
+        processorWithCompiledConditions as Parameters<typeof processJoinProcessor>[0]
+      );
     }
 
     return applyPreProcessing(action, processorWithCompiledConditions as IngestPipelineProcessor);

@@ -41,30 +41,28 @@ import { useTaskPolling } from '../../../hooks/use_task_polling';
 import { SignificantEventsGenerationPanel } from '../generation_panel';
 
 interface Props {
-  refreshDefinition: () => void;
   onClose: () => void;
   definition: Streams.all.GetResponse;
   onSave: (data: SaveData) => Promise<void>;
-  features: System[];
+  systems: System[];
   query?: StreamQueryKql;
   initialFlow?: Flow;
-  initialSelectedFeatures: System[];
-  refreshFeatures: () => void;
+  initialSelectedSystems: System[];
+  refreshSystems: () => void;
   generateOnMount: boolean;
   aiFeatures: AIFeatures | null;
 }
 
 export function AddSignificantEventFlyout({
   generateOnMount,
-  refreshDefinition,
   query,
   onClose,
   definition,
   onSave,
   initialFlow = undefined,
-  initialSelectedFeatures,
-  features,
-  refreshFeatures,
+  initialSelectedSystems,
+  systems,
+  refreshSystems,
   aiFeatures,
 }: Props) {
   const { euiTheme } = useEuiTheme();
@@ -92,7 +90,7 @@ export function AddSignificantEventFlyout({
   const [canSave, setCanSave] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [selectedFeatures, setSelectedFeatures] = useState<System[]>(initialSelectedFeatures);
+  const [selectedSystems, setSelectedSystems] = useState<System[]>(initialSelectedSystems);
 
   const [generatedQueries, setGeneratedQueries] = useState<StreamQueryKql[]>([]);
   const [{ loading: isGettingTask, value: task }, getTask] = useAsyncFn(getGenerationTask);
@@ -171,7 +169,7 @@ export function AddSignificantEventFlyout({
   }, [selectedFlow]);
 
   const generateQueries = useCallback(
-    (featuresOverride?: System[]) => {
+    (systemsOverride?: System[]) => {
       const connectorId = aiFeatures?.genAiConnectors.selectedConnector;
       if (!connectorId) {
         return;
@@ -180,16 +178,16 @@ export function AddSignificantEventFlyout({
       setSelectedFlow('ai');
       setGeneratedQueries([]);
 
-      const effectiveFeatures = featuresOverride ?? selectedFeatures;
+      const effectiveSystems = systemsOverride ?? selectedSystems;
 
       (async () => {
-        await doScheduleGenerationTask(connectorId, effectiveFeatures);
+        await doScheduleGenerationTask(connectorId, effectiveSystems);
         getTask();
       })();
     },
     [
       aiFeatures?.genAiConnectors.selectedConnector,
-      selectedFeatures,
+      selectedSystems,
       doScheduleGenerationTask,
       getTask,
     ]
@@ -247,12 +245,12 @@ export function AddSignificantEventFlyout({
               <EuiPanel hasShadow={false} paddingSize="l">
                 <SignificantEventsGenerationPanel
                   onManualEntryClick={() => setSelectedFlow('manual')}
-                  features={features}
-                  selectedFeatures={selectedFeatures}
-                  onFeaturesChange={setSelectedFeatures}
+                  systems={systems}
+                  selectedSystems={selectedSystems}
+                  onSystemsChange={setSelectedSystems}
                   onGenerateSuggestionsClick={generateQueries}
                   definition={definition.stream}
-                  refreshFeatures={refreshFeatures}
+                  refreshSystems={refreshSystems}
                   isGeneratingQueries={isGenerating}
                   isSavingManualEntry={isSubmitting}
                   selectedFlow={selectedFlow}
@@ -290,6 +288,7 @@ export function AddSignificantEventFlyout({
                       <EuiSpacer size="m" />
                       <ManualFlowForm
                         isSubmitting={isSubmitting}
+                        isEditMode={isEditMode}
                         setQuery={(next: StreamQueryKql) => setQueries([next])}
                         query={queries[0]}
                         setCanSave={(next: boolean) => {
@@ -297,7 +296,7 @@ export function AddSignificantEventFlyout({
                         }}
                         definition={definition.stream}
                         dataViews={dataViewsFetch.value ?? []}
-                        features={features}
+                        systems={systems}
                       />
                     </>
                   )}
@@ -321,7 +320,7 @@ export function AddSignificantEventFlyout({
                       setCanSave={(next: boolean) => {
                         setCanSave(next);
                       }}
-                      features={features}
+                      systems={systems}
                       dataViews={dataViewsFetch.value ?? []}
                       taskStatus={task?.status}
                       taskError={task?.status === 'failed' ? task.error : undefined}

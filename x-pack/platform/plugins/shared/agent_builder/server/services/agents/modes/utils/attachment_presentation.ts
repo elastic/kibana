@@ -8,6 +8,7 @@
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { isAttachmentActive, getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import { generateXmlTree, type XmlNode } from '@kbn/agent-builder-genai-utils/tools/utils';
+import type { BaseMessageLike } from '@langchain/core/messages';
 
 /**
  * Presentation mode for attachments in the LLM context.
@@ -212,4 +213,20 @@ You MUST use attachment tools to access content:
 - Compare versions using attachment_diff(id, from_version, to_version)
 
 Always read an attachment before referencing its content in your response.`;
+};
+
+/**
+ * Builds the system message(s) used to expose conversation-level attachments to the LLM
+ * (attachment XML + handling instructions).
+ */
+export const getConversationAttachmentsSystemMessages = (
+  presentation?: AttachmentPresentation
+): BaseMessageLike[] => {
+  if (!presentation || presentation.activeCount <= 0) {
+    return [];
+  }
+
+  return [
+    ['system', `${presentation.content}\n\n${getAttachmentSystemPrompt(presentation)}`] as const,
+  ];
 };
