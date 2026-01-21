@@ -59,6 +59,7 @@ export interface RecurringScheduleFieldsProps {
   showTimeInSummary?: boolean;
   readOnly?: boolean;
   compressed?: boolean;
+  initialRecurringSchedule?: RecurringSchedule;
 }
 
 /**
@@ -76,6 +77,7 @@ export const RecurringScheduleFormFields = memo(
     showTimeInSummary = false,
     readOnly = false,
     compressed = false,
+    initialRecurringSchedule,
   }: RecurringScheduleFieldsProps) => {
     const [formData] = useFormData<{ recurringSchedule: RecurringSchedule }>({
       watch: [
@@ -92,6 +94,14 @@ export const RecurringScheduleFormFields = memo(
 
     const [today] = useState<Moment>(moment());
 
+    const recurringSchedule = useMemo(
+      () => ({
+        ...initialRecurringSchedule,
+        ...formData.recurringSchedule,
+      }),
+      [initialRecurringSchedule, formData.recurringSchedule]
+    );
+
     const { options, presets } = useMemo(() => {
       let _options: Array<EuiSelectOption & { 'data-test-subj'?: string }> =
         DEFAULT_FREQUENCY_OPTIONS;
@@ -100,6 +110,11 @@ export const RecurringScheduleFormFields = memo(
         const date = moment(startDate);
         const { dayOfWeek, nthWeekdayOfMonth, isLastOfMonth } = getWeekdayInfo(date);
         _options = [
+          {
+            text: i18n.RECURRING_SCHEDULE_FORM_FREQUENCY_HOURLY,
+            value: Frequency.HOURLY,
+            'data-test-subj': 'recurringScheduleOptionHourly',
+          },
           {
             text: i18n.RECURRING_SCHEDULE_FORM_FREQUENCY_DAILY,
             value: Frequency.DAILY,
@@ -141,7 +156,7 @@ export const RecurringScheduleFormFields = memo(
       };
     }, [minFrequency, startDate]);
 
-    const parsedSchedule = useMemo(() => parseSchedule(formData.recurringSchedule), [formData]);
+    const parsedSchedule = useMemo(() => parseSchedule(recurringSchedule), [recurringSchedule]);
 
     return (
       <EuiSplitPanel.Outer hasShadow={false} hasBorder={true} data-test-subj="recurring-form">
@@ -158,7 +173,7 @@ export const RecurringScheduleFormFields = memo(
               },
             }}
           />
-          {(parsedSchedule?.frequency === Frequency.DAILY ||
+          {((parsedSchedule?.frequency === Frequency.DAILY && parsedSchedule?.byweekday) ||
             parsedSchedule?.frequency === 'CUSTOM') && (
             <CustomRecurringSchedule
               startDate={startDate}
@@ -234,6 +249,7 @@ export const RecurringScheduleFormFields = memo(
                           singleSelection={{ asPlainText: true }}
                           selectedOptions={[{ label: timezone[0] }]}
                           isClearable={false}
+                          aria-label={i18n.RECURRING_SCHEDULE_FORM_TIMEZONE}
                           prepend={
                             <EuiFormLabel htmlFor={'disabled-timezone'}>
                               {i18n.RECURRING_SCHEDULE_FORM_TIMEZONE}

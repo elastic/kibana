@@ -12,6 +12,7 @@ import type { EventEmitter } from 'events';
 import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
 
+import { VisualizeConstants } from '@kbn/visualizations-common';
 import { getVisualizationInstance } from '../get_visualization_instance';
 import {
   getEditBreadcrumbs,
@@ -20,7 +21,6 @@ import {
   getEditServerlessBreadcrumbs,
 } from '../breadcrumbs';
 import type { SavedVisInstance, VisualizeServices, IEditorController } from '../../types';
-import { VisualizeConstants } from '../../../../common/constants';
 import { getTypes } from '../../../services';
 import { redirectToSavedObjectPage } from '../utils';
 import type { VisualizeInput } from '../../..';

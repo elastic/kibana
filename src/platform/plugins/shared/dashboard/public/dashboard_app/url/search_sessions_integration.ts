@@ -15,7 +15,7 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createQueryParamObservable, getQueryParams } from '@kbn/kibana-utils-plugin/public';
 import type { History } from 'history';
 import { map } from 'rxjs';
-import { SEARCH_SESSION_ID } from '../../../common/constants';
+import { SEARCH_SESSION_ID } from '../../../common/page_bundle_constants';
 import type { DashboardLocatorParams } from '../../../common/types';
 import type { DashboardApi, DashboardInternalApi } from '../../dashboard_api/types';
 import { dataService } from '../../services/kibana_services';
@@ -77,12 +77,12 @@ function getLocatorParams({
   shouldRestoreSearchSession: boolean;
 }): DashboardLocatorParams {
   const savedObjectId = dashboardApi.savedObjectId$.value;
-  const panels = savedObjectId
-    ? (dashboardInternalApi.serializeLayout() as Pick<
-        DashboardLocatorParams,
-        'panels' | 'references'
-      >)
-    : undefined;
+
+  const { panels, pinned_panels } = dashboardInternalApi.serializeLayout() as Pick<
+    DashboardLocatorParams,
+    'panels' | 'pinned_panels'
+  >;
+
   return {
     viewMode: dashboardApi.viewMode$.value ?? 'view',
     useHash: false,
@@ -93,15 +93,16 @@ function getLocatorParams({
     searchSessionId: shouldRestoreSearchSession
       ? dataService.search.session.getSessionId()
       : undefined,
-    timeRange: shouldRestoreSearchSession
+    time_range: shouldRestoreSearchSession
       ? dataService.query.timefilter.timefilter.getAbsoluteTime()
       : dataService.query.timefilter.timefilter.getTime(),
-    refreshInterval: shouldRestoreSearchSession
+    refresh_interval: shouldRestoreSearchSession
       ? {
           pause: true, // force pause refresh interval when restoring a session
           value: 0,
         }
       : undefined,
-    ...panels,
+    pinned_panels,
+    panels,
   };
 }

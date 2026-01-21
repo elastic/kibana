@@ -34,11 +34,13 @@ export const createServerRoute: CreateServerRouteFactory<
       });
       return handler(options)
         .catch((error) => {
-          if (
-            error instanceof StatusError ||
-            error instanceof AggregateStatusError ||
-            error instanceof errors.ResponseError
-          ) {
+          const isStreamsStateError =
+            error instanceof StatusError || error instanceof AggregateStatusError;
+          if (isStreamsStateError) {
+            telemetry.reportStreamsStateError(error);
+          }
+
+          if (isStreamsStateError || error instanceof errors.ResponseError) {
             switch (error.statusCode) {
               case 400:
                 throw badRequest(error, 'data' in error ? error.data : undefined);

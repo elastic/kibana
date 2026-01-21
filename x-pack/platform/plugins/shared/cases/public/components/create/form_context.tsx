@@ -5,97 +5,33 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { schema } from './schema';
-import { usePostCase } from '../../containers/use_post_case';
-import { usePostPushToService } from '../../containers/use_post_push_to_service';
 
-import type { CasesConfigurationUI, CaseUI } from '../../containers/types';
+import type { CasesConfigurationUI } from '../../containers/types';
 import type { CasePostRequest } from '../../../common/types/api';
-import type { UseCreateAttachments } from '../../containers/use_create_attachments';
-import { useCreateAttachments } from '../../containers/use_create_attachments';
-import type { CaseAttachmentsWithoutOwner } from '../../types';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
-import { useCreateCaseWithAttachmentsTransaction } from '../../common/apm/use_cases_transactions';
-import { useApplication } from '../../common/lib/kibana/use_application';
 import { createFormSerializer, createFormDeserializer, getInitialCaseValue } from './utils';
 import type { CaseFormFieldsSchemaProps } from '../case_form_fields/schema';
+import { type UseSubmitCaseValue } from './use_submit_case';
 
-interface Props {
-  afterCaseCreated?: (
-    theCase: CaseUI,
-    createAttachments: UseCreateAttachments['mutateAsync']
-  ) => Promise<void>;
+export interface FormContextProps {
   children?: JSX.Element | JSX.Element[];
-  onSuccess?: (theCase: CaseUI) => void;
-  attachments?: CaseAttachmentsWithoutOwner;
   initialValue?: Pick<CasePostRequest, 'title' | 'description'>;
   currentConfiguration: CasesConfigurationUI;
   selectedOwner: string;
+  onSubmitCase: UseSubmitCaseValue['submitCase'];
 }
 
-export const FormContext: React.FC<Props> = ({
-  afterCaseCreated,
+export const FormContext: React.FC<FormContextProps> = ({
   children,
-  onSuccess,
-  attachments,
   initialValue,
   currentConfiguration,
   selectedOwner,
+  onSubmitCase,
 }) => {
-  const { appId } = useApplication();
   const { data: connectors = [] } = useGetSupportedActionConnectors();
-  const { mutateAsync: postCase } = usePostCase();
-  const { mutateAsync: createAttachments } = useCreateAttachments();
-  const { mutateAsync: pushCaseToExternalService } = usePostPushToService();
-  const { startTransaction } = useCreateCaseWithAttachmentsTransaction();
-
-  const submitCase = useCallback(
-    async (data: CasePostRequest, isValid: boolean) => {
-      if (isValid) {
-        startTransaction({ appId, attachments });
-
-        const theCase = await postCase({
-          request: data,
-        });
-
-        // add attachments to the case
-        if (theCase && Array.isArray(attachments) && attachments.length > 0) {
-          await createAttachments({
-            caseId: theCase.id,
-            caseOwner: theCase.owner,
-            attachments,
-          });
-        }
-
-        if (afterCaseCreated && theCase) {
-          await afterCaseCreated(theCase, createAttachments);
-        }
-
-        if (theCase?.id && data.connector.id !== 'none') {
-          await pushCaseToExternalService({
-            caseId: theCase.id,
-            connector: data.connector,
-          });
-        }
-
-        if (onSuccess && theCase) {
-          onSuccess(theCase);
-        }
-      }
-    },
-    [
-      startTransaction,
-      appId,
-      attachments,
-      postCase,
-      afterCaseCreated,
-      onSuccess,
-      createAttachments,
-      pushCaseToExternalService,
-    ]
-  );
 
   const { form } = useForm({
     defaultValue: {
@@ -112,7 +48,7 @@ export const FormContext: React.FC<Props> = ({
     },
     options: { stripEmptyFields: false },
     schema,
-    onSubmit: submitCase,
+    onSubmit: onSubmitCase,
     serializer: (data: CaseFormFieldsSchemaProps) =>
       createFormSerializer(
         connectors,

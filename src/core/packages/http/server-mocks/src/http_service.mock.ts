@@ -253,6 +253,7 @@ const createInternalStartContractMock = () => {
   const basePath = createBasePathMock();
   const mock: InternalHttpServiceStartMock = {
     ...createStartContractMock(),
+    generateOas: jest.fn(),
     staticAssets: createInternalStaticAssetsMock(basePath),
     isListening: jest.fn(),
   };

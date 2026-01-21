@@ -17,6 +17,7 @@ import type {
   ApplicationStart,
   ThemeServiceStart,
   I18nStart,
+  AppMountParameters,
 } from '@kbn/core/public';
 import type { UiCounterMetricType } from '@kbn/analytics';
 import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
@@ -57,6 +58,7 @@ export interface HomeKibanaServices {
   overlays: OverlayStart;
   theme: ThemeServiceStart;
   i18nStart: I18nStart;
+  history: AppMountParameters['history'];
 }
 
 let services: HomeKibanaServices | null = null;

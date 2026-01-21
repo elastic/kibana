@@ -11,7 +11,10 @@ import { getActionDetailsById as _getActionDetailsById } from '../../action_deta
 import { EndpointActionsClient } from '../../..';
 import { endpointActionClientMock } from './mocks';
 import { responseActionsClientMock } from '../mocks';
-import { ENDPOINT_ACTIONS_INDEX } from '../../../../../../common/endpoint/constants';
+import {
+  ENDPOINT_ACTIONS_INDEX,
+  metadataCurrentIndexPattern,
+} from '../../../../../../common/endpoint/constants';
 
 import { DEFAULT_EXECUTE_ACTION_TIMEOUT } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { applyEsClientSearchMock } from '../../../../mocks/utils.mock';
@@ -22,6 +25,8 @@ import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_
 import type { ResponseActionsRequestBody } from '../../../../../../common/api/endpoint';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 import { ALLOWED_ACTION_REQUEST_TAGS } from '../../constants';
+import { EndpointMetadataGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
+import { ScriptsLibraryMock } from '../../../scripts_library/mocks';
 
 jest.mock('../../action_details_by_id', () => {
   const originalMod = jest.requireActual('../../action_details_by_id');
@@ -55,6 +60,16 @@ describe('EndpointActionsClient', () => {
       classConstructorOptions.endpointService.getInternalFleetServices()
         .ensureInCurrentSpace as jest.Mock
     ).mockResolvedValue(undefined);
+
+    // @ts-expect-error mocking this for testing purposes
+    classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDump =
+      true;
+    // @ts-expect-error mocking this for testing purposes
+    classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointRunScript =
+      true;
+    // @ts-expect-error mocking this for testing purposes
+    classConstructorOptions.endpointService.experimentalFeatures.responseActionsScriptLibraryManagement =
+      true;
   });
 
   it('should validate endpoint ids and log those that are invalid', async () => {
@@ -395,12 +410,7 @@ describe('EndpointActionsClient', () => {
 
   type ResponseActionsMethodsOnly = keyof Omit<
     ResponseActionsClient,
-    | 'processPendingActions'
-    | 'getFileDownload'
-    | 'getFileInfo'
-    | 'runscript'
-    | 'getCustomScripts'
-    | 'cancel'
+    'processPendingActions' | 'getFileDownload' | 'getFileInfo' | 'getCustomScripts' | 'cancel'
   >;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -429,8 +439,11 @@ describe('EndpointActionsClient', () => {
 
     scan: responseActionsClientMock.createScanOptions(getCommonResponseActionOptions()),
 
-    // TODO: not yet implemented
-    // runscript: responseActionsClientMock.createRunScriptOptions(getCommonResponseActionOptions()),
+    memoryDump: responseActionsClientMock.createMemoryDumpActionOption(
+      getCommonResponseActionOptions()
+    ),
+
+    runscript: endpointActionClientMock.createRunScriptOptions(getCommonResponseActionOptions()),
   };
 
   it.each(Object.keys(responseActionMethods) as ResponseActionsMethodsOnly[])(
@@ -439,6 +452,7 @@ describe('EndpointActionsClient', () => {
       await endpointActionsClient[methodName](responseActionMethods[methodName]);
 
       let expectedParams = responseActionMethods[methodName].parameters;
+      let expectedComment = 'test comment';
 
       switch (methodName) {
         case 'upload':
@@ -457,6 +471,20 @@ describe('EndpointActionsClient', () => {
             timeout: DEFAULT_EXECUTE_ACTION_TIMEOUT,
           };
           break;
+
+        case 'runscript':
+          expectedParams = {
+            ...expectedParams,
+            file_hash: 'e5441eb2bb',
+            file_id: 'file-1-2-3',
+            file_name: 'my_script.sh',
+            file_size: 12098,
+            path_to_executable: undefined,
+            scriptId: 'script-1-2-3',
+            timeout: 60000,
+          };
+          expectedComment = `(Script name: script one / File name: my_script.sh) ${expectedComment}`;
+          break;
       }
 
       expect(
@@ -465,7 +493,7 @@ describe('EndpointActionsClient', () => {
         expect.objectContaining({
           data: {
             command: expect.any(String),
-            comment: 'test comment',
+            comment: expectedComment,
             parameters: expectedParams,
           },
         })
@@ -579,12 +607,158 @@ describe('EndpointActionsClient', () => {
     });
   });
 
+  describe('#memoryDump()', () => {
+    it('should error when feature flag is false', async () => {
+      // @ts-expect-error mocking this for testing purposes
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDump =
+        false;
+
+      await expect(
+        endpointActionsClient.memoryDump(
+          responseActionsClientMock.createMemoryDumpActionOption(getCommonResponseActionOptions())
+        )
+      ).rejects.toThrow('Memory dump operation is not enabled');
+    });
+
+    it.each`
+      title        | params
+      ${'kernel'}  | ${{ type: 'kernel' }}
+      ${'process'} | ${{ type: 'process', pid: '123' }}
+    `(
+      'should validate that agent supports memory dump of $title',
+      async ({ params: ResponseActionMemoryDumpParameters }) => {
+        const generator = new EndpointMetadataGenerator('seed');
+
+        applyEsClientSearchMock({
+          esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+          index: metadataCurrentIndexPattern,
+          response: generator.toEsSearchResponse([
+            generator.toEsSearchHit(generator.generate({ Endpoint: { capabilities: [] } })),
+          ]),
+        });
+
+        await expect(
+          endpointActionsClient.memoryDump(
+            responseActionsClientMock.createMemoryDumpActionOption(getCommonResponseActionOptions())
+          )
+        ).rejects.toThrow(
+          'The following agent IDs do not support memory dump: 0dc3661d-6e67-46b0-af39-6f12b025fcb0 (agent v.7.0.13)'
+        );
+      }
+    );
+  });
+
+  describe('#runscript()', () => {
+    it('should error if feature flag is disabled', async () => {
+      // @ts-expect-error mocking this for testing purposes
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointRunScript =
+        false;
+
+      await expect(
+        endpointActionsClient.runscript(endpointActionClientMock.createRunScriptOptions())
+      ).rejects.toThrow('Elastic Defend runscript operation is not enabled');
+    });
+
+    it('should error if script ID does not exist', async () => {
+      (
+        classConstructorOptions.endpointService.getScriptsLibraryClient('', '').get as jest.Mock
+      ).mockRejectedValueOnce(new Error('not found'));
+
+      await expect(
+        endpointActionsClient.runscript(
+          endpointActionClientMock.createRunScriptOptions({
+            parameters: { scriptId: 'non-existent-script-id' },
+          })
+        )
+      ).rejects.toThrow('not found');
+    });
+
+    it('should error if script requires input args but none were provided', async () => {
+      (
+        classConstructorOptions.endpointService.getScriptsLibraryClient('', '').get as jest.Mock
+      ).mockResolvedValue(ScriptsLibraryMock.generateScriptEntry({ requiresInput: true }));
+
+      await expect(
+        endpointActionsClient.runscript(
+          endpointActionClientMock.createRunScriptOptions({
+            parameters: { scriptId: 'script-with-args' },
+          })
+        )
+      ).rejects.toThrow('The script [script one] requires arguments to be specified.');
+    });
+
+    it('should store script info in action request doc `meta` property', async () => {
+      await expect(
+        endpointActionsClient.runscript(
+          endpointActionClientMock.createRunScriptOptions({
+            parameters: { scriptId: 'script-with-args' },
+          })
+        )
+      ).resolves.toEqual(expect.any(Object));
+
+      expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            meta: {
+              file_hash: 'e5441eb2bb',
+              file_id: 'file-1-2-3',
+              file_name: 'my_script.sh',
+              file_size: 12098,
+              path_to_executable: undefined,
+            },
+          }),
+        }),
+        expect.anything()
+      );
+    });
+  });
+
+  describe('#getCustomScripts()', () => {
+    it.each(['responseActionsEndpointRunScript', 'responseActionsScriptLibraryManagement'])(
+      'should error if feature flag [%s] is disabled',
+      async (featureFlag) => {
+        // @ts-expect-error mocking this for testing purposes
+        classConstructorOptions.endpointService.experimentalFeatures[featureFlag] = false;
+
+        await expect(endpointActionsClient.getCustomScripts()).rejects.toThrow(
+          `Elastic Defend runscript operation is not enabled`
+        );
+      }
+    );
+
+    it('should return list of scripts', async () => {
+      const expectedScriptResponse = ScriptsLibraryMock.generateScriptEntry();
+
+      await expect(endpointActionsClient.getCustomScripts()).resolves.toEqual({
+        data: [
+          {
+            id: expectedScriptResponse.id,
+            name: expectedScriptResponse.name,
+            description: expectedScriptResponse.description ?? '',
+            meta: expectedScriptResponse,
+          },
+        ],
+      });
+    });
+
+    it('should support filtering by OS Type', async () => {
+      await expect(endpointActionsClient.getCustomScripts({ osType: 'linux' })).resolves.toEqual(
+        expect.any(Object)
+      );
+
+      expect(
+        classConstructorOptions.endpointService.getScriptsLibraryClient('', '').list as jest.Mock
+      ).toHaveBeenCalledWith({
+        kuery: 'platform: "linux"',
+        pageSize: 10000,
+        sortDirection: 'asc',
+        sortField: 'name',
+      });
+    });
+  });
+
   describe('and Space Awareness is enabled', () => {
     beforeEach(() => {
-      // @ts-expect-error assign to readonly property
-      classConstructorOptions.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
-        true;
-
       getActionDetailsByIdMock.mockResolvedValue({});
     });
 

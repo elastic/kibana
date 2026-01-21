@@ -10,14 +10,17 @@ import { POST_EXCLUDE_INDICES, PRE_EXCLUDE_INDICES } from '../constants';
 import type { PrivilegeMonitoringDataClient } from '../engine/data_client';
 import { PRIVILEGED_MONITOR_IMPORT_USERS_INDEX_MAPPING } from '../engine/elasticsearch/mappings';
 import { createIndexSyncService } from './sync/index_sync';
-import { createIntegrationsSyncService } from './sync/integrations/integrations_sync';
+import { createIntegrationsSyncService } from './sync/integrations_sync';
 
-export const createDataSourcesService = (dataClient: PrivilegeMonitoringDataClient) => {
-  const { deps } = dataClient;
+export const createDataSourcesService = (
+  dataClient: PrivilegeMonitoringDataClient,
+  soClient: SavedObjectsClientContract,
+  maxUsersAllowed: number // NOTE: This parameter is required for the legacy index sync service. Remove it (and use a const) only when the old sync service and its feature flag are deleted.
+  // related issue: https://github.com/elastic/kibana/pull/243965#discussion_r2642244800
+) => {
   const esClient = dataClient.deps.clusterClient.asCurrentUser;
-  const indexSyncService = createIndexSyncService(dataClient);
-  const integrationsSyncService = createIntegrationsSyncService(dataClient);
-  const integrationsSyncFlag = deps.experimentalFeatures?.integrationsSyncEnabled ?? false;
+  const integrationsSyncService = createIntegrationsSyncService(dataClient, soClient);
+  const indexSyncService = createIndexSyncService(dataClient, soClient);
 
   /**
    * This creates an index for the user to populate privileged users.
@@ -58,10 +61,9 @@ export const createDataSourcesService = (dataClient: PrivilegeMonitoringDataClie
       (name) => !POST_EXCLUDE_INDICES.some((pattern) => name.startsWith(pattern))
     );
   };
-
-  const syncAllSources = async (soClient: SavedObjectsClientContract) => {
-    const jobs = [indexSyncService.plainIndexSync(soClient)];
-    if (integrationsSyncFlag) jobs.push(integrationsSyncService.integrationsSync(soClient));
+  const syncAllSources = async () => {
+    const jobs = [indexSyncService.plainIndexSync()];
+    jobs.push(integrationsSyncService.integrationsSync());
 
     const settled = await Promise.allSettled(jobs);
     settled
@@ -73,7 +75,5 @@ export const createDataSourcesService = (dataClient: PrivilegeMonitoringDataClie
     createImportIndex,
     searchPrivilegesIndices,
     syncAllSources,
-    ...createIndexSyncService(dataClient),
-    ...createIntegrationsSyncService(dataClient),
   };
 };

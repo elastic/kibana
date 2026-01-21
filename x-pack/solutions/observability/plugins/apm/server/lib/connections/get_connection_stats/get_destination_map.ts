@@ -84,7 +84,7 @@ export const getDestinationMap = ({
 
     const hitCountResponse = await apmEventClient.search('get_exit_span_doc_count', {
       apm: {
-        events: [ProcessorEvent.span],
+        events: [ProcessorEvent.span, ProcessorEvent.transaction],
       },
       size: 0,
       track_total_hits: true,
@@ -98,7 +98,7 @@ export const getDestinationMap = ({
 
     const response = await apmEventClient.search('get_exit_span_samples', {
       apm: {
-        events: [ProcessorEvent.span],
+        events: [ProcessorEvent.span, ProcessorEvent.transaction],
       },
       track_total_hits: false,
       size: 0,

@@ -90,6 +90,7 @@ export const GenerationModal = React.memo<GenerationModalProps>(
                 {error ? (
                   <EuiFlexItem>
                     <EuiCallOut
+                      announceOnMount
                       title={i18n.GENERATION_ERROR_TITLE(progressText[progress])}
                       color="danger"
                       iconType="alert"

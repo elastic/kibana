@@ -52,10 +52,7 @@ describe('<Notes />', () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       notesPrivileges: { crud: true, read: true },
     });
-    (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
-      navigateToLeftPanel: mockNavigateToLeftPanel,
-      isEnabled: true,
-    });
+    (useNavigateToLeftPanel as jest.Mock).mockReturnValue(mockNavigateToLeftPanel);
   });
 
   it('should render loading spinner', () => {
@@ -101,30 +98,6 @@ describe('<Notes />', () => {
     expect(mockNavigateToLeftPanel).toHaveBeenCalled();
   });
 
-  it('should disabled the Add note button if in preview mode', () => {
-    (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
-      navigateToLeftPanel: undefined,
-      isEnabled: false,
-    });
-    const { getByTestId } = render(
-      <TestProviders>
-        <DocumentDetailsContext.Provider value={mockContextValue}>
-          <Notes />
-        </DocumentDetailsContext.Provider>
-      </TestProviders>
-    );
-
-    expect(mockDispatch).not.toHaveBeenCalled();
-
-    const button = getByTestId(NOTES_ADD_NOTE_BUTTON_TEST_ID);
-    expect(button).toBeInTheDocument();
-    expect(button).toBeDisabled();
-
-    button.click();
-
-    expect(mockNavigateToLeftPanel).not.toHaveBeenCalled();
-  });
-
   it('should render number of notes and plus button', () => {
     const contextValue = {
       ...mockContextValue,
@@ -148,38 +121,6 @@ describe('<Notes />', () => {
     button.click();
 
     expect(mockNavigateToLeftPanel).toHaveBeenCalled();
-  });
-
-  it('should disable the plus button if navigation is disabled', () => {
-    (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
-      navigateToLeftPanel: undefined,
-      isEnabled: false,
-    });
-    const contextValue = {
-      ...mockContextValue,
-      eventId: '1',
-    };
-
-    const { getByTestId } = render(
-      <TestProviders>
-        <DocumentDetailsContext.Provider value={contextValue}>
-          <Notes />
-        </DocumentDetailsContext.Provider>
-      </TestProviders>
-    );
-
-    expect(getByTestId(NOTES_COUNT_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(NOTES_COUNT_TEST_ID)).toHaveTextContent('1');
-
-    expect(mockDispatch).not.toHaveBeenCalled();
-
-    const button = getByTestId(NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID);
-
-    expect(button).toBeInTheDocument();
-    button.click();
-    expect(button).toBeDisabled();
-
-    expect(mockNavigateToLeftPanel).not.toHaveBeenCalled();
   });
 
   it('should render number of notes in scientific notation for big numbers', () => {

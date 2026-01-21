@@ -214,7 +214,7 @@ export function ActionsPopover({
     {
       name: testInProgress ? (
         <EuiToolTip content={TEST_SCHEDULED_LABEL}>
-          <span>{runTestManually}</span>
+          <span tabIndex={0}>{runTestManually}</span>
         </EuiToolTip>
       ) : (
         <NoPermissionsTooltip

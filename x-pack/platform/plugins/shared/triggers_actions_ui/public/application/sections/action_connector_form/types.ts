@@ -5,30 +5,6 @@
  * 2.0.
  */
 
-import type { UserConfiguredActionConnector } from '../../../types';
-
-/**
- * The following type is equivalent to:
- *
- * interface ConnectorFormSchema<Config, Secrets> {
- *  id?: string,
- *  name?: string,
- *  actionTypeId: string,
- *  isDeprecated: boolean,
- *  config: Config,
- *  secrets: Secrets,
- * }
- */
-
-export type ConnectorFormSchema<
-  Config = Record<string, unknown>,
-  Secrets = Record<string, unknown>
-> = Pick<
-  UserConfiguredActionConnector<Config, Secrets>,
-  'actionTypeId' | 'isDeprecated' | 'config' | 'secrets'
-> &
-  Partial<Pick<UserConfiguredActionConnector<Config, Secrets>, 'id' | 'name'>>;
-
 export interface InferenceConnectorProviderConfig {
   [key: string]: unknown;
   max_number_of_allocations?: number;

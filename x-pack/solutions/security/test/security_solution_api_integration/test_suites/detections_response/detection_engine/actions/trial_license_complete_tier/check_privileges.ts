@@ -10,14 +10,14 @@ import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import type { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
-import { createRuleWithAuth, getThresholdRuleForAlertTesting } from '../../../utils';
 import {
   deleteAllRules,
   deleteAllAlerts,
   createAlertsIndex,
   waitForRulePartialFailure,
   getRuleForAlertTesting,
-} from '../../../../../config/services/detections_response';
+} from '@kbn/detections-response-ftr-services';
+import { createRuleWithAuth, getThresholdRuleForAlertTesting } from '../../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../../../config/services/common';
 
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
@@ -86,10 +86,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
           expect(body?.execution_summary?.last_execution.message).to.contain(
-            `This rule's API key is unable to access all indices that match the ["${index[0]}"] pattern. To learn how to update and manage API keys, refer to https://www.elastic.co/guide/en/kibana/`
-          );
-          expect(body?.execution_summary?.last_execution.message).to.contain(
-            '/alerting-setup.html#alerting-authorization.'
+            `This rule's API key is unable to access all indices that match the ["${index[0]}"] pattern. To learn how to update and manage API keys, refer to https://www.elastic.co/docs/explore-analyze/alerts-cases/alerts/alerting-setup#alerting-authorization`
           );
 
           await deleteUserAndRole(getService, ROLES.detections_admin);
@@ -170,10 +167,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
           expect(body?.execution_summary?.last_execution.message).to.contain(
-            `This rule's API key is unable to access all indices that match the ["${index[0]}"] pattern. To learn how to update and manage API keys, refer to https://www.elastic.co/guide/en/kibana/`
-          );
-          expect(body?.execution_summary?.last_execution.message).to.contain(
-            '/alerting-setup.html#alerting-authorization.'
+            `This rule's API key is unable to access all indices that match the ["${index[0]}"] pattern. To learn how to update and manage API keys, refer to https://www.elastic.co/docs/explore-analyze/alerts-cases/alerts/alerting-setup#alerting-authorization`
           );
 
           await deleteUserAndRole(getService, ROLES.detections_admin);

@@ -15,6 +15,7 @@ export class FleetAgentsOverviewPage {
   private readonly createPolicyButton: Locator;
   private readonly agentPolicyDescription: Locator;
   private readonly enrollInFleetRadioButton: Locator;
+  private readonly codeBlockPlatformSelectorButton: Locator;
   private readonly enrollmentCodeBlock: Locator;
   private readonly enrollmentCopyButton: Locator;
   private readonly confirmedAgentEnrollmentCallout: Locator;
@@ -28,6 +29,7 @@ export class FleetAgentsOverviewPage {
     this.createPolicyButton = this.page.getByTestId('createPolicyBtn');
     this.agentPolicyDescription = this.page.getByTestId('agentPolicyDescription');
     this.enrollInFleetRadioButton = this.page.getByTestId('agentFlyoutManagedRadioButtons');
+    this.codeBlockPlatformSelectorButton = this.page.getByTestId('platformSelectorExtended');
     this.enrollmentCodeBlock = this.page.getByTestId('enrollmentInstructionsCodeBlock');
     this.enrollmentCopyButton = this.page.getByTestId('euiCodeBlockCopy');
     this.confirmedAgentEnrollmentCallout = this.page.getByTestId('ConfirmAgentEnrollmentCallOut');
@@ -59,6 +61,14 @@ export class FleetAgentsOverviewPage {
 
   public async selectEnrollInFleet() {
     await this.enrollInFleetRadioButton.click();
+  }
+
+  public async clickCodeBlockPlatformSelectorButton() {
+    await this.codeBlockPlatformSelectorButton.click();
+  }
+
+  public async selectPlatform(platform: string) {
+    await this.page.getByText(platform).click();
   }
 
   public async assertVisibilityCodeBlock() {

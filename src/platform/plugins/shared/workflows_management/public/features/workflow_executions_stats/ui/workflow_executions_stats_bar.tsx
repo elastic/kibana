@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiPageTemplate, useEuiTheme } from '@elastic/eui';
-import React from 'react';
 import type { Color } from '@elastic/charts';
 import {
   Axis,
@@ -20,8 +18,10 @@ import {
   Settings,
   Tooltip,
 } from '@elastic/charts';
-import { ExecutionStatus } from '@kbn/workflows';
 import { timeFormatter } from '@elastic/charts/dist/utils/data/formatters';
+import { EuiPageTemplate, useEuiTheme } from '@elastic/eui';
+import React from 'react';
+import { ExecutionStatus } from '@kbn/workflows';
 import { useWorkflowStats } from '../../../entities/workflows/model/use_workflow_stats';
 
 interface WorkflowExecutionStatsBarProps {
@@ -41,7 +41,7 @@ export function WorkflowExecutionStatsBar({ height }: WorkflowExecutionStatsBarP
     return null;
   }
 
-  const executionStats: any[] = [];
+  const executionStats: any[] = []; // eslint-disable-line @typescript-eslint/no-explicit-any
   data.executions.forEach((day, index) => {
     executionStats.push({
       timestamp: day.timestamp,
@@ -68,6 +68,7 @@ export function WorkflowExecutionStatsBar({ height }: WorkflowExecutionStatsBarP
     [ExecutionStatus.COMPLETED]: euiTheme.colors.vis.euiColorVis0,
     [ExecutionStatus.FAILED]: euiTheme.colors.vis.euiColorVis6,
     [ExecutionStatus.CANCELLED]: euiTheme.colors.vis.euiColorVis8,
+    [ExecutionStatus.TIMED_OUT]: euiTheme.colors.vis.euiColorVis6,
     [ExecutionStatus.PENDING]: euiTheme.colors.vis.euiColorVis1,
     [ExecutionStatus.WAITING]: euiTheme.colors.vis.euiColorVis1,
     [ExecutionStatus.WAITING_FOR_INPUT]: euiTheme.colors.vis.euiColorVis1,

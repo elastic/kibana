@@ -106,11 +106,11 @@ describe('streamGraph', () => {
         expect(response).toBe(mockResponseWithHeaders);
         await waitFor(() => {
           expect(mockPush).toHaveBeenCalledWith({ payload: 'content', type: 'content' });
-          expect(mockOnLlmResponse).toHaveBeenCalledWith(
-            'final message',
-            { transactionId: 'transactionId', traceId: 'traceId' },
-            false
-          );
+          expect(mockOnLlmResponse).toHaveBeenCalledWith({
+            content: 'final message',
+            traceData: { transactionId: 'transactionId', traceId: 'traceId' },
+            isError: false,
+          });
         });
       });
       it('on_llm_end events with tool calls should not end the stream', async () => {
@@ -175,11 +175,11 @@ describe('streamGraph', () => {
         expect(response).toBe(mockResponseWithHeaders);
         await waitFor(() => {
           expect(mockPush).toHaveBeenCalledWith({ payload: 'content', type: 'content' });
-          expect(mockOnLlmResponse).toHaveBeenCalledWith(
-            'content',
-            { transactionId: 'transactionId', traceId: 'traceId' },
-            false
-          );
+          expect(mockOnLlmResponse).toHaveBeenCalledWith({
+            content: 'content',
+            traceData: { transactionId: 'transactionId', traceId: 'traceId' },
+            isError: false,
+          });
         });
       });
     });
@@ -237,11 +237,11 @@ describe('streamGraph', () => {
           expect(mockPush).toHaveBeenCalledWith({ type: 'content', payload: ' addresses.' });
         }
 
-        expect(mockOnLlmResponse).toHaveBeenCalledWith(
-          'Look at these rare IP addresses.',
-          { transactionId: 'transactionId', traceId: 'traceId' },
-          false
-        );
+        expect(mockOnLlmResponse).toHaveBeenCalledWith({
+          content: 'Look at these rare IP addresses.',
+          traceData: { transactionId: 'transactionId', traceId: 'traceId' },
+          isError: false,
+        });
       });
     };
     it('should execute the graph in streaming mode - Gemini', async () => {

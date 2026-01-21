@@ -19,7 +19,6 @@ import {
   EuiI18n,
   useResizeObserver,
   EuiSwitch,
-  type UseEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -117,8 +116,9 @@ export const DocViewerTable = ({
 
   const flattened = hit.flattened;
   const shouldShowFieldHandler = useMemo(
-    () => getShouldShowFieldHandler(Object.keys(flattened), dataView, showMultiFields),
-    [flattened, dataView, showMultiFields]
+    () =>
+      getShouldShowFieldHandler(Object.keys(flattened), dataView, isEsqlMode || showMultiFields),
+    [flattened, dataView, isEsqlMode, showMultiFields]
   );
 
   const mapping = useCallback((name: string) => dataView.fields.getByName(name), [dataView.fields]);
@@ -391,17 +391,10 @@ export const DocViewerTable = ({
 };
 
 const componentStyles = {
-  fieldsGridWrapper: ({ euiTheme }: UseEuiTheme) =>
+  fieldsGridWrapper: () =>
     css({
       minBlockSize: 0,
       display: 'block',
-
-      '.euiDataGridRow': {
-        '&:hover': {
-          // we keep using a deprecated shade until proper token is available
-          backgroundColor: euiTheme.colors.lightestShade,
-        },
-      },
     }),
   noFieldsFound: css({
     minHeight: 300,

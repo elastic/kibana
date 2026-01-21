@@ -14,6 +14,9 @@ xpack.legacy_uptime.enabled: false
 xpack.ux.enabled: false
 xpack.uptime.enabled: false
 xpack.exploratoryView.enabled: false
+## Disable Workflows plugins in this tier
+workflowsManagement.enabled: false
+workflowsExecutionEngine.enabled: false
 
 xpack.features.overrides:
   ### Machine Learning feature privilege should be hidden

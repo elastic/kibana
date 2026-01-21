@@ -11,7 +11,7 @@ import { formatIndexFields, createFieldItem, requestIndexFieldSearchHandler } fr
 import { mockAuditbeatIndexField, mockFilebeatIndexField, mockPacketbeatIndexField } from './mock';
 import { fieldsBeat as beatFields } from '../../utils/beat_schema/fields.json';
 import type { SearchStrategyDependencies } from '@kbn/data-plugin/server';
-import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
+import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 
 describe('Index Fields', () => {
   describe('formatIndexFields', () => {

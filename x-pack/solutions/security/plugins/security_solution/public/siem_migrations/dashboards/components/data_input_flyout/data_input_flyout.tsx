@@ -14,36 +14,34 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFlyoutResizable,
-  EuiText,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
-import type { DashboardMigrationTaskStats } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import {
   SiemMigrationRetryFilter,
   SiemMigrationTaskStatus,
 } from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
 import { useMigrationDataInputContext } from '../../../common/components/migration_data_input_flyout_context';
-import { DashboardsUploadStep } from './steps/upload_dashboards';
-import { MacrosDataInput } from './steps/macros/macros_data_input';
-import { LookupsDataInput } from './steps/lookups/lookups_data_input';
+import { useStartDashboardsMigrationModal } from '../../hooks/use_start_dashboard_migration_modal';
+import type { DashboardMigrationStats } from '../../types';
 import { useStartMigration } from '../../logic/use_start_migration';
-import { DashboardUploadSteps } from './steps/constants';
+import type { HandleMissingResourcesIndexed, MigrationSettingsBase } from '../../../common/types';
+import { MigrationSource, SplunkDataInputStep } from '../../../common/types';
+import { useMissingResources } from '../../../common/hooks/use_missing_resources';
+import { STEP_COMPONENTS } from './configs';
+import { PanelText } from '../../../../common/components/panel_text';
+import { getCopyrightNoticeByVendor } from '../../../common/utils/get_copyright_notice_by_vendor';
 
 interface DashboardMigrationDataInputFlyoutProps {
   onClose: () => void;
-  migrationStats: DashboardMigrationTaskStats | undefined;
-  setFlyoutMigrationStats: (migrationStats: DashboardMigrationTaskStats | undefined) => void;
+  migrationStats: DashboardMigrationStats | undefined;
+  setFlyoutMigrationStats: (migrationStats: DashboardMigrationStats | undefined) => void;
 }
 
-interface MissingResourcesIndexed {
-  macros: string[];
-  lookups: string[];
-}
+const DASHBOARDS_MIGRATION_DATA_INPUT_FLYOUT_TITLE = 'dashboardsMigrationDataInputFlyoutTitle';
 
 export const DashboardMigrationDataInputFlyout = React.memo(
   function DashboardMigrationDataInputFlyout({
@@ -51,140 +49,151 @@ export const DashboardMigrationDataInputFlyout = React.memo(
     migrationStats,
     setFlyoutMigrationStats,
   }: DashboardMigrationDataInputFlyoutProps) {
-    const modalTitleId = useGeneratedHtmlId();
+    const modalTitleId = useGeneratedHtmlId({
+      prefix: DASHBOARDS_MIGRATION_DATA_INPUT_FLYOUT_TITLE,
+    });
 
     const { closeFlyout } = useMigrationDataInputContext();
-    const [missingResourcesIndexed, setMissingResourcesIndexed] = useState<
-      MissingResourcesIndexed | undefined
-    >();
+
     const isRetry = migrationStats?.status === SiemMigrationTaskStatus.FINISHED;
 
-    const { startMigration, isLoading: isStartLoading } = useStartMigration(onClose);
-    const onStartMigration = useCallback(() => {
-      if (migrationStats?.id) {
-        const retryFilter = isRetry ? SiemMigrationRetryFilter.NOT_FULLY_TRANSLATED : undefined;
-        startMigration(migrationStats.id, retryFilter);
-      }
-    }, [startMigration, migrationStats?.id, isRetry]);
-
-    const [dataInputStep, setDataInputStep] = useState<DashboardUploadSteps>(
-      DashboardUploadSteps.DashboardsUpload
+    const [dataInputStep, setDataInputStep] = useState<SplunkDataInputStep>(
+      SplunkDataInputStep.Upload
     );
 
+    const setMissingResourcesStep: HandleMissingResourcesIndexed = useCallback(
+      ({ newMissingResourcesIndexed }) => {
+        if (newMissingResourcesIndexed?.macros.length) {
+          setDataInputStep(SplunkDataInputStep.Macros);
+          return;
+        }
+
+        if (newMissingResourcesIndexed?.lookups.length) {
+          setDataInputStep(SplunkDataInputStep.Lookups);
+          return;
+        }
+
+        setDataInputStep(SplunkDataInputStep.End);
+      },
+      []
+    );
+
+    const { missingResourcesIndexed, onMissingResourcesFetched } = useMissingResources({
+      handleMissingResourcesIndexed: setMissingResourcesStep,
+      migrationSource: MigrationSource.SPLUNK,
+    });
+
     const onMigrationCreated = useCallback(
-      (createdMigrationStats: DashboardMigrationTaskStats) => {
+      (createdMigrationStats: DashboardMigrationStats) => {
         setFlyoutMigrationStats(createdMigrationStats);
       },
       [setFlyoutMigrationStats]
     );
 
-    const onMissingResourcesFetched = useCallback(
-      (missingResources: SiemMigrationResourceBase[]) => {
-        const newMissingResourcesIndexed = missingResources.reduce<MissingResourcesIndexed>(
-          (acc, { type, name }) => {
-            if (type === 'macro') {
-              acc.macros.push(name);
-            } else if (type === 'lookup') {
-              acc.lookups.push(name);
-            }
-            return acc;
-          },
-          { macros: [], lookups: [] }
-        );
-        setMissingResourcesIndexed(newMissingResourcesIndexed);
-        if (newMissingResourcesIndexed.macros.length) {
-          setDataInputStep(DashboardUploadSteps.MacrosUpload);
-          return;
+    const { startMigration, isLoading: isStartLoading } = useStartMigration(onClose);
+    const onStartMigrationWithSettings = useCallback(
+      (settings: MigrationSettingsBase) => {
+        if (migrationStats) {
+          startMigration(
+            migrationStats,
+            isRetry ? SiemMigrationRetryFilter.NOT_FULLY_TRANSLATED : undefined,
+            settings
+          );
         }
-        if (newMissingResourcesIndexed.lookups.length) {
-          setDataInputStep(DashboardUploadSteps.LookupsUpload);
-          return;
-        }
-        setDataInputStep(DashboardUploadSteps.End);
       },
-      []
+      [isRetry, migrationStats, startMigration]
     );
+    const { modal: startMigrationModal, showModal: showStartMigrationModal } =
+      useStartDashboardsMigrationModal({
+        type: isRetry ? 'retry' : 'start',
+        migrationStats,
+        onStartMigrationWithSettings,
+      });
+    const onTranslateButtonClick = useCallback(() => {
+      if (migrationStats?.id) {
+        showStartMigrationModal();
+      }
+    }, [migrationStats?.id, showStartMigrationModal]);
 
-    const onAllLookupsCreated = useCallback(() => {
-      setDataInputStep(DashboardUploadSteps.End);
-    }, []);
     return (
-      <EuiFlyoutResizable
-        onClose={closeFlyout}
-        ownFocus
-        size={850}
-        maxWidth={1200}
-        minWidth={500}
-        data-test-subj="dashboardMigrationDataInputFlyout"
-        aria-labelledby={modalTitleId}
-      >
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="m" id="dashboardMigrationDataInputFlyoutTitle">
-            <EuiText>{i18n.DATA_INPUT_FLYOUT_TITLE}</EuiText>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          <EuiFlexGroup direction="column" gutterSize="m">
-            <EuiFlexItem>
-              <DashboardsUploadStep
-                dataInputStep={dataInputStep}
-                migrationStats={migrationStats}
-                onMigrationCreated={onMigrationCreated}
-                onMissingResourcesFetched={onMissingResourcesFetched}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <MacrosDataInput
-                dataInputStep={dataInputStep}
-                missingMacros={missingResourcesIndexed?.macros}
-                migrationStats={migrationStats}
-                onMissingResourcesFetched={onMissingResourcesFetched}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <LookupsDataInput
-                dataInputStep={dataInputStep}
-                missingLookups={missingResourcesIndexed?.lookups}
-                migrationStats={migrationStats}
-                onAllLookupsCreated={onAllLookupsCreated}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={onClose}>
-                <FormattedMessage
-                  id="xpack.securitySolution.siemMigrations.dashboards.dataInputFlyout.closeButton"
-                  defaultMessage="Close"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                onClick={onStartMigration}
-                disabled={!migrationStats?.id}
-                isLoading={isStartLoading}
-                data-test-subj="startMigrationButton"
-              >
-                {isRetry ? (
+      <>
+        {startMigrationModal}
+
+        <EuiFlyoutResizable
+          onClose={closeFlyout}
+          ownFocus
+          size={850}
+          maxWidth={1200}
+          minWidth={500}
+          data-test-subj="dashboardMigrationDataInputFlyout"
+          aria-labelledby={modalTitleId}
+        >
+          <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="m">
+              <h2 id={modalTitleId} aria-label={DASHBOARDS_MIGRATION_DATA_INPUT_FLYOUT_TITLE}>
+                {i18n.DATA_INPUT_FLYOUT_TITLE}
+              </h2>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            <EuiFlexGroup direction="column" gutterSize="m">
+              <>
+                {STEP_COMPONENTS[MigrationSource.SPLUNK].map((step) => (
+                  <EuiFlexItem key={step.id}>
+                    <step.Component
+                      dataInputStep={dataInputStep}
+                      migrationSource={MigrationSource.SPLUNK}
+                      migrationStats={migrationStats}
+                      missingResourcesIndexed={missingResourcesIndexed}
+                      onMigrationCreated={onMigrationCreated}
+                      onMissingResourcesFetched={onMissingResourcesFetched}
+                      setDataInputStep={setDataInputStep}
+                    />
+                  </EuiFlexItem>
+                ))}
+              </>
+              <EuiFlexItem>
+                <PanelText size="xs" subdued cursive>
+                  <p>{getCopyrightNoticeByVendor(MigrationSource.SPLUNK)}</p>
+                </PanelText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutBody>
+          <EuiFlyoutFooter>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={onClose} data-test-subj="dataFlyoutCloseButton">
                   <FormattedMessage
-                    id="xpack.securitySolution.siemMigrations.dashboards.dataInputFlyout.retryTranslateButton"
-                    defaultMessage="Retry translation"
+                    id="xpack.securitySolution.siemMigrations.dashboards.dataInputFlyout.closeButton"
+                    defaultMessage="Close"
                   />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.securitySolution.siemMigrations.dashboards.dataInputFlyout.translateButton"
-                    defaultMessage="Translate"
-                  />
-                )}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
-      </EuiFlyoutResizable>
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  onClick={onTranslateButtonClick}
+                  disabled={!migrationStats?.id}
+                  isLoading={isStartLoading}
+                  data-test-subj="startMigrationButton"
+                >
+                  {isRetry ? (
+                    <FormattedMessage
+                      id="xpack.securitySolution.siemMigrations.dashboards.dataInputFlyout.retryTranslateButton"
+                      defaultMessage="Retry translation"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.securitySolution.siemMigrations.dashboards.dataInputFlyout.translateButton"
+                      defaultMessage="Translate"
+                    />
+                  )}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutFooter>
+        </EuiFlyoutResizable>
+      </>
     );
   }
 );

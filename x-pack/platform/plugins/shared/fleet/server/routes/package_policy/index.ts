@@ -74,9 +74,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: GetPackagePoliciesRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => ListResponseSchema(PackagePolicyResponseSchema),
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -108,12 +110,15 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: BulkGetPackagePoliciesRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => BulkGetPackagePoliciesResponseBodySchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
             404: {
+              description: 'Not found.',
               body: notFoundResponse,
             },
           },
@@ -146,15 +151,18 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: GetOnePackagePolicyRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () =>
                 schema.object({
                   item: PackagePolicyResponseSchema,
                 }),
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
             404: {
+              description: 'Not found.',
               body: notFoundResponse,
             },
           },
@@ -178,9 +186,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: {},
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => OrphanedPackagePoliciesResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -206,12 +216,15 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: CreatePackagePolicyRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => CreatePackagePolicyResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
             409: {
+              description: 'A conflict occurred.',
               body: genericErrorResponse,
             },
           },
@@ -244,15 +257,18 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: UpdatePackagePolicyRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () =>
                 schema.object({
                   item: PackagePolicyResponseSchema,
                 }),
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
             403: {
+              description: 'Forbidden.',
               body: genericErrorResponse,
             },
           },
@@ -286,9 +302,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: DeletePackagePoliciesRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => DeletePackagePoliciesResponseBodySchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -321,9 +339,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: DeleteOnePackagePolicyRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => DeleteOnePackagePolicyResponseSchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -357,9 +377,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: UpgradePackagePoliciesRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => UpgradePackagePoliciesResponseBodySchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },
@@ -392,9 +414,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           request: DryRunPackagePoliciesRequestSchema,
           response: {
             200: {
+              description: 'OK: A successful request.',
               body: () => DryRunPackagePoliciesResponseBodySchema,
             },
             400: {
+              description: 'A bad request.',
               body: genericErrorResponse,
             },
           },

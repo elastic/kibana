@@ -7,8 +7,9 @@
 
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
-import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewManagerScopeName } from '../constants';
+import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, PageScope } from '../constants';
 import { useDataView } from './use_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useSelector } from 'react-redux';
@@ -23,6 +24,7 @@ jest.mock('react-redux', () => ({
 
 const mockGet = jest.fn();
 const mockToastsDanger = jest.fn();
+const mockLogger = loggingSystemMock.createLogger();
 
 const mockNotifications = {
   toasts: {
@@ -47,6 +49,7 @@ jest.mock('../../common/lib/kibana', () => {
       services: {
         dataViews: mockDataViews,
         notifications: mockNotifications,
+        logger: mockLogger,
       },
     }),
   };
@@ -111,9 +114,9 @@ describe('useDataView', () => {
   it('should not call get if newDataViewPickerEnabled is false', async () => {
     jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(false);
 
-    const { result, rerender } = renderHook(() => useDataView(DataViewManagerScopeName.default));
+    const { result, rerender } = renderHook(() => useDataView(PageScope.default));
 
-    await act(async () => rerender(DataViewManagerScopeName.default));
+    await act(async () => rerender(PageScope.default));
     expect(mockGet).not.toHaveBeenCalled();
     expect(result.current.status).toBe('pristine');
   });
@@ -121,9 +124,9 @@ describe('useDataView', () => {
   it('should not call get if dataViewId is missing', async () => {
     jest.mocked(useSelector).mockReturnValue({ dataViewId: undefined, status: 'ready' });
 
-    const { result, rerender } = renderHook(() => useDataView(DataViewManagerScopeName.default));
+    const { result, rerender } = renderHook(() => useDataView(PageScope.default));
 
-    await act(async () => rerender(DataViewManagerScopeName.default));
+    await act(async () => rerender(PageScope.default));
     expect(mockGet).not.toHaveBeenCalled();
     expect(result.current.status).toBe('pristine');
   });
@@ -133,9 +136,9 @@ describe('useDataView', () => {
       .mocked(useSelector)
       .mockReturnValue({ dataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, status: 'loading' });
 
-    const { result, rerender } = renderHook(() => useDataView(DataViewManagerScopeName.default));
+    const { result, rerender } = renderHook(() => useDataView(PageScope.default));
 
-    await act(async () => rerender(DataViewManagerScopeName.default));
+    await act(async () => rerender(PageScope.default));
     expect(mockGet).not.toHaveBeenCalled();
     expect(result.current.status).toBe('pristine');
   });
@@ -143,9 +146,9 @@ describe('useDataView', () => {
   it('should set status to error and call toasts.addDanger on get error', async () => {
     mockGet.mockRejectedValue(new Error('fail!'));
 
-    const { result, rerender } = renderHook(() => useDataView(DataViewManagerScopeName.default));
+    const { result, rerender } = renderHook(() => useDataView(PageScope.default));
 
-    await act(async () => rerender(DataViewManagerScopeName.default));
+    await act(async () => rerender(PageScope.default));
     expect(result.current.status).toBe('error');
     expect(mockToastsDanger).toHaveBeenCalledWith({
       title: 'Error retrieving data view',
@@ -156,9 +159,9 @@ describe('useDataView', () => {
   it('should handle unknown error shape gracefully', async () => {
     mockGet.mockRejectedValue({});
 
-    const { result, rerender } = renderHook(() => useDataView(DataViewManagerScopeName.default));
+    const { result, rerender } = renderHook(() => useDataView(PageScope.default));
 
-    await act(async () => rerender(DataViewManagerScopeName.default));
+    await act(async () => rerender(PageScope.default));
     expect(result.current.status).toBe('error');
     expect(mockToastsDanger).toHaveBeenCalledWith({
       title: 'Error retrieving data view',

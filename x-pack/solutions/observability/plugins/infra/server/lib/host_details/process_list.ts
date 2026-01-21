@@ -154,6 +154,7 @@ const getEcsProcessList = async (
   });
 
   const summary: { [p: string]: number } = response.aggregations?.summaryEvent.summary.hits.hits
+    ?.length
     ? (response.aggregations?.summaryEvent.summary.hits.hits[0]._source as EcsMetaSource).system
         .process.summary
     : {};

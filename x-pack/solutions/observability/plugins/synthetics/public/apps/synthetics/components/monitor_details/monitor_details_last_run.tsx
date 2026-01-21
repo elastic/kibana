@@ -32,7 +32,7 @@ export const MonitorDetailsLastRun: React.FC = () => {
               content={moment(latestPing?.['@timestamp']).format('LLL')}
               position="bottom"
             >
-              <>{description}</>
+              <span tabIndex={0}>{description}</span>
             </EuiToolTip>
           ),
         },

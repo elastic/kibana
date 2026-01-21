@@ -26,11 +26,7 @@ export { SearchStatus } from '../../../common/search';
 
 export interface IScopedSearchSessionsClient {
   getId: (request: IKibanaSearchRequest, options: ISearchOptions) => Promise<string>;
-  trackId: (
-    request: IKibanaSearchRequest,
-    searchId: string,
-    options: ISearchOptions
-  ) => Promise<void>;
+  trackId: (searchId: string, options: ISearchOptions) => Promise<void>;
   getSearchIdMapping: (sessionId: string) => Promise<Map<string, string>>;
   save: (
     sessionId: string,

@@ -25,6 +25,7 @@ export interface CreateTestConfigOptions {
    */
   kbnTestServerWait?: RegExp;
   suiteTags?: { include?: string[]; exclude?: string[] };
+  indexRefreshInterval?: string | false;
 }
 
 export function createTestConfig(options: CreateTestConfigOptions) {
@@ -48,6 +49,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'bulkEditAlertSuppressionEnabled',
             'doesNotMatchForIndicatorMatchRuleEnabled',
+            'endpointExceptionsMovedUnderManagement',
           ])}`,
           ...(options.kbnTestServerArgs || []),
           `--plugin-path=${path.resolve(
@@ -80,6 +82,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
             installMockPrebuiltRulesPackage({ getService }),
         },
       },
+      indexRefreshInterval: options.indexRefreshInterval,
     };
   };
 }

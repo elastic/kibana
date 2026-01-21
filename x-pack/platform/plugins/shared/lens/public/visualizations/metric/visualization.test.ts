@@ -23,7 +23,7 @@ import type {
   OperationDescriptor,
   OperationMetadata,
   Visualization,
-} from '../../types';
+} from '@kbn/lens-common';
 import { GROUP_ID } from './constants';
 import { getMetricVisualization } from './visualization';
 import type { Ast } from '@kbn/interpreter';
@@ -287,7 +287,7 @@ describe('metric visualization', () => {
         ).toMatchInlineSnapshot(`
           Array [
             Object {
-              "color": "#ffffff",
+              "color": "#FFFFFF",
               "columnId": "metric-col-id",
               "triggerIconType": "color",
             },
@@ -311,7 +311,7 @@ describe('metric visualization', () => {
           .toMatchInlineSnapshot(`
           Array [
             Object {
-              "color": "#ffffff",
+              "color": "#FFFFFF",
               "columnId": "metric-col-id",
               "triggerIconType": "color",
             },

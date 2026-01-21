@@ -55,7 +55,7 @@ export const generateCspFinding = (
     },
     rule: {
       rego_rule_id: 'AZU-1.0-1.0',
-      references: 'https://elastic.co',
+      reference: 'https://elastic.co',
       impact: `impact ${id}`,
       description: `description ${id}`,
       section: `Section ${id}`,

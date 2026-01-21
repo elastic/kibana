@@ -1,0 +1,10 @@
+{
+  "name": "@kbn/synthtrace",
+  "version": "1.0.0",
+  "description": "Elastic synthetic data generator",
+  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
+  "bin": {
+    "synthtrace": "./bin/synthtrace"
+  },
+  "private": true
+}

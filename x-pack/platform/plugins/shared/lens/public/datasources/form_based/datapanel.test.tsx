@@ -18,7 +18,6 @@ import * as UseExistingFieldsApi from '@kbn/unified-field-list/src/hooks/use_exi
 import * as ExistingFieldsServiceApi from '@kbn/unified-field-list/src/services/field_existing/load_field_existing';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { FormBasedPrivateState } from './types';
 import { documentField } from './document_field';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
@@ -27,7 +26,7 @@ import { getFieldByNameFactory } from './pure_helpers';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
 import { createMockFramePublicAPI } from '../../mocks';
-import type { DataViewsState } from '../../state_management';
+import type { DataViewsState, FormBasedPrivateState } from '@kbn/lens-common';
 import { renderWithProviders } from '../../test_utils/test_utils';
 
 const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });

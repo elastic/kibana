@@ -103,6 +103,12 @@ function UnoptimizedManagedTable<T extends object>(props: {
   tableLayout?: 'auto' | 'fixed';
   tableSearchBar?: TableSearchBar<T>;
   saveTableOptionsToUrl?: boolean;
+
+  tableCaption?: string;
+
+  rowProps?: (item: T) => Record<string, unknown>;
+
+  'data-test-subj'?: string;
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const history = useHistory();
@@ -298,7 +304,12 @@ function UnoptimizedManagedTable<T extends object>(props: {
   );
 
   return (
-    <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>
+    <EuiFlexGroup
+      gutterSize="xs"
+      direction="column"
+      responsive={false}
+      data-test-subj={props['data-test-subj']}
+    >
       {tableSearchBar.isEnabled ? (
         <EuiFlexItem>
           <TableSearchBar
@@ -306,6 +317,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
             searchQuery={searchQuery}
             onChangeSearchQuery={onChangeSearchQuery}
             techPreview={tableSearchBar.techPreview}
+            isLoading={isLoading}
           />
         </EuiFlexItem>
       ) : null}
@@ -332,6 +344,8 @@ function UnoptimizedManagedTable<T extends object>(props: {
           rowHeader={rowHeader === false ? undefined : rowHeader ?? columns[0]?.field}
           sorting={sorting}
           onChange={onTableChange}
+          tableCaption={props.tableCaption}
+          rowProps={props.rowProps}
           {...(paginationProps ? { pagination: paginationProps } : {})}
         />
       </EuiFlexItem>

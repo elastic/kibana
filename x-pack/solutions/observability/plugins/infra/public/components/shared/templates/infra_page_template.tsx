@@ -25,7 +25,7 @@ export const InfraPageTemplate = ({
   onboardingFlow,
   ...pageTemplateProps
 }: Omit<LazyObservabilityPageTemplateProps, 'noDataConfig'> & {
-  dataSourceAvailability?: EntityTypes;
+  dataSourceAvailability?: EntityTypes | 'all';
   onboardingFlow?: OnboardingFlow;
 }) => {
   const {

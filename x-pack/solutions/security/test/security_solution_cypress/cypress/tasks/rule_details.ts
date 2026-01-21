@@ -17,37 +17,37 @@ import {
   FIELD_INPUT,
 } from '../screens/exceptions';
 import {
-  ALERTS_TAB,
-  EXCEPTIONS_TAB,
-  FIELDS_BROWSER_BTN,
-  LAST_EXECUTION_STATUS_REFRESH_BUTTON,
-  REMOVE_EXCEPTION_BTN,
-  RULE_SWITCH,
-  DEFINITION_DETAILS,
-  INDEX_PATTERNS_DETAILS,
-  DETAILS_TITLE,
-  DETAILS_DESCRIPTION,
-  EXCEPTION_ITEM_ACTIONS_BUTTON,
-  EDIT_EXCEPTION_BTN,
-  ENDPOINT_EXCEPTIONS_TAB,
-  EDIT_RULE_SETTINGS_LINK,
-  EXCEPTIONS_TAB_EXPIRED_FILTER,
-  EXCEPTIONS_TAB_ACTIVE_FILTER,
-  RULE_NAME_HEADER,
-  INVESTIGATION_FIELDS_DETAILS,
   ABOUT_DETAILS,
-  EXECUTIONS_TAB,
-  EXECUTION_TABLE,
+  ALERTS_TAB,
+  DEFINITION_DETAILS,
+  DETAILS_DESCRIPTION,
+  DETAILS_TITLE,
+  EDIT_EXCEPTION_BTN,
+  EDIT_RULE_SETTINGS_LINK,
+  ENDPOINT_EXCEPTIONS_TAB,
+  EXCEPTION_ITEM_ACTIONS_BUTTON,
+  EXCEPTIONS_TAB,
+  EXCEPTIONS_TAB_ACTIVE_FILTER,
+  EXCEPTIONS_TAB_EXPIRED_FILTER,
   EXECUTION_LOG_CONTAINER,
   EXECUTION_RUN_TYPE_FILTER,
   EXECUTION_RUN_TYPE_FILTER_ITEM,
+  EXECUTION_TABLE,
+  EXECUTIONS_TAB,
+  EXPORT_RULE_ACTION_BUTTON,
+  FIELDS_BROWSER_BTN,
+  INDEX_PATTERNS_DETAILS,
+  INVESTIGATION_FIELDS_DETAILS,
+  LAST_EXECUTION_STATUS_REFRESH_BUTTON,
+  POPOVER_ACTIONS_TRIGGER_BUTTON,
+  REMOVE_EXCEPTION_BTN,
   RULE_BACKFILLS_TABLE,
-  RULE_GAPS_TABLE,
-  RULE_GAPS_STATUS_FILTER,
   RULE_GAPS_DATE_FILTER_OPTION,
   RULE_GAPS_DATE_PICKER_APPLY_REFRESH,
-  POPOVER_ACTIONS_TRIGGER_BUTTON,
-  EXPORT_RULE_ACTION_BUTTON,
+  RULE_GAPS_STATUS_FILTER,
+  RULE_GAPS_TABLE,
+  RULE_NAME_HEADER,
+  RULE_SWITCH,
 } from '../screens/rule_details';
 import type { RuleDetailsTabs } from '../urls/rule_details';
 import { ruleDetailsUrl } from '../urls/rule_details';
@@ -60,6 +60,7 @@ import {
 import { addsFields, closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
 import { visit } from './navigation';
 import { LOCAL_DATE_PICKER_APPLY_BUTTON_TIMELINE } from '../screens/date_picker';
+import { GAP_AUTO_FILL_LOGS_TABLE } from '../screens/rule_gaps';
 
 interface VisitRuleDetailsPageOptions {
   tab?: RuleDetailsTabs;
@@ -115,12 +116,6 @@ export const addExceptionFlyoutFromViewerHeader = () => {
   cy.get(FIELD_INPUT).should('be.visible');
 };
 
-export const addExceptionFromRuleDetails = (exception: Exception) => {
-  addExceptionFlyoutFromViewerHeader();
-  addExceptionConditions(exception);
-  submitNewExceptionItem();
-};
-
 export const addFirstExceptionFromRuleDetails = (exception: Exception, name: string) => {
   openExceptionFlyoutFromEmptyViewerPrompt();
   addExceptionFlyoutItemName(name);
@@ -139,6 +134,19 @@ export const goToExceptionsTab = () => {
 
 export const goToExecutionLogTab = () => {
   cy.get(EXECUTIONS_TAB).click();
+};
+
+export const waitForExecutionLogTabToBePopulated = (minRowCount = 1) => {
+  cy.waitUntil(
+    () => {
+      cy.log('Waiting for execution logs to appear in execution log table');
+      refreshRuleExecutionTable();
+      return getExecutionLogTableRow().then((rows) => {
+        return rows.length > minRowCount - 1;
+      });
+    },
+    { interval: 5000, timeout: 20000 }
+  );
 };
 
 export const viewExpiredExceptionItems = () => {
@@ -240,4 +248,8 @@ export const filterGapsByStatus = (status: string) => {
 
 export const refreshGapsTable = () => {
   cy.get(RULE_GAPS_DATE_PICKER_APPLY_REFRESH).click();
+};
+
+export const getGapAutoFillLogsTableRows = () => {
+  return cy.get(GAP_AUTO_FILL_LOGS_TABLE).find('tbody tr');
 };

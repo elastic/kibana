@@ -43,7 +43,7 @@ export const EmptyState = ({ isLoading = false }: EmptyStateProps) => (
       {isLoading ? (
         <EuiFlexItem>
           <EuiDelayRender delay={500}>
-            <ChartLoadingProgress />
+            <MetricsGridLoadingProgress />
           </EuiDelayRender>
         </EuiFlexItem>
       ) : (
@@ -68,7 +68,7 @@ export const EmptyState = ({ isLoading = false }: EmptyStateProps) => (
   </div>
 );
 
-export const ChartLoadingProgress = () => (
+export const MetricsGridLoadingProgress = () => (
   <EuiProgress
     size="xs"
     color="accent"

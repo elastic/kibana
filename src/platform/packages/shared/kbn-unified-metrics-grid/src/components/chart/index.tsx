@@ -7,81 +7,72 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useRef } from 'react';
-import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
-import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
-import type { Observable } from 'rxjs';
-import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
-import { createESQLQuery } from '../../common/utils/esql/create_esql_query';
+import { css } from '@emotion/react';
+import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
+import { useBoolean } from '@kbn/react-hooks';
+import React, { useRef } from 'react';
+import type { LensYBoundsConfig } from '@kbn/lens-embeddable-utils/config_builder/types';
+import { useLensProps } from './hooks/use_lens_props';
 import type { LensWrapperProps } from './lens_wrapper';
 import { LensWrapper } from './lens_wrapper';
-import { useLensProps } from './hooks/use_lens_props';
+import type { UnifiedMetricsGridProps } from '../../types';
 
-const ChartSizes = {
+export const ChartSizes = {
   s: 230,
   m: 350,
 };
 
 export type ChartSize = keyof typeof ChartSizes;
-export type ChartProps = Pick<ChartSectionProps, 'searchSessionId' | 'requestParams'> &
-  Omit<LensWrapperProps, 'lensProps' | 'esqlQuery'> & {
-    dimensions: string[];
-    color?: string;
+export type ChartProps = Pick<UnifiedMetricsGridProps, 'fetchParams'> &
+  Omit<LensWrapperProps, 'lensProps' | 'description' | 'abortController'> & {
     size?: ChartSize;
-    filters?: Array<{ field: string; value: string }>;
-    discoverFetch$: Observable<UnifiedHistogramInputMessage>;
-    onViewDetails: (metric: MetricField, esqlQuery: string) => void;
+    discoverFetch$: UnifiedMetricsGridProps['fetch$'];
+    esqlQuery: string;
+    title: string;
+    chartLayers: LensSeriesLayer[];
+    yBounds?: LensYBoundsConfig;
+    isLoading?: boolean;
+    error?: Error;
   };
 
 const LensWrapperMemo = React.memo(LensWrapper);
-
-export const Chart: React.FC<ChartProps> = ({
-  abortController,
-  metric,
-  color,
+export const Chart = ({
   services,
-  searchSessionId,
   onBrushEnd,
   onFilter,
   onViewDetails,
-  requestParams,
+  onExploreInDiscoverTab,
+  fetchParams,
   discoverFetch$,
-  dimensions = [],
+  titleHighlight,
   size = 'm',
-  filters = [],
-}) => {
-  const { euiTheme } = useEuiTheme();
+  esqlQuery,
+  title,
+  chartLayers,
+  syncCursor,
+  syncTooltips,
+  yBounds,
+  extraDisabledActions,
+  isLoading = false,
+  error,
+}: ChartProps) => {
   const chartRef = useRef<HTMLDivElement>(null);
+  const { euiTheme } = useEuiTheme();
 
-  const { getTimeRange } = requestParams;
-
-  const esqlQuery = useMemo(() => {
-    const isSupported = metric.type !== 'unsigned_long' && metric.type !== 'histogram';
-    if (!isSupported) {
-      return '';
-    }
-    return createESQLQuery({
-      metricField: metric.name,
-      instrument: metric.instrument,
-      index: metric.index,
-      dimensions,
-      filters,
-    });
-  }, [metric.type, metric.name, metric.instrument, metric.index, dimensions, filters]);
+  const [isSaveModalVisible, { toggle: toggleSaveModalVisible }] = useBoolean(false);
+  const { SaveModalComponent } = services.lens;
 
   const lensProps = useLensProps({
-    title: metric.name,
+    title,
     query: esqlQuery,
-    unit: metric.unit,
-    seriesType: dimensions.length > 0 ? 'line' : 'area',
-    color,
     services,
-    searchSessionId,
+    fetchParams,
     discoverFetch$,
-    abortController,
-    getTimeRange,
     chartRef,
+    chartLayers,
+    yBounds,
+    error,
   });
 
   return (
@@ -90,23 +81,42 @@ export const Chart: React.FC<ChartProps> = ({
         height: ${ChartSizes[size]}px;
         outline: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
         border-radius: ${euiTheme.border.radius.medium};
-        figcaption {
-          display: none;
+
+        &:hover {
+          .metricsExperienceChartTitle {
+            z-index: ${Number(euiTheme.levels.menu) + 1};
+            transition: none;
+          }
         }
       `}
       ref={chartRef}
     >
-      {lensProps ? (
-        <LensWrapperMemo
-          metric={metric}
-          lensProps={lensProps}
-          services={services}
-          onBrushEnd={onBrushEnd}
-          onFilter={onFilter}
-          abortController={abortController}
-          metricName={metric.name}
-          onViewDetails={onViewDetails}
-        />
+      {lensProps && !isLoading ? (
+        <>
+          <LensWrapperMemo
+            lensProps={lensProps}
+            services={services}
+            onBrushEnd={onBrushEnd}
+            onFilter={onFilter}
+            abortController={fetchParams.abortController}
+            onViewDetails={onViewDetails}
+            onCopyToDashboard={toggleSaveModalVisible}
+            onExploreInDiscoverTab={onExploreInDiscoverTab}
+            syncCursor={syncCursor}
+            titleHighlight={titleHighlight}
+            syncTooltips={syncTooltips}
+            extraDisabledActions={extraDisabledActions}
+          />
+          {isSaveModalVisible && (
+            <SaveModalComponent
+              initialInput={{ attributes: lensProps.attributes }}
+              onClose={toggleSaveModalVisible}
+              // Disables saving ESQL charts to the library.
+              // it will only copy it to a dashboard
+              isSaveable={false}
+            />
+          )}
+        </>
       ) : (
         <EuiFlexGroup
           style={{ height: '100%' }}

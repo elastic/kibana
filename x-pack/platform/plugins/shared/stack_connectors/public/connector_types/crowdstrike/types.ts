@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { CrowdstrikeHostActionsParams } from '../../../common/crowdstrike/types';
-import type { SUB_ACTION } from '../../../common/crowdstrike/constants';
+import type { SUB_ACTION, CrowdstrikeHostActionsParams } from '@kbn/connector-schemas/crowdstrike';
 
 export type CrowdstrikeExecuteSubActionParams = CrowdstrikeHostActionsParams;
 

@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { IFieldSubTypeMulti } from '@kbn/es-query';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { EMPTY_LABEL } from '@kbn/field-formats-common';
 import type { AddFieldFilterHandler } from '../../types';
 
 export interface FieldTopValuesBucketParams {
@@ -117,7 +118,12 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
                 })}
                 delay="long"
               >
-                <EuiText size="xs" textAlign="left" color={getPercentageColor(euiTheme, color)}>
+                <EuiText
+                  tabIndex={0}
+                  size="xs"
+                  textAlign="left"
+                  color={getPercentageColor(euiTheme, color)}
+                >
                   {formattedPercentage}
                 </EuiText>
               </EuiToolTip>
@@ -145,9 +151,7 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
                         defaultMessage: 'Other',
                       })
                     : formattedFieldValue === ''
-                    ? i18n.translate('unifiedFieldList.fieldStats.emptyStringValueLabel', {
-                        defaultMessage: '(empty)',
-                      })
+                    ? EMPTY_LABEL
                     : '-'}
                 </EuiText>
               )}

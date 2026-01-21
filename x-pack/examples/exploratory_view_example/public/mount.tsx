@@ -23,7 +23,7 @@ export const mount =
       plugins,
     };
 
-    const defaultIndexPattern = await plugins.data.indexPatterns.getDefault();
+    const defaultIndexPattern = await plugins.data.dataViews.getDefault();
 
     const i18nCore = core.i18n;
 

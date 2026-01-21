@@ -19,43 +19,141 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { StreamQueryKql, Streams } from '@kbn/streams-schema';
+import { type StreamQueryKql, type Streams, type System } from '@kbn/streams-schema';
 import { streamQuerySchema } from '@kbn/streams-schema';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/css';
+import { v4 } from 'uuid';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
-import { FlowSelector } from './flow_selector';
+import { useSignificantEventsApi } from '../../../hooks/use_significant_events_api';
+import type { AIFeatures } from '../../../hooks/use_ai_features';
 import { GeneratedFlowForm } from './generated_flow_form/generated_flow_form';
 import { ManualFlowForm } from './manual_flow_form/manual_flow_form';
 import type { Flow, SaveData } from './types';
 import { defaultQuery } from './utils/default_query';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
+import { validateQuery } from './common/validate_query';
+import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
+import { useTaskPolling } from '../../../hooks/use_task_polling';
+import { SignificantEventsGenerationPanel } from '../generation_panel';
 
 interface Props {
   onClose: () => void;
-  definition: Streams.all.Definition;
+  definition: Streams.all.GetResponse;
   onSave: (data: SaveData) => Promise<void>;
+  features: System[];
   query?: StreamQueryKql;
+  initialFlow?: Flow;
+  initialSelectedFeatures: System[];
+  refreshFeatures: () => void;
+  generateOnMount: boolean;
+  aiFeatures: AIFeatures | null;
 }
 
-export function AddSignificantEventFlyout({ query, onClose, definition, onSave }: Props) {
+export function AddSignificantEventFlyout({
+  generateOnMount,
+  query,
+  onClose,
+  definition,
+  onSave,
+  initialFlow = undefined,
+  initialSelectedFeatures,
+  features,
+  refreshFeatures,
+  aiFeatures,
+}: Props) {
+  const { euiTheme } = useEuiTheme();
   const {
     dependencies: {
-      start: { streams },
+      start: { data },
     },
   } = useKibana();
-  const { euiTheme } = useEuiTheme();
+
+  const dataViewsFetch = useStreamsAppFetch(() => {
+    return data.dataViews.create({ title: definition.stream.name }).then((value) => {
+      return [value];
+    });
+  }, [data.dataViews, definition.stream.name]);
+
+  const { cancelGenerationTask, getGenerationTask, scheduleGenerationTask } =
+    useSignificantEventsApi({ name: definition.stream.name });
 
   const isEditMode = !!query?.id;
   const [selectedFlow, setSelectedFlow] = useState<Flow | undefined>(
-    isEditMode ? 'manual' : undefined
+    isEditMode ? 'manual' : initialFlow
   );
   const flowRef = useRef<Flow | undefined>(selectedFlow);
   const [queries, setQueries] = useState<StreamQueryKql[]>([{ ...defaultQuery(), ...query }]);
   const [canSave, setCanSave] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [selectedFeatures, setSelectedFeatures] = useState<System[]>(initialSelectedFeatures);
+
+  const [generatedQueries, setGeneratedQueries] = useState<StreamQueryKql[]>([]);
+  const [{ loading: isGettingTask, value: task }, getTask] = useAsyncFn(getGenerationTask);
+  const [{ loading: isSchedulingGenerationTask }, doScheduleGenerationTask] =
+    useAsyncFn(scheduleGenerationTask);
+
+  useEffect(() => {
+    getTask();
+  }, [getTask]);
+
+  useTaskPolling(task, getGenerationTask, getTask);
+
+  const isBeingCanceled = task?.status === 'being_canceled';
+  const isGenerating =
+    task?.status === 'in_progress' ||
+    isBeingCanceled ||
+    isGettingTask ||
+    isSchedulingGenerationTask;
+
+  const prevTaskStatusRef = useRef<string | undefined>(undefined);
+
+  useEffect(() => {
+    const prevStatus = prevTaskStatusRef.current;
+    prevTaskStatusRef.current = task?.status;
+
+    // Process completed when:
+    // - First time getting the task (prevStatus is undefined)
+    // - Transitioning from in_progress to completed
+    const isFirstLoad = prevStatus === undefined;
+    const isTransitionFromInProgress = prevStatus === 'in_progress';
+    if (
+      task?.status === 'completed' &&
+      (isFirstLoad || isTransitionFromInProgress) &&
+      !isGenerating
+    ) {
+      setGeneratedQueries(
+        task.queries
+          .filter((nextQuery) => {
+            const validation = validateQuery({
+              title: nextQuery.title,
+              kql: { query: nextQuery.kql },
+            });
+            return validation.kql.isInvalid === false;
+          })
+          .map((nextQuery) => ({
+            id: v4(),
+            kql: { query: nextQuery.kql },
+            title: nextQuery.title,
+            feature: nextQuery.feature,
+            severity_score: nextQuery.severity_score,
+            evidence: nextQuery.evidence,
+          }))
+      );
+    }
+  }, [isGenerating, task]);
+
+  const stopGeneration = useCallback(() => {
+    if (task?.status === 'in_progress') {
+      cancelGenerationTask().then(() => {
+        getTask();
+      });
+    }
+  }, [cancelGenerationTask, getTask, task?.status]);
 
   const parsedQueries = useMemo(() => {
     return streamQuerySchema.array().safeParse(queries);
@@ -70,25 +168,44 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
     }
   }, [selectedFlow]);
 
-  const systemsFetch = useStreamsAppFetch(
-    ({ signal }) => {
-      return streams.streamsRepositoryClient.fetch(`GET /internal/streams/{name}/systems`, {
-        signal,
-        params: {
-          path: {
-            name: definition.name,
-          },
-        },
-      });
+  const generateQueries = useCallback(
+    (featuresOverride?: System[]) => {
+      const connectorId = aiFeatures?.genAiConnectors.selectedConnector;
+      if (!connectorId) {
+        return;
+      }
+
+      setSelectedFlow('ai');
+      setGeneratedQueries([]);
+
+      const effectiveFeatures = featuresOverride ?? selectedFeatures;
+
+      (async () => {
+        await doScheduleGenerationTask(connectorId, effectiveFeatures);
+        getTask();
+      })();
     },
-    [streams.streamsRepositoryClient, definition]
+    [
+      aiFeatures?.genAiConnectors.selectedConnector,
+      selectedFeatures,
+      doScheduleGenerationTask,
+      getTask,
+    ]
   );
+
+  useEffect(() => {
+    if (initialFlow === 'ai' && generateOnMount) {
+      generateQueries();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [aiFeatures?.enabled]);
 
   return (
     <EuiFlyout
       aria-labelledby="addSignificantEventFlyout"
       onClose={() => onClose()}
-      size={isEditMode ? 's' : 'l'}
+      size={isEditMode ? 'm' : 'l'}
+      type={isEditMode ? 'push' : 'overlay'}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
@@ -126,77 +243,87 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
               `}
             >
               <EuiPanel hasShadow={false} paddingSize="l">
-                <EuiText>
-                  <h4>
-                    {i18n.translate(
-                      'xpack.streams.streamDetailView.addSignificantEventFlyout.selectOptionLabel',
-                      { defaultMessage: 'Select an option' }
-                    )}
-                  </h4>
-                </EuiText>
-                <EuiSpacer size="m" />
-                <FlowSelector
-                  isSubmitting={isSubmitting}
-                  selected={selectedFlow}
-                  updateSelected={(flow) => setSelectedFlow(flow)}
+                <SignificantEventsGenerationPanel
+                  onManualEntryClick={() => setSelectedFlow('manual')}
+                  features={features}
+                  selectedFeatures={selectedFeatures}
+                  onFeaturesChange={setSelectedFeatures}
+                  onGenerateSuggestionsClick={generateQueries}
+                  definition={definition.stream}
+                  refreshFeatures={refreshFeatures}
+                  isGeneratingQueries={isGenerating}
+                  isSavingManualEntry={isSubmitting}
+                  selectedFlow={selectedFlow}
+                  aiFeatures={aiFeatures}
                 />
               </EuiPanel>
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={2}>
+          <EuiFlexItem grow={3}>
             <EuiFlexGroup
               direction="column"
               gutterSize="none"
               justifyContent="spaceBetween"
               css={{ height: '100%' }}
             >
-              <EuiFlexItem grow={1}>
+              <EuiFlexItem grow={1} css={{ overflow: 'scroll' }}>
                 <EuiPanel hasShadow={false} paddingSize="l">
-                  <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiText>
-                        <h4>
-                          {i18n.translate(
-                            'xpack.streams.streamDetailView.addSignificantEventFlyout.previewSignificantEventsLabel',
-                            { defaultMessage: 'Preview significant events' }
-                          )}
-                        </h4>
-                      </EuiText>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <StreamsAppSearchBar showDatePicker />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                  <EuiSpacer size="m" />
-
-                  {selectedFlow === 'manual' && (
-                    <ManualFlowForm
-                      isSubmitting={isSubmitting}
-                      setQuery={(next: StreamQueryKql) => setQueries([next])}
-                      query={queries[0]}
-                      setCanSave={(next: boolean) => {
-                        setCanSave(next);
-                      }}
-                      definition={definition}
-                      systems={
-                        systemsFetch.value?.systems.map((system) => ({
-                          name: system.name,
-                          filter: system.filter,
-                        })) || []
-                      }
-                    />
+                  {flowRef.current === 'manual' && (
+                    <>
+                      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                        <EuiFlexItem grow={false}>
+                          <EuiText>
+                            <h4>
+                              {i18n.translate(
+                                'xpack.streams.streamDetailView.addSignificantEventFlyout.previewSignificantEventsLabel',
+                                { defaultMessage: 'Preview significant events' }
+                              )}
+                            </h4>
+                          </EuiText>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <StreamsAppSearchBar showDatePicker />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                      <EuiSpacer size="m" />
+                      <ManualFlowForm
+                        isSubmitting={isSubmitting}
+                        isEditMode={isEditMode}
+                        setQuery={(next: StreamQueryKql) => setQueries([next])}
+                        query={queries[0]}
+                        setCanSave={(next: boolean) => {
+                          setCanSave(next);
+                        }}
+                        definition={definition.stream}
+                        dataViews={dataViewsFetch.value ?? []}
+                        features={features}
+                      />
+                    </>
                   )}
 
-                  {selectedFlow === 'ai' && (
+                  {flowRef.current === 'ai' && (
                     <GeneratedFlowForm
+                      isBeingCanceled={isBeingCanceled}
                       isSubmitting={isSubmitting}
-                      definition={definition}
+                      isGenerating={isGenerating}
+                      generatedQueries={generatedQueries}
+                      onEditQuery={(editedQuery) => {
+                        setGeneratedQueries((prev) =>
+                          prev.map((q) => (q.id === editedQuery.id ? editedQuery : q))
+                        );
+                      }}
+                      stopGeneration={stopGeneration}
+                      definition={definition.stream}
                       setQueries={(next: StreamQueryKql[]) => {
                         setQueries(next);
                       }}
                       setCanSave={(next: boolean) => {
                         setCanSave(next);
                       }}
+                      features={features}
+                      dataViews={dataViewsFetch.value ?? []}
+                      taskStatus={task?.status}
+                      taskError={task?.status === 'failed' ? task.error : undefined}
                     />
                   )}
                 </EuiPanel>
@@ -210,7 +337,16 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
                 }}
               >
                 <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">
-                  <EuiButtonEmpty color="primary" onClick={() => onClose()} disabled={isSubmitting}>
+                  <EuiButtonEmpty
+                    color="primary"
+                    onClick={() => onClose()}
+                    disabled={isSubmitting}
+                    data-test-subj={
+                      selectedFlow === 'manual'
+                        ? 'significant_events_manual_entry_cancel_button'
+                        : 'significant_events_ai_generate_cancel_button'
+                    }
+                  >
                     {i18n.translate(
                       'xpack.streams.streamDetailView.addSignificantEventFlyout.cancelButtonLabel',
                       { defaultMessage: 'Cancel' }
@@ -219,7 +355,7 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
                   <EuiButton
                     color="primary"
                     fill
-                    disabled={isSubmitting || !parsedQueries.success || !canSave}
+                    disabled={!parsedQueries.success || !canSave || isGenerating}
                     isLoading={isSubmitting}
                     onClick={() => {
                       setIsSubmitting(true);
@@ -228,17 +364,35 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
                         case 'manual':
                           onSave({
                             type: 'single',
-                            query: queries[0],
+                            query: {
+                              ...queries[0],
+                              feature: queries[0].feature
+                                ? omit(queries[0].feature, 'description')
+                                : undefined,
+                            },
                             isUpdating: isEditMode,
                           }).finally(() => setIsSubmitting(false));
                           break;
                         case 'ai':
-                          onSave({ type: 'multiple', queries }).finally(() =>
-                            setIsSubmitting(false)
-                          );
+                          onSave({
+                            type: 'multiple',
+                            queries: queries.map((nextQuery) => ({
+                              ...nextQuery,
+                              feature: nextQuery.feature
+                                ? omit(nextQuery.feature, 'description')
+                                : undefined,
+                            })),
+                          }).finally(() => setIsSubmitting(false));
                           break;
                       }
                     }}
+                    data-test-subj={
+                      isEditMode
+                        ? 'significant_events_edit_save_button'
+                        : selectedFlow === 'manual'
+                        ? 'significant_events_manual_entry_save_button'
+                        : 'significant_events_ai_generate_save_button'
+                    }
                   >
                     {selectedFlow === 'manual'
                       ? isEditMode

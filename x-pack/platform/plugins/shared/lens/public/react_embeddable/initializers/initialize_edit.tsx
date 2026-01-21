@@ -21,15 +21,15 @@ import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import type { Filter } from '@kbn/es-query';
-import { APP_ID, getEditPath } from '../../../common/constants';
 import type {
   GetStateType,
-  LensEmbeddableStartServices,
   LensHasEditPanel,
   LensInspectorAdapters,
   LensInternalApi,
   LensRuntimeState,
-} from '../types';
+} from '@kbn/lens-common';
+import { APP_ID, getEditPath } from '../../../common/constants';
+import type { LensEmbeddableStartServices } from '../types';
 import { extractInheritedViewModeObservable } from '../helper';
 import { prepareInlineEditPanel } from '../inline_editing/setup_inline_editing';
 import { setupPanelManagement } from '../inline_editing/panel_management';
@@ -230,14 +230,22 @@ export function initializeEditApi(
     const firstState = getState();
     const ConfigPanel = await getInlineEditor({
       // restore the first state found when the panel opened
-      onCancel: () => updateState({ ...firstState }),
+      onCancel: () => {
+        internalApi.updateEditingState(false);
+        updateState({ ...firstState });
+      },
       // the getState() here contains the wrong filters references but the input attributes
       // are correct as getInlineEditor() handler is using the getModifiedState() function
       onApply: showOnly
         ? noop
-        : (attributes: LensRuntimeState['attributes']) =>
-            updateState({ ...getState(), attributes }),
-      closeFlyout,
+        : (attributes: LensRuntimeState['attributes']) => {
+            internalApi.updateEditingState(false);
+            updateState({ ...getState(), attributes });
+          },
+      closeFlyout: () => {
+        internalApi.updateEditingState(false);
+        closeFlyout?.();
+      },
     });
     return ConfigPanel ?? undefined;
   };
@@ -279,6 +287,8 @@ export function initializeEditApi(
           );
           return navigateFn();
         }
+
+        internalApi.updateEditingState(true);
 
         mountInlinePanel({
           core: startDependencies.coreStart,

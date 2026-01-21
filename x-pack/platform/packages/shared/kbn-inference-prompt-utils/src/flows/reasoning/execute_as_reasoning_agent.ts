@@ -18,77 +18,25 @@ import type {
   ToolOptionsOfPrompt,
   UnboundPromptOptions,
 } from '@kbn/inference-common';
-import { MessageRole, type Prompt } from '@kbn/inference-common';
+import { MessageRole, ToolChoiceType, type Prompt } from '@kbn/inference-common';
 import { withActiveInferenceSpan, withExecuteToolSpan } from '@kbn/inference-tracing';
 import { trace } from '@opentelemetry/api';
-import { omit, partition, takeRightWhile } from 'lodash';
+import { omit, partition } from 'lodash';
+import { z } from '@kbn/zod';
 import {
   createCompleteToolCall,
   createCompleteToolCallResponse,
 } from './create_complete_tool_call';
 import { createReasonToolCall, createReasonToolCallResponse } from './create_reason_tool_call';
+import { formatMessages, formatToolOptions } from './format_for_power';
 import { BEGIN_INTERNAL_REASONING_MARKER, END_INTERNAL_REASONING_MARKER } from './markers';
-import type { PlanningToolCall, PlanningToolCallName } from './planning_tools';
-import {
-  PLANNING_TOOLS,
-  isPlanningToolName,
-  removeReasonToolCalls,
-  removeSystemToolCalls,
-} from './planning_tools';
+import type { PlanningToolCall, PlanningToolMessage } from './planning_tools';
+import { PLANNING_TOOLS, isPlanningToolName, removeSystemToolCalls } from './planning_tools';
 import type {
   ReasoningPromptOptions,
   ReasoningPromptResponse,
   ReasoningPromptResponseOf,
 } from './types';
-
-function prepareMessagesForLLM({
-  stepsLeft,
-  messages,
-  canCallTaskTools,
-  canCallPlanningTools,
-}: {
-  stepsLeft: number;
-  messages: Message[];
-  canCallTaskTools: boolean;
-  canCallPlanningTools: boolean;
-}) {
-  /**
-   * This removes all system tool calls except if it is the last, to compact the
-   * conversation and not distract the LLM with tool calls that don't impact the
-   * conversation.
-   */
-  const lastToolMessage = messages.findLast(
-    (message): message is ToolMessage => message.role === MessageRole.Tool
-  );
-
-  let next = messages;
-
-  if (lastToolMessage && isPlanningToolName(lastToolMessage.name)) {
-    const idx = messages.indexOf(lastToolMessage) - 1;
-    next = removeReasonToolCalls(messages.slice(0, idx)).concat(messages.slice(idx));
-  } else {
-    next = removeReasonToolCalls(messages);
-  }
-
-  const lastToolResponse = next.findLast(
-    (message): message is ToolMessage => message.role === MessageRole.Tool
-  );
-
-  return next.map((message) => {
-    if (message === lastToolResponse) {
-      return {
-        ...lastToolResponse,
-        response: {
-          ...(typeof lastToolResponse.response === 'string'
-            ? { content: lastToolResponse.response }
-            : {}),
-          stepsLeft,
-        },
-      };
-    }
-    return message;
-  });
-}
 
 export function executeAsReasoningAgent<
   TPrompt extends Prompt,
@@ -140,7 +88,7 @@ export async function executeAsReasoningAgent(
       finalToolChoice?: ToolChoice;
     }
 ): Promise<ReasoningPromptResponse> {
-  const { inferenceClient, maxSteps = 10, toolCallbacks } = options;
+  const { inferenceClient, maxSteps = 10, power = 'medium', toolCallbacks } = options;
 
   async function callTools(toolCalls: ToolCall[]): Promise<ToolMessage[]> {
     return await Promise.all(
@@ -187,72 +135,106 @@ export async function executeAsReasoningAgent(
     stepsLeft: number;
     temperature?: number;
   }): Promise<ReasoningPromptResponse> {
-    // Append a complete() tool call to force the LLM to generate the final response
-    const prevMessages =
-      stepsLeft <= 0 ? givenMessages.concat(createCompleteToolCall()) : givenMessages;
-
-    const withoutSystemToolCalls = removeReasonToolCalls(prevMessages);
-    const consecutiveReasoningSteps = takeRightWhile(withoutSystemToolCalls, (msg) => {
-      return msg.role === MessageRole.Assistant && !msg.toolCalls?.length;
-    }).length;
-
-    const lastSystemToolCall = prevMessages.findLast(
-      (msg): msg is ToolMessage<PlanningToolCallName> =>
-        msg.role === MessageRole.Tool && isPlanningToolName(msg.name)
+    const lastAssistantMessage = givenMessages.findLast(
+      (msg): msg is AssistantMessage => msg.role === MessageRole.Assistant
     );
 
-    const lastSystemToolCallName = lastSystemToolCall?.name;
+    const lastSystemToolCallName = givenMessages.findLast(
+      (message): message is PlanningToolMessage =>
+        message.role === MessageRole.Tool && isPlanningToolName(message.name)
+    )?.name;
 
-    const isCompleting = lastSystemToolCallName === 'complete';
+    const shouldComplete = stepsLeft <= 0 || lastSystemToolCallName === 'complete';
 
-    // Nudge the LLM to reason if it has not done after the last tool call
-    const mustReason =
-      !isCompleting && lastSystemToolCallName === 'reason' && consecutiveReasoningSteps === 0;
+    // reason when:
+    // - not completing
+    // - AND power is medium or high
+    // - AND last assistant message contains a `reason` tool call
+    const shouldReason =
+      !shouldComplete &&
+      (power === 'medium' || power === 'high') &&
+      lastAssistantMessage?.toolCalls?.some((toolCall) =>
+        isPlanningToolName(toolCall.function.name)
+      );
 
-    const canCallTaskTools = !mustReason;
+    const prevMessages = givenMessages.concat();
 
-    const canCallPlanningTools = !mustReason && !isCompleting;
+    // these are hints
+    if (shouldComplete && lastSystemToolCallName !== 'complete') {
+      prevMessages.push(...createCompleteToolCall());
+    } else if (shouldReason && lastSystemToolCallName !== 'reason') {
+      prevMessages.push(...createReasonToolCall());
+    }
 
     const nextPrompt = {
       ...options.prompt,
       versions: options.prompt.versions.map((version) => {
         const { tools: promptTools, ...rest } = version;
 
-        const mergedToolOptions = {
-          tools: promptTools,
-        };
+        if (power === 'low') {
+          return {
+            ...rest,
+            tools: promptTools,
+          };
+        }
 
-        const nextTools = isCompleting
-          ? mergedToolOptions
-          : {
-              tools: {
-                ...mergedToolOptions.tools,
-                ...PLANNING_TOOLS,
-              },
-            };
-
-        return {
-          ...rest,
-          ...nextTools,
-        };
+        return formatToolOptions(
+          {
+            ...rest,
+            tools: {
+              ...promptTools,
+              ...PLANNING_TOOLS,
+            },
+          },
+          power
+        );
       }),
     };
+
+    const forceComplete = shouldComplete;
+    const forceReason = power === 'high' && shouldReason;
 
     const promptOptions = {
       ...omit(options, 'finalToolChoice'),
       prompt: nextPrompt,
     };
 
+    const toolChoice = forceComplete
+      ? options.finalToolChoice || ToolChoiceType.none
+      : forceReason
+      ? ToolChoiceType.none
+      : ToolChoiceType.auto;
+
     const response = await inferenceClient.prompt({
       ...promptOptions,
+      prompt: {
+        ...promptOptions.prompt,
+        input: z.intersection(
+          promptOptions.prompt.input,
+          z.object({
+            power: z.object({
+              low: z.boolean(),
+              medium: z.boolean(),
+              high: z.boolean(),
+            }),
+          })
+        ),
+      },
+      input: {
+        ...promptOptions.input,
+        power: {
+          low: power === 'low',
+          medium: power === 'medium',
+          high: power === 'high',
+        },
+      },
       stream: false,
       temperature,
-      toolChoice: isCompleting ? options.finalToolChoice : undefined,
-      prevMessages: prepareMessagesForLLM({
-        stepsLeft,
+      toolChoice,
+      prevMessages: formatMessages({
         messages: prevMessages,
-        canCallTaskTools,
-        canCallPlanningTools,
+        power,
+        stepsLeft,
       }),
       stopSequences: [END_INTERNAL_REASONING_MARKER],
     });
@@ -309,7 +291,7 @@ export async function executeAsReasoningAgent(
       (toolCall) => toolCall.function.name === finalToolCallName
     );
 
-    if (isCompleting || hasCalledFinalTool) {
+    if (shouldComplete || hasCalledFinalTool) {
       // We don't want to send these results back to the LLM, if we are already
       // completing
       return {

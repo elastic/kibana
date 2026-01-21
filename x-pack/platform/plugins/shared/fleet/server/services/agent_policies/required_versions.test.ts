@@ -91,11 +91,50 @@ describe('validateRequiredVersions', () => {
       );
     });
 
-    it('should throw error if percentage is 0 or undefined', () => {
+    it('should throw error if percentage is 0', () => {
       expect(() => {
         validateRequiredVersions('test policy', [
           { version: '9.0.0', percentage: 100 },
           { version: '9.1.0', percentage: 0 },
+        ]);
+      }).toThrow(
+        new AgentPolicyInvalidError(
+          `Policy "test policy" failed required_versions validation: percentage must be greater than 0`
+        )
+      );
+    });
+
+    it('should throw error if percentage is less than 1', () => {
+      expect(() => {
+        validateRequiredVersions('test policy', [
+          { version: '9.0.0', percentage: 100 },
+          { version: '9.1.0', percentage: 0.5 },
+        ]);
+      }).toThrow(
+        new AgentPolicyInvalidError(
+          `Policy "test policy" failed required_versions validation: percentage must be greater than 0`
+        )
+      );
+    });
+
+    it('should throw error if percentage is undefined', () => {
+      expect(() => {
+        validateRequiredVersions('test policy', [
+          { version: '9.0.0', percentage: 100 },
+          { version: '9.1.0', percentage: undefined as any },
+        ]);
+      }).toThrow(
+        new AgentPolicyInvalidError(
+          `Policy "test policy" failed required_versions validation: percentage is required`
+        )
+      );
+    });
+
+    it('should throw error if percentage property is missing', () => {
+      expect(() => {
+        validateRequiredVersions('test policy', [
+          { version: '9.0.0', percentage: 100 },
+          { version: '9.1.0' } as any,
         ]);
       }).toThrow(
         new AgentPolicyInvalidError(

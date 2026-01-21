@@ -6,31 +6,35 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import {
-  useStreamEnrichmentSelector,
-  type StreamEnrichmentContextType,
-} from '../state_management/stream_enrichment_state_machine';
+import { useInteractiveModeSelector } from '../state_management/stream_enrichment_state_machine';
 import { StepsListItem } from './steps_list';
 import { isRootStep, isStepUnderEdit } from '../state_management/steps_state_machine';
 import { getRootLevelStepsMap } from '../state_management/stream_enrichment_state_machine/utils';
-import { useStepsProcessingSummary } from '../state_management/use_steps_processing_summary';
-import { CreateStepButton } from '../create_step_button';
+import { useStepsProcessingSummary } from '../hooks/use_steps_processing_summary';
+import type { InteractiveModeContext } from '../state_management/interactive_mode_machine';
+import { ProcessingButtonsManual } from '../empty_prompts';
 
-export const RootSteps = ({ stepRefs }: { stepRefs: StreamEnrichmentContextType['stepRefs'] }) => {
+export const RootSteps = ({
+  stepRefs,
+  readOnly = false,
+}: {
+  stepRefs: InteractiveModeContext['stepRefs'];
+  readOnly?: boolean;
+}) => {
   const { euiTheme } = useEuiTheme();
 
   const rootSteps = stepRefs.filter((stepRef) => isRootStep(stepRef.getSnapshot()));
 
-  const rootLevelMap = useStreamEnrichmentSelector((state) => {
+  const rootLevelMap = useInteractiveModeSelector((state) => {
     const steps = state.context.stepRefs;
     return getRootLevelStepsMap(steps);
   });
 
   const stepsProcessingSummaryMap = useStepsProcessingSummary();
 
-  const stepUnderEdit = useStreamEnrichmentSelector((state) => {
+  const stepUnderEdit = useInteractiveModeSelector((state) => {
     const underEdit = state.context.stepRefs.find((stepRef) =>
       isStepUnderEdit(stepRef.getSnapshot())
     );
@@ -44,14 +48,15 @@ export const RootSteps = ({ stepRefs }: { stepRefs: StreamEnrichmentContextType[
       borderRadius="none"
       css={css`
         overflow: auto;
+        background: none;
         padding: ${euiTheme.size.xs};
         // Root panels
         > .euiPanel {
-          margin-bottom: ${euiTheme.size.m};
+          margin-bottom: ${euiTheme.size.s};
         }
       `}
     >
-      {rootSteps.map((stepRef) => (
+      {rootSteps.map((stepRef, index) => (
         <StepsListItem
           key={stepRef.id}
           stepRef={stepRef}
@@ -59,13 +64,21 @@ export const RootSteps = ({ stepRefs }: { stepRefs: StreamEnrichmentContextType[
           stepUnderEdit={stepUnderEdit}
           rootLevelMap={rootLevelMap}
           stepsProcessingSummaryMap={stepsProcessingSummaryMap}
+          isFirstStepInLevel={index === 0}
+          isLastStepInLevel={index === rootSteps.length - 1}
+          readOnly={readOnly}
         />
       ))}
-      <EuiFlexGroup alignItems="center" justifyContent="center" wrap>
-        <EuiFlexItem grow={false}>
-          <CreateStepButton mode="subdued" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {!readOnly && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup alignItems="center" justifyContent="center" wrap>
+            <EuiFlexItem grow={false}>
+              <ProcessingButtonsManual center={true} color="primary" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
     </EuiPanel>
   );
 };

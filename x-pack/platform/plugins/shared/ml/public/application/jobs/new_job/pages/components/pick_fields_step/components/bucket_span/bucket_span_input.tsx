@@ -15,6 +15,7 @@ interface Props {
   isInvalid: boolean;
   disabled: boolean;
   titleId: string;
+  errorId: string;
 }
 
 export const BucketSpanInput: FC<Props> = ({
@@ -23,6 +24,7 @@ export const BucketSpanInput: FC<Props> = ({
   isInvalid,
   disabled,
   titleId,
+  errorId,
 }) => {
   return (
     <EuiFieldText
@@ -32,6 +34,7 @@ export const BucketSpanInput: FC<Props> = ({
       isInvalid={isInvalid}
       data-test-subj="mlJobWizardInputBucketSpan"
       aria-labelledby={titleId}
+      aria-describedby={isInvalid ? errorId : undefined}
     />
   );
 };

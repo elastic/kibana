@@ -10,10 +10,14 @@
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { ReactWrapper } from 'enzyme';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { of } from 'rxjs';
 import { UnifiedHistogramChart } from '../chart';
-import type { UnifiedHistogramChartContext, UnifiedHistogramHitsContext } from '../../types';
+import type {
+  UnifiedHistogramChartContext,
+  UnifiedHistogramFetchParamsExternal,
+  UnifiedHistogramHitsContext,
+} from '../../types';
 import { UnifiedHistogramFetchStatus } from '../../types';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { unifiedHistogramServicesMock } from '../../__mocks__/services';
@@ -22,6 +26,7 @@ import { ResizableLayout, ResizableLayoutMode } from '@kbn/resizable-layout';
 import type { UseUnifiedHistogramProps } from '../../hooks/use_unified_histogram';
 import { useUnifiedHistogram } from '../../hooks/use_unified_histogram';
 import { act } from 'react-dom/test-utils';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 
 let mockBreakpoint = 'l';
 
@@ -50,6 +55,24 @@ describe('Layout', () => {
     (searchSourceInstanceMock.fetch$ as jest.Mock).mockImplementation(
       jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: 2 } } }))
     );
+    const fetchParamsExternal: UnifiedHistogramFetchParamsExternal = {
+      searchSessionId: 'session-id',
+      dataView: dataViewWithTimefieldMock,
+      query: {
+        language: 'kuery',
+        query: '',
+      },
+      filters: [],
+      timeRange: {
+        from: '2020-05-14T11:05:13.590',
+        to: '2020-05-14T11:20:13.590',
+      },
+      relativeTimeRange: {
+        from: '2020-05-14T11:05:13.590',
+        to: '2020-05-14T11:20:13.590',
+      },
+      requestAdapter: new RequestAdapter(),
+    };
     const Wrapper = () => {
       const unifiedHistogram = useUnifiedHistogram({
         services,
@@ -57,21 +80,16 @@ describe('Layout', () => {
           totalHitsStatus: hits?.status ?? UnifiedHistogramFetchStatus.complete,
           totalHitsResult: hits?.total ?? 10,
           chartHidden: chart?.hidden ?? false,
-          timeInterval: chart?.timeInterval ?? 'auto',
-        },
-        dataView: dataViewWithTimefieldMock,
-        query: {
-          language: 'kuery',
-          query: '',
-        },
-        filters: [],
-        timeRange: {
-          from: '2020-05-14T11:05:13.590',
-          to: '2020-05-14T11:20:13.590',
         },
         isChartLoading: false,
         ...rest,
       });
+
+      useEffect(() => {
+        if (!unifiedHistogram.isInitialized && unifiedHistogram.api) {
+          unifiedHistogram.api.fetch(fetchParamsExternal);
+        }
+      }, [unifiedHistogram.isInitialized, unifiedHistogram.api]);
 
       if (!unifiedHistogram.isInitialized) {
         return null;

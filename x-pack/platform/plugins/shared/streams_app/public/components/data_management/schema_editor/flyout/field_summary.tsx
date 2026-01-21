@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Streams } from '@kbn/streams-schema';
+import { Streams, isRoot } from '@kbn/streams-schema';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { FieldParent } from '../field_parent';
 import { FieldStatusBadge } from '../field_status';
@@ -59,12 +59,15 @@ interface FieldSummaryProps {
   toggleEditMode: () => void;
   stream: Streams.ingest.all.Definition;
   onChange: (field: Partial<SchemaField>) => void;
+  enableGeoPointSuggestions?: boolean;
 }
 
 export const FieldSummary = (props: FieldSummaryProps) => {
-  const { field, isEditing, toggleEditMode, onChange, stream } = props;
+  const { field, isEditing, toggleEditMode, onChange, stream, enableGeoPointSuggestions } = props;
 
   const router = useStreamsAppRouter();
+
+  const streamType = Streams.WiredStream.Definition.is(stream) ? 'wired' : 'classic';
 
   return (
     <>
@@ -93,7 +96,7 @@ export const FieldSummary = (props: FieldSummaryProps) => {
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-          ) : field.status === 'inherited' ? (
+          ) : field.status === 'inherited' && !isRoot(field.parent) ? (
             <EuiFlexItem grow={2}>
               <EuiFlexGroup justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>
@@ -160,6 +163,8 @@ export const FieldSummary = (props: FieldSummaryProps) => {
               field={field}
               isEditing={isEditing}
               onTypeChange={(type) => onChange({ type })}
+              streamType={streamType}
+              enableGeoPointSuggestions={enableGeoPointSuggestions}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

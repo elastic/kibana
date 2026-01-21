@@ -10,11 +10,11 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
-import { isObject } from 'lodash';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { DiscoverServices } from '../../../../../build_services';
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import {
+  getSerializedSearchSourceDataViewDetails,
   internalStateActions,
   selectAllTabs,
   selectTabRuntimeState,
@@ -50,21 +50,12 @@ export const onSaveDiscoverSession = async ({
       return tabDataView.isTimeBased();
     }
 
-    const tabDataViewIdOrSpec = tab.initialInternalState?.serializedSearchSource?.index;
-
-    if (!tabDataViewIdOrSpec) {
-      return false;
-    }
-
-    if (isObject(tabDataViewIdOrSpec)) {
-      return Boolean(tabDataViewIdOrSpec.timeFieldName);
-    }
-
-    const dataViewListItem = internalState.savedDataViews.find(
-      (item) => item.id === tabDataViewIdOrSpec
+    const tabDataViewDetails = getSerializedSearchSourceDataViewDetails(
+      tab.initialInternalState?.serializedSearchSource,
+      internalState.savedDataViews
     );
 
-    return Boolean(dataViewListItem?.timeFieldName);
+    return Boolean(tabDataViewDetails?.timeFieldName);
   });
 
   const onSave: DiscoverSessionSaveModalOnSaveCallback = async ({
@@ -76,7 +67,9 @@ export const onSaveDiscoverSession = async ({
     isTitleDuplicateConfirmed,
     onTitleDuplicate,
   }) => {
-    let response: { discoverSession: DiscoverSession | undefined } = { discoverSession: undefined };
+    let response: { discoverSession: DiscoverSession | undefined; nextSelectedTabId?: string } = {
+      discoverSession: undefined,
+    };
 
     try {
       response = await state.internalState
@@ -118,7 +111,10 @@ export const onSaveDiscoverSession = async ({
       if (onSaveCb) {
         onSaveCb();
       } else if (response.discoverSession.id !== persistedDiscoverSession?.id) {
-        services.locator.navigate({ savedSearchId: response.discoverSession.id });
+        services.locator.navigate({
+          savedSearchId: response.discoverSession.id,
+          ...(response?.nextSelectedTabId ? { tab: { id: response.nextSelectedTabId } } : {}),
+        });
       }
     }
 

@@ -12,6 +12,7 @@ import {
   ReadExceptionListSummaryRequestQuery,
   ReadExceptionListSummaryResponse,
 } from '@kbn/securitysolution-exceptions-common/api';
+import { LISTS_API_SUMMARY } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../types';
 
@@ -24,7 +25,7 @@ export const summaryExceptionListRoute = (router: ListsPluginRouter): void => {
       path: `${EXCEPTION_LIST_URL}/summary`,
       security: {
         authz: {
-          requiredPrivileges: ['lists-summary'],
+          requiredPrivileges: [LISTS_API_SUMMARY],
         },
       },
     })

@@ -37,6 +37,10 @@ const strings = {
     i18n.translate('xpack.canvas.textStylePicker.fontColorLabel', {
       defaultMessage: 'Font Color',
     }),
+  getFontSizeLabel: () =>
+    i18n.translate('xpack.canvas.textStylePicker.fontSizeLabel', {
+      defaultMessage: 'Size',
+    }),
   getStyleBoldOption: () =>
     i18n.translate('xpack.canvas.textStylePicker.styleBoldOption', {
       defaultMessage: 'Bold',
@@ -177,7 +181,8 @@ export const TextStylePicker: FC<Props> = ({
             value={size}
             onChange={(e) => doChange('size', Number(e.target.value))}
             options={fontSizes.map((fontSize) => ({ text: String(fontSize), value: fontSize }))}
-            prepend="Size"
+            prepend={strings.getFontSizeLabel()}
+            aria-label={strings.getFontSizeLabel()}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -222,6 +227,7 @@ export const TextStylePicker: FC<Props> = ({
 };
 
 TextStylePicker.propTypes = {
+  // @ts-expect-error upgrade typescript v5.9.3
   family: PropTypes.string,
   size: PropTypes.number,
   align: PropTypes.oneOf(['left', 'center', 'right']),

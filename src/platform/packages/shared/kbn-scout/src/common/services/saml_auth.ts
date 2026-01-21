@@ -68,6 +68,13 @@ export const createSamlSessionManager = (
       sourcePath: rolesDefinitionPath,
     },
     cloudUsersFilePath: config.cloudUsersFilePath,
+    serverless: config.projectType
+      ? {
+          uiam: config.uiam,
+          projectType: config.projectType,
+          organizationId: config.organizationId!,
+        }
+      : undefined,
   });
 
   log.serviceLoaded('samlAuth');

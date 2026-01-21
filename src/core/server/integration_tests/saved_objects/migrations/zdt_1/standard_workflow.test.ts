@@ -9,7 +9,7 @@
 
 import Path from 'path';
 import '../jest_matchers';
-import { startElasticsearch } from '../kibana_migrator_test_kit';
+import { startElasticsearch } from '@kbn/migrator-test-kit';
 import { createStandardWorkflowTest } from '../shared_suites/zdt/standard_workflow';
 
 describe('ZDT upgrades - standard workflow', () => {

@@ -139,6 +139,7 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
         {typeof errorMessage !== 'undefined' ? (
           <>
             <EuiCallOut
+              announceOnMount
               title={i18n.translate('xpack.transform.clone.errorPromptTitle', {
                 defaultMessage: 'An error occurred getting the transform configuration.',
               })}

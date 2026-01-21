@@ -11,7 +11,7 @@ import {
   fromRangeOrHistogramLensApiToLensState,
   fromRangeOrHistogramLensStateToAPI,
 } from './range';
-import type { RangeIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { RangeIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiRangeOperation, LensApiHistogramOperation } from '../../schema/bucket_ops';
 import {
   LENS_HISTOGRAM_EMPTY_ROWS_DEFAULT,

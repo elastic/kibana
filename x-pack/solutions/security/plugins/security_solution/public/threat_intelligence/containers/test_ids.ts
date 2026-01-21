@@ -5,4 +5,7 @@
  * 2.0.
  */
 
+export const LOADING_LOGO_WRAPPER_TEST_ID = 'tiIndicatorsLoadingLogoWrapper';
 export const LOADING_LOGO_TEST_ID = 'tiIndicatorsLoadingLogo';
+
+export const EMPTY_PAGE_WRAPPER_TEST_ID = 'tiIndicatorsEmptyPageWrapper';

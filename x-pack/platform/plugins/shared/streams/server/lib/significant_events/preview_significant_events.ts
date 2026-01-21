@@ -19,19 +19,19 @@ import type { ChangePointType } from '@kbn/es-types/src';
 import type { Condition } from '@kbn/streamlang';
 import { conditionToQueryDsl } from '@kbn/streamlang';
 
-type PreviewStreamQuery = Pick<StreamQueryKql, 'kql' | 'system'>;
+type PreviewStreamQuery = Pick<StreamQueryKql, 'kql' | 'feature'>;
 
 function createSearchRequest({
   from,
   to,
   kuery,
-  systemFilter,
+  featureFilter,
   bucketSize,
 }: {
   from: Date;
   to: Date;
   kuery: string;
-  systemFilter?: Condition;
+  featureFilter?: Condition;
   bucketSize: string;
 }) {
   return {
@@ -47,7 +47,7 @@ function createSearchRequest({
               },
             },
           },
-          ...(systemFilter ? [conditionToQueryDsl(systemFilter)] : []),
+          ...(featureFilter ? [conditionToQueryDsl(featureFilter)] : []),
           {
             kql: {
               query: kuery,
@@ -97,7 +97,7 @@ export async function previewSignificantEvents(
     bucketSize,
     from,
     kuery: query.kql.query,
-    systemFilter: query.system?.filter,
+    featureFilter: query.feature?.filter,
     to,
   });
 

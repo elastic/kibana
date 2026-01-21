@@ -7,7 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowLogEvent } from '../workflow_event_logger/workflow_event_logger';
+import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { CoreStart } from '@kbn/core/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import type { WorkflowLogEvent } from '../repositories/logs_repository';
+
+export interface ContextDependencies {
+  cloudSetup: CloudSetup | undefined;
+  coreStart: CoreStart;
+  actions: ActionsPluginStartContract;
+  taskManager: TaskManagerStartContract;
+  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
+}
 
 /**
  * Interface for workflow context manager logging capabilities

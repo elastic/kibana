@@ -9,12 +9,12 @@ import {
   ENDPOINT_PACKAGE_NAME,
   PREBUILT_RULES_PACKAGE_NAME,
 } from '@kbn/security-solution-plugin/common/detection_engine/constants';
+import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   getPrebuiltRulesAndTimelinesStatus,
   installPrebuiltRulesAndTimelines,
 } from '../../../../utils';
-import { deleteAllRules } from '../../../../../../config/services/detections_response';
 import { deleteAllPrebuiltRuleAssets } from '../../../../utils/rules/prebuilt_rules/delete_all_prebuilt_rule_assets';
 import { deleteAllTimelines } from '../../../../utils/rules/prebuilt_rules/delete_all_timelines';
 import {
@@ -28,7 +28,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
   const retryService = getService('retry');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
 
   describe('@ess @serverless @skipInServerlessMKI Install prebuilt rules from EPR', () => {
     beforeEach(async () => {
@@ -44,7 +44,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await deletePrebuiltRulesFleetPackage({ supertest, es, log, retryService });
           await deleteEndpointFleetPackage({ supertest, es, log, retryService });
 
-          const { body } = await securitySolutionApi.bootstrapPrebuiltRules().expect(200);
+          const { body } = await detectionsApi.bootstrapPrebuiltRules().expect(200);
 
           expect(body).toMatchObject({
             packages: expect.arrayContaining([

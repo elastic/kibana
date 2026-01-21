@@ -69,6 +69,8 @@ export interface IShims {
     kfetchOptions?: KFetchKibanaOptions | undefined
   ) => Promise<any>;
   isCloud: boolean;
+  cloudBaseUrl?: string;
+  hasEnterpriseLicense: boolean;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   usageCollection: UsageCollectionSetup;
   kibanaServices: CoreStart & { usageCollection: UsageCollectionSetup };
@@ -82,6 +84,8 @@ export class Legacy {
     core,
     data,
     isCloud,
+    cloudBaseUrl,
+    hasEnterpriseLicense,
     triggersActionsUi,
     usageCollection,
     appMountParameters,
@@ -136,6 +140,8 @@ export class Legacy {
           ...options,
         }),
       isCloud,
+      cloudBaseUrl,
+      hasEnterpriseLicense,
       triggersActionsUi,
       usageCollection,
       kibanaServices: {

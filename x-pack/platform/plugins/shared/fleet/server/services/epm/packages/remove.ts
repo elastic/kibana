@@ -26,7 +26,6 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
-  USER_SETTINGS_TEMPLATE_SUFFIX,
 } from '../../../constants';
 import { ElasticsearchAssetType, KibanaSavedObjectType } from '../../../types';
 import type {
@@ -44,13 +43,14 @@ import { deleteMlModel } from '../elasticsearch/ml_model';
 import { packagePolicyService, appContextService } from '../..';
 import { deletePackageCache } from '../archive';
 import { deleteIlms } from '../elasticsearch/datastream_ilm/remove';
+import { deleteComponentTemplates } from '../elasticsearch/template/remove';
 import { removeArchiveEntries } from '../archive/storage';
 
 import { auditLoggingService } from '../../audit_logging';
 import { FleetError, PackageRemovalError } from '../../../errors';
 
 import { populatePackagePolicyAssignedAgentsCount } from '../../package_policies/populate_package_policy_assigned_agents_count';
-
+import { deleteEsqlViews } from '../elasticsearch/esql_views/remove';
 import type { PackageSpecConditions } from '../../../../common';
 
 import { getInstallation, getPackageInfo, kibanaSavedObjectTypes } from '.';
@@ -157,7 +157,10 @@ export async function deleteKibanaAssets({
   const savedObjectsClient = new SavedObjectsClient(
     appContextService
       .getSavedObjects()
-      .createInternalRepository([KibanaSavedObjectType.alertingRuleTemplate])
+      .createInternalRepository([
+        KibanaSavedObjectType.alertingRuleTemplate,
+        KibanaSavedObjectType.sloTemplate,
+      ])
   );
 
   const namespace = SavedObjectsUtils.namespaceStringToId(spaceId);
@@ -237,7 +240,7 @@ export const deleteESAsset = async (
   } else if (assetType === ElasticsearchAssetType.indexTemplate) {
     return deleteIndexTemplate(esClient, id);
   } else if (assetType === ElasticsearchAssetType.componentTemplate) {
-    return deleteComponentTemplate(esClient, id);
+    return deleteComponentTemplates(esClient, [id]);
   } else if (assetType === ElasticsearchAssetType.transform) {
     return deleteTransforms(esClient, [id], true);
   } else if (assetType === ElasticsearchAssetType.dataStreamIlmPolicy) {
@@ -246,6 +249,8 @@ export const deleteESAsset = async (
     return deleteIlms(esClient, [id]);
   } else if (assetType === ElasticsearchAssetType.mlModel) {
     return deleteMlModel(esClient, [id]);
+  } else if (assetType === ElasticsearchAssetType.esqlView) {
+    return deleteEsqlViews(esClient, [id]);
   }
 };
 
@@ -415,17 +420,6 @@ async function deleteIndexTemplate(esClient: ElasticsearchClient, name: string):
   }
 }
 
-async function deleteComponentTemplate(esClient: ElasticsearchClient, name: string): Promise<void> {
-  // '*' shouldn't ever appear here, but it still would delete all templates
-  if (name && name !== '*' && !name.endsWith(USER_SETTINGS_TEMPLATE_SUFFIX)) {
-    try {
-      await esClient.cluster.deleteComponentTemplate({ name }, { ignore: [404] });
-    } catch (error) {
-      throw new FleetError(`Error deleting component template ${name}: ${error.message}`);
-    }
-  }
-}
-
 export async function deleteKibanaSavedObjectsAssets({
   savedObjectsClient,
   installedPkg,
@@ -504,9 +498,9 @@ export function cleanupComponentTemplate(
   esClient: ElasticsearchClient
 ) {
   const idsToDelete = installedObjects
-    .filter((asset) => asset.type === ElasticsearchAssetType.mlModel)
+    .filter((asset) => asset.type === ElasticsearchAssetType.componentTemplate)
     .map((asset) => asset.id);
-  return deleteComponentTemplate(esClient, idsToDelete[0]);
+  return deleteComponentTemplates(esClient, idsToDelete);
 }
 
 export function cleanupTransforms(
@@ -517,6 +511,16 @@ export function cleanupTransforms(
     .filter((asset) => asset.type === ElasticsearchAssetType.transform)
     .map((asset) => asset.id);
   return deleteTransforms(esClient, idsToDelete);
+}
+
+export function cleanupEsqlViews(
+  installedObjects: EsAssetReference[],
+  esClient: ElasticsearchClient
+) {
+  const idsToDelete = installedObjects
+    .filter((asset) => asset.type === ElasticsearchAssetType.esqlView)
+    .map((asset) => asset.id);
+  return deleteEsqlViews(esClient, idsToDelete);
 }
 
 /**

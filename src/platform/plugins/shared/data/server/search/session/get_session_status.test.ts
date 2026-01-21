@@ -13,6 +13,7 @@ import type { SearchSessionSavedObjectAttributes } from '../../../common';
 import { SearchSessionStatus } from '../../../common';
 import moment from 'moment';
 import type { SearchSessionsConfigSchema } from '../../config';
+import { createSearchSessionSavedObjectAttributesMock } from './mocks';
 
 const mockInProgressSearchResponse = {
   body: {
@@ -46,13 +47,30 @@ describe('getSessionStatus', () => {
   const deps = {
     esClient: elasticsearchServiceMock.createElasticsearchClient(),
   };
-  test("returns an in_progress status if there's nothing inside the session", async () => {
-    const session: any = {
-      idMapping: {},
-      touched: moment(),
-    };
-    expect(await getSessionStatus(deps, session, mockConfig)).toEqual({
-      status: SearchSessionStatus.IN_PROGRESS,
+
+  describe('when there are no searches inside the session', () => {
+    describe('when the search is brand new', () => {
+      test('returns an in_progress status', async () => {
+        const session = createSearchSessionSavedObjectAttributesMock({
+          idMapping: {},
+          created: moment().toISOString(),
+        });
+        expect(await getSessionStatus(deps, session, mockConfig)).toEqual({
+          status: SearchSessionStatus.IN_PROGRESS,
+        });
+      });
+    });
+
+    describe('when the search is has been created for a few seconds', () => {
+      test('returns an error status', async () => {
+        const session = createSearchSessionSavedObjectAttributesMock({
+          idMapping: {},
+          created: moment().subtract(1, 'minutes').toISOString(),
+        });
+        expect(await getSessionStatus(deps, session, mockConfig)).toEqual({
+          status: SearchSessionStatus.ERROR,
+        });
+      });
     });
   });
 

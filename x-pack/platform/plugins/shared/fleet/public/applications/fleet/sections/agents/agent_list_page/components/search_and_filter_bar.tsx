@@ -64,6 +64,7 @@ export interface SearchAndFilterBarProps {
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
   unsupportedMigrateAgents: Agent[];
+  unsupportedPrivilegeLevelChangeAgents: Agent[];
 }
 
 export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps> = ({
@@ -96,6 +97,7 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
   sortField,
   sortOrder,
   unsupportedMigrateAgents,
+  unsupportedPrivilegeLevelChangeAgents,
 }) => {
   const authz = useAuthz();
 
@@ -203,6 +205,8 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
                   agentPolicies={agentPolicies}
                 />
                 <EuiFilterButton
+                  isToggle
+                  isSelected={showUpgradeable}
                   hasActiveFilters={showUpgradeable}
                   onClick={() => {
                     onShowUpgradeableChange(!showUpgradeable);
@@ -232,6 +236,7 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
                   sortField={sortField}
                   sortOrder={sortOrder}
                   unsupportedMigrateAgents={unsupportedMigrateAgents}
+                  unsupportedPrivilegeLevelChangeAgents={unsupportedPrivilegeLevelChangeAgents}
                 />
               </EuiFlexItem>
             ) : null}

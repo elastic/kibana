@@ -120,6 +120,105 @@ describe('getActiveIntegrationList', () => {
       activePackages: [],
     });
   });
+
+  it('should get all pages of installed packages', async () => {
+    const item = {
+      name: 'test',
+      version: '1.0.0',
+      status: 'installed',
+      dataStreams: [{ name: 'test-data-stream', title: 'test' }],
+    };
+    const firstPageItems = new Array(100).fill(item).map((_, index) => ({
+      ...item,
+      name: `test${index}`,
+    }));
+
+    const firstPage = {
+      items: firstPageItems,
+      total: 101,
+      searchAfter: ['test99'],
+    };
+
+    const secondPage = {
+      items: [
+        {
+          name: 'test2',
+          version: '1.0.0',
+          status: 'installed',
+          dataStreams: [{ name: 'ds2', title: 'ds2' }],
+        },
+      ],
+      total: 101,
+    };
+
+    mockHttpGet.mockResolvedValueOnce(firstPage).mockResolvedValueOnce(secondPage);
+
+    const result = await getActiveIntegrationList(mockService);
+
+    expect(mockHttpGet).toHaveBeenNthCalledWith(1, expect.any(String), {
+      query: expect.objectContaining({
+        perPage: 100,
+        searchAfter: undefined,
+        showOnlyActiveDataStreams: true,
+      }),
+      version: '2023-10-31',
+    });
+
+    expect(mockHttpGet).toHaveBeenNthCalledWith(2, expect.any(String), {
+      query: expect.objectContaining({
+        perPage: 100,
+        searchAfter: JSON.stringify(['test99']),
+        showOnlyActiveDataStreams: true,
+      }),
+      version: '2023-10-31',
+    });
+
+    expect(result.activePackages).toHaveLength(101);
+  });
+
+  it('should return partial results in case of error', async () => {
+    const item = {
+      name: 'test',
+      version: '1.0.0',
+      status: 'installed',
+      dataStreams: [{ name: 'test-data-stream', title: 'test' }],
+    };
+    const firstPageItems = new Array(50).fill(item).map((_, index) => ({
+      ...item,
+      name: `test${index}`,
+    }));
+
+    const firstPage = {
+      items: firstPageItems,
+      total: 150,
+      searchAfter: ['test49'],
+    };
+
+    mockHttpGet.mockResolvedValueOnce(firstPage).mockRejectedValueOnce(new Error('Network error'));
+
+    const result = await getActiveIntegrationList(mockService);
+
+    expect(mockHttpGet).toHaveBeenNthCalledWith(1, expect.any(String), {
+      query: expect.objectContaining({
+        perPage: 100,
+        searchAfter: undefined,
+        showOnlyActiveDataStreams: true,
+      }),
+      version: '2023-10-31',
+    });
+
+    expect(mockHttpGet).toHaveBeenNthCalledWith(2, expect.any(String), {
+      query: expect.objectContaining({
+        perPage: 100,
+        searchAfter: JSON.stringify(['test49']),
+        showOnlyActiveDataStreams: true,
+      }),
+      version: '2023-10-31',
+    });
+
+    expect(result.activePackages).toHaveLength(50);
+    expect(mockService.notifications.toasts.addError).toHaveBeenCalled();
+  });
 });
 
 describe('getAgentsData', () => {

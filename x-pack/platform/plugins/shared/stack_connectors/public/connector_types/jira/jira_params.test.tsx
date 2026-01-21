@@ -14,6 +14,7 @@ import { useGetSingleIssue } from './use_get_single_issue';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { act, fireEvent, render, waitFor, within, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 jest.mock('./use_get_issue_types');
@@ -43,16 +44,12 @@ const actionParams = {
   },
 };
 
-const connector: ActionConnector = {
-  secrets: {},
-  config: {},
+const connector: ActionConnector = createMockActionConnector({
   id: 'test',
   actionTypeId: '.test',
   name: 'Test',
-  isPreconfigured: false,
-  isDeprecated: false,
-  isSystemAction: false as const,
-};
+});
+
 const editAction = jest.fn();
 const defaultProps = {
   actionConnector: connector,

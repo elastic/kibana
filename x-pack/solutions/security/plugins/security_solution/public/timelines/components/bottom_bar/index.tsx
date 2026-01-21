@@ -45,7 +45,7 @@ export const TimelineBottomBar = React.memo<TimelineBottomBarProps>(
     const title = useSelector((state: State) => selectTitleByTimelineById(state, timelineId));
 
     return (
-      <EuiPanel borderRadius="none" data-test-subj="timeline-bottom-bar">
+      <EuiPanel borderRadius="none" hasShadow={false} data-test-subj="timeline-bottom-bar">
         <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <AddTimelineButton timelineId={timelineId} />

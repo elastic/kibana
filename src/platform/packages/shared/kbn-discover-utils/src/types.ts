@@ -75,10 +75,14 @@ export type FormattedHit = FormattedHitPair[];
 export interface LogDocumentOverview
   extends LogResourceFields,
     LogStackTraceFields,
-    LogCloudFields {
+    LogCloudFields,
+    LogOtelStackTraceFields,
+    Partial<ApmErrorLogFields>,
+    Partial<OtelExceptionLogFields> {
   '@timestamp': string;
   'log.level'?: string;
   message?: string;
+  'body.text'?: string;
   'error.message'?: string;
   'event.original'?: string;
   'trace.id'?: string;
@@ -87,6 +91,21 @@ export interface LogDocumentOverview
   'log.file.path'?: string;
   'data_stream.namespace': string;
   'data_stream.dataset': string;
+  'exception.message'?: string;
+}
+
+export interface ApmErrorLogFields {
+  'processor.event': string;
+  'error.log.level'?: string;
+  'error.exception.type'?: string;
+  'error.exception.message'?: string;
+  'error.culprit'?: string;
+  'error.grouping_name'?: string;
+}
+
+export interface OtelExceptionLogFields {
+  event_name: string; // OTEL-specific field
+  'exception.type'?: string;
 }
 
 export interface LogResourceFields {
@@ -105,6 +124,12 @@ export interface LogStackTraceFields {
   'error.stack_trace'?: string;
   'error.exception.stacktrace'?: string;
   'error.log.stacktrace'?: string;
+}
+
+export interface LogOtelStackTraceFields {
+  'attributes.exception.stacktrace'?: string;
+  'attributes.exception.type'?: string;
+  'attributes.exception.message'?: string;
 }
 
 export interface LogCloudFields {

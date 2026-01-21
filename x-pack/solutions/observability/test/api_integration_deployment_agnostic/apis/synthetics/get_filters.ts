@@ -39,6 +39,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         types: [syntheticsMonitorSavedObjectType, legacySyntheticsMonitorTypeSingle],
       });
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
+      await privateLocationTestService.installSyntheticsPackage();
       privateLocation = await privateLocationTestService.addTestPrivateLocation();
     });
 

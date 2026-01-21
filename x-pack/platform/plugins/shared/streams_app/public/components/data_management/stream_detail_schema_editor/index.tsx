@@ -4,34 +4,56 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiBottomBar, EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
+import {
+  EuiBottomBar,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Streams, isRootStreamDefinition } from '@kbn/streams-schema';
-import React from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { Streams, isRootStreamDefinition } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { uniq } from 'lodash';
-import { useKibana } from '../../../hooks/use_kibana';
+import React, { useEffect } from 'react';
 import { useDiscardConfirm } from '../../../hooks/use_discard_confirm';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
+import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
+import { StreamsAppContextProvider } from '../../streams_app_context_provider';
+import { RequestPreviewFlyout } from '../request_preview_flyout';
+import { useRequestPreviewFlyoutState } from '../request_preview_flyout/use_request_preview_flyout_state';
 import { SchemaEditor } from '../schema_editor';
-import { SUPPORTED_TABLE_COLUMN_NAMES } from '../schema_editor/constants';
+import { DEFAULT_TABLE_COLUMN_NAMES } from '../schema_editor/constants';
 import { getDefinitionFields, useSchemaFields } from '../schema_editor/hooks/use_schema_fields';
 import { SchemaChangesReviewModal } from '../schema_editor/schema_changes_review_modal';
-import { StreamsAppContextProvider } from '../../streams_app_context_provider';
+import { buildSchemaSavePayload } from '../schema_editor/utils';
 
 interface SchemaEditorProps {
   definition: Streams.ingest.all.GetResponse;
   refreshDefinition: () => void;
 }
 
-const wiredDefaultColumns = SUPPORTED_TABLE_COLUMN_NAMES;
-const classicDefaultColumns = SUPPORTED_TABLE_COLUMN_NAMES.filter((column) => column !== 'parent');
+const wiredDefaultColumns = DEFAULT_TABLE_COLUMN_NAMES;
+const classicDefaultColumns = DEFAULT_TABLE_COLUMN_NAMES.filter((column) => column !== 'parent');
 
 export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: SchemaEditorProps) => {
   const context = useKibana();
+  const { onPageReady } = usePerformanceContext();
   const { loading } = useStreamDetail();
   const [selectedFields, setSelectedFields] = React.useState<string[]>([]);
+  const {
+    isRequestPreviewFlyoutOpen,
+    requestPreviewFlyoutCodeContent,
+    openRequestPreviewFlyout,
+    closeRequestPreviewFlyout,
+  } = useRequestPreviewFlyoutState();
 
   const {
     fields,
@@ -47,6 +69,11 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
     refreshDefinition,
   });
   const definitionFields = React.useMemo(() => getDefinitionFields(definition), [definition]);
+  const definitionFieldMap = React.useMemo(() => {
+    const map: Set<string> = new Set();
+    definitionFields.forEach((field) => map.add(field.name));
+    return map;
+  }, [definitionFields]);
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: pendingChangesCount > 0,
@@ -57,16 +84,45 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
     shouldPromptOnReplace: false,
   });
 
+  // Telemetry for TTFMP (time to first meaningful paint)
+  useEffect(() => {
+    if (!isLoadingFields && !loading) {
+      const streamType = getStreamTypeFromDefinition(definition.stream);
+      onPageReady({
+        meta: {
+          description: `[ttfmp_streams_detail_schema] streamType: ${streamType}`,
+        },
+        customMetrics: {
+          key1: 'schema_editor_fields_count',
+          value1: fields?.length ?? 0,
+        },
+      });
+    }
+  }, [definition.stream, fields.length, isLoadingFields, loading, onPageReady]);
+
   const handleCancelClick = useDiscardConfirm(discardChanges, {
     defaultFocusedButton: 'cancel',
   });
+
+  const onBottomBarViewCodeClick = () => {
+    const body = buildSchemaSavePayload(definition, fields);
+
+    openRequestPreviewFlyout({
+      method: 'PUT',
+      url: `/api/streams/${definition.stream.name}/_ingest`,
+      body,
+    });
+  };
 
   const openConfirmationModal = () => {
     const overlay = context.core.overlays.openModal(
       toMountPoint(
         <StreamsAppContextProvider context={context}>
           <SchemaChangesReviewModal
-            fields={fields}
+            fields={fields.filter(
+              (field) => field.status !== 'unmapped' || definitionFieldMap.has(field.name)
+            )}
+            streamType={getStreamTypeFromDefinition(definition.stream)}
             definition={definition}
             storedFields={definitionFields}
             submitChanges={submitChanges}
@@ -86,6 +142,20 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%' }}>
+      {isRootStream && (
+        <>
+          <EuiCallOut
+            iconType="info"
+            title={i18n.translate('xpack.streams.schemaEditor.rootStreamReadOnlyMode', {
+              defaultMessage:
+                'Root streams are selectively immutable and their schema cannot be modified. To modify the schema or to add processing steps, partition a new child stream first.',
+            })}
+            announceOnMount={false}
+            size="s"
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
       <EuiFlexItem grow={1} css={{ minHeight: 0 }}>
         <SchemaEditor
           fields={fields}
@@ -116,8 +186,20 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
       </EuiFlexItem>
       {pendingChangesCount > 0 && (
         <EuiFlexItem grow={false}>
-          <EuiBottomBar position="static">
+          <EuiBottomBar>
             <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  data-test-subj="streamsAppSchemaEditorViewRequestButton"
+                  color="text"
+                  size="s"
+                  iconType="editorCodeBlock"
+                  onClick={onBottomBarViewCodeClick}
+                >
+                  {viewCodeButtonText}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+
               <EuiFlexItem grow={false}>
                 <FormattedMessage
                   id="xpack.streams.schemaEditor.changesPendingLabel"
@@ -157,6 +239,16 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
           </EuiBottomBar>
         </EuiFlexItem>
       )}
+      {isRequestPreviewFlyoutOpen && (
+        <RequestPreviewFlyout
+          codeContent={requestPreviewFlyoutCodeContent}
+          onClose={closeRequestPreviewFlyout}
+        />
+      )}
     </EuiFlexGroup>
   );
 };
+
+const viewCodeButtonText = i18n.translate('xpack.streams.schemaEditor.viewCodeButtonText', {
+  defaultMessage: 'View API request',
+});

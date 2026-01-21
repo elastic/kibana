@@ -39,6 +39,7 @@ import type {
 } from './types';
 import { registerSystemActions } from './components/system_actions';
 import { registerAnalytics } from './analytics';
+import { getObservablesFromEcs } from './client/helpers/get_observables_from_ecs';
 
 /**
  * @public
@@ -203,6 +204,7 @@ export class CasesUiPlugin
         getUICapabilities,
         getRuleIdFromEvent,
         groupAlertsByRule,
+        getObservablesFromEcs,
       },
     };
   }

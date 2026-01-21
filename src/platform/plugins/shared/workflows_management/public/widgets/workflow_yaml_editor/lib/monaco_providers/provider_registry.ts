@@ -88,7 +88,7 @@ class MonacoConnectorHandlerRegistry implements MonacoHandlerRegistry {
     return this.handlers.map((handler) => ({
       priority: handler.getPriority(),
       canHandle: ['elasticsearch.', 'kibana.', 'http.', 'console.', 'slack.'].filter((prefix) =>
-        handler.canHandle(prefix + 'test')
+        handler.canHandle(`${prefix}test`)
       ),
     }));
   }

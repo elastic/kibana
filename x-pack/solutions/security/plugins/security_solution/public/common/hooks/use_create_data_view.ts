@@ -37,7 +37,7 @@ interface UseCreateDataViewResults {
 
 /**
  * This hook is used to create a data view from a data view spec.
- * It is used in the attack discovery pages and AI4DSOC pages to create a data view.
+ * It is used in the attack discovery pages and EASE pages to create a data view.
  * When skip is true, it does not create a data view.
  */
 export const useCreateDataView = ({

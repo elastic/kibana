@@ -14,6 +14,8 @@
           "(id?: string | undefined) => string"
         ],
         "path": "src/platform/plugins/shared/saved_search/common/saved_searches_url.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,6 +30,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/saved_searches_url.ts",
+            "lineNumber": 12,
+            "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -47,6 +51,8 @@
           "(id?: string | undefined) => string"
         ],
         "path": "src/platform/plugins/shared/saved_search/common/saved_searches_url.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -61,6 +67,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/saved_searches_url.ts",
+            "lineNumber": 10,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -79,6 +87,8 @@
         "label": "SaveDiscoverSessionOptions",
         "description": [],
         "path": "src/platform/plugins/shared/saved_search/public/service/save_discover_session.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -93,6 +103,8 @@
               "(() => void) | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/public/service/save_discover_session.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -109,6 +121,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/public/service/save_discover_session.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -123,6 +137,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/public/service/save_discover_session.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -154,6 +170,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/saved_search/public/service/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -168,6 +186,8 @@
               "{ outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; errorJSON?: string | undefined; } | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/public/service/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -182,6 +202,8 @@
         "label": "SavedSearchUnwrapMetaInfo",
         "description": [],
         "path": "src/platform/plugins/shared/saved_search/public/service/to_saved_search.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -196,6 +218,8 @@
               "{ outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; errorJSON?: string | undefined; } | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/public/service/to_saved_search.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -210,6 +234,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/public/service/to_saved_search.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -224,6 +250,8 @@
         "label": "SavedSearchUnwrapResult",
         "description": [],
         "path": "src/platform/plugins/shared/saved_search/public/service/to_saved_search.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -235,9 +263,8 @@
             "label": "attributes",
             "description": [],
             "signature": [
-              "Omit<",
               "SavedSearchAttributes",
-              ", \"description\"> & { description?: string | undefined; references: ",
+              " & { references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -248,6 +275,8 @@
               "[]; }"
             ],
             "path": "src/platform/plugins/shared/saved_search/public/service/to_saved_search.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -269,6 +298,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/public/service/to_saved_search.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -283,6 +314,8 @@
         "label": "SaveSavedSearchOptions",
         "description": [],
         "path": "src/platform/plugins/shared/saved_search/public/service/save_saved_searches.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -297,6 +330,8 @@
               "(() => void) | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/public/service/save_saved_searches.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -313,6 +348,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/public/service/save_saved_searches.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -327,6 +364,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/public/service/save_saved_searches.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -343,6 +382,8 @@
         "label": "VIEW_MODE",
         "description": [],
         "path": "src/platform/plugins/shared/saved_search/common/index.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -376,31 +417,8 @@
           ", \"id\">>"
         ],
         "path": "src/platform/plugins/shared/saved_search/public/service/save_discover_session.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "savedSearch",
-        "id": "def-public.SavedSearchByValueAttributes",
-        "type": "Type",
-        "tags": [],
-        "label": "SavedSearchByValueAttributes",
-        "description": [],
-        "signature": [
-          "Omit<",
-          "SavedSearchAttributes",
-          ", \"description\"> & { description?: string | undefined; references: ",
-          {
-            "pluginId": "@kbn/content-management-utils",
-            "scope": "server",
-            "docId": "kibKbnContentManagementUtilsPluginApi",
-            "section": "def-server.Reference",
-            "text": "Reference"
-          },
-          "[]; }"
-        ],
-        "path": "src/platform/plugins/shared/saved_search/public/service/types.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -416,6 +434,8 @@
           "[string, string]"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/sorting/get_sort.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -432,6 +452,8 @@
         "\nSaved search plugin public Start contract"
       ],
       "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
+      "lineNumber": 49,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -456,6 +478,8 @@
             ">"
           ],
           "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
+          "lineNumber": 53,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -470,6 +494,8 @@
                 "string"
               ],
               "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
+              "lineNumber": 54,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -485,6 +511,8 @@
                 "Serialized | undefined"
               ],
               "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
+              "lineNumber": 55,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -511,6 +539,8 @@
             ">"
           ],
           "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
+          "lineNumber": 57,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -525,6 +555,8 @@
                 "string"
               ],
               "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
+              "lineNumber": 57,
+              "columnNumber": 24,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -550,6 +582,8 @@
             }
           ],
           "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
+          "lineNumber": 58,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -576,6 +610,8 @@
             ">[]>"
           ],
           "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
+          "lineNumber": 59,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -608,6 +644,8 @@
             " | undefined) => Promise<string | undefined>"
           ],
           "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
+          "lineNumber": 60,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -628,6 +666,8 @@
                 }
               ],
               "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
+              "lineNumber": 61,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -650,6 +690,8 @@
                 " | undefined"
               ],
               "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
+              "lineNumber": 62,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -692,6 +734,8 @@
             " | undefined>"
           ],
           "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
+          "lineNumber": 64,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -712,6 +756,8 @@
                 }
               ],
               "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
+              "lineNumber": 65,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -734,6 +780,8 @@
                 " | undefined"
               ],
               "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
+              "lineNumber": 66,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -757,9 +805,11 @@
               "section": "def-public.OnSaveProps",
               "text": "OnSaveProps"
             },
-            ", \"newTitle\" | \"isTitleDuplicateConfirmed\" | \"onTitleDuplicate\">) => Promise<void>"
+            ", \"isTitleDuplicateConfirmed\" | \"newTitle\" | \"onTitleDuplicate\">) => Promise<void>"
           ],
           "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
+          "lineNumber": 68,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -779,9 +829,11 @@
                   "section": "def-public.OnSaveProps",
                   "text": "OnSaveProps"
                 },
-                ", \"newTitle\" | \"isTitleDuplicateConfirmed\" | \"onTitleDuplicate\">"
+                ", \"isTitleDuplicateConfirmed\" | \"newTitle\" | \"onTitleDuplicate\">"
               ],
               "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
+              "lineNumber": 69,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -818,6 +870,8 @@
             ">"
           ],
           "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
+          "lineNumber": 71,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -838,6 +892,8 @@
                 }
               ],
               "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
+              "lineNumber": 72,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -853,6 +909,8 @@
                 "Serialized | undefined"
               ],
               "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
+              "lineNumber": 73,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -887,6 +945,8 @@
           ">"
         ],
         "path": "src/platform/plugins/shared/saved_search/server/services/saved_searches/get_saved_searches.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -901,6 +961,8 @@
               "string"
             ],
             "path": "src/platform/plugins/shared/saved_search/server/services/saved_searches/get_saved_searches.ts",
+            "lineNumber": 21,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -916,6 +978,8 @@
               "GetSavedSearchDependencies"
             ],
             "path": "src/platform/plugins/shared/saved_search/server/services/saved_searches/get_saved_searches.ts",
+            "lineNumber": 21,
+            "columnNumber": 61,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -944,9 +1008,11 @@
             "section": "def-common.VIEW_MODE",
             "text": "VIEW_MODE"
           },
-          " | undefined; hideAggregatedPreview?: boolean | undefined; rowHeight?: number | undefined; headerRowHeight?: number | undefined; timeRestore?: boolean | undefined; timeRange?: Readonly<{} & { from: string; to: string; }> | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; rowsPerPage?: number | undefined; sampleSize?: number | undefined; breakdownField?: string | undefined; density?: \"compact\" | \"normal\" | \"expanded\" | undefined; visContext?: Readonly<{} & { attributes: Record<string, any>; requestData: Readonly<{ breakdownField?: string | undefined; timeField?: string | undefined; dataViewId?: string | undefined; timeInterval?: string | undefined; } & {}>; suggestionType: string; }> | Readonly<{} & {}> | undefined; controlGroupJson?: string | undefined; hits?: number | undefined; } & { sort: string[] | string[][]; columns: string[]; grid: Readonly<{ columns?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; } & {}>; hideChart: boolean; isTextBasedQuery: boolean; kibanaSavedObjectMeta: Readonly<{} & { searchSourceJSON: string; }>; }>; }"
+          " | undefined; hideAggregatedPreview?: boolean | undefined; rowHeight?: number | undefined; headerRowHeight?: number | undefined; timeRestore?: boolean | undefined; timeRange?: Readonly<{} & { from: string; to: string; }> | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; rowsPerPage?: number | undefined; sampleSize?: number | undefined; breakdownField?: string | undefined; chartInterval?: string | undefined; density?: \"normal\" | \"compact\" | \"expanded\" | undefined; visContext?: Readonly<{} & { attributes: Record<string, any>; suggestionType: string; requestData: Readonly<{ breakdownField?: string | undefined; dataViewId?: string | undefined; timeField?: string | undefined; timeInterval?: string | undefined; } & {}>; }> | Readonly<{} & {}> | undefined; controlGroupJson?: string | undefined; hits?: number | undefined; } & { sort: string[] | string[][]; grid: Readonly<{ columns?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; } & {}>; columns: string[]; hideChart: boolean; isTextBasedQuery: boolean; kibanaSavedObjectMeta: Readonly<{} & { searchSourceJSON: string; }>; }>; }"
         ],
         "path": "src/platform/plugins/shared/saved_search/server/saved_objects/schema.ts",
+        "lineNumber": 228,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -967,9 +1033,11 @@
             "section": "def-common.VIEW_MODE",
             "text": "VIEW_MODE"
           },
-          " | undefined; readonly hideAggregatedPreview?: boolean | undefined; readonly rowHeight?: number | undefined; readonly headerRowHeight?: number | undefined; readonly timeRestore?: boolean | undefined; readonly timeRange?: Readonly<{} & { from: string; to: string; }> | undefined; readonly refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; readonly rowsPerPage?: number | undefined; readonly sampleSize?: number | undefined; readonly breakdownField?: string | undefined; readonly density?: \"compact\" | \"normal\" | \"expanded\" | undefined; readonly visContext?: Readonly<{} & { attributes: Record<string, any>; requestData: Readonly<{ breakdownField?: string | undefined; timeField?: string | undefined; dataViewId?: string | undefined; timeInterval?: string | undefined; } & {}>; suggestionType: string; }> | Readonly<{} & {}> | undefined; readonly controlGroupJson?: string | undefined; readonly hits?: number | undefined; readonly sort: string[] | string[][]; readonly columns: string[]; readonly grid: Readonly<{ columns?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; } & {}>; readonly hideChart: boolean; readonly isTextBasedQuery: boolean; readonly kibanaSavedObjectMeta: Readonly<{} & { searchSourceJSON: string; }>; }"
+          " | undefined; readonly hideAggregatedPreview?: boolean | undefined; readonly rowHeight?: number | undefined; readonly headerRowHeight?: number | undefined; readonly timeRestore?: boolean | undefined; readonly timeRange?: Readonly<{} & { from: string; to: string; }> | undefined; readonly refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; readonly rowsPerPage?: number | undefined; readonly sampleSize?: number | undefined; readonly breakdownField?: string | undefined; readonly chartInterval?: string | undefined; readonly density?: \"normal\" | \"compact\" | \"expanded\" | undefined; readonly visContext?: Readonly<{} & { attributes: Record<string, any>; suggestionType: string; requestData: Readonly<{ breakdownField?: string | undefined; dataViewId?: string | undefined; timeField?: string | undefined; timeInterval?: string | undefined; } & {}>; }> | Readonly<{} & {}> | undefined; readonly controlGroupJson?: string | undefined; readonly hits?: number | undefined; readonly sort: string[] | string[][]; readonly grid: Readonly<{ columns?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; } & {}>; readonly columns: string[]; readonly hideChart: boolean; readonly isTextBasedQuery: boolean; readonly kibanaSavedObjectMeta: Readonly<{} & { searchSourceJSON: string; }>; }"
         ],
         "path": "src/platform/plugins/shared/saved_search/server/saved_objects/schema.ts",
+        "lineNumber": 225,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -990,9 +1058,11 @@
           "\nExtract tab attributes into a separate array since multiple tabs are supported"
         ],
         "signature": [
-          "(attributes: T) => T & { tabs: { id: string; label: string; attributes: Pick<Omit<T, \"title\" | \"description\">, Exclude<Exclude<keyof T, \"title\" | \"description\">, \"tabs\">>; }[]; }"
+          "(attributes: T, discoverSessionId: string | undefined) => T & { tabs: { id: string; label: string; attributes: Pick<Omit<T, \"title\" | \"description\">, Exclude<Exclude<keyof T, \"title\" | \"description\">, \"tabs\">>; }[]; }"
         ],
         "path": "src/platform/plugins/shared/saved_search/common/service/extract_tabs.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1009,9 +1079,30 @@
               "T"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/service/extract_tabs.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "savedSearch",
+            "id": "def-common.extractTabs.$2",
+            "type": "string",
+            "tags": [],
+            "label": "discoverSessionId",
+            "description": [
+              "Optional Discover session ID used to generate a deterministic UUID for the default tab"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/saved_search/common/service/extract_tabs.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1056,6 +1147,8 @@
           ", managed: boolean, serialized?: Serialized) => ReturnType"
         ],
         "path": "src/platform/plugins/shared/saved_search/common/saved_searches_utils.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1070,6 +1163,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/saved_searches_utils.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1085,6 +1180,8 @@
               "SavedSearchAttributes"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/saved_searches_utils.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1100,6 +1197,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/saved_searches_utils.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1129,6 +1228,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/saved_search/common/saved_searches_utils.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1144,6 +1245,8 @@
               "boolean"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/saved_searches_utils.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1159,6 +1262,8 @@
               "Serialized"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/saved_searches_utils.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1178,6 +1283,8 @@
           "(id?: string | undefined) => string"
         ],
         "path": "src/platform/plugins/shared/saved_search/common/saved_searches_url.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1192,6 +1299,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/saved_searches_url.ts",
+            "lineNumber": 12,
+            "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1220,6 +1329,8 @@
           "SavedSearchAttributes"
         ],
         "path": "src/platform/plugins/shared/saved_search/common/service/saved_searches_utils.ts",
+        "lineNumber": 33,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1240,6 +1351,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/saved_search/common/service/saved_searches_utils.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1255,6 +1368,8 @@
               "string"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/service/saved_searches_utils.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1290,6 +1405,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1312,6 +1429,8 @@
               "> | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1343,6 +1462,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1357,6 +1478,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1371,6 +1494,8 @@
         "label": "DiscoverSession",
         "description": [],
         "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+        "lineNumber": 134,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1382,6 +1507,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+            "lineNumber": 135,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1393,6 +1520,8 @@
             "label": "title",
             "description": [],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+            "lineNumber": 136,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1404,6 +1533,8 @@
             "label": "description",
             "description": [],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+            "lineNumber": 137,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1425,6 +1556,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+            "lineNumber": 138,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1436,6 +1569,8 @@
             "label": "managed",
             "description": [],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+            "lineNumber": 139,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1450,6 +1585,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+            "lineNumber": 140,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1465,6 +1602,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+            "lineNumber": 141,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1479,6 +1618,8 @@
               "{ outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; errorJSON?: string | undefined; } | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+            "lineNumber": 142,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1493,6 +1634,8 @@
         "label": "DiscoverSessionTab",
         "description": [],
         "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+        "lineNumber": 108,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1504,6 +1647,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1515,6 +1660,8 @@
             "label": "label",
             "description": [],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1536,6 +1683,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+            "lineNumber": 111,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1550,6 +1699,8 @@
               "string[]"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1570,6 +1721,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1581,6 +1734,8 @@
             "label": "hideChart",
             "description": [],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1592,6 +1747,8 @@
             "label": "isTextBasedQuery",
             "description": [],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+            "lineNumber": 115,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1606,6 +1763,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+            "lineNumber": 116,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1634,6 +1793,14 @@
                 "text": "AggregateQuery"
               },
               " | undefined; filter?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined; nonHighlightingFilters?: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -1687,7 +1854,15 @@
               },
               " | undefined; searchAfter?: ",
               "SortResults",
-              " | undefined; timeout?: string | undefined; terminate_after?: number | undefined; parent?: ",
+              " | undefined; timeout?: string | undefined; terminate_after?: number | undefined; projectRouting?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              "; timezone?: string | undefined; parent?: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -1698,6 +1873,8 @@
               " | undefined; }"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1719,6 +1896,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1733,6 +1912,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+            "lineNumber": 119,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1747,6 +1928,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+            "lineNumber": 120,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1761,6 +1944,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+            "lineNumber": 121,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1775,6 +1960,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+            "lineNumber": 122,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1797,6 +1984,8 @@
               ", \"from\" | \"to\"> | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+            "lineNumber": 123,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1811,6 +2000,8 @@
               "Readonly<{} & { value: number; pause: boolean; }> | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+            "lineNumber": 124,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1825,6 +2016,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+            "lineNumber": 125,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1839,6 +2032,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+            "lineNumber": 126,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1853,6 +2048,24 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+            "lineNumber": 127,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedSearch",
+            "id": "def-common.DiscoverSessionTab.chartInterval",
+            "type": "string",
+            "tags": [],
+            "label": "chartInterval",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+            "lineNumber": 128,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1874,6 +2087,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1889,6 +2104,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+            "lineNumber": 130,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1903,6 +2120,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+            "lineNumber": 131,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1919,6 +2138,8 @@
         "label": "VIEW_MODE",
         "description": [],
         "path": "src/platform/plugins/shared/saved_search/common/index.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1936,6 +2157,8 @@
           "1"
         ],
         "path": "src/platform/plugins/shared/saved_search/common/constants.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1951,6 +2174,8 @@
           "10000"
         ],
         "path": "src/platform/plugins/shared/saved_search/common/constants.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1966,6 +2191,8 @@
           "1"
         ],
         "path": "src/platform/plugins/shared/saved_search/common/constants.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1993,6 +2220,34 @@
           "[] | undefined; sharingSavedObjectProps?: { outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; errorJSON?: string | undefined; } | undefined; }"
         ],
         "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+        "lineNumber": 86,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedSearch",
+        "id": "def-common.SavedSearchByValueAttributes",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedSearchByValueAttributes",
+        "description": [],
+        "signature": [
+          "SavedSearchAttributes",
+          " & { references: ",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
+          "[]; }"
+        ],
+        "path": "src/platform/plugins/shared/saved_search/common/types.ts",
+        "lineNumber": 79,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2008,6 +2263,8 @@
           "\"search\""
         ],
         "path": "src/platform/plugins/shared/saved_search/common/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2023,6 +2280,8 @@
           "\"discover session\""
         ],
         "path": "src/platform/plugins/shared/saved_search/common/constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

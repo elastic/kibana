@@ -48,6 +48,7 @@ const BulkFillRuleGapsModalComponent = ({
     if (rulesCount > 1) {
       components.push(
         <EuiCallOut
+          announceOnMount
           size="s"
           iconType="warning"
           title={i18n.BULK_FILL_RULE_GAPS_MAX_GAPS_LIMITATIONS}

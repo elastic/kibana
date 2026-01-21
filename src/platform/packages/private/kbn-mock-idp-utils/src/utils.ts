@@ -28,8 +28,12 @@ import {
   MOCK_IDP_LOGOUT_PATH,
   MOCK_IDP_REALM_NAME,
   MOCK_IDP_ROLE_MAPPING_NAME,
+  MOCK_IDP_UIAM_COSMOS_DB_ACCESS_KEY,
   MOCK_IDP_UIAM_SIGNING_SECRET,
 } from './constants';
+import { seedTestUser } from './cosmos_db_seeder';
+import { encodeWithChecksum } from './jwt-codecs/encoder-checksum';
+import { prefixWithEssuDev } from './jwt-codecs/encoder-prefix';
 
 /**
  * Creates XML metadata for our mock identity provider.
@@ -100,19 +104,29 @@ export async function createSAMLResponse(options: {
   full_name?: string;
   email?: string;
   roles: string[];
-  serverless?: { organizationId: string; projectType: string; uiamEnabled: boolean };
+  serverless?:
+    | { organizationId: string; projectType: string; uiamEnabled: false }
+    | {
+        organizationId: string;
+        projectType: string;
+        uiamEnabled: true;
+        accessTokenLifetimeSec?: number;
+        refreshTokenLifetimeSec?: number;
+      };
 }) {
   const issueInstant = new Date().toISOString();
   const notOnOrAfter = new Date(Date.now() + 3600 * 1000).toISOString();
 
   const uiamSessionTokens = options.serverless?.uiamEnabled
-    ? createUiamSessionTokens({
+    ? await createUiamSessionTokens({
         username: options.username,
         organizationId: options.serverless.organizationId,
         projectType: options.serverless.projectType,
         roles: options.roles,
-        familyName: options.full_name,
+        fullName: options.full_name,
         email: options.email,
+        accessTokenLifetimeSec: options.serverless.accessTokenLifetimeSec,
+        refreshTokenLifetimeSec: options.serverless.refreshTokenLifetimeSec,
       })
     : undefined;
 
@@ -246,22 +260,70 @@ export async function ensureSAMLRoleMapping(client: Client) {
   });
 }
 
-function createUiamSessionTokens({
+export function generateCosmosDBApiRequestHeaders(
+  httpVerb: 'POST' | 'PUT',
+  resourceType: 'dbs' | 'colls' | 'docs',
+  resourceId: string
+) {
+  // Generate date in RFC 1123 format
+  const timestamp = new Date().toUTCString();
+
+  // Cosmos DB expects all inputs in the string-to-sign to be lowercased
+  // Format: Verb\nResourceType\nResourceID\nTimestamp\n\n
+  const stringToSign =
+    `${httpVerb.toLowerCase()}\n` +
+    `${resourceType.toLowerCase()}\n` +
+    `${resourceId}\n` +
+    `${timestamp.toLowerCase()}\n` +
+    `\n`;
+
+  const key = Buffer.from(MOCK_IDP_UIAM_COSMOS_DB_ACCESS_KEY, 'base64');
+  return {
+    Authorization: encodeURIComponent(
+      `type=master&ver=1.0&sig=${createHmac('sha256', key).update(stringToSign).digest('base64')}`
+    ),
+    'x-ms-date': timestamp,
+    'x-ms-version': '2018-12-31',
+    'Content-Type': 'application/json',
+  };
+}
+
+async function createUiamSessionTokens({
   username,
   organizationId,
   projectType,
   roles,
-  familyName,
+  fullName,
   email,
+  // 1H
+  accessTokenLifetimeSec = 3600,
+  // 3D
+  refreshTokenLifetimeSec = 3 * 24 * 3600,
 }: {
   username: string;
   organizationId: string;
   projectType: string;
   roles: string[];
-  familyName?: string;
+  fullName?: string;
   email?: string;
+  accessTokenLifetimeSec?: number;
+  refreshTokenLifetimeSec?: number;
 }) {
   const iat = Math.floor(Date.now() / 1000);
+
+  const givenName = fullName ? fullName.split(' ')[0] : 'Test';
+  const familyName = fullName ? fullName.split(' ').slice(1).join(' ') : 'User';
+
+  await seedTestUser({
+    userId: username,
+    organizationId,
+    roleId: 'cloud-role-id',
+    projectType,
+    applicationRoles: roles,
+    email,
+    firstName: givenName,
+    lastName: familyName,
+  });
 
   const accessTokenBody = Buffer.from(
     JSON.stringify({
@@ -271,6 +333,7 @@ function createUiamSessionTokens({
 
       oid: organizationId,
       sub: username,
+      given_name: givenName,
       family_name: familyName,
       email,
 
@@ -290,10 +353,8 @@ function createUiamSessionTokens({
       },
 
       nbf: iat,
-      // 1H
-      exp: iat + 3600,
+      exp: iat + accessTokenLifetimeSec,
       iat,
-
       jti: randomBytes(16).toString('hex'),
     })
   ).toString('base64url');
@@ -307,10 +368,9 @@ function createUiamSessionTokens({
       sub: username,
 
       nbf: iat,
-      // 3D
-      exp: iat + 3600 * 24 * 3,
+      exp: iat + refreshTokenLifetimeSec,
       iat,
-
+      session_created: iat,
       jti: randomBytes(16).toString('hex'),
     })
   ).toString('base64url');
@@ -318,17 +378,31 @@ function createUiamSessionTokens({
   const tokenHeader = Buffer.from(JSON.stringify({ typ: 'JWT', alg: 'HS256' })).toString(
     'base64url'
   );
+
   const accessToken = `${tokenHeader}.${accessTokenBody}`;
+
   const refreshToken = `${tokenHeader}.${refreshTokenBody}`;
 
   return {
-    accessToken: `${accessToken}.${createHmac('sha256', MOCK_IDP_UIAM_SIGNING_SECRET)
-      .update(accessToken)
-      .digest('base64url')}`,
-    accessTokenExpiresAt: (iat + 3600) * 1000,
-    refreshToken: `${refreshToken}.${createHmac('sha256', MOCK_IDP_UIAM_SIGNING_SECRET)
-      .update(refreshToken)
-      .digest('base64url')}`,
-    refreshTokenExpiresAt: (iat + 3600) * 1000,
+    accessToken: prepareJwtForUiam(accessToken),
+    accessTokenExpiresAt: (iat + accessTokenLifetimeSec) * 1000,
+    refreshToken: prepareJwtForUiam(refreshToken),
+    refreshTokenExpiresAt: (iat + refreshTokenLifetimeSec) * 1000,
   };
+}
+
+function prepareJwtForUiam(unsignedJwt: string): string {
+  const signedAccessToken = signJwt(unsignedJwt);
+  return wrapSignedJwt(signedAccessToken);
+}
+
+function signJwt(unsignedJwt: string): string {
+  return `${unsignedJwt}.${createHmac('sha256', MOCK_IDP_UIAM_SIGNING_SECRET)
+    .update(unsignedJwt)
+    .digest('base64url')}`;
+}
+
+function wrapSignedJwt(signedJwt: string): string {
+  const accessTokenEncodedWithChecksum = encodeWithChecksum(signedJwt);
+  return prefixWithEssuDev(accessTokenEncodedWithChecksum);
 }

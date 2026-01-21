@@ -14,7 +14,7 @@ import {
   getPKISSLOverrides,
 } from './other_openai_utils';
 import type { AxiosError } from 'axios';
-import type { Secrets } from '../../../../common/openai/types';
+import type { Secrets } from '@kbn/connector-schemas/openai';
 
 describe('Other (OpenAI Compatible Service) Utils', () => {
   describe('sanitizeRequest', () => {

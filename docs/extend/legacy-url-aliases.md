@@ -30,7 +30,7 @@ You have {{kib}} 7.16, and you create a new dashboard.The ID of this dashboard i
 * **Default space**: `http://localhost:5601/app/dashboards#/view/123`
 * **Bill’s space**: `http://localhost:5601/s/bills-space/app/dashboards#/view/123`
 
-You use these two dashboards frequently, so you bookmark them in your web browser. After some time, you decide to upgrade to {{kib}} 8.0. When these two dashboards go through the conversion process, the one in "Bill’s space" will have its ID changed to "456". The URL to access that dashboard is different — not to worry though, there is a legacy URL alias for that dashboard.
+You use these two dashboards frequently, so you bookmark them in your web browser. After some time, you decide to upgrade to {{kib}} 8.0. When these two dashboards go through the conversion process, the one in "Bill’s space" will have its ID changed to "456". The URL to access that dashboard is different; not to worry though, there is a legacy URL alias for that dashboard.
 
 If you use your bookmark to access that dashboard using its old URL, {{kib}} detects that you are using a legacy URL, and finds the new object ID. If you navigate to `http://localhost:5601/s/bills-space/app/dashboards#/view/123`, you’ll see a message indicating that the dashboard has a new URL, and you’re automatically redirected to `http://localhost:5601/s/bills-space/app/dashboards#/view/456`.
 
@@ -47,6 +47,6 @@ By setting `compatibilityMode` to true when using the copy API, legacy aliases w
 
 ## Handling errors [legacy-url-aliases-handling-errors]
 
-Legacy URL aliases are intended to be fully transparent, but there are rare situations where this can lead to an error. For example, you might have a dashboard and one of the visualizations fails to load, directing you to this page. If you encounter an error in this situation, you might want to disable the legacy URL alias completely. This leaves the saved object intact, and you will not lose any data — you just won’t be able to use the old URL to access that saved object.
+Legacy URL aliases are intended to be fully transparent, but there are rare situations where this can lead to an error. For example, you might have a dashboard and one of the visualizations fails to load, directing you to this page. If you encounter an error in this situation, you might want to disable the legacy URL alias completely. This leaves the saved object intact, and you will not lose any data. You just won’t be able to use the old URL to access that saved object.
 
 To disable a legacy URL alias, you need three pieces of information: the `targetSpace`, the `targetType`, and the `sourceId`. Then use the [`_disable_legacy_url_aliases`](https://www.elastic.co/docs/api/doc/kibana/v8/group/endpoint-spaces) API to disable the problematic legacy URL alias.

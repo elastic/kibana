@@ -43,6 +43,7 @@ import {
   getTestRuleData,
   getUrlPrefix,
   ObjectRemover,
+  resetRulesSettings,
 } from '../../../../../common/lib';
 
 export default function createAlertsAsDataAlertDelayInstallResourcesTest({
@@ -89,6 +90,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
         conflicts: 'proceed',
         ignore_unavailable: true,
       });
+      await resetRulesSettings(supertestWithoutAuth, Spaces.space1.id);
     });
     after(async () => {
       await esTestIndexTool.destroy();
@@ -526,6 +528,313 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
 
       // After the third run, we should have 0 alert docs for the 0 active alerts
       expect(alertDocsRun3.length).to.equal(0);
+    });
+
+    it('should generate expected events with a alertDelay with AAD when flapping is disabled', async () => {
+      await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/settings/_flapping`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          enabled: false,
+          look_back_window: 20,
+          status_change_threshold: 4,
+        })
+        .expect(200);
+      const { body: createdAction } = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'MY action',
+          connector_type_id: 'test.noop',
+          config: {},
+          secrets: {},
+        })
+        .expect(200);
+
+      // pattern of when the alert should fire
+      const pattern = {
+        instance: [true, true, true, true, false, true],
+      };
+
+      const response = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            rule_type_id: 'test.patternFiringAad',
+            schedule: { interval: '1d' },
+            throttle: null,
+            notify_when: null,
+            params: {
+              pattern,
+            },
+            actions: [
+              {
+                id: createdAction.id,
+                group: 'default',
+                params: {},
+                frequency: {
+                  summary: false,
+                  throttle: null,
+                  notify_when: RuleNotifyWhen.CHANGE,
+                },
+              },
+            ],
+            alert_delay: {
+              active: 3,
+            },
+          })
+        );
+
+      expect(response.status).to.eql(200);
+      const ruleId = response.body.id;
+      objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
+
+      // --------------------------
+      // RUN 1 - 0 new alerts
+      // --------------------------
+      let events: IValidatedEvent[] = await waitForEventLogDocs(
+        ruleId,
+        new Map([['execute', { equal: 1 }]])
+      );
+      let executeEvent = events[0];
+      expect(get(executeEvent, ACTIVE_PATH)).to.be(0);
+      expect(get(executeEvent, NEW_PATH)).to.be(0);
+      expect(get(executeEvent, RECOVERED_PATH)).to.be(0);
+      expect(get(executeEvent, ACTION_PATH)).to.be(0);
+      expect(get(executeEvent, DELAYED_PATH)).to.be(1);
+
+      // Query for alerts
+      const alertDocsRun1 = await queryForAlertDocs<PatternFiringAlert>();
+
+      // Get alert state from task document
+      let state: any = await getTaskState(ruleId);
+      expect(state.alertInstances.instance.meta.activeCount).to.equal(1);
+      expect(state.alertInstances.instance.state.patternIndex).to.equal(0);
+
+      // After the first run, we should have 0 alert docs for the 0 active alerts
+      expect(alertDocsRun1.length).to.equal(0);
+
+      // --------------------------
+      // RUN 2 - 0 new alerts
+      // --------------------------
+      let runSoon = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
+        .set('kbn-xsrf', 'foo');
+      expect(runSoon.status).to.eql(204);
+
+      events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 2 }]]));
+      executeEvent = events[1];
+      expect(get(executeEvent, ACTIVE_PATH)).to.be(0);
+      expect(get(executeEvent, NEW_PATH)).to.be(0);
+      expect(get(executeEvent, RECOVERED_PATH)).to.be(0);
+      expect(get(executeEvent, ACTION_PATH)).to.be(0);
+      expect(get(executeEvent, DELAYED_PATH)).to.be(1);
+
+      // Query for alerts
+      const alertDocsRun2 = await queryForAlertDocs<PatternFiringAlert>();
+
+      // Get alert state from task document
+      state = await getTaskState(ruleId);
+      expect(state.alertInstances.instance.meta.activeCount).to.equal(2);
+      expect(state.alertInstances.instance.state.patternIndex).to.equal(1);
+
+      // After the second run, we should have 0 alert docs for the 0 active alerts
+      expect(alertDocsRun2.length).to.equal(0);
+
+      // --------------------------
+      // RUN 3 - 1 new alert
+      // --------------------------
+      runSoon = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
+        .set('kbn-xsrf', 'foo');
+      expect(runSoon.status).to.eql(204);
+
+      events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 3 }]]));
+      executeEvent = events[2];
+      let executionUuid = get(executeEvent, UUID_PATH);
+      expect(get(executeEvent, ACTIVE_PATH)).to.be(1);
+      expect(get(executeEvent, NEW_PATH)).to.be(1);
+      expect(get(executeEvent, RECOVERED_PATH)).to.be(0);
+      expect(get(executeEvent, ACTION_PATH)).to.be(1);
+      expect(get(executeEvent, DELAYED_PATH)).to.be(0);
+
+      // Query for alerts
+      const alertDocsRun3 = await queryForAlertDocs<PatternFiringAlert>();
+
+      // Get alert state from task document
+      state = await getTaskState(ruleId);
+      expect(state.alertInstances.instance.meta.activeCount).to.equal(3);
+      expect(state.alertInstances.instance.state.patternIndex).to.equal(2);
+
+      // After the third run, we should have 1 alert docs for the 1 active alert
+      expect(alertDocsRun3.length).to.equal(1);
+
+      testExpectRuleData(alertDocsRun3, ruleId, { pattern }, executionUuid!);
+      let source: PatternFiringAlert = alertDocsRun3[0]._source!;
+
+      // Each doc should have active status and default action group id
+      expect(source[ALERT_ACTION_GROUP]).to.equal('default');
+      // patternIndex should be 2 for the third run
+      expect(source.patternIndex).to.equal(2);
+      // alert UUID should equal doc id
+      expect(source[ALERT_UUID]).to.equal(alertDocsRun3[0]._id);
+      // duration should be 0 since this is a new alert
+      expect(source[ALERT_DURATION]).to.equal(0);
+      // start should be defined
+      expect(source[ALERT_START]).to.match(timestampPattern);
+      // time_range.gte should be same as start
+      expect(source[ALERT_TIME_RANGE]?.gte).to.equal(source[ALERT_START]);
+      // timestamp should be defined
+      expect(source['@timestamp']).to.match(timestampPattern);
+      // status should be active
+      expect(source[ALERT_STATUS]).to.equal('active');
+      // workflow status should be 'open'
+      expect(source[ALERT_WORKFLOW_STATUS]).to.equal('open');
+      // event.action should be 'open'
+      expect(source[EVENT_ACTION]).to.equal('open');
+      // event.kind should be 'signal'
+      expect(source[EVENT_KIND]).to.equal('signal');
+      // tags should equal rule tags because rule type doesn't set any tags
+      expect(source.tags).to.eql(['foo']);
+      // alert consecutive matches should match the active count
+      expect(source[ALERT_CONSECUTIVE_MATCHES]).to.equal(3);
+
+      // --------------------------
+      // RUN 4 - 1 active alert
+      // --------------------------
+      runSoon = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
+        .set('kbn-xsrf', 'foo');
+      expect(runSoon.status).to.eql(204);
+
+      events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 4 }]]));
+      executeEvent = events[3];
+      executionUuid = get(executeEvent, UUID_PATH);
+      expect(get(executeEvent, ACTIVE_PATH)).to.be(1);
+      expect(get(executeEvent, NEW_PATH)).to.be(0);
+      expect(get(executeEvent, RECOVERED_PATH)).to.be(0);
+      expect(get(executeEvent, ACTION_PATH)).to.be(0);
+      expect(get(executeEvent, DELAYED_PATH)).to.be(0);
+
+      // Query for alerts
+      const alertDocsRun4 = await queryForAlertDocs<PatternFiringAlert>();
+
+      // Get alert state from task document
+      state = await getTaskState(ruleId);
+      expect(state.alertInstances.instance.meta.activeCount).to.equal(4);
+      expect(state.alertInstances.instance.state.patternIndex).to.equal(3);
+
+      // After the fourth run, we should have 1 alert docs for the 1 active alert
+      expect(alertDocsRun4.length).to.equal(1);
+
+      testExpectRuleData(alertDocsRun4, ruleId, { pattern }, executionUuid!);
+      source = alertDocsRun4[0]._source!;
+      const run3Source = alertDocsRun3[0]._source!;
+
+      expect(source[ALERT_UUID]).to.equal(run3Source[ALERT_UUID]);
+      // patternIndex should be 3 for the fourth run
+      expect(source.patternIndex).to.equal(3);
+      expect(source[ALERT_ACTION_GROUP]).to.equal('default');
+      // start time should be defined and the same as prior run
+      expect(source[ALERT_START]).to.match(timestampPattern);
+      expect(source[ALERT_START]).to.equal(run3Source[ALERT_START]);
+      // timestamp should be defined and not the same as prior run
+      expect(source['@timestamp']).to.match(timestampPattern);
+      expect(source['@timestamp']).not.to.equal(run3Source['@timestamp']);
+      // status should still be active
+      expect(source[ALERT_STATUS]).to.equal('active');
+      // event.action set to active
+      expect(source[EVENT_ACTION]).to.eql('active');
+      expect(source.tags).to.eql(['foo']);
+      // these values should be the same as previous run
+      expect(source[EVENT_KIND]).to.eql(run3Source[EVENT_KIND]);
+      expect(source[ALERT_WORKFLOW_STATUS]).to.eql(run3Source[ALERT_WORKFLOW_STATUS]);
+      expect(source[ALERT_TIME_RANGE]?.gte).to.equal(run3Source[ALERT_TIME_RANGE]?.gte);
+      // alert consecutive matches should match the active count
+      expect(source[ALERT_CONSECUTIVE_MATCHES]).to.equal(4);
+
+      // --------------------------
+      // RUN 5 - 1 recovered alert
+      // --------------------------
+      runSoon = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
+        .set('kbn-xsrf', 'foo');
+      expect(runSoon.status).to.eql(204);
+
+      events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 5 }]]));
+      executeEvent = events[4];
+      executionUuid = get(executeEvent, UUID_PATH);
+      expect(get(executeEvent, ACTIVE_PATH)).to.be(0);
+      expect(get(executeEvent, NEW_PATH)).to.be(0);
+      expect(get(executeEvent, RECOVERED_PATH)).to.be(1);
+      expect(get(executeEvent, ACTION_PATH)).to.be(0);
+      expect(get(executeEvent, DELAYED_PATH)).to.be(0);
+
+      // Query for alerts
+      const alertDocsRun5 = await queryForAlertDocs<PatternFiringAlert>();
+
+      // After the fourth run, we should have 1 alert docs for the 1 recovered alert
+      expect(alertDocsRun5.length).to.equal(1);
+
+      testExpectRuleData(alertDocsRun5, ruleId, { pattern }, executionUuid!);
+      source = alertDocsRun5[0]._source!;
+
+      // action group should be set to recovered
+      expect(source[ALERT_ACTION_GROUP]).to.be('recovered');
+      // rule type AAD payload should be set to recovery values
+      expect(source.instancePattern).to.eql([]);
+      expect(source.patternIndex).to.eql(-1);
+      // uuid is the same
+      expect(source[ALERT_UUID]).to.equal(run3Source[ALERT_UUID]);
+      // start time should be defined and the same as before
+      expect(source[ALERT_START]).to.match(timestampPattern);
+      expect(source[ALERT_START]).to.equal(run3Source[ALERT_START]);
+      // timestamp should be defined and not the same as prior run
+      expect(source['@timestamp']).to.match(timestampPattern);
+      expect(source['@timestamp']).not.to.equal(run3Source['@timestamp']);
+      // end time should be defined
+      expect(source[ALERT_END]).to.match(timestampPattern);
+      // status should be set to recovered
+      expect(source[ALERT_STATUS]).to.equal('recovered');
+      // event.action set to close
+      expect(source[EVENT_ACTION]).to.eql('close');
+      expect(source.tags).to.eql(['foo']);
+      // these values should be the same as previous run
+      expect(source[EVENT_KIND]).to.eql(run3Source[EVENT_KIND]);
+      expect(source[ALERT_WORKFLOW_STATUS]).to.eql(run3Source[ALERT_WORKFLOW_STATUS]);
+      expect(source[ALERT_TIME_RANGE]?.gte).to.equal(run3Source[ALERT_TIME_RANGE]?.gte);
+      // time_range.lte should be set to end time
+      expect(source[ALERT_TIME_RANGE]?.lte).to.equal(source[ALERT_END]);
+      // alert consecutive matches should match the active count
+      expect(source[ALERT_CONSECUTIVE_MATCHES]).to.equal(0);
+
+      // --------------------------
+      // RUN 6 - 0 new alerts
+      // --------------------------
+      runSoon = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
+        .set('kbn-xsrf', 'foo');
+      expect(runSoon.status).to.eql(204);
+
+      events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 6 }]]));
+      executeEvent = events[5];
+      expect(get(executeEvent, ACTIVE_PATH)).to.be(0);
+      expect(get(executeEvent, NEW_PATH)).to.be(0);
+      expect(get(executeEvent, RECOVERED_PATH)).to.be(0);
+      expect(get(executeEvent, ACTION_PATH)).to.be(0);
+      expect(get(executeEvent, DELAYED_PATH)).to.be(1);
+
+      // Query for alerts
+      const alertDocsRun6 = await queryForAlertDocs<PatternFiringAlert>();
+
+      // Get alert state from task document
+      state = await getTaskState(ruleId);
+      expect(state.alertInstances.instance.meta.activeCount).to.equal(1);
+      expect(state.alertInstances.instance.state.patternIndex).to.equal(5);
+
+      // After the sixth run, we should have 1 alert docs for the previously recovered alert
+      expect(alertDocsRun6.length).to.equal(1);
     });
   });
 

@@ -11,13 +11,13 @@ import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/public';
-import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
+import { VisualizationContainer } from '@kbn/visualizations-common';
 import type {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common/expression_renderers';
-import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { getColumnByAccessor } from '@kbn/chart-expressions-common';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import type { ChartSizeEvent } from '@kbn/chart-expressions-common';

@@ -134,6 +134,7 @@ describe('PrivilegeMonitoringEngineDescriptorClient', () => {
     expect(soClient.find).toHaveBeenCalledWith({
       type: privilegeMonitoringTypeName,
       namespaces: [namespace],
+      perPage: 10000,
     });
     expect(result).toEqual(findResponse);
   });

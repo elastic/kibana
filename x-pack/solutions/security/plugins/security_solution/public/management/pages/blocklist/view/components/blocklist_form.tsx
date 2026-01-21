@@ -20,8 +20,7 @@ import {
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiToolTip,
-  EuiIcon,
+  EuiIconTip,
 } from '@elastic/eui';
 import type { BlocklistConditionEntryField } from '@kbn/securitysolution-utils';
 import { OperatingSystem, isPathValid } from '@kbn/securitysolution-utils';
@@ -224,13 +223,16 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
     const valueLabel = useMemo(() => {
       return (
         <div>
-          <EuiToolTip
+          {VALUE_LABEL}&nbsp;
+          <EuiIconTip
+            color="subdued"
+            type="info"
+            className="eui-alignTop"
+            iconProps={{
+              className: 'eui-alignTop',
+            }}
             content={displaySingleValueInput ? SINGLE_VALUE_LABEL_HELPER : VALUE_LABEL_HELPER}
-          >
-            <>
-              {VALUE_LABEL} <EuiIcon color="subdued" type="info" className="eui-alignTop" />
-            </>
-          </EuiToolTip>
+          />
         </div>
       );
     }, [displaySingleValueInput]);

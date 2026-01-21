@@ -19,11 +19,22 @@ import {
   SEARCH_PLAYGROUND_NOT_FOUND,
   SEARCH_PLAYGROUND_SEARCH_PATH,
 } from './routes';
+import { usePlaygroundLicenseStatus } from './hooks/use_license_status';
 import { useSearchPlaygroundFeatureFlag } from './hooks/use_search_playground_feature_flag';
+import { PlaygroundUnavailable } from './playground_unavailable_page';
 import { PlaygroundRouteNotFound } from './components/not_found';
 
 export const PlaygroundRouter: React.FC = () => {
+  const { hasRequiredLicense } = usePlaygroundLicenseStatus();
   const isSearchModeEnabled = useSearchPlaygroundFeatureFlag();
+
+  if (!hasRequiredLicense) {
+    return (
+      <Routes>
+        <Route component={PlaygroundUnavailable} />
+      </Routes>
+    );
+  }
 
   return (
     <Routes>

@@ -6,8 +6,8 @@ exports[`SuricataSignature rendering it renders the default SuricataSignature 1`
   justifyContent="center"
   wrap={true}
 >
-  <DraggableSignatureId
-    id="draggable-signature-id-test-doc-id-123"
+  <SignatureId
+    scopeId="test"
     signatureId={123}
   />
   <Tokens
@@ -22,10 +22,10 @@ exports[`SuricataSignature rendering it renders the default SuricataSignature 1`
   <LinkFlexItem
     grow={false}
   >
-    <DefaultDraggable
-      data-test-subj="draggable-signature-link"
+    <CellActionsRenderer
+      data-test-subj="signature-link"
       field="suricata.eve.alert.signature"
-      id="suricata-signature-default-draggable-test-doc-id-123-suricata.eve.alert.signature"
+      scopeId="test"
       tooltipPosition="bottom"
       value="ET SCAN ATTACK Hello"
     >
@@ -36,7 +36,7 @@ exports[`SuricataSignature rendering it renders the default SuricataSignature 1`
           Hello
         </GoogleLink>
       </div>
-    </DefaultDraggable>
+    </CellActionsRenderer>
   </LinkFlexItem>
 </EuiFlexGroup>
 `;

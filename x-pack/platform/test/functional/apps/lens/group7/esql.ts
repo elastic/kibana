@@ -29,6 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
+    hideAnnouncements: true,
   };
 
   describe('lens ES|QL tests', () => {
@@ -119,7 +120,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardPanelActions.removePanel(panel);
       await header.waitUntilLoadingHasFinished();
 
-      await dashboardAddPanel.clickEditorMenuButton();
+      await dashboardAddPanel.openAddPanelFlyout();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
       await header.waitUntilLoadingHasFinished();
 

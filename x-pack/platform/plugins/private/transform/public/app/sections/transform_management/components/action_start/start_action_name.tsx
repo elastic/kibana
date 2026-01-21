@@ -122,7 +122,7 @@ export const StartActionName: FC<StartActionNameProps> = ({
   if ((forceDisable === true || actionIsDisabled) && content !== undefined) {
     return (
       <EuiToolTip position="top" content={content}>
-        <>{startActionNameText}</>
+        <span tabIndex={0}>{startActionNameText}</span>
       </EuiToolTip>
     );
   }

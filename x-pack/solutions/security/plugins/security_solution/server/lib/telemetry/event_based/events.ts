@@ -26,7 +26,10 @@ import type {
 } from '../diagnostic/health_diagnostic_service.types';
 
 import { SIEM_MIGRATIONS_EVENTS } from './events/siem_migrations';
-import type { RuleUpgradeTelemetry } from '../../detection_engine/prebuilt_rules/api/perform_rule_upgrade/update_rule_telemetry';
+import type {
+  RuleBulkUpgradeTelemetry,
+  RuleUpgradeTelemetry,
+} from '../../detection_engine/prebuilt_rules/api/perform_rule_upgrade/update_rule_telemetry';
 
 // Telemetry event that is sent for each rule that is upgraded during a prebuilt rule upgrade
 export const DETECTION_RULE_UPGRADE_EVENT: EventTypeOpts<RuleUpgradeTelemetry> = {
@@ -98,6 +101,139 @@ export const DETECTION_RULE_UPGRADE_EVENT: EventTypeOpts<RuleUpgradeTelemetry> =
         },
       },
       _meta: { description: 'Fields updated without conflicts' },
+    },
+  },
+};
+
+// Telemetry event that is sent for each bulk upgrade rules request
+export const DETECTION_RULE_BULK_UPGRADE_EVENT: EventTypeOpts<RuleBulkUpgradeTelemetry> = {
+  eventType: 'detection_rule_bulk_upgrade',
+  schema: {
+    successfulUpdates: {
+      properties: {
+        totalNumberOfRules: {
+          type: 'long',
+          _meta: { description: 'Number of successfully updated rules in bulk update request' },
+        },
+        numOfCustomizedRules: {
+          type: 'long',
+          _meta: {
+            description: 'Number of successfully updated customized rules in bulk update request',
+          },
+        },
+        numOfNonCustomizedRules: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of successfully updated non-customized rules in bulk update request',
+          },
+        },
+        numOfNonSolvableConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of successfully updated rules with non-solvable conflicts in bulk update request',
+          },
+        },
+        numOfSolvableConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of successfully updated rules with solvable conflicts in bulk update request',
+          },
+        },
+        numOfNoConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of successfully updated rules with no conflicts in bulk update request',
+          },
+        },
+      },
+    },
+    errorUpdates: {
+      properties: {
+        totalNumberOfRules: {
+          type: 'long',
+          _meta: { description: 'Number of rules that failed to update in bulk update request' },
+        },
+        numOfCustomizedRules: {
+          type: 'long',
+          _meta: {
+            description: 'Number of customized rules that failed to update in bulk update request',
+          },
+        },
+        numOfNonCustomizedRules: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of non-customized rules that failed to update in bulk update request',
+          },
+        },
+        numOfNonSolvableConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of rules with non-solvable conflicts that failed to update in bulk update request',
+          },
+        },
+        numOfSolvableConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of rules with solvable conflicts that failed to update in bulk update request',
+          },
+        },
+        numOfNoConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of rules with no conflicts that failed to update in bulk update request',
+          },
+        },
+      },
+    },
+    skippedUpdates: {
+      properties: {
+        totalNumberOfRules: {
+          type: 'long',
+          _meta: { description: 'Number of rules that were skipped during bulk update request' },
+        },
+        numOfCustomizedRules: {
+          type: 'long',
+          _meta: {
+            description: 'Number of customized rules that were skipped during bulk update request',
+          },
+        },
+        numOfNonCustomizedRules: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of non-customized rules that were skipped during bulk update request',
+          },
+        },
+        numOfNonSolvableConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of rules with non-solvable conflicts that were skipped during bulk update request',
+          },
+        },
+        numOfSolvableConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of rules with solvable conflicts that were skipped during bulk update request',
+          },
+        },
+        numOfNoConflicts: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of rules with no conflicts that were skipped during bulk update request',
+          },
+        },
+      },
     },
   },
 };
@@ -260,6 +396,185 @@ export const ENTITY_STORE_DATA_VIEW_REFRESH_EXECUTION_EVENT: EventTypeOpts<{
   },
 };
 
+export const ENTITY_STORE_SNAPSHOT_TASK_EXECUTION_EVENT: EventTypeOpts<{
+  entityType: string;
+  namespace: string;
+  snapshotDate: Date;
+  snapshotIndex: string;
+  entityCount: number;
+  durationMs: number;
+  success: boolean;
+  errorMessage: string | undefined;
+}> = {
+  eventType: 'entity_store_data_view_refresh_execution',
+  schema: {
+    entityType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Type of entities stored (e.g. "host")',
+      },
+    },
+    namespace: {
+      type: 'keyword',
+      _meta: {
+        description: 'Namespace where the entities are stored (e.g. "default")',
+      },
+    },
+    snapshotDate: {
+      type: 'date',
+      _meta: {
+        description:
+          'Snapshot date marks the date on which the entities were captured (the day before the task run)',
+      },
+    },
+    snapshotIndex: {
+      type: 'keyword',
+      _meta: {
+        description: 'Name of the index containing captured entities',
+      },
+    },
+    entityCount: {
+      type: 'long',
+      _meta: {
+        description: 'Number of entities captured in the snapshot',
+      },
+    },
+    durationMs: {
+      type: 'long',
+      _meta: {
+        description:
+          'Duration (in milliseconds) of the entity store data view refresh execution time',
+      },
+    },
+    success: {
+      type: 'boolean',
+      _meta: {
+        description: 'True if the task run was completed succesfully, false otherwise',
+      },
+    },
+    errorMessage: {
+      type: 'keyword',
+      _meta: {
+        optional: true,
+        description: 'Contains the error message in case the task run failed (success: false)',
+      },
+    },
+  },
+};
+
+export const ENTITY_STORE_HEALTH_REPORT_EVENT: EventTypeOpts<{
+  engines: Array<{
+    type: string;
+    status: string;
+    delay: string;
+    frequency: string;
+    docsPerSecond: number;
+    lookbackPeriod: string;
+    fieldHistoryLength: number;
+    indexPattern: string;
+    filter: string;
+    timestampField: string;
+    components: Array<{
+      id: string;
+      resource: string;
+      installed: boolean;
+      health?: string;
+    }>;
+  }>;
+}> = {
+  eventType: 'entity_store_health_report',
+  schema: {
+    engines: {
+      type: 'array',
+      items: {
+        properties: {
+          type: {
+            type: 'keyword',
+            _meta: { description: 'Engine type (e.g "host" or "generic")' },
+          },
+          status: {
+            type: 'keyword',
+            _meta: {
+              description: 'Overall engine status',
+            },
+          },
+          delay: {
+            type: 'keyword',
+            _meta: {
+              description: 'Initial data processing delay (human readable, e.g., "5s")',
+            },
+          },
+          frequency: {
+            type: 'keyword',
+            _meta: { description: 'Run frequency (e.g., "1m", "15m")' },
+          },
+          docsPerSecond: {
+            type: 'double',
+            _meta: { description: 'Indexing rate in documents per second' },
+          },
+          lookbackPeriod: {
+            type: 'keyword',
+            _meta: {
+              description: 'Lookback period used by the engine (e.g., "7d")',
+            },
+          },
+          fieldHistoryLength: {
+            type: 'long',
+            _meta: {
+              description: 'Number of historical field entries retained',
+            },
+          },
+          indexPattern: {
+            type: 'keyword',
+            _meta: { description: 'Additional index pattern ingested by the transform' },
+          },
+          filter: {
+            type: 'keyword',
+            _meta: {
+              description: 'Optional filter applied to ingested documents',
+            },
+          },
+          timestampField: {
+            type: 'keyword',
+            _meta: {
+              description:
+                'Name of the timestamp field used for all operations (e.g. "@timestamp")',
+            },
+          },
+          components: {
+            type: 'array',
+            items: {
+              properties: {
+                id: {
+                  type: 'keyword',
+                  _meta: { description: 'Component identifier' },
+                },
+                resource: {
+                  type: 'keyword',
+                  _meta: {
+                    description: 'Type of the component (e.g. "index" or "transform")',
+                  },
+                },
+                installed: {
+                  type: 'boolean',
+                  _meta: { description: 'Whether the component is installed' },
+                },
+                health: {
+                  type: 'keyword',
+                  _meta: {
+                    optional: true,
+                    description: 'Reported component health; Present for transforms',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
 export const ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT: EventTypeOpts<{
   error: string;
 }> = {
@@ -276,6 +591,8 @@ export const ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT: EventTypeOpts<{
 
 export const ENTITY_ENGINE_INITIALIZATION_EVENT: EventTypeOpts<{
   duration: number;
+  entityType: string;
+  namespace: string;
 }> = {
   eventType: 'entity_engine_initialization',
   schema: {
@@ -285,18 +602,94 @@ export const ENTITY_ENGINE_INITIALIZATION_EVENT: EventTypeOpts<{
         description: 'Duration (in seconds) of the entity engine initialization',
       },
     },
+    entityType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Type of entities stored (e.g. "host")',
+      },
+    },
+    namespace: {
+      type: 'keyword',
+      _meta: {
+        description: 'Namespace where the entities are stored (e.g. "default")',
+      },
+    },
+  },
+};
+
+export const ENTITY_ENGINE_DELETION_EVENT: EventTypeOpts<{
+  duration: number;
+  entityType: string;
+  namespace: string;
+}> = {
+  eventType: 'entity_engine_deletion',
+  schema: {
+    duration: {
+      type: 'long',
+      _meta: {
+        description: 'Duration (in seconds) of the entity engine deletion',
+      },
+    },
+    entityType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Type of entities stored (e.g. "host")',
+      },
+    },
+    namespace: {
+      type: 'keyword',
+      _meta: {
+        description: 'Namespace where the entities are stored (e.g. "default")',
+      },
+    },
   },
 };
 
 export const ENTITY_STORE_USAGE_EVENT: EventTypeOpts<{
   storeSize: number;
+  entityType: string;
+  namespace: string;
 }> = {
   eventType: 'entity_store_usage',
   schema: {
     storeSize: {
       type: 'long',
       _meta: {
-        description: 'Number of entities stored in the entity store',
+        description: 'Number of entities stored in the entity store by type and namespace',
+      },
+    },
+    entityType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Type of entities stored (e.g. "host")',
+      },
+    },
+    namespace: {
+      type: 'keyword',
+      _meta: {
+        description: 'Namespace where the entities are stored (e.g. "default")',
+      },
+    },
+  },
+};
+
+export const ENTITY_STORE_API_CALL_EVENT: EventTypeOpts<{
+  endpoint: string;
+  error?: string;
+}> = {
+  eventType: 'entity_store_api_call',
+  schema: {
+    endpoint: {
+      type: 'keyword',
+      _meta: {
+        description: 'Name of the endpoint called',
+      },
+    },
+    error: {
+      type: 'keyword',
+      _meta: {
+        optional: true,
+        description: 'Contains error message in case the call failed',
       },
     },
   },
@@ -1303,6 +1696,7 @@ export const GAP_DETECTED_EVENT: EventTypeOpts<{
 
 export const events = [
   DETECTION_RULE_UPGRADE_EVENT,
+  DETECTION_RULE_BULK_UPGRADE_EVENT,
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
   RISK_SCORE_EXECUTION_ERROR_EVENT,
   RISK_SCORE_EXECUTION_CANCELLATION_EVENT,
@@ -1314,8 +1708,12 @@ export const events = [
   ENDPOINT_WORKFLOW_INSIGHTS_REMEDIATED_EVENT,
   FIELD_RETENTION_ENRICH_POLICY_EXECUTION_EVENT,
   ENTITY_STORE_DATA_VIEW_REFRESH_EXECUTION_EVENT,
+  ENTITY_STORE_SNAPSHOT_TASK_EXECUTION_EVENT,
+  ENTITY_STORE_HEALTH_REPORT_EVENT,
+  ENTITY_STORE_API_CALL_EVENT,
   ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
   ENTITY_ENGINE_INITIALIZATION_EVENT,
+  ENTITY_ENGINE_DELETION_EVENT,
   ENTITY_STORE_USAGE_EVENT,
   PRIVMON_ENGINE_INITIALIZATION_EVENT,
   PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT,

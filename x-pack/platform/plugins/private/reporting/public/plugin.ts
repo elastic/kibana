@@ -87,10 +87,12 @@ export class ReportingPublicPlugin
   private config: ClientConfigType;
   private contract?: ReportingSetup;
   private startServices$?: StartServices$;
+  private isServerless: boolean;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
     this.kibanaVersion = initializerContext.env.packageInfo.version;
+    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
   private getContract(apiClient: ReportingAPIClient, startServices$: StartServices$) {
@@ -128,6 +130,7 @@ export class ReportingPublicPlugin
             rendering: start.rendering,
             uiSettings: start.uiSettings,
             chrome: start.chrome,
+            userProfile: start.userProfile,
           },
           ...rest,
         ];
@@ -218,7 +221,12 @@ export class ReportingPublicPlugin
     shareSetup.registerShareIntegration<ExportShare>(
       'search',
       // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
-      reportingCsvExportShareIntegration({ apiClient, startServices$ })
+      reportingCsvExportShareIntegration({
+        apiClient,
+        startServices$,
+        isServerless: this.isServerless,
+        csvConfig: this.config.csv,
+      })
     );
 
     if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {

@@ -11,7 +11,7 @@ import React, { useMemo } from 'react';
 import styled from '@emotion/styled';
 
 import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
-import { DefaultDraggable } from '../draggables';
+import { CellActionsRenderer } from '../cell_actions/cell_actions_renderer';
 import { useUiSetting$ } from '../../lib/kibana';
 import { EMPTY_VALUE_LABEL } from './translation';
 import { hasValueToDisplay } from '../../utils/validators';
@@ -29,7 +29,6 @@ const CountFlexItem = styled(EuiFlexItem)`
 
 export interface LegendItem {
   color?: string;
-  dataProviderId: string;
   render?: (fieldValuePair?: { field: string; value: string | number }) => React.ReactNode;
   field: string;
   scopeId?: string;
@@ -55,7 +54,7 @@ const DraggableLegendItemComponent: React.FC<{
   isInlineActions?: boolean;
 }> = ({ legendItem, isInlineActions = false }) => {
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
-  const { color, count, dataProviderId, field, scopeId, value } = legendItem;
+  const { color, count, field, scopeId, value } = legendItem;
 
   const sourcererScopeId = getSourcererScopeId(scopeId ?? '');
   const content = useMemo(() => {
@@ -82,19 +81,13 @@ const DraggableLegendItemComponent: React.FC<{
             gutterSize="none"
             responsive={false}
           >
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} data-test-subj={'legend-item'}>
               {isInlineActions ? (
                 content
               ) : (
-                <DefaultDraggable
-                  field={field}
-                  hideTopN={true}
-                  id={dataProviderId}
-                  scopeId={scopeId}
-                  value={value}
-                >
+                <CellActionsRenderer field={field} hideTopN={true} scopeId={scopeId} value={value}>
                   {content}
-                </DefaultDraggable>
+                </CellActionsRenderer>
               )}
             </EuiFlexItem>
 

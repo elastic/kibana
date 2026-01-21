@@ -6,7 +6,7 @@
  */
 import * as React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ActionTypeForm } from './action_type_form';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import type {
@@ -27,6 +27,8 @@ import { ALERTING_FEATURE_ID, RuleNotifyWhen } from '@kbn/alerting-plugin/common
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { transformActionVariables } from '@kbn/alerts-ui-shared/src/action_variables/transforms';
 import userEvent from '@testing-library/user-event';
+import { createMockConnectorType } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 const CUSTOM_NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
   {
@@ -712,18 +714,14 @@ function getActionTypeForm({
   producerId?: string;
   featureId?: string;
 }) {
-  const actionConnectorDefault = {
+  const actionConnectorDefault = createMockActionConnector({
     actionTypeId: '.pagerduty',
     config: {
       apiUrl: 'http:\\test',
     },
     id: 'test',
-    isPreconfigured: false,
-    isDeprecated: false,
-    isSystemAction: false as const,
     name: 'test name',
-    secrets: {},
-  };
+  });
 
   const actionItemDefault = {
     id: '123',
@@ -736,32 +734,23 @@ function getActionTypeForm({
   };
 
   const connectorsDefault = [
-    {
+    createMockActionConnector({
       actionTypeId: '.pagerduty',
       config: {
         apiUrl: 'http:\\test',
       },
       id: 'test',
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false as const,
       name: 'test name',
-      secrets: {},
-    },
-    {
+    }),
+    createMockActionConnector({
       id: '123',
       name: 'Server log',
       actionTypeId: '.server-log',
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false as const,
-      config: {},
-      secrets: {},
-    },
+    }),
   ];
 
   const actionTypeIndexDefault: Record<string, ActionType> = {
-    '.pagerduty': {
+    '.pagerduty': createMockConnectorType({
       id: '.pagerduty',
       enabled: true,
       name: 'Test',
@@ -770,8 +759,9 @@ function getActionTypeForm({
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       isSystemActionType: false,
-    },
-    '.server-log': {
+      isDeprecated: false,
+    }),
+    '.server-log': createMockConnectorType({
       id: '.server-log',
       enabled: true,
       name: 'Test SL',
@@ -780,7 +770,8 @@ function getActionTypeForm({
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
       isSystemActionType: false,
-    },
+      isDeprecated: false,
+    }),
   };
 
   return (

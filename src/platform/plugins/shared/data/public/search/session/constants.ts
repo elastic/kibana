@@ -8,4 +8,3 @@
  */
 
 export const SEARCH_SESSIONS_MANAGEMENT_ID = 'search_sessions';
-export const BACKGROUND_SEARCH_FEATURE_FLAG_KEY = 'search.backgroundSearchEnabled';

@@ -7,9 +7,9 @@
 
 import type { ObservabilityOnboardingRouteHandlerResources } from '../routes/types';
 
-export function getMangedOtlpServiceUrl(
+export function getManagedOtlpServiceUrl(
   plugins: ObservabilityOnboardingRouteHandlerResources['plugins']
-) {
+): string {
   const managedOtlpServiceUrl = plugins.observability.setup.managedOtlpServiceUrl;
 
   if (!managedOtlpServiceUrl) {

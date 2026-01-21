@@ -47,6 +47,38 @@ const commonRiskFields: FieldMap = {
     array: false,
     required: false,
   },
+  // Modifiers applied to the score calculation
+  modifiers: {
+    type: 'object',
+    array: true,
+    required: false,
+  },
+  'modifiers.type': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'modifiers.subtype': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'modifiers.modifier_value': {
+    type: 'float',
+    array: false,
+    required: false,
+  },
+  'modifiers.contribution': {
+    type: 'float',
+    array: false,
+    required: false,
+  },
+  // Metadata shape is dynamic per modifier type; use flattened for flexibility
+  'modifiers.metadata': {
+    type: 'flattened',
+    array: false,
+    required: false,
+  },
   inputs: {
     type: 'object',
     array: true,

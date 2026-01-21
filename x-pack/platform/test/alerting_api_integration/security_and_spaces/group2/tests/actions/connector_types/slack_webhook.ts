@@ -67,6 +67,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
         name: 'A slack action',
         connector_type_id: '.slack',
         config: {},
+        is_connector_type_deprecated: false,
       });
 
       expect(typeof createdAction.id).to.be('string');
@@ -84,6 +85,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
         name: 'A slack action',
         connector_type_id: '.slack',
         config: {},
+        is_connector_type_deprecated: false,
       });
     });
 
@@ -101,8 +103,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
           expect(resp.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message:
-              'error validating action type secrets: [webhookUrl]: expected value of type [string] but got [undefined]',
+            message: `error validating connector type secrets: Field \"webhookUrl\": Required`,
           });
         });
     });
@@ -123,7 +124,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
           expect(resp.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message: `error validating action type secrets: error configuring slack action: target url \"http://slack.mynonexistent.com/other/stuff/in/the/path\" is not added to the Kibana config xpack.actions.allowedHosts`,
+            message: `error validating connector type secrets: error configuring slack action: target url \"http://slack.mynonexistent.com/other/stuff/in/the/path\" is not added to the Kibana config xpack.actions.allowedHosts`,
           });
         });
     });
@@ -145,7 +146,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'error validating action type secrets: error configuring slack action: unable to parse host name from webhookUrl',
+              'error validating connector type secrets: error configuring slack action: unable to parse host name from webhookUrl',
           });
         });
     });
@@ -208,7 +209,9 @@ export default function slackTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
       expect(result.status).to.eql('error');
-      expect(result.message).to.match(/error validating action params: \[message\]: /);
+      expect(result.message).to.eql(
+        `error validating action params: Field "message": String must contain at least 1 character(s)`
+      );
     });
 
     it('should handle a 40x slack error', async () => {

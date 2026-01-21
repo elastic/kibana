@@ -347,7 +347,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         />
       ) : undefined,
     toolsRight: [
-      <EuiFlexGroup gutterSize="s">
+      <EuiFlexGroup gutterSize="s" key="includeStats">
         <EuiFlexItem grow={false}>
           <EuiSwitch
             label={i18n.translate('xpack.idxMgmt.dataStreamListControls.includeStatsSwitchLabel', {
@@ -374,6 +374,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
       <FilterListButton<DataStreamFilterName>
         filters={viewFilters}
         onChange={onViewFilterChange}
+        key="filterListButton"
       />,
       <EuiButton
         color="success"
@@ -447,7 +448,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
           'data-test-subj': 'cell',
         })}
         data-test-subj="dataStreamTable"
-        message={
+        noItemsMessage={
           <FormattedMessage
             id="xpack.idxMgmt.dataStreamList.table.noDataStreamsMessage"
             defaultMessage="No data streams found"

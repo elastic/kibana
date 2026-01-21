@@ -55,6 +55,7 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
       buttonColor="primary"
     >
       <EuiCallOut
+        announceOnMount
         iconType="info"
         data-test-subj="confirmNoPoliciesCallout"
         title={i18n.translate('xpack.fleet.agentPolicy.noPolicies.confirmModalCalloutTitle', {
@@ -97,6 +98,7 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
     >
       {agentCount > 0 ? (
         <EuiCallOut
+          announceOnMount
           iconType="info"
           title={i18n.translate('xpack.fleet.agentPolicy.confirmModalCalloutTitle', {
             defaultMessage:
@@ -120,6 +122,7 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
         </EuiCallOut>
       ) : (
         <EuiCallOut
+          announceOnMount
           data-test-subj="confirmAddRemovePoliciesCallout"
           iconType="info"
           title={i18n.translate('xpack.fleet.agentPolicy.confirmModalPoliciesCalloutTitle', {

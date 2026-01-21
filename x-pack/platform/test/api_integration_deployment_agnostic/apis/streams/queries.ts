@@ -14,7 +14,13 @@ import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
-import { disableStreams, enableStreams, getQueries, putStream } from './helpers/requests';
+import {
+  deleteStream,
+  disableStreams,
+  enableStreams,
+  getQueries,
+  putStream,
+} from './helpers/requests';
 import type { RoleCredentials } from '../../services';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -41,6 +47,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         },
       },
+      failure_store: { inherit: {} },
     },
   };
 
@@ -67,7 +74,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         stream,
         ...emptyAssets,
       });
-      await alertingApi.deleteRules({ roleAuthc });
+    });
+
+    afterEach(async () => {
+      await deleteStream(apiClient, STREAM_NAME);
     });
 
     it('lists empty queries when none are defined on the stream', async () => {
@@ -219,6 +229,109 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(updatedRules.body.data[0].name).to.eql('updated title');
         expect(updatedRules.body.data[0].id).to.eql(initialRules.body.data[0].id);
       });
+
+      it('returns 400 when attempting to change the feature of an existing query', async () => {
+        const initialFeature = {
+          name: 'initial-feature',
+          filter: { field: 'host.name', eq: 'host1' },
+          type: 'system' as const,
+        };
+        const query = {
+          id: 'feature-query',
+          title: 'query with feature',
+          kql: { query: 'test query' },
+          feature: initialFeature,
+        };
+
+        await apiClient
+          .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
+            params: {
+              path: { name: STREAM_NAME, queryId: query.id },
+              body: {
+                title: query.title,
+                kql: query.kql,
+                feature: initialFeature,
+              },
+            },
+          })
+          .expect(200);
+
+        const updatedFeature = {
+          name: 'updated-feature',
+          filter: { field: 'host.name', eq: 'host2' },
+          type: 'system' as const,
+        };
+
+        // Attempt to update with different feature - should fail
+        await apiClient
+          .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
+            params: {
+              path: { name: STREAM_NAME, queryId: query.id },
+              body: {
+                title: query.title,
+                kql: query.kql,
+                feature: updatedFeature,
+              },
+            },
+          })
+          .expect(400);
+
+        // Verify the query was not updated
+        const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
+        expect(getQueriesResponse.queries).to.eql([query]);
+      });
+
+      it('allows updating a query when the feature remains unchanged', async () => {
+        const feature = {
+          name: 'test-feature',
+          filter: { field: 'host.name', eq: 'host1' },
+          type: 'system' as const,
+        };
+        const query = {
+          id: 'feature-query-unchanged',
+          title: 'initial title',
+          kql: { query: 'initial query' },
+          feature,
+        };
+
+        await apiClient
+          .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
+            params: {
+              path: { name: STREAM_NAME, queryId: query.id },
+              body: {
+                title: query.title,
+                kql: query.kql,
+                feature,
+              },
+            },
+          })
+          .expect(200);
+
+        const upsertQueryResponse = await apiClient
+          .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
+            params: {
+              path: { name: STREAM_NAME, queryId: query.id },
+              body: {
+                title: 'updated title',
+                kql: { query: 'updated query' },
+                feature,
+              },
+            },
+          })
+          .expect(200)
+          .then((res) => res.body);
+        expect(upsertQueryResponse.acknowledged).to.be(true);
+
+        const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
+        expect(getQueriesResponse.queries).to.eql([
+          {
+            id: query.id,
+            title: 'updated title',
+            kql: { query: 'updated query' },
+            feature,
+          },
+        ]);
+      });
     });
 
     it('deletes an existing query and the associated rule successfully', async () => {
@@ -339,6 +452,61 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(initialThirdRuleId).not.to.eql(
         updatedRules.body.data.find((rule: any) => rule.name === updateThirdQuery.title).id
       );
+    });
+
+    it('returns 400 when bulk operation attempts to change the feature of an existing query', async () => {
+      const initialFeature = {
+        name: 'initial-feature',
+        filter: { field: 'host.name', eq: 'host1' },
+        type: 'system' as const,
+      };
+      const queryWithFeature = {
+        id: 'feature-query-bulk',
+        title: 'query with feature',
+        kql: { query: 'test query' },
+        feature: initialFeature,
+      };
+
+      await apiClient
+        .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
+          params: {
+            path: { name: STREAM_NAME, queryId: queryWithFeature.id },
+            body: {
+              title: queryWithFeature.title,
+              kql: queryWithFeature.kql,
+              feature: initialFeature,
+            },
+          },
+        })
+        .expect(200);
+
+      const updatedFeature = {
+        name: 'updated-feature',
+        filter: { field: 'host.name', eq: 'host2' },
+        type: 'system' as const,
+      };
+
+      await apiClient
+        .fetch('POST /api/streams/{name}/queries/_bulk 2023-10-31', {
+          params: {
+            path: { name: STREAM_NAME },
+            body: {
+              operations: [
+                {
+                  index: {
+                    ...queryWithFeature,
+                    feature: updatedFeature,
+                  },
+                },
+              ],
+            },
+          },
+        })
+        .expect(400);
+
+      // Verify the query was not updated
+      const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
+      expect(getQueriesResponse.queries).to.eql([queryWithFeature]);
     });
   });
 }

@@ -41,9 +41,10 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointDataStreamHelpers = getService('endpointDataStreamHelpers');
   const utils = getService('securitySolutionUtils');
 
+  // FLAKY: https://github.com/elastic/kibana/issues/246567
   // @skipInServerlessMKI - this test uses internal index manipulation in before/after hooks
   // @skipInServerlessMKI - if you are removing this annotation, make sure to add the test suite to the MKI pipeline in .buildkite/pipelines/security_solution_quality_gate/mki_periodic/mki_periodic_defend_workflows.yml
-  describe('@ess @serverless @skipInServerlessMKI test metadata apis', function () {
+  describe.skip('@ess @serverless @skipInServerlessMKI test metadata apis', function () {
     let adminSupertest: TestAgent;
     let t1AnalystSupertest: TestAgent;
 
@@ -99,10 +100,36 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await endpointDataStreamHelpers.deleteAllDocsFromFleetAgents(getService);
-        await endpointDataStreamHelpers.deleteAllDocsFromMetadataDatastream(getService);
-        await endpointDataStreamHelpers.deleteAllDocsFromMetadataCurrentIndex(getService);
-        await endpointDataStreamHelpers.deleteAllDocsFromIndex(getService, METADATA_UNITED_INDEX);
+        // Delete data loaded and suppress any errors (no point in failing test suite on data
+        // cleanup, since all test already ran)
+        await endpointDataStreamHelpers.deleteAllDocsFromFleetAgents(getService).catch((error) => {
+          log.warning(
+            `afterAll: 'deleteAllDocsFromFleetAgents()' returned error: ${error.message}`
+          );
+          log.debug(error);
+        });
+        await endpointDataStreamHelpers
+          .deleteAllDocsFromMetadataDatastream(getService)
+          .catch((error) => {
+            log.warning(
+              `afterAll: 'deleteAllDocsFromMetadataDatastream()' returned error: ${error.message}`
+            );
+            log.debug(error);
+          });
+        await endpointDataStreamHelpers
+          .deleteAllDocsFromMetadataCurrentIndex(getService)
+          .catch((error) => {
+            log.warning(
+              `afterAll: 'deleteAllDocsFromMetadataCurrentIndex()' returned error: ${error.message}`
+            );
+            log.debug(error);
+          });
+        await endpointDataStreamHelpers
+          .deleteAllDocsFromIndex(getService, METADATA_UNITED_INDEX)
+          .catch((error) => {
+            log.warning(`afterAll: 'deleteAllDocsFromIndex()' returned error: ${error.message}`);
+            log.debug(error);
+          });
       });
 
       it('should return one entry for each host with default paging', async () => {

@@ -56,10 +56,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('Loads the app', async () => {
-      log.debug('Checking for section heading to say Ingest Pipelines.');
+      log.debug('Checking for section heading to say Ingest pipelines.');
 
       const headingText = await pageObjects.ingestPipelines.sectionHeadingText();
-      expect(headingText).to.be('Ingest Pipelines');
+      expect(headingText).to.be('Ingest pipelines');
     });
 
     describe('Pipelines list', () => {
@@ -211,6 +211,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const baseUrl = await browser.getCurrentUrl();
           await browser.navigateTo(baseUrl + '?pipeline=' + TREE_PIPELINE_NAME);
 
+          // Wait for the details flyout to load with the expected pipeline
+          await pageObjects.ingestPipelines.waitForDetailsFlyoutTitle(TREE_PIPELINE_NAME);
+
           const treeExists = await pageObjects.ingestPipelines.pipelineTreeExists();
           expect(treeExists).to.be(true);
 
@@ -218,6 +221,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(detailsPanelTitle).to.be(TREE_PIPELINE_NAME);
 
           await pageObjects.ingestPipelines.clickTreeNode(TEST_PIPELINE_NAME);
+
+          // Wait for the details panel to update with the new pipeline
+          await pageObjects.ingestPipelines.waitForDetailsFlyoutTitle(TEST_PIPELINE_NAME);
 
           // The details panel should have changed
           detailsPanelTitle = await pageObjects.ingestPipelines.getDetailsFlyoutTitle();

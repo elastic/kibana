@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './login_page.scss';
-
 import {
   EuiButton,
   EuiFlexGroup,
@@ -15,9 +13,10 @@ import {
   EuiImage,
   EuiSpacer,
   EuiText,
+  type EuiThemeComputed,
   EuiTitle,
 } from '@elastic/eui';
-import classNames from 'classnames';
+import { css } from '@emotion/react';
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import type { Subscription } from 'rxjs';
@@ -138,13 +137,24 @@ export class LoginPage extends Component<Props, State> {
         ? false
         : allowLogin && layout === 'form';
 
-    const contentHeaderClasses = classNames('loginWelcome__content', 'eui-textCenter', {
-      ['loginWelcome__contentDisabledForm']: !loginIsSupported,
-    });
+    const loginWelcomeStyle = (euiTheme: EuiThemeComputed) =>
+      css`
+        position: relative;
+        margin: auto;
+        max-width: 460px;
+        padding-left: ${euiTheme.size.xl};
+        padding-right: ${euiTheme.size.xl};
+        z-index: 10;
+        text-align: center;
+      `;
 
-    const contentBodyClasses = classNames('loginWelcome__content', 'loginWelcome-body', {
-      ['loginWelcome__contentDisabledForm']: !loginIsSupported,
-    });
+    const contentHeaderStyles = (euiTheme: EuiThemeComputed) => [
+      loginWelcomeStyle(euiTheme),
+      !loginIsSupported &&
+        css`
+          max-width: 700px;
+        `,
+    ];
 
     const customLogo = this.state.customBranding?.logo;
     const logo = customLogo ? (
@@ -155,9 +165,16 @@ export class LoginPage extends Component<Props, State> {
     // custom logo needs to be centered
     const logoStyle = customLogo ? { padding: 0 } : {};
     return (
-      <div className="loginWelcome login-form" css={kbnFullScreenBgCss}>
-        <header className="loginWelcome__header">
-          <div className={contentHeaderClasses}>
+      <div data-test-subj="loginForm" css={kbnFullScreenBgCss}>
+        <header
+          css={({ euiTheme }) => css`
+            margin-top: calc(${euiTheme.size.xxl} * 3);
+            position: relative;
+            padding: ${euiTheme.size.base};
+            z-index: 10;
+          `}
+        >
+          <div css={({ euiTheme }) => contentHeaderStyles(euiTheme)}>
             <span className="loginWelcome__logo" style={logoStyle}>
               {logo}
             </span>
@@ -171,7 +188,7 @@ export class LoginPage extends Component<Props, State> {
             </EuiTitle>
           </div>
         </header>
-        <div className={contentBodyClasses}>
+        <div css={({ euiTheme }) => contentHeaderStyles(euiTheme)}>
           <EuiFlexGroup gutterSize="l">
             <EuiFlexItem>
               {this.getLoginForm({

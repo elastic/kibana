@@ -19,25 +19,33 @@ import type {
   SimulateIngestResponse,
   SimulateIngestSimulateIngestDocumentResult,
   FieldCapsResponse,
+  IngestSimulateResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
+import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import { flattenObjectNestedLast, calculateObjectDiff } from '@kbn/object-utils';
 import type {
   FlattenRecord,
   NamedFieldDefinitionConfig,
-  FieldDefinitionConfig,
-  InheritedFieldDefinitionConfig,
   FieldDefinition,
+  SimulationError,
+  DocSimulationStatus,
+  SimulationDocReport,
+  ProcessorMetrics,
+  DetectedField,
+  ProcessingSimulationResponse,
 } from '@kbn/streams-schema';
-import {
-  getInheritedFieldsFromAncestors,
-  isNamespacedEcsField,
-  Streams,
-} from '@kbn/streams-schema';
+import { getInheritedFieldsFromAncestors, isOtelStream, Streams } from '@kbn/streams-schema';
 import { mapValues, uniq, omit, isEmpty, uniqBy } from 'lodash';
 import type { StreamlangDSL } from '@kbn/streamlang';
 import { transpileIngestPipeline } from '@kbn/streamlang';
 import { getRoot } from '@kbn/streams-schema/src/shared/hierarchy';
+import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
+import { FIELD_DEFINITION_TYPES } from '@kbn/streams-schema/src/fields';
+import {
+  normalizeGeoPointsInObject,
+  detectGeoPointPatternsFromDocuments,
+} from '../../../../lib/streams/helpers/normalize_geo_points';
 import { getProcessingPipelineName } from '../../../../lib/streams/ingest_pipelines/name';
 import type { StreamsClient } from '../../../../lib/streams/client';
 
@@ -56,54 +64,7 @@ export interface SimulateProcessingDeps {
   params: ProcessingSimulationParams;
   scopedClusterClient: IScopedClusterClient;
   streamsClient: StreamsClient;
-}
-
-export interface BaseSimulationError {
-  message: string;
-}
-
-export type SimulationError = BaseSimulationError &
-  (
-    | {
-        type: 'field_mapping_failure';
-      }
-    | {
-        type: 'generic_processor_failure';
-        processor_id: string;
-      }
-    | {
-        type: 'generic_simulation_failure';
-        processor_id?: string;
-      }
-    | {
-        type: 'ignored_fields_failure';
-        ignored_fields: Array<Record<string, string>>;
-      }
-    | {
-        type: 'non_namespaced_fields_failure';
-        processor_id: string;
-      }
-    | {
-        type: 'reserved_field_failure';
-        processor_id: string;
-      }
-  );
-
-export type DocSimulationStatus = 'parsed' | 'partially_parsed' | 'skipped' | 'failed';
-
-export interface SimulationDocReport {
-  detected_fields: Array<{ processor_id: string; name: string }>;
-  errors: SimulationError[];
-  status: DocSimulationStatus;
-  value: FlattenRecord;
-}
-
-export interface ProcessorMetrics {
-  detected_fields: string[];
-  errors: SimulationError[];
-  failed_rate: number;
-  skipped_rate: number;
-  parsed_rate: number;
+  fieldsMetadataClient: IFieldsMetadataClient;
 }
 
 // Narrow down the type to only successful processor results
@@ -136,18 +97,14 @@ export type IngestSimulationResult =
       error: SimulationError;
     };
 
-export type DetectedField =
-  | WithNameAndEsType
-  | WithNameAndEsType<FieldDefinitionConfig | InheritedFieldDefinitionConfig>;
-
-export type WithNameAndEsType<TObj = {}> = TObj & { name: string; esType?: string };
 export type WithRequired<TObj, TKey extends keyof TObj> = TObj & { [TProp in TKey]-?: TObj[TProp] };
 
 export const simulateProcessing = async ({
   params,
   scopedClusterClient,
   streamsClient,
-}: SimulateProcessingDeps) => {
+  fieldsMetadataClient,
+}: SimulateProcessingDeps): Promise<ProcessingSimulationResponse> => {
   /* 0. Retrieve required data to prepare the simulation */
   const [stream, { indexState: streamIndexState, fieldCaps: streamIndexFieldCaps }] =
     await Promise.all([
@@ -155,8 +112,10 @@ export const simulateProcessing = async ({
       getStreamIndex(scopedClusterClient, streamsClient, params.path.name),
     ]);
 
+  const streamFields = await getStreamFields(streamsClient, stream);
+
   /* 1. Prepare data for either simulation types (ingest, pipeline), prepare simulation body for the mandatory pipeline simulation */
-  const simulationData = prepareSimulationData(params, stream);
+  const simulationData = prepareSimulationData(params, stream, streamFields);
   const pipelineSimulationBody = preparePipelineSimulationBody(simulationData);
   const ingestSimulationBody = prepareIngestSimulationBody(
     simulationData,
@@ -181,7 +140,7 @@ export const simulateProcessing = async ({
     return prepareSimulationFailureResponse(ingestSimulationResult.error);
   }
 
-  const streamFields = await getStreamFields(streamsClient, params.path.name);
+  const otelStream = isOtelStream(stream);
 
   /* 4. Extract all the documents reports and processor metrics from the simulations */
   const { docReports, processorsMetrics } = computePipelineSimulationResult(
@@ -190,15 +149,17 @@ export const simulateProcessing = async ({
     simulationData.docs,
     params.body.processing,
     Streams.WiredStream.Definition.is(stream),
+    otelStream,
     streamFields
   );
 
-  /* 5. Extract valid detected fields asserting existing mapped fields from stream and ancestors */
+  /* 5. Extract valid detected fields with intelligent type suggestions from fieldsMetadataService */
   const detectedFields = await computeDetectedFields(
     processorsMetrics,
     params,
     streamFields,
-    streamIndexFieldCaps
+    streamIndexFieldCaps,
+    fieldsMetadataClient
   );
 
   /* 6. Derive general insights and process final response body */
@@ -207,12 +168,13 @@ export const simulateProcessing = async ({
 
 const prepareSimulationDocs = (
   documents: FlattenRecord[],
-  streamName: string
+  streamName: string,
+  geoPointFields: Set<string>
 ): IngestDocument[] => {
   return documents.map((doc, id) => ({
     _index: streamName,
     _id: id.toString(),
-    _source: doc,
+    _source: normalizeGeoPointsInObject(doc, geoPointFields),
   }));
 };
 
@@ -242,7 +204,7 @@ const prepareSimulationProcessors = (processing: StreamlangDSL): IngestProcessor
               field: '_errors',
               value: {
                 message: '{{{ _ingest.on_failure_message }}}',
-                processor_id: '{{{ _ingest.on_failure_processor_tag }}}',
+                processor_id: processorConfig.tag,
                 type: 'generic_processor_failure',
               },
             },
@@ -255,7 +217,8 @@ const prepareSimulationProcessors = (processing: StreamlangDSL): IngestProcessor
 
 const prepareSimulationData = (
   params: ProcessingSimulationParams,
-  stream: Streams.all.Definition
+  stream: Streams.all.Definition,
+  streamFields: FieldDefinition
 ) => {
   const { body } = params;
   const { processing, documents } = body;
@@ -264,8 +227,22 @@ const prepareSimulationData = (
     ? getRoot(stream.name)
     : stream.name;
 
+  const geoPointFieldsFromDefinition = new Set(
+    Object.entries(streamFields)
+      .filter(([, def]) => def.type === 'geo_point')
+      .map(([name]) => name)
+  );
+
+  const geoPointFields =
+    Streams.ClassicStream.Definition.is(stream) && documents.length > 0
+      ? new Set([
+          ...geoPointFieldsFromDefinition,
+          ...detectGeoPointPatternsFromDocuments(documents),
+        ])
+      : geoPointFieldsFromDefinition;
+
   return {
-    docs: prepareSimulationDocs(documents, targetStreamName),
+    docs: prepareSimulationDocs(documents, targetStreamName, geoPointFields),
     processors: prepareSimulationProcessors(processing),
   };
 };
@@ -277,7 +254,6 @@ const preparePipelineSimulationBody = (
 
   return {
     docs,
-    // @ts-expect-error field_access_pattern not supported by typing yet
     pipeline: { processors, field_access_pattern: 'flexible' },
     verbose: true,
   };
@@ -295,14 +271,12 @@ const prepareIngestSimulationBody = (
   const { docs, processors } = simulationData;
 
   const defaultPipelineName = streamIndex.settings?.index?.default_pipeline;
-  const mappings = streamIndex.mappings;
 
   const pipelineSubstitutions: SimulateIngestRequest['pipeline_substitutions'] = {};
 
   if (defaultPipelineName) {
     pipelineSubstitutions[defaultPipelineName] = {
       processors,
-      // @ts-expect-error field_access_pattern not supported by typing yet
       field_access_pattern: 'flexible',
     };
   }
@@ -326,13 +300,11 @@ const prepareIngestSimulationBody = (
     // But the ingest simulation API does not validate correctly the mappings unless they are specified in the simulation body.
     // So we need to merge the mappings from the stream index with the detected fields.
     // This is a workaround until the ingest simulation API works as expected.
-    mapping_addition: {
-      ...mappings,
-      properties: {
-        ...(mappings && mappings.properties),
-        ...(detected_fields && computeMappingProperties(detected_fields)),
+    ...(detected_fields && {
+      mapping_addition: {
+        properties: computeMappingProperties(detected_fields),
       },
-    },
+    }),
   };
 
   return simulationBody;
@@ -343,25 +315,27 @@ const prepareIngestSimulationBody = (
  * If the simulation fails, we won't be able to extract the documents reports and the processor metrics.
  * In case any other error occurs, we delegate the error handling to currently in draft processor.
  */
-const executePipelineSimulation = async (
+export const executePipelineSimulation = async (
   scopedClusterClient: IScopedClusterClient,
   simulationBody: IngestSimulateRequest
 ): Promise<PipelineSimulationResult> => {
   try {
-    const simulation = await scopedClusterClient.asCurrentUser.ingest.simulate(simulationBody);
-
+    const originalSimulation = await scopedClusterClient.asCurrentUser.ingest.simulate(
+      simulationBody
+    );
+    const simulation = sanitiseSimulationResult(originalSimulation);
     return {
       status: 'success',
       simulation: simulation as SuccessfulPipelineSimulateResponse,
     };
   } catch (error) {
     if (error instanceof esErrors.ResponseError) {
-      const { processor_tag, reason } = error.body?.error;
+      const { processor_tag } = error.body?.error;
 
       return {
         status: 'failure',
         error: {
-          message: reason,
+          message: error.message,
           processor_id: processor_tag,
           type: 'generic_simulation_failure',
         },
@@ -377,6 +351,81 @@ const executePipelineSimulation = async (
     };
   }
 };
+
+// When dealing with a manual_ingest_pipeline action it is possible to have nested pipelines in the configuration,
+// as in, using the actual pipeline processor type. The problem is these results are a little bit different, e.g:
+// {
+//   "processor_type": "pipeline",
+//   "status": "success",
+//   "tag": "id5ded880-a555-11f0-94f6-45fc383ca38e",
+//   "if": {
+//     "condition": "ctx['data_stream.type'] == 'logs'",
+//     "result": true
+//   }
+// },
+// {
+//   "processor_type": "set",
+//   "status": "success",
+//   "doc": {
+//     "_index": "logs-synth-default",
+//     "_version": "-3",
+//     "_id": "99",
+//     "_source": {
+//       "host.name": test,
+//     },
+//   "_ingest": {
+//     "pipeline": "network_subpipeline",
+//     "timestamp": "2025-10-09T23:40:40.710774Z"
+//   }
+// }
+// We use sanitiseSimulationResult and propagateProcessorResultsPipelineTags to
+// propagate the pipeline processor tag (taken from the manual_ingest_pipeline action) to all nested
+// pipeline processor results.
+const sanitiseSimulationResult = (simulationResult: IngestSimulateResponse) => {
+  return {
+    docs: simulationResult.docs.map((doc) => {
+      return {
+        ...doc,
+        processor_results: propagateProcessorResultsPipelineTags(doc.processor_results)?.filter(
+          (result) => {
+            return result.processor_type !== 'pipeline';
+          }
+        ),
+      };
+    }),
+  };
+};
+
+function propagateProcessorResultsPipelineTags(
+  processorResults: IngestSimulateDocumentResult['processor_results']
+): IngestSimulateDocumentResult['processor_results'] {
+  if (!processorResults) return undefined;
+
+  let lastPipelineTag: string | undefined;
+  let applyTag = false;
+
+  return processorResults.map((result) => {
+    // If this is a pipeline processor, store its tag and start applying
+    if (result.processor_type === 'pipeline' && result.tag) {
+      lastPipelineTag = result.tag;
+      applyTag = true;
+      return result;
+    }
+
+    // If 1. we should apply the tag 2. this result is not from the root simulated pipeline 3. has no tag set
+    if (applyTag && !result.tag && result.doc?._ingest?.pipeline !== '_simulate_pipeline') {
+      // Apply the last pipeline tag
+      return { ...result, tag: lastPipelineTag };
+    }
+
+    // If this result has its own tag, stop applying the pipeline tag
+    if (result.tag) {
+      applyTag = false;
+    }
+
+    return result;
+  });
+}
 
 const executeIngestSimulation = async (
   scopedClusterClient: IScopedClusterClient,
@@ -428,6 +477,7 @@ const computePipelineSimulationResult = (
   sampleDocs: Array<{ _source: FlattenRecord }>,
   processing: StreamlangDSL,
   isWiredStream: boolean,
+  otelStream: boolean,
   streamFields: FieldDefinition
 ): {
   docReports: SimulationDocReport[];
@@ -446,7 +496,8 @@ const computePipelineSimulationResult = (
 
   const docReports = pipelineSimulationResult.docs.map((pipelineDocResult, id) => {
     const ingestDocResult = ingestSimulationResult.docs[id];
-    const ingestDocErrors = collectIngestDocumentErrors(ingestDocResult);
+    const ingestDocErrors = collectIngestDocumentErrors(ingestDocResult, otelStream);
+    const processedBy = collectProcessedByProcessorIds(pipelineDocResult.processor_results);
 
     const { errors, status, value } = getLastDoc(
       pipelineDocResult,
@@ -466,6 +517,10 @@ const computePipelineSimulationResult = (
 
       if (procId && isSkippedProcessor(processor)) {
         processorsMap[procId].skipped_rate++;
+      }
+
+      if (procId && isDroppedProcessor(processor)) {
+        processorsMap[procId].dropped_rate++;
       }
     });
 
@@ -487,6 +542,7 @@ const computePipelineSimulationResult = (
     return {
       detected_fields: diff.detected_fields,
       errors,
+      processed_by: processedBy,
       status,
       value,
     };
@@ -527,6 +583,7 @@ const initProcessorMetricsMap = (
       failed_rate: 0,
       skipped_rate: 0,
       parsed_rate: 1,
+      dropped_rate: 0,
     },
   ]);
 
@@ -544,6 +601,7 @@ const extractProcessorMetrics = ({
     const failureRate = metrics.failed_rate / sampleSize;
     const skippedRate = metrics.skipped_rate / sampleSize;
     const parsedRate = 1 - skippedRate - failureRate;
+    const droppedRate = metrics.dropped_rate / sampleSize;
     const detected_fields = uniq(metrics.detected_fields);
     const errors = uniqBy(metrics.errors, (error) => error.message);
 
@@ -553,6 +611,7 @@ const extractProcessorMetrics = ({
       failed_rate: parseFloat(failureRate.toFixed(3)),
       skipped_rate: parseFloat(skippedRate.toFixed(3)),
       parsed_rate: parseFloat(parsedRate.toFixed(3)),
+      dropped_rate: parseFloat(droppedRate.toFixed(3)),
     };
   });
 };
@@ -569,6 +628,12 @@ const getDocumentStatus = (
 
   if (processorResults.every(isSkippedProcessor)) {
     return 'skipped';
+  }
+
+  // If any processor dropped the document, it should be considered dropped
+  // (even if other processors succeeded before the drop)
+  if (processorResults.some(isDroppedProcessor)) {
+    return 'dropped';
   }
 
   if (processorResults.every((proc) => isSuccessfulProcessor(proc) || isSkippedProcessor(proc))) {
@@ -619,10 +684,12 @@ const computeSimulationDocDiff = (
 
   const comparisonDocs = [
     { processor_id: 'base', value: base },
-    ...successfulProcessors.map((proc) => ({
-      processor_id: proc.tag,
-      value: omit(proc.doc._source, ['_errors']),
-    })),
+    ...successfulProcessors.map((proc) => {
+      return {
+        processor_id: proc.tag,
+        value: omit(proc.doc._source, ['_errors']),
+      };
+    }),
   ];
 
   const diffResult: Pick<SimulationDocReport, 'detected_fields' | 'errors'> = {
@@ -652,16 +719,6 @@ const computeSimulationDocDiff = (
 
     diffResult.detected_fields.push(...processorDetectedFields);
 
-    if (isWiredStream) {
-      const nonNamespacedFields = addedFields.filter((field) => !isNamespacedEcsField(field));
-      if (!isEmpty(nonNamespacedFields)) {
-        diffResult.errors.push({
-          processor_id: nextDoc.processor_id,
-          type: 'non_namespaced_fields_failure',
-          message: `The fields generated by the processor do not match streams log record fields - put custom fields into attributes, body.structured or resource.attributes: [${nonNamespacedFields.join()}]`,
-        });
-      }
-    }
     if (forbiddenFields.some((field) => updatedFields.includes(field))) {
       diffResult.errors.push({
         processor_id: nextDoc.processor_id,
@@ -674,7 +731,26 @@ const computeSimulationDocDiff = (
   return diffResult;
 };
 
-const collectIngestDocumentErrors = (docResult: SimulateIngestSimulateIngestDocumentResult) => {
+const collectProcessedByProcessorIds = (
+  processorResults: SuccessfulPipelineSimulateDocumentResult['processor_results']
+) => {
+  const processedBy = new Set<string>();
+
+  processorResults.forEach((processor) => {
+    if (!processor.tag || isSkippedProcessor(processor)) {
+      return;
+    }
+
+    processedBy.add(processor.tag);
+  });
+
+  return Array.from(processedBy);
+};
+
+const collectIngestDocumentErrors = (
+  docResult: SimulateIngestSimulateIngestDocumentResult,
+  otelStream: boolean
+) => {
   const errors: SimulationError[] = [];
 
   if (isMappingFailure(docResult)) {
@@ -685,10 +761,17 @@ const collectIngestDocumentErrors = (docResult: SimulateIngestSimulateIngestDocu
   }
 
   if (docResult.doc?.ignored_fields) {
+    // Drop ignored field errors for OTEL streams if they end in geo.location - This is a temporary workaround for https://github.com/elastic/elasticsearch/issues/140506
+    const fieldsWithoutLocation = docResult.doc.ignored_fields.filter(({ field }) => {
+      return !field.endsWith('geo.location');
+    });
+    if (otelStream && fieldsWithoutLocation.length === 0) {
+      return errors;
+    }
     errors.push({
       type: 'ignored_fields_failure',
       message: 'Some fields were ignored while simulating this document ingestion.',
-      ignored_fields: docResult.doc.ignored_fields,
+      ignored_fields: fieldsWithoutLocation,
     });
   }
 
@@ -706,21 +789,25 @@ const prepareSimulationResponse = async (
   const partiallyParsedRate = calculateRateByStatus('partially_parsed');
   const skippedRate = calculateRateByStatus('skipped');
   const failureRate = calculateRateByStatus('failed');
+  const droppedRate = calculateRateByStatus('dropped');
 
   return {
     detected_fields: detectedFields,
     documents: docReports,
     processors_metrics: processorsMetrics,
+    definition_error: undefined,
     documents_metrics: {
       failed_rate: parseFloat(failureRate.toFixed(3)),
       partially_parsed_rate: parseFloat(partiallyParsedRate.toFixed(3)),
       skipped_rate: parseFloat(skippedRate.toFixed(3)),
       parsed_rate: parseFloat(parsedRate.toFixed(3)),
+      dropped_rate: parseFloat(droppedRate.toFixed(3)),
     },
   };
 };
 
 const prepareSimulationFailureResponse = (error: SimulationError) => {
+  const failedBecauseNoSampleDocs = error.message.includes('must specify at least one document');
   return {
     detected_fields: [],
     documents: [],
@@ -733,14 +820,19 @@ const prepareSimulationFailureResponse = (error: SimulationError) => {
             failed_rate: 1,
             skipped_rate: 0,
             parsed_rate: 0,
+            dropped_rate: 0,
           },
         }),
     },
+    // failure to simulate is considered a definition error, which will be displayed prominently in the UI
+    // The simulate API returns a generic error when no documents are provided, which is not useful in this context
+    definition_error: !failedBecauseNoSampleDocs ? error : undefined,
     documents_metrics: {
       failed_rate: 1,
       partially_parsed_rate: 0,
       skipped_rate: 0,
       parsed_rate: 0,
+      dropped_rate: 0,
     },
   };
 };
@@ -777,12 +869,9 @@ const getStreamIndex = async (
 
 const getStreamFields = async (
   streamsClient: StreamsClient,
-  streamName: string
+  stream: Streams.all.Definition
 ): Promise<FieldDefinition> => {
-  const [stream, ancestors] = await Promise.all([
-    streamsClient.getStream(streamName),
-    streamsClient.getAncestors(streamName),
-  ]);
+  const ancestors = await streamsClient.getAncestors(stream.name);
 
   if (Streams.WiredStream.Definition.is(stream)) {
     return { ...stream.ingest.wired.fields, ...getInheritedFieldsFromAncestors(ancestors) };
@@ -802,7 +891,8 @@ const computeDetectedFields = async (
   processorsMetrics: Record<string, ProcessorMetrics>,
   params: ProcessingSimulationParams,
   streamFields: FieldDefinition,
-  streamFieldCaps: FieldCapsResponse['fields']
+  streamFieldCaps: FieldCapsResponse['fields'],
+  fieldsMetadataClient: IFieldsMetadataClient
 ): Promise<DetectedField[]> => {
   const fields = Object.values(processorsMetrics).flatMap((metrics) => metrics.detected_fields);
 
@@ -815,6 +905,18 @@ const computeDetectedFields = async (
 
   const confirmedValidDetectedFields = computeMappingProperties(params.body.detected_fields ?? []);
 
+  let fieldMetadataMap: Record<string, FieldMetadataPlain>;
+  try {
+    fieldMetadataMap = (
+      await fieldsMetadataClient.find({
+        fieldNames: uniqueFields,
+      })
+    ).toPlain();
+  } catch (error) {
+    // Gracefully handle metadata service failures
+    fieldMetadataMap = {};
+  }
+
   return uniqueFields.map((name) => {
     const existingField = streamFields[name];
     if (existingField) {
@@ -822,10 +924,31 @@ const computeDetectedFields = async (
     }
 
     const existingFieldCaps = Object.keys(streamFieldCaps[name] || {});
-
     const esType = existingFieldCaps.length > 0 ? existingFieldCaps[0] : undefined;
 
-    return { name, type: confirmedValidDetectedFields[name]?.type, esType };
+    let suggestedType: string | undefined;
+    let source: string | undefined;
+    let description: string | undefined;
+
+    const fieldMetadata = fieldMetadataMap[name];
+    if (
+      fieldMetadata &&
+      fieldMetadata.type &&
+      FIELD_DEFINITION_TYPES.includes(fieldMetadata.type as (typeof FIELD_DEFINITION_TYPES)[number])
+    ) {
+      suggestedType = fieldMetadata.type;
+      source = fieldMetadata.source;
+      description = fieldMetadata.description;
+    }
+
+    return {
+      name,
+      type: confirmedValidDetectedFields[name]?.type,
+      esType,
+      suggestedType,
+      source,
+      description,
+    };
   });
 };
 
@@ -858,6 +981,11 @@ const isSkippedProcessor = (
   processor: IngestPipelineProcessorResult
 ): processor is WithRequired<IngestPipelineProcessorResult, 'tag'> =>
   processor.status === 'skipped';
+
+const isDroppedProcessor = (
+  processor: IngestPipelineProcessorResult
+): processor is WithRequired<IngestPipelineProcessorResult, 'tag'> =>
+  processor.status === 'dropped';
 
 const isMappingFailure = (entry: SimulateIngestSimulateIngestDocumentResult) =>
   entry.doc?.error?.type === 'document_parsing_exception';

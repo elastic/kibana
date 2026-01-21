@@ -14,8 +14,10 @@ import {
   ALERT_FLAPPING_HISTORY,
   ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MAINTENANCE_WINDOW_NAMES,
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_PENDING_RECOVERED_COUNT,
+  ALERT_MUTED,
   ALERT_RULE_TAGS,
   ALERT_START,
   ALERT_STATUS,
@@ -31,13 +33,16 @@ import {
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_SEVERITY_IMPROVING,
   ALERT_STATUS_ACTIVE,
+  ALERT_STATE_NAMESPACE,
 } from '@kbn/rule-data-utils';
 import type { DeepPartial } from '@kbn/utility-types';
 import type { Alert as LegacyAlert } from '../../alert/alert';
 import type { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
-import type { AlertRule } from '../types';
+import type { AlertRule, AlertRuleData } from '../types';
 import { stripFrameworkFields } from './strip_framework_fields';
 import { nanosToMicros } from './nanos_to_micros';
+import { filterAlertState } from './filter_alert_state';
+import { getAlertMutedStatus } from './get_alert_muted_status';
 
 interface BuildNewAlertOpts<
   AlertData extends RuleAlertData,
@@ -48,6 +53,7 @@ interface BuildNewAlertOpts<
 > {
   legacyAlert: LegacyAlert<LegacyState, LegacyContext, ActionGroupIds | RecoveryActionGroupId>;
   rule: AlertRule;
+  ruleData?: AlertRuleData;
   payload?: DeepPartial<AlertData>;
   runTimestamp?: string;
   timestamp: string;
@@ -69,6 +75,7 @@ export const buildNewAlert = <
 >({
   legacyAlert,
   rule,
+  ruleData,
   runTimestamp,
   timestamp,
   payload,
@@ -82,6 +89,13 @@ export const buildNewAlert = <
   RecoveryActionGroupId
 >): Alert & AlertData => {
   const cleanedPayload = stripFrameworkFields(payload);
+
+  const alertState = legacyAlert.getState();
+  const filteredAlertState = filterAlertState(alertState);
+  const hasAlertState = Object.keys(filteredAlertState).length > 0;
+  const alertInstanceId = legacyAlert.getId();
+  const isMuted = getAlertMutedStatus(alertInstanceId, ruleData);
+
   return deepmerge.all(
     [
       cleanedPayload,
@@ -94,21 +108,21 @@ export const buildNewAlert = <
         [ALERT_ACTION_GROUP]: legacyAlert.getScheduledActionOptions()?.actionGroup,
         [ALERT_FLAPPING]: legacyAlert.getFlapping(),
         [ALERT_FLAPPING_HISTORY]: legacyAlert.getFlappingHistory(),
-        [ALERT_INSTANCE_ID]: legacyAlert.getId(),
+        [ALERT_INSTANCE_ID]: alertInstanceId,
         [ALERT_MAINTENANCE_WINDOW_IDS]: legacyAlert.getMaintenanceWindowIds(),
+        [ALERT_MAINTENANCE_WINDOW_NAMES]: legacyAlert.getMaintenanceWindowNames(),
         [ALERT_CONSECUTIVE_MATCHES]: legacyAlert.getActiveCount(),
         [ALERT_PENDING_RECOVERED_COUNT]: legacyAlert.getPendingRecoveredCount(),
+        [ALERT_MUTED]: isMuted,
         [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
         [ALERT_UUID]: legacyAlert.getUuid(),
         [ALERT_SEVERITY_IMPROVING]: false,
         [ALERT_WORKFLOW_STATUS]: get(cleanedPayload, ALERT_WORKFLOW_STATUS, 'open'),
-        ...(legacyAlert.getState().duration
-          ? { [ALERT_DURATION]: nanosToMicros(legacyAlert.getState().duration) }
-          : {}),
-        ...(legacyAlert.getState().start
+        ...(alertState.duration ? { [ALERT_DURATION]: nanosToMicros(alertState.duration) } : {}),
+        ...(alertState.start
           ? {
-              [ALERT_START]: legacyAlert.getState().start,
-              [ALERT_TIME_RANGE]: { gte: legacyAlert.getState().start },
+              [ALERT_START]: alertState.start,
+              [ALERT_TIME_RANGE]: { gte: alertState.start },
             }
           : {}),
         [SPACE_IDS]: dangerouslyCreateAlertsInAllSpaces === true ? ['*'] : rule[SPACE_IDS],
@@ -116,6 +130,7 @@ export const buildNewAlert = <
         [TAGS]: Array.from(
           new Set([...((cleanedPayload?.tags as string[]) ?? []), ...(rule[ALERT_RULE_TAGS] ?? [])])
         ),
+        ...(hasAlertState ? { [ALERT_STATE_NAMESPACE]: filteredAlertState } : {}),
       },
     ],
     { arrayMerge: (_, sourceArray) => sourceArray }

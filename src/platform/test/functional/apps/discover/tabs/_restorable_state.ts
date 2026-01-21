@@ -23,6 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const monacoEditor = getService('monacoEditor');
   const esql = getService('esql');
   const browser = getService('browser');
+  const fieldEditor = getService('fieldEditor');
 
   describe('tabs restorable state', function () {
     describe('sidebar', function () {
@@ -118,6 +119,95 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedFieldList.clearSidebarFieldFilters();
         await retry.try(async () => {
           await expectState(initialCount);
+        });
+      });
+    });
+
+    describe('sidebar existing fields', function () {
+      it('should not fetch existing fields again when returning', async function () {
+        const expectState = async () => {
+          await unifiedFieldList.waitUntilFieldlistHasCountOfFields(48);
+        };
+        await expectState();
+
+        await discover.expectFieldsForWildcardRequestCount(1, async () => {
+          await unifiedTabs.createNewTab();
+          await expectState();
+        });
+
+        await discover.expectFieldsForWildcardRequestCount(0, async () => {
+          await unifiedTabs.selectTab(0);
+          await expectState();
+        });
+
+        await discover.expectFieldsForWildcardRequestCount(0, async () => {
+          await unifiedTabs.selectTab(1);
+          await expectState();
+        });
+
+        await discover.expectFieldsForWildcardRequestCount(1, async () => {
+          await unifiedTabs.createNewTab();
+          await expectState();
+        });
+      });
+
+      it('should refetch when returning to an edited data view', async function () {
+        const initialCount = 48;
+        const countAfterEditing = 49;
+        const expectState = async (state: number) => {
+          await unifiedFieldList.waitUntilSidebarHasLoaded();
+          await unifiedFieldList.waitUntilFieldlistHasCountOfFields(state);
+        };
+        await expectState(initialCount);
+        const expectField = async (fieldName: string, exists: boolean) => {
+          await unifiedFieldList.waitUntilSidebarHasLoaded();
+          const availableFields = await unifiedFieldList.getSidebarSectionFieldNames('available');
+          expect(availableFields.includes(fieldName)).to.be(exists);
+        };
+
+        await discover.expectFieldsForWildcardRequestCount(1, async () => {
+          await unifiedTabs.createNewTab();
+          await expectState(initialCount);
+        });
+
+        const field = '_test';
+        const field2 = '_test2';
+        await discover.expectFieldsForWildcardRequestCount(1, async () => {
+          await discover.addRuntimeField(field, `emit('test')`);
+          await discover.waitUntilTabIsLoaded();
+          await expectState(countAfterEditing);
+          await expectField(field, true);
+        });
+
+        await discover.expectFieldsForWildcardRequestCount(1, async () => {
+          await unifiedTabs.selectTab(0);
+          await expectState(countAfterEditing);
+          await expectField(field, true);
+        });
+
+        await discover.expectFieldsForWildcardRequestCount(0, async () => {
+          await unifiedTabs.selectTab(1);
+          await expectState(countAfterEditing);
+          await expectField(field, true);
+        });
+
+        await discover.expectFieldsForWildcardRequestCount(1, async () => {
+          await discover.editField(field);
+          await fieldEditor.setName(field2, true);
+          await fieldEditor.save();
+          await fieldEditor.confirmSave();
+          await fieldEditor.waitUntilClosed();
+          await discover.waitUntilTabIsLoaded();
+          await expectState(countAfterEditing);
+          await expectField(field, false);
+          await expectField(field2, true);
+        });
+
+        await discover.expectFieldsForWildcardRequestCount(1, async () => {
+          await unifiedTabs.selectTab(0);
+          await expectState(countAfterEditing);
+          await expectField(field, false);
+          await expectField(field2, true);
         });
       });
     });
@@ -387,6 +477,49 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
         await expectState(draftQuery0, false);
         expect(await discover.getHitCount()).to.be('50');
+      });
+
+      it('should restore the search bar state also after running the updated query', async () => {
+        await discover.selectTextBaseLang();
+        await discover.waitUntilTabIsLoaded();
+        const defaultQuery = 'FROM logstash-*';
+
+        const expectState = async (query: string, isDirty: boolean) => {
+          await retry.try(async () => {
+            expect(await monacoEditor.getCodeEditorValue()).to.be(query);
+          });
+          expect(await testSubjects.getAttribute('querySubmitButton', 'aria-label')).to.be(
+            isDirty ? 'Run query' : 'Refresh query'
+          );
+        };
+
+        const draftQuery0 =
+          'from logstash-* | sort @timestamp desc | limit 50 // edit and run this';
+        await expectState(defaultQuery, false);
+        await monacoEditor.setCodeEditorValue(draftQuery0);
+        await expectState(draftQuery0, true);
+        await queryBar.clickQuerySubmitButton();
+        await discover.waitUntilTabIsLoaded();
+        await expectState(draftQuery0, false);
+        expect(await discover.getHitCount()).to.be('50');
+
+        const draftQuery1 = 'from logstash-* | sort @timestamp desc | limit 150 // only edit this';
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        await expectState(defaultQuery, false);
+        await monacoEditor.setCodeEditorValue(draftQuery1);
+        await expectState(draftQuery1, true);
+        expect(await discover.getHitCount()).to.be('1,000');
+
+        await unifiedTabs.selectTab(0);
+        await discover.waitUntilTabIsLoaded();
+        await expectState(draftQuery0, false);
+        expect(await discover.getHitCount()).to.be('50');
+
+        await unifiedTabs.selectTab(1);
+        await discover.waitUntilTabIsLoaded();
+        await expectState(draftQuery1, true);
+        expect(await discover.getHitCount()).to.be('1,000');
       });
 
       it('should restore ES|QL editor state', async () => {

@@ -40,6 +40,7 @@ export const createMigrationConfigMock = (
     metaPickupSyncDelaySec: 120,
     runOnRoles: ['migrator'],
   },
+  useCumulativeLogger: false,
   ...parts,
 });
 

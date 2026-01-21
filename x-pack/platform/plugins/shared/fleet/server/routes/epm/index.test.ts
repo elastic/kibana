@@ -72,7 +72,7 @@ import {
   updateCustomIntegrationHandler,
 } from './handlers';
 
-import { installPackageKibanaAssetsHandler } from './kibana_assets_handler';
+import { installPackageKibanaAssetsHandler } from './install_assets_handler';
 
 jest.mock('./handlers', () => ({
   ...jest.requireActual('./handlers'),
@@ -96,7 +96,7 @@ jest.mock('./handlers', () => ({
   getInputsHandler: jest.fn(),
 }));
 
-jest.mock('./kibana_assets_handler', () => ({
+jest.mock('./install_assets_handler', () => ({
   installPackageKibanaAssetsHandler: jest.fn(),
 }));
 
@@ -191,6 +191,7 @@ describe('schema validation', () => {
     const assets: AssetsGroupedByServiceByType = {
       kibana: {
         alerting_rule_template: [],
+        slo_template: [],
         dashboard: [],
         visualization: [],
         search: [],
@@ -214,6 +215,7 @@ describe('schema validation', () => {
         data_stream_ilm_policy: [],
         ml_model: [],
         knowledge_base: [],
+        esql_view: [],
       },
     };
     packageInfo = {

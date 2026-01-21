@@ -16,7 +16,7 @@ import {
   useNodesState,
 } from '@xyflow/react';
 import type { Edge, FitViewOptions, Node, ReactFlowInstance, FitView } from '@xyflow/react';
-import { useGeneratedHtmlId } from '@elastic/eui';
+import { useGeneratedHtmlId, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { CommonProps } from '@elastic/eui';
 import { SvgDefsMarker } from '../edge/markers';
 import {
@@ -65,6 +65,11 @@ export interface GraphProps extends CommonProps {
    * Additional children to be rendered inside the graph component.
    */
   children?: React.ReactNode;
+  /**
+   * Optional content to be rendered in the bottom-right corner of the graph.
+   * Typically used for callouts or other contextual messages displayed next to the controls.
+   */
+  interactiveBottomRightContent?: React.ReactNode;
   /**
    * Callback invoked when the graph is updated with new nodes.
    * Receives one argument with the list of newly added nodes.
@@ -118,6 +123,7 @@ export const Graph = memo<GraphProps>(
     isLocked = false,
     showMinimap = false,
     children,
+    interactiveBottomRightContent,
     onCenterGraphAfterRefresh,
     ...rest
   }: GraphProps) => {
@@ -129,6 +135,7 @@ export const Graph = memo<GraphProps>(
     const [isGraphInteractive, _setIsGraphInteractive] = useState(interactive);
     const [nodesState, setNodes, onNodesChange] = useNodesState<Node<NodeViewModel>>([]);
     const [edgesState, setEdges, onEdgesChange] = useEdgesState<Edge<EdgeViewModel>>([]);
+    const [reactFlowKey, setReactFlowKey] = useState(0);
 
     // Filter the ids of those nodes that are origin events
     const originNodeIds = useMemo(
@@ -151,8 +158,15 @@ export const Graph = memo<GraphProps>(
         const { initialNodes, initialEdges } = processGraph(nodes, edges, isGraphInteractive);
         const { nodes: layoutedNodes } = layoutGraph(initialNodes, initialEdges);
 
-        setNodes(layoutedNodes);
-        setEdges(initialEdges);
+        // Force ReactFlow to remount by changing the key first
+        setReactFlowKey((prev) => prev + 1);
+
+        // Then set nodes and edges after a microtask to ensure ReactFlow has remounted
+        setTimeout(() => {
+          setNodes(layoutedNodes);
+          setEdges(initialEdges);
+        }, 0);
+
         currNodesRef.current = nodes;
         currEdgesRef.current = edges;
 
@@ -173,7 +187,6 @@ export const Graph = memo<GraphProps>(
         };
 
         setTimeout(() => {
-          // If this is the initial render, skip centering behavior
           if (isInitialRenderRef.current) {
             isInitialRenderRef.current = false;
             return;
@@ -242,6 +255,7 @@ export const Graph = memo<GraphProps>(
       <div {...rest}>
         <SvgDefsMarker />
         <ReactFlow
+          key={reactFlowKey}
           data-test-subj={GRAPH_ID}
           fitView={true}
           onInit={onInitCallback}
@@ -268,7 +282,12 @@ export const Graph = memo<GraphProps>(
         >
           {interactive && (
             <Panel position="bottom-right">
-              <Controls fitViewOptions={fitViewOptions} nodeIdsToCenterOn={originNodeIds} />
+              <EuiFlexGroup direction="row" gutterSize="s" alignItems="flexEnd">
+                {interactiveBottomRightContent}
+                <EuiFlexItem grow={false}>
+                  <Controls fitViewOptions={fitViewOptions} nodeIdsToCenterOn={originNodeIds} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </Panel>
           )}
           {children}

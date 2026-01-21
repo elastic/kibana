@@ -152,7 +152,7 @@ export const ExecutionHistoryPanel = () => {
             }
           )}
         >
-          <span>
+          <span tabIndex={0}>
             {i18n.translate('xpack.watcher.sections.watchHistory.watchTable.stateHeader', {
               defaultMessage: 'State',
             })}{' '}
@@ -175,7 +175,7 @@ export const ExecutionHistoryPanel = () => {
             }
           )}
         >
-          <span>
+          <span tabIndex={0}>
             {i18n.translate('xpack.watcher.sections.watchHistory.watchTable.metConditionHeader', {
               defaultMessage: 'Condition met',
             })}{' '}
@@ -208,7 +208,7 @@ export const ExecutionHistoryPanel = () => {
             }
           )}
         >
-          <span>
+          <span tabIndex={0}>
             {i18n.translate('xpack.watcher.sections.watchHistory.watchTable.commentHeader', {
               defaultMessage: 'Comment',
             })}{' '}
@@ -284,7 +284,7 @@ export const ExecutionHistoryPanel = () => {
                 }
               )}
             >
-              <span>
+              <span tabIndex={0}>
                 {i18n.translate(
                   'xpack.watcher.sections.watchHistory.watchActionStatusTable.state',
                   {
@@ -333,7 +333,7 @@ export const ExecutionHistoryPanel = () => {
               items={(watchHistoryDetails.watchStatus as any).actionStatuses}
               itemId="id"
               columns={detailColumns}
-              message={
+              noItemsMessage={
                 <FormattedMessage
                   id="xpack.watcher.sections.watchHistory.watchTable.noWatchesMessage"
                   defaultMessage="No current status to show"
@@ -385,7 +385,7 @@ export const ExecutionHistoryPanel = () => {
         sorting={true}
         loading={isLoading}
         data-test-subj="watchHistoryTable"
-        message={
+        noItemsMessage={
           <FormattedMessage
             id="xpack.watcher.sections.watchHistory.watchTable.noCurrentStatus"
             defaultMessage="No execution history to show"

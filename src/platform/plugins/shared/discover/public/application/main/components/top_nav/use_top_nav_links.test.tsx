@@ -16,6 +16,7 @@ import type { DiscoverServices } from '../../../../build_services';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
+import { internalStateActions } from '../../state_management/redux';
 
 describe('useTopNavLinks', () => {
   const services = {
@@ -31,7 +32,11 @@ describe('useTopNavLinks', () => {
   } as unknown as DiscoverServices;
 
   const state = getDiscoverStateMock({ isTimeBased: true });
-  state.actions.setDataView(dataViewMock);
+  state.internalState.dispatch(
+    state.injectCurrentTab(internalStateActions.assignNextDataView)({
+      dataView: dataViewMock,
+    })
+  );
 
   // identifier to denote if share integration is available,
   // we default to false especially that there a specific test scenario for when this is true
@@ -60,11 +65,13 @@ describe('useTopNavLinks', () => {
           onOpenInspector: jest.fn(),
           services,
           state,
+          hasUnsavedChanges: false,
           isEsqlMode: false,
           adHocDataViews: [],
           topNavCustomization: undefined,
           shouldShowESQLToDataViewTransitionModal: false,
           hasShareIntegration,
+          persistedDiscoverSession: undefined,
           ...hookAttrs,
         }),
       {
@@ -262,11 +269,13 @@ describe('useTopNavLinks', () => {
             onOpenInspector: jest.fn(),
             services,
             state,
+            hasUnsavedChanges: false,
             isEsqlMode: false,
             adHocDataViews: [],
             topNavCustomization: undefined,
             shouldShowESQLToDataViewTransitionModal: false,
             hasShareIntegration: true,
+            persistedDiscoverSession: undefined,
           }),
         {
           wrapper: Wrapper,

@@ -9,33 +9,9 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import type { Dimension, MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import type { MetricField } from '../../types';
 import { OverviewTab } from './overview_tab';
-
-jest.mock('./tab_title_and_description', () => ({
-  TabTitleAndDescription: ({ metric }: { metric: MetricField }) => (
-    <div data-test-subj="tab-title-description">Tab Title for {metric.name}</div>
-  ),
-}));
-
-jest.mock('./dimension_badges', () => ({
-  DimensionBadges: ({ dimensions }: { dimensions: Dimension[] }) => (
-    <div data-test-subj="dimension-badges">
-      {dimensions.map((dim, index) => (
-        <span key={index} data-test-subj={`dimension-badge-${dim.name}`}>
-          {dim.name}
-        </span>
-      ))}
-    </div>
-  ),
-}));
-
-jest.mock('../../common/utils/dimensions', () => ({
-  categorizeDimensions: jest.fn((dimensions = []) => ({
-    requiredDimensions: dimensions.filter((d: any) => d.required),
-    optionalDimensions: dimensions.filter((d: any) => !d.required),
-  })),
-}));
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 jest.mock('../../common/utils', () => ({
   getUnitLabel: jest.fn(({ unit }) => {
@@ -55,7 +31,6 @@ describe('Metric Flyout Overview Tab', () => {
     index: 'test-index',
     type: 'double',
     unit: 'ms',
-    source: 'ecs',
     dimensions: [],
     ...overrides,
   });
@@ -67,10 +42,10 @@ describe('Metric Flyout Overview Tab', () => {
   describe('basic rendering', () => {
     it('renders the tab title and description', () => {
       const metric = createMockMetric();
-      const { getByTestId } = render(<OverviewTab metric={metric} />);
+      const { getByText, getByTestId } = render(<OverviewTab metric={metric} />);
 
-      expect(getByTestId('tab-title-description')).toBeInTheDocument();
-      expect(getByTestId('tab-title-description')).toHaveTextContent('Tab Title for test.metric');
+      expect(getByTestId('metricsExperienceFlyoutMetricName')).toBeInTheDocument();
+      expect(getByText(metric.name)).toBeInTheDocument();
     });
 
     it('renders main description list', () => {
@@ -137,82 +112,91 @@ describe('Metric Flyout Overview Tab', () => {
     });
   });
 
-  describe('Otel metrics', () => {
-    it('renders otel section when source is otel and stability exists', () => {
-      const metric = createMockMetric({
-        source: 'otel',
-        stability: 'stable',
-      });
-
-      const { getByTestId, getByText } = render(<OverviewTab metric={metric} />);
-
-      expect(
-        getByTestId('metricsExperienceFlyoutOverviewTabOtelDescriptionList')
-      ).toBeInTheDocument();
-      expect(getByText('stable')).toBeInTheDocument();
-    });
-
-    it('renders stability badge for experimental metrics', () => {
-      const metric = createMockMetric({
-        source: 'otel',
-        stability: 'experimental',
-      });
-      const { getByTestId, getByText } = render(<OverviewTab metric={metric} />);
-
-      expect(
-        getByTestId('metricsExperienceFlyoutOverviewTabOtelDescriptionList')
-      ).toBeInTheDocument();
-      expect(getByText('experimental')).toBeInTheDocument();
-    });
-
-    it('does not render Otel section when source is not Otel', () => {
-      const metric = createMockMetric({
-        source: 'ecs',
-        stability: 'stable',
-      });
-      const { queryByTestId } = render(<OverviewTab metric={metric} />);
-
-      expect(
-        queryByTestId('metricsExperienceFlyoutOverviewTabOtelDescriptionList')
-      ).not.toBeInTheDocument();
-    });
-
-    it('does not render Otel section when stability is not present', () => {
-      const metric = createMockMetric({
-        source: 'otel',
-        stability: undefined,
-      });
-      const { queryByTestId } = render(<OverviewTab metric={metric} />);
-
-      expect(
-        queryByTestId('metricsExperienceFlyoutOverviewTabOtelDescriptionList')
-      ).not.toBeInTheDocument();
-    });
-  });
-
   describe('dimensions handling', () => {
     it('does not render dimensions section when no dimensions', () => {
       const metric = createMockMetric({ dimensions: [] });
       const { queryByTestId } = render(<OverviewTab metric={metric} />);
 
       expect(
-        queryByTestId('metricsExperienceFlyoutOverviewTabRequiredDimensionsLabel')
+        queryByTestId('metricsExperienceFlyoutOverviewTabDimensionsLabel')
       ).not.toBeInTheDocument();
       expect(
-        queryByTestId('metricsExperienceFlyoutOverviewTabAdditionalDimensionsLabel')
+        queryByTestId('metricsExperienceFlyoutOverviewTabDimensionsList')
       ).not.toBeInTheDocument();
     });
 
-    it('renders dimensions when present', () => {
+    it('renders dimensions list when dimensions are present', () => {
       const dimensions = [
-        { name: 'host.name', type: 'keyword' },
-        { name: 'service.name', type: 'keyword' },
+        { name: 'service.name', type: ES_FIELD_TYPES.KEYWORD },
+        { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
+        { name: 'attributes.state', type: ES_FIELD_TYPES.KEYWORD },
       ];
+      const metric = createMockMetric({ dimensions });
+      const { getByTestId, getByText } = render(<OverviewTab metric={metric} />);
+
+      expect(getByTestId('metricsExperienceFlyoutOverviewTabDimensionsLabel')).toBeInTheDocument();
+      expect(getByTestId('metricsExperienceFlyoutOverviewTabDimensionsList')).toBeInTheDocument();
+
+      // Check dimensions are sorted alphabetically
+      expect(getByText('attributes.state')).toBeInTheDocument();
+      expect(getByText('host.name')).toBeInTheDocument();
+      expect(getByText('service.name')).toBeInTheDocument();
+    });
+
+    it('shows pagination when dimensions count is 20 or more', () => {
+      const dimensions = Array.from({ length: 20 }, (_, i) => ({
+        name: `dimension.${String(i).padStart(2, '0')}`,
+        type: ES_FIELD_TYPES.KEYWORD,
+      }));
       const metric = createMockMetric({ dimensions });
       const { getByTestId } = render(<OverviewTab metric={metric} />);
 
-      expect(getByTestId('dimension-badge-host.name')).toBeInTheDocument();
-      expect(getByTestId('dimension-badge-service.name')).toBeInTheDocument();
+      expect(
+        getByTestId('metricsExperienceFlyoutOverviewTabDimensionsPagination')
+      ).toBeInTheDocument();
+    });
+
+    it('does not show pagination when dimensions count is less than 20', () => {
+      const dimensions = [
+        { name: 'dimension.01', type: ES_FIELD_TYPES.KEYWORD },
+        { name: 'dimension.02', type: ES_FIELD_TYPES.KEYWORD },
+      ];
+      const metric = createMockMetric({ dimensions });
+      const { queryByTestId } = render(<OverviewTab metric={metric} />);
+
+      expect(
+        queryByTestId('metricsExperienceFlyoutOverviewTabDimensionsPagination')
+      ).not.toBeInTheDocument();
+    });
+
+    it('sorts dimensions alphabetically', () => {
+      const dimensions = [
+        { name: 'zebra.field', type: ES_FIELD_TYPES.KEYWORD },
+        { name: 'alpha.field', type: ES_FIELD_TYPES.KEYWORD },
+        { name: 'beta.field', type: ES_FIELD_TYPES.KEYWORD },
+      ];
+      const metric = createMockMetric({ dimensions });
+      const { container } = render(<OverviewTab metric={metric} />);
+
+      const listItems = container.querySelectorAll('li.euiListGroupItem');
+      expect(listItems).toHaveLength(3);
+
+      // Verify alphabetical order in rendered list
+      expect(listItems[0]).toHaveTextContent('alpha.field');
+      expect(listItems[1]).toHaveTextContent('beta.field');
+      expect(listItems[2]).toHaveTextContent('zebra.field');
+    });
+  });
+
+  describe('description display', () => {
+    it('renders description when present', () => {
+      const metric = createMockMetric();
+      const { getByTestId, getByText } = render(
+        <OverviewTab metric={metric} description="Test description" />
+      );
+
+      expect(getByTestId('metricsExperienceFlyoutMetricDescription')).toBeInTheDocument();
+      expect(getByText('Test description')).toBeInTheDocument();
     });
   });
 });

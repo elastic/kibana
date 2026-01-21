@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FileUploadStartApi } from '@kbn/file-upload-plugin/public/api';
+import type { FileUploadPluginStartApi } from '@kbn/file-upload-plugin/public/api';
 import numeral from '@elastic/numeral';
 import { FILE_SIZE_DISPLAY_FORMAT } from '@kbn/file-upload-common';
 import { isTikaType } from './tika_utils';
@@ -13,7 +13,7 @@ import { isTikaType } from './tika_utils';
 export class FileSizeChecker {
   private _maxBytes: number;
   private _fileSize: number;
-  constructor(fileUpload: FileUploadStartApi, file: File) {
+  constructor(fileUpload: FileUploadPluginStartApi, file: File) {
     this._fileSize = file.size;
     this._maxBytes = isTikaType(file.type)
       ? fileUpload.getMaxTikaBytes()

@@ -11,9 +11,9 @@ import { EuiToolTip, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
+import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
+import { isMac } from '@kbn/shared-ux-utility';
 import { useAssistantContext } from '../..';
-
-const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
 const TOOLTIP_CONTENT = i18n.translate(
   'xpack.elasticAssistant.assistantContext.assistantNavLinkShortcutTooltip',
@@ -27,7 +27,13 @@ const LINK_LABEL = i18n.translate('xpack.elasticAssistant.assistantContext.assis
 });
 
 export const AssistantNavLink: FC = () => {
-  const { chrome, showAssistantOverlay, assistantAvailability } = useAssistantContext();
+  const {
+    chrome,
+    showAssistantOverlay,
+    assistantAvailability,
+    openChatTrigger$,
+    completeOpenChat,
+  } = useAssistantContext();
   const [chromeStyle, setChromeStyle] = useState<ChromeStyle | undefined>(undefined);
 
   // useObserverable would change the order of re-renders that are tested against closely.
@@ -40,6 +46,17 @@ export const AssistantNavLink: FC = () => {
     () => showAssistantOverlay({ showOverlay: true }),
     [showAssistantOverlay]
   );
+
+  useEffect(() => {
+    if (!openChatTrigger$) return;
+    const sub = openChatTrigger$.subscribe((selection) => {
+      if (selection === AIAssistantType.Security) {
+        showOverlay();
+        completeOpenChat?.();
+      }
+    });
+    return () => sub.unsubscribe();
+  }, [completeOpenChat, openChatTrigger$, showOverlay]);
 
   if (!assistantAvailability.hasAssistantPrivilege || !chromeStyle) {
     return null;

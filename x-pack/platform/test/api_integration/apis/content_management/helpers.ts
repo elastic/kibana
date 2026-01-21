@@ -8,19 +8,6 @@
 import { parse as parseCookie } from 'tough-cookie';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
-export const sampleDashboard = {
-  contentTypeId: 'dashboard',
-  data: {
-    kibanaSavedObjectMeta: {},
-    title: 'Sample dashboard',
-  },
-  options: {
-    references: [],
-    overwrite: true,
-  },
-  version: 1,
-};
-
 const roleEditor = 'content_manager_dashboard';
 const roleReader = 'content_reader_dashboard';
 const usersEditor = ['content_manager_dashboard_1', 'content_manager_dashboard_2'] as const;

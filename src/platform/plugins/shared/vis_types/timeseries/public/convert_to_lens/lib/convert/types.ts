@@ -8,33 +8,33 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { NavigateToLensLayer as BaseLayer } from '@kbn/lens-common';
 import type {
-  Layer as BaseLayer,
   Column as BaseColumn,
   GenericColumnWithMeta,
   PercentileColumn as BasePercentileColumn,
   PercentileRanksColumn as BasePercentileRanksColumn,
-  FiltersColumn,
-  TermsColumn,
-  RangeColumn as BaseRangeColumn,
-  DateHistogramColumn,
-  MinColumn as BaseMinColumn,
-  MaxColumn as BaseMaxColumn,
-  AvgColumn as BaseAvgColumn,
-  SumColumn as BaseSumColumn,
-  MedianColumn as BaseMedianColumn,
-  StandardDeviationColumn as BaseStandardDeviationColumn,
-  CardinalityColumn as BaseCardinalityColumn,
-  CountColumn as BaseCountColumn,
-  LastValueColumn as BaseLastValueColumn,
-  CumulativeSumColumn as BaseCumulativeSumColumn,
-  CounterRateColumn as BaseCounterRateColumn,
-  DerivativeColumn as BaseDerivativeColumn,
-  MovingAverageColumn as BaseMovingAverageColumn,
   FormulaColumn as BaseFormulaColumn,
+  LastValueColumn as BaseLastValueColumn,
+  AvgColumn as BaseAvgColumn,
+  CountColumn as BaseCountColumn,
+  CardinalityColumn as BaseCardinalityColumn,
+  MaxColumn as BaseMaxColumn,
+  MedianColumn as BaseMedianColumn,
+  MinColumn as BaseMinColumn,
+  SumColumn as BaseSumColumn,
+  CumulativeSumColumn as BaseCumulativeSumColumn,
+  MovingAverageColumn as BaseMovingAverageColumn,
+  DerivativeColumn as BaseDerivativeColumn,
+  CounterRateColumn as BaseCounterRateColumn,
+  StandardDeviationColumn as BaseStandardDeviationColumn,
   StaticValueColumn as BaseStaticValueColumn,
+  RangeColumn as BaseRangeColumn,
+  TermsColumn,
+  FiltersColumn,
+  DateHistogramColumn,
   AnyColumnWithReferences as BaseAnyColumnWithReferences,
-} from '@kbn/visualizations-plugin/common/convert_to_lens';
+} from '@kbn/visualizations-plugin/common';
 import type { Metric, Series } from '../../../../common/types';
 
 export interface Meta {

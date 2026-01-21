@@ -5,48 +5,51 @@
  * 2.0.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPageHeader, EuiPageSection, EuiEmptyPrompt, EuiText } from '@elastic/eui';
-import { ReadinessTasksTable } from './readiness_tasks_table';
+import React, { useCallback, useMemo } from 'react';
+import { EuiPageHeader, EuiPageSection } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { useHistory, useParams } from 'react-router-dom';
+import { SIEM_READINESS_PATH } from '../../../common/constants';
+import { VisibilitySectionBoxes, type VisibilityTabId } from './visibility_section_boxes';
+import { VisibilitySectionTabs } from './visibility_section_tabs';
+
+const VALID_TABS: VisibilityTabId[] = ['coverage', 'quality', 'continuity', 'retention'];
+const DEFAULT_TAB: VisibilityTabId = 'coverage';
 
 const SiemReadinessDashboard = () => {
+  const history = useHistory();
+  const { tab } = useParams<{ tab?: string }>();
+
+  // Get selected tab from URL path params
+  const selectedTabId = useMemo<VisibilityTabId>(() => {
+    return tab && VALID_TABS.includes(tab as VisibilityTabId)
+      ? (tab as VisibilityTabId)
+      : DEFAULT_TAB;
+  }, [tab]);
+
+  // Handle tab selection by updating URL path
+  const handleTabSelect = useCallback(
+    (tabId: VisibilityTabId) => {
+      history.push(`${SIEM_READINESS_PATH}/visibility/${tabId}`);
+    },
+    [history]
+  );
+
   return (
-    <>
-      <EuiPageHeader pageTitle="SIEM Readiness" bottomBorder={true} />
+    <div>
+      <EuiPageHeader
+        pageTitle={i18n.translate('xpack.securitySolution.siemReadiness.pageTitle', {
+          defaultMessage: 'SIEM Readiness',
+        })}
+        bottomBorder={true}
+      />
       <EuiPageSection>
-        <EuiEmptyPrompt
-          iconType="managementApp"
-          title={
-            <h2>
-              <FormattedMessage
-                id="xpack.securitySolution.siemReadiness.wipTitle"
-                defaultMessage="Work in Progress"
-              />
-            </h2>
-          }
-          body={
-            <EuiText>
-              <p>
-                <FormattedMessage
-                  id="xpack.securitySolution.siemReadiness.wipUpperBody"
-                  defaultMessage="This page is a placeholder for the SIEM Readiness Dashboard, which is currently under development."
-                />
-              </p>
-              <p>
-                <FormattedMessage
-                  id="xpack.securitySolution.siemReadiness.wipLowerBody"
-                  defaultMessage="It will help you get a comprehensive view of your security posture and guide you through key steps to improve your readiness."
-                />
-              </p>
-            </EuiText>
-          }
-        />
+        <VisibilitySectionBoxes selectedTabId={selectedTabId} onTabSelect={handleTabSelect} />
       </EuiPageSection>
       <EuiPageSection>
-        <ReadinessTasksTable />
+        <VisibilitySectionTabs selectedTabId={selectedTabId} onTabSelect={handleTabSelect} />
       </EuiPageSection>
-    </>
+    </div>
   );
 };
 

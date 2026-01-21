@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { groupByParent } from './trace_waterfall_context';
+import { groupByParent, filterMapByCriticalPath } from './trace_waterfall_context';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
+import type { CriticalPathSegment } from './critical_path';
 
 describe('groupByParent', () => {
   it('groups items by their parentId', () => {
@@ -23,7 +24,8 @@ describe('groupByParent', () => {
         traceId: 't1',
         duration: 100,
         serviceName: 'svcA',
-        errorCount: 0,
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
       {
         id: '2',
@@ -37,7 +39,8 @@ describe('groupByParent', () => {
         traceId: 't1',
         duration: 50,
         serviceName: 'svcB',
-        errorCount: 0,
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
       {
         id: '3',
@@ -51,7 +54,8 @@ describe('groupByParent', () => {
         traceId: 't1',
         duration: 30,
         serviceName: 'svcC',
-        errorCount: 0,
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
       {
         id: '4',
@@ -65,7 +69,8 @@ describe('groupByParent', () => {
         traceId: 't1',
         duration: 10,
         serviceName: 'svcD',
-        errorCount: 0,
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
     ];
 
@@ -91,7 +96,8 @@ describe('groupByParent', () => {
         traceId: 't1',
         duration: 100,
         serviceName: 'svcA',
-        errorCount: 0,
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
     ];
 
@@ -114,7 +120,8 @@ describe('groupByParent', () => {
         traceId: 't1',
         duration: 50,
         serviceName: 'svcB',
-        errorCount: 0,
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
       {
         id: '3',
@@ -128,7 +135,8 @@ describe('groupByParent', () => {
         traceId: 't1',
         duration: 30,
         serviceName: 'svcC',
-        errorCount: 0,
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
       },
     ];
 
@@ -136,5 +144,129 @@ describe('groupByParent', () => {
 
     expect(result['1']).toHaveLength(2);
     expect(result['1'].map((i) => i.id)).toEqual(['2', '3']);
+  });
+});
+
+describe('filterMapByCriticalPath', () => {
+  const mockItem = (id: string, parentId: string = 'parent'): TraceWaterfallItem => ({
+    id,
+    parentId,
+    name: `Item ${id}`,
+    traceId: 'trace1',
+    timestampUs: 1000,
+    duration: 100,
+    depth: 0,
+    offset: 0,
+    skew: 0,
+    color: '#fff',
+    errors: [],
+    spanLinksCount: { incoming: 0, outgoing: 0 },
+    serviceName: 'test-service',
+  });
+
+  const mockSegment = (item: TraceWaterfallItem): CriticalPathSegment<TraceWaterfallItem> => ({
+    item,
+    offset: 0,
+    duration: 100,
+    self: true,
+  });
+
+  it('filters out children not in critical path', () => {
+    const child1 = mockItem('child1');
+    const child2 = mockItem('child2');
+    const child3 = mockItem('child3');
+
+    const map = {
+      parent1: [child1, child2, child3],
+    };
+
+    const criticalPathSegmentsById = {
+      child1: [mockSegment(child1)],
+      child3: [mockSegment(child3)],
+    };
+
+    const result = filterMapByCriticalPath(map, criticalPathSegmentsById);
+
+    expect(result.parent1).toHaveLength(2);
+    expect(result.parent1.map((c: TraceWaterfallItem) => c.id)).toEqual(['child1', 'child3']);
+  });
+
+  it('returns empty array for parents with no children in critical path', () => {
+    const child1 = mockItem('child1');
+    const child2 = mockItem('child2');
+    const child3 = mockItem('child3');
+
+    const map = {
+      parent1: [child1, child2],
+    };
+
+    const criticalPathSegmentsById = {
+      child3: [mockSegment(child3)],
+    };
+
+    const result = filterMapByCriticalPath(map, criticalPathSegmentsById);
+
+    expect(result.parent1).toEqual([]);
+  });
+
+  it('keeps all children when all are in critical path', () => {
+    const child1 = mockItem('child1');
+    const child2 = mockItem('child2');
+
+    const map = {
+      parent1: [child1, child2],
+    };
+
+    const criticalPathSegmentsById = {
+      child1: [mockSegment(child1)],
+      child2: [mockSegment(child2)],
+    };
+
+    const result = filterMapByCriticalPath(map, criticalPathSegmentsById);
+
+    expect(result.parent1).toHaveLength(2);
+    expect(result.parent1.map((c: TraceWaterfallItem) => c.id)).toEqual(['child1', 'child2']);
+  });
+
+  it('handles multiple parents', () => {
+    const child1 = mockItem('child1');
+    const child2 = mockItem('child2');
+    const child3 = mockItem('child3');
+    const child4 = mockItem('child4');
+
+    const map = {
+      parent1: [child1, child2],
+      parent2: [child3, child4],
+    };
+
+    const criticalPathSegmentsById = {
+      child1: [mockSegment(child1)],
+      child4: [mockSegment(child4)],
+    };
+
+    const result = filterMapByCriticalPath(map, criticalPathSegmentsById);
+
+    expect(result.parent1.map((c: TraceWaterfallItem) => c.id)).toEqual(['child1']);
+    expect(result.parent2.map((c: TraceWaterfallItem) => c.id)).toEqual(['child4']);
+  });
+
+  it('returns empty map when input is empty', () => {
+    const result = filterMapByCriticalPath({}, {});
+    expect(result).toEqual({});
+  });
+
+  it('preserves original object references', () => {
+    const child1 = mockItem('child1');
+    const map = {
+      parent1: [child1],
+    };
+
+    const criticalPathSegmentsById = {
+      child1: [mockSegment(child1)],
+    };
+
+    const result = filterMapByCriticalPath(map, criticalPathSegmentsById);
+
+    expect(result.parent1[0]).toBe(child1);
   });
 });

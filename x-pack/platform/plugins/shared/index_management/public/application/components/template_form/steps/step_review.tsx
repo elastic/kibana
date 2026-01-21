@@ -423,6 +423,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
         {hasWildCardIndexPattern ? (
           <Fragment>
             <EuiCallOut
+              announceOnMount
               title={
                 <FormattedMessage
                   id="xpack.idxMgmt.templateForm.stepReview.summaryTab.indexPatternsWarningTitle"

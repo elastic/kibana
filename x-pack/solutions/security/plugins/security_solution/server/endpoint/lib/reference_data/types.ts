@@ -41,7 +41,14 @@ export interface MigrationMetadata {
   started: string;
   finished: string;
   status: 'not-started' | 'complete' | 'pending';
+  /**
+   * Any data that needs to be persisted with the migration
+   */
   data?: unknown;
+  /**
+   * Version may be helpful in cases where the migration code might have had issues and we need to re-run it
+   */
+  version?: number;
 }
 
 export interface OrphanResponseActionsMetadata {

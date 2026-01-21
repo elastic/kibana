@@ -76,3 +76,18 @@ export const VIEW_DASHBOARD_TRANSLATION_SUMMARY_TOOLTIP = i18n.translate(
     defaultMessage: 'View dashboard translation summary',
   }
 );
+
+export const UPDATE_COLUMN_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.siemMigrations.dashboards.updateColumnTooltip',
+  {
+    defaultMessage:
+      'This column references the date in the dashboard when last modified in the source platform.',
+  }
+);
+
+export const TAGS_COLUMN_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.siemMigrations.dashboards.tagsColumnTooltip',
+  {
+    defaultMessage: 'Tags reference the app the dashboard originated from.',
+  }
+);

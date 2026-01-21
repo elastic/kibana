@@ -28,12 +28,12 @@ import {
   reparentOrphanItems,
   generateLegendsAndAssignColorsToWaterfall,
 } from './waterfall_helpers';
-import type { APMError } from '../../../../../../../../typings/es_schemas/ui/apm_error';
 import type {
   WaterfallSpan,
   WaterfallTransaction,
 } from '../../../../../../../../common/waterfall/typings';
 import { WaterfallLegendType } from '../../../../../../../../common/waterfall/legend';
+import type { Error } from '@kbn/apm-types';
 
 describe('waterfall_helpers', () => {
   const hits = [
@@ -122,6 +122,7 @@ describe('waterfall_helpers', () => {
   ];
   const errorDocs = [
     {
+      id: 'error1',
       processor: { event: 'error' },
       parent: { id: 'myTransactionId1' },
       timestamp: { us: 1549324795810000 },
@@ -139,7 +140,7 @@ describe('waterfall_helpers', () => {
         name: 'ruby',
         version: '2',
       },
-    } as unknown as APMError,
+    } as Error,
   ];
 
   describe('getWaterfall', () => {

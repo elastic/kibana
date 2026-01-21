@@ -157,7 +157,7 @@ export const AgentDetailsIntegrationInputs: React.FunctionComponent<{
                         }
                       )}
                     >
-                      {displayInputType(current.type)}
+                      {displayInputType(current.type, current?.id)}
                     </StyledEuiLink>
                   ) : (
                     <>{displayInputType(current.type)}</>

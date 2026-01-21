@@ -28,6 +28,7 @@ export function MissingSymbolsCallout({ frameType }: Props) {
   if (languageType === 'NATIVE') {
     return (
       <EuiCallOut
+        announceOnMount
         title={i18n.translate(
           'xpack.profiling.frameInformationWindow.missingSymbols.native.title',
           { defaultMessage: 'Missing symbols' }

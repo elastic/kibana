@@ -11,7 +11,7 @@ import expect from '@kbn/expect';
 
 import { FilterManager } from './filter_manager';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { DataViewsContract } from '@kbn/data-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { FilterManager as QueryFilterManager } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
 

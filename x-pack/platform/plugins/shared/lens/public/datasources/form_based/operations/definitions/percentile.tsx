@@ -20,7 +20,7 @@ import { useDebouncedValue } from '@kbn/visualization-utils';
 import { PERCENTILE_ID, PERCENTILE_NAME } from '@kbn/lens-formula-docs';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
 import { memoize } from 'lodash';
-import type { ValueFormatConfig } from '../../../../../common';
+import type { PercentileIndexPatternColumn } from '@kbn/lens-common';
 import type { OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
@@ -30,19 +30,10 @@ import {
   getFilter,
   isColumnOfType,
 } from './helpers';
-import type { FieldBasedIndexPatternColumn } from './column_types';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { FormRow } from './shared_components';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 import { getGroupByKey, groupByKey } from './get_group_by_key';
-
-export interface PercentileIndexPatternColumn extends FieldBasedIndexPatternColumn {
-  operationType: typeof PERCENTILE_ID;
-  params: {
-    percentile: number;
-    format?: ValueFormatConfig;
-  };
-}
 
 const DEFAULT_PERCENTILE_VALUE = 95;
 const ALLOWED_DECIMAL_DIGITS = 4;

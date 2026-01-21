@@ -492,6 +492,7 @@ describe('useOnSubmit', () => {
             ],
           },
         ],
+        supports_cloud_connector: true,
       } as any;
 
       const newAgentPolicy = {
@@ -547,6 +548,7 @@ describe('useOnSubmit', () => {
             ],
           },
         ],
+        supports_cloud_connector: false,
       } as any;
 
       const newAgentPolicy = {
@@ -600,6 +602,7 @@ describe('useOnSubmit', () => {
             ],
           },
         ],
+        supports_cloud_connector: true,
       } as any;
 
       const newAgentPolicy = {
@@ -655,6 +658,7 @@ describe('useOnSubmit', () => {
             ],
           },
         ],
+        supports_cloud_connector: false,
       } as any;
 
       const newAgentPolicy = {
@@ -708,6 +712,7 @@ describe('useOnSubmit', () => {
             ],
           },
         ],
+        supports_cloud_connector: false,
       } as any;
 
       const newAgentPolicy = {
@@ -758,6 +763,7 @@ describe('useOnSubmit', () => {
             ],
           },
         ],
+        supports_cloud_connector: true,
       } as any;
 
       const newAgentPolicy = {
@@ -799,6 +805,7 @@ describe('useOnSubmit', () => {
             ],
           },
         ],
+        supports_cloud_connector: undefined,
       } as any;
 
       const newAgentPolicy = {

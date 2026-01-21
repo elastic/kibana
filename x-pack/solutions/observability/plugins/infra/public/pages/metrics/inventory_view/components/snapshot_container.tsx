@@ -15,7 +15,7 @@ import { useWaffleTimeContext } from '../hooks/use_waffle_time';
 import { FilterBar } from './filter_bar';
 import { LayoutView } from './layout_view';
 
-export const SnapshotContainer = React.memo(() => {
+export const SnapshotContainer = React.memo(function SnapshotContainer() {
   const { sourceId } = useSourceContext();
   const { metric, groupBy, nodeType, accountId, region, preferredSchema } =
     useWaffleOptionsContext();
@@ -31,7 +31,6 @@ export const SnapshotContainer = React.memo(() => {
   const {
     loading,
     nodes,
-    reload,
     interval = '60s',
   } = useSnapshot(
     {
@@ -51,7 +50,7 @@ export const SnapshotContainer = React.memo(() => {
   return (
     <>
       <FilterBar interval={interval} />
-      <LayoutView loading={loading} nodes={nodes} reload={reload} interval={interval} />
+      <LayoutView loading={loading} nodes={nodes} interval={interval} />
     </>
   );
 });

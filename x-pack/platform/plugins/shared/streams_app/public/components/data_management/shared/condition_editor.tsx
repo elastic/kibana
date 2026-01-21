@@ -5,61 +5,77 @@
  * 2.0.
  */
 
-import type { Condition } from '@kbn/streamlang';
-import {
-  type FilterCondition,
-  getDefaultFormValueForOperator,
-  getFilterOperator,
-  getFilterValue,
-  isCondition,
-  isFilterConditionObject,
-  type OperatorKeys,
-  operatorToHumanReadableNameMap,
-} from '@kbn/streamlang';
-import type { RoutingStatus } from '@kbn/streams-schema';
-import { isPlainObject } from 'lodash';
-import useToggle from 'react-use/lib/useToggle';
 import {
   EuiCodeBlock,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiLink,
   EuiSelect,
-  type EuiSelectOption,
   EuiSwitch,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { Condition, RangeCondition } from '@kbn/streamlang';
+import {
+  type FilterCondition,
+  getFilterOperator,
+  getFilterValue,
+  isCondition,
+  type OperatorKeys,
+} from '@kbn/streamlang';
+import type { RoutingStatus } from '@kbn/streams-schema';
 import React, { useMemo } from 'react';
-import { alwaysToEmptyEquals, emptyEqualsToAlways } from '../../../util/condition';
-import type { FieldSuggestion } from './field_selector';
-import { FieldSelector } from './field_selector';
+import useToggle from 'react-use/lib/useToggle';
+import { useKibana } from '../../../hooks/use_kibana';
+import {
+  alwaysToEmptyEquals,
+  conditionNeedsValueField,
+  emptyEqualsToAlways,
+  isConditionEditableInUi,
+} from '../../../util/condition';
+import type { Suggestion } from './autocomplete_selector';
+import { AutocompleteSelector } from './autocomplete_selector';
+import { OperatorSelector } from './operator_selector';
+import { RangeInput } from './range_input';
 
 export interface ConditionEditorProps {
   condition: Condition;
   status: RoutingStatus;
   onConditionChange: (condition: Condition) => void;
-  fieldSuggestions?: FieldSuggestion[];
+  fieldSuggestions?: Suggestion[];
+  valueSuggestions?: Suggestion[];
 }
 
-const operatorOptions: EuiSelectOption[] = Object.entries(operatorToHumanReadableNameMap).map(
-  ([value, text]) => ({
-    value,
-    text,
-  })
-);
-
 export function ConditionEditor(props: ConditionEditorProps) {
-  const { status, onConditionChange, fieldSuggestions = [] } = props;
+  const { status, onConditionChange, fieldSuggestions = [], valueSuggestions = [] } = props;
+  const { core } = useKibana();
 
   const isInvalidCondition = !isCondition(props.condition);
 
   const condition = alwaysToEmptyEquals(props.condition);
 
-  const isFilterCondition = isPlainObject(condition) && isFilterConditionObject(condition);
+  const conditionEditableInUi = useMemo(() => isConditionEditableInUi(condition), [condition]);
 
-  const [usingSyntaxEditor, toggleSyntaxEditor] = useToggle(!isFilterCondition);
+  const [usingSyntaxEditor, toggleSyntaxEditor] = useToggle(!conditionEditableInUi);
+
+  // Check if the selected field is a date type AND the operator is "in range"
+  const isDateFieldWithRange = useMemo(() => {
+    if (!conditionEditableInUi || fieldSuggestions.length === 0) {
+      return false;
+    }
+
+    const filterCondition = condition as FilterCondition;
+    const operator = getFilterOperator(filterCondition);
+
+    if (operator !== 'range') {
+      return false;
+    }
+
+    const fieldSuggestion = fieldSuggestions.find((s) => s.name === filterCondition.field);
+    return fieldSuggestion?.type === 'date';
+  }, [condition, conditionEditableInUi, fieldSuggestions]);
 
   const handleConditionChange = (updatedCondition: Condition) => {
     onConditionChange(emptyEqualsToAlways(updatedCondition));
@@ -81,6 +97,28 @@ export function ConditionEditor(props: ConditionEditorProps) {
           onChange={toggleSyntaxEditor}
           disabled={status === 'disabled'}
         />
+      }
+      helpText={
+        isDateFieldWithRange ? (
+          <FormattedMessage
+            id="xpack.streams.conditionEditor.dateRangeHelpText"
+            defaultMessage="You can use {dateMathLink} expressions to query date fields."
+            values={{
+              dateMathLink: (
+                <EuiLink
+                  data-test-subj="streamsAppConditionEditorDateMathLink"
+                  external
+                  target="_blank"
+                  href={core.docLinks.links.date.dateMath}
+                >
+                  {i18n.translate('xpack.streams.conditionEditor.dateMathLinkLabel', {
+                    defaultMessage: 'date math',
+                  })}
+                </EuiLink>
+              ),
+            }}
+          />
+        ) : undefined
       }
       isInvalid={isInvalidCondition}
       error={
@@ -109,12 +147,13 @@ export function ConditionEditor(props: ConditionEditorProps) {
             automaticLayout: true,
           }}
         />
-      ) : isFilterCondition ? (
-        <FilterForm
+      ) : conditionEditableInUi ? (
+        <FilterConditionForm
           disabled={status === 'disabled'}
-          condition={condition}
+          condition={condition as FilterCondition}
           onConditionChange={handleConditionChange}
           fieldSuggestions={fieldSuggestions}
+          valueSuggestions={valueSuggestions}
         />
       ) : (
         <EuiCodeBlock language="json" paddingSize="m" isCopyable>
@@ -125,13 +164,14 @@ export function ConditionEditor(props: ConditionEditorProps) {
   );
 }
 
-function FilterForm(props: {
+function FilterConditionForm(props: {
   condition: FilterCondition;
   disabled: boolean;
   onConditionChange: (condition: FilterCondition) => void;
-  fieldSuggestions?: FieldSuggestion[];
+  fieldSuggestions?: Suggestion[];
+  valueSuggestions?: Suggestion[];
 }) {
-  const { condition, disabled, onConditionChange, fieldSuggestions } = props;
+  const { condition, disabled, onConditionChange, fieldSuggestions, valueSuggestions } = props;
 
   const operator = useMemo(() => {
     return getFilterOperator(condition);
@@ -148,102 +188,110 @@ function FilterForm(props: {
     } as FilterCondition);
   };
 
-  const handleValueChange = (nextValue: string | boolean) => {
+  const handleValueChange = (nextValue: string | boolean | RangeCondition) => {
     onConditionChange({
       field: condition.field,
       [operator as OperatorKeys]: nextValue,
     } as FilterCondition);
   };
 
-  const handleOperatorChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const newOperator = event.target.value;
-
-    const existingValue = getFilterValue(condition);
-
-    const defaultValue = getDefaultFormValueForOperator(newOperator as OperatorKeys);
-
-    const typeChanged = typeof existingValue !== typeof defaultValue;
-
-    onConditionChange({
-      field: condition.field,
-      [newOperator]: existingValue !== undefined && !typeChanged ? existingValue : defaultValue,
-    } as FilterCondition);
-  };
+  const showValueField = useMemo(() => conditionNeedsValueField(condition), [condition]);
+  const isRangeValue = typeof value === 'object' && value !== null;
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj="streamsAppConditionEditor">
-      <EuiFlexItem grow={2}>
-        <FieldSelector
-          value={condition.field}
-          onChange={(fieldValue) => handleConditionChange({ field: fieldValue })}
-          placeholder={i18n.translate('xpack.streams.filter.fieldPlaceholder', {
-            defaultMessage: 'Field',
-          })}
-          suggestions={fieldSuggestions}
-          compressed
-          disabled={disabled}
-          dataTestSubj="streamsAppConditionEditorFieldText"
-          autoFocus={true}
-        />
+    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="streamsAppConditionEditor">
+      <EuiFlexItem>
+        <EuiFlexGroup gutterSize="s" alignItems="center" wrap responsive={false}>
+          <EuiFlexItem grow={2} style={{ minWidth: '120px' }}>
+            <AutocompleteSelector
+              value={condition.field}
+              onChange={(fieldValue) => handleConditionChange({ field: fieldValue })}
+              placeholder={i18n.translate('xpack.streams.filter.fieldPlaceholder', {
+                defaultMessage: 'Field',
+              })}
+              suggestions={fieldSuggestions}
+              compressed
+              disabled={disabled}
+              dataTestSubj="streamsAppConditionEditorFieldText"
+              showIcon={true}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={showValueField && !isRangeValue ? 1 : 2} style={{ minWidth: '80px' }}>
+            <OperatorSelector
+              condition={condition}
+              onConditionChange={onConditionChange}
+              compressed
+              disabled={disabled}
+              dataTestSubj="streamsAppConditionEditorOperator"
+            />
+          </EuiFlexItem>
+          {showValueField && !isRangeValue ? (
+            <EuiFlexItem grow={2} style={{ minWidth: '120px' }}>
+              {typeof value === 'string' ? (
+                <AutocompleteSelector
+                  aria-label={i18n.translate('xpack.streams.filter.value', {
+                    defaultMessage: 'Value',
+                  })}
+                  placeholder={i18n.translate('xpack.streams.filter.valuePlaceholder', {
+                    defaultMessage: 'Value',
+                  })}
+                  suggestions={valueSuggestions}
+                  compressed
+                  value={value}
+                  dataTestSubj="streamsAppConditionEditorValueText"
+                  onChange={(newValue) => {
+                    handleValueChange(newValue);
+                  }}
+                  disabled={disabled}
+                />
+              ) : typeof value === 'boolean' ? (
+                <EuiSelect
+                  aria-label={i18n.translate('xpack.streams.conditionEditor.booleanLabel', {
+                    defaultMessage: 'Value',
+                  })}
+                  compressed
+                  options={[
+                    {
+                      value: 'true',
+                      text: i18n.translate('xpack.streams.conditionEditor.booleanValueTrue', {
+                        defaultMessage: 'True',
+                      }),
+                    },
+                    {
+                      value: 'false',
+                      text: i18n.translate('xpack.streams.conditionEditor.booleanFalseValue', {
+                        defaultMessage: 'False',
+                      }),
+                    },
+                  ]}
+                  value={String(value)}
+                  data-test-subj="streamsAppFilterFormValueBoolean"
+                  onChange={(e) => {
+                    const nextValue = e.target.value === 'true';
+                    handleValueChange(nextValue);
+                  }}
+                  disabled={disabled}
+                />
+              ) : null}
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={1}>
-        <EuiSelect
-          aria-label={i18n.translate('xpack.streams.filter.operator', {
-            defaultMessage: 'Operator',
-          })}
-          data-test-subj="streamsAppConditionEditorOperator"
-          options={operatorOptions}
-          value={operator}
-          compressed
-          onChange={handleOperatorChange}
-          disabled={disabled}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={2}>
-        {typeof value === 'string' ? (
-          <EuiFieldText
-            aria-label={i18n.translate('xpack.streams.filter.value', { defaultMessage: 'Value' })}
-            placeholder={i18n.translate('xpack.streams.filter.valuePlaceholder', {
-              defaultMessage: 'Value',
-            })}
-            compressed
-            value={value}
-            data-test-subj="streamsAppConditionEditorValueText"
-            onChange={(e) => {
-              handleValueChange(e.target.value);
+
+      {showValueField && isRangeValue ? (
+        <EuiFlexItem>
+          <RangeInput
+            value={value as RangeCondition}
+            onChange={(newValue) => {
+              handleValueChange(newValue);
             }}
-            disabled={disabled}
-          />
-        ) : typeof value === 'boolean' ? (
-          <EuiSelect
-            aria-label={i18n.translate('xpack.streams.conditionEditor.booleanLabel', {
-              defaultMessage: 'Value',
-            })}
+            valueSuggestions={valueSuggestions}
             compressed
-            options={[
-              {
-                value: 'true',
-                text: i18n.translate('xpack.streams.conditionEditor.booleanValueTrue', {
-                  defaultMessage: 'True',
-                }),
-              },
-              {
-                value: 'false',
-                text: i18n.translate('xpack.streams.conditionEditor.booleanFalseValue', {
-                  defaultMessage: 'False',
-                }),
-              },
-            ]}
-            value={String(value)}
-            data-test-subj="streamsAppFilterFormValueBoolean"
-            onChange={(e) => {
-              const nextValue = e.target.value === 'true' ? true : false;
-              handleValueChange(nextValue);
-            }}
             disabled={disabled}
+            dataTestSubj="streamsAppConditionEditorValueRange"
           />
-        ) : null}
-      </EuiFlexItem>
+        </EuiFlexItem>
+      ) : null}
     </EuiFlexGroup>
   );
 }

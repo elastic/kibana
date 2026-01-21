@@ -419,7 +419,12 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                       })
                     )}
                   >
-                    Elastic Connectors
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.connectorStats.elasticConnectorsButton',
+                      {
+                        defaultMessage: 'Elastic Connectors',
+                      }
+                    )}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>

@@ -18,11 +18,12 @@ import {
   ALERT_RULE_TAGS,
   ALERT_START,
   ALERT_STATUS,
+  ALERT_WORKFLOW_TAGS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { FEATURE_LABEL } from './translations';
+import type { AlertsTableSortCombinations } from './types';
 
 const columns = [
   {
@@ -111,6 +112,16 @@ const columns = [
   },
   {
     displayAsText: i18n.translate(
+      'xpack.triggersActionsUI.alertsTable.workflowTagsColumnDescription',
+      {
+        defaultMessage: 'Workflow tags',
+      }
+    ),
+    id: ALERT_WORKFLOW_TAGS,
+    initialWidth: 150,
+  },
+  {
+    displayAsText: i18n.translate(
       'xpack.triggersActionsUI.alertsTable.maintenanceWindowsColumnDescription',
       {
         defaultMessage: 'Maintenance windows',
@@ -124,7 +135,7 @@ const columns = [
 
 export { columns as defaultAlertsTableColumns };
 
-const sort: SortCombinations[] = [
+const sort: AlertsTableSortCombinations[] = [
   {
     [TIMESTAMP]: {
       order: 'desc',

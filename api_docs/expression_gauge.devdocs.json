@@ -30,6 +30,8 @@
           " | undefined) => any"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+        "lineNumber": 123,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -51,6 +53,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+            "lineNumber": 123,
+            "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -73,6 +77,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+            "lineNumber": 123,
+            "columnNumber": 50,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -116,6 +122,8 @@
           " | undefined, isRespectRanges?: boolean | undefined) => number"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+        "lineNumber": 59,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -137,6 +145,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -159,6 +169,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -181,6 +193,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -196,6 +210,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -239,6 +255,8 @@
           " | undefined, isRespectRanges?: boolean | undefined) => number"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+        "lineNumber": 92,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -260,6 +278,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -282,6 +302,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -304,6 +326,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -319,6 +343,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -346,6 +372,8 @@
           " | undefined) => any"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -360,6 +388,8 @@
               "string"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -382,6 +412,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -425,6 +457,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/expression_functions/gauge_function.ts",
+        "lineNumber": 42,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -441,6 +475,8 @@
         "label": "Accessors",
         "description": [],
         "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+        "lineNumber": 98,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -455,6 +491,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "lineNumber": 99,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -469,6 +507,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "lineNumber": 100,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -483,6 +523,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -497,6 +539,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -511,6 +555,8 @@
         "label": "GaugeExpressionProps",
         "description": [],
         "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+        "lineNumber": 78,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -531,6 +577,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -550,7 +598,13 @@
                 "text": "GaugeState"
               },
               " & { colorMode: ",
-              "GaugeColorMode",
+              {
+                "pluginId": "expressionGauge",
+                "scope": "common",
+                "docId": "kibExpressionGaugePluginApi",
+                "section": "def-common.GaugeColorMode",
+                "text": "GaugeColorMode"
+              },
               "; palette?: ",
               {
                 "pluginId": "@kbn/coloring",
@@ -570,6 +624,8 @@
               "> | undefined; ariaLabel?: string | undefined; }"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -581,6 +637,8 @@
             "label": "canNavigateToLens",
             "description": [],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -595,6 +653,8 @@
         "label": "GaugeState",
         "description": [],
         "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -608,15 +668,17 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -630,15 +692,17 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -652,15 +716,17 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -674,15 +740,17 @@
             "signature": [
               "string | ",
               {
-                "pluginId": "visualizations",
+                "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -694,9 +762,11 @@
             "label": "ticksPosition",
             "description": [],
             "signature": [
-              "\"hidden\" | \"auto\" | \"bands\""
+              "\"auto\" | \"hidden\" | \"bands\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -708,9 +778,11 @@
             "label": "labelMajorMode",
             "description": [],
             "signature": [
-              "\"none\" | \"custom\" | \"auto\""
+              "\"none\" | \"auto\" | \"custom\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -725,6 +797,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -739,6 +813,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -750,10 +826,18 @@
             "label": "colorMode",
             "description": [],
             "signature": [
-              "GaugeColorMode",
+              {
+                "pluginId": "expressionGauge",
+                "scope": "common",
+                "docId": "kibExpressionGaugePluginApi",
+                "section": "def-common.GaugeColorMode",
+                "text": "GaugeColorMode"
+              },
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -783,6 +867,8 @@
               "> | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -797,6 +883,8 @@
               "\"arc\" | \"circle\" | \"horizontalBullet\" | \"verticalBullet\" | \"semiCircle\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -811,6 +899,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -825,6 +915,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -842,6 +934,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
             "references": []
@@ -859,6 +953,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
             "references": []
@@ -878,6 +974,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
             "references": [
@@ -907,7 +1005,7 @@
         "signature": [
           "{ gauge?: { id: string; target?: number | undefined; subtype: ",
           "GoalSubtype",
-          "; bands?: number | number[] | undefined; ticks?: number | number[] | undefined; domain: ",
+          "; domain: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -917,13 +1015,13 @@
           },
           "<",
           "GoalDomainRange",
-          ">; actual?: number | undefined; base?: number | undefined; labelMajor?: string | ",
+          ">; bands?: number | number[] | undefined; ticks?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
           "GoalLabelAccessor",
           " | undefined; labelMinor?: string | ",
           "GoalLabelAccessor",
           " | undefined; centralMajor?: string | ",
           "GoalLabelAccessor",
-          " | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; centralMinor?: string | ",
+          " | undefined; centralMinor?: string | ",
           "GoalLabelAccessor",
           " | undefined; angleStart?: number | undefined; angleEnd?: number | undefined; bandLabels?: ",
           {
@@ -936,6 +1034,8 @@
           "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; } | undefined; }"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+        "lineNumber": 105,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -951,6 +1051,8 @@
           "\"gauge\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -989,6 +1091,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_renderers.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1019,6 +1123,8 @@
               "> | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_renderers.ts",
+            "lineNumber": 18,
+            "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1041,7 +1147,13 @@
             "text": "GaugeState"
           },
           " & { colorMode: ",
-          "GaugeColorMode",
+          {
+            "pluginId": "expressionGauge",
+            "scope": "common",
+            "docId": "kibExpressionGaugePluginApi",
+            "section": "def-common.GaugeColorMode",
+            "text": "GaugeColorMode"
+          },
           "; palette?: ",
           {
             "pluginId": "@kbn/coloring",
@@ -1061,6 +1173,25 @@
           "> | undefined; ariaLabel?: string | undefined; }"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+        "lineNumber": 70,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionGauge",
+        "id": "def-common.GaugeColorMode",
+        "type": "Type",
+        "tags": [],
+        "label": "GaugeColorMode",
+        "description": [],
+        "signature": [
+          "\"none\" | \"palette\""
+        ],
+        "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1131,6 +1262,8 @@
           ">>"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+        "lineNumber": 90,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1143,9 +1276,11 @@
         "label": "GaugeLabelMajorMode",
         "description": [],
         "signature": [
-          "\"none\" | \"custom\" | \"auto\""
+          "\"none\" | \"auto\" | \"custom\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1185,15 +1320,15 @@
           },
           "; renderComplete: () => void; uiState: ",
           {
-            "pluginId": "visualizations",
-            "scope": "public",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-public.PersistedState",
+            "pluginId": "@kbn/visualizations-common",
+            "scope": "common",
+            "docId": "kibKbnVisualizationsCommonPluginApi",
+            "section": "def-common.PersistedState",
             "text": "PersistedState"
           },
           "; overrides?: (Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
           "GoalSubtype",
-          "; bands?: number | number[] | undefined; ticks?: number | number[] | undefined; domain: ",
+          "; domain: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -1203,13 +1338,13 @@
           },
           "<",
           "GoalDomainRange",
-          ">; actual?: number | undefined; base?: number | undefined; labelMajor?: string | ",
+          ">; bands?: number | number[] | undefined; ticks?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
           "GoalLabelAccessor",
           " | undefined; labelMinor?: string | ",
           "GoalLabelAccessor",
           " | undefined; centralMajor?: string | ",
           "GoalLabelAccessor",
-          " | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; centralMinor?: string | ",
+          " | undefined; centralMinor?: string | ",
           "GoalLabelAccessor",
           " | undefined; angleStart?: number | undefined; angleEnd?: number | undefined; bandLabels?: ",
           {
@@ -1255,7 +1390,7 @@
           "MakeOverridesSerializable",
           "<",
           "CustomXDomain",
-          " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: React.ComponentType<{}> | React.ReactChild | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
+          " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType<{}> | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
           "LegendStrategy",
           " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> & Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>>) | undefined; setChartSize: (d: ",
           {
@@ -1268,6 +1403,8 @@
           ") => void; }"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_renderers.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1283,6 +1420,8 @@
           "\"arc\" | \"circle\" | \"horizontalBullet\" | \"verticalBullet\" | \"semiCircle\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1295,9 +1434,11 @@
         "label": "GaugeTicksPosition",
         "description": [],
         "signature": [
-          "\"hidden\" | \"auto\" | \"bands\""
+          "\"auto\" | \"hidden\" | \"bands\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1313,6 +1454,8 @@
           "\"expressionGauge\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1328,6 +1471,8 @@
           "\"expressionGauge\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/index.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1345,6 +1490,8 @@
           "{ readonly PALETTE: \"palette\"; readonly NONE: \"none\"; }"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/constants.ts",
+        "lineNumber": 39,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1360,6 +1507,8 @@
           "{ readonly AUTO: \"auto\"; readonly CUSTOM: \"custom\"; readonly NONE: \"none\"; }"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/constants.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1375,6 +1524,8 @@
           "{ readonly HORIZONTAL_BULLET: \"horizontalBullet\"; readonly VERTICAL_BULLET: \"verticalBullet\"; readonly SEMI_CIRCLE: \"semiCircle\"; readonly ARC: \"arc\"; readonly CIRCLE: \"circle\"; }"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/constants.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1390,6 +1541,8 @@
           "{ readonly HIDDEN: \"hidden\"; readonly AUTO: \"auto\"; readonly BANDS: \"bands\"; }"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_gauge/common/constants.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

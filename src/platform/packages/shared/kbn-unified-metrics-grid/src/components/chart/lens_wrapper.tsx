@@ -6,48 +6,47 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import { useBoolean } from '@kbn/react-hooks';
-import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
-import type { AggregateQuery } from '@kbn/es-query';
+import { PresentationPanelQuickActionContext } from '@kbn/presentation-panel-plugin/public';
 import type { LensProps } from './hooks/use_lens_props';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
+import { ACTION_EXPLORE_IN_DISCOVER_TAB } from '../../common/constants';
 import { ChartTitle } from './chart_title';
-import { useMetricsGridState } from '../../hooks/use_metrics_grid_state';
+import type { UnifiedMetricsGridProps } from '../../types';
 
 export type LensWrapperProps = {
-  metric: MetricField;
   lensProps: LensProps;
-  metricName: string;
-  onViewDetails: (metric: MetricField, esqlQuery: string) => void;
-} & Pick<ChartSectionProps, 'services' | 'onBrushEnd' | 'onFilter' | 'abortController'>;
+  titleHighlight?: string;
+  onViewDetails?: () => void;
+  onCopyToDashboard?: () => void;
+  onExploreInDiscoverTab?: UnifiedMetricsGridProps['actions']['openInNewTab'];
+  syncTooltips?: boolean;
+  syncCursor?: boolean;
+  abortController: AbortController | undefined;
+  disabledActions?: string[];
+  extraDisabledActions?: string[];
+} & Pick<UnifiedMetricsGridProps, 'services' | 'onBrushEnd' | 'onFilter'>;
 
-const DEFAULT_DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL', 'ACTION_EXPORT_CSV'];
-
+const DEFAULT_DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL', 'ACTION_EXPORT_CSV', 'alertRule'];
 export function LensWrapper({
   lensProps,
-  metric,
   services,
   onBrushEnd,
   onFilter,
   abortController,
-  metricName,
+  titleHighlight,
   onViewDetails,
+  onCopyToDashboard,
+  onExploreInDiscoverTab,
+  syncTooltips,
+  syncCursor,
+  extraDisabledActions = [],
 }: LensWrapperProps) {
   const { euiTheme } = useEuiTheme();
-  const [isSaveModalVisible, { toggle: toggleSaveModalVisible }] = useBoolean(false);
-  const { searchTerm } = useMetricsGridState();
 
-  const { EmbeddableComponent, SaveModalComponent } = services.lens;
-
-  const esqlQuery = (lensProps?.attributes?.state?.query as AggregateQuery).esql ?? '';
-
-  const handleViewDetails = React.useCallback(() => {
-    onViewDetails(metric, esqlQuery);
-  }, [onViewDetails, metric, esqlQuery]);
+  const { EmbeddableComponent } = services.lens;
 
   const chartCss = css`
     position: relative;
@@ -59,11 +58,14 @@ export function LensWrapper({
       width: 100%;
     }
 
+    & .embPanel__header {
+      visibility: hidden;
+    }
+
     & .lnsExpressionRenderer {
       width: 100%;
       margin: auto;
       box-shadow: none;
-      padding-top: ${euiTheme.size.l};
     }
 
     & .echLegend .echLegendList {
@@ -78,34 +80,50 @@ export function LensWrapper({
     }
   `;
 
+  const handleExploreInDiscoverTab = useCallback(
+    () =>
+      onExploreInDiscoverTab?.({
+        query: lensProps.attributes.state.query,
+        tabLabel: lensProps.attributes.title,
+        timeRange: lensProps.timeRange,
+      }),
+    [
+      lensProps.attributes.state.query,
+      lensProps.attributes.title,
+      lensProps.timeRange,
+      onExploreInDiscoverTab,
+    ]
+  );
+
   const extraActions = useLensExtraActions({
-    copyToDashboard: { onClick: toggleSaveModalVisible },
-    viewDetails: { onClick: handleViewDetails },
+    copyToDashboard: onCopyToDashboard ? { onClick: onCopyToDashboard } : undefined,
+    viewDetails: onViewDetails ? { onClick: onViewDetails } : undefined,
+    exploreInDiscoverTab: onExploreInDiscoverTab
+      ? { onClick: handleExploreInDiscoverTab }
+      : undefined,
   });
 
+  const disabledActions = [...DEFAULT_DISABLED_ACTIONS, ...extraDisabledActions];
+
   return (
-    <>
-      <div css={chartCss}>
-        <ChartTitle searchTerm={searchTerm} text={metricName} truncation="end" />
+    <div css={chartCss}>
+      <PresentationPanelQuickActionContext.Provider
+        value={{ view: [ACTION_EXPLORE_IN_DISCOVER_TAB, 'openInspector'] }}
+      >
+        <ChartTitle highlight={titleHighlight} title={lensProps.attributes.title} />
         <EmbeddableComponent
           {...lensProps}
+          title={lensProps.attributes.title}
           extraActions={extraActions}
           abortController={abortController}
-          disabledActions={DEFAULT_DISABLED_ACTIONS}
+          disabledActions={disabledActions}
           withDefaultActions
           onBrushEnd={onBrushEnd}
           onFilter={onFilter}
+          syncTooltips={syncTooltips}
+          syncCursor={syncCursor}
         />
-      </div>
-      {isSaveModalVisible && (
-        <SaveModalComponent
-          initialInput={{ attributes: lensProps.attributes }}
-          onClose={toggleSaveModalVisible}
-          // Disables saving ESQL charts to the library.
-          // it will only copy it to a dashboard
-          isSaveable={false}
-        />
-      )}
-    </>
+      </PresentationPanelQuickActionContext.Provider>
+    </div>
   );
 }

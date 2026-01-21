@@ -41,6 +41,10 @@ import type {
   ShouldIncrementRevision,
   UpdateOperationOpts,
 } from './types';
+import {
+  combineFiltersWithInternalRuleTypeFilter,
+  constructIgnoreInternalRuleTypesFilter,
+} from '../construct_ignore_internal_rule_type_filters';
 
 export interface BulkEditOptions<Params extends RuleParams> {
   filter?: string | KueryNode;
@@ -53,6 +57,7 @@ export interface BulkEditOptions<Params extends RuleParams> {
   requiredAuthOperation: ReadOperations | WriteOperations;
   paramsModifier?: ParamsModifier<Params>;
   shouldIncrementRevision?: ShouldIncrementRevision<Params>;
+  ignoreInternalRuleTypes?: boolean;
 }
 
 export async function bulkEditRules<Params extends RuleParams>(
@@ -61,6 +66,8 @@ export async function bulkEditRules<Params extends RuleParams>(
 ): Promise<BulkEditResult<Params>> {
   const queryFilter = options.filter;
   const ids = options.ids;
+  const ignoreInternalRuleTypes = options.ignoreInternalRuleTypes ?? true;
+
   const actionsClient = await context.getActionsClient();
 
   if (ids && queryFilter) {
@@ -70,9 +77,13 @@ export async function bulkEditRules<Params extends RuleParams>(
   }
 
   const qNodeQueryFilter = buildKueryNodeFilter(queryFilter);
-
   const qNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : qNodeQueryFilter;
+  const internalRuleTypeFilter = constructIgnoreInternalRuleTypesFilter({
+    ruleTypes: context.ruleTypeRegistry.list(),
+  });
+
   let authorizationTuple;
+
   try {
     authorizationTuple = await context.authorization.getFindAuthorizationFilter({
       authorizationEntity: AlertingAuthorizationEntity.Rule,
@@ -83,15 +94,23 @@ export async function bulkEditRules<Params extends RuleParams>(
     throw error;
   }
   const { filter: authorizationFilter } = authorizationTuple;
+
   const qNodeFilterWithAuth =
     authorizationFilter && qNodeFilter
       ? nodeBuilder.and([qNodeFilter, authorizationFilter as KueryNode])
       : qNodeFilter;
 
+  const finalFilter = ignoreInternalRuleTypes
+    ? combineFiltersWithInternalRuleTypeFilter({
+        filter: qNodeFilterWithAuth,
+        internalRuleTypeFilter,
+      })
+    : qNodeFilterWithAuth;
+
   const { aggregations, total } = await findRulesSo<RuleBulkOperationAggregation>({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
     savedObjectsFindOptions: {
-      filter: qNodeFilterWithAuth,
+      filter: finalFilter,
       page: 1,
       perPage: 0,
       aggs: {
@@ -150,7 +169,7 @@ export async function bulkEditRules<Params extends RuleParams>(
         paramsModifier: options.paramsModifier,
         shouldIncrementRevision: options.shouldIncrementRevision,
       }),
-    qNodeFilterWithAuth
+    finalFilter
   );
 
   if (apiKeysToInvalidate.length > 0) {

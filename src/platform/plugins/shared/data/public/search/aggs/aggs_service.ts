@@ -55,7 +55,7 @@ export interface AggsSetupDependencies {
 /** @internal */
 export interface AggsStartDependencies {
   fieldFormats: FieldFormatsStart;
-  indexPatterns: DataViewsContract;
+  dataViews: DataViewsContract;
 }
 
 /**
@@ -87,10 +87,10 @@ export class AggsService {
     });
   }
 
-  public start({ indexPatterns, fieldFormats }: AggsStartDependencies): AggsStart {
+  public start({ dataViews, fieldFormats }: AggsStartDependencies): AggsStart {
     const { calculateAutoTimeExpression, types, createAggConfigs } = this.aggsCommonService.start({
       getConfig: this.getConfig!,
-      getIndexPattern: indexPatterns.get,
+      getIndexPattern: dataViews.get,
       calculateBounds: this.calculateBounds,
       fieldFormats,
     });

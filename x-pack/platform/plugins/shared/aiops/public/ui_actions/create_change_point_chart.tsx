@@ -18,7 +18,7 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { AiopsPluginStartDeps } from '../types';
 
 import type { ChangePointChartActionContext } from './change_point_action_context';
-import type { ChangePointEmbeddableState } from '../embeddables/change_point_chart/types';
+import type { ChangePointEmbeddableState } from '../../common/embeddables/change_point_chart/types';
 
 const parentApiIsCompatible = async (
   parentApi: unknown
@@ -76,9 +76,7 @@ export function createAddChangePointChartAction(
               onConfirm={(initialState) => {
                 presentationContainerParent.addNewPanel<ChangePointEmbeddableState>({
                   panelType: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
-                  serializedState: {
-                    rawState: initialState,
-                  },
+                  serializedState: initialState,
                 });
                 closeFlyout();
               }}

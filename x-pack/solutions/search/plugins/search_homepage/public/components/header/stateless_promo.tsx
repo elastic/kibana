@@ -9,27 +9,48 @@ import { i18n } from '@kbn/i18n';
 
 import { HeaderPromo } from './promo';
 import { HeaderCTALink } from './cta_link';
+import { useKibana } from '../../hooks/use_kibana';
+import { HeaderCTAButton } from './cta_button';
 
 export const StatelessHeaderPromo = () => {
+  const {
+    services: { application },
+  } = useKibana();
+
+  const ctaButtonLabel = i18n.translate('xpack.searchHomepage.statelessPromo12.content.ctaButton', {
+    defaultMessage: 'Start Building',
+  });
   return (
     <HeaderPromo
-      title={i18n.translate('xpack.searchHomepage.header.statelessPromo.9.title', {
-        defaultMessage: 'Excluding vectors from source',
+      title={i18n.translate('xpack.searchHomepage.header.statelessPromo12.title', {
+        defaultMessage: 'Get started building AI Agents and chatting with your data',
       })}
-      description={i18n.translate('xpack.searchHomepage.header.statelessPromo.9.description', {
+      description={i18n.translate('xpack.searchHomepage.header.statelessPromo12.description', {
         defaultMessage:
-          'Elasticsearch now excludes vectors from source by default, saving space and improving performance while keeping vectors accessible when needed.',
+          'Start building AI agents. Try Agent Builder to chat with your data using powerful native tools, or create your own agents and tools with hybrid search and ES|QL.',
       })}
-      cta={
-        <HeaderCTALink
-          data-telemetry-id="9-exclude-vectors"
-          href="https://www.elastic.co/search-labs/blog/elasticsearch-exclude-vectors-from-source"
+      actions={[
+        <HeaderCTAButton
+          key="12-agent-builder-button"
+          data-telemetry-id="12-agent-builder-button"
+          handleOnClick={() => {
+            application.navigateToApp('agent_builder');
+          }}
+          ariaLabel={ctaButtonLabel}
         >
-          {i18n.translate('xpack.searchHomepage.statelessPromo.9.content', {
-            defaultMessage: 'View on Elasticsearch Labs',
+          {ctaButtonLabel}
+        </HeaderCTAButton>,
+        <HeaderCTALink
+          key="12-agent-builder-blog"
+          // "search-promo-homepage-" is prepended to the telemetry id in HeaderCTALink
+          data-telemetry-id="12-agent-builder-blog"
+          href="https://www.elastic.co/search-labs/blog/ai-agentic-workflows-elastic-ai-agent-builder"
+        >
+          {i18n.translate('xpack.searchHomepage.statelessPromo12.content.ctaLink', {
+            defaultMessage: 'Check out the docs',
           })}
-        </HeaderCTALink>
-      }
+        </HeaderCTALink>,
+      ]}
     />
   );
 };

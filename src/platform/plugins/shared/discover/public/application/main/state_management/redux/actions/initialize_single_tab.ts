@@ -11,19 +11,15 @@ import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { cloneDeep, isEqual, isObject, pick } from 'lodash';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
-import {
-  internalStateSlice,
-  type TabActionPayload,
-  type InternalStateThunkActionCreator,
-} from '../internal_state';
-import {
-  getInitialState,
-  type AppStateUrl,
-  type DiscoverAppState,
-} from '../../discover_app_state_container';
+import type { ESQLControlState } from '@kbn/esql-types';
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
+import { internalStateSlice, type TabActionPayload } from '../internal_state';
+import { getInitialAppState } from '../../utils/get_initial_app_state';
+import { type DiscoverAppState } from '..';
 import type { DiscoverStateContainer } from '../../discover_state';
-import { appendAdHocDataViews, setDataView } from './data_views';
-import { cleanupUrlState } from '../../utils/cleanup_url_state';
+import { appendAdHocDataViews } from './data_views';
+import { setDataView } from './tab_state_data_view';
+import { type AppStateUrl, cleanupUrlState } from '../../utils/cleanup_url_state';
 import { getEsqlDataView } from '../../utils/get_esql_data_view';
 import { loadAndResolveDataView } from '../../utils/resolve_data_view';
 import { isDataViewSource } from '../../../../../../common/data_sources';
@@ -32,7 +28,6 @@ import { isRefreshIntervalValid, isTimeRangeValid } from '../../../../../utils/v
 import { getValidFilters } from '../../../../../utils/get_valid_filters';
 import { updateSavedSearch } from '../../utils/update_saved_search';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
-import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../../../../constants';
 import { selectTabRuntimeState } from '../runtime_state';
 import type { ConnectedCustomizationService } from '../../../../../customizations';
 import { disconnectTab } from './tabs';
@@ -40,28 +35,36 @@ import { selectTab } from '../selectors';
 import type { TabState, TabStateGlobalState } from '../types';
 import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
 import { fromSavedObjectTabToSavedSearch } from '../tab_mapping_utils';
+import { createInternalStateAsyncThunk, extractEsqlVariables } from '../utils';
+import { fetchData } from './tab_state';
 
 export interface InitializeSingleTabsParams {
   stateContainer: DiscoverStateContainer;
   customizationService: ConnectedCustomizationService;
   dataViewSpec: DataViewSpec | undefined;
+  esqlControls: ControlPanelsState<ESQLControlState> | undefined;
   defaultUrlState: DiscoverAppState | undefined;
 }
 
-export const initializeSingleTab: InternalStateThunkActionCreator<
-  [TabActionPayload<{ initializeSingleTabParams: InitializeSingleTabsParams }>],
-  Promise<{ showNoDataPage: boolean }>
-> =
-  ({
-    tabId,
-    initializeSingleTabParams: {
-      stateContainer,
-      customizationService,
-      dataViewSpec,
-      defaultUrlState,
-    },
-  }) =>
-  async (dispatch, getState, { services, runtimeStateManager, urlStateStorage }) => {
+export const initializeSingleTab = createInternalStateAsyncThunk(
+  'internalState/initializeSingleTab',
+  async function initializeSingleTabThunkFn(
+    {
+      tabId,
+      initializeSingleTabParams: {
+        stateContainer,
+        customizationService,
+        dataViewSpec,
+        esqlControls,
+        defaultUrlState,
+      },
+    }: TabActionPayload<{ initializeSingleTabParams: InitializeSingleTabsParams }>,
+    {
+      dispatch,
+      getState,
+      extra: { services, runtimeStateManager, urlStateStorage, searchSessionManager },
+    }
+  ) {
     dispatch(disconnectTab({ tabId }));
     dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId }));
 
@@ -72,28 +75,54 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
      * New tab initialization with the restored data if available
      */
 
-    const tabsEnabled = services.core.featureFlags.getBooleanValue(
-      TABS_ENABLED_FEATURE_FLAG_KEY,
-      false
-    );
-
     let tabInitialGlobalState: TabStateGlobalState | undefined;
     let tabInitialAppState: DiscoverAppState | undefined;
     let tabInitialInternalState: TabState['initialInternalState'] | undefined;
 
-    if (tabsEnabled) {
-      const tabState = selectTab(getState(), tabId);
+    const tabState = selectTab(getState(), tabId);
 
+    if (tabState.globalState) {
       tabInitialGlobalState = cloneDeep(tabState.globalState);
-
-      if (tabState.initialAppState) {
-        tabInitialAppState = cloneDeep(tabState.initialAppState);
-      }
-
-      if (tabState.initialInternalState) {
-        tabInitialInternalState = cloneDeep(tabState.initialInternalState);
-      }
     }
+
+    if (tabState.appState) {
+      tabInitialAppState = cloneDeep(tabState.appState);
+    }
+
+    if (tabState.initialInternalState) {
+      tabInitialInternalState = cloneDeep(tabState.initialInternalState);
+    }
+
+    if (esqlControls) {
+      tabInitialInternalState = {
+        ...tabInitialInternalState,
+        controlGroupJson: JSON.stringify(esqlControls),
+      };
+
+      dispatch(
+        internalStateSlice.actions.setControlGroupState({
+          tabId,
+          controlGroupState: esqlControls,
+        })
+      );
+
+      dispatch(
+        internalStateSlice.actions.setEsqlVariables({
+          tabId,
+          esqlVariables: extractEsqlVariables(esqlControls),
+        })
+      );
+    }
+
+    // Get a snapshot of the current URL state before any async work is done
+    // to avoid race conditions if the URL changes during tab initialization,
+    // e.g. if the user quickly switches tabs
+    const urlGlobalState = urlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY);
+    const urlAppState = {
+      ...tabInitialAppState,
+      ...(defaultUrlState ??
+        cleanupUrlState(urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY), services.uiSettings)),
+    };
 
     const discoverTabLoadTracker = scopedEbtManager$
       .getValue()
@@ -110,14 +139,7 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
           })
         : undefined;
 
-    const urlAppState = {
-      ...tabInitialAppState,
-      ...(defaultUrlState ??
-        cleanupUrlState(urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY), services.uiSettings)),
-    };
-
-    const initialQuery =
-      urlAppState?.query ?? persistedTabSavedSearch?.searchSource.getField('query');
+    const initialQuery = urlAppState?.query ?? persistedTab?.serializedSearchSource.query;
     const isEsqlMode = isOfAggregateQueryType(initialQuery);
 
     const initialDataViewIdOrSpec = tabInitialInternalState?.serializedSearchSource?.index;
@@ -195,7 +217,6 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
         : undefined),
       ...tabInitialGlobalState,
     };
-    const urlGlobalState = urlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY);
 
     if (urlGlobalState?.time) {
       initialGlobalState.timeRange = urlGlobalState.time;
@@ -211,12 +232,13 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
 
     // Get the initial app state based on a combo of the URL and persisted tab saved search,
     // then get an updated copy of the saved search with the applied initial state
-    const initialAppState = getInitialState({
+    const initialAppState = getInitialAppState({
       initialUrlState: urlAppState,
-      savedSearch: persistedTabSavedSearch,
-      overrideDataView: dataView,
+      persistedTab,
+      dataView,
       services,
     });
+
     const savedSearch = updateSavedSearch({
       savedSearch: persistedTabSavedSearch
         ? copySavedSearch(persistedTabSavedSearch)
@@ -232,39 +254,53 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
      * Sync global services
      */
 
-    // Cleaning up the previous state
-    services.filterManager.setAppFilters([]);
-    services.data.query.queryString.clearQuery();
+    // Only update global services if this is still the current tab
+    if (getState().tabs.unsafeCurrentId === tabId) {
+      // Push the tab's initial search session ID to the URL if one exists,
+      // unless it should be overridden by a search session ID already in the URL
+      if (
+        tabInitialInternalState?.searchSessionId &&
+        !searchSessionManager.hasSearchSessionIdInURL()
+      ) {
+        searchSessionManager.pushSearchSessionIdToURL(tabInitialInternalState.searchSessionId, {
+          replace: true,
+        });
+      }
 
-    if (initialGlobalState.timeRange && isTimeRangeValid(initialGlobalState.timeRange)) {
-      services.timefilter.setTime(initialGlobalState.timeRange);
-    }
+      // Cleaning up the previous state
+      services.filterManager.setAppFilters([]);
+      services.data.query.queryString.clearQuery();
 
-    if (
-      initialGlobalState.refreshInterval &&
-      isRefreshIntervalValid(initialGlobalState.refreshInterval)
-    ) {
-      services.timefilter.setRefreshInterval(initialGlobalState.refreshInterval);
-    }
+      if (initialGlobalState.timeRange && isTimeRangeValid(initialGlobalState.timeRange)) {
+        services.timefilter.setTime(initialGlobalState.timeRange);
+      }
 
-    if (initialGlobalState.filters) {
-      services.filterManager.setGlobalFilters(cloneDeep(initialGlobalState.filters));
-    }
+      if (
+        initialGlobalState.refreshInterval &&
+        isRefreshIntervalValid(initialGlobalState.refreshInterval)
+      ) {
+        services.timefilter.setRefreshInterval(initialGlobalState.refreshInterval);
+      }
 
-    if (initialAppState.filters) {
-      services.filterManager.setAppFilters(cloneDeep(initialAppState.filters));
-    }
+      if (initialGlobalState.filters) {
+        services.filterManager.setGlobalFilters(cloneDeep(initialGlobalState.filters));
+      }
 
-    // some filters may not be valid for this context, so update
-    // the filter manager with a modified list of valid filters
-    const currentFilters = services.filterManager.getFilters();
-    const validFilters = getValidFilters(dataView, currentFilters);
-    if (!isEqual(currentFilters, validFilters)) {
-      services.filterManager.setFilters(validFilters);
-    }
+      if (initialAppState.filters) {
+        services.filterManager.setAppFilters(cloneDeep(initialAppState.filters));
+      }
 
-    if (initialAppState.query) {
-      services.data.query.queryString.setQuery(initialAppState.query);
+      // some filters may not be valid for this context, so update
+      // the filter manager with a modified list of valid filters
+      const currentFilters = services.filterManager.getFilters();
+      const validFilters = getValidFilters(dataView, currentFilters);
+      if (!isEqual(currentFilters, validFilters)) {
+        services.filterManager.setFilters(validFilters);
+      }
+
+      if (initialAppState.query) {
+        services.data.query.queryString.setQuery(initialAppState.query);
+      }
     }
 
     /**
@@ -280,18 +316,27 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
       stateContainer.savedSearchState.set(savedSearch);
     }
 
-    // Make sure app state container is completely reset
-    stateContainer.appState.resetToState(initialAppState);
-    stateContainer.appState.resetInitialState();
+    // Make sure app state is completely reset
+    dispatch(internalStateSlice.actions.resetAppState({ tabId, appState: initialAppState }));
 
     // Set runtime state
     stateContainer$.next(stateContainer);
     customizationService$.next(customizationService);
 
     // Begin syncing the state and trigger the initial fetch
-    stateContainer.actions.initializeAndSync();
-    stateContainer.actions.fetchData(true);
+    // if this is still the current tab, otherwise mark the
+    // tab to fetch when selected
+    if (getState().tabs.unsafeCurrentId === tabId) {
+      stateContainer.actions.initializeAndSync();
+      dispatch(fetchData({ tabId, initial: true }));
+    } else {
+      dispatch(
+        internalStateSlice.actions.setForceFetchOnSelect({ tabId, forceFetchOnSelect: true })
+      );
+    }
+
     discoverTabLoadTracker.reportEvent();
 
     return { showNoDataPage: false };
-  };
+  }
+);

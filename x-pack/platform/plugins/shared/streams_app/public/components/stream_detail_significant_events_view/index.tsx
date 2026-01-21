@@ -5,170 +5,138 @@
  * 2.0.
  */
 import { niceTimeFormatter } from '@elastic/charts';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { StreamQueryKql } from '@kbn/streams-schema';
-import type { Streams } from '@kbn/streams-schema';
-import React, { useMemo, useState } from 'react';
-import { useFetchSignificantEvents } from '../../hooks/use_fetch_significant_events';
+import type { Streams, StreamQueryKql, System } from '@kbn/streams-schema';
+import type { TimeRange } from '@kbn/es-query';
+import { compact, isEqual } from 'lodash';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useStreamFeatures } from '../stream_detail_features/stream_features/hooks/use_stream_features';
 import { useKibana } from '../../hooks/use_kibana';
+import { EditSignificantEventFlyout } from './edit_significant_event_flyout';
+import { useFetchSignificantEvents } from '../../hooks/use_fetch_significant_events';
 import { useSignificantEventsApi } from '../../hooks/use_significant_events_api';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { LoadingPanel } from '../loading_panel';
-import { StreamsAppSearchBar } from '../streams_app_search_bar';
-import { AddSignificantEventFlyout } from './add_significant_event_flyout/add_significant_event_flyout';
-import type { SaveData } from './add_significant_event_flyout/types';
-import { ChangePointSummary } from './change_point_summary';
-import { SignificantEventsViewEmptyState } from './empty_state/empty_state';
+import type { Flow } from './add_significant_event_flyout/types';
 import { SignificantEventsTable } from './significant_events_table';
-import type { TimelineEvent } from './timeline';
-import { Timeline } from './timeline';
+import { EmptyState } from './empty_state';
+import {
+  OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM,
+  SELECTED_FEATURES_URL_PARAM,
+} from '../../constants';
+import { SignificantEventsHistogramChart } from './significant_events_histogram';
 import { formatChangePoint } from './utils/change_point';
-import { getStreamTypeFromDefinition } from '../../util/get_stream_type_from_definition';
-import { NO_SYSTEM } from './add_significant_event_flyout/utils/default_query';
+import { useAIFeatures } from '../../hooks/use_ai_features';
 
 interface Props {
   definition: Streams.all.GetResponse;
 }
 
 export function StreamDetailSignificantEventsView({ definition }: Props) {
+  const { timeState, setTime, refresh } = useTimefilter();
   const {
-    core: { notifications },
-    services: { telemetryClient },
+    dependencies: {
+      start: { unifiedSearch },
+    },
   } = useKibana();
-  const {
-    timeState: { start, end },
-  } = useTimefilter();
-
-  const theme = useEuiTheme().euiTheme;
+  const { euiTheme } = useEuiTheme();
+  const aiFeatures = useAIFeatures();
 
   const xFormatter = useMemo(() => {
-    return niceTimeFormatter([start, end]);
-  }, [start, end]);
+    return niceTimeFormatter([timeState.start, timeState.end]);
+  }, [timeState.start, timeState.end]);
 
+  const { features, refreshFeatures, featuresLoading } = useStreamFeatures(definition.stream.name);
+  const [query, setQuery] = useState<string>('');
   const significantEventsFetchState = useFetchSignificantEvents({
     name: definition.stream.name,
-    start,
-    end,
+    query,
   });
 
-  const { upsertQuery, removeQuery, bulk } = useSignificantEventsApi({
-    name: definition.stream.name,
-    start,
-    end,
-  });
-
+  const { removeQuery } = useSignificantEventsApi({ name: definition.stream.name });
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
+  const [initialFlow, setInitialFlow] = useState<Flow | undefined>('ai');
 
+  const [selectedFeatures, setSelectedFeatures] = useState<System[]>([]);
   const [queryToEdit, setQueryToEdit] = useState<StreamQueryKql | undefined>();
+  const [dateRange, setDateRange] = useState<TimeRange>(timeState.timeRange);
 
-  const events = useMemo(() => {
-    return (
-      significantEventsFetchState.value?.flatMap((item): TimelineEvent[] => {
-        const change = formatChangePoint(item);
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get(OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM) === 'true' && features.length > 0) {
+      setIsEditFlyoutOpen(true);
 
-        if (!change) {
-          return [];
-        }
+      // Parse selected features from URL parameters
+      const selectedFeaturesParam = urlParams.get(SELECTED_FEATURES_URL_PARAM);
 
-        return [
-          {
-            id: item.query.id,
-            label: <ChangePointSummary change={change} xFormatter={xFormatter} />,
-            color: theme.colors[change.color],
-            time: change.time,
-            header: item.query.title,
-          },
-        ];
-      }) ?? []
-    );
-  }, [significantEventsFetchState.value, theme, xFormatter]);
+      if (selectedFeaturesParam) {
+        const selectedFeatureNames = selectedFeaturesParam.split(',').filter((name) => name.trim());
+        setSelectedFeatures(
+          features.filter((feature) => selectedFeatureNames.includes(feature.name))
+        );
+      }
 
-  if (!significantEventsFetchState.value) {
-    return <LoadingPanel />;
+      // Clean up the URL parameters after opening the flyout
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete(OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM);
+      newUrl.searchParams.delete(SELECTED_FEATURES_URL_PARAM);
+      window.history.replaceState({}, '', newUrl.toString());
+    }
+  }, [features]);
+
+  if (
+    !significantEventsFetchState.data &&
+    (featuresLoading || significantEventsFetchState.isLoading)
+  ) {
+    return <LoadingPanel size="xxl" />;
   }
 
-  const editFlyout = isEditFlyoutOpen ? (
-    <AddSignificantEventFlyout
-      definition={definition.stream}
-      query={queryToEdit}
-      onSave={async (data: SaveData) => {
-        const streamType = getStreamTypeFromDefinition(definition.stream);
-
-        switch (data.type) {
-          case 'single':
-            await upsertQuery(data.query).then(
-              () => {
-                notifications.toasts.addSuccess({
-                  title: i18n.translate(
-                    'xpack.streams.significantEvents.savedSingle.successfullyToastTitle',
-                    { defaultMessage: `Saved significant event query successfully` }
-                  ),
-                });
-                telemetryClient.trackSignificantEventsCreated({
-                  count: 1,
-                  stream_type: streamType,
-                });
-                setIsEditFlyoutOpen(false);
-                significantEventsFetchState.refresh();
-              },
-              (error) => {
-                notifications.showErrorDialog({
-                  title: i18n.translate(
-                    'xpack.streams.significantEvents.savedSingle.errorToastTitle',
-                    { defaultMessage: `Could not save significant event query` }
-                  ),
-                  error,
-                });
-              }
-            );
-            break;
-          case 'multiple':
-            await bulk(data.queries.map((query) => ({ index: query }))).then(
-              () => {
-                notifications.toasts.addSuccess({
-                  title: i18n.translate(
-                    'xpack.streams.significantEvents.savedMultiple.successfullyToastTitle',
-                    { defaultMessage: `Saved significant events queries successfully` }
-                  ),
-                });
-                telemetryClient.trackSignificantEventsCreated({
-                  count: data.queries.length,
-                  stream_type: streamType,
-                });
-                setIsEditFlyoutOpen(false);
-                significantEventsFetchState.refresh();
-              },
-              (error) => {
-                notifications.showErrorDialog({
-                  title: i18n.translate(
-                    'xpack.streams.significantEvents.savedMultiple.errorToastTitle',
-                    { defaultMessage: 'Could not save significant events queries' }
-                  ),
-                  error,
-                });
-              }
-            );
-            break;
-        }
-      }}
-      onClose={() => {
-        setIsEditFlyoutOpen(false);
-        setQueryToEdit(undefined);
-      }}
+  const editFlyout = (generateOnMount: boolean) => (
+    <EditSignificantEventFlyout
+      setIsEditFlyoutOpen={setIsEditFlyoutOpen}
+      isEditFlyoutOpen={isEditFlyoutOpen}
+      definition={definition}
+      refresh={significantEventsFetchState.refetch}
+      queryToEdit={queryToEdit}
+      setQueryToEdit={setQueryToEdit}
+      initialFlow={initialFlow}
+      selectedFeatures={selectedFeatures}
+      setSelectedFeatures={setSelectedFeatures}
+      features={features}
+      refreshFeatures={refreshFeatures}
+      generateOnMount={generateOnMount}
+      aiFeatures={aiFeatures}
     />
-  ) : null;
+  );
 
-  if (significantEventsFetchState.value.length === 0) {
+  const noSignificantEvents =
+    !query &&
+    !significantEventsFetchState.isLoading &&
+    significantEventsFetchState.data &&
+    significantEventsFetchState.data.significant_events.length === 0;
+
+  if (noSignificantEvents) {
     return (
       <>
-        <SignificantEventsViewEmptyState
-          onAddClick={() => {
-            setIsEditFlyoutOpen(true);
+        <EmptyState
+          features={features}
+          selectedFeatures={selectedFeatures}
+          onFeaturesChange={setSelectedFeatures}
+          definition={definition.stream}
+          refreshFeatures={refreshFeatures}
+          onManualEntryClick={() => {
             setQueryToEdit(undefined);
+            setInitialFlow('manual');
+            setIsEditFlyoutOpen(true);
           }}
+          onGenerateSuggestionsClick={() => {
+            setInitialFlow('ai');
+            setIsEditFlyoutOpen(true);
+          }}
+          aiFeatures={aiFeatures}
         />
-        {editFlyout}
+        {editFlyout(true)}
       </>
     );
   }
@@ -179,16 +147,43 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
         <EuiFlexItem grow={false}>
           <EuiFlexGroup direction="row" gutterSize="s">
             <EuiFlexItem grow>
-              <StreamsAppSearchBar showQueryInput={false} showDatePicker />
+              <unifiedSearch.ui.SearchBar
+                appName="streamsApp"
+                showFilterBar={false}
+                showQueryMenu={false}
+                showQueryInput={true}
+                submitButtonStyle="iconOnly"
+                displayStyle="inPage"
+                disableQueryLanguageSwitcher
+                onQuerySubmit={(queryN) => {
+                  setQuery(String(queryN.query?.query ?? ''));
+
+                  if (isEqual(queryN.dateRange, dateRange)) {
+                    refresh();
+                  } else {
+                    setTime(queryN.dateRange);
+                    setDateRange(queryN.dateRange);
+                  }
+                }}
+                query={{
+                  query,
+                  language: 'text',
+                }}
+                isLoading={significantEventsFetchState.isLoading}
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
+                fill={true}
+                size="s"
                 color="primary"
                 onClick={() => {
+                  setSelectedFeatures([]);
                   setIsEditFlyoutOpen(true);
                   setQueryToEdit(undefined);
                 }}
                 iconType="plus"
+                data-test-subj="significant_events_existing_queries_open_flyout_button"
               >
                 {i18n.translate('xpack.streams.significantEvents.addSignificantEventButton', {
                   defaultMessage: 'Significant events',
@@ -198,31 +193,63 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
           </EuiFlexGroup>
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <Timeline start={start} end={end} events={events} xFormatter={xFormatter} />
-        </EuiFlexItem>
+        <EuiPanel grow={false} hasShadow={false} hasBorder={true}>
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <EuiText css={{ fontWeight: euiTheme.font.weight.semiBold }}>
+                {i18n.translate(
+                  'xpack.streams.addSignificantEventFlyout.manualFlow.previewChartDetectedOccurrences',
+                  {
+                    defaultMessage: 'Detected event occurrences ({count})',
+                    values: {
+                      count: (
+                        significantEventsFetchState.data?.aggregated_occurrences ?? []
+                      ).reduce((acc, point) => acc + point.y, 0),
+                    },
+                  }
+                )}
+              </EuiText>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <SignificantEventsHistogramChart
+                id={'all-events'}
+                occurrences={significantEventsFetchState.data?.aggregated_occurrences ?? []}
+                changes={compact(
+                  (significantEventsFetchState.data?.significant_events ?? []).map((item) =>
+                    formatChangePoint({
+                      query: item.query,
+                      change_points: item.change_points,
+                      occurrences: item.occurrences,
+                    })
+                  )
+                )}
+                xFormatter={xFormatter}
+                compressed={false}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
 
         <EuiFlexItem grow={false}>
           <SignificantEventsTable
+            loading={significantEventsFetchState.isLoading}
             definition={definition.stream}
-            response={significantEventsFetchState}
+            items={significantEventsFetchState.data?.significant_events ?? []}
             onEditClick={(item) => {
               setIsEditFlyoutOpen(true);
-              setQueryToEdit({
-                ...item.query,
-                system: item.query.system ?? NO_SYSTEM,
-              });
+              setQueryToEdit({ ...item.query });
             }}
             onDeleteClick={async (item) => {
               await removeQuery?.(item.query.id).then(() => {
-                significantEventsFetchState.refresh();
+                significantEventsFetchState.refetch();
               });
             }}
             xFormatter={xFormatter}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {editFlyout}
+      {editFlyout(selectedFeatures.length > 0)}
     </>
   );
 }

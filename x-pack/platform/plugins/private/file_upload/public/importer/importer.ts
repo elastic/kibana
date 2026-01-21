@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { chunk, cloneDeep, intersection } from 'lodash';
-import moment from 'moment';
+import { chunk, intersection } from 'lodash';
 import type {
   IndicesIndexSettings,
   IngestDeletePipelineResponse,
-  IngestSimulateResponse,
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type {
-  MessageReader,
-  TikaReader,
-  NdjsonReader,
-  ImportDoc,
-  ImportFailure,
-  ImportResponse,
-  IngestPipeline,
-  IngestPipelineWrapper,
-  ImportResults,
+import {
+  type MessageReader,
+  type TikaReader,
+  type NdjsonReader,
+  type ImportDoc,
+  type ImportFailure,
+  type ImportResponse,
+  type IngestPipeline,
+  type IngestPipelineWrapper,
+  type ImportResults,
+  updatePipelineTimezone,
+  AbortError,
 } from '@kbn/file-upload-common';
 import { getHttp } from '../kibana_services';
 
@@ -105,7 +105,8 @@ export abstract class Importer implements IImporter {
     settings: IndicesIndexSettings,
     mappings: MappingTypeMapping,
     pipelines: Array<IngestPipeline | undefined>,
-    existingIndex: boolean = false
+    existingIndex: boolean = false,
+    signal?: AbortSignal
   ) {
     this._initialize(index, mappings, pipelines);
 
@@ -115,6 +116,7 @@ export abstract class Importer implements IImporter {
       mappings,
       ingestPipelines: this._pipelines,
       existingIndex,
+      signal,
     });
   }
 
@@ -129,7 +131,8 @@ export abstract class Importer implements IImporter {
   public async import(
     index: string,
     ingestPipelineId: string,
-    setImportProgress: (progress: number) => void
+    setImportProgress: (progress: number) => void,
+    signal?: AbortSignal
   ): Promise<ImportResults> {
     if (!index) {
       return {
@@ -146,6 +149,10 @@ export abstract class Importer implements IImporter {
     const failures: ImportFailure[] = [];
     let error;
 
+    if (signal?.aborted) {
+      throw new AbortError();
+    }
+
     for (let i = 0; i < chunks.length; i++) {
       let retries = IMPORT_RETRIES;
       let resp: ImportResponse = {
@@ -156,12 +163,13 @@ export abstract class Importer implements IImporter {
         pipelineId: '',
       };
 
-      while (resp.success === false && retries > 0) {
+      while (resp.success === false && retries > 0 && !signal?.aborted) {
         try {
           resp = await callImportRoute({
             index,
             ingestPipelineId,
             data: chunks[i],
+            signal,
           });
 
           if (retries < IMPORT_RETRIES) {
@@ -175,6 +183,10 @@ export abstract class Importer implements IImporter {
           resp.error = err;
           retries = 0;
         }
+      }
+
+      if (signal?.aborted) {
+        throw new AbortError();
       }
 
       if (resp.success) {
@@ -240,7 +252,7 @@ export abstract class Importer implements IImporter {
     });
   }
 
-  public async deletePipelines() {
+  public async deletePipelines(signal?: AbortSignal) {
     const ids = this._pipelines.filter((p) => p.pipeline !== undefined).map((p) => p.id);
 
     if (ids.length === 0) {
@@ -251,27 +263,7 @@ export abstract class Importer implements IImporter {
       path: `/internal/file_upload/remove_pipelines/${ids.join(',')}`,
       method: 'DELETE',
       version: '1',
-    });
-  }
-
-  public async previewDocs(
-    data: ArrayBuffer,
-    ingestPipeline: IngestPipeline,
-    limit = 20
-  ): Promise<IngestSimulateResponse> {
-    this.read(data);
-    const pipeline = cloneDeep(ingestPipeline);
-    updatePipelineTimezone(pipeline);
-
-    return await getHttp().fetch<IngestSimulateResponse>({
-      path: `/internal/file_upload/preview_docs`,
-      method: 'POST',
-      version: '1',
-      body: JSON.stringify({
-        // first doc is the header
-        docs: this._docArray.slice(1, limit + 1),
-        pipeline,
-      }),
+      signal,
     });
   }
 }
@@ -290,25 +282,6 @@ function populateFailures(
       failure.item = failure.item + chunkSize * chunkCount;
     }
     failures.push(...error.failures);
-  }
-}
-
-// The file structure endpoint sets the timezone to be {{ event.timezone }}
-// as that's the variable Filebeat would send the client timezone in.
-// In this data import function the UI is effectively performing the role of Filebeat,
-// i.e. doing basic parsing, processing and conversion to JSON before forwarding to the ingest pipeline.
-// But it's not sending every single field that Filebeat would add, so the ingest pipeline
-// cannot look for a event.timezone variable in each input record.
-// Therefore we need to replace {{ event.timezone }} with the actual browser timezone
-function updatePipelineTimezone(ingestPipeline: IngestPipeline) {
-  if (ingestPipeline !== undefined && ingestPipeline.processors && ingestPipeline.processors) {
-    const dateProcessor = ingestPipeline.processors.find(
-      (p: any) => p.date !== undefined && p.date.timezone === '{{ event.timezone }}'
-    );
-
-    if (dateProcessor) {
-      dateProcessor.date.timezone = moment.tz.guess();
-    }
   }
 }
 

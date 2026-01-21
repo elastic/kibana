@@ -45,6 +45,7 @@ export const DraggableList: React.FC<DraggableListProps> = ({
         <>
           {actionFields.length === 0 && actionIdsFields?.length === 0 && (
             <EuiCallOut
+              announceOnMount
               title="At least one document is required"
               color="warning"
               size="s"

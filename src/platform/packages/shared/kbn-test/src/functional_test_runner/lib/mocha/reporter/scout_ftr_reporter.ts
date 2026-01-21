@@ -12,13 +12,13 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { SCOUT_REPORT_OUTPUT_ROOT, SCOUT_TARGET_MODE, SCOUT_TARGET_TYPE } from '@kbn/scout-info';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ScoutFileInfo } from '@kbn/scout-reporting';
+import { computeTestID } from '@kbn/scout-reporting';
 import {
   datasources,
   ScoutEventsReport,
   ScoutReportEventAction,
   type ScoutTestRunInfo,
   generateTestRunId,
-  getTestIDForTitle,
 } from '@kbn/scout-reporting';
 import {
   type CodeOwnersEntry,
@@ -149,7 +149,7 @@ export class ScoutFTRReporter {
         type: test.parent?.root ? 'root' : 'suite',
       },
       test: {
-        id: getTestIDForTitle(test.fullTitle()),
+        id: computeTestID(path.relative(REPO_ROOT, test.file || ''), test.fullTitle()),
         title: test.title,
         tags: [],
         file: test.file
@@ -178,7 +178,7 @@ export class ScoutFTRReporter {
         type: test.parent?.root ? 'root' : 'suite',
       },
       test: {
-        id: getTestIDForTitle(test.fullTitle()),
+        id: computeTestID(path.relative(REPO_ROOT, test.file || ''), test.fullTitle()),
         title: test.title,
         tags: [],
         file: test.file
@@ -201,6 +201,10 @@ export class ScoutFTRReporter {
     /**
      * Root suite execution has ended
      */
+    const passes = this.runner.stats?.passes ?? 0;
+    const failures = this.runner.stats?.failures ?? 0;
+    const pending = this.runner.stats?.pending ?? 0;
+
     this.report.logEvent({
       ...datasources.environmentMetadata,
       reporter: {
@@ -211,9 +215,18 @@ export class ScoutFTRReporter {
         ...this.baseTestRunInfo,
         status: this.runner.stats?.failures === 0 ? 'passed' : 'failed',
         duration: this.runner.stats?.duration || 0,
+        tests: {
+          passes,
+          failures,
+          pending,
+          total: passes + failures + pending,
+        },
       },
       event: {
         action: ScoutReportEventAction.RUN_END,
+      },
+      process: {
+        uptime: Math.floor(process.uptime() * 1000),
       },
     });
 

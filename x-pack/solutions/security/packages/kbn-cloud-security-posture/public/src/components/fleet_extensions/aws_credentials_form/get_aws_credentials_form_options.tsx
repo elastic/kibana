@@ -310,7 +310,7 @@ export const getAwsCredentialsFormOptions = (
 export const getAwsCloudConnectorsCredentialsFormOptions = (
   awsInputFieldMapping?: AwsInputFieldMapping
 ): Omit<AwsOptions, 'assume_role' | 'cloud_formation' | 'shared_credentials'> => {
-  const { roleArn, accessKeyId, secretAccessKey, sessionToken, credentialExternalId } =
+  const { accessKeyId, secretAccessKey, sessionToken } =
     getAwsFieldMappingValues(awsInputFieldMapping);
 
   return {
@@ -322,29 +322,7 @@ export const getAwsCloudConnectorsCredentialsFormOptions = (
         }
       ),
       info: AssumeRoleDescription,
-      fields: {
-        [roleArn]: {
-          label: i18n.translate(
-            'securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.roleArnLabel',
-            {
-              defaultMessage: 'Role ARN',
-            }
-          ),
-          type: 'text',
-          dataTestSubj: 'awsRoleArnInput',
-        },
-        [credentialExternalId]: {
-          label: i18n.translate(
-            'securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.externalId',
-            {
-              defaultMessage: 'External ID',
-            }
-          ),
-          type: 'password',
-          dataTestSubj: 'awsExternalId',
-          isSecret: true,
-        },
-      },
+      fields: {},
     },
     [AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS]: {
       label: i18n.translate(

@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-export const RISK_SCORE_URL = `/internal/risk_score` as const;
-export const INDICES_URL = `/internal/risk_score/indices` as const;
-export const INGEST_PIPELINES_URL = `/api/ingest_pipelines` as const;
-export const TRANSFORMS_URL = `/internal/transform` as const;
-export const STORED_SCRIPTS_URL = `/internal/risk_score/stored_scripts` as const;
-export const RISK_SCORE_SAVED_OBJECTS_URL =
-  `/internal/risk_score/prebuilt_content/saved_objects` as const;
 export const SAVED_OBJECTS_URL = `/api/saved_objects` as const;

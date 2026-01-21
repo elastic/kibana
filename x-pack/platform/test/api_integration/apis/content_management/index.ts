@@ -12,6 +12,5 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     loadTestFile(require.resolve('./created_by'));
     loadTestFile(require.resolve('./updated_by'));
     loadTestFile(require.resolve('./favorites'));
-    loadTestFile(require.resolve('./dashboard_search'));
   });
 }

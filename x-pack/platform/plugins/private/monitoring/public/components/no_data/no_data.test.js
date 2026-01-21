@@ -9,6 +9,38 @@ import React from 'react';
 import { renderWithI18nProvider } from '@kbn/test-jest-helpers';
 import { NoData } from '.';
 
+jest.mock('../../legacy_shims', () => ({
+  Legacy: {
+    shims: {
+      hasEnterpriseLicense: false,
+    },
+  },
+}));
+
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: () => ({
+    services: {
+      docLinks: {
+        links: {
+          cloud: {
+            connectToAutoops: 'https://docs.elastic.co/cloud/connect',
+          },
+        },
+      },
+      application: {
+        getUrlForApp: jest.fn(() => '/app/cloud_connect'),
+        navigateToApp: jest.fn(),
+        capabilities: {
+          cloudConnect: {
+            show: true,
+            configure: true,
+          },
+        },
+      },
+    },
+  }),
+}));
+
 const enabler = {};
 
 describe('NoData', () => {

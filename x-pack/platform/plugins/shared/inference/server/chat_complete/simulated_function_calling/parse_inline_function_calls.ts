@@ -63,6 +63,10 @@ export function parseInlineFunctionCalls({ logger }: { logger: Logger }) {
           if (!parsedFunctionCall.name) {
             throw createInferenceInternalError(`Missing name for tool use`);
           }
+          let input = parsedFunctionCall.input;
+          if (typeof input === 'string') {
+            input = { input };
+          }
 
           subscriber.next({
             content: '',
@@ -72,7 +76,7 @@ export function parseInlineFunctionCalls({ logger }: { logger: Logger }) {
                 toolCallId: parsedFunctionCall.name,
                 function: {
                   name: parsedFunctionCall.name,
-                  arguments: JSON.stringify(parsedFunctionCall.input || {}),
+                  arguments: JSON.stringify(input || {}),
                 },
               },
             ],

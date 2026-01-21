@@ -18,7 +18,7 @@
         "false",
         "wait_for"
       ],
-      "routing": "",
+      "routing": [],
       "timeout": [
         "1m",
         "-1",
@@ -28,15 +28,15 @@
       "version_type": [
         "internal",
         "external",
-        "external_gte",
-        "force"
+        "external_gte"
       ],
       "wait_for_active_shards": [
         "1",
         "all",
         "index-setting"
       ],
-      "require_alias": "__flag__"
+      "require_alias": "__flag__",
+      "require_data_stream": "__flag__"
     },
     "methods": [
       "PUT",

@@ -82,14 +82,12 @@ describe('Change privilege level handlers', () => {
 
     it('returns 403 if agent privilege level cannot be changed', async () => {
       (changeAgentPrivilegeLevel as jest.Mock).mockRejectedValue(
-        new FleetUnauthorizedError(
-          'Agent policy foo contains integrations that require root access'
-        )
+        new FleetUnauthorizedError('Cannot remove root privilege')
       );
 
       await expect(
         changeAgentPrivilegeLevelHandler(mockContext, mockRequest, mockResponse)
-      ).rejects.toThrow('Agent policy foo contains integrations that require root access');
+      ).rejects.toThrow('Cannot remove root privilege');
     });
   });
 });

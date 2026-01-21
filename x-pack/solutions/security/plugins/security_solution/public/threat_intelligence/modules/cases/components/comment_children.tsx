@@ -6,12 +6,11 @@
  */
 
 import type { FC } from 'react';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiLoadingLogo, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { LOADING_LOGO_TEST_ID } from './test_ids';
-import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
-import { IndicatorsFlyout } from '../../indicators/components/flyout/flyout';
 import { useStyles } from './styles';
 import { useIndicatorById } from '../hooks/use_indicator_by_id';
 import type { AttachmentMetadata } from '../utils/attachments';
@@ -37,23 +36,24 @@ export interface CommentChildrenProps {
  */
 export const CommentChildren: FC<CommentChildrenProps> = ({ id, metadata }) => {
   const styles = useStyles();
-  const [expanded, setExpanded] = useState<boolean>(false);
 
   const { indicator, isLoading } = useIndicatorById(id);
 
   const { indicatorName, indicatorType, indicatorFeedName } = metadata;
 
-  const flyoutFragment = useMemo(
+  const { openFlyout } = useExpandableFlyoutApi();
+
+  const open = useCallback(
     () =>
-      expanded ? (
-        <IndicatorsFlyout
-          indicator={indicator as Indicator}
-          closeFlyout={() => setExpanded(false)}
-          kqlBarIntegration={true}
-          indicatorName={indicatorName}
-        />
-      ) : null,
-    [expanded, indicator, indicatorName]
+      openFlyout({
+        right: {
+          id: 'ioc-details-right',
+          params: {
+            id: indicator?._id,
+          },
+        },
+      }),
+    [indicator?._id, openFlyout]
   );
 
   if (isLoading) {
@@ -76,7 +76,7 @@ export const CommentChildren: FC<CommentChildrenProps> = ({ id, metadata }) => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">
-              <EuiLink data-test-subj={INDICATOR_NAME_TEST_ID} onClick={() => setExpanded(true)}>
+              <EuiLink data-test-subj={INDICATOR_NAME_TEST_ID} onClick={open}>
                 {indicatorName}
               </EuiLink>{' '}
             </EuiText>
@@ -119,8 +119,6 @@ export const CommentChildren: FC<CommentChildrenProps> = ({ id, metadata }) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexGroup>
-
-      {flyoutFragment}
     </>
   );
 };

@@ -161,13 +161,13 @@ run(
     }
   },
   {
-    usage: `node scripts/package_linter [...packages]`,
+    usage: `node scripts/lint_ts_projects [...packages]`,
     flags: {
       boolean: ['fix', 'refs-check', 'no-refs-check'],
       alias: { f: 'fix', R: 'no-refs-check' },
       default: { 'refs-check': true },
       help: `
-        --no-lint          Disables linting rules, only validting that every file is a member of just one project
+        --no-lint          Disables linting rules, only validating that every file is a member of just one project
         --fix              Automatically fix some issues in tsconfig.json files
         -R, --no-refs-check  Disables the reference checking rules, making the linting much faster, but less accruate
       `,

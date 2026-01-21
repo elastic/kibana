@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  DATA_GRID_COLUMN_SORTER_SELECTION_BTN,
+  DATA_GRID_FIELD_SORT_BTN,
+} from '../screens/common/data_grid';
 import { LOADING_SPINNER } from '../screens/loading';
 import {
   rowsPerPageSelector,
@@ -59,4 +63,13 @@ export const expectTableSorting = (columnName: string, direction: 'asc' | 'desc'
     .contains(columnName)
     .parents('.euiTableHeaderCell')
     .should('have.attr', 'aria-sort', direction === 'asc' ? 'ascending' : 'descending');
+};
+
+export const sortUsingDataGridBtn = (columnName: string) => {
+  cy.get(DATA_GRID_FIELD_SORT_BTN).click();
+  cy.get(DATA_GRID_COLUMN_SORTER_SELECTION_BTN).click();
+  cy.get('[data-test-subj^="dataGridColumnSortingPopoverColumnSelection"]')
+    .contains(columnName)
+    .first()
+    .click();
 };

@@ -46,7 +46,7 @@ export class ServerlessPlugin
     chrome.setChromeStyle('project');
 
     if (cloud.serverless.projectName) {
-      project.setProjectName(cloud.serverless.projectName);
+      project.setKibanaName(cloud.serverless.projectName);
     }
 
     project.setCloudUrls(cloud.getUrls()); // Ensure the project has the non-privileged URLs immediately

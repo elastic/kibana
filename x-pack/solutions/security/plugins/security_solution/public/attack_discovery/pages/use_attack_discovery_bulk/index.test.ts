@@ -60,6 +60,43 @@ describe('useAttackDiscoveryBulk', () => {
     expect(mockAddSuccess).toHaveBeenCalled();
   });
 
+  it('includes with_replacements: false in the request body', async () => {
+    mockHttpPost.mockResolvedValueOnce({ data: [{ id: 'foo' }] });
+    const { result } = getHook();
+
+    await act(async () => {
+      await result.current.mutateAsync({
+        ids: defaultIds,
+        kibanaAlertWorkflowStatus: defaultStatus,
+        visibility: defaultVisibility,
+      });
+    });
+
+    const call = mockHttpPost.mock.calls[mockHttpPost.mock.calls.length - 1];
+    const options = call[1] || {};
+    const parsed = JSON.parse(options.body ?? '{}');
+    expect(parsed.update).toHaveProperty('with_replacements', false);
+  });
+
+  it('includes enable_field_rendering: true in the request body', async () => {
+    mockHttpPost.mockResolvedValueOnce({ data: [{ id: 'foo' }] });
+    const { result } = getHook();
+
+    await act(async () => {
+      await result.current.mutateAsync({
+        ids: defaultIds,
+        kibanaAlertWorkflowStatus: defaultStatus,
+        visibility: defaultVisibility,
+      });
+    });
+
+    // public route should include `enable_field_rendering: true`
+    const call = mockHttpPost.mock.calls[mockHttpPost.mock.calls.length - 1];
+    const options = call[1] || {};
+    const parsed = JSON.parse(options.body ?? '{}');
+    expect(parsed.update).toHaveProperty('enable_field_rendering', true);
+  });
+
   it('returns a mutation that calls addError on error', async () => {
     mockHttpPost.mockRejectedValueOnce(new Error('fail'));
     const { result } = getHook();

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { ISearchRequestParams } from '@kbn/search-types';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import { isEmpty } from 'lodash';
@@ -19,9 +20,11 @@ import { buildIndexNameWithNamespace } from '../../../../../utils/build_index_na
 
 export const buildActionResultsQuery = ({
   actionId,
+  agentIds,
   kuery,
   startDate,
   sort,
+  pagination,
   componentTemplateExists,
   useNewDataStream,
   integrationNamespaces,
@@ -31,7 +34,7 @@ export const buildActionResultsQuery = ({
     filter = filter + ` AND ${kuery}`;
   }
 
-  const timeRangeFilter =
+  const timeRangeFilter: estypes.QueryDslQueryContainer[] =
     startDate && !isEmpty(startDate)
       ? [
           {
@@ -45,7 +48,26 @@ export const buildActionResultsQuery = ({
         ]
       : [];
 
-  const filterQuery = [...timeRangeFilter, getQueryFilter({ filter })];
+  const agentIdsFilter: estypes.QueryDslQueryContainer[] =
+    agentIds && agentIds.length > 0
+      ? [
+          {
+            bool: {
+              should: [
+                { terms: { 'agent.id': agentIds } },
+                { terms: { agent_id: agentIds } },
+              ] as estypes.QueryDslQueryContainer[],
+              minimum_should_match: 1,
+            },
+          },
+        ]
+      : [];
+
+  const filterQuery: estypes.QueryDslQueryContainer[] = [
+    ...timeRangeFilter,
+    ...agentIdsFilter,
+    getQueryFilter({ filter }),
+  ];
 
   let baseIndex: string;
   if (useNewDataStream) {
@@ -106,8 +128,8 @@ export const buildActionResultsQuery = ({
       },
     },
     query: { bool: { filter: filterQuery } },
-    // from: activePage * querySize,
-    size: 10000, // querySize,
+    from: pagination ? pagination.activePage * pagination.querySize : 0,
+    size: pagination?.querySize ?? 100,
     track_total_hits: true,
     fields: ['*'],
     sort: [

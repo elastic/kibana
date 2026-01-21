@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getBaselineDocuments } from '../kibana_migrator_test_kit.fixtures';
+import { getBaselineDocuments } from '@kbn/migrator-test-kit/fixtures';
 import {
   BASELINE_DOCUMENTS_PER_TYPE_SMALL,
   BASELINE_DOCUMENTS_PER_TYPE_LARGE,

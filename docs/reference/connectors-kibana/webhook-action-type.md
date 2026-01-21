@@ -9,7 +9,7 @@ applies_to:
 
 # Webhook connector and action [webhook-action-type]
 
-The Webhook connector uses [axios](https://github.com/axios/axios) to send a POST or PUT request to a web service.
+The Webhook connector uses [axios](https://github.com/axios/axios) to send a request to a web service.
 
 ## Create connectors in {{kib}} [define-webhook-ui]
 
@@ -28,18 +28,38 @@ Name
 :   The name of the connector.
 
 Method
-:   The HTTP request method, either `post`(default) or `put`.
+:   The HTTP method to send a request to a web service: 
+    - `POST` (default)
+    - `PUT`
+    - {applies_to}`stack: ga 9.3` `PATCH`
+    - {applies_to}`stack: ga 9.3` `GET`
+    - {applies_to}`stack: ga 9.3` `DELETE` 
 
 URL
 :   The request URL. If you are using the [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings) setting, make sure the hostname is added to the allowed hosts.
 
 Authentication
-:   The authentication type: none, basic, or SSL. If you choose basic authentication, you must provide a user name and password. If you choose SSL authentication, you must provide SSL server certificate authentication data in a CRT and key file format or a PFX file format. You can also optionally provide a passphrase if the files are password-protected.
+:   The authentication type: none, basic, SSL, or {applies_to}`stack: ga 9.2` OAuth 2.0 authentication. 
 
-HTTP headers
-:   A set of key-value pairs sent as headers with the request. For example, set `Content-Type` to the appropriate media type for your requests.
+    Basic
+    :   If you choose basic authentication, you must provide a user name and password.
 
-Certificate authority
+    SSL
+    :   If you choose SSL authentication, you must provide SSL server certificate authentication data in a CRT and key file format or a PFX file format. You can also optionally provide a passphrase if the files are password-protected.
+
+    OAuth 2.0 authentication {applies_to}`stack: ga 9.2` 
+    :   If you choose OAuth 2.0 authentication, you must provide an access token URL, client ID, and client secret. Specifying the [access token scope](https://datatracker.ietf.org/doc/html/rfc6749#section-3.3) is optional. You also have the option to specify additional parameters that your authentication provider might require. 
+
+HTTP headers (optional)
+:   A custom set of HTTP headers that you can send with API requests.
+
+    Config
+    :   If you choose the config type, values in headers will be sent as plain text in requests.   
+
+    Secret {applies_to}`stack: ga 9.2` 
+    :   If you choose the secret type, values in your headers will be encrypted in requests. 
+
+Certificate authority (optional)
 :   A certificate authority (CA) that the connector can trust, for example to sign and validate server certificates. This option is available for all authentication types.
 
     CA file
@@ -63,7 +83,7 @@ You can test connectors as you’re creating or editing the connector in {{kib}}
 Webhook actions have the following properties.
 
 Body
-:   A JSON payload sent to the request URL. For example:
+:   A JSON payload sent to the request URL using the `POST`, `PUT`, or `PATCH` HTTP methods. For example:
 
     ```text
     {

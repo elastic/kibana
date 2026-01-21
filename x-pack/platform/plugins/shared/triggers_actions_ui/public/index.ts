@@ -49,7 +49,6 @@ export type {
 
 export {
   AlertHistoryDefaultIndexName,
-  ALERT_HISTORY_PREFIX,
   AlertHistoryDocumentTemplate,
   AlertHistoryEsIndexConnectorId,
   ActionConnectorMode,
@@ -76,6 +75,8 @@ export {
   TextFieldWithMessageVariables,
   SectionLoading,
 } from './application/components';
+
+export { AddMessageVariablesOptional } from './application/components/add_message_variables_optional';
 
 export { AlertProvidedActionVariables } from '@kbn/alerts-ui-shared';
 export { templateActionVariable, updateActionConnector, executeAction } from './application/lib';
@@ -123,3 +124,5 @@ export type { BulkOperationAttributes, BulkOperationResponse } from './types';
 export { transformRule } from './application/lib/rule_api/common_transformations';
 
 export { validateActionFilterQuery } from './application/lib/value_validators';
+
+export { RULE_PREBUILD_DESCRIPTION_FIELDS } from './application/sections/rule_details/components/rule_detail_description_type';

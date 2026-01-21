@@ -63,7 +63,7 @@ describe('DashboardRenderer', () => {
     expect(input).toEqual(
       expect.objectContaining({
         viewMode: 'view',
-        timeRange: props.timeRange,
+        time_range: props.timeRange,
         query: props.query,
         filters: props.filters,
       })

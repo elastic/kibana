@@ -165,7 +165,7 @@ export const createCaseAndAttachAlert = async ({
         {
           ...postCaseReq,
           owner,
-          settings: { syncAlerts: false },
+          settings: { syncAlerts: false, extractObservables: false },
         },
         200,
         { user: superUser, space: 'space1' }

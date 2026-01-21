@@ -9,8 +9,9 @@ import type { ChangeEvent } from 'react';
 import React, { Component, Fragment } from 'react';
 import { EuiFormRow, EuiSelect, EuiTitle, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SortDirection, indexPatterns } from '@kbn/data-plugin/public';
+import { SortDirection } from '@kbn/data-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
+import { isNestedField } from '@kbn/data-views-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
 import type { SCALING_TYPES } from '../../../../common/constants';
@@ -111,9 +112,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
       supportsClustering: supportsGeoTileAgg(geoField),
       clusteringDisabledReason: getGeoTileAggNotSupportedReason(geoField),
       sourceFields,
-      sortFields: indexPattern.fields.filter(
-        (field) => field.sortable && !indexPatterns.isNestedField(field)
-      ), // todo change sort fields to use fields
+      sortFields: indexPattern.fields.filter((field) => field.sortable && !isNestedField(field)), // todo change sort fields to use fields
     });
   }
   _onTooltipPropertiesChange = (propertyNames: string[]) => {

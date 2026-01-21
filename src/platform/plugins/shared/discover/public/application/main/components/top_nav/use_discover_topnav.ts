@@ -8,6 +8,8 @@
  */
 
 import { useMemo } from 'react';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
+import { useIsWithinBreakpoints } from '@elastic/eui';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useInspector } from '../../hooks/use_inspector';
@@ -25,12 +27,15 @@ import { useHasShareIntegration } from '../../hooks/use_has_share_integration';
 
 export const useDiscoverTopNav = ({
   stateContainer,
+  persistedDiscoverSession,
 }: {
   stateContainer: DiscoverStateContainer;
+  persistedDiscoverSession: DiscoverSession | undefined;
 }) => {
   const services = useDiscoverServices();
   const topNavCustomization = useDiscoverCustomization('top_nav');
   const hasUnsavedChanges = useInternalStateSelector((state) => state.hasUnsavedChanges);
+  const isMobile = useIsWithinBreakpoints(['xs']);
 
   const topNavBadges = useMemo(
     () =>
@@ -39,13 +44,11 @@ export const useDiscoverTopNav = ({
         services,
         hasUnsavedChanges,
         topNavCustomization,
+        isMobile,
       }),
-    [stateContainer, services, hasUnsavedChanges, topNavCustomization]
+    [stateContainer, services, hasUnsavedChanges, topNavCustomization, isMobile]
   );
 
-  const persistedDiscoverSession = useInternalStateSelector(
-    (state) => state.persistedDiscoverSession
-  );
   const unsavedTabIds = useInternalStateSelector((state) => state.tabs.unsavedIds);
   const currentTabId = useCurrentTabSelector((tab) => tab.id);
   const shouldShowESQLToDataViewTransitionModal =
@@ -64,11 +67,13 @@ export const useDiscoverTopNav = ({
     services,
     state: stateContainer,
     onOpenInspector,
+    hasUnsavedChanges,
     isEsqlMode,
     adHocDataViews,
     topNavCustomization,
     shouldShowESQLToDataViewTransitionModal,
     hasShareIntegration,
+    persistedDiscoverSession,
   });
 
   return {

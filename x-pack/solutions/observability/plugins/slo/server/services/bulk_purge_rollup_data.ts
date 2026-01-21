@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
-import type {
-  BulkPurgeRollupResponse,
-  BulkPurgeRollupParams,
-} from '@kbn/slo-schema/src/rest_specs/routes/bulk_purge_rollup';
-import { calendarAlignedTimeWindowSchema } from '@kbn/slo-schema';
 import { assertNever } from '@elastic/eui';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { calendarAlignedTimeWindowSchema } from '@kbn/slo-schema';
+import type {
+  BulkPurgeRollupParams,
+  BulkPurgeRollupResponse,
+} from '@kbn/slo-schema/src/rest_specs/routes/bulk_purge_rollup';
 import moment from 'moment';
 import { SLI_DESTINATION_INDEX_PATTERN } from '../../common/constants';
-import type { SLORepository } from './slo_repository';
-import { IllegalArgumentError } from '../errors';
 import type { SLODefinition } from '../domain/models';
+import { IllegalArgumentError } from '../errors';
+import type { SLODefinitionRepository } from './slo_definition_repository';
 
 export class BulkPurgeRollupData {
-  constructor(private esClient: ElasticsearchClient, private repository: SLORepository) {}
+  constructor(private esClient: ElasticsearchClient, private repository: SLODefinitionRepository) {}
 
   public async execute(params: BulkPurgeRollupParams): Promise<BulkPurgeRollupResponse> {
     const lookback = this.getTimestamp(params.purgePolicy);

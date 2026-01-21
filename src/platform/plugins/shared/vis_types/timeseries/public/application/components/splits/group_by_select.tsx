@@ -72,6 +72,9 @@ export const GroupBySelect = ({
       onChange={onChange}
       singleSelection={{ asPlainText: true }}
       data-test-subj="groupBySelect"
+      aria-label={i18n.translate('visTypeTimeseries.splits.groupBySelect.ariaLabel', {
+        defaultMessage: 'Group by mode',
+      })}
     />
   );
 };

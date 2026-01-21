@@ -8,14 +8,10 @@
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import type { GenericIndexPatternColumn, FieldBasedIndexPatternColumn } from '@kbn/lens-common';
 import { insertOrReplaceColumn } from '../operations/layer_helpers';
 import { FieldSelect } from './field_select';
-import type {
-  FieldInputProps,
-  OperationType,
-  GenericIndexPatternColumn,
-} from '../operations/definitions';
-import type { FieldBasedIndexPatternColumn } from '../operations/definitions/column_types';
+import type { FieldInputProps, OperationType } from '../operations/definitions';
 import { shouldShowTimeSeriesOption } from '../pure_utils';
 
 export function FieldInput({
@@ -48,12 +44,13 @@ export function FieldInput({
       selectedOperationDefinition?.input,
       currentFieldIsInvalid
     );
+  const fieldLabel = i18n.translate('xpack.lens.indexPattern.chooseField', {
+    defaultMessage: 'Field',
+  });
   return (
     <EuiFormRow
       data-test-subj="indexPattern-field-selection-row"
-      label={i18n.translate('xpack.lens.indexPattern.chooseField', {
-        defaultMessage: 'Field',
-      })}
+      label={fieldLabel}
       fullWidth
       isInvalid={Boolean(incompleteOperation || currentFieldIsInvalid)}
       error={fieldErrorMessage}
@@ -90,6 +87,7 @@ export function FieldInput({
           groupId,
           dimensionGroups
         )}
+        aria-label={fieldLabel}
       />
     </EuiFormRow>
   );

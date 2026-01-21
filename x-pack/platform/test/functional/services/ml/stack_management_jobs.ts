@@ -81,13 +81,15 @@ export function MachineLearningStackManagementJobsProvider(
     },
 
     async assertSyncFlyoutSyncButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlJobMgmtSyncFlyoutSyncButton');
-      expect(isEnabled).to.eql(
-        expectedValue,
-        `Expected Stack Management job sync flyout "Synchronize" button to be '${
-          expectedValue ? 'enabled' : 'disabled'
-        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
-      );
+      await retry.tryForTime(5000, async () => {
+        const isEnabled = await testSubjects.isEnabled('mlJobMgmtSyncFlyoutSyncButton');
+        expect(isEnabled).to.eql(
+          expectedValue,
+          `Expected Stack Management job sync flyout "Synchronize" button to be '${
+            expectedValue ? 'enabled' : 'disabled'
+          }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+        );
+      });
     },
 
     async getSyncFlyoutObjectCountFromTitle(objectType: SyncFlyoutObjectType): Promise<number> {
@@ -329,6 +331,15 @@ export function MachineLearningStackManagementJobsProvider(
           )}')`
         );
       });
+    },
+
+    async assertDatafeedWarnings(expectedNumberOfJobs: number) {
+      const warningElements = await testSubjects.findAll('mlJobImportJobDatafeedWarning');
+
+      expect(warningElements.length).to.eql(
+        expectedNumberOfJobs,
+        `Expected ${expectedNumberOfJobs} datafeed warnings (got ${warningElements.length})`
+      );
     },
 
     async importJobs() {

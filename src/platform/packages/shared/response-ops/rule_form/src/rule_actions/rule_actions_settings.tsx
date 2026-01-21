@@ -172,6 +172,7 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
     ? getDurationUnitValue(action.frequency?.throttle)
     : 'h';
 
+  // @ts-expect-error upgrade typescript v5.9.3
   const [minimumActionThrottle = -1, minimumActionThrottleUnit] = [
     intervalNumber,
     intervalUnit,
@@ -213,13 +214,17 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
             {showSelectActionGroup && (
               <EuiSuperSelect
                 prepend={
-                  <EuiFormLabel htmlFor={`addNewActionConnectorActionGroup-${action.actionTypeId}`}>
+                  <EuiFormLabel
+                    id={`addNewActionConnectorActionGroupLabel-${action.actionTypeId}`}
+                    htmlFor={`addNewActionConnectorActionGroup-${action.actionTypeId}`}
+                  >
                     {ACTION_GROUP_RUN_WHEN}
                   </EuiFormLabel>
                 }
                 data-test-subj="ruleActionsSettingsSelectActionGroup"
                 fullWidth
                 id={`addNewActionConnectorActionGroup-${action.actionTypeId}`}
+                aria-labelledby={`addNewActionConnectorActionGroupLabel-${action.actionTypeId}`}
                 options={actionGroups.map(({ id: value, name }) => ({
                   value,
                   ['data-test-subj']: `addNewActionConnectorActionGroup-${value}`,

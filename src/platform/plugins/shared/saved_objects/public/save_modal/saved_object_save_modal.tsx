@@ -73,7 +73,7 @@ interface Props<T = void> {
   description?: string;
   showDescription: boolean;
   isValid?: boolean;
-  customModalTitle?: string;
+  customModalTitle?: string | React.ReactNode;
   theme: WithEuiThemeProps['theme'];
 }
 

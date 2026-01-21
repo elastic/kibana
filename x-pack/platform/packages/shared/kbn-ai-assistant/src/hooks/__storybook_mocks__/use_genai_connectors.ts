@@ -16,5 +16,6 @@ export function useGenAIConnectors(): UseGenAIConnectorsResult {
     selectConnector: (id: string) => {},
     reloadConnectors: () => {},
     getConnector: () => undefined,
+    isConnectorSelectionRestricted: false,
   };
 }

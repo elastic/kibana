@@ -1,0 +1,23 @@
+{
+  "type": "plugin",
+  "id": "@kbn/kubernetes-security-plugin",
+  "owner": [
+    "@elastic/kibana-cloud-security-posture"
+  ],
+  "group": "security",
+  "visibility": "private",
+  "plugin": {
+    "id": "kubernetesSecurity",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": [
+      "data",
+      "timelines",
+      "ruleRegistry",
+      "sessionView"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
+  }
+}

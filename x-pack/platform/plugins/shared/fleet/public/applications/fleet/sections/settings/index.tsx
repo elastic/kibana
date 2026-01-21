@@ -84,6 +84,7 @@ export const SettingsApp = withConfirmModalProvider(() => {
   ]);
 
   const { cloud } = useStartServices();
+  const isServerlessEnabled = cloud?.isServerlessEnabled;
 
   if (
     (outputs.isLoading && outputs.isInitialRequest) ||
@@ -127,7 +128,7 @@ export const SettingsApp = withConfirmModalProvider(() => {
         </Route>
         <Route path={FLEET_ROUTING_PATHS.settings_create_fleet_server_hosts}>
           <EuiPortal>
-            {cloud?.isServerlessEnabled ? (
+            {isServerlessEnabled ? (
               <FleetServerHostsFlyout
                 proxies={proxies.data?.items ?? []}
                 onClose={onCloseCallback}
@@ -145,7 +146,11 @@ export const SettingsApp = withConfirmModalProvider(() => {
             <EditOutputFlyout
               proxies={proxies.data.items}
               onClose={onCloseCallback}
-              defaultOuput={outputs.data?.items.find((o) => o.id === SERVERLESS_DEFAULT_OUTPUT_ID)}
+              defaultOutput={
+                isServerlessEnabled
+                  ? outputs.data?.items.find((o) => o.id === SERVERLESS_DEFAULT_OUTPUT_ID)
+                  : undefined
+              }
             />
           </EuiPortal>
         </Route>
@@ -182,9 +187,11 @@ export const SettingsApp = withConfirmModalProvider(() => {
                   proxies={proxies.data?.items ?? []}
                   onClose={onCloseCallback}
                   output={output}
-                  defaultOuput={outputs.data?.items.find(
-                    (o) => o.id === SERVERLESS_DEFAULT_OUTPUT_ID
-                  )}
+                  defaultOutput={
+                    isServerlessEnabled
+                      ? outputs.data?.items.find((o) => o.id === SERVERLESS_DEFAULT_OUTPUT_ID)
+                      : undefined
+                  }
                 />
               </EuiPortal>
             );

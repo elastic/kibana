@@ -91,7 +91,7 @@ export function DataTypesSelect({ seriesId, series }: Props) {
       )}
       {series.dataType && (
         <EuiToolTip position="top" content={SELECT_DATA_TYPE_TOOLTIP}>
-          <EuiBadge>{currDataType?.label}</EuiBadge>
+          <EuiBadge tabIndex={0}>{currDataType?.label}</EuiBadge>
         </EuiToolTip>
       )}
     </>

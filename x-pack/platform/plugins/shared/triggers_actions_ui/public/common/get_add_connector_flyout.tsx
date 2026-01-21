@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ConnectorProvider } from '../application/context/connector_context';
 import { CreateConnectorFlyout } from '../application/sections/action_connector_form';
 import type { CreateConnectorFlyoutProps } from '../application/sections/action_connector_form/create_connector_flyout';

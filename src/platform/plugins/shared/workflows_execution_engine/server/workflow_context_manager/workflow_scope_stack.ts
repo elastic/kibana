@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// TODO: Remove eslint exceptions comments and fix the issues
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import type { StackFrame } from '@kbn/workflows';
 
 export interface ScopeData {
@@ -100,6 +103,20 @@ export class WorkflowScopeStack {
    */
   public enterScope(enterScopeData: ScopeData): WorkflowScopeStack {
     if (this._stackFrames.length && this._stackFrames.at(-1)!.stepId === enterScopeData.stepId) {
+      if (
+        this._stackFrames.at(-1)?.nestedScopes?.length &&
+        this._stackFrames.at(-1)!.nestedScopes.at(-1)?.nodeId === enterScopeData.nodeId
+      ) {
+        const clonedFrames = this.cloneFrames(this.stackFrames);
+        const stackFrame = clonedFrames.at(-1)!;
+
+        if (enterScopeData.scopeId) {
+          stackFrame.nestedScopes.at(-1)!.scopeId = enterScopeData.scopeId;
+        }
+
+        return WorkflowScopeStack.fromStackFrames(clonedFrames);
+      }
+
       const clonedFrames = this.cloneFrames(this.stackFrames);
       const stackFrame = clonedFrames.at(-1)!;
       return WorkflowScopeStack.fromStackFrames(

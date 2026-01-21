@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/logging';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import type { LogQueryFields } from '@kbn/metrics-data-access-plugin/server';
-import { unflattenKnownApmEventFields as unflattenKnownFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields as accessKnownFields } from '@kbn/apm-data-access-plugin/server/utils';
 import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import type { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
 import type {
@@ -99,7 +99,7 @@ const getMetadata = (
       Object.entries(metadata).filter(([key]) => !ADDITIONAL_CONTEXT_BLOCKED_LIST_REGEX.test(key))
     );
 
-    return unflattenKnownFields(filteredMetadata);
+    return accessKnownFields(filteredMetadata).unflatten();
   }
 
   return bucketHits[0]._source;
@@ -150,7 +150,9 @@ export const getData = async ({
 
       previous[bucket.key.node] = {
         value: bucket?.[metricId]?.value ?? null,
+        // @ts-expect-error upgrade typescript v5.9.3
         warn: bucket?.shouldWarn.value > 0 ?? false,
+        // @ts-expect-error upgrade typescript v5.9.3
         trigger: bucket?.shouldTrigger.value > 0 ?? false,
         container: containerList,
         ...additionalContextSource,

@@ -6,13 +6,11 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 
 import { DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE } from '../../constants';
-
 import type { AgentPolicy } from '../../types';
-
 import { appContextService } from '../../services/app_context';
 
 import { getDownloadSourceForAgentPolicy } from './source_uri_utils';
@@ -23,29 +21,9 @@ mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
 
-function getMockedSoClient(options: { id?: string; sameName?: boolean } = {}) {
+function getMockedSoClient() {
   const soClientMock = savedObjectsClientMock.create();
 
-  soClientMock.get.mockImplementation(async (type: string, id: string) => {
-    switch (id) {
-      case 'test-ds-1': {
-        return mockDownloadSourceSO('test-ds-1', {
-          is_default: false,
-          name: 'Test',
-          host: 'http://custom-registry-test',
-        });
-      }
-      case 'default-download-source-id': {
-        return mockDownloadSourceSO('default-download-source-id', {
-          is_default: true,
-          name: 'Default host',
-          host: 'http://default-registry.co',
-        });
-      }
-      default:
-        throw new Error('not found: ' + id);
-    }
-  });
   soClientMock.find.mockResolvedValue({
     saved_objects: [
       {
@@ -69,6 +47,38 @@ function getMockedSoClient(options: { id?: string; sameName?: boolean } = {}) {
   return soClientMock;
 }
 
+function getMockedEncryptedSoClient() {
+  const esoClientMock: jest.Mocked<EncryptedSavedObjectsClient> = {
+    getDecryptedAsInternalUser: jest.fn(),
+    createPointInTimeFinderDecryptedAsInternalUser: jest.fn(),
+  };
+
+  esoClientMock.getDecryptedAsInternalUser.mockImplementation(async (type: string, id: string) => {
+    switch (id) {
+      case 'test-ds-1': {
+        return mockDownloadSourceSO('test-ds-1', {
+          is_default: false,
+          name: 'Test',
+          host: 'http://custom-registry-test',
+        });
+      }
+      case 'default-download-source-id': {
+        return mockDownloadSourceSO('default-download-source-id', {
+          is_default: true,
+          name: 'Default host',
+          host: 'http://default-registry.co',
+        });
+      }
+      default:
+        throw new Error('not found: ' + id);
+    }
+  });
+
+  mockedAppContextService.getEncryptedSavedObjects.mockReturnValue(esoClientMock);
+
+  return esoClientMock;
+}
+
 function mockDownloadSourceSO(id: string, attributes: any = {}) {
   return {
     id,
@@ -84,7 +94,8 @@ describe('helpers', () => {
   beforeEach(() => {});
   describe('getDownloadSourceForAgentPolicy', () => {
     it('should return the dowload source object set on an agent policy ', async () => {
-      const soClient = getMockedSoClient();
+      getMockedSoClient();
+      getMockedEncryptedSoClient();
       const agentPolicy: AgentPolicy = {
         id: 'agent-policy-id',
         status: 'active',
@@ -99,7 +110,7 @@ describe('helpers', () => {
         is_protected: false,
       };
 
-      expect(await getDownloadSourceForAgentPolicy(soClient, agentPolicy)).toEqual({
+      expect(await getDownloadSourceForAgentPolicy(agentPolicy)).toEqual({
         host: 'http://custom-registry-test',
         id: 'test-ds-1',
         is_default: false,
@@ -108,7 +119,8 @@ describe('helpers', () => {
     });
 
     it('should return the default download source object if there is none set on the agent policy ', async () => {
-      const soClient = getMockedSoClient();
+      getMockedSoClient();
+      getMockedEncryptedSoClient();
       const agentPolicy: AgentPolicy = {
         id: 'agent-policy-id',
         status: 'active',
@@ -122,7 +134,7 @@ describe('helpers', () => {
         is_protected: false,
       };
 
-      expect(await getDownloadSourceForAgentPolicy(soClient, agentPolicy)).toEqual({
+      expect(await getDownloadSourceForAgentPolicy(agentPolicy)).toEqual({
         host: 'http://default-registry.co',
         id: 'default-download-source-id',
         is_default: true,

@@ -89,6 +89,7 @@ describe('CollapsedItemActions', () => {
       actionsCount: 1,
       index: 0,
       ruleType: 'Test Rule Type',
+      isInternallyManaged: false,
       isEditable: true,
       enabledInLicense: true,
       revision: 0,
@@ -111,6 +112,34 @@ describe('CollapsedItemActions', () => {
     };
   };
 
+  describe('when the rule is internally managed', () => {
+    beforeAll(async () => {
+      await setup(true);
+    });
+
+    test('render update key action as only item', async () => {
+      render(
+        <CollapsedItemActions
+          {...getPropsWithRule({
+            isInternallyManaged: true,
+            name: 'internally managed rule',
+          })}
+        />
+      );
+
+      await userEvent.click(screen.getByTestId('selectActionButton'));
+
+      expect(await screen.findByTestId('updateApiKeyInternallyManaged')).toBeInTheDocument();
+      expect(screen.queryByTestId('disableButtonInternallyManaged')).toBeInTheDocument();
+      expect(screen.queryByTestId('snoozeButton')).toBeNull();
+      expect(screen.queryByTestId('disableButton')).toBeNull();
+      expect(screen.queryByTestId('editRule')).toBeNull();
+      expect(screen.queryByTestId('deleteRule')).toBeNull();
+      expect(screen.queryByTestId('runRule')).toBeNull();
+      expect(screen.queryByTestId('cloneRule')).toBeNull();
+    });
+  });
+
   describe('Lifecycle alerts', () => {
     beforeAll(async () => {
       await setup();
@@ -124,17 +153,17 @@ describe('CollapsedItemActions', () => {
       render(<CollapsedItemActions {...getPropsWithRule({ autoRecoverAlerts: true })} />);
 
       expect(await screen.findByTestId('selectActionButton')).toBeInTheDocument();
-      await userEvent.click(await screen.getByTestId('selectActionButton'));
+      await userEvent.click(screen.getByTestId('selectActionButton'));
       await waitForEuiPopoverOpen();
-      expect(await screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
+      expect(screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
 
-      await userEvent.click(await screen.getByTestId('disableButton'));
+      await userEvent.click(screen.getByTestId('disableButton'));
       await waitFor(async () => {
-        expect(await screen.getByTestId('untrackAlertsModal')).toBeInTheDocument();
+        expect(screen.getByTestId('untrackAlertsModal')).toBeInTheDocument();
         expect(bulkDisableRules).not.toHaveBeenCalled();
       });
 
-      await userEvent.click(await screen.getByTestId('confirmModalConfirmButton'));
+      await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
       await waitFor(async () => {
         expect(bulkDisableRules).toHaveBeenCalledWith({ ids: ['1'], untrack: false });
       });
@@ -144,17 +173,17 @@ describe('CollapsedItemActions', () => {
       render(<CollapsedItemActions {...getPropsWithRule({ autoRecoverAlerts: undefined })} />);
 
       expect(await screen.findByTestId('selectActionButton')).toBeInTheDocument();
-      await userEvent.click(await screen.getByTestId('selectActionButton'));
+      await userEvent.click(screen.getByTestId('selectActionButton'));
       await waitForEuiPopoverOpen();
-      expect(await screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
+      expect(screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
 
-      await userEvent.click(await screen.getByTestId('disableButton'));
+      await userEvent.click(screen.getByTestId('disableButton'));
       await waitFor(async () => {
-        expect(await screen.getByTestId('untrackAlertsModal')).toBeInTheDocument();
+        expect(screen.getByTestId('untrackAlertsModal')).toBeInTheDocument();
         expect(bulkDisableRules).not.toHaveBeenCalled();
       });
 
-      await userEvent.click(await screen.getByTestId('confirmModalConfirmButton'));
+      await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
       await waitFor(async () => {
         expect(bulkDisableRules).toHaveBeenCalledWith({ ids: ['1'], untrack: false });
       });
@@ -164,13 +193,13 @@ describe('CollapsedItemActions', () => {
       render(<CollapsedItemActions {...getPropsWithRule({ autoRecoverAlerts: false })} />);
 
       expect(await screen.findByTestId('selectActionButton')).toBeInTheDocument();
-      await userEvent.click(await screen.getByTestId('selectActionButton'));
+      await userEvent.click(screen.getByTestId('selectActionButton'));
       await waitForEuiPopoverOpen();
-      expect(await screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
+      expect(screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
 
-      await userEvent.click(await screen.getByTestId('disableButton'));
+      await userEvent.click(screen.getByTestId('disableButton'));
       await waitFor(async () => {
-        expect(await screen.queryByTestId('untrackAlertsModal')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('untrackAlertsModal')).not.toBeInTheDocument();
         expect(bulkDisableRules).toHaveBeenCalledWith({ ids: ['1'], untrack: false });
       });
     });

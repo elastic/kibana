@@ -185,5 +185,44 @@ export const SCHEMA_SEARCH_MODEL_VERSION_8 = SCHEMA_SEARCH_MODEL_VERSION_7.exten
   tabs: schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB_VERSION_8, { minSize: 1 }),
 });
 
-export type DiscoverSessionTabAttributes = TypeOf<typeof DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_8>;
-export type DiscoverSessionTab = TypeOf<typeof SCHEMA_DISCOVER_SESSION_TAB_VERSION_8>;
+// We need to flatten the schema type here to avoid this error:
+// "Type instantiation is excessively deep and possibly infinite",
+// since each `extends()` call wraps the previous type until we hit the depth limit.
+const { tabs: tabsV8, ...restV8Props } = SCHEMA_SEARCH_MODEL_VERSION_8.getPropSchemas();
+
+// This schema temporarily makes `tabs` optional again, to work around an issue
+// where saved objects created via the deprecated saved objects API without a
+// specified version would fail validation if `tabs` was not provided, which
+// broke existing API usages after SCHEMA_SEARCH_MODEL_VERSION_8 was added.
+// It should not be relied on in application code or used for the content
+// management validation schema, and `tabs` should be required again once Core
+// provides a way to fix the underlying issue at the saved objects API level.
+export const SCHEMA_SEARCH_MODEL_VERSION_9_SO_API_WORKAROUND = schema.object({
+  ...restV8Props,
+  tabs: schema.maybe(tabsV8),
+});
+
+const DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_10 =
+  DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_8.extends({
+    chartInterval: schema.maybe(schema.string()),
+  });
+
+const SCHEMA_DISCOVER_SESSION_TAB_VERSION_10 = SCHEMA_DISCOVER_SESSION_TAB_VERSION_8.extends({
+  attributes: DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_10,
+});
+
+export const SCHEMA_SEARCH_MODEL_VERSION_10 = SCHEMA_SEARCH_MODEL_VERSION_8.extends({
+  tabs: schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB_VERSION_10, { minSize: 1 }),
+});
+
+const { tabs: tabsV10, ...restV10Props } = SCHEMA_SEARCH_MODEL_VERSION_10.getPropSchemas();
+
+export const SCHEMA_SEARCH_MODEL_VERSION_10_SO_API_WORKAROUND = schema.object({
+  ...restV10Props,
+  tabs: schema.maybe(tabsV10),
+});
+
+export type DiscoverSessionTabAttributes = TypeOf<
+  typeof DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_10
+>;
+export type DiscoverSessionTab = TypeOf<typeof SCHEMA_DISCOVER_SESSION_TAB_VERSION_10>;

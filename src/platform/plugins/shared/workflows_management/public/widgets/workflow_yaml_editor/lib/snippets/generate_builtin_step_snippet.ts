@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BuiltInStepType } from '@kbn/workflows';
 import type { ToStringOptions } from 'yaml';
 import { stringify } from 'yaml';
+import type { BuiltInStepType } from '@kbn/workflows';
 
 interface GenerateBuiltInStepSnippetOptions {
   full?: boolean;
@@ -29,7 +29,7 @@ export function generateBuiltInStepSnippet(
   { full, withStepsSection }: GenerateBuiltInStepSnippetOptions = {}
 ): string {
   const stringifyOptions: ToStringOptions = { indent: 2 };
-  let parameters: Record<string, any>;
+  let parameters: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
   switch (stepType) {
     case 'foreach':
@@ -61,6 +61,14 @@ export function generateBuiltInStepSnippet(
       parameters = {
         sources: ['branch-1', 'branch-2'],
         steps: [{ name: 'merge-step', type: '# Add step type here' }],
+      };
+      break;
+    case 'data.set':
+      parameters = {
+        with: {
+          variable_name: 'value',
+          another_variable: '{{steps.previous_step.output}}',
+        },
       };
       break;
     case 'http':

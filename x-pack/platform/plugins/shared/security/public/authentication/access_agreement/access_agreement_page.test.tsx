@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSkeletonText } from '@elastic/eui';
+import { EuiProvider, EuiSkeletonText } from '@elastic/eui';
 import { act } from '@testing-library/react';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
@@ -28,11 +28,13 @@ describe('AccessAgreementPage', () => {
     coreStartMock.http.get.mockResolvedValue({ accessAgreement: 'This is [link](../link)' });
 
     const wrapper = mountWithIntl(
-      <AccessAgreementPage
-        http={coreStartMock.http}
-        notifications={coreStartMock.notifications}
-        fatalErrors={coreStartMock.fatalErrors}
-      />
+      <EuiProvider>
+        <AccessAgreementPage
+          http={coreStartMock.http}
+          notifications={coreStartMock.notifications}
+          fatalErrors={coreStartMock.fatalErrors}
+        />
+      </EuiProvider>
     );
 
     expect(wrapper.exists(EuiSkeletonText)).toBe(true);
@@ -59,11 +61,13 @@ describe('AccessAgreementPage', () => {
     coreStartMock.http.get.mockRejectedValue(error);
 
     const wrapper = mountWithIntl(
-      <AccessAgreementPage
-        http={coreStartMock.http}
-        notifications={coreStartMock.notifications}
-        fatalErrors={coreStartMock.fatalErrors}
-      />
+      <EuiProvider>
+        <AccessAgreementPage
+          http={coreStartMock.http}
+          notifications={coreStartMock.notifications}
+          fatalErrors={coreStartMock.fatalErrors}
+        />
+      </EuiProvider>
     );
 
     await act(async () => {
@@ -88,11 +92,13 @@ describe('AccessAgreementPage', () => {
       '/some-base-path/app/kibana#/home?_g=()'
     )}`;
     const wrapper = mountWithIntl(
-      <AccessAgreementPage
-        http={coreStartMock.http}
-        notifications={coreStartMock.notifications}
-        fatalErrors={coreStartMock.fatalErrors}
-      />
+      <EuiProvider>
+        <AccessAgreementPage
+          http={coreStartMock.http}
+          notifications={coreStartMock.notifications}
+          fatalErrors={coreStartMock.fatalErrors}
+        />
+      </EuiProvider>
     );
 
     await act(async () => {
@@ -127,11 +133,13 @@ describe('AccessAgreementPage', () => {
 
     window.location.href = currentURL;
     const wrapper = mountWithIntl(
-      <AccessAgreementPage
-        http={coreStartMock.http}
-        notifications={coreStartMock.notifications}
-        fatalErrors={coreStartMock.fatalErrors}
-      />
+      <EuiProvider>
+        <AccessAgreementPage
+          http={coreStartMock.http}
+          notifications={coreStartMock.notifications}
+          fatalErrors={coreStartMock.fatalErrors}
+        />
+      </EuiProvider>
     );
 
     await act(async () => {

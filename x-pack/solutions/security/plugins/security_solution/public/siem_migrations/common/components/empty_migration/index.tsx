@@ -20,6 +20,7 @@ export const EmptyMigration: React.FC = React.memo(() => {
 
   return (
     <EuiFlexGroup
+      data-test-subj="emptyMigrationContainer"
       alignItems="center"
       gutterSize="s"
       responsive={false}

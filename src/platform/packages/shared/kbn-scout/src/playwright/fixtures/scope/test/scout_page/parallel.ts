@@ -9,8 +9,8 @@
 
 import type { Page } from '@playwright/test';
 import { test as base } from '@playwright/test';
-import type { PathOptions } from '../../../../../common/services/kibana_url';
 import type { ScoutPage } from '.';
+import type { PathOptions } from '../../../../../common/services/kibana_url';
 import type { KibanaUrl, ScoutLogger } from '../../worker';
 import type { ScoutSpaceParallelFixture } from '../../worker/scout_space';
 import { extendPlaywrightPage } from './single_thread';

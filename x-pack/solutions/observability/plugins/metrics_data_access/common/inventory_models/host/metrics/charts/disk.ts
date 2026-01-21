@@ -11,9 +11,9 @@ import type { HostFormulas } from '../formulas';
 import {
   DEFAULT_XY_FITTING_FUNCTION,
   DEFAULT_XY_HIDDEN_AXIS_TITLE,
-  DEFAULT_XY_HIDDEN_LEGEND,
   DEFAULT_XY_LEGEND,
   DEFAULT_XY_YBOUNDS,
+  DEFAULT_LEGEND_STATS,
   DISK_IOPS_LABEL,
   DISK_THROUGHPUT_LABEL,
   DISK_USAGE_BY_MOUNT_POINT_LABEL,
@@ -53,7 +53,10 @@ export const init = (formulas: FormulasCatalog<HostFormulas>) => {
       },
     ],
     ...DEFAULT_XY_FITTING_FUNCTION,
-    ...DEFAULT_XY_LEGEND,
+    legend: {
+      ...DEFAULT_XY_LEGEND.legend,
+      legendStats: DEFAULT_LEGEND_STATS,
+    },
     ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
   };
 
@@ -70,7 +73,7 @@ export const init = (formulas: FormulasCatalog<HostFormulas>) => {
           type: 'topValues',
           field:
             formulas.schema === 'ecs' ? 'system.filesystem.mount_point' : 'attributes.mountpoint',
-          size: 5,
+          size: 15,
         },
         yAxis: [
           {
@@ -86,7 +89,10 @@ export const init = (formulas: FormulasCatalog<HostFormulas>) => {
       },
     ],
     ...DEFAULT_XY_FITTING_FUNCTION,
-    ...DEFAULT_XY_LEGEND,
+    legend: {
+      ...DEFAULT_XY_LEGEND.legend,
+      legendStats: DEFAULT_LEGEND_STATS,
+    },
     ...DEFAULT_XY_YBOUNDS,
     ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
   };
@@ -123,7 +129,10 @@ export const init = (formulas: FormulasCatalog<HostFormulas>) => {
       },
     ],
     ...DEFAULT_XY_FITTING_FUNCTION,
-    ...DEFAULT_XY_LEGEND,
+    legend: {
+      ...DEFAULT_XY_LEGEND.legend,
+      legendStats: DEFAULT_LEGEND_STATS,
+    },
     ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
   };
 
@@ -140,7 +149,10 @@ export const init = (formulas: FormulasCatalog<HostFormulas>) => {
       },
     ],
     ...DEFAULT_XY_FITTING_FUNCTION,
-    ...DEFAULT_XY_HIDDEN_LEGEND,
+    legend: {
+      ...DEFAULT_XY_LEGEND.legend,
+      legendStats: DEFAULT_LEGEND_STATS,
+    },
     ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
   };
 
@@ -157,7 +169,10 @@ export const init = (formulas: FormulasCatalog<HostFormulas>) => {
       },
     ],
     ...DEFAULT_XY_FITTING_FUNCTION,
-    ...DEFAULT_XY_HIDDEN_LEGEND,
+    legend: {
+      ...DEFAULT_XY_LEGEND.legend,
+      legendStats: DEFAULT_LEGEND_STATS,
+    },
     ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
   };
 
@@ -174,7 +189,10 @@ export const init = (formulas: FormulasCatalog<HostFormulas>) => {
       },
     ],
     ...DEFAULT_XY_FITTING_FUNCTION,
-    ...DEFAULT_XY_HIDDEN_LEGEND,
+    legend: {
+      ...DEFAULT_XY_LEGEND.legend,
+      legendStats: DEFAULT_LEGEND_STATS,
+    },
     ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
   };
 
@@ -191,7 +209,10 @@ export const init = (formulas: FormulasCatalog<HostFormulas>) => {
       },
     ],
     ...DEFAULT_XY_FITTING_FUNCTION,
-    ...DEFAULT_XY_HIDDEN_LEGEND,
+    legend: {
+      ...DEFAULT_XY_LEGEND.legend,
+      legendStats: DEFAULT_LEGEND_STATS,
+    },
     ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
   };
 
@@ -208,7 +229,10 @@ export const init = (formulas: FormulasCatalog<HostFormulas>) => {
       },
     ],
     ...DEFAULT_XY_FITTING_FUNCTION,
-    ...DEFAULT_XY_HIDDEN_LEGEND,
+    legend: {
+      ...DEFAULT_XY_LEGEND.legend,
+      legendStats: DEFAULT_LEGEND_STATS,
+    },
     ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
   };
 

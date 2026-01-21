@@ -88,10 +88,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await esClient.deleteByQuery({
         index: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
         query: { term: { 'kibana.alert.rule.uuid': ruleId } },
+        conflicts: 'proceed',
+        refresh: true,
       });
       await esClient.deleteByQuery({
         index: '.kibana-event-log-*',
         query: { term: { 'kibana.alert.rule.consumer': expectedConsumer } },
+        conflicts: 'proceed',
+        refresh: true,
       });
       await dataViewApi.delete({
         id: DATA_VIEW_ID,

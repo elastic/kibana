@@ -37,7 +37,7 @@ export function Timestamp({
     </EuiText>
   ) : (
     <EuiToolTip content={absoluteTime} data-test-subj="apmUiSharedTimestampTooltip">
-      <>{relativeTime}</>
+      <span tabIndex={0}>{relativeTime}</span>
     </EuiToolTip>
   );
 }

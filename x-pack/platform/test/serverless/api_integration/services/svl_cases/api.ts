@@ -116,6 +116,7 @@ export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
         category: null,
         customFields: [],
         observables: [],
+        total_observables: 0,
       };
     },
 

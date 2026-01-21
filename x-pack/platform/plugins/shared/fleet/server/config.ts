@@ -30,6 +30,9 @@ const REGISTRY_SPEC_MIN_VERSION = '2.3';
 const REGISTRY_SPEC_MAX_VERSION = '3.5';
 
 export const config: PluginConfigDescriptor = {
+  dynamicConfig: {
+    experimentalFeatures: true, // To allow to be changed for tests
+  },
   exposeToBrowser: {
     epm: true,
     agents: {
@@ -43,6 +46,7 @@ export const config: PluginConfigDescriptor = {
       },
     },
     enableExperimental: true,
+    experimentalFeatures: true,
     developer: {
       maxAgentPoliciesWithInactivityTimeout: true,
     },
@@ -118,16 +122,50 @@ export const config: PluginConfigDescriptor = {
 
       return fullConfig;
     },
-    // Log invalid experimental values
+    // Log invalid experimental values listed in xpack.fleet.enableExperimental
     (fullConfig, fromPath, addDeprecation) => {
       for (const key of fullConfig?.xpack?.fleet?.enableExperimental ?? []) {
         if (!isValidExperimentalValue(key)) {
           addDeprecation({
-            configPath: 'xpack.fleet.fleet.enableExperimental',
-            message: `[${key}] is not a valid fleet experimental feature [xpack.fleet.fleet.enableExperimental].`,
+            configPath: 'xpack.fleet.enableExperimental',
+            message: `[${key}] is not a valid fleet experimental feature [xpack.fleet.enableExperimental].`,
             correctiveActions: {
               manualSteps: [
-                `Use [xpack.fleet.fleet.enableExperimental] with an array of valid experimental features.`,
+                `Use [xpack.fleet.enableExperimental] with an array of valid experimental features.`,
+              ],
+            },
+            level: 'warning',
+          });
+        }
+      }
+    },
+
+    // Prefer using xpack.fleet.experimentalFeatures over xpack.fleet.enableExperimental
+    (fullConfig, fromPath, addDeprecation) => {
+      if (fullConfig?.xpack?.fleet?.enableExperimental?.length > 0) {
+        addDeprecation({
+          configPath: 'xpack.fleet.enableExperimental',
+          message: `Config key [xpack.fleet.enableExperimental] is deprecated. Please use [xpack.fleet.experimentalFeatures] instead.`,
+          correctiveActions: {
+            manualSteps: [
+              `Use [xpack.fleet.experimentalFeatures] to enable or disable experimental features.`,
+            ],
+          },
+          level: 'warning',
+        });
+      }
+    },
+
+    // Log invalid experimental values listed in xpack.fleet.experimentalFeatures
+    (fullConfig, fromPath, addDeprecation) => {
+      for (const key of Object.keys(fullConfig?.xpack?.fleet?.experimentalFeatures ?? {})) {
+        if (!isValidExperimentalValue(key)) {
+          addDeprecation({
+            configPath: 'xpack.fleet.experimentalFeatures',
+            message: `[${key}] is not a valid fleet experimental feature [xpack.fleet.experimentalFeatures].`,
+            correctiveActions: {
+              manualSteps: [
+                `Use [xpack.fleet.experimentalFeatures] with an object containing valid experimental features.`,
               ],
             },
             level: 'warning',
@@ -183,6 +221,13 @@ export const config: PluginConfigDescriptor = {
               enabled: schema.maybe(schema.boolean({ defaultValue: false })),
             })
           ),
+          backgroundSync: schema.maybe(
+            schema.object({
+              enabled: schema.boolean({ defaultValue: false }),
+              dryRun: schema.boolean({ defaultValue: false }),
+              interval: schema.maybe(schema.string({ defaultValue: '1h' })),
+            })
+          ),
         })
       ),
       packages: PreconfiguredPackagesSchema,
@@ -197,6 +242,19 @@ export const config: PluginConfigDescriptor = {
         schema.object({
           agentPolicySchemaUpgradeBatchSize: schema.maybe(schema.number()),
           uninstallTokenVerificationBatchSize: schema.maybe(schema.number()),
+        })
+      ),
+      /**
+       * Startup optimization settings to reduce memory usage during Fleet initialization.
+       */
+      startupOptimization: schema.maybe(
+        schema.object({
+          /** Defer package install version bump operations to background tasks */
+          deferPackageBumpInstallVersion: schema.boolean({ defaultValue: false }),
+          /** Maximum packages to process concurrently during startup */
+          maxConcurrentPackageOperations: schema.number({ defaultValue: 10, min: 1, max: 20 }),
+          /** Batch size for package upgrade operations */
+          packageUpgradeBatchSize: schema.number({ defaultValue: 50, min: 10, max: 200 }),
         })
       ),
       developer: schema.object({
@@ -224,6 +282,19 @@ export const config: PluginConfigDescriptor = {
         defaultValue: () => [],
       }),
 
+      /**
+       * A record of experimental features that can be enabled or disabled.
+       * Keys must be one of the values listed in `allowedExperimentalValues`.
+       *
+       * @example
+       * xpack.fleet.experimentalFeatures:
+       *   enableAgentStatusAlerting: false # Disable agent status alerting (enabled by default)
+       *   enableAgentPrivilegeLevelChange: true # Enable agent privilege level change (disabled by default)
+       */
+      experimentalFeatures: schema.recordOf(schema.string(), schema.boolean(), {
+        defaultValue: {},
+      }),
+
       internal: schema.object({
         useMeteringApi: schema.boolean({
           defaultValue: false,
@@ -242,7 +313,7 @@ export const config: PluginConfigDescriptor = {
             min: 0,
           })
         ),
-        retrySetupOnBoot: schema.boolean({ defaultValue: false }),
+        retrySetupOnBoot: schema.boolean({ defaultValue: true }),
         registry: schema.object(
           {
             kibanaVersionCheckEnabled: schema.boolean({ defaultValue: true }),
@@ -338,9 +409,17 @@ export const config: PluginConfigDescriptor = {
           taskInterval: schema.maybe(schema.string()),
         })
       ),
+      fleetPolicyRevisionsCleanup: schema.maybe(
+        schema.object({
+          maxRevisions: schema.number({ min: 1, defaultValue: 10 }),
+          interval: schema.string({ defaultValue: '1h' }),
+          maxPoliciesPerRun: schema.number({ min: 1, defaultValue: 100 }),
+        })
+      ),
       integrationsHomeOverride: schema.maybe(schema.string()),
       prereleaseEnabledByDefault: schema.boolean({ defaultValue: false }),
       hideDashboards: schema.boolean({ defaultValue: false }),
+      integrationRollbackTTL: schema.maybe(schema.string()),
     },
     {
       validate: (configToValidate) => {

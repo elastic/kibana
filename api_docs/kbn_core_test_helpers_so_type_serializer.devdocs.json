@@ -35,6 +35,8 @@
           "SavedObjectTypeMigrationInfo"
         ],
         "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
+        "lineNumber": 54,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -50,6 +52,8 @@
               "<any>"
             ],
             "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
+            "lineNumber": 54,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -71,6 +75,8 @@
           "<any>) => string"
         ],
         "path": "src/core/packages/test-helpers/so-type-serializer/src/get_migration_hash.ts",
+        "lineNumber": 129,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -86,6 +92,8 @@
               "<any>"
             ],
             "path": "src/core/packages/test-helpers/so-type-serializer/src/get_migration_hash.ts",
+            "lineNumber": 129,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -107,6 +115,8 @@
           "<any>) => SavedObjectTypeMigrationHashes"
         ],
         "path": "src/core/packages/test-helpers/so-type-serializer/src/get_migration_hash.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -122,6 +132,8 @@
               "<any>"
             ],
             "path": "src/core/packages/test-helpers/so-type-serializer/src/get_migration_hash.ts",
+            "lineNumber": 26,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -134,12 +146,117 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-test-helpers-so-type-serializer",
+        "id": "def-common.ModelVersionSummary",
+        "type": "Interface",
+        "tags": [],
+        "label": "ModelVersionSummary",
+        "description": [],
+        "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-test-helpers-so-type-serializer",
+            "id": "def-common.ModelVersionSummary.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-so-type-serializer",
+            "id": "def-common.ModelVersionSummary.modelVersionHash",
+            "type": "string",
+            "tags": [],
+            "label": "modelVersionHash",
+            "description": [],
+            "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-so-type-serializer",
+            "id": "def-common.ModelVersionSummary.changeTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "changeTypes",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-so-type-serializer",
+            "id": "def-common.ModelVersionSummary.hasTransformation",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasTransformation",
+            "description": [],
+            "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-so-type-serializer",
+            "id": "def-common.ModelVersionSummary.newMappings",
+            "type": "Array",
+            "tags": [],
+            "label": "newMappings",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-so-type-serializer",
+            "id": "def-common.ModelVersionSummary.schemas",
+            "type": "Object",
+            "tags": [],
+            "label": "schemas",
+            "description": [],
+            "signature": [
+              "{ create: string | false; forwardCompatibility: string | false; }"
+            ],
+            "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-test-helpers-so-type-serializer",
         "id": "def-common.SavedObjectTypeMigrationInfo",
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectTypeMigrationInfo",
         "description": [],
         "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -151,6 +268,8 @@
             "label": "name",
             "description": [],
             "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -162,9 +281,11 @@
             "label": "namespaceType",
             "description": [],
             "signature": [
-              "\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""
+              "\"multiple\" | \"single\" | \"agnostic\" | \"multiple-isolated\""
             ],
             "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -179,6 +300,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -193,6 +316,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -207,6 +332,8 @@
               "string[]"
             ],
             "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -221,6 +348,8 @@
               "string[]"
             ],
             "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -235,6 +364,8 @@
               "{ [x: string]: unknown; }"
             ],
             "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -246,6 +377,8 @@
             "label": "hasExcludeOnUpgrade",
             "description": [],
             "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -261,6 +394,8 @@
               "[]"
             ],
             "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -275,6 +410,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

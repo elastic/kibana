@@ -5,8 +5,35 @@
  * 2.0.
  */
 
-export interface SiemReadinessTask {
-  task_id: string;
-  status: 'completed' | 'incomplete';
-  meta?: Record<string, unknown>;
+export interface IndexInfo {
+  indexName: string;
+  docs: number;
+}
+
+type MainCategories = 'Endpoint' | 'Identity' | 'Network' | 'Cloud' | 'Application/SaaS';
+
+export interface CategoryGroup {
+  category: MainCategories | string;
+  indices: IndexInfo[];
+}
+
+export interface CategoriesResponse {
+  rawCategoriesMap: CategoryGroup[];
+  mainCategoriesMap: CategoryGroup[];
+}
+
+export interface RelatedIntegrationRuleResponse {
+  related_integrations?: Array<{
+    package: string;
+    version?: string;
+    integration?: string;
+  }>;
+}
+
+export interface SiemReadinessPackageInfo {
+  id: string;
+  name: string;
+  title: string;
+  version: string;
+  status: string;
 }

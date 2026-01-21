@@ -21,6 +21,12 @@ import { getHosts } from './lib/host/get_hosts';
 import { getHostsCount } from './lib/host/get_hosts_count';
 import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
 import { getApmDataAccessClient } from '../../lib/helpers/get_apm_data_access_client';
+import type { InfraEntityMetricType } from '../../../common/http_api/infra';
+
+// Network metrics that are not supported for semconv schema
+// These require derivative aggregations with histogram parents which would
+// significantly impact performance and could cause max bucket exceptions
+const UNSUPPORTED_SEMCONV_METRICS: InfraEntityMetricType[] = ['rxV2', 'txV2'];
 
 export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
   const { framework } = libs;
@@ -37,14 +43,30 @@ export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
     async (context, request, response) => {
       const { from, to, metrics, limit, query, schema } = request.body;
 
+      // Validate that unsupported metrics are not requested for semconv schema
+      if (schema === 'semconv') {
+        const unsupportedMetrics = metrics.filter((metric) =>
+          UNSUPPORTED_SEMCONV_METRICS.includes(metric)
+        );
+
+        if (unsupportedMetrics.length > 0) {
+          return response.badRequest({
+            body: {
+              message: `The following metrics are not supported for semconv schema: ${unsupportedMetrics.join(
+                ', '
+              )}`,
+            },
+          });
+        }
+      }
+
       try {
         const apmDataAccessClient = getApmDataAccessClient({ request, libs, context });
-        const hasApmPrivileges = await apmDataAccessClient.hasPrivileges();
 
         const [infraMetricsClient, alertsClient, apmDataAccessServices] = await Promise.all([
           getInfraMetricsClient({ request, libs, context }),
           getInfraAlertsClient({ libs, request }),
-          hasApmPrivileges ? apmDataAccessClient.getServices() : undefined,
+          apmDataAccessClient.getServices(),
         ]);
 
         const hosts = await getHosts({
@@ -96,11 +118,10 @@ export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
 
       try {
         const apmDataAccessClient = getApmDataAccessClient({ request, libs, context });
-        const hasApmPrivileges = await apmDataAccessClient.hasPrivileges();
 
         const [infraMetricsClient, apmDataAccessServices] = await Promise.all([
           getInfraMetricsClient({ request, libs, context }),
-          hasApmPrivileges ? apmDataAccessClient.getServices() : undefined,
+          apmDataAccessClient.getServices(),
         ]);
 
         const count = await getHostsCount({

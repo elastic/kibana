@@ -49,7 +49,11 @@ export function useDatePicker({
         : undefined),
       ...(!urlState?.autoRefresh ? { autoRefresh } : undefined),
       // this is needed since both /hosts and /inventory use different URL state
-      preferredSchema: searchCriteria?.preferredSchema ?? preferredSchema ?? 'semconv',
+      preferredSchema:
+        urlState?.preferredSchema ??
+        searchCriteria?.preferredSchema ??
+        preferredSchema ??
+        'semconv',
     });
   });
 

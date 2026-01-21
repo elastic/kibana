@@ -10,13 +10,14 @@ import axios from 'axios';
 
 import { createExternalService } from './service';
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
-import type { ExternalService, ServiceNowITSMIncident } from './types';
+import type { ExternalService } from './types';
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { serviceNowCommonFields, serviceNowChoices } from './mocks';
 import { snExternalServiceConfig } from './config';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import type { ServiceNowITSMIncident } from '@kbn/connector-schemas/servicenow_itsm';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 jest.mock('axios', () => ({

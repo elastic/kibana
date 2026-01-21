@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const TOUR_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.tourTitle',
-  {
-    defaultMessage: "What's new",
-  }
-);
-
 export const PREVIOUS_STEP_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.previousStepLabel',
   {

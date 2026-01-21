@@ -28,7 +28,7 @@ import {
   createMockWaffleParams,
 } from '../mocks';
 import { ChartTypes } from '../../common/types';
-import { LegendSize } from '@kbn/visualizations-plugin/common';
+import { LegendSize } from '@kbn/chart-expressions-common';
 import { cloneDeep } from 'lodash';
 
 const actWithTimeout = (action: Function, timer: number = 1) =>

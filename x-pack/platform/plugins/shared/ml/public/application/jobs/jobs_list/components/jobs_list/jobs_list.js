@@ -190,7 +190,12 @@ export class JobsListUI extends Component {
                       'This job is preconfigured and managed by Elastic; other parts of the product might have might have dependencies on its behavior.',
                   })}
                 >
-                  <EuiBadge color="hollow" data-test-subj="mlJobListRowManagedLabel" size="xs">
+                  <EuiBadge
+                    tabIndex={0}
+                    color="hollow"
+                    data-test-subj="mlJobListRowManagedLabel"
+                    size="xs"
+                  >
                     {i18n.translate('xpack.ml.jobsList.managedBadgeLabel', {
                       defaultMessage: 'Managed',
                     })}

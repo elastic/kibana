@@ -6,6 +6,7 @@
  */
 
 import { omit } from 'lodash';
+import pMap from 'p-map';
 
 import type {
   ElasticsearchClient,
@@ -13,6 +14,7 @@ import type {
   SavedObject,
   KibanaRequest,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { normalizeHostsForAgents } from '../../common/services';
 import {
@@ -77,8 +79,12 @@ const fakeRequest = {
 } as unknown as KibanaRequest;
 
 class FleetServerHostService {
-  private get encryptedSoClient() {
+  private get soClient() {
     return appContextService.getInternalUserSOClient(fakeRequest);
+  }
+
+  private get encryptedSoClient() {
+    return appContextService.getEncryptedSavedObjects();
   }
 
   public async create(
@@ -102,7 +108,7 @@ class FleetServerHostService {
     }
 
     if (fleetServerHost.is_default) {
-      const defaultItem = await this.getDefaultFleetServerHost(soClient);
+      const defaultItem = await this.getDefaultFleetServerHost();
       if (defaultItem && defaultItem.id !== options?.id) {
         await this.update(
           soClient,
@@ -134,45 +140,71 @@ class FleetServerHostService {
     } else {
       if (
         (!fleetServerHost.ssl?.key && fleetServerHost.secrets?.ssl?.key) ||
-        (!fleetServerHost.ssl?.es_key && fleetServerHost.secrets?.ssl?.es_key)
+        (!fleetServerHost.ssl?.es_key && fleetServerHost.secrets?.ssl?.es_key) ||
+        (!fleetServerHost.ssl?.agent_key && fleetServerHost.secrets?.ssl?.agent_key)
       ) {
         data.ssl = JSON.stringify({ ...fleetServerHost.ssl, ...fleetServerHost.secrets.ssl });
       }
     }
-    const res = await this.encryptedSoClient.create<FleetServerHostSOAttributes>(
+    const res = await this.soClient.create<FleetServerHostSOAttributes>(
       FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
       data,
       { id: options?.id, overwrite: options?.overwrite }
     );
     logger.debug(`Created fleet server host ${options?.id}`);
+    // soClient.create doesn't return the decrypted attributes, so we need to fetch it again.
+    const retrievedSo =
+      await this.encryptedSoClient.getDecryptedAsInternalUser<FleetServerHostSOAttributes>(
+        FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+        res.id
+      );
+    return savedObjectToFleetServerHost(retrievedSo);
+  }
+
+  public async get(id: string): Promise<FleetServerHost> {
+    const res =
+      await this.encryptedSoClient.getDecryptedAsInternalUser<FleetServerHostSOAttributes>(
+        FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+        id
+      );
+
     return savedObjectToFleetServerHost(res);
   }
 
-  public async get(soClient: SavedObjectsClientContract, id: string): Promise<FleetServerHost> {
-    const res = await this.encryptedSoClient.get<FleetServerHostSOAttributes>(
-      FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
-      id
-    );
+  public async list() {
+    const fleetServerHostsFinder =
+      await this.encryptedSoClient.createPointInTimeFinderDecryptedAsInternalUser<FleetServerHostSOAttributes>(
+        {
+          type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+          perPage: SO_SEARCH_LIMIT,
+        }
+      );
 
-    return savedObjectToFleetServerHost(res);
-  }
+    let fleetServerHosts: SavedObject<FleetServerHostSOAttributes>[] = [];
+    let total = 0;
+    let page = 0;
+    let perPage = 0;
 
-  public async list(soClient: SavedObjectsClientContract) {
-    const res = await this.encryptedSoClient.find<FleetServerHostSOAttributes>({
-      type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
-      perPage: SO_SEARCH_LIMIT,
-    });
+    for await (const result of fleetServerHostsFinder.find()) {
+      fleetServerHosts = result.saved_objects;
+      page = result.page;
+      total = result.total;
+      perPage = result.per_page;
+      break; // Return first page;
+    }
+
+    await fleetServerHostsFinder.close();
 
     return {
-      items: res.saved_objects.map<FleetServerHost>(savedObjectToFleetServerHost),
-      total: res.total,
-      page: res.page,
-      perPage: res.per_page,
+      items: fleetServerHosts.map<FleetServerHost>(savedObjectToFleetServerHost),
+      total,
+      page,
+      perPage,
     };
   }
 
-  public async listAllForProxyId(soClient: SavedObjectsClientContract, proxyId: string) {
-    const res = await this.encryptedSoClient.find<FleetServerHostSOAttributes>({
+  public async listAllForProxyId(proxyId: string) {
+    const res = await this.soClient.find<FleetServerHostSOAttributes>({
       type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
       perPage: SO_SEARCH_LIMIT,
       searchFields: ['proxy_id'],
@@ -188,7 +220,6 @@ class FleetServerHostService {
   }
 
   public async delete(
-    soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     id: string,
     options?: { fromPreconfiguration?: boolean }
@@ -196,7 +227,7 @@ class FleetServerHostService {
     const logger = appContextService.getLogger();
     logger.debug(`Deleting fleet server host ${id}`);
 
-    const fleetServerHost = await this.get(soClient, id);
+    const fleetServerHost = await this.get(id);
 
     if (fleetServerHost.is_preconfigured && !options?.fromPreconfiguration) {
       throw new FleetServerHostUnauthorizedError(
@@ -214,10 +245,7 @@ class FleetServerHostService {
       force: options?.fromPreconfiguration,
     });
 
-    const soDeleteResult = await this.encryptedSoClient.delete(
-      FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
-      id
-    );
+    const soDeleteResult = await this.soClient.delete(FLEET_SERVER_HOST_SAVED_OBJECT_TYPE, id);
     await deleteFleetServerHostsSecrets({
       fleetServerHost,
       esClient: appContextService.getInternalUserESClient(),
@@ -238,7 +266,7 @@ class FleetServerHostService {
     const logger = appContextService.getLogger();
     logger.debug(`Updating fleet server host ${id}`);
 
-    const originalItem = await this.get(soClient, id);
+    const originalItem = await this.get(id);
     const updateData: Partial<FleetServerHostSOAttributes> = {
       ...omit(data, ['ssl', 'secrets']),
     };
@@ -250,7 +278,7 @@ class FleetServerHostService {
     }
 
     if (data.is_default) {
-      const defaultItem = await this.getDefaultFleetServerHost(soClient);
+      const defaultItem = await this.getDefaultFleetServerHost();
       if (defaultItem && defaultItem.id !== id) {
         await this.update(
           soClient,
@@ -290,13 +318,14 @@ class FleetServerHostService {
     } else {
       if (
         (!data.ssl?.key && data.secrets?.ssl?.key) ||
-        (!data.ssl?.es_key && data.secrets?.ssl?.es_key)
+        (!data.ssl?.es_key && data.secrets?.ssl?.es_key) ||
+        (!data.ssl?.agent_key && data.secrets?.ssl?.agent_key)
       ) {
         updateData.ssl = JSON.stringify({ ...data.ssl, ...data.secrets.ssl });
       }
     }
 
-    await this.encryptedSoClient.update<FleetServerHostSOAttributes>(
+    await this.soClient.update<FleetServerHostSOAttributes>(
       FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
       id,
       updateData
@@ -317,46 +346,41 @@ class FleetServerHostService {
     };
   }
 
-  public async bulkGet(
-    soClient: SavedObjectsClientContract,
-    ids: string[],
-    { ignoreNotFound = false } = { ignoreNotFound: true }
-  ) {
+  public async bulkGet(ids: string[], { ignoreNotFound = false } = { ignoreNotFound: true }) {
     if (ids.length === 0) {
       return [];
     }
-
-    const res = await this.encryptedSoClient.bulkGet<FleetServerHostSOAttributes>(
-      ids.map((id) => ({
-        id,
-        type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
-      }))
+    const decryptedSavedObjects = await pMap(
+      ids,
+      async (id) => {
+        try {
+          const decryptedSo =
+            await this.encryptedSoClient.getDecryptedAsInternalUser<FleetServerHostSOAttributes>(
+              FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+              id
+            );
+          return savedObjectToFleetServerHost(decryptedSo);
+        } catch (error: any) {
+          if (ignoreNotFound && SavedObjectsErrorHelpers.isNotFoundError(error)) {
+            return undefined;
+          }
+          throw error;
+        }
+      },
+      { concurrency: 50 } // Match the concurrency used in x-pack/platform/plugins/shared/encrypted_saved_objects/server/saved_objects/index.ts#L172
     );
 
-    return res.saved_objects
-      .map((so) => {
-        if (so.error) {
-          if (!ignoreNotFound || so.error.statusCode !== 404) {
-            throw so.error;
-          }
-          return undefined;
-        }
-
-        return savedObjectToFleetServerHost(so);
-      })
-      .filter(
-        (fleetServerHostOrUndefined): fleetServerHostOrUndefined is FleetServerHost =>
-          typeof fleetServerHostOrUndefined !== 'undefined'
-      );
+    return decryptedSavedObjects.filter(
+      (fleetServerHostOrUndefined): fleetServerHostOrUndefined is FleetServerHost =>
+        typeof fleetServerHostOrUndefined !== 'undefined'
+    );
   }
 
   /**
    * Get the default Fleet server policy hosts or throw if it does not exists
    */
-  public async getDefaultFleetServerHost(
-    soClient: SavedObjectsClientContract
-  ): Promise<FleetServerHost | null> {
-    const res = await this.encryptedSoClient.find<FleetServerHostSOAttributes>({
+  public async getDefaultFleetServerHost(): Promise<FleetServerHost | null> {
+    const res = await this.soClient.find<FleetServerHostSOAttributes>({
       type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
       filter: `${FLEET_SERVER_HOST_SAVED_OBJECT_TYPE}.attributes.is_default:true`,
     });
@@ -376,10 +400,10 @@ export async function getFleetServerHostsForAgentPolicy(
   agentPolicy: Pick<AgentPolicy, 'fleet_server_host_id'>
 ) {
   if (agentPolicy.fleet_server_host_id) {
-    return fleetServerHostService.get(soClient, agentPolicy.fleet_server_host_id);
+    return fleetServerHostService.get(agentPolicy.fleet_server_host_id);
   }
 
-  const defaultFleetServerHost = await fleetServerHostService.getDefaultFleetServerHost(soClient);
+  const defaultFleetServerHost = await fleetServerHostService.getDefaultFleetServerHost();
   if (!defaultFleetServerHost) {
     throw new FleetServerHostNotFoundError('Default Fleet Server host is not setup');
   }
@@ -394,7 +418,7 @@ export async function migrateSettingsToFleetServerHost(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ) {
-  const defaultFleetServerHost = await fleetServerHostService.getDefaultFleetServerHost(soClient);
+  const defaultFleetServerHost = await fleetServerHostService.getDefaultFleetServerHost();
   if (defaultFleetServerHost) {
     return;
   }

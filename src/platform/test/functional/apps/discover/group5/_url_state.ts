@@ -89,9 +89,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await common.navigateToApp('lens');
       await appsMenu.openCollapsibleNav();
       let discoverLink = await appsMenu.getLink('Discover');
+      expect(discoverLink?.href).to.contain('/app/discover#/');
       expect(discoverLink?.href).to.contain(
-        '/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-15m,to:now))' +
-          "&_a=(columns:!(),dataSource:(dataViewId:'logstash-*',type:dataView),filters:!(),interval:auto,query:(language:kuery,query:''),sort:!(!('@timestamp',desc)))"
+        '_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-15m,to:now))' +
+          "&_a=(dataSource:(dataViewId:'logstash-*',type:dataView),filters:!(),interval:auto,query:(language:kuery,query:''),sort:!(!('@timestamp',desc)))"
       );
       await appsMenu.closeCollapsibleNav();
       await timePicker.setDefaultAbsoluteRange();
@@ -104,14 +105,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await appsMenu.openCollapsibleNav();
       discoverLink = await appsMenu.getLink('Discover');
+      expect(discoverLink?.href).to.contain('/app/discover#/');
       expect(discoverLink?.href).to.contain(
-        "/app/discover#/?_g=(filters:!(('$state':(store:globalState)," +
+        "_g=(filters:!(('$state':(store:globalState)," +
           "meta:(alias:!n,disabled:!f,field:extension.raw,index:'logstash-*'," +
           'key:extension.raw,negate:!f,params:!(jpg,css),type:phrases,value:!(jpg,css)),' +
           'query:(bool:(minimum_should_match:1,should:!((match_phrase:(extension.raw:jpg)),' +
           "(match_phrase:(extension.raw:css))))))),query:(language:kuery,query:'')," +
           "refreshInterval:(pause:!t,value:60000),time:(from:'2015-09-19T06:31:44.000Z'," +
-          "to:'2015-09-23T18:31:44.000Z'))&_a=(columns:!(),dataSource:(dataViewId:'logstash-*',type:dataView),filters:!()," +
+          "to:'2015-09-23T18:31:44.000Z'))&_a=(dataSource:(dataViewId:'logstash-*',type:dataView),filters:!()," +
           "interval:auto,query:(language:kuery,query:''),sort:!(!('@timestamp',desc)))"
       );
       await appsMenu.clickLink('Discover', { category: 'kibana' });

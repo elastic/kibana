@@ -9,15 +9,5 @@ import { getDataTestSubjectSelector } from '../../helpers/common';
 
 export const USER_PANEL_HEADER = getDataTestSubjectSelector('user-panel-header');
 
-const MANAGED_DATA_SECTION = getDataTestSubjectSelector('managedUser-data');
-
-export const OKTA_MANAGED_DATA_TITLE = `${MANAGED_DATA_SECTION} ${getDataTestSubjectSelector(
-  'managed-user-accordion-userAssetOktaLeftSection'
-)}`;
-
-export const ENTRA_MANAGED_DATA_TITLE = `${MANAGED_DATA_SECTION} ${getDataTestSubjectSelector(
-  'managed-user-accordion-userAssetEntraLeftSection'
-)}`;
-
 export const USER_PREVIEW_PANEL_FOOTER = getDataTestSubjectSelector('user-preview-footer');
 export const OPEN_USER_FLYOUT_LINK = getDataTestSubjectSelector('open-user-flyout');

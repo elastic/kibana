@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import * as Rx from 'rxjs';
 
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { NavControlPopover, type Props as NavControlPopoverProps } from './nav_control_popover';

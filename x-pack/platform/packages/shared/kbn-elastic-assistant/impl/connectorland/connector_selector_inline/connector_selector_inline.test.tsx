@@ -82,7 +82,7 @@ describe('ConnectorSelectorInline', () => {
       </TestProviders>
     );
     fireEvent.click(getByTestId('connector-selector'));
-    expect(getByTestId('addNewConnectorButton')).toBeInTheDocument();
+    expect(getByTestId('aiAssistantAddConnectorButton')).toBeInTheDocument();
   });
 
   it('renders empty view if selectedConnectorId is NOT in list of connectors', () => {
@@ -97,7 +97,7 @@ describe('ConnectorSelectorInline', () => {
       </TestProviders>
     );
     fireEvent.click(getByTestId('connector-selector'));
-    expect(getByTestId('addNewConnectorButton')).toBeInTheDocument();
+    expect(getByTestId('aiAssistantAddConnectorButton')).toBeInTheDocument();
   });
   it('renders the connector selector', () => {
     const { getByTestId } = render(

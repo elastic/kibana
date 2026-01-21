@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import expect from '@kbn/expect';
 
 import type {
@@ -33,7 +32,6 @@ interface GetTestDefinition {
 const nonExistantSpaceId = 'not-a-space';
 
 export function getTestSuiteFactory(context: DeploymentAgnosticFtrProviderContext) {
-  const esArchiver = context.getService('esArchiver');
   const config = context.getService('config');
   const isServerless = config.get('serverless');
 
@@ -96,11 +94,11 @@ export function getTestSuiteFactory(context: DeploymentAgnosticFtrProviderContex
             'securitySolutionAttackDiscovery',
             'securitySolutionCasesV3',
             'securitySolutionNotes',
+            'securitySolutionRulesV1',
             'securitySolutionSiemMigrations',
             'securitySolutionTimeline',
-            'siemV4',
+            'siemV5',
             'slo',
-            'streams',
             'uptime',
           ],
         }),
@@ -126,15 +124,10 @@ export function getTestSuiteFactory(context: DeploymentAgnosticFtrProviderContex
 
         before(async () => {
           supertest = await spacesSupertest.getSupertestWithRoleScope(user!);
-          await esArchiver.load(
-            'x-pack/platform/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          );
         });
+
         after(async () => {
           await supertest.destroy();
-          await esArchiver.unload(
-            'x-pack/platform/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          );
         });
 
         getTestScenariosForSpace(currentSpaceId).forEach(({ urlPrefix, scenario }) => {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, useCallback, useMemo, useRef } from 'react';
+import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import {
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -15,7 +15,6 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
-  type UseEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -51,10 +50,11 @@ import useObservable from 'react-use/lib/useObservable';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useQuerySubscriber } from '@kbn/unified-field-list';
-import type { DocViewerApi } from '@kbn/unified-doc-viewer';
+import type { DocViewerApi, DocViewerRestorableState } from '@kbn/unified-doc-viewer';
+import useLatest from 'react-use/lib/useLatest';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
-import { useAppStateSelector } from '../../state_management/discover_app_state_container';
+import { useAppStateSelector } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
@@ -70,7 +70,11 @@ import { useDiscoverCustomization } from '../../../../customizations';
 import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
 import { useContextualGridCustomisations } from '../../hooks/grid_customisations';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import type { CellRenderersExtensionParams } from '../../../../context_awareness';
+import type {
+  CellRenderersExtensionParams,
+  DocViewerExtensionParams,
+  UpdateESQLQueryFn,
+} from '../../../../context_awareness';
 import {
   DISCOVER_CELL_ACTIONS_TRIGGER,
   useAdditionalCellActions,
@@ -90,11 +94,10 @@ const DiscoverGridMemoized = React.memo(DiscoverGrid);
 // export needs for testing
 export const onResize = (
   colSettings: { columnId: string; width: number | undefined },
-  stateContainer: DiscoverStateContainer
+  currentGrid: DiscoverGridSettings | undefined,
+  updateGrid: (grid: DiscoverGridSettings) => void
 ) => {
-  const state = stateContainer.appState.getState();
-  const newGrid = onResizeGridColumn(colSettings, state.grid);
-  stateContainer.appState.update({ grid: newGrid });
+  updateGrid(onResizeGridColumn(colSettings, currentGrid));
 };
 
 function DiscoverDocumentsComponent({
@@ -108,12 +111,14 @@ function DiscoverDocumentsComponent({
   dataView: DataView;
   onAddFilter?: DocViewFilterFn;
   stateContainer: DiscoverStateContainer;
-  onFieldEdited?: () => void;
+  onFieldEdited?: (options: { editedDataView: DataView }) => void;
 }) {
+  const [isDataGridFullScreen, setIsDataGridFullScreen] = useState(false);
   const styles = useMemoCss(componentStyles);
   const services = useDiscoverServices();
   const { scopedEBTManager } = useScopedServices();
   const dispatch = useInternalStateDispatch();
+  const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const documents$ = stateContainer.dataState.data$.documents$;
   const persistedDiscoverSession = useInternalStateSelector(
     (state) => state.persistedDiscoverSession
@@ -145,8 +150,8 @@ function DiscoverDocumentsComponent({
       state.density,
     ];
   });
-  const expandedDoc = useInternalStateSelector((state) => state.expandedDoc);
-  const initialDocViewerTabId = useInternalStateSelector((state) => state.initialDocViewerTabId);
+  const expandedDoc = useCurrentTabSelector((state) => state.expandedDoc);
+  const initialDocViewerTabId = useCurrentTabSelector((state) => state.initialDocViewerTabId);
   const isEsqlMode = useIsEsqlMode();
   const documentState = useDataState(documents$);
   const isDataLoading =
@@ -174,9 +179,9 @@ function DiscoverDocumentsComponent({
 
   const setAppState = useCallback<UseColumnsProps['setAppState']>(
     ({ settings, ...rest }) => {
-      stateContainer.appState.update({ ...rest, grid: settings as DiscoverGridSettings });
+      dispatch(updateAppState({ appState: { ...rest, grid: settings as DiscoverGridSettings } }));
     },
-    [stateContainer]
+    [dispatch, updateAppState]
   );
 
   const {
@@ -212,66 +217,80 @@ function DiscoverDocumentsComponent({
   );
 
   const docViewerRef = useRef<DocViewerApi>(null);
+  const setExpandedDocAction = useCurrentTabAction(internalStateActions.setExpandedDoc);
+
   const setExpandedDoc = useCallback(
-    (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => {
+    (
+      doc: DataTableRecord | undefined,
+      options?: {
+        initialTabId?: string;
+        initialTabState?: object;
+      }
+    ) => {
       dispatch(
-        internalStateActions.setExpandedDoc({
+        setExpandedDocAction({
           expandedDoc: doc,
           initialDocViewerTabId: options?.initialTabId,
+          initialDocViewerTabState: options?.initialTabState,
         })
       );
       if (options?.initialTabId) {
         docViewerRef.current?.setSelectedTabId(options.initialTabId);
       }
     },
-    [dispatch]
+    [dispatch, setExpandedDocAction]
   );
 
+  const latestGrid = useLatest(grid);
   const onResizeDataGrid = useCallback<NonNullable<UnifiedDataTableProps['onResize']>>(
-    (colSettings) => onResize(colSettings, stateContainer),
-    [stateContainer]
+    (colSettings) => {
+      onResize(colSettings, latestGrid.current, (nextGrid) => {
+        dispatch(updateAppState({ appState: { grid: nextGrid } }));
+      });
+    },
+    [dispatch, latestGrid, updateAppState]
   );
 
   const onUpdateRowsPerPage = useCallback(
     (nextRowsPerPage: number) => {
-      stateContainer.appState.update({ rowsPerPage: nextRowsPerPage });
+      dispatch(updateAppState({ appState: { rowsPerPage: nextRowsPerPage } }));
     },
-    [stateContainer]
+    [dispatch, updateAppState]
   );
 
   const onUpdateSampleSize = useCallback(
     (newSampleSize: number) => {
-      stateContainer.appState.update({ sampleSize: newSampleSize });
+      dispatch(updateAppState({ appState: { sampleSize: newSampleSize } }));
     },
-    [stateContainer]
+    [dispatch, updateAppState]
   );
 
   const onSort = useCallback(
     (nextSort: string[][]) => {
-      stateContainer.appState.update({ sort: nextSort });
+      dispatch(updateAppState({ appState: { sort: nextSort } }));
     },
-    [stateContainer]
+    [dispatch, updateAppState]
   );
 
   const onUpdateRowHeight = useCallback(
     (newRowHeight: number) => {
-      stateContainer.appState.update({ rowHeight: newRowHeight });
+      dispatch(updateAppState({ appState: { rowHeight: newRowHeight } }));
     },
-    [stateContainer]
+    [dispatch, updateAppState]
   );
 
   const onUpdateHeaderRowHeight = useCallback(
     (newHeaderRowHeight: number) => {
-      stateContainer.appState.update({ headerRowHeight: newHeaderRowHeight });
+      dispatch(updateAppState({ appState: { headerRowHeight: newHeaderRowHeight } }));
     },
-    [stateContainer]
+    [dispatch, updateAppState]
   );
 
   const onUpdateDensity = useCallback(
     (newDensity: DataGridDensity) => {
-      stateContainer.appState.update({ density: newDensity });
+      dispatch(updateAppState({ appState: { density: newDensity } }));
     },
-    [stateContainer]
+    [dispatch, updateAppState]
   );
 
   // should be aligned with embeddable `showTimeCol` prop
@@ -297,6 +316,42 @@ function DiscoverDocumentsComponent({
     timeRange: requestParams.timeRangeAbsolute,
   });
 
+  const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
+  const onUpdateESQLQuery: UpdateESQLQueryFn = useCallback(
+    (queryOrUpdater) => {
+      dispatch(updateESQLQuery({ queryOrUpdater }));
+    },
+    [dispatch, updateESQLQuery]
+  );
+  const docViewerExtensionActions = useMemo<DocViewerExtensionParams['actions']>(
+    () => ({
+      openInNewTab: (params) => dispatch(internalStateActions.openInNewTabExtPointAction(params)),
+      updateESQLQuery: onUpdateESQLQuery,
+    }),
+    [dispatch, onUpdateESQLQuery]
+  );
+
+  const docViewerUiState = useCurrentTabSelector((state) => state.uiState.docViewer);
+  const setDocViewerUiState = useCurrentTabAction(internalStateActions.setDocViewerUiState);
+
+  const onInitialDocViewerStateChange = useCallback(
+    (newDocViewerUiState: Partial<DocViewerRestorableState>) => {
+      dispatch(setDocViewerUiState({ docViewerUiState: newDocViewerUiState }));
+    },
+    [dispatch, setDocViewerUiState]
+  );
+
+  const setInitialDocViewerTabIdAction = useCurrentTabAction(
+    internalStateActions.setInitialDocViewerTabId
+  );
+
+  const onUpdateSelectedTabId = useCallback(
+    (tabId: string | undefined) => {
+      dispatch(setInitialDocViewerTabIdAction({ initialDocViewerTabId: tabId }));
+    },
+    [dispatch, setInitialDocViewerTabIdAction]
+  );
+
   const renderDocumentView = useCallback(
     (
       hit: DataTableRecord,
@@ -320,6 +375,10 @@ function DiscoverDocumentsComponent({
         query={query}
         initialTabId={initialDocViewerTabId}
         docViewerRef={docViewerRef}
+        docViewerExtensionActions={docViewerExtensionActions}
+        onUpdateSelectedTabId={onUpdateSelectedTabId}
+        initialDocViewerState={docViewerUiState}
+        onInitialDocViewerStateChange={onInitialDocViewerStateChange}
       />
     ),
     [
@@ -331,6 +390,10 @@ function DiscoverDocumentsComponent({
       setExpandedDoc,
       query,
       initialDocViewerTabId,
+      docViewerExtensionActions,
+      onUpdateSelectedTabId,
+      docViewerUiState,
+      onInitialDocViewerStateChange,
     ]
   );
 
@@ -410,7 +473,7 @@ function DiscoverDocumentsComponent({
   const renderCustomToolbarWithElements = useMemo(
     () =>
       getRenderCustomToolbarWithElements({
-        leftSide: viewModeToggle,
+        leftSide: isDataGridFullScreen ? undefined : viewModeToggle,
         bottomSection: (
           <>
             {callouts}
@@ -418,7 +481,7 @@ function DiscoverDocumentsComponent({
           </>
         ),
       }),
-    [viewModeToggle, callouts, loadingIndicator]
+    [viewModeToggle, callouts, loadingIndicator, isDataGridFullScreen]
   );
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
@@ -494,13 +557,14 @@ function DiscoverDocumentsComponent({
             rowAdditionalLeadingControls={rowAdditionalLeadingControls}
             dataGridDensityState={density}
             onUpdateDataGridDensity={onUpdateDensity}
-            onUpdateESQLQuery={stateContainer.actions.updateESQLQuery}
+            onUpdateESQLQuery={onUpdateESQLQuery}
             query={query}
             cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
             cellActionsMetadata={cellActionsMetadata}
             cellActionsHandling="append"
             initialState={dataGridUiState}
             onInitialStateChange={onInitialStateChange}
+            onFullScreenChange={setIsDataGridFullScreen}
           />
         </CellActionsProvider>
       </div>
@@ -526,53 +590,10 @@ const componentStyles = {
     height: '100%',
     width: '100%',
   }),
-  // Following guidelines for CSS-in-JS - styles for high granularity components should be assigned to a parent and targeting classes of repeating children
-  dataTable: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      width: '100%',
-      maxWidth: '100%',
-      height: '100%',
-      overflow: 'hidden',
-
-      '.unifiedDataTable__cell--highlight': {
-        backgroundColor: euiTheme.colors.backgroundBaseWarning,
-      },
-
-      '.unifiedDataTable__cell--expanded': {
-        backgroundColor: euiTheme.colors.highlight,
-      },
-
-      '.unifiedDataTable__cellValue': {
-        fontFamily: euiTheme.font.familyCode,
-      },
-
-      // Custom styles for data grid header cell.
-      // It can also be inside a portal (outside of `unifiedDataTable__inner`) when dragged.
-      '.unifiedDataTable__headerCell': {
-        alignItems: 'start',
-
-        '.euiDataGridHeaderCell__draggableIcon': {
-          paddingBlock: `calc(${euiTheme.size.xs} / 2)`, // to align with a token height
-        },
-        '.euiDataGridHeaderCell__button': {
-          marginBlock: -euiTheme.size.xs, // to override Eui value for Density "Expanded"
-        },
-      },
-
-      '.unifiedDataTable__rowControl': {
-        marginTop: -1, // fine-tuning the vertical alignment with the text for any row height setting
-      },
-      // Compact density - 'auto & custom' row height
-      '.euiDataGrid--fontSizeSmall .euiDataGridRowCell__content:not(.euiDataGridRowCell__content--defaultHeight) .unifiedDataTable__rowControl':
-        {
-          marginTop: -2.5,
-        },
-
-      // Compact density - 'single' row height
-      '.euiDataGrid--fontSizeSmall .euiDataGridRowCell__content--defaultHeight .unifiedDataTable__rowControl':
-        {
-          alignSelf: 'flex-start',
-          marginTop: -3,
-        },
-    }),
+  dataTable: css({
+    width: '100%',
+    maxWidth: '100%',
+    height: '100%',
+    overflow: 'hidden',
+  }),
 };

@@ -28,6 +28,7 @@ interface ProvidersCommonConfigType {
   description?: Type<string>;
   hint?: Type<string>;
   icon?: Type<string>;
+  origin?: Type<string[] | string>;
   session?: Type<{ idleTimeout?: Duration | null; lifespan?: Duration | null }>;
 }
 
@@ -41,6 +42,16 @@ const providerOptionsSchema = (providerType: string, optionsSchema: Type<any>) =
     schema.never()
   );
 
+const providerOriginSchema = schema.uri({
+  validate(originConfig) {
+    const url = new URL(originConfig);
+
+    if (originConfig !== url.origin) {
+      return `expected a lower-case origin (scheme, host, and optional port) but got: ${originConfig}`;
+    }
+  },
+});
+
 function getCommonProviderSchemaProperties(overrides: Partial<ProvidersCommonConfigType> = {}) {
   return {
     enabled: schema.boolean({ defaultValue: true }),
@@ -49,6 +60,9 @@ function getCommonProviderSchemaProperties(overrides: Partial<ProvidersCommonCon
     description: schema.maybe(schema.string()),
     hint: schema.maybe(schema.string()),
     icon: schema.maybe(schema.string()),
+    origin: schema.maybe(
+      schema.oneOf([providerOriginSchema, schema.arrayOf(providerOriginSchema)])
+    ),
     accessAgreement: schema.maybe(schema.object({ message: schema.string() })),
     session: schema.object({
       idleTimeout: schema.maybe(schema.oneOf([schema.duration(), schema.literal(null)])),
@@ -315,10 +329,40 @@ export const ConfigSchema = schema.object({
       roleMappingManagementEnabled: schema.boolean({ defaultValue: true }),
     }),
   }),
+  uiam: offeringBasedSchema({
+    serverless: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+      url: schema.conditional(
+        schema.siblingRef('enabled'),
+        true,
+        schema.uri({ scheme: ['https', 'http'] }),
+        // When UIAM is disabled we still want to validate the URL if it's specified
+        // to prevent potential misconfiguration.
+        schema.maybe(schema.uri({ scheme: ['https', 'http'] }))
+      ),
+      ssl: schema.object({
+        verificationMode: schema.oneOf(
+          [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
+          { defaultValue: 'full' }
+        ),
+        certificateAuthorities: schema.maybe(
+          schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
+        ),
+      }),
+      sharedSecret: schema.conditional(
+        schema.siblingRef('enabled'),
+        true,
+        schema.string(),
+        schema.maybe(schema.string())
+      ),
+    }),
+  }),
   fipsMode: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
 });
+
+export type UiamConfigType = TypeOf<typeof ConfigSchema>['uiam'];
 
 export function createConfig(
   config: RawConfigType,

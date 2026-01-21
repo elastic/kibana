@@ -57,6 +57,11 @@ export interface Hash {
   md5?: string[];
   sha1?: string[];
   sha256: string[];
+  cdhash?: string[];
+  sha384?: string[];
+  sha512?: string[];
+  ssdeep?: string[];
+  tlsh?: string[];
 }
 
 export interface FileEcs {

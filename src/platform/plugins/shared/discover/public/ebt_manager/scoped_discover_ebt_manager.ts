@@ -16,6 +16,9 @@ import {
   getIsKqlFreeTextExpression,
 } from '@kbn/es-query';
 import { getQueryColumnsFromESQLQuery, getKqlSearchQueries } from '@kbn/esql-utils';
+import type { Request as InspectedRequest } from '@kbn/inspector-plugin/public';
+import { TabsEventDataKeys, type TabsEBTEvent, type TabsEventName } from '@kbn/unified-tabs';
+import { LRUCache } from 'lru-cache';
 import {
   CONTEXTUAL_PROFILE_ID,
   CONTEXTUAL_PROFILE_LEVEL,
@@ -25,8 +28,14 @@ import {
   QUERY_FIELDS_USAGE_EVENT_TYPE,
   FIELD_USAGE_FIELD_NAME,
   FIELD_USAGE_FILTER_OPERATION,
+  TABS_EVENT_TYPE,
   QUERY_FIELDS_USAGE_FIELD_NAMES,
 } from './discover_ebt_manager_registrations';
+import {
+  analyzeMultiMatchTypesRequest,
+  mergeMultiMatchAnalyses,
+  type MultiMatchAnalysis,
+} from './query_analysis_utils';
 import { ContextualProfileLevel } from '../context_awareness';
 import type {
   ReportEvent,
@@ -50,6 +59,7 @@ enum QueryFieldsUsageEventName {
   kqlQuery = 'kqlQuery',
   esqlQuery = 'esqlQuery',
 }
+
 interface FieldUsageEventData {
   [FIELD_USAGE_EVENT_NAME]: FieldUsageEventName;
   [FIELD_USAGE_FIELD_NAME]?: string;
@@ -59,6 +69,10 @@ interface FieldUsageEventData {
 interface QueryFieldsUsageEventData {
   [FIELD_USAGE_EVENT_NAME]: QueryFieldsUsageEventName;
   [QUERY_FIELDS_USAGE_FIELD_NAMES]?: string[];
+}
+
+interface TabsEventData {
+  [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName;
 }
 
 interface ContextualProfileResolvedEventData {
@@ -76,6 +90,15 @@ export class ScopedDiscoverEBTManager {
     [ContextualProfileLevel.dataSourceLevel]: undefined,
     [ContextualProfileLevel.documentLevel]: undefined,
   };
+  private queryAnalysisCache = new LRUCache<
+    string, // cache analysis per request id
+    MultiMatchAnalysis,
+    { request: InspectedRequest } // pass full request via context
+  >({
+    max: 10,
+    memoMethod: (requestId, _previousValue, { context: { request } }) =>
+      analyzeMultiMatchTypesRequest(request),
+  });
 
   constructor(
     private readonly reportEvent: ReportEvent | undefined,
@@ -332,5 +355,62 @@ export class ScopedDiscoverEBTManager {
         });
       },
     };
+  }
+
+  public trackQueryPerformanceEvent(eventName: string) {
+    const startTime = window.performance.now();
+    let reported = false;
+
+    return {
+      startTime,
+      reportEvent: (
+        {
+          queryRangeSeconds,
+          requests = [],
+        }: {
+          queryRangeSeconds: number;
+          requests?: InspectedRequest[];
+        },
+        otherEventData?: Omit<PerformanceMetricEvent, 'eventName' | 'duration'>
+      ) => {
+        if (reported || !this.reportPerformanceEvent) {
+          return;
+        }
+
+        reported = true;
+        const duration = window.performance.now() - startTime;
+
+        const queryAnalyses = requests.map((request) =>
+          this.queryAnalysisCache.memo(request.id, { context: { request } })
+        );
+        const mergedAnalysis = mergeMultiMatchAnalyses(queryAnalyses);
+
+        this.reportPerformanceEvent({
+          key1: 'query_range_secs',
+          value1: queryRangeSeconds,
+          key2: 'phrase_query_count',
+          value2: mergedAnalysis.typeCounts.get('match_phrase') ?? 0,
+          ...otherEventData,
+          meta: {
+            multi_match_types: mergedAnalysis.rawTypes,
+            ...otherEventData?.meta,
+          },
+          eventName,
+          duration,
+        });
+      },
+    };
+  }
+
+  public trackTabsEvent({ eventName, ...payload }: TabsEBTEvent) {
+    if (!this.reportEvent) {
+      return;
+    }
+    const eventData: TabsEventData = {
+      [TabsEventDataKeys.TABS_EVENT_NAME]: eventName,
+      ...payload,
+    };
+
+    this.reportEvent(TABS_EVENT_TYPE, eventData);
   }
 }

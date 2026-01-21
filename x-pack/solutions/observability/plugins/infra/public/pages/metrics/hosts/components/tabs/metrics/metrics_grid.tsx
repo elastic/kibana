@@ -18,7 +18,7 @@ export const MetricsGrid = () => {
   const { metricsView } = useMetricsDataViewContext();
   const { searchCriteria } = useUnifiedSearchContext();
   const charts = useMetricsCharts({
-    dataViewId: metricsView?.dataViewReference.id,
+    indexPattern: metricsView?.dataViewReference.getIndexPattern(),
     schema: searchCriteria.preferredSchema,
   });
 
@@ -43,7 +43,7 @@ export const MetricsGrid = () => {
       <EuiFlexGrid columns={2} gutterSize="s" data-test-subj="hostsView-metricChart">
         {charts.map((chartProp, index) => (
           <EuiFlexItem key={index} grow={false}>
-            <Chart {...chartProp} />
+            <Chart {...chartProp} dataView={metricsView?.dataViewReference} />
           </EuiFlexItem>
         ))}
       </EuiFlexGrid>

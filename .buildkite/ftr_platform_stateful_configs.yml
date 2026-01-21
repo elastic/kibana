@@ -5,6 +5,7 @@ disabled:
 
   # Base config files, only necessary to inform config finding script
   - src/platform/test/functional/config.base.js
+  - src/platform/test/functional/config.base.http2.ts
   - src/platform/test/functional/firefox/config.base.ts
   - x-pack/platform/test/functional/config.base.ts
   - x-pack/platform/test/localization/config.base.ts
@@ -48,6 +49,7 @@ disabled:
 
   # Gen AI suites, running with their own pipeline
   - x-pack/platform/test/functional_gen_ai/inference/config.ts
+  - x-pack/platform/test/agent_builder/smoke_tests/config.stateful.ts
 
 defaultQueue: 'n2-4-spot'
 enabled:
@@ -65,7 +67,6 @@ enabled:
   - src/platform/test/functional/apps/dashboard_elements/input_control_vis/config.ts
   - src/platform/test/functional/apps/dashboard_elements/links/config.ts
   - src/platform/test/functional/apps/dashboard_elements/markdown/config.ts
-  - src/platform/test/functional/apps/dashboard/background_search/config.ts
   - src/platform/test/functional/apps/dashboard/group1/config.ts
   - src/platform/test/functional/apps/dashboard/group2/config.ts
   - src/platform/test/functional/apps/dashboard/group3/config.ts
@@ -76,7 +77,6 @@ enabled:
   - src/platform/test/functional/apps/discover/ccs_compatibility/config.ts
   - src/platform/test/functional/apps/discover/embeddable/config.ts
   - src/platform/test/functional/apps/discover/esql/config.ts
-  - src/platform/test/functional/apps/discover/background_search/config.ts
   - src/platform/test/functional/apps/discover/group1/config.ts
   - src/platform/test/functional/apps/discover/group2_data_grid1/config.ts
   - src/platform/test/functional/apps/discover/group2_data_grid2/config.ts
@@ -93,6 +93,7 @@ enabled:
   - src/platform/test/functional/apps/discover/observability/config.ts
   - src/platform/test/functional/apps/discover/tabs/config.ts
   - src/platform/test/functional/apps/discover/tabs2/config.ts
+  - src/platform/test/functional/apps/discover/tabs3/config.ts
   - src/platform/test/functional/apps/getting_started/config.ts
   - src/platform/test/functional/apps/home/config.ts
   - src/platform/test/functional/apps/kibana_overview/config.ts
@@ -169,6 +170,7 @@ enabled:
   - x-pack/platform/test/disable_ems/config.ts
   - x-pack/platform/test/examples/config.ts
   - x-pack/platform/test/fleet_api_integration/config.agent.ts
+  - x-pack/platform/test/fleet_api_integration/config.agentless.ts
   - x-pack/platform/test/fleet_api_integration/config.agent_policy.ts
   - x-pack/platform/test/fleet_api_integration/config.epm.ts
   - x-pack/platform/test/fleet_api_integration/config.event_ingested.ts
@@ -198,6 +200,7 @@ enabled:
   - x-pack/platform/test/functional_with_es_ssl/apps/discover_ml/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/embeddable_alerts_table/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/config.ts
+  - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/config.rules.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/with_email_aws_ses_kbn_config/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/with_email_services_enabled_kbn_config/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/shared/config.ts
@@ -250,7 +253,6 @@ enabled:
   - x-pack/platform/test/functional/apps/ml/memory_usage/config.ts
   - x-pack/platform/test/functional/apps/monitoring/config.ts
   - x-pack/platform/test/functional/apps/painless_lab/config.ts
-  - x-pack/platform/test/functional/apps/product_intercept/config.ts
   - x-pack/platform/test/functional/apps/remote_clusters/config.ts
   - x-pack/platform/test/functional/apps/reporting_management/config.ts
   - x-pack/platform/test/functional/apps/rollup_job/config.ts
@@ -281,6 +283,7 @@ enabled:
   - x-pack/platform/test/licensing_plugin/config.public.ts
   - x-pack/platform/test/licensing_plugin/config.ts
   - x-pack/platform/test/plugin_functional/config.ts
+  - x-pack/platform/test/product_intercepts_functional/config.ts
   - x-pack/platform/test/reporting_api_integration/reporting_and_security.config.ts
   - x-pack/platform/test/reporting_api_integration/reporting_without_security.config.ts
   - x-pack/platform/test/reporting_functional/reporting_and_security.config.ts
@@ -307,6 +310,7 @@ enabled:
   - x-pack/platform/test/security_api_integration/oidc_implicit_flow.config.ts
   - x-pack/platform/test/security_api_integration/oidc.config.ts
   - x-pack/platform/test/security_api_integration/oidc.http2.config.ts
+  - x-pack/platform/test/security_api_integration/oidc_multiple_realms.config.ts
   - x-pack/platform/test/security_api_integration/pki.config.ts
   - x-pack/platform/test/security_api_integration/saml.config.ts
   - x-pack/platform/test/security_api_integration/saml.http2.config.ts
@@ -330,9 +334,12 @@ enabled:
   - x-pack/platform/test/security_functional/user_profiles.config.ts
   - x-pack/platform/test/security_functional/expired_session.config.ts
   - x-pack/solutions/security/test/session_view/basic/config.ts
+  - x-pack/solutions/security/test/kubernetes_security/basic/config.ts
   - x-pack/platform/test/spaces_api_integration/security_and_spaces/config_basic.ts
   - x-pack/platform/test/spaces_api_integration/security_and_spaces/config_trial.ts
   - x-pack/platform/test/spaces_api_integration/spaces_only/config.ts
+  - x-pack/platform/test/spaces_api_integration/access_control_objects/config.ts
+  - x-pack/platform/test/spaces_api_integration/access_control_objects/feature_disabled.config.ts
   - x-pack/platform/test/task_manager_claimer_update_by_query/config.ts
   - x-pack/platform/test/ui_capabilities/security_and_spaces/config.ts
   - x-pack/platform/test/ui_capabilities/spaces_only/config.ts
@@ -340,8 +347,6 @@ enabled:
   - x-pack/platform/test/reindex_service/config.ts
   - x-pack/platform/test/usage_collection/config.ts
   - x-pack/performance/journeys_e2e/aiops_log_rate_analysis.ts
-  - x-pack/performance/journeys_e2e/ecommerce_dashboard.ts
-  - x-pack/performance/journeys_e2e/ecommerce_dashboard_http2.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard_map_only.ts
   - x-pack/performance/journeys_e2e/flight_dashboard.ts
   - x-pack/performance/journeys_e2e/login.ts
@@ -353,9 +358,7 @@ enabled:
   - x-pack/performance/journeys_e2e/promotion_tracking_dashboard.ts
   - x-pack/performance/journeys_e2e/web_logs_dashboard.ts
   - x-pack/performance/journeys_e2e/web_logs_dashboard_esql.ts
-  - x-pack/performance/journeys_e2e/web_logs_dashboard_dataview.ts
   - x-pack/performance/journeys_e2e/data_stress_test_lens.ts
-  - x-pack/performance/journeys_e2e/data_stress_test_lens_http2.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard_saved_search_only.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard_tsvb_gauge_only.ts
   - x-pack/performance/journeys_e2e/dashboard_listing_page.ts
@@ -393,17 +396,17 @@ enabled:
   - x-pack/platform/test/api_integration/apis/stats/config.ts
   - x-pack/platform/test/api_integration/apis/status/config.ts
   - x-pack/platform/test/api_integration/apis/telemetry/config.ts
-  - x-pack/platform/test/api_integration/apis/transform/config.ts
   - x-pack/platform/test/api_integration/apis/upgrade_assistant/config.ts
   - x-pack/platform/test/api_integration/apis/watcher/config.ts
   - x-pack/platform/test/api_integration_basic/apis/aiops/config.ts
   - x-pack/platform/test/api_integration_basic/apis/security/config.ts
-  - x-pack/platform/test/api_integration_basic/apis/transform/config.ts
   - x-pack/platform/test/automatic_import_api_integration/apis/config_basic.ts
   - x-pack/platform/test/automatic_import_api_integration/apis/config_graphs.ts
+  - x-pack/platform/test/automatic_import_v2_api_integration/configs/config.stateful.ts
   - x-pack/platform/test/encrypted_saved_objects_api_integration/config.ts
   - x-pack/platform/test/fleet_multi_cluster/config.ts
   - x-pack/platform/test/monitoring_api_integration/config.ts
+  - x-pack/platform/test/agent_builder_functional/config.ts
   - x-pack/platform/test/plugin_api_integration/config.ts
   - x-pack/platform/test/saved_object_api_integration/security_and_spaces/config_basic.ts
   - x-pack/platform/test/saved_object_api_integration/security_and_spaces/config_trial.ts

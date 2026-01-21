@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { validateAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { validateAccessor } from '@kbn/chart-expressions-common';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import { LayerTypes, XY_VIS_RENDERER, DATA_LAYER } from '../constants';
 import { appendLayerIds, getAccessors, getShowLines, normalizeTable } from '../helpers';
 import type { DataLayerConfigResult, XYLayerConfig, XyVisFn, XYArgs, XYRender } from '../types';

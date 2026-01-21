@@ -16,13 +16,12 @@ import type {
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { EuiDataGridColumnCellAction } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
+import { LENS_ROW_HEIGHT_MODE, DEFAULT_HEADER_ROW_HEIGHT } from '@kbn/lens-common';
+import type { LensCellValueAction, RowHeightMode } from '@kbn/lens-common';
 import type { FormatFactory } from '../../../../common/types';
-import { RowHeightMode } from '../../../../common/types';
 import type { DatatableColumnConfig } from '../../../../common/expressions';
 import { nonNullable } from '../../../utils';
-import type { LensCellValueAction } from '../../../types';
 import { buildColumnsMetaLookup } from './helpers';
-import { DEFAULT_HEADER_ROW_HEIGHT } from './constants';
 
 const hasFilterCellAction = (actions: LensCellValueAction[]) => {
   return actions.some(({ type }) => type === FILTER_CELL_ACTION_TYPE);
@@ -46,7 +45,6 @@ export const createGridColumns = (
         negate?: boolean
       ) => void)
     | undefined,
-  isReadOnly: boolean,
   columnConfig: DatatableColumnConfig,
   visibleColumns: string[],
   formatFactory: FormatFactory,
@@ -241,36 +239,37 @@ export const createGridColumns = (
         });
       }
 
-      if (!isReadOnly) {
-        if (isTransposed && columnArgs?.bucketValues && handleTransposedColumnClick) {
-          const bucketValues = columnArgs?.bucketValues;
-          additionalActions.push({
-            color: 'text',
-            size: 'xs',
-            onClick: () => handleTransposedColumnClick(bucketValues, false),
-            iconType: 'plusInCircle',
-            label: i18n.translate('xpack.lens.table.columnFilter.filterForValueText', {
-              defaultMessage: 'Filter for',
-            }),
-            'data-test-subj': 'lensDatatableHide',
-          });
+      if (isTransposed && columnArgs?.bucketValues && handleTransposedColumnClick) {
+        const bucketValues = columnArgs?.bucketValues;
+        additionalActions.push({
+          color: 'text',
+          size: 'xs',
+          onClick: () => handleTransposedColumnClick(bucketValues, false),
+          iconType: 'plusInCircle',
+          label: i18n.translate('xpack.lens.table.columnFilter.filterForValueText', {
+            defaultMessage: 'Filter for',
+          }),
+          'data-test-subj': 'lensDatatableHide',
+        });
 
-          additionalActions.push({
-            color: 'text',
-            size: 'xs',
-            onClick: () => handleTransposedColumnClick(bucketValues, true),
-            iconType: 'minusInCircle',
-            label: i18n.translate('xpack.lens.table.columnFilter.filterOutValueText', {
-              defaultMessage: 'Filter out',
-            }),
-            'data-test-subj': 'lensDatatableHide',
-          });
-        }
+        additionalActions.push({
+          color: 'text',
+          size: 'xs',
+          onClick: () => handleTransposedColumnClick(bucketValues, true),
+          iconType: 'minusInCircle',
+          label: i18n.translate('xpack.lens.table.columnFilter.filterOutValueText', {
+            defaultMessage: 'Filter out',
+          }),
+          'data-test-subj': 'lensDatatableHide',
+        });
       }
+
       const currentAlignment = alignments && alignments.get(field);
-      const hasMultipleRows = [RowHeightMode.auto, RowHeightMode.custom, undefined].includes(
-        headerRowHeight
-      );
+      const hasMultipleRows = [
+        LENS_ROW_HEIGHT_MODE.auto,
+        LENS_ROW_HEIGHT_MODE.custom,
+        undefined,
+      ].includes(headerRowHeight);
 
       const columnStyle = css({
         ...((headerRowHeight === DEFAULT_HEADER_ROW_HEIGHT || headerRowHeight === undefined) && {

@@ -47,7 +47,7 @@ export const createNameColumn = ({
   openDashboardDetailsFlyout,
 }: CreateNameColumnParams): TableColumn => {
   return {
-    field: 'elastic_dashboard.title',
+    field: 'original_dashboard.title',
     name: i18n.COLUMN_NAME,
     render: (_, dashboard: DashboardMigrationDashboard) => (
       <Name dashboard={dashboard} openDashboardDetailsFlyout={openDashboardDetailsFlyout} />

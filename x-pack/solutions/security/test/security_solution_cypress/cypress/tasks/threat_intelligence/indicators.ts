@@ -6,7 +6,6 @@
  */
 
 import {
-  ADD_INTEGRATIONS_BUTTON,
   FIELD_BROWSER,
   FIELD_BROWSER_MODAL,
   FIELD_BROWSER_MODAL_CLOSE_BUTTON,
@@ -55,8 +54,3 @@ export const closeFieldBrowser = () =>
  * Open inspector flyout
  */
 export const openInspector = () => cy.get(INSPECTOR_BUTTON).last().click();
-
-/**
- * Navigate to integrations
- */
-export const navigateToIntegrations = () => cy.get(ADD_INTEGRATIONS_BUTTON).click();

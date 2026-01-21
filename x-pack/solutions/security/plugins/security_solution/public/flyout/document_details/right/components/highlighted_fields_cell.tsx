@@ -40,12 +40,12 @@ export interface HighlightedFieldsCellProps {
   values: string[] | null | undefined;
   /**
    * Maintain backwards compatibility // TODO remove when possible
-   * Only needed if alerts page flyout (which has PreviewLink), NOT in the AI for SOC alert summary flyout.
+   * Only needed if alerts page flyout (which has PreviewLink), NOT in EASE alert summary flyout.
    */
   scopeId?: string;
   /**
    * If true, we show a PreviewLink for some specific fields.
-   * This is false by default (for the AI for SOC alert summary page) and will be true for the alerts page.
+   * This is false by default (for EASE alert summary page) and will be true for the alerts page.
    */
   showPreview?: boolean;
   /**

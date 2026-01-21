@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import moment from 'moment';
+import { EMPTY_LABEL } from '@kbn/field-formats-common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -207,7 +208,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await lens.closeDimensionEditor();
 
           expect(await lens.getDimensionTriggerText('lnsXY_xDimensionPanel', 0)).to.eql(
-            'Top 5 values of geo.src'
+            'Top 9 values of geo.src'
           );
 
           const data = await lens.getCurrentChartDebugState('xyVisChart');
@@ -291,12 +292,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
           operation: 'terms',
           field: 'a',
+          keepOpen: true,
         });
+        // Set to 2 to ensure Other bucket appears with test data (6 unique values)
+        await lens.setTermsNumberOfValues(2);
+        await lens.closeDimensionEditor();
 
         await lens.waitForVisualization('xyVisChart');
         const data = await lens.getCurrentChartDebugState('xyVisChart');
         const seriesBar = data!.bars![0].bars;
-        expect(seriesBar[0].x).to.eql('(empty)');
+        expect(seriesBar[0].x).to.eql(EMPTY_LABEL);
         expect(seriesBar[seriesBar.length - 1].x).to.eql('Other');
       });
 
@@ -313,11 +318,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
           operation: 'terms',
           field: 'a',
+          keepOpen: true,
         });
+        // Set to 2 to ensure Other bucket appears with test data
+        await lens.setTermsNumberOfValues(2);
+        await lens.closeDimensionEditor();
 
         await lens.waitForVisualization('xyVisChart');
         const data = await lens.getCurrentChartDebugState('xyVisChart');
-        expect(data!.bars![0].name).to.eql('(empty)');
+        expect(data!.bars![0].name).to.eql(EMPTY_LABEL);
         expect(data!.bars![data!.bars!.length - 1].name).to.eql('Other');
       });
 
@@ -325,6 +334,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await lens.switchToVisualization('lnsDatatable');
 
         await lens.removeLayer();
+        await lens.ensureLayerTabIsActive();
 
         await lens.configureDimension({
           dimension: 'lnsDatatable_rows > lns-empty-dimension',
@@ -351,13 +361,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await lens.waitForVisualization();
         await common.sleep(20000);
         // a empty value
-        expect(await lens.getDatatableCellText(1, 0)).to.eql('(empty)');
+        expect(await lens.getDatatableCellText(1, 0)).to.eql(EMPTY_LABEL);
         // b Other value
         expect(await lens.getDatatableCellText(1, 1)).to.eql('Other');
         // a Other value
         expect(await lens.getDatatableCellText(5, 0)).to.eql('Other');
         // b empty value
-        expect(await lens.getDatatableCellText(5, 1)).to.eql('(empty)');
+        expect(await lens.getDatatableCellText(5, 1)).to.eql(EMPTY_LABEL);
       });
     });
   });

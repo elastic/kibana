@@ -13,10 +13,10 @@ import {
   getColumnByAccessor,
   getAccessor,
   getFormatByAccessor,
-} from '@kbn/visualizations-plugin/common/utils';
+} from '@kbn/chart-expressions-common';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/public';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import { getFormatService, getPaletteService } from '../services';
 import type { VisParams, MetricOptions } from '../../common/types';
 import { MetricVisValue } from './metric_value';

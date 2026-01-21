@@ -35,7 +35,8 @@ import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 const savedQueryName = 'custom saved query';
 const savedQueryQuery = 'process.name: test';
 
-describe('Saved query rules, rule edit', { tags: ['@ess', '@serverless'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/237284
+describe.skip('Saved query rules, rule edit', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     deleteAlertsAndRules();

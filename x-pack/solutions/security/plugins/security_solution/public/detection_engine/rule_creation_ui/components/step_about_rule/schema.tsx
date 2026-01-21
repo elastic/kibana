@@ -118,6 +118,7 @@ export const schema: FormSchema<AboutStepRule> = {
     ],
   },
   isAssociatedToEndpointList: {
+    defaultValue: false,
     type: FIELD_TYPES.CHECKBOX,
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldAssociatedToEndpointListLabel',

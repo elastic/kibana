@@ -1,10 +1,10 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": ["jest", "node", "react"]
   },
-  "include": ["**/*.ts", "**/*.tsx"],
+  "include": ["**/*.ts", "**/*.tsx", "../../../../../../typings/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
@@ -13,6 +13,6 @@
     "@kbn/security-plugin-types-common",
     "@kbn/test-jest-helpers",
     "@kbn/security-role-management-model",
-    "@kbn/features-plugin",
+    "@kbn/features-plugin"
   ]
 }

@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { ruleParamsSchemaV1 } from '@kbn/response-ops-rule-params';
-import { adHocRunStatus } from '../../../../constants';
+import { adHocRunStatus, backfillInitiator } from '../../../../constants';
 
 export const statusSchema = schema.oneOf([
   schema.literal(adHocRunStatus.COMPLETE),
@@ -40,6 +40,11 @@ export const backfillResponseSchema = schema.object({
     revision: schema.number(),
   }),
   space_id: schema.string(),
+  initiator: schema.oneOf([
+    schema.literal(backfillInitiator.USER),
+    schema.literal(backfillInitiator.SYSTEM),
+  ]),
+  initiator_id: schema.maybe(schema.string()),
   start: schema.string(),
   status: statusSchema,
   end: schema.maybe(schema.string()),

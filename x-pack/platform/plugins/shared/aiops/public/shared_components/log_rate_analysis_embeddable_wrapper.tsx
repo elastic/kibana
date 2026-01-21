@@ -40,7 +40,7 @@ export type LogRateAnalysisPropsWithDeps = LogRateAnalysisEmbeddableWrapperProps
 export type LogRateAnalysisEmbeddableWrapper = FC<LogRateAnalysisEmbeddableWrapperProps>;
 
 export interface LogRateAnalysisEmbeddableWrapperProps {
-  dataViewId: string;
+  dataViewId?: string;
   timeRange: TimeRange;
   /**
    * Component to render if there are no significant items found

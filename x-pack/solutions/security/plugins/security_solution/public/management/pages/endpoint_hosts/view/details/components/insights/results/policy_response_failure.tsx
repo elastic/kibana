@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
+import { useTruncateText } from '@kbn/react-hooks';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,7 +15,6 @@ import {
   EuiText,
   EuiButtonEmpty,
   EuiLink,
-  useEuiTheme,
 } from '@elastic/eui';
 
 import type { SecurityWorkflowInsight } from '../../../../../../../../../common/endpoint/types/workflow_insights';
@@ -32,30 +32,10 @@ export const WorkflowInsightsPolicyResponseFailureResult = ({
   const { ariaLabel, actionText, expandMessage, collapseMessage } =
     WORKFLOW_INSIGHTS.issues.remediationButton.policyResponseFailure;
 
-  const { euiTheme } = useEuiTheme();
-
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [showViewMore, setShowViewMore] = useState(false);
-  const textRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const textElement = textRef.current;
-    if (!textElement) return;
-
-    const clone = textElement.cloneNode(true) as HTMLDivElement;
-    clone.style.cssText = `
-    position: absolute;
-    visibility: hidden;
-    height: auto;
-    width: ${textElement.offsetWidth}px;
-    -webkit-line-clamp: unset;
-    display: block;
-  `;
-
-    document.body.appendChild(clone);
-    setShowViewMore(clone.offsetHeight > textElement.offsetHeight);
-    document.body.removeChild(clone);
-  }, [insight.remediation.descriptive]);
+  const { displayText, isExpanded, toggleExpanded, shouldTruncate } = useTruncateText(
+    (insight.remediation.descriptive ?? '').replace(/\\\\/g, '\\').replace(/\\n/g, '\n'),
+    120
+  );
 
   return (
     <EuiPanel
@@ -72,61 +52,18 @@ export const WorkflowInsightsPolicyResponseFailureResult = ({
 
         <EuiFlexItem>
           <EuiText size="s">
-            <EuiText
-              size={'s'}
-              css={{
-                display: '-webkit-box',
-                WebkitLineClamp: 1,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-              }}
-            >
-              <strong>{insight.metadata.display_name || insight.value}</strong>
-            </EuiText>
-            <div
-              ref={textRef}
-              css={{
-                display: isExpanded ? 'block' : '-webkit-box',
-                WebkitLineClamp: isExpanded ? 'none' : 2,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-                position: 'relative',
-              }}
-            >
-              <EuiText size={'s'} color={'subdued'}>
-                <span
-                  css={{
-                    // Hide the default ellipsis by creating our own truncation
-                    display: !isExpanded && showViewMore ? 'inline' : 'contents',
-                  }}
-                >
-                  {insight.remediation.descriptive}
-                </span>
-                {!isExpanded && showViewMore && (
-                  <span
-                    css={{
-                      position: 'absolute',
-                      bottom: 0,
-                      right: 0,
-                      backgroundColor: euiTheme.colors.backgroundBasePlain,
-                    }}
-                  >
-                    {'... '}
-                    <EuiLink onClick={() => setIsExpanded(true)} color="primary">
-                      {expandMessage}
-                    </EuiLink>
-                  </span>
-                )}
-                {isExpanded && showViewMore && (
-                  <>
-                    {' '}
-                    <EuiLink onClick={() => setIsExpanded(false)} color="primary">
-                      {collapseMessage}
-                    </EuiLink>
-                  </>
-                )}
-              </EuiText>
-            </div>
+            <strong>{insight.metadata.display_name || insight.value}</strong>
+          </EuiText>
+          <EuiText size="s" color="subdued">
+            {displayText}
+            {shouldTruncate && (
+              <>
+                {' '}
+                <EuiLink onClick={toggleExpanded}>
+                  {isExpanded ? collapseMessage : expandMessage}
+                </EuiLink>
+              </>
+            )}
           </EuiText>
         </EuiFlexItem>
 

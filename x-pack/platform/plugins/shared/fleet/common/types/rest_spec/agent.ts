@@ -133,6 +133,28 @@ export type PostBulkAgentUpgradeResponse = BulkAgentAction;
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PostAgentUpgradeResponse {}
 
+export interface PostAgentRollbackRequest {
+  params: {
+    agentId: string;
+  };
+}
+
+export interface PostAgentRollbackResponse {
+  actionId: string;
+}
+
+export interface PostBulkAgentRollbackRequest {
+  body: {
+    agents: string[] | string;
+    batchSize?: number;
+    includeInactive?: boolean;
+  };
+}
+
+export interface PostBulkAgentRollbackResponse {
+  actionIds: string[];
+}
+
 export interface PostAgentReassignRequest {
   params: {
     agentId: string;
@@ -316,4 +338,32 @@ export interface PostRetrieveAgentsByActionsRequest {
 
 export interface PostRetrieveAgentsByActionsResponse {
   items: string[];
+}
+
+export interface ChangeAgentPrivilegeLevelRequest {
+  agentId: string;
+  body: {
+    user_info?: AgentPrivilegeLevelChangeUserInfo;
+  } | null;
+}
+
+export interface ChangeAgentPrivilegeLevelResponse {
+  actionId: string;
+}
+
+export interface AgentPrivilegeLevelChangeUserInfo {
+  username?: string;
+  groupname?: string;
+  password?: string;
+}
+
+export interface BulkChangeAgentPrivilegeLevelRequest {
+  body: {
+    agents: string[] | string;
+    user_info?: AgentPrivilegeLevelChangeUserInfo;
+  };
+}
+
+export interface BulkChangeAgentPrivilegeLevelResponse {
+  actionId: string;
 }

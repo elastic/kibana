@@ -4,9 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import {
+  AlertConsumers,
+  OBSERVABILITY_RULE_TYPE_IDS,
+  STACK_RULE_TYPE_IDS_SUPPORTED_BY_OBSERVABILITY,
+} from '@kbn/rule-data-utils';
 
 export const observabilityFeatureId = 'observability';
+
+/**
+ * Combined list of all observability rule type IDs including stack rules
+ * supported by observability.
+ */
+export const OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES = [
+  ...OBSERVABILITY_RULE_TYPE_IDS,
+  ...STACK_RULE_TYPE_IDS_SUPPORTED_BY_OBSERVABILITY,
+];
 export const observabilityAppId = 'observability-overview';
 export const casesFeatureId = 'observabilityCasesV3';
 export const sloFeatureId = 'slo';
@@ -156,7 +169,7 @@ export {
 
 export { type Color, colorTransformer } from './color_palette';
 export { ObservabilityTriggerId } from './trigger_ids';
-export { getInspectResponse } from './utils/get_inspect_response';
+export { getInspectResponse, type InspectResponse } from './utils/get_inspect_response';
 export {
   type DataTier,
   indexLifeCyclePhaseToDataTier,

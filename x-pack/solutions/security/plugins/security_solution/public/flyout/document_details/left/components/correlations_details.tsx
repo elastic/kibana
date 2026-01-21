@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSelector } from 'react-redux';
 import { CORRELATIONS_DETAILS_TEST_ID } from './test_ids';
@@ -21,7 +21,7 @@ import { useShowRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_sh
 import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
 import { RelatedAlertsByAncestry } from './related_alerts_by_ancestry';
 import { SuppressedAlerts } from './suppressed_alerts';
-import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 import { sourcererSelectors } from '../../../../sourcerer/store';
 
@@ -34,7 +34,7 @@ export const CorrelationsDetails: React.FC = () => {
   const { dataAsNestedObject, eventId, getFieldsData, scopeId, isRulePreview } =
     useDocumentDetailsContext();
 
-  const { newDataViewPickerEnabled } = useEnableExperimental();
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const oldSecurityDefaultPatterns =
     useSelector(sourcererSelectors.defaultDataView)?.patternList ?? [];
   const { indexPatterns: experimentalSecurityDefaultIndexPatterns } = useSecurityDefaultPatterns();

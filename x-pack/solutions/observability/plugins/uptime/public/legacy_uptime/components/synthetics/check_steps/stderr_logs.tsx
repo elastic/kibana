@@ -124,7 +124,7 @@ export const StdErrorLogs = ({
               </EuiLink>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiCallOut title={ERROR_SUMMARY_LABEL} color="danger" iconType="warning">
+          <EuiCallOut announceOnMount title={ERROR_SUMMARY_LABEL} color="danger" iconType="warning">
             <p>{summaryMessage}</p>
           </EuiCallOut>
         </>

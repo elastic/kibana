@@ -30,7 +30,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
 
-  describe('discover URL state', () => {
+  describe('discover URL state', function () {
+    // failsOnMKI, see https://github.com/elastic/kibana/issues/237086
+    this.tags(['failsOnMKI']);
+
     before(async function () {
       log.debug('load kibana index with default index pattern');
       await kibanaServer.importExport.load(
@@ -92,9 +95,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         let discoverLink = await PageObjects.svlCommonNavigation.sidenav.findLink({
           deepLinkId: 'discover',
         });
+        expect(await discoverLink?.getAttribute('href')).to.contain('/app/discover#/');
         expect(await discoverLink?.getAttribute('href')).to.contain(
-          '/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-15m,to:now))' +
-            "&_a=(columns:!(),dataSource:(dataViewId:'logstash-*',type:dataView),filters:!(),interval:auto,query:(language:kuery,query:''),sort:!(!('@timestamp',desc)))"
+          '_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-15m,to:now))' +
+            "&_a=(dataSource:(dataViewId:'logstash-*',type:dataView),filters:!(),interval:auto,query:(language:kuery,query:''),sort:!(!('@timestamp',desc)))"
         );
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await filterBar.addFilter({
@@ -107,14 +111,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         discoverLink = await PageObjects.svlCommonNavigation.sidenav.findLink({
           deepLinkId: 'discover',
         });
+        expect(await discoverLink?.getAttribute('href')).to.contain('/app/discover#/');
         expect(await discoverLink?.getAttribute('href')).to.contain(
-          "/app/discover#/?_g=(filters:!(('$state':(store:globalState)," +
+          "_g=(filters:!(('$state':(store:globalState)," +
             "meta:(alias:!n,disabled:!f,field:extension.raw,index:'logstash-*'," +
             'key:extension.raw,negate:!f,params:!(jpg,css),type:phrases,value:!(jpg,css)),' +
             'query:(bool:(minimum_should_match:1,should:!((match_phrase:(extension.raw:jpg)),' +
             "(match_phrase:(extension.raw:css))))))),query:(language:kuery,query:'')," +
             "refreshInterval:(pause:!t,value:60000),time:(from:'2015-09-19T06:31:44.000Z'," +
-            "to:'2015-09-23T18:31:44.000Z'))&_a=(columns:!(),dataSource:(dataViewId:'logstash-*',type:dataView),filters:!()," +
+            "to:'2015-09-23T18:31:44.000Z'))&_a=(dataSource:(dataViewId:'logstash-*',type:dataView),filters:!()," +
             "interval:auto,query:(language:kuery,query:''),sort:!(!('@timestamp',desc)))"
         );
         await PageObjects.svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'discover' });

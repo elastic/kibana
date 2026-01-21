@@ -7,7 +7,7 @@
 
 import type { FetchSLOHealthResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { sloKeys } from './query_key_factory';
 import { usePluginContext } from './use_plugin_context';
 
@@ -24,8 +24,8 @@ export interface Params {
 export function useFetchSloHealth({ list }: Params): UseFetchSloHealth {
   const { sloClient } = usePluginContext();
   const payload = list.map((slo) => ({
-    sloId: slo.id,
-    sloInstanceId: slo.instanceId ?? ALL_VALUE,
+    id: slo.id,
+    instanceId: slo.instanceId ?? ALL_VALUE,
   }));
 
   const { isLoading, isError, data } = useQuery({

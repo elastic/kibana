@@ -8,6 +8,9 @@
 export const ELASTIC_AI_ASSISTANT_URL = '/api/security_ai_assistant';
 export const ELASTIC_AI_ASSISTANT_INTERNAL_URL = '/internal/elastic_assistant';
 
+export const UPDATE_ANONYMIZATION_FIELDS_URL =
+  `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/update_anonymization_fields` as const;
+
 export const POST_ACTIONS_CONNECTOR_EXECUTE =
   `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/actions/connector/{connectorId}/_execute` as const;
 
@@ -84,24 +87,29 @@ export const DEFEND_INSIGHTS_BY_ID = `${DEFEND_INSIGHTS}/{id}`;
 export const ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID = 'attack-discovery' as const;
 export const ATTACK_DISCOVERY_SCHEDULES_CONSUMER_ID = 'siem' as const;
 
-export const ATTACK_DISCOVERY = `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/attack_discovery` as const;
+// Attack discovery public API
+export const ATTACK_DISCOVERY = '/api/attack_discovery';
 export const ATTACK_DISCOVERY_BULK = `${ATTACK_DISCOVERY}/_bulk` as const;
-export const ATTACK_DISCOVERY_BY_CONNECTOR_ID = `${ATTACK_DISCOVERY}/{connectorId}` as const;
-export const ATTACK_DISCOVERY_CANCEL_BY_CONNECTOR_ID =
-  `${ATTACK_DISCOVERY}/cancel/{connectorId}` as const;
 export const ATTACK_DISCOVERY_FIND = `${ATTACK_DISCOVERY}/_find` as const;
+export const ATTACK_DISCOVERY_GENERATE = `${ATTACK_DISCOVERY}/_generate` as const;
 export const ATTACK_DISCOVERY_GENERATIONS = `${ATTACK_DISCOVERY}/generations` as const;
 export const ATTACK_DISCOVERY_GENERATIONS_BY_ID =
   `${ATTACK_DISCOVERY_GENERATIONS}/{execution_uuid}` as const;
 export const ATTACK_DISCOVERY_GENERATIONS_BY_ID_DISMISS =
   `${ATTACK_DISCOVERY_GENERATIONS_BY_ID}/_dismiss` as const;
-export const ATTACK_DISCOVERY_SCHEDULES = `${ATTACK_DISCOVERY}/schedules` as const;
+export const ATTACK_DISCOVERY_SCHEDULES = `${ATTACK_DISCOVERY}/schedules` as const; // <-- create
 export const ATTACK_DISCOVERY_SCHEDULES_BY_ID = `${ATTACK_DISCOVERY_SCHEDULES}/{id}` as const;
 export const ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE =
   `${ATTACK_DISCOVERY_SCHEDULES}/{id}/_enable` as const;
 export const ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE =
   `${ATTACK_DISCOVERY_SCHEDULES}/{id}/_disable` as const;
 export const ATTACK_DISCOVERY_SCHEDULES_FIND = `${ATTACK_DISCOVERY_SCHEDULES}/_find` as const;
+
+// Attack discovery internal API
+export const ATTACK_DISCOVERY_INTERNAL =
+  `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/attack_discovery` as const;
+export const ATTACK_DISCOVERY_INTERNAL_MISSING_PRIVILEGES =
+  `${ATTACK_DISCOVERY_INTERNAL}/_missing_privileges` as const;
 
 /** A fake `kibana.alert.rule.uuid` for ad hock rules */
 export const ATTACK_DISCOVERY_AD_HOC_RULE_ID = 'attack_discovery_ad_hoc_rule_id' as const;
@@ -129,3 +137,6 @@ export const INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG =
 
 export const ELASTIC_AI_ASSISTANT_CHECKPOINT_SAVER_ENABLED_FEATURE_FLAG =
   'elasticAssistant.checkpointSaverEnabled' as const;
+
+export const ASSISTANT_INTERRUPTS_ENABLED_FEATURE_FLAG =
+  'securitySolution.assistantInterruptsEnabled' as const;

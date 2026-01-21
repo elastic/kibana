@@ -47,6 +47,7 @@ export default function getConnectorTests({ getService }: FtrProviderContext) {
           config: {
             unencrypted: `This value shouldn't get encrypted`,
           },
+          is_connector_type_deprecated: false,
         });
     });
 
@@ -86,6 +87,7 @@ export default function getConnectorTests({ getService }: FtrProviderContext) {
           is_system_action: false,
           connector_type_id: '.slack',
           name: 'Slack#xyz',
+          is_connector_type_deprecated: false,
         });
     });
 
@@ -109,6 +111,7 @@ export default function getConnectorTests({ getService }: FtrProviderContext) {
           is_system_action: false,
           connector_type_id: '.servicenow',
           name: 'ServiceNow#xyz',
+          is_connector_type_deprecated: false,
         });
 
       await supertest
@@ -122,6 +125,7 @@ export default function getConnectorTests({ getService }: FtrProviderContext) {
           is_system_action: false,
           connector_type_id: '.servicenow',
           name: 'ServiceNow#xyz',
+          is_connector_type_deprecated: false,
         });
     });
   });

@@ -7,25 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { withSuspense } from '@kbn/shared-ux-utility';
+import { VariablesEditor as VariablesEditorComponent } from './variables_editor';
 
 export { type Props } from './variables_editor';
 export { type DevToolsVariable } from './types';
 
-/**
- * The Lazily-loaded `VariablesEditorLazy` component.  Consumers should use `React.Suspense` or
- * the withSuspense` HOC to load this component.
- */
-export const VariablesEditorLazy = React.lazy(() =>
-  import('./variables_editor').then(({ VariablesEditor }) => ({
-    default: VariablesEditor,
-  }))
-);
-
-/**
- * A `VariablesEditor` component that is wrapped by the `withSuspense` HOC. This component can
- * be used directly by consumers and will load the `VariablesEditorLazy` component lazily with
- * a predefined fallback and error boundary.
- */
-export const VariablesEditor = withSuspense(VariablesEditorLazy);
+export const VariablesEditor = VariablesEditorComponent;

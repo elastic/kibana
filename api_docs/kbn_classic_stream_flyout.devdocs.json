@@ -1,0 +1,65 @@
+{
+  "id": "@kbn/classic-stream-flyout",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/classic-stream-flyout",
+        "id": "def-common.CreateClassicStreamFlyout",
+        "type": "Function",
+        "tags": [],
+        "label": "CreateClassicStreamFlyout",
+        "description": [],
+        "signature": [
+          "({ onClose, onCreate, onCreateTemplate, templates, isLoadingTemplates, hasErrorLoadingTemplates, onRetryLoadTemplates, onValidate, getIlmPolicy, getSimulatedTemplate, }: CreateClassicStreamFlyoutProps) => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-classic-stream-flyout/src/components/create_classic_stream_flyout/create_classic_stream_flyout.tsx",
+        "lineNumber": 94,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/classic-stream-flyout",
+            "id": "def-common.CreateClassicStreamFlyout.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  onClose,\n  onCreate,\n  onCreateTemplate,\n  templates,\n  isLoadingTemplates = false,\n  hasErrorLoadingTemplates = false,\n  onRetryLoadTemplates,\n  onValidate,\n  getIlmPolicy,\n  getSimulatedTemplate,\n}",
+            "description": [],
+            "signature": [
+              "CreateClassicStreamFlyoutProps"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-classic-stream-flyout/src/components/create_classic_stream_flyout/create_classic_stream_flyout.tsx",
+            "lineNumber": 94,
+            "columnNumber": 43,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -15,7 +15,7 @@ export const CODE_OWNER_AREAS = [
   'search',
   'observability',
   'security',
-  'chat',
+  'workplaceai',
 ] as const;
 export type CodeOwnerArea = (typeof CODE_OWNER_AREAS)[number];
 
@@ -40,7 +40,6 @@ export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/kibana-operations',
     'elastic/kibana-performance-testing',
     'elastic/kibana-presentation',
-    'elastic/kibana-qa',
     'elastic/kibana-reporting-services',
     'elastic/kibana-security',
     'elastic/kibana-tech-leads',
@@ -50,16 +49,19 @@ export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/platform-docs',
     'elastic/response-ops',
     'elastic/stack-monitoring',
+    'elastic/workflows-eng',
   ],
   search: ['elastic/search-design', 'elastic/search-kibana'],
   observability: [
-    'elastic/obs-ai-assistant',
+    'elastic/actionable-obs-team',
+    'elastic/obs-ai-team',
     'elastic/obs-cloudnative-monitoring',
     'elastic/obs-docs',
     'elastic/obs-entities',
+    'elastic/obs-exploration-team',
     'elastic/obs-knowledge-team',
-    'elastic/obs-ux-infra_services-team',
-    'elastic/obs-ux-logs-team',
+    'elastic/obs-onboarding-team',
+    'elastic/obs-presentation-team',
     'elastic/obs-ux-management-team',
     'elastic/observability-design',
     'elastic/observability-ui',
@@ -67,9 +69,11 @@ export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/streams-program-team',
   ],
   security: [
+    'elastic/contextual-security-apps',
+    'elastic/core-analysis',
     'elastic/integration-experience',
+    'elastic/kibana-cases',
     'elastic/kibana-cloud-security-posture',
-    'elastic/security-asset-management',
     'elastic/security-data-analytics',
     'elastic/security-defend-workflows',
     'elastic/security-design',
@@ -82,13 +86,9 @@ export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/security-service-integrations',
     'elastic/security-solution',
     'elastic/security-threat-hunting',
-    'elastic/security-threat-hunting-explore',
     'elastic/security-threat-hunting-investigations',
   ],
-  chat: [
-    // TODO add owner teams here (once they exist)
-    // https://github.com/elastic/kibana/issues/213469
-  ],
+  workplaceai: ['elastic/search-kibana', 'elastic/workchat-eng'],
 };
 
 /**

@@ -18,6 +18,11 @@ export const entitiesLatestBaseComponentTemplateConfig: ClusterPutComponentTempl
     managed: true,
   },
   template: {
+    settings: {
+      index: {
+        mode: 'lookup',
+      },
+    },
     mappings: {
       properties: {
         entity: {

@@ -24,10 +24,7 @@ describe('<InsightsSummaryRow />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
-      navigateToLeftPanel: mockNavigateToLeftPanel,
-      isEnabled: true,
-    });
+    (useNavigateToLeftPanel as jest.Mock).mockReturnValue(mockNavigateToLeftPanel);
   });
 
   it('should render loading skeleton if loading is true', () => {
@@ -103,29 +100,5 @@ describe('<InsightsSummaryRow />', () => {
     getByTestId(buttonTestId).click();
 
     expect(mockNavigateToLeftPanel).toHaveBeenCalled();
-  });
-
-  it('should disabled the click when navigation is disabled', () => {
-    (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
-      navigateToLeftPanel: undefined,
-      isEnabled: false,
-    });
-
-    const { getByTestId } = render(
-      <IntlProvider locale="en">
-        <InsightsSummaryRow
-          text={'this is a test for red'}
-          value={2}
-          expandedSubTab={'subTab'}
-          data-test-subj={testId}
-        />
-      </IntlProvider>
-    );
-    const button = getByTestId(buttonTestId);
-
-    expect(button).toHaveAttribute('disabled');
-
-    button.click();
-    expect(mockNavigateToLeftPanel).not.toHaveBeenCalled();
   });
 });

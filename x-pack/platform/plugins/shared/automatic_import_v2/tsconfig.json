@@ -1,0 +1,50 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "index.ts",
+    "public/**/*",
+    "server/**/*.ts",
+    "common/**/*.ts",
+    "../../../../typings/**/*"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/licensing-plugin",
+    "@kbn/actions-plugin",
+    "@kbn/inference-plugin",
+    "@kbn/spaces-plugin",
+    "@kbn/security-plugin",
+    "@kbn/core-saved-objects-utils-server",
+    "@kbn/config-schema",
+    "@kbn/zod",
+    "@kbn/zod-helpers",
+    "@kbn/core-lifecycle-server-internal",
+    "@kbn/core-test-helpers-kbn-server",
+    "@kbn/logging-mocks",
+    "@kbn/core-security-common",
+    "@kbn/storage-adapter",
+    "@kbn/core-saved-objects-server-mocks",
+    "@kbn/inference-langchain",
+    "@kbn/kibana-react-plugin",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/core-application-common",
+    "@kbn/i18n",
+    "@kbn/features-plugin",
+    "@kbn/task-manager-plugin",
+    "@kbn/logging",
+    "@kbn/i18n-react",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/ai-assistant-connector-selector-action",
+    "@kbn/management-settings-ids",
+    "@kbn/langchain",
+    "@kbn/core-lifecycle-browser-mocks",
+    "@kbn/core-http-server-mocks",
+  ]
+}

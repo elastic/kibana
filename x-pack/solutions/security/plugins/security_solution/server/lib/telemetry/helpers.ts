@@ -32,6 +32,7 @@ import type {
   TimelineTelemetryEvent,
   ValueListResponse,
   AnyObject,
+  PrebuiltRuleCustomizations,
 } from './types';
 import type { TaskExecutionPeriod } from './task';
 import {
@@ -48,6 +49,8 @@ import {
   TelemetryLoggerImpl,
   tlog as telemetryLogger,
 } from './telemetry_logger';
+import type { RuleResponse } from '../../../common/api/detection_engine/model/rule_schema';
+import { FUNCTIONAL_FIELD_MAP } from '../detection_engine/rule_management/constants';
 
 /**
  * Determines the when the last run was in order to execute to.
@@ -389,6 +392,29 @@ export const processK8sUsernames = (clusterId: string, event: TelemetryEvent): T
   return event;
 };
 
+export const processDetectionRuleCustomizations = (
+  event: TelemetryEvent
+): PrebuiltRuleCustomizations | undefined => {
+  const ruleSource = event['kibana.alert.rule.parameters']?.rule_source;
+  if (
+    !ruleSource ||
+    ruleSource.type === 'internal' ||
+    ruleSource.is_customized === false ||
+    ruleSource.customized_fields == null || // New fields might not appear on alert documents
+    ruleSource.has_base_version == null || // New fields might not appear on alert documents
+    ruleSource.has_base_version === false
+  ) {
+    return undefined; // Don't return anything if rule is not customized or base version doesn't exist
+  }
+  const numberOfFunctionalFields = ruleSource.customized_fields.filter(
+    (field) => FUNCTIONAL_FIELD_MAP[field.field_name as keyof RuleResponse]
+  ).length;
+  return {
+    customized_fields: ruleSource.customized_fields.map((fieldObj) => fieldObj.field_name),
+    num_functional_fields: numberOfFunctionalFields,
+  };
+};
+
 export const ranges = (
   taskExecutionPeriod: TaskExecutionPeriod,
   defaultIntervalInHours: number = 3
@@ -529,6 +555,14 @@ export function unflatten<T extends AnyObject = AnyObject>(object: AnyObject): T
     }
     return accum;
   }, {}) as T;
+}
+
+export function withErrorMessage(error?: Error, meta?: LogMeta): LogMeta {
+  return {
+    error,
+    error_message: error?.message,
+    ...(meta ?? {}),
+  } as LogMeta;
 }
 
 function _set(object: AnyObject, key: string, value: unknown) {

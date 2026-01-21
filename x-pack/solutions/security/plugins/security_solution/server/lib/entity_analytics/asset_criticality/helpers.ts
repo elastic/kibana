@@ -60,11 +60,11 @@ export const applyCriticalityToScore = ({
  * @returns The updated score with modifiers applied
  */
 export const bayesianUpdate = ({
-  max,
+  max = RISK_SCORING_NORMALIZATION_MAX,
   modifier,
   score,
 }: {
-  max: number;
+  max?: number;
   modifier: number;
   score: number;
 }) => {

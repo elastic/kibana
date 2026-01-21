@@ -9,7 +9,7 @@
 
 import type { TooltipInfo, XYChartSeriesIdentifier } from '@elastic/charts';
 import type { FormatFactory } from '@kbn/field-formats-plugin/common';
-import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
+import { getAccessorByDimension } from '@kbn/chart-expressions-common';
 import type { FC } from 'react';
 import React from 'react';
 import { euiFontSize, euiShadow, type UseEuiTheme } from '@elastic/eui';
@@ -163,7 +163,7 @@ const styles = {
       ${euiFontSize(euiThemeContext, 's')}
       color: ${euiThemeContext.euiTheme.colors.textParagraph};
 
-      ${euiShadow(euiThemeContext)}
+      ${euiShadow(euiThemeContext, 'l', { border: 'none' })}
       background-color: ${euiThemeContext.euiTheme.colors.backgroundBasePlain};
 
       table {

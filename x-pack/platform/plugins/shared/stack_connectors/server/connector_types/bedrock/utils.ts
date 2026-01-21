@@ -6,8 +6,8 @@
  */
 
 import { SmithyMessageDecoderStream } from '@smithy/eventstream-codec';
-import { DEFAULT_TOKEN_LIMIT } from '../../../common/bedrock/constants';
-import type { BedrockMessage, BedrockToolChoice } from '../../../common/bedrock/types';
+import { DEFAULT_TOKEN_LIMIT } from '@kbn/connector-schemas/bedrock';
+import type { BedrockMessage, BedrockToolChoice } from '@kbn/connector-schemas/bedrock';
 
 export const formatBedrockBody = ({
   messages,
@@ -105,9 +105,6 @@ export function extractRegionId(url: string) {
   const match = (url ?? '').match(/https:\/\/.*?\.([a-z\-0-9]+)\.amazonaws\.com/);
   if (match) {
     return match[1];
-  } else {
-    // fallback to us-east-1
-    return 'us-east-1';
   }
 }
 

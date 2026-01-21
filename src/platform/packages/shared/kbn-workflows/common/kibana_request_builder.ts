@@ -7,34 +7,64 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Lazy import to avoid bundling large generated file in main plugin bundle
+import { getKibanaConnectors } from '../spec/kibana';
+import { KIBANA_TYPE_ALIASES } from '../spec/kibana/aliases';
 
 /**
  * Builds a Kibana HTTP request from connector definitions
  * This is shared between the execution engine and the YAML editor copy functionality
  */
+// eslint-disable-next-line complexity
 export function buildKibanaRequestFromAction(
   actionType: string,
-  params: any
-): { method: string; path: string; body?: any; query?: any; headers?: any } {
+  params: Record<string, unknown>,
+  spaceId?: string
+): {
+  method: string;
+  path: string;
+  body?: Record<string, unknown>;
+  query?: Record<string, unknown>;
+  headers?: Record<string, string>;
+} {
   // Support raw API format first - this always works
   if (params.request) {
-    const { method = 'GET', path, body, query, headers } = params.request;
-    return { method, path, body, query, headers };
+    const {
+      method = 'GET',
+      path,
+      body,
+      query,
+      headers,
+    } = params.request as Record<string, unknown>;
+    return {
+      method: method as string,
+      path: path as string,
+      body: body as Record<string, unknown>,
+      query: query as Record<string, unknown>,
+      headers: headers as Record<string, string>,
+    };
   }
 
   // Special case: kibana.request type uses raw API format at top level
   if (actionType === 'kibana.request') {
     const { method = 'GET', path, body, query, headers } = params;
-    return { method, path, body, query, headers };
+    return {
+      method: method as string,
+      path: path as string,
+      body: body as Record<string, unknown>,
+      query: query as Record<string, unknown>,
+      headers: headers as Record<string, string>,
+    };
   }
 
   // Lazy load the generated connectors to avoid main bundle bloat
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { GENERATED_KIBANA_CONNECTORS } = require('./generated_kibana_connectors');
+  const kibanaConnectors = getKibanaConnectors();
+
+  // Resolve alias if the action type uses an old name (backward compatibility)
+  const resolvedActionType = KIBANA_TYPE_ALIASES[actionType] ?? actionType;
 
   // Find the connector definition for this action type
-  const connector = GENERATED_KIBANA_CONNECTORS.find((c: any) => c.type === actionType);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const connector = kibanaConnectors.find((c: any) => c.type === resolvedActionType);
 
   if (connector && connector.patterns && connector.methods) {
     // Use explicit parameter type metadata (no hardcoded keys!)
@@ -43,7 +73,7 @@ export function buildKibanaRequestFromAction(
     const headerParamKeys = new Set<string>(connector.parameterTypes?.headerParams || []);
 
     // Determine method (allow user override)
-    const method = params.method || connector.methods[0]; // User can override method
+    const method = typeof params.method === 'string' ? params.method : connector.methods[0]; // User can override method
 
     // Choose the best pattern based on available parameters
     let selectedPattern = selectBestPattern(connector.patterns, params);
@@ -65,20 +95,20 @@ export function buildKibanaRequestFromAction(
     }
 
     // Build body, query parameters, and headers
-    const body: any = {};
-    const queryParams: any = {};
-    const headers: any = {};
+    const body: Record<string, unknown> = {};
+    const queryParams: Record<string, unknown> = {};
+    const headers: Record<string, string> = {};
 
     for (const [key, value] of Object.entries(params)) {
-      // Skip path parameters (they're used in the URL)
-      if (pathParams.has(key)) continue;
-
-      // Skip meta parameters that control request building
-      if (key === 'method') continue;
+      // Skip path parameters (they're used in the URL) and meta parameters
+      if (pathParams.has(key) || key === 'method') {
+        // eslint-disable-next-line no-continue
+        continue;
+      }
 
       // Handle headers (like kbn-xsrf)
       if (headerParamKeys.has(key)) {
-        headers[key] = value;
+        headers[key] = String(value);
       }
       // Prioritize body parameters over URL parameters when both are available
       else if (bodyParamKeys.has(key)) {
@@ -101,7 +131,7 @@ export function buildKibanaRequestFromAction(
 
     const result = {
       method,
-      path: selectedPattern,
+      path: applySpacePrefix(selectedPattern, spaceId),
       body: Object.keys(body).length > 0 ? body : undefined,
       query: Object.keys(queryParams).length > 0 ? queryParams : undefined,
       headers: Object.keys(headers).length > 0 ? headers : undefined,
@@ -116,7 +146,7 @@ export function buildKibanaRequestFromAction(
   );
 }
 
-function selectBestPattern(patterns: string[], params: any): string {
+function selectBestPattern(patterns: string[], params: Record<string, unknown>): string {
   // Strategy: Prefer patterns where all path parameters are provided
 
   // Score each pattern based on how well it matches the provided parameters
@@ -159,4 +189,17 @@ function selectBestPattern(patterns: string[], params: any): string {
   }
 
   return bestPattern;
+}
+
+/**
+ * Applies the space prefix to the path for non-default spaces
+ * Following Kibana's standard space-aware API pattern: /s/{spaceId}/api/...
+ */
+function applySpacePrefix(path: string, spaceId?: string): string {
+  // Only prepend space prefix for non-default spaces
+  // Default space can use /api/... directly without the /s/default prefix
+  if (spaceId && spaceId !== 'default') {
+    return `/s/${spaceId}${path}`;
+  }
+  return path;
 }

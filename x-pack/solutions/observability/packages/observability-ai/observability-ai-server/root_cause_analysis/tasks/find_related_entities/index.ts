@@ -8,7 +8,7 @@
 import type {
   DocumentAnalysis,
   FieldPatternResultWithChanges,
-  TruncatedDocumentAnalysis,
+  FormattedDocumentAnalysis,
 } from '@kbn/ai-tools';
 import type { InferenceClient } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
@@ -44,7 +44,7 @@ export async function findRelatedEntities({
   esClient: TracedElasticsearchClient;
   entity: Record<string, string>;
   analysis: {
-    truncated: TruncatedDocumentAnalysis;
+    truncated: FormattedDocumentAnalysis;
     full: DocumentAnalysis;
   };
   logger: Logger;

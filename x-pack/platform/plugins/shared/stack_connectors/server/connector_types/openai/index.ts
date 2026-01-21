@@ -12,24 +12,26 @@ import {
   GenerativeAIForSecurityConnectorFeatureId,
   GenerativeAIForObservabilityConnectorFeatureId,
   GenerativeAIForSearchPlaygroundConnectorFeatureId,
+  WorkflowsConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { assertURL } from '@kbn/actions-plugin/server/sub_action_framework/helpers/validators';
-import { nonPkiSecretsValidator, pkiSecretsValidator } from './lib/other_openai_utils';
 import {
-  OPENAI_CONNECTOR_ID,
-  OPENAI_TITLE,
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
   OpenAiProviderType,
-} from '../../../common/openai/constants';
-import { ConfigSchema, SecretsSchema } from '../../../common/openai/schema';
-import type { Config, Secrets } from '../../../common/openai/types';
+  ConfigSchema,
+  SecretsSchema,
+} from '@kbn/connector-schemas/openai';
+import type { Config, Secrets } from '@kbn/connector-schemas/openai';
+import { nonPkiSecretsValidator, pkiSecretsValidator } from './lib/other_openai_utils';
 import { OpenAIConnector } from './openai';
 import { renderParameterTemplates } from './render';
 
 export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => ({
-  id: OPENAI_CONNECTOR_ID,
-  name: OPENAI_TITLE,
+  id: CONNECTOR_ID,
+  name: CONNECTOR_NAME,
   getService: (params) => new OpenAIConnector(params),
   schema: {
     config: ConfigSchema,
@@ -43,6 +45,7 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
     GenerativeAIForSecurityConnectorFeatureId,
     GenerativeAIForObservabilityConnectorFeatureId,
     GenerativeAIForSearchPlaygroundConnectorFeatureId,
+    WorkflowsConnectorFeatureId,
   ],
   minimumLicenseRequired: 'enterprise' as const,
   renderParameterTemplates,

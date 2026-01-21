@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { log, apm, generateShortId, timerange } from '@kbn/apm-synthtrace-client';
+import { log, apm, generateShortId, timerange } from '@kbn/synthtrace-client';
 import expect from '@kbn/expect';
 import type { LogCategory } from '@kbn/apm-plugin/server/routes/assistant_functions/get_log_categories';
 import type { SupertestReturnType } from '../../common/obs_api_supertest';
@@ -123,6 +123,9 @@ export default function ApiTest({ getService }: ObsFtrProviderContext) {
               'span.destination.service.resource': 'elasticsearch',
               'span.type': 'db',
               'span.subtype': 'elasticsearch',
+              errorRate: 0,
+              latencyMs: 1000000,
+              throughputPerMin: 0.007,
             },
           ]);
         });
@@ -183,6 +186,9 @@ export default function ApiTest({ getService }: ObsFtrProviderContext) {
               'span.destination.service.resource': 'elasticsearch',
               'span.type': 'db',
               'span.subtype': 'elasticsearch',
+              errorRate: 0,
+              latencyMs: 1000000,
+              throughputPerMin: 0.007, // Rounded to 3 decimals
             },
           ]);
         });

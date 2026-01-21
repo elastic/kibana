@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
 import React, { useCallback } from 'react';
+import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
 import { SingleTabView, type SingleTabViewProps } from '../single_tab_view';
 import {
   createTabItem,
@@ -18,6 +18,7 @@ import {
   selectIsTabsBarHidden,
   useInternalStateDispatch,
   useInternalStateSelector,
+  useCurrentTabRuntimeState,
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { usePreviewData } from './use_preview_data';
@@ -34,8 +35,25 @@ export const TabsView = (props: SingleTabViewProps) => {
   const hideTabsBar = useInternalStateSelector(selectIsTabsBarHidden);
   const unsavedTabIds = useInternalStateSelector((state) => state.tabs.unsavedIds);
 
+  const scopedEbtManager = useCurrentTabRuntimeState(
+    props.runtimeStateManager,
+    (state) => state.scopedEbtManager$
+  );
+
+  const onEvent: UnifiedTabsProps['onEBTEvent'] = useCallback(
+    (event) => {
+      void scopedEbtManager.trackTabsEvent(event);
+    },
+    [scopedEbtManager]
+  );
+
   const onChanged: UnifiedTabsProps['onChanged'] = useCallback(
     (updateState) => dispatch(internalStateActions.updateTabs(updateState)),
+    [dispatch]
+  );
+
+  const onClearRecentlyClosed: UnifiedTabsProps['onClearRecentlyClosed'] = useCallback(
+    () => dispatch(internalStateActions.clearRecentlyClosedTabs()),
     [dispatch]
   );
 
@@ -62,6 +80,8 @@ export const TabsView = (props: SingleTabViewProps) => {
       getPreviewData={getPreviewData}
       renderContent={renderContent}
       onChanged={onChanged}
+      onEBTEvent={onEvent}
+      onClearRecentlyClosed={onClearRecentlyClosed}
     />
   );
 };

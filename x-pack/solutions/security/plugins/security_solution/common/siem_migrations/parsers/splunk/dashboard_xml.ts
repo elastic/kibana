@@ -14,8 +14,8 @@
  */
 
 import { v4 as uuidV4 } from 'uuid';
-import xml2js from 'xml2js';
 import type { ParsedPanel, PanelPosition, VizType } from '../types';
+import { XmlParser } from '../xml/xml';
 
 interface XmlElement {
   $?: { [key: string]: string }; // XML attributes
@@ -62,15 +62,7 @@ interface SplunkXmlElement extends XmlElement {
  *
  *
  **/
-export class SplunkXmlDashboardParser {
-  constructor(private readonly xml: string) {}
-
-  private async parse(): Promise<SplunkXmlElement> {
-    return xml2js.parseStringPromise(this.xml, {
-      explicitArray: true,
-    }) as Promise<SplunkXmlElement>;
-  }
-
+export class SplunkXmlDashboardParser extends XmlParser {
   public async extractPanels(): Promise<ParsedPanel[]> {
     const root = await this.parse();
     const panels: ParsedPanel[] = [];
@@ -215,95 +207,6 @@ export class SplunkXmlDashboardParser {
     };
 
     return typeMap[chartType] || 'table';
-  }
-
-  /** Unified deep search method (equivalent to XML's .// XPath expressions) */
-  private findDeep(
-    source: SplunkXmlElement,
-    elementName: string,
-    attrName?: string,
-    attrValue?: string
-  ): SplunkXmlElement[] | SplunkXmlElement | string | undefined {
-    if (typeof source !== 'object' || source === null) {
-      return undefined;
-    }
-    // Check if the element exists at this level
-    if (elementName in source) {
-      const element = source[elementName];
-
-      // If no attribute filtering is needed, return the element
-      if (!attrName || !attrValue) {
-        return element;
-      }
-
-      // If attribute filtering is needed, check if it's an array of elements
-      if (Array.isArray(element)) {
-        for (const item of element as SplunkXmlElement[]) {
-          if (item.$ && item.$[attrName] === attrValue) {
-            return item;
-          }
-        }
-      }
-    }
-
-    for (const key of Object.keys(source)) {
-      const value = source[key];
-
-      if (Array.isArray(value)) {
-        for (const item of value) {
-          const result = this.findDeep(item, elementName, attrName, attrValue);
-          if (result !== undefined) {
-            return result;
-          }
-        }
-      } else if (typeof value === 'object' && value !== null) {
-        const result = this.findDeep(value, elementName, attrName, attrValue);
-        if (result !== undefined) {
-          return result;
-        }
-      }
-    }
-
-    return undefined;
-  }
-
-  private findAllDeep(source: SplunkXmlElement, elementName: string): SplunkXmlElement[] {
-    const results: SplunkXmlElement[] = [];
-
-    if (typeof source !== 'object' || source === null) {
-      return results;
-    }
-
-    if (elementName in source) {
-      const element = source[elementName];
-
-      if (Array.isArray(element)) {
-        results.push(...element);
-      } else if (element) {
-        results.push(element as SplunkXmlElement);
-      }
-    }
-
-    // Search recursively in all properties (but skip children of found elements)
-    for (const key of Object.keys(source)) {
-      if (key === elementName) {
-        // Skip the element we already processed above
-      } else {
-        const value = source[key];
-
-        if (Array.isArray(value)) {
-          for (const item of value) {
-            const childResults = this.findAllDeep(item, elementName);
-            results.push(...childResults);
-          }
-        } else if (typeof value === 'object' && value !== null) {
-          const childResults = this.findAllDeep(value, elementName);
-          results.push(...childResults);
-        }
-      }
-    }
-
-    return results;
   }
 
   /** Calculate panel positions */

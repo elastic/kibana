@@ -132,7 +132,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should work with valid values', async function () {
-      await supertest
+      const { body: packagePolicyCreateResponse } = await supertest
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
@@ -149,11 +149,17 @@ export default function (providerContext: FtrProviderContext) {
           },
         })
         .expect(200);
-      const { body } = await supertest
-        .get(`/internal/saved_objects_tagging/tags/_find?page=1&perPage=10000`)
+      const packagePolicyId = packagePolicyCreateResponse.item.id;
+      const { body: packagePolicyGetResponse } = await supertest
+        .get(`/api/fleet/package_policies/${packagePolicyId}`)
         .expect(200);
-      expect(body.tags.find((tag: any) => tag.name === 'Managed').relationCount).to.be(9);
-      expect(body.tags.find((tag: any) => tag.name === 'For File Tests').relationCount).to.be(9);
+      expect(packagePolicyGetResponse.item.name).to.eql('filetest-2');
+      expect(packagePolicyGetResponse.item.policy_id).to.eql(agentPolicyId);
+      expect(packagePolicyGetResponse.item.package).to.eql({
+        name: 'filetest',
+        title: 'For File Tests',
+        version: '0.1.0',
+      });
     });
 
     it('should work with multiple policy ids', async function () {

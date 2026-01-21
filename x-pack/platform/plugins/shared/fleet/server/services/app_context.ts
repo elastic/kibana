@@ -28,6 +28,8 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { Logger } from '@kbn/logging';
 import type { LockManagerService } from '@kbn/lock-manager';
+import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 
 import type { FleetConfigType } from '../../common/types';
 import {
@@ -84,6 +86,7 @@ class AppContextService {
   private taskManagerStart: TaskManagerStartContract | undefined;
   private fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
   private lockManagerService: LockManagerService | undefined;
+  private alertingStart: AlertingServerStart | undefined;
 
   public start(appContext: FleetAppContext) {
     this.data = appContext.data;
@@ -111,6 +114,7 @@ class AppContextService {
     this.taskManagerStart = appContext.taskManagerStart;
     this.fetchUsage = appContext.fetchUsage;
     this.lockManagerService = appContext.lockManagerService;
+    this.alertingStart = appContext.alertingStart;
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
@@ -198,7 +202,7 @@ class AppContextService {
       url: { href: '', hash: '' } as URL,
       raw: { req: { url: '/' } } as any,
     });
-    if (this.httpSetup && spaceId && spaceId !== DEFAULT_SPACE_ID) {
+    if (this.httpSetup && spaceId && spaceId !== DEFAULT_SPACE_ID && spaceId !== ALL_SPACES_ID) {
       this.httpSetup?.basePath.set(request, `/s/${spaceId}`);
     }
 
@@ -207,6 +211,7 @@ class AppContextService {
       includedHiddenTypes: [
         UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
         KibanaSavedObjectType.alertingRuleTemplate,
+        KibanaSavedObjectType.sloTemplate,
       ],
       excludedExtensions: [SECURITY_EXTENSION_ID],
     });
@@ -230,6 +235,7 @@ class AppContextService {
       includedHiddenTypes: [
         UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
         KibanaSavedObjectType.alertingRuleTemplate,
+        KibanaSavedObjectType.sloTemplate,
       ],
       excludedExtensions: [SECURITY_EXTENSION_ID],
     });
@@ -252,6 +258,7 @@ class AppContextService {
       includedHiddenTypes: [
         UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
         KibanaSavedObjectType.alertingRuleTemplate,
+        KibanaSavedObjectType.sloTemplate,
       ],
     });
   }
@@ -366,6 +373,10 @@ class AppContextService {
 
   public getLockManagerService() {
     return this.lockManagerService;
+  }
+
+  public getAlertingStart() {
+    return this.alertingStart;
   }
 }
 

@@ -30,7 +30,7 @@ import { isEmpty } from 'lodash';
 import { useStreamEnrichmentSelector } from '../../../../state_management/stream_enrichment_state_machine';
 import { SortableList } from '../../../../sortable_list';
 import type { GrokFormState } from '../../../../types';
-import { useAIFeatures } from './use_ai_features';
+import { useAIFeatures } from '../../../../../../../hooks/use_ai_features';
 
 const GrokPatternAISuggestions = dynamic(() =>
   import('./grok_pattern_suggestion').then((mod) => ({ default: mod.GrokPatternAISuggestions }))

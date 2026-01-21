@@ -10,9 +10,9 @@ import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { asyncForEach } from '../../helpers';
 
-const TOTAL_ALERTS_CELL_COUNT = 440;
-const RECOVERED_ALERTS_CELL_COUNT = 330;
-const ACTIVE_ALERTS_CELL_COUNT = 110;
+const TOTAL_ALERTS_CELL_COUNT = 480;
+const RECOVERED_ALERTS_CELL_COUNT = 360;
+const ACTIVE_ALERTS_CELL_COUNT = 120;
 
 export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -213,6 +213,25 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         });
       });
 
+      describe('Actions Button', () => {
+        after(async () => {
+          await observability.alerts.common.navigateToTimeWithData();
+          // Clear active status
+          await alertControls.clearControlSelections('0');
+          await observability.alerts.common.waitForAlertTableToLoad();
+        });
+
+        it('Opens rule details page when click on "View Rule Details"', async () => {
+          const actionsButton = await observability.alerts.common.getActionsButtonByIndex(0);
+          await actionsButton.click();
+          await observability.alerts.common.viewRuleDetailsButtonClick();
+
+          expect(
+            await (await find.byCssSelector('[data-test-subj="breadcrumb first"]')).getVisibleText()
+          ).to.eql('Observability');
+        });
+      });
+
       describe('Flyout', () => {
         it('Can be opened', async () => {
           await observability.alerts.common.openAlertsFlyout();
@@ -283,18 +302,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           it('Displays a View rule details link', async () => {
             await observability.alerts.common.getAlertsFlyoutViewRuleDetailsLinkOrFail();
           });
-        });
-      });
-
-      describe('Actions Button', () => {
-        it('Opens rule details page when click on "View Rule Details"', async () => {
-          const actionsButton = await observability.alerts.common.getActionsButtonByIndex(0);
-          await actionsButton.click();
-          await observability.alerts.common.viewRuleDetailsButtonClick();
-
-          expect(
-            await (await find.byCssSelector('[data-test-subj="breadcrumb first"]')).getVisibleText()
-          ).to.eql('Observability');
         });
       });
     });

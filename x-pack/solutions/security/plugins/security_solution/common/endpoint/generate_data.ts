@@ -266,6 +266,7 @@ export interface TreeOptions {
   eventsDataStream?: DataStream;
   alertsDataStream?: DataStream;
   sessionEntryLeader?: string;
+  deviceEvents?: number;
 }
 
 type TreeOptionDefaults = Required<TreeOptions>;
@@ -290,6 +291,7 @@ export function getTreeOptionsWithDef(options?: TreeOptions): TreeOptionDefaults
     ancestryArraySize: options?.ancestryArraySize ?? ANCESTRY_LIMIT,
     eventsDataStream: options?.eventsDataStream ?? eventsDefaultDataStream,
     alertsDataStream: options?.alertsDataStream ?? alertsDefaultDataStream,
+    deviceEvents: options?.deviceEvents ?? 5,
   };
 }
 
@@ -1095,6 +1097,91 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   }
 
   /**
+   * Generates a device event with randomized device fields
+   */
+  public generateDeviceEvent(options: {
+    timestamp: number;
+    hostInfo: CommonHostInfo;
+    eventsDataStream?: DataStream;
+  }): Event {
+    const deviceVendors = [
+      { name: 'TDK LoR', id: '0718' },
+      { name: 'SanDisk', id: '0781' },
+      { name: 'Samsung', id: '04e8' },
+      { name: 'Western Digital', id: '1058' },
+      { name: 'Seagate', id: '0bc2' },
+      { name: 'Kingston', id: '0951' },
+    ];
+
+    const deviceProducts = [
+      { name: 'Trans-It Drive', id: '0528' },
+      { name: 'Ultra USB 3.0', id: '5581' },
+      { name: 'Portable SSD T5', id: '61f5' },
+      { name: 'My Passport', id: '2621' },
+      { name: 'Backup Plus', id: 'ab31' },
+      { name: 'DataTraveler', id: '1666' },
+    ];
+
+    const deviceTypes = [
+      'Disk File System',
+      'USB Mass Storage',
+      'Removable Disk',
+      'External Hard Drive',
+    ];
+
+    const vendor = this.randomChoice(deviceVendors);
+    const product = this.randomChoice(deviceProducts);
+    const deviceType = this.randomChoice(deviceTypes);
+    const serialNumber = this.randomString(12).toUpperCase();
+
+    const event: Event = {
+      '@timestamp': options.timestamp,
+      agent: {
+        ...options.hostInfo.agent,
+        type: 'endpoint',
+      },
+      ecs: {
+        version: '8.10.0',
+      },
+      host: options.hostInfo.host,
+      event: {
+        category: ['host'],
+        type: ['denied', 'device'],
+        kind: 'event',
+        module: 'endpoint',
+        action: ['mount'],
+        dataset: 'endpoint.events.device',
+        outcome: this.randomChoice(['success', 'failure']),
+      },
+      device: {
+        serial_number: serialNumber,
+        vendor: {
+          name: vendor.name,
+          id: vendor.id,
+        },
+        product: {
+          name: product.name,
+          id: product.id,
+        },
+        type: deviceType,
+      },
+      user: {
+        name: this.randomChoice(['SYSTEM', 'Administrator', 'LocalService']),
+        domain: 'NT AUTHORITY',
+      },
+    };
+
+    if (options.eventsDataStream) {
+      event.data_stream = {
+        ...options.eventsDataStream,
+        dataset: 'endpoint.events.device',
+      };
+    }
+
+    return event;
+  }
+
+  /**
    * This generates a full resolver tree and keeps the entire tree in memory. This is useful for tests that want
    * to compare results from elasticsearch with the actual events created by this generator. Because all the events
    * are stored in memory do not use this function to generate large trees.
@@ -1591,6 +1678,23 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         parentEntityID: parentEntityIDSafeVersion(node),
         ancestry: ancestryArray(node),
         alertsDataStream,
+      });
+    }
+  }
+
+  /**
+   * Creates device events for a host
+   * @param deviceEvents - number of device events to create
+   * @param eventsDataStream - data stream configuration
+   */
+  public *deviceEventsGenerator(deviceEvents = 5, eventsDataStream?: DataStream) {
+    const baseTimestamp = new Date().getTime();
+    for (let i = 0; i < deviceEvents; i++) {
+      const eventTimestamp = baseTimestamp + this.randomN(3600) * 1000;
+      yield this.generateDeviceEvent({
+        timestamp: eventTimestamp,
+        hostInfo: this.commonInfo,
+        eventsDataStream,
       });
     }
   }

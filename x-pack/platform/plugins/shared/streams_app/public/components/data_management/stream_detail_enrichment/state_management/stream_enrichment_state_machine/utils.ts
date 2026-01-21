@@ -7,39 +7,39 @@
 
 import type { FieldDefinition } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
-import { i18n } from '@kbn/i18n';
+import { v4 as uuidv4 } from 'uuid';
 import type { AssignArgs } from 'xstate5';
-import { isActionBlock, isWhereBlock } from '@kbn/streamlang/types/streamlang';
-import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
-import type { StreamEnrichmentContextType } from './types';
+import type {
+  CustomSamplesDataSource,
+  EnrichmentDataSource,
+  EnrichmentUrlState,
+  KqlSamplesDataSource,
+  LatestSamplesDataSource,
+} from '../../../../../../common/url_schema';
+import { CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX } from '../../../../../../common/url_schema/common';
+import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
+import { DATA_SOURCES_I18N } from '../../data_sources_flyout/translations';
+import { dataSourceConverter } from '../../utils';
+import type { DataSourceActorRef, DataSourceSimulationMode } from '../data_source_state_machine';
 import type { SampleDocumentWithUIAttributes } from '../simulation_state_machine';
 import {
   convertToFieldDefinition,
   getMappedSchemaFields,
   getUnmappedSchemaFields,
 } from '../simulation_state_machine';
-import type {
-  EnrichmentUrlState,
-  KqlSamplesDataSource,
-  RandomSamplesDataSource,
-  CustomSamplesDataSource,
-  EnrichmentDataSource,
-} from '../../../../../../common/url_schema';
-import { dataSourceConverter } from '../../utils';
 import type { StepActorRef } from '../steps_state_machine';
-import { isStepUnderEdit } from '../steps_state_machine';
+import { collectDescendantStepIds } from '../utils';
+import type { StreamEnrichmentContextType } from './types';
 
-export const defaultRandomSamplesDataSource: RandomSamplesDataSource = {
-  type: 'random-samples',
-  name: i18n.translate('xpack.streams.enrichment.dataSources.randomSamples.defaultName', {
-    defaultMessage: 'Random samples',
-  }),
+export const defaultLatestSamplesDataSource: LatestSamplesDataSource = {
+  type: 'latest-samples',
+  name: DATA_SOURCES_I18N.latestSamples.defaultName,
   enabled: true,
 };
 
 export const defaultKqlSamplesDataSource: KqlSamplesDataSource = {
   type: 'kql-samples',
-  name: '',
+  name: DATA_SOURCES_I18N.kqlDataSource.defaultName,
   enabled: true,
   timeRange: {
     from: 'now-15m',
@@ -52,16 +52,19 @@ export const defaultKqlSamplesDataSource: KqlSamplesDataSource = {
   },
 };
 
-export const defaultCustomSamplesDataSource: CustomSamplesDataSource = {
+export const createDefaultCustomSamplesDataSource = (
+  streamName: string
+): CustomSamplesDataSource => ({
   type: 'custom-samples',
-  name: '',
+  name: DATA_SOURCES_I18N.customSamples.defaultName,
   enabled: true,
   documents: [],
-};
+  storageKey: `${CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX}${streamName}__${uuidv4()}`,
+});
 
 export const defaultEnrichmentUrlState: EnrichmentUrlState = {
   v: 1,
-  dataSources: [defaultRandomSamplesDataSource],
+  dataSources: [defaultLatestSamplesDataSource],
 };
 
 export function getDataSourcesUrlState(context: StreamEnrichmentContextType) {
@@ -70,54 +73,26 @@ export function getDataSourcesUrlState(context: StreamEnrichmentContextType) {
   );
 
   return dataSources
-    .filter((dataSource) => dataSource.type !== 'custom-samples') // Custom samples are not stored in the URL
+    .map((dataSource) =>
+      // Don't persist custom samples documents
+      dataSource.type === 'custom-samples' ? { ...dataSource, documents: [] } : dataSource
+    )
     .map(dataSourceConverter.toUrlSchema);
 }
 
-export function getDataSourcesSamples(
+export function getActiveDataSourceSamples(
   context: StreamEnrichmentContextType
 ): SampleDocumentWithUIAttributes[] {
-  const dataSourcesSnapshots = context.dataSourcesRefs
+  const dataSourceSnapshot = context.dataSourcesRefs
     .map((dataSourceRef) => dataSourceRef.getSnapshot())
-    .filter((snapshot) => snapshot.matches('enabled'));
+    .find((snapshot) => snapshot.matches('enabled'));
 
-  return dataSourcesSnapshots.flatMap((snapshot) => {
-    return snapshot.context.data.map((doc) => ({
-      dataSourceId: snapshot.context.dataSource.id,
-      document: doc,
-    }));
-  });
-}
+  if (!dataSourceSnapshot) return [];
 
-/**
- * Gets processors for simulation based on current editing state.
- * - If no processor is being edited: returns all new processors
- * - If a processor is being edited: returns new processors up to and including the one being edited
- */
-export function getStepsForSimulation({ stepRefs }: Pick<StreamEnrichmentContextType, 'stepRefs'>) {
-  let newStepSnapshots = stepRefs
-    .map((procRef) => procRef.getSnapshot())
-    .filter((snapshot) => isWhereBlock(snapshot.context.step) || snapshot.context.isNew);
-
-  // Find if any processor is currently being edited
-  const editingProcessorIndex = newStepSnapshots.findIndex(
-    (snapshot) => isActionBlock(snapshot.context) && isStepUnderEdit(snapshot)
-  );
-
-  // If a processor is being edited, set new processors up to and including the one being edited
-  if (editingProcessorIndex !== -1) {
-    newStepSnapshots = newStepSnapshots.slice(0, editingProcessorIndex + 1);
-  }
-
-  // Return processors
-  return newStepSnapshots.map((snapshot) => snapshot.context.step);
-}
-
-export function getConfiguredSteps(context: StreamEnrichmentContextType) {
-  return context.stepRefs
-    .map((proc) => proc.getSnapshot())
-    .filter((proc) => proc.matches('configured'))
-    .map((proc) => proc.context.step);
+  return dataSourceSnapshot.context.data.map((doc) => ({
+    dataSourceId: dataSourceSnapshot.context.dataSource.id,
+    document: doc,
+  }));
 }
 
 export function getUpsertFields(context: StreamEnrichmentContextType): FieldDefinition | undefined {
@@ -146,25 +121,6 @@ export function getUpsertFields(context: StreamEnrichmentContextType): FieldDefi
   return { ...originalFieldDefinition, ...simulationMappedFieldDefinition };
 }
 
-export const spawnStep = <
-  TAssignArgs extends AssignArgs<StreamEnrichmentContextType, any, any, any>
->(
-  step: StreamlangStepWithUIAttributes,
-  assignArgs: Pick<TAssignArgs, 'self' | 'spawn'>,
-  options?: { isNew: boolean }
-) => {
-  const { spawn, self } = assignArgs;
-
-  return spawn('stepMachine', {
-    id: step.customIdentifier,
-    input: {
-      parentRef: self,
-      step,
-      isNew: options?.isNew ?? false,
-    },
-  });
-};
-
 export const spawnDataSource = <
   TAssignArgs extends AssignArgs<StreamEnrichmentContextType, any, any, any>
 >(
@@ -179,10 +135,31 @@ export const spawnDataSource = <
     input: {
       parentRef: self,
       streamName: context.definition.stream.name,
+      streamType: getStreamTypeFromDefinition(context.definition.stream),
       dataSource: dataSourceWithUIAttributes,
     },
   });
 };
+
+/**
+ * Recursively finds a place for a new place step for a step with given parent step.
+ * Takes into account nested conditions and their descendants.
+ */
+function findNewSiblingStepIndex(stepRefs: StepActorRef[], parentId: string): number {
+  const steps = stepRefs.map((ref) => ref.getSnapshot().context.step);
+  const descendantStepIds = collectDescendantStepIds(steps, parentId);
+  const lastDescendantId = Array.from(descendantStepIds).at(-1);
+
+  const lastDescendantIndex = stepRefs.findIndex((stepRef) => {
+    return stepRef.getSnapshot().context.step.customIdentifier === lastDescendantId;
+  });
+
+  if (lastDescendantIndex !== -1) {
+    return lastDescendantIndex + 1;
+  }
+
+  return -1;
+}
 
 /* Find insert index based on step hierarchy */
 export function findInsertIndex(stepRefs: StepActorRef[], parentId: string | null): number {
@@ -190,19 +167,15 @@ export function findInsertIndex(stepRefs: StepActorRef[], parentId: string | nul
   const parentIndex = parentId ? stepRefs.findIndex((step) => step.id === parentId) : -1;
 
   // Find the last index of any step with the same parentId
-  let lastSiblingIndex = -1;
+  let newSiblingIndex = -1;
 
   if (parentId !== null) {
-    for (let i = 0; i < stepRefs.length; i++) {
-      if (stepRefs[i].getSnapshot().context.step.parentId === parentId) {
-        lastSiblingIndex = i;
-      }
-    }
+    newSiblingIndex = findNewSiblingStepIndex(stepRefs, parentId);
   }
 
-  if (lastSiblingIndex !== -1) {
+  if (newSiblingIndex !== -1) {
     // Insert after the last sibling with the same parentId
-    return lastSiblingIndex + 1;
+    return newSiblingIndex;
   } else if (parentIndex !== -1) {
     // Insert right after the parent if no siblings
     return parentIndex + 1;
@@ -216,18 +189,80 @@ export function insertAtIndex<T>(array: T[], item: T, index: number): T[] {
   return [...array.slice(0, index), item, ...array.slice(index)];
 }
 
-export function collectDescendantIds(id: string, stepRefs: StepActorRef[]): Set<string> {
-  const ids = new Set<string>();
-  function collect(currentId: string) {
-    stepRefs
-      .filter((step) => step.getSnapshot().context.step.parentId === currentId)
-      .forEach((child) => {
-        ids.add(child.id);
-        collect(child.id);
-      });
+/**
+ * Moves a contiguous block of steps (step + all descendants) up or down in the steps array.
+ * This means reordering around other contiguous blocks of steps.
+ * Maintains a strict index-based ordering of steps that reflects the hierarchy.
+ * @param stepRefs The flat array of StepActorRef
+ * @param stepId The customIdentifier of the root step to move
+ * @param direction 'up' or 'down'
+ * @returns A new reordered array of StepActorRef
+ */
+export function reorderSteps(
+  stepRefs: StepActorRef[],
+  stepId: string,
+  direction: 'up' | 'down'
+): StepActorRef[] {
+  // 1. Collect all descendant ids for the block to move
+  const steps = stepRefs.map((ref) => ref.getSnapshot().context.step);
+  const children = collectDescendantStepIds(steps, stepId);
+  const allBlockIds = new Set([stepId, ...children]);
+
+  // 2. Find the start and end index of the block in the original array
+  const startIndex = stepRefs.findIndex((step) => step.id === stepId);
+  const lastChildId = Array.from(children).pop();
+  const endIndex = lastChildId
+    ? stepRefs.findIndex((step) => step.id === lastChildId) + 1
+    : startIndex + 1;
+  const block = stepRefs.slice(startIndex, endIndex);
+
+  // 3. Remove the block from the array
+  const withoutBlock = [...stepRefs.slice(0, startIndex), ...stepRefs.slice(endIndex)];
+
+  // 4. Get the parentId of the block root
+  const blockRootParentId = stepRefs[startIndex].getSnapshot().context.step.parentId;
+
+  if (direction === 'up') {
+    // Find the previous block with the same parentId
+    let insertIndex = 0;
+    for (let i = startIndex - 1; i >= 0; i--) {
+      const candidate = stepRefs[i];
+      const candidateStep = candidate.getSnapshot().context.step;
+      if (!allBlockIds.has(candidate.id) && candidateStep.parentId === blockRootParentId) {
+        // Find the start of this previous block in withoutBlock
+        const candidateBlockStart = withoutBlock.findIndex((step) => step.id === candidate.id);
+        insertIndex = candidateBlockStart;
+        break;
+      }
+    }
+    // If not found, insert at the top among siblings
+    return [...withoutBlock.slice(0, insertIndex), ...block, ...withoutBlock.slice(insertIndex)];
+  } else {
+    // direction === 'down'
+    // Find the next block with the same parentId
+    let insertIndex = withoutBlock.length;
+    for (let i = endIndex; i < stepRefs.length; i++) {
+      const candidate = stepRefs[i];
+      const candidateStep = candidate.getSnapshot().context.step;
+      if (!allBlockIds.has(candidate.id) && candidateStep.parentId === blockRootParentId) {
+        // Find the end of this next block in withoutBlock
+        let candidateBlockEnd = withoutBlock.findIndex((step) => step.id === candidate.id);
+        // Find the last descendant of this block
+        const candidateDescendants = collectDescendantStepIds(steps, candidate.id);
+        if (candidateDescendants.size > 0) {
+          const lastDescendantId = Array.from(candidateDescendants).pop();
+          const lastDescendantIdx = withoutBlock.findIndex((step) => step.id === lastDescendantId);
+          if (lastDescendantIdx !== -1) {
+            candidateBlockEnd = lastDescendantIdx;
+          }
+        }
+        insertIndex = candidateBlockEnd + 1;
+        break;
+      }
+    }
+    // If not found, insert at the end among siblings
+    return [...withoutBlock.slice(0, insertIndex), ...block, ...withoutBlock.slice(insertIndex)];
   }
-  collect(id);
-  return ids;
 }
 
 export type RootLevelMap = Map<string, string>;
@@ -258,3 +293,42 @@ export function getRootLevelStepsMap(stepRefs: StepActorRef[]): Map<string, stri
 
   return result;
 }
+
+export function getActiveDataSourceRef(
+  dataSourcesRefs: DataSourceActorRef[]
+): DataSourceActorRef | undefined {
+  return dataSourcesRefs.find((dataSourceRef) => dataSourceRef.getSnapshot().matches('enabled'));
+}
+
+export function getActiveSimulationMode(
+  context: StreamEnrichmentContextType
+): DataSourceSimulationMode {
+  const activeDataSourceRef = getActiveDataSourceRef(context.dataSourcesRefs);
+  if (!activeDataSourceRef) return 'partial';
+  return activeDataSourceRef.getSnapshot().context.simulationMode;
+}
+
+export function selectDataSource(
+  dataSourcesRefs: StreamEnrichmentContextType['dataSourcesRefs'],
+  id: string
+) {
+  dataSourcesRefs.forEach((dataSourceRef) => {
+    if (dataSourceRef.id === id) {
+      dataSourceRef.send({ type: 'dataSource.enable' });
+    } else {
+      dataSourceRef.send({ type: 'dataSource.disable' });
+    }
+  });
+}
+
+export const canDataSourceTypeBeOutdated = (
+  dataSourceType: EnrichmentDataSource['type']
+): boolean => {
+  switch (dataSourceType) {
+    case 'latest-samples':
+    case 'kql-samples':
+      return true;
+    default:
+      return false;
+  }
+};

@@ -8,9 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import React, { useCallback, useMemo } from 'react';
-import { useCurrentEuiBreakpoint } from '@elastic/eui';
+import { EuiLink, useCurrentEuiBreakpoint } from '@elastic/eui';
 import styled from '@emotion/styled';
 import type { DataSchemaFormat, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import moment from 'moment';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { SwitchSchemaMessage } from '../../../../components/shared/switch_schema_message';
 import { useTimeRangeMetadataContext } from '../../../../hooks/use_time_range_metadata';
 import type {
@@ -28,6 +30,8 @@ import { Legend } from './waffle/legend';
 import { useAssetDetailsFlyoutState } from '../hooks/use_asset_details_flyout_url_state';
 import { AssetDetailsFlyout } from './waffle/asset_details_flyout';
 import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
+import { useWaffleTimeContext } from '../hooks/use_waffle_time';
+import { INTEGRATIONS } from '../../../../components/supported_data_tooltip_link';
 
 export interface KueryFilterQuery {
   kind: 'kuery';
@@ -39,7 +43,6 @@ interface Props {
   nodeType: InventoryItemType;
   nodes: SnapshotNode[];
   loading: boolean;
-  reload: () => void;
   onDrilldown: (filter: string) => void;
   currentTime: number;
   view: string;
@@ -58,7 +61,6 @@ export const NodesOverview = ({
   loading,
   nodes,
   nodeType,
-  reload,
   view,
   currentTime,
   options,
@@ -72,6 +74,7 @@ export const NodesOverview = ({
   const currentBreakpoint = useCurrentEuiBreakpoint();
   const [{ detailsItemId, entityType }, setFlyoutUrlState] = useAssetDetailsFlyoutState();
   const { onPageReady } = usePerformanceContext();
+  const { jumpToTime } = useWaffleTimeContext();
   const { data: timeRangeMetadata } = useTimeRangeMetadataContext();
   const { preferredSchema } = useWaffleOptionsContext();
   const schemas: DataSchemaFormat[] = useMemo(
@@ -103,7 +106,8 @@ export const NodesOverview = ({
 
   const noData = !loading && nodes && nodes.length === 0;
 
-  const hasDataOnAnotherSchema = schemas.length === 1 && preferredSchema !== schemas[0];
+  const hasDataOnAnotherSchema =
+    schemas.length === 1 && preferredSchema !== schemas[0] && nodeType === 'host';
   const refetchProps = hasDataOnAnotherSchema
     ? {}
     : {
@@ -111,7 +115,7 @@ export const NodesOverview = ({
           defaultMessage: 'Check for new data',
         }),
         onRefetch: () => {
-          reload();
+          jumpToTime(moment().valueOf());
         },
       };
 
@@ -124,6 +128,7 @@ export const NodesOverview = ({
         text={i18n.translate('xpack.infra.waffle.loadingDataText', {
           defaultMessage: 'Loading data',
         })}
+        data-test-subj="infraNodesOverviewLoadingPanel"
       />
     );
   } else if (noData) {
@@ -136,9 +141,23 @@ export const NodesOverview = ({
           hasDataOnAnotherSchema ? (
             <SwitchSchemaMessage dataTestSubj="infraInventoryViewNoDataInSelectedSchema" />
           ) : (
-            i18n.translate('xpack.infra.waffle.noDataDescription', {
-              defaultMessage: 'Try adjusting your time or filter.',
-            })
+            <FormattedMessage
+              id="xpack.infra.waffle.noDataSupportedIntegrationDescription"
+              defaultMessage="Try modifying your filter and ensure that you are sending data from the {supportedIntegration} for this view."
+              values={{
+                supportedIntegration: (
+                  <EuiLink
+                    data-test-subj="infraNodesOverviewNoDataSupportedIntegrationLink"
+                    href={INTEGRATIONS[nodeType].documentation}
+                    target="_blank"
+                  >
+                    {i18n.translate('xpack.infra.waffle.noData.supportedIntegration', {
+                      defaultMessage: 'supported integration',
+                    })}
+                  </EuiLink>
+                ),
+              }}
+            />
           )
         }
         {...refetchProps}
@@ -156,7 +175,7 @@ export const NodesOverview = ({
 
   if (view === 'table') {
     return (
-      <TableContainer>
+      <TableContainer data-test-subj="infraNodesOverviewTable">
         <TableView
           nodeType={nodeType}
           nodes={nodes}

@@ -115,14 +115,15 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   integration,
   pkgLabel,
   addIntegrationFlyoutProps,
+  defaultPolicyData,
+  noBreadcrumb,
 }) => {
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
   const hasFleetAddAgentsPrivileges = useAuthz().fleet.addAgents;
   const fleetStatus = useFleetStatus();
-  const { docLinks, cloud } = useStartServices();
-  const isServerless = !!cloud?.isServerlessEnabled;
+  const { docLinks } = useStartServices();
   const spaceSettings = useSpaceSettingsContext();
   const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>(
     generateNewAgentPolicyWithDefaults({
@@ -145,7 +146,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   });
 
   const [selectedPolicyTab, setSelectedPolicyTab] = useState<SelectedPolicyTab>(
-    queryParamsPolicyId ? SelectedPolicyTab.EXISTING : SelectedPolicyTab.NEW
+    queryParamsPolicyId || (defaultPolicyData?.policy_ids?.length ?? 0) > 0
+      ? SelectedPolicyTab.EXISTING
+      : SelectedPolicyTab.NEW
   );
 
   const {
@@ -218,6 +221,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     setNewAgentPolicy,
     setSelectedPolicyTab,
     isAddIntegrationFlyout,
+    defaultPolicyData,
   });
 
   if (addIntegrationFlyoutProps?.agentPolicy) {
@@ -362,8 +366,17 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       agentPolicies,
       packageInfo,
       integrationInfo,
+      defaultPolicyData,
     }),
-    [agentPolicies, cancelClickHandler, cancelUrl, from, integrationInfo, packageInfo]
+    [
+      agentPolicies,
+      cancelClickHandler,
+      cancelUrl,
+      from,
+      integrationInfo,
+      packageInfo,
+      defaultPolicyData,
+    ]
   );
 
   const stepSelectAgentPolicy = useMemo(
@@ -379,7 +392,13 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         packageInfo={packageInfo}
         setHasAgentPolicyError={setHasAgentPolicyError}
         updateSelectedTab={updateSelectedPolicyTab}
-        selectedAgentPolicyIds={queryParamsPolicyId ? [queryParamsPolicyId] : []}
+        selectedAgentPolicyIds={
+          queryParamsPolicyId
+            ? [queryParamsPolicyId]
+            : defaultPolicyData?.policy_ids
+            ? defaultPolicyData?.policy_ids
+            : []
+        }
       />
     ),
     [
@@ -393,6 +412,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       updateSelectedPolicyTab,
       queryParamsPolicyId,
       setHasAgentPolicyError,
+      defaultPolicyData,
     ]
   );
 
@@ -472,7 +492,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           {/* Show SetupTechnologySelector for all agentless integrations, including extension views */}
           {!isAddIntegrationFlyout && isAgentlessIntegration(packageInfo) && (
             <SetupTechnologySelector
-              showLimitationsMessage={!isServerless}
               disabled={false}
               allowedSetupTechnologies={allowedSetupTechnologies}
               setupTechnology={selectedSetupTechnology}
@@ -481,7 +500,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                 // agentless doesn't need system integration
                 setWithSysMonitoring(value === SetupTechnology.AGENT_BASED);
               }}
-              showBetaBadge={isAgentlessDefault}
+              isAgentlessDefault={isAgentlessDefault}
+              showBetaBadge={!isAgentlessDefault}
             />
           )}
 
@@ -531,7 +551,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       handleSetupTechnologyChange,
       allowedSetupTechnologies,
       isAddIntegrationFlyout,
-      isServerless,
     ]
   );
 
@@ -607,6 +626,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       {fipsAgentsCount > 0 && !fipsCompatibleIntegration && (
         <>
           <EuiCallOut
+            announceOnMount={false}
             size="m"
             color="warning"
             iconType="warning"
@@ -639,6 +659,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       {showSecretsDisabledCallout && (
         <>
           <EuiCallOut
+            announceOnMount
             size="m"
             color="warning"
             title={
@@ -725,7 +746,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                   onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
                 />
               )}
-            {packageInfo && !addIntegrationFlyoutProps && (
+            {packageInfo && !addIntegrationFlyoutProps && !noBreadcrumb && (
               <IntegrationBreadcrumb
                 pkgTitle={integrationInfo?.title || packageInfo.title}
                 pkgkey={pkgKeyFromPackageInfo(packageInfo)}

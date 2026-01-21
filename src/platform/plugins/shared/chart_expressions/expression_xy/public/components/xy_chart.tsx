@@ -49,17 +49,15 @@ import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/pu
 import type { PointEventAnnotationRow } from '@kbn/event-annotation-plugin/common';
 import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
-import {
-  getAccessorByDimension,
-  getColumnByAccessor,
-} from '@kbn/visualizations-plugin/common/utils';
+import type { ChartSizeSpec } from '@kbn/chart-expressions-common';
+import type { PersistedState } from '@kbn/visualizations-common';
 import {
   DEFAULT_LEGEND_SIZE,
   LegendSizeToPixels,
-} from '@kbn/visualizations-plugin/common/constants';
-import type { PersistedState } from '@kbn/visualizations-plugin/public';
-import type { ChartSizeSpec } from '@kbn/chart-expressions-common';
-import { getOverridesFor } from '@kbn/chart-expressions-common';
+  getAccessorByDimension,
+  getColumnByAccessor,
+  getOverridesFor,
+} from '@kbn/chart-expressions-common';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type { AlertRuleFromVisUIActionData } from '@kbn/alerts-ui-shared';
@@ -755,11 +753,8 @@ export function XYChart({
     formatFactory
   );
 
-  // ES|QL charts are allowed to create filters only when the unified search bar query is ES|QL (e.g. in Discover)
-  const applicationQuery = data.query.queryString.getQuery();
-  const canCreateFilters =
-    !isEsqlMode || (isEsqlMode && applicationQuery && isOfAggregateQueryType(applicationQuery));
   // ES|QL charts are allowed to create alert rules only in dashboards
+  const applicationQuery = data.query.queryString.getQuery();
   const canCreateAlerts =
     isEsqlMode && applicationQuery && !isOfAggregateQueryType(applicationQuery);
 
@@ -892,7 +887,7 @@ export function XYChart({
               onBrushEnd={interactive ? (brushHandler as BrushEndListener) : undefined}
               onElementClick={interactive ? clickHandler : undefined}
               legendAction={
-                interactive && canCreateFilters
+                interactive
                   ? getLegendAction(
                       dataLayers,
                       onClickValue,

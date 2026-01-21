@@ -7,7 +7,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
@@ -56,9 +56,12 @@ export const renderApp = ({
     observabilityRuleTypeRegistry,
     dataViews: pluginsStart.dataViews,
     unifiedSearch: pluginsStart.unifiedSearch,
+    kql: pluginsStart.kql,
     lens: pluginsStart.lens,
     uiActions: pluginsStart.uiActions,
     observabilityAIAssistant: pluginsStart.observabilityAIAssistant,
+    agentBuilder: pluginsStart.agentBuilder,
+    observabilityAgentBuilder: pluginsStart.observabilityAgentBuilder,
     share: pluginsSetup.share,
     kibanaEnvironment,
     licensing: pluginsStart.licensing,

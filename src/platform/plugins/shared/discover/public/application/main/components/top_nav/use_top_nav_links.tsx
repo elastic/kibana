@@ -23,6 +23,7 @@ import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
 import type { RuleTypeWithDescription } from '@kbn/alerts-ui-shared';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import useObservable from 'react-use/lib/useObservable';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import type { DiscoverServices } from '../../../../build_services';
@@ -42,11 +43,14 @@ import { useProfileAccessor } from '../../../../context_awareness';
 import {
   internalStateActions,
   useCurrentDataView,
+  useCurrentTabAction,
+  useCurrentTabSelector,
   useInternalStateDispatch,
 } from '../../state_management/redux';
 import type { DiscoverAppLocatorParams } from '../../../../../common';
-import type { DiscoverAppState } from '../../state_management/discover_app_state_container';
+import type { DiscoverAppState } from '../../state_management/redux';
 import { onSaveDiscoverSession } from './save_discover_session';
+import { useDataState } from '../../hooks/use_data_state';
 
 /**
  * Helper function to build the top nav links
@@ -56,30 +60,37 @@ export const useTopNavLinks = ({
   services,
   state,
   onOpenInspector,
+  hasUnsavedChanges,
   isEsqlMode,
   adHocDataViews,
   topNavCustomization,
   shouldShowESQLToDataViewTransitionModal,
   hasShareIntegration,
+  persistedDiscoverSession,
 }: {
   dataView: DataView | undefined;
   services: DiscoverServices;
   state: DiscoverStateContainer;
   onOpenInspector: () => void;
+  hasUnsavedChanges: boolean;
   isEsqlMode: boolean;
   adHocDataViews: DataView[];
   topNavCustomization: TopNavCustomization | undefined;
   shouldShowESQLToDataViewTransitionModal: boolean;
   hasShareIntegration: boolean;
+  persistedDiscoverSession: DiscoverSession | undefined;
 }): TopNavMenuData[] => {
   const dispatch = useInternalStateDispatch();
   const currentDataView = useCurrentDataView();
   const appId = useObservable(services.application.currentAppId$);
+  const currentTab = useCurrentTabSelector((tabState) => tabState);
   const { authorizedRuleTypes }: { authorizedRuleTypes: RuleTypeWithDescription[] } =
     useGetRuleTypesPermissions({
       http: services.http,
       toasts: services.notifications.toasts,
     });
+  const totalHits$ = state.dataState.data$.totalHits$;
+  const totalHitsState = useDataState(totalHits$);
 
   const getAuthorizedWriteConsumerIds = (ruleTypes: RuleTypeWithDescription[]): string[] =>
     ruleTypes
@@ -134,7 +145,16 @@ export const useTopNavLinks = ({
       ) {
         const backgroundSearchFlyoutMenuItem = getBackgroundSearchFlyout({
           onClick: () => {
-            services.data.search.showSearchSessionsFlyout({ appId });
+            services.data.search.showSearchSessionsFlyout({
+              appId,
+              trackingProps: { openedFrom: 'background search button' },
+              onBackgroundSearchOpened: ({ session, event }) => {
+                event?.preventDefault();
+                dispatch(
+                  internalStateActions.openSearchSessionInNewTab({ searchSession: session })
+                );
+              },
+            });
           },
         });
         items.push(backgroundSearchFlyoutMenuItem);
@@ -166,7 +186,8 @@ export const useTopNavLinks = ({
 
       if (!defaultMenu?.openItem?.disabled) {
         const openSearchMenuItem = getOpenSearchAppMenuItem({
-          onOpenSavedSearch: state.actions.onOpenSavedSearch,
+          onOpenSavedSearch: (discoverSessionId) =>
+            dispatch(internalStateActions.openDiscoverSession({ discoverSessionId })),
         });
         items.push(openSearchMenuItem);
       }
@@ -177,6 +198,10 @@ export const useTopNavLinks = ({
           services,
           stateContainer: state,
           hasIntegrations: hasShareIntegration,
+          hasUnsavedChanges,
+          currentTab,
+          persistedDiscoverSession,
+          totalHitsState,
         });
         items.push(...shareAppMenuItem);
       }
@@ -185,13 +210,18 @@ export const useTopNavLinks = ({
     }, [
       defaultMenu,
       services,
-      onOpenInspector,
       discoverParams,
+      appId,
+      onOpenInspector,
       state,
+      dispatch,
       isEsqlMode,
       currentDataView,
+      currentTab,
+      persistedDiscoverSession,
       hasShareIntegration,
-      appId,
+      hasUnsavedChanges,
+      totalHitsState,
     ]);
 
   const getAppMenuAccessor = useProfileAccessor('getAppMenu');
@@ -203,6 +233,13 @@ export const useTopNavLinks = ({
 
     return getAppMenu(discoverParams).appMenuRegistry(newAppMenuRegistry);
   }, [getAppMenuAccessor, discoverParams, appMenuPrimaryAndSecondaryItems]);
+
+  const transitionFromESQLToDataView = useCurrentTabAction(
+    internalStateActions.transitionFromESQLToDataView
+  );
+  const transitionFromDataViewToESQL = useCurrentTabAction(
+    internalStateActions.transitionFromDataViewToESQL
+  );
 
   return useMemo(() => {
     const entries = appMenuRegistry.getSortedItems().map((appMenuItem) =>
@@ -250,10 +287,10 @@ export const useTopNavLinks = ({
               ) {
                 dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(true));
               } else {
-                state.actions.transitionFromESQLToDataView(dataView.id ?? '');
+                dispatch(transitionFromESQLToDataView({ dataViewId: dataView.id ?? '' }));
               }
             } else {
-              state.actions.transitionFromDataViewToESQL(dataView);
+              dispatch(transitionFromDataViewToESQL({ dataView }));
               services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:try_btn_clicked`);
             }
           }
@@ -298,5 +335,7 @@ export const useTopNavLinks = ({
     shouldShowESQLToDataViewTransitionModal,
     dispatch,
     state,
+    transitionFromESQLToDataView,
+    transitionFromDataViewToESQL,
   ]);
 };

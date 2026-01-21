@@ -10,7 +10,7 @@
         "tags": [],
         "label": "AlertsTable",
         "description": [
-          "\nAn `EuiDataGrid` abstraction to render alert documents\n\nIt manages the paginated and cached fetching of alerts based on the\nprovided `ruleTypeIds` and `consumers` (the final query can be refined\nthrough the `query` and `initialSort` props). The `id` prop is required in order\nto persist the table state in `localStorage`\n"
+          "\nAn `EuiDataGrid` abstraction to render alert documents\n\nIt manages the paginated and cached fetching of alerts based on the\nprovided `ruleTypeIds` and `consumers` (the final query can be refined\nthrough the `query` and `sort` props). The `id` prop is required in order\nto persist the table state in `localStorage`\n"
         ],
         "signature": [
           "<AC extends ",
@@ -22,6 +22,8 @@
           ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
         ],
         "path": "src/platform/packages/shared/response-ops/alerts-table/components/alerts_table.tsx",
+        "lineNumber": 159,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -37,6 +39,8 @@
               "P & React.RefAttributes<T>"
             ],
             "path": "src/platform/packages/shared/response-ops/alerts-table/utils/react.ts",
+            "lineNumber": 24,
+            "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -50,7 +54,7 @@
         "tags": [],
         "label": "AlertsTable",
         "description": [
-          "\nAn `EuiDataGrid` abstraction to render alert documents\n\nIt manages the paginated and cached fetching of alerts based on the\nprovided `ruleTypeIds` and `consumers` (the final query can be refined\nthrough the `query` and `initialSort` props). The `id` prop is required in order\nto persist the table state in `localStorage`\n"
+          "\nAn `EuiDataGrid` abstraction to render alert documents\n\nIt manages the paginated and cached fetching of alerts based on the\nprovided `ruleTypeIds` and `consumers` (the final query can be refined\nthrough the `query` and `sort` props). The `id` prop is required in order\nto persist the table state in `localStorage`\n"
         ],
         "signature": [
           "<AC extends ",
@@ -62,6 +66,8 @@
           ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
         ],
         "path": "src/platform/packages/shared/response-ops/alerts-table/components/alerts_table.tsx",
+        "lineNumber": 159,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -77,6 +83,8 @@
               "P & React.RefAttributes<T>"
             ],
             "path": "src/platform/packages/shared/response-ops/alerts-table/utils/react.ts",
+            "lineNumber": 24,
+            "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -104,6 +112,8 @@
           ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
         ],
         "path": "src/platform/packages/shared/response-ops/alerts-table/components/alerts_table.tsx",
+        "lineNumber": 700,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -119,6 +129,8 @@
               "P & React.RefAttributes<T>"
             ],
             "path": "src/platform/packages/shared/response-ops/alerts-table/utils/react.ts",
+            "lineNumber": 24,
+            "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -142,6 +154,8 @@
           ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
         ],
         "path": "src/platform/packages/shared/response-ops/alerts-table/components/alerts_table.tsx",
+        "lineNumber": 700,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -157,6 +171,8 @@
               "P & React.RefAttributes<T>"
             ],
             "path": "src/platform/packages/shared/response-ops/alerts-table/utils/react.ts",
+            "lineNumber": 24,
+            "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
           }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { adHocRunStatus } from '../../../../common/constants';
+import { adHocRunStatus, backfillInitiator } from '../../../../common/constants';
 import type { RuleDomain } from '../../rule/types';
 import type { ScheduleBackfillParam } from '../methods/schedule/types';
 import { transformBackfillParamToAdHocRun } from './transform_backfill_param_to_ad_hoc_run';
@@ -19,6 +19,7 @@ function getMockData(overwrites: Record<string, unknown> = {}): ScheduleBackfill
         end: '2023-11-16T20:00:00.000Z',
       },
     ],
+    initiator: backfillInitiator.USER,
     runActions: true,
     ...overwrites,
   };
@@ -76,6 +77,8 @@ describe('transformBackfillParamToAdHocRun', () => {
       duration: '12h',
       enabled: true,
       end: '2023-11-16T20:00:00.000Z',
+      initiator: backfillInitiator.USER,
+      initiatorId: undefined,
       rule: {
         name: 'my rule name',
         tags: ['foo'],
@@ -120,6 +123,8 @@ describe('transformBackfillParamToAdHocRun', () => {
       createdAt: '2024-01-30T00:00:00.000Z',
       duration: '12h',
       enabled: true,
+      initiator: backfillInitiator.USER,
+      initiatorId: undefined,
       // injects end parameter
       end: '2023-11-16T20:00:00.000Z',
       rule: {
@@ -171,6 +176,8 @@ describe('transformBackfillParamToAdHocRun', () => {
       createdAt: '2024-01-30T00:00:00.000Z',
       duration: '12h',
       enabled: true,
+      initiator: backfillInitiator.USER,
+      initiatorId: undefined,
       // injects end parameter
       end: '2023-11-16T20:00:00.000Z',
       rule: {

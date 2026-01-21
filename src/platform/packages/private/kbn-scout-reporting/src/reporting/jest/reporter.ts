@@ -32,7 +32,7 @@ import type { ScoutFileInfo } from '../../..';
 import {
   datasources,
   generateTestRunId,
-  getTestIDForTitle,
+  computeTestID,
   ScoutEventsReport,
   ScoutReportEventAction,
   type ScoutTestRunInfo,
@@ -157,7 +157,7 @@ export class ScoutJestReporter extends BaseReporter {
         type: test.result.ancestorTitles.length <= 1 ? 'root' : 'suite',
       },
       test: {
-        id: getTestIDForTitle(test.result.fullName),
+        id: computeTestID(path.relative(REPO_ROOT, test.filePath), test.result.fullName),
         title: test.result.title,
         tags: [],
         file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, test.filePath)),
@@ -235,9 +235,18 @@ export class ScoutJestReporter extends BaseReporter {
         ...this.baseTestRunInfo,
         status: results.numFailedTests === 0 ? 'passed' : 'failed',
         duration: Date.now() - results.startTime || 0,
+        tests: {
+          failures: results.numFailedTests,
+          passes: results.numPassedTests,
+          pending: results.numPendingTests,
+          total: results.numTotalTests,
+        },
       },
       event: {
         action: ScoutReportEventAction.RUN_END,
+      },
+      process: {
+        uptime: Math.floor(process.uptime() * 1000),
       },
     });
 

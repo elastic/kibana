@@ -12,6 +12,7 @@ import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { analyticsServiceMock } from '@kbn/core/server/mocks';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 
 import { attackDiscoveryScheduleExecutor } from './executor';
 import { findDocuments } from '../../../../ai_assistant_data_clients/find';
@@ -27,6 +28,8 @@ import {
 import { mockAttackDiscoveries } from '../../evaluation/__mocks__/mock_attack_discoveries';
 import { getFindAnonymizationFieldsResultWithSingleHit } from '../../../../__mocks__/response';
 import { deduplicateAttackDiscoveries } from '../../persistence/deduplication';
+import * as transforms from '../../persistence/transforms/transform_to_alert_documents';
+import { isInvalidAnonymizationError } from '../../../../routes/attack_discovery/public/post/helpers/throw_if_invalid_anonymization';
 
 jest.mock('../../../../ai_assistant_data_clients/find', () => ({
   ...jest.requireActual('../../../../ai_assistant_data_clients/find'),
@@ -36,6 +39,12 @@ jest.mock('../../../../routes/attack_discovery/helpers/generate_discoveries', ()
   ...jest.requireActual('../../../../routes/attack_discovery/helpers/generate_discoveries'),
   generateAttackDiscoveries: jest.fn(),
 }));
+jest.mock('../../../../routes/attack_discovery/helpers/filter_hallucinated_alerts', () => ({
+  filterHallucinatedAlerts: jest.fn().mockImplementation(({ attackDiscoveries }) => {
+    // By default, pass through all discoveries (no filtering)
+    return Promise.resolve(attackDiscoveries);
+  }),
+}));
 jest.mock('../../../../routes/attack_discovery/helpers/telemetry', () => ({
   ...jest.requireActual('../../../../routes/attack_discovery/helpers/telemetry'),
   reportAttackDiscoveryGenerationFailure: jest.fn(),
@@ -44,6 +53,18 @@ jest.mock('../../../../routes/attack_discovery/helpers/telemetry', () => ({
 jest.mock('../../persistence/deduplication', () => ({
   ...jest.requireActual('../../persistence/deduplication'),
   deduplicateAttackDiscoveries: jest.fn(),
+}));
+
+jest.mock(
+  '../../../../routes/attack_discovery/public/post/helpers/throw_if_invalid_anonymization',
+  () => ({
+    isInvalidAnonymizationError: jest.fn(),
+  })
+);
+
+jest.mock('@kbn/task-manager-plugin/server', () => ({
+  createTaskRunError: jest.fn((error, source) => ({ message: error.message, source })),
+  TaskErrorSource: { USER: 'USER' },
 }));
 
 describe('attackDiscoveryScheduleExecutor', () => {
@@ -271,6 +292,27 @@ describe('attackDiscoveryScheduleExecutor', () => {
     });
   });
 
+  it('calls filterHallucinatedAlerts with the expected parameters', async () => {
+    const { filterHallucinatedAlerts } = jest.requireMock(
+      '../../../../routes/attack_discovery/helpers/filter_hallucinated_alerts'
+    );
+    const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+
+    await attackDiscoveryScheduleExecutor({
+      options,
+      logger: mockLogger,
+      publicBaseUrl: undefined,
+      telemetry: mockTelemetry,
+    });
+
+    expect(filterHallucinatedAlerts).toHaveBeenCalledWith({
+      attackDiscoveries: mockAttackDiscoveries,
+      alertsIndexPattern: params.alertsIndexPattern,
+      esClient: services.scopedClusterClient.asCurrentUser,
+      logger: mockLogger,
+    });
+  });
+
   it('should report generated attack discoveries as alerts', async () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
@@ -349,6 +391,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
           'Critical Malware and Phishing Alerts on host e1cb3cf0-30f3-4f99-a9c8-518b955c6f90',
         'kibana.alert.attack_discovery.title_with_replacements':
           'Critical Malware and Phishing Alerts on host Test-Host-1',
+        'kibana.alert.attack_ids': ['fake-alert'],
       },
       context: {
         attack: {
@@ -502,5 +545,63 @@ describe('attackDiscoveryScheduleExecutor', () => {
         context: { attack: expect.objectContaining({ alertIds, timestamp, mitreAttackTactics }) },
       });
     }
+  });
+
+  it('should call transformToBaseAlertDocument with alertsParams.withReplacements set to false', async () => {
+    const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+    const spy = jest.spyOn(transforms, 'transformToBaseAlertDocument');
+
+    await attackDiscoveryScheduleExecutor({
+      options,
+      logger: mockLogger,
+      publicBaseUrl: undefined,
+      telemetry: mockTelemetry,
+    });
+
+    const firstCallArg = spy.mock.calls[0][0] as {
+      alertsParams: { withReplacements?: boolean };
+    };
+    expect(firstCallArg.alertsParams.withReplacements).toBe(false);
+
+    spy.mockRestore();
+  });
+
+  it('should call transformToBaseAlertDocument with alertsParams.enableFieldRendering set to true', async () => {
+    const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+    const spy = jest.spyOn(transforms, 'transformToBaseAlertDocument');
+
+    await attackDiscoveryScheduleExecutor({
+      options,
+      logger: mockLogger,
+      publicBaseUrl: undefined,
+      telemetry: mockTelemetry,
+    });
+
+    const firstCallArg = spy.mock.calls[0][0] as {
+      alertsParams: { enableFieldRendering?: boolean };
+    };
+    expect(firstCallArg.alertsParams.enableFieldRendering).toBe(true);
+
+    spy.mockRestore();
+  });
+
+  it('throws TaskRunError when isInvalidAnonymizationError returns true', async () => {
+    const error = new Error('Invalid Anonymization');
+    (generateAttackDiscoveries as jest.Mock).mockRejectedValue(error);
+    (isInvalidAnonymizationError as jest.Mock).mockReturnValue(true);
+    const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+
+    await expect(
+      attackDiscoveryScheduleExecutor({
+        options,
+        logger: mockLogger,
+        publicBaseUrl: undefined,
+        telemetry: mockTelemetry,
+      })
+    ).rejects.toEqual(
+      expect.objectContaining({ message: error.message, source: TaskErrorSource.USER })
+    );
+
+    expect(createTaskRunError).toHaveBeenCalledWith(error, TaskErrorSource.USER);
   });
 });

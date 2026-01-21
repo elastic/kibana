@@ -24,13 +24,15 @@ import type { UseFormSetValue, FieldValues } from 'react-hook-form';
 import { useWatch } from 'react-hook-form';
 import type { GrokProcessorResult } from '@kbn/grok-heuristics';
 import type { APIReturnType } from '@kbn/streams-plugin/public/api';
+import { useAbortController } from '@kbn/react-hooks';
 import { useStreamDetail } from '../../../../../../../hooks/use_stream_detail';
 import { selectPreviewRecords } from '../../../../state_management/simulation_state_machine/selectors';
 import { useSimulatorSelector } from '../../../../state_management/stream_enrichment_state_machine';
 import type { ProcessorFormState } from '../../../../types';
-import { GeneratePatternButton, AdditionalChargesCallout } from './generate_pattern_button';
+import { AdditionalChargesCallout } from './additional_charges_callout';
+import { GenerateSuggestionButton } from '../../../../../stream_detail_routing/review_suggestions_form/generate_suggestions_button';
 import { useGrokPatternSuggestion } from './use_grok_pattern_suggestion';
-import type { AIFeatures } from './use_ai_features';
+import type { AIFeatures } from '../../../../../../../hooks/use_ai_features';
 
 export const GrokPatternAISuggestions = ({
   aiFeatures,
@@ -51,9 +53,10 @@ export const GrokPatternAISuggestions = ({
     selectPreviewRecords(snapshot.context)
   );
 
-  const [suggestionsState, refreshSuggestions] = useGrokPatternSuggestion();
+  const abortController = useAbortController();
+  const [suggestionsState, refreshSuggestions] = useGrokPatternSuggestion(abortController);
 
-  const fieldValue = useWatch<ProcessorFormState, 'from'>({ name: 'from' });
+  const fieldValue = useWatch<ProcessorFormState, 'from'>({ name: 'from' }) as string;
   const isValidField = useMemo(() => {
     return Boolean(
       fieldValue &&
@@ -77,6 +80,11 @@ export const GrokPatternAISuggestions = ({
               ),
               { shouldValidate: true }
             );
+            setValue(
+              'pattern_definitions',
+              suggestionsState.value.grokProcessor.pattern_definitions,
+              { shouldValidate: true }
+            );
           }
           refreshSuggestions(null);
         }}
@@ -90,7 +98,7 @@ export const GrokPatternAISuggestions = ({
       <EuiFlexGroup gutterSize="l" alignItems="center">
         {aiFeatures.enabled && (
           <EuiFlexItem grow={false}>
-            <GeneratePatternButton
+            <GenerateSuggestionButton
               aiFeatures={aiFeatures}
               onClick={(connectorId) => {
                 refreshSuggestions({
@@ -101,7 +109,14 @@ export const GrokPatternAISuggestions = ({
               }}
               isLoading={suggestionsState.loading}
               isDisabled={!isValidField}
-            />
+            >
+              {i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.refreshSuggestions',
+                {
+                  defaultMessage: 'Generate pattern',
+                }
+              )}
+            </GenerateSuggestionButton>
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={false}>
@@ -120,6 +135,7 @@ export const GrokPatternAISuggestions = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       {aiFeatures &&
+        aiFeatures.enabled &&
         aiFeatures.isManagedAIConnector &&
         !aiFeatures.hasAcknowledgedAdditionalCharges && (
           <>
@@ -192,7 +208,14 @@ export function GrokPatternSuggestion({
           </EuiBadgeGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton iconType="check" onClick={onAccept} color="primary" size="s">
+          <EuiButton
+            iconType="check"
+            onClick={onAccept}
+            color="primary"
+            size="s"
+            fill
+            data-test-subj="streamsAppGrokSuggestionAcceptButton"
+          >
             {i18n.translate(
               'xpack.streams.streamDetailView.managementTab.enrichment.grokPatternSuggestion.acceptButton',
               {

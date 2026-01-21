@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -21,16 +21,17 @@
     // required bundles
     "@kbn/kibana-react-plugin",
     "@kbn/es-ui-shared-plugin",
-    "@kbn/data-plugin",
     "@kbn/license-api-guard-plugin",
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/analytics",
     "@kbn/test-jest-helpers",
+    "@kbn/test-eui-helpers",
     "@kbn/config-schema",
     "@kbn/shared-ux-router",
     "@kbn/react-kibana-context-render",
     "@kbn/licensing-types",
+    "@kbn/data-views-plugin",
   ],
   "exclude": [
     "target/**/*",

@@ -7,7 +7,14 @@
 
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { types } from '@kbn/storage-adapter';
-import { STREAM_NAME, SYSTEM_DESCRIPTION, SYSTEM_FILTER, SYSTEM_NAME, SYSTEM_UUID } from './fields';
+import {
+  STREAM_NAME,
+  SYSTEM_DESCRIPTION,
+  SYSTEM_FILTER,
+  SYSTEM_NAME,
+  SYSTEM_TYPE,
+  SYSTEM_UUID,
+} from './fields';
 
 export const systemStorageSettings = {
   name: '.kibana_streams_systems',
@@ -15,6 +22,7 @@ export const systemStorageSettings = {
     properties: {
       [SYSTEM_UUID]: types.keyword(),
       [STREAM_NAME]: types.keyword(),
+      [SYSTEM_TYPE]: types.keyword(),
       [SYSTEM_NAME]: types.keyword(),
       [SYSTEM_DESCRIPTION]: types.text(),
       [SYSTEM_FILTER]: types.object({ enabled: false }),

@@ -27,4 +27,4 @@ export const AddConnectorInline = suspendedComponentWithProps(
   lazy(() => import('./connector_add_inline'))
 );
 
-export type { ConnectorFormSchema } from './types';
+export type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';

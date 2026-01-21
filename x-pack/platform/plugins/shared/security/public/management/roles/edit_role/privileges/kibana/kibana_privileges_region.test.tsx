@@ -96,7 +96,9 @@ describe('<KibanaPrivileges>', () => {
 
   it('renders the transform error section when the role has a transform error', () => {
     const props = buildProps();
-    (props.role as Role)._transform_error = ['kibana'];
+    (props.role as Role)._transform_error = [
+      { reason: 'kibana:reserved_privileges_mixed', state: [] },
+    ];
 
     const wrapper = shallow(<KibanaPrivilegesRegion {...props} />);
     expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(0);

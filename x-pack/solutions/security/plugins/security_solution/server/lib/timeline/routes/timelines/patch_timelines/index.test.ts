@@ -28,11 +28,12 @@ import {
   UPDATE_TIMELINE_ERROR_MESSAGE,
   UPDATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
 } from '../../../utils/failure_cases';
+import type { SecuritySolutionRequestHandlerContextMock } from '../../../../detection_engine/routes/__mocks__/request_context';
 
 describe('update timelines', () => {
   let server: ReturnType<typeof serverMock.create>;
   let securitySetup: SecurityPluginSetup;
-  let { context } = requestContextMock.createTools();
+  let context: SecuritySolutionRequestHandlerContextMock;
   let mockGetTimeline: jest.Mock;
   let mockGetTemplateTimeline: jest.Mock;
   let mockPersistTimeline: jest.Mock;
@@ -58,6 +59,11 @@ describe('update timelines', () => {
     mockPersistTimeline = jest.fn();
     mockPersistPinnedEventOnTimeline = jest.fn();
     mockPersistNote = jest.fn();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('Manipulate timeline', () => {

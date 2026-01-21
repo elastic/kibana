@@ -16,7 +16,7 @@ import { timelineSelectors } from '.';
 import { TimelineTabs } from '../../../common/types';
 import type { State } from '../../common/store/types';
 import type { TimelineModel } from './model';
-import type { InsertTimeline, TimelineById } from './types';
+import type { InsertTimeline } from './types';
 import { TimelineStatusEnum, TimelineTypeEnum } from '../../../common/api/timeline';
 
 export const getTimelineShowStatusByIdSelector = () =>
@@ -27,11 +27,6 @@ export const getTimelineShowStatusByIdSelector = () =>
     updated: timeline?.updated ?? undefined,
     changed: timeline?.changed ?? false,
   }));
-
-/**
- * @deprecated
- */
-const timelineByIdState = (state: State): TimelineById => state.timeline.timelineById;
 
 const selectCallOutUnauthorizedMsg = (state: State): boolean =>
   state.timeline.showCallOutUnauthorizedMsg;
@@ -44,14 +39,6 @@ export const selectTimeline = (state: State, timelineId: string): TimelineModel 
 
 export const selectInsertTimeline = (state: State): InsertTimeline | null =>
   state.timeline.insertTimeline;
-
-/**
- * @deprecated prefer using selectTimelineById below
- */
-export const timelineByIdSelector = createSelector(
-  timelineByIdState,
-  (timelineById) => timelineById
-);
 
 export const getShowCallOutUnauthorizedMsg = () =>
   createSelector(
@@ -183,3 +170,13 @@ export const selectExcludedRowRendererIds = createSelector(
   selectTimelineById,
   (timeline) => timeline?.excludedRowRendererIds
 );
+
+/**
+ * Selector that returns if an event has been pinned in a timeline
+ */
+export const selectIsPinnedEventInTimeline = () =>
+  createSelector(
+    selectTimelineById,
+    (_: State, __: string, pinnedEventId: string) => pinnedEventId,
+    (timeline, pinnedEventId): boolean => !!timeline?.pinnedEventIds?.[pinnedEventId]
+  );

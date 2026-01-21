@@ -215,21 +215,81 @@ describe('SiemMigrationsDataMigrationClient', () => {
       });
     });
 
-    it('should update `finished_at` when called saveAsEnded', async () => {
-      const migrationId = 'testId';
+    describe('saveAsFinished', () => {
+      it('should update `finished_at` and `total_execution_time_ms` when called saveAsEnded', async () => {
+        const migrationId = 'testId';
+        const mockStartedAt = new Date(Date.now() - 5000).toISOString();
 
-      await siemMigrationsDataMigrationClient.saveAsFinished({ id: migrationId });
-
-      expect(esClient.asInternalUser.update).toHaveBeenCalledWith({
-        index: '.kibana-siem-rule-migrations',
-        id: migrationId,
-        refresh: 'wait_for',
-        doc: {
-          last_execution: {
-            finished_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
+        esClient.asInternalUser.get = jest.fn().mockResolvedValue({
+          _index: '.kibana-siem-rule-migrations',
+          found: true,
+          _source: {
+            name: 'Test Migration',
+            last_execution: {
+              started_at: mockStartedAt,
+            },
           },
-        },
-        retry_on_conflict: 1,
+          _id: migrationId,
+        });
+
+        await siemMigrationsDataMigrationClient.saveAsFinished({ id: migrationId });
+
+        expect(esClient.asInternalUser.update).toHaveBeenCalledWith({
+          index: '.kibana-siem-rule-migrations',
+          id: migrationId,
+          refresh: 'wait_for',
+          doc: {
+            last_execution: {
+              finished_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
+              total_execution_time_ms: expect.any(Number),
+            },
+          },
+          retry_on_conflict: 1,
+        });
+
+        // Now, assert that total_execution_time_ms is greater than 5000
+        const callArgs = (esClient.asInternalUser.update as jest.Mock).mock.calls[0][0].doc
+          .last_execution;
+        expect(callArgs.total_execution_time_ms).toBeGreaterThanOrEqual(5000);
+      });
+
+      it('should update `total_execution_time_ms` when it is already present', async () => {
+        const migrationId = 'testId';
+        const mockStartedAt = new Date(Date.now() - 5000).toISOString();
+        const existingExecutionTime = 10000;
+
+        esClient.asInternalUser.get = jest.fn().mockResolvedValue({
+          _index: '.kibana-siem-rule-migrations',
+          found: true,
+          _source: {
+            name: 'Test Migration',
+            last_execution: {
+              started_at: mockStartedAt,
+              total_execution_time_ms: existingExecutionTime,
+            },
+          },
+          _id: migrationId,
+        });
+
+        await siemMigrationsDataMigrationClient.saveAsFinished({ id: migrationId });
+
+        expect(esClient.asInternalUser.update).toHaveBeenCalledWith({
+          index: '.kibana-siem-rule-migrations',
+          id: migrationId,
+          refresh: 'wait_for',
+          doc: {
+            last_execution: {
+              finished_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
+              total_execution_time_ms: expect.any(Number),
+            },
+          },
+          retry_on_conflict: 1,
+        });
+
+        // Now, assert that total_execution_time_ms is greater than existingExecutionTime
+        const callArgs = (esClient.asInternalUser.update as jest.Mock).mock.calls[0][0].doc
+          .last_execution;
+        expect(callArgs.total_execution_time_ms).toBeGreaterThanOrEqual(15000);
       });
     });
 
@@ -251,25 +311,40 @@ describe('SiemMigrationsDataMigrationClient', () => {
       });
     });
 
-    it('should update `error` params correctly when called saveAsFailed', async () => {
-      const migrationId = 'testId';
+    describe('error handling', () => {
+      it('should update `error` params correctly when called saveAsFailed', async () => {
+        const migrationId = 'testId';
 
-      await siemMigrationsDataMigrationClient.saveAsFailed({
-        id: migrationId,
-        error: 'Test error',
-      });
-
-      expect(esClient.asInternalUser.update).toHaveBeenCalledWith({
-        index: '.kibana-siem-rule-migrations',
-        id: migrationId,
-        refresh: 'wait_for',
-        doc: {
-          last_execution: {
-            error: 'Test error',
-            finished_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
+        esClient.asInternalUser.get = jest.fn().mockResolvedValue({
+          _index: '.kibana-siem-rule-migrations',
+          found: true,
+          _source: {
+            name: 'Test Migration',
+            last_execution: {
+              started_at: new Date().toISOString(),
+            },
           },
-        },
-        retry_on_conflict: 1,
+          _id: migrationId,
+        });
+
+        await siemMigrationsDataMigrationClient.saveAsFailed({
+          id: migrationId,
+          error: 'Test error',
+        });
+
+        expect(esClient.asInternalUser.update).toHaveBeenCalledWith({
+          index: '.kibana-siem-rule-migrations',
+          id: migrationId,
+          refresh: 'wait_for',
+          doc: {
+            last_execution: {
+              error: 'Test error',
+              finished_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
+              total_execution_time_ms: expect.any(Number),
+            },
+          },
+          retry_on_conflict: 1,
+        });
       });
     });
   });

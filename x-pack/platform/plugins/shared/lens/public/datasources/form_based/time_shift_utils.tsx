@@ -18,9 +18,14 @@ import {
   parseAbsoluteTimeShift,
   parseTimeShift,
 } from '@kbn/data-plugin/common';
-import type { DateRange } from '../../../common/types';
-import type { FormBasedLayer, FormBasedPrivateState } from './types';
-import type { FramePublicAPI, IndexPattern, UserMessage } from '../../types';
+import type {
+  FormBasedLayer,
+  FormBasedPrivateState,
+  FramePublicAPI,
+  IndexPattern,
+  UserMessage,
+  DateRange,
+} from '@kbn/lens-common';
 import { TIMESHIFT_LT_INTERVAL, TIMESHIFT_NOT_MULTIPLE_INTERVAL } from '../../user_messages_ids';
 
 export function parseTimeShiftWrapper(timeShiftString: string, dateRange: DateRange) {

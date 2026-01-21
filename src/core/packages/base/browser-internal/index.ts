@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { CoreContext } from './src/core_context';
+export type { CoreContext, CoreEnv } from './src/core_context';
 export type { CoreService } from './src/services';

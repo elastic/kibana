@@ -60,6 +60,7 @@ export const IndexPatternPlaceholderFormWrapper: FC<IndexPatternPlaceholderFormW
                 onClick={onClose}
                 flush="left"
                 data-test-subj="indexPatternPlaceholderFormCancelBtn"
+                aria-label={i18n.INDEX_PATTERN_PLACEHOLDER_FORM_CANCEL}
               >
                 {i18n.INDEX_PATTERN_PLACEHOLDER_FORM_CANCEL}
               </EuiButtonEmpty>
@@ -68,7 +69,10 @@ export const IndexPatternPlaceholderFormWrapper: FC<IndexPatternPlaceholderFormW
               <EuiButton
                 onClick={() => onSubmit(form.getFormData().index.join(','))}
                 fill
-                disabled={isValid === false}
+                // The `isValid` is set to `undefined` on initialization. Until value is changed we show the `Save` button as disabled.
+                // Once value is updated the form will go through the validation cycle and will update `isValid` state.
+                // In case form is invalid, we disable button as well.
+                disabled={isValid !== true}
                 data-test-subj="indexPatternPlaceholderFormSaveBtn"
               >
                 {i18n.INDEX_PATTERN_PLACEHOLDER_FORM_SAVE}

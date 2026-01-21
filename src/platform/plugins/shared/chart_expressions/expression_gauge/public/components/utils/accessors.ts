@@ -9,7 +9,7 @@
 
 import type { CustomPaletteParams } from '@kbn/coloring';
 import type { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
-import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
+import { getAccessorByDimension } from '@kbn/chart-expressions-common';
 import type { Accessors, GaugeArguments } from '../../../common';
 
 export const getValueFromAccessor = (

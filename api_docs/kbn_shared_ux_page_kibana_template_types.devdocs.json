@@ -14,10 +14,11 @@
         "label": "KibanaPageTemplateKibanaDependencies",
         "description": [],
         "signature": [
-          "KibanaDependencies & ",
-          "RedirectAppLinksKibanaDependencies"
+          "KibanaDependencies"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/kibana_template/types/index.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -66,6 +67,8 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/kibana_template/types/index.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -84,11 +87,11 @@
             "docId": "kibKbnSharedUxCardNoDataTypesPluginApi",
             "section": "def-public.Services",
             "text": "Services"
-          },
-          " & ",
-          "RedirectAppLinksServices"
+          }
         ],
         "path": "src/platform/packages/shared/shared-ux/page/kibana_template/types/index.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -110,6 +113,8 @@
           }
         ],
         "path": "src/platform/packages/shared/shared-ux/page/no_data_config/types/index.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

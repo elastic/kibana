@@ -6,28 +6,21 @@
  */
 
 import type { Observable } from 'rxjs';
-import { of } from 'rxjs';
 import { map as mapObservable } from 'rxjs';
 import type { TimeRange } from '@kbn/es-query';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
-import type {
-  InfluencersFilterQuery,
-  MlEntityField,
-  MlRecordForInfluencer,
-} from '@kbn/ml-anomaly-utils';
+import type { InfluencersFilterQuery, MlEntityField } from '@kbn/ml-anomaly-utils';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import type { SeverityThreshold } from '../../../common/types/anomalies';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import type { SeriesConfigWithMetadata } from '../../../common/types/results';
 
 import type { ExplorerChartsData } from '../explorer/explorer_charts/explorer_charts_container_service';
-import type { AppStateSelectedCells } from '../explorer/explorer_utils';
 import { SWIM_LANE_LABEL_WIDTH } from '../explorer/constants';
 
 import type { MlApi } from './ml_api_service';
-import type { MlResultsService } from './results_service';
 
 const MAX_CHARTS_PER_ROW = 4;
 const OPTIMAL_CHART_WIDTH = 550;
@@ -44,11 +37,7 @@ export const DEFAULT_MAX_SERIES_TO_PLOT = 6;
 export class AnomalyExplorerChartsService {
   private _customTimeRange: TimeRange | undefined;
 
-  constructor(
-    private timeFilter: TimefilterContract,
-    private mlApi: MlApi,
-    private mlResultsService: MlResultsService
-  ) {
+  constructor(private timeFilter: TimefilterContract, private mlApi: MlApi) {
     this.timeFilter.enableTimeRangeSelector();
   }
 
@@ -71,39 +60,6 @@ export class AnomalyExplorerChartsService {
       .filter(isDefined)
       .filter((r) => r.job !== undefined && r.datafeed !== undefined)
       .map(({ job, datafeed }) => ({ ...job, datafeed_config: datafeed } as CombinedJob));
-  }
-
-  public loadDataForCharts$(
-    jobIds: string[],
-    earliestMs: number,
-    latestMs: number,
-    influencers: MlEntityField[] = [],
-    selectedCells: AppStateSelectedCells | undefined | null,
-    influencersFilterQuery: InfluencersFilterQuery
-  ): Observable<MlRecordForInfluencer[]> {
-    if (!selectedCells && influencers.length === 0 && influencersFilterQuery === undefined) {
-      of([]);
-    }
-
-    return this.mlResultsService
-      .getRecordsForInfluencer$(
-        jobIds,
-        influencers,
-        0,
-        earliestMs,
-        latestMs,
-        500,
-        influencersFilterQuery
-      )
-      .pipe(
-        mapObservable((resp): MlRecordForInfluencer[] => {
-          if (isPopulatedObject(selectedCells) || influencersFilterQuery !== undefined) {
-            return resp.records;
-          }
-
-          return [] as MlRecordForInfluencer[];
-        })
-      );
   }
 
   public getAnomalyData$(

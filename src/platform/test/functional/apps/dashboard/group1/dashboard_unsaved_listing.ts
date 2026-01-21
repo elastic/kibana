@@ -40,8 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('lists unsaved changes to existing dashboards', async () => {
-      await dashboard.loadSavedDashboard(dashboardTitle);
-      await dashboard.switchToEditMode();
+      await dashboard.loadDashboardInEditMode(dashboardTitle);
       // change dashboard by adding panel
       await dashboardAddPanel.addVisualization('Rendering-Test: metric');
 
@@ -104,8 +103,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         `discard-unsaved-${dashboardTitle.split(' ').join('-')}`
       );
       await dashboard.expectUnsavedChangesListingDoesNotExist(dashboardTitle);
-      await dashboard.loadSavedDashboard(dashboardTitle);
-      await dashboard.switchToEditMode();
+      await dashboard.loadDashboardInEditMode(dashboardTitle);
       const currentPanelCount = await dashboard.getPanelCount();
       expect(currentPanelCount).to.eql(originalPanelCount);
       await dashboard.gotoDashboardLandingPage();
@@ -131,16 +129,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('does not list unsaved changes when unsaved version of the dashboard is the same', async () => {
-      await dashboard.loadSavedDashboard(newDashboartTitle);
-      await dashboard.switchToEditMode();
+      await dashboard.loadDashboardInEditMode(newDashboartTitle);
 
       // add another panel so we can delete it later
       await dashboardAddPanel.addVisualization('Rendering-Test: heatmap');
       await header.waitUntilLoadingHasFinished();
       await dashboard.waitForRenderComplete();
 
-      // wait for the unsaved changes badge to appear.
-      await dashboard.expectUnsavedChangesBadge();
+      // wait for the unsaved changes notification indicator to appear.
+      await dashboard.ensureHasUnsavedChangesNotification({ retry: true });
 
       // ensure that the unsaved listing exists
       await dashboard.gotoDashboardLandingPage();

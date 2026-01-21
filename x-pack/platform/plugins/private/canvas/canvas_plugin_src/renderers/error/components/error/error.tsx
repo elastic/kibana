@@ -34,7 +34,14 @@ export const Error: FC<Props> = ({ payload, onClose }) => {
   const message = payload.error?.message;
 
   const CloseIconButton = () => (
-    <EuiButtonIcon color="danger" iconType="cross" onClick={onClose} aria-hidden />
+    <EuiButtonIcon
+      color="danger"
+      iconType="cross"
+      onClick={onClose}
+      aria-label={i18n.translate('xpack.canvas.errorComponent.dismissErrorAriaLabel', {
+        defaultMessage: 'Dismiss error',
+      })}
+    />
   );
 
   return (

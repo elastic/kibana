@@ -25,6 +25,7 @@ exports[`renderLegendDetailRow Should render categorical legend with breaks 1`] 
               "maxWidth": "180px",
             }
           }
+          tabIndex={0}
         >
           <small>
             <strong>
@@ -122,6 +123,7 @@ exports[`renderLegendDetailRow Should render categorical legend with custom icon
               "maxWidth": "180px",
             }
           }
+          tabIndex={0}
         >
           <small>
             <strong>

@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
-import type { WorkflowYaml } from '../spec/schema';
+import type { JsonValue } from '@kbn/utility-types';
+import { z } from '@kbn/zod/v4';
+import type { SerializedError, WorkflowYaml } from '../spec/schema';
 import { WorkflowSchema } from '../spec/schema';
 
 export enum ExecutionStatus {
@@ -22,10 +23,26 @@ export enum ExecutionStatus {
   COMPLETED = 'completed',
   FAILED = 'failed',
   CANCELLED = 'cancelled',
+  TIMED_OUT = 'timed_out',
   SKIPPED = 'skipped',
 }
 export type ExecutionStatusUnion = `${ExecutionStatus}`;
 export const ExecutionStatusValues = Object.values(ExecutionStatus);
+
+export const TerminalExecutionStatuses: readonly ExecutionStatus[] = [
+  ExecutionStatus.COMPLETED,
+  ExecutionStatus.FAILED,
+  ExecutionStatus.CANCELLED,
+  ExecutionStatus.SKIPPED,
+  ExecutionStatus.TIMED_OUT,
+] as const;
+
+export const NonTerminalExecutionStatuses: readonly ExecutionStatus[] = [
+  ExecutionStatus.PENDING,
+  ExecutionStatus.WAITING,
+  ExecutionStatus.WAITING_FOR_INPUT,
+  ExecutionStatus.RUNNING,
+] as const;
 
 export enum ExecutionType {
   TEST = 'test',
@@ -58,13 +75,21 @@ export interface StackFrame {
   nestedScopes: ScopeEntry[];
 }
 
+export interface QueueMetrics {
+  scheduledAt?: string;
+  runAt?: string;
+  startedAt: string;
+  queueDelayMs: number | null;
+  scheduleDelayMs: number | null;
+}
+
 export interface EsWorkflowExecution {
   spaceId: string;
   id: string;
   workflowId: string;
   isTestRun: boolean;
   status: ExecutionStatus;
-  context: Record<string, any>;
+  context: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
   workflowDefinition: WorkflowYaml;
   yaml: string;
   currentNodeId?: string; // The node currently being executed
@@ -72,17 +97,21 @@ export interface EsWorkflowExecution {
   stepId?: string;
   scopeStack: StackFrame[];
   createdAt: string;
-  error: string | null;
+  error: SerializedError | null;
   createdBy: string;
   startedAt: string;
   finishedAt: string;
   cancelRequested: boolean;
+  cancellationReason?: string;
   cancelledAt?: string;
   cancelledBy?: string;
   duration: number;
   triggeredBy?: string; // 'manual' or 'scheduled'
+  taskRunAt?: string | null; // Task's runAt timestamp to link execution to specific scheduled run
   traceId?: string; // APM trace ID for observability
   entryTransactionId?: string; // APM root transaction ID for trace embeddable
+  concurrencyGroupKey?: string; // Evaluated concurrency group key for grouping executions
+  queueMetrics?: QueueMetrics; // Queue delay metrics for observability
 }
 
 export interface ProviderInput {
@@ -93,7 +122,7 @@ export interface ProviderInput {
 
 export interface Provider {
   type: string;
-  action: (stepInputs?: Record<string, any>) => Promise<Record<string, any> | void>;
+  action: (stepInputs?: Record<string, unknown>) => Promise<Record<string, unknown> | void>;
   inputsDefinition: Record<string, ProviderInput>;
 }
 
@@ -109,7 +138,7 @@ export interface EsWorkflowStepExecution {
   workflowId: string;
   status: ExecutionStatus;
   startedAt: string;
-  completedAt?: string;
+  finishedAt?: string;
   executionTimeMs?: number;
 
   /** Topological index of step in workflow graph. */
@@ -123,12 +152,12 @@ export interface EsWorkflowStepExecution {
    * There might be several instances of the same stepId if it's inside loops, retries, etc.
    */
   stepExecutionIndex: number;
-  error?: string | null;
-  output?: Record<string, any> | null;
-  input?: Record<string, any> | null;
+  error?: SerializedError;
+  output?: JsonValue;
+  input?: JsonValue;
 
   /** Specific step execution instance state. Used by loops, retries, etc to track execution context. */
-  state?: Record<string, any>;
+  state?: Record<string, unknown>;
 }
 
 export type WorkflowStepExecutionDto = Omit<EsWorkflowStepExecution, 'spaceId'>;
@@ -154,16 +183,22 @@ export interface WorkflowExecutionDto {
   spaceId: string;
   id: string;
   status: ExecutionStatus;
+  isTestRun: boolean;
   startedAt: string;
+  error: SerializedError | null;
   finishedAt: string;
   workflowId?: string;
   workflowName?: string;
   workflowDefinition: WorkflowYaml;
+  /** If specified, only this step and its children were executed */
   stepId?: string | undefined;
   stepExecutions: WorkflowStepExecutionDto[];
   duration: number | null;
   triggeredBy?: string; // 'manual' or 'scheduled'
   yaml: string;
+  context?: Record<string, unknown>;
+  traceId?: string; // APM trace ID for observability
+  entryTransactionId?: string; // APM root transaction ID for trace embeddable
 }
 
 export type WorkflowExecutionListItemDto = Omit<
@@ -173,13 +208,9 @@ export type WorkflowExecutionListItemDto = Omit<
 
 export interface WorkflowExecutionListDto {
   results: WorkflowExecutionListItemDto[];
-  _pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    next?: string;
-    prev?: string;
-  };
+  page: number;
+  size: number;
+  total: number;
 }
 
 // TODO: convert to actual elastic document spec
@@ -194,7 +225,7 @@ export const EsWorkflowSchema = z.object({
   createdBy: z.string(),
   lastUpdatedAt: z.date(),
   lastUpdatedBy: z.string(),
-  definition: WorkflowSchema,
+  definition: WorkflowSchema.optional(),
   deleted_at: z.date().nullable().default(null),
   yaml: z.string(),
   valid: z.boolean().readonly(),
@@ -202,8 +233,14 @@ export const EsWorkflowSchema = z.object({
 
 export type EsWorkflow = z.infer<typeof EsWorkflowSchema>;
 
+export type EsWorkflowCreate = Omit<
+  EsWorkflow,
+  'id' | 'createdAt' | 'createdBy' | 'lastUpdatedAt' | 'lastUpdatedBy' | 'yaml' | 'deleted_at'
+>;
+
 export const CreateWorkflowCommandSchema = z.object({
   yaml: z.string(),
+  id: z.string().optional(),
 });
 
 export const UpdateWorkflowCommandSchema = z.object({
@@ -216,8 +253,8 @@ export const UpdateWorkflowCommandSchema = z.object({
 
 export const SearchWorkflowCommandSchema = z.object({
   triggerType: z.string().optional(),
-  limit: z.number().default(100),
-  page: z.number().default(0),
+  size: z.number().default(100),
+  page: z.number().default(1),
   createdBy: z.array(z.string()).optional(),
   // bool or number transformed to boolean
   enabled: z.array(z.union([z.boolean(), z.number().transform((val) => val === 1)])).optional(),
@@ -226,27 +263,38 @@ export const SearchWorkflowCommandSchema = z.object({
 });
 
 export const RunWorkflowCommandSchema = z.object({
-  inputs: z.record(z.any()),
+  inputs: z.record(z.string(), z.unknown()),
 });
 export type RunWorkflowCommand = z.infer<typeof RunWorkflowCommandSchema>;
 
 export const RunStepCommandSchema = z.object({
   workflowYaml: z.string(),
   stepId: z.string(),
-  contextOverride: z.record(z.any()).optional(),
+  contextOverride: z.record(z.string(), z.unknown()).optional(),
 });
 export type RunStepCommand = z.infer<typeof RunStepCommandSchema>;
+
+export const TestWorkflowCommandSchema = z.object({
+  workflowYaml: z.string(),
+  inputs: z.record(z.string(), z.unknown()),
+});
+export type TestWorkflowCommand = z.infer<typeof TestWorkflowCommandSchema>;
 
 export const RunWorkflowResponseSchema = z.object({
   workflowExecutionId: z.string(),
 });
 export type RunWorkflowResponseDto = z.infer<typeof RunWorkflowResponseSchema>;
 
+export const TestWorkflowResponseSchema = z.object({
+  workflowExecutionId: z.string(),
+});
+export type TestWorkflowResponseDto = z.infer<typeof TestWorkflowResponseSchema>;
+
 export type CreateWorkflowCommand = z.infer<typeof CreateWorkflowCommandSchema>;
 
 export interface UpdatedWorkflowResponseDto {
   id: string;
-  lastUpdatedAt: Date;
+  lastUpdatedAt: string;
   lastUpdatedBy: string | undefined;
   enabled: boolean;
   valid: boolean;
@@ -258,9 +306,9 @@ export interface WorkflowDetailDto {
   name: string;
   description?: string;
   enabled: boolean;
-  createdAt: Date;
+  createdAt: string;
   createdBy: string;
-  lastUpdatedAt: Date;
+  lastUpdatedAt: string;
   lastUpdatedBy: string;
   definition: WorkflowYaml | null;
   yaml: string;
@@ -273,20 +321,16 @@ export interface WorkflowListItemDto {
   description: string;
   enabled: boolean;
   definition: WorkflowYaml | null;
-  createdAt: Date;
+  createdAt: string;
   history: WorkflowExecutionHistoryModel[];
   tags?: string[];
   valid: boolean;
 }
 
 export interface WorkflowListDto {
-  _pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    next?: string;
-    prev?: string;
-  };
+  page: number;
+  size: number;
+  total: number;
   results: WorkflowListItemDto[];
 }
 export interface WorkflowExecutionEngineModel
@@ -326,4 +370,178 @@ export interface WorkflowAggsDto {
     key: string;
     label: string;
   }[];
+}
+
+export interface ConnectorSubAction {
+  name: string;
+  displayName: string;
+}
+
+export interface ConnectorInstance {
+  id: string;
+  name: string;
+  isPreconfigured: boolean;
+  isDeprecated: boolean;
+}
+
+export interface ConnectorTypeInfo {
+  actionTypeId: string;
+  displayName: string;
+  instances: ConnectorInstance[];
+  enabled: boolean;
+  enabledInConfig: boolean;
+  enabledInLicense: boolean;
+  minimumLicenseRequired: string;
+  subActions: ConnectorSubAction[];
+}
+
+export type CompletionFn = () => Promise<
+  Array<{ label: string; value: string; detail?: string; documentation?: string }>
+>;
+
+export interface BaseConnectorContract {
+  type: string;
+  paramsSchema: z.ZodType;
+  connectorIdRequired?: boolean;
+  connectorId?: z.ZodType;
+  outputSchema: z.ZodType;
+  configSchema?: z.ZodObject;
+  summary: string | null;
+  description: string | null;
+  /** Documentation URL for this API endpoint */
+  documentation?: string | null;
+  examples?: ConnectorExamples;
+  // Rich property handlers for completions, validation and decorations
+  editorHandlers?: {
+    config?: Record<string, StepPropertyHandler | undefined>;
+    input?: Record<string, StepPropertyHandler | undefined>;
+  };
+}
+
+export interface DynamicConnectorContract extends BaseConnectorContract {
+  /** Action type ID from Kibana actions plugin */
+  actionTypeId: string;
+  /** Available connector instances */
+  instances: ConnectorInstance[];
+  /** Whether this connector type is enabled */
+  enabled?: boolean;
+  /** Whether this is a system action type */
+  isSystemActionType?: boolean;
+}
+
+export const KNOWN_HTTP_METHODS = [
+  'GET',
+  'POST',
+  'PUT',
+  'DELETE',
+  'PATCH',
+  'HEAD',
+  'OPTIONS',
+] as const;
+
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
+
+export interface EnhancedInternalConnectorContract extends InternalConnectorContract {
+  examples: ConnectorExamples;
+}
+
+export interface InternalConnectorContract extends BaseConnectorContract {
+  /** HTTP method(s) for this API endpoint */
+  methods: HttpMethod[];
+  /** URL pattern(s) for this API endpoint */
+  patterns: string[];
+  /** Parameter type metadata for proper request building */
+  parameterTypes: {
+    headerParams: string[];
+    pathParams: string[];
+    urlParams: string[];
+    bodyParams: string[];
+  };
+}
+
+export interface StepPropertyHandler<T = unknown> {
+  /**
+   * Autocompletion configuration for the property.
+   */
+  completion?: {
+    /**
+     * Fetch available options for autocompletion.
+     * Called lazily when the user triggers completion.
+     */
+    getOptions: PropertyCompletionFn<T>;
+  };
+
+  /**
+   * Additional validation configuration for the property.
+   */
+  validation?: {
+    /**
+     * Validate a value and return decoration/error info.
+     * Return null if no validation is needed (static Zod validation is sufficient).
+     *
+     * Important: Called everytime when the YAML document changes.
+     *
+     * For validators that check external resources, consider using a client-side caching solution
+     * (e.g., React Query) within your validator implementation to handle cache invalidation
+     * when external data changes.
+     */
+    validate: PropertyValidationFn<T>;
+  };
+}
+
+export type PropertyCompletionFn<T = unknown> = (value: T) => Promise<PropertyCompletionOption[]>;
+
+export type PropertyValidationFn<T = unknown> = (
+  value: T,
+  context: PropertyValidationContext
+) => Promise<PropertyValidationResult | null>;
+
+export interface PropertyCompletionOption {
+  /** The value that will be stored in the yaml */
+  value: string;
+  /** The label displayed in the completion popup */
+  label: string;
+  /** Brief detail shown inline in completion popup (optional) */
+  detail?: string;
+  /** Extended documentation shown in side panel (optional) */
+  documentation?: string;
+}
+
+export interface PropertyValidationResult {
+  /** null = valid (show success decoration), 'error'|'warning'|'info' = show error */
+  severity: 'error' | 'warning' | 'info' | null;
+  /** Error message for markers panel (only when severity is not null) */
+  message?: string;
+  /** Decoration text shown after the value (e.g., "✓ Connected (agent ID: xyz)") */
+  afterMessage?: string;
+  /** Hover tooltip (markdown supported) */
+  hoverMessage?: string;
+}
+
+// TODO: Add other context for cross-field validation
+export interface PropertyValidationContext {
+  /** The step type ID (e.g., "onechat.runAgent") */
+  stepType: string;
+  /** The property path ("config" or "input") */
+  scope: 'config' | 'input';
+  /** The property key (e.g., "agent_id") */
+  propertyKey: string;
+}
+
+export interface ConnectorExamples {
+  params?: Record<string, string>;
+  snippet?: string;
+}
+
+export type ConnectorContractUnion =
+  | DynamicConnectorContract
+  | BaseConnectorContract
+  | InternalConnectorContract;
+
+export interface WorkflowsSearchParams {
+  size: number;
+  page: number;
+  query?: string;
+  createdBy?: string[];
+  enabled?: boolean[];
 }

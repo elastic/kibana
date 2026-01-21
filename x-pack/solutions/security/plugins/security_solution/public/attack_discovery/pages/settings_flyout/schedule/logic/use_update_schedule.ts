@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 import type {
   AttackDiscoveryScheduleUpdateProps,
   UpdateAttackDiscoverySchedulesResponse,
@@ -38,15 +38,22 @@ export const useUpdateAttackDiscoverySchedule = () => {
     UpdateAttackDiscoverySchedulesResponse,
     Error,
     UpdateAttackDiscoveryScheduleParams
-  >(({ id, scheduleToUpdate }) => updateAttackDiscoverySchedule({ id, body: scheduleToUpdate }), {
-    mutationKey: UPDATE_ATTACK_DISCOVERY_SCHEDULE_MUTATION_KEY,
-    onSuccess: ({ id }) => {
-      invalidateGetAttackDiscoverySchedule(id);
-      invalidateFindAttackDiscoverySchedule();
-      addSuccess(i18n.UPDATE_ATTACK_DISCOVERY_SCHEDULES_SUCCESS());
-    },
-    onError: (error) => {
-      addError(error, { title: i18n.UPDATE_ATTACK_DISCOVERY_SCHEDULES_FAILURE() });
-    },
-  });
+  >(
+    ({ id, scheduleToUpdate }) =>
+      updateAttackDiscoverySchedule({
+        id,
+        body: scheduleToUpdate,
+      }),
+    {
+      mutationKey: UPDATE_ATTACK_DISCOVERY_SCHEDULE_MUTATION_KEY,
+      onSuccess: ({ id }) => {
+        invalidateGetAttackDiscoverySchedule(id);
+        invalidateFindAttackDiscoverySchedule();
+        addSuccess(i18n.UPDATE_ATTACK_DISCOVERY_SCHEDULES_SUCCESS());
+      },
+      onError: (error) => {
+        addError(error, { title: i18n.UPDATE_ATTACK_DISCOVERY_SCHEDULES_FAILURE() });
+      },
+    }
+  );
 };

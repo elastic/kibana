@@ -7,6 +7,8 @@
 
 import type {
   ConversationCategory,
+  InterruptResumeValue,
+  InterruptValue,
   MessageRole,
   Provider,
   Reader,
@@ -27,6 +29,7 @@ export interface EsConversationSchema {
     '@timestamp': string;
     id?: string;
     content: string;
+    refusal?: string;
     reader?: Reader;
     role: MessageRole;
     is_error?: boolean;
@@ -40,6 +43,8 @@ export interface EsConversationSchema {
     };
     metadata?: {
       content_references?: unknown;
+      interrupt_value?: InterruptValue;
+      interrupt_resume_value?: InterruptResumeValue;
     };
   }>;
   api_config?: {
@@ -73,6 +78,7 @@ export interface CreateMessageSchema {
     '@timestamp': string;
     id: string;
     content: string;
+    refusal?: string;
     reader?: Reader;
     role: MessageRole;
     is_error?: boolean;

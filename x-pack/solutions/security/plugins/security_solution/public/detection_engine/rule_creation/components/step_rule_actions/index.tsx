@@ -11,6 +11,7 @@ import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type {
+  ActionConnector,
   ActionTypeRegistryContract,
   ActionVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
@@ -38,6 +39,7 @@ interface StepRuleActionsProps extends RuleStepProps {
   summaryActionMessageParams: ActionVariables;
   form: FormHook<ActionsStepRule>;
   ruleInterval: string | undefined;
+  onNewConnectorCreated?: (connector: ActionConnector) => void;
 }
 
 interface StepRuleActionsReadOnlyProps {
@@ -78,6 +80,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   summaryActionMessageParams,
   form,
   ruleInterval,
+  onNewConnectorCreated,
 }) => {
   const {
     services: { application },
@@ -94,11 +97,18 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
             summaryMessageVariables: summaryActionMessageParams,
             ruleTypeId,
             minimumThrottleInterval: transformRuleInterval(ruleInterval),
+            onNewConnectorCreated,
           }}
         />
       </>
     ),
-    [actionMessageParams, ruleTypeId, summaryActionMessageParams, ruleInterval]
+    [
+      actionMessageParams,
+      ruleTypeId,
+      summaryActionMessageParams,
+      ruleInterval,
+      onNewConnectorCreated,
+    ]
   );
   const displayResponseActionsOptions = useMemo(() => {
     return (

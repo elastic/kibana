@@ -6,7 +6,13 @@
  */
 
 import { omit } from 'lodash';
-import { ALERT_REASON, ALERT_WORKFLOW_STATUS, TAGS, ALERT_URL } from '@kbn/rule-data-utils';
+import {
+  ALERT_REASON,
+  ALERT_WORKFLOW_STATUS,
+  TAGS,
+  ALERT_URL,
+  ALERT_INDEX_PATTERN,
+} from '@kbn/rule-data-utils';
 import { alertFieldMap } from '@kbn/alerts-as-data-utils';
 import type { RuleAlertData } from '../../types';
 
@@ -15,6 +21,7 @@ const allowedFrameworkFields = new Set<string>([
   ALERT_WORKFLOW_STATUS,
   TAGS,
   ALERT_URL,
+  ALERT_INDEX_PATTERN,
 ]);
 
 /**

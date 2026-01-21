@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 
-import type { JiraServiceManagementCreateAlertParams } from '../../../../server/connector_types';
+import type { CreateAlertParams as JiraServiceManagementCreateAlertParams } from '@kbn/connector-schemas/jira-service-management';
 import * as i18n from './translations';
 import type { EditActionCallback } from '../types';
 import { OptionalFieldLabel } from '../../../common/optional_field_label';

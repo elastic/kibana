@@ -6,7 +6,7 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useEntitiesListQuery } from './use_entities_list_query';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 import React from 'react';

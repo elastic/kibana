@@ -14,16 +14,27 @@ import { get, merge } from 'lodash';
 import type { AllowedSchemaTypes } from '@kbn/usage-collection-plugin/server';
 
 /**
+ * Meta information that can be attached to the Telemetry Schema to describe it
+ */
+export interface TelemetrySchemaMeta {
+  /** The root _meta attrobute */
+  _meta?: {
+    /** The description of the collected field */
+    description?: string;
+  };
+}
+
+/**
  * Type that defines all the possible values that the Telemetry Schema accepts.
  * These types definitions are helping to identify earlier the possible missing `properties` nesting when
  * manually defining the schemas.
  */
 export type TelemetrySchemaValue =
-  | {
+  | ({
       type: AllowedSchemaTypes | 'pass_through' | string;
-    }
-  | { type: 'array'; items: TelemetrySchemaValue }
-  | TelemetrySchemaObject;
+    } & TelemetrySchemaMeta)
+  | ({ type: 'array'; items: TelemetrySchemaValue } & TelemetrySchemaMeta)
+  | (TelemetrySchemaObject & TelemetrySchemaMeta);
 
 export interface TelemetrySchemaObject {
   properties: Record<string, TelemetrySchemaValue>;

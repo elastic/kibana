@@ -15,26 +15,16 @@ import type { CustomBulkAction } from '../../../../common/types';
 import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from './translations';
 
 /**
- * Utility function converting timeline items to event attachments
+ * Utility function converting multiple timeline items into single attachment (when attaching multiple timeline items to a case)
  */
-const timelineItemsToCaseEventAttachments = (
+const timelineItemsToCaseEventAttachment = (
   timelineItems: TimelineItem[]
-): CaseAttachmentWithoutOwner[] => {
-  const timelineItemToAttachment = (timelineItem: TimelineItem) => {
-    if (!timelineItem._index) {
-      return null;
-    }
-
-    return {
-      type: AttachmentType.event,
-      eventId: timelineItem._id,
-      index: timelineItem._index,
-    };
-  };
-
-  return timelineItems
-    .map(timelineItemToAttachment)
-    .filter(Boolean) as CaseAttachmentWithoutOwner[];
+): CaseAttachmentWithoutOwner => {
+  return {
+    type: AttachmentType.event,
+    eventId: timelineItems.map((item) => item._id).filter(Boolean),
+    index: timelineItems.map((item) => item._index).filter(Boolean),
+  } as CaseAttachmentWithoutOwner;
 };
 
 /**
@@ -63,6 +53,12 @@ export const useBulkAddEventsToCaseActions = ({
   const selectCaseModal = casesService?.hooks.useCasesAddToExistingCaseModal({
     onSuccess,
   });
+  const getObservables = useCallback(
+    (events: TimelineItem[] = []) => {
+      return casesService?.helpers.getObservablesFromEcs(events.map((event) => event.data));
+    },
+    [casesService?.helpers]
+  );
 
   return useMemo(() => {
     return isCasesContextAvailable &&
@@ -79,7 +75,8 @@ export const useBulkAddEventsToCaseActions = ({
             disabledLabel: ADD_TO_NEW_CASE,
             onClick: (events: TimelineItem[] = []) =>
               createCaseFlyout.open({
-                attachments: timelineItemsToCaseEventAttachments(events),
+                attachments: [timelineItemsToCaseEventAttachment(events)],
+                observables: getObservables(events),
               }),
           },
           {
@@ -90,8 +87,10 @@ export const useBulkAddEventsToCaseActions = ({
             'data-test-subj': 'attach-existing-case',
             onClick: (events: TimelineItem[] = []) =>
               selectCaseModal.open({
-                getAttachments: (): CaseAttachmentWithoutOwner[] =>
-                  timelineItemsToCaseEventAttachments(events),
+                getAttachments: (): CaseAttachmentWithoutOwner[] => [
+                  timelineItemsToCaseEventAttachment(events),
+                ],
+                getObservables: () => getObservables(events),
               }),
           },
         ]
@@ -102,5 +101,6 @@ export const useBulkAddEventsToCaseActions = ({
     selectCaseModal,
     userCasesPermissions?.create,
     userCasesPermissions?.read,
+    getObservables,
   ]);
 };

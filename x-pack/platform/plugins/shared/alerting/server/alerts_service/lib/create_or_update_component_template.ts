@@ -11,7 +11,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { asyncForEach } from '@kbn/std';
-import { retryTransientEsErrors } from './retry_transient_es_errors';
+import { retryTransientEsErrors } from '../../lib/retry_transient_es_errors';
 import { updateIndexTemplateFieldsLimit } from './update_index_template_fields_limit';
 
 interface CreateOrUpdateComponentTemplateOpts {

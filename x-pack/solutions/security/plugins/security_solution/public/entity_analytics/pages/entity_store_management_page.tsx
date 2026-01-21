@@ -223,6 +223,7 @@ export const EntityStoreManagementPage = () => {
           <EuiFlexGroup direction="column">
             {enableStoreMutation.isError && (
               <EuiCallOut
+                announceOnMount
                 title={
                   <FormattedMessage
                     id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.errors.initErrorTitle"
@@ -237,6 +238,7 @@ export const EntityStoreManagementPage = () => {
             )}
             {deleteEntityEngineMutation.isError && (
               <EuiCallOut
+                announceOnMount
                 title={
                   <FormattedMessage
                     id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.errors.deleteErrorTitle"

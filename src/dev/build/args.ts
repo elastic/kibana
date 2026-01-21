@@ -22,7 +22,6 @@ export function readCliArgs(argv: string[]) {
       'skip-generic-folders',
       'skip-platform-folders',
       'skip-os-packages',
-      'skip-canvas-shareable-runtime',
       'rpm',
       'deb',
       'docker-context-use-local-artifact',
@@ -153,7 +152,6 @@ export function readCliArgs(argv: string[]) {
     targetAllPlatforms: Boolean(flags['all-platforms']),
     targetServerlessPlatforms: Boolean(flags.serverless),
     eprRegistry: flags['epr-registry'],
-    buildCanvasShareableRuntime: !Boolean(flags['skip-canvas-shareable-runtime']),
     withExamplePlugins: Boolean(flags['with-example-plugins']),
     withTestPlugins: Boolean(flags['with-test-plugins']),
   };

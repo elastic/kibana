@@ -16,7 +16,7 @@ import {
   updateAgentPolicy,
   updateIntegrationPolicy,
 } from '@kbn/security-solution-plugin/scripts/endpoint/common/fleet_services';
-import type { PolicyTestResourceInfo } from '../../../../../security_solution_endpoint/services/endpoint_policy';
+import type { PolicyTestResourceInfo } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_policy';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -28,7 +28,8 @@ export default function ({ getService }: FtrProviderContext) {
   const config = getService('config');
   const isServerless = config.get('serverless');
 
-  describe('@ess @serverless Creation of DOT indices for elastic defend policies', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/246341
+  describe.skip('@ess @serverless Creation of DOT indices for elastic defend policies', function () {
     let testData: PolicyTestResourceInfo;
 
     const getExpectedIndexList = (namespace: string): string[] => {

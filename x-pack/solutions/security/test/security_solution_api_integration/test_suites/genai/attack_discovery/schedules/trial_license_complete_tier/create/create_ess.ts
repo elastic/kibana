@@ -53,11 +53,23 @@ export default ({ getService }: FtrProviderContext) => {
           kibanaSpace: kibanaSpace1,
         });
 
+        const mockSchedule = getSimpleAttackDiscoverySchedule();
+        const { name, enabled, schedule: mockInterval, actions, params } = mockSchedule;
         expect(schedule).toEqual(
           expect.objectContaining({
-            ...getSimpleAttackDiscoverySchedule(),
-            createdBy: secOnlySpacesAll.username,
-            updatedBy: secOnlySpacesAll.username,
+            actions,
+            created_by: secOnlySpacesAll.username,
+            enabled,
+            name,
+            params: expect.objectContaining({
+              alerts_index_pattern: params.alerts_index_pattern,
+              api_config: params.api_config,
+              end: params.end,
+              size: params.size,
+              start: params.start,
+            }),
+            schedule: mockInterval,
+            updated_by: secOnlySpacesAll.username,
           })
         );
 

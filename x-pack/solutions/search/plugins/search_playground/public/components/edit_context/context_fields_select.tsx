@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState, useRef } from 'react';
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiCallOut, EuiComboBox } from '@elastic/eui';
+import { EuiCallOut, EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type { QuerySourceFields } from '../../types';
@@ -26,6 +26,24 @@ export const ContextFieldsSelect = ({
   selectedContextFields,
   updateSelectedContextFields,
 }: ContextFieldsSelectProps) => {
+  const searchValue = useRef('');
+  const [hasError, setHasError] = useState(false);
+
+  const handleSearchChange = (value: string) => {
+    searchValue.current = value;
+    setHasError(false);
+  };
+
+  const handleBlur = () => {
+    if (searchValue.current.trim() === '') return;
+
+    const hasExactMatch = selectOptions.some(
+      (opt) => opt.label.toLowerCase() === searchValue.current.toLowerCase()
+    );
+
+    setHasError(!hasExactMatch);
+  };
+
   const { options: selectOptions, selectedOptions } = useMemo(() => {
     if (!indexFields.source_fields?.length) return { options: [], selectedOptions: [] };
 
@@ -63,6 +81,7 @@ export const ContextFieldsSelect = ({
   if (selectOptions.length === 0) {
     return (
       <EuiCallOut
+        announceOnMount
         title={i18n.translate('xpack.searchPlayground.editContext.noSourceFieldWarning', {
           defaultMessage: 'No source fields found',
         })}
@@ -74,13 +93,34 @@ export const ContextFieldsSelect = ({
   }
 
   return (
-    <EuiComboBox
-      data-test-subj={`contextFieldsSelectable-${indexName}`}
-      options={selectOptions}
-      selectedOptions={selectedOptions}
-      onChange={onSelectFields}
-      isClearable={false}
+    <EuiFormRow
       fullWidth
-    />
+      isInvalid={hasError}
+      error={
+        hasError
+          ? `"${searchValue.current}" ${i18n.translate(
+              'xpack.searchPlayground.editContext.noSourceFieldWarning',
+              {
+                defaultMessage: 'does not match any options',
+              }
+            )}`
+          : undefined
+      }
+    >
+      <EuiComboBox
+        data-test-subj={`contextFieldsSelectable-${indexName}`}
+        options={selectOptions}
+        selectedOptions={selectedOptions}
+        onChange={onSelectFields}
+        isClearable={false}
+        fullWidth
+        aria-label={i18n.translate('xpack.searchPlayground.editContext.ariaLabel', {
+          defaultMessage: 'Select context field options',
+        })}
+        onSearchChange={handleSearchChange}
+        onBlur={handleBlur}
+        isInvalid={hasError}
+      />
+    </EuiFormRow>
   );
 };

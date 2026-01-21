@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { log, timerange } from '@kbn/apm-synthtrace-client';
+import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
+import { log, timerange } from '@kbn/synthtrace-client';
 import expect from '@kbn/expect';
 import type { DegradedField } from '@kbn/dataset-quality-plugin/common/api_types';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';

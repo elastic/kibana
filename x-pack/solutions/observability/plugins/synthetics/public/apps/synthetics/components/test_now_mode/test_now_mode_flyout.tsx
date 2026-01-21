@@ -67,7 +67,7 @@ export function TestNowModeFlyout({
       <EuiFlyoutBody>
         <KibanaSectionErrorBoundary sectionName="xpack.synthetics.monitorManagement.testNowFlyout.body">
           {isPushing && (
-            <EuiCallOut color="primary">
+            <EuiCallOut announceOnMount color="primary">
               {PushingLabel} <EuiLoadingSpinner />
             </EuiCallOut>
           )}

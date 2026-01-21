@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/streams-app-plugin",
-  "owner": "@elastic/streams-program-team",
+  "owner": "@elastic/obs-onboarding-team @elastic/obs-sig-events-team",
   "group": "platform",
   "visibility": "shared",
   "plugin": {
@@ -14,8 +14,8 @@
       "data",
       "datasetQuality",
       "dataViews",
-      "discover",
       "discoverShared",
+      "console",
       "fieldFormats",
       "fieldsMetadata",
       "licensing",
@@ -29,8 +29,9 @@
       "unifiedDocViewer",
       "dashboard",
     ],
-    "optionalPlugins": ["observabilityAIAssistant"],
+    "optionalPlugins": ["cloud", "spaces", "indexLifecycleManagement"],
     "requiredBundles": [
+      "discover",
       "kibanaReact",
       "kibanaUtils",
       "observabilityAIAssistant",

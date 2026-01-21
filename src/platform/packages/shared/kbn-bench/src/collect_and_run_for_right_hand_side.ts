@@ -17,9 +17,11 @@ import type { Benchmark, Script } from './config/types';
 export async function collectAndRunForRightHandSide({
   context,
   leftResults,
+  configFromCwd,
 }: {
   context: GlobalRunContext;
   leftResults: ConfigResult[];
+  configFromCwd?: boolean;
 }): Promise<ConfigResult[]> {
   const { log, globalConfig, runtimeOverrides, workspace } = context;
 
@@ -27,7 +29,10 @@ export async function collectAndRunForRightHandSide({
 
   log.debug('Collecting benchmark configs');
 
-  const configPaths = await collectConfigPaths({ patterns: [], cwd: workspace.getDir() });
+  const configPaths = await collectConfigPaths({
+    patterns: [],
+    cwd: configFromCwd ? process.cwd() : workspace.getDir(),
+  });
 
   log.debug(`Discovered ${configPaths.length} config path(s)`);
 

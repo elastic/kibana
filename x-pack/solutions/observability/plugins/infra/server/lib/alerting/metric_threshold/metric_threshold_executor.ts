@@ -11,6 +11,7 @@ import {
   ALERT_EVALUATION_VALUES,
   ALERT_GROUP,
   ALERT_GROUPING,
+  ALERT_INDEX_PATTERN,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { castArray, isEqual } from 'lodash';
@@ -69,6 +70,7 @@ export type MetricThresholdAlert = Omit<
   [ALERT_EVALUATION_VALUES]?: Array<number | null>;
   [ALERT_EVALUATION_THRESHOLD]?: Array<number | null>;
   [ALERT_GROUP]?: Group[];
+  [ALERT_INDEX_PATTERN]?: string;
 };
 
 export type MetricThresholdRuleParams = Record<string, any>;
@@ -105,6 +107,7 @@ type MetricThresholdAlertReporter = (params: {
   groups?: Group[];
   grouping?: { flatten?: Record<string, unknown>; unflatten?: Record<string, unknown> };
   thresholds?: Array<number | null>;
+  metricAlias: string;
 }) => void;
 
 // TODO: Refactor the executor code to have better flow-control with better
@@ -148,7 +151,7 @@ export const createMetricThresholdExecutor =
       throw new AlertsClientError();
     }
 
-    const alertReporter: MetricThresholdAlertReporter = async ({
+    const alertReporter: MetricThresholdAlertReporter = ({
       id,
       reason,
       actionGroup,
@@ -158,6 +161,7 @@ export const createMetricThresholdExecutor =
       groups,
       thresholds,
       grouping,
+      metricAlias,
     }) => {
       const { uuid } = alertsClient.report({
         id,
@@ -172,6 +176,7 @@ export const createMetricThresholdExecutor =
           [ALERT_EVALUATION_THRESHOLD]: thresholds,
           [ALERT_GROUP]: groups,
           [ALERT_GROUPING]: grouping?.unflatten,
+          [ALERT_INDEX_PATTERN]: metricAlias,
           ...flattenAdditionalContext(additionalContext),
           ...getEcsGroupsFromFlattenGrouping(grouping?.flatten),
         },
@@ -191,6 +196,11 @@ export const createMetricThresholdExecutor =
       alertOnNoData: boolean;
       alertOnGroupDisappear: boolean | undefined;
     };
+
+    const source = await libs.sources.getSourceConfiguration(
+      savedObjectsClient,
+      sourceId || 'default'
+    );
 
     if (!params.filterQuery && params.filterQueryText) {
       try {
@@ -221,6 +231,7 @@ export const createMetricThresholdExecutor =
           reason,
           actionGroup: actionGroupId,
           context: alertContext,
+          metricAlias: source.configuration.metricAlias,
         });
 
         return {
@@ -235,12 +246,9 @@ export const createMetricThresholdExecutor =
     }
 
     // For backwards-compatibility, interpret undefined alertOnGroupDisappear as true
-    const alertOnGroupDisappear = _alertOnGroupDisappear !== false;
+    const alertOnGroupDisappear =
+      _alertOnGroupDisappear !== false && params.noDataBehavior !== 'recover';
 
-    const source = await libs.sources.getSourceConfiguration(
-      savedObjectsClient,
-      sourceId || 'default'
-    );
     const config = source.configuration;
     const compositeSize = libs.configuration.alerting.metric_threshold.group_by_page_size;
 
@@ -294,22 +302,37 @@ export const createMetricThresholdExecutor =
       const shouldAlertWarn = alertResults.every((result) => result[group]?.shouldWarn);
       // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
       // whole alert is in a No Data/Error state
-      const isNoData = alertResults.some((result) => result[group]?.isNoData);
+      const isNoDataFound = alertResults.some((result) => result[group]?.isNoData);
 
-      if (isNoData && group !== UNGROUPED_FACTORY_KEY) {
+      if (isNoDataFound && group !== UNGROUPED_FACTORY_KEY) {
         nextMissingGroups.add({ key: group, bucketKey: alertResults[0][group].bucketKey });
       }
 
-      const nextState = isNoData
-        ? AlertStates.NO_DATA
-        : shouldAlertFire
-        ? AlertStates.ALERT
-        : shouldAlertWarn
-        ? AlertStates.WARNING
-        : AlertStates.OK;
+      const isIndeterminateState =
+        isNoDataFound &&
+        params.noDataBehavior === 'remainActive' &&
+        alertsClient.isTrackedAlert(group);
+
+      const isAlertOnNoDataEnabled = params.noDataBehavior
+        ? params.noDataBehavior === 'alertOnNoData'
+        : alertOnNoData || alertOnGroupDisappear;
+
+      const nextState =
+        isNoDataFound && isAlertOnNoDataEnabled
+          ? AlertStates.NO_DATA
+          : isIndeterminateState
+          ? AlertStates.ALERT
+          : shouldAlertFire
+          ? AlertStates.ALERT
+          : shouldAlertWarn
+          ? AlertStates.WARNING
+          : AlertStates.OK;
 
       let reason;
-      if (nextState === AlertStates.ALERT || nextState === AlertStates.WARNING) {
+      if (
+        (nextState === AlertStates.ALERT || nextState === AlertStates.WARNING) &&
+        !isIndeterminateState
+      ) {
         reason = alertResults
           .map((result) =>
             buildFiredAlertReason({
@@ -345,10 +368,14 @@ export const createMetricThresholdExecutor =
        * If `alertOnNoData` is true but `alertOnGroupDisappear` is false, we don't need to worry about the {a, b, c} possibility.
        * At this point in the function, a false `alertOnGroupDisappear` would already have prevented group 'a' from being evaluated at all.
        */
-      if (alertOnNoData || (alertOnGroupDisappear && hasGroups)) {
+      const shouldBuildNoDataReason = params.noDataBehavior
+        ? params.noDataBehavior !== 'recover'
+        : alertOnNoData || (alertOnGroupDisappear && hasGroups);
+
+      if (shouldBuildNoDataReason) {
         // In the previous line we've determined if the user is interested in No Data states, so only now do we actually
         // check to see if a No Data state has occurred
-        if (nextState === AlertStates.NO_DATA) {
+        if (nextState === AlertStates.NO_DATA || isIndeterminateState) {
           reason = alertResults
             .filter((result) => result[group]?.isNoData)
             .map((result) => buildNoDataAlertReason({ ...result[group], group }))
@@ -444,6 +471,7 @@ export const createMetricThresholdExecutor =
           groups,
           thresholds,
           grouping: { flatten: flattenGroupings[group], unflatten: grouping },
+          metricAlias: source.configuration.metricAlias,
         });
         scheduledActionsCount++;
       }

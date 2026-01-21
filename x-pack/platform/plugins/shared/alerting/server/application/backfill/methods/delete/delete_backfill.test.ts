@@ -88,6 +88,7 @@ const mockAdHocRunSO: SavedObject<AdHocRunSO> = {
     createdAt: '2024-01-30T00:00:00.000Z',
     duration: '12h',
     enabled: true,
+    initiator: 'user',
     rule: {
       name: fakeRuleName,
       tags: ['foo'],

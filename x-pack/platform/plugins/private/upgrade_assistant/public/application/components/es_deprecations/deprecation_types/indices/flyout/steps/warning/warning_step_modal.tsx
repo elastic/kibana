@@ -228,6 +228,7 @@ const WarningReadOnlyModalStep: React.FunctionComponent<WarningModalStepProps> =
         {warnings.length > 0 && (
           <>
             <EuiCallOut
+              announceOnMount={false}
               title={
                 <FormattedMessage
                   id="xpack.upgradeAssistant.esDeprecations.indices.indexModal.warningsStep.readonly.calloutTitle"

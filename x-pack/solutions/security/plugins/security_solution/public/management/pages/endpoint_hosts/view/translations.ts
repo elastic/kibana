@@ -41,6 +41,25 @@ export const WORKFLOW_INSIGHTS = {
       }
     ),
   },
+  knowledgeBase: {
+    setupKB: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.knowledgeBase.setupRequired.setupKB',
+      { defaultMessage: 'set up a knowledge base' }
+    ),
+    setupOngoing: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.knowledgeBase.setupOngoing',
+      {
+        defaultMessage:
+          "Knowledge base setup is in progress. You can start a scan now and we'll queue it for you.",
+      }
+    ),
+    docsLinkText: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.knowledgeBase.docsLinkText',
+      {
+        defaultMessage: 'Learn more',
+      }
+    ),
+  },
   issues: {
     title: i18n.translate('xpack.securitySolution.endpointDetails.workflowInsights.issues.title', {
       defaultMessage: 'Insights',

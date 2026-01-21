@@ -17,7 +17,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...baseIntegrationTestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...baseIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
-        '--data.search.sessions.enabled=true', // enable search sessions
+        '--data.search.sessions.enabled=true',
       ],
     },
   };

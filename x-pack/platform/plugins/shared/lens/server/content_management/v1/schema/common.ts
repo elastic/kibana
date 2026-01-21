@@ -15,25 +15,10 @@ export const lensItemAttributesSchema = schema.object(
   {
     title: schema.string(),
     description: schema.maybe(schema.string()),
-    visualizationType: schema.maybe(schema.nullable(schema.string())),
+    visualizationType: schema.string(),
     state: schema.maybe(schema.any()),
     // TODO make version required
     version: schema.maybe(schema.literal(LENS_ITEM_VERSION)), // pin version explicitly
-  },
-  { unknowns: 'forbid' }
-);
-
-export const lensAPIStateSchema = schema.object(
-  {
-    isNewApiFormat: schema.literal(true), // pin this to validate CB transformations
-  },
-  { unknowns: 'allow' }
-);
-
-export const lensAPIAttributesSchema = schema.object(
-  {
-    ...lensItemAttributesSchema.getPropSchemas(),
-    state: lensAPIStateSchema,
   },
   { unknowns: 'forbid' }
 );
@@ -44,6 +29,17 @@ export const lensAPIAttributesSchema = schema.object(
  * Only used in lens server-side Content Management.
  */
 export const lensSavedObjectSchema = savedObjectSchema(lensItemAttributesSchema);
+
+/**
+ * The Lens item data returned from the server
+ */
+export const lensItemSchema = schema.object(
+  {
+    ...pickFromObjectSchema(lensSavedObjectSchema.getPropSchemas(), ['id', 'references']),
+    ...lensSavedObjectSchema.getPropSchemas().attributes.getPropSchemas(),
+  },
+  { unknowns: 'forbid' }
+);
 
 /**
  * The common SO type used for mSearch items.
@@ -57,56 +53,7 @@ export const lensCommonSavedObjectSchema = savedObjectSchema(
   )
 );
 
-/**
- * The Lens item data returned from the server
- */
-export const lensItemSchema = schema.object(
-  {
-    ...pickFromObjectSchema(lensSavedObjectSchema.getPropSchemas(), ['id', 'references']),
-    // Spread attributes at root
-    ...lensSavedObjectSchema.getPropSchemas().attributes.getPropSchemas(),
-  },
-  { unknowns: 'forbid' }
-);
-
-/**
- * The Lens item data returned from the server
- */
-export const lensAPIConfigSchema = schema.object(
-  {
-    // TODO flatten this with new CB shape
-    ...pickFromObjectSchema(lensSavedObjectSchema.getPropSchemas(), ['id', 'references']),
-    // Spread attributes at root
-    ...lensAPIAttributesSchema.getPropSchemas(),
-  },
-  { unknowns: 'forbid' }
-);
-
-/**
- * The Lens item meta returned from the server
- */
-export const lensItemMetaSchema = schema.object(
-  {
-    ...pickFromObjectSchema(lensSavedObjectSchema.getPropSchemas(), [
-      'type',
-      'createdAt',
-      'updatedAt',
-      'createdBy',
-      'updatedBy',
-      'originId', // maybe??
-      'managed',
-    ]),
-  },
-  { unknowns: 'forbid' }
-);
-
-/**
- * The Lens response item returned from the server
- */
-export const lensResponseItemSchema = schema.object(
-  {
-    data: lensAPIConfigSchema,
-    meta: lensItemMetaSchema,
-  },
-  { unknowns: 'forbid' }
-);
+// TODO: cleanup data for update, should we forbid or just ignore body.id on update?
+export const lensItemDataSchema = lensItemSchema.extends({
+  id: undefined,
+});

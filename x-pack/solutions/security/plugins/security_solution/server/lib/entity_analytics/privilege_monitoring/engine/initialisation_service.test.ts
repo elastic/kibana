@@ -21,13 +21,10 @@ import { MonitoringEngineComponentResourceEnum } from '../../../../../common/api
 import { PrivilegeMonitoringEngineActions } from '../auditing/actions';
 import { allowedExperimentalValues } from '../../../../../common';
 
-const mockUpsertIndex = jest.fn();
-jest.mock('./elasticsearch/indices', () => {
+const mockUpsertSources = jest.fn();
+jest.mock('./initialisation_sources_service', () => {
   return {
-    createPrivmonIndexService: () => ({
-      upsertIndex: () => mockUpsertIndex(),
-      createIngestPipelineIfDoesNotExist: jest.fn(),
-    }),
+    createInitialisationSourcesService: () => () => mockUpsertSources(),
   };
 });
 
@@ -57,6 +54,7 @@ jest.mock('../saved_objects', () => {
     })),
   };
 });
+
 describe('Privileged User Monitoring: Index Sync Service', () => {
   const mockSavedObjectClient = savedObjectsClientMock.create();
   const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
@@ -83,25 +81,25 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     dataClient = new PrivilegeMonitoringDataClient(deps);
-    initService = createInitialisationService(dataClient);
+    initService = createInitialisationService(dataClient, mockSavedObjectClient);
   });
   describe('init', () => {
     it('should throw if taskManager is not available', async () => {
       const { taskManager, ...optsWithoutTaskManager } = deps;
       dataClient = new PrivilegeMonitoringDataClient(optsWithoutTaskManager);
 
-      expect(() => createInitialisationService(dataClient)).toThrow(
+      expect(() => createInitialisationService(dataClient, mockSavedObjectClient)).toThrow(
         'Task Manager is not available'
       );
     });
 
     it('should initialize the privilege monitoring engine successfully', async () => {
-      mockUpsertIndex.mockResolvedValue(undefined);
+      mockUpsertSources.mockResolvedValue(undefined);
       mockEngineDescriptorInit.mockResolvedValue({ status: 'success' });
 
-      const result = await initService.init(mockSavedObjectClient);
+      const result = await initService.init();
 
-      expect(mockUpsertIndex).toHaveBeenCalled();
+      expect(mockUpsertSources).toHaveBeenCalled();
       expect(mockStartPrivilegeMonitoringTask).toHaveBeenCalled();
       expect(auditMock.log).toHaveBeenCalled();
       expect(result).toEqual({ status: 'success' });
@@ -109,7 +107,7 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
 
     it('should handle unexpected errors and update engine status', async () => {
       const fakeError = new Error('Something went wrong');
-      mockUpsertIndex.mockRejectedValue(fakeError);
+      mockUpsertSources.mockRejectedValue(fakeError);
 
       const mockAudit = jest.fn();
       const mockLog = jest.fn();
@@ -117,7 +115,7 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
       dataClient.audit = mockAudit;
       dataClient.log = mockLog;
 
-      await initService.init(mockSavedObjectClient);
+      await initService.init();
 
       expect(mockLog).toHaveBeenCalledWith(
         'error',

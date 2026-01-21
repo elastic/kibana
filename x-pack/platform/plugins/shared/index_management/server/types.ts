@@ -30,6 +30,7 @@ export interface RouteDependencies {
     enableMappingsSourceFieldSection: boolean;
     enableTogglingDataRetention: boolean;
     enableProjectLevelRetentionChecks: boolean;
+    enableFailureStoreRetentionDisabling: boolean;
   };
   indexDataEnricher: IndexDataEnricher;
   lib: {

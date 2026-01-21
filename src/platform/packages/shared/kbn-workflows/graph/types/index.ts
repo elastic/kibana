@@ -10,6 +10,8 @@
 export type {
   AtomicGraphNode,
   AtomicGraphNodeSchema,
+  DataSetGraphNode,
+  DataSetGraphNodeSchema,
   HttpGraphNode,
   HttpGraphNodeSchema,
   WaitGraphNode,
@@ -57,6 +59,8 @@ export type {
   EnterFallbackPathNode,
   ExitFallbackPathNodeSchema,
   ExitFallbackPathNode,
+  EnterTimeoutZoneNode,
+  ExitTimeoutZoneNode,
 } from './nodes/on_failure_nodes';
 
 export type { GraphNodeUnion } from './nodes/union';
@@ -64,6 +68,7 @@ export type { WorkflowGraphType } from './graph';
 
 export {
   isAtomic,
+  isDataSet,
   isElasticsearch,
   isKibana,
   isHttp,
@@ -80,4 +85,8 @@ export {
   isExitNormalPath,
   isEnterContinue,
   isExitContinue,
+  isEnterStepTimeoutZone,
+  isExitStepTimeoutZone,
+  isEnterWorkflowTimeoutZone,
+  isExitWorkflowTimeoutZone,
 } from './guards';

@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { RuleUpgradeEventTypes } from '../../../common/lib/telemetry/events/rule_upgrade/types';
 import type { ReviewPrebuiltRuleUpgradeFilter } from '../../../../common/api/detection_engine/prebuilt_rules/common/review_prebuilt_rules_upgrade_filter';
 import { FieldUpgradeStateEnum, type RuleUpgradeState } from '../model/prebuilt_rule_upgrade';
@@ -48,6 +49,8 @@ import { useKibana } from '../../../common/lib/kibana';
 import { TabContentPadding } from '../components/rule_details/rule_details_flyout';
 
 const REVIEW_PREBUILT_RULES_UPGRADE_REFRESH_INTERVAL = 5 * 60 * 1000;
+const RULE_UPGRADE_FLYOUT_BUTTON_EVENT_VERSION = 2;
+const RULE_UPGRADE_FLYOUT_OPEN_EVENT_VERSION = 2;
 
 export const PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR = 'updatePrebuiltRulePreview';
 
@@ -71,6 +74,7 @@ export function usePrebuiltRulesUpgrade({
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
   const [loadingRules, setLoadingRules] = useState<RuleSignatureId[]>([]);
   const { telemetry } = useKibana().services;
+  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
 
   const {
     data: upgradeReviewResponse,
@@ -252,6 +256,7 @@ export function usePrebuiltRulesUpgrade({
       return (
         <EuiButton
           disabled={
+            !canEditRules ||
             loadingRules.includes(rule.rule_id) ||
             isRefetching ||
             isUpgradingSecurityPackages ||
@@ -276,6 +281,7 @@ export function usePrebuiltRulesUpgrade({
     },
     [
       rulesUpgradeState,
+      canEditRules,
       loadingRules,
       isRefetching,
       isUpgradingSecurityPackages,
@@ -364,16 +370,18 @@ export function usePrebuiltRulesUpgrade({
   );
   const closeRulePreviewAction = (rule: RuleResponse, reason: RulePreviewFlyoutCloseReason) => {
     const ruleUpgradeState = rulesUpgradeState[rule.rule_id];
-    const hasMissingBaseVersion = ruleUpgradeState.has_base_version === false;
+    const hasBaseVersion = ruleUpgradeState.has_base_version === true;
     if (reason === 'dismiss') {
       telemetry.reportEvent(RuleUpgradeEventTypes.RuleUpgradeFlyoutButtonClick, {
         type: 'dismiss',
-        hasMissingBaseVersion,
+        hasBaseVersion,
+        eventVersion: RULE_UPGRADE_FLYOUT_BUTTON_EVENT_VERSION,
       });
     } else {
       telemetry.reportEvent(RuleUpgradeEventTypes.RuleUpgradeFlyoutButtonClick, {
         type: 'update',
-        hasMissingBaseVersion,
+        hasBaseVersion,
+        eventVersion: RULE_UPGRADE_FLYOUT_BUTTON_EVENT_VERSION,
       });
     }
   };
@@ -393,9 +401,11 @@ export function usePrebuiltRulesUpgrade({
     (ruleId: string) => {
       openRulePreviewDefault(ruleId);
       const ruleUpgradeState = rulesUpgradeState[ruleId];
-      const hasMissingBaseVersion = ruleUpgradeState.has_base_version === false;
+      const hasBaseVersion = ruleUpgradeState.has_base_version === true;
+
       telemetry.reportEvent(RuleUpgradeEventTypes.RuleUpgradeFlyoutOpen, {
-        hasMissingBaseVersion,
+        hasBaseVersion,
+        eventVersion: RULE_UPGRADE_FLYOUT_OPEN_EVENT_VERSION,
       });
     },
     [openRulePreviewDefault, rulesUpgradeState, telemetry]

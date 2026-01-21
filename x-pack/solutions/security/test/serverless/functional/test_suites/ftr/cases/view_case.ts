@@ -37,7 +37,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   // https://github.com/elastic/kibana/pull/190690
   // fails after missing `awaits` were added
-  describe('Case View', function () {
+  // Flaky: See https://github.com/elastic/kibana/issues/241493
+  describe.skip('Case View', function () {
     before(async () => {
       await svlCommonPage.loginWithPrivilegedRole();
     });
@@ -396,19 +397,19 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('case-view-tab-title-files');
         await testSubjects.existOrFail('case-view-tab-content-files');
 
-        await cases.casesFilesTable.addFile(require.resolve('./empty.txt'));
+        await cases.casesFilesTable.addFile(require.resolve('./note.txt'));
 
         const uploadedFileName = await testSubjects.getVisibleText('cases-files-name-text');
-        expect(uploadedFileName).to.be('empty.txt');
+        expect(uploadedFileName).to.be('note.txt');
       });
 
       it('search by file name', async () => {
         await cases.casesFilesTable.searchByFileName('foobar');
         await cases.casesFilesTable.emptyOrFail();
-        await cases.casesFilesTable.searchByFileName('empty');
+        await cases.casesFilesTable.searchByFileName('note');
 
         const uploadedFileName = await testSubjects.getVisibleText('cases-files-name-text');
-        expect(uploadedFileName).to.be('empty.txt');
+        expect(uploadedFileName).to.be('note.txt');
       });
 
       it('files added to a case can be deleted', async () => {
@@ -418,13 +419,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       describe('Files User Activity', () => {
         it('file user action is displayed correctly', async () => {
-          await cases.casesFilesTable.addFile(require.resolve('./empty.txt'));
+          await cases.casesFilesTable.addFile(require.resolve('./note.txt'));
 
           await testSubjects.click('case-view-tab-title-activity');
           await testSubjects.existOrFail('case-view-tab-content-activity');
 
           const uploadedFileName = await testSubjects.getVisibleText('cases-files-name-text');
-          expect(uploadedFileName).to.be('empty.txt');
+          expect(uploadedFileName).to.be('note.txt');
         });
       });
     });

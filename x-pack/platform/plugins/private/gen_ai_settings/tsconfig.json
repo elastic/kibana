@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -28,6 +28,14 @@
     "@kbn/management-settings-field-definition",
     "@kbn/react-kibana-context-theme",
     "@kbn/licensing-plugin",
+    "@kbn/management-settings-components-field-row",
+    "@kbn/react-query",
+    "@kbn/product-doc-base-plugin",
+    "@kbn/ai-assistant-common",
+    "@kbn/ai-agent-confirmation-modal",
+    "@kbn/product-doc-common",
+    "@kbn/react-kibana-mount",
+    "@kbn/agent-builder-common"
   ],
   "exclude": ["target/**/*"]
 }

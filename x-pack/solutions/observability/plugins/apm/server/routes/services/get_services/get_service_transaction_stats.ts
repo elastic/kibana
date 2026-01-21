@@ -7,6 +7,12 @@
 
 import { kqlQuery, rangeQuery, wildcardQuery } from '@kbn/observability-plugin/server';
 import { getAgentName } from '@kbn/elastic-agent-utils';
+import {
+  calculateThroughputWithRange,
+  calculateFailedTransactionRate,
+  getOutcomeAggregation,
+  getDurationFieldForTransactions,
+} from '@kbn/apm-data-access-plugin/server/utils';
 import type { ApmDocumentType } from '../../../../common/document_type';
 import {
   AGENT_NAME,
@@ -22,14 +28,8 @@ import type { ServiceGroup } from '../../../../common/service_groups';
 import { isDefaultTransactionType } from '../../../../common/transaction_types';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import { calculateThroughputWithRange } from '../../../lib/helpers/calculate_throughput';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import type { RandomSampler } from '../../../lib/helpers/get_random_sampler';
-import { getDurationFieldForTransactions } from '../../../lib/helpers/transactions';
-import {
-  calculateFailedTransactionRate,
-  getOutcomeAggregation,
-} from '../../../lib/helpers/transaction_error_rate';
 import { maybe } from '../../../../common/utils/maybe';
 import { serviceGroupWithOverflowQuery } from '../../../lib/service_group_query_with_overflow';
 
@@ -61,6 +61,7 @@ export interface ServiceTransactionStatsResponse {
     transactionErrorRate?: number;
     throughput?: number;
   }>;
+  maxCountExceeded: boolean;
   serviceOverflowCount: number;
 }
 
@@ -164,6 +165,8 @@ export async function getServiceTransactionStats({
     },
   });
 
+  const maxCountExceeded = (response.aggregations?.sample.services.sum_other_doc_count ?? 0) > 0;
+
   return {
     serviceStats:
       response.aggregations?.sample.services.buckets.map((bucket) => {
@@ -198,6 +201,7 @@ export async function getServiceTransactionStats({
             : undefined,
         };
       }) ?? [],
+    maxCountExceeded,
     serviceOverflowCount: response.aggregations?.sample?.overflowCount?.value || 0,
   };
 }

@@ -9,10 +9,8 @@
     "id": "intercepts",
     "browser": true,
     "server": true,
-    "requiredPlugins": [
-      "cloud",
-      "licensing"
-    ],
+    "requiredPlugins": ["cloud", "licensing"],
+    "optionalPlugins": ["usageCollection"],
     "requiredBundles": [],
     "configPath": ["xpack", "intercepts"]
   }

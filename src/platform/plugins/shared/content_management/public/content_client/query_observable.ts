@@ -12,8 +12,8 @@ import type {
   QueryObserverResult,
   QueryClient,
   QueryKey,
-} from '@tanstack/react-query';
-import { notifyManager, QueryObserver } from '@tanstack/react-query';
+} from '@kbn/react-query';
+import { notifyManager, QueryObserver } from '@kbn/react-query';
 import { Observable } from 'rxjs';
 
 export const createQueryObservable = <
