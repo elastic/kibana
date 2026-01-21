@@ -464,6 +464,7 @@ export function KnowledgeBaseTab() {
             <KnowledgeBaseInstallationStatusPanel
               knowledgeBase={knowledgeBase}
               eisCalloutZIndex={0}
+              isInKnowledgeBaseTab
             />
           )}
         </EuiFlexItem>

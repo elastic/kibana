@@ -36,12 +36,14 @@ interface SelectModelAndInstallKnowledgeBaseProps {
   onInstall: (inferenceId: string) => Promise<void>;
   isInstalling: boolean;
   eisCalloutZIndex?: number;
+  isInKnowledgeBaseTab?: boolean;
 }
 
 export function SelectModelAndInstallKnowledgeBase({
   onInstall,
   isInstalling,
   eisCalloutZIndex,
+  isInKnowledgeBaseTab = false,
 }: SelectModelAndInstallKnowledgeBaseProps) {
   const { euiTheme } = useEuiTheme();
 
@@ -61,8 +63,9 @@ export function SelectModelAndInstallKnowledgeBase({
   const isSelectedModelFromEis = EIS_PRECONFIGURED_INFERENCE_IDS.includes(selectedInferenceId);
   const showEisKnowledgeBaseCallout = isSelectedModelFromEis && !eisKnowledgeBaseCalloutDismissed;
 
-  // Position callout to the left when AI Agent tour is visible to avoid overlap in flyout
-  const eisCalloutAnchorPosition = aiAgentTourDismissed ? 'downCenter' : 'leftCenter';
+  // Position callout to the left when AI Agent tour is visible to avoid overlap
+  const eisCalloutAnchorPosition =
+    !isInKnowledgeBaseTab && !aiAgentTourDismissed ? 'leftCenter' : 'downCenter';
 
   const handleDismissEisKnowledgeBaseCallout = () => {
     setEisKnowledgeBaseCalloutDismissed(true);
