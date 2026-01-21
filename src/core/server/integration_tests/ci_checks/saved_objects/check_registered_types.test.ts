@@ -1146,7 +1146,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "space|mappings: d534234257efd99d22a17a7e5b59f38d98490ff5",
         "space|schemas: 8d6477e08dfdf20335752a69994646f9da90741f",
         "space|10.2.0: a570fb1ea89ade83a890a2c377a6f72497e8e611862dd4cdafca32a7f7da7778",
-        "space|10.1.0: 214c21a89ba2a4671b17c8cfdbbddb9926df162666978093a9273eced6a95e31",
+        "space|10.1.0: 7270f0ed28380892b77c16dd330ebbdf42ddbedaa075ac6e4c3f201861635f56",
         "space|6.6.0: dfb9c6c42a6dc7783055066df268315ed4cb80f1",
         "=====================================================",
         "spaces-usage-stats|global: 5a98aab5e4f8fe76c5c0c9cc5784175bc4555680",
