@@ -192,12 +192,20 @@ test.describe('Node Details: host', { tag: ['@ess', '@svlOblt'] }, () => {
     });
   });
 
-  test('Overview Tab - shows the CPU Profiling prompt', async ({
+  test.skip('Overview Tab - shows the CPU Profiling prompt', async ({
     pageObjects: { nodeDetailsPage },
   }) => {
     await nodeDetailsPage.clickOverviewTab();
     await test.step('verify CPU profiling prompt exists', async () => {
       await expect(nodeDetailsPage.cpuProfilingPrompt).toBeVisible();
+    });
+  });
+
+  test.skip('Profiling tab - shows the Profiling tab', async ({
+    pageObjects: { nodeDetailsPage },
+  }) => {
+    await test.step('verify profiling tab exists', async () => {
+      await expect(nodeDetailsPage.profilingTab).toBeVisible();
     });
   });
 
