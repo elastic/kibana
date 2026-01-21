@@ -56,6 +56,21 @@ export const scriptsLibraryLabels = Object.freeze({
         defaultMessage: 'Open',
       }),
     },
+    actions: {
+      details: i18n.translate('xpack.securitySolution.scriptsLibrary.table.actions.detailsLabel', {
+        defaultMessage: 'View details',
+      }),
+      edit: i18n.translate('xpack.securitySolution.scriptsLibrary.table.actions.editLabel', {
+        defaultMessage: 'Edit script',
+      }),
+      delete: i18n.translate('xpack.securitySolution.scriptsLibrary.table.actions.deleteLabel', {
+        defaultMessage: 'Delete script',
+      }),
+      download: i18n.translate(
+        'xpack.securitySolution.scriptsLibrary.table.actions.downloadLabel',
+        { defaultMessage: 'Download script' }
+      ),
+    },
     recordsPerPage: (totalScriptCount: number) =>
       i18n.translate('xpack.securitySolution.scriptsLibrary.list.recordRangeLabel', {
         defaultMessage: '{records, plural, one {script} other {scripts}}',
