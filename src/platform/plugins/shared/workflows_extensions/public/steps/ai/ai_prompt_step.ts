@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { convertJsonSchemaToZod } from './temp';
+import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 import type {
   AiPromptStepConfigSchema,
   AiPromptStepInputSchema,
@@ -33,7 +33,7 @@ export const AiPromptStepDefinition: PublicStepDefinition<
     dynamicSchema: {
       getOutputSchema: ({ input }) => {
         if (input.schema) {
-          return getStructuredOutputSchema(convertJsonSchemaToZod(input.schema));
+          return getStructuredOutputSchema(fromJSONSchema(input.schema));
         }
 
         return AiPromptOutputSchema;
