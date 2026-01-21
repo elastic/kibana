@@ -239,9 +239,9 @@ describe('registerRoutes', () => {
         });
       });
 
-      it('should handle page=0 (first page)', async () => {
+      it('should handle page=1 (first page)', async () => {
         const mockFindResult = {
-          page: 0,
+          page: 1,
           per_page: 5,
           total: 3,
           saved_objects: [createMockDataSource('1', 'Data Source 1', 'github')],
@@ -253,7 +253,7 @@ describe('registerRoutes', () => {
 
         const routeHandler = mockRouter.get.mock.calls[0][1];
         const mockRequest = httpServerMock.createKibanaRequest({
-          query: { page: 0, per_page: 5 },
+          query: { page: 1, per_page: 5 },
         });
         const mockResponse = httpServerMock.createResponseFactory();
 
@@ -262,7 +262,7 @@ describe('registerRoutes', () => {
         expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
           type: DATA_SOURCE_SAVED_OBJECT_TYPE,
           perPage: 5,
-          page: 0,
+          page: 1,
         });
       });
 
@@ -1163,7 +1163,7 @@ describe('GET /api/data_sources/_bulk_delete/{taskId}', () => {
   });
 
   describe('task not found', () => {
-    it('should return error when task is not found', async () => {
+    it('should return 404 when task is not found', async () => {
       const notFoundError = SavedObjectsErrorHelpers.createGenericNotFoundError(
         'task',
         'non-existent'
@@ -1176,11 +1176,9 @@ describe('GET /api/data_sources/_bulk_delete/{taskId}', () => {
         mockResponse
       );
 
-      expect(mockResponse.ok).toHaveBeenCalledWith({
+      expect(mockResponse.notFound).toHaveBeenCalledWith({
         body: {
-          isDone: true,
-          deletedCount: 0,
-          error: 'Task not found',
+          message: 'Task not found',
         },
       });
     });

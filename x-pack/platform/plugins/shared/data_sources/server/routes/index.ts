@@ -113,8 +113,8 @@ export function registerRoutes(dependencies: RouteDependencies) {
       path: API_BASE_PATH,
       validate: {
         query: schema.object({
-          per_page: schema.number({ min: 0, defaultValue: 100, max: 1000 }),
-          page: schema.number({ min: 0, defaultValue: 1 }),
+          per_page: schema.number({ min: 1, defaultValue: 100, max: 1000 }),
+          page: schema.number({ min: 1, defaultValue: 1 }),
         }),
       },
       security: {
@@ -414,28 +414,16 @@ export function registerRoutes(dependencies: RouteDependencies) {
         try {
           task = await taskManager.get(request.params.taskId);
         } catch (error) {
-          // If it's a "not found" error, return task not found response
+          // If it's a "not found" error, return 404 response
           if (SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
-            return response.ok({
+            return response.notFound({
               body: {
-                isDone: true,
-                deletedCount: 0,
-                error: 'Task not found',
+                message: 'Task not found',
               },
             });
           }
           // For other errors, rethrow to be caught by outer catch block
           throw error;
-        }
-
-        if (!task) {
-          return response.ok({
-            body: {
-              isDone: true,
-              deletedCount: 0,
-              error: 'Task not found',
-            },
-          });
         }
 
         const state = (task.state || {}) as {
