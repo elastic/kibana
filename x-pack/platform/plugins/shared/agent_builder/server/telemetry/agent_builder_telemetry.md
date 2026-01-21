@@ -156,8 +156,6 @@ period configured by Kibana (defaults to several days).
   - Count of tool calls triggered via direct API calls.
 - `agent_builder_tool_call_a2a`
   - Count of tool calls triggered by agent-to-agent communication.
-  - These counters are tracked for usage purposes but are not currently reported in the
-    snapshot telemetry payload.
 
 ### LLM usage counters
 - `agent_builder_llm_provider_{provider}`
