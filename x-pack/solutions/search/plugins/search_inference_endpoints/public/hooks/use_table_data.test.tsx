@@ -156,6 +156,7 @@ describe('useTableData', () => {
   });
 
   it('should filter data based on searchKey matching model_id', () => {
+    // Search for 'third-party' which only exists in model_id, not in inference_id
     const searchKey2 = 'third-party';
     const { result } = renderHook(
       () => useTableData(inferenceEndpoints, queryParams, filterOptions, searchKey2),
@@ -163,7 +164,9 @@ describe('useTableData', () => {
     );
     const filteredData = result.current.sortedTableData;
     expect(filteredData.length).toBe(1);
+    // Verify the correct endpoint was found by checking both inference_id and model_id
     expect(filteredData[0].inference_id).toBe('my-openai-model-05');
+    expect(filteredData[0].service_settings.model_id).toBe('third-party-model');
   });
 
   it('should filter data case-insensitively', () => {
