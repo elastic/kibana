@@ -12,6 +12,8 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 const mockGetCreateSLOFormFlyout = jest.fn();
 
+const mockGetRedirectUrl = jest.fn().mockReturnValue('/app/slos?search=test');
+
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => ({
     services: {
@@ -21,6 +23,15 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
       http: {
         basePath: {
           prepend: (path: string) => path,
+        },
+      },
+      share: {
+        url: {
+          locators: {
+            get: () => ({
+              getRedirectUrl: mockGetRedirectUrl,
+            }),
+          },
         },
       },
     },
@@ -177,7 +188,12 @@ describe('SloPopoverAndFlyout', () => {
                 },
               },
             },
-            allowedIndicatorTypes: ['sli.apm.transactionDuration', 'sli.apm.transactionErrorRate'],
+            formSettings: {
+              allowedIndicatorTypes: [
+                'sli.apm.transactionDuration',
+                'sli.apm.transactionErrorRate',
+              ],
+            },
           })
         );
       });
@@ -205,7 +221,12 @@ describe('SloPopoverAndFlyout', () => {
                 },
               },
             },
-            allowedIndicatorTypes: ['sli.apm.transactionDuration', 'sli.apm.transactionErrorRate'],
+            formSettings: {
+              allowedIndicatorTypes: [
+                'sli.apm.transactionDuration',
+                'sli.apm.transactionErrorRate',
+              ],
+            },
           })
         );
       });
@@ -229,17 +250,24 @@ describe('SloPopoverAndFlyout', () => {
   });
 
   describe('manage SLOs link', () => {
-    it('has correct href with APM SLO type filters', async () => {
+    it('has correct href from SLO list locator', async () => {
       renderSloPopover({ canReadSlos: true, canWriteSlos: false });
 
       fireEvent.click(screen.getByTestId('apmSlosHeaderLink'));
 
       await waitFor(() => {
         const manageSlosLink = screen.getByTestId('apmSlosMenuItemManageSlos');
-        expect(manageSlosLink).toHaveAttribute(
-          'href',
-          expect.stringContaining('/app/slos?search=')
-        );
+        expect(manageSlosLink).toHaveAttribute('href', '/app/slos?search=test');
+        expect(mockGetRedirectUrl).toHaveBeenCalledWith({
+          filters: [
+            expect.objectContaining({
+              meta: expect.objectContaining({
+                key: 'slo.indicator.type',
+                type: 'phrases',
+              }),
+            }),
+          ],
+        });
       });
     });
   });
