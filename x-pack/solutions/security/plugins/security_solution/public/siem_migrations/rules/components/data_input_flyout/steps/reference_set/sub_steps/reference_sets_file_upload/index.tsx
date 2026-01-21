@@ -33,7 +33,11 @@ export const useReferencesFileUploadStep = ({
       if (lookupsFromFile.length === 0) {
         return; // No lookups provided
       }
-      upsertResources(migrationStats.id, lookupsFromFile);
+      upsertResources({
+        migrationId: migrationStats.id,
+        vendor: migrationStats.vendor,
+        data: lookupsFromFile,
+      });
     },
     [upsertResources, migrationStats]
   );

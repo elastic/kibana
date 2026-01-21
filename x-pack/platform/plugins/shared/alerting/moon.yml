@@ -52,7 +52,7 @@ dependsOn:
   - '@kbn/rrule'
   - '@kbn/management-plugin'
   - '@kbn/core-saved-objects-utils-server'
-  - '@kbn/unified-search-plugin'
+  - '@kbn/kql'
   - '@kbn/core-http-server-mocks'
   - '@kbn/serverless'
   - '@kbn/core-http-router-server-mocks'

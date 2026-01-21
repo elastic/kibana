@@ -27,6 +27,7 @@ import { getMissingCapabilitiesChecker } from '../../common/service/capabilities
 import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
 import { licenseService } from '../../../common/hooks/use_license';
 import type { ExperimentalFeatures } from '../../../../common';
+import { MigrationSource } from '../../common/types';
 
 jest.mock('../api', () => ({
   createDashboardMigration: jest.fn(),
@@ -84,7 +85,9 @@ const mockUpsertDashboardMigrationResources = api.upsertDashboardMigrationResour
 const defaultMigrationStats = {
   id: 'mig-1',
   status: SiemMigrationTaskStatus.READY,
-  dashboards: { total: 100, pending: 100, processing: 0, completed: 0, failed: 0 },
+  vendor: MigrationSource.SPLUNK,
+  name: 'Test Migration',
+  items: { total: 100, pending: 100, processing: 0, completed: 0, failed: 0 },
   created_at: '2025-01-01T00:00:00Z',
   last_updated_at: '2025-01-01T01:00:00Z',
 };
@@ -163,9 +166,9 @@ describe('SiemDashboardMigrationsService', () => {
 
   describe('createDashboardMigration', () => {
     it('should throw an error when body is empty', async () => {
-      await expect(service.createDashboardMigration([], 'test')).rejects.toThrow(
-        i18n.EMPTY_DASHBOARDS_ERROR
-      );
+      await expect(
+        service.createDashboardMigration([], 'test', MigrationSource.SPLUNK)
+      ).rejects.toThrow(i18n.EMPTY_DASHBOARDS_ERROR);
     });
 
     it('should create migration with a single batch', async () => {
@@ -175,7 +178,11 @@ describe('SiemDashboardMigrationsService', () => {
       const name = 'test';
       mockCreateDashboardMigration.mockResolvedValue({ migration_id: 'mig-1' });
       mockAddDashboardsToDashboardMigration.mockResolvedValue(undefined);
-      const migrationId = await service.createDashboardMigration(body, name);
+      const migrationId = await service.createDashboardMigration(
+        body,
+        name,
+        MigrationSource.SPLUNK
+      );
       expect(mockCreateDashboardMigration).toHaveBeenCalledTimes(1);
       expect(mockCreateDashboardMigration).toHaveBeenCalledWith({ name });
       expect(mockAddDashboardsToDashboardMigration).toHaveBeenCalledWith({
@@ -192,7 +199,11 @@ describe('SiemDashboardMigrationsService', () => {
       const name = 'test';
       mockCreateDashboardMigration.mockResolvedValueOnce({ migration_id: 'mig-1' });
       mockAddDashboardsToDashboardMigration.mockResolvedValue(undefined);
-      const migrationId = await service.createDashboardMigration(body, name);
+      const migrationId = await service.createDashboardMigration(
+        body,
+        name,
+        MigrationSource.SPLUNK
+      );
       expect(mockCreateDashboardMigration).toHaveBeenCalledTimes(1);
       expect(mockAddDashboardsToDashboardMigration).toHaveBeenCalledTimes(2);
       expect(mockAddDashboardsToDashboardMigration).toHaveBeenNthCalledWith(1, {
@@ -209,9 +220,13 @@ describe('SiemDashboardMigrationsService', () => {
 
   describe('upsertMigrationResources', () => {
     it('should throw an error when body is empty', async () => {
-      await expect(service.upsertMigrationResources('mig-1', [])).rejects.toThrow(
-        i18n.EMPTY_DASHBOARDS_ERROR
-      );
+      await expect(
+        service.upsertMigrationResources({
+          migrationId: defaultMigrationStats.id,
+          vendor: defaultMigrationStats.vendor,
+          body: [],
+        })
+      ).rejects.toThrow(i18n.EMPTY_DASHBOARDS_ERROR);
     });
 
     it('should upsert resources in batches', async () => {
@@ -219,7 +234,11 @@ describe('SiemDashboardMigrationsService', () => {
         resource: 'res',
       });
       mockUpsertDashboardMigrationResources.mockResolvedValue({});
-      await service.upsertMigrationResources('mig-1', body);
+      await service.upsertMigrationResources({
+        migrationId: defaultMigrationStats.id,
+        vendor: defaultMigrationStats.vendor,
+        body,
+      });
       expect(mockUpsertDashboardMigrationResources).toHaveBeenCalledTimes(2);
       expect(mockUpsertDashboardMigrationResources.mock.calls[0][0]).toEqual({
         migrationId: 'mig-1',
@@ -237,7 +256,10 @@ describe('SiemDashboardMigrationsService', () => {
       mockGetMissingCapabilitiesChecker.mockReturnValue(() => [
         { capability: 'cap', description: 'desc' },
       ]);
-      const result = await service.startDashboardMigration('mig-1');
+      const result = await service.startDashboardMigration({
+        migrationId: defaultMigrationStats.id,
+        vendor: defaultMigrationStats.vendor,
+      });
       expect(mockNotifications.toasts.add).toHaveBeenCalled();
       expect(result).toEqual({ started: false });
     });
@@ -245,7 +267,10 @@ describe('SiemDashboardMigrationsService', () => {
     it('should notify and not start migration if connectorId is missing', async () => {
       jest.spyOn(service, 'getMissingCapabilities').mockReturnValue([]);
       jest.spyOn(service.connectorIdStorage, 'get').mockReturnValue(undefined);
-      const result = await service.startDashboardMigration('mig-1');
+      const result = await service.startDashboardMigration({
+        migrationId: defaultMigrationStats.id,
+        vendor: defaultMigrationStats.vendor,
+      });
       expect(mockNotifications.toasts.add).toHaveBeenCalled();
       expect(result).toEqual({ started: false });
     });
@@ -265,7 +290,10 @@ describe('SiemDashboardMigrationsService', () => {
       const startPollingSpy = jest.spyOn(service, 'startPolling');
       /* @ts-expect-error spying on protected property */
       const migrationStatsTaskPollUntilSpy = jest.spyOn(service, 'migrationTaskPollingUntil');
-      const result = await service.startDashboardMigration('mig-1');
+      const result = await service.startDashboardMigration({
+        migrationId: defaultMigrationStats.id,
+        vendor: defaultMigrationStats.vendor,
+      });
       expect(mockStartDashboardMigration).toHaveBeenCalledWith({
         migrationId: 'mig-1',
         settings: { connectorId: 'connector-123' },
@@ -282,7 +310,10 @@ describe('SiemDashboardMigrationsService', () => {
       jest
         .spyOn(service, 'getMissingCapabilities')
         .mockReturnValue([{ capability: 'cap', description: 'desc' }]);
-      const result = await service.stopDashboardMigration('mig-1');
+      const result = await service.stopDashboardMigration({
+        migrationId: defaultMigrationStats.id,
+        vendor: defaultMigrationStats.vendor,
+      });
       expect(mockNotifications.toasts.add).toHaveBeenCalled();
       expect(result).toEqual({ stopped: false });
     });
@@ -300,7 +331,10 @@ describe('SiemDashboardMigrationsService', () => {
       });
       /* @ts-expect-error Spying on protecting property */
       const migrationStatsTaskPollUntilSpy = jest.spyOn(service, 'migrationTaskPollingUntil');
-      const result = await service.stopDashboardMigration('mig-1');
+      const result = await service.stopDashboardMigration({
+        migrationId: defaultMigrationStats.id,
+        vendor: defaultMigrationStats.vendor,
+      });
       expect(mockStopDashboardMigration).toHaveBeenCalledWith({ migrationId: 'mig-1' });
       expect(migrationStatsTaskPollUntilSpy).toHaveBeenCalled();
       expect(mockGetDashboardMigrationStats).toHaveBeenCalledTimes(statsCalls);
@@ -315,7 +349,7 @@ describe('SiemDashboardMigrationsService', () => {
         { id: 'mig-2', status: SiemMigrationTaskStatus.FINISHED, name: 'test 2' },
       ];
       mockGetDashboardMigrationAllStats.mockResolvedValue(statsArray);
-      /* @ts-expect-error acccessing protected property */
+      /* @ts-expect-error accessing protected property */
       const result = await service.fetchMigrationsStatsAll();
       expect(api.getDashboardMigrationAllStats).toHaveBeenCalled();
       expect(result).toHaveLength(2);
