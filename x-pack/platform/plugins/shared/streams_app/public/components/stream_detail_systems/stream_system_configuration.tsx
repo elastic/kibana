@@ -8,10 +8,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import { EuiPanel, EuiText, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { useStreamFeatures } from './stream_features/hooks/use_stream_features';
-import { StreamFeaturesAccordion } from './stream_features/stream_features_accordion';
+import { useStreamSystems } from './stream_systems/hooks/use_stream_systems';
+import { StreamSystemsAccordion } from './stream_systems/stream_systems_accordion';
 import { Row } from '../data_management/stream_detail_management/advanced_view/row';
-import { FeatureIdentificationControl } from '../stream_detail_significant_events_view/feature_identification_control';
+import { SystemIdentificationControl } from '../stream_detail_significant_events_view/system_identification_control';
 import type { AIFeatures } from '../../hooks/use_ai_features';
 
 interface StreamConfigurationProps {
@@ -19,20 +19,20 @@ interface StreamConfigurationProps {
   aiFeatures: AIFeatures | null;
 }
 
-export function StreamFeatureConfiguration({ definition, aiFeatures }: StreamConfigurationProps) {
+export function StreamSystemConfiguration({ definition, aiFeatures }: StreamConfigurationProps) {
   const {
-    features: existingFeatures,
-    refreshFeatures,
-    featuresLoading,
-  } = useStreamFeatures(definition.name);
+    systems: existingSystems,
+    refreshSystems,
+    systemsLoading,
+  } = useStreamSystems(definition.name);
 
   return (
     <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
       <EuiPanel hasShadow={false} color="subdued">
         <EuiText size="s">
           <h3>
-            {i18n.translate('xpack.streams.streamDetailView.configurationTitle', {
-              defaultMessage: 'Feature identification',
+            {i18n.translate('xpack.streams.streamDetailView.systemConfigurationTitle', {
+              defaultMessage: 'System identification',
             })}
           </h3>
         </EuiText>
@@ -43,7 +43,7 @@ export function StreamFeatureConfiguration({ definition, aiFeatures }: StreamCon
           <Row
             left={
               <EuiText size="s" color="subdued">
-                {i18n.translate('xpack.streams.streamDetailView.configurationDescription', {
+                {i18n.translate('xpack.streams.streamDetailView.systemConfigurationDescription', {
                   defaultMessage:
                     'Use AI to generate logical subsets of the data in this stream. You will find useful insights like programming language, operating system, cloud provider etc. This is useful for generating better significant events. Generation uses the last 24 hours of data.',
                 })}
@@ -52,23 +52,23 @@ export function StreamFeatureConfiguration({ definition, aiFeatures }: StreamCon
             right={
               <EuiFlexGroup>
                 <EuiFlexItem grow={false}>
-                  <FeatureIdentificationControl
+                  <SystemIdentificationControl
                     definition={definition}
-                    refreshFeatures={refreshFeatures}
+                    refreshSystems={refreshSystems}
                     aiFeatures={aiFeatures}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
             }
           />
-          {existingFeatures.length > 0 && (
+          {existingSystems.length > 0 && (
             <>
               <EuiSpacer size="m" />
-              <StreamFeaturesAccordion
+              <StreamSystemsAccordion
                 definition={definition}
-                features={existingFeatures}
-                loading={featuresLoading}
-                refresh={refreshFeatures}
+                systems={existingSystems}
+                loading={systemsLoading}
+                refresh={refreshSystems}
                 aiFeatures={aiFeatures}
               />
             </>

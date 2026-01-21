@@ -14,13 +14,13 @@ import { conditionToESQL } from '@kbn/streamlang';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import { useKibana } from '../../../hooks/use_kibana';
-import { FeatureEventsSparklineLast24hrs } from './feature_events_sparkline';
+import { SystemEventsSparklineLast24hrs } from './system_events_sparkline';
 
-export const FeatureEventsData = ({
-  feature,
+export const SystemEventsData = ({
+  system,
   definition,
 }: {
-  feature: System;
+  system: System;
   definition: Streams.all.Definition;
 }) => {
   const {
@@ -31,7 +31,7 @@ export const FeatureEventsData = ({
   const useUrl = share.url.locators.useUrl;
 
   const esqlQuery = `FROM ${getIndexPatternsForStream(definition).join(',')}
-      | WHERE ${conditionToESQL(feature.filter)}`;
+      | WHERE ${conditionToESQL(system.filter)}`;
 
   const discoverLink = useUrl<DiscoverAppLocatorParams>(
     () => ({
@@ -50,8 +50,8 @@ export const FeatureEventsData = ({
         <EuiFlexItem>
           <EuiTitle size="xxs">
             <h3>
-              {i18n.translate('xpack.streams.identifiedFeatureEvents.label', {
-                defaultMessage: 'Detected feature events',
+              {i18n.translate('xpack.streams.identifiedSystemEvents.label', {
+                defaultMessage: 'Detected system events',
               })}
             </h3>
           </EuiTitle>
@@ -62,14 +62,14 @@ export const FeatureEventsData = ({
               size="s"
               href={discoverLink}
               aria-label={i18n.translate(
-                'xpack.streams.identifiedFeatureEvents.viewAllLinkAriaLabel',
+                'xpack.streams.identifiedSystemEvents.viewAllLinkAriaLabel',
                 {
                   defaultMessage: 'Open in Discover',
                 }
               )}
-              data-test-subj="feature_identification_existing_open_in_discover_button"
+              data-test-subj="system_identification_existing_open_in_discover_button"
             >
-              {i18n.translate('xpack.streams.identifiedFeatureEvents.viewAllLinkText', {
+              {i18n.translate('xpack.streams.identifiedSystemEvents.viewAllLinkText', {
                 defaultMessage: 'Open in Discover',
               })}
             </EuiButtonEmpty>
@@ -77,8 +77,8 @@ export const FeatureEventsData = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <FeatureEventsSparklineLast24hrs
-        feature={feature}
+      <SystemEventsSparklineLast24hrs
+        system={system}
         definition={definition}
         hideAxis={false}
         height={200}
