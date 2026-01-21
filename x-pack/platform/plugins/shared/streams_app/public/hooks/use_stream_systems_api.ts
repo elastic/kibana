@@ -12,7 +12,7 @@ import type { SystemIdentificationTaskResult } from '@kbn/streams-plugin/server/
 import { useKibana } from './use_kibana';
 import { getStreamTypeFromDefinition } from '../util/get_stream_type_from_definition';
 
-interface StreamFeaturesApi {
+interface StreamSystemsApi {
   getSystemIdentificationStatus: () => Promise<SystemIdentificationTaskResult>;
   scheduleSystemIdentificationTask: (connectorId: string) => Promise<void>;
   cancelSystemIdentificationTask: () => Promise<void>;
@@ -22,7 +22,7 @@ interface StreamFeaturesApi {
   upsertSystem: (system: System) => Promise<void>;
 }
 
-export function useStreamFeaturesApi(definition: Streams.all.Definition): StreamFeaturesApi {
+export function useStreamSystemsApi(definition: Streams.all.Definition): StreamSystemsApi {
   const {
     dependencies: {
       start: {

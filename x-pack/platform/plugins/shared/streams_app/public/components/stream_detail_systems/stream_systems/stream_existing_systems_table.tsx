@@ -22,45 +22,45 @@ import { i18n } from '@kbn/i18n';
 import type { AIFeatures } from '../../../hooks/use_ai_features';
 import {
   OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM,
-  SELECTED_FEATURES_URL_PARAM,
+  SELECTED_SYSTEMS_URL_PARAM,
 } from '../../../constants';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
-import { useStreamFeaturesApi } from '../../../hooks/use_stream_features_api';
-import { StreamFeatureDetailsFlyout } from './stream_feature_details_flyout';
+import { useStreamSystemsApi } from '../../../hooks/use_stream_systems_api';
+import { StreamSystemDetailsFlyout } from './stream_system_details_flyout';
 import { TableTitle } from './table_title';
-import { useStreamFeaturesTable } from './hooks/use_stream_features_table';
+import { useStreamSystemsTable } from './hooks/use_stream_systems_table';
 
-export function StreamExistingFeaturesTable({
+export function StreamExistingSystemsTable({
   isLoading,
-  features,
+  systems,
   definition,
-  refreshFeatures,
+  refreshSystems,
   aiFeatures,
 }: {
   isLoading?: boolean;
-  features: System[];
+  systems: System[];
   definition: Streams.all.Definition;
-  refreshFeatures: () => void;
+  refreshSystems: () => void;
   aiFeatures: AIFeatures | null;
 }) {
   const router = useStreamsAppRouter();
 
-  const [selectedFeature, setSelectedFeature] = useState<System>();
-  const [selectedFeatures, setSelectedFeatures] = useState<System[]>([]);
-  const { removeSystemsFromStream } = useStreamFeaturesApi(definition);
+  const [selectedSystem, setSelectedSystem] = useState<System>();
+  const [selectedSystems, setSelectedSystems] = useState<System[]>([]);
+  const { removeSystemsFromStream } = useStreamSystemsApi(definition);
   const [isDeleting, setIsDeleting] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(5);
-  const { nameColumn, filterColumn, eventsLast24HoursColumn } = useStreamFeaturesTable({
+  const { nameColumn, filterColumn, eventsLast24HoursColumn } = useStreamSystemsTable({
     definition,
   });
 
-  const goToGenerateSignificantEvents = (significantEventsFeatures: System[]) => {
+  const goToGenerateSignificantEvents = (significantEventsSystems: System[]) => {
     router.push('/{key}/management/{tab}', {
       path: { key: definition.name, tab: 'significantEvents' },
       query: {
         [OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM]: 'true',
-        [SELECTED_FEATURES_URL_PARAM]: significantEventsFeatures.map((f) => f.name).join(','),
+        [SELECTED_SYSTEMS_URL_PARAM]: significantEventsSystems.map((s) => s.name).join(','),
       },
     });
   };
@@ -79,19 +79,19 @@ export function StreamExistingFeaturesTable({
           type: 'icon',
           icon: 'crosshairs',
           enabled: () => (aiFeatures?.genAiConnectors.selectedConnector ? true : false),
-          onClick: (feature) => {
-            goToGenerateSignificantEvents([feature]);
+          onClick: (system) => {
+            goToGenerateSignificantEvents([system]);
           },
-          'data-test-subj': 'feature_identification_single_goto_significant_events_button',
+          'data-test-subj': 'system_identification_single_goto_significant_events_button',
         },
         {
           name: EDIT_ACTION_NAME_LABEL,
           description: EDIT_ACTION_DESCRIPTION_LABEL,
           type: 'icon',
           icon: 'pencil',
-          'data-test-subj': 'feature_identification_existing_start_edit_button',
-          onClick: (feature) => {
-            setSelectedFeature(feature);
+          'data-test-subj': 'system_identification_existing_start_edit_button',
+          onClick: (system) => {
+            setSelectedSystem(system);
           },
         },
         {
@@ -100,11 +100,11 @@ export function StreamExistingFeaturesTable({
           type: 'icon',
           icon: 'trash',
           color: 'danger',
-          onClick: (feature: System) => {
+          onClick: (system: System) => {
             setIsDeleting(true);
-            removeSystemsFromStream([feature])
+            removeSystemsFromStream([system])
               .then(() => {
-                refreshFeatures();
+                refreshSystems();
               })
               .finally(() => {
                 setIsDeleting(false);
@@ -115,8 +115,8 @@ export function StreamExistingFeaturesTable({
     },
   ];
 
-  const toggleDetails = (feature: System) => {
-    setSelectedFeature(feature);
+  const toggleDetails = (system: System) => {
+    setSelectedSystem(system);
   };
 
   const columnsWithExpandingRowToggle: Array<EuiBasicTableColumn<System>> = [
@@ -129,12 +129,12 @@ export function StreamExistingFeaturesTable({
           <span>{OPEN_DETAILS_LABEL}</span>
         </EuiScreenReaderOnly>
       ),
-      render: (feature: System) => {
+      render: (system: System) => {
         return (
           <EuiButtonIcon
-            onClick={() => toggleDetails(feature)}
-            aria-label={selectedFeature ? COLLAPSE_DETAILS_LABEL : EXPAND_DETAILS_LABEL}
-            iconType={selectedFeature ? 'minimize' : 'expand'}
+            onClick={() => toggleDetails(system)}
+            aria-label={selectedSystem ? COLLAPSE_DETAILS_LABEL : EXPAND_DETAILS_LABEL}
+            iconType={selectedSystem ? 'minimize' : 'expand'}
           />
         );
       },
@@ -143,7 +143,7 @@ export function StreamExistingFeaturesTable({
   ];
 
   const isGenerateSignificantEventsButtonDisabled =
-    selectedFeatures.length === 0 || !aiFeatures?.genAiConnectors.selectedConnector;
+    selectedSystems.length === 0 || !aiFeatures?.genAiConnectors.selectedConnector;
 
   return (
     <div css={{ padding: '16px' }}>
@@ -152,14 +152,14 @@ export function StreamExistingFeaturesTable({
           <TableTitle
             pageIndex={pageIndex}
             pageSize={pageSize}
-            total={features.length}
-            label={FEATURES_LABEL}
+            total={systems.length}
+            label={SYSTEMS_LABEL}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiLink
             onClick={() => {
-              goToGenerateSignificantEvents(selectedFeatures);
+              goToGenerateSignificantEvents(selectedSystems);
             }}
           >
             <EuiButtonEmpty
@@ -167,7 +167,7 @@ export function StreamExistingFeaturesTable({
               iconType="crosshairs"
               size="xs"
               aria-label={GENERATE_SIGNIFICANT_EVENTS}
-              data-test-subj="feature_identification_selection_goto_significant_events_button"
+              data-test-subj="system_identification_selection_goto_significant_events_button"
             >
               {GENERATE_SIGNIFICANT_EVENTS}
             </EuiButtonEmpty>
@@ -178,9 +178,9 @@ export function StreamExistingFeaturesTable({
             iconType="cross"
             size="xs"
             aria-label={CLEAR_SELECTION}
-            isDisabled={selectedFeatures.length === 0 || isLoading}
+            isDisabled={selectedSystems.length === 0 || isLoading}
             onClick={() => {
-              setSelectedFeatures([]);
+              setSelectedSystems([]);
             }}
           >
             {CLEAR_SELECTION}
@@ -193,15 +193,15 @@ export function StreamExistingFeaturesTable({
             iconType="trash"
             color="danger"
             aria-label={DELETE_ALL}
-            isDisabled={selectedFeatures.length === 0 || isLoading}
+            isDisabled={selectedSystems.length === 0 || isLoading}
             onClick={() => {
               setIsDeleting(true);
-              removeSystemsFromStream(selectedFeatures)
+              removeSystemsFromStream(selectedSystems)
                 .then(() => {
-                  setSelectedFeatures([]);
+                  setSelectedSystems([]);
                 })
                 .finally(() => {
-                  refreshFeatures();
+                  refreshSystems();
                   setIsDeleting(false);
                 });
             }}
@@ -215,16 +215,16 @@ export function StreamExistingFeaturesTable({
       <EuiInMemoryTable
         loading={isLoading}
         tableCaption={TABLE_CAPTION_LABEL}
-        items={features}
+        items={systems}
         itemId="name"
         columns={columnsWithExpandingRowToggle}
-        noItemsMessage={i18n.translate('xpack.streams.streamFeaturesTable.noFeaturesMessage', {
-          defaultMessage: 'No features found',
+        noItemsMessage={i18n.translate('xpack.streams.streamSystemsTable.noSystemsMessage', {
+          defaultMessage: 'No systems found',
         })}
         selection={{
-          initialSelected: selectedFeatures,
-          onSelectionChange: setSelectedFeatures,
-          selected: selectedFeatures,
+          initialSelected: selectedSystems,
+          onSelectionChange: setSelectedSystems,
+          selected: selectedSystems,
         }}
         pagination={{
           pageSize,
@@ -238,14 +238,14 @@ export function StreamExistingFeaturesTable({
           },
         }}
       />
-      {selectedFeature && (
-        <StreamFeatureDetailsFlyout
+      {selectedSystem && (
+        <StreamSystemDetailsFlyout
           definition={definition}
-          feature={selectedFeature}
+          system={selectedSystem}
           closeFlyout={() => {
-            setSelectedFeature(undefined);
+            setSelectedSystem(undefined);
           }}
-          refreshFeatures={refreshFeatures}
+          refreshSystems={refreshSystems}
         />
       )}
     </div>
@@ -253,77 +253,77 @@ export function StreamExistingFeaturesTable({
 }
 
 const CLEAR_SELECTION = i18n.translate(
-  'xpack.streams.streamFeaturesTable.columns.actions.clearSelection',
+  'xpack.streams.streamSystemsTable.columns.actions.clearSelection',
   { defaultMessage: 'Clear selection' }
 );
 
 const DELETE_ALL = i18n.translate(
-  'xpack.streams.streamFeaturesTable.columns.actions.deleteSelection',
+  'xpack.streams.streamSystemsTable.columns.actions.deleteSelection',
   {
     defaultMessage: 'Delete selected',
   }
 );
 
 const GENERATE_SIGNIFICANT_EVENTS = i18n.translate(
-  'xpack.streams.streamFeaturesTable.columns.actions.generate',
+  'xpack.streams.streamSystemsTable.columns.actions.generate',
   { defaultMessage: 'Generate significant events' }
 );
 
 // i18n labels moved to end of file
 
 const ACTIONS_COLUMN_HEADER_LABEL = i18n.translate(
-  'xpack.streams.streamFeaturesTable.columns.actionsColumnHeader',
+  'xpack.streams.streamSystemsTable.columns.actionsColumnHeader',
   {
     defaultMessage: 'Actions',
   }
 );
 
 const EDIT_ACTION_NAME_LABEL = i18n.translate(
-  'xpack.streams.streamFeaturesTable.columns.actions.editActionName',
+  'xpack.streams.streamSystemsTable.columns.actions.editActionName',
   {
     defaultMessage: 'Edit',
   }
 );
 
 const EDIT_ACTION_DESCRIPTION_LABEL = i18n.translate(
-  'xpack.streams.streamFeaturesTable.columns.actions.editActionDescription',
-  { defaultMessage: 'Edit this feature' }
+  'xpack.streams.streamSystemsTable.columns.actions.editActionDescription',
+  { defaultMessage: 'Edit this system' }
 );
 
 const DELETE_ACTION_NAME_LABEL = i18n.translate(
-  'xpack.streams.streamFeaturesTable.columns.actions.deleteActionName',
+  'xpack.streams.streamSystemsTable.columns.actions.deleteActionName',
   {
     defaultMessage: 'Delete',
   }
 );
 
 const DELETE_ACTION_DESCRIPTION_LABEL = i18n.translate(
-  'xpack.streams.streamFeaturesTable.columns.actions.deleteActionDescription',
-  { defaultMessage: 'Delete this feature' }
+  'xpack.streams.streamSystemsTable.columns.actions.deleteActionDescription',
+  { defaultMessage: 'Delete this system' }
 );
 
-const OPEN_DETAILS_LABEL = i18n.translate('xpack.streams.streamFeaturesTable.columns.openDetails', {
+const OPEN_DETAILS_LABEL = i18n.translate('xpack.streams.streamSystemsTable.columns.openDetails', {
   defaultMessage: 'Open details',
 });
 
 const COLLAPSE_DETAILS_LABEL = i18n.translate(
-  'xpack.streams.streamFeaturesTable.columns.collapseDetails',
+  'xpack.streams.streamSystemsTable.columns.collapseDetails',
   {
     defaultMessage: 'Collapse details',
   }
 );
 
 const EXPAND_DETAILS_LABEL = i18n.translate(
-  'xpack.streams.streamFeaturesTable.columns.expandDetails',
+  'xpack.streams.streamSystemsTable.columns.expandDetails',
   {
     defaultMessage: 'Expand details',
   }
 );
 
-const FEATURES_LABEL = i18n.translate('xpack.streams.streamFeaturesTable.tableTitle', {
-  defaultMessage: 'Features',
+const SYSTEMS_LABEL = i18n.translate('xpack.streams.streamSystemsTable.tableTitle', {
+  defaultMessage: 'Systems',
 });
 
-const TABLE_CAPTION_LABEL = i18n.translate('xpack.streams.streamFeaturesTable.tableCaption', {
-  defaultMessage: 'List of features',
+const TABLE_CAPTION_LABEL = i18n.translate('xpack.streams.streamSystemsTable.tableCaption', {
+  defaultMessage: 'List of systems',
 });
