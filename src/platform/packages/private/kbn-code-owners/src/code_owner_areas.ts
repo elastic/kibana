@@ -62,7 +62,6 @@ export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/obs-knowledge-team',
     'elastic/obs-onboarding-team',
     'elastic/obs-presentation-team',
-    'elastic/obs-ui-devex-team',
     'elastic/obs-ux-management-team',
     'elastic/observability-design',
     'elastic/observability-ui',
