@@ -192,23 +192,6 @@ test.describe('Node Details: host', { tag: ['@ess', '@svlOblt'] }, () => {
     });
   });
 
-  test.skip('Overview Tab - shows the CPU Profiling prompt', async ({
-    pageObjects: { nodeDetailsPage },
-  }) => {
-    await nodeDetailsPage.clickOverviewTab();
-    await test.step('verify CPU profiling prompt exists', async () => {
-      await expect(nodeDetailsPage.cpuProfilingPrompt).toBeVisible();
-    });
-  });
-
-  test.skip('Profiling tab - shows the Profiling tab', async ({
-    pageObjects: { nodeDetailsPage },
-  }) => {
-    await test.step('verify profiling tab exists', async () => {
-      await expect(nodeDetailsPage.profilingTab).toBeVisible();
-    });
-  });
-
   test('Metadata Tab - shows metadata table', async ({ pageObjects: { nodeDetailsPage } }) => {
     await nodeDetailsPage.clickMetadataTab();
 
