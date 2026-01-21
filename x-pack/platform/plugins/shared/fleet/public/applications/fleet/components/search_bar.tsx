@@ -10,7 +10,7 @@ import styled from 'styled-components';
 import { fromKueryExpression } from '@kbn/es-query';
 
 import type { FieldSpec } from '@kbn/data-plugin/common';
-import { QueryStringInput } from '@kbn/unified-search-plugin/public';
+import { QueryStringInput } from '@kbn/kql/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { i18n } from '@kbn/i18n';
@@ -134,7 +134,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
   const {
     data,
     dataViews,
-    unifiedSearch,
+    kql,
     storage,
     notifications,
     http,
@@ -198,7 +198,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
       autoSubmit
       appName={i18n.translate('xpack.fleet.appTitle', { defaultMessage: 'Fleet' })}
       deps={{
-        unifiedSearch,
+        autocomplete: kql.autocomplete,
         notifications,
         http,
         docLinks,
