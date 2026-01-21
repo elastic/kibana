@@ -54,10 +54,11 @@ export const AppMenuPopover = ({
         items,
         primaryActionItem,
         secondaryActionItem,
+        rootPanelWidth: popoverWidth,
         onClose,
         onCloseOverflowButton,
       }),
-    [items, primaryActionItem, secondaryActionItem, onClose, onCloseOverflowButton]
+    [items, primaryActionItem, secondaryActionItem, popoverWidth, onClose, onCloseOverflowButton]
   );
 
   if (panels.length === 0) {
@@ -91,9 +92,6 @@ export const AppMenuPopover = ({
       panelPaddingSize="none"
       hasArrow={false}
       anchorPosition={anchorPosition || 'upLeft'}
-      panelStyle={{
-        width: popoverWidth,
-      }}
       panelProps={{
         'data-test-subj': activeTestId,
       }}
