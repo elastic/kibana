@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import type { ModelOptionsData } from '../utils/get_model_options_for_inference_endpoints';
 import { SelectModelAndInstallKnowledgeBase } from './select_model_and_install_knowledge_base';
+import * as modelOptionsModule from '../utils/get_model_options_for_inference_endpoints';
 
 jest.mock('../hooks/use_inference_endpoints', () => ({
   useInferenceEndpoints: () => ({
@@ -17,14 +17,9 @@ jest.mock('../hooks/use_inference_endpoints', () => ({
   }),
 }));
 
-jest.mock('../utils/get_model_options_for_inference_endpoints', () => ({
-  getModelOptionsForInferenceEndpoints: ({ endpoints }: { endpoints: any[] }): ModelOptionsData[] =>
-    endpoints.map((e, i) => ({
-      key: e.inference_id,
-      label: `Label${i + 1}`,
-      description: `Desc${i + 1}`,
-    })),
-}));
+jest.mock('../utils/get_model_options_for_inference_endpoints');
+
+const mockGetModelOptions = jest.mocked(modelOptionsModule.getModelOptionsForInferenceEndpoints);
 
 const onInstall = jest.fn();
 
@@ -34,37 +29,60 @@ function renderComponent() {
 
 describe('SelectModelAndInstallKnowledgeBase', () => {
   beforeEach(() => {
-    renderComponent();
+    jest.clearAllMocks();
   });
 
-  it('renders heading, subtitle, and the dropdown with a default model selected', () => {
-    expect(screen.getByRole('heading', { level: 3 })).toHaveTextContent(
-      'Get started by setting up the Knowledge Base'
-    );
+  describe('when Jina Embedding v3 is available', () => {
+    beforeEach(() => {
+      mockGetModelOptions.mockReturnValue([{ key: 'id1', label: 'Label1', description: 'Desc1' }]);
+      renderComponent();
+    });
 
-    const learnMore = screen.getByRole('link', { name: /Learn more/i });
-    expect(learnMore).toHaveAttribute('href', expect.stringContaining('ml-nlp-built-in-models'));
+    it('renders heading, subtitle, and the dropdown with a default model selected', () => {
+      expect(screen.getByRole('heading', { level: 3 })).toHaveTextContent(
+        'Get started by setting up the Knowledge Base'
+      );
 
-    expect(screen.getByText('Label1')).toBeInTheDocument();
+      const learnMore = screen.getByRole('link', { name: /Learn more/i });
+      expect(learnMore).toHaveAttribute('href', expect.stringContaining('ml-nlp-built-in-models'));
+
+      expect(screen.getByText('Label1')).toBeInTheDocument();
+    });
+
+    it('calls onInstall with default id when the install button is clicked', () => {
+      const installBtn = screen.getByRole('button', { name: /Install Knowledge Base/i });
+      fireEvent.click(installBtn);
+      expect(onInstall).toHaveBeenCalledWith('id1');
+    });
+
+    it('keeps the dropdown enabled even with only one model option so that the description can be viewed', () => {
+      const dropdown = screen.getByTestId('observabilityAiAssistantKnowledgeBaseModelDropdown');
+      expect(dropdown).not.toBeDisabled();
+    });
   });
 
-  it('calls onInstall with default id when the install button is clicked', () => {
-    const installBtn = screen.getByRole('button', { name: /Install Knowledge Base/i });
-    fireEvent.click(installBtn);
-    expect(onInstall).toHaveBeenCalledWith('id1');
-  });
+  describe('when Jina Embedding v3 is NOT available', () => {
+    beforeEach(() => {
+      mockGetModelOptions.mockReturnValue([
+        { key: 'id1', label: 'Label1', description: 'Desc1' },
+        { key: 'id2', label: 'Label2', description: 'Desc2' },
+      ]);
+      renderComponent();
+    });
 
-  it('allows changing selection and installing the KB with the inference_id for the new model', async () => {
-    const defaultSelection = screen.getByText('Label1');
-    fireEvent.click(defaultSelection);
+    it('allows changing selection and installing the KB with the inference_id for the new model', async () => {
+      const dropdown = screen.getByTestId('observabilityAiAssistantKnowledgeBaseModelDropdown');
+      fireEvent.click(dropdown);
 
-    const nextSelection = screen.getByText('Label2');
-    await waitFor(() => nextSelection);
-    fireEvent.click(nextSelection);
+      const nextSelection = await screen.findByText('Label2');
+      fireEvent.click(nextSelection);
 
-    expect(nextSelection).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Label2')).toBeInTheDocument();
+      });
 
-    fireEvent.click(screen.getByRole('button', { name: /Install Knowledge Base/i }));
-    expect(onInstall).toHaveBeenCalledWith('id2');
+      fireEvent.click(screen.getByRole('button', { name: /Install Knowledge Base/i }));
+      expect(onInstall).toHaveBeenCalledWith('id2');
+    });
   });
 });

@@ -12,4 +12,9 @@ export const ELSER_IN_EIS_INFERENCE_ID = '.elser-2-elastic';
 
 export const E5_SMALL_INFERENCE_ID = '.multilingual-e5-small-elasticsearch';
 
-export const EIS_PRECONFIGURED_INFERENCE_IDS = [ELSER_IN_EIS_INFERENCE_ID];
+export const JINA_EMBEDDINGS_V3_INFERENCE_ID = '.jina-embeddings-v3';
+
+export const EIS_PRECONFIGURED_INFERENCE_IDS = [
+  ELSER_IN_EIS_INFERENCE_ID,
+  JINA_EMBEDDINGS_V3_INFERENCE_ID,
+];

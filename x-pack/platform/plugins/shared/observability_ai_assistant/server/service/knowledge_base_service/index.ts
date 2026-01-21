@@ -256,6 +256,9 @@ export class KnowledgeBaseService {
 
     const maxTokens = limit.tokens ?? 4_000;
 
+    this.dependencies.logger.info(`maxTokens: ${maxTokens}`);
+    this.dependencies.logger.info(`sortedEntries: ${JSON.stringify(sortedEntries, null, 2)}`);
+
     let tokenCount = 0;
 
     const returnedEntries: RecalledEntry[] = [];
@@ -267,6 +270,8 @@ export class KnowledgeBaseService {
         break;
       }
     }
+
+    this.dependencies.logger.info(`returnedEntries: ${JSON.stringify(returnedEntries, null, 2)}`);
 
     const droppedEntries = sortedEntries.length - returnedEntries.length;
     if (droppedEntries > 0) {
