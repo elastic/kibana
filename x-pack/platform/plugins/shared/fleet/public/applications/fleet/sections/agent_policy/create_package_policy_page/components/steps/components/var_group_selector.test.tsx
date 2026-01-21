@@ -18,6 +18,10 @@ import {
   shouldShowVar,
   computeDefaultVarGroupSelections,
   isVarRequiredByVarGroup,
+  isCloudConnectorOption,
+  getCloudProviderFromOption,
+  getCloudProviderFromVarGroupSelection,
+  isCloudConnectorSelectedInVarGroups,
 } from './var_group_selector';
 
 const mockVarGroup: RegistryVarGroup = {
@@ -444,6 +448,227 @@ describe('VarGroupSelector', () => {
 
       const selections = { test: 'opt1' };
       expect(isVarRequiredByVarGroup('var1', [varGroupWithoutRequired], selections)).toBe(false);
+    });
+  });
+
+  describe('Cloud Connector detection', () => {
+    const cloudConnectorVarGroup: RegistryVarGroup = {
+      name: 'setup_method',
+      title: 'Setup Method',
+      selector_title: 'Select method',
+      options: [
+        {
+          name: 'cloud_connector',
+          title: 'Cloud Connector',
+          vars: ['role_arn', 'external_id'],
+          cloud_connector_enabled: true,
+          provider: 'aws',
+        } as RegistryVarGroup['options'][0],
+        {
+          name: 'manual',
+          title: 'Manual',
+          vars: ['access_key_id', 'secret_access_key'],
+        },
+        {
+          name: 'azure_cloud_connector',
+          title: 'Azure Cloud Connector',
+          vars: ['tenant_id', 'client_id'],
+          cloud_connector_enabled: true,
+          provider: 'azure',
+        } as RegistryVarGroup['options'][0],
+      ],
+    };
+
+    describe('isCloudConnectorOption', () => {
+      it('should return true for option with cloud_connector_enabled: true', () => {
+        const option = {
+          name: 'cc',
+          title: 'CC',
+          vars: [],
+          cloud_connector_enabled: true,
+          provider: 'aws',
+        } as RegistryVarGroup['options'][0];
+        expect(isCloudConnectorOption(option)).toBe(true);
+      });
+
+      it('should return false for option without cloud_connector_enabled', () => {
+        const option = { name: 'manual', title: 'Manual', vars: [] };
+        expect(isCloudConnectorOption(option)).toBe(false);
+      });
+
+      it('should return false for option with cloud_connector_enabled: false', () => {
+        const option = {
+          name: 'x',
+          title: 'X',
+          vars: [],
+          cloud_connector_enabled: false,
+        } as RegistryVarGroup['options'][0];
+        expect(isCloudConnectorOption(option)).toBe(false);
+      });
+
+      it('should return false for option with provider but no cloud_connector_enabled', () => {
+        // provider alone does NOT make it a cloud connector
+        const option = {
+          name: 'x',
+          title: 'X',
+          vars: [],
+          provider: 'aws',
+        } as RegistryVarGroup['options'][0];
+        expect(isCloudConnectorOption(option)).toBe(false);
+      });
+    });
+
+    describe('getCloudProviderFromOption', () => {
+      it('should return aws for option with provider: aws', () => {
+        const option = {
+          name: 'cc',
+          title: 'CC',
+          vars: [],
+          provider: 'aws',
+        } as RegistryVarGroup['options'][0];
+        expect(getCloudProviderFromOption(option)).toBe('aws');
+      });
+
+      it('should return azure for option with provider: azure', () => {
+        const option = {
+          name: 'cc',
+          title: 'CC',
+          vars: [],
+          provider: 'azure',
+        } as RegistryVarGroup['options'][0];
+        expect(getCloudProviderFromOption(option)).toBe('azure');
+      });
+
+      it('should return gcp for option with provider: gcp', () => {
+        const option = {
+          name: 'cc',
+          title: 'CC',
+          vars: [],
+          provider: 'gcp',
+        } as RegistryVarGroup['options'][0];
+        expect(getCloudProviderFromOption(option)).toBe('gcp');
+      });
+
+      it('should return undefined for option without provider', () => {
+        const option = { name: 'cc', title: 'CC', vars: [] };
+        expect(getCloudProviderFromOption(option)).toBeUndefined();
+      });
+
+      it('should return undefined for invalid provider', () => {
+        const option = {
+          name: 'cc',
+          title: 'CC',
+          vars: [],
+          provider: 'invalid',
+        } as RegistryVarGroup['options'][0];
+        expect(getCloudProviderFromOption(option)).toBeUndefined();
+      });
+    });
+
+    describe('getCloudProviderFromVarGroupSelection', () => {
+      it('should return provider when CC option is selected', () => {
+        const selections = { setup_method: 'cloud_connector' };
+        expect(getCloudProviderFromVarGroupSelection([cloudConnectorVarGroup], selections)).toBe(
+          'aws'
+        );
+      });
+
+      it('should return azure when Azure CC option is selected', () => {
+        const selections = { setup_method: 'azure_cloud_connector' };
+        expect(getCloudProviderFromVarGroupSelection([cloudConnectorVarGroup], selections)).toBe(
+          'azure'
+        );
+      });
+
+      it('should return undefined when non-CC option selected', () => {
+        const selections = { setup_method: 'manual' };
+        expect(
+          getCloudProviderFromVarGroupSelection([cloudConnectorVarGroup], selections)
+        ).toBeUndefined();
+      });
+
+      it('should return undefined for empty var_groups', () => {
+        expect(getCloudProviderFromVarGroupSelection([], {})).toBeUndefined();
+      });
+
+      it('should return undefined for undefined inputs', () => {
+        expect(getCloudProviderFromVarGroupSelection(undefined, undefined)).toBeUndefined();
+      });
+
+      it('should return undefined when no selection for the group', () => {
+        const selections = { other_group: 'some_option' };
+        expect(
+          getCloudProviderFromVarGroupSelection([cloudConnectorVarGroup], selections)
+        ).toBeUndefined();
+      });
+    });
+
+    describe('isCloudConnectorSelectedInVarGroups', () => {
+      it('should return true when CC option is selected', () => {
+        const selections = { setup_method: 'cloud_connector' };
+        expect(isCloudConnectorSelectedInVarGroups([cloudConnectorVarGroup], selections)).toBe(
+          true
+        );
+      });
+
+      it('should return true when Azure CC option is selected', () => {
+        const selections = { setup_method: 'azure_cloud_connector' };
+        expect(isCloudConnectorSelectedInVarGroups([cloudConnectorVarGroup], selections)).toBe(
+          true
+        );
+      });
+
+      it('should return false when non-CC option selected', () => {
+        const selections = { setup_method: 'manual' };
+        expect(isCloudConnectorSelectedInVarGroups([cloudConnectorVarGroup], selections)).toBe(
+          false
+        );
+      });
+
+      it('should return false for empty var_groups', () => {
+        expect(isCloudConnectorSelectedInVarGroups([], {})).toBe(false);
+      });
+
+      it('should return false for undefined inputs', () => {
+        expect(isCloudConnectorSelectedInVarGroups(undefined, undefined)).toBe(false);
+      });
+
+      it('should return false when no selection matches any group', () => {
+        const selections = { other_group: 'some_option' };
+        expect(isCloudConnectorSelectedInVarGroups([cloudConnectorVarGroup], selections)).toBe(
+          false
+        );
+      });
+
+      it('should handle multiple var_groups', () => {
+        const anotherGroup: RegistryVarGroup = {
+          name: 'another_group',
+          title: 'Another',
+          selector_title: 'Select',
+          options: [
+            {
+              name: 'gcp_connector',
+              title: 'GCP Connector',
+              vars: ['project_id'],
+              cloud_connector_enabled: true,
+              provider: 'gcp',
+            } as RegistryVarGroup['options'][0],
+            { name: 'other', title: 'Other', vars: [] },
+          ],
+        };
+
+        // CC selected in second group
+        const selections = { setup_method: 'manual', another_group: 'gcp_connector' };
+        expect(
+          isCloudConnectorSelectedInVarGroups([cloudConnectorVarGroup, anotherGroup], selections)
+        ).toBe(true);
+
+        // No CC selected in any group
+        const noCC = { setup_method: 'manual', another_group: 'other' };
+        expect(
+          isCloudConnectorSelectedInVarGroups([cloudConnectorVarGroup, anotherGroup], noCC)
+        ).toBe(false);
+      });
     });
   });
 });

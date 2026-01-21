@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export const CLOUD_CONNECTOR_ACCOUNT_TYPE_VAR_NAME = 'cloud_connector_account_type';
+
 // Backward compatibility for CSPM and Asset Discovery
 export const AWS_ROLE_ARN_VAR_NAME = 'aws.role_arn';
 export const AWS_CREDENTIALS_EXTERNAL_ID_VAR_NAME = 'aws.credentials.external_id';

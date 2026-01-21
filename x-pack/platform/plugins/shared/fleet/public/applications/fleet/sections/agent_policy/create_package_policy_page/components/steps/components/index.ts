@@ -15,6 +15,10 @@ export {
   shouldShowVar,
   computeDefaultVarGroupSelections,
   isVarRequiredByVarGroup,
+  isCloudConnectorOption,
+  getCloudProviderFromOption,
+  getCloudProviderFromVarGroupSelection,
+  isCloudConnectorSelectedInVarGroups,
 } from './var_group_selector';
 export type { VarGroupSelection } from './var_group_selector';
 export { useVarGroupSelections } from './hooks';

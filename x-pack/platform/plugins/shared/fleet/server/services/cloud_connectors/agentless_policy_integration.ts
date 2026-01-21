@@ -7,6 +7,8 @@
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
+import type { AccountType } from '../../../common/types';
+
 import type { AgentPolicy, NewPackagePolicy } from '../../types';
 import { CloudConnectorCreateError } from '../../errors';
 import { cloudConnectorService } from '../cloud_connector';
@@ -53,6 +55,7 @@ export async function createAndIntegrateCloudConnector(params: {
   esClient: ElasticsearchClient;
   logger: Logger;
   cloudConnectorName?: string;
+  cloudConnectorAccountType?: AccountType;
 }): Promise<CloudConnectorIntegrationResult> {
   const {
     packagePolicy,
@@ -62,6 +65,7 @@ export async function createAndIntegrateCloudConnector(params: {
     esClient,
     logger,
     cloudConnectorName: providedCloudConnectorName,
+    cloudConnectorAccountType: providedAccountType,
   } = params;
 
   // Check if cloud connectors are enabled for this agentless policy
@@ -138,8 +142,10 @@ export async function createAndIntegrateCloudConnector(params: {
     providedCloudConnectorName ||
     getCloudConnectorNameFromPackagePolicy(updatedPackagePolicy, cloudProvider, policyName);
 
-  // Extract account type from package policy vars
-  const accountType = extractAccountType(cloudProvider, updatedPackagePolicy);
+  // Use provided account type from API request if available,
+  // otherwise extract from package policy vars
+  const accountType =
+    providedAccountType || extractAccountType(cloudProvider, updatedPackagePolicy);
 
   try {
     const cloudConnector = await cloudConnectorService.create(soClient, {

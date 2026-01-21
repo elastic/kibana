@@ -130,13 +130,14 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       // Build agentless config with cloud connectors if provided
       let agentlessConfig = baseAgentlessConfig;
       if (data.cloud_connector?.enabled) {
-        const inputsArray = data.inputs ? Object.entries(data.inputs) : [];
-        const input = inputsArray.find(([, pinput]) => pinput.enabled !== false);
-        const targetCsp = input?.[0].match(/aws|azure|gcp/)?.[0] as
-          | 'aws'
-          | 'azure'
-          | 'gcp'
-          | undefined;
+        // Use target_csp from cloud_connector object (passed from frontend)
+        // Fallback to detecting from input keys for backward compatibility
+        let targetCsp = data.cloud_connector.target_csp as 'aws' | 'azure' | 'gcp' | undefined;
+        if (!targetCsp) {
+          const inputsArray = data.inputs ? Object.entries(data.inputs) : [];
+          const input = inputsArray.find(([, pinput]) => pinput.enabled !== false);
+          targetCsp = input?.[0].match(/aws|azure|gcp/)?.[0] as 'aws' | 'azure' | 'gcp' | undefined;
+        }
 
         this.logger.debug(
           `Configuring cloud connectors for cloud provider: ${targetCsp} from cloud_connector object`
@@ -204,6 +205,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
         esClient: this.esClient,
         logger: this.logger,
         cloudConnectorName: data.cloud_connector?.name,
+        cloudConnectorAccountType: data.cloud_connector?.account_type,
       });
 
       newPackagePolicy = updatedPackagePolicy;

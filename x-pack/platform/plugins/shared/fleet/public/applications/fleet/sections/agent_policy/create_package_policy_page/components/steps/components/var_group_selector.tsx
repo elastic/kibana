@@ -148,6 +148,74 @@ export function isVarRequiredByVarGroup(
 }
 
 /**
+ * Check if a var_group option is a Cloud Connector option.
+ * Cloud Connector options have 'cloud_connector_enabled: true'.
+ */
+export function isCloudConnectorOption(option: RegistryVarGroupOption): boolean {
+  return (
+    (option as RegistryVarGroupOption & { cloud_connector_enabled?: boolean })
+      .cloud_connector_enabled === true
+  );
+}
+
+/**
+ * Get the cloud provider from a var_group option.
+ * Used for setting agent policy agentless.cloud_connectors.target_csp.
+ */
+export function getCloudProviderFromOption(
+  option: RegistryVarGroupOption
+): 'aws' | 'azure' | 'gcp' | undefined {
+  const provider = (option as RegistryVarGroupOption & { provider?: string }).provider;
+  if (typeof provider === 'string' && ['aws', 'azure', 'gcp'].includes(provider)) {
+    return provider as 'aws' | 'azure' | 'gcp';
+  }
+  return undefined;
+}
+
+/**
+ * Get the cloud provider from a selected var_group option.
+ * Returns undefined if no Cloud Connector option is selected.
+ */
+export function getCloudProviderFromVarGroupSelection(
+  varGroups: RegistryVarGroup[] | undefined,
+  varGroupSelections: VarGroupSelection | undefined
+): 'aws' | 'azure' | 'gcp' | undefined {
+  if (!varGroups || !varGroupSelections) return undefined;
+
+  for (const group of varGroups) {
+    const selectedOptionName = varGroupSelections[group.name];
+    if (!selectedOptionName) continue;
+
+    const selectedOption = group.options.find((opt) => opt.name === selectedOptionName);
+    if (selectedOption && isCloudConnectorOption(selectedOption)) {
+      return getCloudProviderFromOption(selectedOption);
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Check if any selected var_group option has cloud_connector_enabled.
+ */
+export function isCloudConnectorSelectedInVarGroups(
+  varGroups: RegistryVarGroup[] | undefined,
+  varGroupSelections: VarGroupSelection | undefined
+): boolean {
+  if (!varGroups || !varGroupSelections) return false;
+
+  for (const group of varGroups) {
+    const selectedOptionName = varGroupSelections[group.name];
+    if (!selectedOptionName) continue;
+
+    const selectedOption = group.options.find((opt) => opt.name === selectedOptionName);
+    if (selectedOption && isCloudConnectorOption(selectedOption)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
  * VarGroupSelector component renders a dropdown for selecting between
  * mutually exclusive variable groups (e.g., authentication methods).
  */

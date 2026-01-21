@@ -49,16 +49,28 @@ async function extractAwsCloudConnectorSecrets(
   esClient: ElasticsearchClient,
   logger: Logger
 ): Promise<CloudConnectorVars | undefined> {
-  const vars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
+  // Look for vars in both stream vars and package-level vars (for var_groups)
+  // Cloud connector vars may be in either location depending on how the package is configured
+  const streamVars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
+  const packageVars = packagePolicy.vars;
 
-  if (!vars) {
+  if (!streamVars && !packageVars) {
     logger.error('Package policy must contain vars for AWS cloud connector');
     throw new CloudConnectorInvalidVarsError('Package policy must contain vars');
   }
 
-  // Look for role_arn and external_id in the vars
-  const roleArn: string = vars.role_arn?.value || vars['aws.role_arn']?.value;
-  const externalIdVar = vars.external_id || vars['aws.credentials.external_id'];
+  // Look for role_arn and external_id in BOTH stream vars and package vars
+  // Check stream vars first, then package vars
+  const roleArn: string =
+    streamVars?.role_arn?.value ||
+    streamVars?.['aws.role_arn']?.value ||
+    packageVars?.role_arn?.value ||
+    packageVars?.['aws.role_arn']?.value;
+  const externalIdVar =
+    streamVars?.external_id ||
+    streamVars?.['aws.credentials.external_id'] ||
+    packageVars?.external_id ||
+    packageVars?.['aws.credentials.external_id'];
 
   if (roleArn && externalIdVar) {
     let externalIdWithSecretRef: { type: 'password'; value: any };
@@ -116,17 +128,32 @@ async function extractAzureCloudConnectorSecrets(
   esClient: ElasticsearchClient,
   logger: Logger
 ): Promise<CloudConnectorVars | undefined> {
-  const vars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
+  // Look for vars in both stream vars and package-level vars (for var_groups)
+  // Cloud connector vars may be in either location depending on how the package is configured
+  const streamVars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
+  const packageVars = packagePolicy.vars;
 
-  if (!vars) {
+  if (!streamVars && !packageVars) {
     logger.error('Package policy must contain vars for Azure cloud connector');
     throw new CloudConnectorInvalidVarsError('Package policy must contain vars');
   }
 
-  const tenantIdVar = vars.tenant_id || vars['azure.credentials.tenant_id'];
-  const clientIdVar = vars.client_id || vars['azure.credentials.client_id'];
+  // Look for Azure vars in BOTH stream vars and package vars
+  const tenantIdVar =
+    streamVars?.tenant_id ||
+    streamVars?.['azure.credentials.tenant_id'] ||
+    packageVars?.tenant_id ||
+    packageVars?.['azure.credentials.tenant_id'];
+  const clientIdVar =
+    streamVars?.client_id ||
+    streamVars?.['azure.credentials.client_id'] ||
+    packageVars?.client_id ||
+    packageVars?.['azure.credentials.client_id'];
   const azureCredentials =
-    vars.azure_credentials_cloud_connector_id || vars['azure.credentials.cloud_connector_id'];
+    streamVars?.azure_credentials_cloud_connector_id ||
+    streamVars?.['azure.credentials.cloud_connector_id'] ||
+    packageVars?.azure_credentials_cloud_connector_id ||
+    packageVars?.['azure.credentials.cloud_connector_id'];
 
   if (tenantIdVar && clientIdVar && azureCredentials) {
     let tenantIdWithSecretRef = tenantIdVar;

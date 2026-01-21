@@ -823,5 +823,216 @@ describe('useOnSubmit', () => {
       expect(setNewAgentPolicy).not.toHaveBeenCalled();
       expect(setPackagePolicy).not.toHaveBeenCalled();
     });
+
+    describe('var_group cloud connector detection', () => {
+      const packageInfoWithVarGroups: PackageInfo = {
+        name: 'test-package',
+        version: '1.0.0',
+        description: '',
+        format_version: '',
+        release: 'ga',
+        owner: { github: '' },
+        title: 'Test Package',
+        latestVersion: '',
+        assets: {} as any,
+        status: 'not_installed',
+        var_groups: [
+          {
+            name: 'setup_method',
+            title: 'Setup Method',
+            selector_title: 'Select method',
+            options: [
+              {
+                name: 'cloud_connector',
+                title: 'Cloud Connector',
+                vars: ['role_arn', 'external_id'],
+                cloud_connector_enabled: true,
+                provider: 'aws',
+              },
+              {
+                name: 'manual',
+                title: 'Manual',
+                vars: ['access_key_id', 'secret_access_key'],
+              },
+            ],
+          },
+        ],
+      } as any;
+
+      it('should detect CC via var_group cloud_connector_enabled field when input type does not match', () => {
+        const setNewAgentPolicy = jest.fn();
+        const setPackagePolicy = jest.fn();
+
+        const packagePolicy = {
+          inputs: [
+            {
+              type: 'generic', // Not aws or azure
+              enabled: true,
+              streams: [],
+            },
+          ],
+          var_group_selections: { setup_method: 'cloud_connector' },
+          supports_cloud_connector: false,
+        } as any;
+
+        const newAgentPolicy = {
+          supports_agentless: true,
+          agentless: {},
+        } as any;
+
+        updateAgentlessCloudConnectorConfig(
+          packagePolicy,
+          newAgentPolicy,
+          setNewAgentPolicy,
+          setPackagePolicy,
+          packageInfoWithVarGroups
+        );
+
+        expect(setNewAgentPolicy).toHaveBeenCalledWith({
+          ...newAgentPolicy,
+          agentless: {
+            cloud_connectors: {
+              enabled: true,
+              target_csp: 'aws',
+            },
+          },
+        });
+        expect(setPackagePolicy).toHaveBeenCalledWith({
+          ...packagePolicy,
+          supports_cloud_connector: true,
+        });
+      });
+
+      it('should clear cloud_connector_id when switching away from CC', () => {
+        const setNewAgentPolicy = jest.fn();
+        const setPackagePolicy = jest.fn();
+
+        const packagePolicy = {
+          inputs: [
+            {
+              type: 'generic',
+              enabled: true,
+              streams: [],
+            },
+          ],
+          var_group_selections: { setup_method: 'manual' }, // Non-CC option selected
+          supports_cloud_connector: true,
+          cloud_connector_id: 'existing-connector-123',
+        } as any;
+
+        const newAgentPolicy = {
+          supports_agentless: true,
+          agentless: {
+            cloud_connectors: {
+              enabled: true,
+              target_csp: 'aws',
+            },
+          },
+        } as any;
+
+        updateAgentlessCloudConnectorConfig(
+          packagePolicy,
+          newAgentPolicy,
+          setNewAgentPolicy,
+          setPackagePolicy,
+          packageInfoWithVarGroups
+        );
+
+        // Should clear agent policy cloud_connectors
+        expect(setNewAgentPolicy).toHaveBeenCalledWith({
+          ...newAgentPolicy,
+          agentless: {
+            ...newAgentPolicy.agentless,
+            cloud_connectors: undefined,
+          },
+        });
+
+        // Should clear supports_cloud_connector and cloud_connector_id
+        expect(setPackagePolicy).toHaveBeenCalledWith({
+          ...packagePolicy,
+          supports_cloud_connector: false,
+          cloud_connector_id: null,
+        });
+      });
+
+      it('should maintain backward compatibility with input type detection', () => {
+        const setNewAgentPolicy = jest.fn();
+        const setPackagePolicy = jest.fn();
+
+        const packagePolicy = {
+          inputs: [
+            {
+              type: 'aws', // Input type matches
+              enabled: true,
+              streams: [],
+            },
+          ],
+          supports_cloud_connector: true,
+        } as any;
+
+        const newAgentPolicy = {
+          supports_agentless: true,
+          agentless: {
+            cloud_connectors: {
+              enabled: false,
+              target_csp: 'azure',
+            },
+          },
+        } as any;
+
+        // No var_groups in packageInfo - should still work via input type
+        updateAgentlessCloudConnectorConfig(
+          packagePolicy,
+          newAgentPolicy,
+          setNewAgentPolicy,
+          setPackagePolicy,
+          undefined // No packageInfo
+        );
+
+        expect(setNewAgentPolicy).toHaveBeenCalledWith({
+          ...newAgentPolicy,
+          agentless: {
+            ...newAgentPolicy.agentless,
+            cloud_connectors: {
+              enabled: true,
+              target_csp: 'aws',
+            },
+          },
+        });
+      });
+
+      it('should not update when non-CC var_group option is selected and no input type match', () => {
+        const setNewAgentPolicy = jest.fn();
+        const setPackagePolicy = jest.fn();
+
+        const packagePolicy = {
+          inputs: [
+            {
+              type: 'generic',
+              enabled: true,
+              streams: [],
+            },
+          ],
+          var_group_selections: { setup_method: 'manual' },
+          supports_cloud_connector: false,
+        } as any;
+
+        const newAgentPolicy = {
+          supports_agentless: true,
+          agentless: {},
+        } as any;
+
+        updateAgentlessCloudConnectorConfig(
+          packagePolicy,
+          newAgentPolicy,
+          setNewAgentPolicy,
+          setPackagePolicy,
+          packageInfoWithVarGroups
+        );
+
+        expect(setNewAgentPolicy).not.toHaveBeenCalled();
+        expect(setPackagePolicy).not.toHaveBeenCalled();
+      });
+    });
   });
 });

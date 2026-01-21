@@ -30,7 +30,10 @@ export function extractAccountType(
   cloudProvider: CloudProvider,
   packagePolicy: NewPackagePolicy
 ): AccountType | undefined {
-  const vars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
+  // Look for vars in stream vars first, then fall back to package-level vars (for var_groups)
+  const streamVars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
+  const packageVars = packagePolicy.vars;
+  const vars = streamVars || packageVars;
 
   if (!vars) {
     return undefined;
@@ -69,9 +72,10 @@ export function validateAccountType(accountType: string | undefined): AccountTyp
 }
 
 /**
- * Updates package policy inputs with cloud connector secret references
+ * Updates package policy with cloud connector secret references
  * This ensures that extractAndWriteSecrets recognizes these as existing secrets
  * and doesn't attempt to create duplicate secrets.
+ * Handles both stream-level vars and package-level vars (for var_groups).
  *
  * @param packagePolicy - The package policy to update
  * @param cloudConnectorVars - Cloud connector variables with secret references
@@ -83,58 +87,96 @@ export function updatePackagePolicyWithCloudConnectorSecrets(
   cloudConnectorVars: CloudConnectorVars,
   cloudProvider: CloudProvider
 ): NewPackagePolicy {
-  const updatedInputs = packagePolicy.inputs.map((input) => {
-    if (!input.enabled || !input.streams?.length) {
-      return input;
+  // Check if vars are at package level (var_groups) or stream level
+  const hasPackageLevelVars = packagePolicy.vars && Object.keys(packagePolicy.vars).length > 0;
+  const hasStreamLevelVars = packagePolicy.inputs.some(
+    (input) => input.enabled && input.streams?.some((stream) => stream.vars)
+  );
+
+  let updatedPackagePolicy = { ...packagePolicy };
+
+  // Update package-level vars if present
+  if (hasPackageLevelVars && packagePolicy.vars) {
+    const updatedVars = { ...packagePolicy.vars };
+
+    if (cloudProvider === 'aws') {
+      const awsVars = cloudConnectorVars as any;
+      if (awsVars.external_id && updatedVars.external_id) {
+        updatedVars.external_id = awsVars.external_id;
+      }
+    } else if (cloudProvider === 'azure') {
+      const azureVars = cloudConnectorVars as any;
+      if (azureVars.tenant_id && updatedVars.tenant_id) {
+        updatedVars.tenant_id = azureVars.tenant_id;
+      }
+      if (azureVars.client_id && updatedVars.client_id) {
+        updatedVars.client_id = azureVars.client_id;
+      }
     }
 
-    const updatedStreams = input.streams.map((stream) => {
-      if (!stream.vars) {
-        return stream;
+    updatedPackagePolicy = {
+      ...updatedPackagePolicy,
+      vars: updatedVars,
+    };
+  }
+
+  // Update stream-level vars if present
+  if (hasStreamLevelVars) {
+    const updatedInputs = packagePolicy.inputs.map((input) => {
+      if (!input.enabled || !input.streams?.length) {
+        return input;
       }
 
-      const updatedVars = { ...stream.vars };
-
-      if (cloudProvider === 'aws') {
-        const awsVars = cloudConnectorVars as any;
-        // Update external_id with secret reference
-        if (awsVars.external_id && updatedVars.external_id) {
-          updatedVars.external_id = awsVars.external_id;
-        } else if (awsVars.external_id && updatedVars['aws.credentials.external_id']) {
-          updatedVars['aws.credentials.external_id'] = awsVars.external_id;
-        }
-      } else if (cloudProvider === 'azure') {
-        const azureVars = cloudConnectorVars as any;
-        // Update tenant_id and client_id with secret references
-        if (azureVars.tenant_id && updatedVars.tenant_id) {
-          updatedVars.tenant_id = azureVars.tenant_id;
-        } else if (azureVars.tenant_id && updatedVars['azure.tenant_id']) {
-          updatedVars['azure.tenant_id'] = azureVars.tenant_id;
+      const updatedStreams = input.streams.map((stream) => {
+        if (!stream.vars) {
+          return stream;
         }
 
-        if (azureVars.client_id && updatedVars.client_id) {
-          updatedVars.client_id = azureVars.client_id;
-        } else if (azureVars.client_id && updatedVars['azure.client_id']) {
-          updatedVars['azure.client_id'] = azureVars.client_id;
+        const updatedVars = { ...stream.vars };
+
+        if (cloudProvider === 'aws') {
+          const awsVars = cloudConnectorVars as any;
+          // Update external_id with secret reference
+          if (awsVars.external_id && updatedVars.external_id) {
+            updatedVars.external_id = awsVars.external_id;
+          } else if (awsVars.external_id && updatedVars['aws.credentials.external_id']) {
+            updatedVars['aws.credentials.external_id'] = awsVars.external_id;
+          }
+        } else if (cloudProvider === 'azure') {
+          const azureVars = cloudConnectorVars as any;
+          // Update tenant_id and client_id with secret references
+          if (azureVars.tenant_id && updatedVars.tenant_id) {
+            updatedVars.tenant_id = azureVars.tenant_id;
+          } else if (azureVars.tenant_id && updatedVars['azure.tenant_id']) {
+            updatedVars['azure.tenant_id'] = azureVars.tenant_id;
+          }
+
+          if (azureVars.client_id && updatedVars.client_id) {
+            updatedVars.client_id = azureVars.client_id;
+          } else if (azureVars.client_id && updatedVars['azure.client_id']) {
+            updatedVars['azure.client_id'] = azureVars.client_id;
+          }
         }
-      }
+
+        return {
+          ...stream,
+          vars: updatedVars,
+        };
+      });
 
       return {
-        ...stream,
-        vars: updatedVars,
+        ...input,
+        streams: updatedStreams,
       };
     });
 
-    return {
-      ...input,
-      streams: updatedStreams,
+    updatedPackagePolicy = {
+      ...updatedPackagePolicy,
+      inputs: updatedInputs,
     };
-  });
+  }
 
-  return {
-    ...packagePolicy,
-    inputs: updatedInputs,
-  };
+  return updatedPackagePolicy;
 }
 
 /**
@@ -151,7 +193,10 @@ export function getCloudConnectorNameFromPackagePolicy(
   targetCsp: CloudProvider,
   policyName: string
 ): string {
-  const vars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
+  // Look for vars in stream vars first, then fall back to package-level vars (for var_groups)
+  const streamVars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
+  const packageVars = packagePolicy.vars;
+  const vars = streamVars || packageVars;
   const defaultName = `${targetCsp}-cloud-connector: ${policyName}`;
 
   if (!vars) {

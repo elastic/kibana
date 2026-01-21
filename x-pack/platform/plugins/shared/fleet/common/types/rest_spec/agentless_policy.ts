@@ -42,6 +42,14 @@ export const CreateAgentlessPolicyRequestSchema = {
           defaultValue: false,
           meta: { description: 'Whether cloud connectors are enabled for this policy.' },
         }),
+        target_csp: schema.maybe(
+          schema.oneOf([schema.literal('aws'), schema.literal('azure'), schema.literal('gcp')], {
+            meta: {
+              description:
+                'The target cloud service provider for the cloud connector (aws, azure, or gcp).',
+            },
+          })
+        ),
         cloud_connector_id: schema.maybe(
           schema.string({
             meta: {
@@ -57,6 +65,14 @@ export const CreateAgentlessPolicyRequestSchema = {
             meta: {
               description:
                 'Optional name for the cloud connector. If not provided, will be auto-generated from credentials.',
+            },
+          })
+        ),
+        account_type: schema.maybe(
+          schema.oneOf([schema.literal('single-account'), schema.literal('organization-account')], {
+            meta: {
+              description:
+                'The account type for the cloud connector (single-account or organization-account).',
             },
           })
         ),

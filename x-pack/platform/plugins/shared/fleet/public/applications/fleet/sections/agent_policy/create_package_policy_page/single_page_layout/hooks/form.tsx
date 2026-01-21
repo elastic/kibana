@@ -14,7 +14,10 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
 
-import { inputsFormat } from '../../../../../../../../common/constants';
+import {
+  CLOUD_CONNECTOR_ACCOUNT_TYPE_VAR_NAME,
+  inputsFormat,
+} from '../../../../../../../../common/constants';
 import {
   formatInputs,
   formatVars,
@@ -72,6 +75,11 @@ import {
   getCloudShellUrlFromPackagePolicy,
 } from '../../../../../../../components/cloud_security_posture/services';
 import { ensurePackageKibanaAssetsInstalled } from '../../../../../services/ensure_kibana_assets_installed';
+
+import {
+  getCloudProviderFromVarGroupSelection,
+  isCloudConnectorSelectedInVarGroups,
+} from '../../components/steps/components';
 
 import { useAgentless, useSetupTechnology } from './setup_technology';
 
@@ -145,7 +153,10 @@ export const createAgentPolicyIfNeeded = async ({
   }
 };
 
-async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) {
+async function savePackagePolicy(
+  pkgPolicy: CreatePackagePolicyRequest['body'],
+  agentPolicy?: NewAgentPolicy | AgentPolicy
+) {
   const { policy, forceCreateNeeded } = await prepareInputPackagePolicyDataset(pkgPolicy);
 
   // If agentless use agentless policies API
@@ -153,6 +164,13 @@ async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) 
     function formatPackage(pkg: NewPackagePolicy['package']) {
       return omit(pkg, 'title');
     }
+
+    // Get target_csp from agent policy for cloud connectors (with backward compatibility)
+    const targetCsp = agentPolicy?.agentless?.cloud_connectors?.target_csp;
+    const cloudConnectorName =
+      pkgPolicy.cloud_connector_name || pkgPolicy.vars?.cloud_connector_name?.value;
+    const cloudConnectorAccountType =
+      pkgPolicy.vars?.[CLOUD_CONNECTOR_ACCOUNT_TYPE_VAR_NAME]?.value;
 
     const agentlessRequestBody = {
       package: formatPackage(pkgPolicy.package),
@@ -176,14 +194,17 @@ async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) 
       ...(pkgPolicy.supports_cloud_connector && {
         cloud_connector: {
           enabled: true,
+          // Pass target_csp from agent policy for cloud provider detection
+          ...(targetCsp && { target_csp: targetCsp }),
           ...(pkgPolicy.cloud_connector_id && {
             cloud_connector_id: pkgPolicy.cloud_connector_id,
           }),
           // Only pass the name if creating a new connector (no cloud_connector_id)
-          ...(!pkgPolicy.cloud_connector_id &&
-            pkgPolicy.cloud_connector_name && {
-              name: pkgPolicy.cloud_connector_name,
-            }),
+          // Check both policy-level and vars-level for backward compatibility
+          ...(!pkgPolicy.cloud_connector_id && {
+            name: cloudConnectorName,
+            account_type: cloudConnectorAccountType,
+          }),
         },
       }),
     };
@@ -203,20 +224,44 @@ async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) 
   return result;
 }
 // Update the agentless policy with cloud connector info in the new agent policy when the package policy input `aws.support_cloud_connectors is updated
+// or when a var_group option with cloud_connector_enabled: true is selected
 export const updateAgentlessCloudConnectorConfig = (
   packagePolicy: NewPackagePolicy,
   newAgentPolicy: NewAgentPolicy,
   setNewAgentPolicy: (policy: NewAgentPolicy) => void,
-  setPackagePolicy: (policy: NewPackagePolicy) => void
+  setPackagePolicy: (policy: NewPackagePolicy) => void,
+  packageInfo?: PackageInfo
 ) => {
   const input = packagePolicy.inputs?.find(
     (pinput: NewPackagePolicyInput) => pinput.enabled === true
   );
-  const targetCsp = input?.type.match(/aws|azure/)?.[0];
 
-  // Making sure that the cloud connector is disabled when switching to GCP
+  // EXISTING: Detect via input type matching
+  let targetCsp: CloudProvider | undefined = input?.type.match(/aws|azure/)?.[0] as
+    | 'aws'
+    | 'azure'
+    | undefined;
+
+  // NEW: Also detect via var_group cloud_connector_enabled field
+  if (!targetCsp && packageInfo?.var_groups) {
+    targetCsp = getCloudProviderFromVarGroupSelection(
+      packageInfo.var_groups,
+      packagePolicy.var_group_selections
+    );
+  }
+
+  // Check if cloud connector is selected via var_groups
+  const isCloudConnectorViaVarGroups = packageInfo?.var_groups
+    ? isCloudConnectorSelectedInVarGroups(
+        packageInfo.var_groups,
+        packagePolicy.var_group_selections
+      )
+    : false;
+
+  // Making sure that the cloud connector is disabled when switching away from CC
   if (
     !targetCsp &&
+    !isCloudConnectorViaVarGroups &&
     (newAgentPolicy.agentless?.cloud_connectors || packagePolicy.supports_cloud_connector)
   ) {
     setNewAgentPolicy({
@@ -227,14 +272,17 @@ export const updateAgentlessCloudConnectorConfig = (
       },
     });
 
+    // Clear metadata when switching away from CC
     setPackagePolicy({
       ...packagePolicy,
       supports_cloud_connector: false,
+      cloud_connector_id: null,
     });
     return;
   }
 
-  const cloudConnectorPolicyEnabled: boolean = !!packagePolicy.supports_cloud_connector;
+  const cloudConnectorPolicyEnabled: boolean =
+    !!packagePolicy.supports_cloud_connector || isCloudConnectorViaVarGroups;
   const cloudConnectorPolicyMismatch =
     newAgentPolicy.agentless?.cloud_connectors?.enabled !== cloudConnectorPolicyEnabled;
 
@@ -255,6 +303,7 @@ export const updateAgentlessCloudConnectorConfig = (
       },
     });
 
+    // Set supports_cloud_connector on package policy so it's included in the request
     setPackagePolicy({
       ...packagePolicy,
       supports_cloud_connector: cloudConnectorPolicyEnabled,
@@ -508,7 +557,8 @@ export function useOnSubmit({
     packagePolicy,
     newAgentPolicy,
     setNewAgentPolicy,
-    setPackagePolicy
+    setPackagePolicy,
+    packageInfo
   );
 
   const onSaveNavigate = useOnSaveNavigate({
@@ -649,11 +699,15 @@ export function useOnSubmit({
       setFormState('LOADING');
       try {
         // passing pkgPolicy with policy_id here as setPackagePolicy doesn't propagate immediately
-        const data = await savePackagePolicy({
-          ...packagePolicy,
-          policy_ids: agentPolicyIdToSave,
-          force: forceInstall,
-        });
+        // Also pass the agent policy for cloud connector target_csp detection
+        const data = await savePackagePolicy(
+          {
+            ...packagePolicy,
+            policy_ids: agentPolicyIdToSave,
+            force: forceInstall,
+          },
+          createdPolicy || newAgentPolicy
+        );
 
         if (data?.item.package) {
           await ensurePackageKibanaAssetsInstalled({
