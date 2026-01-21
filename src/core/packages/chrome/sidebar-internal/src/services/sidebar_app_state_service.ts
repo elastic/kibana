@@ -12,6 +12,7 @@ import { BehaviorSubject } from 'rxjs';
 import { z } from '@kbn/zod/v4';
 import type { SidebarAppId } from '@kbn/core-chrome-sidebar';
 import type { SidebarRegistryService } from './sidebar_registry_service';
+import type { StorageHelper } from './storage_helper';
 
 const isDev = process.env.NODE_ENV !== 'production';
 
@@ -23,14 +24,13 @@ const isDev = process.env.NODE_ENV !== 'production';
  */
 export class SidebarAppStateService {
   private readonly appParams = new Map<string, BehaviorSubject<any>>();
-  // Base path is needed to separate storage keys between different Kibana spaces. Base path === space path.
-  private basePath!: string;
 
-  constructor(private readonly registry: SidebarRegistryService) {}
+  constructor(
+    private readonly registry: SidebarRegistryService,
+    private readonly storage: StorageHelper
+  ) {}
 
-  start(basePath: string): void {
-    this.basePath = basePath;
-  }
+  start(): void {}
 
   getParams$<T>(appId: SidebarAppId): Observable<T> {
     return this.getOrCreateParams<T>(appId);
@@ -45,10 +45,10 @@ export class SidebarAppStateService {
     const newParams = { ...currentParams, ...params };
 
     if (isDev) {
-      this.validateParams(appId, newParams);
+      this.parseParams(appId, newParams);
     }
     this.getOrCreateParams<T>(appId).next(newParams as T);
-    this.saveToStorage(appId, newParams as T);
+    this.storage.set(appId, newParams as T);
   }
 
   /**
@@ -60,7 +60,7 @@ export class SidebarAppStateService {
     const mergedParams = initialParams ? { ...defaultParams, ...initialParams } : defaultParams;
 
     if (isDev) {
-      this.validateParams(appId, mergedParams);
+      this.parseParams(appId, mergedParams);
     }
 
     if (this.appParams.has(appId)) {
@@ -69,12 +69,12 @@ export class SidebarAppStateService {
       this.appParams.set(appId, new BehaviorSubject<T>(mergedParams as T));
     }
 
-    this.saveToStorage(appId, mergedParams as T);
+    this.storage.set(appId, mergedParams as T);
   }
 
   private getOrCreateParams<T>(appId: SidebarAppId): BehaviorSubject<T> {
     if (!this.appParams.has(appId)) {
-      const storedParams = this.loadFromStorage<T>(appId);
+      const storedParams = this.loadAndValidateParams<T>(appId);
       const initialParams = storedParams ?? this.createDefaultParams<T>(appId);
 
       this.appParams.set(appId, new BehaviorSubject<T>(initialParams));
@@ -86,13 +86,13 @@ export class SidebarAppStateService {
    * Creates default params from schema defaults
    */
   private createDefaultParams<T>(appId: SidebarAppId): T {
-    return this.validateParams(appId, {});
+    return this.parseParams(appId, {});
   }
 
   /**
    * Validates params against app's schema
    */
-  private validateParams<T>(appId: SidebarAppId, params: unknown): T {
+  private parseParams<T>(appId: SidebarAppId, params: unknown): T {
     const schema = this.registry.getApp(appId).getParamsSchema();
     try {
       return schema.parse(params) as T;
@@ -104,46 +104,18 @@ export class SidebarAppStateService {
     }
   }
 
-  private getStorageKey(appId: SidebarAppId): string {
-    if (this.basePath === undefined) {
-      throw new Error(
-        '[SidebarAppStateService] Service not started. Call start(basePath) before using.'
-      );
-    }
-    return this.basePath
-      ? `${this.basePath}:core.chrome.sidebar.app:${appId}`
-      : `core.chrome.sidebar.app:${appId}`;
-  }
-
   /**
    * Loads params from localStorage and validates against schema.
    * Returns null if not found, corrupted, or validation fails.
    */
-  private loadFromStorage<T>(appId: SidebarAppId): T | null {
+  private loadAndValidateParams<T>(appId: SidebarAppId): T | null {
     try {
-      const key = this.getStorageKey(appId);
-      const stored = localStorage.getItem(key);
+      const stored = this.storage.get<unknown>(appId);
       if (!stored) return null;
-
-      const parsed = JSON.parse(stored);
-      return this.validateParams(appId, parsed);
-    } catch (error) {
+      return this.parseParams(appId, stored);
+    } catch {
       // Invalid data - drop it
       return null;
-    }
-  }
-
-  /**
-   * Saves params to localStorage.
-   * Fails silently on errors (quota exceeded, unavailable, etc.)
-   */
-  private saveToStorage<T>(appId: SidebarAppId, params: T): void {
-    try {
-      const key = this.getStorageKey(appId);
-      localStorage.setItem(key, JSON.stringify(params));
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.warn(`[Sidebar] localStorage error for '${appId}':`, error);
     }
   }
 }

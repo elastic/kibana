@@ -10,7 +10,7 @@
 import { useCallback, useMemo } from 'react';
 import { useObservable } from '@kbn/use-observable';
 import { useSidebarService } from '@kbn/core-chrome-sidebar-context';
-import type { SidebarAppId, SidebarApp } from '@kbn/core-chrome-sidebar';
+import type { SidebarAppId } from '@kbn/core-chrome-sidebar';
 
 /**
  * Hook based API for interacting with the global sidebar state.
@@ -25,8 +25,6 @@ export interface UseSidebarApi {
   close: () => void;
   /** Set the sidebar width */
   setWidth: (width: number) => void;
-  /** Get an app-bound API for a specific sidebar app */
-  getApp: <TParams = unknown>(appId: SidebarAppId) => SidebarApp<TParams>;
 }
 
 /**
@@ -41,10 +39,6 @@ export function useSidebar(): UseSidebarApi {
 
   const close = useCallback(() => sidebar.close(), [sidebar]);
   const setWidth = useCallback((newWidth: number) => sidebar.setWidth(newWidth), [sidebar]);
-  const getApp = useCallback(
-    <TParams = unknown>(appId: SidebarAppId) => sidebar.getApp<TParams>(appId),
-    [sidebar]
-  );
 
   return useMemo(
     () => ({
@@ -52,9 +46,8 @@ export function useSidebar(): UseSidebarApi {
       currentAppId,
       close,
       setWidth,
-      getApp,
     }),
-    [isOpen, currentAppId, close, setWidth, getApp]
+    [isOpen, currentAppId, close, setWidth]
   );
 }
 
@@ -70,9 +63,15 @@ export function useSidebarWidth(): number {
  * Hook based API for interacting with a specific sidebar app.
  * Extends `SidebarApp` with reactive `params` state.
  */
-export interface UseSidebarAppApi<TParams = unknown> extends SidebarApp<TParams> {
+export interface UseSidebarAppApi<TParams = unknown> {
   /** Current params (reactive, updates when params change) */
   params: TParams;
+  /** Update params (merges with existing params) */
+  setParams: (newParams: Partial<TParams>) => void;
+  /** Open the sidebar with params to merge */
+  open: (openParams?: Partial<TParams>) => void;
+  /** Close the sidebar if this app is currently open */
+  close: () => void;
 }
 
 /**
@@ -85,19 +84,10 @@ export function useSidebarApp<TParams = unknown>(appId: SidebarAppId): UseSideba
 
   const params = useObservable(appApi.getParams$(), appApi.getParams());
 
-  const open = useCallback(
-    (openParams?: Partial<TParams>) => appApi.open(openParams),
-    [appApi]
-  );
+  const open = useCallback((openParams?: Partial<TParams>) => appApi.open(openParams), [appApi]);
   const close = useCallback(() => appApi.close(), [appApi]);
   const setParams = useCallback(
     (newParams: Partial<TParams>) => appApi.setParams(newParams),
-    [appApi]
-  );
-  const getParams = useCallback(() => appApi.getParams(), [appApi]);
-  const getParams$ = useCallback(() => appApi.getParams$(), [appApi]);
-  const setAvailable = useCallback(
-    (available: boolean) => appApi.setAvailable(available),
     [appApi]
   );
 
@@ -107,10 +97,7 @@ export function useSidebarApp<TParams = unknown>(appId: SidebarAppId): UseSideba
       open,
       close,
       setParams,
-      getParams,
-      getParams$,
-      setAvailable,
     }),
-    [params, open, close, setParams, getParams, getParams$, setAvailable]
+    [params, open, close, setParams]
   );
 }

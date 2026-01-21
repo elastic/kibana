@@ -86,6 +86,7 @@ const SNAPSHOT_REGEX = /-snapshot/i;
 interface ConstructorParams {
   browserSupportsCsp: boolean;
   kibanaVersion: string;
+  basePath: string;
   coreContext: CoreContext;
 }
 
@@ -130,7 +131,7 @@ export class ChromeService {
     this.logger = params.coreContext.logger.get('chrome-browser');
     this.isServerless = params.coreContext.env.packageInfo.buildFlavor === 'serverless';
     this.projectNavigation = new ProjectNavigationService(this.isServerless);
-    this.sidebar = new SidebarService();
+    this.sidebar = new SidebarService({ basePath: params.basePath });
   }
 
   /**

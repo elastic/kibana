@@ -17,6 +17,7 @@ import { memoize } from 'decko';
 import { SidebarRegistryService } from './sidebar_registry_service';
 import { SidebarStateService } from './sidebar_state_service';
 import { SidebarAppStateService } from './sidebar_app_state_service';
+import { StorageHelper } from './storage_helper';
 
 /**
  * Composite service for sidebar functionality
@@ -31,10 +32,14 @@ export class SidebarService {
   readonly appState: SidebarAppStateService;
   readonly state: SidebarStateService;
 
-  constructor() {
+  constructor(params: { basePath: string }) {
     this.registry = new SidebarRegistryService();
-    this.appState = new SidebarAppStateService(this.registry);
-    this.state = new SidebarStateService(this.registry, this.appState);
+
+    const appStateStorage = new StorageHelper(`${params.basePath}:core.chrome.sidebar.app`);
+    this.appState = new SidebarAppStateService(this.registry, appStateStorage);
+
+    const stateStorage = new StorageHelper(`${params.basePath}:core.chrome.sidebar.state`);
+    this.state = new SidebarStateService(this.registry, this.appState, stateStorage);
   }
 
   setup(): SidebarSetup {
@@ -43,10 +48,9 @@ export class SidebarService {
     };
   }
 
-  start(basePath: string): SidebarStart {
-    // initialize services on start to make sure all apps are registered
-    this.appState.start(basePath);
-    this.state.start(basePath);
+  start(): SidebarStart {
+    this.appState.start();
+    this.state.start();
 
     return {
       // SidebarStateServiceApi

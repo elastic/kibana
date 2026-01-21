@@ -8,7 +8,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { map, startWith, Subject } from 'rxjs';
+import { map, startWith, Subject, distinctUntilChanged } from 'rxjs';
 import { memoize } from 'decko';
 import type { SidebarAppDefinition, SidebarAppId } from '@kbn/core-chrome-sidebar';
 import { isValidSidebarAppId } from '@kbn/core-chrome-sidebar';
@@ -16,21 +16,6 @@ import { isValidSidebarAppId } from '@kbn/core-chrome-sidebar';
 export class SidebarRegistryService {
   private readonly registeredApps = new Map<string, SidebarAppDefinition>();
   private readonly changed$ = new Subject<void>();
-
-  @memoize
-  private getApps$(): Observable<SidebarAppDefinition[]> {
-    return this.changed$.pipe(
-      startWith(undefined),
-      map(() => Array.from(this.registeredApps.values()))
-    );
-  }
-
-  @memoize
-  private getAvailableApps$(): Observable<string[]> {
-    return this.getApps$().pipe(
-      map((apps) => apps.map((app) => app.appId).filter((appId) => this.isAvailable(appId)))
-    );
-  }
 
   registerApp<TParams = {}>(app: SidebarAppDefinition<TParams>): void {
     if (!isValidSidebarAppId(app.appId)) {
@@ -77,7 +62,12 @@ export class SidebarRegistryService {
     if (!this.registeredApps.has(appId)) {
       throw new Error(`[Sidebar Registry] Cannot get availability. App not registered: ${appId}`);
     }
-    return this.getAvailableApps$().pipe(map((availableAppIds) => availableAppIds.includes(appId)));
+
+    return this.changed$.pipe(
+      startWith(undefined),
+      map(() => Boolean(this.registeredApps.get(appId)?.available)),
+      distinctUntilChanged()
+    );
   }
 
   isAvailable(appId: SidebarAppId): boolean {

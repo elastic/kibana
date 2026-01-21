@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// eslint-disable-next-line max-classes-per-file
 import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject, filter, map, take } from 'rxjs';
 import { memoize } from 'decko';
@@ -15,6 +14,7 @@ import type { SidebarAppId } from '@kbn/core-chrome-sidebar';
 import { isValidSidebarAppId } from '@kbn/core-chrome-sidebar';
 import type { SidebarRegistryService } from './sidebar_registry_service';
 import type { SidebarAppStateService } from './sidebar_app_state_service';
+import type { StorageHelper } from './storage_helper';
 
 const DEFAULT_WIDTH = 400;
 const MIN_WIDTH = 200;
@@ -28,11 +28,11 @@ export class SidebarStateService {
   private readonly currentAppId$ = new BehaviorSubject<SidebarAppId | null>(null);
   private readonly width$ = new BehaviorSubject<number>(DEFAULT_WIDTH);
   private pendingRestoreSubscription?: Subscription;
-  private storage!: StorageHelper;
 
   constructor(
     private readonly registry: SidebarRegistryService,
-    private readonly appStateService: SidebarAppStateService
+    private readonly appStateService: SidebarAppStateService,
+    private readonly storage: StorageHelper
   ) {}
 
   @memoize
@@ -50,9 +50,8 @@ export class SidebarStateService {
     return this.currentAppId$.asObservable();
   }
 
-  start(basePath: string) {
-    this.storage = new StorageHelper(basePath);
-    const currentAppId = this.storage.get<string>('currentAppId') ?? null;
+  start() {
+    const currentAppId = this.storage.get<string>('currentAppId', 'session') ?? null;
 
     // Validate app ID from localStorage - ignore if invalid
     if (currentAppId && isValidSidebarAppId(currentAppId) && this.registry.hasApp(currentAppId)) {
@@ -120,12 +119,12 @@ export class SidebarStateService {
     }
 
     this.currentAppId$.next(appId);
-    this.storage.set('currentAppId', appId);
+    this.storage.set('currentAppId', appId, 'session');
   }
 
   close(): void {
     this.currentAppId$.next(null);
-    this.storage.set('currentAppId', null);
+    this.storage.set('currentAppId', null, 'session');
   }
 
   isOpen(): boolean {
@@ -146,46 +145,5 @@ export class SidebarStateService {
 
   getCurrentAppId(): SidebarAppId | null {
     return this.currentAppId$.getValue();
-  }
-}
-
-type StorageKeys = 'currentAppId' | 'width';
-
-class StorageHelper {
-  // some keys are persisted in localStorage, others in sessionStorage
-  private static readonly PERSISTENCE: Record<StorageKeys, 'local' | 'session'> = {
-    currentAppId: 'session' as const,
-    width: 'local' as const,
-  };
-
-  // Base path is needed to separate storage keys between different Kibana spaces. Base path === space path.
-  constructor(private readonly basePath: string) {}
-
-  private getStoragePrefix(key: string): string {
-    return this.basePath
-      ? `${this.basePath}:core.chrome.sidebar.state:${key}`
-      : `core.chrome.sidebar.state:${key}`;
-  }
-
-  set<T>(key: StorageKeys, state: T): void {
-    try {
-      const storage = StorageHelper.PERSISTENCE[key] === 'local' ? localStorage : sessionStorage;
-      storage.setItem(this.getStoragePrefix(key), JSON.stringify(state));
-    } catch (e) {
-      // Ignore
-    }
-  }
-
-  get<T>(key: StorageKeys): T | null {
-    try {
-      const storage = StorageHelper.PERSISTENCE[key] === 'local' ? localStorage : sessionStorage;
-      const item = storage.getItem(this.getStoragePrefix(key));
-      if (item) {
-        return JSON.parse(item) as T;
-      }
-    } catch (e) {
-      // Ignore
-    }
-    return null;
   }
 }
