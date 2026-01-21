@@ -15,6 +15,7 @@ import { collectAllCustomPropertyItems } from './collect_all_custom_property_ite
 import { collectAllVariables } from './collect_all_variables';
 import { validateConnectorIds } from './validate_connector_ids';
 import { validateCustomProperties } from './validate_custom_properties';
+import { validateJsonSchemaDefaults } from './validate_json_schema_defaults';
 import { validateLiquidTemplate } from './validate_liquid_template';
 import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
 import { validateVariables as validateVariablesInternal } from './validate_variables';
@@ -97,7 +98,6 @@ export function useYamlValidation(
         return;
       }
 
-      const variableItems = collectAllVariables(model, yamlDocument, workflowGraph);
       const connectorIdItems = collectAllConnectorIds(yamlDocument, lineCounter);
       const customPropertyItems =
         workflowLookup && lineCounter
@@ -116,13 +116,28 @@ export function useYamlValidation(
         absolute: true,
       });
 
+      // Build validation results - only include validations that don't require workflowDefinition
+      // Monaco YAML's schema validation will show errors independently
       const validationResults: YamlValidationResult[] = [
-        validateStepNameUniqueness(yamlDocument),
-        validateVariablesInternal(variableItems, workflowGraph, workflowDefinition),
-        validateLiquidTemplate(model.getValue()),
-        validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl),
-        await validateCustomProperties(customPropertyItems),
-      ].flat();
+        ...validateStepNameUniqueness(yamlDocument),
+        ...validateLiquidTemplate(model.getValue()),
+        ...validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl),
+        ...(customPropertyItems ? await validateCustomProperties(customPropertyItems) : []),
+      ];
+
+      // Only run validations that require workflowDefinition if it's available
+      if (workflowGraph && workflowDefinition) {
+        const variableItems = collectAllVariables(model, yamlDocument, workflowGraph);
+        validationResults.push(
+          ...validateVariablesInternal(
+            variableItems,
+            workflowGraph,
+            workflowDefinition,
+            yamlDocument
+          ),
+          ...validateJsonSchemaDefaults(yamlDocument, workflowDefinition, model)
+        );
+      }
 
       const { markers, decorations } = createMarkersAndDecorations(validationResults);
 
@@ -196,6 +211,15 @@ function createMarkersAndDecorations(validationResults: YamlValidationResult[]):
           stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
         },
       });
+    } else if (validationResult.owner === 'json-schema-default-validation') {
+      if (validationResult.severity !== null) {
+        markers.push({
+          ...marker,
+          severity: SEVERITY_MAP[validationResult.severity],
+          message: validationResult.message,
+          source: 'json-schema-default-validation',
+        });
+      }
     } else if (validationResult.owner === 'liquid-template-validation') {
       markers.push({
         ...marker,
