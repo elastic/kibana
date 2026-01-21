@@ -56,6 +56,8 @@ export interface ESQLStatsQueryMeta {
 // list of stats functions we support for grouping in the cascade experience
 const SUPPORTED_STATS_COMMAND_OPTION_FUNCTIONS = ['categorize' as const];
 
+const removeWhitespaceFromString = (str: string) => str.replace(/\s+/g, '');
+
 export type SupportedStatsFunction = (typeof SUPPORTED_STATS_COMMAND_OPTION_FUNCTIONS)[number];
 
 const isSupportedStatsFunction = (fnName: string): fnName is SupportedStatsFunction =>
@@ -684,9 +686,7 @@ export const appendFilteringWhereClauseForCascadeLayout = <
 
   const isFieldUsedInOperatingStatsCommand = Boolean(
     Object.keys(fieldDeclarationCommandSummary.grouping).some(
-      (key) =>
-        removeBackticks(key).replace(/\s+/g, '') ===
-        removeBackticks(rawFieldName).replace(/\s+/g, '')
+      (key) => removeBackticks(key) === removeBackticks(rawFieldName)
     )
   );
 
@@ -706,8 +706,8 @@ export const appendFilteringWhereClauseForCascadeLayout = <
     // so we set the flag to true and use the stats command as the insertion anchor command
     const hasNormalizedField = Array.from(lastStatsCommandFields).some(
       (field) =>
-        removeBackticks(field).replace(/\s+/g, '') ===
-        removeBackticks(rawFieldName).replace(/\s+/g, '')
+        removeWhitespaceFromString(removeBackticks(field)) ===
+        removeWhitespaceFromString(removeBackticks(rawFieldName))
     );
 
     if (hasNormalizedField) {
