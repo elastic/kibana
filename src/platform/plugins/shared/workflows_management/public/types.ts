@@ -51,6 +51,7 @@ export interface WorkflowsPublicPluginStartDependencies {
 
 export interface WorkflowsPublicPluginStartAdditionalServices {
   storage: Storage;
+  workflowsManagement: WorkflowsPublicPluginStart;
 }
 
 export type WorkflowsServices = CoreStart &

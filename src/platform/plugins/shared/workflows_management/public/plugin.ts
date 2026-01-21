@@ -123,19 +123,19 @@ export class WorkflowsPlugin
   /** Creates the start services to be used in the Kibana services context of the workflows application */
   private async createWorkflowsStartServices(
     core: CoreSetup<WorkflowsPublicPluginStartDependencies, WorkflowsPublicPluginStart>
-  ): Promise<WorkflowsServices & { workflowsManagement: WorkflowsPublicPluginStart }> {
+  ): Promise<WorkflowsServices> {
     // Get start services as specified in kibana.jsonc
     const [coreStart, depsStart, pluginStart] = await core.getStartServices();
 
     const additionalServices: WorkflowsPublicPluginStartAdditionalServices = {
       storage: new Storage(localStorage),
+      workflowsManagement: pluginStart,
     };
 
     return {
       ...coreStart,
       ...depsStart,
       ...additionalServices,
-      workflowsManagement: pluginStart,
     };
   }
 }

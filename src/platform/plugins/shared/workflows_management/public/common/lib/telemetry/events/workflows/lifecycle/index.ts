@@ -92,24 +92,24 @@ const workflowCreatedSchema: RootSchema<ReportWorkflowCreatedActionParams> = {
     type: 'boolean',
     _meta: {
       description: 'Whether the workflow is enabled',
-      optional: true,
+      optional: false,
     },
   },
   stepCount: {
     type: 'integer',
     _meta: {
       description: 'Total number of steps in the workflow (including nested steps)',
-      optional: true,
+      optional: false,
     },
   },
   connectorTypes: {
     type: 'array',
     items: {
-    type: 'keyword',
+      type: 'keyword',
     },
     _meta: {
       description: 'Unique connector types used in the workflow',
-      optional: true,
+      optional: false,
     },
   },
   stepTypeCounts: {
@@ -117,35 +117,35 @@ const workflowCreatedSchema: RootSchema<ReportWorkflowCreatedActionParams> = {
     _meta: {
       description:
         'Count of steps by step type (e.g., { "foreach": 2, "slack.webhook": 5, "if": 1 })',
-      optional: true,
+      optional: false,
     },
   },
   hasScheduledTriggers: {
     type: 'boolean',
     _meta: {
       description: 'Whether the workflow has scheduled triggers',
-      optional: true,
+      optional: false,
     },
   },
   hasAlertTriggers: {
     type: 'boolean',
     _meta: {
       description: 'Whether the workflow has alert triggers',
-      optional: true,
+      optional: false,
     },
   },
   hasTimeout: {
     type: 'boolean',
     _meta: {
       description: 'Whether the workflow has a timeout configured',
-      optional: true,
+      optional: false,
     },
   },
   hasConcurrency: {
     type: 'boolean',
     _meta: {
       description: 'Whether the workflow has concurrency settings configured',
-      optional: true,
+      optional: false,
     },
   },
   concurrencyMax: {
@@ -167,7 +167,7 @@ const workflowCreatedSchema: RootSchema<ReportWorkflowCreatedActionParams> = {
     type: 'boolean',
     _meta: {
       description: 'Whether the workflow has on-failure handling configured',
-      optional: true,
+      optional: false,
     },
   },
 };
@@ -224,7 +224,7 @@ const workflowDeletedSchema: RootSchema<ReportWorkflowDeletedActionParams> = {
   workflowIds: {
     type: 'array',
     items: {
-    type: 'keyword',
+      type: 'keyword',
     },
     _meta: {
       description: 'The workflow IDs being deleted',

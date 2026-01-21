@@ -57,55 +57,60 @@ export interface ReportWorkflowCreatedActionParams
    */
   workflowId?: string;
   /**
-   * Total number of steps in the workflow (including nested steps).
-   * Automatically extracted from workflow definition if provided.
+   * Whether the workflow is enabled.
+   * Always extracted from workflow definition (defaults to false if not provided).
    */
-  stepCount?: number;
+  enabled: boolean;
+  /**
+   * Total number of steps in the workflow (including nested steps).
+   * Always extracted from workflow definition (defaults to 0 if not provided).
+   */
+  stepCount: number;
   /**
    * Unique connector types used in the workflow.
-   * Automatically extracted from workflow definition if provided.
+   * Always extracted from workflow definition (defaults to empty array if not provided).
    */
-  connectorTypes?: string[];
+  connectorTypes: string[];
   /**
    * Count of steps by step type (e.g., { 'foreach': 2, 'slack.webhook': 5, 'if': 1 }).
-   * Automatically extracted from workflow definition if provided.
+   * Always extracted from workflow definition (defaults to empty object if not provided).
    */
-  stepTypeCounts?: Record<string, number>;
+  stepTypeCounts: Record<string, number>;
   /**
    * Whether the workflow has scheduled triggers.
-   * Automatically extracted from workflow definition if provided.
+   * Always extracted from workflow definition (defaults to false if not provided).
    */
-  hasScheduledTriggers?: boolean;
+  hasScheduledTriggers: boolean;
   /**
    * Whether the workflow has alert triggers.
-   * Automatically extracted from workflow definition if provided.
+   * Always extracted from workflow definition (defaults to false if not provided).
    */
-  hasAlertTriggers?: boolean;
+  hasAlertTriggers: boolean;
   /**
    * Whether the workflow has a timeout configured.
-   * Automatically extracted from workflow definition if provided.
+   * Always extracted from workflow definition (defaults to false if not provided).
    */
-  hasTimeout?: boolean;
+  hasTimeout: boolean;
   /**
    * Whether the workflow has concurrency settings configured.
-   * Automatically extracted from workflow definition if provided.
+   * Always extracted from workflow definition (defaults to false if not provided).
    */
-  hasConcurrency?: boolean;
+  hasConcurrency: boolean;
   /**
    * Maximum concurrent runs if concurrency is configured.
-   * Automatically extracted from workflow definition if provided.
+   * Only present when concurrency is configured.
    */
   concurrencyMax?: number;
   /**
    * Concurrency strategy if concurrency is configured ('queue', 'drop', or 'cancel-in-progress').
-   * Automatically extracted from workflow definition if provided.
+   * Only present when concurrency is configured.
    */
   concurrencyStrategy?: string;
   /**
    * Whether the workflow has on-failure handling configured.
-   * Automatically extracted from workflow definition if provided.
+   * Always extracted from workflow definition (defaults to false if not provided).
    */
-  hasOnFailure?: boolean;
+  hasOnFailure: boolean;
 }
 
 /**

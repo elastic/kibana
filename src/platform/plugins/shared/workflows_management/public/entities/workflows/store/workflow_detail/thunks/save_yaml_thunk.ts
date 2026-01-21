@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import type { WorkflowDetailDto } from '@kbn/workflows/types/latest';
 import { loadWorkflowThunk } from './load_workflow_thunk';
 import { PLUGIN_ID } from '../../../../../../common';
-import type { TelemetryServiceStart } from '../../../../../common/lib/telemetry/types';
 import { WorkflowsBaseTelemetry } from '../../../../../common/service/telemetry';
 import { queryClient } from '../../../../../shared/lib/query_client';
 import type { WorkflowsServices } from '../../../../../types';
@@ -38,13 +37,7 @@ export const saveYamlThunk = createAsyncThunk<
     const { http, notifications, application } = services;
 
     // Initialize telemetry
-    // Access workflowsManagement from services (it's added in createWorkflowsStartServices)
-    // The services object should have workflowsManagement at runtime, even though TypeScript doesn't know about it
-    const workflowsManagement = (
-      services as WorkflowsServices & {
-        workflowsManagement?: { telemetry?: TelemetryServiceStart };
-      }
-    ).workflowsManagement;
+    const workflowsManagement = services.workflowsManagement;
 
     // Always create telemetry instance - use real service if available, otherwise no-op
     const telemetry = workflowsManagement?.telemetry
@@ -97,9 +90,10 @@ export const saveYamlThunk = createAsyncThunk<
         });
 
         // Report telemetry for workflow creation
+        // Use workflow.definition from the created workflow if available, otherwise fall back to workflowDefinition from state
         telemetry.reportWorkflowCreated({
           workflowId: workflow.id,
-          workflowDefinition: workflowDefinition || undefined,
+          workflowDefinition: workflow.definition || workflowDefinition || undefined,
           error: undefined,
           editorType: 'yaml', // Saving YAML always comes from YAML editor
           origin: 'workflow_detail',

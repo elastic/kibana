@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import type { EsWorkflow } from '@kbn/workflows';
 import { loadWorkflowThunk } from './load_workflow_thunk';
 import { affectsYamlMetadata, updateWorkflowYamlFields } from '../../../../../../common/lib/yaml';
-import type { TelemetryServiceStart } from '../../../../../common/lib/telemetry/types';
 import { WorkflowsBaseTelemetry } from '../../../../../common/service/telemetry';
 import { queryClient } from '../../../../../shared/lib/query_client';
 import type { WorkflowsServices } from '../../../../../types';
@@ -44,11 +43,7 @@ export const updateWorkflowThunk = createAsyncThunk<
     const workflowDefinition = selectWorkflowDefinition(state);
 
     // Initialize telemetry
-    const workflowsManagement = (
-      services as WorkflowsServices & {
-        workflowsManagement?: { telemetry?: TelemetryServiceStart };
-      }
-    ).workflowsManagement;
+    const workflowsManagement = services.workflowsManagement;
     const telemetry = workflowsManagement?.telemetry
       ? new WorkflowsBaseTelemetry(workflowsManagement.telemetry)
       : null;

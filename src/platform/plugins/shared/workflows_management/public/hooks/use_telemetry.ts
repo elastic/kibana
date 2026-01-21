@@ -8,9 +8,7 @@
  */
 
 import { useKibana } from './use_kibana';
-import type { TelemetryServiceStart } from '../common/lib/telemetry/types';
 import { WorkflowsBaseTelemetry } from '../common/service/telemetry';
-import type { WorkflowsServices } from '../types';
 
 let telemetryInstance: WorkflowsBaseTelemetry | null = null;
 
@@ -19,9 +17,7 @@ let telemetryInstance: WorkflowsBaseTelemetry | null = null;
  */
 export function useTelemetry(): WorkflowsBaseTelemetry {
   const services = useKibana().services;
-  const workflowsManagement = (
-    services as WorkflowsServices & { workflowsManagement?: { telemetry?: TelemetryServiceStart } }
-  ).workflowsManagement;
+  const workflowsManagement = services.workflowsManagement;
 
   if (!workflowsManagement?.telemetry) {
     // Return a no-op instance if telemetry is not available

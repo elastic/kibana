@@ -45,7 +45,6 @@ export class WorkflowsBaseTelemetry {
 
   /**
    * Reports a workflow creation attempt.
-   * Call this AFTER the creation request completes (in both success and error cases).
    *
    * @param params.workflowDefinition - Optional workflow definition to extract metadata from.
    *                                    If provided, metadata (stepCount, connectorTypes, etc.) will be automatically extracted.
@@ -59,15 +58,14 @@ export class WorkflowsBaseTelemetry {
   }) => {
     const { workflowId, error, editorType, workflowDefinition, origin } = params;
 
-    // Extract metadata from workflow definition if provided
-    const metadata = workflowDefinition ? extractWorkflowMetadata(workflowDefinition) : undefined;
+    // Always extract metadata - extractWorkflowMetadata returns defaults if workflowDefinition is null/undefined
+    const metadata = extractWorkflowMetadata(workflowDefinition);
 
     this.telemetryService.reportEvent(WorkflowLifecycleEventTypes.WorkflowCreated, {
       eventName: workflowEventNames[WorkflowLifecycleEventTypes.WorkflowCreated],
       workflowId,
       ...(editorType && { editorType }),
       ...(origin && { origin }),
-      ...(metadata && {
         enabled: metadata.enabled,
         stepCount: metadata.stepCount,
         connectorTypes: metadata.connectorTypes,
@@ -79,14 +77,12 @@ export class WorkflowsBaseTelemetry {
         ...(metadata.concurrencyMax !== undefined && { concurrencyMax: metadata.concurrencyMax }),
         ...(metadata.concurrencyStrategy && { concurrencyStrategy: metadata.concurrencyStrategy }),
         hasOnFailure: metadata.hasOnFailure,
-      }),
       ...this.getBaseResultParams(error),
     });
   };
 
   /**
    * Reports a workflow update attempt.
-   * Call this AFTER the update request completes (in both success and error cases).
    * The telemetry service automatically determines the update type and publishes the appropriate event:
    * - For enable/disable actions, publishes WorkflowEnabledStateChanged
    * - For all other updates, publishes WorkflowUpdated
@@ -178,7 +174,6 @@ export class WorkflowsBaseTelemetry {
 
   /**
    * Reports a workflow deletion attempt.
-   * Call this AFTER the deletion request completes (in both success and error cases).
    */
   reportWorkflowDeleted = (params: {
     workflowIds: string[];
@@ -198,7 +193,6 @@ export class WorkflowsBaseTelemetry {
 
   /**
    * Reports a workflow clone attempt.
-   * Call this AFTER the clone request completes (in both success and error cases).
    */
   reportWorkflowCloned = (params: {
     sourceWorkflowId: string;
@@ -220,7 +214,6 @@ export class WorkflowsBaseTelemetry {
 
   /**
    * Reports a workflow enabled state change attempt (enable or disable).
-   * Call this AFTER the state change request completes (in both success and error cases).
    */
   reportWorkflowEnabledStateChanged = (params: {
     workflowId: string;
@@ -325,7 +318,6 @@ export class WorkflowsBaseTelemetry {
 
   /**
    * Reports a workflow test run initiation.
-   * Call this AFTER the test run request completes (in both success and error cases).
    */
   reportWorkflowTestRunInitiated = (params: {
     workflowId?: string;
@@ -351,7 +343,6 @@ export class WorkflowsBaseTelemetry {
 
   /**
    * Reports a workflow step test run initiation.
-   * Call this AFTER the step test run request completes (in both success and error cases).
    *
    * @param params.workflowYaml - The workflow YAML string to extract step information from
    * @param params.stepId - The step ID (name) to find and report
@@ -386,7 +377,6 @@ export class WorkflowsBaseTelemetry {
 
   /**
    * Reports a workflow manual run initiation.
-   * Call this AFTER the run request completes (in both success and error cases).
    */
   reportWorkflowRunInitiated = (params: {
     workflowId: string;
@@ -412,7 +402,6 @@ export class WorkflowsBaseTelemetry {
 
   /**
    * Reports a workflow run cancellation request.
-   * Call this AFTER the cancellation request completes (in both success and error cases).
    */
   reportWorkflowRunCancelled = (params: {
     workflowExecutionId: string;

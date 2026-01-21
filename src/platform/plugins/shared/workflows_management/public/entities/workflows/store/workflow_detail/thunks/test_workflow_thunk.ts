@@ -9,7 +9,6 @@
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
-import type { TelemetryServiceStart } from '../../../../../common/lib/telemetry/types';
 import { WorkflowsBaseTelemetry } from '../../../../../common/service/telemetry';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
@@ -32,11 +31,7 @@ export const testWorkflowThunk = createAsyncThunk<
   'detail/testWorkflowThunk',
   async ({ inputs, triggerTab }, { getState, rejectWithValue, extra: { services } }) => {
     const { http, notifications } = services;
-    const workflowsManagement = (
-      services as WorkflowsServices & {
-        workflowsManagement?: { telemetry?: TelemetryServiceStart };
-      }
-    ).workflowsManagement;
+    const workflowsManagement = services.workflowsManagement;
     const telemetry = workflowsManagement?.telemetry
       ? new WorkflowsBaseTelemetry(workflowsManagement.telemetry)
       : null;
@@ -70,7 +65,7 @@ export const testWorkflowThunk = createAsyncThunk<
         hasInputs: inputCount > 0,
         inputCount,
         error: undefined,
-        editorType: 'yaml', // Test runs are always from YAML editor context
+        editorType: 'yaml',
         origin: 'workflow_detail',
         triggerTab,
       });
