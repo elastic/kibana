@@ -17,7 +17,6 @@ import { bulkInstallPackages } from './epm/packages';
 import { incrementPackageName } from './package_policies';
 import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from './api_keys';
 import type { KibanaRequest } from '@kbn/core/server';
-import { request } from 'http';
 
 const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 const mockedPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
