@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 import type { Space } from '@kbn/spaces-plugin/server';
@@ -15,6 +15,7 @@ import type { RuleTypeRegistry } from './types';
 export interface AlertingAuthorizationClientFactoryOpts {
   ruleTypeRegistry: RuleTypeRegistry;
   securityPluginStart?: SecurityPluginStart;
+  logger: Logger;
   getSpace: (request: KibanaRequest) => Promise<Space | undefined>;
   /**
    * Retrieves a specific space by id using the provided request context.
@@ -62,12 +63,15 @@ export class AlertingAuthorizationClientFactory {
     request: KibanaRequest,
     spaceId: string
   ): Promise<AlertingAuthorization> {
-    this.validateInitialization();
-
     // If we cannot resolve a space by id (e.g. spaces disabled), fall back to request-derived behavior.
-    if (!this.options.getSpaceById) {
+    if (!this.options?.getSpaceById) {
+      this.options?.logger.debug(
+        `createForSpace called with spaceId "${spaceId}", but getSpaceById is not available (spaces plugin may be disabled). Falling back to request-derived space.`
+      );
       return await this.create(request);
     }
+
+    this.validateInitialization();
 
     return AlertingAuthorization.create({
       authorization: this.options.securityPluginStart?.authz,

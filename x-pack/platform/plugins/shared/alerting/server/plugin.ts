@@ -613,14 +613,12 @@ export class AlertingPlugin {
     alertingAuthorizationClientFactory.initialize({
       ruleTypeRegistry: ruleTypeRegistry!,
       securityPluginStart: plugins.security,
+      logger,
       async getSpace(request: KibanaRequest) {
         return plugins.spaces?.spacesService.getActiveSpace(request);
       },
       async getSpaceById(request: KibanaRequest, spaceId: string) {
-        if (!plugins.spaces) {
-          return;
-        }
-        return plugins.spaces.spacesService.createSpacesClient(request).get(spaceId);
+        return plugins.spaces?.spacesService.createSpacesClient(request).get(spaceId);
       },
       getSpaceId(request: KibanaRequest) {
         return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;

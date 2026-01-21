@@ -125,6 +125,7 @@ export class RulesClientFactory {
       request,
       savedObjects,
       spaceId: this.getSpaceId(request),
+      isExplicitSpaceOverride: false,
     });
   }
 
@@ -137,17 +138,24 @@ export class RulesClientFactory {
     savedObjects: SavedObjectsServiceStart,
     spaceId: string
   ): Promise<RulesClient> {
-    return await this.createInternal({ request, savedObjects, spaceId });
+    return await this.createInternal({
+      request,
+      savedObjects,
+      spaceId,
+      isExplicitSpaceOverride: true,
+    });
   }
 
   private async createInternal({
     request,
     savedObjects,
     spaceId,
+    isExplicitSpaceOverride,
   }: {
     request: KibanaRequest;
     savedObjects: SavedObjectsServiceStart;
     spaceId: string;
+    isExplicitSpaceOverride: boolean;
   }): Promise<RulesClient> {
     const { securityPluginSetup, securityService, securityPluginStart, actions, eventLog } = this;
 
@@ -220,10 +228,16 @@ export class RulesClientFactory {
         };
       },
       async getActionsClient() {
-        return actions.getActionsClientWithRequestInSpace(request, spaceId);
+        if (isExplicitSpaceOverride) {
+          return actions.getActionsClientWithRequestInSpace(request, spaceId);
+        }
+        return actions.getActionsClientWithRequest(request);
       },
       async getEventLogClient() {
-        return eventLog.getClientWithRequestInSpace(request, spaceId);
+        if (isExplicitSpaceOverride) {
+          return eventLog.getClientWithRequestInSpace(request, spaceId);
+        }
+        return eventLog.getClient(request);
       },
       eventLogger: this.eventLogger,
       isAuthenticationTypeAPIKey() {
