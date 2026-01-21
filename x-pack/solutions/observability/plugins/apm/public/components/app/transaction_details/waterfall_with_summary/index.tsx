@@ -15,7 +15,7 @@ import {
   EuiSkeletonText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { SavedSearchTableConfig } from '@kbn/saved-search-component';
 import { TransactionSummary } from '../../../shared/summary/transaction_summary';
 import { TransactionActionMenu } from '../../../shared/transaction_action_menu/transaction_action_menu';
@@ -27,6 +27,10 @@ import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import type { WaterfallFetchResult } from '../use_waterfall_fetcher';
 import type { UnifiedWaterfallFetcherResult } from '../use_unified_waterfall_fetcher';
 import { OpenInDiscoverButton } from '../../../shared/links/discover_links/open_in_discover_button';
+import {
+  getTraceParentChildrenMap,
+  getRootItemOrFallback,
+} from '../../../shared/trace_waterfall/use_trace_waterfall';
 
 interface Props<TSample extends {}> {
   waterfallFetchResult: WaterfallFetchResult['waterfall'];
@@ -111,6 +115,18 @@ export function WaterfallWithSummary<TSample extends {}>({
     ? unifiedWaterfallFetchResult.entryTransaction
     : waterfallFetchResult.entryTransaction;
 
+  const unifiedRootTransactionDuration = useMemo(() => {
+    if (!useUnified || unifiedWaterfallFetchResult.traceItems.length === 0) {
+      return undefined;
+    }
+    const parentChildMap = getTraceParentChildrenMap(unifiedWaterfallFetchResult.traceItems, false);
+    const { rootItem } = getRootItemOrFallback(
+      parentChildMap,
+      unifiedWaterfallFetchResult.traceItems
+    );
+    return rootItem?.duration;
+  }, [useUnified, unifiedWaterfallFetchResult.traceItems]);
+
   if (!entryTransaction && traceSamples?.length === 0 && isSucceeded) {
     return (
       <EuiEmptyPrompt
@@ -194,7 +210,7 @@ export function WaterfallWithSummary<TSample extends {}>({
             }
             totalDuration={
               useUnified
-                ? unifiedWaterfallFetchResult.entryTransaction?.transaction?.duration?.us
+                ? unifiedRootTransactionDuration
                 : waterfallFetchResult.rootWaterfallTransaction?.duration
             }
             transaction={entryTransaction}
