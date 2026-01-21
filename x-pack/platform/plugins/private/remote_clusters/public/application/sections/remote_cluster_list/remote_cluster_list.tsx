@@ -23,8 +23,8 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
-import { remoteClustersUrl } from '../../services/documentation';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { remoteClustersUrl } from '../../services/documentation';
 import { extractQueryParams, SectionLoading } from '../../../shared_imports';
 import { setBreadcrumbs } from '../../services/breadcrumb';
 
