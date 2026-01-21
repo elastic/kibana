@@ -48,12 +48,12 @@ export interface ITableColumn<T extends object> {
   actions?: Array<Record<string, unknown>>;
   field?: string;
   dataType?: string;
-  align?: 'left' | 'right' | 'center';
+  align?: string;
   width?: string;
   sortable?: boolean;
   truncateText?: boolean;
   nameTooltip?: EuiBasicTableColumn<T>['nameTooltip'];
-  render?: (value: any, item: T) => ReactNode;
+  render?: (value: any, item: T) => unknown;
 }
 
 export interface TableSearchBar<T> {
@@ -68,7 +68,8 @@ export interface TableSearchBar<T> {
 export interface TableActionSubItem<T> {
   id: string;
   name: string;
-  onClick: (item: T) => void;
+  onClick?: (item: T) => void;
+  href?: (item: T) => string | undefined;
   icon?: string;
 }
 
@@ -76,6 +77,7 @@ export interface TableAction<T> {
   id: string;
   name: string;
   onClick?: (item: T) => void;
+  href?: (item: T) => string | undefined;
   icon?: string;
   items?: Array<TableActionSubItem<T>>;
 }
@@ -149,10 +151,14 @@ function ActionsCell<T extends object>({
             items: action.items!.map((subItem) => ({
               name: subItem.name,
               icon: subItem.icon,
-              onClick: () => {
-                subItem.onClick(item);
-                closePopover();
-              },
+              ...(subItem.href
+                ? { href: subItem.href(item), target: '_self' }
+                : {
+                    onClick: () => {
+                      subItem.onClick?.(item);
+                      closePopover();
+                    },
+                  }),
               'data-test-subj': `apmManagedTableActionsMenuItem-${subItem.id}`,
             })),
           });
@@ -160,12 +166,16 @@ function ActionsCell<T extends object>({
           mainPanelItems.push({
             name: action.name,
             icon: action.icon,
-            onClick: action.onClick
-              ? () => {
-                  action.onClick!(item);
-                  closePopover();
-                }
-              : undefined,
+            ...(action.href
+              ? { href: action.href(item), target: '_self' }
+              : {
+                  onClick: action.onClick
+                    ? () => {
+                        action.onClick!(item);
+                        closePopover();
+                      }
+                    : undefined,
+                }),
             'data-test-subj': `apmManagedTableActionsMenuItem-${action.id}`,
           });
         }
@@ -512,7 +522,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
               : noItemsMessage
           }
           items={renderedItems}
-          columns={columnsWithActions as Array<EuiBasicTableColumn<T>>}
+          columns={columnsWithActions as unknown as Array<EuiBasicTableColumn<T>>}
           rowHeader={rowHeader === false ? undefined : rowHeader ?? columns[0]?.field}
           sorting={sorting}
           onChange={onTableChange}

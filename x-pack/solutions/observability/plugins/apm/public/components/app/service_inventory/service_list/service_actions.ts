@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  rulesLocatorID,
-  sloListLocatorID,
-  type RulesLocatorParams,
-  type SloListLocatorParams,
-} from '@kbn/deeplinks-observability';
+import { sloListLocatorID, type SloListLocatorParams } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { useMemo } from 'react';
@@ -20,13 +15,6 @@ import { APM_SLO_INDICATOR_TYPES } from '../../../../../common/slo_indicator_typ
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
 import type { TableActions } from '../../../shared/managed_table';
-
-const APM_RULE_TYPES = [
-  'apm.anomaly',
-  'apm.error_rate',
-  'apm.transaction_error_rate',
-  'apm.transaction_duration',
-];
 
 interface UseServiceActionsParams {
   openAlertFlyout: (ruleType: ApmRuleType, serviceName: string) => void;
@@ -44,7 +32,6 @@ export function useServiceActions({
 }: UseServiceActionsParams): UseServiceActionsReturn {
   const { core, plugins, share } = useApmPluginContext();
   const { capabilities } = core.application;
-  const rulesLocator = share.url.locators.get<RulesLocatorParams>(rulesLocatorID);
   const sloListLocator = share.url.locators.get<SloListLocatorParams>(sloListLocatorID);
 
   const { canSaveAlerts } = getAlertingCapabilities(plugins, capabilities);
@@ -109,22 +96,6 @@ export function useServiceActions({
               openAlertFlyout(ApmRuleType.ErrorCount, item.serviceName);
             },
           },
-          {
-            id: 'manageRules',
-            name: i18n.translate('xpack.apm.servicesTable.actions.manageRules', {
-              defaultMessage: 'Manage rules',
-            }),
-            icon: 'tableOfContents',
-            onClick: (item) => {
-              const rulesUrl = rulesLocator?.getRedirectUrl({
-                search: `service.name:${item.serviceName}`,
-                type: APM_RULE_TYPES,
-              });
-              if (rulesUrl) {
-                window.location.href = rulesUrl;
-              }
-            },
-          },
         ],
       });
     }
@@ -160,8 +131,8 @@ export function useServiceActions({
               defaultMessage: 'Manage SLOs',
             }),
             icon: 'tableOfContents',
-            onClick: (item) => {
-              const slosUrl = sloListLocator?.getRedirectUrl({
+            href: (item) =>
+              sloListLocator?.getRedirectUrl({
                 filters: [
                   {
                     meta: {
@@ -195,25 +166,14 @@ export function useServiceActions({
                     },
                   },
                 ],
-              });
-              if (slosUrl) {
-                window.location.href = slosUrl;
-              }
-            },
+              }),
           },
         ],
       });
     }
 
     return actionsList;
-  }, [
-    openAlertFlyout,
-    openSloFlyout,
-    canSaveApmAlerts,
-    canWriteSlos,
-    rulesLocator,
-    sloListLocator,
-  ]);
+  }, [openAlertFlyout, openSloFlyout, canSaveApmAlerts, canWriteSlos, sloListLocator]);
 
   return { actions, showActionsColumn };
 }
