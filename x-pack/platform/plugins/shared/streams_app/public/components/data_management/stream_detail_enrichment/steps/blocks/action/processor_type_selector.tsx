@@ -472,6 +472,7 @@ const PROCESSOR_GROUP_MAP: Record<
   uppercase: 'set',
   lowercase: 'set',
   trim: 'set',
+  join: 'set',
 };
 
 const getProcessorDescription =

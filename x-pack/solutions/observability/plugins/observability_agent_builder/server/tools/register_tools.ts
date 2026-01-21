@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import type { StaticToolRegistration } from '@kbn/agent-builder-server';
 import type {
+  ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
 } from '../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../data_registry/data_registry';
 import {
@@ -49,6 +48,10 @@ import {
   OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
   createGetMetricChangePointsTool,
 } from './get_metric_change_points/tool';
+import {
+  OBSERVABILITY_GET_TRACE_CHANGE_POINTS_TOOL_ID,
+  createGetTraceChangePointsTool,
+} from './get_trace_change_points/tool';
 import { OBSERVABILITY_GET_INDEX_INFO_TOOL_ID, createGetIndexInfoTool } from './get_index_info';
 
 const PLATFORM_TOOL_IDS = [
@@ -71,6 +74,7 @@ const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
   OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID,
   OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
+  OBSERVABILITY_GET_TRACE_CHANGE_POINTS_TOOL_ID,
   OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
 ];
 
@@ -82,10 +86,7 @@ export async function registerTools({
   dataRegistry,
   logger,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
   logger: Logger;
@@ -102,6 +103,7 @@ export async function registerTools({
     createGetTraceMetricsTool({ core, plugins, logger }),
     createGetLogChangePointsTool({ core, plugins, logger }),
     createGetMetricChangePointsTool({ core, plugins, logger }),
+    createGetTraceChangePointsTool({ core, plugins, logger }),
     createGetIndexInfoTool({ core, plugins, logger }),
   ];
 
