@@ -131,7 +131,61 @@ expect(response).toHavePayload({ owner: caseOwner, status: 'open' });
 
 ---
 
+## Why `toHavePayload` over `toMatchObject`?
+
+`toHavePayload` is tailored for API testing workflows:
+
+1. **No destructuring needed** - Automatically finds `data` or `body` in the response:
+
+   ```typescript
+   // Instead of:
+   const { data } = response;
+   expect(data).toMatchObject({ id: 1 });
+
+   // Just:
+   expect(response).toHavePayload({ id: 1 });
+   ```
+
+2. **Partial array matching** - `toMatchObject` requires arrays to match exactly in length and order. `toHavePayload` finds matching items anywhere in the array:
+
+   ```typescript
+   // response.data.items = [{ id: 3, title: 'c' }, { id: 1, title: 'a' }, { id: 2, title: 'b' }]
+
+   // ❌ toMatchObject fails (wrong order, wrong length)
+   expect(response.data).toMatchObject({ items: [{ id: 1 }] });
+
+   // ✅ toHavePayload passes (finds id:1 somewhere in the array)
+   expect(response).toHavePayload({ items: [{ id: 1 }] });
+   ```
+
+3. **Existence check** - Call without arguments to verify payload exists:
+
+   ```typescript
+   // ❌ Manual check
+   expect(response.data).toBeDefined();
+
+   // ✅ Built-in
+   expect(response).toHavePayload();
+   ```
+
+4. **Asymmetric matchers** - Built-in helpers for common checks:
+
+   ```typescript
+   expect(response).toHavePayload({
+     count: expect.toBeGreaterThan(0),
+     items: expect.toHaveLength(3),
+     id: expect.toBeDefined(),
+   });
+   ```
+
+5. **Exact matching when needed** - Opt-in strict mode:
+   ```typescript
+   expect(response).toHavePayload({ id: 1 }, { exactMatch: true });
+   ```
+
+---
+
 ## Notes
 
-- Custom matchers throw errors identical to Playwright's format for consistent developer experience
+- Custom matchers throw Playwright-style errors; stack traces can be trimmed via `skipStackLines` to point directly at the test file
 - `toHaveStatusCode` options interface is designed for extensibility (e.g., future `range` option)
