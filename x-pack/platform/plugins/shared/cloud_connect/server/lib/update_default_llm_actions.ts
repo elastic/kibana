@@ -25,7 +25,8 @@ export async function hasAnyDefaultLLMConnectors(actionsClient: ActionsClient): 
   for (const connector of existingConnectors) {
     if (
       connector.actionTypeId === '.inference' &&
-      connector?.config?.taskType === 'chat_completion'
+      connector?.config?.taskType === 'chat_completion' &&
+      connector?.config?.provider === 'elastic'
     ) {
       return true;
     }
