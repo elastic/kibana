@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Type } from '@kbn/config-schema';
+import type { Type, TypeOf } from '@kbn/config-schema';
 import type { Reference } from '@kbn/content-management-utils';
+import type { getDrilldownSchema } from './schemas';
 
-export type Drilldown<
+export type DrilldownSetup<
   StoredState extends { type: string } = { type: string },
   State extends { type: string } = { type: string }
 > = {
@@ -28,3 +29,5 @@ export type Drilldown<
     references?: Reference[];
   };
 };
+
+export type DrilldownState = TypeOf<ReturnType<typeof getDrilldownSchema>>;

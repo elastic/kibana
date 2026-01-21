@@ -13,6 +13,8 @@ export type { EmbeddableSetup, EmbeddableStart };
 
 export type { EmbeddableRegistryDefinition } from './types';
 
+export type { DrilldownState } from './drilldowns/types';
+
 export type {
   EmbeddableStateWithType,
   EmbeddablePersistableStateService,

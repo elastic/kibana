@@ -11,7 +11,7 @@ import { generateRefName } from './dynamic_actions/dashboard_drilldown_persistab
 import type { DynamicActionsState, SerializedEvent } from './dynamic_actions/types';
 
 export function convertToDrilldowns(enhancementsState: { dynamicActions?: DynamicActionsState }) {
-  if (!enhancementsState?.dynamicActions?.events) return {};
+  if (!enhancementsState?.dynamicActions?.events) return [];
 
   return enhancementsState.dynamicActions.events
     .map((event) => {
@@ -27,7 +27,7 @@ export function convertToDrilldowns(enhancementsState: { dynamicActions?: Dynami
         return convertToUrlDrilldown(event);
       }
     })
-    .filter((drilldown) => Boolean(drilldown));
+    .filter((drilldown) => drilldown !== undefined);
 }
 
 function convertToDashboardDrilldown(event: SerializedEvent) {

@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Drilldown } from './types';
+import type { DrilldownSetup } from './types';
 
 export class DrilldownRegistry {
-  private registry: { [key: string]: Drilldown } = {};
+  private registry: { [key: string]: DrilldownSetup } = {};
 
-  registerDrilldown(type: string, drilldown: Drilldown) {
+  registerDrilldown(type: string, drilldown: DrilldownSetup) {
     if (this.registry[type]) {
       throw new Error(`Drilldown for type "${type}" are already registered.`);
     }

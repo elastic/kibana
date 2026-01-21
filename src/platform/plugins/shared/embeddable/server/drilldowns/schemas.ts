@@ -22,7 +22,10 @@ export function getDrilldownsSchema(
   });
 }
 
-function getDrilldownSchema(registry: DrilldownRegistry, embeddableSupportedTriggers: string[]) {
+export function getDrilldownSchema(
+  registry: DrilldownRegistry,
+  embeddableSupportedTriggers: string[]
+) {
   return schema.object({
     config: schema.discriminatedUnion(
       'type',
