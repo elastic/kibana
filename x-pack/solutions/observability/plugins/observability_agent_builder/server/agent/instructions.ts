@@ -8,20 +8,27 @@
 import dedent from 'dedent';
 
 /**
- * Shared Entity Linking prompt section for Observability Agent Builder.
- * This prompt instructs the LLM to format entities as clickable links using Kibana's relative URL paths.
+ * Shared instruction prompts for Observability Agent Builder.
+ *
+ * These prompts are reused across:
+ * - Observability agent system instructions
+ * - AI insight attachments (logs, alerts, errors)
+ *
+ * All instruction prompts should be co-located here for consistency and reusability.
+ */
+
+/**
+ * Entity Linking instructions for Observability Agent Builder.
+ * Instructs the LLM to format entities as clickable links using Kibana's relative URL paths.
  *
  * Supported entity types:
  * - APM: Services, Traces, Errors (individual and service-level), Transactions, Dependencies, Service Map
  * - Logs: Service-specific logs and general logs explorer
  * - Infrastructure: Hosts
  * - Platform: Alerts, ML Jobs
- *
- * This should be included in:
- * - System prompts for all AI insight attachment types (logs, alerts, errors)
- * - Observability agent instructions
  */
-export const ENTITY_LINKING_PROMPT = dedent(`
+export function getEntityLinkingInstructions() {
+  return dedent(`
   ## Entity Linking Guidelines
 
   Use markdown for readability. When referencing entities, create clickable links:
@@ -39,6 +46,6 @@ export const ENTITY_LINKING_PROMPT = dedent(`
   | Dependencies | \`[Dependencies](/app/apm/services/<serviceName>/dependencies)\` | "View [Dependencies](/app/apm/services/catalog-api/dependencies) to identify upstream issues." |
   | Alert | \`[<alertId>](/app/observability/alerts/<alertId>)\` | "Alert [alert-uuid-123](/app/observability/alerts/alert-uuid-123) was triggered." |
   | Logs Explorer | \`[Logs](/app/logs)\` | "View [Logs](/app/logs) to investigate the issue further." |
-  | ML Job | \`[<jobId>](/app/ml/jobs)\` | "ML job [anomaly-detection](/app/ml/jobs) detected unusual patterns." |
-
+  
 `);
+}

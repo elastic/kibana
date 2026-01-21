@@ -11,7 +11,7 @@ import { safeJsonStringify } from '@kbn/std';
 import dedent from 'dedent';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import { getLogDocumentById } from './get_log_document_by_id';
-import { ENTITY_LINKING_PROMPT } from '../../utils/entity_linking_prompt';
+import { getEntityLinkingInstructions } from '../../agent/instructions';
 
 export interface GetLogAiInsightsParams {
   index: string;
@@ -35,8 +35,8 @@ export async function getLogAiInsights({
   const systemPrompt = dedent(`
     You are assisting an SRE who is viewing a log entry in the Kibana Logs UI.
     Using the provided data produce a concise, action-oriented response.
-  
-    ${ENTITY_LINKING_PROMPT}
+
+    ${getEntityLinkingInstructions()}
   `);
 
   const logEntry = await getLogDocumentById({

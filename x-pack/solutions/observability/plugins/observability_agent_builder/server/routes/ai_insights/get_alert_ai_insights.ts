@@ -12,7 +12,7 @@ import dedent from 'dedent';
 import { compact, isEmpty } from 'lodash';
 import moment from 'moment';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
-import { ENTITY_LINKING_PROMPT } from '../../utils/entity_linking_prompt';
+import { getEntityLinkingInstructions } from '../../agent/instructions';
 import type {
   ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
@@ -240,8 +240,8 @@ async function generateAlertSummary({
     3) Log categories: error messages and exception patterns
     4) Errors: exception patterns with downstream context
     5) Service summary: instance counts, versions, anomalies, and metadata
-    
-      ${ENTITY_LINKING_PROMPT}
+
+     ${getEntityLinkingInstructions()}
   `);
 
   const alertDetails = `\`\`\`json\n${JSON.stringify(alertDoc, null, 2)}\n\`\`\``;

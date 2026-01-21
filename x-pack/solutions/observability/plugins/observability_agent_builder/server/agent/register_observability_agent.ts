@@ -14,7 +14,7 @@ import type {
 import { OBSERVABILITY_AGENT_TOOL_IDS } from '../tools/register_tools';
 import { OBSERVABILITY_GET_INDEX_INFO_TOOL_ID } from '../tools';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
-import { ENTITY_LINKING_PROMPT } from '../utils/entity_linking_prompt';
+import { getEntityLinkingInstructions } from './instructions';
 
 export const OBSERVABILITY_AGENT_ID = 'observability.agent';
 
@@ -41,11 +41,12 @@ export async function registerObservabilityAgent({
     configuration: {
       instructions: dedent(
         `You are an observability specialist agent that helps Site Reliability Engineers (SREs) investigate incidents and understand system health.
-        
+
         ${getInvestigationInstructions()}
         ${getReasoningInstructions()}
         ${getFieldDiscoveryInstructions()}
-      ` + ENTITY_LINKING_PROMPT
+        ${getEntityLinkingInstructions()}
+      `
       ),
       tools: [{ tool_ids: OBSERVABILITY_AGENT_TOOL_IDS }],
     },
@@ -57,7 +58,7 @@ export async function registerObservabilityAgent({
 function getInvestigationInstructions() {
   return dedent(`
     ### INVESTIGATION APPROACH
-    
+
     Follow a progressive workflow - start broad, then narrow down:
     1. **Triage**: What's the severity? How many users/services affected?
     2. **Scope**: Which components are affected? What's the blast radius?
@@ -71,7 +72,7 @@ function getInvestigationInstructions() {
 function getReasoningInstructions() {
   return dedent(`
     ### REASONING PRINCIPLES
-    
+
     - **Be quantitative**: Quote specific metrics (error rate %, latency ms, throughput rpm). Avoid vague terms like "high" without numbers.
     - **Correlation ≠ causation**: Look for temporal sequence (what happened FIRST) and causal mechanism.
     - **Consider all layers**: Infrastructure (CPU, memory, disk) → Application (latency, throughput, failure rate) → Dependencies (databases, caches, external APIs).
