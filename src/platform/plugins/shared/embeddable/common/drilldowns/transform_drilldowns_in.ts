@@ -22,10 +22,10 @@ export function getTransformDrilldownsIn(
     if (!state.drilldowns) {
       return {
         state: {},
-        references: []
+        references: [],
       };
     }
-    
+
     const references: Reference[] = [];
     return {
       state: {
@@ -45,7 +45,7 @@ export function getTransformDrilldownsIn(
             ...drilldownState,
             config: drilldownConfig,
           };
-        })
+        }),
       },
       references,
     };

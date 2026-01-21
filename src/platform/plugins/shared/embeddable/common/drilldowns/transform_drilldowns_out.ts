@@ -26,16 +26,18 @@ export function getTransformDrilldownsOut(
   ) {
     return state.enhancements || state.drilldowns
       ? {
-          drilldowns: [...convertToDrilldowns(state.enhancements ?? {}), ...(state.drilldowns ?? [])].map(
-            (drilldownState) => {
-              const transformOut = getTranformOut(drilldownState.config.type);
-              return transformOut
-                ? {
-                    ...drilldownState,
-                    config: transformOut(drilldownState.config, references),
-                  }
-                : drilldownState;
-            })
+          drilldowns: [
+            ...convertToDrilldowns(state.enhancements ?? {}),
+            ...(state.drilldowns ?? []),
+          ].map((drilldownState) => {
+            const transformOut = getTranformOut(drilldownState.config.type);
+            return transformOut
+              ? {
+                  ...drilldownState,
+                  config: transformOut(drilldownState.config, references),
+                }
+              : drilldownState;
+          }),
         }
       : {};
   }
