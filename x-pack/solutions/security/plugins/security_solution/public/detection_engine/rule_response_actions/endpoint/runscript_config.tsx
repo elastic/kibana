@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, type ComponentProps, useCallback } from 'react';
+import React, { type ComponentProps, memo, useCallback, useMemo } from 'react';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
@@ -17,15 +17,12 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import type { AutomatedRunScriptConfig } from '../../../../common/endpoint/types';
 import { EndpointRunscriptScriptSelector } from '../../../management/components/endpoint_runscript_script_selector';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { OS_TITLES } from '../../../management/common/translations';
 import { PlatformIcon } from '../../../management/components/endpoint_responder/components/header_info/platforms';
-import type { EndpointRunScriptActionRequestParams } from '../../../../common/api/endpoint';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import type { SupportedHostOsType } from '../../../../common/endpoint/constants';
-
-type RunScriptUseFieldDataType = Record<SupportedHostOsType, EndpointRunScriptActionRequestParams>;
 
 export interface RunscriptConfigProps {
   basePath: string;
@@ -41,7 +38,7 @@ export const RunscriptConfig = memo<RunscriptConfigProps>(
       'responseActionsEndpointAutomatedRunScript'
     );
 
-    const fieldConfig: ComponentProps<typeof UseField<RunScriptUseFieldDataType>>['config'] =
+    const fieldConfig: ComponentProps<typeof UseField<AutomatedRunScriptConfig>>['config'] =
       useMemo(() => {
         return {
           defaultValue: {
@@ -60,7 +57,7 @@ export const RunscriptConfig = memo<RunscriptConfigProps>(
     return (
       <>
         <EuiSpacer />
-        <UseField<RunScriptUseFieldDataType>
+        <UseField<AutomatedRunScriptConfig>
           path={`${basePath}.config`}
           component={AutomatedRunScriptConfiguration}
           componentProps={{ 'data-test-subj': 'runscript-config-field' }}
@@ -72,7 +69,7 @@ export const RunscriptConfig = memo<RunscriptConfigProps>(
     );
     //
     // return (
-    //   <UseField<RunScriptUseFieldDataType> path={`${commandPath}.config`}>
+    //   <UseField<AutomatedRunScriptConfig> path={`${commandPath}.config`}>
     //     {(field) => {
     //       const { onChange, value } = field;
     //
@@ -152,7 +149,7 @@ export const RunscriptConfig = memo<RunscriptConfigProps>(
 RunscriptConfig.displayName = 'RunscriptConfig';
 
 export interface AutomatedRunScriptConfigurationProps {
-  field: FieldHook<RunScriptUseFieldDataType>;
+  field: FieldHook<AutomatedRunScriptConfig>;
   'data-test-subj'?: string;
 }
 
@@ -164,7 +161,7 @@ export const AutomatedRunScriptConfiguration = memo<AutomatedRunScriptConfigurat
     const userHasRunScriptAuthz = useUserPrivileges().endpointPrivileges.canWriteExecuteOperations;
 
     const emitChange = useCallback(
-      (newValue: RunScriptUseFieldDataType) => {
+      (newValue: AutomatedRunScriptConfig) => {
         const event = new Event('change', {
           bubbles: true,
         }) as unknown as React.ChangeEvent<HTMLInputElement>;
@@ -189,7 +186,7 @@ export const AutomatedRunScriptConfiguration = memo<AutomatedRunScriptConfigurat
     // FIXME:PT add i18n for all labels below
     return (
       <EuiText size="s" data-test-subj={dataTestSubj}>
-        {(['linux', 'macos', 'windows'] as Array<keyof RunScriptUseFieldDataType>).map(
+        {(['linux', 'macos', 'windows'] as Array<keyof AutomatedRunScriptConfig>).map(
           (osType, index) => {
             const currentConfig = value[osType];
 
