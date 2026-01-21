@@ -347,7 +347,7 @@ export const generateCmd: Command<void> = {
     );
     log.write('\n');
     log.warning(
-      '!!! Remember to register your plugin/package in .buildkite/pipelines/pull_request/scout_tests.yml before opening PR !!!'
+      '⚠️ CI setup required: to run these tests in CI, you must add your plugin or package to .buildkite/scout_ci_config.yml.'
     );
   },
 };
