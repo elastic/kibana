@@ -12,6 +12,7 @@ import type {
   ServiceMapService,
   ServiceMapConnections,
   GroupResourceNodesResponse,
+  ServiceConnectionNode,
 } from './types';
 import { getServiceMapNodes } from './get_service_map_nodes';
 import { getExternalConnectionNode, getServiceConnectionNode } from './utils';
@@ -69,23 +70,62 @@ const elasticSearchExternal = createExitSpan({
   spanSubtype: 'elasticsearch',
 });
 
-// Define anomalies
-const anomalies = {
-  mlJobIds: ['apm-test-1234-ml-module-name'],
-  serviceAnomalies: [
-    {
-      serviceName: 'opbeans-test',
-      transactionType: 'request',
-      actualValue: 10000,
-      anomalyScore: 50,
-      jobId: 'apm-test-1234-ml-module-name',
-      healthStatus: ServiceHealthStatus.warning,
-    },
-  ],
+// Helper to create a single service anomaly
+const createServiceAnomaly = (
+  serviceName: string,
+  overrides: Partial<{
+    anomalyScore: number;
+    healthStatus: ServiceHealthStatus;
+    actualValue: number;
+  }> = {}
+) => ({
+  serviceName,
+  transactionType: 'request',
+  actualValue: overrides.actualValue ?? 10000,
+  anomalyScore: overrides.anomalyScore ?? 50,
+  jobId: 'apm-production-1234-apm_tx_metrics',
+  healthStatus: overrides.healthStatus ?? ServiceHealthStatus.warning,
+});
+
+// Helper to create anomalies for one or more services
+const createAnomalies = (
+  ...serviceConfigs: Array<
+    | string
+    | {
+        serviceName: string;
+        anomalyScore?: number;
+        healthStatus?: ServiceHealthStatus;
+        actualValue?: number;
+      }
+  >
+) => ({
+  mlJobIds: ['apm-production-1234-apm_tx_metrics'],
+  serviceAnomalies: serviceConfigs.map((config) =>
+    typeof config === 'string'
+      ? createServiceAnomaly(config)
+      : createServiceAnomaly(config.serviceName, config)
+  ),
+});
+
+// Default anomalies for tests that don't care about matching service names
+const anomalies = createAnomalies('opbeans-test');
+
+// Helper to get anomaly stats from a node
+const getNodeAnomalyStats = (
+  elements: GroupResourceNodesResponse['elements'],
+  serviceId: string
+) => {
+  const node = elements.find((el) => el.data.id === serviceId);
+  return (node?.data as ServiceConnectionNode)?.serviceAnomalyStats;
 };
 
 describe('getServiceMapNodes', () => {
-  it('maps external destinations to internal services', () => {
+  it('maps external destinations to internal services with anomalies', () => {
+    const multiServiceAnomalies = createAnomalies(
+      { serviceName: 'opbeans-node', anomalyScore: 75, healthStatus: ServiceHealthStatus.critical },
+      { serviceName: 'opbeans-java', anomalyScore: 25, healthStatus: ServiceHealthStatus.healthy }
+    );
+
     const response: ServiceMapConnections = {
       servicesData: [
         getServiceConnectionNode(nodejsService),
@@ -103,7 +143,7 @@ describe('getServiceMapNodes', () => {
           destination: getExternalConnectionNode(nodejsExternal),
         },
       ],
-      anomalies,
+      anomalies: multiServiceAnomalies,
     };
 
     const { elements } = getServiceMapNodes(response);
@@ -112,6 +152,14 @@ describe('getServiceMapNodes', () => {
 
     expect(getIds(nodes)).toEqual(['opbeans-java', 'opbeans-node']);
     expect(getIds(edges)).toEqual(['opbeans-java~opbeans-node']);
+
+    // Verify anomalies are attached to each service node
+    expect(getNodeAnomalyStats(elements, 'opbeans-node')).toEqual(
+      multiServiceAnomalies.serviceAnomalies[0]
+    );
+    expect(getNodeAnomalyStats(elements, 'opbeans-java')).toEqual(
+      multiServiceAnomalies.serviceAnomalies[1]
+    );
   });
 
   it('adds connections for messaging systems', () => {
@@ -289,7 +337,73 @@ describe('getServiceMapNodes', () => {
     expect(elements.length).toBe(3);
   });
 
-  it('should return connections when exit spans point to a load balancer', () => {
+  it('returns serviceAnomalies for a single service', () => {
+    const nodejsAnomalies = createAnomalies({
+      serviceName: 'opbeans-node',
+      anomalyScore: 75,
+      healthStatus: ServiceHealthStatus.critical,
+    });
+
+    const response: ServiceMapConnections = {
+      servicesData: [getServiceConnectionNode(nodejsService)],
+      exitSpanDestinations: [],
+      connections: [],
+      anomalies: nodejsAnomalies,
+    };
+
+    const { elements } = getServiceMapNodes(response);
+
+    const { nodes } = partitionElements(elements);
+
+    expect(nodes).toHaveLength(1);
+    expect(getIds(nodes)).toEqual(['opbeans-node']);
+
+    // Verify the service node contains the anomaly data
+    expect(getNodeAnomalyStats(elements, 'opbeans-node')).toEqual(
+      nodejsAnomalies.serviceAnomalies[0]
+    );
+  });
+
+  it('does not attach anomaly stats to external nodes', () => {
+    const javaAnomalies = createAnomalies({
+      serviceName: 'opbeans-java',
+      anomalyScore: 75,
+      healthStatus: ServiceHealthStatus.critical,
+    });
+
+    const response: ServiceMapConnections = {
+      servicesData: [getServiceConnectionNode(javaService)],
+      exitSpanDestinations: [],
+      connections: [
+        {
+          source: getServiceConnectionNode(javaService),
+          destination: getExternalConnectionNode({ ...elasticSearchExternal, ...javaService }),
+        },
+      ],
+      anomalies: javaAnomalies,
+    };
+
+    const { elements } = getServiceMapNodes(response);
+
+    const { nodes } = partitionElements(elements);
+
+    expect(getIds(nodes)).toEqual(['>elasticsearch', 'opbeans-java']);
+
+    // Service node should have anomaly stats
+    expect(getNodeAnomalyStats(elements, 'opbeans-java')?.anomalyScore).toBe(75);
+
+    // External node should NOT have anomaly stats
+    expect(getNodeAnomalyStats(elements, '>elasticsearch')).toBeUndefined();
+  });
+
+  it('should return connections and anomalies when exit spans point to a load balancer', () => {
+    const loadBalancerAnomalies = createAnomalies(
+      { serviceName: 'opbeans-java', anomalyScore: 80, healthStatus: ServiceHealthStatus.critical },
+      { serviceName: 'opbeans-go', anomalyScore: 50, healthStatus: ServiceHealthStatus.warning },
+      { serviceName: 'opbeans-node', anomalyScore: 10, healthStatus: ServiceHealthStatus.healthy },
+      { serviceName: 'opbeans-python', anomalyScore: 60, healthStatus: ServiceHealthStatus.warning }
+    );
+
     const response: ServiceMapConnections = {
       servicesData: [getServiceConnectionNode(javaService)],
       exitSpanDestinations: [
@@ -320,7 +434,7 @@ describe('getServiceMapNodes', () => {
           destination: getExternalConnectionNode({ ...httpLoadBalancer, ...pythonService }),
         },
       ],
-      anomalies,
+      anomalies: loadBalancerAnomalies,
     };
 
     const { elements } = getServiceMapNodes(response);
@@ -333,6 +447,15 @@ describe('getServiceMapNodes', () => {
       'opbeans-java~opbeans-node',
       'opbeans-python~opbeans-java',
     ]);
+
+    // Verify anomalies are correctly attached to all services
+    expect(getNodeAnomalyStats(elements, 'opbeans-java')?.anomalyScore).toBe(80);
+    expect(getNodeAnomalyStats(elements, 'opbeans-java')?.healthStatus).toBe(
+      ServiceHealthStatus.critical
+    );
+    expect(getNodeAnomalyStats(elements, 'opbeans-go')?.anomalyScore).toBe(50);
+    expect(getNodeAnomalyStats(elements, 'opbeans-node')?.anomalyScore).toBe(10);
+    expect(getNodeAnomalyStats(elements, 'opbeans-python')?.anomalyScore).toBe(60);
   });
 });
 
