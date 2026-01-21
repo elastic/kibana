@@ -28,7 +28,6 @@
       "embeddableEnhanced",
       "kibanaUtils",
       "imageEmbeddable",
-      "presentationUtil",
       "uiActions"
     ]
   }
