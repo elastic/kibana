@@ -10,6 +10,12 @@ import type { DataSourceAttributes } from '../saved_objects';
 import { convertSOtoAPIResponse } from './schema';
 
 describe('convertSOtoAPIResponse', () => {
+  // Simple helper to create a test catalog
+  const createTestCatalog = (iconTypes: Record<string, string>) =>
+    ({
+      get: (type: string) => (iconTypes[type] ? { iconType: iconTypes[type] } : undefined),
+    } as unknown);
+
   it('should convert SavedObject to API response format', () => {
     const savedObject: SavedObject<DataSourceAttributes> = {
       id: 'connector-123',
@@ -18,7 +24,6 @@ describe('convertSOtoAPIResponse', () => {
       attributes: {
         name: 'My Notion Connector',
         type: 'notion',
-        iconType: '.notion',
         config: {},
         createdAt: '2025-01-07T10:00:00.000Z',
         updatedAt: '2025-01-07T10:00:00.000Z',
@@ -28,7 +33,8 @@ describe('convertSOtoAPIResponse', () => {
       },
     };
 
-    const result = convertSOtoAPIResponse(savedObject);
+    const catalog = createTestCatalog({ notion: '.notion' });
+    const result = convertSOtoAPIResponse(savedObject, catalog);
 
     expect(result).toEqual({
       id: 'connector-123',
@@ -51,7 +57,6 @@ describe('convertSOtoAPIResponse', () => {
       attributes: {
         name: 'Empty Connector',
         type: 'github',
-        iconType: '.github',
         config: {},
         createdAt: '2025-01-07T10:00:00.000Z',
         updatedAt: '2025-01-07T10:00:00.000Z',
@@ -61,7 +66,8 @@ describe('convertSOtoAPIResponse', () => {
       },
     };
 
-    const result = convertSOtoAPIResponse(savedObject);
+    const catalog = createTestCatalog({ github: '.github' });
+    const result = convertSOtoAPIResponse(savedObject, catalog);
 
     expect(result).toEqual({
       id: 'connector-empty',
@@ -84,7 +90,6 @@ describe('convertSOtoAPIResponse', () => {
       attributes: {
         name: 'Minimal',
         type: 'slack',
-        iconType: '.slack',
         config: {},
         createdAt: '2025-01-07T10:00:00.000Z',
         updatedAt: '2025-01-07T10:00:00.000Z',
@@ -94,7 +99,8 @@ describe('convertSOtoAPIResponse', () => {
       },
     };
 
-    const result = convertSOtoAPIResponse(savedObject);
+    const catalog = createTestCatalog({ slack: '.slack' });
+    const result = convertSOtoAPIResponse(savedObject, catalog);
 
     expect(result).toEqual({
       id: 'minimal-connector',
@@ -117,7 +123,6 @@ describe('convertSOtoAPIResponse', () => {
       attributes: {
         name: 'Multi Stack Connector',
         type: 'custom',
-        iconType: '.custom',
         config: {},
         createdAt: '2025-01-07T10:00:00.000Z',
         updatedAt: '2025-01-07T10:00:00.000Z',
@@ -127,7 +132,8 @@ describe('convertSOtoAPIResponse', () => {
       },
     };
 
-    const result = convertSOtoAPIResponse(savedObject);
+    const catalog = createTestCatalog({ custom: '.custom' });
+    const result = convertSOtoAPIResponse(savedObject, catalog);
 
     expect(result).toEqual({
       id: 'multi-connector',
@@ -150,7 +156,6 @@ describe('convertSOtoAPIResponse', () => {
       attributes: {
         name: 'Timestamped Connector',
         type: 'notion',
-        iconType: '.notion',
         config: {},
         createdAt: '2025-01-07T10:00:00.000Z',
         updatedAt: '2025-01-07T12:30:00.000Z',
@@ -160,7 +165,8 @@ describe('convertSOtoAPIResponse', () => {
       },
     };
 
-    const result = convertSOtoAPIResponse(savedObject);
+    const catalog = createTestCatalog({ notion: '.notion' });
+    const result = convertSOtoAPIResponse(savedObject, catalog);
 
     expect(result).toEqual({
       id: 'connector-with-timestamps',
@@ -172,6 +178,39 @@ describe('convertSOtoAPIResponse', () => {
       agentTools: [],
       createdAt: '2025-01-07T10:00:00.000Z',
       updatedAt: '2025-01-07T12:30:00.000Z',
+    });
+  });
+
+  it('should use fallback icon when data source type is not in catalog', () => {
+    const savedObject: SavedObject<DataSourceAttributes> = {
+      id: 'unknown-connector',
+      type: 'data_connector',
+      references: [],
+      attributes: {
+        name: 'Unknown Connector',
+        type: 'unknown-type',
+        config: {},
+        createdAt: '2025-01-07T10:00:00.000Z',
+        updatedAt: '2025-01-07T10:00:00.000Z',
+        workflowIds: [],
+        toolIds: [],
+        kscIds: [],
+      },
+    };
+
+    const catalog = createTestCatalog({});
+    const result = convertSOtoAPIResponse(savedObject, catalog);
+
+    expect(result).toEqual({
+      id: 'unknown-connector',
+      name: 'Unknown Connector',
+      type: 'unknown-type',
+      iconType: '.integration',
+      stackConnectors: [],
+      workflows: [],
+      agentTools: [],
+      createdAt: '2025-01-07T10:00:00.000Z',
+      updatedAt: '2025-01-07T10:00:00.000Z',
     });
   });
 });

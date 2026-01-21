@@ -143,7 +143,6 @@ export async function createDataSourceAndRelatedResources(
   const savedObject = await savedObjectsClient.create(DATA_SOURCE_SAVED_OBJECT_TYPE, {
     name,
     type,
-    iconType: dataSource.iconType,
     config: {},
     createdAt: now,
     updatedAt: now,
