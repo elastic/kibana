@@ -12,7 +12,7 @@ export const SpacesSavedObjectSchemas = {
     description: schema.maybe(schema.string()),
     initials: schema.maybe(schema.string()),
     color: schema.maybe(schema.string()),
-    disabledFeatures: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+    disabledFeatures: schema.maybe(schema.arrayOf(schema.string())),
     imageUrl: schema.maybe(schema.string()),
     _reserved: schema.maybe(schema.boolean()),
   }),
