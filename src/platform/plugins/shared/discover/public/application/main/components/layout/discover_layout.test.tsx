@@ -129,7 +129,6 @@ async function mountComponent(
     dataView,
     inspectorAdapters: { requests: new RequestAdapter() },
     navigateTo: jest.fn(),
-    onChangeDataView: jest.fn(),
     savedSearch: savedSearchMock,
     searchSource: searchSourceMock,
     state: { columns: [], query, hideChart: false, interval: 'auto' },
