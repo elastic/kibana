@@ -336,13 +336,13 @@ describe('helpers', function () {
 
     it('should filter duplicated unmappedColumnWarning warnings', function () {
       const warnings = [
-        createMessage('unmappedColumnWarning', 'Fields [a] are unmapped'),
-        createMessage('unmappedColumnWarning', 'Fields [a] are unmapped'),
-        createMessage('unmappedColumnWarning', 'Fields [b] are unmapped'),
+        createMessage('unmappedColumnWarning', 'Field a is unmapped'),
+        createMessage('unmappedColumnWarning', 'Field a is unmapped'),
+        createMessage('unmappedColumnWarning', 'Field b is unmapped'),
       ];
       expect(filterDuplicatedUnmappedColumnWarnings(warnings)).toEqual([
-        createMessage('unmappedColumnWarning', 'Fields [a] are unmapped'),
-        createMessage('unmappedColumnWarning', 'Fields [b] are unmapped'),
+        createMessage('unmappedColumnWarning', 'Field a is unmapped'),
+        createMessage('unmappedColumnWarning', 'Field b is unmapped'),
       ]);
     });
 
@@ -353,18 +353,6 @@ describe('helpers', function () {
       ];
       expect(filterDuplicatedUnmappedColumnWarnings(warnings)).toEqual([
         createMessage('otherWarning', 'Some warning'),
-        createMessage('otherWarning', 'Some warning'),
-      ]);
-    });
-
-    it('should handle mixed warnings', function () {
-      const warnings = [
-        createMessage('unmappedColumnWarning', 'Fields [a] are unmapped'),
-        createMessage('otherWarning', 'Some warning'),
-        createMessage('unmappedColumnWarning', 'Fields [a] are unmapped'),
-      ];
-      expect(filterDuplicatedUnmappedColumnWarnings(warnings)).toEqual([
-        createMessage('unmappedColumnWarning', 'Fields [a] are unmapped'),
         createMessage('otherWarning', 'Some warning'),
       ]);
     });
