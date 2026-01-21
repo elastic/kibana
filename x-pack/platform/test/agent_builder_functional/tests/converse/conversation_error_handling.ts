@@ -24,6 +24,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const es = getService('es');
   const browser = getService('browser');
+  const toasts = getService('toasts');
 
   describe('Conversation Error Handling', function () {
     let llmProxy: LlmProxy;
@@ -98,6 +99,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // Assert the error is no longer visible
       const isErrorStillVisible = await agentBuilder.isErrorVisible();
       expect(isErrorStillVisible).to.be(false);
+    });
+
+    it('redirects to "new" page and shows a toast when conversation ID does not exist', async () => {
+      const INVALID_ID = 'this-id-does-not-exist-12345';
+
+      await agentBuilder.navigateToApp(`conversations/${INVALID_ID}`);
+      await retry.try(async () => {
+        const currentUrl = await browser.getCurrentUrl();
+        expect(currentUrl).to.contain('conversations/new');
+      });
+      await testSubjects.existOrFail('agentBuilderWelcomePage');
+      expect((await toasts.getContentByIndex(1)).startsWith('Conversation not found')).to.be(true);
     });
 
     it('can start a new conversation when there is an error', async () => {

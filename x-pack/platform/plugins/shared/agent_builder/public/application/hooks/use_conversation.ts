@@ -10,6 +10,7 @@ import { useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { agentBuilderDefaultAgentId, ConversationRoundStatus } from '@kbn/agent-builder-common';
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { labels } from '../utils/i18n';
 import { queryKeys } from '../query_keys';
 import { newConversationId, createNewRound } from '../utils/new_conversation';
@@ -57,7 +58,7 @@ export const useConversation = () => {
         throw error;
       }
     },
-    retry: (failureCount, error: Error) => {
+    retry: (failureCount, error: IHttpFetchError) => {
       // Never retry if conversation doesn't exist
       if (error?.response?.status === 404) {
         return false;
