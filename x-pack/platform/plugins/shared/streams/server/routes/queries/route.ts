@@ -89,7 +89,9 @@ const upsertQueryRoute = createServerRoute({
     body: upsertStreamQueryRequestSchema,
   }),
   handler: async ({ params, request, getScopedClients }): Promise<UpsertQueryResponse> => {
-    const { streamsClient, queryClient, licensing } = await getScopedClients({ request });
+    const { streamsClient, queryClient, assetClient, licensing } = await getScopedClients({
+      request,
+    });
     const {
       path: { name: streamName, queryId },
       body,
@@ -98,7 +100,7 @@ const upsertQueryRoute = createServerRoute({
 
     await streamsClient.ensureStream(streamName);
     await assertFeatureNotChanged({
-      queryClient,
+      assetClient,
       streamName,
       queries: [{ id: queryId, feature: body.feature }],
     });
@@ -205,7 +207,9 @@ const bulkQueriesRoute = createServerRoute({
     getScopedClients,
     logger,
   }): Promise<BulkUpdateAssetsResponse> => {
-    const { streamsClient, queryClient, licensing } = await getScopedClients({ request });
+    const { streamsClient, queryClient, assetClient, licensing } = await getScopedClients({
+      request,
+    });
     await assertEnterpriseLicense(licensing);
 
     const {
@@ -218,7 +222,7 @@ const bulkQueriesRoute = createServerRoute({
     const indexOperations = operations.flatMap((op) =>
       'index' in op ? [{ id: op.index.id, feature: op.index.feature }] : []
     );
-    await assertFeatureNotChanged({ queryClient, streamName, queries: indexOperations });
+    await assertFeatureNotChanged({ assetClient, streamName, queries: indexOperations });
 
     await queryClient.bulk(streamName, operations);
 

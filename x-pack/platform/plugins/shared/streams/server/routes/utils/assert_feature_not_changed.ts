@@ -7,7 +7,7 @@
 
 import { isEqual } from 'lodash';
 import type { StreamQueryKql } from '@kbn/streams-schema';
-import type { QueryClient } from '../../lib/streams/assets/query/query_client';
+import type { AssetClient } from '../../lib/streams/assets/asset_client';
 import { StatusError } from '../../lib/streams/errors/status_error';
 
 /**
@@ -15,18 +15,18 @@ import { StatusError } from '../../lib/streams/errors/status_error';
  * Throws a StatusError (400) if attempting to modify the feature of an existing query.
  */
 export async function assertFeatureNotChanged({
-  queryClient,
+  assetClient,
   streamName,
   queries,
 }: {
-  queryClient: QueryClient;
+  assetClient: AssetClient;
   streamName: string;
   queries: Array<{ id: string; feature: StreamQueryKql['feature'] }>;
 }): Promise<void> {
   if (queries.length === 0) return;
 
   const queryIds = queries.map((q) => q.id);
-  const existingQueries = await queryClient.bulkGetByIds(streamName, queryIds);
+  const existingQueries = await assetClient.bulkGetByIds(streamName, 'query', queryIds);
   const existingQueryMap = new Map(existingQueries.map((q) => [q.query.id, q.query]));
 
   for (const query of queries) {
