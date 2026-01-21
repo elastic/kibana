@@ -21,8 +21,8 @@ tags:
   - shared-common
   - package
   - prod
-  - group-security
-  - private
+  - group-platform
+  - shared
 fileGroups:
   src:
     - '**/*.ts'
