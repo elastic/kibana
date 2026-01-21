@@ -110,6 +110,7 @@ import { testData } from '../fixtures';
 
 apiTest.describe('Scout API test suite example', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   let viewerApiCredentials: RoleApiCredentials;
+  
   apiTest.beforeAll(async ({ requestAuth }) => {
     viewerApiCredentials = await requestAuth.getApiKey('viewer');
   });
