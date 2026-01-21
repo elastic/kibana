@@ -758,8 +758,8 @@ describe('registerRoutes', () => {
 
       registerRoutes(dependencies);
 
-      const deleteCall = (mockRouter.delete as jest.Mock).mock.calls.find(
-        (call) => call[0].path?.includes('{id}')
+      const deleteCall = (mockRouter.delete as jest.Mock).mock.calls.find((call) =>
+        call[0].path?.includes('{id}')
       );
       const routeHandler = deleteCall?.[1];
       const mockRequest = httpServerMock.createKibanaRequest({
@@ -819,15 +819,15 @@ describe('registerRoutes', () => {
 
       registerRoutes(dependencies);
 
-      const deleteCall = (mockRouter.delete as jest.Mock).mock.calls.find(
-        (call) => call[0].path?.includes('{id}')
+      const deleteCall = (mockRouter.delete as jest.Mock).mock.calls.find((call) =>
+        call[0].path?.includes('{id}')
       );
       const routeHandler = deleteCall?.[1];
-      
+
       if (!routeHandler) {
         throw new Error('Route handler not found for DELETE /api/data_sources/{id}');
       }
-      
+
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { id: 'data-source-1' },
       });
@@ -854,8 +854,8 @@ describe('registerRoutes', () => {
 
       registerRoutes(dependencies);
 
-      const deleteCall = (mockRouter.delete as jest.Mock).mock.calls.find(
-        (call) => call[0].path?.includes('{id}')
+      const deleteCall = (mockRouter.delete as jest.Mock).mock.calls.find((call) =>
+        call[0].path?.includes('{id}')
       );
       const routeHandler = deleteCall?.[1];
       const mockRequest = httpServerMock.createKibanaRequest({
@@ -932,11 +932,7 @@ describe('DELETE /api/data_sources', () => {
       };
       mockTaskManager.ensureScheduled.mockResolvedValue(mockTaskInstance as any);
 
-      await routeHandler(
-        context,
-        httpServerMock.createKibanaRequest(),
-        mockResponse
-      );
+      await routeHandler(context, httpServerMock.createKibanaRequest(), mockResponse);
 
       expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -968,10 +964,9 @@ describe('DELETE /api/data_sources', () => {
 
       await routeHandler(context, mockRequest, mockResponse);
 
-      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith(
-        expect.any(Object),
-        { request: mockRequest }
-      );
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith(expect.any(Object), {
+        request: mockRequest,
+      });
     });
   });
 
@@ -987,11 +982,7 @@ describe('DELETE /api/data_sources', () => {
         },
       ]);
 
-      await routeHandler(
-        context,
-        httpServerMock.createKibanaRequest(),
-        mockResponse
-      );
+      await routeHandler(context, httpServerMock.createKibanaRequest(), mockResponse);
 
       expect(mockResponse.customError).toHaveBeenCalledWith({
         statusCode: 503,
@@ -1007,11 +998,7 @@ describe('DELETE /api/data_sources', () => {
       const error = new Error('Failed to schedule task');
       mockTaskManager.ensureScheduled.mockRejectedValue(error);
 
-      await routeHandler(
-        context,
-        httpServerMock.createKibanaRequest(),
-        mockResponse
-      );
+      await routeHandler(context, httpServerMock.createKibanaRequest(), mockResponse);
 
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to schedule bulk delete task')

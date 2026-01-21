@@ -91,12 +91,10 @@ export class BulkDeleteTask {
               const errors: Array<{ dataSourceId: string; error: string }> = [];
 
               try {
-                const finder = savedObjectsClient.createPointInTimeFinder<DataSourceAttributes>(
-                  {
-                    type: DATA_SOURCE_SAVED_OBJECT_TYPE,
-                    perPage: 100,
-                  }
-                );
+                const finder = savedObjectsClient.createPointInTimeFinder<DataSourceAttributes>({
+                  type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+                  perPage: 100,
+                });
 
                 try {
                   for await (const response of finder.find()) {
@@ -163,10 +161,7 @@ export class BulkDeleteTask {
                   state: {
                     isDone: true,
                     deletedCount,
-                    errors: [
-                      ...errors,
-                      { dataSourceId: 'unknown', error: (err as Error).message },
-                    ],
+                    errors: [...errors, { dataSourceId: 'unknown', error: (err as Error).message }],
                   } satisfies BulkDeleteTaskState,
                 };
               }
@@ -180,4 +175,3 @@ export class BulkDeleteTask {
     });
   }
 }
-

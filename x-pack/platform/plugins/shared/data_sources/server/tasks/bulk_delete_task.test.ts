@@ -113,9 +113,7 @@ describe('BulkDeleteTask', () => {
       close: jest.fn().mockResolvedValue(undefined),
     };
 
-    mockSavedObjectsClient.createPointInTimeFinder = jest
-      .fn()
-      .mockReturnValue(mockFinder as any);
+    mockSavedObjectsClient.createPointInTimeFinder = jest.fn().mockReturnValue(mockFinder as any);
 
     return mockFinder;
   };
@@ -162,9 +160,8 @@ describe('BulkDeleteTask', () => {
         plugins: mockPlugins,
       });
 
-      const registerCall = (
-        mockPlugins.taskManager.setup.registerTaskDefinitions as jest.Mock
-      ).mock.calls[0][0];
+      const registerCall = (mockPlugins.taskManager.setup.registerTaskDefinitions as jest.Mock).mock
+        .calls[0][0];
       const createTaskRunner = registerCall[TYPE].createTaskRunner;
 
       mockTaskInstance = {
@@ -185,12 +182,22 @@ describe('BulkDeleteTask', () => {
 
     describe('full deletion success', () => {
       it('should delete all resources when all deletions succeed', async () => {
-        const dataSource1 = createMockDataSource('ds-1', 'Source 1', 'github', [
-          'workflow-1',
-        ], ['tool-1'], ['ksc-1']);
-        const dataSource2 = createMockDataSource('ds-2', 'Source 2', 'notion', [
-          'workflow-2',
-        ], ['tool-2'], ['ksc-2']);
+        const dataSource1 = createMockDataSource(
+          'ds-1',
+          'Source 1',
+          'github',
+          ['workflow-1'],
+          ['tool-1'],
+          ['ksc-1']
+        );
+        const dataSource2 = createMockDataSource(
+          'ds-2',
+          'Source 2',
+          'notion',
+          ['workflow-2'],
+          ['tool-2'],
+          ['ksc-2']
+        );
 
         createMockPointInTimeFinder([dataSource1, dataSource2]);
         setupTaskRunner();
@@ -266,7 +273,14 @@ describe('BulkDeleteTask', () => {
       });
 
       it('should delete workflows via deleteDataSourceAndRelatedResources', async () => {
-        const dataSource = createMockDataSource('ds-1', 'Source 1', 'github', ['workflow-1'], [], []);
+        const dataSource = createMockDataSource(
+          'ds-1',
+          'Source 1',
+          'github',
+          ['workflow-1'],
+          [],
+          []
+        );
 
         createMockPointInTimeFinder([dataSource]);
         setupTaskRunner();
@@ -348,12 +362,22 @@ describe('BulkDeleteTask', () => {
 
     describe('partial deletion', () => {
       it('should track partial deletions as errors', async () => {
-        const dataSource1 = createMockDataSource('ds-1', 'Source 1', 'github', [
-          'workflow-1',
-        ], ['tool-1'], ['ksc-1']);
-        const dataSource2 = createMockDataSource('ds-2', 'Source 2', 'notion', [
-          'workflow-2',
-        ], ['tool-2'], ['ksc-2']);
+        const dataSource1 = createMockDataSource(
+          'ds-1',
+          'Source 1',
+          'github',
+          ['workflow-1'],
+          ['tool-1'],
+          ['ksc-1']
+        );
+        const dataSource2 = createMockDataSource(
+          'ds-2',
+          'Source 2',
+          'notion',
+          ['workflow-2'],
+          ['tool-2'],
+          ['ksc-2']
+        );
 
         createMockPointInTimeFinder([dataSource1, dataSource2]);
         setupTaskRunner();
@@ -463,9 +487,7 @@ describe('BulkDeleteTask', () => {
           createMockDataSource('ds-1', 'Source 1', 'github', [], [], []),
           createMockDataSource('ds-2', 'Source 2', 'notion', [], [], []),
         ];
-        const batch2 = [
-          createMockDataSource('ds-3', 'Source 3', 'github', [], [], []),
-        ];
+        const batch2 = [createMockDataSource('ds-3', 'Source 3', 'github', [], [], [])];
 
         const mockFinder = {
           find: jest.fn().mockImplementation(async function* () {
@@ -538,13 +560,15 @@ describe('BulkDeleteTask', () => {
           plugins: mockPlugins,
         });
 
-        const registerCall = (
-          mockPlugins.taskManager.setup.registerTaskDefinitions as jest.Mock
-        ).mock.calls[0][0];
+        const registerCall = (mockPlugins.taskManager.setup.registerTaskDefinitions as jest.Mock)
+          .mock.calls[0][0];
         const createTaskRunner = registerCall[TYPE].createTaskRunner;
 
         const taskRunner = createTaskRunner({
-          taskInstance: { id: 'test-task-id', state: { isDone: false, deletedCount: 0, errors: [] } },
+          taskInstance: {
+            id: 'test-task-id',
+            state: { isDone: false, deletedCount: 0, errors: [] },
+          },
           fakeRequest: undefined,
           abortController: new AbortController(),
         });
@@ -573,4 +597,3 @@ describe('BulkDeleteTask', () => {
     });
   });
 });
-
