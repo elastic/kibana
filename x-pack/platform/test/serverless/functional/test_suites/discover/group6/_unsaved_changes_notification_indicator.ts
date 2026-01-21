@@ -95,6 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should not show a notification indicator after loading a saved search, only after changes', async () => {
       await PageObjects.discover.loadSavedSearch(SAVED_SEARCH_NAME);
       await PageObjects.discover.waitUntilTabIsLoaded();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
 
       await PageObjects.discover.ensureNoUnsavedChangesIndicator();
 
