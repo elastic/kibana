@@ -250,29 +250,31 @@ export class DiscoverPageObject extends FtrService {
     await this.retry.try(async () => {
       await this.testSubjects.click('unifiedHistogramBreakdownSelectorButton');
       await this.testSubjects.existOrFail('unifiedHistogramBreakdownSelectorSelectable');
-    });
 
-    await (
-      await this.testSubjects.find('unifiedHistogramBreakdownSelectorSelectorSearch')
-    ).type(field, { charByChar: true });
+      const searchInput = await this.testSubjects.find(
+        'unifiedHistogramBreakdownSelectorSelectorSearch'
+      );
 
-    const optionValue = value ?? field;
+      await searchInput.type(field, { charByChar: true });
 
-    await this.find.clickDisplayedByCssSelector(
-      `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${optionValue}"]`
-    );
+      const optionValue = value ?? field;
 
-    await this.retry.waitFor('the dropdown to close', async () => {
-      return !(await this.testSubjects.exists('unifiedHistogramBreakdownSelectorSelectable'));
-    });
+      await this.find.clickDisplayedByCssSelector(
+        `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${optionValue}"]`
+      );
 
-    await this.retry.waitFor('the value to be selected', async () => {
+      await this.testSubjects.missingOrFail('unifiedHistogramBreakdownSelectorSelectable');
+
       const breakdownButton = await this.testSubjects.find(
         'unifiedHistogramBreakdownSelectorButton'
       );
-      return (
-        (await breakdownButton.getAttribute('data-selected-value')) === optionValue ||
-        (await breakdownButton.getVisibleText()) === field
+      const hasSelectedValue =
+        (await breakdownButton.getAttribute('data-selected-value')) === optionValue;
+      const hasSelectedField = (await breakdownButton.getVisibleText()) === field;
+
+      expect(hasSelectedValue || hasSelectedField).to.equal(
+        true,
+        `Expected hasSelectedValue (${hasSelectedValue}) or hasSelectedField (${hasSelectedField}) to be true`
       );
     });
   }
