@@ -392,9 +392,9 @@ Expected one of:
         ),
         type: 'error',
       };
-    case 'invalidSettingValueType':
+    case 'invalidSettingValue':
       return {
-        message: i18n.translate('kbn-esql-language.esql.validation.invalidSettingValueType', {
+        message: i18n.translate('kbn-esql-language.esql.validation.invalidSettingValue', {
           defaultMessage: 'Invalid value "{value}" for setting "{setting}".',
           values: {
             value: out.value,
@@ -406,7 +406,7 @@ Expected one of:
     case 'unknownMapParameterName':
       return {
         message: i18n.translate('kbn-esql-language.esql.validation.unknownMapParameterName', {
-          defaultMessage: 'Unknown map parameter "{paramName}". Available parameters are: {map}.',
+          defaultMessage: 'Unknown parameter "{paramName}".',
           values: {
             paramName: out.paramName,
             map: out.map,
@@ -418,7 +418,7 @@ Expected one of:
       return {
         message: i18n.translate('kbn-esql-language.esql.validation.invalidMapParameterValueType', {
           defaultMessage:
-            'Invalid value type for map parameter "{paramName}". Expected types: {expectedTypes}. Actual type: {actualType}.',
+            'Invalid type for parameter "{paramName}". Expected types: {expectedTypes}. Received {actualType}.',
           values: {
             paramName: out.paramName,
             expectedTypes: out.expectedTypes,

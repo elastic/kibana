@@ -94,7 +94,7 @@ function validateSettingValues(
         'valueUnquoted' in settingValue ? settingValue.valueUnquoted : settingValue.text;
 
       return getMessageFromId({
-        messageId: 'invalidSettingValueType',
+        messageId: 'invalidSettingValue',
         values: { value: paramKey, setting: setting.name },
         locations: settingValue.location,
       });

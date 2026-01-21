@@ -378,7 +378,7 @@ export interface ValidationErrors {
     message: string;
     type: {};
   };
-  invalidSettingValueType: {
+  invalidSettingValue: {
     message: string;
     type: { value: string; setting: string };
   };
