@@ -19,6 +19,7 @@ import {
   GET_DISCOVER_FIELD_BROWSER_POPOVER_FIELD_ADD_BUTTON,
 } from '../screens/discover';
 import { GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON } from '../screens/search_bar';
+import { setCodeEditorValue, getCodeEditorValue } from './common/monaco';
 
 export const waitForDiscoverFieldsToLoad = () => {
   cy.get(AVAILABLE_FIELD_COUNT).should('be.visible');
@@ -29,8 +30,11 @@ export const assertFieldsAreLoaded = () => {
 };
 
 export const fillEsqlQueryBar = (query: string) => {
-  // eslint-disable-next-line cypress/no-force
-  cy.get(DISCOVER_ESQL_EDITABLE_INPUT).type(query, { force: true });
+  return setCodeEditorValue(DISCOVER_CONTAINER, query);
+};
+
+export const getEsqlQueryBarValue = () => {
+  return getCodeEditorValue(DISCOVER_CONTAINER);
 };
 
 export const selectCurrentDiscoverEsqlQuery = (
@@ -47,9 +51,7 @@ export const addDiscoverEsqlQuery = (esqlQuery: string) => {
       // ESQL input uses the monaco editor which doesn't allow for traditional input updates
       selectCurrentDiscoverEsqlQuery();
       fillEsqlQueryBar(esqlQuery);
-      return cy
-        .get(DISCOVER_ESQL_INPUT_TEXT_CONTAINER)
-        .then(($el) => $el.text().replaceAll(String.fromCharCode(160), ' '));
+      return getEsqlQueryBarValue();
     },
     (val) =>
       val === esqlQuery || val.replaceAll(/\s/, '\u00b7') === esqlQuery.replaceAll(/\s/, '\u00b7'),
@@ -61,7 +63,6 @@ export const addDiscoverEsqlQuery = (esqlQuery: string) => {
       },
     }
   );
-  cy.get(DISCOVER_ESQL_EDITABLE_INPUT).blur();
   cy.get(GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON(DISCOVER_CONTAINER)).click();
 };
 
