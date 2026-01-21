@@ -9,9 +9,9 @@ import { defineCypressConfig } from '@kbn/cypress-config';
 
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
-  reporter: '../../../../../../node_modules/cypress-multi-reporters',
+  reporter: '../../../../../node_modules/cypress-multi-reporters',
   reporterOptions: {
-    configFile: './reporter_config.json',
+    configFile: './cypress/reporter_config.json',
   },
   defaultCommandTimeout: 60000,
   requestTimeout: 60000,
@@ -27,10 +27,10 @@ export default defineCypressConfig({
     grepFilterSpecs: false,
   },
 
-  screenshotsFolder: '../../../../../../target/kibana-fleet/cypress/screenshots',
+  screenshotsFolder: '../../../../../target/kibana-fleet/cypress/screenshots',
   trashAssetsBeforeRuns: false,
   video: false,
-  videosFolder: '../../../../../../target/kibana-fleet/cypress/videos',
+  videosFolder: '../../../../../target/kibana-fleet/cypress/videos',
   viewportHeight: 900,
   viewportWidth: 1440,
   screenshotOnRunFailure: true,
@@ -42,13 +42,13 @@ export default defineCypressConfig({
     experimentalMemoryManagement: true,
     numTestsKeptInMemory: 3,
 
-    specPattern: './e2e/**/*.cy.ts',
-    supportFile: './support/e2e.ts',
-    excludeSpecPattern: './e2e/space_awareness/**/*.cy.ts',
+    specPattern: './cypress/e2e/**/*.cy.ts',
+    supportFile: './cypress/support/e2e.ts',
+    excludeSpecPattern: './cypress/e2e/space_awareness/**/*.cy.ts',
 
     setupNodeEvents(on, config) {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      return require('./plugins')(on, config);
+      // eslint-disable-next-line @typescript-eslint/no-var-requires, @kbn/imports/uniform_imports
+      return require('@kbn/fleet-plugin-cypress/plugins')(on, config);
     },
   },
 });
