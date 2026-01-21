@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 
 const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
+  enabled: schema.boolean({ defaultValue: false }),
   ears: schema.object({
     url: schema.maybe(schema.string()),
     ui_enabled: schema.boolean({ defaultValue: false }),

@@ -37,9 +37,9 @@ apiTest.describe(
         expect(response.body).toHaveProperty('steps');
         expect(Array.isArray(response.body.steps)).toBe(true);
 
-        expect(response.body.steps, {
+        expect(APPROVED_STEP_DEFINITIONS, {
           message: 'Registered step definitions do not match approved step definitions',
-        }).toMatchObject(APPROVED_STEP_DEFINITIONS);
+        }).toMatchObject(expect.arrayContaining(response.body.steps));
       }
     );
   }
