@@ -16,7 +16,7 @@ import type { ElasticsearchSettingsDefinition } from '../src/commands/definition
 import { readElasticsearchDefinitions } from './utils/elasticsearch_definitions';
 
 // We exlude the time_zone setting as we decided that we won't support it in Kibana
-const SETTINGS_TO_EXCLUDE = new Set(['time_zone']);
+const SETTINGS_TO_EXCLUDE = new Set(['time_zone', 'project_routing']);
 const GENERATED_DEFINITIONS_PATH = '../src/commands/definitions/generated';
 const ELASTICSEARCH_SETTINGS_PATH =
   '/docs/reference/query-languages/esql/kibana/definition/settings';
