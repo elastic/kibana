@@ -24,6 +24,8 @@
           "[]"
         ],
         "path": "packages/kbn-docs-utils/src/find_plugins.ts",
+        "lineNumber": 72,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -38,6 +40,8 @@
               "string[] | undefined"
             ],
             "path": "packages/kbn-docs-utils/src/find_plugins.ts",
+            "lineNumber": 72,
+            "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -59,6 +63,8 @@
           "[]"
         ],
         "path": "packages/kbn-docs-utils/src/find_plugins.ts",
+        "lineNumber": 98,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -73,6 +79,8 @@
               "string"
             ],
             "path": "packages/kbn-docs-utils/src/find_plugins.ts",
+            "lineNumber": 98,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -92,6 +100,8 @@
           "() => void"
         ],
         "path": "packages/kbn-docs-utils/src/build_api_docs_cli.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
