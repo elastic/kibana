@@ -486,7 +486,7 @@ describe('createCookieSessionStorageFactory', () => {
     });
 
     describe('clear()', () => {
-      it('should clear session using default cookie auth', async () => {
+      it('should clear session using cookie auth', async () => {
         const factory = await createCookieSessionStorageFactory(
           mockLogger.get(),
           mockServer as any,
@@ -502,51 +502,6 @@ describe('createCookieSessionStorageFactory', () => {
         factory.asScoped(mockRequest).clear();
 
         expect(mockClear).toHaveBeenCalled();
-      });
-
-      it('should clear session with custom cookie options using default path', async () => {
-        const factory = await createCookieSessionStorageFactory(
-          mockLogger.get(),
-          mockServer as any,
-          defaultCookieOptions,
-          false
-        );
-
-        const mockRequest = mockRouter.createKibanaRequest();
-        const rawRequest = ensureRawRequest(mockRequest);
-        const mockUnstate = jest.fn();
-        (rawRequest as any).cookieAuth = {
-          h: { unstate: mockUnstate },
-          clear: jest.fn(),
-        };
-
-        const options = { isSecure: true };
-        factory.asScoped(mockRequest).clear(options);
-
-        expect(mockUnstate).toHaveBeenCalledWith('test-cookie', { path: '/' });
-      });
-
-      it('should clear session with custom cookie options using basePath', async () => {
-        const factory = await createCookieSessionStorageFactory(
-          mockLogger.get(),
-          mockServer as any,
-          defaultCookieOptions,
-          false,
-          '/my-app'
-        );
-
-        const mockRequest = mockRouter.createKibanaRequest();
-        const rawRequest = ensureRawRequest(mockRequest);
-        const mockUnstate = jest.fn();
-        (rawRequest as any).cookieAuth = {
-          h: { unstate: mockUnstate },
-          clear: jest.fn(),
-        };
-
-        const options = { sameSite: 'None' as const };
-        factory.asScoped(mockRequest).clear(options);
-
-        expect(mockUnstate).toHaveBeenCalledWith('test-cookie', { path: '/my-app' });
       });
     });
   });

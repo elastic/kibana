@@ -43,9 +43,8 @@ export interface SessionStorage<T> {
 
   /**
    * Clears current session.
-   * @param options - optional overrides for cookie attributes
    */
-  clear(options?: SessionStorageSetOptions): void;
+  clear(): void;
 }
 
 /**
