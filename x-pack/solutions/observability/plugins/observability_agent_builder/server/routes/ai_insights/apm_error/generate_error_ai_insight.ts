@@ -6,7 +6,6 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { CoreSetup } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { MessageRole } from '@kbn/inference-common';
 import type { BoundInferenceClient } from '@kbn/inference-common';
@@ -14,9 +13,8 @@ import dedent from 'dedent';
 import { concat, of } from 'rxjs';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../../data_registry/data_registry';
 import type {
+  ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../../types';
 import { fetchApmErrorContext } from './fetch_apm_error_context';
 import type { AiInsightResult, ContextEvent } from '../types';
@@ -62,10 +60,7 @@ const buildUserPrompt = (errorContext: string) => {
 };
 
 export interface GenerateErrorAiInsightParams {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   errorId: string;
   serviceName: string;

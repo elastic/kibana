@@ -33,7 +33,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
         alertId: t.string,
       }),
     }),
-    handler: async ({ core, dataRegistry, logger, request, params, response }) => {
+    handler: async ({ core, plugins, dataRegistry, logger, request, params, response }) => {
       const { alertId } = params.body;
 
       const [coreStart, startDeps] = await core.getStartServices();
@@ -46,6 +46,8 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
       const alertDoc = (await alertsClient.get({ id: alertId })) as AlertDocForInsight;
 
       const result = await getAlertAiInsight({
+        core,
+        plugins,
         alertDoc,
         inferenceClient,
         connectorId,

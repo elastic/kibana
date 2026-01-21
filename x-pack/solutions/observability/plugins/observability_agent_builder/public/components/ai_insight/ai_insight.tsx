@@ -34,6 +34,12 @@ import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { StartConversationButton } from './start_conversation_button';
 import { AiInsightErrorBanner } from './ai_insight_error_banner';
 import { LoadingCursor } from './loading_cursor';
+import { OBSERVABILITY_AGENT_ID } from '../../../common/constants';
+
+export interface AiInsightResponse {
+  summary: string;
+  context: string;
+}
 
 export interface AiInsightAttachment {
   type: string;
@@ -74,6 +80,7 @@ export function AiInsight({ title, createStream, buildAttachments }: AiInsightPr
 
     agentBuilder.openConversationFlyout({
       newConversation: true,
+      agentId: OBSERVABILITY_AGENT_ID,
       attachments: buildAttachments(summary, context),
     });
   }, [agentBuilder, buildAttachments, summary, context]);
