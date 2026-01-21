@@ -115,7 +115,7 @@ apiTest.describe('Scout API test suite example', { tag: tags.DEPLOYMENT_AGNOSTIC
     viewerApiCredentials = await requestAuth.getApiKey('viewer');
   });
 
-  apiTest('should complete a basic api flow', async ({ apiClient }) => {
+  apiTest('should complete a basic API flow', async ({ apiClient }) => {
     const response = await apiClient.post('kibana/api', {
       headers: {
         ...viewerApiCredentials.apiKeyHeader,
