@@ -6,15 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import {
-  ruleParamsSchemaWithRuleTypeIdAndDefaultValueV1,
-  createRuleParamsExamplesV1,
-} from '@kbn/response-ops-rule-params';
+import { createRuleParamsExamplesV1 } from '@kbn/response-ops-rule-params';
 import { validateDurationV1, validateHoursV1, validateTimezoneV1 } from '../../../validation';
 import { notifyWhenSchemaV1, alertDelaySchemaV1 } from '../../../response';
 import { artifactsSchemaV1 } from '../../../request';
 import { alertsFilterQuerySchemaV1 } from '../../../../alerts_filter_query';
 import { flappingSchemaV2 } from '../../../common';
+import { EsQueryRuleParamsSchemaV1 } from '@kbn/response-ops-rule-params/es_query';
+import { IndexThresholdRuleParamsSchemaV1 } from '@kbn/response-ops-rule-params/index_threshold';
 
 export const actionFrequencySchema = schema.object({
   summary: schema.boolean({
@@ -189,9 +188,121 @@ export const createBodySchemaCommon = schema.object({
   artifacts: schema.maybe(artifactsSchemaV1),
 });
 
-export const createBodySchema = schema.intersection([
-  createBodySchemaCommon,
-  ruleParamsSchemaWithRuleTypeIdAndDefaultValueV1(),
+export const createBodySchema = schema.discriminatedUnion('rule_type_id', [
+  schema.object({
+    rule_type_id: schema.literal('.es-query'),
+    params: EsQueryRuleParamsSchemaV1,
+    name: schema.string({
+      meta: {
+        description:
+          'The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule.',
+      },
+    }),
+    enabled: schema.boolean({
+      defaultValue: true,
+      meta: {
+        description:
+          'Indicates whether you want to run the rule on an interval basis after it is created.',
+      },
+    }),
+    consumer: schema.string({
+      meta: {
+        description:
+          'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.',
+      },
+    }),
+    tags: schema.arrayOf(schema.string(), {
+      defaultValue: [],
+      meta: { description: 'The tags for the rule.' },
+    }),
+    throttle: schema.maybe(
+      schema.nullable(
+        schema.string({
+          validate: validateDurationV1,
+          meta: {
+            description:
+              'Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how often an alert generates repeated actions. NOTE: You cannot specify the throttle interval at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.',
+          },
+        })
+      )
+    ),
+    schedule: schema.object(
+      {
+        interval: schema.string({
+          validate: validateDurationV1,
+          meta: { description: 'The interval is specified in seconds, minutes, hours, or days.' },
+        }),
+      },
+      {
+        meta: {
+          description:
+            'The check interval, which specifies how frequently the rule conditions are checked.',
+        },
+      }
+    ),
+    actions: schema.arrayOf(actionSchema, { defaultValue: [] }),
+    notify_when: schema.maybe(schema.nullable(notifyWhenSchemaV1)),
+    alert_delay: schema.maybe(alertDelaySchemaV1),
+    flapping: schema.maybe(schema.nullable(flappingSchemaV2)),
+    artifacts: schema.maybe(artifactsSchemaV1),
+  }),
+  schema.object({
+    rule_type_id: schema.literal('.index-threshold'),
+    params: IndexThresholdRuleParamsSchemaV1,
+    name: schema.string({
+      meta: {
+        description:
+          'The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule.',
+      },
+    }),
+    enabled: schema.boolean({
+      defaultValue: true,
+      meta: {
+        description:
+          'Indicates whether you want to run the rule on an interval basis after it is created.',
+      },
+    }),
+    consumer: schema.string({
+      meta: {
+        description:
+          'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.',
+      },
+    }),
+    tags: schema.arrayOf(schema.string(), {
+      defaultValue: [],
+      meta: { description: 'The tags for the rule.' },
+    }),
+    throttle: schema.maybe(
+      schema.nullable(
+        schema.string({
+          validate: validateDurationV1,
+          meta: {
+            description:
+              'Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how often an alert generates repeated actions. NOTE: You cannot specify the throttle interval at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.',
+          },
+        })
+      )
+    ),
+    schedule: schema.object(
+      {
+        interval: schema.string({
+          validate: validateDurationV1,
+          meta: { description: 'The interval is specified in seconds, minutes, hours, or days.' },
+        }),
+      },
+      {
+        meta: {
+          description:
+            'The check interval, which specifies how frequently the rule conditions are checked.',
+        },
+      }
+    ),
+    actions: schema.arrayOf(actionSchema, { defaultValue: [] }),
+    notify_when: schema.maybe(schema.nullable(notifyWhenSchemaV1)),
+    alert_delay: schema.maybe(alertDelaySchemaV1),
+    flapping: schema.maybe(schema.nullable(flappingSchemaV2)),
+    artifacts: schema.maybe(artifactsSchemaV1),
+  }),
 ]);
 
 export { createRuleParamsExamplesV1 };
