@@ -186,7 +186,7 @@ export const getAlertsAppMenuItem = ({
               iconType: 'tableOfContents',
               testId: 'discoverManageAlertsButton',
               href: services.application.getUrlForApp(
-                services.application.isAppRegistered?.('rules')
+                services.application.isAppRegistered('rules')
                   ? 'rules'
                   : 'management/insightsAndAlerting/triggersActions/rules'
               ),
