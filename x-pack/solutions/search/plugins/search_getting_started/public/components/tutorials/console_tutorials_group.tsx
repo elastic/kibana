@@ -6,25 +6,34 @@
  */
 import { consoleTutorials } from '@kbn/search-code-examples';
 import { TryInConsoleButton } from '@kbn/try-in-console';
-import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiText, EuiImage } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { useKibana } from '../../hooks/use_kibana';
 import { SearchGettingStartedSectionHeading } from '../section_heading';
-import { useAssetBasePath } from '../../hooks/use_asset_base_path';
+
 interface TutorialMetadata {
   title: string;
   dataTestSubj: string;
   description: string;
   request: string;
-  image: string;
+  icon: string;
   buttonRef: React.RefObject<HTMLButtonElement>;
+  isNew?: boolean;
 }
 
 export const ConsoleTutorialsGroup = () => {
   const { application, console: consolePlugin, share } = useKibana().services;
-  const assetBasePath = useAssetBasePath();
+  const { euiTheme } = useEuiTheme();
   const tutorials: TutorialMetadata[] = useMemo(
     () => [
       {
@@ -40,7 +49,7 @@ export const ConsoleTutorialsGroup = () => {
           }
         ),
         request: consoleTutorials.basics,
-        image: `${assetBasePath}/search_window_illustration.svg`,
+        icon: 'search',
         buttonRef: React.createRef<HTMLButtonElement>(),
       },
       {
@@ -56,8 +65,9 @@ export const ConsoleTutorialsGroup = () => {
           }
         ),
         request: consoleTutorials.semanticSearch,
-        image: `${assetBasePath}/search_results_illustration.svg`,
+        icon: 'bullseye',
         buttonRef: React.createRef<HTMLButtonElement>(),
+        isNew: true,
       },
       {
         title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.esqlTitle', {
@@ -69,104 +79,119 @@ export const ConsoleTutorialsGroup = () => {
             "Learn how to use Elastic's piped query language to simplify data investigations.",
         }),
         request: consoleTutorials.esql,
-        image: `${assetBasePath}/search_observe_illustration.svg`,
+        icon: 'console',
         buttonRef: React.createRef<HTMLButtonElement>(),
       },
       // TODO:  uncomment below lines when we are ready to show TSDS tutorial. review https://github.com/elastic/kibana/pull/237384#issuecomment-3411670210
-      // {
-      //   title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.tsdsTitle', {
-      //     defaultMessage: 'Time series data streams',
-      //   }),
-      //   dataTestSubj: 'console_tutorials_tsds',
-      //   description: i18n.translate('xpack.searchHomepage.consoleTutorials.tsdsDescription', {
-      //     defaultMessage:
-      //       'Learn how to use a time series data stream (TSDS) to store timestamped metrics data.',
-      //   }),
-      //   request: consoleTutorials.timeSeriesDataStreams,
-      //   image: null,
-      //   buttonRef: useRef<HTMLButtonElement>(null),
-      // },
+      {
+        title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.tsdsTitle', {
+          defaultMessage: 'Time series data streams',
+        }),
+        dataTestSubj: 'console_tutorials_tsds',
+        description: i18n.translate('xpack.searchHomepage.consoleTutorials.tsdsDescription', {
+          defaultMessage:
+            'Learn how to use a time series data stream (TSDS) to store timestamped metrics data.',
+        }),
+        request: consoleTutorials.timeSeriesDataStreams,
+        icon: 'clock',
+        buttonRef: React.createRef<HTMLButtonElement>(),
+      },
     ],
-    [assetBasePath]
+    []
+  );
+
+  const tutorialCardStyles = css`
+    cursor: pointer;
+    .tutorialIcon {
+      background-color: ${euiTheme.colors.backgroundBaseSubdued};
+      border-radius: ${euiTheme.border.radius.small};
+      border: 1px solid transparent;
+      padding: ${euiTheme.size.base};
+    }
+    &:hover {
+      color: ${euiTheme.colors.textPrimary};
+      .tutorialTitle {
+        color: inherit;
+      }
+      .tutorialDescription {
+        color: ${euiTheme.colors.textParagraph};
+      }
+      .tutorialIcon {
+        border: 1px solid ${euiTheme.colors.borderBasePrimary};
+        background-color: ${euiTheme.colors.backgroundBasePlain};
+        color: inherit;
+      }
+    }
+  `;
+
+  const NewBadge = () => (
+    <EuiFlexItem grow={false}>
+      <EuiBadge color="accent">
+        {i18n.translate('xpack.searchGettingStarted.consoleTutorials.newBadge', {
+          defaultMessage: 'New',
+        })}
+      </EuiBadge>
+    </EuiFlexItem>
   );
 
   return (
-    <EuiFlexGroup gutterSize="l" direction={'column'} justifyContent="spaceBetween">
+    <EuiFlexGroup gutterSize="l" direction="column" justifyContent="spaceBetween">
       <SearchGettingStartedSectionHeading
         title={i18n.translate('xpack.searchGettingStarted.consoleTutorials.label', {
-          defaultMessage: 'Explore the API',
+          defaultMessage: 'Learn the API with step-by-step tutorials in Console',
         })}
-        icon={`${assetBasePath}/command_line.svg`}
-        description={i18n.translate('xpack.searchGettingStarted.consoleTutorials.description', {
-          defaultMessage:
-            'Choose a tutorial and use Console to quickly start interacting with the Elasticsearch API.',
-        })}
+        icon="commandLine"
       />
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="l" justifyContent="spaceBetween">
+        <EuiFlexGroup gutterSize="l" wrap>
           {tutorials.map((tutorial) => (
-            <EuiFlexItem key={tutorial.dataTestSubj}>
-              <EuiCard
-                hasBorder
-                title={tutorial.title}
-                titleSize="xs"
-                textAlign="left"
-                onClick={() => {
-                  tutorial.buttonRef.current?.click();
+            // The card
+            <EuiFlexItem key={tutorial.dataTestSubj} grow={true} css={tutorialCardStyles}>
+              {/* The card content */}
+              <EuiFlexGroup gutterSize="m" alignItems="flexStart" responsive={false}>
+                {/* Icon */}
+                <EuiFlexItem grow={false} className="tutorialIcon">
+                  <EuiIcon type={tutorial.icon} size="l" />
+                </EuiFlexItem>
+                {/* Title and description */}
+                <EuiFlexItem grow>
+                  <EuiFlexGroup gutterSize="xs" direction="column" alignItems="flexStart">
+                    {/* Badge and Title */}
+                    <EuiFlexItem grow={false}>
+                      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                        {tutorial.isNew && <NewBadge />}
+                        <EuiFlexItem grow={false}>
+                          <EuiTitle size="xs" className="tutorialTitle">
+                            <h4>{tutorial.title}</h4>
+                          </EuiTitle>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                    {/* Description */}
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s" className="tutorialDescription" color="subdued">
+                        {tutorial.description}
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              {/* Hidden button for console functionality */}
+              <TryInConsoleButton
+                type="button"
+                request={tutorial.request}
+                application={application}
+                sharePlugin={share}
+                consolePlugin={consolePlugin}
+                telemetryId={tutorial.dataTestSubj}
+                data-test-subj={`${tutorial.dataTestSubj}-btn`}
+                buttonProps={{
+                  buttonRef: tutorial.buttonRef,
+                  css: css`
+                    display: none;
+                  `,
                 }}
-                data-test-subj={tutorial.dataTestSubj}
-                footer={
-                  <TryInConsoleButton
-                    type="button"
-                    iconType={`${assetBasePath}/command_line.svg`} // TODO: Replace with EUI icon when it's available
-                    color="text"
-                    request={tutorial.request}
-                    application={application}
-                    sharePlugin={share}
-                    consolePlugin={consolePlugin}
-                    telemetryId={tutorial.dataTestSubj}
-                    data-test-subj={`${tutorial.dataTestSubj}-btn`}
-                    buttonProps={{ buttonRef: tutorial.buttonRef }}
-                    content={
-                      <FormattedMessage
-                        id="xpack.searchGettingStarted.consoleTutorials.runInConsole"
-                        defaultMessage="Open in Console"
-                      />
-                    }
-                    onClick={(e) => {
-                      // Do not trigger the card click
-                      e.stopPropagation();
-                    }}
-                  />
-                }
-              >
-                <EuiFlexGroup
-                  gutterSize="m"
-                  alignItems="flexStart"
-                  justifyContent="spaceBetween"
-                  wrap
-                >
-                  <EuiFlexItem grow={1}>
-                    <EuiFlexGroup
-                      gutterSize="s"
-                      direction="column"
-                      justifyContent="center"
-                      alignItems="flexStart"
-                    >
-                      <EuiFlexItem grow={false}>
-                        <EuiText size="relative">{tutorial.description}</EuiText>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiImage
-                      src={tutorial.image}
-                      alt={`${tutorial.title} tutorial icon`}
-                      size="original"
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiCard>
+              />
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
