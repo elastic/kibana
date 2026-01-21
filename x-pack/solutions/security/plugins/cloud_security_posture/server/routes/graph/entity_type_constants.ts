@@ -90,6 +90,7 @@ const buildEntityTypeMappings = (): EntityTypeMappings => {
         'Snapshot',
         'Volume',
         'Volume Claim',
+        'Storage',
         'Storage Bucket',
         'Backup Service',
         'Managed Certificate',
