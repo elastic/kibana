@@ -18,8 +18,9 @@ import { ExpandableSection } from '../../../shared/components/expandable_section
 import { useDocumentDetailsContext } from '../../shared/context';
 import { getField } from '../../shared/utils';
 import { EventKind } from '../../shared/constants/event_kinds';
+import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
 
-const KEY = 'document-details-flyout-insights';
+const KEY = 'insights';
 
 /**
  * Insights section under overview tab. It contains entities, threat intelligence, prevalence and correlations.
@@ -28,7 +29,11 @@ export const InsightsSection = memo(() => {
   const { getFieldsData } = useDocumentDetailsContext();
   const eventKind = getField(getFieldsData('event.kind'));
 
-  const expanded = useExpandSection({ title: KEY, defaultValue: false });
+  const expanded = useExpandSection({
+    storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
+    title: KEY,
+    defaultValue: false,
+  });
 
   return (
     <ExpandableSection
@@ -39,7 +44,8 @@ export const InsightsSection = memo(() => {
           defaultMessage="Insights"
         />
       }
-      localStorageKey={KEY}
+      localStorageKey={FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS}
+      sectionId={KEY}
       data-test-subj={INSIGHTS_TEST_ID}
     >
       <EntitiesOverview />

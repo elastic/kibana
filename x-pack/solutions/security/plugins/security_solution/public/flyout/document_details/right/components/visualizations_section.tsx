@@ -16,14 +16,19 @@ import { VISUALIZATIONS_TEST_ID } from './test_ids';
 import { GraphPreviewContainer } from './graph_preview_container';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
+import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
 
-const KEY = 'document-details-flyout-visualizations';
+const KEY = 'visualizations';
 
 /**
  * Visualizations section in overview. It contains analyzer preview and session view preview.
  */
 export const VisualizationsSection = memo(() => {
-  const expanded = useExpandSection({ title: KEY, defaultValue: false });
+  const expanded = useExpandSection({
+    storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
+    title: KEY,
+    defaultValue: false,
+  });
   const { dataAsNestedObject, getFieldsData, dataFormattedForFieldBrowser } =
     useDocumentDetailsContext();
 
@@ -43,7 +48,8 @@ export const VisualizationsSection = memo(() => {
           defaultMessage="Visualizations"
         />
       }
-      localStorageKey={KEY}
+      localStorageKey={FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS}
+      sectionId={KEY}
       data-test-subj={VISUALIZATIONS_TEST_ID}
     >
       <SessionPreviewContainer />

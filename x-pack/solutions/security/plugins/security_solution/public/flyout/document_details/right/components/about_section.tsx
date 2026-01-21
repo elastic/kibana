@@ -21,8 +21,9 @@ import { EventCategoryDescription } from './event_category_description';
 import { EventKindDescription } from './event_kind_description';
 import { EventRenderer } from './event_renderer';
 import { AlertStatus } from './alert_status';
+import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
 
-const KEY = 'document-details-flyout-about';
+const KEY = 'about';
 
 /**
  * Most top section of the overview tab.
@@ -35,7 +36,11 @@ export const AboutSection = memo(() => {
   const eventKind = getField(getFieldsData('event.kind'));
   const eventKindInECS = eventKind && isEcsAllowedValue('event.kind', eventKind);
 
-  const expanded = useExpandSection({ title: KEY, defaultValue: true });
+  const expanded = useExpandSection({
+    storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
+    title: KEY,
+    defaultValue: true,
+  });
 
   const content =
     eventKind === EventKind.signal ? (
@@ -68,7 +73,8 @@ export const AboutSection = memo(() => {
           defaultMessage="About"
         />
       }
-      localStorageKey={KEY}
+      localStorageKey={FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS}
+      sectionId={KEY}
       gutterSize="s"
       data-test-subj={ABOUT_SECTION_TEST_ID}
     >

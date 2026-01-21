@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { useKibana } from '../../../common/lib/kibana';
-import { EXPANDABLE_SECTION_STORAGE_KEY } from './use_accordion_state';
 
 export interface UseExpandSectionParams {
   /**
@@ -17,18 +17,23 @@ export interface UseExpandSectionParams {
    * Default value for the section
    */
   defaultValue: boolean;
+  /**
+   * StorageKey to save value in specific flyout
+   */
+  storageKey: string;
 }
 
 /**
  * Hook to get the expanded state of a section from local storage.
  */
-export const useExpandSection = ({ title, defaultValue }: UseExpandSectionParams): boolean => {
+export const useExpandSection = ({ storageKey, title, defaultValue }: UseExpandSectionParams) => {
   const { storage } = useKibana().services;
 
-  const localStorage = storage.get(EXPANDABLE_SECTION_STORAGE_KEY);
-  const key = title.toLowerCase();
-  const expanded =
-    localStorage && localStorage[key] !== undefined ? localStorage[key] : defaultValue;
-
-  return expanded;
+  return useMemo(() => {
+    const localStorage = storage.get(storageKey);
+    const key = title.toLowerCase();
+    const expanded =
+      localStorage && localStorage[key] !== undefined ? localStorage[key] : defaultValue;
+    return expanded;
+  }, [storage, storageKey, title, defaultValue]);
 };
