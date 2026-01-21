@@ -24,7 +24,7 @@ exports[`IndexPatternsMissingPrompt renders correctly against snapshot 1`] = `
         Required index patterns not configured
       </h2>
       <div
-        class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+        class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
       />
       <div
         class="euiText emotion-euiText-m-euiTextColor-subdued"

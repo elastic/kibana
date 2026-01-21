@@ -5,31 +5,44 @@
  * 2.0.
  */
 
-import { memoize } from 'lodash';
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { Logger } from '@kbn/logging';
+import type { KibanaRequest } from '@kbn/core/server';
 import type {
   EntityStoreApiRequestHandlerContext,
   EntityStoreRequestHandlerContext,
+  EntityStoreStartPlugins,
 } from './types';
-import { ResourcesService } from './domain/resources_service';
+import { AssetManager } from './domain/asset_manager';
 import { FeatureFlags } from './infra/feature_flags';
 
 interface EntityStoreApiRequestHandlerContextDeps {
-  core: CoreSetup;
+  coreSetup: CoreSetup<EntityStoreStartPlugins, void>;
   context: Omit<EntityStoreRequestHandlerContext, 'entityStore'>;
   logger: Logger;
+  request: KibanaRequest;
 }
 
 export async function createRequestHandlerContext({
   logger,
   context,
+  coreSetup,
+  request,
 }: EntityStoreApiRequestHandlerContextDeps): Promise<EntityStoreApiRequestHandlerContext> {
   const core = await context.core;
+  const [_, startPlugins] = await coreSetup.getStartServices();
+  const taskManagerStart = startPlugins.taskManager;
+  const namespace = startPlugins.spaces.spacesService.getSpaceId(request);
+
   return {
     core,
     logger,
-    getResourcesService: memoize(() => new ResourcesService(logger)),
-    getFeatureFlags: memoize(() => new FeatureFlags(core.uiSettings.client)),
+    assetManager: new AssetManager(
+      logger,
+      core.elasticsearch.client.asCurrentUser,
+      taskManagerStart,
+      namespace
+    ),
+    featureFlags: new FeatureFlags(core.uiSettings.client),
   };
 }

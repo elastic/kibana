@@ -22,6 +22,7 @@ import type { DiscoverAppState, TabState } from '../types';
 import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
 import {
   internalStateSlice,
+  discardFlyoutsOnTabChange,
   type TabActionPayload,
   type InternalStateThunkActionCreator,
 } from '../internal_state';
@@ -41,6 +42,7 @@ import { setBreadcrumbs } from '../../../../../utils/breadcrumbs';
 import { DEFAULT_TAB_STATE } from '../constants';
 import type { DiscoverAppLocatorParams } from '../../../../../../common';
 import { parseAppLocatorParams } from '../../../../../../common/app_locator_get_location';
+import { fetchData } from './tab_state';
 
 export const setTabs: InternalStateThunkActionCreator<
   [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
@@ -278,7 +280,7 @@ export const updateTabs: InternalStateThunkActionCreator<
 
         if (nextTab.forceFetchOnSelect) {
           nextTabStateContainer.dataState.reset();
-          nextTabStateContainer.actions.fetchData();
+          dispatch(fetchData({ tabId: nextTab.id }));
         }
       } else {
         await Promise.all([
@@ -289,7 +291,7 @@ export const updateTabs: InternalStateThunkActionCreator<
         services.data.search.session.reset();
       }
 
-      dispatch(internalStateSlice.actions.discardFlyoutsOnTabChange());
+      dispatch(discardFlyoutsOnTabChange());
     }
 
     dispatch(

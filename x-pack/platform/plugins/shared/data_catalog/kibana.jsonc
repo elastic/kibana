@@ -1,0 +1,22 @@
+{
+  "type": "plugin",
+  "id": "@kbn/data-catalog-plugin",
+  "owner": [
+    "@elastic/workchat-eng"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Data Catalog for Workplace AI",
+  "plugin": {
+    "id": "dataCatalog",
+    "server": true,
+    "browser": false,
+    "configPath": ["xpack", "dataCatalog"],
+    "requiredPlugins": [],
+    "optionalPlugins": [],
+    "requiredBundles": [],
+    "extraPublicDirs": [
+      "common"
+    ]
+  }
+}
