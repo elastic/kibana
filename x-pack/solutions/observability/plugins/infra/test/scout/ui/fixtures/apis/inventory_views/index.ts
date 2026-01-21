@@ -8,6 +8,7 @@
 import type { KbnClient, ScoutLogger } from '@kbn/scout-oblt';
 import { measurePerformanceAsync } from '@kbn/scout-oblt';
 import type {
+  CreateInventoryViewAttributes,
   FindInventoryViewResponse,
   InventoryView,
   InventoryViewResponse,
@@ -27,10 +28,10 @@ export interface InventoryViewApiService {
 
   /**
    * Creates a new inventory view
-   * @param body - The inventory view attributes
+   * @param attributes - The inventory view attributes
    * @returns Promise with the newly created inventory view
    */
-  create: (body: Record<string, any>) => Promise<InventoryView>;
+  create: (attributes: CreateInventoryViewAttributes) => Promise<InventoryView>;
 
   /**
    * Deletes an inventory view by ID
@@ -69,7 +70,7 @@ export const getInventoryViewsApiService = ({
         }
       );
     },
-    create: async (body: any) => {
+    create: async (attributes: CreateInventoryViewAttributes) => {
       return await measurePerformanceAsync(
         log,
         'inventoryViews.create',
@@ -78,7 +79,7 @@ export const getInventoryViewsApiService = ({
             method: 'POST',
             path: '/api/infra/inventory_views',
             retries: 3,
-            body: { attributes: body },
+            body: { attributes },
           });
 
           return response.data.data;

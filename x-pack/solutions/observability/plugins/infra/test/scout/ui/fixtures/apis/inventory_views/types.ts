@@ -152,3 +152,12 @@ export interface FindInventoryViewResponse {
 export interface InventoryViewResponse {
   data: InventoryView;
 }
+
+/**
+ * Attributes payload for creating a new inventory view
+ */
+export interface CreateInventoryViewAttributes
+  extends Omit<InventoryViewAttributes, 'isDefault' | 'isStatic'> {
+  isDefault?: undefined;
+  isStatic?: undefined;
+}

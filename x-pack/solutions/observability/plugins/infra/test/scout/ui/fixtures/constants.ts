@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { InventoryView } from './apis/inventory_views/types';
+import type { CreateInventoryViewAttributes } from './apis/inventory_views/types';
 
 export const DATE_WITH_HOSTS_DATA_FROM = '2023-03-28T18:20:00.000Z';
 export const DATE_WITH_HOSTS_DATA_TO = '2023-03-28T18:21:00.000Z';
@@ -114,7 +114,7 @@ export const EXTENDED_TIMEOUT = 45000; // 45 seconds
 export const KUBERNETES_TOUR_STORAGE_KEY = 'isKubernetesTourSeen';
 
 export const BASE_DEFAULT_INVENTORY_VIEW_ATTRIBUTES: Omit<
-  InventoryView['attributes'],
+  CreateInventoryViewAttributes,
   'nodeType' | 'name' | 'time' | 'metric'
 > = {
   groupBy: [],
