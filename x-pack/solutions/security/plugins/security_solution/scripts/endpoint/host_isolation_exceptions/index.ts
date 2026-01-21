@@ -10,9 +10,7 @@ import type { RunFn } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
 import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
-  ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_DESCRIPTION,
-  ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
-  ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_NAME,
+  ENDPOINT_ARTIFACT_LISTS,
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
@@ -101,10 +99,10 @@ const createHostIsolationException: RunFn = async ({ flags, log }) => {
 
 const ensureCreateEndpointHostIsolationExceptionList = async (kbn: KbnClient) => {
   const newListDefinition: CreateExceptionListSchema = {
-    description: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_DESCRIPTION,
-    list_id: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
+    description: ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.description,
+    list_id: ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id,
     meta: undefined,
-    name: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_NAME,
+    name: ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.name,
     os_types: [],
     tags: [],
     type: 'endpoint',
