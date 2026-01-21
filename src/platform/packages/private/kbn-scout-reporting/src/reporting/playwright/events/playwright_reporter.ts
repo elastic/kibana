@@ -26,9 +26,9 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import {
   type CodeOwnersEntry,
   type CodeOwnerArea,
-  findAreaForCodeOwner,
   getCodeOwnersEntries,
   getOwningTeamsForPath,
+  findAreaForCodeOwner,
 } from '@kbn/code-owners';
 import { SCOUT_TARGET_TYPE, SCOUT_TARGET_MODE } from '@kbn/scout-info';
 import {
