@@ -55,6 +55,11 @@ const triggersActionsUiStartMock = {
       getRulesSettingsLink: jest.fn(() => (
         <div data-test-subj="rules-settings-link">mocked component</div>
       )),
+      getIsExperimentalFeatureEnabled: jest.fn((feature: string) => {
+        // Default mock: return false for all experimental features
+        // Tests can override this if needed
+        return false;
+      }),
       ruleTypeRegistry: {
         has: jest.fn(),
         register: jest.fn(),

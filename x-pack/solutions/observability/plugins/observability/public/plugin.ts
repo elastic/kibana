@@ -504,10 +504,13 @@ export class Plugin
       )
     );
 
+    const unifiedRulesPage =
+      pluginsSetup.triggersActionsUi.getIsExperimentalFeatureEnabled('unifiedRulesPage');
+
     return {
       dashboard: { register: registerDataHandler },
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
-      useRulesLink: createUseRulesLink(),
+      useRulesLink: createUseRulesLink(unifiedRulesPage),
       rulesLocator,
       ruleDetailsLocator,
       config,
@@ -531,10 +534,13 @@ export class Plugin
       );
     });
 
+    const unifiedRulesPage =
+      pluginsStart.triggersActionsUi.getIsExperimentalFeatureEnabled('unifiedRulesPage');
+
     return {
       config,
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
-      useRulesLink: createUseRulesLink(),
+      useRulesLink: createUseRulesLink(unifiedRulesPage),
     };
   }
 }

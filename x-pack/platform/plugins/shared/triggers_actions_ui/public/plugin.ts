@@ -60,6 +60,7 @@ import { getRuleStatusPanelLazy } from './common/get_rule_status_panel';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
+import { getIsExperimentalFeatureEnabled } from './common/get_experimental_features';
 import { getRulesListNotifyBadgeLazy } from './common/get_rules_list_notify_badge';
 import type { TriggersActionsUiConfigType } from '../common/types';
 import type { ActionAccordionFormProps } from './application/sections/action_connector_form/action_form';
@@ -104,6 +105,7 @@ import { getUntrackModalLazy } from './common/get_untrack_modal';
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   ruleTypeRegistry: TypeRegistry<RuleTypeModel<any>>;
+  getIsExperimentalFeatureEnabled: (feature: keyof ExperimentalFeatures) => boolean;
 }
 
 export interface TriggersAndActionsUIPublicPluginStart {
@@ -152,6 +154,7 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getGlobalRuleEventLogList: (
     props: GlobalRuleEventLogListProps
   ) => ReactElement<GlobalRuleEventLogListProps>;
+  getIsExperimentalFeatureEnabled: (feature: keyof ExperimentalFeatures) => boolean;
 }
 
 interface PluginsSetup {
@@ -507,6 +510,7 @@ export class Plugin
     return {
       actionTypeRegistry: this.actionTypeRegistry,
       ruleTypeRegistry: this.ruleTypeRegistry,
+      getIsExperimentalFeatureEnabled,
     };
   }
 
@@ -633,6 +637,7 @@ export class Plugin
           }),
         };
       },
+      getIsExperimentalFeatureEnabled,
     };
   }
 

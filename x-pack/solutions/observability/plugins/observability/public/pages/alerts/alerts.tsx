@@ -64,7 +64,6 @@ const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
 const DEFAULT_EMPTY_FILTERS: Filter[] = [];
 
 const tableColumns = getColumns({ showRuleName: true });
-const useRulesLink = createUseRulesLink();
 
 function InternalAlertsPage() {
   const kibanaServices = useKibana().services;
@@ -87,6 +86,7 @@ function InternalAlertsPage() {
     triggersActionsUi: {
       getAlertsSearchBar: AlertsSearchBar,
       getAlertSummaryWidget: AlertSummaryWidget,
+      getIsExperimentalFeatureEnabled,
     },
     uiSettings,
   } = kibanaServices;
@@ -143,6 +143,8 @@ function InternalAlertsPage() {
       description: '[ttfmp_alerts] The Observability Alerts page has loaded a table of alerts.',
     },
   });
+
+  const useRulesLink = createUseRulesLink(getIsExperimentalFeatureEnabled('unifiedRulesPage'));
 
   const onGroupingsChange = useCallback(
     ({ activeGroups }: { activeGroups: string[] }) => {
