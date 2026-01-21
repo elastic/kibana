@@ -10,9 +10,9 @@ import { type System, type Streams } from '@kbn/streams-schema';
 import { EuiMarkdownFormat, type EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ConditionPanel } from '../../../data_management/shared';
-import { FeatureEventsSparklineLast24hrs } from '../feature_events_sparkline';
+import { SystemEventsSparklineLast24hrs } from '../system_events_sparkline';
 
-export const useStreamFeaturesTable = ({ definition }: { definition: Streams.all.Definition }) => {
+export const useStreamSystemsTable = ({ definition }: { definition: Streams.all.Definition }) => {
   const nameColumn: EuiBasicTableColumn<System> = {
     field: 'name',
     name: TITLE_LABEL,
@@ -23,8 +23,8 @@ export const useStreamFeaturesTable = ({ definition }: { definition: Streams.all
   const filterColumn: EuiBasicTableColumn<System> = {
     name: FILTER_LABEL,
     width: '30%',
-    render: (feature: System) => {
-      return <ConditionPanel condition={feature.filter} />;
+    render: (system: System) => {
+      return <ConditionPanel condition={system.filter} />;
     },
   };
 
@@ -42,8 +42,8 @@ export const useStreamFeaturesTable = ({ definition }: { definition: Streams.all
   const eventsLast24HoursColumn: EuiBasicTableColumn<System> = {
     name: EVENTS_LAST_24_HOURS_LABEL,
     width: '15%',
-    render: (feature: System) => {
-      return <FeatureEventsSparklineLast24hrs feature={feature} definition={definition} />;
+    render: (system: System) => {
+      return <SystemEventsSparklineLast24hrs system={system} definition={definition} />;
     },
   };
 
@@ -55,20 +55,20 @@ export const useStreamFeaturesTable = ({ definition }: { definition: Streams.all
   };
 };
 
-const DESCRIPTION_LABEL = i18n.translate('xpack.streams.streamFeaturesTable.columns.description', {
+const DESCRIPTION_LABEL = i18n.translate('xpack.streams.streamSystemsTable.columns.description', {
   defaultMessage: 'Description',
 });
 
-const TITLE_LABEL = i18n.translate('xpack.streams.streamFeaturesTable.columns.title', {
+const TITLE_LABEL = i18n.translate('xpack.streams.streamSystemsTable.columns.title', {
   defaultMessage: 'Title',
 });
 
-const FILTER_LABEL = i18n.translate('xpack.streams.streamFeaturesTable.columns.filter', {
+const FILTER_LABEL = i18n.translate('xpack.streams.streamSystemsTable.columns.filter', {
   defaultMessage: 'Filter',
 });
 
 const EVENTS_LAST_24_HOURS_LABEL = i18n.translate(
-  'xpack.streams.streamFeaturesTable.columns.eventsLast24Hours',
+  'xpack.streams.streamSystemsTable.columns.eventsLast24Hours',
   {
     defaultMessage: 'Events (last 24 hours)',
   }

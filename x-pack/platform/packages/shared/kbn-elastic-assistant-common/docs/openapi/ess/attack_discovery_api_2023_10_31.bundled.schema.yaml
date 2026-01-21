@@ -265,6 +265,16 @@ paths:
           schema:
             type: boolean
         - description: >-
+            Whether to filter by scheduled or ad-hoc attack discoveries. If
+            omitted, both types of attack discoveries are returned. Use `true`
+            to return only scheduled discoveries or `false` to return only
+            ad-hoc discoveries.
+          in: query
+          name: scheduled
+          required: false
+          schema:
+            type: boolean
+        - description: >-
             Field used to sort results. See `AttackDiscoveryFindSortField` for
             allowed values.
           example: '@timestamp'
