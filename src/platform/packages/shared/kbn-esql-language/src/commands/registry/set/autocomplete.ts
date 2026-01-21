@@ -47,9 +47,12 @@ export async function autocomplete(
   }
 
   // The value completions depends on the setting name.
-  const settingsByName = getCompletionItemsBySettingName(innerText, settingRightSide);
   const settingName = isIdentifier(settingLeftSide) ? settingLeftSide.text : '';
-  const settingsValueCompletions = settingsByName[settingName] ?? [];
+  const settingsValueCompletions = getCompletionItemsBySettingName(
+    settingName,
+    innerText,
+    settingRightSide
+  );
 
   // SET <setting> = /
   // SET <setting> = {

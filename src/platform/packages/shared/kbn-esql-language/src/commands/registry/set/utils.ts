@@ -127,11 +127,17 @@ const getApproximateCompletionItems = (
   ];
 };
 
+const COMPLETIONS_BY_SETTING_NAME: Record<string, Function> = {
+  project_routing: getProjectRoutingCommonCompletionItems,
+  unmapped_fields: getUnmappedFieldsCompletionItems,
+  approximate: getApproximateCompletionItems,
+};
+
 export const getCompletionItemsBySettingName: (
+  settingName: string,
   innerText: string,
   settingRightSide: ESQLAstItem | null
-) => Record<string, ISuggestionItem[]> = (innerText, settingRightSide) => ({
-  project_routing: getProjectRoutingCommonCompletionItems(),
-  unmapped_fields: getUnmappedFieldsCompletionItems(),
-  approximate: getApproximateCompletionItems(innerText, settingRightSide),
-});
+) => ISuggestionItem[] = (settingName, innerText, settingRightSide) =>
+  COMPLETIONS_BY_SETTING_NAME[settingName]
+    ? COMPLETIONS_BY_SETTING_NAME[settingName](innerText, settingRightSide)
+    : [];
