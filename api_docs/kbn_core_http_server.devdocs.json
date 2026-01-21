@@ -3491,6 +3491,18 @@
                 "path": "src/platform/plugins/shared/home/server/services/sample_data/routes/list.ts"
               },
               {
+                "plugin": "share",
+                "path": "src/platform/plugins/shared/share/server/url_service/http/short_urls/register_get_route.ts"
+              },
+              {
+                "plugin": "share",
+                "path": "src/platform/plugins/shared/share/server/url_service/http/short_urls/register_resolve_route.ts"
+              },
+              {
+                "plugin": "@kbn/content-management-content-insights-server",
+                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts"
+              },
+              {
                 "plugin": "features",
                 "path": "x-pack/platform/plugins/shared/features/server/routes/index.ts"
               },
@@ -3611,12 +3623,12 @@
                 "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/internal/find_tags.ts"
               },
               {
-                "plugin": "share",
-                "path": "src/platform/plugins/shared/share/server/url_service/http/short_urls/register_get_route.ts"
+                "plugin": "@kbn/content-management-access-control-server",
+                "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/register_access_control.ts"
               },
               {
-                "plugin": "share",
-                "path": "src/platform/plugins/shared/share/server/url_service/http/short_urls/register_resolve_route.ts"
+                "plugin": "@kbn/content-management-access-control-server",
+                "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/register_access_control.ts"
               },
               {
                 "plugin": "monitoringCollection",
@@ -3787,10 +3799,6 @@
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation.ts"
               },
               {
-                "plugin": "@kbn/content-management-content-insights-server",
-                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts"
-              },
-              {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/get_alert_by_id.ts"
               },
@@ -3813,14 +3821,6 @@
               {
                 "plugin": "productDocBase",
                 "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/routes/installation.ts"
-              },
-              {
-                "plugin": "@kbn/content-management-access-control-server",
-                "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/register_access_control.ts"
-              },
-              {
-                "plugin": "@kbn/content-management-access-control-server",
-                "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/register_access_control.ts"
               },
               {
                 "plugin": "globalSearch",
@@ -4331,20 +4331,20 @@
                 "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/api_keys.ts"
               },
               {
-                "plugin": "dataSourcesRegistry",
-                "path": "x-pack/platform/plugins/shared/data_sources_registry/server/routes.ts"
+                "plugin": "dataCatalog",
+                "path": "x-pack/platform/plugins/shared/data_catalog/server/routes.ts"
               },
               {
-                "plugin": "dataSourcesRegistry",
-                "path": "x-pack/platform/plugins/shared/data_sources_registry/server/routes.ts"
+                "plugin": "dataCatalog",
+                "path": "x-pack/platform/plugins/shared/data_catalog/server/routes.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.ts"
               },
               {
                 "plugin": "ingestPipelines",
@@ -4943,6 +4943,14 @@
                 "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/vulnerabilities_dashboard/vulnerabilities_dashboard.ts"
               },
               {
+                "plugin": "workplaceAIApp",
+                "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/server/routes/ears/fetch_secrets.ts"
+              },
+              {
+                "plugin": "workplaceAIApp",
+                "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/server/routes/get_inference_endpoints.ts"
+              },
+              {
                 "plugin": "apmDataAccess",
                 "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.test.ts"
               },
@@ -5331,20 +5339,20 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/get_rule_state.test.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
               },
               {
                 "plugin": "features",
@@ -6475,6 +6483,14 @@
                 "path": "src/platform/plugins/shared/home/server/routes/fetch_es_hits_status.ts"
               },
               {
+                "plugin": "share",
+                "path": "src/platform/plugins/shared/share/server/url_service/http/short_urls/register_create_route.ts"
+              },
+              {
+                "plugin": "@kbn/content-management-content-insights-server",
+                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts"
+              },
+              {
                 "plugin": "spaces",
                 "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/external/copy_to_space.ts"
               },
@@ -6575,10 +6591,6 @@
                 "path": "x-pack/platform/plugins/shared/security/server/routes/analytics/record_violations.ts"
               },
               {
-                "plugin": "encryptedSavedObjects",
-                "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/routes/key_rotation.ts"
-              },
-              {
                 "plugin": "savedObjectsTagging",
                 "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/tags/create_tag.ts"
               },
@@ -6595,8 +6607,12 @@
                 "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/internal/bulk_delete.ts"
               },
               {
-                "plugin": "share",
-                "path": "src/platform/plugins/shared/share/server/url_service/http/short_urls/register_create_route.ts"
+                "plugin": "@kbn/content-management-access-control-server",
+                "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/register_access_control.ts"
+              },
+              {
+                "plugin": "encryptedSavedObjects",
+                "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/routes/key_rotation.ts"
               },
               {
                 "plugin": "actions",
@@ -6843,10 +6859,6 @@
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation.ts"
               },
               {
-                "plugin": "@kbn/content-management-content-insights-server",
-                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts"
-              },
-              {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/get_alerts_group_aggregations.ts"
               },
@@ -6897,10 +6909,6 @@
               {
                 "plugin": "productDocBase",
                 "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/routes/installation.ts"
-              },
-              {
-                "plugin": "@kbn/content-management-access-control-server",
-                "path": "src/platform/packages/shared/content-management/access_control/access_control_server/src/register_access_control.ts"
               },
               {
                 "plugin": "globalSearch",
@@ -7291,8 +7299,8 @@
                 "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/api_keys.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.ts"
               },
               {
                 "plugin": "ingestPipelines",
@@ -7863,6 +7871,10 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/resolver.ts"
               },
               {
+                "plugin": "workplaceAIApp",
+                "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/server/routes/ears/start_oauth.ts"
+              },
+              {
                 "plugin": "ftrApis",
                 "path": "src/platform/plugins/private/ftr_apis/server/routes/kbn_client_so/bulk_delete.ts"
               },
@@ -8147,16 +8159,16 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/update_flapping_settings.test.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
               },
               {
                 "plugin": "encryptedSavedObjects",
@@ -9383,8 +9395,8 @@
                 "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.ts"
               },
               {
                 "plugin": "ingestPipelines",
@@ -10083,6 +10095,10 @@
                 "path": "src/platform/plugins/shared/home/server/services/sample_data/routes/uninstall.ts"
               },
               {
+                "plugin": "share",
+                "path": "src/platform/plugins/shared/share/server/url_service/http/short_urls/register_delete_route.ts"
+              },
+              {
                 "plugin": "security",
                 "path": "x-pack/platform/plugins/shared/security/server/routes/role_mapping/delete.ts"
               },
@@ -10093,10 +10109,6 @@
               {
                 "plugin": "savedObjectsTagging",
                 "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/tags/delete_tag.ts"
-              },
-              {
-                "plugin": "share",
-                "path": "src/platform/plugins/shared/share/server/url_service/http/short_urls/register_delete_route.ts"
               },
               {
                 "plugin": "actions",
@@ -10203,12 +10215,12 @@
                 "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.ts"
               },
               {
                 "plugin": "ingestPipelines",
@@ -10343,28 +10355,28 @@
                 "path": "x-pack/platform/plugins/shared/cloud_connect/server/routes/clusters.test.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
               },
               {
-                "plugin": "dataConnectors",
-                "path": "x-pack/platform/plugins/shared/data_connectors/server/routes/index.test.ts"
+                "plugin": "dataSources",
+                "path": "x-pack/platform/plugins/shared/data_sources/server/routes/index.test.ts"
               },
               {
                 "plugin": "globalSearch",
@@ -15840,6 +15852,10 @@
                 "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/get_all.ts"
               },
               {
+                "plugin": "dashboard",
+                "path": "src/platform/plugins/shared/dashboard/server/api/read/register_read_route.ts"
+              },
+              {
                 "plugin": "telemetry",
                 "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_config.ts"
               },
@@ -15890,10 +15906,6 @@
               {
                 "plugin": "maps",
                 "path": "x-pack/platform/plugins/shared/maps/server/routes.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/server/api/read/register_read_route.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -17179,6 +17191,10 @@
                 "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/put.ts"
               },
               {
+                "plugin": "dashboard",
+                "path": "src/platform/plugins/shared/dashboard/server/api/update/register_update_route.ts"
+              },
+              {
                 "plugin": "telemetry",
                 "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_user_has_seen_notice.ts"
               },
@@ -17193,10 +17209,6 @@
               {
                 "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/update.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/server/api/update/register_update_route.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -17582,6 +17594,14 @@
                 "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/query.ts"
               },
               {
+                "plugin": "dashboard",
+                "path": "src/platform/plugins/shared/dashboard/server/api/create/register_create_route.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/platform/plugins/shared/dashboard/server/api/search/register_search_route.ts"
+              },
+              {
                 "plugin": "kql",
                 "path": "src/platform/plugins/shared/kql/server/autocomplete/value_suggestions_route.ts"
               },
@@ -17620,14 +17640,6 @@
               {
                 "plugin": "maps",
                 "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/server/api/create/register_create_route.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/server/api/search/register_search_route.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -18714,6 +18726,10 @@
                 "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/install.ts"
               },
               {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/uninstall.ts"
+              },
+              {
                 "plugin": "controls",
                 "path": "src/platform/plugins/shared/controls/server/options_list/options_list_suggestions_route.ts"
               },
@@ -19032,6 +19048,10 @@
                 "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/delete.ts"
               },
               {
+                "plugin": "dashboard",
+                "path": "src/platform/plugins/shared/dashboard/server/api/delete/register_delete_route.ts"
+              },
+              {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
               },
@@ -19042,10 +19062,6 @@
               {
                 "plugin": "maps",
                 "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/server/api/delete/register_delete_route.ts"
               },
               {
                 "plugin": "@kbn/core",
