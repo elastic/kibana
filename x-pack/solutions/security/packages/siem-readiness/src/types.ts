@@ -23,6 +23,7 @@ export interface CategoriesResponse {
 }
 
 export interface RelatedIntegrationRuleResponse {
+  enabled: { package: string; version?: string; integration?: string }[] | undefined;
   related_integrations?: Array<{
     package: string;
     version?: string;
