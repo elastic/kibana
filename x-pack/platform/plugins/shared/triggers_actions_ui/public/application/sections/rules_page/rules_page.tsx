@@ -11,10 +11,12 @@ import { EuiSpacer } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
+import useObservable from 'react-use/lib/useObservable';
 import {
   getCreateRuleRoute,
   getEditRuleRoute,
-  getCreateRuleFromTemplateRoute,
+  getRulesAppDetailsRoute,
+  rulesAppDetailsRoute,
 } from '@kbn/rule-data-utils';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { RuleTypeModal } from '@kbn/response-ops-rule-form';
@@ -38,11 +40,12 @@ const RulesPage = () => {
   const {
     chrome: { docTitle },
     setBreadcrumbs,
-    application: { navigateToApp, getUrlForApp, isAppRegistered },
+    application: { navigateToApp, getUrlForApp, isAppRegistered, currentAppId$ },
     http,
     notifications: { toasts },
     ruleTypeRegistry,
   } = useKibana().services;
+  const currentAppId = useObservable(currentAppId$, undefined);
 
   const [headerActions, setHeaderActions] = useState<React.ReactNode[] | undefined>();
 
@@ -109,6 +112,7 @@ const RulesPage = () => {
     (ruleId: string) => {
       const { pathname, search, hash } = locationRef.current;
       const returnPath = `${pathname}${search}${hash}`;
+
       const returnApp = 'rules';
       navigateToApp('management', {
         path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(ruleId)}`,
@@ -125,16 +129,16 @@ const RulesPage = () => {
     (ruleTypeId: string) => {
       const { pathname, search, hash } = locationRef.current;
       const returnPath = `${pathname}${search}${hash}`;
-      const returnApp = 'rules';
-      navigateToApp('management', {
-        path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
+
+      navigateToApp(currentAppId || 'management', {
+        path: getCreateRuleRoute(ruleTypeId),
         state: {
-          returnApp,
+          returnApp: currentAppId || 'management',
           returnPath,
         },
       });
     },
-    [navigateToApp]
+    [navigateToApp, currentAppId]
   );
 
   const renderRulesList = useCallback(() => {
@@ -146,6 +150,7 @@ const RulesPage = () => {
           showCreateRuleButtonInPrompt={true}
           navigateToEditRuleForm={navigateToEditRuleForm}
           navigateToCreateRuleForm={navigateToCreateRuleForm}
+          ruleDetailsRoute={rulesAppDetailsRoute}
         />
       </KibanaPageTemplate.Section>
     );
@@ -154,7 +159,12 @@ const RulesPage = () => {
   const renderLogsList = useCallback(() => {
     return (
       <KibanaPageTemplate.Section grow={false} paddingSize="l">
-        {suspendedComponentWithProps(LogsList, 'xl')({})}
+        {suspendedComponentWithProps(
+          LogsList,
+          'xl'
+        )({
+          getRuleDetailsRoute: getRulesAppDetailsRoute,
+        })}
       </KibanaPageTemplate.Section>
     );
   }, []);
