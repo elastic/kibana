@@ -67,7 +67,7 @@ export const streamQueryKqlSchema: z.Schema<StreamQuery> = z.intersection(
       where: z
         .string()
         .describe(
-          'ESQL WHERE clause condition that combines the KQL query with the feature filter'
+          'ES|QL WHERE clause condition that combines the KQL query with the feature filter.'
         ),
     }),
     severity_score: z.number().optional(),
@@ -96,7 +96,9 @@ export const upsertStreamQueryRequestSchema = z.object({
   esql: z.object({
     where: z
       .string()
-      .describe('ESQL WHERE clause condition that combines the KQL query with the feature filter'),
+      .describe(
+        'ES|QL WHERE clause condition that combines the KQL query with the feature filter.'
+      ),
   }),
   severity_score: z.number().optional(),
   evidence: z.array(z.string()).optional(),
