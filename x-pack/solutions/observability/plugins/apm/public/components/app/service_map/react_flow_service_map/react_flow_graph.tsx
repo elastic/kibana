@@ -59,6 +59,40 @@ const nodeTypes: NodeTypes = {
 // Default edge colors
 const EDGE_COLOR_DEFAULT = '#98A2B3';
 
+// Helper function to find the closest node in a given direction
+function findNodeInDirection(
+  currentNode: Node<ServiceMapNodeData>,
+  direction: string,
+  allNodes: Node<ServiceMapNodeData>[]
+): Node<ServiceMapNodeData> | null {
+  const current = currentNode.position;
+  const candidates: Array<{ node: Node<ServiceMapNodeData>; distance: number }> = [];
+
+  allNodes.forEach((node) => {
+    if (node.id === currentNode.id) return;
+
+    const pos = node.position;
+    const dx = pos.x - current.x;
+    const dy = pos.y - current.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    // Check if node is in the correct direction with some tolerance
+    const isInDirection =
+      (direction === 'ArrowRight' && dx > 50 && Math.abs(dy) < Math.abs(dx)) ||
+      (direction === 'ArrowLeft' && dx < -50 && Math.abs(dy) < Math.abs(dx)) ||
+      (direction === 'ArrowDown' && dy > 50 && Math.abs(dx) < Math.abs(dy)) ||
+      (direction === 'ArrowUp' && dy < -50 && Math.abs(dx) < Math.abs(dy));
+
+    if (isInDirection) {
+      candidates.push({ node, distance });
+    }
+  });
+
+  // Return closest node in that direction
+  candidates.sort((a, b) => a.distance - b.distance);
+  return candidates[0]?.node || null;
+}
+
 interface ReactFlowGraphProps {
   elements: cytoscape.ElementDefinition[];
   height: number;
@@ -367,6 +401,31 @@ function ReactFlowGraphInner({
           }
         }
       }
+
+      // Handle Arrow keys for spatial navigation between nodes
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
+        const activeElement = document.activeElement;
+        const currentNodeElement = activeElement?.closest('[data-id]');
+
+        // Only handle arrow keys if a node is focused and no modifier keys (allow Shift+Arrow for panning)
+        if (currentNodeElement && !event.shiftKey && !event.ctrlKey && !event.metaKey) {
+          const currentNodeId = currentNodeElement.getAttribute('data-id');
+          const currentNode = nodes.find((n) => n.id === currentNodeId);
+
+          if (currentNode) {
+            const nextNode = findNodeInDirection(currentNode, event.key, nodes);
+
+            if (nextNode) {
+              event.preventDefault();
+              // Focus the next node
+              const nextElement = document.querySelector(`[data-id="${nextNode.id}"]`);
+              if (nextElement instanceof HTMLElement) {
+                nextElement.focus();
+              }
+            }
+          }
+        }
+      }
     };
 
     document.addEventListener('keydown', handleKeyDown);
@@ -445,7 +504,8 @@ function ReactFlowGraphInner({
         nodesConnectable={false}
         edgesFocusable={false}
         aria-label={i18n.translate('xpack.apm.serviceMap.ariaLabel', {
-          defaultMessage: 'Service map showing {nodeCount} services and dependencies',
+          defaultMessage:
+            'Service map showing {nodeCount} services and dependencies. Use tab or arrow keys to navigate between nodes, enter or space to view details.',
           values: { nodeCount: nodes.length },
         })}
       >

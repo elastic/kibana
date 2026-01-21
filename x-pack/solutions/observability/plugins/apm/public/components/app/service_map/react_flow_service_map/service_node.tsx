@@ -32,6 +32,7 @@ export interface ServiceMapNodeData {
   groupName?: string;
   /** Callback to collapse the group this node belongs to */
   onCollapseGroup?: (groupId: string) => void;
+  groupedConnections?: Array<any>; // For grouped resource nodes (e.g., Kafka topics)
   [key: string]: unknown; // Allow additional properties for popover content
 }
 

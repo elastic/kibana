@@ -98,6 +98,7 @@ export function transformElements(
         serviceAnomalyStats?: {
           healthStatus?: ServiceHealthStatus;
         };
+        groupedConnections?: Array<any>;
       };
 
       const isService = !!nodeData['service.name'];
@@ -118,6 +119,10 @@ export function transformElements(
           spanType: nodeData['span.type'],
           spanSubtype: nodeData['span.subtype'],
           isService,
+          // Preserve groupedConnections for grouped nodes
+          ...(nodeData.groupedConnections && {
+            groupedConnections: nodeData.groupedConnections,
+          }),
         },
       });
     }
