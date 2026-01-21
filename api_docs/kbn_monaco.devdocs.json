@@ -2023,7 +2023,7 @@
         "label": "ESQLLang",
         "description": [],
         "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-        "lineNumber": 46,
+        "lineNumber": 51,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2039,7 +2039,7 @@
               "\"esql\""
             ],
             "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-            "lineNumber": 47,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2055,7 +2055,7 @@
               "() => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-            "lineNumber": 48,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2077,7 +2077,7 @@
               ".IStandaloneThemeData"
             ],
             "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-            "lineNumber": 56,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2110,7 +2110,7 @@
             "label": "languageConfiguration",
             "description": [],
             "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-            "lineNumber": 57,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2126,7 +2126,7 @@
                   "[string, string][]"
                 ],
                 "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-                "lineNumber": 58,
+                "lineNumber": 63,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2142,7 +2142,7 @@
                   "{ open: string; close: string; }[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-                "lineNumber": 62,
+                "lineNumber": 67,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2158,7 +2158,7 @@
                   "{ open: string; close: string; }[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-                "lineNumber": 69,
+                "lineNumber": 74,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2202,7 +2202,7 @@
               "[]; }>"
             ],
             "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-            "lineNumber": 76,
+            "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2219,7 +2219,7 @@
                   ".ITextModel"
                 ],
                 "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-                "lineNumber": 77,
+                "lineNumber": 82,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2236,7 +2236,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-                "lineNumber": 78,
+                "lineNumber": 83,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2260,7 +2260,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-                "lineNumber": 79,
+                "lineNumber": 84,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2274,7 +2274,7 @@
                 "label": "options",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-                "lineNumber": 80,
+                "lineNumber": 85,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2290,7 +2290,7 @@
                       "boolean | undefined"
                     ],
                     "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-                    "lineNumber": 80,
+                    "lineNumber": 85,
                     "columnNumber": 17,
                     "deprecated": false,
                     "trackAdoption": false
@@ -2315,7 +2315,7 @@
               ".HoverProvider"
             ],
             "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-            "lineNumber": 88,
+            "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2332,7 +2332,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-                "lineNumber": 88,
+                "lineNumber": 93,
                 "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2366,7 +2366,7 @@
               ".InlineCompletion>>"
             ],
             "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-            "lineNumber": 120,
+            "lineNumber": 125,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2389,7 +2389,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-                "lineNumber": 121,
+                "lineNumber": 126,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2413,7 +2413,7 @@
               ".CompletionItemProvider"
             ],
             "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-            "lineNumber": 148,
+            "lineNumber": 153,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2430,7 +2430,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-                "lineNumber": 148,
+                "lineNumber": 153,
                 "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2454,7 +2454,7 @@
               ".SignatureHelpProvider"
             ],
             "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-            "lineNumber": 204,
+            "lineNumber": 221,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2471,7 +2471,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-                "lineNumber": 204,
+                "lineNumber": 221,
                 "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
