@@ -865,7 +865,6 @@ ROW
 
       test('single-line comment over assignment', () => {
         const src = `PROMQL
-  
     // this is the index:
     index =
       my_index
@@ -875,7 +874,6 @@ ROW
 
       test('single-line comment after assignment', () => {
         const src = `PROMQL
-  
     index =
       my_index // this is the index
   bytes[5m]`;
