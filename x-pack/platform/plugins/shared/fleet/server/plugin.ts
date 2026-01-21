@@ -1037,9 +1037,9 @@ export class FleetPlugin
     try {
       await this.validateUninstallTokens();
     } catch (error) {
-      appContextService.getLogger().error('Error happened during uninstall token validation.', {
-        error,
-      });
+      appContextService
+        .getLogger()
+        .error('Error happened during uninstall token validation.', { error });
     }
   }
 
