@@ -581,6 +581,5 @@ describe('telemetry_collector', () => {
 
       expect(result.errors.avg_errors_per_conversation).toBe(0);
     });
-
   });
 });
