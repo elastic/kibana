@@ -66,7 +66,7 @@ $$$datenanosformat$$$`dateNanosFormat` {applies_to}`stack: ga` {applies_to}`serv
 $$$theme-darkmode$$$`theme:darkMode` {applies_to}`stack: deprecated 9.0` {applies_to}`serverless: unavailable`
 :   The UI theme that the {{product.kibana}} UI should use. Set to `enabled` or `disabled` to enable or disable the dark theme. Set to `system` to have the {{product.kibana}} UI theme follow the system theme. You must refresh the page to apply the setting.
 
-$$$state-storeinsessionstorage$$$`state:storeInSessionStorage` {applies_to}`stack: preview` {applies_to}`serverless: unavailable` {applies_to}`stack: deprecated 9.4`
+$$$state-storeinsessionstorage$$$`state:storeInSessionStorage` {applies_to}`stack: preview 9.0-9.3, deprecated 9.4+` {applies_to}`serverless: unavailable`
 :   {{product.kibana}} tracks UI state in the URL, which can lead to problems when there is a lot of state information, and the URL gets long. Enabling this setting stores part of the URL in your browser session to keep the URL short.
 
 $$$savedobjects-perpage$$$`savedObjects:perPage` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
