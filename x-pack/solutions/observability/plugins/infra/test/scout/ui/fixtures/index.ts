@@ -9,7 +9,7 @@ import type {
   ObltPageObjects,
   ObltTestFixtures,
   ObltWorkerFixtures,
-  KibanaUrl,
+  ObltApiServicesFixture,
 } from '@kbn/scout-oblt';
 import {
   test as base,
@@ -21,6 +21,7 @@ import type { InfraDocument, SynthtraceGenerator } from '@kbn/synthtrace-client'
 import { Readable } from 'stream';
 import { InventoryPage } from './page_objects/inventory';
 import { AssetDetailsPage } from './page_objects/asset_details/asset_details';
+import { getInventoryViewsApiService, type InventoryViewApiService } from './apis/inventory_views';
 
 export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
   pageObjects: ObltPageObjects & {
@@ -29,17 +30,38 @@ export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
   };
 }
 
-export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
+export interface ExtendedScoutWorkerFixtures extends ObltWorkerFixtures {
+  apiServices: ObltApiServicesFixture & {
+    inventoryViews: InventoryViewApiService;
+  };
+}
+
+const extendApiServices = async (
+  {
+    apiServices,
+    kbnClient,
+    log,
+  }: {
+    apiServices: ExtendedScoutWorkerFixtures['apiServices'];
+    kbnClient: ExtendedScoutWorkerFixtures['kbnClient'];
+    log: ExtendedScoutWorkerFixtures['log'];
+  },
+  use: (apiServices: ExtendedScoutWorkerFixtures['apiServices']) => Promise<void>
+) => {
+  const extendedApiServices: ExtendedScoutWorkerFixtures['apiServices'] = {
+    ...apiServices,
+    inventoryViews: getInventoryViewsApiService({
+      kbnClient,
+      log,
+    }),
+  };
+
+  await use(extendedApiServices);
+};
+
+export const test = base.extend<ExtendedScoutTestFixtures, ExtendedScoutWorkerFixtures>({
   pageObjects: async (
-    {
-      pageObjects,
-      page,
-      kbnUrl,
-    }: {
-      pageObjects: ExtendedScoutTestFixtures['pageObjects'];
-      page: ExtendedScoutTestFixtures['page'];
-      kbnUrl: KibanaUrl;
-    },
+    { pageObjects, page, kbnUrl },
     use: (pageObjects: ExtendedScoutTestFixtures['pageObjects']) => Promise<void>
   ) => {
     const extendedPageObjects = {
@@ -50,9 +72,13 @@ export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
 
     await use(extendedPageObjects);
   },
+  apiServices: extendApiServices,
 });
 
-export const globalSetupHook = baseGlobalSetupHook.extend({
+export const globalSetupHook = baseGlobalSetupHook.extend<
+  ExtendedScoutTestFixtures,
+  ExtendedScoutWorkerFixtures
+>({
   infraSynthtraceEsClient: async ({ esClient, config, kbnUrl, log }, use) => {
     const { infraEsClient } = await getSynthtraceClient(
       'infraEsClient',
@@ -76,4 +102,5 @@ export const globalSetupHook = baseGlobalSetupHook.extend({
 
     await use({ index, clean });
   },
+  apiServices: extendApiServices,
 });

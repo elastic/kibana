@@ -7,11 +7,14 @@
 
 import { generateHostData } from '../fixtures/synthtrace/host_data';
 import {
+  BASE_DEFAULT_INVENTORY_VIEW_ATTRIBUTES,
   CONTAINER_COUNT,
   CONTAINER_IDS,
   DATE_WITH_DOCKER_DATA_FROM,
+  DATE_WITH_DOCKER_DATA_TIMESTAMP,
   DATE_WITH_DOCKER_DATA_TO,
   DATE_WITH_HOSTS_DATA_FROM,
+  DATE_WITH_HOSTS_DATA_TIMESTAMP,
   DATE_WITH_HOSTS_DATA_TO,
   DATE_WITH_HOSTS_WITHOUT_DATA_FROM,
   DATE_WITH_HOSTS_WITHOUT_DATA_TO,
@@ -19,6 +22,8 @@ import {
   DATE_WITH_K8S_HOSTS_DATA_TO,
   DATE_WITH_POD_DATA_FROM,
   DATE_WITH_POD_DATA_TO,
+  DEFAULT_CONTAINERS_INVENTORY_VIEW_NAME,
+  DEFAULT_HOSTS_INVENTORY_VIEW_NAME,
   HOST_NAME_WITH_SERVICES,
   HOSTS,
   HOSTS_WITHOUT_DATA,
@@ -35,7 +40,13 @@ import { globalSetupHook } from '../fixtures';
 globalSetupHook(
   'Ingest data to Elasticsearch',
   { tag: ['@ess', '@svlOblt'] },
-  async ({ infraSynthtraceEsClient, logsSynthtraceEsClient, apmSynthtraceEsClient, log }) => {
+  async ({
+    infraSynthtraceEsClient,
+    logsSynthtraceEsClient,
+    apmSynthtraceEsClient,
+    log,
+    apiServices: { inventoryViews },
+  }) => {
     await infraSynthtraceEsClient.index(
       generateHostData({
         from: DATE_WITH_HOSTS_DATA_FROM,
@@ -107,5 +118,25 @@ globalSetupHook(
       })
     );
     log.info('Logs data for containers indexed');
+
+    await inventoryViews.upsertByName(DEFAULT_HOSTS_INVENTORY_VIEW_NAME, {
+      ...BASE_DEFAULT_INVENTORY_VIEW_ATTRIBUTES,
+      nodeType: 'host',
+      time: DATE_WITH_HOSTS_DATA_TIMESTAMP,
+      metric: {
+        type: 'cpuV2',
+      },
+    });
+    log.info('Default hosts inventory view created');
+
+    await inventoryViews.upsertByName(DEFAULT_CONTAINERS_INVENTORY_VIEW_NAME, {
+      ...BASE_DEFAULT_INVENTORY_VIEW_ATTRIBUTES,
+      nodeType: 'container',
+      time: DATE_WITH_DOCKER_DATA_TIMESTAMP,
+      metric: {
+        type: 'cpu',
+      },
+    });
+    log.info('Default containers inventory view created');
   }
 );

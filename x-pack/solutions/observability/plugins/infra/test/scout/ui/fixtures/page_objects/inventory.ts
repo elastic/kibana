@@ -88,6 +88,43 @@ export class InventoryPage {
     }
   }
 
+  public async goToPageWithSavedView(savedViewId: string) {
+    const appUrl = `${this.kbnUrl.app('metrics')}/inventory`;
+
+    const url = this.kbnUrl.get(appUrl, {
+      params: {
+        inventoryViewId: `'${savedViewId}'`,
+      },
+    });
+
+    this.page.goto(url);
+
+    await this.waitForPageToLoad();
+  }
+
+  public async goToPageWithSavedViewAndAssetDetailsFlyout({
+    savedViewId,
+    assetId,
+    entityType,
+  }: {
+    savedViewId: string;
+    assetId: string;
+    entityType: 'host' | 'container';
+  }) {
+    const appUrl = `${this.kbnUrl.app('metrics')}/inventory`;
+
+    const url = this.kbnUrl.get(appUrl, {
+      params: {
+        assetDetailsFlyout: `(detailsItemId:${assetId},entityType:${entityType})`,
+        inventoryViewId: `'${savedViewId}'`,
+      },
+    });
+
+    this.page.goto(url);
+
+    await this.waitForPageToLoad();
+  }
+
   public async reload() {
     await this.page.reload();
     await this.waitForPageToLoad();

@@ -8,11 +8,11 @@
 import { expect } from '@kbn/scout-oblt';
 import { test } from '../../fixtures';
 import {
-  DATE_WITH_HOSTS_DATA,
   HOST1_NAME,
   LOG_LEVELS,
   EXTENDED_TIMEOUT,
   HOSTS_METADATA_FIELD,
+  DEFAULT_HOSTS_INVENTORY_VIEW_NAME,
 } from '../../fixtures/constants';
 import type { MetricsTabQuickAccessItem } from '../../fixtures/page_objects/asset_details/metrics_tab';
 
@@ -20,12 +20,24 @@ test.describe(
   'Infrastructure Inventory - Host Asset Details Flyout',
   { tag: ['@ess', '@svlOblt'] },
   () => {
+    let savedViewId: string = '';
+
+    test.beforeAll(async ({ apiServices: { inventoryViews } }) => {
+      const foundViewId = await inventoryViews.getViewIdByName(DEFAULT_HOSTS_INVENTORY_VIEW_NAME);
+
+      expect(foundViewId).not.toBeNull();
+
+      savedViewId = foundViewId!;
+    });
+
     test.beforeEach(async ({ browserAuth, pageObjects: { inventoryPage } }) => {
       await browserAuth.loginAsViewer();
       await inventoryPage.addDismissK8sTourInitScript();
-      await inventoryPage.goToPage();
-      await inventoryPage.goToTime(DATE_WITH_HOSTS_DATA);
-      await inventoryPage.clickWaffleNode(HOST1_NAME);
+      await inventoryPage.goToPageWithSavedViewAndAssetDetailsFlyout({
+        savedViewId,
+        assetId: HOST1_NAME,
+        entityType: 'host',
+      });
     });
 
     test('Overview Tab', async ({ pageObjects: { assetDetailsPage } }) => {

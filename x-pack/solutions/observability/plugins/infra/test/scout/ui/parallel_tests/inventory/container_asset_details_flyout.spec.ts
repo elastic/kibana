@@ -12,7 +12,7 @@ import {
   CONTAINER_IDS,
   CONTAINER_METADATA_FIELD,
   CONTAINER_NAMES,
-  DATE_WITH_DOCKER_DATA,
+  DEFAULT_CONTAINERS_INVENTORY_VIEW_NAME,
   EXTENDED_TIMEOUT,
   LOG_LEVELS,
 } from '../../fixtures/constants';
@@ -25,13 +25,26 @@ test.describe(
   'Infrastructure Inventory - Container Asset Details Flyout',
   { tag: ['@ess', '@svlOblt'] },
   () => {
+    let savedViewId: string = '';
+
+    test.beforeAll(async ({ apiServices: { inventoryViews } }) => {
+      const foundViewId = await inventoryViews.getViewIdByName(
+        DEFAULT_CONTAINERS_INVENTORY_VIEW_NAME
+      );
+
+      expect(foundViewId).not.toBeNull();
+
+      savedViewId = foundViewId!;
+    });
+
     test.beforeEach(async ({ browserAuth, pageObjects: { inventoryPage } }) => {
       await browserAuth.loginAsViewer();
       await inventoryPage.addDismissK8sTourInitScript();
-      await inventoryPage.goToPage();
-      await inventoryPage.showContainers();
-      await inventoryPage.goToTime(DATE_WITH_DOCKER_DATA);
-      await inventoryPage.clickWaffleNode(CONTAINER_NAME);
+      await inventoryPage.goToPageWithSavedViewAndAssetDetailsFlyout({
+        savedViewId,
+        assetId: CONTAINER_ID,
+        entityType: 'container',
+      });
     });
 
     test('Overview Tab', async ({ pageObjects: { assetDetailsPage } }) => {

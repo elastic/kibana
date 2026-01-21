@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import type { InventoryView } from './apis/inventory_views/types';
+
 export const DATE_WITH_HOSTS_DATA_FROM = '2023-03-28T18:20:00.000Z';
 export const DATE_WITH_HOSTS_DATA_TO = '2023-03-28T18:21:00.000Z';
 export const DATE_WITH_HOSTS_DATA = '03/28/2023 6:20:59 PM';
+export const DATE_WITH_HOSTS_DATA_TIMESTAMP = 1680027659000;
 
 export const HOST1_NAME = 'host-1';
 export const HOST2_NAME = 'host-2';
@@ -53,6 +56,7 @@ export const HOSTS = [
     cpuValue: 0.4,
   },
 ];
+export const DEFAULT_HOSTS_INVENTORY_VIEW_NAME = 'Hosts Default View';
 
 export const DATE_WITH_HOSTS_WITHOUT_DATA_FROM = '2023-03-29T18:20:00.000Z';
 export const DATE_WITH_HOSTS_WITHOUT_DATA_TO = '2023-03-29T18:21:00.000Z';
@@ -85,6 +89,7 @@ export const K8S_HOSTS = [
 export const DATE_WITH_DOCKER_DATA_FROM = '2023-03-31T18:20:00.000Z';
 export const DATE_WITH_DOCKER_DATA_TO = '2023-03-31T18:21:00.000Z';
 export const DATE_WITH_DOCKER_DATA = '03/31/2023 6:20:59 PM';
+export const DATE_WITH_DOCKER_DATA_TIMESTAMP = 1680286859000;
 export const CONTAINER_COUNT = 1;
 export const CONTAINER_IDS = Array.from({ length: CONTAINER_COUNT }, (_, i) => `cont-${i}`);
 export const CONTAINER_NAMES = Array.from(
@@ -93,6 +98,8 @@ export const CONTAINER_NAMES = Array.from(
 );
 
 export const CONTAINER_METADATA_FIELD = 'container.id';
+
+export const DEFAULT_CONTAINERS_INVENTORY_VIEW_NAME = 'Containers Default View';
 
 export const DATE_WITH_POD_DATA_FROM = '2023-04-01T18:20:00.000Z';
 export const DATE_WITH_POD_DATA_TO = '2023-04-01T18:21:00.000Z';
@@ -105,3 +112,36 @@ export const DATE_WITHOUT_DATA = '04/01/2024 6:20:59 PM';
 export const EXTENDED_TIMEOUT = 45000; // 45 seconds
 
 export const KUBERNETES_TOUR_STORAGE_KEY = 'isKubernetesTourSeen';
+
+export const BASE_DEFAULT_INVENTORY_VIEW_ATTRIBUTES: Omit<
+  InventoryView['attributes'],
+  'nodeType' | 'name' | 'time' | 'metric'
+> = {
+  groupBy: [],
+  view: 'map',
+  customOptions: [],
+  customMetrics: [],
+  boundsOverride: {
+    max: 1,
+    min: 0,
+  },
+  autoBounds: true,
+  accountId: '',
+  region: '',
+  legend: {
+    palette: 'cool',
+    reverseColors: false,
+    steps: 10,
+  },
+  sort: {
+    by: 'name',
+    direction: 'desc',
+  },
+  timelineOpen: false,
+  autoReload: false,
+  filterQuery: {
+    expression: '',
+    kind: 'kuery',
+  },
+  preferredSchema: 'ecs',
+};
