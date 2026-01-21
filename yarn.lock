@@ -6870,6 +6870,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ftr-benchmarks@link:src/platform/packages/shared/kbn-ftr-benchmarks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ftr-common-functional-services@link:src/platform/packages/shared/kbn-ftr-common-functional-services":
   version "0.0.0"
   uid ""
@@ -18562,14 +18566,15 @@ cssom@~0.3.6:
   resolved "https://registry.yarnpkg.com/cssom/-/cssom-0.3.8.tgz#9f1276f5b2b463f2114d3f2c75250af8c1a36f4a"
   integrity sha512-b0tGHbfegbhPJpxpiBPU2sCkigAqtM9O121le6bbOlgyV+NyGyCmVfJ6QW9eRjz8CpNfWEOYBIMIGRYkLwsIYg==
 
-cssstyle@5.3.5:
-  version "5.3.5"
-  resolved "https://registry.yarnpkg.com/cssstyle/-/cssstyle-5.3.5.tgz#00bd24f150773bef3b1d7530366e413b74d06394"
-  integrity sha512-GlsEptulso7Jg0VaOZ8BXQi3AkYM5BOJKEO/rjMidSCq70FkIC5y0eawrCXeYzxgt3OCf4Ls+eoxN+/05vN0Ag==
+cssstyle@5.3.7:
+  version "5.3.7"
+  resolved "https://registry.yarnpkg.com/cssstyle/-/cssstyle-5.3.7.tgz#2202e56abcecf97ae81dd7783fc8abc5f044305d"
+  integrity sha512-7D2EPVltRrsTkhpQmksIu+LxeWAIEk6wRDMJ1qljlv+CKHJM+cJLlfhWIzNA44eAsHXSNe3+vO6DW1yCYx8SuQ==
   dependencies:
     "@asamuzakjp/css-color" "^4.1.1"
     "@csstools/css-syntax-patches-for-csstree" "^1.0.21"
     css-tree "^3.1.0"
+    lru-cache "^11.2.4"
 
 cssstyle@^2.3.0:
   version "2.3.0"
