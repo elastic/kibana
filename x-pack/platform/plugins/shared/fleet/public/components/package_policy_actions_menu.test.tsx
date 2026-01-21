@@ -254,4 +254,36 @@ describe('PackagePolicyActionsMenu', () => {
       });
     });
   });
+
+  it('Should disable Copy integration for excluded packages', async () => {
+    const agentPolicies = createMockAgentPolicies();
+    const packagePolicy = createMockPackagePolicy({
+      package: {
+        name: 'endpoint',
+        version: '1.0.0',
+        title: 'Elastic Defend',
+      },
+    });
+    const { utils } = renderMenu({ agentPolicies, packagePolicy });
+    await waitFor(() => {
+      const copyButton = utils.getByTestId('PackagePolicyActionsCopyItem');
+      expect(copyButton).toBeDisabled();
+    });
+  });
+
+  it('Should enable Copy integration for non-excluded packages', async () => {
+    const agentPolicies = createMockAgentPolicies();
+    const packagePolicy = createMockPackagePolicy({
+      package: {
+        name: 'some-other-package',
+        version: '1.0.0',
+        title: 'Some Other Package',
+      },
+    });
+    const { utils } = renderMenu({ agentPolicies, packagePolicy });
+    await waitFor(() => {
+      const copyButton = utils.getByTestId('PackagePolicyActionsCopyItem');
+      expect(copyButton).not.toBeDisabled();
+    });
+  });
 });
