@@ -16,6 +16,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const dataGrid = getService('dataGrid');
   const filterBar = getService('filterBar');
+  const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects([
     'common',
     'svlCommonPage',
@@ -29,6 +31,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const defaultSettings = {
     defaultIndex: 'logstash-*',
     hideAnnouncements: true,
+  };
+
+  const loadSavedSearchWithRetry = async (searchName: string) => {
+    await PageObjects.discover.openLoadSavedSearchPanel();
+    const searchItemTestSubj = `savedObjectTitle${searchName.split(' ').join('-')}`;
+    await retry.waitFor(`saved search "${searchName}" to appear in the list`, async () => {
+      return await testSubjects.exists(searchItemTestSubj);
+    });
+    await testSubjects.click(searchItemTestSubj);
+    await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
   describe('discover unsaved changes notification indicator', function describeIndexTests() {
@@ -93,7 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should not show a notification indicator after loading a saved search, only after changes', async () => {
-      await PageObjects.discover.loadSavedSearch(SAVED_SEARCH_NAME);
+      await loadSavedSearchWithRetry(SAVED_SEARCH_NAME);
       await PageObjects.discover.waitUntilTabIsLoaded();
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
@@ -107,7 +119,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should allow to revert changes', async () => {
-      await PageObjects.discover.loadSavedSearch(SAVED_SEARCH_NAME);
+      await loadSavedSearchWithRetry(SAVED_SEARCH_NAME);
       await PageObjects.discover.waitUntilTabIsLoaded();
       await PageObjects.discover.ensureNoUnsavedChangesIndicator();
 
@@ -152,7 +164,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should hide the notification indicator once user manually reverts changes', async () => {
-      await PageObjects.discover.loadSavedSearch(SAVED_SEARCH_NAME);
+      await loadSavedSearchWithRetry(SAVED_SEARCH_NAME);
       await PageObjects.discover.waitUntilTabIsLoaded();
       await PageObjects.discover.ensureNoUnsavedChangesIndicator();
 
