@@ -408,8 +408,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     }),
     value: false,
     description: i18n.translate('xpack.observability.apmUseUnifiedTraceWaterfallDescription', {
-      defaultMessage:
-        'Enable to use the new unified trace waterfall. This implementation supports both APM-processed documents and native OpenTelemetry spans',
+      defaultMessage: 'Enable the new unified trace waterfall',
     }),
     schema: schema.boolean(),
     requiresPageReload: true,
