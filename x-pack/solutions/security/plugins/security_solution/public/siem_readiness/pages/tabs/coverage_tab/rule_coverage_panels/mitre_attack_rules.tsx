@@ -429,18 +429,47 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
                         fontSize: euiTheme.size.m,
                       }}
                     >
-                      {`${item.missingIntegrationCount} missing integrations`}
+                      <span style={{ fontWeight: 'bold' }}>{item.missingIntegrationCount}</span>{' '}
+                      <span style={{ fontWeight: 'normal' }}>
+                        {i18n.translate(
+                          'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.mitreAttack.missingIntegrations',
+                          {
+                            defaultMessage: 'missing integrations',
+                          }
+                        )}
+                      </span>
                     </div>
                   )}
                   <div
                     style={{
                       textAlign: 'left',
                       fontSize: euiTheme.size.m,
+                      fontWeight: 'normal',
                     }}
                   >
-                    {item.count > 0
-                      ? `${item.rulesWithoutDocuments}/${item.count} Rules missing data`
-                      : `${item.count} rules`}
+                    {item.count > 0 ? (
+                      <>
+                        <span style={{ fontWeight: 'bold' }}>{item.rulesWithoutDocuments}</span>
+                        {`/`}
+                        <span style={{ fontWeight: 'bold' }}>{item.count}</span>{' '}
+                        {i18n.translate(
+                          'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.mitreAttack.rulesMissingData',
+                          {
+                            defaultMessage: 'rules missing data',
+                          }
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <span style={{ fontWeight: 'bold' }}>{item.count}</span>{' '}
+                        {i18n.translate(
+                          'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.mitreAttack.rules',
+                          {
+                            defaultMessage: 'rules',
+                          }
+                        )}
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
