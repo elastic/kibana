@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useCallback, type ComponentType } from 'react';
+import React, { useMemo, useCallback, useRef, type ComponentType } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { EuiFlyoutProps } from '@elastic/eui';
@@ -113,6 +113,7 @@ export function UnifiedDocViewerFlyout({
     flyoutWidthLocalStorageKey ?? FLYOUT_WIDTH_KEY,
     defaultWidth
   );
+  const flyoutWidthRef = useRef(flyoutWidth ?? defaultWidth);
   const minWidth = euiTheme.base * 24;
   const maxWidth = euiTheme.breakpoint.xl;
   // Get actual hit with updated highlighted searches
@@ -283,7 +284,8 @@ export function UnifiedDocViewerFlyout({
         className="DiscoverFlyout" // used to override the z-index of the flyout from SecuritySolution
         onClose={onClose}
         type={flyoutType ?? 'push'}
-        size={flyoutWidth}
+        // workaround for remounting EUI flyout on resize if session prop is set to 'start'
+        size={flyoutWidthRef.current}
         pushMinBreakpoint="xl"
         data-test-subj={dataTestSubj ?? 'docViewerFlyout'}
         onKeyDown={onKeyDown}
