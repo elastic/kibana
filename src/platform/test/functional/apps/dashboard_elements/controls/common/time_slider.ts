@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'dashboard',
   ]);
 
-  describe.only('Time Slider Control', () => {
+  describe('Time Slider Control', () => {
     before(async () => {
       await security.testUser.setRoles([
         'kibana_admin',
@@ -99,7 +99,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('making changes to time slice causes unsaved changes', async () => {
         await dashboardControls.gotoNextTimeSlice();
-        debugger;
         await dashboard.clearUnsavedChanges();
       });
 
@@ -110,7 +109,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('changes to time slice can be discarded', async () => {
-        debugger;
         const valueBefore = await dashboardControls.getTimeSliceFromTimeSlider();
         await dashboardControls.gotoNextTimeSlice();
         const valueAfter = await dashboardControls.getTimeSliceFromTimeSlider();
@@ -126,7 +124,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('dashboard does not load with unsaved changes when changes are discarded', async () => {
-        debugger;
         await dashboard.loadDashboardInEditMode('test time slider control');
         await dashboard.ensureMissingUnsavedChangesNotification();
       });
