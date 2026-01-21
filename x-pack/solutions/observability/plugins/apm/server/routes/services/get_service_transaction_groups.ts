@@ -6,6 +6,12 @@
  */
 
 import { kqlQuery, rangeQuery, wildcardQuery } from '@kbn/observability-plugin/server';
+import {
+  calculateThroughputWithRange,
+  calculateFailedTransactionRate,
+  getOutcomeAggregation,
+  getDurationFieldForTransactions,
+} from '@kbn/apm-data-access-plugin/server/utils';
 import type { ApmTransactionDocumentType } from '../../../common/document_type';
 import {
   SERVICE_NAME,
@@ -16,14 +22,8 @@ import {
 import type { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import type { RollupInterval } from '../../../common/rollup';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getLatencyAggregation, getLatencyValue } from '../../lib/helpers/latency_aggregation_type';
-import { getDurationFieldForTransactions } from '../../lib/helpers/transactions';
-import {
-  calculateFailedTransactionRate,
-  getOutcomeAggregation,
-} from '../../lib/helpers/transaction_error_rate';
 
 const txGroupsDroppedBucketName = '_other';
 export const MAX_NUMBER_OF_TX_GROUPS = 1_000;
