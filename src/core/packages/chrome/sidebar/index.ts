@@ -14,7 +14,7 @@ import type { z } from '@kbn/zod/v4';
 /**
  * Valid sidebar app IDs (explicitly listed production apps)
  */
-export const VALID_SIDEBAR_APP_IDS = [] as const;
+export const VALID_SIDEBAR_APP_IDS = ['agentBuilder'] as const;
 
 /**
  * Prefix for example/test app IDs (any ID starting with this prefix is allowed)

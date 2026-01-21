@@ -42,9 +42,15 @@ import type {
   AgentBuilderStartDependencies,
   ConversationFlyoutRef,
 } from './types';
-import { openConversationFlyout } from './flyout/open_conversation_flyout';
 import type { EmbeddableConversationProps } from './embeddable/types';
 import type { OpenConversationFlyoutOptions } from './flyout/types';
+import {
+  setSidebarServices,
+  setSidebarRuntimeContext,
+  clearSidebarRuntimeContext,
+  getParamsSchema,
+} from './sidebar';
+import type { SidebarParams } from './sidebar';
 
 export class AgentBuilderPlugin
   implements
@@ -61,11 +67,6 @@ export class AgentBuilderPlugin
   private setupServices?: {
     navigationService: NavigationService;
   };
-  private activeFlyoutRef: ConversationFlyoutRef | null = null;
-  private flyoutCallbacks: {
-    updateProps: (props: EmbeddableConversationProps) => void;
-    resetBrowserApiTools: () => void;
-  } | null = null;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
@@ -95,6 +96,16 @@ export class AgentBuilderPlugin
     registerLocators(deps.share);
 
     registerWorkflowSteps(deps.workflowsExtensions);
+
+    // Register sidebar app for conversation UI
+    core.chrome.sidebar.registerApp<SidebarParams>({
+      appId: 'agentBuilder',
+      getParamsSchema,
+      loadComponent: async () => {
+        const { SidebarConversation } = await import('./sidebar/sidebar_conversation');
+        return SidebarConversation;
+      },
+    });
 
     return {};
   }
@@ -136,31 +147,40 @@ export class AgentBuilderPlugin
 
     this.internalServices = internalServices;
 
-    const hasAgentBuilder = core.application.capabilities.agentBuilder?.show === true;
+    // Initialize services for sidebar component (accessed via observable)
+    setSidebarServices(core, internalServices);
 
-    const openFlyoutInternal = (options?: OpenConversationFlyoutOptions) => {
+    const hasAgentBuilder = core.application.capabilities.agentBuilder?.show === true;
+    const sidebar = core.chrome.sidebar.getApp<SidebarParams>('agentBuilder');
+
+    // Helper to open sidebar with given options
+    const openSidebarInternal = (options?: OpenConversationFlyoutOptions) => {
       const config = options ?? this.conversationFlyoutActiveConfig;
 
-      // If a flyout is already open, update its props instead of creating a new one
-      if (this.activeFlyoutRef && this.flyoutCallbacks) {
-        this.flyoutCallbacks.updateProps(config);
-        return { flyoutRef: this.activeFlyoutRef };
+      // Store non-serializable runtime context
+      if (config.browserApiTools || config.attachments) {
+        setSidebarRuntimeContext({
+          browserApiTools: config.browserApiTools,
+          attachments: config.attachments,
+        });
       }
 
-      // Create new flyout and set up prop updates
-      const { flyoutRef } = openConversationFlyout(config, {
-        coreStart: core,
-        services: internalServices,
-        onRegisterCallbacks: (callbacks) => {
-          this.flyoutCallbacks = callbacks;
-        },
-        onClose: () => {
-          this.activeFlyoutRef = null;
-          this.flyoutCallbacks = null;
-        },
+      // Open sidebar with serializable params only
+      sidebar.open({
+        sessionTag: config.sessionTag ?? 'default',
+        agentId: config.agentId,
+        initialMessage: config.initialMessage,
+        autoSendInitialMessage: config.autoSendInitialMessage,
+        newConversation: config.newConversation,
       });
 
-      this.activeFlyoutRef = flyoutRef;
+      // Return a flyoutRef-compatible object for backward compatibility
+      const flyoutRef: ConversationFlyoutRef = {
+        close: () => {
+          sidebar.close();
+          clearSidebarRuntimeContext();
+        },
+      };
 
       return { flyoutRef };
     };
@@ -171,36 +191,45 @@ export class AgentBuilderPlugin
       tools: createPublicToolContract({ toolsService }),
       events: createPublicEventsContract({ eventsService }),
       setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => {
-        // set config until flyout is next opened
+        // Store config for next open
         this.conversationFlyoutActiveConfig = config;
-        // if there is already an active flyout, update its props
-        if (this.activeFlyoutRef && this.flyoutCallbacks) {
-          this.flyoutCallbacks.updateProps(config);
-          return { flyoutRef: this.activeFlyoutRef };
-        }
+
+        // Update runtime context for sidebar
+        setSidebarRuntimeContext({
+          browserApiTools: config.browserApiTools,
+          attachments: config.attachments,
+        });
+
+        // update serializable params for sidebar
+        sidebar.setParams({
+          sessionTag: config.sessionTag ?? 'default',
+          agentId: config.agentId,
+          initialMessage: config.initialMessage,
+          autoSendInitialMessage: config.autoSendInitialMessage,
+          newConversation: config.newConversation,
+        });
       },
       clearConversationFlyoutActiveConfig: () => {
         this.conversationFlyoutActiveConfig = {};
-        if (this.activeFlyoutRef && this.flyoutCallbacks) {
-          // Removes stale browserApiTools from the flyout
-          this.flyoutCallbacks.resetBrowserApiTools();
-        }
+        clearSidebarRuntimeContext();
       },
       openConversationFlyout: (options?: OpenConversationFlyoutOptions) => {
-        return openFlyoutInternal(options);
+        // Use sidebar implementation
+        return openSidebarInternal(options);
       },
       toggleConversationFlyout: (options?: OpenConversationFlyoutOptions) => {
-        if (this.activeFlyoutRef) {
-          const flyoutRef = this.activeFlyoutRef;
-          // Be defensive: clear local references immediately in case the underlying overlay doesn't
-          // synchronously invoke our onClose callback.
-          this.activeFlyoutRef = null;
-          this.flyoutCallbacks = null;
-          flyoutRef.close();
+        // Check if sidebar is open for agentBuilder
+        if (
+          // TODO improve isOpen API to check for specific app
+          core.chrome.sidebar.isOpen() &&
+          core.chrome.sidebar.getCurrentAppId() === 'agentBuilder'
+        ) {
+          sidebar.close();
+          clearSidebarRuntimeContext();
           return;
         }
 
-        openFlyoutInternal(options);
+        openSidebarInternal(options);
       },
     };
 
