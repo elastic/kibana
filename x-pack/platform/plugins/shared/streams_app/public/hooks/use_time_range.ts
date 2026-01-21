@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { useLocation } from 'react-router-dom';
 import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
-import { useStreamsAppParams } from './use_streams_app_params';
 
 // Default time range (matches Kibana's default)
 const DEFAULT_FROM = 'now-15m';
@@ -14,16 +14,19 @@ const DEFAULT_TO = 'now';
 
 /**
  * Hook to get the current time range from URL params.
+ * Reads directly from URL search params rather than typed router params
+ * to avoid type inference issues with route definitions.
+ *
  * Assumes DateRangeRedirect has ensured time params are present in the URL.
  */
 export function useTimeRange() {
-  // Read from URL params via typed router
-  // DateRangeRedirect ensures rangeFrom/rangeTo are always present
-  const { query } = useStreamsAppParams('/*');
+  const location = useLocation();
 
-  // Fallback to defaults for TypeScript safety (DateRangeRedirect ensures these exist at runtime)
-  const rangeFrom = query?.rangeFrom ?? DEFAULT_FROM;
-  const rangeTo = query?.rangeTo ?? DEFAULT_TO;
+  // Read directly from URL search params
+  // DateRangeRedirect ensures rangeFrom/rangeTo are always present
+  const searchParams = new URLSearchParams(location.search);
+  const rangeFrom = searchParams.get('rangeFrom') ?? DEFAULT_FROM;
+  const rangeTo = searchParams.get('rangeTo') ?? DEFAULT_TO;
 
   // Convert relative times (e.g., "now-15m") to absolute timestamps
   const { from: start, to: end } = getAbsoluteTimeRange(
