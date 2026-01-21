@@ -63,6 +63,8 @@ import {
 } from '@kbn/rule-data-utils';
 import type { MultiField } from './types';
 
+// ECS defines data_stream.* as constant_keyword, but alerts need them as regular keyword
+// since constant_keyword is excluded from ecsFieldMap (causes composite mapping conflicts).
 const DATA_STREAM_DATASET = 'data_stream.dataset' as const;
 const DATA_STREAM_NAMESPACE = 'data_stream.namespace' as const;
 const DATA_STREAM_TYPE = 'data_stream.type' as const;
@@ -288,6 +290,7 @@ export const alertFieldMap = {
     type: 'unmapped',
     required: false,
   },
+  // ignore_above values must match ECS definitions to prevent composite mapping conflicts
   [EVENT_ACTION]: {
     type: 'keyword',
     array: false,
@@ -300,6 +303,7 @@ export const alertFieldMap = {
     required: false,
     ignore_above: 1024,
   },
+  // 32766 is Lucene's max term byte length - prevents "immense term" indexing errors
   [EVENT_ORIGINAL]: {
     type: 'keyword',
     array: false,
@@ -326,6 +330,7 @@ export const alertFieldMap = {
     array: true,
     required: true,
   },
+  // ignore_above: 1024 matches ECS definition to prevent composite mapping conflicts
   [TAGS]: {
     type: 'keyword',
     array: true,

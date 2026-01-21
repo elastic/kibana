@@ -51,8 +51,8 @@ export const isRuleParametersFieldOrSubfield = (field: string, prependField?: st
   (prependField?.includes(ALERT_RULE_PARAMETERS) || field === ALERT_RULE_PARAMETERS) &&
   !nonFlattenedFormatParamsFields.includes(field);
 
-// Known threat enrichment subfields that should be recursively processed
-// These are the ECS-defined children of threat.enrichments
+// threat.enrichments is a nested type, excluded from ecsFieldMap to prevent mapping conflicts.
+// We must handle it specially to ensure enrichment data still displays correctly in the UI.
 const KNOWN_THREAT_ENRICHMENT_SUBFIELDS = ['indicator', 'matched'];
 
 export const isThreatEnrichmentFieldOrSubfield = (field: string, prependField?: string) => {

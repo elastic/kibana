@@ -35,6 +35,7 @@ export const multiFieldRT = rt.type({
   type: rt.string,
 });
 
+// ECS 9.2.0 introduced OTEL fields with stability: "experimental" in addition to existing values
 export const baseOTELPropertyRT = rt.intersection([
   rt.type({
     stability: rt.keyof({

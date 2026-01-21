@@ -10,6 +10,9 @@
 import { EcsFlat } from '@elastic/ecs';
 import type { EcsMetadata, FieldMap } from './types';
 
+// These field types cause Elasticsearch "invalid composite mappings" errors when composing
+// index templates. constant_keyword conflicts with keyword overrides, while nested/flattened
+// types cannot be mixed with object mappings in component template composition.
 const EXCLUDED_TYPES = ['constant_keyword', 'nested', 'flattened'];
 
 // ECS fields that have reached Stage 2 in the RFC process
@@ -48,6 +51,8 @@ const EXPERIMENTAL_FIELDS = [
   'process.io.bytes',
 ];
 
+// Child fields of excluded parent types must also be excluded to prevent mapping conflicts.
+// E.g., if threat.enrichments is nested, all threat.enrichments.* children are also excluded.
 const EXCLUDED_PARENT_PATHS = Object.entries(EcsFlat)
   .filter(([_, value]) => EXCLUDED_TYPES.includes(value.type))
   .map(([key]) => key + '.');
