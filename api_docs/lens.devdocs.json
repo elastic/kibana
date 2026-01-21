@@ -26508,10 +26508,18 @@
           "FeatureFlagsStart",
           " | ",
           "FeatureFlagsStart",
-          ") => Promise<GetFlagTypes<{ apiFormat: { id: string; type: string; fallback: boolean; }; }>>"
+          ") => Promise<",
+          {
+            "pluginId": "lens",
+            "scope": "common",
+            "docId": "kibLensPluginApi",
+            "section": "def-common.LensFeatureFlags",
+            "text": "LensFeatureFlags"
+          },
+          ">"
         ],
         "path": "x-pack/platform/plugins/shared/lens/common/feature_flags.ts",
-        "lineNumber": 50,
+        "lineNumber": 54,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -26529,7 +26537,7 @@
               "FeatureFlagsStart"
             ],
             "path": "x-pack/platform/plugins/shared/lens/common/feature_flags.ts",
-            "lineNumber": 51,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -26547,10 +26555,17 @@
         "label": "getLensFeatureFlagDefaults",
         "description": [],
         "signature": [
-          "() => GetFlagTypes<{ apiFormat: { id: string; type: string; fallback: boolean; }; }>"
+          "() => ",
+          {
+            "pluginId": "lens",
+            "scope": "common",
+            "docId": "kibLensPluginApi",
+            "section": "def-common.LensFeatureFlags",
+            "text": "LensFeatureFlags"
+          }
         ],
         "path": "x-pack/platform/plugins/shared/lens/common/feature_flags.ts",
-        "lineNumber": 82,
+        "lineNumber": 97,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -26707,7 +26722,7 @@
           "BooleanFeatureFlag | NumberFeatureFlag | StringFeatureFlag"
         ],
         "path": "x-pack/platform/plugins/shared/lens/common/feature_flags.ts",
-        "lineNumber": 35,
+        "lineNumber": 39,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -26721,10 +26736,12 @@
         "label": "LensFeatureFlags",
         "description": [],
         "signature": [
-          "{ apiFormat: boolean; }"
+          "{ apiFormat: boolean; } & { apiFormat$: ",
+          "Observable",
+          "<boolean>; }"
         ],
         "path": "x-pack/platform/plugins/shared/lens/common/feature_flags.ts",
-        "lineNumber": 48,
+        "lineNumber": 52,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -26740,7 +26757,7 @@
         "label": "lensFeatureFlags",
         "description": [],
         "path": "x-pack/platform/plugins/shared/lens/common/feature_flags.ts",
-        "lineNumber": 37,
+        "lineNumber": 41,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -26755,7 +26772,7 @@
               "/**\n   * Enables transforming lens state to/from new API Format over the wire.\n   */"
             ],
             "path": "x-pack/platform/plugins/shared/lens/common/feature_flags.ts",
-            "lineNumber": 38,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -26768,7 +26785,7 @@
                 "label": "id",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/lens/common/feature_flags.ts",
-                "lineNumber": 42,
+                "lineNumber": 46,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -26781,7 +26798,7 @@
                 "label": "type",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/lens/common/feature_flags.ts",
-                "lineNumber": 43,
+                "lineNumber": 47,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -26794,7 +26811,7 @@
                 "label": "fallback",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/lens/common/feature_flags.ts",
-                "lineNumber": 44,
+                "lineNumber": 48,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
