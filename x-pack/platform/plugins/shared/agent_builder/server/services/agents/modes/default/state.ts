@@ -24,6 +24,14 @@ export const StateAnnotation = Annotation.Root({
   // internals
   resumeToStep: Annotation<string>(),
 
+  /**
+   * Timestamp for the current conversation round.
+   * Used to keep prompts cache-friendly within a round.
+   */
+  conversationTimestamp: Annotation<string>({
+    reducer: (a, b) => b,
+    default: () => '',
+  }),
   currentCycle: Annotation<number>({
     reducer: (a, b) => b,
     default: () => 0,

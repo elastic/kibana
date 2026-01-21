@@ -8,20 +8,17 @@
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import defaults from 'lodash/defaults';
 import { getEntityDefinition } from './definitions/registry';
 import type { EntityType } from './definitions/entity_schema';
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../tasks/extract_entity_task';
-import type { EntityStoreTaskConfig } from '../tasks/config';
-import { TasksConfig } from '../tasks/config';
-import { EntityStoreTaskType } from '../tasks/constants';
 import { installElasticsearchAssets, uninstallElasticsearchAssets } from './assets/install_assets';
 
 export class AssetManager {
   constructor(
     private logger: Logger,
     private esClient: ElasticsearchClient,
-    private taskManager: TaskManagerStartContract
+    private taskManager: TaskManagerStartContract,
+    private namespace: string
   ) {}
 
   public async init(type: EntityType, logExtractionFrequency?: string) {
@@ -32,25 +29,22 @@ export class AssetManager {
   public async start(type: EntityType, logExtractionFrequency?: string) {
     this.logger.debug(`Scheduling extract entity task for type: ${type}`);
 
-    const task: EntityStoreTaskConfig = defaults(
-      {},
-      TasksConfig[EntityStoreTaskType.Values.extractEntity],
-      { interval: logExtractionFrequency }
-    );
-
     // TODO: if this fails, set status to failed
     await scheduleExtractEntityTask({
       logger: this.logger,
       taskManager: this.taskManager,
       type,
-      task,
+      frequency: logExtractionFrequency,
+      namespace: this.namespace,
     });
   }
+
   public async stop(type: EntityType) {
-    return await stopExtractEntityTask({
+    await stopExtractEntityTask({
       taskManager: this.taskManager,
       logger: this.logger,
       type,
+      namespace: this.namespace,
     });
   }
 
@@ -63,7 +57,7 @@ export class AssetManager {
       esClient: this.esClient,
       logger: this.logger,
       definition,
-      namespace: 'default',
+      namespace: this.namespace,
     });
     this.logger.debug(`Installed definition: ${type}`);
 
@@ -77,7 +71,7 @@ export class AssetManager {
       esClient: this.esClient,
       logger: this.logger,
       definition,
-      namespace: 'default',
+      namespace: this.namespace,
     });
 
     this.logger.debug(`Uninstalled definition: ${type}`);

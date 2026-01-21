@@ -81,7 +81,7 @@
           " | undefined; }; includeAppLinks: { control: string; defaultValue: boolean; }; simulateErrors: { control: string; defaultValue: boolean; }; }"
         ],
         "path": "src/platform/packages/shared/home/sample_data_card/src/mocks/index.ts",
-        "lineNumber": 95,
+        "lineNumber": 99,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -223,7 +223,7 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
-        "lineNumber": 107,
+        "lineNumber": 112,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -247,7 +247,7 @@
               ">"
             ],
             "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
-            "lineNumber": 107,
+            "lineNumber": 112,
             "columnNumber": 89,
             "deprecated": false,
             "trackAdoption": false,
@@ -278,7 +278,7 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
-        "lineNumber": 46,
+        "lineNumber": 48,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -302,7 +302,7 @@
               ">"
             ],
             "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
-            "lineNumber": 46,
+            "lineNumber": 48,
             "columnNumber": 73,
             "deprecated": false,
             "trackAdoption": false,
@@ -322,7 +322,7 @@
         "label": "KibanaDependencies",
         "description": [],
         "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
-        "lineNumber": 75,
+        "lineNumber": 79,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -335,10 +335,10 @@
             "label": "coreStart",
             "description": [],
             "signature": [
-              "{ application: { navigateToUrl: NavigateToUrl; }; http: { basePath: { prepend: (path: string) => string; }; delete: (path: string) => Promise<unknown>; post: (path: string) => Promise<unknown>; }; notifications: { toasts: { addDanger: NotifyFn; addSuccess: NotifyFn; }; }; uiSettings: { get: (key: string, defaultOverride?: any) => any; isDefault: (key: string) => boolean; set: (key: string, value: any) => Promise<boolean>; }; }"
+              "{ application: { navigateToUrl: NavigateToUrl; }; http: { basePath: { prepend: (path: string) => string; }; delete: (path: string) => Promise<unknown>; get: (path: string) => Promise<unknown>; post: (path: string) => Promise<unknown>; }; notifications: { toasts: { addDanger: NotifyFn; addSuccess: NotifyFn; }; }; uiSettings: { get: (key: string, defaultOverride?: any) => any; isDefault: (key: string) => boolean; set: (key: string, value: any) => Promise<boolean>; }; }"
             ],
             "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
-            "lineNumber": 76,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -354,7 +354,7 @@
               "{ clearCache: () => void; }"
             ],
             "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
-            "lineNumber": 99,
+            "lineNumber": 104,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -426,7 +426,7 @@
           "\nA list of services that are consumed by this component."
         ],
         "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
-        "lineNumber": 29,
+        "lineNumber": 30,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -442,7 +442,7 @@
               "(path: string) => string"
             ],
             "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
-            "lineNumber": 33,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -458,13 +458,33 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
-                "lineNumber": 33,
+                "lineNumber": 34,
                 "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/home-sample-data-card",
+            "id": "def-common.Services.fetchSampleDataSets",
+            "type": "Function",
+            "tags": [],
+            "label": "fetchSampleDataSets",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              "SampleDataSet",
+              "[]>"
+            ],
+            "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -478,7 +498,7 @@
               "(path: string) => React.MouseEventHandler<Element>"
             ],
             "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
-            "lineNumber": 34,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -494,7 +514,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
-                "lineNumber": 34,
+                "lineNumber": 36,
                 "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -514,7 +534,7 @@
               "(id: string, defaultIndex: string) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
-            "lineNumber": 35,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -530,7 +550,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
-                "lineNumber": 35,
+                "lineNumber": 37,
                 "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -547,7 +567,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
-                "lineNumber": 35,
+                "lineNumber": 37,
                 "columnNumber": 38,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -567,7 +587,7 @@
               "(notification: NotifyInput) => void"
             ],
             "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
-            "lineNumber": 36,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -584,7 +604,7 @@
                   "string | NotifyInputFields"
                 ],
                 "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
-                "lineNumber": 27,
+                "lineNumber": 28,
                 "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false
@@ -602,7 +622,7 @@
               "(notification: NotifyInput) => void"
             ],
             "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
-            "lineNumber": 37,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -619,7 +639,7 @@
                   "string | NotifyInputFields"
                 ],
                 "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
-                "lineNumber": 27,
+                "lineNumber": 28,
                 "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false
@@ -637,7 +657,7 @@
               "(id: string, defaultIndex: string) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
-            "lineNumber": 38,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -653,7 +673,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
-                "lineNumber": 38,
+                "lineNumber": 40,
                 "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -670,7 +690,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/home/sample_data_card/src/services.tsx",
-                "lineNumber": 38,
+                "lineNumber": 40,
                 "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false,

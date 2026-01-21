@@ -46,7 +46,20 @@ export const createAttachmentAddTool = ({
       };
     }
 
-    const attachment = attachmentManager.add({ id, type, data, description });
+    let attachment;
+    try {
+      attachment = await attachmentManager.add({ id, type, data, description });
+    } catch (e) {
+      return {
+        results: [
+          {
+            tool_result_id: getToolResultId(),
+            type: ToolResultType.error,
+            data: { message: e.message },
+          },
+        ],
+      };
+    }
 
     return {
       results: [

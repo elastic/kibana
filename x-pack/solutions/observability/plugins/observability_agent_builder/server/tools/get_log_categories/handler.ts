@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import type { CoreSetup, IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/types';
-import type {
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
-} from '../../types';
+import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
 import { getLogsIndices } from '../../utils/get_logs_indices';
 import { getTypedSearch } from '../../utils/get_typed_search';
 import { getTotalHits } from '../../utils/get_total_hits';
@@ -27,12 +24,8 @@ export async function getToolHandler({
   end,
   kqlFilter: kuery,
   fields,
-  messageField,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   logger: Logger;
   esClient: IScopedClusterClient;
   index?: string;
@@ -40,7 +33,6 @@ export async function getToolHandler({
   end: string;
   kqlFilter?: string;
   fields: string[];
-  messageField: string;
 }) {
   const logsIndices = index?.split(',') ?? (await getLogsIndices({ core, logger }));
   const boolFilters = [
@@ -49,7 +41,7 @@ export async function getToolHandler({
       end: parseDatemath(end, { roundUp: true }),
     }),
     ...kqlFilter(kuery),
-    { exists: { field: messageField } },
+    { exists: { field: 'message' } },
   ];
 
   const [highSeverityCategories, lowSeverityCategories] = await Promise.all([
@@ -60,7 +52,7 @@ export async function getToolHandler({
       logger,
       categoryCount: 20,
       fields,
-      messageField,
+      field: 'message',
     }),
     getLogCategories({
       esClient,
@@ -69,7 +61,7 @@ export async function getToolHandler({
       logger,
       categoryCount: 10,
       fields,
-      messageField,
+      field: 'message',
     }),
   ]);
 
@@ -83,7 +75,7 @@ export async function getLogCategories({
   logger,
   categoryCount,
   fields,
-  messageField,
+  field = 'message',
 }: {
   esClient: IScopedClusterClient;
   logsIndices: string[];
@@ -91,7 +83,7 @@ export async function getLogCategories({
   logger: Logger;
   categoryCount: number;
   fields: string[];
-  messageField: string;
+  field?: string;
 }) {
   const search = getTypedSearch(esClient.asCurrentUser);
 
@@ -105,7 +97,9 @@ export async function getLogCategories({
 
   const totalHits = getTotalHits(countResponse);
   if (totalHits === 0) {
-    logger.debug('No log documents found for the given query.');
+    logger.debug(
+      `No log documents found for field "${field}", filter: ${JSON.stringify(boolQuery)}`
+    );
     return undefined;
   }
 
@@ -117,7 +111,7 @@ export async function getLogCategories({
   logger.debug(
     `Total log documents: ${totalHits}, using sampling probability: ${samplingProbability.toFixed(
       4
-    )} using filter: ${JSON.stringify(boolQuery)}`
+    )} for field "${field}", filter: ${JSON.stringify(boolQuery)}`
   );
 
   const response = await search({
@@ -131,7 +125,7 @@ export async function getLogCategories({
         aggs: {
           categories: {
             categorize_text: {
-              field: messageField,
+              field,
               size: categoryCount,
               min_doc_count: 1,
             },
@@ -140,7 +134,7 @@ export async function getLogCategories({
                 top_hits: {
                   size: 1,
                   _source: false,
-                  fields: [messageField, '@timestamp', ...fields],
+                  fields: [field, '@timestamp', ...fields],
                   sort: {
                     '@timestamp': { order: 'desc' },
                   },

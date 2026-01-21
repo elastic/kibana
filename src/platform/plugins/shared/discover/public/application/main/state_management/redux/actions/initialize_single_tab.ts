@@ -17,7 +17,8 @@ import { internalStateSlice, type TabActionPayload } from '../internal_state';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
 import { type DiscoverAppState } from '..';
 import type { DiscoverStateContainer } from '../../discover_state';
-import { appendAdHocDataViews, setDataView } from './data_views';
+import { appendAdHocDataViews } from './data_views';
+import { setDataView } from './tab_state_data_view';
 import { type AppStateUrl, cleanupUrlState } from '../../utils/cleanup_url_state';
 import { getEsqlDataView } from '../../utils/get_esql_data_view';
 import { loadAndResolveDataView } from '../../utils/resolve_data_view';
@@ -35,6 +36,7 @@ import type { TabState, TabStateGlobalState } from '../types';
 import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
 import { fromSavedObjectTabToSavedSearch } from '../tab_mapping_utils';
 import { createInternalStateAsyncThunk, extractEsqlVariables } from '../utils';
+import { fetchData } from './tab_state';
 
 export interface InitializeSingleTabsParams {
   stateContainer: DiscoverStateContainer;
@@ -326,7 +328,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     // tab to fetch when selected
     if (getState().tabs.unsafeCurrentId === tabId) {
       stateContainer.actions.initializeAndSync();
-      stateContainer.actions.fetchData(true);
+      dispatch(fetchData({ tabId, initial: true }));
     } else {
       dispatch(
         internalStateSlice.actions.setForceFetchOnSelect({ tabId, forceFetchOnSelect: true })

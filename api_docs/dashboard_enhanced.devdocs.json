@@ -335,7 +335,7 @@
             "label": "createConfig",
             "description": [],
             "signature": [
-              "() => { useCurrentFilters: boolean; useCurrentDateRange: boolean; openInNewTab: boolean; dashboardId: string; }"
+              "() => { open_in_new_tab: boolean; use_time_range: boolean; use_filters: boolean; dashboardId: string; }"
             ],
             "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
             "lineNumber": 65,
@@ -832,14 +832,7 @@
         "label": "DashboardDrilldownConfig",
         "description": [],
         "signature": [
-          "{ dashboardId?: string | undefined; } & ",
-          {
-            "pluginId": "presentationUtil",
-            "scope": "public",
-            "docId": "kibPresentationUtilPluginApi",
-            "section": "def-public.DashboardDrilldownOptions",
-            "text": "DashboardDrilldownOptions"
-          }
+          "{ dashboardId?: string | undefined; } & Required<Readonly<{ use_filters?: boolean | undefined; use_time_range?: boolean | undefined; open_in_new_tab?: boolean | undefined; } & {}>>"
         ],
         "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/types.ts",
         "lineNumber": 11,

@@ -183,7 +183,7 @@ pageLoadAssetSize:
   transform: 16515
   triggersActionsUi: 111000
   uiActions: 24670
-  uiActionsEnhanced: 20189
+  uiActionsEnhanced: 19272
   unifiedDocViewer: 14513
   unifiedSearch: 19500
   upgradeAssistant: 6898
@@ -207,6 +207,6 @@ pageLoadAssetSize:
   visTypeXy: 32342
   visualizations: 38375
   watcher: 10485
-  workflowsExtensions: 76704
+  workflowsExtensions: 76765
   workflowsManagement: 8497
-  workplaceAIApp: 6112
+  workplaceAIApp: 65731

@@ -10,7 +10,7 @@ import { subj } from '@kbn/test-subj-selector';
 
 export const journey = new Journey({
   kbnArchives: ['x-pack/performance/kbn_archives/promotion_tracking_dashboard'],
-  esArchives: ['x-pack/performance/es_archives/sample_data_ecommerce'],
+  esArchives: ['x-pack/performance/es_archives/sample_data_ecommerce_many_fields'],
   scalabilitySetup: {
     warmup: [
       {

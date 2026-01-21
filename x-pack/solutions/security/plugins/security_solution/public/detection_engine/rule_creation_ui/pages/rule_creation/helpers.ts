@@ -24,7 +24,7 @@ import type {
   ThreatTechnique,
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
-import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type {
   RuleAction as AlertingRuleAction,
   RuleSystemAction as AlertingRuleSystemAction,
@@ -601,8 +601,8 @@ export const formatAboutStepData = (
       ? {
           exceptions_list: [
             {
-              id: ENDPOINT_LIST_ID,
-              list_id: ENDPOINT_LIST_ID,
+              id: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+              list_id: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
               namespace_type: 'agnostic' as NamespaceType,
               type: 'endpoint' as ExceptionListType,
             },

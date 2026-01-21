@@ -17,7 +17,6 @@ import {
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverSavedSearchContainer } from '../discover_saved_search_container';
 import type { DiscoverDataStateContainer } from '../discover_data_state_container';
-import type { DiscoverStateContainer } from '../discover_state';
 import type { DiscoverAppState } from '../redux';
 import { isEqualState } from './state_comparators';
 import { addLog } from '../../../../utils/add_log';
@@ -42,7 +41,6 @@ export const buildStateSubscribe =
     runtimeStateManager,
     savedSearchState,
     services,
-    setDataView,
     getCurrentTab,
   }: {
     dataState: DiscoverDataStateContainer;
@@ -50,7 +48,6 @@ export const buildStateSubscribe =
     runtimeStateManager: RuntimeStateManager;
     savedSearchState: DiscoverSavedSearchContainer;
     services: DiscoverServices;
-    setDataView: DiscoverStateContainer['actions']['setDataView'];
     getCurrentTab: () => TabState;
   }) =>
   async (nextState: DiscoverAppState) => {
@@ -130,7 +127,12 @@ export const buildStateSubscribe =
 
       savedSearch.searchSource.setField('index', nextDataView);
       dataState.reset();
-      setDataView(nextDataView);
+      internalState.dispatch(
+        internalStateActions.assignNextDataView({
+          tabId: getCurrentTab().id,
+          dataView: nextDataView,
+        })
+      );
       savedSearchDataView = nextDataView;
     }
 

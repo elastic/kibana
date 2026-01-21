@@ -102,6 +102,12 @@ interface YamlValidationResultConnectorIdError extends YamlValidationResultBase 
   owner: 'connector-id-validation';
 }
 
+interface YamlValidationResultJsonSchemaDefault extends YamlValidationResultBase {
+  severity: YamlValidationErrorSeverity;
+  message: string;
+  owner: 'json-schema-default-validation';
+}
+
 interface YamlValidationResultCustomPropertyError extends YamlValidationResultBase {
   severity: YamlValidationErrorSeverity;
   message: string;
@@ -123,6 +129,7 @@ export const CUSTOM_YAML_VALIDATION_MARKER_OWNERS = [
   'variable-validation',
   'liquid-template-validation',
   'connector-id-validation',
+  'json-schema-default-validation',
   'custom-property-validation',
 ] as const;
 
@@ -140,5 +147,6 @@ export type YamlValidationResult =
   | YamlValidationResultLiquidTemplate
   | YamlValidationResultConnectorIdError
   | YamlValidationResultConnectorIdValid
+  | YamlValidationResultJsonSchemaDefault
   | YamlValidationResultCustomPropertyError
   | YamlValidationResultCustomPropertyValid;

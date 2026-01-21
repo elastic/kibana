@@ -159,7 +159,9 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     promptState?: PromptStorageState;
   }): ScopedRunner => {
     const resultStore = createResultStore(conversation?.rounds);
-    const attachmentStateManager = createAttachmentStateManager(conversation?.attachments ?? []);
+    const attachmentStateManager = createAttachmentStateManager(conversation?.attachments ?? [], {
+      getTypeDefinition: runnerDeps.attachmentsService.getTypeDefinition,
+    });
     const stateManager = createConversationStateManager(conversation);
     const promptManager = createPromptManager({ state: promptState });
 

@@ -74,6 +74,7 @@ export class IndexMgmtUIPlugin
     enableSemanticText: boolean;
     enforceAdaptiveAllocations: boolean;
     enableFailureStoreRetentionDisabling: boolean;
+    isServerless: boolean;
   };
   private canUseSyntheticSource: boolean = false;
   private licensingSubscription?: Subscription;
@@ -99,8 +100,12 @@ export class IndexMgmtUIPlugin
       enableFailureStoreRetentionDisabling,
       dev: { enableSemanticText },
     } = ctx.config.get<ClientConfigType>();
+
+    const isServerless = ctx.env.packageInfo.buildFlavor === 'serverless';
+
     this.config = {
       isIndexManagementUiEnabled,
+      isServerless,
       enableIndexActions: enableIndexActions ?? true,
       enableLegacyTemplates: enableLegacyTemplates ?? true,
       enableIndexStats: enableIndexStats ?? true,
@@ -111,7 +116,7 @@ export class IndexMgmtUIPlugin
       enableTogglingDataRetention: enableTogglingDataRetention ?? true,
       enableProjectLevelRetentionChecks: enableProjectLevelRetentionChecks ?? false,
       enableSemanticText: enableSemanticText ?? true,
-      enforceAdaptiveAllocations: ctx.env.packageInfo.buildFlavor === 'serverless',
+      enforceAdaptiveAllocations: isServerless,
       enableFailureStoreRetentionDisabling: enableFailureStoreRetentionDisabling ?? true,
     };
   }

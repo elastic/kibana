@@ -12,7 +12,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...baseConfig.getAll(),
-    testFiles: [require.resolve('./rules_list'), require.resolve('./rules_page')],
+    testFiles: [require.resolve('.')],
     junit: {
       reportName: 'Chrome X-Pack UI Functional Tests with ES SSL - Triggers Actions UI',
     },

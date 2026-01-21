@@ -59,6 +59,19 @@ const breadcrumbGetters: {
     },
     { text: policyName },
   ],
+  integration_policy_copy: ({ pkgTitle, pkgkey, policyName }) => [
+    BASE_BREADCRUMB,
+    {
+      href: pagePathGetters.integration_details_policies({ pkgkey })[1],
+      text: pkgTitle,
+    },
+    { text: policyName },
+    {
+      text: i18n.translate('xpack.fleet.breadcrumbs.copyPackagePolicyPageTitle', {
+        defaultMessage: 'Copy integration',
+      }),
+    },
+  ],
   integration_policy_upgrade: ({ pkgTitle, pkgkey, policyName }) => [
     BASE_BREADCRUMB,
     {
@@ -81,6 +94,21 @@ const breadcrumbGetters: {
       }),
     },
     { text: policyName },
+  ],
+  integration_policy_copy_from_installed: ({ policyName }) => [
+    BASE_BREADCRUMB,
+    {
+      href: pagePathGetters.integrations_installed({})[1],
+      text: i18n.translate('xpack.fleet.breadcrumbs.installedIntegrationsPageTitle', {
+        defaultMessage: 'Installed integrations',
+      }),
+    },
+    { text: policyName },
+    {
+      text: i18n.translate('xpack.fleet.breadcrumbs.copyPackagePolicyPageTitle', {
+        defaultMessage: 'Copy integration',
+      }),
+    },
   ],
 };
 

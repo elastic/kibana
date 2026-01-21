@@ -11118,6 +11118,22 @@
                 "path": "src/platform/plugins/shared/data/server/search/saved_objects/search_session.ts"
               },
               {
+                "plugin": "dashboard",
+                "path": "src/platform/plugins/shared/dashboard/server/dashboard_saved_object/dashboard_saved_object.ts"
+              },
+              {
+                "plugin": "share",
+                "path": "src/platform/plugins/shared/share/server/url_service/saved_objects/register_url_service_saved_object_type.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
+              },
+              {
                 "plugin": "links",
                 "path": "src/platform/plugins/private/links/server/saved_objects/links.ts"
               },
@@ -11132,18 +11148,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
-              },
-              {
-                "plugin": "share",
-                "path": "src/platform/plugins/shared/share/server/url_service/saved_objects/register_url_service_saved_object_type.ts"
               },
               {
                 "plugin": "actions",
@@ -11192,10 +11196,6 @@
               {
                 "plugin": "maps",
                 "path": "x-pack/platform/plugins/shared/maps/server/saved_objects/setup_saved_objects.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/server/dashboard_saved_object/dashboard_saved_object.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -11819,16 +11819,16 @@
                 "path": "src/platform/plugins/shared/data/server/search/saved_objects/search_session.ts"
               },
               {
+                "plugin": "dashboard",
+                "path": "src/platform/plugins/shared/dashboard/server/dashboard_saved_object/dashboard_saved_object.ts"
+              },
+              {
                 "plugin": "spaces",
                 "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
               },
               {
                 "plugin": "savedSearch",
                 "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/server/dashboard_saved_object/dashboard_saved_object.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -11985,6 +11985,10 @@
                 "path": "src/platform/plugins/shared/data/server/saved_objects/query.ts"
               },
               {
+                "plugin": "dashboard",
+                "path": "src/platform/plugins/shared/dashboard/server/dashboard_saved_object/dashboard_saved_object.ts"
+              },
+              {
                 "plugin": "savedObjectsTagging",
                 "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/saved_objects/tag.ts"
               },
@@ -12011,10 +12015,6 @@
               {
                 "plugin": "maps",
                 "path": "x-pack/platform/plugins/shared/maps/server/saved_objects/setup_saved_objects.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/server/dashboard_saved_object/dashboard_saved_object.ts"
               },
               {
                 "plugin": "canvas",

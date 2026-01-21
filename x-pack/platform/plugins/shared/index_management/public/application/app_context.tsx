@@ -79,6 +79,7 @@ export interface AppDependencies {
     enableSemanticText: boolean;
     enforceAdaptiveAllocations: boolean;
     enableFailureStoreRetentionDisabling: boolean;
+    isServerless: boolean;
   };
   history: ScopedHistory;
   setBreadcrumbs: (type: IndexManagementBreadcrumb, additionalBreadcrumb?: EuiBreadcrumb) => void;

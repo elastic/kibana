@@ -9,7 +9,7 @@ import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
 
 export const journey = new Journey({
-  esArchives: ['x-pack/performance/es_archives/sample_data_ecommerce'],
+  esArchives: ['x-pack/performance/es_archives/sample_data_ecommerce_many_fields'],
   kbnArchives: ['x-pack/performance/kbn_archives/ecommerce_saved_search_only_dashboard'],
 })
 

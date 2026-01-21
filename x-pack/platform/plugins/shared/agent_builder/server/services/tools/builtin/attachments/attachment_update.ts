@@ -59,7 +59,19 @@ export const createAttachmentUpdateTool = ({
     // Capture version before update (attachmentManager mutates the object in place)
     const previousVersion = existing.current_version;
 
-    const updated = attachmentManager.update(attachmentId, { data, description });
+    let updated;
+    try {
+      updated = await attachmentManager.update(attachmentId, { data, description });
+    } catch (e) {
+      return {
+        results: [
+          createErrorResult({
+            message: e.message,
+            metadata: { attachment_id: attachmentId },
+          }),
+        ],
+      };
+    }
 
     if (!updated) {
       return {

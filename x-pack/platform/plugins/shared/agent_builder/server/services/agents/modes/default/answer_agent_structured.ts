@@ -79,6 +79,7 @@ export const createAnswerAgentStructured = ({
         customInstructions: configuration.answer.instructions,
         capabilities,
         initialMessages: state.initialMessages,
+        conversationTimestamp: state.conversationTimestamp,
         actions: state.mainActions,
         answerActions: state.answerActions,
         attachmentTypes,
