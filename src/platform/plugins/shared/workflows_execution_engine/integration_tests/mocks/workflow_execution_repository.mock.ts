@@ -8,7 +8,7 @@
  */
 
 import type { EsWorkflowExecution } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { TerminalExecutionStatuses } from '@kbn/workflows';
 import type { WorkflowExecutionRepository as WorkflowExecutionRepositoryType } from '../../server/repositories/workflow_execution_repository';
 
 export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecutionRepositoryType> {
@@ -125,19 +125,11 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
     spaceId: string,
     triggeredBy?: string
   ): Promise<Array<{ _source: EsWorkflowExecution; _id: string; _index: string }>> {
-    const terminalStatuses = [
-      ExecutionStatus.COMPLETED,
-      ExecutionStatus.FAILED,
-      ExecutionStatus.CANCELLED,
-      ExecutionStatus.SKIPPED,
-      ExecutionStatus.TIMED_OUT,
-    ];
-
     let results = Array.from(this.workflowExecutions.values()).filter(
       (exec) =>
         exec.workflowId === workflowId &&
         exec.spaceId === spaceId &&
-        !terminalStatuses.includes(exec.status)
+        !TerminalExecutionStatuses.includes(exec.status)
     );
 
     if (triggeredBy) {
