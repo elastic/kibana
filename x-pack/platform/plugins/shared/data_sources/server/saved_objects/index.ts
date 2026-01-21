@@ -41,10 +41,10 @@ export const dataSourceSchemaV2 = schema.object({
   config: schema.object({}),
   createdAt: schema.string(),
   updatedAt: schema.string(),
-  features: schema.maybe(schema.arrayOf(schema.string())),
-  workflowIds: schema.arrayOf(schema.string()),
-  toolIds: schema.arrayOf(schema.string()),
-  kscIds: schema.arrayOf(schema.string()),
+  features: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
+  workflowIds: schema.arrayOf(schema.string(), { maxSize: 50 }),
+  toolIds: schema.arrayOf(schema.string(), { maxSize: 100 }),
+  kscIds: schema.arrayOf(schema.string(), { maxSize: 10 }),
 });
 
 export const dataSourceMappings: SavedObjectsTypeMappingDefinition = {
