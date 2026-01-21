@@ -11,27 +11,27 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AIFeatures } from '../../hooks/use_ai_features';
-import { useStreamFeaturesApi } from '../../hooks/use_stream_features_api';
+import { useStreamSystemsApi } from '../../hooks/use_stream_systems_api';
 import { useTaskPolling } from '../../hooks/use_task_polling';
-import { StreamFeaturesFlyout } from '../stream_detail_features/stream_features/stream_features_flyout';
+import { StreamSystemsFlyout } from '../stream_detail_systems/stream_systems/stream_systems_flyout';
 import { ConnectorListButton } from '../connector_list_button/connector_list_button';
 
-interface FeatureIdentificationControlProps {
+interface SystemIdentificationControlProps {
   definition: Streams.all.Definition;
-  refreshFeatures: () => void;
+  refreshSystems: () => void;
   aiFeatures: AIFeatures | null;
   disabled?: boolean;
 }
 
-export function FeatureIdentificationControl({
+export function SystemIdentificationControl({
   definition,
-  refreshFeatures,
+  refreshSystems,
   aiFeatures,
   disabled = false,
-}: FeatureIdentificationControlProps) {
+}: SystemIdentificationControlProps) {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
-  const [features, setFeatures] = useState<System[]>([]);
+  const [systems, setSystems] = useState<System[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const {
@@ -39,7 +39,7 @@ export function FeatureIdentificationControl({
     scheduleSystemIdentificationTask,
     cancelSystemIdentificationTask,
     acknowledgeSystemIdentificationTask,
-  } = useStreamFeaturesApi(definition);
+  } = useStreamSystemsApi(definition);
 
   const [{ loading, value: task, error }, getTask] = useAsyncFn(getSystemIdentificationStatus);
   useEffect(() => {
@@ -48,18 +48,18 @@ export function FeatureIdentificationControl({
   useTaskPolling(task, getSystemIdentificationStatus, getTask);
 
   const flyout = isFlyoutVisible && (
-    <StreamFeaturesFlyout
+    <StreamSystemsFlyout
       definition={definition}
-      features={features}
-      setFeatures={setFeatures}
+      systems={systems}
+      setSystems={setSystems}
       closeFlyout={() => {
         setIsFlyoutVisible(false);
       }}
-      onFeaturesAdded={() => {
+      onSystemsAdded={() => {
         setIsFlyoutVisible(false);
-        acknowledgeSystemIdentificationTask().then(getTask).then(refreshFeatures);
+        acknowledgeSystemIdentificationTask().then(getTask).then(refreshSystems);
       }}
-      onFeaturesDiscarded={() => {
+      onSystemsDiscarded={() => {
         setIsFlyoutVisible(false);
         acknowledgeSystemIdentificationTask().then(getTask);
       }}
@@ -71,8 +71,8 @@ export function FeatureIdentificationControl({
       <EuiCallOut
         announceOnMount
         title={i18n.translate(
-          'xpack.streams.streamDetailView.featureIdentificationLoadingTaskFailedLabel',
-          { defaultMessage: 'Failed to load feature identification task status' }
+          'xpack.streams.streamDetailView.systemIdentificationLoadingTaskFailedLabel',
+          { defaultMessage: 'Failed to load system identification task status' }
         )}
         color="danger"
         iconType="error"
@@ -102,13 +102,10 @@ export function FeatureIdentificationControl({
             }
           );
         },
-        'data-test-subj': 'feature_identification_identify_features_button',
-        children: i18n.translate(
-          'xpack.streams.streamDetailView.featureIdentificationButtonLabel',
-          {
-            defaultMessage: 'Identify features',
-          }
-        ),
+        'data-test-subj': 'system_identification_identify_systems_button',
+        children: i18n.translate('xpack.streams.streamDetailView.systemIdentificationButtonLabel', {
+          defaultMessage: 'Identify systems',
+        }),
       }}
     />
   );
@@ -129,19 +126,19 @@ export function FeatureIdentificationControl({
             iconType="sparkle"
             iconSide="right"
             isLoading={true}
-            data-test-subj="feature_identification_identify_features_button"
+            data-test-subj="system_identification_identify_systems_button"
           >
             {i18n.translate(
-              'xpack.streams.streamDetailView.featureIdentificationButtonInProgressLabel',
+              'xpack.streams.streamDetailView.systemIdentificationButtonInProgressLabel',
               {
-                defaultMessage: 'Feature identification in progress',
+                defaultMessage: 'System identification in progress',
               }
             )}
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiButtonEmpty
-            data-test-subj="feature_identification_cancel_feature_identification_button"
+            data-test-subj="system_identification_cancel_system_identification_button"
             onClick={() => {
               cancelSystemIdentificationTask().then(() => {
                 getTask();
@@ -149,7 +146,7 @@ export function FeatureIdentificationControl({
             }}
           >
             {i18n.translate(
-              'xpack.streams.streamDetailView.cancelFeatureIdentificationButtonLabel',
+              'xpack.streams.streamDetailView.cancelSystemIdentificationButtonLabel',
               {
                 defaultMessage: 'Cancel',
               }
@@ -169,11 +166,11 @@ export function FeatureIdentificationControl({
           iconSide: 'right',
           isDisabled: true,
           isLoading: true,
-          'data-test-subj': 'feature_identification_identify_features_button',
+          'data-test-subj': 'system_identification_identify_systems_button',
           children: i18n.translate(
-            'xpack.streams.streamDetailView.featureIdentificationButtonCancellingLabel',
+            'xpack.streams.streamDetailView.systemIdentificationButtonCancellingLabel',
             {
-              defaultMessage: 'Canceling feature identification task',
+              defaultMessage: 'Canceling system identification task',
             }
           ),
         }}
@@ -189,8 +186,8 @@ export function FeatureIdentificationControl({
           <EuiFlexItem>
             <EuiCallOut
               announceOnMount
-              title={i18n.translate('xpack.streams.streamDetailView.noFeaturesIdentifiedTitle', {
-                defaultMessage: 'No features identified',
+              title={i18n.translate('xpack.streams.streamDetailView.noSystemsIdentifiedTitle', {
+                defaultMessage: 'No systems identified',
               })}
               color="primary"
               iconType="search"
@@ -198,9 +195,9 @@ export function FeatureIdentificationControl({
                 acknowledgeSystemIdentificationTask().then(getTask);
               }}
             >
-              {i18n.translate('xpack.streams.streamDetailView.noFeaturesIdentifiedDescription', {
+              {i18n.translate('xpack.streams.streamDetailView.noSystemsIdentifiedDescription', {
                 defaultMessage:
-                  "The feature identification task didn't find any new features in your data. You can try again with different AI connector settings or try later with new data ingested.",
+                  "The system identification task didn't find any new systems in your data. You can try again with different AI connector settings or try later with new data ingested.",
               })}
             </EuiCallOut>
           </EuiFlexItem>
@@ -212,14 +209,14 @@ export function FeatureIdentificationControl({
       <>
         <EuiButton
           onClick={() => {
-            setFeatures(task.systems);
+            setSystems(task.systems);
             setIsFlyoutVisible(true);
           }}
-          data-test-subj="feature_identification_review_features_button"
+          data-test-subj="system_identification_review_systems_button"
         >
-          {i18n.translate('xpack.streams.streamDetailView.reviewIdentifiedFeaturesButtonLabel', {
+          {i18n.translate('xpack.streams.streamDetailView.reviewIdentifiedSystemsButtonLabel', {
             defaultMessage:
-              'Review {count} identified {count, plural, one {feature} other {features}}',
+              'Review {count} identified {count, plural, one {system} other {systems}}',
             values: { count: task.systems.length },
           })}
         </EuiButton>
@@ -236,8 +233,8 @@ export function FeatureIdentificationControl({
           <EuiCallOut
             announceOnMount
             title={i18n.translate(
-              'xpack.streams.streamDetailView.featureIdentificationTaskFailedLabel',
-              { defaultMessage: 'Feature identification task failed' }
+              'xpack.streams.streamDetailView.systemIdentificationTaskFailedLabel',
+              { defaultMessage: 'System identification task failed' }
             )}
             color="danger"
             iconType="error"
@@ -257,17 +254,17 @@ export function FeatureIdentificationControl({
           <EuiCallOut
             announceOnMount
             title={i18n.translate(
-              'xpack.streams.streamDetailView.featureIdentificationTaskStaledLabel',
-              { defaultMessage: 'Feature identification task did not complete' }
+              'xpack.streams.streamDetailView.systemIdentificationTaskStaledLabel',
+              { defaultMessage: 'System identification task did not complete' }
             )}
             color="warning"
             iconType="warning"
           >
             {i18n.translate(
-              'xpack.streams.streamDetailView.featureIdentificationTaskStaledDescription',
+              'xpack.streams.streamDetailView.systemIdentificationTaskStaledDescription',
               {
                 defaultMessage:
-                  "The feature identification task didn't report its status for a prolonged period and is considered stale. Please start a new task.",
+                  "The system identification task didn't report its status for a prolonged period and is considered stale. Please start a new task.",
               }
             )}
           </EuiCallOut>
