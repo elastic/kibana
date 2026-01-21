@@ -147,15 +147,15 @@ describe('stepCreateAlertingRules', () => {
       packageInstallContext: {
         packageInfo: { name: 'not-elastic-agent' },
         archivePackage: { assets: [] },
-      savedObjectsClient: {} as any,
-      esClient: {} as any,
-      rulesClient: {} as any,
-    },
-    logger: loggingSystemMock.createLogger(),
-    request: httpServerMock.createKibanaRequest(),
-  };
+        savedObjectsClient: {} as any,
+        esClient: {} as any,
+        rulesClient: {} as any,
+      },
+      logger: loggingSystemMock.createLogger(),
+      request: httpServerMock.createKibanaRequest(),
+    };
 
-  await stepCreateAlertingRules(context as any);
+    await stepCreateAlertingRules(context as any);
 
     expect(saveKibanaAssetsRefs).not.toHaveBeenCalled();
   });
@@ -198,15 +198,15 @@ describe('stepCreateAlertingRules', () => {
             ],
           ])
         ),
-      esClient: {} as any,
-      rulesClient: {} as any,
-    },
-    logger: loggingSystemMock.createLogger(),
-    request: httpServerMock.createKibanaRequest(),
-  };
+        esClient: {} as any,
+        rulesClient: {} as any,
+      },
+      logger: loggingSystemMock.createLogger(),
+      request: httpServerMock.createKibanaRequest(),
+    };
 
-  await stepCreateAlertingRules(context as any);
-  expect(saveKibanaAssetsRefs).toHaveBeenCalledWith(
+    await stepCreateAlertingRules(context as any);
+    expect(saveKibanaAssetsRefs).toHaveBeenCalledWith(
       expect.anything(),
       'elastic_agent',
       [

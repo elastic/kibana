@@ -182,14 +182,14 @@ function getTest(
             }),
             esClient: mocks.esClient,
             savedObjectsClient: mocks.soClient,
-          logger: mocks.logger,
-          // package reinstall means we need to force transforms to reinstall
-          force: true,
-          // Undefined es references
-          esReferences: undefined,
-          // Undefined request
-          request: undefined,
-        },
+            logger: mocks.logger,
+            // package reinstall means we need to force transforms to reinstall
+            force: true,
+            // Undefined es references
+            esReferences: undefined,
+            // Undefined request
+            request: undefined,
+          },
         ],
         spyResponse: {
           installedTransforms: [
