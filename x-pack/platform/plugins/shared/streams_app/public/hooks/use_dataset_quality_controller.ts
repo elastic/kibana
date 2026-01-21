@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Streams } from '@kbn/streams-schema';
-import { useHistory } from 'react-router-dom';
 import type {
   DatasetQualityDetailsController,
   DatasetQualityView,
@@ -22,6 +21,7 @@ import { useKibana } from './use_kibana';
 import { useKbnUrlStateStorageFromRouterContext } from '../util/kbn_url_state_context';
 import type { StreamsAppLocatorParams } from '../../common/locators/streams_locator';
 import { useTimeRange } from './use_time_range';
+import { useTimeRangeUpdate } from './use_time_range_update';
 
 export const useDatasetQualityController = (
   definition: Streams.ingest.all.GetResponse,
@@ -43,30 +43,8 @@ export const useDatasetQualityController = (
   const [controller, setController] = useState<DatasetQualityDetailsController>();
   const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
 
-  const history = useHistory();
   const { rangeFrom, rangeTo } = useTimeRange();
-
-  // Function to update time in URL - reads current URL state to avoid stale closures
-  const setTime = useCallback(
-    (time: { from: string; to: string }) => {
-      // Read current URL state to ensure we don't lose other params (like pageState)
-      const searchParams = new URLSearchParams(history.location.search);
-
-      // Don't update if time is the same to avoid infinite loops
-      if (searchParams.get('rangeFrom') === time.from && searchParams.get('rangeTo') === time.to) {
-        return;
-      }
-
-      searchParams.set('rangeFrom', time.from);
-      searchParams.set('rangeTo', time.to);
-
-      history.replace({
-        ...history.location,
-        search: searchParams.toString(),
-      });
-    },
-    [history]
-  );
+  const { updateTimeRange } = useTimeRangeUpdate();
 
   const streamsUrls = useMemo(() => {
     const streamsLocator = locators.get<StreamsAppLocatorParams>(STREAMS_APP_LOCATOR_ID);
@@ -159,7 +137,7 @@ export const useDatasetQualityController = (
           updateUrlFromDatasetQualityDetailsState({
             urlStateStorageContainer,
             datasetQualityDetailsState: state,
-            setTime,
+            setTime: updateTimeRange,
           });
         }
       );
@@ -173,14 +151,13 @@ export const useDatasetQualityController = (
     getDatasetQualityDetailsController();
   }, [
     datasetQuality,
-    history,
     toasts,
     urlStateStorageContainer,
     definition,
     saveStateInUrl,
     rangeFrom,
     rangeTo,
-    setTime,
+    updateTimeRange,
     streamsRepositoryClient,
     refreshDefinition,
     streamsUrls,

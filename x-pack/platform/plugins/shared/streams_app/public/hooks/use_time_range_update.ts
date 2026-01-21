@@ -27,6 +27,16 @@ export function useTimeRangeUpdate() {
   const updateTimeRange = useCallback(
     (nextRange: TimeRange) => {
       const searchParams = new URLSearchParams(history.location.search);
+
+      // Skip update if values are the same to avoid unnecessary URL changes
+      // and potential infinite loops when used in subscriptions
+      if (
+        searchParams.get('rangeFrom') === nextRange.from &&
+        searchParams.get('rangeTo') === nextRange.to
+      ) {
+        return;
+      }
+
       searchParams.set('rangeFrom', nextRange.from);
       searchParams.set('rangeTo', nextRange.to);
       history.replace({
