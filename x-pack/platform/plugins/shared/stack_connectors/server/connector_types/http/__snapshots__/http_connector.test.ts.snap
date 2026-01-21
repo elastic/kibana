@@ -44,7 +44,6 @@ Object {
   "maxRedirects": undefined,
   "method": "POST",
   "sslOverrides": Object {},
-  "timeout": undefined,
   "url": "https://abc.def/my-endpoint",
 }
 `;
@@ -92,7 +91,6 @@ Object {
   "maxRedirects": undefined,
   "method": "POST",
   "sslOverrides": Object {},
-  "timeout": undefined,
   "url": "https://abc.def/my-endpoint",
 }
 `;
@@ -140,7 +138,6 @@ Object {
   "maxRedirects": undefined,
   "method": "POST",
   "sslOverrides": Object {},
-  "timeout": undefined,
   "url": "https://abc.def/my-endpoint",
 }
 `;

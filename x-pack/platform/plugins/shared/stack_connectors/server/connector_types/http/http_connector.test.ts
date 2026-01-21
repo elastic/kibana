@@ -453,16 +453,6 @@ describe('params validation', () => {
     });
   });
 
-  test('params validation passes when timeout is provided', () => {
-    const params: Record<string, any> = {
-      timeout: 5000,
-    };
-    expect(validateParams(connectorType, params, { configurationUtilities })).toEqual({
-      method: 'GET',
-      ...params,
-    });
-  });
-
   test('params validation passes when fetcher options are provided', () => {
     const params: Record<string, any> = {
       fetcher: {
@@ -1126,38 +1116,6 @@ describe('execute()', () => {
     });
 
     expect(requestMock.mock.calls[0][0].keepAlive).toBe(true);
-  });
-
-  test('execute handles timeout', async () => {
-    const config = {
-      url: 'https://abc.def',
-      authType: AuthType.Basic,
-      hasAuth: true,
-    } as ConnectorTypeConfigType;
-    await connectorType.executor?.({
-      actionId: 'some-id',
-      services,
-      config,
-      secrets: {
-        user: 'abc',
-        password: '123',
-        key: null,
-        crt: null,
-        pfx: null,
-        clientSecret: null,
-        secretHeaders: null,
-      },
-      params: {
-        method: 'POST',
-        path: '/my-endpoint',
-        timeout: 5000,
-      },
-      configurationUtilities,
-      logger: mockedLogger,
-      connectorUsageCollector,
-    });
-
-    expect(requestMock.mock.calls[0][0].timeout).toBe(5000);
   });
 
   test('execute returns response with status, statusText, headers, and data', async () => {

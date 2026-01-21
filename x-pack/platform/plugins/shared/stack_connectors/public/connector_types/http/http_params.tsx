@@ -12,7 +12,6 @@ import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/
 import {
   EuiButton,
   EuiButtonIcon,
-  EuiFieldNumber,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -45,7 +44,7 @@ const HttpParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTy
   messageVariables,
   errors,
 }) => {
-  const { path, method = 'GET', body, query, headers, timeout } = actionParams;
+  const { path, method = 'GET', body, query, headers } = actionParams;
 
   const [queryParams, setQueryParams] = useState<KeyValuePair[]>(() => {
     if (!query) return [{ key: '', value: '' }];
@@ -348,30 +347,6 @@ const HttpParamsFields: React.FunctionComponent<ActionParamsProps<ActionParamsTy
           </EuiFlexItem>
         </EuiFlexGroup>
       ))}
-
-      <EuiSpacer size="m" />
-
-      <EuiFormRow
-        label={i18n.translate('xpack.stackConnectors.components.http.timeoutFieldLabel', {
-          defaultMessage: 'Timeout (seconds)',
-        })}
-        fullWidth
-        error={errors.timeout as string}
-        isInvalid={Boolean(errors.timeout?.length)}
-      >
-        <EuiFieldNumber
-          isInvalid={Boolean(errors.timeout?.length)}
-          fullWidth
-          value={timeout || ''}
-          onChange={(e) => {
-            const value = e.target.value ? Number(e.target.value) : undefined;
-            editAction('timeout', value && value > 0 ? value : undefined, index);
-          }}
-          placeholder="30"
-          min={1}
-          data-test-subj="httpTimeoutInput"
-        />
-      </EuiFormRow>
     </>
   );
 };
