@@ -388,7 +388,7 @@ export interface ValidationErrors {
   };
   invalidMapParameterValueType: {
     message: string;
-    type: { paramName: string; expectedTypes: string; actualType: string };
+    type: { paramName: string; expectedType: string; actualType: string };
   };
 }
 

@@ -418,10 +418,10 @@ Expected one of:
       return {
         message: i18n.translate('kbn-esql-language.esql.validation.invalidMapParameterValueType', {
           defaultMessage:
-            'Invalid type for parameter "{paramName}". Expected types: {expectedTypes}. Received {actualType}.',
+            'Invalid type for parameter "{paramName}". Expected type: {expectedType}. Received {actualType}.',
           values: {
             paramName: out.paramName,
-            expectedTypes: out.expectedTypes,
+            expectedType: out.expectedType,
             actualType: out.actualType,
           },
         }),
