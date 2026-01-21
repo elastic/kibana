@@ -109,6 +109,7 @@ const upsertQueryRoute = createServerRoute({
       kql: {
         query: body.kql.query,
       },
+      esql: body.esql,
       severity_score: body.severity_score,
       evidence: body.evidence,
     });

@@ -106,7 +106,7 @@ function toQueryLink<TQueryLink extends QueryLinkRequest>(
 type QueryLinkStorageFields = Omit<QueryLink, 'query' | 'stream_name'> & {
   [QUERY_TITLE]: string;
   [QUERY_KQL_BODY]: string;
-  [QUERY_ESQL_WHERE]?: string;
+  [QUERY_ESQL_WHERE]: string;
   [QUERY_SEVERITY_SCORE]?: number;
 };
 
@@ -144,11 +144,9 @@ function fromStorage(link: StoredQueryLink): QueryLink {
       kql: {
         query: storageFields[QUERY_KQL_BODY],
       },
-      esql: storageFields[QUERY_ESQL_WHERE]
-        ? {
-            where: storageFields[QUERY_ESQL_WHERE],
-          }
-        : undefined,
+      esql: {
+        where: storageFields[QUERY_ESQL_WHERE],
+      },
       feature: storageFields[QUERY_FEATURE_NAME]
         ? {
             name: storageFields[QUERY_FEATURE_NAME],

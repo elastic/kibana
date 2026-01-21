@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { StreamQueryKql, Streams, System } from '@kbn/streams-schema';
+import type { StreamQuery, Streams, System } from '@kbn/streams-schema';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDebounceFn } from '@kbn/react-hooks';
 import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar/uncontrolled_streams_app_bar';
@@ -28,10 +28,10 @@ import { ALL_DATA_OPTION } from '../../system_selector';
 
 interface Props {
   definition: Streams.all.Definition;
-  query: StreamQueryKql;
+  query: StreamQuery;
   isSubmitting: boolean;
   isEditMode: boolean;
-  setQuery: (query: StreamQueryKql) => void;
+  setQuery: (query: StreamQuery) => void;
   setCanSave: (canSave: boolean) => void;
   systems: System[];
   dataViews: DataView[];
@@ -67,7 +67,7 @@ export function ManualFlowForm({
 
   // Create a query object with debounced KQL for the preview chart
   const debouncedQuery = useMemo(
-    (): StreamQueryKql => ({
+    (): StreamQuery => ({
       ...query,
       kql: { query: debouncedKqlQuery },
     }),

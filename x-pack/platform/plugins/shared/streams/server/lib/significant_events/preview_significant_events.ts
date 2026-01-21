@@ -7,11 +7,7 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
-import type {
-  SignificantEventsPreviewResponse,
-  StreamQueryKql,
-  Streams,
-} from '@kbn/streams-schema';
+import type { SignificantEventsPreviewResponse, StreamQuery, Streams } from '@kbn/streams-schema';
 import { getIndexPatternsForStream } from '@kbn/streams-schema';
 import type { InferSearchResponseOf } from '@kbn/es-types';
 import { notFound } from '@hapi/boom';
@@ -19,7 +15,7 @@ import type { ChangePointType } from '@kbn/es-types/src';
 import type { Condition } from '@kbn/streamlang';
 import { conditionToQueryDsl } from '@kbn/streamlang';
 
-type PreviewStreamQuery = Pick<StreamQueryKql, 'kql' | 'feature'>;
+type PreviewStreamQuery = Pick<StreamQuery, 'kql' | 'feature'>;
 
 function createSearchRequest({
   from,

@@ -7,7 +7,7 @@
 
 import { useAbortController } from '@kbn/react-hooks';
 import type {
-  StreamQueryKql,
+  StreamQuery,
   System,
   SignificantEventsQueriesGenerationTaskResult,
 } from '@kbn/streams-schema';
@@ -15,7 +15,7 @@ import { useKibana } from './use_kibana';
 import { getLast24HoursTimeRange } from '../util/time_range';
 
 interface SignificantEventsApiBulkOperationCreate {
-  index: StreamQueryKql;
+  index: StreamQuery;
 }
 interface SignificantEventsApiBulkOperationDelete {
   delete: { id: string };
@@ -26,7 +26,7 @@ type SignificantEventsApiBulkOperation =
   | SignificantEventsApiBulkOperationDelete;
 
 interface SignificantEventsApi {
-  upsertQuery: (query: StreamQueryKql) => Promise<void>;
+  upsertQuery: (query: StreamQuery) => Promise<void>;
   removeQuery: (id: string) => Promise<void>;
   bulk: (operations: SignificantEventsApiBulkOperation[]) => Promise<void>;
   abort: () => void;

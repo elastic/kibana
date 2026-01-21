@@ -18,7 +18,7 @@ interface StreamQueryBase {
   title: string;
 }
 
-export interface StreamQueryKql extends StreamQueryBase {
+export interface StreamQuery extends StreamQueryBase {
   /**
    * @deprecated Use esql.where instead. Will be removed in a future version.
    */
@@ -37,7 +37,7 @@ export interface StreamQueryKql extends StreamQueryBase {
    * ESQL-based query condition. Contains the WHERE clause condition
    * that combines the KQL query with the feature filter.
    */
-  esql?: {
+  esql: {
     where: string;
   };
   // from 0 to 100. aligned with anomaly detection scoring
@@ -45,14 +45,12 @@ export interface StreamQueryKql extends StreamQueryBase {
   evidence?: string[];
 }
 
-export type StreamQuery = StreamQueryKql;
-
 const streamQueryBaseSchema: z.Schema<StreamQueryBase> = z.object({
   id: NonEmptyString,
   title: NonEmptyString,
 });
 
-export const streamQueryKqlSchema: z.Schema<StreamQueryKql> = z.intersection(
+export const streamQueryKqlSchema: z.Schema<StreamQuery> = z.intersection(
   streamQueryBaseSchema,
   z.object({
     feature: z
@@ -65,11 +63,9 @@ export const streamQueryKqlSchema: z.Schema<StreamQueryKql> = z.intersection(
     kql: z.object({
       query: z.string(),
     }),
-    esql: z
-      .object({
-        where: z.string(),
-      })
-      .optional(),
+    esql: z.object({
+      where: z.string(),
+    }),
     severity_score: z.number().optional(),
     evidence: z.array(z.string()).optional(),
   })
@@ -93,13 +89,11 @@ export const upsertStreamQueryRequestSchema = z.object({
   kql: z.object({
     query: z.string(),
   }),
-  esql: z
-    .object({
-      where: z.string(),
-    })
-    .optional(),
+  esql: z.object({
+    where: z.string(),
+  }),
   severity_score: z.number().optional(),
   evidence: z.array(z.string()).optional(),
 });
 
-export const isStreamQueryKql = createIsNarrowSchema(streamQuerySchema, streamQueryKqlSchema);
+export const isStreamQuery = createIsNarrowSchema(streamQuerySchema, streamQueryKqlSchema);

@@ -7,7 +7,7 @@
 import { niceTimeFormatter } from '@elastic/charts';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Streams, StreamQueryKql, System } from '@kbn/streams-schema';
+import type { Streams, StreamQuery, System } from '@kbn/streams-schema';
 import type { TimeRange } from '@kbn/es-query';
 import { compact, isEqual } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -59,7 +59,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const [initialFlow, setInitialFlow] = useState<Flow | undefined>('ai');
 
   const [selectedSystems, setSelectedSystems] = useState<System[]>([]);
-  const [queryToEdit, setQueryToEdit] = useState<StreamQueryKql | undefined>();
+  const [queryToEdit, setQueryToEdit] = useState<StreamQuery | undefined>();
   const [dateRange, setDateRange] = useState<TimeRange>(timeState.timeRange);
 
   useEffect(() => {

@@ -7,7 +7,7 @@
 
 import type { EuiThemeComputed } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { StreamQueryKql } from '@kbn/streams-schema';
+import type { StreamQuery } from '@kbn/streams-schema';
 import type { $Values } from 'utility-types';
 import type { SignificantEventItem } from '../../../hooks/use_fetch_significant_events';
 import { pValueToLabel } from './p_value_to_label';
@@ -19,7 +19,7 @@ type EuiThemeColor = $Values<{
 }>;
 
 export interface FormattedChangePoint {
-  query: StreamQueryKql;
+  query: StreamQuery;
   time: number;
   impact: 'high' | 'medium' | 'low';
   p_value: number;
