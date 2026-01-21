@@ -15,6 +15,7 @@ import {
   parseMapParams,
 } from '../../definitions/utils/autocomplete/map_expression';
 import { settings } from '../../definitions/generated/settings';
+import { confidenceLevelValueItems, numOfRowsValueItems } from '../complete_items';
 
 const getProjectRoutingCommonCompletionItems = (): ISuggestionItem[] => {
   return [
@@ -82,6 +83,8 @@ const getApproximateCompletionItems = (
   if (isMap(settingRightSide)) {
     const approximateSetting = settings.find((s) => s.name === 'approximate') as ApproximateSetting;
     const availableParameters = parseMapParams(approximateSetting?.mapParams || '');
+    availableParameters.confidence_level.suggestions = confidenceLevelValueItems;
+    availableParameters.num_rows.suggestions = numOfRowsValueItems;
     return getCommandMapExpressionSuggestions(innerText, availableParameters);
   }
   return [

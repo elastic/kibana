@@ -418,6 +418,73 @@ export const rlikePatternItems: ISuggestionItem[] = [
   },
 ];
 
+export const confidenceLevelValueItems: ISuggestionItem[] = [
+  {
+    label: 'High precision',
+    text: '0.99',
+    kind: 'Value',
+    detail: i18n.translate(
+      'kbn-esql-language.esql.autocomplete.set.approximate.highPrecisionDetail',
+      {
+        defaultMessage: 'High precision (99%)',
+      }
+    ),
+    category: SuggestionCategory.CONSTANT_VALUE,
+  },
+  {
+    label: 'Standard',
+    text: '0.95',
+    kind: 'Value',
+    detail: i18n.translate(
+      'kbn-esql-language.esql.autocomplete.set.approximate.standardPrecisionDetail',
+      {
+        defaultMessage: 'Standard (95%)',
+      }
+    ),
+    category: SuggestionCategory.CONSTANT_VALUE,
+  },
+  {
+    label: 'Exploratory',
+    text: '0.9',
+    kind: 'Value',
+    detail: i18n.translate(
+      'kbn-esql-language.esql.autocomplete.set.approximate.exploratoryPrecisionDetail',
+      {
+        defaultMessage: 'Exploratory (90%)',
+      }
+    ),
+  },
+];
+
+export const numOfRowsValueItems: ISuggestionItem[] = [
+  {
+    label: '100K rows',
+    text: '100000',
+    kind: 'Value',
+    detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.approximate.rows100KDetail', {
+      defaultMessage: 'Return up to 100,000 rows',
+    }),
+    category: SuggestionCategory.CONSTANT_VALUE,
+  },
+  {
+    label: '500K rows',
+    text: '500000',
+    kind: 'Value',
+    detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.approximate.rows500KDetail', {
+      defaultMessage: 'Return up to 500,000 rows',
+    }),
+    category: SuggestionCategory.CONSTANT_VALUE,
+  },
+  {
+    label: '1M rows',
+    text: '1000000',
+    kind: 'Value',
+    detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.approximate.rows1MDetail', {
+      defaultMessage: 'Return up to 1,000,000 rows',
+    }),
+  },
+];
+
 export const getCommandAutocompleteDefinitions = (commands: string[]): ISuggestionItem[] => {
   const suggestions: ISuggestionItem[] = [];
 
