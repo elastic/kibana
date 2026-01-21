@@ -34,6 +34,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         `--plugin-path=${userProfilesConsumerPlugin}`,
+        `--logging.loggers=${JSON.stringify([
+          {
+            name: 'plugins.security',
+            level: 'debug',
+          },
+        ])}`,
       ],
     },
   };

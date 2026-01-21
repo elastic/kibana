@@ -149,14 +149,20 @@ export class UserProfileService {
     let activationRetriesLeft = ACTIVATION_MAX_RETRIES;
     do {
       try {
-        const response = await clusterClient.asInternalUser.security.activateUserProfile(
-          activateRequest
-        );
+        console.log(`***** activateRequest: ${JSON.stringify(activateRequest)}`);
+        const response = await clusterClient.asInternalUser.security.activateUserProfile({
+          ...activateRequest,
+          // querystring: { data: prefixCommaSeparatedValues('*', KIBANA_DATA_ROOT) },
+        });
 
         this.logger.debug(`Successfully activated profile for "${response.user.username}".`);
 
+        console.log(`***** activate RAW USER PROFILE: ${JSON.stringify(response)}`);
+
         return parseUserProfileWithSecurity<{}>(response);
       } catch (err) {
+        console.log(`***** err: ${err.toString()}`);
+
         const detailedErrorMessage = getDetailedErrorMessage(err);
         const statusCode = getErrorStatusCode(err);
         // Retry on 409 (conflict) and 503 (service unavailable) errors
@@ -195,47 +201,150 @@ export class UserProfileService {
     session: PublicMethodsOf<Session>,
     { request, dataPath }: UserProfileGetCurrentParams
   ) {
-    let userSession;
-    try {
-      userSession = await session.get(request);
-    } catch (error) {
-      this.logger.error(`Failed to retrieve user session: ${getDetailedErrorMessage(error)}`);
-      throw error;
-    }
-
-    if (userSession.error) {
+    // === UNAUTHENTICATED REQUEST ====================================================================
+    // If the request is not authenticated, then this function should not attempt to return a profile.
+    if (request.auth.isAuthenticated === false) {
+      this.logger.debug('Request is not authenticated, returning null for current user profile.');
       return null;
     }
 
-    if (!userSession.value.userProfileId) {
-      this.logger.debug(
-        `User profile missing from the current session [sid=${getPrintableSessionId(
-          userSession.value.sid
-        )}].`
-      );
+    let profileId: string | undefined;
+    let userSession;
+
+    const hasCookieHeader =
+      (request.headers.cookie || request.headers.Cookie || request.headers.COOKIE) !== undefined;
+
+    const authHeader =
+      request.headers.Authorization ||
+      request.headers.authorization ||
+      request.headers.AUTHORIZATION;
+
+    // console.log(`***** request: ${JSON.stringify(request, null, 2)}`);
+    // console.log(`***** request.headers: ${JSON.stringify(request.headers, null, 2)}`);
+    console.log(`***** has cookie header: ${hasCookieHeader}`);
+    console.log(`***** authHeader: ${authHeader}`);
+
+    // === SESSION =======================================================================================
+    // If the request is associated with a session (no authc header), then the current logic will suffice.
+    if (hasCookieHeader) {
+      try {
+        userSession = await session.get(request);
+      } catch (error) {
+        this.logger.error(`Failed to retrieve user session: ${getDetailedErrorMessage(error)}`);
+        throw error;
+      }
+
+      // ToDo: what is the execution flow with anonymous access?
+      // export enum SessionErrorReason {
+      //   'SESSION_MISSING' = 'SESSION_MISSING',
+      //   'SESSION_EXPIRED' = 'SESSION_EXPIRED',
+      //   'CONCURRENCY_LIMIT' = 'CONCURRENCY_LIMIT',
+      //   'UNEXPECTED_SESSION_ERROR' = 'UNEXPECTED_SESSION_ERROR',
+      // }
+
+      if (userSession.error) {
+        console.log(`***** User session error: ${userSession.error.message}`);
+        return null;
+      }
+
+      profileId = userSession.value.userProfileId;
+
+      if (!profileId) {
+        this.logger.debug(
+          `User profile missing from the current session [sid=${getPrintableSessionId(
+            userSession.value.sid
+          )}].`
+        );
+        console.log(`***** User profile missing`);
+        return null;
+      }
+    }
+
+    // === NON SESSION =================================================================================
+    // If the request is authenticated with an 'Authorization' header (and therefore not a session), then:
+    else if (authHeader && typeof authHeader === 'string') {
+      // Determine if it is basic or API key...
+      const isBasicAuth = authHeader.trim().toLowerCase().startsWith('basic ');
+      const isApiKeyAuth = authHeader.trim().toLowerCase().startsWith('apikey ');
+
+      // === BASIC AUTHC ================================================================================
+      // Requests authenticated via Basic auth need to have their profile activated. We can then return
+      // the profile from the activation call.
+      if (isBasicAuth) {
+        this.logger.debug('Request is authenticated via Basic auth, activating user profile...');
+        const base64Credentials = authHeader.trim().substring('basic '.length);
+        const credentials = Buffer.from(base64Credentials, 'base64').toString().split(':');
+        console.log(`***** credentials: ${JSON.stringify(credentials)}`);
+        const username = credentials[0] || '';
+        const password = credentials[1] || '';
+
+        // ToDo: figure out how to filter dataPath on activate
+        const activatedProfile = await this.activate(clusterClient, {
+          type: 'password',
+          username,
+          password,
+        }); // ToDo: catch and wrap error?
+
+        profileId = activatedProfile.uid;
+      }
+
+      // === API KEY ======================================================================================
+      // Requests authenticated via ApiKey need to have their profile id retrieved from the API Key itself.
+      // Using an ES Client scoped with the ApiKey credentials, we can call
+      // /_security/api_key?with_profile_uid=true to retrieve the profile id associated with the API Key.
+      // Important: This step may fail, or may succeed but not return a profile id. We will need to
+      // gracefully handle both of these scenarios.
+      else if (isApiKeyAuth) {
+        this.logger.debug(
+          'Request is authenticated via API key, getting the profile ID for the API key...'
+        );
+
+        try {
+          const response = await clusterClient.asScoped(request).asCurrentUser.security.getApiKey({
+            with_profile_uid: true,
+          });
+
+          if (response.api_keys && response.api_keys.length > 0) {
+            profileId = response.api_keys[0].profile_uid;
+          }
+        } catch (error) {
+          console.log(`***** API key error: ${JSON.stringify(error)}`);
+          this.logger.error(
+            `Failed to retrieve API key for user profile retrieval: ${getDetailedErrorMessage(
+              error
+            )}`
+          );
+          // throw error; // Gracefully return null instead of throwing
+        }
+      }
+    }
+
+    // === GET THE PROFILE ===============================================================================
+    if (!profileId) {
       return null;
     }
 
     let body;
+    console.log(`***** dataPath: ${dataPath}`);
     try {
       body = await clusterClient.asInternalUser.security.getUserProfile({
-        uid: userSession.value.userProfileId,
+        uid: profileId,
         data: dataPath ? prefixCommaSeparatedValues(dataPath, KIBANA_DATA_ROOT) : undefined,
       });
     } catch (error) {
       this.logger.error(
-        `Failed to retrieve user profile for the current user [sid=${getPrintableSessionId(
-          userSession.value.sid
-        )}]: ${getDetailedErrorMessage(error)}`
+        `Failed to retrieve user profile for the current user${
+          userSession ? ` [sid=${getPrintableSessionId(userSession.value.sid)}]` : ''
+        }: ${getDetailedErrorMessage(error)}`
       );
       throw error;
     }
 
     if (body.profiles.length === 0) {
       this.logger.error(
-        `The user profile for the current user [sid=${getPrintableSessionId(
-          userSession.value.sid
-        )}] is not found.`
+        `The user profile for the current user${
+          userSession ? ` [sid=${getPrintableSessionId(userSession.value.sid)}]` : ''
+        } is not found.`
       );
       throw new Error(`User profile is not found.`);
     }
