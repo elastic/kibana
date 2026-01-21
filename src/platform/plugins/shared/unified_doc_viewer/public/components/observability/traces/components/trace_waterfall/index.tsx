@@ -90,6 +90,14 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
         title={sectionTitle}
         description={sectionTip}
         actions={[
+          {
+            icon: 'fullScreen',
+            onClick: () => setShowFullScreenWaterfall(true),
+            label: fullScreenButtonLabel,
+            ariaLabel: fullScreenButtonLabel,
+            id: actionId,
+            dataTestSubj: 'unifiedDocViewerObservabilityTracesTraceFullScreenButton',
+          },
           ...(openInDiscoverLink
             ? [
                 {
@@ -101,14 +109,6 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
                 },
               ]
             : []),
-          {
-            icon: 'fullScreen',
-            onClick: () => setShowFullScreenWaterfall(true),
-            label: fullScreenButtonLabel,
-            ariaLabel: fullScreenButtonLabel,
-            id: actionId,
-            dataTestSubj: 'unifiedDocViewerObservabilityTracesTraceFullScreenButton',
-          },
         ]}
       >
         {/* TODO: This is a workaround for layout issues when using hidePanelChrome outside of Dashboard.
