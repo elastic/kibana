@@ -30,10 +30,13 @@ interface TraceChart {
   esqlQuery: string;
 }
 
+const UNMAPPED_FIELDS_NULLIFY_SET_COMMAND = 'SET unmapped_fields="NULLIFY";';
+
 function getWhereClauses(dataSource: DataSource, filters: string[]) {
-  return [...filters, ...(dataSource === 'apm' ? [`${PROCESSOR_EVENT} == "transaction"`] : [])].map(
-    (filter) => where(filter)
-  );
+  return [
+    ...filters,
+    ...[`TO_STRING(${PROCESSOR_EVENT}) == "transaction" OR ${PROCESSOR_EVENT} IS NULL`],
+  ].map((filter) => where(filter));
 }
 
 export function getErrorRateChart({
@@ -50,13 +53,9 @@ export function getErrorRateChart({
     const esqlQuery = from(indexes)
       .pipe(
         ...whereClauses,
-        dataSource === 'apm'
-          ? stats(
-              `failure = COUNT(*) WHERE ${EVENT_OUTCOME} == "failure", all = COUNT(*)  BY timestamp = BUCKET(${AT_TIMESTAMP}, 100, ?_tstart, ?_tend)`
-            )
-          : stats(
-              `failure = COUNT(*) WHERE ${STATUS_CODE} == "Error", all = COUNT(*)  BY timestamp = BUCKET(${AT_TIMESTAMP}, 100, ?_tstart, ?_tend)`
-            ),
+        stats(
+          `failure = COUNT(*) WHERE TO_STRING(${EVENT_OUTCOME}) == "failure" OR TO_STRING(${STATUS_CODE}) == "Error", all = COUNT(*)  BY timestamp = BUCKET(${AT_TIMESTAMP}, 100, ?_tstart, ?_tend)`
+        ),
         evaluate('error_rate = TO_DOUBLE(failure) / all'),
         keep('timestamp, error_rate'),
         sort('timestamp')
@@ -71,7 +70,7 @@ export function getErrorRateChart({
       color: chartPalette[6],
       unit: 'percent',
       seriesType: 'line',
-      esqlQuery,
+      esqlQuery: `${UNMAPPED_FIELDS_NULLIFY_SET_COMMAND} ${esqlQuery}`,
     };
   } catch (error) {
     return null;
@@ -92,9 +91,9 @@ export function getLatencyChart({
     const esqlQuery = from(indexes)
       .pipe(
         ...whereClauses,
-        dataSource === 'apm'
-          ? evaluate(`duration_ms = ROUND(${TRANSACTION_DURATION})/1000`) // apm duration is in us
-          : evaluate(`duration_ms = ROUND(${DURATION})/1000/1000`), // otel duration is in ns
+        evaluate(`duration_ms_ecs = ROUND(${TRANSACTION_DURATION})/1000`), // apm duration is in us
+        evaluate(`duration_ms_otel = ROUND(${DURATION})/1000/1000`), // otel duration is in ns
+        evaluate('duration_ms = COALESCE(TO_LONG(duration_ms_ecs), TO_LONG(duration_ms_otel))'), // need to convert both to the same type to make sure the COALESCE works
         stats(`AVG(duration_ms) BY BUCKET(${AT_TIMESTAMP}, 100, ?_tstart, ?_tend)`)
       )
       .toString();
@@ -107,7 +106,7 @@ export function getLatencyChart({
       color: chartPalette[2],
       unit: 'ms',
       seriesType: 'line',
-      esqlQuery,
+      esqlQuery: `${UNMAPPED_FIELDS_NULLIFY_SET_COMMAND} ${esqlQuery}`,
     };
   } catch (error) {
     return null;
@@ -142,7 +141,7 @@ export function getThroughputChart({
       color: chartPalette[0],
       unit: 'count',
       seriesType: 'line',
-      esqlQuery,
+      esqlQuery: `${UNMAPPED_FIELDS_NULLIFY_SET_COMMAND} ${esqlQuery}`,
     };
   } catch (error) {
     return null;
