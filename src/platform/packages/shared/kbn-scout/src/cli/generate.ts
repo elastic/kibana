@@ -222,7 +222,7 @@ export const generateCmd: Command<void> = {
         type: 'input',
         name: 'path',
         message:
-          'What is the relative path to the plugin or package? (e.g., x-pack/platform/plugins/shared/maps)',
+          'What is the relative path to the plugin or package? (e.g., x-pack/platform/plugins/shared/maps):',
         validate: async (input) => {
           const result = await validatePath(input);
           if (result === true) {
