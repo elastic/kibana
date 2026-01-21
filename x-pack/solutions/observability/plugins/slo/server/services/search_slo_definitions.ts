@@ -7,9 +7,46 @@
 
 import type { SearchSLODefinitionsParams, SearchSLODefinitionResponse } from '@kbn/slo-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AggregationsCompositeAggregateKey } from '@elastic/elasticsearch/lib/api/types';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { getSummaryIndices } from './utils/get_summary_indices';
 import type { SLOSettings } from '../domain/models';
+
+interface SLOSourceDocument {
+  slo?: {
+    id?: string;
+    name?: string;
+    groupBy?: unknown;
+  };
+  kibanaUrl?: string;
+}
+
+interface SLODetailsAggregation {
+  hits: {
+    hits: Array<{
+      _source?: SLOSourceDocument;
+      fields?: {
+        remoteName?: string | string[];
+      };
+    }>;
+  };
+}
+
+interface SLOBucket {
+  key: {
+    slo_id: string;
+  };
+  slo_details: SLODetailsAggregation;
+}
+
+interface SLODefinitionsAggregation {
+  after_key?: AggregationsCompositeAggregateKey;
+  buckets: SLOBucket[];
+}
+
+interface SLOSearchAggregations {
+  slo_definitions: SLODefinitionsAggregation;
+}
 
 export class SearchSLODefinitions {
   constructor(
@@ -24,28 +61,16 @@ export class SearchSLODefinitions {
     const { indices } = await getSummaryIndices(this.esClient, this.settings);
 
     try {
-      let afterObj: Record<string, any> | undefined;
+      let afterObj: AggregationsCompositeAggregateKey | undefined;
       if (searchAfter) {
         try {
-          afterObj = JSON.parse(searchAfter);
+          afterObj = JSON.parse(searchAfter) as AggregationsCompositeAggregateKey;
         } catch (e) {
           // ignore parse errors, treat as no after
         }
       }
 
-      const filters: Array<Record<string, any>> = [{ term: { spaceId: this.spaceId } }];
-      if (search) {
-        filters.push({
-          simple_query_string: {
-            query: search,
-            fields: ['slo.name^3', 'slo.description^2', 'slo.tags'],
-            default_operator: 'AND' as const,
-            analyze_wildcard: true,
-          },
-        });
-      }
-
-      const response = await this.esClient.search<{ slo?: any; remote?: any }>({
+      const response = await this.esClient.search<SLOSourceDocument, SLOSearchAggregations>({
         index: indices,
         size: 0,
         runtime_mappings: {
@@ -66,7 +91,21 @@ export class SearchSLODefinitions {
         },
         query: {
           bool: {
-            filter: filters,
+            filter: [
+              { term: { spaceId: this.spaceId } },
+              ...(search
+                ? [
+                    {
+                      simple_query_string: {
+                        query: search,
+                        fields: ['slo.name^3', 'slo.description^2', 'slo.tags'],
+                        default_operator: 'AND' as const,
+                        analyze_wildcard: true,
+                      },
+                    },
+                  ]
+                : []),
+            ],
           },
         },
         aggs: {
@@ -96,12 +135,9 @@ export class SearchSLODefinitions {
         },
       });
 
-      const buckets =
-        response.aggregations && (response.aggregations as any).slo_definitions
-          ? (response.aggregations as any).slo_definitions.buckets
-          : [];
+      const buckets = response.aggregations?.slo_definitions?.buckets ?? [];
 
-      const results = buckets.map((bucket: any) => {
+      const results = buckets.map((bucket) => {
         const hit = bucket.slo_details.hits.hits[0];
         const sloSrc = hit?._source?.slo ?? {};
         const kibanaUrl = hit?._source?.kibanaUrl;
@@ -118,7 +154,7 @@ export class SearchSLODefinitions {
           groupBy: string[];
           remote?: { remoteName: string; kibanaUrl: string };
         } = {
-          id: sloSrc.id ?? bucket.key,
+          id: sloSrc.id ?? bucket.key.slo_id,
           name: sloSrc.name ?? '',
           groupBy,
         };
@@ -130,10 +166,7 @@ export class SearchSLODefinitions {
         return item;
       });
 
-      const afterKey =
-        response.aggregations && (response.aggregations as any).slo_definitions
-          ? (response.aggregations as any).slo_definitions.after_key
-          : undefined;
+      const afterKey = response.aggregations?.slo_definitions?.after_key;
 
       return {
         results,
