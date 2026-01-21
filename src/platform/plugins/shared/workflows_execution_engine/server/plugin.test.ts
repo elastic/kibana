@@ -13,7 +13,11 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import {
+  ExecutionStatus,
+  NonTerminalExecutionStatuses,
+  TerminalExecutionStatuses,
+} from '@kbn/workflows';
 import { checkAndSkipIfExistingScheduledExecution } from './execution_functions';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../common';
@@ -106,27 +110,20 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         index: WORKFLOWS_EXECUTIONS_INDEX,
         query: {
           bool: {
-            must: [
+            filter: [
               { term: { workflowId: workflow.id } },
               { term: { spaceId } },
-              { term: { triggeredBy: 'scheduled' } },
-            ],
-            must_not: [
               {
                 terms: {
-                  status: [
-                    ExecutionStatus.COMPLETED,
-                    ExecutionStatus.FAILED,
-                    ExecutionStatus.CANCELLED,
-                    ExecutionStatus.SKIPPED,
-                    ExecutionStatus.TIMED_OUT,
-                  ],
+                  status: NonTerminalExecutionStatuses,
                 },
               },
+              { term: { triggeredBy: 'scheduled' } },
             ],
           },
         },
         size: 1,
+        terminate_after: 1,
       });
       expect(esClient.index).not.toHaveBeenCalled();
       expect(logger.info).not.toHaveBeenCalled();
@@ -167,7 +164,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
       expect(esClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
           index: WORKFLOWS_EXECUTIONS_INDEX,
-          refresh: true,
+          refresh: false,
           id: expect.any(String),
           document: expect.objectContaining({
             spaceId,
