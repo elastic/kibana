@@ -10,7 +10,6 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { BulkDeleteTask, TYPE, type BulkDeleteTaskState } from './bulk_delete_task';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../saved_objects';
-import type { DataSourceAttributes } from '../saved_objects';
 import { deleteDataSourceAndRelatedResources } from '../routes/data_sources_helpers';
 import { createToolRegistryMock } from '@kbn/agent-builder-plugin/server/test_utils/tools';
 
@@ -157,7 +156,7 @@ describe('BulkDeleteTask', () => {
       const { mockCoreSetup } = createMockCoreSetup();
       const mockPlugins = createMockPlugins();
 
-      const bulkDeleteTask = new BulkDeleteTask({
+      new BulkDeleteTask({
         core: mockCoreSetup as any,
         logFactory: mockLogFactory as any,
         plugins: mockPlugins,
@@ -485,7 +484,7 @@ describe('BulkDeleteTask', () => {
         const { mockCoreSetup } = createMockCoreSetup();
         const mockPlugins = createMockPlugins();
 
-        const bulkDeleteTask = new BulkDeleteTask({
+        new BulkDeleteTask({
           core: mockCoreSetup as any,
           logFactory: mockLogFactory as any,
           plugins: mockPlugins,
