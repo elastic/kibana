@@ -87,7 +87,7 @@ export class RemoveClusterButtonProvider extends Component {
 
       modal = (
         <>
-          {/* eslint-disable-next-line jsx-a11y/mouse-events-have-key-events */}
+          {}
           <EuiConfirmModal
             data-test-subj="remoteClustersDeleteConfirmModal"
             aria-labelledby={modalTitleId}

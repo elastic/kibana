@@ -241,7 +241,7 @@ describe('<RemoteClusterList />', () => {
         ],
         [
           '',
-          remoteCluster2.name.concat('Info'), //Tests include the word "info" to account for the rendered text coming from EuiIcon
+          remoteCluster2.name.concat('Info'), // Tests include the word "info" to account for the rendered text coming from EuiIcon
           'Not connected',
           PROXY_MODE,
           remoteCluster2.proxyAddress,
@@ -251,7 +251,7 @@ describe('<RemoteClusterList />', () => {
         ],
         [
           '',
-          remoteCluster3.name.concat('Info'), //Tests include the word "info" to account for the rendered text coming from EuiIcon
+          remoteCluster3.name.concat('Info'), // Tests include the word "info" to account for the rendered text coming from EuiIcon
           'Not connected',
           PROXY_MODE,
           remoteCluster2.proxyAddress,
