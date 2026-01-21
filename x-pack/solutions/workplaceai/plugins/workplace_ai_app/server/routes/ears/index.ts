@@ -5,11 +5,5 @@
  * 2.0.
  */
 
-import React from 'react';
-
-// TODO: Implement Scripts Library Page
-export const ScriptsLibraryPage = () => {
-  return <div>{'Scripts Library Page'}</div>;
-};
-
-ScriptsLibraryPage.displayName = 'ScriptsLibraryPage';
+export { registerStartOAuthRoute } from './start_oauth';
+export { registerFetchSecretsRoute } from './fetch_secrets';
