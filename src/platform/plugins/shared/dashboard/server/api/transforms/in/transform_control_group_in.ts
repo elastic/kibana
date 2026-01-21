@@ -39,9 +39,9 @@ export function transformControlGroupIn(controls?: ControlsGroupState) {
           const transformedState = transformed.state as Writable<StoredPinnedControlState>;
           if ('dataViewRefName' in transformedState) {
             transformedControlState = {
-              ...transformedState,
+              ...transformedControlState,
               explicitInput: {
-                ...transformedState.explicitInput,
+                ...(transformedState as StoredPinnedControlState['explicitInput']),
                 dataViewRefName: `${uid}:${transformedState.dataViewRefName}`,
               },
             };
