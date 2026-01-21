@@ -72,9 +72,10 @@ function convertDataLayerToAPI(
     }
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    const breakdown_by = visualization.splitAccessors
-      ? operationFromColumn(visualization.splitAccessors[0], layer) // TODO temp fix for this PR until XY API will be upgraded to support multiple splits
-      : undefined;
+    const breakdown_by =
+      visualization.splitAccessors && visualization.splitAccessors.length > 0
+        ? operationFromColumn(visualization.splitAccessors[0], layer) // TODO temp fix for this PR until XY API will be upgraded to support multiple splits
+        : undefined;
 
     if (breakdown_by && !isAPIColumnOfBucketType(breakdown_by)) {
       throw new Error('Breakdown by axis must be a bucket operation');
@@ -107,6 +108,7 @@ function convertDataLayerToAPI(
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const aggregate_first =
       visualization.splitAccessors &&
+      visualization.splitAccessors.length > 0 &&
       visualization.xAccessor &&
       layer.columnOrder[0] === visualization.splitAccessors[0]; // TODO temp fix for this PR until XY API will be upgraded to support multiple splits
     return {
@@ -130,9 +132,10 @@ function convertDataLayerToAPI(
 
   const x = visualization.xAccessor ? getValueApiColumn(visualization.xAccessor, layer) : undefined;
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const breakdown_by = visualization.splitAccessors
-    ? getValueApiColumn(visualization.splitAccessors[0], layer) // TODO temp fix for this PR until XY API will be upgraded to support multiple splits
-    : undefined;
+  const breakdown_by =
+    visualization.splitAccessors && visualization.splitAccessors.length > 0
+      ? getValueApiColumn(visualization.splitAccessors[0], layer) // TODO temp fix for this PR until XY API will be upgraded to support multiple splits
+      : undefined;
   const y = visualization.accessors?.map((accessor) => {
     const { color } = yConfigMap.get(accessor) || {};
     return {

@@ -17,7 +17,7 @@ export interface DeprecatedSplitAccessorLayer extends Omit<XYDataLayerConfig, 's
 }
 
 /**
- * Old color mapping state meant for type safety during runtime migrations of old configurations
+ * Deprecated single splitAccessor state
  *
  * @deprecated
  */

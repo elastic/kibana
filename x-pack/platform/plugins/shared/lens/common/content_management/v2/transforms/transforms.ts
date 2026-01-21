@@ -20,8 +20,6 @@ import type { LensAttributesV2, LensSavedObjectV2 } from './types';
 export function transformToV2LensItemAttributes(
   attributes: LensAttributesV1 | LensAttributesV2
 ): LensAttributesV2 {
-  // splitAccessors migration needs to run before the color mapping one due to the
-  // requirements about the splitAccessors required by the color mapping runtime convertion
   return convertToSplitAccessors(increaseVersion(attributes));
 }
 

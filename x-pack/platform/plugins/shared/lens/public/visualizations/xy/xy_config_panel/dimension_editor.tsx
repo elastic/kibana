@@ -186,7 +186,7 @@ export function DataDimensionEditor(
   }
 
   const isHorizontal = isHorizontalChart(state.layers);
-  const disabledMessage = Boolean(!layer.collapseFn && layer.splitAccessors)
+  const disabledMessage = Boolean(!layer.collapseFn && (layer.splitAccessors ?? []).length > 0)
     ? i18n.translate('xpack.lens.xyChart.colorPicker.tooltip.disabled', {
         defaultMessage:
           'You are unable to apply custom colors to individual series when the layer includes a "Break down by" field.',

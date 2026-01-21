@@ -460,7 +460,7 @@ export const getXyVisualization = ({
             isDataLayer(l) &&
             l.seriesType === dataLayer.seriesType &&
             Boolean(l.xAccessor) === Boolean(dataLayer.xAccessor) &&
-            Boolean(l.splitAccessors) === Boolean(dataLayer.splitAccessors)
+            l.splitAccessors?.length === dataLayer.splitAccessors?.length
           ) {
             const { left: localLeft, right: localRight } = groupAxesByType([l], frame.activeData);
             // return true only if matching axis are found
@@ -529,7 +529,9 @@ export const getXyVisualization = ({
             : [],
           filterOperations: isBucketed,
           // multiple breakdown are supported only in text based layers
-          supportsMoreColumns: isTextBasedLayer ? true : !dataLayer.splitAccessors,
+          supportsMoreColumns: isTextBasedLayer
+            ? true
+            : (dataLayer.splitAccessors ?? []).length === 0,
           dataTestSubj: 'lnsXY_splitDimensionPanel',
           requiredMinDimensionCount:
             dataLayer.seriesType.includes('percentage') && hasOnlyOneAccessor ? 1 : 0,
