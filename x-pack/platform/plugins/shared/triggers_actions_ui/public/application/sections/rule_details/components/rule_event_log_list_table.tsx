@@ -20,7 +20,6 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import type { IExecutionLog } from '@kbn/alerting-plugin/common';
-import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
   RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
@@ -117,13 +116,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     getRuleDetailsRoute,
   } = props;
 
-  const {
-    uiSettings,
-    notifications,
-    http,
-    application: { navigateToApp },
-    ruleTypeRegistry,
-  } = useKibana().services;
+  const { uiSettings, notifications } = useKibana().services;
 
   const [searchText, setSearchText] = useState<string>('');
   const [search, setSearch] = useState<string>('');
@@ -166,12 +159,6 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
           label: display,
         })) || []
     );
-  });
-
-  const { authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
-    http,
-    toasts: notifications.toasts,
-    filteredRuleTypes,
   });
 
   const { onShowAllSpacesChange, canAccessMultipleSpaces, namespaces, activeSpace } =

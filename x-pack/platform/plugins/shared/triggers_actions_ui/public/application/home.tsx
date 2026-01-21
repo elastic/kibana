@@ -100,7 +100,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
     ];
 
     setHeaderActions(buttons);
-    return () => setHeaderActions();
+    return () => setHeaderActions([[]]);
   }, [authorizedToCreateAnyRules, openRuleTypeModal]);
 
   const renderRulesList = useCallback(() => {

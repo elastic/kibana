@@ -17,6 +17,7 @@ import {
   getEditRuleRoute,
   getRulesAppDetailsRoute,
   rulesAppDetailsRoute,
+  getCreateRuleFromTemplateRoute,
 } from '@kbn/rule-data-utils';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { RuleTypeModal } from '@kbn/response-ops-rule-form';
@@ -92,7 +93,7 @@ const RulesPage = () => {
       <RulesListDocLink />,
     ];
     setHeaderActions(buttons);
-    return () => setHeaderActions();
+    return () => setHeaderActions([]);
   }, [authorizedToCreateAnyRules, openRuleTypeModal]);
 
   const onSectionChange = (newSection: Section) => {

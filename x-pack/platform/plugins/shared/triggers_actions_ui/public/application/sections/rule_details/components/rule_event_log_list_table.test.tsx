@@ -36,16 +36,6 @@ jest.mock('../../../hooks/use_load_rule_event_logs', () => ({
   useLoadRuleEventLogs: jest.fn(),
 }));
 
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions', () => ({
-  useGetRuleTypesPermissions: jest.fn().mockReturnValue({
-    authorizedToCreateAnyRules: true,
-  }),
-}));
-
-const { useGetRuleTypesPermissions } = jest.requireMock(
-  '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'
-);
-
 const { getIsExperimentalFeatureEnabled } = jest.requireMock(
   '../../../../common/get_experimental_features'
 );
