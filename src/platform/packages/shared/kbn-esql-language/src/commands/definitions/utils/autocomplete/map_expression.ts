@@ -23,7 +23,7 @@ export const OBJECT_KEYS_REGEX = /"([^"]+)"\s*:/g;
 // Parses mapParams format: {name='paramName', values=[val1, val2], description='param desc', type=[valuesType]}
 // Captures: [1] = param name, [2] = comma-separated values
 export const MAP_PARAMS_REGEX =
-  /\{name='([^']+)'(?:,\s*values=\[([^\]]*)\])?[^}]*(?:,\s*description='([^']+)')(?:,\s*type=\[([^\]]*)\])?[^}]*\}/g;
+  /\{name='([^']*(?:''[^']*)*)'(?:,\s*values=\[([^\]]*)\])?[^,}]*(?:,\s*description='([^']*(?:''[^']*)*)')?[^,}]*(?:,\s*type=\[([^\]]*)\])?\}/g;
 const STRIP_SINGLE_QUOTES_REGEX = /^'|'$/g;
 
 export interface MapParameterValues {

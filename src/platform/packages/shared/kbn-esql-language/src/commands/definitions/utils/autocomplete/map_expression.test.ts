@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { MapParameters } from './map_expression';
-import { getCommandMapExpressionSuggestions } from './map_expression';
+import { getCommandMapExpressionSuggestions, MAP_PARAMS_REGEX } from './map_expression';
 
 describe('getCommandMapExpressionSuggestions', () => {
   const availableParameters: MapParameters = {
@@ -177,5 +177,149 @@ describe('getCommandMapExpressionSuggestions', () => {
         expect(suggestions).toEqual([]);
       });
     });
+  });
+});
+
+describe('MAP_PARAMS_REGEX', () => {
+  const regex = MAP_PARAMS_REGEX;
+
+  it('should parse map parameters correctly', () => {
+    const input =
+      "{name='param1', values=['val1','val2'], description='This is param1', type=[string]}, {name='param2', values=['val3'], description='This is param2', type=[number]}";
+
+    const matches = Array.from(input.matchAll(regex));
+
+    expect(matches.length).toBe(2);
+
+    expect(matches[0][1]).toBe('param1');
+    expect(matches[0][2]).toBe("'val1','val2'");
+    expect(matches[0][3]).toBe('This is param1');
+    expect(matches[0][4]).toBe('string');
+
+    expect(matches[1][1]).toBe('param2');
+    expect(matches[1][2]).toBe("'val3'");
+    expect(matches[1][3]).toBe('This is param2');
+    expect(matches[1][4]).toBe('number');
+  });
+
+  it('should handle missing optional fields', () => {
+    const input = "{name='param1', description='This is param1'}";
+
+    const matches = Array.from(input.matchAll(regex));
+
+    expect(matches.length).toBe(1);
+
+    expect(matches[0][1]).toBe('param1');
+    expect(matches[0][2]).toBeUndefined();
+    expect(matches[0][3]).toBe('This is param1');
+    expect(matches[0][4]).toBeUndefined();
+  });
+
+  it('should handle descriptions with escaped apostrophes', () => {
+    const input = "{name='param1', description='It''s a great parameter', type=[string]}";
+
+    const matches = Array.from(input.matchAll(regex));
+
+    expect(matches.length).toBe(1);
+    expect(matches[0][1]).toBe('param1');
+    expect(matches[0][3]).toBe("It''s a great parameter");
+    expect(matches[0][4]).toBe('string');
+  });
+
+  it('should handle only name field', () => {
+    const input = "{name='param1'}";
+
+    const matches = Array.from(input.matchAll(regex));
+
+    expect(matches.length).toBe(1);
+    expect(matches[0][1]).toBe('param1');
+    expect(matches[0][2]).toBeUndefined();
+    expect(matches[0][3]).toBeUndefined();
+    expect(matches[0][4]).toBeUndefined();
+  });
+
+  it('should handle empty values in fields', () => {
+    const input = "{name='', values=[], description='', type=[]}";
+
+    const matches = Array.from(input.matchAll(regex));
+
+    expect(matches.length).toBe(1);
+    expect(matches[0][1]).toBe('');
+    expect(matches[0][2]).toBe('');
+    expect(matches[0][3]).toBe('');
+    expect(matches[0][4]).toBe('');
+  });
+
+  it('should handle multiple escaped apostrophes in description', () => {
+    const input =
+      "{name='param', description='This param''s value can''t be empty', type=[keyword]}";
+
+    const matches = Array.from(input.matchAll(regex));
+
+    expect(matches.length).toBe(1);
+    expect(matches[0][1]).toBe('param');
+    expect(matches[0][3]).toBe("This param''s value can''t be empty");
+    expect(matches[0][4]).toBe('keyword');
+  });
+
+  it('should handle name and type only', () => {
+    const input = "{name='param1', type=[number]}";
+
+    const matches = Array.from(input.matchAll(regex));
+
+    expect(matches.length).toBe(1);
+    expect(matches[0][1]).toBe('param1');
+    expect(matches[0][2]).toBeUndefined();
+    expect(matches[0][3]).toBeUndefined();
+    expect(matches[0][4]).toBe('number');
+  });
+
+  it('should handle name and values only', () => {
+    const input = "{name='param1', values=['opt1','opt2','opt3']}";
+
+    const matches = Array.from(input.matchAll(regex));
+
+    expect(matches.length).toBe(1);
+    expect(matches[0][1]).toBe('param1');
+    expect(matches[0][2]).toBe("'opt1','opt2','opt3'");
+    expect(matches[0][3]).toBeUndefined();
+    expect(matches[0][4]).toBeUndefined();
+  });
+
+  it('should handle multiple types in array', () => {
+    const input = "{name='param1', description='Multi-type param', type=[string, keyword, text]}";
+
+    const matches = Array.from(input.matchAll(regex));
+
+    expect(matches.length).toBe(1);
+    expect(matches[0][1]).toBe('param1');
+    expect(matches[0][3]).toBe('Multi-type param');
+    expect(matches[0][4]).toBe('string, keyword, text');
+  });
+
+  it('should handle long descriptions with special characters', () => {
+    const input =
+      "{name='separator', description='A list of strings used as possible split points when chunking text. Each string can be a plain string or a\\nregular expression (regex) pattern.', type=[keyword]}";
+
+    const matches = Array.from(input.matchAll(regex));
+
+    expect(matches.length).toBe(1);
+    expect(matches[0][1]).toBe('separator');
+    expect(matches[0][3]).toContain('A list of strings');
+    expect(matches[0][4]).toBe('keyword');
+  });
+
+  it('should parse consecutive map parameter definitions', () => {
+    const input =
+      "{name='param1'}, {name='param2', description='Second param'}, {name='param3', type=[boolean]}";
+
+    const matches = Array.from(input.matchAll(regex));
+
+    expect(matches.length).toBe(3);
+    expect(matches[0][1]).toBe('param1');
+    expect(matches[1][1]).toBe('param2');
+    expect(matches[1][3]).toBe('Second param');
+    expect(matches[2][1]).toBe('param3');
+    expect(matches[2][4]).toBe('boolean');
   });
 });
