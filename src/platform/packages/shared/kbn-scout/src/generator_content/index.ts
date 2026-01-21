@@ -162,7 +162,7 @@ test.describe('Scout ui test suite example', { tag: tags.DEPLOYMENT_AGNOSTIC }, 
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.SOME_ARCHIVE);
   });
 
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+  test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
   });
 
