@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { IMAGE_CLICK_TRIGGER } from '../../common/constants';
 export { imageClickTrigger } from './image_click_trigger';

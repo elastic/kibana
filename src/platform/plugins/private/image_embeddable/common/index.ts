@@ -7,10 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ImageEmbeddablePlugin } from './plugin';
-
-export { IMAGE_CLICK_TRIGGER } from '../common';
-
-export function plugin() {
-  return new ImageEmbeddablePlugin();
-}
+export { IMAGE_CLICK_TRIGGER } from './constants';

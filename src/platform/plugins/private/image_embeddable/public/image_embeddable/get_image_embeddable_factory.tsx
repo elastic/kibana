@@ -18,7 +18,7 @@ import { openLazyFlyout } from '@kbn/presentation-util';
 import { initializeTitleManager, titleComparators } from '@kbn/presentation-publishing';
 
 import type { ImageEmbeddableState } from '../../server';
-import { IMAGE_CLICK_TRIGGER } from '../actions';
+import { IMAGE_CLICK_TRIGGER } from '../../common';
 import { ImageEmbeddable as ImageEmbeddableComponent } from '../components/image_embeddable';
 import type { FileImageMetadata } from '../imports';
 import { coreServices, filesService } from '../services/kibana_services';

@@ -27,3 +27,5 @@ export type TransformEnhancementsOut = (
   enhancementsState: SerializableRecord,
   references: Reference[]
 ) => SerializableRecord;
+
+export { CONTEXT_MENU_TRIGGER, SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from "./constants";

@@ -7,10 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ImageEmbeddablePlugin } from './plugin';
-
-export { IMAGE_CLICK_TRIGGER } from '../common';
-
-export function plugin() {
-  return new ImageEmbeddablePlugin();
-}
+export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
+export const SELECT_RANGE_TRIGGER = 'SELECT_RANGE_TRIGGER';
+export const VALUE_CLICK_TRIGGER = 'VALUE_CLICK_TRIGGER';
