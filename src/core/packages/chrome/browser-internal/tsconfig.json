@@ -67,6 +67,9 @@
     "@kbn/shared-ux-error-boundary",
     "@kbn/core-chrome-app-menu-components",
     "@kbn/shared-ux-label-formatter",
+    "@kbn/core-chrome-sidebar-internal",
+    "@kbn/core-chrome-sidebar-context",
+    "@kbn/core-chrome-sidebar-components",
   ],
   "exclude": [
     "target/**/*",

@@ -9,7 +9,7 @@
 
 import type { ReactNode } from 'react';
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import type { ChromeStyle } from '@kbn/core-chrome-browser';
+import type { ChromeStyle } from './layout.types';
 import type { LayoutDimensions } from './layout.types';
 
 /**
@@ -85,34 +85,42 @@ export const LayoutConfigProvider = ({
   value: initialValue,
   children,
 }: LayoutConfigProviderProps) => {
-  const [config, setConfig] = useState<LayoutConfig>(initialValue);
+  // Base config from props
+  const [baseConfig, setBaseConfig] = useState<LayoutConfig>(initialValue);
 
-  // Reset state when initialValue changes, but only for fields that have changed
+  // Programmatic overrides from updateLayout()
+  const [overrides, setOverrides] = useState<Partial<LayoutConfig>>({});
+
+  // Update base config when props change
   useEffect(() => {
-    setConfig((prevConfig) => {
-      const changedFields = getChangedFields(prevConfig, initialValue);
+    setBaseConfig((prev) => {
+      // Only update changed fields
+      const changes = getChangedFields(prev, initialValue);
+      if (Object.keys(changes).length === 0) return prev;
 
-      // Only update if there are any changed fields
-      if (Object.keys(changedFields).length > 0) {
-        return { ...prevConfig, ...changedFields };
-      }
+      // Clear overrides for fields that changed in props (props take precedence)
+      setOverrides((prevOverrides) => {
+        const newOverrides = { ...prevOverrides };
+        Object.keys(changes).forEach((key) => {
+          delete newOverrides[key as keyof LayoutConfig];
+        });
+        return newOverrides;
+      });
 
-      return prevConfig;
+      return { ...prev, ...changes };
     });
   }, [initialValue]);
 
   const updateLayout = useCallback((updates: Partial<LayoutConfig>) => {
-    setConfig((prevConfig) => {
-      const changedFields = getChangedFields(prevConfig, updates);
-
-      // Only update if there are any changed fields
-      if (Object.keys(changedFields).length > 0) {
-        return { ...prevConfig, ...changedFields };
-      }
-
-      return prevConfig;
+    setOverrides((prev) => {
+      const changes = getChangedFields(prev, updates);
+      if (Object.keys(changes).length === 0) return prev;
+      return { ...prev, ...changes };
     });
   }, []);
+
+  // Merge base and overrides to create final config
+  const config = { ...baseConfig, ...overrides };
 
   return (
     <LayoutConfigContext.Provider value={{ config, updateLayout }}>

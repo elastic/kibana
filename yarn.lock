@@ -5278,6 +5278,26 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-chrome-sidebar-components@link:src/core/packages/chrome/sidebar-components":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-chrome-sidebar-context@link:src/core/packages/chrome/sidebar-context":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-chrome-sidebar-internal@link:src/core/packages/chrome/sidebar-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-chrome-sidebar-mocks@link:src/core/packages/chrome/sidebar-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-chrome-sidebar@link:src/core/packages/chrome/sidebar":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-config-server-internal@link:src/core/packages/config/server-internal":
   version "0.0.0"
   uid ""
@@ -8875,6 +8895,10 @@
   uid ""
 
 "@kbn/shared-ux-utility@link:src/platform/packages/shared/kbn-shared-ux-utility":
+  version "0.0.0"
+  uid ""
+
+"@kbn/sidebar-examples-plugin@link:examples/sidebar_examples":
   version "0.0.0"
   uid ""
 
@@ -19151,7 +19175,7 @@ decimal.js@10, decimal.js@^10.4.1:
   resolved "https://registry.yarnpkg.com/decimal.js/-/decimal.js-10.6.0.tgz#e649a43e3ab953a72192ff5983865e509f37ed9a"
   integrity sha512-YpgQiITW3JXGntzdUmyUR1V812Hn8T1YVXhCu+wO3OpS4eU9l4YdD3qjyiKdV6mvV29zapkMeD390UVEf2lkUg==
 
-decko@^1.2.0:
+decko@1.2.0, decko@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/decko/-/decko-1.2.0.tgz#fd43c735e967b8013306884a56fbe665996b6817"
   integrity sha512-m8FnyHXV1QX+S1cl+KPFDIl6NMkxtKsy6+U/aYyjrOqWMuwAwYWu7ePqrsUHtDR5Y8Yk2pi/KIDSgF+vT4cPOQ==

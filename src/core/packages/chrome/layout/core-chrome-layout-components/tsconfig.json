@@ -22,6 +22,5 @@
   "kbn_references": [
     "@kbn/core-chrome-layout-constants",
     "@kbn/core-chrome-layout-utils",
-    "@kbn/core-chrome-browser",
   ]
 }

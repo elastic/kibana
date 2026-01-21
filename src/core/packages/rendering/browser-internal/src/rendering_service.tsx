@@ -38,8 +38,8 @@ export interface RenderingServiceContextDeps {
   i18n: I18nStart;
   theme: ThemeServiceStart;
   userProfile: UserProfileService;
-  coreEnv: CoreEnv;
   chrome: InternalChromeStart;
+  coreEnv: CoreEnv;
 }
 
 export interface RenderingServiceRenderCoreDeps {
@@ -140,6 +140,7 @@ export class RenderingService implements IRenderingService {
         theme={deps.theme}
         userProfile={deps.userProfile}
         coreEnv={deps.coreEnv}
+        chrome={deps.chrome}
       >
         {children}
       </KibanaRenderContextProvider>
