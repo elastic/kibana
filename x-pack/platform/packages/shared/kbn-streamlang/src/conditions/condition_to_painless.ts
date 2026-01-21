@@ -197,7 +197,7 @@ function shorthandBinaryToPainless(
       const encodedValue = encodeValue(value as StringOrNumberOrBoolean);
       const encodedStringValue = encodeValue(String(value));
       // If List: check contains or string match. If single value (unwrapped): check equality
-      return `((${safeFieldAccessor} instanceof List && (${safeFieldAccessor}.contains(${encodedValue}) || ${safeFieldAccessor}.stream().anyMatch(e -> String.valueOf(e).equals(${encodedStringValue})))) || (!(${safeFieldAccessor} instanceof List) && (${safeFieldAccessor} == ${encodedValue} || String.valueOf(${safeFieldAccessor}).equals(${encodedStringValue}))))`;
+      return `(${safeFieldAccessor} instanceof List ? (${safeFieldAccessor}.contains(${encodedValue}) || ${safeFieldAccessor}.stream().anyMatch(e -> String.valueOf(e).equals(${encodedStringValue}))) : (${safeFieldAccessor} == ${encodedValue} || String.valueOf(${safeFieldAccessor}).equals(${encodedStringValue})))`;
     }
     case 'neq':
     default: // eq
