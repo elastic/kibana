@@ -49,6 +49,8 @@ const userErrorCodes = [400, 404, 405, 406, 410, 411, 414, 428, 431];
 
 // connector type definition
 
+// This is currently a Workflows-only connector.
+// Ownership can be extended to support other features if needed.
 const connectorTypeDefinition: Omit<HttpConnectorType, 'id' | 'validate'> = {
   minimumLicenseRequired: 'gold',
   name: CONNECTOR_NAME,

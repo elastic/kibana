@@ -2774,6 +2774,11 @@ src/platform/packages/shared/kbn-connector-schemas/thehive @elastic/kibana-cases
 /x-pack/platform/plugins/shared/stack_connectors/server/usage/inference @elastic/appex-ai-infra
 /src/platform/packages/shared/kbn-connector-schemas/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-team
 
+# HTTP
+/x-pack/platform/plugins/shared/stack_connectors/public/connector_types/http @elastic/workflows-eng
+/x-pack/platform/plugins/shared/stack_connectors/server/connector_types/http @elastic/workflows-eng
+/src/platform/packages/shared/kbn-connector-schemas/http @elastic/workflows-eng
+
 # Token tracking
 x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/security-generative-ai
 
