@@ -186,7 +186,8 @@ export const useTopNavLinks = ({
 
       if (!services.embeddableEditor.isEmbeddedEditor() && !defaultMenu?.openItem?.disabled) {
         const openSearchMenuItem = getOpenSearchAppMenuItem({
-          onOpenSavedSearch: state.actions.onOpenSavedSearch,
+          onOpenSavedSearch: (discoverSessionId) =>
+            dispatch(internalStateActions.openDiscoverSession({ discoverSessionId })),
         });
         items.push(openSearchMenuItem);
       }
