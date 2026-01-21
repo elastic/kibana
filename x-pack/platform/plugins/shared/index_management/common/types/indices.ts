@@ -7,8 +7,8 @@
 
 import type { IndicesIndexSettingsKeys } from '@elastic/elasticsearch/lib/api/types';
 
-export type { Index } from '@kbn/index-management-shared-types';
-
+import type { Index } from '@kbn/index-management-shared-types';
+export type { Index };
 interface AnalysisModule {
   analyzer: {
     [key: string]: {
@@ -32,19 +32,6 @@ export interface IndexSettingsResponse {
   defaults: IndexSettings;
 }
 
-export interface IndexData {
-  documents?: number;
-  size?: string;
-  name: string;
-  isFrozen: boolean;
-  aliases?: string[];
-  hidden: boolean;
-  data_stream?: string;
-  mode?: string;
-  primary?: number;
-  replica?: number;
-}
-
 export interface IndexDataResponse {
-  body: IndexData[];
+  body: Index[];
 }

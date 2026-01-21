@@ -19,8 +19,6 @@ export class IndexDataEnricher {
   public enrichIndices = (
     client: HttpSetup
   ): Promise<{ indices?: Index[]; error?: string; errorSource?: string }>[] => {
-    // this is complaining about the name field
-    // @ts-ignore
     return this.enrichers.map((enricher) => enricher(client));
   };
 

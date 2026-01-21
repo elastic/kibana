@@ -21,7 +21,7 @@ import type { PublicApiServiceSetup } from './services/public_api_service';
 
 export interface EnricherResponse {
   source: string;
-  indices?: Partial<Index>[];
+  indices?: Index[];
   error?: string;
 }
 export type Enricher = (client: HttpSetup) => Promise<EnricherResponse>;
@@ -115,13 +115,15 @@ export interface IndexManagementPluginStart {
   }) => React.FC<DatastreamFlyoutProps>;
 }
 
-export interface Index {
+export interface Index extends IndexAttributes {
   name: string;
+}
+export interface IndexAttributes {
   primary?: number | string;
   replica?: number | string;
-  isFrozen: boolean;
-  hidden: boolean;
-  aliases: string | string[];
+  isFrozen?: boolean;
+  hidden?: boolean;
+  aliases?: string | string[];
   data_stream?: string;
   mode?: string;
 

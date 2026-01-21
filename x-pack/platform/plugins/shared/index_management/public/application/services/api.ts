@@ -48,7 +48,6 @@ import { httpService } from './http';
 import type { UiMetricService } from './ui_metric';
 import type { FieldFromIndicesRequest } from '../../../common';
 import type { Fields } from '../components/mappings_editor/types';
-import type { IndexData } from '../../../common/types/indices';
 import type { UserStartPrivilegesResponse } from '../../../server/lib/types';
 import { indexDataEnricher } from '../../services';
 
@@ -142,24 +141,6 @@ export async function updateDSFailureStore(
   });
 }
 
-interface IndexMetadata {
-  name: string;
-  primary?: Number;
-  replica?: Number;
-  isFrozen: boolean;
-  aliases?: string[];
-  hidden: boolean;
-  data_stream?: string;
-  mode?: string;
-  health?: string;
-  status?: string;
-  uuid?: string;
-  documents?: number;
-  documents_deleted?: number;
-  size?: string;
-  primary_size?: string;
-}
-
 export async function loadIndices(onIndicesLoaded: (indices: Index[]) => void) {
   // Run all requests in parallel
   const enrichedPromises = indexDataEnricher.enrichIndices(httpService.httpClient);
@@ -167,14 +148,11 @@ export async function loadIndices(onIndicesLoaded: (indices: Index[]) => void) {
   // we'll wait for the main request to complete first so
   // the index list has stability - unsure if this is an actual
   // issue but its certainly possible looking at the code
-  const indices = await httpService.httpClient.get<Record<string, IndexData>>(
+  const indices = await httpService.httpClient.get<Record<string, Index>>(
     `${API_BASE_PATH}/indices_get`
   );
 
   onIndicesLoaded(Object.values(indices));
-
-  // todo review types
-  const indicesWithMetadata: Record<string, IndexMetadata> = indices;
 
   // iterate over all the requests for additional info
   enrichedPromises.forEach((enrichedPromise) => {
@@ -183,11 +161,11 @@ export async function loadIndices(onIndicesLoaded: (indices: Index[]) => void) {
         // iterate over the array of additional data and merge it into the original index data
         if (enriched.indices) {
           enriched.indices.forEach((enrichedIndex) => {
-            if (indicesWithMetadata[enrichedIndex.name]) {
-              Object.assign(indicesWithMetadata[enrichedIndex.name], enrichedIndex);
+            if (indices[enrichedIndex.name]) {
+              Object.assign(indices[enrichedIndex.name], enrichedIndex);
             }
           });
-          onIndicesLoaded(Object.values(indicesWithMetadata));
+          onIndicesLoaded(Object.values(indices));
         } else {
           console.error(enriched.error);
         }
@@ -197,9 +175,6 @@ export async function loadIndices(onIndicesLoaded: (indices: Index[]) => void) {
         console.error(error);
       });
   });
-
-  // this is currently returning unenriched data
-  // return Object.values(indicesWithMetadata);
 }
 
 export async function reloadIndices(
