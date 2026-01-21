@@ -7,15 +7,16 @@
 
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu, EuiHeaderLink, EuiPopover } from '@elastic/eui';
+import { sloListLocatorID, type SloListLocatorParams } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useState } from 'react';
-import rison from '@kbn/rison';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import type { ApmPluginStartDeps } from '../../../../plugin';
-import { useApmParams } from '../../../../hooks/use_apm_params';
+import React, { useCallback, useMemo, useState } from 'react';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import type { ApmIndicatorType } from '../../../../../common/slo_indicator_types';
+import { APM_SLO_INDICATOR_TYPES } from '../../../../../common/slo_indicator_types';
+import type { ApmPluginStartDeps } from '../../../../plugin';
+import { useApmParams } from '../../../../hooks/use_apm_params';
 
 const sloLabel = i18n.translate('xpack.apm.home.sloMenu.slosHeaderLink', {
   defaultMessage: 'SLOs',
@@ -39,7 +40,7 @@ interface Props {
 }
 
 export function SloPopoverAndFlyout({ canReadSlos, canWriteSlos }: Props) {
-  const { slo, http } = useKibana<ApmPluginStartDeps>().services;
+  const { slo, share } = useKibana<ApmPluginStartDeps>().services;
   const { query } = useApmParams('/*');
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [flyoutState, setFlyoutState] = useState<{
@@ -53,54 +54,40 @@ export function SloPopoverAndFlyout({ canReadSlos, canWriteSlos }: Props) {
   const apmEnvironment = ('environment' in query && query.environment) || ENVIRONMENT_ALL.value;
   const sloEnvironment = apmEnvironment === ENVIRONMENT_ALL.value ? ALL_VALUE : apmEnvironment;
 
-  const openFlyout = (indicatorType: ApmIndicatorType) => {
+  const openFlyout = useCallback((indicatorType: ApmIndicatorType) => {
     setFlyoutState({ isOpen: true, indicatorType });
     setPopoverOpen(false);
-  };
+  }, []);
 
-  const closeFlyout = () => {
+  const closeFlyout = useCallback(() => {
     setFlyoutState({ isOpen: false, indicatorType: null });
-  };
+  }, []);
 
   const manageSlosUrl = useMemo(() => {
-    const searchParams = rison.encode({
-      filters: [
-        {
-          meta: {
-            alias: null,
-            disabled: false,
-            key: 'slo.indicator.type',
-            negate: false,
-            params: ['sli.apm.transactionDuration', 'sli.apm.transactionErrorRate'],
-            type: 'phrases',
-          },
-          query: {
-            bool: {
-              minimum_should_match: 1,
-              should: [
-                { match_phrase: { 'slo.indicator.type': 'sli.apm.transactionDuration' } },
-                { match_phrase: { 'slo.indicator.type': 'sli.apm.transactionErrorRate' } },
-              ],
-            },
-          },
+    const sloListLocator = share?.url.locators.get<SloListLocatorParams>(sloListLocatorID);
+    if (!sloListLocator) return undefined;
+
+    const apmIndicatorTypeFilter = {
+      meta: {
+        alias: null,
+        disabled: false,
+        key: 'slo.indicator.type',
+        negate: false,
+        params: [...APM_SLO_INDICATOR_TYPES],
+        type: 'phrases',
+      },
+      query: {
+        bool: {
+          minimum_should_match: 1,
+          should: APM_SLO_INDICATOR_TYPES.map((type) => ({
+            match_phrase: { 'slo.indicator.type': type },
+          })),
         },
-      ],
-    });
+      },
+    };
 
-    return http?.basePath.prepend(`/app/slos?search=${searchParams}`);
-  }, [http?.basePath]);
-
-  const button = (
-    <EuiHeaderLink
-      color="primary"
-      iconType="arrowDown"
-      iconSide="right"
-      onClick={() => setPopoverOpen((prevState) => !prevState)}
-      data-test-subj="apmSlosHeaderLink"
-    >
-      {sloLabel}
-    </EuiHeaderLink>
-  );
+    return sloListLocator.getRedirectUrl({ filters: [apmIndicatorTypeFilter] });
+  }, [share?.url.locators]);
 
   const panels: EuiContextMenuPanelDescriptor[] = [
     {
@@ -147,7 +134,9 @@ export function SloPopoverAndFlyout({ canReadSlos, canWriteSlos }: Props) {
             },
           },
           onClose: closeFlyout,
-          allowedIndicatorTypes: ['sli.apm.transactionDuration', 'sli.apm.transactionErrorRate'],
+          formSettings: {
+            allowedIndicatorTypes: ['sli.apm.transactionDuration', 'sli.apm.transactionErrorRate'],
+          },
         })
       : null;
 
@@ -155,7 +144,17 @@ export function SloPopoverAndFlyout({ canReadSlos, canWriteSlos }: Props) {
     <>
       <EuiPopover
         id="slos-menu"
-        button={button}
+        button={
+          <EuiHeaderLink
+            color="primary"
+            iconType="arrowDown"
+            iconSide="right"
+            onClick={() => setPopoverOpen((prevState) => !prevState)}
+            data-test-subj="apmSlosHeaderLink"
+          >
+            {sloLabel}
+          </EuiHeaderLink>
+        }
         isOpen={popoverOpen}
         closePopover={() => setPopoverOpen(false)}
         panelPaddingSize="none"

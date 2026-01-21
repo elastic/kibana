@@ -128,18 +128,27 @@ describe('ManagedTable', () => {
       },
     ];
 
-    it('renders actions column when actions are provided', () => {
+    const renderManagedTable = (
+      props: Partial<React.ComponentProps<typeof ManagedTable<TestItem>>> = {}
+    ) => {
       const onClickMock = jest.fn();
       const actions = createTestActions(onClickMock);
 
-      render(
+      const result = render(
         <ManagedTable
           items={testItems}
           columns={testColumns}
           initialPageSize={10}
           actions={actions}
+          {...props}
         />
       );
+
+      return { ...result, onClickMock, actions };
+    };
+
+    it('renders actions column when actions are provided', () => {
+      renderManagedTable();
 
       expect(screen.getByText('Actions')).toBeInTheDocument();
 
@@ -148,17 +157,7 @@ describe('ManagedTable', () => {
     });
 
     it('renders action groups with correct test subjects using IDs', async () => {
-      const onClickMock = jest.fn();
-      const actions = createTestActions(onClickMock);
-
-      render(
-        <ManagedTable
-          items={testItems}
-          columns={testColumns}
-          initialPageSize={10}
-          actions={actions}
-        />
-      );
+      renderManagedTable();
 
       const actionButtons = screen.getAllByTestId('apmManagedTableActionsCellButton');
       fireEvent.click(actionButtons[0]);
@@ -168,17 +167,7 @@ describe('ManagedTable', () => {
     });
 
     it('renders action items with correct test subjects using IDs', async () => {
-      const onClickMock = jest.fn();
-      const actions = createTestActions(onClickMock);
-
-      render(
-        <ManagedTable
-          items={testItems}
-          columns={testColumns}
-          initialPageSize={10}
-          actions={actions}
-        />
-      );
+      renderManagedTable();
 
       const actionButtons = screen.getAllByTestId('apmManagedTableActionsCellButton');
       fireEvent.click(actionButtons[0]);
@@ -195,17 +184,7 @@ describe('ManagedTable', () => {
     });
 
     it('renders sub-menu items with correct test subjects using IDs', async () => {
-      const onClickMock = jest.fn();
-      const actions = createTestActions(onClickMock);
-
-      render(
-        <ManagedTable
-          items={testItems}
-          columns={testColumns}
-          initialPageSize={10}
-          actions={actions}
-        />
-      );
+      renderManagedTable();
 
       const actionButtons = screen.getAllByTestId('apmManagedTableActionsCellButton');
       fireEvent.click(actionButtons[0]);
@@ -227,17 +206,7 @@ describe('ManagedTable', () => {
     });
 
     it('calls onClick handler with correct item when action is clicked', async () => {
-      const onClickMock = jest.fn();
-      const actions = createTestActions(onClickMock);
-
-      render(
-        <ManagedTable
-          items={testItems}
-          columns={testColumns}
-          initialPageSize={10}
-          actions={actions}
-        />
-      );
+      const { onClickMock } = renderManagedTable();
 
       const actionButtons = screen.getAllByTestId('apmManagedTableActionsCellButton');
       fireEvent.click(actionButtons[0]);
@@ -251,17 +220,7 @@ describe('ManagedTable', () => {
     });
 
     it('calls onClick handler with correct item when sub-item is clicked', async () => {
-      const onClickMock = jest.fn();
-      const actions = createTestActions(onClickMock);
-
-      render(
-        <ManagedTable
-          items={testItems}
-          columns={testColumns}
-          initialPageSize={10}
-          actions={actions}
-        />
-      );
+      const { onClickMock } = renderManagedTable();
 
       const actionButtons = screen.getAllByTestId('apmManagedTableActionsCellButton');
       fireEvent.click(actionButtons[1]);
@@ -286,26 +245,13 @@ describe('ManagedTable', () => {
     });
 
     it('does not render actions column when no actions are provided', () => {
-      render(
-        <ManagedTable items={testItems} columns={testColumns} initialPageSize={10} actions={[]} />
-      );
+      renderManagedTable({ actions: [] });
 
       expect(screen.queryByTestId('apmManagedTableActionsCellButton')).not.toBeInTheDocument();
     });
 
     it('disables action button when isActionsDisabled returns true', () => {
-      const onClickMock = jest.fn();
-      const actions = createTestActions(onClickMock);
-
-      render(
-        <ManagedTable
-          items={testItems}
-          columns={testColumns}
-          initialPageSize={10}
-          actions={actions}
-          isActionsDisabled={(item) => item.id === '1'}
-        />
-      );
+      renderManagedTable({ isActionsDisabled: (item) => item.id === '1' });
 
       const actionButtons = screen.getAllByTestId('apmManagedTableActionsCellButton');
 

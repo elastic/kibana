@@ -48,12 +48,12 @@ export interface ITableColumn<T extends object> {
   actions?: Array<Record<string, unknown>>;
   field?: string;
   dataType?: string;
-  align?: string;
+  align?: 'left' | 'right' | 'center';
   width?: string;
   sortable?: boolean;
   truncateText?: boolean;
   nameTooltip?: EuiBasicTableColumn<T>['nameTooltip'];
-  render?: (value: any, item: T) => unknown;
+  render?: (value: any, item: T) => ReactNode;
 }
 
 export interface TableSearchBar<T> {
@@ -295,7 +295,9 @@ function UnoptimizedManagedTable<T extends object>(props: {
       isEnabled: false,
       fieldsToSearch: [],
       maxCountExceeded: false,
-      placeholder: 'Search...',
+      placeholder: i18n.translate('xpack.apm.managedTable.searchPlaceholder', {
+        defaultMessage: 'Search...',
+      }),
       onChangeSearchQuery: () => {},
     },
     actions,
@@ -510,7 +512,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
               : noItemsMessage
           }
           items={renderedItems}
-          columns={columnsWithActions as unknown as Array<EuiBasicTableColumn<T>>}
+          columns={columnsWithActions as Array<EuiBasicTableColumn<T>>}
           rowHeader={rowHeader === false ? undefined : rowHeader ?? columns[0]?.field}
           sorting={sorting}
           onChange={onTableChange}

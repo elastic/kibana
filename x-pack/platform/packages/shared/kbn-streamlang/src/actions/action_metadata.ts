@@ -576,6 +576,36 @@ export const ACTION_METADATA_MAP: Record<ProcessorType, ActionMetadata> = {
     ],
   },
 
+  join: {
+    name: i18n.translate('xpack.streamlang.actionMetadata.join.name', {
+      defaultMessage: 'Join',
+    }),
+    description: i18n.translate('xpack.streamlang.actionMetadata.join.description', {
+      defaultMessage: 'Join fields with a delimiter',
+    }),
+    usage: i18n.translate('xpack.streamlang.actionMetadata.join.usage', {
+      defaultMessage:
+        'Provide `from` for the list of source fields, `delimiter` for the string to join with, and `to` for the target field',
+    }),
+    examples: [
+      {
+        description: i18n.translate('xpack.streamlang.actionMetadata.join.examples.simple', {
+          defaultMessage: 'Join multiple fields into a target field with a delimiter',
+        }),
+        yaml: `- action: join
+  from: [field1, field2, field3]
+  delimiter: ", "
+  to: my_joined_field`,
+      },
+    ],
+    tips: [
+      i18n.translate('xpack.streamlang.actionMetadata.join.tips.ignoreMissing', {
+        defaultMessage:
+          'Ignore missing fields by setting ignore_missing to true. This will omit missing fields from the joined string',
+      }),
+    ],
+  },
+
   manual_ingest_pipeline: {
     name: i18n.translate('xpack.streamlang.actionMetadata.manualIngestPipeline.name', {
       defaultMessage: 'Manual Ingest Pipeline',

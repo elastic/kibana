@@ -9,11 +9,8 @@ import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
-import type { CoreSetup, Logger } from '@kbn/core/server';
-import type {
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
-} from '../../types';
+import type { Logger } from '@kbn/core/server';
+import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
 import { timeRangeSchemaOptional, indexDescription } from '../../utils/tool_schemas';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import type { getLogCategories } from './handler';
@@ -50,23 +47,13 @@ const getLogsSchema = z.object({
     .describe(
       'Additional fields to return for each log sample. "@timestamp" and the message field are always included. Example: ["service.name", "host.name"]'
     ),
-  messageField: z
-    .string()
-    .optional()
-    .describe(
-      'The field containing the log message. Use "message" for ECS logs or "body.text" for OpenTelemetry logs. Defaults to "message".'
-    )
-    .default('message'),
 });
 
 export function createGetLogCategoriesTool({
   core,
   logger,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   logger: Logger;
 }): StaticToolRegistration<typeof getLogsSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof getLogsSchema> = {
@@ -102,7 +89,7 @@ Do NOT use for:
       },
     },
     handler: async (toolParams, { esClient }) => {
-      const { index, start, end, kqlFilter, fields = [], messageField } = toolParams;
+      const { index, start, end, kqlFilter, fields = [] } = toolParams;
 
       try {
         const { highSeverityCategories, lowSeverityCategories } = await getToolHandler({
@@ -114,7 +101,6 @@ Do NOT use for:
           end,
           kqlFilter,
           fields,
-          messageField,
         });
 
         return {

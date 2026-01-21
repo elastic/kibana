@@ -7,12 +7,13 @@
 
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { CreateSLOInput, IndicatorType } from '@kbn/slo-schema';
+import type { CreateSLOInput } from '@kbn/slo-schema';
 import type { RecursivePartial } from '@kbn/utility-types';
 import React from 'react';
 import { OutPortal, createHtmlPortalNode } from 'react-reverse-portal';
 import { SloEditForm } from '../components/slo_edit_form';
 import { transformPartialSLODataToFormState } from '../helpers/process_slo_form_values';
+import type { FormSettings } from '../types';
 
 export const sloEditFormFooterPortal = createHtmlPortalNode();
 
@@ -20,11 +21,11 @@ export const sloEditFormFooterPortal = createHtmlPortalNode();
 export default function CreateSLOFormFlyout({
   onClose,
   initialValues = {},
-  allowedIndicatorTypes,
+  formSettings,
 }: {
   onClose: () => void;
   initialValues: RecursivePartial<CreateSLOInput>;
-  allowedIndicatorTypes?: IndicatorType[];
+  formSettings: FormSettings;
 }) {
   const formInitialValues = transformPartialSLODataToFormState(initialValues);
 
@@ -41,8 +42,7 @@ export default function CreateSLOFormFlyout({
         <SloEditForm
           onFlyoutClose={onClose}
           initialValues={formInitialValues}
-          isEditMode={false}
-          allowedIndicatorTypes={allowedIndicatorTypes}
+          formSettings={formSettings}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
