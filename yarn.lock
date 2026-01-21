@@ -8578,7 +8578,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-t-grid@link:x-pack/solutions/security/packages/kbn-securitysolution-t-grid":
+"@kbn/securitysolution-t-grid@link:x-pack/platform/packages/shared/kbn-securitysolution-t-grid":
   version "0.0.0"
   uid ""
 

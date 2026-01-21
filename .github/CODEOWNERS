@@ -1229,7 +1229,7 @@ x-pack/solutions/security/packages/kbn-securitysolution-list-constants @elastic/
 x-pack/solutions/security/packages/kbn-securitysolution-list-hooks @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-securitysolution-list-utils @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-securitysolution-lists-common @elastic/security-detection-engine
-x-pack/solutions/security/packages/kbn-securitysolution-t-grid @elastic/security-detection-engine
+x-pack/platform/packages/shared/kbn-securitysolution-t-grid @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-securitysolution-utils @elastic/security-detection-engine @elastic/security-detection-rule-management
 x-pack/solutions/security/packages/navigation @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/packages/security-ai-prompts @elastic/security-generative-ai

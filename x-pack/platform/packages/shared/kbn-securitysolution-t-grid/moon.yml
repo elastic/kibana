@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/security-detection-engine'
   metadata:
-    sourceRoot: x-pack/solutions/security/packages/kbn-securitysolution-t-grid
+    sourceRoot: x-pack/platform/packages/shared/kbn-securitysolution-t-grid
 tags:
   - shared-common
   - package

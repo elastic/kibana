@@ -996,7 +996,7 @@
     "@kbn/securitysolution-list-utils": "link:x-pack/solutions/security/packages/kbn-securitysolution-list-utils",
     "@kbn/securitysolution-lists-common": "link:x-pack/solutions/security/packages/kbn-securitysolution-lists-common",
     "@kbn/securitysolution-rules": "link:src/platform/packages/shared/kbn-securitysolution-rules",
-    "@kbn/securitysolution-t-grid": "link:x-pack/solutions/security/packages/kbn-securitysolution-t-grid",
+    "@kbn/securitysolution-t-grid": "link:x-pack/platform/packages/shared/kbn-securitysolution-t-grid",
     "@kbn/securitysolution-utils": "link:x-pack/solutions/security/packages/kbn-securitysolution-utils",
     "@kbn/server-http-tools": "link:src/platform/packages/shared/kbn-server-http-tools",
     "@kbn/server-route-repository": "link:src/platform/packages/shared/kbn-server-route-repository",
