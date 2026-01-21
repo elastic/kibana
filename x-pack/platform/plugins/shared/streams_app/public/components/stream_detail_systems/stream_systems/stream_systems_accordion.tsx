@@ -10,7 +10,7 @@ import { EuiAccordion, EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@e
 import type { Streams, System } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { StreamExistingFeaturesTable } from './stream_existing_features_table';
+import { StreamExistingSystemsTable } from './stream_existing_systems_table';
 import type { AIFeatures } from '../../../hooks/use_ai_features';
 
 const getUnderlineOnHoverStyle = (textDecorationValue: 'underline' | 'none') => css`
@@ -20,15 +20,15 @@ const getUnderlineOnHoverStyle = (textDecorationValue: 'underline' | 'none') => 
   }
 `;
 
-export const StreamFeaturesAccordion = ({
+export const StreamSystemsAccordion = ({
   definition,
-  features,
+  systems,
   loading,
   refresh,
   aiFeatures,
 }: {
   definition: Streams.all.Definition;
-  features: System[];
+  systems: System[];
   loading: boolean;
   refresh: () => void;
   aiFeatures: AIFeatures | null;
@@ -36,27 +36,27 @@ export const StreamFeaturesAccordion = ({
   return (
     <EuiAccordion
       initialIsOpen={true}
-      id="stream-features-accordion"
+      id="stream-systems-accordion"
       buttonContent={
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false} css={getUnderlineOnHoverStyle('underline')}>
-            {i18n.translate('xpack.streams.streamFeaturesAccordion.buttonLabel', {
-              defaultMessage: 'Features',
+            {i18n.translate('xpack.streams.streamSystemsAccordion.buttonLabel', {
+              defaultMessage: 'Systems',
             })}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">{features.length}</EuiBadge>
+            <EuiBadge color="hollow">{systems.length}</EuiBadge>
           </EuiFlexItem>
         </EuiFlexGroup>
       }
       buttonProps={{ css: getUnderlineOnHoverStyle('none') }}
     >
       <EuiSpacer size="s" />
-      <StreamExistingFeaturesTable
+      <StreamExistingSystemsTable
         isLoading={loading}
-        features={features}
+        systems={systems}
         definition={definition}
-        refreshFeatures={refresh}
+        refreshSystems={refresh}
         aiFeatures={aiFeatures}
       />
     </EuiAccordion>
