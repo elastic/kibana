@@ -28,7 +28,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const endpointTestResources = getService('endpointTestResources');
   const retry = getService('retry');
   const timeout = 150_000;
-  describe('When on the Endpoint Policy Details Page', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/246399
+  describe.skip('When on the Endpoint Policy Details Page', function () {
     targetTags(this, ['@ess', '@serverless']);
 
     let indexedData: IndexedHostsAndAlertsResponse;
