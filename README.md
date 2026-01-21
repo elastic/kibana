@@ -1,13 +1,14 @@
-# Kibana
+# Kibana!
 
 Kibana is the open source interface to query, analyze, visualize, and manage your data stored in Elasticsearch.
 
-- [Getting Started](#getting-started)
-  - [Using a Kibana Release](#using-a-kibana-release)
-  - [Building and Running Kibana, and/or Contributing Code](#building-and-running-kibana-andor-contributing-code)
-- [Documentation](#documentation)
-- [Version Compatibility with Elasticsearch](#version-compatibility-with-elasticsearch)
-- [Questions? Problems? Suggestions?](#questions-problems-suggestions)
+- [Kibana!](#kibana)
+  - [Getting Started](#getting-started)
+    - [Using a Kibana Release](#using-a-kibana-release)
+    - [Building and Running Kibana, and/or Contributing Code](#building-and-running-kibana-andor-contributing-code)
+  - [Documentation](#documentation)
+  - [Version Compatibility with Elasticsearch](#version-compatibility-with-elasticsearch)
+  - [Questions? Problems? Suggestions?](#questions-problems-suggestions)
 
 ## Getting Started
 
@@ -46,15 +47,15 @@ Ideally, you should be running Elasticsearch and Kibana with matching version nu
 
 _Note: The version numbers below are only examples, meant to illustrate the relationships between different types of version numbers._
 
-| Situation                 | Example Kibana version     | Example ES version | Outcome |
-| ------------------------- | -------------------------- |------------------- | ------- |
-| Versions are the same.    | 7.15.1                     | 7.15.1             | 💚 OK      |
-| ES patch number is newer. | 7.15.__0__                 | 7.15.__1__         | ⚠️ Logged warning      |
-| ES minor number is newer. | 7.__14__.2                 | 7.__15__.0         | ⚠️ Logged warning      |
-| ES major number is newer. | __7__.15.1                 | __8__.0.0          | 🚫 Fatal error      |
-| ES patch number is older. | 7.15.__1__                 | 7.15.__0__         | ⚠️ Logged warning      |
-| ES minor number is older. | 7.__15__.1                 | 7.__14__.2         | 🚫 Fatal error      |
-| ES major number is older. | __8__.0.0                  | __7__.15.1         | 🚫 Fatal error      |
+| Situation                 | Example Kibana version | Example ES version | Outcome          |
+| ------------------------- | ---------------------- | ------------------ | ---------------- |
+| Versions are the same.    | 7.15.1                 | 7.15.1             | 💚 OK             |
+| ES patch number is newer. | 7.15.__0__             | 7.15.__1__         | ⚠️ Logged warning |
+| ES minor number is newer. | 7.__14__.2             | 7.__15__.0         | ⚠️ Logged warning |
+| ES major number is newer. | __7__.15.1             | __8__.0.0          | 🚫 Fatal error    |
+| ES patch number is older. | 7.15.__1__             | 7.15.__0__         | ⚠️ Logged warning |
+| ES minor number is older. | 7.__15__.1             | 7.__14__.2         | 🚫 Fatal error    |
+| ES major number is older. | __8__.0.0              | __7__.15.1         | 🚫 Fatal error    |
 
 ## Questions? Problems? Suggestions?
 
