@@ -438,6 +438,11 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
         loadingMessage={i18nKeys.loading}
         emptyMessage={i18nKeys.empty}
         noMatchesMessage={i18nKeys.noMatches}
+        listProps={{
+          truncationProps: {
+            truncation: 'middle'
+          }
+        }}
       >
         {(list, search) => (
           <div style={{ width: BROWSER_POPOVER_WIDTH, maxHeight: BROWSER_POPOVER_HEIGHT }}>
