@@ -306,8 +306,8 @@ describe('AutomaticImportSetupService', () => {
         mockEsClient
       );
       expect(mockDeleteSavedObject).toHaveBeenCalledWith(
-        'integration-123',
         'data-stream-456',
+        'integration-123',
         undefined
       );
     });
@@ -331,8 +331,8 @@ describe('AutomaticImportSetupService', () => {
       await service.deleteDataStream('integration-123', 'data-stream-456', mockEsClient, options);
 
       expect(mockDeleteSavedObject).toHaveBeenCalledWith(
-        'integration-123',
         'data-stream-456',
+        'integration-123',
         options
       );
     });
