@@ -60,6 +60,8 @@
           ", {}, ServiceArguments>"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/mocks/src/storybook.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -71,6 +73,8 @@
             "label": "propArguments",
             "description": [],
             "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/mocks/src/storybook.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -84,6 +88,8 @@
                   "// requires hasESData to be toggled to true"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/mocks/src/storybook.ts",
+                "lineNumber": 41,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -95,6 +101,8 @@
                     "label": "control",
                     "description": [],
                     "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/mocks/src/storybook.ts",
+                    "lineNumber": 42,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
@@ -106,6 +114,8 @@
                         "label": "control",
                         "description": [],
                         "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/mocks/src/storybook.ts",
+                        "lineNumber": 42,
+                        "columnNumber": 18,
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -119,6 +129,8 @@
                     "label": "defaultValue",
                     "description": [],
                     "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/mocks/src/storybook.ts",
+                    "lineNumber": 43,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -134,6 +146,8 @@
             "label": "serviceArguments",
             "description": [],
             "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/mocks/src/storybook.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -145,6 +159,8 @@
                 "label": "kibanaGuideDocLink",
                 "description": [],
                 "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/mocks/src/storybook.ts",
+                "lineNumber": 47,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -156,6 +172,8 @@
                     "label": "control",
                     "description": [],
                     "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/mocks/src/storybook.ts",
+                    "lineNumber": 48,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
@@ -167,6 +185,8 @@
                         "label": "control",
                         "description": [],
                         "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/mocks/src/storybook.ts",
+                        "lineNumber": 48,
+                        "columnNumber": 18,
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -180,6 +200,8 @@
                     "label": "defaultValue",
                     "description": [],
                     "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/mocks/src/storybook.ts",
+                    "lineNumber": 49,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -193,6 +215,8 @@
                 "label": "customBranding",
                 "description": [],
                 "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/mocks/src/storybook.ts",
+                "lineNumber": 51,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -204,6 +228,8 @@
                     "label": "hasCustomBranding$",
                     "description": [],
                     "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/mocks/src/storybook.ts",
+                    "lineNumber": 52,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
@@ -215,6 +241,8 @@
                         "label": "control",
                         "description": [],
                         "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/mocks/src/storybook.ts",
+                        "lineNumber": 53,
+                        "columnNumber": 9,
                         "deprecated": false,
                         "trackAdoption": false,
                         "children": [
@@ -226,6 +254,8 @@
                             "label": "control",
                             "description": [],
                             "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/mocks/src/storybook.ts",
+                            "lineNumber": 53,
+                            "columnNumber": 20,
                             "deprecated": false,
                             "trackAdoption": false
                           }
@@ -239,6 +269,8 @@
                         "label": "defaultValue",
                         "description": [],
                         "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/mocks/src/storybook.ts",
+                        "lineNumber": 54,
+                        "columnNumber": 9,
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -266,6 +298,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/mocks/src/storybook.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -295,6 +329,8 @@
               }
             ],
             "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/mocks/src/storybook.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -315,6 +351,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/mocks/src/storybook.ts",
+                "lineNumber": 61,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -345,6 +383,8 @@
               " | undefined; }"
             ],
             "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/mocks/src/storybook.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -366,6 +406,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/mocks/src/storybook.ts",
+                "lineNumber": 74,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -396,6 +438,8 @@
           }
         ],
         "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/mocks/src/jest.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -420,6 +464,8 @@
           }
         ],
         "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/mocks/src/jest.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -471,6 +517,8 @@
           }
         ],
         "path": "src/platform/packages/shared/shared-ux/page/analytics_no_data/mocks/src/storybook.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

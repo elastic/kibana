@@ -77,7 +77,7 @@ export const InputSchema = z.object({
 
 /**
  * Output schema for the step.
- * 
+ *
  * Defines the structure and types of data that this step will return.
  * This schema is used for validation and type checking to ensure data consistency
  * across workflow steps.
@@ -151,8 +151,8 @@ export const getMyStepDefinition = (coreSetup: CoreSetup) =>
         context.logger.error('My step execution failed', error);
         return { error };
       }
-    }
-  })
+    },
+  });
 ```
 
 ### Step 3: Implement Public-Side Definition
@@ -198,11 +198,9 @@ export const myStepDefinition: PublicStepDefinition = {
 
 **Important**: Icons must be custom components or images imported from EUI, not passed as strings. The workflows app does not fully support built-in `EuiIconType` strings (e.g., `'star'`) yet. See [EUI icon consumption guide](https://github.com/elastic/eui/blob/main/wiki/consuming-eui/README.md#failing-icon-imports) for details.
 
-
 #### Advanced Example with Dynamic Output Schema
 
 For steps that need different output schemas based on input parameters, you can use `dynamicOutputSchema`. This function is evaluated **in the workflows editor UI** to provide real-time schema validation and autocomplete based on the current step configuration. Here's an example of a data transformation step:
-
 
 ```typescript
 import React from 'react';
@@ -243,19 +241,244 @@ export const myStepDefinition: PublicStepDefinition = {
       getOutputSchema: ({ input }) => {
         if (input.mode == 'partial') {
           return z.object({
-            partialResult: z.string()
+            partialResult: z.string(),
           });
         }
 
         return z.object({
-            result: z.string()
-          });
-      }
-    }
-  }
+          result: z.string(),
+        });
+      },
+    },
+  },
 };
 ```
 
+### Custom Property Selection
+
+Custom steps can provide property-level selection handlers for both config properties (step-level, outside `with`) and input properties (inside `with`). The selection interface provides a unified API for entity selection that handles:
+
+- **Search**: Autocomplete suggestions when the user types
+- **Resolution**: Entity lookup when loading or pasting values
+- **Decoration**: Visual feedback and metadata display in the editor
+
+#### Property Handler Structure
+
+Property handlers are defined in the `editorHandlers` object of the public step definition:
+
+```typescript
+import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
+
+export const myStepDefinition = createPublicStepDefinition({
+  ...myStepCommonDefinition,
+  // ... other properties (icon, label, description, documentation)
+  editorHandlers: {
+    // Handlers for config properties (step-level, outside `with`)
+    config: {
+      'property.path': {
+        selection: {
+          search: async (input, context) => { /* ... */ },
+          resolve: async (value, context) => { /* ... */ },
+          getDetails: async (value, context, option) => { /* ... */ },
+        },
+      },
+    },
+    // Handlers for input properties (inside `with`)
+    input: {
+      property: {
+        selection: {
+          search: async (input, context) => { /* ... */ },
+          resolve: async (value, context) => { /* ... */ },
+          getDetails: async (value, context, option) => { /* ... */ },
+        },
+      },
+    },
+  },
+});
+```
+
+**Note**: Property paths support dot notation for nested objects. For example, if your `configSchema` is:
+
+```typescript
+z.object({
+  agent: z.object({
+    id: z.string(),
+  }),
+});
+```
+
+Use `'agent.id'` as the property key in `editorHandlers.config`.
+
+#### Implementing Selection
+
+The `selection` interface provides three functions that work together:
+
+**1. `search`** - Provides autocomplete options when the user types:
+
+```typescript
+editorHandlers: {
+  config: {
+    'agent-id': {
+      selection: {
+        search: async (input: string, context: SelectionContext) => {
+          const agents = await agentService.search(input);
+          return agents.map((agent) => ({
+            value: agent.id,
+            label: agent.name,
+            description: agent.description,
+            documentation: agent.documentation,
+          }));
+        },
+        // ...
+      },
+    },
+  },
+},
+```
+
+**2. `resolve`** - Resolves an entity by its value (used on load, paste, etc.):
+
+```typescript
+resolve: async (value: string, context: SelectionContext) => {
+  const agent = await agentService.get(value);
+  if (!agent) {
+    return null;
+  }
+  return {
+    value: agent.id,
+    label: agent.name,
+    description: agent.description,
+  };
+},
+```
+
+**3. `getDetails`** - Provides detailed information for decoration and metadata:
+
+```typescript
+getDetails: async (value, context, option) => {
+  if (option) {
+    return {
+      message: `Successfully connected to ${option.label}`,
+      links: [
+        { text: 'Edit agent', path: `/app/agent-builder/agents/${option.value}` },
+        { text: 'Create agent', path: `/app/agent-builder/agents/new` },
+        { text: 'Manage agents', path: `/app/agent-builder/agents` },
+      ],
+    };
+  }
+  return {
+    message: `Agent ID "${value}" not found. Please select an existing agent or create a new one.`,
+    links: [
+      { text: 'Create agent', path: `/app/agent-builder/agents/new` },
+      { text: 'Manage agents', path: `/app/agent-builder/agents` },
+    ],
+  };
+},
+```
+
+#### Complete Example
+
+```typescript
+editorHandlers: {
+  config: {
+    'agent-id': {
+      selection: {
+        search: async (input: string, context: SelectionContext) => {
+          const agents = await agentService.search(input);
+          return agents.map((agent) => ({
+            value: agent.id,
+            label: agent.name,
+            description: agent.description,
+          }));
+        },
+        resolve: async (value: string, context: SelectionContext) => {
+          const agent = await agentService.get(value);
+          return agent
+            ? {
+                value: agent.id,
+                label: agent.name,
+                description: agent.description,
+              }
+            : null;
+        },
+        getDetails: async (
+          value: string,
+          context: SelectionContext,
+          option: SelectionOption | null
+        ) => {
+          if (option) {
+            return {
+              message: `✓ Agent connected: ${option.label}`,
+              links: [
+                { text: 'Edit agent', path: `/agents/${option.value}` },
+                { text: 'Manage agents', path: '/agents' },
+              ],
+            };
+          }
+          return {
+            message: `Agent "${value}" not found`,
+            links: [
+              { text: 'Create agent', path: '/agents/new' },
+              { text: 'Manage agents', path: '/agents' },
+            ],
+          };
+        },
+      },
+    },
+  },
+},
+```
+
+#### Type Definitions
+
+```typescript
+interface SelectionOption {
+  /** The value that will be stored in the YAML */
+  value: string;
+  /** The label displayed in the UI */
+  label: string;
+  /** Description shown in completion popup or tooltips (optional) */
+  description?: string;
+  /** Extended documentation shown in side panel (optional) */
+  documentation?: string;
+}
+
+interface SelectionDetails {
+  /** Message to display (e.g., "✓ Agent connected" or "Agent not found") */
+  message: string;
+  /** Links to related actions (e.g., "Edit agent", "Create agent") */
+  links?: Array<{
+    /** Link text */
+    text: string;
+    /** Link path (relative or absolute URL) */
+    path: string;
+  }>;
+}
+
+interface SelectionContext {
+  /** The step type ID (e.g., "oneChat.runAgent") */
+  stepType: string;
+  /** The property scope ("config" or "input") */
+  scope: 'config' | 'input';
+  /** The property key (e.g., "agent-id") */
+  propertyKey: string;
+}
+```
+
+#### Example Implementation
+
+For a complete working example, see the `external_step` implementation in `examples/workflows_extensions_example`:
+
+- Common definition: `examples/workflows_extensions_example/common/step_types/external_step.ts`
+- Public definition with `editorHandlers`: `examples/workflows_extensions_example/public/step_types/external_step.ts`
+
+#### Performance Considerations
+
+The selection interface includes built-in caching for resolved entities to optimize performance:
+
+- Resolved entities are cached for 30 seconds to avoid redundant API calls
+- The `resolve` function is only called when needed (on load, paste, or when validation is triggered), and if the value is valid against the schema.
+- The `search` function is called lazily when the user triggers autocomplete
 
 ### Step 4: Register in Plugin Setup
 
@@ -268,7 +491,6 @@ import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import { myStepDefinition } from './workflows/step_types/my_step';
 import { getMyStepWithDepsDefinition } from './workflows/step_types/my_step_with_deps';
-
 
 export interface MyPluginServerSetupDeps {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
@@ -356,10 +578,12 @@ When designing a step, you need to decide which parameters should be **config** 
 
 **Config (step-level properties):**
 Use config to **control step behavior** - how/when/who the step executes:
+
 - Execution context (e.g., `connector-id: 'slack-webhook'`, `agent-id: 'agent-123'`)
 - Execution mode (e.g., `mode: 'batch'`, `strategy: 'parallel'`)
 
 **Built-in step-level config examples:**
+
 - `if`: Conditional execution (e.g., `if: '${{ steps.check.output.passed }}'`)
 - `foreach`: Iteration over collections (e.g., `foreach: '${{ steps.list.output.items }}'`)
 - `on-failure`: Error handling policy with `continue`, `retry`, or `fallback` strategies
@@ -367,6 +591,7 @@ Use config to **control step behavior** - how/when/who the step executes:
 
 **Inputs (the `with` section):**
 Use inputs for **what/where to process** - the step's payload:
+
 - Target destinations (e.g., `index`, `channel`, `namespace`, `bucket`)
 - Data to process (e.g., `document`, `message`, `query`, `payload`)
 - Processing parameters (e.g., `severity`, `priority`, `format`, `options`)
@@ -378,26 +603,26 @@ Use inputs for **what/where to process** - the step's payload:
 # Config properties (step-level) - Control step behavior
 - name: send_notification
   type: myPlugin.sendNotification
-  connector-id: slack-webhook                      # Config: which connector to use (controls behavior)
-  mode: async                                   # Config: execution mode (controls behavior)
-  timeout: 10s                                  # Config: time limit (controls behavior)
+  connector-id: slack-webhook # Config: which connector to use (controls behavior)
+  mode: async # Config: execution mode (controls behavior)
+  timeout: 10s # Config: time limit (controls behavior)
   # Inputs (with section) - What/Where to process
   with:
-    channel: "#alerts"                          # Input: WHERE - target destination
-    message: ${{ steps.process.output.alert }}  # Input: WHAT - data to send
-    priority: high                              # Input: WHAT - processing parameter
+    channel: '#alerts' # Input: WHERE - target destination
+    message: ${{ steps.process.output.alert }} # Input: WHAT - data to send
+    priority: high # Input: WHAT - processing parameter
 
 - name: process_data
   type: myPlugin.processData
-  if: steps.previous.output.data.length > 10    # Config: by which condition to run this step (control behavior)
-  agent-id: data-processor-1                     # Config: which agent to use (controls behavior)
-  strategy: parallel                            # Config: processing strategy (controls behavior)
+  if: steps.previous.output.data.length > 10 # Config: by which condition to run this step (control behavior)
+  agent-id: data-processor-1 # Config: which agent to use (controls behavior)
+  strategy: parallel # Config: processing strategy (controls behavior)
   # Inputs (with section) - What/Where to process
   with:
-    index: logs-*                               # Input: WHERE - data source
-    query: "status:error"                       # Input: WHAT - data to process
-    outputIndex: processed-*                    # Input: WHERE - output destination
-    transform:                                  # Input: WHAT - transformation logic
+    index: logs-* # Input: WHERE - data source
+    query: 'status:error' # Input: WHAT - data to process
+    outputIndex: processed-* # Input: WHERE - output destination
+    transform: # Input: WHAT - transformation logic
       field: timestamp
       format: iso8601
 ```
@@ -444,6 +669,7 @@ However, if you need to throw or return an error with a **custom error type** or
 #### Standard Error Handling (No ExecutionError Required)
 
 For most cases, you can simply throw errors or return them. When a raw error is thrown or returned, it will be automatically converted to `ExecutionError` with the following mapping:
+
 - `ExecutionError.type` = `Error.name` (e.g., `'TypeError'`, `'RangeError'`)
 - `ExecutionError.message` = `Error.message`
 - `ExecutionError.details` = `undefined` (no additional details)
@@ -455,7 +681,7 @@ const myStepHandler: StepHandler = async (context) => {
   // Option 1: Let errors propagate (recommended for simplicity)
   const result = await someOperation(); // Throws on error - automatically caught
   return { output: { result } };
-  
+
   // Option 2: Catch and return errors explicitly
   try {
     const result = await someOperation();
@@ -477,7 +703,7 @@ import { ExecutionError } from '@kbn/workflows/server';
 
 const myStepHandler: StepHandler = async (context) => {
   const { userId, action } = context.input;
-  
+
   // Option 1: Throw ExecutionError (recommended for validation errors)
   if (!userId) {
     throw new ExecutionError({
@@ -489,7 +715,7 @@ const myStepHandler: StepHandler = async (context) => {
       },
     });
   }
-  
+
   // Option 2: Return ExecutionError in result
   const user = await fetchUser(userId);
   if (!user.hasPermission(action)) {
@@ -506,7 +732,7 @@ const myStepHandler: StepHandler = async (context) => {
       }),
     };
   }
-  
+
   // Proceed with step logic
   const result = await performAction(user, action);
   return { output: { result } };
@@ -518,19 +744,19 @@ You can also wrap standard errors with additional context:
 ```typescript
 const myStepHandler: StepHandler = async (context) => {
   const { userId, action } = context.input;
-  
+
   try {
     const user = await fetchUser(userId);
     const result = await performAction(user, action);
     return { output: { result } };
   } catch (error) {
     context.logger.error('Failed to process user action', error);
-    
+
     // If already an ExecutionError, re-throw or return it
     if (error instanceof ExecutionError) {
       throw error; // or: return { error };
     }
-    
+
     // Wrap standard errors with additional context
     throw new ExecutionError({
       type: 'ProcessingError',
@@ -591,6 +817,10 @@ The public definition must include:
 - `description`: (Optional) user-facing description
 - `documentation`: (Optional) documentation with details and examples
 - `actionsMenuCatalog`: (Optional) The catalog under which the step is displayed in the actions menu. Must be one of `StepMenuCatalog.elasticsearch`, `StepMenuCatalog.external`, `StepMenuCatalog.ai`, or `StepMenuCatalog.kibana`. Defaults to `StepMenuCatalog.kibana` if not provided.
+- `editorHandlers`: (Optional) Property handlers for custom completion and validation. See [Custom Property Completion and Validation](#custom-property-completion-and-validation) for details.
+  - `config`: Handlers for config properties (step-level, outside `with`)
+  - `input`: Handlers for input properties (inside `with`)
+  - `dynamicSchema`: Dynamic schema handlers (e.g., `getOutputSchema`)
 
 ## Dependencies
 
