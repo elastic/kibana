@@ -10,31 +10,44 @@ import { schema } from '@kbn/config-schema';
 import type {
   KibanaRequest,
   KibanaResponseFactory,
+  RequestHandlerContext,
   Logger,
   IKibanaResponse,
 } from '@kbn/core/server';
+import { PUBLIC_ROUTES } from '@kbn/reporting-common';
 import type { BaseParams } from '@kbn/reporting-common/types';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
 import type { ReportingCore } from '../../..';
 import type { ReportingRequestHandlerContext, ReportingUser } from '../../../types';
-import { authorizedUserPreRouting } from '..';
 import type { SavedReport } from '../../../lib/store';
 import { Report } from '../../../lib/store';
 import type { RequestParams } from './request_handler';
 import { RequestHandler } from './request_handler';
 
-interface JobConfig {
+export interface JobConfig {
   exportTypeId: string;
   jobParams: BaseParams;
+}
+
+export interface GenerateSystemReportRequestParams {
+  jobConfig: JobConfig;
+  request: KibanaRequest;
+  response: KibanaResponseFactory;
+  context: RequestHandlerContext;
 }
 
 const Params = schema.recordOf(schema.string(), schema.string());
 const Query = schema.nullable(schema.recordOf(schema.string(), schema.maybe(schema.string())));
 const Body = schema.nullable(schema.recordOf(schema.string(), schema.maybe(schema.any())));
 
+interface GenerateSystemReportResult {
+  report: SavedReport;
+  downloadUrl: string;
+}
+
 export type HandleResponseFunc = (
-  report: SavedReport | null,
+  result: GenerateSystemReportResult | null,
   err?: Error
 ) => Promise<IKibanaResponse>;
 export type CreateJobConfigFunc = () => JobConfig;
@@ -77,7 +90,6 @@ export class GenerateSystemReportRequestHandler<
 
     const spaceId = reporting.getSpaceId(req, logger);
 
-    // Encrypt request headers to store for the running report job to authenticate itself with Kibana
     const headers = await this.encryptHeaders();
 
     const payload = {
@@ -90,7 +102,6 @@ export class GenerateSystemReportRequestHandler<
       spaceId,
     };
 
-    // Add the report to ReportingStore to show as pending
     const report = await store.addReport(
       new Report({
         jobtype: jobType,
@@ -99,7 +110,6 @@ export class GenerateSystemReportRequestHandler<
         migration_version: version,
         space_id: spaceId || DEFAULT_SPACE_ID,
         meta: {
-          // telemetry fields
           objectType: jobParams.objectType,
           layout: jobParams.layout?.id,
           isDeprecated: job.isDeprecated,
@@ -108,20 +118,18 @@ export class GenerateSystemReportRequestHandler<
     );
     logger.debug(`Successfully stored pending job: ${report._index}/${report._id}`);
 
-    // Schedule the report with Task Manager
     const task = await reporting.scheduleTaskWithInternalES(req, report.toReportTaskJSON());
     logger.info(
       `Scheduled ${name} reporting task using internal ES client. Task ID: task:${task.id}. Report ID: ${report._id}`,
       { tags: [report._id] }
     );
 
-    // Log the action with event log
     reporting.getEventLogger(report, task).logScheduleTask();
     return report;
   }
 
   public async handleRequest(params: RequestParams) {
-    const { exportTypeId, jobParams } = params;
+    const { exportTypeId } = params;
     const checkErrorResponse = await this.checkLicense(exportTypeId);
 
     if (checkErrorResponse) {
@@ -130,44 +138,61 @@ export class GenerateSystemReportRequestHandler<
 
     try {
       const report = await this.enqueueJob(params);
-      return this.handleResponse(report);
+
+      const { basePath } = this.opts.reporting.getServerInfo();
+      const publicDownloadPath = basePath + PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX;
+
+      return this.handleResponse({
+        report,
+        downloadUrl: `${publicDownloadPath}/${report._id}`,
+      });
     } catch (err) {
       return this.handleResponse(null, err);
     }
   }
 }
 
-export type GenerateSystemReportRequestHandlerFunc = ReturnType<
-  typeof getGenerateSystemReportRequestHandler
+export type HandleGenerateSystemReportRequestFunc = ReturnType<
+  typeof handleGenerateSystemReportRequest
 >;
 
-export function getGenerateSystemReportRequestHandler(
+export async function handleGenerateSystemReportRequest(
   reporting: ReportingCore,
   logger: Logger,
   path: string,
-  createJobConfig: CreateJobConfigFunc,
+  requestParams: GenerateSystemReportRequestParams,
   handleResponse: HandleResponseFunc
 ) {
-  const { exportTypeId, jobParams } = createJobConfig();
-  return authorizedUserPreRouting(reporting, async (user, context, req, res) => {
-    const requestHandler = new GenerateSystemReportRequestHandler(
-      {
-        reporting,
-        user,
-        context,
-        path,
-        req: req as KibanaRequest<TypeOf<typeof Params>, TypeOf<typeof Query>, TypeOf<typeof Body>>,
-        res,
-        logger,
-      },
-      {
-        handleResponse,
-      }
-    );
+  const { jobConfig, request: req, response: res, context } = requestParams;
+  const { exportTypeId, jobParams } = jobConfig;
+  const { securityService } = await reporting.getPluginStartDeps();
+  const reportingContext = {
+    ...context,
+    reporting: Promise.resolve(reporting.getContract()),
+  };
+  const user = securityService.authc.getCurrentUser(req);
 
-    return await requestHandler.handleRequest({
-      exportTypeId,
-      jobParams,
-    });
+  if (!user) {
+    return res.unauthorized({ body: `Sorry, you aren't authenticated` });
+  }
+
+  const requestHandler = new GenerateSystemReportRequestHandler(
+    {
+      reporting,
+      user,
+      context: reportingContext,
+      path,
+      req: req as KibanaRequest<TypeOf<typeof Params>, TypeOf<typeof Query>, TypeOf<typeof Body>>,
+      res,
+      logger,
+    },
+    {
+      handleResponse,
+    }
+  );
+
+  return await requestHandler.handleRequest({
+    exportTypeId,
+    jobParams,
   });
 }

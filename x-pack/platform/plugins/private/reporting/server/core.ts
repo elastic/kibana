@@ -61,7 +61,7 @@ import type { ReportingPluginRouter } from './types';
 import { EventTracker } from './usage';
 import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from './saved_objects';
 import { EmailNotificationService } from './services/notifications/email_notification_service';
-import { getGenerateSystemReportRequestHandler } from './routes/common/request_handler/generate_system_report_request_handler';
+import { handleGenerateSystemReportRequest } from './routes/common/request_handler/generate_system_report_request_handler';
 import { API_PRIVILEGES } from './features';
 
 export interface ReportingInternalSetup {
@@ -143,12 +143,12 @@ export class ReportingCore {
     this.getContract = () => ({
       registerExportTypes: (id) => id,
       getSpaceId: this.getSpaceId.bind(this),
-      getGenerateSystemReportHandler: (path, jobConfigFunc, handleResponseFunc) =>
-        getGenerateSystemReportRequestHandler(
+      handleGenerateSystemReportRequest: (path, requestParams, handleResponseFunc) =>
+        handleGenerateSystemReportRequest(
           this,
           this.logger,
           path,
-          jobConfigFunc,
+          requestParams,
           handleResponseFunc
         ),
     });

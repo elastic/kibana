@@ -13,14 +13,15 @@ import {
 } from '@kbn/data-plugin/common';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { PUBLIC_ROUTES } from '@kbn/reporting-common';
-import type { SavedReport } from '@kbn/reporting-plugin/server/lib/store';
+import type { ReportingStart } from '@kbn/reporting-plugin/server';
 
 import { AGENT_API_ROUTES, getSortConfig, removeSOAttributes } from '../../../common';
 import type { FleetRequestHandler, PostGenerateAgentsReportRequestSchema } from '../../types';
 import { appContextService } from '../../services/app_context';
 import { buildAgentStatusRuntimeField } from '../../services/agents/build_status_runtime_field';
 import { FleetError } from '../../errors';
+
+type HandleResponseFunc = Parameters<ReportingStart['handleGenerateSystemReportRequest']>[2];
 
 export const generateReportHandler: FleetRequestHandler<
   Record<string, string>,
@@ -29,6 +30,12 @@ export const generateReportHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const { agentIds, fields, timezone, sort } = request.body;
   const logger = appContextService.getLogger();
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request);
+
+  if (!user) {
+    throw new FleetError('User not authenticated');
+  }
+
   const runtimeFieldsResult = await buildAgentStatusRuntimeField();
   const runtimeFields = runtimeFieldsResult.status.script?.source ?? 'emit("")';
 
@@ -37,45 +44,38 @@ export const generateReportHandler: FleetRequestHandler<
     throw new FleetError('Report generation is not ready');
   }
 
-  const jobConfig = () => {
-    return {
-      jobParams: getJobParams(agentIds, fields, runtimeFields, timezone, sort),
-      exportTypeId: 'csv_searchsource',
-    };
+  const jobConfig = {
+    jobParams: getJobParams(agentIds, fields, runtimeFields, timezone, sort),
+    exportTypeId: 'csv_searchsource',
   };
 
-  const handleResponse = async (report: SavedReport | null, err?: Error) => {
+  const handleResponse: HandleResponseFunc = async (result, err?) => {
     if (err) {
       throw err;
     }
 
-    if (!report) {
+    if (!result) {
       throw new FleetError('Report generation encountered an unknown error');
     }
-    // Return the download URL
-    const basePath = appContextService.getHttpSetup().basePath.serverBasePath;
-    const publicDownloadPath = basePath + PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX;
 
     return response.ok({
       body: {
-        url: `${publicDownloadPath}/${report._id}`,
+        url: result.downloadUrl,
       },
     });
   };
 
   try {
-    const handler = reporting.getGenerateSystemReportHandler(
+    return await reporting.handleGenerateSystemReportRequest(
       AGENT_API_ROUTES.GENERATE_REPORT_PATTERN,
-      jobConfig,
+      {
+        request,
+        response,
+        context,
+        jobConfig,
+      },
       handleResponse
     );
-
-    const reportingContext = {
-      ...context,
-      reporting: Promise.resolve(reporting),
-    };
-
-    return await handler(reportingContext, request, response);
   } catch (error) {
     logger.error(`Failed to generate report: ${error.message}`);
     throw new FleetError(`Failed to generate report: ${error.message}`);
