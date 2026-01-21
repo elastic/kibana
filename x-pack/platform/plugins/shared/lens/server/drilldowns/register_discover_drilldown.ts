@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { schema } from "@kbn/config-schema";
-import { EmbeddableSetup } from "@kbn/embeddable-plugin/server";
-import { DISCOVER_DRILLDOWN_SUPPORTED_TRIGGERS, DISCOVER_DRILLDOWN_TYPE } from "@kbn/lens-plugin/common/constants";
+import { schema } from '@kbn/config-schema';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import {
+  DISCOVER_DRILLDOWN_SUPPORTED_TRIGGERS,
+  DISCOVER_DRILLDOWN_TYPE,
+} from '../../common/constants';
 
 export const discoverDrilldownSchema = schema.object({
   open_in_new_tab: schema.maybe(schema.boolean()),
@@ -17,6 +20,6 @@ export const discoverDrilldownSchema = schema.object({
 export function registerDiscoverDrilldown(embeddableSetup: EmbeddableSetup) {
   embeddableSetup.registerDrilldown(DISCOVER_DRILLDOWN_TYPE, {
     schema: discoverDrilldownSchema,
-    supportedTriggers: DISCOVER_DRILLDOWN_SUPPORTED_TRIGGERS
+    supportedTriggers: DISCOVER_DRILLDOWN_SUPPORTED_TRIGGERS,
   });
 }

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
+import type { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import type { ApplicationStart } from '@kbn/core/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { CollectConfigProps as CollectConfigPropsBase } from '@kbn/kibana-utils-plugin/public';

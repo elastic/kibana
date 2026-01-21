@@ -6,7 +6,11 @@
  */
 
 import rison from '@kbn/rison';
-import { APPLY_FILTER_TRIGGER, type RefreshInterval, type TimeRange } from '@kbn/data-plugin/common';
+import {
+  APPLY_FILTER_TRIGGER,
+  type RefreshInterval,
+  type TimeRange,
+} from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
 
 import { LENS_ITEM_VERSION_V1 } from './content_management/constants';
