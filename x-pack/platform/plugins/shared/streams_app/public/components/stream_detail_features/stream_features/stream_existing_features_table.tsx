@@ -20,10 +20,6 @@ import { EuiButtonIcon, EuiScreenReaderOnly } from '@elastic/eui';
 import type { Streams, System } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import type { AIFeatures } from '../../../hooks/use_ai_features';
-import {
-  OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM,
-  SELECTED_FEATURES_URL_PARAM,
-} from '../../../constants';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamFeaturesApi } from '../../../hooks/use_stream_features_api';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -63,8 +59,8 @@ export function StreamExistingFeaturesTable({
       query: {
         rangeFrom,
         rangeTo,
-        [OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM]: 'true',
-        [SELECTED_FEATURES_URL_PARAM]: significantEventsFeatures.map((f) => f.name).join(','),
+        openFlyout: 'true',
+        selectedFeatures: significantEventsFeatures.map((f) => f.name).join(','),
       },
     });
   };

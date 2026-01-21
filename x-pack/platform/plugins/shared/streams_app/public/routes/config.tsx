@@ -18,13 +18,31 @@ import { StreamDetailManagement } from '../components/data_management/stream_det
 import { SignificantEventsDiscoveryPage } from '../components/significant_events_discovery/page';
 
 /**
+ * Optional time range query params.
+ * DateRangeRedirect ensures these are present at runtime.
+ */
+const timeRangeQueryParams = t.partial({
+  rangeFrom: t.string,
+  rangeTo: t.string,
+});
+
+/**
+ * Extended query params for management routes that may include
+ * additional feature-specific params (e.g., significant events flyout).
+ */
+const managementQueryParams = t.partial({
+  rangeFrom: t.string,
+  rangeTo: t.string,
+  // Significant events flyout params
+  openFlyout: t.string,
+  selectedFeatures: t.string,
+  // Data quality page state
+  pageState: t.string,
+});
+
+/**
  * The array of route definitions to be used when the application
  * creates the routes.
- *
- * Note: Time range params (rangeFrom/rangeTo) are managed via URL query params
- * but NOT defined in route params. DateRangeRedirect ensures they exist,
- * and useTimeRange reads them directly from the URL. This avoids type
- * inference issues with the typed router while still persisting time in URLs.
  */
 const streamsAppRoutes = {
   '/': {
@@ -43,6 +61,9 @@ const streamsAppRoutes = {
     children: {
       '/': {
         element: <StreamListView />,
+        params: t.type({
+          query: timeRangeQueryParams,
+        }),
       },
       '/_discovery': {
         element: <Outlet />,
@@ -56,6 +77,7 @@ const streamsAppRoutes = {
               path: t.type({
                 tab: t.string,
               }),
+              query: timeRangeQueryParams,
             }),
           },
         },
@@ -70,6 +92,7 @@ const streamsAppRoutes = {
           path: t.type({
             key: t.string,
           }),
+          query: timeRangeQueryParams,
         }),
         children: {
           '/{key}': {
@@ -99,6 +122,7 @@ const streamsAppRoutes = {
               path: t.type({
                 tab: t.string,
               }),
+              query: timeRangeQueryParams,
             }),
           },
           '/{key}/management/{tab}': {
@@ -107,6 +131,7 @@ const streamsAppRoutes = {
               path: t.type({
                 tab: t.string,
               }),
+              query: managementQueryParams,
             }),
           },
           /**

@@ -14,15 +14,16 @@ const DEFAULT_TO = 'now';
 
 /**
  * Hook to get the current time range from URL params.
- * Reads directly from URL search params rather than typed router params
- * to avoid type inference issues with route definitions.
+ *
+ * Reads from URL search params directly to work across all routes.
+ * Time params are defined in route definitions for type-safe navigation,
+ * but read universally via URL for flexibility.
  *
  * Assumes DateRangeRedirect has ensured time params are present in the URL.
  */
 export function useTimeRange() {
   const location = useLocation();
 
-  // Read directly from URL search params
   // DateRangeRedirect ensures rangeFrom/rangeTo are always present
   const searchParams = new URLSearchParams(location.search);
   const rangeFrom = searchParams.get('rangeFrom') ?? DEFAULT_FROM;
