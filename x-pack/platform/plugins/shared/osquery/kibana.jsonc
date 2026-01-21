@@ -31,7 +31,8 @@
       "lens",
       "telemetry",
       "cases",
-      "spaces"
+      "spaces",
+      "timelines"
     ],
     "requiredBundles": [
       "esUiShared",
