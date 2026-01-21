@@ -69,6 +69,10 @@ export const AttackDiscoveryFindRequestQuery = z.object({
    */
   shared: BooleanFromString.optional(),
   /**
+   * Whether to filter by scheduled or ad-hoc attack discoveries. If omitted, both types of attack discoveries are returned. Use `true` to return only scheduled discoveries or `false` to return only ad-hoc discoveries.
+   */
+  scheduled: BooleanFromString.optional(),
+  /**
    * Field used to sort results. See `AttackDiscoveryFindSortField` for allowed values.
    */
   sort_field: AttackDiscoveryFindSortField.optional().default('@timestamp'),
