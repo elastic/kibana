@@ -112,6 +112,7 @@ export class ScoutCypressReporter {
   private getScoutFileInfoForPath(filePath: string): ScoutFileInfo {
     const fileOwners = this.getFileOwners(filePath);
     const areas = this.getOwnerAreas(fileOwners);
+
     return {
       path: filePath,
       owner: fileOwners,
