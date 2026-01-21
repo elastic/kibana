@@ -11,9 +11,8 @@ import type {
   SeparatorExpandPopoverListItemProps,
 } from '../primitives/list_graph_popover';
 import { emitFilterAction } from '../../filters/filter_pub_sub';
-import { emitPreviewAction } from '../../preview_pub_sub';
+import { isFilterActive } from '../../filters/filter_state';
 import type { NodeViewModel } from '../../types';
-import { getNodeDocumentMode, isEntityNodeEnriched } from '../../utils';
 import {
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID,
@@ -22,7 +21,6 @@ import {
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID,
 } from '../../test_ids';
 import { RELATED_ENTITY } from '../../../common/constants';
-import type { EntityOrEventItem } from '../../graph_grouped_node_preview_panel/components/grouped_item/types';
 
 /**
  * Helper function to extract ecsParentField from the entity object in the first document.
@@ -63,21 +61,36 @@ export const getTargetFieldFromNamespace = (sourceNamespace: string | undefined)
 };
 
 /**
+ * Opt-in configuration for which items to render in the entity expand popover.
+ * All items default to false - consumers must explicitly enable the items they want.
+ */
+export interface EntityExpandEnabledItems {
+  /** Show "Show this entity's actions" filter toggle */
+  showActionsByEntity?: boolean;
+  /** Show "Show actions done to this entity" filter toggle */
+  showActionsOnEntity?: boolean;
+  /** Show "Show related events" filter toggle */
+  showRelatedEvents?: boolean;
+  /** Show "Show entity details" preview action */
+  showEntityDetails?: boolean;
+}
+
+/**
  * Options for generating entity expand popover items.
  */
 export interface GetEntityExpandItemsOptions {
   /** The node ID */
   nodeId: string;
-  /** The node data */
+  /** The node data (required for deriving filter fields from source namespace) */
   nodeData?: NodeViewModel;
-  /** Function to check if a filter is currently active */
-  isFilterActive: (field: string, value: string) => boolean;
-  /** Callback to open event preview with full node data (for graph node popovers) */
-  onOpenEventPreview?: (node: NodeViewModel) => void;
-  /** Item to use for preview action via pub-sub (for flyout action buttons) */
-  previewItem?: EntityOrEventItem;
+  /** Callback to show entity details. Called when "Show entity details" is clicked. */
+  onShowEntityDetails?: () => void;
   /** Callback to close the popover */
   onClose?: () => void;
+  /** Opt-in configuration for which items to render. All default to false. */
+  enabledItems: EntityExpandEnabledItems;
+  /** Whether entity details should be disabled (shown but not clickable). Defaults to false. */
+  entityDetailsDisabled?: boolean;
 }
 
 const DISABLED_TOOLTIP = i18n.translate(
@@ -88,142 +101,142 @@ const DISABLED_TOOLTIP = i18n.translate(
 /**
  * Generates entity expand popover items with onClick handlers.
  * Returns items ready to be rendered directly in ListGraphPopover.
+ *
+ * Uses opt-in pattern: consumers must explicitly enable each item type they want.
  */
 export const getEntityExpandItems = (
   options: GetEntityExpandItemsOptions
 ): Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps> => {
-  const { nodeId, nodeData, isFilterActive, onOpenEventPreview, previewItem, onClose } = options;
+  const {
+    nodeId,
+    nodeData,
+    onShowEntityDetails,
+    onClose,
+    enabledItems,
+    entityDetailsDisabled = false,
+  } = options;
 
-  // Determine document mode and fields from node data
-  const docMode = nodeData ? getNodeDocumentMode(nodeData) : 'single-entity';
+  // Determine fields from node data
   const sourceNamespace = nodeData ? getSourceNamespaceFromNode(nodeData) : undefined;
   const actorField = getActorFieldFromNamespace(sourceNamespace);
   const targetField = getTargetFieldFromNamespace(sourceNamespace);
 
-  // Determine if entity details should be disabled
-  const hasPreviewAction = onOpenEventPreview !== undefined || previewItem !== undefined;
-  const entityDetailsDisabled =
-    !hasPreviewAction ||
-    !['single-entity', 'grouped-entities'].includes(docMode) ||
-    (docMode === 'single-entity' && nodeData !== undefined && !isEntityNodeEnriched(nodeData));
+  const items: Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps> = [];
 
-  // Create the entity details click handler
-  const handleEntityDetailsClick = () => {
-    if (onOpenEventPreview && nodeData) {
-      onOpenEventPreview(nodeData);
-    } else if (previewItem) {
-      emitPreviewAction(previewItem);
-    }
-    onClose?.();
-  };
-
-  // Entity details item
-  const entityDetailsItem: ItemExpandPopoverListItemProps = {
-    type: 'item',
-    iconType: 'expand',
-    testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
-    label: i18n.translate(
-      'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetails',
-      { defaultMessage: 'Show entity details' }
-    ),
-    disabled: entityDetailsDisabled,
-    onClick: handleEntityDetailsClick,
-    showToolTip: entityDetailsDisabled,
-    toolTipText: entityDetailsDisabled ? DISABLED_TOOLTIP : undefined,
-    toolTipProps: entityDetailsDisabled
-      ? {
-          position: 'bottom',
-          'data-test-subj': GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID,
-        }
-      : undefined,
-  };
-
-  // For 'grouped-entities', only show entity details
-  if (docMode === 'grouped-entities') {
-    return [entityDetailsItem];
-  }
-
-  // For 'single-entity', show filter actions + separator + entity details
-  if (docMode === 'single-entity') {
+  // Filter action items
+  if (enabledItems.showActionsByEntity) {
     const actionsByEntityActive = isFilterActive(actorField, nodeId);
-    const actionsOnEntityActive = isFilterActive(targetField, nodeId);
-    const relatedEventsActive = isFilterActive(RELATED_ENTITY, nodeId);
-
-    return [
-      {
-        type: 'item',
-        iconType: 'sortRight',
-        testSubject: GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
-        label: actionsByEntityActive
-          ? i18n.translate(
-              'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideThisEntitysActions',
-              { defaultMessage: "Hide this entity's actions" }
-            )
-          : i18n.translate(
-              'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showThisEntitysActions',
-              { defaultMessage: "Show this entity's actions" }
-            ),
-        onClick: () => {
-          emitFilterAction({
-            type: 'TOGGLE_ACTIONS_BY_ENTITY',
-            field: actorField,
-            value: nodeId,
-            action: actionsByEntityActive ? 'hide' : 'show',
-          });
-          onClose?.();
-        },
+    items.push({
+      type: 'item',
+      iconType: 'sortRight',
+      testSubject: GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
+      label: actionsByEntityActive
+        ? i18n.translate(
+            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideThisEntitysActions',
+            { defaultMessage: "Hide this entity's actions" }
+          )
+        : i18n.translate(
+            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showThisEntitysActions',
+            { defaultMessage: "Show this entity's actions" }
+          ),
+      onClick: () => {
+        emitFilterAction({
+          type: 'TOGGLE_ACTIONS_BY_ENTITY',
+          field: actorField,
+          value: nodeId,
+          action: actionsByEntityActive ? 'hide' : 'show',
+        });
+        onClose?.();
       },
-      {
-        type: 'item',
-        iconType: 'sortLeft',
-        testSubject: GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID,
-        label: actionsOnEntityActive
-          ? i18n.translate(
-              'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideActionsDoneToThisEntity',
-              { defaultMessage: 'Hide actions done to this entity' }
-            )
-          : i18n.translate(
-              'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showActionsDoneToThisEntity',
-              { defaultMessage: 'Show actions done to this entity' }
-            ),
-        onClick: () => {
-          emitFilterAction({
-            type: 'TOGGLE_ACTIONS_ON_ENTITY',
-            field: targetField,
-            value: nodeId,
-            action: actionsOnEntityActive ? 'hide' : 'show',
-          });
-          onClose?.();
-        },
-      },
-      {
-        type: 'item',
-        iconType: 'analyzeEvent',
-        testSubject: GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID,
-        label: relatedEventsActive
-          ? i18n.translate(
-              'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideRelatedEntities',
-              { defaultMessage: 'Hide related events' }
-            )
-          : i18n.translate(
-              'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showRelatedEntities',
-              { defaultMessage: 'Show related events' }
-            ),
-        onClick: () => {
-          emitFilterAction({
-            type: 'TOGGLE_RELATED_EVENTS',
-            field: RELATED_ENTITY,
-            value: nodeId,
-            action: relatedEventsActive ? 'hide' : 'show',
-          });
-          onClose?.();
-        },
-      },
-      { type: 'separator' },
-      entityDetailsItem,
-    ];
+    });
   }
 
-  // For other modes, return empty array
-  return [];
+  if (enabledItems.showActionsOnEntity) {
+    const actionsOnEntityActive = isFilterActive(targetField, nodeId);
+    items.push({
+      type: 'item',
+      iconType: 'sortLeft',
+      testSubject: GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID,
+      label: actionsOnEntityActive
+        ? i18n.translate(
+            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideActionsDoneToThisEntity',
+            { defaultMessage: 'Hide actions done to this entity' }
+          )
+        : i18n.translate(
+            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showActionsDoneToThisEntity',
+            { defaultMessage: 'Show actions done to this entity' }
+          ),
+      onClick: () => {
+        emitFilterAction({
+          type: 'TOGGLE_ACTIONS_ON_ENTITY',
+          field: targetField,
+          value: nodeId,
+          action: actionsOnEntityActive ? 'hide' : 'show',
+        });
+        onClose?.();
+      },
+    });
+  }
+
+  if (enabledItems.showRelatedEvents) {
+    const relatedEventsActive = isFilterActive(RELATED_ENTITY, nodeId);
+    items.push({
+      type: 'item',
+      iconType: 'analyzeEvent',
+      testSubject: GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID,
+      label: relatedEventsActive
+        ? i18n.translate(
+            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideRelatedEntities',
+            { defaultMessage: 'Hide related events' }
+          )
+        : i18n.translate(
+            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showRelatedEntities',
+            { defaultMessage: 'Show related events' }
+          ),
+      onClick: () => {
+        emitFilterAction({
+          type: 'TOGGLE_RELATED_EVENTS',
+          field: RELATED_ENTITY,
+          value: nodeId,
+          action: relatedEventsActive ? 'hide' : 'show',
+        });
+        onClose?.();
+      },
+    });
+  }
+
+  // Entity details item (with optional separator if filter items exist)
+  if (enabledItems.showEntityDetails) {
+    // Add separator if there are filter items before the entity details
+    if (items.length > 0) {
+      items.push({ type: 'separator' });
+    }
+
+    const handleEntityDetailsClick = () => {
+      onShowEntityDetails?.();
+      onClose?.();
+    };
+
+    items.push({
+      type: 'item',
+      iconType: 'expand',
+      testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
+      label: i18n.translate(
+        'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetails',
+        { defaultMessage: 'Show entity details' }
+      ),
+      disabled: entityDetailsDisabled,
+      onClick: handleEntityDetailsClick,
+      showToolTip: entityDetailsDisabled,
+      toolTipText: entityDetailsDisabled ? DISABLED_TOOLTIP : undefined,
+      toolTipProps: entityDetailsDisabled
+        ? {
+            position: 'bottom',
+            'data-test-subj': GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID,
+          }
+        : undefined,
+    });
+  }
+
+  return items;
 };

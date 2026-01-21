@@ -14,7 +14,7 @@ import {
   GROUPED_ITEM_ACTIONS_POPOVER_TEST_ID,
 } from '../../../test_ids';
 import type { EntityItem } from '../types';
-import { isFilterActive } from '../../../../filters/filter_state';
+import { emitPreviewAction } from '../../../../preview_pub_sub';
 import { getEntityExpandItems } from '../../../../popovers/node_expand/get_entity_expand_items';
 
 const actionsButtonAriaLabel = i18n.translate(
@@ -43,9 +43,14 @@ export const EntityActionsButton = ({ item }: EntityActionsButtonProps) => {
   // Generate items fresh on each render to reflect current filter state
   const items = getEntityExpandItems({
     nodeId: item.id,
-    isFilterActive,
-    previewItem: item,
+    onShowEntityDetails: item.availableInEntityStore ? () => emitPreviewAction(item) : undefined,
     onClose: closePopover,
+    enabledItems: {
+      showActionsByEntity: true,
+      showActionsOnEntity: true,
+      showRelatedEvents: true,
+      showEntityDetails: !!item.availableInEntityStore,
+    },
   });
 
   return (

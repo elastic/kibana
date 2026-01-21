@@ -9,8 +9,8 @@ import { useCallback } from 'react';
 import { useNodeExpandPopover } from './use_node_expand_popover';
 import type { NodeProps, NodeViewModel } from '../../types';
 import { GRAPH_NODE_EXPAND_POPOVER_TEST_ID } from '../../test_ids';
-import { isFilterActive } from '../../filters/filter_state';
 import { getEntityExpandItems } from './get_entity_expand_items';
+import { getNodeDocumentMode, isEntityNodeEnriched } from '../../utils';
 
 /**
  * Hook to handle the entity node expand popover.
@@ -27,11 +27,26 @@ import { getEntityExpandItems } from './get_entity_expand_items';
 export const useEntityNodeExpandPopover = (onOpenEventPreview?: (node: NodeViewModel) => void) => {
   const itemsFn = useCallback(
     (node: NodeProps) => {
+      const docMode = getNodeDocumentMode(node.data);
+      const isSingleEntity = docMode === 'single-entity';
+      const isGroupedEntities = docMode === 'grouped-entities';
+      const isEnriched = isEntityNodeEnriched(node.data);
+
       return getEntityExpandItems({
         nodeId: node.id,
         nodeData: node.data,
-        isFilterActive,
-        onOpenEventPreview,
+        onShowEntityDetails: onOpenEventPreview ? () => onOpenEventPreview(node.data) : undefined,
+        enabledItems: {
+          // Filter actions only for single-entity mode
+          showActionsByEntity: isSingleEntity,
+          showActionsOnEntity: isSingleEntity,
+          showRelatedEvents: isSingleEntity,
+          // Entity details for both single and grouped, when handler available
+          showEntityDetails:
+            (isSingleEntity || isGroupedEntities) && onOpenEventPreview !== undefined,
+        },
+        // Disable entity details if not enriched (single-entity mode)
+        entityDetailsDisabled: isSingleEntity && !isEnriched,
       });
     },
     [onOpenEventPreview]

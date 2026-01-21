@@ -11,15 +11,23 @@ import type {
   SeparatorExpandPopoverListItemProps,
 } from '../primitives/list_graph_popover';
 import { emitFilterAction } from '../../filters/filter_pub_sub';
-import { emitPreviewAction } from '../../preview_pub_sub';
-import type { NodeViewModel } from '../../types';
-import { getNodeDocumentMode } from '../../utils';
+import { isFilterActive } from '../../filters/filter_state';
 import {
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID,
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
 } from '../../test_ids';
 import { EVENT_ACTION } from '../../../common/constants';
-import type { EntityOrEventItem } from '../../graph_grouped_node_preview_panel/components/grouped_item/types';
+
+/**
+ * Opt-in configuration for which items to render in the label expand popover.
+ * All items default to false - consumers must explicitly enable the items they want.
+ */
+export interface LabelExpandEnabledItems {
+  /** Show "Show events with this action" filter toggle */
+  showEventsWithAction?: boolean;
+  /** Show "Show event details" preview action */
+  showEventDetails?: boolean;
+}
 
 /**
  * Options for generating label expand popover items.
@@ -27,40 +35,33 @@ import type { EntityOrEventItem } from '../../graph_grouped_node_preview_panel/c
 export interface GetLabelExpandItemsOptions {
   /** The node label (action name) */
   nodeLabel: string;
-  /** The node data */
-  nodeData?: NodeViewModel;
-  /** Function to check if a filter is currently active */
-  isFilterActive: (field: string, value: string) => boolean;
-  /** Callback to open event preview with full node data (for graph node popovers) */
-  onOpenEventPreview?: (node: NodeViewModel) => void;
-  /** Item to use for preview action via pub-sub (for flyout action buttons) */
-  previewItem?: EntityOrEventItem;
+  /** Callback to show event details. Called when "Show event details" is clicked. */
+  onShowEventDetails?: () => void;
   /** Callback to close the popover */
   onClose?: () => void;
+  /** Opt-in configuration for which items to render. All default to false. */
+  enabledItems: LabelExpandEnabledItems;
+  /** Label for event details item. Defaults to 'Show event details'. */
+  eventDetailsLabel?: string;
 }
 
 /**
  * Generates label expand popover items with onClick handlers.
  * Returns items ready to be rendered directly in ListGraphPopover.
+ *
+ * Uses opt-in pattern: consumers must explicitly enable each item type they want.
  */
 export const getLabelExpandItems = (
   options: GetLabelExpandItemsOptions
 ): Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps> => {
-  const { nodeLabel, nodeData, isFilterActive, onOpenEventPreview, previewItem, onClose } = options;
+  const { nodeLabel, onShowEventDetails, onClose, enabledItems, eventDetailsLabel } = options;
 
-  // Determine document mode
-  const docMode = nodeData ? getNodeDocumentMode(nodeData) : 'single-event';
+  const items: Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps> = [];
 
-  // Check if filter is active
-  const eventsWithActionActive = isFilterActive(EVENT_ACTION, nodeLabel);
-
-  // Determine if event details should be shown
-  const hasPreviewAction = onOpenEventPreview !== undefined || previewItem !== undefined;
-  const shouldShowEventDetails =
-    hasPreviewAction && ['single-alert', 'single-event', 'grouped-events'].includes(docMode);
-
-  const items: Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps> = [
-    {
+  // Filter action item
+  if (enabledItems.showEventsWithAction) {
+    const eventsWithActionActive = isFilterActive(EVENT_ACTION, nodeLabel);
+    items.push({
       type: 'item',
       iconType: 'analyzeEvent',
       testSubject: GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID,
@@ -82,31 +83,28 @@ export const getLabelExpandItems = (
         });
         onClose?.();
       },
-    },
-  ];
+    });
+  }
 
-  if (shouldShowEventDetails) {
-    items.push({ type: 'separator' });
+  // Event details item (with optional separator if filter items exist)
+  if (enabledItems.showEventDetails) {
+    // Add separator if there are filter items before the event details
+    if (items.length > 0) {
+      items.push({ type: 'separator' });
+    }
+
+    const defaultLabel = i18n.translate(
+      'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showEventDetails',
+      { defaultMessage: 'Show event details' }
+    );
+
     items.push({
       type: 'item',
       iconType: 'expand',
       testSubject: GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
-      label:
-        docMode === 'single-alert'
-          ? i18n.translate(
-              'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showAlertDetails',
-              { defaultMessage: 'Show alert details' }
-            )
-          : i18n.translate(
-              'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showEventDetails',
-              { defaultMessage: 'Show event details' }
-            ),
+      label: eventDetailsLabel ?? defaultLabel,
       onClick: () => {
-        if (onOpenEventPreview && nodeData) {
-          onOpenEventPreview(nodeData);
-        } else if (previewItem) {
-          emitPreviewAction(previewItem);
-        }
+        onShowEventDetails?.();
         onClose?.();
       },
     });

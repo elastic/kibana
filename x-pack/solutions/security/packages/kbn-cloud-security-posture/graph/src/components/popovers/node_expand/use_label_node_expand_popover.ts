@@ -6,11 +6,12 @@
  */
 
 import { useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useNodeExpandPopover } from './use_node_expand_popover';
 import type { NodeProps, NodeViewModel } from '../../types';
 import { GRAPH_LABEL_EXPAND_POPOVER_TEST_ID } from '../../test_ids';
-import { isFilterActive } from '../../filters/filter_state';
 import { getLabelExpandItems } from './get_label_expand_items';
+import { getNodeDocumentMode } from '../../utils';
 
 /**
  * Hook to handle the label node expand popover.
@@ -31,11 +32,27 @@ export const useLabelNodeExpandPopover = (onOpenEventPreview?: (node: NodeViewMo
       const nodeLabel =
         'label' in node.data && typeof node.data.label === 'string' ? node.data.label : '';
 
+      const docMode = getNodeDocumentMode(node.data);
+      const isSingleAlert = docMode === 'single-alert';
+      const isSingleEvent = docMode === 'single-event';
+      const isGroupedEvents = docMode === 'grouped-events';
+
       return getLabelExpandItems({
         nodeLabel,
-        nodeData: node.data,
-        isFilterActive,
-        onOpenEventPreview,
+        onShowEventDetails: onOpenEventPreview ? () => onOpenEventPreview(node.data) : undefined,
+        enabledItems: {
+          // Always show filter action for label nodes
+          showEventsWithAction: true,
+          // Event details for single events/alerts or grouped events when handler available
+          showEventDetails:
+            (isSingleAlert || isSingleEvent || isGroupedEvents) && onOpenEventPreview !== undefined,
+        },
+        eventDetailsLabel: isSingleAlert
+          ? i18n.translate(
+              'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showAlertDetails',
+              { defaultMessage: 'Show alert details' }
+            )
+          : undefined,
       });
     },
     [onOpenEventPreview]
