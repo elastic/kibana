@@ -10,29 +10,21 @@ import { Router } from '@kbn/shared-ux-router';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { render, screen } from '@testing-library/react';
-import { createLocation, createMemoryHistory } from 'history';
+import { createMemoryHistory } from 'history';
 import * as React from 'react';
-import type { RouteComponentProps } from 'react-router-dom';
-import { getIsExperimentalFeatureEnabled } from '../common/get_experimental_features';
-import type { MatchParams } from './home';
-import TriggersActionsUIHome from './home';
-import { hasShowActionsCapability } from './lib/capabilities';
-import { useKibana } from '../common/lib/kibana';
+import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
+import RulesPage from './rules_page';
+import { hasShowActionsCapability } from '../../lib/capabilities';
+import { useKibana } from '../../../common/lib/kibana';
 
-jest.mock('../common/lib/kibana');
-jest.mock('../common/get_experimental_features');
-jest.mock('./lib/capabilities');
+jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/get_experimental_features');
+jest.mock('../../lib/capabilities');
 
-jest.mock('./sections/rules_list/components/rules_list', () => {
+jest.mock('../rules_list/components/rules_list', () => {
   return () => <div data-test-subj="rulesListComponents">{'Render Rule list component'}</div>;
 });
 
-jest.mock('./components/health_check', () => ({
-  HealthCheck: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-jest.mock('./context/health_context', () => ({
-  HealthContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
 jest.mock('@kbn/ebt-tools', () => ({
   PerformanceContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
@@ -52,7 +44,7 @@ const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 const queryClient = new QueryClient();
 
-describe('home', () => {
+describe('rulesPage', () => {
   beforeEach(() => {
     (hasShowActionsCapability as jest.Mock).mockClear();
     (getIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(() => false);
@@ -60,26 +52,12 @@ describe('home', () => {
   });
 
   it('renders rule list components', async () => {
-    const props: RouteComponentProps<MatchParams> = {
-      history: createMemoryHistory({
-        initialEntries: ['/rules'],
-      }),
-      location: createLocation('/rules'),
-      match: {
-        isExact: true,
-        path: `/rules`,
-        url: '',
-        params: {
-          section: 'rules',
-        },
-      },
-    };
-
+    const history = createMemoryHistory({ initialEntries: ['/'] });
     render(
       <IntlProvider locale="en">
-        <Router history={props.history}>
+        <Router history={history}>
           <QueryClientProvider client={queryClient}>
-            <TriggersActionsUIHome {...props} />
+            <RulesPage />
           </QueryClientProvider>
         </Router>
       </IntlProvider>
@@ -89,26 +67,11 @@ describe('home', () => {
   });
 
   it('shows the correct number of tabs', async () => {
-    (hasShowActionsCapability as jest.Mock).mockImplementation(() => {
-      return true;
-    });
-    const props: RouteComponentProps<MatchParams> = {
-      history: createMemoryHistory(),
-      location: createLocation('/'),
-      match: {
-        isExact: true,
-        path: `/connectors`,
-        url: '',
-        params: {
-          section: 'connectors',
-        },
-      },
-    };
-
+    const history = createMemoryHistory({ initialEntries: ['/'] });
     const home = mountWithIntl(
-      <Router history={props.history}>
+      <Router history={history}>
         <QueryClientProvider client={queryClient}>
-          <TriggersActionsUIHome {...props} />
+          <RulesPage />
         </QueryClientProvider>
       </Router>
     );
@@ -121,25 +84,12 @@ describe('home', () => {
     useGetRuleTypesPermissions.mockReturnValue({
       authorizedToReadAnyRules: false,
     });
-    const props: RouteComponentProps<MatchParams> = {
-      history: createMemoryHistory({
-        initialEntries: ['/rules'],
-      }),
-      location: createLocation('/rules'),
-      match: {
-        isExact: true,
-        path: `/rules`,
-        url: '',
-        params: {
-          section: 'rules',
-        },
-      },
-    };
+    const history = createMemoryHistory({ initialEntries: ['/'] });
 
     const home = mountWithIntl(
-      <Router history={props.history}>
+      <Router history={history}>
         <QueryClientProvider client={queryClient}>
-          <TriggersActionsUIHome {...props} />
+          <RulesPage />
         </QueryClientProvider>
       </Router>
     );
@@ -159,31 +109,18 @@ describe('home', () => {
         },
       };
     });
+
     it('should render the header actions correctly when the user is authorized to create rules', async () => {
       useGetRuleTypesPermissions.mockReturnValue({
         authorizedToReadAnyRules: true,
         authorizedToCreateAnyRules: true,
       });
-      const props: RouteComponentProps<MatchParams> = {
-        history: createMemoryHistory({
-          initialEntries: ['/rules'],
-        }),
-        location: createLocation('/rules'),
-        match: {
-          isExact: true,
-          path: `/rules`,
-          url: '',
-          params: {
-            section: 'rules',
-          },
-        },
-      };
-
+      const history = createMemoryHistory({ initialEntries: ['/'] });
       render(
         <IntlProvider locale="en">
-          <Router history={props.history}>
+          <Router history={history}>
             <QueryClientProvider client={queryClient}>
-              <TriggersActionsUIHome {...props} />
+              <RulesPage />
             </QueryClientProvider>
           </Router>
         </IntlProvider>
@@ -199,27 +136,12 @@ describe('home', () => {
         authorizedToReadAnyRules: true,
         authorizedToCreateAnyRules: false,
       });
-
-      const props: RouteComponentProps<MatchParams> = {
-        history: createMemoryHistory({
-          initialEntries: ['/rules'],
-        }),
-        location: createLocation('/rules'),
-        match: {
-          isExact: true,
-          path: `/rules`,
-          url: '',
-          params: {
-            section: 'rules',
-          },
-        },
-      };
-
+      const history = createMemoryHistory({ initialEntries: ['/'] });
       render(
         <IntlProvider locale="en">
-          <Router history={props.history}>
+          <Router history={history}>
             <QueryClientProvider client={queryClient}>
-              <TriggersActionsUIHome {...props} />
+              <RulesPage />
             </QueryClientProvider>
           </Router>
         </IntlProvider>

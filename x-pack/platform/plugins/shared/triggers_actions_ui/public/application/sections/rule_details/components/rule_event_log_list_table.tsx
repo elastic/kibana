@@ -21,8 +21,6 @@ import {
 } from '@elastic/eui';
 import type { IExecutionLog } from '@kbn/alerting-plugin/common';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
-import { RuleTypeModal } from '@kbn/response-ops-rule-form';
-import { getCreateRuleRoute, getCreateRuleFromTemplateRoute } from '@kbn/rule-data-utils';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
   RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
@@ -43,15 +41,12 @@ import {
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import { RuleActionErrorLogFlyout } from './rule_action_error_log_flyout';
 import { RefineSearchPrompt } from '../../common/components/refine_search_prompt';
-import { RulesListDocLink } from '../../rules_list/components/rules_list_doc_link';
 import type { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
 import { RuleEventLogListKPIWithApi as RuleEventLogListKPI } from './rule_event_log_list_kpi';
 import { useMultipleSpaces } from '../../../hooks/use_multiple_spaces';
 import type { UseLoadRuleEventLogsProps } from '../../../hooks/use_load_rule_event_logs';
 import { useLoadRuleEventLogs } from '../../../hooks/use_load_rule_event_logs';
-import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
 import type { RefreshToken } from './types';
-import { CreateRuleButton } from '../../rules_list/components/create_rule_button';
 
 const API_FAILED_MESSAGE = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.apiError',
@@ -98,7 +93,6 @@ export interface RuleEventLogListCommonProps {
   hasRuleNames?: boolean;
   hasAllSpaceSwitch?: boolean;
   filteredRuleTypes?: string[];
-  setHeaderActions?: (components?: React.ReactNode[]) => void;
   getRuleDetailsRoute?: (ruleId: string) => string;
 }
 
@@ -119,7 +113,6 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     initialPageSize = 10,
     hasRuleNames = false,
     hasAllSpaceSwitch = false,
-    setHeaderActions,
     filteredRuleTypes = [],
     getRuleDetailsRoute,
   } = props;
@@ -175,8 +168,6 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     );
   });
 
-  const [ruleTypeModalVisible, setRuleTypeModalVisibility] = useState(false);
-
   const { authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
     http,
     toasts: notifications.toasts,
@@ -206,22 +197,6 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
       },
     }));
   }, [sortingColumns]);
-
-  const openRuleTypeModal = useCallback(() => {
-    setRuleTypeModalVisibility(true);
-  }, []);
-
-  useEffect(() => {
-    setHeaderActions?.([
-      ...(authorizedToCreateAnyRules ? [<CreateRuleButton openFlyout={openRuleTypeModal} />] : []),
-      <RulesSettingsLink
-        alertDeleteCategoryIds={['management', 'observability', 'securitySolution']}
-      />,
-      <RulesListDocLink />,
-    ]);
-    return () => setHeaderActions?.();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const onError = useCallback<NonNullable<UseLoadRuleEventLogsProps['onError']>>(
     (e) => {
@@ -787,27 +762,6 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
           />
         )}
       </EuiFlexGroup>
-      {ruleTypeModalVisible && (
-        <RuleTypeModal
-          onClose={() => setRuleTypeModalVisibility(false)}
-          onSelectRuleType={(ruleTypeId) => {
-            navigateToApp('management', {
-              path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
-            });
-          }}
-          onSelectTemplate={(templateId) => {
-            navigateToApp('management', {
-              path: `insightsAndAlerting/triggersActions/${getCreateRuleFromTemplateRoute(
-                encodeURIComponent(templateId)
-              )}`,
-            });
-          }}
-          http={http}
-          toasts={notifications.toasts}
-          registeredRuleTypes={ruleTypeRegistry.list()}
-          filteredRuleTypes={filteredRuleTypes}
-        />
-      )}
     </>
   );
 };
