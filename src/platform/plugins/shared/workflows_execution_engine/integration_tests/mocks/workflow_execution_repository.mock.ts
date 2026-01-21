@@ -8,7 +8,7 @@
  */
 
 import type { EsWorkflowExecution } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { TerminalExecutionStatuses } from '@kbn/workflows';
 import type { WorkflowExecutionRepository as WorkflowExecutionRepositoryType } from '../../server/repositories/workflow_execution_repository';
 
 export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecutionRepositoryType> {
@@ -21,7 +21,10 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
     return Promise.resolve(this.workflowExecutions.get(workflowExecutionId) || null);
   }
 
-  public createWorkflowExecution(workflowExecution: Partial<EsWorkflowExecution>): Promise<void> {
+  public createWorkflowExecution(
+    workflowExecution: Partial<EsWorkflowExecution>,
+    _options: { refresh?: boolean | 'wait_for' } = {}
+  ): Promise<void> {
     if (!workflowExecution.id) {
       throw new Error('Workflow execution ID is required for creation');
     }
@@ -97,24 +100,36 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
     }));
   }
 
+  public async hasRunningExecution(
+    workflowId: string,
+    spaceId: string,
+    triggeredBy?: string
+  ): Promise<boolean> {
+    let results = Array.from(this.workflowExecutions.values()).filter(
+      (exec) =>
+        exec.workflowId === workflowId &&
+        exec.spaceId === spaceId &&
+        !TerminalExecutionStatuses.includes(exec.status)
+    );
+
+    if (triggeredBy) {
+      results = results.filter((exec) => exec.triggeredBy === triggeredBy);
+    }
+
+    // Return true if there's at least one running execution
+    return results.length > 0;
+  }
+
   public async getRunningExecutionsByWorkflowId(
     workflowId: string,
     spaceId: string,
     triggeredBy?: string
   ): Promise<Array<{ _source: EsWorkflowExecution; _id: string; _index: string }>> {
-    const terminalStatuses = [
-      ExecutionStatus.COMPLETED,
-      ExecutionStatus.FAILED,
-      ExecutionStatus.CANCELLED,
-      ExecutionStatus.SKIPPED,
-      ExecutionStatus.TIMED_OUT,
-    ];
-
     let results = Array.from(this.workflowExecutions.values()).filter(
       (exec) =>
         exec.workflowId === workflowId &&
         exec.spaceId === spaceId &&
-        !terminalStatuses.includes(exec.status)
+        !TerminalExecutionStatuses.includes(exec.status)
     );
 
     if (triggeredBy) {
