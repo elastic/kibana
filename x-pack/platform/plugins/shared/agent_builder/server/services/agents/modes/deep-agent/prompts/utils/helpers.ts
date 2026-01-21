@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export { createSkillTypeRegistry, type SkillTypeRegistry } from './skill_type_registry';
-export { type SkillService, createSkillService } from './skill_service';
-export type { SkillServiceSetup, SkillServiceStart } from './types';
+import moment from 'moment';
 
-
+export const formatDate = (date: Date = new Date()): string => {
+  return moment(date).format('YYYY/MM/DD');
+};

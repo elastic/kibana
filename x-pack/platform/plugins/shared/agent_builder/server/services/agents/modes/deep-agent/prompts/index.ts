@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-export { createSkillTypeRegistry, type SkillTypeRegistry } from './skill_type_registry';
-export { type SkillService, createSkillService } from './skill_service';
-export type { SkillServiceSetup, SkillServiceStart } from './types';
-
-
+export { getResearchAgentPrompt } from './research_agent';
+export { getAnswerAgentPrompt, getStructuredAnswerPrompt } from './answer_agent';
