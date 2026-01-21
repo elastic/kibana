@@ -71,6 +71,7 @@ export {
   ExecutionStatusValues,
   ExecutionTypeValues,
   TerminalExecutionStatuses,
+  NonTerminalExecutionStatuses,
   SearchWorkflowCommandSchema,
   UpdateWorkflowCommandSchema,
 } from './v1';
