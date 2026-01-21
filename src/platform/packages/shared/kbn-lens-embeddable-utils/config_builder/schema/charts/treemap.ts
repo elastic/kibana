@@ -20,11 +20,7 @@ import {
   sharedPanelInfoSchema,
   legendTruncateAfterLinesSchema,
 } from '../shared';
-import {
-  legendNestedSchema,
-  legendVisibleSchema,
-  valueDisplaySchema,
-} from './partition_shared';
+import { legendNestedSchema, legendVisibleSchema, valueDisplaySchema } from './partition_shared';
 import {
   legendSizeSchema,
   mergeAllBucketsWithChartDimensionSchema,
