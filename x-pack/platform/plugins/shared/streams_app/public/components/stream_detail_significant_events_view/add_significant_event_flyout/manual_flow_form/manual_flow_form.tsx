@@ -37,6 +37,7 @@ interface Props {
 }
 
 const DEBOUNCE_DELAY_MS = 300;
+const DEBOUNCE_OPTIONS = { wait: DEBOUNCE_DELAY_MS };
 
 export function ManualFlowForm({
   definition,
@@ -58,10 +59,8 @@ export function ManualFlowForm({
   const [debouncedKqlQuery, setDebouncedKqlQuery] = useState(query.kql.query);
 
   const { run: updateDebouncedKqlQuery } = useDebounceFn(
-    (kqlQuery: string) => {
-      setDebouncedKqlQuery(kqlQuery);
-    },
-    { wait: DEBOUNCE_DELAY_MS }
+    (kqlQuery: string) => setDebouncedKqlQuery(kqlQuery),
+    DEBOUNCE_OPTIONS
   );
 
   // Create a query object with debounced KQL for the preview chart
