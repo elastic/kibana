@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from './use_kibana';
 
@@ -42,9 +42,12 @@ export function useWiredStreamsStatus(): UseWiredStreamsStatusResult {
 
   const [isEnabling, setIsEnabling] = useState(false);
   const [refetchTrigger, setRefetchTrigger] = useState(0);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const fetchStatus = useCallback(async () => {
+    abortControllerRef.current?.abort();
     const controller = new AbortController();
+    abortControllerRef.current = controller;
 
     try {
       const response = await http.get<WiredStreamsStatus>('/api/streams/_status', {
@@ -75,15 +78,13 @@ export function useWiredStreamsStatus(): UseWiredStreamsStatusResult {
         }
       }
     }
-
-    return controller;
   }, [http]);
 
   useEffect(() => {
-    const controllerPromise = fetchStatus();
+    fetchStatus();
 
     return () => {
-      controllerPromise.then((controller) => controller.abort());
+      abortControllerRef.current?.abort();
     };
   }, [fetchStatus, refetchTrigger]);
 
