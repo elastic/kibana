@@ -36,29 +36,6 @@ export interface ExtendedScoutWorkerFixtures extends ObltWorkerFixtures {
   };
 }
 
-const extendApiServices = async (
-  {
-    apiServices,
-    kbnClient,
-    log,
-  }: {
-    apiServices: ExtendedScoutWorkerFixtures['apiServices'];
-    kbnClient: ExtendedScoutWorkerFixtures['kbnClient'];
-    log: ExtendedScoutWorkerFixtures['log'];
-  },
-  use: (apiServices: ExtendedScoutWorkerFixtures['apiServices']) => Promise<void>
-) => {
-  const extendedApiServices: ExtendedScoutWorkerFixtures['apiServices'] = {
-    ...apiServices,
-    inventoryViews: getInventoryViewsApiService({
-      kbnClient,
-      log,
-    }),
-  };
-
-  await use(extendedApiServices);
-};
-
 export const test = base.extend<ExtendedScoutTestFixtures, ExtendedScoutWorkerFixtures>({
   pageObjects: async (
     { pageObjects, page, kbnUrl },
@@ -72,13 +49,23 @@ export const test = base.extend<ExtendedScoutTestFixtures, ExtendedScoutWorkerFi
 
     await use(extendedPageObjects);
   },
-  apiServices: extendApiServices,
+  apiServices: async (
+    { apiServices, kbnClient, log },
+    use: (apiServices: ExtendedScoutWorkerFixtures['apiServices']) => Promise<void>
+  ) => {
+    const extendedApiServices: ExtendedScoutWorkerFixtures['apiServices'] = {
+      ...apiServices,
+      inventoryViews: getInventoryViewsApiService({
+        kbnClient,
+        log,
+      }),
+    };
+
+    await use(extendedApiServices);
+  },
 });
 
-export const globalSetupHook = baseGlobalSetupHook.extend<
-  ExtendedScoutTestFixtures,
-  ExtendedScoutWorkerFixtures
->({
+export const globalSetupHook = baseGlobalSetupHook.extend({
   infraSynthtraceEsClient: async ({ esClient, config, kbnUrl, log }, use) => {
     const { infraEsClient } = await getSynthtraceClient(
       'infraEsClient',
@@ -102,5 +89,4 @@ export const globalSetupHook = baseGlobalSetupHook.extend<
 
     await use({ index, clean });
   },
-  apiServices: extendApiServices,
 });

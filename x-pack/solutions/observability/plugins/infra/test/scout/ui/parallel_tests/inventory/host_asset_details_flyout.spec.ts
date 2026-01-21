@@ -13,6 +13,8 @@ import {
   EXTENDED_TIMEOUT,
   HOSTS_METADATA_FIELD,
   DEFAULT_HOSTS_INVENTORY_VIEW_NAME,
+  BASE_DEFAULT_INVENTORY_VIEW_ATTRIBUTES,
+  DATE_WITH_HOSTS_DATA_TIMESTAMP,
 } from '../../fixtures/constants';
 import type { MetricsTabQuickAccessItem } from '../../fixtures/page_objects/asset_details/metrics_tab';
 
@@ -23,11 +25,17 @@ test.describe(
     let savedViewId: string = '';
 
     test.beforeAll(async ({ apiServices: { inventoryViews } }) => {
-      const foundViewId = await inventoryViews.getViewIdByName(DEFAULT_HOSTS_INVENTORY_VIEW_NAME);
+      const createResult = await inventoryViews.create({
+        ...BASE_DEFAULT_INVENTORY_VIEW_ATTRIBUTES,
+        name: DEFAULT_HOSTS_INVENTORY_VIEW_NAME,
+        nodeType: 'host',
+        time: DATE_WITH_HOSTS_DATA_TIMESTAMP,
+        metric: {
+          type: 'cpuV2',
+        },
+      });
 
-      expect(foundViewId).not.toBeNull();
-
-      savedViewId = foundViewId!;
+      savedViewId = createResult.id;
     });
 
     test.beforeEach(async ({ browserAuth, pageObjects: { inventoryPage } }) => {
@@ -38,6 +46,10 @@ test.describe(
         assetId: HOST1_NAME,
         entityType: 'host',
       });
+    });
+
+    test.afterAll(async ({ apiServices: { inventoryViews } }) => {
+      await inventoryViews.deleteOne(savedViewId);
     });
 
     test('Overview Tab', async ({ pageObjects: { assetDetailsPage } }) => {

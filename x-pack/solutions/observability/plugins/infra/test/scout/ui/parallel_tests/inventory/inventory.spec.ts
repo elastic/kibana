@@ -10,9 +10,9 @@ import { test } from '../../fixtures';
 import {
   CONTAINER_NAMES,
   DATE_WITH_DOCKER_DATA,
+  DATE_WITH_HOSTS_DATA,
   DATE_WITH_POD_DATA,
   DATE_WITHOUT_DATA,
-  DEFAULT_HOSTS_INVENTORY_VIEW_NAME,
   HOSTS,
   POD_COUNT,
   POD_NAMES,
@@ -21,20 +21,10 @@ import {
 const POD_NAME = POD_NAMES[POD_COUNT - 1];
 
 test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
-  let savedViewId: string = '';
-
-  test.beforeAll(async ({ apiServices: { inventoryViews } }) => {
-    const foundViewId = await inventoryViews.getViewIdByName(DEFAULT_HOSTS_INVENTORY_VIEW_NAME);
-
-    expect(foundViewId).not.toBeNull();
-
-    savedViewId = foundViewId!;
-  });
-
   test.beforeEach(async ({ browserAuth, pageObjects: { inventoryPage } }) => {
     await browserAuth.loginAsViewer();
     await inventoryPage.addDismissK8sTourInitScript();
-    await inventoryPage.goToPageWithSavedView(savedViewId);
+    await inventoryPage.goToPage();
   });
 
   test('Render expected content', async ({ page, pageObjects: { inventoryPage } }) => {
@@ -48,6 +38,7 @@ test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
     });
 
     await test.step('display waffle map', async () => {
+      await inventoryPage.goToTime(DATE_WITH_HOSTS_DATA);
       await expect(inventoryPage.mapViewButton).toHaveAttribute('aria-pressed', 'true');
       await expect(inventoryPage.waffleMap).toBeVisible();
     });
@@ -88,6 +79,7 @@ test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
 
   test('Inventory switcher changes node types', async ({ pageObjects: { inventoryPage } }) => {
     await test.step('show hosts by default', async () => {
+      await inventoryPage.goToTime(DATE_WITH_HOSTS_DATA);
       await expect(inventoryPage.inventorySwitcherButton).toContainText('Hosts');
 
       const hostName = HOSTS[Math.floor(Math.random() * HOSTS.length)].hostName;
@@ -153,7 +145,11 @@ test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
     });
   });
 
-  test('Has no detectable a11y violations on load', async ({ page }) => {
+  test('Has no detectable a11y violations on load', async ({
+    page,
+    pageObjects: { inventoryPage },
+  }) => {
+    await inventoryPage.goToTime(DATE_WITH_HOSTS_DATA);
     const { violations } = await page.checkA11y({ include: ['main'] });
     expect(violations).toHaveLength(0);
   });

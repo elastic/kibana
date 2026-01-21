@@ -8,10 +8,12 @@
 import { expect } from '@kbn/scout-oblt';
 import { test } from '../../fixtures';
 import {
+  BASE_DEFAULT_INVENTORY_VIEW_ATTRIBUTES,
   CONTAINER_COUNT,
   CONTAINER_IDS,
   CONTAINER_METADATA_FIELD,
   CONTAINER_NAMES,
+  DATE_WITH_DOCKER_DATA_TIMESTAMP,
   DEFAULT_CONTAINERS_INVENTORY_VIEW_NAME,
   EXTENDED_TIMEOUT,
   LOG_LEVELS,
@@ -28,13 +30,17 @@ test.describe(
     let savedViewId: string = '';
 
     test.beforeAll(async ({ apiServices: { inventoryViews } }) => {
-      const foundViewId = await inventoryViews.getViewIdByName(
-        DEFAULT_CONTAINERS_INVENTORY_VIEW_NAME
-      );
+      const createResult = await inventoryViews.create({
+        ...BASE_DEFAULT_INVENTORY_VIEW_ATTRIBUTES,
+        name: DEFAULT_CONTAINERS_INVENTORY_VIEW_NAME,
+        nodeType: 'container',
+        time: DATE_WITH_DOCKER_DATA_TIMESTAMP,
+        metric: {
+          type: 'cpu',
+        },
+      });
 
-      expect(foundViewId).not.toBeNull();
-
-      savedViewId = foundViewId!;
+      savedViewId = createResult.id;
     });
 
     test.beforeEach(async ({ browserAuth, pageObjects: { inventoryPage } }) => {
@@ -45,6 +51,10 @@ test.describe(
         assetId: CONTAINER_ID,
         entityType: 'container',
       });
+    });
+
+    test.afterAll(async ({ apiServices: { inventoryViews } }) => {
+      await inventoryViews.deleteOne(savedViewId);
     });
 
     test('Overview Tab', async ({ pageObjects: { assetDetailsPage } }) => {
