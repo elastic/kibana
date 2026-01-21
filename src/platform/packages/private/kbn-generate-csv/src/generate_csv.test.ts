@@ -595,6 +595,56 @@ describe('CsvGenerator', () => {
         expect(debugLogSpy).toHaveBeenCalledWith('Received total hits: 12345. Accuracy: unknown.');
       });
     });
+
+    describe('useInternalUser parameter', () => {
+      beforeEach(() => {
+        mockEsClient.asInternalUser.openPointInTime = jest
+          .fn()
+          .mockResolvedValue({ id: mockCursorId });
+        mockEsClient.asInternalUser.closePointInTime = jest.fn().mockResolvedValue({});
+      });
+
+      it('uses internal user client when useInternalUser is true', async () => {
+        const generateCsv = new CsvGenerator(
+          mockJobUsingPitPaging,
+          mockConfig,
+          mockTaskInstanceFields,
+          {
+            es: mockEsClient,
+            data: mockDataClient,
+            uiSettings: uiSettingsClient,
+          },
+          {
+            searchSourceStart: mockSearchSourceService,
+            fieldFormatsRegistry: mockFieldFormatsRegistry,
+          },
+          new CancellationToken(),
+          mockLogger,
+          stream,
+          false,
+          jobId,
+          true // useInternalUser
+        );
+
+        await generateCsv.generateData();
+
+        expect(mockEsClient.asInternalUser.openPointInTime).toHaveBeenCalledTimes(1);
+        expect(mockEsClient.asInternalUser.openPointInTime).toHaveBeenCalledWith(
+          {
+            ignore_unavailable: true,
+            index: 'logstash-*',
+            keep_alive: '30s',
+          },
+          {
+            maxConcurrentShardRequests: 5,
+            maxRetries: 0,
+            requestTimeout: '30s',
+            signal: expect.any(AbortSignal),
+          }
+        );
+        expect(mockEsClient.asCurrentUser.openPointInTime).not.toHaveBeenCalled();
+      });
+    });
   });
 
   describe('export behavior when scroll duration config is auto', () => {
