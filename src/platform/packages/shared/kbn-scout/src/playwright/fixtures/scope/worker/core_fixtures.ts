@@ -253,6 +253,10 @@ export const coreWorkerFixtures = base.extend<{}, CoreWorkerFixtures>({
         return { cookieValue, cookieHeader };
       };
 
+      // TODO: rely on global setting before https://github.com/elastic/kibana/issues/248983
+      // Hide announcements (e.g. tours) in the default space
+      await kbnClient.uiSettings.update({ hideAnnouncements: true });
+
       await use({
         session,
         customRoleName,

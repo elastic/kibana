@@ -192,8 +192,6 @@ export const defaultConfig: ScoutServerConfig = {
           hosts: ['https://localhost:9200'],
         },
       ])}`,
-      // Disable tours globally for all tests
-      '--uiSettings.globalOverrides.hideAnnouncements=true',
     ],
   },
 };
