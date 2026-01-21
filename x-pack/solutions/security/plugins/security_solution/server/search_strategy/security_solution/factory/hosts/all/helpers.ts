@@ -22,6 +22,8 @@ export const HOSTS_FIELDS: readonly string[] = [
   'host.name',
   'host.os.name',
   'host.os.version',
+  'host.risk.calculated_level',
+  'asset.criticality',
 ];
 
 export const formatHostEdgesData = (
@@ -35,6 +37,15 @@ export const formatHostEdgesData = (
       flattenedFields.cursor.value = hostId || '';
       const fieldValue = getHostFieldValue(fieldName, bucket);
       if (fieldValue != null) {
+        // Risk and criticality should be single string values, not arrays
+        if (fieldName === 'host.risk.calculated_level' || fieldName === 'asset.criticality') {
+          const stringValue = Array.isArray(fieldValue) ? fieldValue[0] : fieldValue;
+          return set(
+            fieldName === 'host.risk.calculated_level' ? 'node.risk' : 'node.criticality',
+            stringValue,
+            flattenedFields
+          );
+        }
         return set(
           `node.${fieldName}`,
           toObjectArrayOfStrings(fieldValue).map(({ str }) => str),
@@ -59,7 +70,15 @@ const getHostFieldValue = (fieldName: string, bucket: HostAggEsItem): string | s
   if (has(aggField, bucket)) {
     const valueObj: HostValue = get(aggField, bucket);
     return valueObj.value_as_string;
-  } else if (['host.name', 'host.os.name', 'host.os.version'].includes(fieldName)) {
+  } else if (
+    [
+      'host.name',
+      'host.os.name',
+      'host.os.version',
+      'host.risk.calculated_level',
+      'asset.criticality',
+    ].includes(fieldName)
+  ) {
     switch (fieldName) {
       case 'host.name':
         return get('key', bucket) || null;
@@ -67,6 +86,10 @@ const getHostFieldValue = (fieldName: string, bucket: HostAggEsItem): string | s
         return get('os.hits.hits[0].fields["host.os.name"]', bucket) || null;
       case 'host.os.version':
         return get('os.hits.hits[0].fields["host.os.version"]', bucket) || null;
+      case 'host.risk.calculated_level':
+        return get('os.hits.hits[0].fields["host.risk.calculated_level"]', bucket)?.[0] || null;
+      case 'asset.criticality':
+        return get('os.hits.hits[0].fields["asset.criticality"]', bucket)?.[0] || null;
     }
   }
   return null;

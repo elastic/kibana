@@ -73,7 +73,6 @@ export const HostPanel = ({
 
   // Extract hostName from entityIdentifiers
   // Priority: entityIdentifiers['host.name'] > entityIdentifiers[first key]
-  console.log('entityIdentifiers', entityIdentifiers);
   const effectiveHostName = useMemo<string>(() => {
     const hostNameFromIdentifiers =
       entityIdentifiers['host.name'] || Object.values(entityIdentifiers)[0];

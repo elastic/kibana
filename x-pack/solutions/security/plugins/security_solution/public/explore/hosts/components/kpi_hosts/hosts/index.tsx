@@ -35,7 +35,7 @@ export const useGetHostsStatItems: () => Readonly<StatItems[]> = () => {
         ],
         enableAreaChart: true,
         description: i18n.HOSTS,
-        getAreaChartLensAttributes: getKpiHostAreaLensAttributes,
+        getAreaChartLensAttributes: getKpiHostAreaLensAttributes(spaceId),
       },
     ],
     [euiTheme.colors.vis.euiColorVis1, spaceId]

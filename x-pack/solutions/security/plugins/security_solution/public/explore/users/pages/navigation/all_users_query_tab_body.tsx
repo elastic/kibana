@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getOr } from 'lodash/fp';
+import { getOr, noop } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import type { UsersComponentsQueryProps } from './types';
@@ -34,17 +34,15 @@ export const AllUsersQueryTabBody = ({
   useEffect(() => {
     setQuerySkip(skip || !toggleStatus);
   }, [skip, toggleStatus]);
-
-  const [loading, { users, totalCount, pageInfo, loadPage, id, inspect, refetch }] = useAllUser({
+  const getUsersSelector = useMemo(() => usersSelectors.allUsersSelector(), []);
+  const { sort } = useDeepEqualSelector((state) => getUsersSelector(state));
+  const [loading, { users, totalCount, pageInfo, id, inspect, refetch }] = useAllUser({
     endDate,
     filterQuery,
     skip: querySkip,
     startDate,
     type,
   });
-
-  const getUsersSelector = useMemo(() => usersSelectors.allUsersSelector(), []);
-  const { sort } = useDeepEqualSelector((state) => getUsersSelector(state));
 
   return (
     <UsersTableManage
@@ -54,7 +52,7 @@ export const AllUsersQueryTabBody = ({
       id={id}
       inspect={inspect}
       loading={loading}
-      loadPage={loadPage}
+      loadPage={noop} // It isn't necessary because PaginatedTable updates redux store and we load the page when activePage updates on the store
       refetch={refetch}
       showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
       setQuery={setQuery}

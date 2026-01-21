@@ -61,6 +61,12 @@ export const buildHostsQuery = ({
                 },
               ],
               _source: false,
+              fields: [
+                'host.os.name',
+                'host.os.version',
+                'host.risk.calculated_level',
+                'asset.criticality',
+              ],
             },
           },
         },
@@ -74,6 +80,8 @@ export const buildHostsQuery = ({
         field: '@timestamp',
         format: 'strict_date_optional_time',
       },
+      'host.risk.calculated_level',
+      'asset.criticality',
     ],
     size: 0,
   };

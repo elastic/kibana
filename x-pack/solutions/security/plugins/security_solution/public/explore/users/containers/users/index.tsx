@@ -89,10 +89,11 @@ export const useAllUser = ({
   // Convert filter query to Entity Store format
   const entityFilterQuery = useMemo(() => {
     const filter = createFilter(filterQuery);
-    if (!filter) {
+    if (!filter || filter === '{}' || filter === '""') {
       return undefined;
     }
-    return JSON.stringify(filter);
+    // createFilter already returns a string, so we don't need to stringify again
+    return filter;
   }, [filterQuery]);
 
   const wrappedLoadMore = useCallback((newActivePage: number) => {
