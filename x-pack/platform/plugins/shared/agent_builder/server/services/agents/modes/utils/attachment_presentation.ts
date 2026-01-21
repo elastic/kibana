@@ -220,7 +220,7 @@ You can:
 - Update attachments using attachment_update(id, data) to modify content
 - Add new attachments using attachment_add(type, data) to store information
 
-IMPORTANT: If you see "[content truncated, use attachment_read for full content]", you MUST call attachment_read(id) to get the complete content before analyzing or referencing that attachment.`;
+If you see "[content truncated, use attachment_read for full content]", you MUST call attachment_read(id) to get the complete content before analyzing or referencing that attachment.`;
     }
 
     return `## Conversation Attachments
