@@ -16,8 +16,7 @@ paths:
              --header "Content-Type: application/json"
       x-labels: [ess, serverless]
       operationId: GetAttackDiscoveryGenerations
-      x-state: Technical Preview; added in 9.2.0
-      description: Get the latest attack discovery generations metadata (that are not dismissed) for the current user. This endpoint retrieves generation metadata including execution status and statistics for Attack discovery generations. `Technical preview`
+      description: Get the latest attack discovery generations metadata (that are not dismissed) for the current user. This endpoint retrieves generation metadata including execution status and statistics for Attack discovery generations.
       summary: Get the latest attack discovery generations metadata for the current user
       parameters:
         - name: end

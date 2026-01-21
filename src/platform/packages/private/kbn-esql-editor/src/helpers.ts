@@ -259,6 +259,10 @@ export const onKeyDownResizeHandler = (
 
 export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
   return css`
+    .monaco-editor .suggest-details .scrollbar {
+      display: none !important;
+    }
+
     .monaco-hover {
       display: block !important;
       background-color: ${theme.euiTheme.colors.backgroundBasePlain} !important;
@@ -317,15 +321,21 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
     .suggest-details-container {
       border-radius: ${theme.euiTheme.border.radius.medium};
       ${euiShadow(theme, 'l')}
+      // Suggestions must be rendered above flyouts
+      z-index: 1100 !important;
     }
 
     .suggest-details-container {
       background-color: ${theme.euiTheme.colors.backgroundBasePlain};
       line-height: 1.5rem;
     }
+
     .suggest-details {
-      padding-left: ${theme.euiTheme.size.s};
+      padding-left: ${theme.euiTheme.size.m};
+      padding-right: ${theme.euiTheme.size.m};
+      text-align: justify;
     }
+
     .monaco-list .monaco-scrollable-element .monaco-list-row.focused {
       border-radius: ${theme.euiTheme.border.radius.medium};
     }
@@ -333,11 +343,44 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
     .suggest-details > .monaco-scrollable-element > .body > .header > .type {
       white-space: normal !important;
     }
+
+    .suggest-details .rendered-markdown h1 {
+      display: block;
+      margin-top: ${theme.euiTheme.size.m};
+      font-size: ${theme.euiTheme.size.base};
+      font-weight: ${theme.euiTheme.font.weight.bold};
+    }
+
+    .suggest-details [data-code] {
+      overflow-x: auto !important;
+    }
   `;
 };
 
 export const filterDataErrors = (errors: (MonacoMessage & { code: string })[]): MonacoMessage[] => {
   return errors.filter((error) => {
-    return !['unknownIndex', 'unknownColumn'].includes(error.code);
+    return !['unknownIndex', 'unknownColumn', 'unmappedColumnWarning'].includes(error.code);
   });
+};
+
+/**
+ * Filters warning messages that overlap with error messages ranges.
+ */
+export const filterOutWarningsOverlappingWithErrors = (
+  errors: MonacoMessage[],
+  warnings: MonacoMessage[]
+): MonacoMessage[] => {
+  const hasOverlap = (warning: MonacoMessage) => {
+    return errors.some((error) => {
+      const isOverlappingLine =
+        warning.startLineNumber <= error.endLineNumber &&
+        warning.endLineNumber >= error.startLineNumber;
+      const isOverlappingColumn =
+        warning.startColumn <= error.endColumn && warning.endColumn >= error.startColumn;
+
+      return isOverlappingLine && isOverlappingColumn;
+    });
+  };
+
+  return warnings.filter((warning) => !hasOverlap(warning));
 };

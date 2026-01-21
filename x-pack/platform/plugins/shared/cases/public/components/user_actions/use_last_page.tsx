@@ -31,7 +31,7 @@ export const useLastPage = ({
         lastPageType = Math.ceil(userActionsStats.totalOtherActions / perPage);
         break;
       case 'user':
-        lastPageType = Math.ceil(userActionsStats.totalComments / perPage);
+        lastPageType = Math.ceil(userActionsStats.totalCommentCreations / perPage || 1);
         break;
       case 'all':
         lastPageType = Math.ceil(userActionsStats.total / perPage);

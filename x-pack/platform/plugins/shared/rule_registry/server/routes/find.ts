@@ -55,11 +55,9 @@ export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>
           consumers,
           index,
           query,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           search_after,
           size,
           sort,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           track_total_hits,
           _source,
         } = request.body;

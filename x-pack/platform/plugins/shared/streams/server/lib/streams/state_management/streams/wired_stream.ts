@@ -41,13 +41,12 @@ import { StatusError } from '../../errors/status_error';
 import {
   validateAncestorFields,
   validateDescendantFields,
+  validateSimulation,
   validateSystemFields,
 } from '../../helpers/validate_fields';
 import {
-  validateNoManualIngestPipelineUsage,
   validateRootStreamChanges,
   validateBracketsInFieldNames,
-  validateSettings,
 } from '../../helpers/validate_stream';
 import { generateIndexTemplate } from '../../index_templates/generate_index_template';
 import { getIndexTemplateName } from '../../index_templates/name';
@@ -65,6 +64,7 @@ import type {
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
 import { hasSupportedStreamsRoot } from '../../root_stream_definition';
 import { formatSettings, settingsUpdateRequiresRollover } from './helpers';
+import { validateSettings, validateSettingsWithDryRun } from './validate_settings';
 
 interface WiredStreamChanges extends StreamChanges {
   ownFields: boolean;
@@ -346,11 +346,6 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
 
     const existsInStartingState = startingState.has(this._definition.name);
 
-    if (this._changes.processing && this._definition.ingest.processing.steps.length > 0) {
-      // recursively go through all steps to make sure it's not using manual_ingest_pipeline
-      validateNoManualIngestPipelineUsage(this._definition.ingest.processing.steps);
-    }
-
     if (!existsInStartingState) {
       // Check for conflicts
       const { existsAsIndex, existsAsManagedDataStream, existsAsDataStream } =
@@ -529,7 +524,37 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       }
     }
 
-    validateSettings(this._definition, this.dependencies.isServerless);
+    const ancestorsAndSelf = getAncestorsAndSelf(this._definition.name).map(
+      (id) => desiredState.get(id)!
+    ) as WiredStream[];
+
+    const inheritedSettings = getInheritedSettings(
+      ancestorsAndSelf.map((ancestor) => ancestor.definition) as Streams.WiredStream.Definition[]
+    );
+
+    const allowlistValidation = validateSettings({
+      settings: inheritedSettings,
+      isServerless: this.dependencies.isServerless,
+    });
+
+    if (!allowlistValidation.isValid) {
+      return allowlistValidation;
+    }
+
+    const shouldValidateSettingsWithDryRun =
+      existsInStartingState && ancestorsAndSelf.some((ancestor) => ancestor.hasChangedSettings());
+
+    await Promise.all([
+      shouldValidateSettingsWithDryRun
+        ? validateSettingsWithDryRun({
+            scopedClusterClient: this.dependencies.scopedClusterClient,
+            streamName: this._definition.name,
+            settings: inheritedSettings,
+            isServerless: this.dependencies.isServerless,
+          })
+        : Promise.resolve(),
+      validateSimulation(this._definition, this.dependencies.scopedClusterClient),
+    ]);
 
     return { isValid: true, errors: [] };
   }
@@ -926,6 +951,12 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       },
       {
         type: 'unlink_assets',
+        request: {
+          name: this._definition.name,
+        },
+      },
+      {
+        type: 'unlink_systems',
         request: {
           name: this._definition.name,
         },

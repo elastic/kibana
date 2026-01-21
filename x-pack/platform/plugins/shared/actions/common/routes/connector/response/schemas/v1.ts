@@ -122,6 +122,11 @@ export const connectorTypeResponseSchema = schema.object({
       },
     })
   ),
+  source: schema.oneOf([schema.literal('yml'), schema.literal('spec'), schema.literal('stack')], {
+    meta: {
+      description: 'The source of the connector type definition.',
+    },
+  }),
 });
 
 export const getAllConnectorTypesResponseSchema = schema.arrayOf(connectorTypeResponseSchema);

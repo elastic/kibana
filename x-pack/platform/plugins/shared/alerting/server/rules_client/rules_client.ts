@@ -86,11 +86,18 @@ import type { EnableRuleParams } from '../application/rule/methods/enable_rule';
 import type { GetGlobalExecutionSummaryParams } from './methods/get_execution_summary';
 import { getGlobalExecutionSummaryWithAuth } from './methods/get_execution_summary';
 import type { GetRuleTypesByQueryParams } from '../application/rule/methods/get_rule_types_by_query/types';
+import type { FindRuleTemplatesParams } from '../application/rule_template/methods/find/types';
 import { getRuleTypesByQuery } from '../application/rule/methods/get_rule_types_by_query/get_rule_types_by_query';
 import type { GetRuleTemplateParams } from '../application/rule_template/methods/get/types';
 import { getRuleTemplate } from '../application/rule_template/methods/get/get_rule_template';
-import { createGapAutoFillScheduler } from '../application/gap_auto_fill_scheduler/methods/create/create_gap_auto_fill_scheduler';
-import type { CreateGapAutoFillSchedulerParams } from '../application/gap_auto_fill_scheduler/methods/create/types';
+import { findRuleTemplates } from '../application/rule_template/methods/find/find_rule_templates';
+import { createGapAutoFillScheduler } from '../application/gaps/auto_fill_scheduler/methods/create/create_gap_auto_fill_scheduler';
+import type { CreateGapAutoFillSchedulerParams } from '../application/gaps/auto_fill_scheduler/methods/create/types';
+import { getGapAutoFillScheduler } from '../application/gaps/auto_fill_scheduler/methods/get/get_gap_auto_fill_scheduler';
+import type { GetGapAutoFillSchedulerParams } from '../application/gaps/auto_fill_scheduler/methods/types';
+import { deleteGapAutoFillScheduler } from '../application/gaps/auto_fill_scheduler/methods/delete/delete_gap_auto_fill_scheduler';
+import { updateGapAutoFillScheduler } from '../application/gaps/auto_fill_scheduler/methods/update/update_gap_auto_fill_scheduler';
+import type { UpdateGapAutoFillSchedulerParams } from '../application/gaps/auto_fill_scheduler/methods/update/types';
 
 // Gap methods
 import { findGaps } from '../application/gaps/methods/find_gaps';
@@ -106,6 +113,8 @@ import type {
   BulkFillGapsByRuleIdsOptions,
   BulkFillGapsByRuleIdsParams,
 } from '../application/gaps/methods/bulk_fill_gaps_by_rule_ids/types';
+import type { FindGapAutoFillSchedulerLogsParams } from '../application/gaps/auto_fill_scheduler/methods/find_logs/types/find_gap_auto_fill_scheduler_logs_types';
+import { findGapAutoFillSchedulerLogs } from '../application/gaps/auto_fill_scheduler/methods/find_logs/find_gap_auto_fill_scheduler_logs';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -250,6 +259,9 @@ export class RulesClient {
 
   public getTemplate = (params: GetRuleTemplateParams) => getRuleTemplate(this.context, params);
 
+  public findTemplates = (params: FindRuleTemplatesParams) =>
+    findRuleTemplates(this.context, params);
+
   public getScheduleFrequency = () => getScheduleFrequency(this.context);
 
   public findGaps = (params: FindGapsParams) => findGaps(this.context, params);
@@ -272,6 +284,18 @@ export class RulesClient {
 
   public createGapAutoFillScheduler = (params: CreateGapAutoFillSchedulerParams) =>
     createGapAutoFillScheduler(this.context, params);
+
+  public getGapAutoFillScheduler = (params: GetGapAutoFillSchedulerParams) =>
+    getGapAutoFillScheduler(this.context, params);
+
+  public updateGapAutoFillScheduler = (params: UpdateGapAutoFillSchedulerParams) =>
+    updateGapAutoFillScheduler(this.context, params);
+
+  public deleteGapAutoFillScheduler = (params: GetGapAutoFillSchedulerParams) =>
+    deleteGapAutoFillScheduler(this.context, params);
+
+  public findGapAutoFillSchedulerLogs = (params: FindGapAutoFillSchedulerLogsParams) =>
+    findGapAutoFillSchedulerLogs(this.context, params);
 
   public getContext() {
     return this.context;

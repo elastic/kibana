@@ -8,9 +8,8 @@
  */
 
 import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiIconTip } from '@elastic/eui';
-import type { Filter } from '@kbn/es-query';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import type { GroupingBucket } from '../types';
+import type { GroupChildComponentRenderer, GroupingBucket } from '../types';
 import { createGroupFilter, getNullGroupFilter } from '../../containers/query/helpers';
 
 interface GroupPanelProps<T> {
@@ -26,7 +25,7 @@ interface GroupPanelProps<T> {
   nullGroupMessage?: string;
   onGroupClose: () => void;
   onToggleGroup?: (isOpen: boolean, groupBucket: GroupingBucket<T>) => void;
-  renderChildComponent: (groupFilter: Filter[]) => React.ReactElement;
+  renderChildComponent: GroupChildComponentRenderer<T>;
   selectedGroup: string;
   multiValueFields?: string[];
 }
@@ -137,9 +136,11 @@ const GroupPanelComponent = <T,>({
       onToggle={onToggle}
       paddingSize="m"
     >
-      <span data-test-subj="grouping-accordion-content">{renderChildComponent(groupFilters)}</span>
+      <span data-test-subj="grouping-accordion-content">
+        {renderChildComponent(groupFilters, selectedGroup, groupBucket)}
+      </span>
     </EuiAccordion>
   );
 };
 
-export const GroupPanel = React.memo(GroupPanelComponent);
+export const GroupPanel = React.memo(GroupPanelComponent) as typeof GroupPanelComponent;

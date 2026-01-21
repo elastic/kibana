@@ -159,11 +159,11 @@ describe('useDashboardListingTable', () => {
       urlStateEnabled: false,
       contentEditor: {
         onSave: expect.any(Function),
-        isReadonly: false,
         customValidators: expect.any(Object),
       },
       createdByEnabled: true,
       recentlyAccessed: expect.objectContaining({ get: expect.any(Function) }),
+      rowItemActions: expect.any(Function),
     };
 
     expect(tableListViewTableProps).toEqual(expectedProps);
@@ -277,5 +277,110 @@ describe('useDashboardListingTable', () => {
     );
 
     expect(result.current.tableListViewTableProps.editItem).toBeUndefined();
+  });
+
+  describe('rowItemActions', () => {
+    beforeEach(() => {
+      coreServices.application.capabilities = {
+        ...coreServices.application.capabilities,
+        dashboard_v2: {
+          showWriteControls: true,
+        },
+      };
+    });
+
+    test('should disable edit and delete actions when showWriteControls is false', () => {
+      (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = false;
+
+      const { result } = renderHook(() =>
+        useDashboardListingTable({
+          getDashboardUrl,
+          goToDashboard,
+        })
+      );
+
+      const rowItemActions = result.current.tableListViewTableProps.rowItemActions;
+
+      const item = {
+        id: 'dashboard-1',
+      } as DashboardSavedObjectUserContent;
+
+      const actions = rowItemActions!(item);
+
+      expect(actions?.edit?.enabled).toBe(false);
+      expect(actions?.delete?.enabled).toBe(false);
+      expect(actions?.edit?.reason).toBeDefined();
+      expect(actions?.delete?.reason).toBeDefined();
+    });
+
+    test('should disable edit and delete actions when item is managed', () => {
+      const { result } = renderHook(() =>
+        useDashboardListingTable({
+          getDashboardUrl,
+          goToDashboard,
+        })
+      );
+
+      const rowItemActions = result.current.tableListViewTableProps.rowItemActions;
+
+      const item = {
+        id: 'dashboard-1',
+        managed: true,
+      } as DashboardSavedObjectUserContent;
+
+      const actions = rowItemActions!(item);
+
+      expect(actions?.edit?.enabled).toBe(false);
+      expect(actions?.delete?.enabled).toBe(false);
+      expect(actions?.edit?.reason).toBeDefined();
+      expect(actions?.delete?.reason).toBeDefined();
+    });
+
+    test('should disable edit and delete actions when user lacks access control and dashboard is read-only', () => {
+      const { result } = renderHook(() =>
+        useDashboardListingTable({
+          getDashboardUrl,
+          goToDashboard,
+        })
+      );
+
+      const rowItemActions = result.current.tableListViewTableProps.rowItemActions;
+
+      const item = {
+        id: 'dashboard-1',
+        canManageAccessControl: false,
+        accessMode: 'write_restricted',
+      } as DashboardSavedObjectUserContent;
+
+      const actions = rowItemActions!(item);
+
+      expect(actions?.edit?.enabled).toBe(false);
+      expect(actions?.delete?.enabled).toBe(false);
+      expect(actions?.edit?.reason).toBeDefined();
+      expect(actions?.delete?.reason).toBeDefined();
+    });
+
+    test('should enable edit and delete actions when conditions are met', () => {
+      const { result } = renderHook(() =>
+        useDashboardListingTable({
+          getDashboardUrl,
+          goToDashboard,
+        })
+      );
+
+      const rowItemActions = result.current.tableListViewTableProps.rowItemActions;
+
+      const item = {
+        id: 'dashboard-1',
+        canManageAccessControl: true,
+      } as DashboardSavedObjectUserContent;
+
+      const actions = rowItemActions!(item);
+
+      expect(actions?.edit?.enabled).toBe(true);
+      expect(actions?.delete?.enabled).toBe(true);
+      expect(actions?.edit?.reason).toBeUndefined();
+      expect(actions?.delete?.reason).toBeUndefined();
+    });
   });
 });

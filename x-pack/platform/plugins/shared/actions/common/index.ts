@@ -10,6 +10,7 @@
 export type {
   SubFeature,
   ActionType,
+  ActionTypeSource,
   ValidatedEmail,
   ActionTypeExecutorResult,
   ActionTypeExecutorRawResult,

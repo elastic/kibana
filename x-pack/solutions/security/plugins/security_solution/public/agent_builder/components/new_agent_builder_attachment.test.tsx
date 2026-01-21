@@ -10,6 +10,8 @@ import React from 'react';
 import { TestProviders } from '../../common/mock';
 import { NewAgentBuilderAttachment } from './new_agent_builder_attachment';
 import * as i18n from './translations';
+import { useAgentBuilderAvailability } from '../hooks/use_agent_builder_availability';
+jest.mock('../hooks/use_agent_builder_availability');
 
 describe('NewAgentBuilderAttachment', () => {
   const defaultProps = {
@@ -18,6 +20,12 @@ describe('NewAgentBuilderAttachment', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (useAgentBuilderAvailability as jest.Mock).mockReturnValue({
+      isAgentBuilderEnabled: true,
+      hasAgentBuilderPrivilege: true,
+      isAgentChatExperienceEnabled: true,
+      hasValidAgentBuilderLicense: true,
+    });
   });
 
   it('renders with default props', () => {
@@ -27,8 +35,7 @@ describe('NewAgentBuilderAttachment', () => {
       </TestProviders>
     );
 
-    expect(screen.getByTestId('newAgentBuilderAttachment')).toBeInTheDocument();
-    expect(screen.getByText(i18n.ADD_TO_CHAT)).toBeInTheDocument();
+    expect(screen.getByTestId('newAgentBuilderAttachment')).toHaveTextContent(i18n.ADD_TO_CHAT);
   });
 
   it('renders with custom color', () => {
@@ -74,5 +81,22 @@ describe('NewAgentBuilderAttachment', () => {
     );
 
     expect(screen.getByTestId('newAgentBuilderAttachment')).toBeInTheDocument();
+  });
+
+  it('renders disabled when license is invalid', () => {
+    (useAgentBuilderAvailability as jest.Mock).mockReturnValue({
+      isAgentBuilderEnabled: false,
+      hasAgentBuilderPrivilege: true,
+      isAgentChatExperienceEnabled: true,
+      hasValidAgentBuilderLicense: false,
+    });
+
+    render(
+      <TestProviders>
+        <NewAgentBuilderAttachment {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('newAgentBuilderAttachment')).toBeDisabled();
   });
 });

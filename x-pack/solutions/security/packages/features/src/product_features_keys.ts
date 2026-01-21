@@ -15,6 +15,11 @@ export enum ProductFeatureSecurityKey {
   /** Enables AI Value Report access */
   aiValueReport = 'ai_value_report',
 
+  /**
+   * Enables rule gaps auto-fill
+   */
+  ruleGapsAutoFill = 'rule_gaps_auto_fill',
+
   /** Elastic endpoint detections, includes CSP rules which remain provisionally within siem */
   detections = 'detections',
   /**
@@ -43,6 +48,12 @@ export enum ProductFeatureSecurityKey {
    * Enables endpoint policy views that enables user to manage endpoint security policies
    */
   endpointPolicyManagement = 'endpoint_policy_management',
+
+  /**
+   * Enables the ablity to manage or view scripts used with Elastic Defend reponse actions
+   */
+  endpointScriptsManagement = 'endpoint_scripts_management',
+
   /**
    * Enables Endpoint Policy protections (like Malware, Ransomware, etc)
    */
@@ -205,6 +216,7 @@ export enum SecuritySubFeatureId {
   eventFilters = 'eventFiltersSubFeature',
   globalArtifactManagement = 'globalArtifactManagementSubFeature',
   policyManagement = 'policyManagementSubFeature',
+  scriptsManagement = 'scriptsManagementSubFeature',
   responseActionsHistory = 'responseActionsHistorySubFeature',
   workflowInsights = 'workflowInsightsSubFeature',
   socManagement = 'socManagementSubFeature',

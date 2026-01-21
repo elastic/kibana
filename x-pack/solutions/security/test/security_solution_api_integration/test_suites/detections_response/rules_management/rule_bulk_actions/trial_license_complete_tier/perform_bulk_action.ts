@@ -2893,7 +2893,7 @@ export default ({ getService }: FtrProviderContext): void => {
               ids: createdRuleIds,
               action: BulkActionTypeEnum.fill_gaps,
               [BulkActionTypeEnum.fill_gaps]: {
-                start_date: new Date(Date.now() + 1000).toISOString(),
+                start_date: new Date(Date.now() + 10000).toISOString(),
                 end_date: backfillEnd.toISOString(),
               },
             },

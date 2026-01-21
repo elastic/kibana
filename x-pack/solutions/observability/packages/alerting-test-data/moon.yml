@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/observability-alerting-test-data'
 type: unknown
 owners:
-  defaultOwner: '@elastic/obs-ux-management-team'
+  defaultOwner: '@elastic/actionable-obs-team'
 toolchain:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   name: '@kbn/observability-alerting-test-data'
   description: Moon project for @kbn/observability-alerting-test-data
   channel: ''
-  owner: '@elastic/obs-ux-management-team'
+  owner: '@elastic/actionable-obs-team'
   metadata:
     sourceRoot: x-pack/solutions/observability/packages/alerting-test-data
 dependsOn:

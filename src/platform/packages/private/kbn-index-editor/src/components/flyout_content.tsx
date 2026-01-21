@@ -20,15 +20,14 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { CellActionsProvider } from '@kbn/cell-actions';
-import { FileUploadContext, useFileUpload } from '@kbn/file-upload';
+import { FileUploadContext, FileUploadManager, useFileUpload } from '@kbn/file-upload';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import type { FC } from 'react';
-import React, { lazy, useMemo } from 'react';
+import React, { lazy, useCallback, useState, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import type { FileUploadResults } from '@kbn/file-upload-common';
 import { i18n } from '@kbn/i18n';
 import { ErrorCallout } from './error_callout';
 import { UnsavedChangesModal } from './modals/unsaved_changes_modal';
@@ -57,22 +56,47 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
   const rows = useObservable(deps.indexUpdateService.rows$, []);
   const isLoading = useObservable(deps.indexUpdateService.isFetching$, false);
 
+  const createFileUploadManager = useCallback(
+    (existingIndex?: string | null) => {
+      return new FileUploadManager(
+        {
+          analytics: coreStart.analytics,
+          data: deps.data,
+          fileUpload: deps.fileUpload,
+          http: coreStart.http,
+          notifications: coreStart.notifications,
+        },
+        null,
+        false,
+        true,
+        existingIndex,
+        { index: { mode: 'lookup' } },
+        'lookup-index-editor'
+      );
+    },
+    [coreStart.analytics, coreStart.http, coreStart.notifications, deps.data, deps.fileUpload]
+  );
+
+  const [fileUploadManager, setFileUploadManager] = useState<FileUploadManager>(() =>
+    createFileUploadManager(deps.existingIndexName)
+  );
+
+  const reset = useCallback(
+    (existingIndex?: string) => {
+      setFileUploadManager(createFileUploadManager(existingIndex));
+    },
+    [createFileUploadManager]
+  );
+
   const fileUploadContextValue = useFileUpload(
-    deps.fileManager,
+    fileUploadManager,
     deps.data,
     coreStart.application,
     coreStart.http,
     coreStart.notifications,
     undefined,
-    // onUploadComplete
-    (results: FileUploadResults | null) => {
-      if (results) {
-        fileUploadContextValue.setExistingIndexName(results.index);
-        results.files.forEach((_, index) => {
-          deps.fileManager.removeFile(index);
-        });
-      }
-    }
+    undefined,
+    reset
   );
 
   const noResults = useMemo(() => {

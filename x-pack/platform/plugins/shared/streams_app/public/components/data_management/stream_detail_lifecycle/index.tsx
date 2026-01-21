@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { EuiFlexGroup, EuiHorizontalRule } from '@elastic/eui';
 import type { Streams } from '@kbn/streams-schema';
+import { usePerformanceContext } from '@kbn/ebt-tools';
+import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import { StreamDetailFailureStore } from './failure_store';
 import { StreamDetailGeneralData } from './general_data';
 import { useDataStreamStats } from './hooks/use_data_stream_stats';
 import { useTimefilter } from '../../../hooks/use_timefilter';
+import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
 
 export function StreamDetailLifecycle({
   definition,
@@ -23,6 +26,40 @@ export function StreamDetailLifecycle({
   const { timeState } = useTimefilter();
   const data = useDataStreamStats({ definition, timeState });
 
+  const { onPageReady } = usePerformanceContext();
+
+  const queryRangeSeconds = getTimeDifferenceInSeconds(timeState.timeRange);
+
+  // Telemetry for TTFMP (time to first meaningful paint)
+  useEffect(() => {
+    if (definition && !data.isLoading) {
+      const streamType = getStreamTypeFromDefinition(definition.stream);
+      onPageReady({
+        meta: {
+          description: `[ttfmp_streams_detail_retention] streamType: ${streamType}`,
+        },
+        customMetrics: {
+          key1: 'dataStreamStatsTotalDocs',
+          value1: data.stats?.ds?.stats?.totalDocs ?? 0,
+          key2: 'timeFrom',
+          value2: timeState.start,
+          key3: 'timeTo',
+          value3: timeState.end,
+          key4: 'queryRangeSeconds',
+          value4: queryRangeSeconds,
+        },
+      });
+    }
+  }, [
+    definition,
+    data.isLoading,
+    onPageReady,
+    data.stats?.ds?.stats?.totalDocs,
+    timeState.start,
+    timeState.end,
+    queryRangeSeconds,
+  ]);
+
   return (
     <EuiFlexGroup gutterSize="m" direction="column">
       <StreamDetailGeneralData
@@ -30,7 +67,7 @@ export function StreamDetailLifecycle({
         refreshDefinition={refreshDefinition}
         data={data}
       />
-      <EuiSpacer size="m" />
+      <EuiHorizontalRule margin="m" />
       <StreamDetailFailureStore
         definition={definition}
         data={data}

@@ -68,6 +68,12 @@ export const FilteringRulesTable: React.FC<FilteringRulesTableProps> = ({
     <EuiBasicTable
       columns={columns}
       items={filteringRules.sort(({ order }, { order: secondOrder }) => order - secondOrder)}
+      tableCaption={i18n.translate(
+        'xpack.enterpriseSearch.content.index.filtering.rulesTableCaption',
+        {
+          defaultMessage: 'Filtering rules',
+        }
+      )}
     />
   );
 };

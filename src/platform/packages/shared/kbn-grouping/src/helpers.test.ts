@@ -13,9 +13,11 @@ import {
   addGroupsToStorage,
   isRawBucket,
   isGroupingBucket,
+  validateEnforcedGroups,
+  ensureEnforcedGroupsInFront,
   LOCAL_STORAGE_GROUPING_KEY,
 } from './helpers';
-import type { Storage, GroupModel } from './hooks/types';
+import type { Storage, GroupModel, GroupSettings } from './hooks/types';
 import type { RawBucket, GroupingBucket } from './components';
 
 describe('helpers', () => {
@@ -306,6 +308,128 @@ describe('helpers', () => {
         selectedGroup: 'group',
       };
       expect(isGroupingBucket(bucket)).toBe(false);
+    });
+  });
+
+  describe('validateEnforcedGroups', () => {
+    it('does not throw when settings is undefined', () => {
+      expect(() => validateEnforcedGroups(undefined, undefined)).not.toThrow();
+    });
+
+    it('does not throw when enforcedGroups is not provided', () => {
+      const settings: GroupSettings = {};
+      expect(() => validateEnforcedGroups(settings, undefined)).not.toThrow();
+    });
+
+    it('does not throw when enforcedGroups is empty', () => {
+      const settings: GroupSettings = { enforcedGroups: [] };
+      expect(() => validateEnforcedGroups(settings, undefined)).not.toThrow();
+    });
+
+    it('throws error when "none" is in enforcedGroups', () => {
+      const settings: GroupSettings = { enforcedGroups: ['none'] };
+      expect(() => validateEnforcedGroups(settings, undefined)).toThrow(
+        "'none' cannot be in enforcedGroups"
+      );
+    });
+
+    it('throws error when "none" is in enforcedGroups with other groups', () => {
+      const settings: GroupSettings = { enforcedGroups: ['group1', 'none', 'group2'] };
+      expect(() => validateEnforcedGroups(settings, undefined)).toThrow(
+        "'none' cannot be in enforcedGroups"
+      );
+    });
+
+    it('does not throw when enforcedGroups.length <= maxGroupingLevels', () => {
+      const settings: GroupSettings = { enforcedGroups: ['group1', 'group2'] };
+      expect(() => validateEnforcedGroups(settings, 2)).not.toThrow();
+      expect(() => validateEnforcedGroups(settings, 3)).not.toThrow();
+    });
+
+    it('throws error when enforcedGroups.length > maxGroupingLevels', () => {
+      const settings: GroupSettings = { enforcedGroups: ['group1', 'group2', 'group3'] };
+      expect(() => validateEnforcedGroups(settings, 2)).toThrow(
+        'enforcedGroups.length (3) must be <= maxGroupingLevels (2)'
+      );
+    });
+
+    it('does not throw when maxGroupingLevels is undefined', () => {
+      const settings: GroupSettings = { enforcedGroups: ['group1', 'group2', 'group3'] };
+      expect(() => validateEnforcedGroups(settings, undefined)).not.toThrow();
+    });
+
+    it('throws error when enforcedGroups are used with maxGroupingLevels === 1 (toggle mode)', () => {
+      const settings: GroupSettings = { enforcedGroups: ['group1'] };
+      expect(() => validateEnforcedGroups(settings, 1)).toThrow(
+        'enforcedGroups cannot be used when maxGroupingLevels is 1 (toggle mode)'
+      );
+    });
+
+    it('validates both constraints together', () => {
+      const settings: GroupSettings = { enforcedGroups: ['group1', 'group2'] };
+      expect(() => validateEnforcedGroups(settings, 2)).not.toThrow();
+      expect(() => validateEnforcedGroups(settings, 3)).not.toThrow();
+    });
+  });
+
+  describe('ensureEnforcedGroupsInFront', () => {
+    it('returns groups unchanged when enforced is empty', () => {
+      const groups = ['group1', 'group2'];
+      expect(ensureEnforcedGroupsInFront(groups, [])).toEqual(groups);
+    });
+
+    it('returns enforced groups when only "none" is selected', () => {
+      const enforced = ['group1', 'group2'];
+      expect(ensureEnforcedGroupsInFront(['none'], enforced)).toEqual(['group1', 'group2']);
+    });
+
+    it('places enforced groups in front of non-enforced groups', () => {
+      const groups = ['group3', 'group1', 'group4', 'group2'];
+      const enforced = ['group1', 'group2'];
+      const result = ensureEnforcedGroupsInFront(groups, enforced);
+      expect(result).toEqual(['group1', 'group2', 'group3', 'group4']);
+    });
+
+    it('adds missing enforced groups to the front', () => {
+      const groups = ['group3', 'group4'];
+      const enforced = ['group1', 'group2'];
+      const result = ensureEnforcedGroupsInFront(groups, enforced);
+      expect(result).toEqual(['group1', 'group2', 'group3', 'group4']);
+    });
+
+    it('removes duplicates and places enforced groups in front', () => {
+      const groups = ['group1', 'group3', 'group2', 'group4'];
+      const enforced = ['group1', 'group2'];
+      const result = ensureEnforcedGroupsInFront(groups, enforced);
+      expect(result).toEqual(['group1', 'group2', 'group3', 'group4']);
+    });
+
+    it('handles single enforced group', () => {
+      const groups = ['group2', 'group3'];
+      const enforced = ['group1'];
+      const result = ensureEnforcedGroupsInFront(groups, enforced);
+      expect(result).toEqual(['group1', 'group2', 'group3']);
+    });
+
+    it('handles multiple enforced groups', () => {
+      const groups = ['group4', 'group5'];
+      const enforced = ['group1', 'group2', 'group3'];
+      const result = ensureEnforcedGroupsInFront(groups, enforced);
+      expect(result).toEqual(['group1', 'group2', 'group3', 'group4', 'group5']);
+    });
+
+    it('preserves order of enforced groups', () => {
+      const groups = ['group3'];
+      const enforced = ['group2', 'group1'];
+      const result = ensureEnforcedGroupsInFront(groups, enforced);
+      expect(result).toEqual(['group2', 'group1', 'group3']);
+    });
+
+    it('preserves order of non-enforced groups', () => {
+      const groups = ['group3', 'group4', 'group5'];
+      const enforced = ['group1', 'group2'];
+      const result = ensureEnforcedGroupsInFront(groups, enforced);
+      expect(result).toEqual(['group1', 'group2', 'group3', 'group4', 'group5']);
     });
   });
 });

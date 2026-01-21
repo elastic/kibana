@@ -62,6 +62,7 @@ export function TraceWaterfallEmbeddable({
   return (
     <TraceWaterfall
       traceItems={data.traceItems}
+      errors={data.errors}
       onClick={onNodeClick}
       scrollElement={scrollElement}
       getRelatedErrorsHref={getRelatedErrorsHref}
@@ -70,6 +71,8 @@ export function TraceWaterfallEmbeddable({
       serviceName={serviceName}
       onErrorClick={onErrorClick}
       isFiltered={isFiltered}
+      agentMarks={data.agentMarks}
+      showCriticalPathControl
     />
   );
 }

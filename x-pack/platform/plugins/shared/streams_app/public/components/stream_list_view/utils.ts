@@ -9,6 +9,7 @@ import { getAncestors, getSegments, isRootStreamDefinition, Streams } from '@kbn
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import { isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
 import type { Direction } from '@elastic/eui';
+import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common/types';
 import { parseDurationInSeconds } from '../data_management/stream_detail_lifecycle/helpers/helpers';
 
 const SORTABLE_FIELDS = ['nameSortKey', 'retentionMs'] as const;
@@ -28,6 +29,7 @@ export type TableRow = EnrichedStream & {
   rootNameSortKey: string;
   rootDocumentsCount: number;
   rootRetentionMs: number;
+  dataQuality: QualityIndicators;
 };
 export interface StreamTree extends ListStreamDetail {
   children: StreamTree[];
@@ -96,7 +98,8 @@ export function filterCollapsedStreamRows(
 export function buildStreamRows(
   enrichedStreams: EnrichedStream[],
   sortField: SortableField,
-  sortDirection: Direction
+  sortDirection: Direction,
+  qualityByStream: Record<string, QualityIndicators>
 ): TableRow[] {
   const isAscending = sortDirection === 'asc';
   const compare = (a: EnrichedStream, b: EnrichedStream): number => {
@@ -117,7 +120,12 @@ export function buildStreamRows(
     level: number,
     rootMeta: Pick<TableRow, 'rootNameSortKey' | 'rootDocumentsCount' | 'rootRetentionMs'>
   ) => {
-    result.push({ ...node, level, ...rootMeta });
+    result.push({
+      ...node,
+      level,
+      ...rootMeta,
+      dataQuality: qualityByStream[node.stream.name] ?? 'good',
+    });
     if (node.children) {
       node.children.sort(compare).forEach((child) => pushNode(child, level + 1, rootMeta));
     }

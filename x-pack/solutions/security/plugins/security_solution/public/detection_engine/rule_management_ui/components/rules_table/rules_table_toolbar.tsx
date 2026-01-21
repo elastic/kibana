@@ -17,7 +17,7 @@ import { useRulesTableContext } from './rules_table/rules_table_context';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import * as i18nAssistant from '../../../common/translations';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
 import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
 import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
@@ -101,16 +101,19 @@ export const RulesTableToolbar = React.memo(() => {
     return `${i18nAssistant.DETECTION_RULES_CONVERSATION_ID} - ${selectedRuleNames.join(', ')}`;
   }, [selectedRuleNames]);
 
-  const isAgentBuilderEnabled = useIsExperimentalFeatureEnabled('agentBuilderEnabled');
-  const attachmentData = useMemo(
-    () => ({ text: getPromptContextFromDetectionRules(selectedRules) }),
+  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
+  const ruleAttachment = useMemo(
+    () => ({
+      attachmentType: SecurityAgentBuilderAttachments.rule,
+      attachmentData: {
+        text: getPromptContextFromDetectionRules(selectedRules),
+        attachmentLabel: selectedRules.length === 1 ? selectedRules[0].name : i18n.SELECTED_RULES,
+      },
+      attachmentPrompt: i18nAssistant.EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS,
+    }),
     [selectedRules]
   );
-  const { openAgentBuilderFlyout } = useAgentBuilderAttachment({
-    attachmentType: SecurityAgentBuilderAttachments.rule,
-    attachmentData,
-    attachmentPrompt: i18nAssistant.EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS,
-  });
+  const { openAgentBuilderFlyout } = useAgentBuilderAttachment(ruleAttachment);
 
   return (
     <EuiFlexGroup justifyContent={'spaceBetween'}>
@@ -120,8 +123,14 @@ export const RulesTableToolbar = React.memo(() => {
       <EuiFlexItem grow={false}>
         {hasAssistantPrivilege && selectedRules.length > 0 && isAssistantEnabled && (
           <>
-            {isAgentBuilderEnabled ? (
-              <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} />
+            {isAgentChatExperienceEnabled ? (
+              <NewAgentBuilderAttachment
+                onClick={openAgentBuilderFlyout}
+                telemetry={{
+                  pathway: 'rules_table',
+                  attachments: ['rule'],
+                }}
+              />
             ) : (
               <NewChat
                 category="detection-rules"

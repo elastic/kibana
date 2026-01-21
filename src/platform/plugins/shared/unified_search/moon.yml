@@ -38,9 +38,6 @@ dependsOn:
   - '@kbn/datemath'
   - '@kbn/monaco'
   - '@kbn/field-types'
-  - '@kbn/config'
-  - '@kbn/config-schema'
-  - '@kbn/utility-types-jest'
   - '@kbn/react-field'
   - '@kbn/ui-theme'
   - '@kbn/saved-objects-management-plugin'
@@ -59,11 +56,12 @@ dependsOn:
   - '@kbn/language-documentation'
   - '@kbn/esql-types'
   - '@kbn/aiops-utils'
-  - '@kbn/esql-ast'
+  - '@kbn/esql-language'
   - '@kbn/background-search'
   - '@kbn/split-button'
   - '@kbn/cps'
   - '@kbn/css-utils'
+  - '@kbn/kql'
 tags:
   - plugin
   - prod
@@ -74,7 +72,6 @@ fileGroups:
   src:
     - public/**/*
     - public/**/*.json
-    - server/**/*
     - '!target/**/*'
 tasks:
   jest:

@@ -20,8 +20,8 @@
       "llmTasks",
       "productDocBase"
     ],
-    "optionalPlugins": ["cloud", "serverless", "usageCollection"],
-    "requiredBundles": ["kibanaReact", "kibanaUtils"],
+    "optionalPlugins": ["cloud", "serverless", "usageCollection", "agentBuilder"],
+    "requiredBundles": ["kibanaReact", "kibanaUtils", "aiAssistantManagementSelection"],
     "runtimePluginDependencies": ["ml"],
     "extraPublicDirs": []
   }

@@ -62,7 +62,7 @@ dependsOn:
   - '@kbn/storybook'
   - '@kbn/esql-composer'
   - '@kbn/deeplinks-analytics'
-  - '@kbn/core-chrome-layout-constants'
+  - '@kbn/lens-embeddable-utils'
 tags:
   - plugin
   - prod

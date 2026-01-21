@@ -16,7 +16,7 @@ import { IndexTable } from './index_table';
 
 export const IndexList: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
   const {
-    core: { executionContext },
+    core: { executionContext, http },
   } = useAppContext();
 
   useExecutionContext(executionContext, {
@@ -30,7 +30,7 @@ export const IndexList: React.FunctionComponent<RouteComponentProps> = ({ histor
 
   return (
     <div className={APP_WRAPPER_CLASS} data-test-subj="indicesList">
-      <IndexTable history={history as ScopedHistory} />
+      <IndexTable history={history as ScopedHistory} http={http} />
     </div>
   );
 };

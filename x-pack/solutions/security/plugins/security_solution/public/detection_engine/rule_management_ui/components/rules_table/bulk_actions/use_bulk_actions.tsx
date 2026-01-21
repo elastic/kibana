@@ -310,9 +310,7 @@ export const useBulkActions = ({
 
         const dryRunResult = await executeBulkActionsDryRun({
           type: BulkActionTypeEnum.fill_gaps,
-          ...(isAllSelected
-            ? { query: convertRulesFilterToKQL(filterOptions) }
-            : { ids: selectedRuleIds }),
+          ...(isAllSelected ? globalQuery : { ids: selectedRuleIds }),
           fillGapsPayload: {
             start_date: new Date(Date.now() - 1000).toISOString(),
             end_date: new Date().toISOString(),
@@ -385,7 +383,7 @@ export const useBulkActions = ({
 
         await executeBulkAction({
           type: BulkActionTypeEnum.fill_gaps,
-          ...(isAllSelected ? { query: kql } : { ids: enabledIds }),
+          ...(isAllSelected ? globalQuery : { ids: enabledIds }),
           fillGapsPayload: {
             start_date: modalBulkFillRuleGapsConfirmationResult.startDate.toISOString(),
             end_date: modalBulkFillRuleGapsConfirmationResult.endDate.toISOString(),
@@ -801,7 +799,6 @@ export const useBulkActions = ({
       isAlertSuppressionLicenseValid,
       alertSuppressionUpsellingMessage,
       globalQuery,
-      kql,
       showBulkFillRuleGapsConfirmation,
       isBulkFillRuleGapsEnabled,
     ]

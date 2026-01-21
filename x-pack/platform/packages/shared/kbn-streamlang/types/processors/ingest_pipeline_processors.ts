@@ -13,12 +13,17 @@ import type {
   RenameProcessor,
   SetProcessor,
   ManualIngestPipelineProcessor,
+  MathProcessor,
   AppendProcessor,
   ConvertProcessor,
   RemoveByPrefixProcessor,
   RemoveProcessor,
   DropDocumentProcessor,
   ReplaceProcessor,
+  UppercaseProcessor,
+  TrimProcessor,
+  LowercaseProcessor,
+  JoinProcessor,
 } from '.';
 import type { Condition } from '../conditions';
 
@@ -92,6 +97,36 @@ export type IngestPipelineReplaceProcessor = RenameFieldsAndRemoveAction<
   { from: 'field'; to: 'target_field'; where: 'if' }
 >;
 
+// Math (uses script processor internally)
+export type IngestPipelineMathProcessor = RenameFieldsAndRemoveAction<
+  MathProcessor,
+  { where: 'if' }
+>;
+
+// Uppercase
+export type IngestPipelineUppercaseProcessor = RenameFieldsAndRemoveAction<
+  UppercaseProcessor,
+  { from: 'field'; to: 'target_field'; where: 'if' }
+>;
+
+// Lowercase
+export type IngestPipelineLowercaseProcessor = RenameFieldsAndRemoveAction<
+  LowercaseProcessor,
+  { from: 'field'; to: 'target_field'; where: 'if' }
+>;
+
+// Trim
+export type IngestPipelineTrimProcessor = RenameFieldsAndRemoveAction<
+  TrimProcessor,
+  { from: 'field'; to: 'target_field'; where: 'if' }
+>;
+
+// Join
+export type IngestPipelineJoinProcessor = RenameFieldsAndRemoveAction<
+  JoinProcessor,
+  { to: 'field'; where: 'if' }
+>;
+
 // Manual Ingest Pipeline (escape hatch)
 export type IngestPipelineManualIngestPipelineProcessor = RenameFieldsAndRemoveAction<
   ManualIngestPipelineProcessor,
@@ -103,6 +138,7 @@ export type IngestPipelineProcessor =
   | IngestPipelineDissectProcessor
   | IngestPipelineDateProcessor
   | IngestPipelineDropProcessor
+  | IngestPipelineMathProcessor
   | IngestPipelineRenameProcessor
   | IngestPipelineSetProcessor
   | IngestPipelineAppendProcessor
@@ -110,4 +146,8 @@ export type IngestPipelineProcessor =
   | IngestPipelineRemoveByPrefixProcessor
   | IngestPipelineRemoveProcessor
   | IngestPipelineReplaceProcessor
+  | IngestPipelineUppercaseProcessor
+  | IngestPipelineLowercaseProcessor
+  | IngestPipelineTrimProcessor
+  | IngestPipelineJoinProcessor
   | IngestPipelineManualIngestPipelineProcessor;

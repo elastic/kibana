@@ -34,6 +34,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         'xpack.security.enabled=true',
       ],
     },
+    kbnTestServer: {
+      ...functionalConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...functionalConfig.get('kbnTestServer.serverArgs'),
+        `--uiSettings.overrides.eisPromotionalTour:enabled=false`,
+      ],
+    },
     testFiles: [require.resolve('.')],
     screenshots: { directory: resolve(__dirname, '../screenshots') },
     apps: {

@@ -19,8 +19,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Streams, isRootStreamDefinition } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { uniq } from 'lodash';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useDiscardConfirm } from '../../../hooks/use_discard_confirm';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
@@ -44,6 +45,7 @@ const classicDefaultColumns = DEFAULT_TABLE_COLUMN_NAMES.filter((column) => colu
 
 export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: SchemaEditorProps) => {
   const context = useKibana();
+  const { onPageReady } = usePerformanceContext();
   const { loading } = useStreamDetail();
   const [selectedFields, setSelectedFields] = React.useState<string[]>([]);
   const {
@@ -81,6 +83,22 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
     openConfirm: context.core.overlays.openConfirm,
     shouldPromptOnReplace: false,
   });
+
+  // Telemetry for TTFMP (time to first meaningful paint)
+  useEffect(() => {
+    if (!isLoadingFields && !loading) {
+      const streamType = getStreamTypeFromDefinition(definition.stream);
+      onPageReady({
+        meta: {
+          description: `[ttfmp_streams_detail_schema] streamType: ${streamType}`,
+        },
+        customMetrics: {
+          key1: 'schema_editor_fields_count',
+          value1: fields?.length ?? 0,
+        },
+      });
+    }
+  }, [definition.stream, fields.length, isLoadingFields, loading, onPageReady]);
 
   const handleCancelClick = useDiscardConfirm(discardChanges, {
     defaultFocusedButton: 'cancel',

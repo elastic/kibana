@@ -138,7 +138,15 @@ export class DataPublicPlugin
 
   public start(
     core: CoreStart,
-    { uiActions, fieldFormats, dataViews, inspector, screenshotMode, share }: DataStartDependencies
+    {
+      uiActions,
+      fieldFormats,
+      dataViews,
+      inspector,
+      screenshotMode,
+      share,
+      cps,
+    }: DataStartDependencies
   ): DataPublicPluginStart {
     const { uiSettings, overlays } = core;
     setOverlays(overlays);
@@ -158,6 +166,7 @@ export class DataPublicPlugin
       screenshotMode,
       share,
       scriptedFieldsEnabled: dataViews.scriptedFieldsEnabled,
+      cps,
     });
     setSearchService(search);
 

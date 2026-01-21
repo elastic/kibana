@@ -10,15 +10,12 @@
 import {
   createLogsContextService,
   type LogsContextService,
-  createMetricsContextService,
-  type MetricsContextService,
   type ApmContextService,
   createApmContextService,
 } from '@kbn/discover-utils';
 
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
-import type { MetricsExperiencePluginStart } from '@kbn/metrics-experience-plugin/public';
 import type { DiscoverServices } from '../../build_services';
 
 /**
@@ -27,7 +24,6 @@ import type { DiscoverServices } from '../../build_services';
 export interface ProfileProviderSharedServicesDeps {
   logsDataAccess?: LogsDataAccessPluginStart;
   apmSourcesAccess?: ApmSourceAccessPluginStart;
-  metricsExperience?: MetricsExperiencePluginStart;
 }
 
 /**
@@ -36,7 +32,6 @@ export interface ProfileProviderSharedServicesDeps {
 export interface ProfileProviderSharedServices {
   logsContextService: LogsContextService;
   apmContextService: ApmContextService;
-  metricsContextService: MetricsContextService;
 }
 
 /**
@@ -52,13 +47,11 @@ export type ProfileProviderServices = ProfileProviderSharedServices & DiscoverSe
 export const createProfileProviderSharedServices = async ({
   logsDataAccess,
   apmSourcesAccess,
-  metricsExperience,
 }: ProfileProviderSharedServicesDeps): Promise<ProfileProviderSharedServices> => {
-  const [logsContextService, apmContextService, metricsContextService] = await Promise.all([
+  const [logsContextService, apmContextService] = await Promise.all([
     createLogsContextService({ logsDataAccess }),
     createApmContextService({ apmSourcesAccess }),
-    createMetricsContextService({ metricsExperience }),
   ]);
 
-  return { logsContextService, apmContextService, metricsContextService };
+  return { logsContextService, apmContextService };
 };

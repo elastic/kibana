@@ -6,13 +6,14 @@
  */
 import React, { useEffect } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiToolTip, EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiToolTip } from '@elastic/eui';
 
 import { gapFillStatus } from '@kbn/alerting-plugin/common';
 import { useRulesTableContext } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import * as i18n from './translations';
 import { useGetRuleIdsWithGaps } from '../../api/hooks/use_get_rule_ids_with_gaps';
 import { defaultRangeValue } from '../../constants';
+import { GapAutoFillStatus } from './gap_auto_fill_status';
 
 export const RulesWithGapsOverviewPanel = () => {
   const {
@@ -43,7 +44,7 @@ export const RulesWithGapsOverviewPanel = () => {
     <EuiPanel hasBorder>
       <EuiFlexGroup
         alignItems="center"
-        justifyContent="flexStart"
+        justifyContent="spaceBetween"
         gutterSize="m"
         data-test-subj="rule-with-gaps_overview-panel"
       >
@@ -65,6 +66,9 @@ export const RulesWithGapsOverviewPanel = () => {
               </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <GapAutoFillStatus />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

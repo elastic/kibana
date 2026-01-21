@@ -9,7 +9,7 @@
       "preference": "",
       "realtime": "__flag__",
       "refresh": "__flag__",
-      "routing": "",
+      "routing": [],
       "_source": "__flag__",
       "_source_excludes": [],
       "_source_exclude_vectors": "__flag__",
@@ -19,8 +19,7 @@
       "version_type": [
         "internal",
         "external",
-        "external_gte",
-        "force"
+        "external_gte"
       ]
     },
     "methods": [

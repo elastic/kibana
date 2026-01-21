@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate5';
-import { assertEvent, assign, sendTo, setup } from 'xstate5';
+import { and, assertEvent, assign, sendTo, setup } from 'xstate5';
 import type { SampleDocument } from '@kbn/streams-schema';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { isEqual, omit } from 'lodash';
@@ -83,9 +83,14 @@ export const dataSourceMachine = setup({
       })
     ),
   },
+  delays: {
+    // Debounce delay for custom samples to avoid processing every keystroke
+    customSamplesDebounce: 300,
+  },
   guards: {
     isEnabled: ({ context }) => context.dataSource.enabled,
     isValidData: (_, params: { data?: SampleDocument[] }) => Array.isArray(params.data),
+    isCustomSamples: ({ context }) => context.dataSource.type === 'custom-samples',
     shouldCollectData: ({ context, event }) => {
       assertEvent(event, 'dataSource.change');
       /**
@@ -126,6 +131,14 @@ export const dataSourceMachine = setup({
         },
         'dataSource.refresh': { target: '.loadingData', reenter: true },
         'dataSource.change': [
+          // For custom samples with substantive changes, debounce before collecting
+          {
+            guard: and(['shouldCollectData', 'isCustomSamples']),
+            target: '.debouncingChange',
+            reenter: true,
+            actions: [{ type: 'storeDataSource', params: ({ event }) => event }],
+          },
+          // For other data sources with substantive changes, collect immediately
           {
             guard: 'shouldCollectData',
             target: '.loadingData',
@@ -135,6 +148,7 @@ export const dataSourceMachine = setup({
               { type: 'notifyParent', params: { eventType: 'dataSource.change' } },
             ],
           },
+          // Cosmetic changes only (e.g., name updates)
           {
             actions: [
               { type: 'storeDataSource', params: ({ event }) => event },
@@ -145,6 +159,15 @@ export const dataSourceMachine = setup({
       },
       states: {
         idle: {},
+        // Debouncing state for custom samples - waits for typing to stop before processing
+        debouncingChange: {
+          after: {
+            customSamplesDebounce: {
+              target: 'loadingData',
+              actions: [{ type: 'notifyParent', params: { eventType: 'dataSource.change' } }],
+            },
+          },
+        },
         loadingData: {
           invoke: {
             id: 'dataCollectorActor',

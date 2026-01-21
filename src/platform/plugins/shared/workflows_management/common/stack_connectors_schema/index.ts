@@ -169,3 +169,13 @@ export {
 
 // Torq connector schemas
 export { TorqParamsSchema, TorqResponseSchema } from './torq';
+
+// MCP connector schemas
+export {
+  McpTestParamsSchema,
+  McpListToolsParamsSchema,
+  McpCallToolParamsSchema,
+  McpTestResponseSchema,
+  McpListToolsResponseSchema,
+  McpCallToolResponseSchema,
+} from './mcp';

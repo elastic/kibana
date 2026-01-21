@@ -11,41 +11,46 @@ import { v4 as generateUuid } from 'uuid';
 import type {
   CoreSetup,
   CoreStart,
+  KibanaRequest,
   Logger,
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import type { EsWorkflowExecution } from '@kbn/workflows';
+import type {
+  ConcurrencySettings,
+  EsWorkflowExecution,
+  WorkflowExecutionEngineModel,
+} from '@kbn/workflows';
 import { ExecutionStatus, WorkflowRepository } from '@kbn/workflows';
 import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
-
+import { ConcurrencyManager } from './concurrency/concurrency_manager';
 import type { WorkflowsExecutionEngineConfig } from './config';
-
 import {
   checkAndSkipIfExistingScheduledExecution,
   resumeWorkflow,
   runWorkflow,
 } from './execution_functions';
+import { checkLicense } from './lib/check_license';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import type {
   CancelWorkflowExecution,
   ExecuteWorkflow,
   ExecuteWorkflowStep,
+  ScheduleWorkflow,
   WorkflowsExecutionEnginePluginSetup,
   WorkflowsExecutionEnginePluginSetupDeps,
   WorkflowsExecutionEnginePluginStart,
   WorkflowsExecutionEnginePluginStartDeps,
 } from './types';
-
 import { generateExecutionTaskScope } from './utils';
+import { buildWorkflowContext } from './workflow_context_manager/build_workflow_context';
 import type { ContextDependencies } from './workflow_context_manager/types';
 import { WorkflowEventLoggerService } from './workflow_event_logger';
 import type {
   ResumeWorkflowExecutionParams,
   StartWorkflowExecutionParams,
 } from './workflow_task_manager/types';
-
 import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
 import { createIndexes } from '../common';
 
@@ -62,6 +67,7 @@ export class WorkflowsExecutionEnginePlugin
 {
   private readonly logger: Logger;
   private readonly config: WorkflowsExecutionEngineConfig;
+  private concurrencyManager!: ConcurrencyManager;
   private setupDependencies?: SetupDependencies;
   private initializePromise?: Promise<void>;
 
@@ -102,7 +108,31 @@ export class WorkflowsExecutionEnginePlugin
             run: async () => {
               const { workflowRunId, spaceId } =
                 taskInstance.params as StartWorkflowExecutionParams;
+
+              // Add queue delay metrics to APM trace for observability
+              const now = Date.now();
+              const scheduledAt = taskInstance.scheduledAt
+                ? new Date(taskInstance.scheduledAt).getTime()
+                : null;
+              const queueDelayMs = scheduledAt ? now - scheduledAt : null;
+
+              const apm = await import('elastic-apm-node');
+              const currentTransaction = apm.default.currentTransaction;
+              if (currentTransaction) {
+                if (queueDelayMs !== null) {
+                  currentTransaction.setLabel('queue_delay_ms', queueDelayMs);
+                  currentTransaction.setLabel(
+                    'queue_delay_seconds',
+                    Math.round(queueDelayMs / 1000)
+                  );
+                }
+                currentTransaction.setLabel('workflow_run_id', workflowRunId);
+                currentTransaction.setLabel('space_id', spaceId);
+              }
+
               const [coreStart, pluginsStart] = await core.getStartServices();
+              await checkLicense(pluginsStart.licensing);
+
               await this.initialize(coreStart);
               const dependencies: ContextDependencies = {
                 ...setupDependencies,
@@ -147,7 +177,36 @@ export class WorkflowsExecutionEnginePlugin
             run: async () => {
               const { workflowRunId, spaceId } =
                 taskInstance.params as ResumeWorkflowExecutionParams;
+
+              // Add queue delay metrics to APM trace for observability
+              const now = Date.now();
+              const scheduledAt = taskInstance.scheduledAt
+                ? new Date(taskInstance.scheduledAt).getTime()
+                : null;
+              const runAt = taskInstance.runAt ? new Date(taskInstance.runAt).getTime() : null;
+              const queueDelayMs = scheduledAt ? now - scheduledAt : null;
+              const resumeDelayMs = runAt ? now - runAt : null;
+
+              const apm = await import('elastic-apm-node');
+              const currentTransaction = apm.default.currentTransaction;
+              if (currentTransaction) {
+                if (queueDelayMs !== null) {
+                  currentTransaction.setLabel('queue_delay_ms', queueDelayMs);
+                  currentTransaction.setLabel(
+                    'queue_delay_seconds',
+                    Math.round(queueDelayMs / 1000)
+                  );
+                }
+                if (resumeDelayMs !== null) {
+                  currentTransaction.setLabel('resume_delay_ms', resumeDelayMs);
+                }
+                currentTransaction.setLabel('workflow_run_id', workflowRunId);
+                currentTransaction.setLabel('space_id', spaceId);
+              }
+
               const [coreStart, pluginsStart] = await core.getStartServices();
+              await checkLicense(pluginsStart.licensing);
+
               await this.initialize(coreStart);
               const dependencies: ContextDependencies = {
                 ...setupDependencies,
@@ -195,7 +254,43 @@ export class WorkflowsExecutionEnginePlugin
                 spaceId: string;
                 triggerType: string;
               };
+
+              // Add queue delay metrics to APM trace for observability
+              // This shows how long the task waited in the queue before execution
+              const now = Date.now();
+              const scheduledAt = taskInstance.scheduledAt
+                ? new Date(taskInstance.scheduledAt).getTime()
+                : null;
+              const runAt = taskInstance.runAt ? new Date(taskInstance.runAt).getTime() : null;
+
+              const queueDelayMs = scheduledAt ? now - scheduledAt : null;
+              const scheduleDelayMs = runAt ? now - runAt : null;
+
+              // Add labels to current APM transaction for queue visibility
+              const apm = await import('elastic-apm-node');
+              const currentTransaction = apm.default.currentTransaction;
+              if (currentTransaction) {
+                if (queueDelayMs !== null) {
+                  currentTransaction.setLabel('queue_delay_ms', queueDelayMs);
+                  currentTransaction.setLabel(
+                    'queue_delay_seconds',
+                    Math.round(queueDelayMs / 1000)
+                  );
+                }
+                if (scheduleDelayMs !== null) {
+                  currentTransaction.setLabel('schedule_delay_ms', scheduleDelayMs);
+                }
+                currentTransaction.setLabel('workflow_id', workflowId);
+                currentTransaction.setLabel('space_id', spaceId);
+              }
+
+              logger.debug(
+                `Workflow ${workflowId} queue metrics: queueDelayMs=${queueDelayMs}, scheduleDelayMs=${scheduleDelayMs}`
+              );
+
               const [coreStart, pluginsStart] = await core.getStartServices();
+              await checkLicense(pluginsStart.licensing);
+
               await this.initialize(coreStart);
               const dependencies: ContextDependencies = {
                 ...setupDependencies,
@@ -221,6 +316,7 @@ export class WorkflowsExecutionEnginePlugin
                 workflow,
                 spaceId,
                 workflowExecutionRepository,
+                taskInstance,
                 logger
               );
               if (wasSkipped) {
@@ -249,7 +345,7 @@ export class WorkflowsExecutionEnginePlugin
                 triggeredBy: 'scheduled',
               };
 
-              const workflowExecution = {
+              const workflowExecution: Partial<EsWorkflowExecution> = {
                 id: generateUuid(),
                 spaceId,
                 workflowId: workflow.id,
@@ -258,11 +354,53 @@ export class WorkflowsExecutionEnginePlugin
                 yaml: workflow.yaml,
                 context: executionContext,
                 status: ExecutionStatus.PENDING,
+                // Store task's runAt to link execution to specific scheduled run
+                // runAt is stable across retries (retries use the same runAt but get a new startedAt)
+                // This allows us to detect stale executions from previous scheduled runs
+                taskRunAt: taskInstance.runAt?.toISOString() || null,
                 createdAt: workflowCreatedAt.toISOString(),
                 createdBy: '',
                 triggeredBy: 'scheduled',
+                // Store queue delay metrics for observability (only if enabled in config)
+                ...(this.config.collectQueueMetrics
+                  ? {
+                      queueMetrics: {
+                        scheduledAt: taskInstance.scheduledAt?.toString(),
+                        runAt: taskInstance.runAt?.toString(),
+                        startedAt: new Date(now).toISOString(),
+                        queueDelayMs,
+                        scheduleDelayMs,
+                      },
+                    }
+                  : {}),
               };
-              await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
+
+              const concurrencyGroupKey = this.getConcurrencyGroupKey(
+                workflowExecution,
+                workflow.definition?.settings?.concurrency,
+                coreStart,
+                dependencies
+              );
+              if (concurrencyGroupKey) {
+                workflowExecution.concurrencyGroupKey = concurrencyGroupKey;
+              }
+
+              // Use refresh: 'wait_for' to ensure the execution is immediately searchable
+              // for deduplication checks by subsequent scheduled tasks
+              await workflowExecutionRepository.createWorkflowExecution(workflowExecution, {
+                refresh: 'wait_for',
+              });
+
+              // Check concurrency limits and apply collision strategy if needed
+              const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
+              if (!canProceed) {
+                // Execution was dropped due to concurrency limit, skip running
+                return;
+              }
+
+              if (!workflowExecution.id || !workflowExecution.spaceId) {
+                throw new Error('Workflow execution must have id and spaceId');
+              }
 
               await runWorkflow({
                 workflowRunId: workflowExecution.id,
@@ -297,6 +435,16 @@ export class WorkflowsExecutionEnginePlugin
       throw new Error('Setup not called before start');
     }
 
+    // Initialize ConcurrencyManager with dependencies
+    const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
+    const workflowExecutionRepository = new WorkflowExecutionRepository(
+      coreStart.elasticsearch.client.asInternalUser
+    );
+    this.concurrencyManager = new ConcurrencyManager(
+      workflowTaskManager,
+      workflowExecutionRepository
+    );
+
     const dependencies: ContextDependencies = {
       ...this.setupDependencies,
       coreStart,
@@ -305,17 +453,23 @@ export class WorkflowsExecutionEnginePlugin
       workflowsExtensions: plugins.workflowsExtensions,
     };
 
-    const executeWorkflow: ExecuteWorkflow = async (workflow, context, request) => {
+    // Helper function to create and persist a workflow execution
+    const createAndPersistWorkflowExecution = async (
+      workflow: WorkflowExecutionEngineModel,
+      context: Record<string, unknown>,
+      defaultTriggeredBy: string
+    ): Promise<{
+      workflowExecution: Partial<EsWorkflowExecution>;
+      repository: WorkflowExecutionRepository;
+    }> => {
       await this.initialize(coreStart);
       const workflowCreatedAt = new Date();
-      // Get ES client and create repository for this execution
-      const esClient = coreStart.elasticsearch.client.asInternalUser;
-      const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
-
-      const triggeredBy = context.triggeredBy || 'manual'; // 'manual' or 'scheduled'
-      const workflowExecution = {
+      const triggeredBy = (context.triggeredBy as string | undefined) || defaultTriggeredBy;
+      const createdBy = (context.createdBy as string | undefined) || 'system';
+      const spaceId = (context.spaceId as string | undefined) || 'default';
+      const workflowExecution: Partial<EsWorkflowExecution> = {
         id: generateUuid(),
-        spaceId: context.spaceId,
+        spaceId,
         workflowId: workflow.id,
         isTestRun: workflow.isTestRun,
         workflowDefinition: workflow.definition,
@@ -323,16 +477,75 @@ export class WorkflowsExecutionEnginePlugin
         context,
         status: ExecutionStatus.PENDING,
         createdAt: workflowCreatedAt.toISOString(),
-        createdBy: context.createdBy || '', // TODO: set if available
-        triggeredBy, // <-- new field for scheduled workflows
+        createdBy,
+        triggeredBy,
       };
+
+      const concurrencyGroupKey = this.getConcurrencyGroupKey(
+        workflowExecution,
+        workflow.definition?.settings?.concurrency,
+        coreStart,
+        dependencies
+      );
+      if (concurrencyGroupKey) {
+        workflowExecution.concurrencyGroupKey = concurrencyGroupKey;
+      }
+
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
 
+      return { workflowExecution, repository: workflowExecutionRepository };
+    };
+
+    // Helper function to create a task instance
+    const createTaskInstance = (
+      workflowExecution: Partial<EsWorkflowExecution>,
+      scope: string[]
+    ) => {
+      return {
+        id: `workflow:${workflowExecution.id}:${workflowExecution.triggeredBy}`,
+        taskType: 'workflow:run',
+        params: {
+          workflowRunId: workflowExecution.id,
+          spaceId: workflowExecution.spaceId,
+        } as StartWorkflowExecutionParams,
+        state: {
+          lastRunAt: null,
+          lastRunStatus: null,
+          lastRunError: null,
+        },
+        scope,
+        enabled: true,
+      };
+    };
+
+    const executeWorkflow: ExecuteWorkflow = async (workflow, context, request) => {
+      await checkLicense(plugins.licensing);
+
       // AUTO-DETECT: Check if we're already running in a Task Manager context
+      // We can determine this from context and request before creating the execution
       const isRunningInTaskManager =
-        triggeredBy === 'scheduled' ||
-        context.source === 'task-manager' ||
-        request.isFakeRequest === true;
+        (context.triggeredBy as string | undefined) === 'scheduled' ||
+        (context.source as string | undefined) === 'task-manager' ||
+        request?.isFakeRequest === true;
+
+      if (!isRunningInTaskManager && !request) {
+        throw new Error('Workflows cannot be executed without the user context');
+      }
+
+      const { workflowExecution } = await createAndPersistWorkflowExecution(
+        workflow,
+        context,
+        'manual'
+      );
+
+      // Check concurrency limits and apply collision strategy if needed
+      const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
+      if (!canProceed) {
+        // Execution was dropped due to concurrency limit, return execution ID
+        return {
+          workflowExecutionId: workflowExecution.id as string,
+        };
+      }
 
       if (isRunningInTaskManager) {
         // We're already in a task - execute directly without scheduling another task
@@ -341,68 +554,81 @@ export class WorkflowsExecutionEnginePlugin
         );
 
         await runWorkflow({
-          workflowRunId: workflowExecution.id,
-          spaceId: workflowExecution.spaceId,
-          taskAbortController: new AbortController(),
+          workflowRunId: workflowExecution.id as string,
+          spaceId: workflowExecution.spaceId || 'default',
+          taskAbortController: new AbortController(), // TODO: We need to think how to pass this properly from outer task
           logger: this.logger,
           config: this.config,
           fakeRequest: request,
           dependencies,
         });
       } else {
-        const taskInstance = {
-          id: `workflow:${workflowExecution.id}:${context.triggeredBy}`,
-          taskType: 'workflow:run',
-          params: {
-            workflowRunId: workflowExecution.id,
-            spaceId: workflowExecution.spaceId,
-          },
-          state: {
-            lastRunAt: null,
-            lastRunStatus: null,
-            lastRunError: null,
-          },
-          scope: ['workflows'],
-          enabled: true,
-        };
-
-        // Use Task Manager's first-class API key support by passing the request
-        // Task Manager will automatically create and manage the API key
-        if (request) {
-          // Debug: Log the user info from the original request
-          this.logger.debug(
-            `Scheduling workflow task with user context for workflow ${workflow.id}`
-          );
-          await plugins.taskManager.schedule(taskInstance, { request });
-        } else {
-          this.logger.debug(
-            `Workflow with execution id ${workflowExecution.id} does not have a request, aborting`
-          );
-          await workflowExecutionRepository.updateWorkflowExecution({
-            id: workflowExecution.id,
-            status: ExecutionStatus.FAILED,
-            error: {
-              type: 'Error',
-              message: 'Workflows cannot be executed without the user context',
-            },
-          });
-        }
+        const taskInstance = createTaskInstance(workflowExecution, ['workflows']);
+        await plugins.taskManager.schedule(taskInstance, { request: request as KibanaRequest });
+        this.logger.debug(
+          `Scheduling workflow task with user context for workflow ${workflow.id}, execution ${workflowExecution.id}`
+        );
       }
 
       return {
-        workflowExecutionId: workflowExecution.id,
+        workflowExecutionId: workflowExecution.id as string,
       };
     };
 
-    const executeWorkflowStep: ExecuteWorkflowStep = async (workflow, stepId, context, request) => {
+    const scheduleWorkflow: ScheduleWorkflow = async (workflow, context, request) => {
+      await checkLicense(plugins.licensing);
+
+      const { workflowExecution } = await createAndPersistWorkflowExecution(
+        workflow,
+        context,
+        'alert'
+      );
+
+      // Check concurrency limits and apply collision strategy if needed
+      const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
+      if (!canProceed) {
+        // Execution was dropped due to concurrency limit, skip scheduling
+        return {
+          workflowExecutionId: workflowExecution.id as string,
+        };
+      }
+
+      // Always schedule a task (never execute directly)
+      const taskInstance = createTaskInstance(
+        workflowExecution,
+        generateExecutionTaskScope(workflowExecution as EsWorkflowExecution)
+      );
+
+      await plugins.taskManager.schedule(taskInstance, { request });
+      this.logger.debug(
+        `Scheduling workflow task with user context for workflow ${workflow.id}, execution ${workflowExecution.id}`
+      );
+
+      return {
+        workflowExecutionId: workflowExecution.id as string,
+      };
+    };
+
+    const executeWorkflowStep: ExecuteWorkflowStep = async (
+      workflow,
+      stepId,
+      contextOverride,
+      request
+    ) => {
+      await checkLicense(plugins.licensing);
+
+      // Check if request is required before creating execution
+      // Workflow steps require user context to run with proper permissions
+      if (!request) {
+        throw new Error('Workflow steps cannot be executed without the user context');
+      }
       await this.initialize(coreStart);
       const workflowCreatedAt = new Date();
+      const context: Record<string, unknown> = {
+        contextOverride,
+      };
 
-      // Get ES client and create repository for this execution
-      const esClient = coreStart.elasticsearch.client.asInternalUser;
-      const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
-
-      const triggeredBy = context.triggeredBy || 'manual'; // 'manual' or 'scheduled'
+      const triggeredBy = (context.triggeredBy as string | undefined) || 'manual'; // 'manual' or 'scheduled'
       const workflowExecution = {
         id: generateUuid(),
         spaceId: workflow.spaceId,
@@ -414,7 +640,7 @@ export class WorkflowsExecutionEnginePlugin
         context,
         status: ExecutionStatus.PENDING,
         createdAt: workflowCreatedAt.toISOString(),
-        createdBy: context.createdBy || '', // TODO: set if available
+        createdBy: context.createdBy as string | undefined, // TODO: set if available
         triggeredBy, // <-- new field for scheduled workflows
       };
 
@@ -438,27 +664,14 @@ export class WorkflowsExecutionEnginePlugin
 
       // Use Task Manager's first-class API key support by passing the request
       // This ensures the step runs with the user's permissions, not kibana_system
-      if (request) {
-        this.logger.debug(
-          `Scheduling workflow step task with user context for workflow ${workflow.id}, step ${stepId}`
-        );
-        await plugins.taskManager.schedule(taskInstance, { request });
-      } else {
-        this.logger.debug(
-          `Workflow with execution id ${workflowExecution.id} does not have a request, aborting`
-        );
-        await workflowExecutionRepository.updateWorkflowExecution({
-          id: workflowExecution.id,
-          status: ExecutionStatus.FAILED,
-          error: {
-            type: 'Error',
-            message: 'Workflows cannot be executed without the user context',
-          },
-        });
-      }
+      // At this point, request is guaranteed to exist due to the early check above
+      this.logger.debug(
+        `Scheduling workflow step task with user context for workflow ${workflow.id}, step ${stepId}`
+      );
+      await plugins.taskManager.schedule(taskInstance, { request });
 
       return {
-        workflowExecutionId: workflowExecution.id,
+        workflowExecutionId: workflowExecution.id as string,
       };
     };
 
@@ -466,14 +679,13 @@ export class WorkflowsExecutionEnginePlugin
       workflowExecutionId,
       spaceId
     ) => {
+      await checkLicense(plugins.licensing);
+
       await this.initialize(coreStart);
-      const esClient = coreStart.elasticsearch.client.asInternalUser;
-      const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
       const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
         workflowExecutionId,
         spaceId
       );
-      const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
 
       if (!workflowExecution) {
         throw new WorkflowExecutionNotFoundError(workflowExecutionId);
@@ -508,6 +720,7 @@ export class WorkflowsExecutionEnginePlugin
       workflowEventLoggerService,
       executeWorkflow,
       executeWorkflowStep,
+      scheduleWorkflow,
       cancelWorkflowExecution,
     };
   }
@@ -522,5 +735,109 @@ export class WorkflowsExecutionEnginePlugin
       });
     }
     await this.initializePromise;
+  }
+
+  /**
+   * Reused local wrapper for evaluating the concurrency group key for a workflow execution.
+   * Normalizes the partial workflowExecution to build the workflow context needed for template evaluation.
+   *
+   * @param workflowExecution - The partial workflow execution
+   * @param concurrencySettings - The concurrency settings from workflow definition
+   * @param coreStart - Core start services
+   * @param dependencies - Context dependencies for building workflow context
+   * @returns The evaluated concurrency group key, or null if not applicable
+   */
+  private getConcurrencyGroupKey(
+    workflowExecution: Partial<EsWorkflowExecution>,
+    concurrencySettings: ConcurrencySettings | undefined,
+    coreStart: CoreStart,
+    dependencies: ContextDependencies
+  ): string | null {
+    if (!concurrencySettings?.key) {
+      return null;
+    }
+
+    // Guard check: ConcurrencyManager may not be initialized if task executes before start().
+    // This should not occur in normal operation.
+    if (!this.concurrencyManager) {
+      this.logger.warn('ConcurrencyManager not initialized, skipping concurrency key evaluation.');
+      return null;
+    }
+
+    const normalizedWorkflowExecution: EsWorkflowExecution = {
+      scopeStack: [],
+      error: null,
+      startedAt: null,
+      finishedAt: '',
+      cancelRequested: false,
+      duration: 0,
+      ...workflowExecution,
+    } as EsWorkflowExecution;
+
+    return this.concurrencyManager.evaluateConcurrencyKey(
+      concurrencySettings,
+      buildWorkflowContext(normalizedWorkflowExecution, coreStart, dependencies)
+    );
+  }
+
+  /**
+   * Checks concurrency limits and applies collision strategy if needed.
+   * This helper method consolidates the duplicated concurrency check logic.
+   *
+   * For 'drop' strategy: if limit is exceeded, ConcurrencyManager marks execution as SKIPPED.
+   * For 'cancel-in-progress' strategy: ConcurrencyManager cancels old executions to make room.
+   *
+   * @param workflowExecution - The workflow execution (might be partial)
+   * @returns Promise<boolean> - true if execution can proceed, false if it should be dropped
+   */
+  private async checkConcurrencyIfNeeded(
+    workflowExecution: Partial<EsWorkflowExecution>
+  ): Promise<boolean> {
+    // Guard check: ConcurrencyManager not initialized if task executes before start().
+    // This should not occur in normal operation.
+    // Execution will proceed without concurrency enforcement.
+    if (!this.concurrencyManager) {
+      this.logger.warn(
+        `ConcurrencyManager not initialized, skipping concurrency check for execution ${workflowExecution.id}.`
+      );
+      return true;
+    }
+
+    if (
+      !workflowExecution.workflowDefinition?.settings?.concurrency ||
+      !workflowExecution.concurrencyGroupKey ||
+      !workflowExecution.id ||
+      !workflowExecution.spaceId
+    ) {
+      return true; // No concurrency settings, allow execution
+    }
+
+    try {
+      const canProceed = await this.concurrencyManager.checkConcurrency(
+        workflowExecution.workflowDefinition.settings.concurrency,
+        workflowExecution.concurrencyGroupKey,
+        workflowExecution.id,
+        workflowExecution.spaceId
+      );
+
+      if (!canProceed) {
+        this.logger.debug(
+          `Dropped workflow execution ${workflowExecution.id} (group: ${workflowExecution.concurrencyGroupKey}) due to concurrency limit`
+        );
+      }
+
+      return canProceed;
+    } catch (error) {
+      // Best-effort concurrency enforcement: log error but allow execution to proceed
+      // This prevents a single cancellation failure from blocking new executions
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.debug(
+        `Failed to enforce concurrency limits for workflow execution ${workflowExecution.id} (group: ${workflowExecution.concurrencyGroupKey}): ${errorMessage}. Execution will proceed without concurrency enforcement.`
+      );
+      if (error instanceof Error) {
+        this.logger.debug(`Concurrency enforcement error stack: ${error.stack}`);
+      }
+      return true; // On error, allow execution to proceed
+    }
   }
 }

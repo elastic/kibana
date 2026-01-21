@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/flyout-system-example-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "description": "Example app that shows use cases for the platform flyouts system",
+  "plugin": {
+    "id": "flyoutSystemExamples",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "developerExamples",
+      "navigation",
+      "unifiedSearch"
+    ],
+    "requiredBundles": []
+  }
+}

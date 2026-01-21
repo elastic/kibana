@@ -53,5 +53,11 @@
     "@kbn/ai-assistant-connector-selector-action",
     "@kbn/connector-schemas",
     "@kbn/react-query",
+    "@kbn/ai-agent-confirmation-modal",
+    "@kbn/ai-assistant-common",
+    "@kbn/agent-builder-common",
+    "@kbn/kibana-react-plugin",
+    "@kbn/core-analytics-browser",
+    "@kbn/shared-ux-utility"
   ]
 }

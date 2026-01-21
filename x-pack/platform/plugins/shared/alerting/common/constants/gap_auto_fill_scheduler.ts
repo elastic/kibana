@@ -28,3 +28,12 @@ export const gapAutoFillSchedulerLimits = {
   },
   minScheduleIntervalInMs: 60 * 1000,
 } as const;
+
+export const GAP_AUTO_FILL_STATUS = {
+  SUCCESS: 'success',
+  ERROR: 'error',
+  SKIPPED: 'skipped',
+  NO_GAPS: 'no_gaps',
+} as const;
+
+export type GapAutoFillStatus = (typeof GAP_AUTO_FILL_STATUS)[keyof typeof GAP_AUTO_FILL_STATUS];

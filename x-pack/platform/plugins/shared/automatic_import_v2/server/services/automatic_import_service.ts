@@ -16,6 +16,9 @@ import type {
   SavedObjectsUpdateResponse,
   SavedObjectsServiceSetup,
   SavedObjectsClient,
+  ElasticsearchClient,
+  CoreSetup,
+  KibanaRequest,
 } from '@kbn/core/server';
 import type {
   TaskManagerSetupContract,
@@ -33,37 +36,34 @@ import { TaskManagerService } from './task_manager/task_manager_service';
 import type { CreateDataStreamParams, CreateIntegrationParams } from '../routes/types';
 import { TASK_STATUSES } from './saved_objects/constants';
 import { DATA_STREAM_CREATION_TASK_TYPE } from './task_manager';
+import type { AutomaticImportV2PluginStartDependencies } from '../types';
 
 export class AutomaticImportService {
   private pluginStop$: Subject<void>;
   private samplesIndexService: AutomaticImportSamplesIndexService;
   private savedObjectService: AutomaticImportSavedObjectService | null = null;
-  private logger: LoggerFactory;
+  private loggerFactory: LoggerFactory;
   private savedObjectsServiceSetup: SavedObjectsServiceSetup;
   private taskManagerSetup: TaskManagerSetupContract;
   private taskManagerService: TaskManagerService;
 
   constructor(
-    logger: LoggerFactory,
+    loggerFactory: LoggerFactory,
     savedObjectsServiceSetup: SavedObjectsServiceSetup,
-    taskManagerSetup: TaskManagerSetupContract
+    taskManagerSetup: TaskManagerSetupContract,
+    core: CoreSetup<AutomaticImportV2PluginStartDependencies>
   ) {
     this.pluginStop$ = new ReplaySubject(1);
-    this.logger = logger;
+    this.loggerFactory = loggerFactory;
     this.savedObjectsServiceSetup = savedObjectsServiceSetup;
-    this.samplesIndexService = new AutomaticImportSamplesIndexService(logger);
+    this.samplesIndexService = new AutomaticImportSamplesIndexService(loggerFactory);
 
     this.savedObjectsServiceSetup.registerType(integrationSavedObjectType);
     this.savedObjectsServiceSetup.registerType(dataStreamSavedObjectType);
 
     this.taskManagerSetup = taskManagerSetup;
-    this.taskManagerService = new TaskManagerService(this.logger, this.taskManagerSetup);
+    this.taskManagerService = new TaskManagerService(loggerFactory, this.taskManagerSetup, core);
   }
-
-  private processDataStreamWorkflow = async (params: DataStreamTaskParams): Promise<void> => {
-    // TODO: Implement the actual AI agent workflow here that uses AgentService
-    // Will use params.integrationId and params.dataStreamId
-  };
 
   // Run initialize in the start phase of plugin
   public async initialize(
@@ -71,12 +71,10 @@ export class AutomaticImportService {
     taskManagerStart: TaskManagerStartContract
   ): Promise<void> {
     this.savedObjectService = new AutomaticImportSavedObjectService(
-      this.logger,
+      this.loggerFactory,
       savedObjectsClient
     );
-    this.taskManagerService.initialize(taskManagerStart, {
-      taskWorkflow: this.processDataStreamWorkflow,
-    });
+    this.taskManagerService.initialize(taskManagerStart, this.savedObjectService);
   }
 
   public async createIntegration(params: CreateIntegrationParams): Promise<void> {
@@ -168,17 +166,22 @@ export class AutomaticImportService {
     return this.savedObjectService.deleteIntegration(integrationId, options);
   }
 
-  public async createDataStream(params: CreateDataStreamParams): Promise<void> {
+  public async createDataStream(
+    params: CreateDataStreamParams,
+    request: KibanaRequest
+  ): Promise<void> {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
-    const { authenticatedUser, dataStreamParams } = params;
+    const { authenticatedUser, dataStreamParams, connectorId } = params;
 
-    // Schedule the data stream creation Background task
+    // Schedule the data stream creation background task
     const dataStreamTaskParams: DataStreamTaskParams = {
       integrationId: dataStreamParams.integrationId,
       dataStreamId: dataStreamParams.dataStreamId,
+      connectorId,
     };
     const { taskId } = await this.taskManagerService.scheduleDataStreamCreationTask(
-      dataStreamTaskParams
+      dataStreamTaskParams,
+      request
     );
 
     // Insert the data stream in saved object
@@ -195,23 +198,14 @@ export class AutomaticImportService {
     );
   }
 
-  public async updateDataStream(
-    data: DataStreamAttributes,
-    expectedVersion: string,
-    versionUpdate?: 'major' | 'minor' | 'patch',
-    options?: SavedObjectsUpdateOptions<DataStreamAttributes>
-  ): Promise<SavedObjectsUpdateResponse<DataStreamAttributes>> {
+  public async getDataStream(
+    dataStreamId: string,
+    integrationId: string
+  ): Promise<SavedObject<DataStreamAttributes>> {
     if (!this.savedObjectService) {
       throw new Error('Saved Objects service not initialized.');
     }
-    return this.savedObjectService.updateDataStream(data, expectedVersion, versionUpdate, options);
-  }
-
-  public async getDataStream(dataStreamId: string): Promise<SavedObject<DataStreamAttributes>> {
-    if (!this.savedObjectService) {
-      throw new Error('Saved Objects service not initialized.');
-    }
-    return this.savedObjectService.getDataStream(dataStreamId);
+    return this.savedObjectService.getDataStream(dataStreamId, integrationId);
   }
 
   public async getAllDataStreams(integrationId: string): Promise<DataStreamAttributes[]> {
@@ -242,13 +236,25 @@ export class AutomaticImportService {
   }
 
   public async deleteDataStream(
+    integrationId: string,
     dataStreamId: string,
+    esClient: ElasticsearchClient,
     options?: SavedObjectsDeleteOptions
   ): Promise<void> {
-    if (!this.savedObjectService) {
-      throw new Error('Saved Objects service not initialized.');
-    }
-    return this.savedObjectService.deleteDataStream(dataStreamId, options);
+    assert(this.savedObjectService, 'Saved Objects service not initialized.');
+    // Remove the data stream creation task
+    await this.taskManagerService.removeDataStreamCreationTask({
+      integrationId,
+      dataStreamId,
+    });
+    // Delete the samples from the samples index
+    await this.samplesIndexService.deleteSamplesForDataStream(
+      integrationId,
+      dataStreamId,
+      esClient
+    );
+    // Delete the data stream from the saved objects
+    await this.savedObjectService.deleteDataStream(integrationId, dataStreamId, options);
   }
 
   public async addSamplesToDataStream(

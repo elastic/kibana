@@ -37,6 +37,7 @@ import type {
   EncryptedSavedObjectsClientOptions,
 } from '@kbn/encrypted-saved-objects-shared';
 import { TaskValidator } from './task_validator';
+import { bulkMarkApiKeysForInvalidation } from './lib/bulk_mark_api_keys_for_invalidation';
 
 let mockGetValidatedTaskInstanceFromReading: jest.SpyInstance;
 let mockGetValidatedTaskInstanceForUpdating: jest.SpyInstance;
@@ -44,6 +45,12 @@ let mockGetValidatedTaskInstanceForUpdating: jest.SpyInstance;
 jest.mock('./lib/api_key_utils', () => ({
   getApiKeyAndUserScope: jest.fn(),
 }));
+
+jest.mock('./lib/bulk_mark_api_keys_for_invalidation', () => ({
+  bulkMarkApiKeysForInvalidation: jest.fn(),
+}));
+
+(bulkMarkApiKeysForInvalidation as jest.Mock).mockResolvedValue(void 0);
 
 function createEncryptedSavedObjectsClientMock(opts?: EncryptedSavedObjectsClientOptions) {
   return {
@@ -2228,7 +2235,7 @@ describe('TaskStore', () => {
   describe('remove', () => {
     let store: TaskStore;
     const mockApiKey = Buffer.from('apiKeyId:apiKey').toString('base64');
-
+    const logger = mockLogger();
     const mockTask = {
       id: 'task1',
       type: 'test',
@@ -2258,7 +2265,7 @@ describe('TaskStore', () => {
 
     beforeEach(() => {
       store = new TaskStore({
-        logger: mockLogger(),
+        logger,
         index: 'tasky',
         taskManagerId: '',
         serializer,
@@ -2301,8 +2308,10 @@ describe('TaskStore', () => {
       const result = await store.remove(id);
       expect(result).toBeUndefined();
       expect(savedObjectsClient.delete).toHaveBeenCalledWith('task', id, { refresh: false });
-      expect(coreStart.security.authc.apiKeys.invalidateAsInternalUser).toHaveBeenCalledWith({
-        ids: ['apiKeyId'],
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith({
+        apiKeyIds: ['apiKeyId'],
+        logger,
+        savedObjectsClient,
       });
     });
 
@@ -2321,7 +2330,7 @@ describe('TaskStore', () => {
     let store: TaskStore;
     const mockApiKey1 = Buffer.from('apiKeyId1:apiKey').toString('base64');
     const mockApiKey2 = Buffer.from('apiKeyId2:apiKey').toString('base64');
-
+    const logger = mockLogger();
     const mockTask1 = {
       id: 'task1',
       type: 'test',
@@ -2380,7 +2389,7 @@ describe('TaskStore', () => {
 
     beforeEach(() => {
       store = new TaskStore({
-        logger: mockLogger(),
+        logger,
         index: 'tasky',
         taskManagerId: '',
         serializer,
@@ -2424,14 +2433,16 @@ describe('TaskStore', () => {
       );
     });
 
-    test('bulk invalidates API key of tasks with API keys', async () => {
+    test('bulk marks API keys for invalidation for tasks with API keys', async () => {
       savedObjectsClient.bulkGet.mockResolvedValueOnce({
         saved_objects: [mockTask1, mockTask2],
       });
       const result = await store.bulkRemove(['task1', 'task2']);
       expect(result).toBeUndefined();
-      expect(coreStart.security.authc.apiKeys.invalidateAsInternalUser).toHaveBeenCalledWith({
-        ids: ['apiKeyId1', 'apiKeyId2'],
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith({
+        apiKeyIds: ['apiKeyId1', 'apiKeyId2'],
+        logger,
+        savedObjectsClient,
       });
     });
 

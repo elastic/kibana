@@ -7,7 +7,6 @@
 
 import { bulkDeleteSLORoute, getBulkDeleteStatusRoute } from './bulk_delete';
 import { bulkPurgeRollupRoute } from './bulk_purge_rollup';
-import { purgeInstancesRoute, getPurgeInstancesStatusRoute } from './purge_instances';
 import { createSLORoute } from './create_slo';
 import { deleteSloInstancesRoute } from './delete_instances';
 import { findSLOInstancesRoute } from './find_instances';
@@ -20,7 +19,6 @@ import { findSloDefinitionsRoute } from './find_definitions';
 import { findSLOGroupsRoute } from './find_groups';
 import { findSLORoute } from './find_slo';
 import { getDiagnosisRoute } from './get_diagnosis';
-import { getSLOGroupingsRoute } from './get_groupings';
 import { getPreviewData } from './get_preview_data';
 import { getSLORoute } from './get_slo';
 import { getSloBurnRates } from './get_slo_burn_rates';
@@ -28,15 +26,18 @@ import { getSloSettingsRoute } from './get_slo_settings';
 import { getSLOStatsOverview } from './get_slo_stats_overview';
 import { getSLOSuggestionsRoute } from './get_suggestions';
 import { inspectSLORoute } from './inspect_slo';
-import { putSloSettings } from './put_slo_settings';
+import { getPurgeInstancesStatusRoute, purgeInstancesRoute } from './purge_instances';
 import { resetSLORoute } from './reset_slo';
+import { repairSLORoute } from './repair_slo';
 import { updateSLORoute } from './update_slo';
+import { updateSloSettings } from './update_slo_settings';
+import { getSLOTemplateRoute, findSLOTemplatesRoute } from './slo_templates';
 
 export const getSloRouteRepository = (isServerless?: boolean) => {
   return {
     ...fetchSloHealthRoute,
     ...getSloSettingsRoute,
-    ...putSloSettings(isServerless),
+    ...updateSloSettings(isServerless),
     ...createSLORoute,
     ...inspectSLORoute,
     ...deleteSLORoute,
@@ -52,15 +53,17 @@ export const getSloRouteRepository = (isServerless?: boolean) => {
     ...getDiagnosisRoute,
     ...getSloBurnRates,
     ...getPreviewData,
-    ...getSLOGroupingsRoute,
     ...resetSLORoute,
     ...findSLOGroupsRoute,
     ...getSLOSuggestionsRoute,
     ...getSLOStatsOverview,
     ...bulkDeleteSLORoute,
     ...getBulkDeleteStatusRoute,
+    ...repairSLORoute,
     ...purgeInstancesRoute,
     ...getPurgeInstancesStatusRoute,
     ...findSLOInstancesRoute,
+    ...getSLOTemplateRoute,
+    ...findSLOTemplatesRoute,
   };
 };

@@ -25,16 +25,13 @@ interface ProjectPickerContainerProps {
  */
 export const ProjectPickerContainer: React.FC<ProjectPickerContainerProps> = ({ cpsManager }) => {
   const { projectRouting, updateProjectRouting } = useProjectRouting(cpsManager);
-  const accessInfo = useObservable(cpsManager.getProjectPickerAccess$(), {
-    access: ProjectRoutingAccess.DISABLED,
-    readonlyMessage: undefined,
-  });
+  const access = useObservable(cpsManager.getProjectPickerAccess$(), ProjectRoutingAccess.DISABLED);
 
   const fetchProjects = useCallback(() => {
     return cpsManager.fetchProjects();
   }, [cpsManager]);
 
-  if (accessInfo.access === ProjectRoutingAccess.DISABLED) {
+  if (access === ProjectRoutingAccess.DISABLED) {
     return <DisabledProjectPicker />;
   }
 
@@ -43,8 +40,7 @@ export const ProjectPickerContainer: React.FC<ProjectPickerContainerProps> = ({ 
       projectRouting={projectRouting}
       onProjectRoutingChange={updateProjectRouting}
       fetchProjects={fetchProjects}
-      isReadonly={accessInfo.access === ProjectRoutingAccess.READONLY}
-      readonlyCustomTitle={accessInfo.readonlyMessage}
+      isReadonly={access === ProjectRoutingAccess.READONLY}
     />
   );
 };

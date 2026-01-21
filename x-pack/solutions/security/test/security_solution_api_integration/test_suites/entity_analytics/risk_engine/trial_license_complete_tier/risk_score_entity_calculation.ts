@@ -124,6 +124,7 @@ export default ({ getService }: FtrProviderContext): void => {
           category_1_count: 1,
           id_field: 'host.name',
           id_value: 'host-1',
+          modifiers: [],
         };
 
         const [score] = sanitizeScores([results.score]);
@@ -176,6 +177,16 @@ export default ({ getService }: FtrProviderContext): void => {
             category_1_count: 1,
             id_field: 'host.name',
             id_value: 'host-1',
+            modifiers: [
+              {
+                type: 'asset_criticality',
+                modifier_value: 1.5,
+                metadata: {
+                  criticality_level: 'high_impact',
+                },
+                contribution: 3.5773103045,
+              },
+            ],
           };
 
           const [score] = sanitizeScores([results.score]);
@@ -219,6 +230,7 @@ export default ({ getService }: FtrProviderContext): void => {
             category_1_count: 1,
             id_field: 'host.name',
             id_value: 'host-1',
+            modifiers: [],
           };
 
           const [score] = sanitizeScores([results.score]);

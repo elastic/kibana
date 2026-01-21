@@ -59,7 +59,6 @@ describe('validateFileExtension', () => {
         '.doc',
         '.pdf',
         '.exe',
-        '.zip',
         '.bat',
         '.cmd',
         '.sh',
@@ -70,7 +69,7 @@ describe('validateFileExtension', () => {
       ];
       unsupportedExtensions.forEach((extension) => {
         expect(() => validateFileExtension(`file${extension}`)).toThrow(
-          `Invalid file type: "file${extension}". Only .txt, .md, .log, .json, .yml, .yaml, .csv, .svg, .png files are allowed.`
+          `Invalid file type: "file${extension}". Only .txt, .md, .log, .json, .yml, .yaml, .csv, .svg, .png, .zip files are allowed.`
         );
       });
     });

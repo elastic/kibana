@@ -8,6 +8,7 @@
  */
 
 import { COLUMN_PLACEHOLDER_PREFIX } from '../constants';
+import type { DeleteDocAction, DocUpdate } from '../types';
 
 export function parsePrimitive(value: unknown): string | number | boolean | object | unknown {
   if (typeof value !== 'string') {
@@ -52,4 +53,19 @@ export function getCellValue(value: unknown): string | undefined {
     return JSON.stringify(value);
   }
   return value?.toString();
+}
+
+export function isDocUpdate(update: unknown): update is { type: 'add-doc'; payload: DocUpdate } {
+  return (
+    typeof update === 'object' && update !== null && 'type' in update && update.type === 'add-doc'
+  );
+}
+
+export function isDocDelete(update: unknown): update is DeleteDocAction {
+  return (
+    typeof update === 'object' &&
+    update !== null &&
+    'type' in update &&
+    update.type === 'delete-doc'
+  );
 }

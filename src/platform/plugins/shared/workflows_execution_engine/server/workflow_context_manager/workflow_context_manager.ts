@@ -68,6 +68,7 @@ export class WorkflowContextManager {
     const stepContext: StepContext = {
       ...this.buildWorkflowContext(),
       steps: {},
+      variables: this.getVariables(),
     };
 
     const currentNode = this.node;
@@ -217,6 +218,31 @@ export class WorkflowContextManager {
    */
   public getCoreStart(): CoreStart {
     return this.coreStart;
+  }
+
+  /**
+   * Get variables from all data.set steps that are predecessors of the current step.
+   * Variables are retrieved from step outputs, which are persisted in execution state.
+   * This ensures variables survive across wait steps and task resumptions.
+   */
+  public getVariables(): Record<string, unknown> {
+    const predecessors = this.workflowExecutionGraph.getAllPredecessors(this.node.id);
+    const dataSetSteps = predecessors.filter((node) => node.stepType === 'data.set');
+
+    const variables: Record<string, unknown> = {};
+
+    for (const dataSetStep of dataSetSteps) {
+      const stepExecution = this.workflowExecutionState.getLatestStepExecution(dataSetStep.id);
+      if (
+        stepExecution?.output &&
+        typeof stepExecution.output === 'object' &&
+        !Array.isArray(stepExecution.output)
+      ) {
+        Object.assign(variables, stepExecution.output);
+      }
+    }
+
+    return variables;
   }
 
   /**

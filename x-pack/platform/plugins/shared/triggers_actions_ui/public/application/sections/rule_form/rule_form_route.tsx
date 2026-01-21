@@ -7,13 +7,13 @@
 
 import React, { useEffect } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { RuleForm } from '@kbn/response-ops-rule-form';
-import { AlertConsumers, getRuleDetailsRoute } from '@kbn/rule-data-utils';
-import { useLocation, useParams } from 'react-router-dom';
+import { RuleForm, useRuleTemplate } from '@kbn/response-ops-rule-form';
+import { AlertConsumers, getRuleDetailsRoute, getRulesAppDetailsRoute } from '@kbn/rule-data-utils';
+import { useLocation, useParams, useHistory } from 'react-router-dom';
+import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '../../../common/lib/kibana';
 import { getAlertingSectionBreadcrumb } from '../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../lib/doc_title';
-import { useRuleTemplate } from '../../hooks/use_rule_template';
 import { RuleTemplateError } from './components/rule_template_error';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 
@@ -36,8 +36,12 @@ export const RuleFormRoute = () => {
     setBreadcrumbs,
     ...startServices
   } = useKibana().services;
+  const { currentAppId$, navigateToApp, getUrlForApp } = application;
+  const currentAppId = useObservable(currentAppId$, undefined);
+  const isInRulesApp = currentAppId === 'rules';
 
   const location = useLocation<{ returnApp?: string; returnPath?: string }>();
+  const history = useHistory();
   const {
     id,
     ruleTypeId: ruleTypeIdParams,
@@ -57,6 +61,7 @@ export const RuleFormRoute = () => {
     isLoading: isLoadingRuleTemplate,
     isError: isErrorRuleTemplate,
   } = useRuleTemplate({
+    http,
     templateId,
   });
 
@@ -64,22 +69,26 @@ export const RuleFormRoute = () => {
 
   // Set breadcrumb and page title
   useEffect(() => {
+    const rulesBreadcrumb = getAlertingSectionBreadcrumb('rules', true);
+    const breadcrumbHref = isInRulesApp
+      ? getUrlForApp('rules', { path: '/' })
+      : getUrlForApp('management', { path: 'insightsAndAlerting/triggersActions/rules' });
+
+    const rulesBreadcrumbWithAppPath = {
+      ...rulesBreadcrumb,
+      href: breadcrumbHref,
+    };
+
     if (id) {
-      setBreadcrumbs([
-        getAlertingSectionBreadcrumb('rules', true),
-        getAlertingSectionBreadcrumb('editRule'),
-      ]);
+      setBreadcrumbs([rulesBreadcrumbWithAppPath, getAlertingSectionBreadcrumb('editRule')]);
       chrome.docTitle.change(getCurrentDocTitle('editRule'));
     }
     if (ruleTypeId || templateId) {
-      setBreadcrumbs([
-        getAlertingSectionBreadcrumb('rules', true),
-        getAlertingSectionBreadcrumb('createRule'),
-      ]);
+      setBreadcrumbs([rulesBreadcrumbWithAppPath, getAlertingSectionBreadcrumb('createRule')]);
       chrome.docTitle.change(getCurrentDocTitle('createRule'));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ruleTypeId, templateId]);
+  }, [ruleTypeId, templateId, id, getUrlForApp, isInRulesApp]);
 
   if (isLoadingRuleTemplate) {
     return <CenterJustifiedSpinner />;
@@ -112,18 +121,33 @@ export const RuleFormRoute = () => {
         id={id}
         ruleTypeId={ruleTypeId}
         onCancel={() => {
-          if (returnApp && returnPath) {
-            application.navigateToApp(returnApp, { path: returnPath });
+          if (isInRulesApp) {
+            // Use history.push when in rules app
+            // Use returnPath if available, otherwise default to root
+            history.push(returnPath || '/');
+          } else if (returnApp && returnPath) {
+            // Navigate to other apps using navigateToApp
+            navigateToApp(returnApp, { path: returnPath });
           } else {
-            application.navigateToApp('management', {
+            // Default: navigate to management app rules list
+            navigateToApp('management', {
               path: `insightsAndAlerting/triggersActions/rules`,
             });
           }
         }}
         onSubmit={(ruleId) => {
-          application.navigateToApp('management', {
-            path: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(ruleId)}`,
-          });
+          if (isInRulesApp) {
+            // Navigate to rule details page in the rules app using history.push
+            history.push(getRulesAppDetailsRoute(ruleId));
+          } else if (returnApp && returnPath) {
+            // Navigate back to the original app/path for other apps
+            navigateToApp(returnApp, { path: returnPath });
+          } else {
+            // Default: navigate to management app rule details (existing behavior)
+            navigateToApp('management', {
+              path: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(ruleId)}`,
+            });
+          }
         }}
         multiConsumerSelection={AlertConsumers.ALERTS}
       />

@@ -30,6 +30,12 @@
     "@kbn/licensing-plugin",
     "@kbn/management-settings-components-field-row",
     "@kbn/react-query",
+    "@kbn/product-doc-base-plugin",
+    "@kbn/ai-assistant-common",
+    "@kbn/ai-agent-confirmation-modal",
+    "@kbn/product-doc-common",
+    "@kbn/react-kibana-mount",
+    "@kbn/agent-builder-common"
   ],
   "exclude": ["target/**/*"]
 }

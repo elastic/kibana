@@ -9,8 +9,9 @@ import { useEffect, useState } from 'react';
 import { combineLatest } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES, type PublicAppInfo } from '@kbn/core/public';
-import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
+import { AIAssistantType, AIChatExperience } from '@kbn/ai-assistant-management-plugin/public';
 import type { Space } from '@kbn/spaces-plugin/common';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
 
 interface UseIsNavControlVisibleProps {
@@ -23,9 +24,16 @@ function getVisibility(
   appId: string | undefined,
   applications: ReadonlyMap<string, PublicAppInfo>,
   preferredAssistantType: AIAssistantType,
+  chatExperience: AIChatExperience,
   space: Space,
   isServerless?: boolean
 ) {
+  // If AI Agents are enabled, hide the nav control
+  // AgentBuilderNavControl will be used instead
+  if (chatExperience === AIChatExperience.Agent) {
+    return false;
+  }
+
   // If the app itself is enabled, always show the control in the solution view or serverless.
   if (space.solution === 'es' || space.solution === 'oblt' || isServerless) {
     return true;
@@ -61,15 +69,26 @@ export function useIsNavControlVisible({
   const space$ = spaces.getActiveSpace$();
 
   useEffect(() => {
+    const chatExperience$ =
+      coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
+
     const appSubscription = combineLatest([
       currentAppId$,
       applications$,
       aiAssistantManagementSelection.aiAssistantType$,
+      chatExperience$,
       space$,
     ]).subscribe({
-      next: ([appId, applications, preferredAssistantType, space]) => {
+      next: ([appId, applications, preferredAssistantType, chatExperience, space]) => {
         setIsVisible(
-          getVisibility(appId, applications, preferredAssistantType, space, isServerless)
+          getVisibility(
+            appId,
+            applications,
+            preferredAssistantType,
+            chatExperience,
+            space,
+            isServerless
+          )
         );
       },
     });
@@ -79,6 +98,7 @@ export function useIsNavControlVisible({
     currentAppId$,
     applications$,
     aiAssistantManagementSelection.aiAssistantType$,
+    coreStart.settings.client,
     space$,
     isServerless,
   ]);

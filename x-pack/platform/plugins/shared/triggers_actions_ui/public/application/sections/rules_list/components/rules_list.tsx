@@ -32,6 +32,7 @@ import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import {
   ruleDetailsRoute as commonRuleDetailsRoute,
   getCreateRuleRoute,
+  getCreateRuleFromTemplateRoute,
   getEditRuleRoute,
 } from '@kbn/rule-data-utils';
 import type {
@@ -121,6 +122,7 @@ export interface RulesListProps {
   setHeaderActions?: (components?: React.ReactNode[]) => void;
   initialSelectedConsumer?: RuleCreationValidConsumer | null;
   navigateToEditRuleForm?: (ruleId: string) => void;
+  navigateToCreateRuleForm?: (ruleTypeId: string) => void;
 }
 
 export const percentileFields = {
@@ -163,6 +165,7 @@ export const RulesList = ({
   onRefresh,
   setHeaderActions,
   navigateToEditRuleForm,
+  navigateToCreateRuleForm,
 }: RulesListProps) => {
   const history = useHistory();
   const kibanaServices = useKibana().services;
@@ -179,7 +182,6 @@ export const RulesList = ({
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
-  const [inputText, setInputText] = useState<string>(searchFilter);
 
   const [ruleTypeModalVisible, setRuleTypeModalVisibility] = useState<boolean>(false);
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
@@ -245,6 +247,8 @@ export const RulesList = ({
       searchFilter,
       typeFilter,
     });
+
+  const [inputText, setInputText] = useState<string>(filters.searchText ?? searchFilter ?? '');
 
   const rulesTypesFilter = isEmpty(filters.types)
     ? authorizedRuleTypes.map((art) => art.id)
@@ -446,7 +450,11 @@ export const RulesList = ({
   }, [ruleParamFilter]);
 
   useEffect(() => {
-    if (typeof searchFilter === 'string') {
+    if (
+      typeof searchFilter === 'string' &&
+      searchFilter !== filters.searchText &&
+      searchFilter.trim() !== ''
+    ) {
       updateFilters({ filter: 'searchText', value: searchFilter });
     }
   }, [searchFilter]);
@@ -1018,8 +1026,21 @@ export const RulesList = ({
           <RuleTypeModal
             onClose={() => setRuleTypeModalVisibility(false)}
             onSelectRuleType={(ruleTypeId) => {
+              if (navigateToCreateRuleForm) {
+                navigateToCreateRuleForm(ruleTypeId);
+              } else {
+                navigateToApp('management', {
+                  path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
+                });
+              }
+            }}
+            onSelectTemplate={(templateId) => {
+              // For templates, we need to extract the ruleTypeId or handle it differently
+              // For now, fall back to default behavior
               navigateToApp('management', {
-                path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
+                path: `insightsAndAlerting/triggersActions/${getCreateRuleFromTemplateRoute(
+                  encodeURIComponent(templateId)
+                )}`,
               });
             }}
             http={http}

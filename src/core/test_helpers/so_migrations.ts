@@ -152,8 +152,8 @@ export const createTestHarness = () => {
       if (stopped)
         throw new Error(`SavedObjectTestHarness already stopped! Cannot call stop again`);
 
-      await root.shutdown();
-      await esServer.stop();
+      await root?.shutdown();
+      await esServer?.stop();
       stopped = true;
     },
 

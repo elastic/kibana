@@ -17,9 +17,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
+import { paths, SLOS_PATH } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { paths, SLOS_PATH } from '../../../common/locators/paths';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
 import { SloPermissionsCallout } from '../../components/slo/slo_permissions_callout';

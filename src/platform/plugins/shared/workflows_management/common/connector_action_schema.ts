@@ -61,6 +61,12 @@ import {
   JiraServiceManagementCloseAlertParamsSchema,
   JiraServiceManagementCreateAlertParamsSchema,
   JiraServiceManagementResponseSchema,
+  McpCallToolParamsSchema,
+  McpCallToolResponseSchema,
+  McpListToolsParamsSchema,
+  McpListToolsResponseSchema,
+  McpTestParamsSchema,
+  McpTestResponseSchema,
   OpenAIParamsSchema,
   OpenAIResponseSchema,
   OpsgenieCloseAlertParamsSchema,
@@ -272,6 +278,14 @@ export const ConnectorActionInputSchemas = new Map<string, Record<string, z.ZodS
       test: GenAITestParamsSchema,
     },
   ],
+  [
+    '.mcp',
+    {
+      listTools: McpListToolsParamsSchema,
+      callTool: McpCallToolParamsSchema,
+      test: McpTestParamsSchema,
+    },
+  ],
 ]);
 
 /**
@@ -420,6 +434,14 @@ export const ConnectorActionOutputSchemas = new Map<string, Record<string, z.Zod
       stream: GenAIStreamResponseSchema,
       getDashboard: GenAIDashboardResponseSchema,
       test: GenAITestResponseSchema,
+    },
+  ],
+  [
+    '.mcp',
+    {
+      listTools: McpListToolsResponseSchema,
+      callTool: McpCallToolResponseSchema,
+      test: McpTestResponseSchema,
     },
   ],
 ]);

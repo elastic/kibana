@@ -22,7 +22,7 @@ export const findSloDefinitionsRoute = createSloServerRoute({
   handler: async ({ request, logger, params, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
     const { repository, scopedClusterClient } = await getScopedClients({ request, logger });
-    const findSloDefinitions = new FindSLODefinitions(repository, scopedClusterClient);
+    const findSloDefinitions = new FindSLODefinitions(repository, scopedClusterClient, logger);
 
     return await findSloDefinitions.execute(params?.query ?? {});
   },

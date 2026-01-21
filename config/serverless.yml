@@ -14,7 +14,7 @@ xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
 xpack.fleet.internal.registry.spec.min: '3.0'
 xpack.fleet.internal.registry.spec.max: '3.5'
 xpack.fleet.agentless.backgroundSync.enabled: true
-xpack.fleet.agentless.backgroundSync.interval: '1h'
+xpack.fleet.agentless.backgroundSync.interval: '10m'
 
 ## Fine-tune the feature privileges.
 xpack.features.overrides:
@@ -129,6 +129,7 @@ xpack.ilm.enabled: false
 xpack.remote_clusters.enabled: false
 xpack.snapshot_restore.enabled: false
 xpack.license_management.enabled: false
+xpack.cloud_connect.enabled: false
 xpack.reindex_service.rollupsEnabled: false
 
 # Management team UI configurations
@@ -165,7 +166,6 @@ xpack.cloud_integrations.data_migration.enabled: false
 
 # Other disabled plugins
 xpack.canvas.enabled: false
-xpack.reindex_service.enabled: false
 advanced_settings.globalSettingsEnabled: false
 
 # Disable the browser-side functionality that depends on SecurityCheckupGetStateRoutes
@@ -268,6 +268,7 @@ xpack.screenshotting.enabled: false
 xpack.reporting.queue.pollInterval: 3m
 xpack.reporting.statefulSettings.enabled: false
 xpack.reporting.csv.maxConcurrentShardRequests: 0
+xpack.reporting.csv.maxRows: 100000
 
 # Disabled Platform plugins
 monitoring.enabled: false

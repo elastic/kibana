@@ -10,7 +10,6 @@
 import {
   createApmContextServiceMock,
   createLogsContextServiceMock,
-  createMetricsContextServiceMock,
 } from '@kbn/discover-utils/src/__mocks__';
 import type { ProfileProviderServices } from '../profile_providers';
 import { createDiscoverServicesMock } from '../../__mocks__/services';
@@ -21,5 +20,4 @@ export const createProfileProviderSharedServicesMock = (
   ...discoverServices,
   logsContextService: createLogsContextServiceMock(),
   apmContextService: createApmContextServiceMock(),
-  metricsContextService: createMetricsContextServiceMock(),
 });
