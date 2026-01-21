@@ -51,7 +51,7 @@ export const AgentPolicyMultiSelect: React.FunctionComponent<Props> = ({
   return (
     <EuiComboBox
       aria-label="Select Multiple Agent Policies"
-      data-test-subj="agentPolicyMultiSelect"
+      data-test-subj={isLoading ? 'agentPolicyMultiSelectLoading' : 'agentPolicyMultiSelect'}
       placeholder={i18n.translate(
         'xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyMultiPlaceholderText',
         {

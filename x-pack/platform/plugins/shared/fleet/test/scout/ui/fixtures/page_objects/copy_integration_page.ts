@@ -30,6 +30,10 @@ export class CopyIntegrationPage {
     return this.page.testSubj.locator('agentPolicyMultiSelect');
   }
 
+  getAgentPolicySelectOption() {
+    return this.getAgentPolicySelect().getByTestId('comboBoxInput');
+  }
+
   async fillPackagePolicyName(name: string) {
     const input = this.getPackagePolicyNameInput();
     await input.clear();
