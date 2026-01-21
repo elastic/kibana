@@ -307,6 +307,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     [dispatch, updateAppState]
   );
 
+  const updateAdHocDataViewId = useCurrentTabAction(internalStateActions.updateAdHocDataViewId);
   const onFieldEdited: (options: {
     editedDataView: DataView;
     removedFieldName?: string;
@@ -319,7 +320,11 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         onRemoveColumn(removedFieldName);
       }
       if (!editedDataView.isPersisted()) {
-        await stateContainer.actions.updateAdHocDataViewId(editedDataView);
+        await dispatch(
+          updateAdHocDataViewId({
+            editedDataView,
+          })
+        );
       }
       if (editedDataView?.id) {
         // `tab.uiState.fieldListExistingFieldsInfo` needs to be reset when user edits fields,
@@ -333,7 +338,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       }
       stateContainer.dataState.refetch$.next('reset');
     },
-    [dataView, stateContainer, currentColumns, onRemoveColumn, dispatch]
+    [dataView, stateContainer, currentColumns, onRemoveColumn, dispatch, updateAdHocDataViewId]
   );
 
   const onDisableFilters = useCallback(() => {
@@ -438,6 +443,22 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     [dispatch, setLayoutUiState]
   );
 
+  const changeDataView = useCurrentTabAction(internalStateActions.changeDataView);
+  const onChangeDataView = useCallback(
+    (dataViewOrDataViewId: string | DataView) => {
+      dispatch(changeDataView({ dataViewOrDataViewId }));
+    },
+    [dispatch, changeDataView]
+  );
+
+  const onDataViewCreatedAction = useCurrentTabAction(internalStateActions.onDataViewCreated);
+  const onDataViewCreated = useCallback(
+    (nextDataView: DataView) => {
+      dispatch(onDataViewCreatedAction({ nextDataView }));
+    },
+    [dispatch, onDataViewCreatedAction]
+  );
+
   return (
     <EuiPage
       className="dscPage" // class is used in tests and other styles
@@ -482,8 +503,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
                 onAddBreakdownField={canSetBreakdownField ? onAddBreakdownField : undefined}
                 onAddField={onAddColumnWithTracking}
                 onAddFilter={onFilter}
-                onChangeDataView={stateContainer.actions.onChangeDataView}
-                onDataViewCreated={stateContainer.actions.onDataViewCreated}
+                onChangeDataView={onChangeDataView}
+                onDataViewCreated={onDataViewCreated}
                 onFieldEdited={onFieldEdited}
                 onRemoveField={onRemoveColumnWithTracking}
                 selectedDataView={dataView}

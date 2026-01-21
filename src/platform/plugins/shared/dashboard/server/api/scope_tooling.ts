@@ -31,12 +31,14 @@ export function stripUnmappedKeys(dashboardState: DashboardState) {
       }
     }
 
-    if (!transforms?.schema) {
+    const panelSchema = transforms?.getSchema?.();
+
+    if (!panelSchema) {
       warnings.push(
         `Dropped panel ${panel.uid}, panel schema not available for panel type: ${panel.type}. Panels without schemas are not supported by dashboard REST endpoints`
       );
     }
-    return Boolean(transforms?.schema);
+    return Boolean(panelSchema);
   }
 
   function removeEnhancements(panel: DashboardPanel) {
@@ -83,7 +85,9 @@ export function throwOnUnmappedKeys(dashboardState: DashboardState) {
 
   function throwOnUnmappedPanelKeys(panel: DashboardPanel) {
     const transforms = embeddableService?.getTransforms(panel.type);
-    if (!transforms?.schema) {
+    const panelSchema = transforms?.getSchema?.();
+
+    if (!panelSchema) {
       throw new Error(
         `Panel schema not available for panel type: ${panel.type}. Panels without schemas are not supported by dashboard REST endpoints`
       );

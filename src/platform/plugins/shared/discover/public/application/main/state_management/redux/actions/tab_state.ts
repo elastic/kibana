@@ -8,8 +8,8 @@
  */
 
 import { isFunction } from 'lodash';
+import { type DataView, DataViewType } from '@kbn/data-views-plugin/common';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   type AggregateQuery,
   type Query,
@@ -37,6 +37,7 @@ import type {
   UpdateCascadeGroupingActionPayload,
 } from '../types';
 import { addLog } from '../../../../../utils/add_log';
+import { FetchStatus } from '../../../../types';
 
 type AppStatePayload = TabActionPayload<Pick<TabState, 'appState'>>;
 
@@ -53,7 +54,7 @@ const mergeAppState = (
  * Partially update the tab app state, merging with existing state and pushing to URL history
  */
 export const updateAppState: InternalStateThunkActionCreator<[AppStatePayload]> = (payload) =>
-  async function updateAppStateThunkFn(dispatch, getState) {
+  function updateAppStateThunkFn(dispatch, getState) {
     const { mergedAppState, hasStateChanges } = mergeAppState(getState(), payload);
 
     if (hasStateChanges) {
@@ -100,7 +101,7 @@ const mergeGlobalState = (
  * Partially update the tab global state, merging with existing state and pushing to URL history
  */
 export const updateGlobalState: InternalStateThunkActionCreator<[GlobalStatePayload]> = (payload) =>
-  async function updateGlobalStateThunkFn(dispatch, getState) {
+  function updateGlobalStateThunkFn(dispatch, getState) {
     const { mergedGlobalState, hasStateChanges } = mergeGlobalState(getState(), payload);
 
     if (hasStateChanges) {
@@ -158,7 +159,7 @@ export const pushCurrentTabStateToUrl: InternalStateThunkActionCreator<
 export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataViewId: string }>]
 > = ({ tabId, dataViewId }) =>
-  async function transitionFromESQLToDataViewThunkFn(dispatch) {
+  function transitionFromESQLToDataViewThunkFn(dispatch) {
     dispatch(
       updateAppState({
         tabId,
@@ -195,7 +196,7 @@ const clearTimeFieldFromSort = (
 export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataView: DataView }>]
 > = ({ tabId, dataView }) =>
-  async function transitionFromDataViewToESQLThunkFn(dispatch, getState) {
+  function transitionFromDataViewToESQLThunkFn(dispatch, getState) {
     const currentState = getState();
     const appState = selectTab(currentState, tabId).appState;
     const { query, sort } = appState;
@@ -229,7 +230,7 @@ export const updateESQLQuery: InternalStateThunkActionCreator<[UpdateESQLQueryAc
   tabId,
   queryOrUpdater,
 }) =>
-  async function updateESQLQueryThunkFn(dispatch, getState) {
+  function updateESQLQueryThunkFn(dispatch, getState) {
     addLog('updateESQLQuery');
     const currentState = getState();
     const appState = selectTab(currentState, tabId).appState;
@@ -258,7 +259,7 @@ export const onQuerySubmit: InternalStateThunkActionCreator<
     }>
   ]
 > = ({ tabId, payload, isUpdate }) =>
-  async function onQuerySubmitThunkFn(
+  function onQuerySubmitThunkFn(
     dispatch,
     getState,
     { searchSessionManager, runtimeStateManager, services }
@@ -312,4 +313,43 @@ export const updateCascadeGrouping: InternalStateThunkActionCreator<
         },
       })
     );
+  };
+
+/**
+ * Triggers fetching of new data from Elasticsearch
+ * If initial is true, when SEARCH_ON_PAGE_LOAD_SETTING is set to false and it's a new saved search no fetch is triggered
+ */
+export const fetchData: InternalStateThunkActionCreator<
+  [TabActionPayload<{ initial?: boolean }>]
+> = ({ tabId, initial }) =>
+  function fetchDataThunkFn(dispatch, getState, { runtimeStateManager }) {
+    addLog('fetchData', { initial });
+    const { stateContainer$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+    const dataStateContainer = stateContainer$.getValue()?.dataState;
+    if (!initial || dataStateContainer?.getInitialFetchStatus() === FetchStatus.LOADING) {
+      dataStateContainer?.fetch();
+    }
+  };
+
+/**
+ * Pause auto refresh interval if the data view is not time-based or is a rollup
+ */
+export const pauseAutoRefreshInterval: InternalStateThunkActionCreator<
+  [TabActionPayload<{ dataView: DataView }>]
+> = ({ tabId, dataView }) =>
+  function pauseAutoRefreshIntervalThunkFn(dispatch, getState) {
+    if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
+      const currentState = getState();
+      const globalState = selectTab(currentState, tabId).globalState;
+      if (globalState?.refreshInterval && !globalState.refreshInterval.pause) {
+        dispatch(
+          updateGlobalState({
+            tabId,
+            globalState: {
+              refreshInterval: { ...globalState.refreshInterval, pause: true },
+            },
+          })
+        );
+      }
+    }
   };

@@ -22,10 +22,7 @@ import {
   connectToQueryState,
   noSearchSessionStorageCapabilityMessage,
 } from '@kbn/data-plugin/public';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
-import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
 import { combineLatest, distinctUntilChanged, from, map, merge, skip, startWith } from 'rxjs';
 import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
@@ -33,8 +30,6 @@ import { FilterStateStore, isOfAggregateQueryType, type AggregateQuery } from '@
 import { isEqual } from 'lodash';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { DiscoverServices } from '../../..';
-import { FetchStatus } from '../../types';
-import { changeDataView } from './utils/change_data_view';
 import { buildStateSubscribe } from './utils/build_state_subscribe';
 import { addLog } from '../../../utils/add_log';
 import type { DiscoverDataStateContainer } from './discover_data_state_container';
@@ -44,7 +39,6 @@ import type { DiscoverAppLocatorParams } from '../../../../common';
 import { APP_STATE_URL_KEY, DISCOVER_APP_LOCATOR } from '../../../../common';
 import type { DiscoverAppState, ReactiveTabRuntimeState } from './redux';
 import { getCurrentUrlState } from './utils/cleanup_url_state';
-import { updateFiltersReferences } from './utils/update_filter_references';
 import type { DiscoverCustomizationContext } from '../../../customizations';
 import {
   createDataViewDataSource,
@@ -63,7 +57,6 @@ import {
   internalStateActions,
   selectTab,
   selectTabRuntimeState,
-  selectIsDataViewUsedInMultipleRuntimeTabStates,
 } from './redux';
 import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
 import { getSavedSearchContainer } from './discover_saved_search_container';
@@ -155,12 +148,6 @@ export interface DiscoverStateContainer {
    */
   actions: {
     /**
-     * Triggers fetching of new data from Elasticsearch
-     * If initial is true, when SEARCH_ON_PAGE_LOAD_SETTING is set to false and it's a new saved search no fetch is triggered
-     * @param initial
-     */
-    fetchData: (initial?: boolean) => void;
-    /**
      * Initializing state containers and start subscribing to changes triggering e.g. data fetching
      */
     initializeAndSync: () => void;
@@ -168,42 +155,6 @@ export interface DiscoverStateContainer {
      * Stop syncing the state containers started by initializeAndSync
      */
     stopSyncing: () => void;
-    /**
-     * Create and select a temporary/adhoc data view by a given index pattern
-     * Used by the Data View Picker
-     * @param pattern
-     */
-    createAndAppendAdHocDataView: (dataViewSpec: DataViewSpec) => Promise<DataView>;
-    /**
-     * Triggered when a new data view is created
-     * @param dataView
-     */
-    onDataViewCreated: (dataView: DataView) => Promise<void>;
-    /**
-     * Triggered when a new data view is edited
-     * @param dataView
-     */
-    onDataViewEdited: (dataView: DataView) => Promise<void>;
-    /**
-     * Triggered when a saved search is opened in the savedObject finder
-     * @param savedSearchId
-     */
-    onOpenSavedSearch: (savedSearchId: string) => Promise<void>;
-    /**
-     * Triggered when the user selects a different data view in the data view picker
-     * @param id - id of the data view
-     */
-    onChangeDataView: (id: string | DataView) => Promise<void>;
-    /**
-     * Set the currently selected data view
-     * @param dataView
-     */
-    setDataView: (dataView: DataView) => void;
-    /**
-     * When editing an ad hoc data view, a new id needs to be generated for the data view
-     * This is to prevent duplicate ids messing with our system
-     */
-    updateAdHocDataViewId: (editedDataView: DataView) => Promise<DataView | undefined>;
   };
 }
 
@@ -231,132 +182,15 @@ export function getDiscoverStateContainer({
     getCurrentTab,
   });
 
-  const pauseAutoRefreshInterval = async (dataView: DataView) => {
-    if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
-      const state = selectTab(internalState.getState(), tabId).globalState;
-      if (state?.refreshInterval && !state.refreshInterval.pause) {
-        internalState.dispatch(
-          injectCurrentTab(internalStateActions.updateGlobalState)({
-            globalState: {
-              refreshInterval: { ...state.refreshInterval, pause: true },
-            },
-          })
-        );
-      }
-    }
-  };
-
-  const setDataView = (dataView: DataView) => {
-    internalState.dispatch(injectCurrentTab(internalStateActions.setDataView)({ dataView }));
-    pauseAutoRefreshInterval(dataView);
-    savedSearchContainer.getState().searchSource.setField('index', dataView);
-  };
-
   const dataStateContainer = getDataStateContainer({
     services,
     searchSessionManager,
     internalState,
     runtimeStateManager,
     savedSearchContainer,
-    setDataView,
     injectCurrentTab,
     getCurrentTab,
   });
-
-  /**
-   * When editing an ad hoc data view, a new id needs to be generated for the data view
-   * This is to prevent duplicate ids messing with our system
-   */
-  const updateAdHocDataViewId = async (editedDataView: DataView) => {
-    const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
-    const prevDataView = currentDataView$.getValue();
-    if (!prevDataView || prevDataView.isPersisted()) return;
-
-    const isUsedInMultipleTabs = selectIsDataViewUsedInMultipleRuntimeTabStates(
-      runtimeStateManager,
-      prevDataView.id!
-    );
-
-    const nextDataView = await services.dataViews.create({
-      ...editedDataView.toSpec(),
-      id: uuidv4(),
-    });
-
-    if (!isUsedInMultipleTabs) {
-      services.dataViews.clearInstanceCache(prevDataView.id);
-    }
-
-    await updateFiltersReferences({
-      prevDataView,
-      nextDataView,
-      services,
-    });
-
-    if (isUsedInMultipleTabs) {
-      internalState.dispatch(internalStateActions.appendAdHocDataViews(nextDataView));
-    } else {
-      internalState.dispatch(
-        internalStateActions.replaceAdHocDataViewWithId(prevDataView.id!, nextDataView)
-      );
-    }
-
-    if (isDataSourceType(getCurrentTab().appState.dataSource, DataSourceType.DataView)) {
-      await internalState.dispatch(
-        injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({
-          appState: {
-            dataSource: nextDataView.id
-              ? createDataViewDataSource({ dataViewId: nextDataView.id })
-              : undefined,
-          },
-        })
-      );
-    }
-
-    const { persistedDiscoverSession } = internalState.getState();
-    const trackingEnabled = Boolean(nextDataView.isPersisted() || persistedDiscoverSession?.id);
-    services.urlTracker.setTrackingEnabled(trackingEnabled);
-
-    return nextDataView;
-  };
-
-  const onOpenSavedSearch = async (newSavedSearchId: string) => {
-    addLog('[discoverState] onOpenSavedSearch', newSavedSearchId);
-    const { persistedDiscoverSession } = internalState.getState();
-    if (persistedDiscoverSession?.id === newSavedSearchId) {
-      addLog('[discoverState] undo changes since saved search did not change');
-      await internalState.dispatch(internalStateActions.resetDiscoverSession()).unwrap();
-    } else {
-      addLog('[discoverState] onOpenSavedSearch open view URL');
-      services.locator.navigate({
-        savedSearchId: newSavedSearchId,
-      });
-    }
-  };
-
-  const onDataViewCreated = async (nextDataView: DataView) => {
-    if (!nextDataView.isPersisted()) {
-      internalState.dispatch(internalStateActions.appendAdHocDataViews(nextDataView));
-    } else {
-      await internalState.dispatch(internalStateActions.loadDataViewList());
-    }
-    if (nextDataView.id) {
-      await onChangeDataView(nextDataView);
-    }
-  };
-
-  const onDataViewEdited = async (editedDataView: DataView) => {
-    if (editedDataView.isPersisted()) {
-      // Clear the current data view from the cache and create a new instance
-      // of it, ensuring we have a new object reference to trigger a re-render
-      services.dataViews.clearInstanceCache(editedDataView.id);
-      setDataView(await services.dataViews.create(editedDataView.toSpec(), true));
-    } else {
-      await updateAdHocDataViewId(editedDataView);
-    }
-    void internalState.dispatch(internalStateActions.loadDataViewList());
-    addLog('[getDiscoverStateContainer] onDataViewEdited triggers data fetching');
-    fetchData();
-  };
 
   const getAppState = (state: DiscoverInternalState): DiscoverAppState => {
     return selectTab(state, tabId).appState;
@@ -517,7 +351,7 @@ export function getDiscoverStateContainer({
       .subscribe(() => {
         internalState.dispatch(internalStateActions.markNonActiveTabsForRefetch());
         addLog('[getDiscoverStateContainer] projectRouting changes triggers data fetching');
-        fetchData();
+        internalState.dispatch(injectCurrentTab(internalStateActions.fetchData)({}));
       });
 
     const { start: startSyncingGlobalStateWithUrl, stop: stopSyncingGlobalStateWithUrl } =
@@ -612,7 +446,6 @@ export function getDiscoverStateContainer({
         internalState,
         runtimeStateManager,
         services,
-        setDataView,
         getCurrentTab,
       })
     );
@@ -633,7 +466,11 @@ export function getDiscoverStateContainer({
         useFilterAndQueryServices: true,
       });
       addLog('[getDiscoverStateContainer] filter changes triggers data fetching');
-      fetchData();
+      internalState.dispatch(
+        internalStateActions.fetchData({
+          tabId,
+        })
+      );
     });
 
     services.data.search.session.enableStorage(
@@ -665,37 +502,6 @@ export function getDiscoverStateContainer({
     };
   };
 
-  const createAndAppendAdHocDataView = async (dataViewSpec: DataViewSpec) => {
-    const newDataView = await services.dataViews.create(dataViewSpec);
-    if (newDataView.fields.getByName('@timestamp')?.type === 'date') {
-      newDataView.timeFieldName = '@timestamp';
-    }
-    internalState.dispatch(internalStateActions.appendAdHocDataViews(newDataView));
-    await onChangeDataView(newDataView);
-    return newDataView;
-  };
-
-  /**
-   * Function e.g. triggered when user changes data view in the sidebar
-   */
-  const onChangeDataView = async (dataViewId: string | DataView) => {
-    await changeDataView({
-      dataViewId,
-      services,
-      internalState,
-      runtimeStateManager,
-      injectCurrentTab,
-      getCurrentTab,
-    });
-  };
-
-  const fetchData = (initial: boolean = false) => {
-    addLog('fetchData', { initial });
-    if (!initial || dataStateContainer.getInitialFetchStatus() === FetchStatus.LOADING) {
-      dataStateContainer.fetch();
-    }
-  };
-
   return {
     appState$,
     internalState,
@@ -711,14 +517,6 @@ export function getDiscoverStateContainer({
     actions: {
       initializeAndSync,
       stopSyncing,
-      fetchData,
-      onChangeDataView,
-      createAndAppendAdHocDataView,
-      onDataViewCreated,
-      onDataViewEdited,
-      onOpenSavedSearch,
-      setDataView,
-      updateAdHocDataViewId,
     },
   };
 }
