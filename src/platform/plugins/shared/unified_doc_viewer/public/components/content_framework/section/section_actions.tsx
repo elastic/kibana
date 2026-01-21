@@ -19,11 +19,9 @@ interface BaseAction {
   id?: string;
 }
 
-export type Target = '_blank' | '_self';
-
 export type Action =
   | (BaseAction & { onClick: () => void; href?: never })
-  | (BaseAction & { href: string; onClick?: never; target?: Target });
+  | (BaseAction & { href: string; onClick?: never });
 
 export interface SectionActionsProps {
   actions: Action[];
@@ -37,7 +35,7 @@ export const SectionActions = ({ actions }: SectionActionsProps) => {
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
       {actions.map((action, idx) => {
         const { icon, ariaLabel, dataTestSubj, label, onClick, href } = action;
-        const buttonProps = onClick ? { onClick } : { href, target: action.target };
+        const buttonProps = onClick ? { onClick } : { href };
 
         return (
           <EuiFlexItem grow={false} key={action.id ?? idx} id={action.id}>

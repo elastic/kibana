@@ -14,7 +14,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { EuiDelayRender } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { TRACE_ID_FIELD } from '@kbn/discover-utils';
-import type { Target } from '../../../../content_framework/section/section_actions';
 import { useGetGenerateDiscoverLink } from '../../../../../hooks/use_generate_discover_link';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { ContentFrameworkSection } from '../../../../..';
@@ -98,7 +97,6 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
                   label: OPEN_IN_DISCOVER_LABEL,
                   ariaLabel: OPEN_IN_DISCOVER_ARIA_LABEL,
                   href: openInDiscoverLink,
-                  target: '_blank' as Target,
                   dataTestSubj: 'unifiedDocViewerObservabilityTracesOpenInDiscoverButton',
                 },
               ]
