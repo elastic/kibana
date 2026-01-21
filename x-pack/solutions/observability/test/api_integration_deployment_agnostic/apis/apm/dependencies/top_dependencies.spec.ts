@@ -9,6 +9,7 @@ import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_
 import type { DependencyNode } from '@kbn/apm-plugin/common/connections';
 import { NodeType } from '@kbn/apm-plugin/common/connections';
 import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
+import { SPANS_PER_DESTINATION_METRIC } from '@kbn/synthtrace/src/lib/apm/aggregators/create_span_metrics_aggregator';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { dataConfig, generateData } from './generate_data';
 import { roundNumber } from '../utils/common';
@@ -156,10 +157,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           } = dependencies;
           const { errorRate } = dataConfig;
           const totalRate = errorRate;
-          expect(roundNumber(throughput.value)).to.be(roundNumber(totalRate));
+          expect(roundNumber(throughput.value)).to.be(
+            roundNumber(totalRate * SPANS_PER_DESTINATION_METRIC)
+          );
           expect(
             topDependenciesStats.currentTimeseries[dataConfig.span.destination].throughput.every(
-              ({ y }) => roundNumber(y) === roundNumber(totalRate)
+              ({ y }) => roundNumber(y) === roundNumber(totalRate * SPANS_PER_DESTINATION_METRIC)
             )
           ).to.be(true);
         });
@@ -170,7 +173,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           } = dependencies;
           const { transaction, errorRate } = dataConfig;
 
-          const expectedValuePerBucket = errorRate * transaction.duration * 1000;
+          const expectedValuePerBucket =
+            errorRate * transaction.duration * SPANS_PER_DESTINATION_METRIC * 1000;
           expect(totalTime.value).to.be(expectedValuePerBucket * bucketSize);
         });
 
