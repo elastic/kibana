@@ -16,6 +16,7 @@ import type { OpenTimelineResult } from '../types';
 import type { TimelinesTableProps } from '.';
 import { getMockTimelinesTableProps } from './mocks';
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
+import { TestProvidersComponent } from '../../../../common/mock';
 
 const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
 
@@ -36,9 +37,11 @@ describe('#getActionsColumns', () => {
       actionTimelineToShow: ['delete'],
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="delete-timeline"]').exists()).toBe(true);
@@ -50,23 +53,27 @@ describe('#getActionsColumns', () => {
       actionTimelineToShow: [],
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="delete-timeline"]').exists()).toBe(false);
   });
 
-  test('it renders the duplicate icon timeline when actionTimelineToShow is including the action duplicate', () => {
+  test('it renders the duplicate timeline (copy icon) when actionTimelineToShow is including the action duplicate', () => {
     const testProps: TimelinesTableProps = {
       ...getMockTimelinesTableProps(mockResults),
       actionTimelineToShow: ['duplicate'],
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="open-duplicate"]').exists()).toBe(true);
@@ -78,9 +85,11 @@ describe('#getActionsColumns', () => {
       actionTimelineToShow: ['duplicate'],
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="open-duplicate"]').first().text()).toEqual('');
@@ -92,9 +101,11 @@ describe('#getActionsColumns', () => {
       actionTimelineToShow: [],
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="open-duplicate"]').exists()).toBe(false);
@@ -106,9 +117,11 @@ describe('#getActionsColumns', () => {
       actionTimelineToShow: ['delete'],
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="delete-timeline"]').exists()).toBe(false);
@@ -123,9 +136,11 @@ describe('#getActionsColumns', () => {
       ...getMockTimelinesTableProps(missingSavedObjectId),
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     const props = wrapper
@@ -140,9 +155,11 @@ describe('#getActionsColumns', () => {
       ...getMockTimelinesTableProps(mockResults),
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     const props = wrapper
@@ -160,9 +177,11 @@ describe('#getActionsColumns', () => {
       onOpenTimeline,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     wrapper.find('[data-test-subj="open-duplicate"]').first().simulate('click');
@@ -176,9 +195,11 @@ describe('#getActionsColumns', () => {
       actionTimelineToShow: ['export'],
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
     expect(wrapper.find('[data-test-subj="export-timeline"]').exists()).toBe(true);
   });
@@ -188,9 +209,11 @@ describe('#getActionsColumns', () => {
       ...getMockTimelinesTableProps(mockResults),
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
     expect(wrapper.find('[data-test-subj="export-timeline"]').exists()).toBe(false);
   });
@@ -205,9 +228,11 @@ describe('#getActionsColumns', () => {
       actionTimelineToShow: ['export'],
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     const props = wrapper
@@ -225,9 +250,11 @@ describe('#getActionsColumns', () => {
       enableExportTimelineDownloader,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     wrapper.find('[data-test-subj="export-timeline"]').first().simulate('click');
@@ -241,9 +268,11 @@ describe('#getActionsColumns', () => {
       actionTimelineToShow: ['createFrom', 'duplicate'],
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="export-timeline"]').exists()).toEqual(false);
@@ -255,9 +284,11 @@ describe('#getActionsColumns', () => {
       actionTimelineToShow: ['createFrom', 'duplicate'],
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="delete-timeline"]').exists()).toEqual(false);

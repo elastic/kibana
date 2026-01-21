@@ -20,6 +20,7 @@ import { TimelinesTable } from '.';
 import * as i18n from '../translations';
 import { getMockTimelinesTableProps } from './mocks';
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
+import { TestProvidersComponent } from '../../../../common/mock';
 
 const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
 
@@ -38,9 +39,11 @@ describe('#getExtendedColumns', () => {
         ...getMockTimelinesTableProps(mockResults),
       };
       const wrapper = mountWithIntl(
-        <ThemeProvider theme={mockTheme}>
-          <TimelinesTable {...testProps} />
-        </ThemeProvider>
+        <TestProvidersComponent>
+          <ThemeProvider theme={mockTheme}>
+            <TimelinesTable {...testProps} />
+          </ThemeProvider>
+        </TestProvidersComponent>
       );
 
       expect(wrapper.find('thead tr th').at(4).text()).toContain(i18n.MODIFIED_BY);
@@ -51,9 +54,11 @@ describe('#getExtendedColumns', () => {
         ...getMockTimelinesTableProps(mockResults),
       };
       const wrapper = mountWithIntl(
-        <ThemeProvider theme={mockTheme}>
-          <TimelinesTable {...testProps} />
-        </ThemeProvider>
+        <TestProvidersComponent>
+          <ThemeProvider theme={mockTheme}>
+            <TimelinesTable {...testProps} />
+          </ThemeProvider>
+        </TestProvidersComponent>
       );
 
       expect(wrapper.find('[data-test-subj="username"]').first().text()).toEqual(
@@ -67,9 +72,11 @@ describe('#getExtendedColumns', () => {
         ...getMockTimelinesTableProps(missingUpdatedBy),
       };
       const wrapper = mountWithIntl(
-        <ThemeProvider theme={mockTheme}>
-          <TimelinesTable {...testProps} />
-        </ThemeProvider>
+        <TestProvidersComponent>
+          <ThemeProvider theme={mockTheme}>
+            <TimelinesTable {...testProps} />
+          </ThemeProvider>
+        </TestProvidersComponent>
       );
 
       expect(wrapper.find('[data-test-subj="username"]').first().text()).toEqual(getEmptyValue());

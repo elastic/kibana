@@ -18,6 +18,7 @@ import { OpenTimelineModalBody } from './open_timeline_modal_body';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../constants';
 import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../../common/api/timeline';
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
+import { TestProvidersComponent } from '../../../../common/mock';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -69,9 +70,11 @@ describe('OpenTimelineModal', () => {
   test('it renders the title row', () => {
     const defaultProps = getDefaultTestProps(mockResults);
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimelineModalBody {...defaultProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimelineModalBody {...defaultProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="open-timeline-modal-title"]').first().exists()).toBe(
@@ -82,9 +85,11 @@ describe('OpenTimelineModal', () => {
   test('it renders the search row', () => {
     const defaultProps = getDefaultTestProps(mockResults);
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimelineModalBody {...defaultProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimelineModalBody {...defaultProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="search-row"]').first().exists()).toBe(true);
@@ -93,9 +98,11 @@ describe('OpenTimelineModal', () => {
   test('it renders the timelines table', () => {
     const defaultProps = getDefaultTestProps(mockResults);
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimelineModalBody {...defaultProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimelineModalBody {...defaultProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="timelines-table"]').first().exists()).toBe(true);
@@ -108,9 +115,11 @@ describe('OpenTimelineModal', () => {
       deleteTimelines: jest.fn(),
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimelineModalBody {...defaultProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimelineModalBody {...defaultProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     const props = wrapper
@@ -128,9 +137,11 @@ describe('OpenTimelineModal', () => {
       deleteTimelines: undefined,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimelineModalBody {...defaultProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimelineModalBody {...defaultProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     const props = wrapper
@@ -148,9 +159,11 @@ describe('OpenTimelineModal', () => {
       deleteTimelines: undefined,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimelineModalBody {...defaultProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimelineModalBody {...defaultProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     const props = wrapper
@@ -168,9 +181,11 @@ describe('OpenTimelineModal', () => {
       deleteTimelines: undefined,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimelineModalBody {...defaultProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimelineModalBody {...defaultProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     const props = wrapper

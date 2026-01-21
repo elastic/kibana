@@ -35,48 +35,36 @@ export const DELETE_NOTES_CANCEL = i18n.translate(
 /**
  * Renders a confirmation modal to delete notes in the notes management page
  */
-export const DeleteConfirmModal = React.memo(
-  ({
-    refetch = true,
-    onCancelCallback,
-    onConfirmCallback,
-  }: {
-    refetch?: boolean;
-    onCancelCallback?: () => void;
-    onConfirmCallback?: () => void;
-  }) => {
-    const dispatch = useDispatch();
-    const pendingDeleteIds = useSelector(selectNotesTablePendingDeleteIds);
-    const deleteNotesStatus = useSelector(selectDeleteNotesStatus);
-    const deleteLoading = deleteNotesStatus === ReqStatus.Loading;
+export const DeleteConfirmModal = React.memo(({ refetch = true }: { refetch?: boolean }) => {
+  const dispatch = useDispatch();
+  const pendingDeleteIds = useSelector(selectNotesTablePendingDeleteIds);
+  const deleteNotesStatus = useSelector(selectDeleteNotesStatus);
+  const deleteLoading = deleteNotesStatus === ReqStatus.Loading;
 
-    const onCancel = useCallback(() => {
-      if (onCancelCallback) onCancelCallback();
-      dispatch(userClosedDeleteModal());
-    }, [dispatch, onCancelCallback]);
+  const onCancel = useCallback(() => {
+    dispatch(userClosedDeleteModal());
+  }, [dispatch]);
 
-    const onConfirm = useCallback(() => {
-      if (onConfirmCallback) onConfirmCallback();
-      dispatch(deleteNotes({ ids: pendingDeleteIds, refetch }));
-    }, [dispatch, pendingDeleteIds, refetch, onConfirmCallback]);
+  const onConfirm = useCallback(() => {
+    dispatch(deleteNotes({ ids: pendingDeleteIds, refetch }));
+  }, [dispatch, pendingDeleteIds, refetch]);
 
-    return (
-      <EuiConfirmModal
-        aria-labelledby={'delete-notes-modal'}
-        data-test-subj={'delete-notes-modal'}
-        title={DELETE}
-        onCancel={onCancel}
-        onConfirm={onConfirm}
-        isLoading={deleteLoading}
-        cancelButtonText={DELETE_NOTES_CANCEL}
-        confirmButtonText={DELETE}
-        buttonColor="danger"
-        defaultFocusedButton="confirm"
-      >
-        {DELETE_NOTES_CONFIRM(pendingDeleteIds.length)}
-      </EuiConfirmModal>
-    );
-  }
-);
+  return (
+    <EuiConfirmModal
+      aria-labelledby={'delete-notes-modal'}
+      data-test-subj={'delete-notes-modal'}
+      title={DELETE}
+      onCancel={onCancel}
+      onConfirm={onConfirm}
+      isLoading={deleteLoading}
+      cancelButtonText={DELETE_NOTES_CANCEL}
+      confirmButtonText={DELETE}
+      buttonColor="danger"
+      defaultFocusedButton="confirm"
+    >
+      {DELETE_NOTES_CONFIRM(pendingDeleteIds.length)}
+    </EuiConfirmModal>
+  );
+});
 
 DeleteConfirmModal.displayName = 'DeleteConfirmModal';

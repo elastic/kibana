@@ -20,6 +20,7 @@ import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from './constants';
 import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../common/api/timeline';
 import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { TestProvidersComponent } from '../../../common/mock';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -85,9 +86,11 @@ describe('OpenTimeline', () => {
   test('it renders the search row', () => {
     const defaultProps = getDefaultTestProps(mockResults);
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimeline {...defaultProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimeline {...defaultProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="search-row"]').first().exists()).toBe(true);
@@ -96,9 +99,11 @@ describe('OpenTimeline', () => {
   test('it renders the timelines table', () => {
     const defaultProps = getDefaultTestProps(mockResults);
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimeline {...defaultProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimeline {...defaultProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="timelines-table"]').first().exists()).toBe(true);
@@ -110,9 +115,11 @@ describe('OpenTimeline', () => {
     });
     const defaultProps = getDefaultTestProps(mockResults);
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimeline {...defaultProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimeline {...defaultProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     const props = wrapper
@@ -130,9 +137,11 @@ describe('OpenTimeline', () => {
       deleteTimelines: undefined,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimeline {...defaultProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimeline {...defaultProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     const props = wrapper
@@ -150,9 +159,11 @@ describe('OpenTimeline', () => {
       deleteTimelines: undefined,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimeline {...defaultProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimeline {...defaultProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     const props = wrapper
@@ -170,9 +181,11 @@ describe('OpenTimeline', () => {
       deleteTimelines: undefined,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimeline {...defaultProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimeline {...defaultProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     const props = wrapper
@@ -193,9 +206,11 @@ describe('OpenTimeline', () => {
       timelinePrivileges: { crud: false, read: true },
     });
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimeline {...defaultProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimeline {...defaultProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     const props = wrapper
@@ -212,9 +227,11 @@ describe('OpenTimeline', () => {
       query: '',
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimeline {...defaultProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimeline {...defaultProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="selectable-query-text"]').first().text()).toEqual('');
@@ -226,9 +243,11 @@ describe('OpenTimeline', () => {
       query: '   ',
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimeline {...defaultProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimeline {...defaultProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="selectable-query-text"]').first().text()).toEqual('');
@@ -240,9 +259,11 @@ describe('OpenTimeline', () => {
       query: 'Would you like to go to Denver?',
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimeline {...defaultProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimeline {...defaultProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="selectable-query-text"]').first().text()).toContain(
@@ -256,9 +277,11 @@ describe('OpenTimeline', () => {
       query: '   Is it starting to feel cramped in here?   ',
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimeline {...defaultProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimeline {...defaultProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="selectable-query-text"]').first().text()).toContain(
@@ -272,9 +295,11 @@ describe('OpenTimeline', () => {
       query: '',
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimeline {...defaultProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimeline {...defaultProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="query-message"]').first().text()).toContain(
@@ -288,9 +313,11 @@ describe('OpenTimeline', () => {
       query: '   ',
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimeline {...defaultProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimeline {...defaultProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="query-message"]').first().text()).toContain(
@@ -304,9 +331,11 @@ describe('OpenTimeline', () => {
       query: 'How was your day?',
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimeline {...defaultProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimeline {...defaultProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="query-message"]').first().text()).toContain(
@@ -320,9 +349,11 @@ describe('OpenTimeline', () => {
       timelineStatus: TimelineStatusEnum.active,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimeline {...defaultProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimeline {...defaultProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="utility-bar-action"]').exists()).toEqual(true);
@@ -335,9 +366,11 @@ describe('OpenTimeline', () => {
       selectedItems: [],
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimeline {...defaultProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimeline {...defaultProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     wrapper
@@ -362,9 +395,11 @@ describe('OpenTimeline', () => {
       selectedItems: [],
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimeline {...defaultProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimeline {...defaultProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     wrapper
@@ -386,9 +421,11 @@ describe('OpenTimeline', () => {
       selectedItems: [{}],
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimeline {...defaultProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimeline {...defaultProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     wrapper
@@ -413,9 +450,11 @@ describe('OpenTimeline', () => {
       selectedItems: [{}],
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimeline {...defaultProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimeline {...defaultProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     wrapper
@@ -439,9 +478,11 @@ describe('OpenTimeline', () => {
       timelineStatus: TimelineStatusEnum.active,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimeline {...defaultProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimeline {...defaultProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(
@@ -458,9 +499,11 @@ describe('OpenTimeline', () => {
       timelineStatus: TimelineStatusEnum.active,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimeline {...defaultProps} onCreateRule={jest.fn()} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimeline {...defaultProps} onCreateRule={jest.fn()} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(
@@ -477,9 +520,11 @@ describe('OpenTimeline', () => {
       timelinePrivileges: { crud: false, read: true },
     });
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimeline {...defaultProps} onCreateRule={jest.fn()} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimeline {...defaultProps} onCreateRule={jest.fn()} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(
@@ -493,9 +538,11 @@ describe('OpenTimeline', () => {
       timelineStatus: TimelineStatusEnum.active,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimeline {...defaultProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimeline {...defaultProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="selected-count"]').exists()).toEqual(true);
@@ -507,9 +554,11 @@ describe('OpenTimeline', () => {
       timelineStatus: TimelineStatusEnum.immutable,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimeline {...defaultProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimeline {...defaultProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="utility-bar-action"]').exists()).toEqual(false);
@@ -524,9 +573,11 @@ describe('OpenTimeline', () => {
       timelineStatus: TimelineStatusEnum.immutable,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimeline {...defaultProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimeline {...defaultProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(
@@ -540,9 +591,11 @@ describe('OpenTimeline', () => {
       timelineStatus: TimelineStatusEnum.immutable,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimeline {...defaultProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimeline {...defaultProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="selected-count"]').exists()).toEqual(false);
@@ -554,9 +607,11 @@ describe('OpenTimeline', () => {
       timelineStatus: null,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimeline {...defaultProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimeline {...defaultProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="utility-bar-action"]').exists()).toEqual(true);
@@ -571,9 +626,11 @@ describe('OpenTimeline', () => {
       timelineStatus: null,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimeline {...defaultProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimeline {...defaultProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(
@@ -590,9 +647,11 @@ describe('OpenTimeline', () => {
       timelinePrivileges: { crud: false, read: true },
     });
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimeline {...defaultProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimeline {...defaultProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(
@@ -606,9 +665,11 @@ describe('OpenTimeline', () => {
       timelineStatus: null,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <OpenTimeline {...defaultProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <OpenTimeline {...defaultProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="selected-count"]').exists()).toEqual(true);

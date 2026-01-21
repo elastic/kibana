@@ -9,7 +9,6 @@ import { cloneDeep } from 'lodash/fp';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { useSelector } from 'react-redux';
 import { render, screen } from '@testing-library/react';
 
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';
@@ -17,18 +16,12 @@ import type { OpenTimelineResult } from '../types';
 import type { TimelinesTableProps } from '.';
 import { TimelinesTable } from '.';
 import { getMockTimelinesTableProps } from './mocks';
-import { selectNotesTablePendingDeleteIds } from '../../../../notes';
 
 import * as i18n from '../translations';
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
+import { TestProvidersComponent, createMockStore, mockGlobalState } from '../../../../common/mock';
 
 const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
-
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
-  useSelector: jest.fn(),
-  useDispatch: jest.fn().mockReturnValue(jest.fn()),
-}));
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -37,14 +30,15 @@ describe('TimelinesTable', () => {
 
   beforeEach(() => {
     mockResults = cloneDeep(mockTimelineResults);
-    (useSelector as jest.Mock).mockReturnValue([]);
   });
 
   test('it renders the select all timelines header checkbox when actionTimelineToShow has the action selectable', () => {
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('thead tr th input').first().exists()).toBe(true);
@@ -56,9 +50,11 @@ describe('TimelinesTable', () => {
       actionTimelineToShow: ['delete', 'duplicate'],
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('thead tr th input').first().exists()).toBe(false);
@@ -70,9 +66,11 @@ describe('TimelinesTable', () => {
       showExtendedColumns: true,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('thead tr th').at(4).text()).toContain(i18n.MODIFIED_BY);
@@ -84,9 +82,11 @@ describe('TimelinesTable', () => {
       showExtendedColumns: false,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(
@@ -101,9 +101,11 @@ describe('TimelinesTable', () => {
 
   test('it renders the delete timeline (trash icon) when actionTimelineToShow has the delete action', () => {
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="delete-timeline"]').first().exists()).toBe(true);
@@ -115,9 +117,11 @@ describe('TimelinesTable', () => {
       actionTimelineToShow: ['duplicate', 'selectable'],
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="delete-timeline"]').first().exists()).toBe(false);
@@ -125,9 +129,11 @@ describe('TimelinesTable', () => {
 
   test('it renders the rows per page selector when showExtendedColumns is true', () => {
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('EuiTablePagination EuiPopover').first().exists()).toBe(true);
@@ -139,9 +145,11 @@ describe('TimelinesTable', () => {
       showExtendedColumns: false,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('EuiTablePagination EuiPopover').first().exists()).toBe(false);
@@ -155,9 +163,11 @@ describe('TimelinesTable', () => {
       pageSize: defaultPageSize,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('EuiTablePagination EuiPopover').first().text()).toEqual(
@@ -167,9 +177,11 @@ describe('TimelinesTable', () => {
 
   test('it sorts the Last Modified column in descending order when showExtendedColumns is true ', () => {
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[aria-sort="descending"]').first().text()).toContain(i18n.LAST_MODIFIED);
@@ -181,9 +193,11 @@ describe('TimelinesTable', () => {
       showExtendedColumns: false,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[aria-sort="descending"]').first().text()).toContain(i18n.LAST_MODIFIED);
@@ -195,9 +209,11 @@ describe('TimelinesTable', () => {
       searchResults: [],
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('tbody tr td div').first().text()).toEqual(i18n.ZERO_TIMELINES_MATCH);
@@ -210,9 +226,11 @@ describe('TimelinesTable', () => {
       onTableChange,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     wrapper.find('thead tr th button').at(0).simulate('click');
@@ -232,9 +250,11 @@ describe('TimelinesTable', () => {
       onSelectionChange,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     wrapper
@@ -253,9 +273,11 @@ describe('TimelinesTable', () => {
       loading: true,
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     const props = wrapper
@@ -268,9 +290,11 @@ describe('TimelinesTable', () => {
 
   test('it disables the table loading animation when isLoading is false', () => {
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
-      </ThemeProvider>
+      <TestProvidersComponent>
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     const props = wrapper
@@ -282,17 +306,20 @@ describe('TimelinesTable', () => {
   });
 
   test('it should show a delete confirmation popup when there are pending deletes', () => {
-    (useSelector as jest.Mock).mockImplementation((selector) => {
-      if (selector === selectNotesTablePendingDeleteIds) {
-        return ['1'];
-      }
-      return [];
+    const storeWithPendingDeletes = createMockStore({
+      ...mockGlobalState,
+      notes: {
+        ...mockGlobalState.notes,
+        pendingDeleteIds: ['1'],
+      },
     });
 
     render(
-      <ThemeProvider theme={mockTheme}>
-        <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
-      </ThemeProvider>
+      <TestProvidersComponent store={storeWithPendingDeletes}>
+        <ThemeProvider theme={mockTheme}>
+          <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
+        </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(screen.getByTestId('delete-notes-modal')).toBeInTheDocument();
