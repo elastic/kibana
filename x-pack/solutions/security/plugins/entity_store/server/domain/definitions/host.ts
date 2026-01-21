@@ -13,7 +13,7 @@ export const HOST_IDENTITY_FIELD = 'host.name';
 
 // Mostly copied from x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_definitions/entity_descriptions/host.ts
 
-export const hostEntityDescription: EntityDefinitionWithoutId = {
+export const hostEntityDefinition: EntityDefinitionWithoutId = {
   type: 'host',
   name: `Security 'host' Entity Store Definition`,
   identityFields: [{ field: HOST_IDENTITY_FIELD, mapping: { type: 'keyword' } }],

@@ -363,7 +363,7 @@
           "(kql: string) => string[]"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/common/utils/extract_property_paths_from_kql/extract_property_paths_from_kql.ts",
-        "lineNumber": 37,
+        "lineNumber": 39,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -381,7 +381,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/common/utils/extract_property_paths_from_kql/extract_property_paths_from_kql.ts",
-            "lineNumber": 64,
+            "lineNumber": 66,
             "columnNumber": 45,
             "deprecated": false,
             "trackAdoption": false,
