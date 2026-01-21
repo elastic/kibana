@@ -10,6 +10,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon, EuiPanel } from '@elastic/eui';
+import { useScrollSync } from '../../../../lib/core/scroll_sync';
 import {
   useStyles as useCascadeRowHeaderSlotsRendererStyles,
   type ScrollState,
@@ -37,13 +38,21 @@ const calculateScrollState = (element: HTMLDivElement | null): ScrollState => {
 
 const CascadeRowHeaderSlotsRenderer = ({ headerMetaSlots }: CascadeRowHeaderSlotsRendererProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const scrollSync = useScrollSync();
   const [scrollState, setScrollState] = useState<ScrollState>({
     isScrollable: false,
     canScrollLeft: false,
     canScrollRight: false,
   });
 
-  const styles = useCascadeRowHeaderSlotsRendererStyles(scrollState);
+  // Register with scroll sync provider (handles initialization automatically)
+  useEffect(() => {
+    const el = containerRef.current;
+    if (el) {
+      scrollSync.register(el);
+      return () => scrollSync.unregister(el);
+    }
+  }, [scrollSync]);
 
   const updateScrollState = useCallback(() => {
     setScrollState(calculateScrollState(containerRef.current));
@@ -53,7 +62,7 @@ const CascadeRowHeaderSlotsRenderer = ({ headerMetaSlots }: CascadeRowHeaderSlot
   useEffect(() => {
     updateScrollState();
 
-    // Use ResizeObserver to detect container size changes
+    // Use ResizeObserver to detect container size changes for scroll button visibility
     const resizeObserver = new ResizeObserver(updateScrollState);
     if (containerRef.current) {
       resizeObserver.observe(containerRef.current);
@@ -63,7 +72,12 @@ const CascadeRowHeaderSlotsRenderer = ({ headerMetaSlots }: CascadeRowHeaderSlot
 
   const handleScroll = useCallback(() => {
     updateScrollState();
-  }, [updateScrollState]);
+
+    if (containerRef.current) {
+      // Sync scroll position with other scrollable elements
+      scrollSync.syncScroll(containerRef.current);
+    }
+  }, [updateScrollState, scrollSync]);
 
   const scrollLeft = useCallback(() => {
     if (containerRef.current) {
@@ -79,6 +93,8 @@ const CascadeRowHeaderSlotsRenderer = ({ headerMetaSlots }: CascadeRowHeaderSlot
       );
     }
   }, []);
+
+  const styles = useCascadeRowHeaderSlotsRendererStyles(scrollState);
 
   const scrollLeftLabel = i18n.translate(
     'sharedUXPackages.dataCascade.headerSlots.scrollLeftLabel',
