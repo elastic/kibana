@@ -101,7 +101,7 @@ describe('custom_property_selection_cache', () => {
       const key = getCacheKeyForValue('step.type', 'config', 'proxy.id', 'proxy-1');
       setCachedOption(key, mockOption1);
 
-      jest.advanceTimersByTime(5 * 60 * 1000 + 1);
+      jest.advanceTimersByTime(30 * 1000 + 1);
 
       const cached = getCachedOption(key);
       expect(cached).toBeNull();
@@ -111,7 +111,7 @@ describe('custom_property_selection_cache', () => {
       const key = getCacheKeyForValue('step.type', 'config', 'proxy.id', 'proxy-1');
       setCachedOption(key, mockOption1);
 
-      jest.advanceTimersByTime(5 * 60 * 1000 - 1);
+      jest.advanceTimersByTime(30 * 1000 - 1);
 
       const cached = getCachedOption(key);
       expect(cached).toEqual(mockOption1);
@@ -271,7 +271,7 @@ describe('custom_property_selection_cache', () => {
       const key = getCacheKeyForValue('step.type', 'config', 'proxy.id', 'proxy-1');
       setCachedOption(key, mockOption1);
 
-      jest.advanceTimersByTime(5 * 60 * 1000 + 1);
+      jest.advanceTimersByTime(30 * 1000 + 1);
 
       const cached = getCachedOption(key);
       expect(cached).toBeNull();
@@ -280,7 +280,7 @@ describe('custom_property_selection_cache', () => {
     it('should not expire search cache entries (they persist)', () => {
       cacheSearchOptions('step.type', 'config', 'proxy.id', [mockOption1]);
 
-      jest.advanceTimersByTime(5 * 60 * 1000 + 1);
+      jest.advanceTimersByTime(30 * 1000 + 1);
 
       const cached = getCachedSearchOption('step.type', 'config', 'proxy.id', 'proxy-1');
       expect(cached).toEqual(mockOption1);
@@ -290,7 +290,7 @@ describe('custom_property_selection_cache', () => {
       cacheSearchOptions('step.type', 'config', 'proxy.id', [mockOption1]);
 
       const key = getCacheKeyForValue('step.type', 'config', 'proxy.id', 'proxy-1');
-      jest.advanceTimersByTime(5 * 60 * 1000 + 1);
+      jest.advanceTimersByTime(30 * 1000 + 1);
 
       const cachedViaKey = getCachedOption(key);
       expect(cachedViaKey).toBeNull();

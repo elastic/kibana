@@ -79,7 +79,7 @@ export async function getCustomPropertySuggestions(
     endColumn: endPos.col,
   };
 
-  const input = currentValue != null ? String(currentValue) : '';
+  const input = sanitizeSearchInput(currentValue);
   const context: SelectionContext = {
     stepType: focusedStepInfo.stepType,
     scope: isInConfig ? 'config' : 'input',
@@ -97,8 +97,16 @@ export async function getCustomPropertySuggestions(
       range: replaceRange,
       detail: option.description,
       documentation: option.documentation,
-      filterText: `${option.value} ${option.label}`,
+      filterText: `${option.value} ${option.label} "${option.label}" '${option.label}'`,
       sortText: option.label,
     })
   );
+}
+
+function sanitizeSearchInput(input: unknown): string {
+  if (input == null) {
+    return '';
+  }
+  const strInput = String(input);
+  return strInput.trim().replace(/^['"]|['"]$/g, '');
 }
