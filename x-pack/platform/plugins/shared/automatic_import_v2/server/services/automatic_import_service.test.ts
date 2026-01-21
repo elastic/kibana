@@ -108,7 +108,7 @@ describe('AutomaticImportSetupService', () => {
 
   describe('methods before initialization', () => {
     it('should throw error when calling createIntegration before initialize', async () => {
-      await expect(service.createIntegration({} as any)).rejects.toThrow(
+      await expect(service.createUpdateIntegration({} as any)).rejects.toThrow(
         'Saved Objects service not initialized.'
       );
     });
@@ -306,8 +306,8 @@ describe('AutomaticImportSetupService', () => {
         mockEsClient
       );
       expect(mockDeleteSavedObject).toHaveBeenCalledWith(
-        'integration-123',
         'data-stream-456',
+        'integration-123',
         undefined
       );
     });
@@ -331,8 +331,8 @@ describe('AutomaticImportSetupService', () => {
       await service.deleteDataStream('integration-123', 'data-stream-456', mockEsClient, options);
 
       expect(mockDeleteSavedObject).toHaveBeenCalledWith(
-        'integration-123',
         'data-stream-456',
+        'integration-123',
         options
       );
     });

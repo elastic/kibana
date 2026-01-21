@@ -461,64 +461,61 @@ export interface InternalConnectorContract extends BaseConnectorContract {
 
 export interface StepPropertyHandler<T = unknown> {
   /**
-   * Autocompletion configuration for the property.
+   * Entity selection configuration for the property.
+   * Provides a unified interface for search, resolution, and decoration of entity references.
    */
-  completion?: {
-    /**
-     * Fetch available options for autocompletion.
-     * Called lazily when the user triggers completion.
-     */
-    getOptions: PropertyCompletionFn<T>;
-  };
-
-  /**
-   * Additional validation configuration for the property.
-   */
-  validation?: {
-    /**
-     * Validate a value and return decoration/error info.
-     * Return null if no validation is needed (static Zod validation is sufficient).
-     *
-     * Important: Called everytime when the YAML document changes.
-     *
-     * For validators that check external resources, consider using a client-side caching solution
-     * (e.g., React Query) within your validator implementation to handle cache invalidation
-     * when external data changes.
-     */
-    validate: PropertyValidationFn<T>;
-  };
+  selection?: PropertySelectionHandler<Exclude<T, undefined>>;
 }
 
-export type PropertyCompletionFn<T = unknown> = (value: T) => Promise<PropertyCompletionOption[]>;
+export interface PropertySelectionHandler<T = unknown> {
+  /**
+   * Search for options matching the input query.
+   * Used by autocomplete dropdowns when the user types.
+   */
+  search: (input: string, context: SelectionContext) => Promise<SelectionOption<T>[]>;
 
-export type PropertyValidationFn<T = unknown> = (
-  value: T,
-  context: PropertyValidationContext
-) => Promise<PropertyValidationResult | null>;
+  /**
+   * Resolve an entity by its value.
+   * Used when loading existing values or when a value is pasted.
+   * Returns null if the entity is not found.
+   */
+  resolve: (value: T, context: SelectionContext) => Promise<SelectionOption<T> | null>;
 
-export interface PropertyCompletionOption {
-  /** The value that will be stored in the yaml */
-  value: string;
-  /** The label displayed in the completion popup */
+  /**
+   * Get detailed information for the current value.
+   * Used for decoration and metadata display in the editor.
+   * The option parameter is the resolved entity from `resolve`, if available.
+   */
+  getDetails: (
+    input: string,
+    context: SelectionContext,
+    option: SelectionOption<T> | null
+  ) => Promise<SelectionDetails>;
+}
+
+export interface SelectionOption<T = unknown> {
+  /** The value that will be stored in the YAML */
+  value: T;
+  /** The label displayed in the UI */
   label: string;
-  /** Brief detail shown inline in completion popup (optional) */
-  detail?: string;
+  /** Description shown in completion popup or tooltips (optional) */
+  description?: string;
   /** Extended documentation shown in side panel (optional) */
   documentation?: string;
 }
 
-export interface PropertyValidationResult {
-  /** null = valid (show success decoration), 'error'|'warning'|'info' = show error */
-  severity: 'error' | 'warning' | 'info' | null;
-  /** Error message for markers panel (only when severity is not null) */
-  message?: string;
-  /** Decoration text shown after the value (e.g., "✓ Connected (agent ID: xyz)") */
-  afterMessage?: string;
-  /** Hover tooltip (markdown supported) */
-  hoverMessage?: string;
+export interface SelectionDetails {
+  /** Message to display (e.g., "✓ Agent connected" or "Agent not found") */
+  message: string;
+  /** Links to related actions (e.g., "Edit agent", "Create agent") */
+  links?: Array<{
+    /** Link text */
+    text: string;
+    /** Link path (relative or absolute URL) */
+    path: string;
+  }>;
 }
 
-// TODO: Add other context for cross-field validation
 export interface PropertyValidationContext {
   /** The step type ID (e.g., "onechat.runAgent") */
   stepType: string;
@@ -527,6 +524,8 @@ export interface PropertyValidationContext {
   /** The property key (e.g., "agent_id") */
   propertyKey: string;
 }
+
+export type SelectionContext = PropertyValidationContext;
 
 export interface ConnectorExamples {
   params?: Record<string, string>;
@@ -544,4 +543,14 @@ export interface WorkflowsSearchParams {
   query?: string;
   createdBy?: string[];
   enabled?: boolean[];
+}
+
+export interface RequestOptions {
+  method: string;
+  path: string;
+  body?: Record<string, unknown>;
+  query?: Record<string, string>;
+  headers?: Record<string, string>;
+  /** Bulk body for elasticsearch.bulk step */
+  bulkBody?: Array<Record<string, unknown>>;
 }

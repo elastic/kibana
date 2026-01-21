@@ -279,6 +279,9 @@ components:
         shared:
           description: '`undefined`: show both shared, and only visible to me Attack discoveries. `true`: show only shared Attack discoveries. `false`: show only visible to me Attack discoveries.'
           type: boolean
+        scheduled:
+          description: 'Whether to return scheduled or ad-hoc attack discoveries. If omitted, both types of attack discoveries are returned. Use `true` to return only scheduled discoveries or `false` to return only ad-hoc discoveries.'
+          type: boolean
         sortField:
           default: '@timestamp'
           type: string

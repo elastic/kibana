@@ -25,3 +25,4 @@ ink
 @hey-api/openapi-ts
 vscode-languageserver-textdocument
 yaml-language-server
+@opentelemetry/exporter-metrics-otlp-proto

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AiClassifyStepDefinition } from './ai/ai_classify_step';
 import { AiPromptStepDefinition } from './ai/ai_prompt_step';
 import {
   dataDedupeStepDefinition,
@@ -22,4 +23,5 @@ export const registerInternalStepDefinitions = (stepRegistry: PublicStepRegistry
   stepRegistry.register(dataRegexExtractStepDefinition);
   stepRegistry.register(dataRegexReplaceStepDefinition);
   stepRegistry.register(AiPromptStepDefinition);
+  stepRegistry.register(AiClassifyStepDefinition);
 };

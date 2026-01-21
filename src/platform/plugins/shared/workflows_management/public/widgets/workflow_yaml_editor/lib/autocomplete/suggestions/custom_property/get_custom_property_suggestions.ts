@@ -8,7 +8,13 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import { isBuiltInStepProperty, isBuiltInStepType, type StepPropertyHandler } from '@kbn/workflows';
+import {
+  isBuiltInStepProperty,
+  isBuiltInStepType,
+  type SelectionContext,
+  type StepPropertyHandler,
+} from '@kbn/workflows';
+import { cacheSearchOptions } from '../../../../../../shared/lib/custom_property_selection_cache';
 import type { AutocompleteContext } from '../../context/autocomplete.types';
 
 export type GetCustomPropertySuggestionsContext = Pick<
@@ -59,29 +65,48 @@ export async function getCustomPropertySuggestions(
     isInConfig ? 'config' : 'input',
     composedKey
   );
-  if (!propertyHandler || !propertyHandler.completion?.getOptions) {
+  if (!propertyHandler || !propertyHandler.selection?.search) {
     return [];
   }
   const [startOffset, endOffset] = focusedYamlPair.valueNode.range;
   const currentValue = focusedYamlPair.valueNode.value;
   const startPos = yamlLineCounter?.linePos(startOffset);
   const endPos = yamlLineCounter?.linePos(endOffset);
-  // replace the whole value with the suggestion
   const replaceRange = {
     startLineNumber: startPos.line,
     startColumn: startPos.col,
     endLineNumber: endPos.line,
     endColumn: endPos.col,
   };
-  const completions = await propertyHandler.completion?.getOptions(currentValue);
-  return completions.map(
-    (completion): monaco.languages.CompletionItem => ({
-      label: completion.label,
+
+  const input = sanitizeSearchInput(currentValue);
+  const context: SelectionContext = {
+    stepType: focusedStepInfo.stepType,
+    scope: isInConfig ? 'config' : 'input',
+    propertyKey: composedKey,
+  };
+  const options = await propertyHandler.selection.search(input, context);
+
+  cacheSearchOptions(focusedStepInfo.stepType, context.scope, composedKey, options);
+
+  return options.map(
+    (option): monaco.languages.CompletionItem => ({
+      label: option.label,
       kind: monaco.languages.CompletionItemKind.Value,
-      insertText: completion.value,
+      insertText: String(option.value),
       range: replaceRange,
-      detail: completion.detail,
-      documentation: completion.documentation,
+      detail: option.description,
+      documentation: option.documentation,
+      filterText: `${option.value} ${option.label} "${option.label}" '${option.label}'`,
+      sortText: option.label,
     })
   );
+}
+
+function sanitizeSearchInput(input: unknown): string {
+  if (input == null) {
+    return '';
+  }
+  const strInput = String(input);
+  return strInput.trim().replace(/^['"]|['"]$/g, '');
 }

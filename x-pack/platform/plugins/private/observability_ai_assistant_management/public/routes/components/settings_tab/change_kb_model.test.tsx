@@ -14,6 +14,7 @@ import {
   ELSER_ON_ML_NODE_INFERENCE_ID,
   ELSER_IN_EIS_INFERENCE_ID,
   E5_SMALL_INFERENCE_ID,
+  useEisKnowledgeBaseCalloutDismissed,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { UseKnowledgeBaseResult } from '@kbn/ai-assistant/src/hooks';
 import type { APIReturnType } from '@kbn/observability-ai-assistant-plugin/public';
@@ -51,6 +52,21 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
     },
   }),
 }));
+
+const mockSetEisKnowledgeBaseCalloutDismissed = jest.fn();
+
+jest.mock('@kbn/observability-ai-assistant-plugin/public', () => {
+  const actual = jest.requireActual('@kbn/observability-ai-assistant-plugin/public');
+  return {
+    ...actual,
+    useEisKnowledgeBaseCalloutDismissed: jest.fn(() => [
+      false,
+      mockSetEisKnowledgeBaseCalloutDismissed,
+    ]),
+  };
+});
+
+const mockUseEisKnowledgeBaseCalloutDismissed = useEisKnowledgeBaseCalloutDismissed as jest.Mock;
 
 jest.mock('@kbn/ai-assistant/src/utils/get_model_options_for_inference_endpoints');
 
@@ -135,6 +151,10 @@ const renderComponent = (
 describe('ChangeKbModel', () => {
   beforeEach(() => {
     setupMockGetModelOptions();
+    mockUseEisKnowledgeBaseCalloutDismissed.mockReturnValue([
+      false,
+      mockSetEisKnowledgeBaseCalloutDismissed,
+    ]);
   });
 
   afterEach(() => {
@@ -289,6 +309,101 @@ describe('ChangeKbModel', () => {
         const button = screen.getByTestId('observabilityAiAssistantKnowledgeBaseUpdateModelButton');
         expect(button).toBeEnabled();
       });
+    });
+  });
+
+  describe('EIS Knowledge Base Callout', () => {
+    const eisModelOptions = [
+      {
+        key: ELSER_IN_EIS_INFERENCE_ID,
+        label: elserTitle,
+        description: elserDescription,
+      },
+      {
+        key: E5_SMALL_INFERENCE_ID,
+        label: e5SmallTitle,
+        description: e5SmallDescription,
+      },
+    ];
+
+    it('shows the EIS callout when the selected model is from EIS and callout is not dismissed', async () => {
+      setupMockGetModelOptions(eisModelOptions);
+      mockUseEisKnowledgeBaseCalloutDismissed.mockReturnValue([
+        false,
+        mockSetEisKnowledgeBaseCalloutDismissed,
+      ]);
+
+      const mockKb = createMockKnowledgeBase({
+        status: createMockStatus({
+          currentInferenceId: ELSER_IN_EIS_INFERENCE_ID,
+          endpoint: {
+            inference_id: ELSER_IN_EIS_INFERENCE_ID,
+            task_type: 'text_embedding',
+            service: 'my-service',
+            service_settings: {},
+          },
+        }),
+      });
+
+      renderComponent(mockKb, { currentIdOverride: ELSER_IN_EIS_INFERENCE_ID });
+
+      await waitFor(() => {
+        expect(
+          screen.getByText('Elastic Inference Service (EIS) now available')
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('does not show the EIS callout when the callout has been dismissed', async () => {
+      setupMockGetModelOptions(eisModelOptions);
+      mockUseEisKnowledgeBaseCalloutDismissed.mockReturnValue([
+        true,
+        mockSetEisKnowledgeBaseCalloutDismissed,
+      ]);
+
+      const mockKb = createMockKnowledgeBase({
+        status: createMockStatus({
+          currentInferenceId: ELSER_IN_EIS_INFERENCE_ID,
+          endpoint: {
+            inference_id: ELSER_IN_EIS_INFERENCE_ID,
+            task_type: 'text_embedding',
+            service: 'my-service',
+            service_settings: {},
+          },
+        }),
+      });
+
+      renderComponent(mockKb, { currentIdOverride: ELSER_IN_EIS_INFERENCE_ID });
+
+      expect(
+        screen.queryByText('Elastic Inference Service (EIS) now available')
+      ).not.toBeInTheDocument();
+    });
+
+    it('does not show the EIS callout when the selected model is not from EIS', async () => {
+      setupMockGetModelOptions(eisModelOptions);
+      mockUseEisKnowledgeBaseCalloutDismissed.mockReturnValue([
+        false,
+        mockSetEisKnowledgeBaseCalloutDismissed,
+      ]);
+
+      const mockKb = createMockKnowledgeBase({
+        status: createMockStatus({
+          currentInferenceId: E5_SMALL_INFERENCE_ID,
+          endpoint: {
+            inference_id: E5_SMALL_INFERENCE_ID,
+            task_type: 'text_embedding',
+            service: 'my-service',
+            service_settings: {},
+          },
+        }),
+      });
+
+      renderComponent(mockKb, { currentIdOverride: E5_SMALL_INFERENCE_ID });
+
+      expect(
+        screen.queryByText('Elastic Inference Service (EIS) now available')
+      ).not.toBeInTheDocument();
     });
   });
 });

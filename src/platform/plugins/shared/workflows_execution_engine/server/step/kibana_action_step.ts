@@ -11,7 +11,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { FetcherConfigSchema } from '@kbn/workflows';
-import { buildKibanaRequestFromAction } from '@kbn/workflows';
+import { buildKibanaRequest } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
@@ -162,7 +162,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
         body,
         query,
         headers: connectorHeaders,
-      } = buildKibanaRequestFromAction(stepType, cleanParams, spaceId);
+      } = buildKibanaRequest(stepType, cleanParams, spaceId);
 
       return this.makeHttpRequest(
         kibanaUrl,

@@ -21,26 +21,26 @@ export const EditSignificantEventFlyout = ({
   isEditFlyoutOpen,
   setIsEditFlyoutOpen,
   initialFlow,
-  selectedFeatures,
-  setSelectedFeatures,
+  selectedSystems,
+  setSelectedSystems,
   setQueryToEdit,
-  features,
+  systems,
   refresh,
-  refreshFeatures,
+  refreshSystems,
   generateOnMount,
   aiFeatures,
 }: {
   refresh: () => void;
   setQueryToEdit: React.Dispatch<React.SetStateAction<StreamQueryKql | undefined>>;
   initialFlow?: Flow;
-  selectedFeatures: System[];
-  setSelectedFeatures: React.Dispatch<React.SetStateAction<System[]>>;
-  features: System[];
+  selectedSystems: System[];
+  setSelectedSystems: React.Dispatch<React.SetStateAction<System[]>>;
+  systems: System[];
   queryToEdit?: StreamQueryKql;
   definition: Streams.all.GetResponse;
   isEditFlyoutOpen: boolean;
   setIsEditFlyoutOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  refreshFeatures: () => void;
+  refreshSystems: () => void;
   generateOnMount: boolean;
   aiFeatures: AIFeatures | null;
 }) => {
@@ -56,13 +56,13 @@ export const EditSignificantEventFlyout = ({
   const onCloseFlyout = () => {
     setIsEditFlyoutOpen(false);
     setQueryToEdit(undefined);
-    setSelectedFeatures([]);
+    setSelectedSystems([]);
   };
 
   return isEditFlyoutOpen ? (
     <AddSignificantEventFlyout
       generateOnMount={generateOnMount}
-      refreshFeatures={refreshFeatures}
+      refreshSystems={refreshSystems}
       definition={definition}
       query={queryToEdit}
       aiFeatures={aiFeatures}
@@ -143,8 +143,8 @@ export const EditSignificantEventFlyout = ({
       }}
       onClose={onCloseFlyout}
       initialFlow={initialFlow}
-      initialSelectedFeatures={selectedFeatures}
-      features={features}
+      initialSelectedSystems={selectedSystems}
+      systems={systems}
     />
   ) : null;
 };

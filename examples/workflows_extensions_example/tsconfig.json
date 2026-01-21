@@ -19,7 +19,6 @@
     "@kbn/workflows-extensions",
     "@kbn/zod",
     "@kbn/i18n",
-    "@kbn/workflows"
   ]
 }
 

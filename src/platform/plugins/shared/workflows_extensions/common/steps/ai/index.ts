@@ -8,3 +8,11 @@
  */
 
 export * from './ai_prompt_step';
+export {
+  AiClassifyStepCommonDefinition,
+  AiClassifyStepTypeId,
+  type AiClassifyStepConfigSchema,
+  type AiClassifyStepInputSchema,
+  type AiClassifyStepOutputSchema,
+  buildStructuredOutputSchema,
+} from './ai_classify_step';

@@ -10,10 +10,7 @@ import type { Filter } from '@kbn/es-query';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { AlertsTablePropsWithRef } from '@kbn/response-ops-alerts-table/types';
 import type { TableId } from '@kbn/securitysolution-data-table';
-import type {
-  EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor,
-} from '@elastic/eui';
+import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import type { PageScope } from '../../../data_view_manager/constants';
 import type { AlertsUserProfilesData } from '../../configurations/security_solution_detections/fetch_page_context';
 import type { Status } from '../../../../common/api/detection_engine';
@@ -102,7 +99,4 @@ export type GroupTakeActionItems = (props: {
    * Selected group to know which group is extended/visible. This is coming from the getLevel function in the detections alert grouping code.
    */
   selectedGroup: string;
-}) => {
-  items: EuiContextMenuPanelItemDescriptor[];
-  panels: EuiContextMenuPanelDescriptor[];
-};
+}) => JSX.Element | undefined;
