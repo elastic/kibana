@@ -82,26 +82,19 @@ export class ScoutJestReporter extends BaseReporter {
     return getOwningTeamsForPath(filePath, this.codeOwnersEntries);
   }
 
-  private getOwnerAreas(owners: string[]): CodeOwnerArea[] | 'unknown' {
-    const areas = owners
+  private getOwnerAreas(owners: string[]): CodeOwnerArea[] {
+    return owners
       .map((owner) => findAreaForCodeOwner(owner))
-      .filter((area) => area !== undefined);
-
-    // Report 'unknown' if no area is found as some aggregations may depend on this value to exist
-    if (areas.length === 0) {
-      return 'unknown';
-    }
-
-    return areas;
+      .filter((area): area is CodeOwnerArea => area !== undefined);
   }
 
   private getScoutFileInfoForPath(filePath: string): ScoutFileInfo {
     const fileOwners = this.getFileOwners(filePath);
-
+    const areas = this.getOwnerAreas(fileOwners);
     return {
       path: filePath,
       owner: fileOwners,
-      area: this.getOwnerAreas(fileOwners),
+      area: areas.length > 0 ? areas : 'unknown',
     };
   }
 
