@@ -14,3 +14,8 @@ export const AGENT_BUILDER_CONVERSATIONS_NEW_PATH = '/conversations/new';
 
 // Stack Management deeplinks
 export const STACK_CONNECTORS_MANAGEMENT_ID = 'management:triggersActionsConnectors';
+
+// EARS OAuth routes
+export const EARS_API_PATH = '/internal/workplace_ai/ears';
+export const EARS_START_OAUTH_ROUTE = `${EARS_API_PATH}/oauth/start/{provider}`;
+export const EARS_FETCH_SECRETS_ROUTE = `${EARS_API_PATH}/oauth/fetch_secrets`;
