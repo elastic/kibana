@@ -56,7 +56,8 @@ export const generateFieldHintCases = (fields: readonly string[], entityIdVar: s
  * If the value is NOT NULL, it returns the full property with quoted value.
  * If the value is NULL, it returns an empty string (property is omitted entirely).
  *
- * Always includes comma prefix - use with REPLACE to fix leading comma after "{".
+ * Always includes comma prefix - place required properties first in the JSON
+ * object so optional properties using this function come after.
  *
  * @param propertyName - The JSON property name (e.g., "name", "type", "sub_type")
  * @param valueVar - The ESQL variable name containing the value
@@ -68,8 +69,8 @@ export const generateFieldHintCases = (fields: readonly string[], entityIdVar: s
  * // If actorEntityType = "user" → ,"type":"user"
  * // If actorEntityType = null   → "" (empty, property omitted)
  *
- * // Usage with REPLACE to fix leading comma:
- * REPLACE(CONCAT("{", formatJsonProperty('name', 'name'), ...}"), "\\{,", "{")
+ * // Usage: put required fields first, then optional fields
+ * CONCAT("{", "\"required\":true", formatJsonProperty('optional', 'val'), "}")
  * ```
  */
 export const formatJsonProperty = (propertyName: string, valueVar: string): string => {

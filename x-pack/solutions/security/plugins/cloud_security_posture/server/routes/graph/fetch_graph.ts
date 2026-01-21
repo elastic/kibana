@@ -233,10 +233,12 @@ const checkIfEntitiesIndexLookupMode = async (
 const buildEnrichedEntityFieldsEsql = (): string => {
   return `// Construct actor and target entities data
 // Build entity field conditionally - only include fields that have values
-// All properties use comma prefix, then REPLACE fixes "{," -> "{"
+// Put required fields first (no comma prefix), optional fields use comma prefix
 | EVAL actorEntityField = CASE(
     actorEntityName IS NOT NULL OR actorEntityType IS NOT NULL OR actorEntitySubType IS NOT NULL,
-    REPLACE(CONCAT(",\\"entity\\":", "{",
+    CONCAT(",\\"entity\\":", "{",
+      "\\"availableInEntityStore\\":true",
+      ",\\"ecsParentField\\":\\"", actorEntityFieldHint, "\\"",
       ${formatJsonProperty('name', 'actorEntityName')},
       ${formatJsonProperty('type', 'actorEntityType')},
       ${formatJsonProperty('sub_type', 'actorEntitySubType')},
@@ -245,9 +247,7 @@ const buildEnrichedEntityFieldsEsql = (): string => {
         CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(actorHostIp), "\\"", "}"),
         ""
       ),
-      ",\\"availableInEntityStore\\":true",
-      ",\\"ecsParentField\\":\\"", actorEntityFieldHint, "\\"",
-    "}"), "\\\\{,", "{"),
+    "}"),
     CONCAT(",\\"entity\\":", "{",
       "\\"availableInEntityStore\\":false",
       ",\\"ecsParentField\\":\\"", actorEntityFieldHint, "\\"",
@@ -255,7 +255,9 @@ const buildEnrichedEntityFieldsEsql = (): string => {
   )
 | EVAL targetEntityField = CASE(
     targetEntityName IS NOT NULL OR targetEntityType IS NOT NULL OR targetEntitySubType IS NOT NULL,
-    REPLACE(CONCAT(",\\"entity\\":", "{",
+    CONCAT(",\\"entity\\":", "{",
+      "\\"availableInEntityStore\\":true",
+      ",\\"ecsParentField\\":\\"", targetEntityFieldHint, "\\"",
       ${formatJsonProperty('name', 'targetEntityName')},
       ${formatJsonProperty('type', 'targetEntityType')},
       ${formatJsonProperty('sub_type', 'targetEntitySubType')},
@@ -264,9 +266,7 @@ const buildEnrichedEntityFieldsEsql = (): string => {
         CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(targetHostIp), "\\"", "}"),
         ""
       ),
-      ",\\"availableInEntityStore\\":true",
-      ",\\"ecsParentField\\":\\"", targetEntityFieldHint, "\\"",
-    "}"), "\\\\{,", "{"),
+    "}"),
     CONCAT(",\\"entity\\":", "{",
       "\\"availableInEntityStore\\":false",
       ",\\"ecsParentField\\":\\"", targetEntityFieldHint, "\\"",
