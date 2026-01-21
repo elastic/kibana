@@ -29,6 +29,10 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
     handlerHash: 'af7364aa959fe541e304241fbaddcc21d22382f6421686f666fd67641d3fac2b',
   },
   {
+    id: 'ai.classify',
+    handlerHash: '544ebbf2b32840510958ced5ddc6109712a11b260ab22d13fa8c83d5265aa481',
+  },
+  {
     id: 'ai.prompt',
     handlerHash: 'fa1e9cfa78ed6c6cbebabe3533286b88ff9b3715dfb1b64b3d460251f72f9838',
   },
