@@ -209,7 +209,12 @@ describe('BulkDeleteTask', () => {
 
         expect(mockDeleteDataSourceAndRelatedResources).toHaveBeenCalledTimes(2);
         expect(mockDeleteDataSourceAndRelatedResources).toHaveBeenCalledWith({
-          dataSource: dataSource1,
+          dataSource: expect.objectContaining({
+            id: 'ds-1',
+            attributes: expect.objectContaining({
+              kscIds: ['ksc-1'],
+            }),
+          }),
           savedObjectsClient: mockSavedObjectsClient,
           actionsClient: mockActionsClient,
           toolRegistry: mockToolRegistry,
@@ -218,7 +223,12 @@ describe('BulkDeleteTask', () => {
           logger: mockLogger,
         });
         expect(mockDeleteDataSourceAndRelatedResources).toHaveBeenCalledWith({
-          dataSource: dataSource2,
+          dataSource: expect.objectContaining({
+            id: 'ds-2',
+            attributes: expect.objectContaining({
+              kscIds: ['ksc-2'],
+            }),
+          }),
           savedObjectsClient: mockSavedObjectsClient,
           actionsClient: mockActionsClient,
           toolRegistry: mockToolRegistry,
@@ -291,7 +301,45 @@ describe('BulkDeleteTask', () => {
 
         expect(mockDeleteDataSourceAndRelatedResources).toHaveBeenCalledWith(
           expect.objectContaining({
-            dataSource,
+            dataSource: expect.objectContaining({
+              id: 'ds-1',
+              attributes: expect.objectContaining({
+                kscIds: ['ksc-1'],
+              }),
+            }),
+            actionsClient: mockActionsClient,
+          })
+        );
+      });
+
+      it('should delete multiple stack connectors via deleteDataSourceAndRelatedResources', async () => {
+        const dataSource = createMockDataSource(
+          'ds-1',
+          'Source 1',
+          'github',
+          [],
+          [],
+          ['ksc-1', 'ksc-2', 'ksc-3']
+        );
+
+        createMockPointInTimeFinder([dataSource]);
+        setupTaskRunner();
+
+        mockDeleteDataSourceAndRelatedResources.mockResolvedValue({
+          success: true,
+          fullyDeleted: true,
+        });
+
+        await taskRunner.run();
+
+        expect(mockDeleteDataSourceAndRelatedResources).toHaveBeenCalledWith(
+          expect.objectContaining({
+            dataSource: expect.objectContaining({
+              id: 'ds-1',
+              attributes: expect.objectContaining({
+                kscIds: ['ksc-1', 'ksc-2', 'ksc-3'],
+              }),
+            }),
             actionsClient: mockActionsClient,
           })
         );
