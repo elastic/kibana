@@ -57,32 +57,19 @@ export const findExceptionListsItem = async ({
   sortOrder,
 }: FindExceptionListItemsOptions): Promise<FoundExceptionListItemSchema | null> => {
   const savedObjectType = getSavedObjectTypes({ namespaceType });
-  const allExceptionLists = await Promise.all(
-    listId.map((singleListId, index) => {
-      return getExceptionList({
-        id: undefined,
-        listId: singleListId,
-        namespaceType: namespaceType[index],
-        savedObjectsClient,
-      });
-    })
-  );
-  // eslint-disable-next-line no-console
-  console.log(
-    `[DEBUG] findExceptionListsItem: getExceptionList results for listIds=${JSON.stringify(
-      listId
-    )}: ${JSON.stringify(
-      allExceptionLists?.map((l) => (l ? { id: l.id, list_id: l.list_id } : null))
-    )}`
-  );
-  const exceptionLists = allExceptionLists.filter((list) => list != null);
-  // eslint-disable-next-line no-console
-  console.log(
-    `[DEBUG] findExceptionListsItem: filtered exceptionLists.length=${exceptionLists.length}`
-  );
+  const exceptionLists = (
+    await Promise.all(
+      listId.map((singleListId, index) => {
+        return getExceptionList({
+          id: undefined,
+          listId: singleListId,
+          namespaceType: namespaceType[index],
+          savedObjectsClient,
+        });
+      })
+    )
+  ).filter((list) => list != null);
   if (exceptionLists.length === 0) {
-    // eslint-disable-next-line no-console
-    console.log(`[DEBUG] findExceptionListsItem: returning null (no lists found)`);
     return null;
   } else {
     const savedObjectsFindResponse = await savedObjectsClient.find<ExceptionListSoSchema>({

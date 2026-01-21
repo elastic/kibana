@@ -386,40 +386,19 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should return 404 when endpoint list does not exist', async () => {
-        // Delete ALL instances of the endpoint_list (there may be duplicates with different saved object IDs)
-        // eslint-disable-next-line no-console
-        console.log('[DEBUG] Deleting ALL endpoint_list instances with privileged user...');
-        let deleteResponse;
-        let deleteCount = 0;
-        do {
-          deleteResponse = await endpointPolicyManagerSupertest
+        await retry.tryForTime(10000, async () => {
+          const deleteResponse = await endpointPolicyManagerSupertest
             .delete(`${EXCEPTION_LIST_URL}?list_id=endpoint_list&namespace_type=agnostic`)
             .set('kbn-xsrf', 'true');
-          if (deleteResponse.status === 200) {
-            deleteCount++;
-            // eslint-disable-next-line no-console
-            console.log(`[DEBUG] Deleted endpoint_list instance #${deleteCount}`);
-          }
-        } while (deleteResponse.status === 200);
-        // eslint-disable-next-line no-console
-        console.log(`[DEBUG] Delete completed. Total deleted: ${deleteCount}`);
 
-        // eslint-disable-next-line no-console
-        console.log('[DEBUG] Testing with read-only user...');
-        await retry.tryForTime(5000, async () => {
-          const response = await readOnlyNoSoWriteSupertest
-            .get(`${ENDPOINT_LIST_ITEM_URL}/_find?page=1&per_page=1&sort_field=name&sort_order=asc`)
-            .set('kbn-xsrf', 'true');
-
-          // eslint-disable-next-line no-console
-          console.log(
-            `[DEBUG] Read-only user response: status=${response.status}, body=${JSON.stringify(
-              response.body
-            )}`
-          );
-
-          expect(response.status).to.be(404);
+          expect(deleteResponse.status).to.be(404);
         });
+
+        const response = await readOnlyNoSoWriteSupertest
+          .get(`${ENDPOINT_LIST_ITEM_URL}/_find?page=1&per_page=1&sort_field=name&sort_order=asc`)
+          .set('kbn-xsrf', 'true');
+
+        expect(response.status).to.be(404);
       });
     });
   });

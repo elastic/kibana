@@ -46,41 +46,21 @@ export const getExceptionList = async ({
   }
 
   if (listId != null) {
-    // eslint-disable-next-line no-console
-    console.log(
-      `[DEBUG] getExceptionList: searching for listId=${listId}, namespaceType=${namespaceType}, savedObjectType=${savedObjectType}`
-    );
-    try {
-      const savedObject = await savedObjectsClient.find<ExceptionListSoSchema>({
-        filter: `${savedObjectType}.attributes.list_type: list`,
-        perPage: 1,
-        search: listId,
-        searchFields: ['list_id'],
-        sortField: 'tie_breaker_id',
-        sortOrder: 'desc',
-        type: savedObjectType,
+    const savedObject = await savedObjectsClient.find<ExceptionListSoSchema>({
+      filter: `${savedObjectType}.attributes.list_type: list`,
+      perPage: 1,
+      search: listId,
+      searchFields: ['list_id'],
+      sortField: 'tie_breaker_id',
+      sortOrder: 'desc',
+      type: savedObjectType,
+    });
+    if (savedObject.saved_objects[0] != null) {
+      return transformSavedObjectToExceptionList({
+        savedObject: savedObject.saved_objects[0],
       });
-      // eslint-disable-next-line no-console
-      console.log(
-        `[DEBUG] getExceptionList: find result for listId=${listId}: total=${
-          savedObject.total
-        }, found=${savedObject.saved_objects.length > 0}, firstId=${
-          savedObject.saved_objects[0]?.id
-        }`
-      );
-      if (savedObject.saved_objects[0] != null) {
-        return transformSavedObjectToExceptionList({
-          savedObject: savedObject.saved_objects[0],
-        });
-      } else {
-        return null;
-      }
-    } catch (findErr) {
-      // eslint-disable-next-line no-console
-      console.log(
-        `[DEBUG] getExceptionList: find FAILED for listId=${listId}: error=${findErr.message}`
-      );
-      throw findErr;
+    } else {
+      return null;
     }
   }
 

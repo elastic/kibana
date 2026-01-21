@@ -32,10 +32,6 @@ export const createEndpointList = async ({
 }: CreateEndpointListOptions): Promise<ExceptionListSchema | null> => {
   const savedObjectType = getSavedObjectType({ namespaceType: 'agnostic' });
   const dateNow = new Date().toISOString();
-  // eslint-disable-next-line no-console
-  console.log(
-    `[DEBUG] createEndpointList: attempting to create saved object type=${savedObjectType} for user=${user}`
-  );
   try {
     const savedObject = await savedObjectsClient.create<ExceptionListSoSchema>(
       savedObjectType,
@@ -64,16 +60,8 @@ export const createEndpointList = async ({
         id: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
       }
     );
-    // eslint-disable-next-line no-console
-    console.log(`[DEBUG] createEndpointList: successfully created endpoint list for user=${user}`);
     return transformSavedObjectToExceptionList({ savedObject });
   } catch (err) {
-    // eslint-disable-next-line no-console
-    console.log(
-      `[DEBUG] createEndpointList: failed with error=${
-        err.message
-      }, isConflict=${SavedObjectsErrorHelpers.isConflictError(err)}`
-    );
     if (SavedObjectsErrorHelpers.isConflictError(err)) {
       return null;
     } else {
