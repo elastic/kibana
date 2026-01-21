@@ -43,6 +43,7 @@ import { useProfileAccessor } from '../../../../context_awareness';
 import {
   internalStateActions,
   useCurrentDataView,
+  useCurrentTabAction,
   useCurrentTabSelector,
   useInternalStateDispatch,
 } from '../../state_management/redux';
@@ -185,7 +186,8 @@ export const useTopNavLinks = ({
 
       if (!defaultMenu?.openItem?.disabled) {
         const openSearchMenuItem = getOpenSearchAppMenuItem({
-          onOpenSavedSearch: state.actions.onOpenSavedSearch,
+          onOpenSavedSearch: (discoverSessionId) =>
+            dispatch(internalStateActions.openDiscoverSession({ discoverSessionId })),
         });
         items.push(openSearchMenuItem);
       }
@@ -231,6 +233,13 @@ export const useTopNavLinks = ({
 
     return getAppMenu(discoverParams).appMenuRegistry(newAppMenuRegistry);
   }, [getAppMenuAccessor, discoverParams, appMenuPrimaryAndSecondaryItems]);
+
+  const transitionFromESQLToDataView = useCurrentTabAction(
+    internalStateActions.transitionFromESQLToDataView
+  );
+  const transitionFromDataViewToESQL = useCurrentTabAction(
+    internalStateActions.transitionFromDataViewToESQL
+  );
 
   return useMemo(() => {
     const entries = appMenuRegistry.getSortedItems().map((appMenuItem) =>
@@ -278,10 +287,10 @@ export const useTopNavLinks = ({
               ) {
                 dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(true));
               } else {
-                state.actions.transitionFromESQLToDataView(dataView.id ?? '');
+                dispatch(transitionFromESQLToDataView({ dataViewId: dataView.id ?? '' }));
               }
             } else {
-              state.actions.transitionFromDataViewToESQL(dataView);
+              dispatch(transitionFromDataViewToESQL({ dataView }));
               services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:try_btn_clicked`);
             }
           }
@@ -326,5 +335,7 @@ export const useTopNavLinks = ({
     shouldShowESQLToDataViewTransitionModal,
     dispatch,
     state,
+    transitionFromESQLToDataView,
+    transitionFromDataViewToESQL,
   ]);
 };

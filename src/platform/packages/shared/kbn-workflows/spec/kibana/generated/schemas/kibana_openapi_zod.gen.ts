@@ -32,6 +32,18 @@ export const security_detections_api_set_alert_tags = z.object({
 });
 
 /**
+ * A list of alerts `id`s.
+ */
+export const security_detections_api_alert_ids = z.array(z.string().min(1)).min(1).register(z.globalRegistry, {
+    description: 'A list of alerts `id`s.'
+});
+
+export const security_detections_api_set_alert_tags_body = z.object({
+    ids: security_detections_api_alert_ids,
+    tags: security_detections_api_set_alert_tags
+});
+
+/**
  * The status of an alert, which can be `open`, `acknowledged`, `in-progress`, or `closed`.
  */
 export const security_detections_api_alert_status_except_closed = z.enum([
@@ -98,13 +110,6 @@ export const security_detections_api_platform_error_response = z.object({
     error: z.string(),
     message: z.string(),
     statusCode: z.int()
-});
-
-/**
- * A list of alerts `id`s.
- */
-export const security_detections_api_alert_ids = z.array(z.string().min(1)).min(1).register(z.globalRegistry, {
-    description: 'A list of alerts `id`s.'
 });
 
 /**
@@ -585,7 +590,7 @@ export const cases_update_case_request = z.object({
         tags: z.optional(cases_case_tags),
         title: z.optional(cases_case_title),
         version: z.string().register(z.globalRegistry, {
-            description: 'The current version of the case. To determine this value, use the get case or find cases APIs.'
+            description: 'The current version of the case. To determine this value, use the get case or search cases (`_find`) APIs.\n'
         })
     })).min(1).max(100).register(z.globalRegistry, {
         description: 'An array containing one or more case objects.'
@@ -935,10 +940,10 @@ export const cases_include_comments = z.boolean().register(z.globalRegistry, {
 }).default(true);
 
 /**
- * The identifier for the case. To retrieve case IDs, use the find cases API. All non-ASCII characters must be URL encoded.
+ * The identifier for the case. To retrieve case IDs, use the search cases (`_find)` API. All non-ASCII characters must be URL encoded.
  */
 export const cases_case_id = z.string().register(z.globalRegistry, {
-    description: 'The identifier for the case. To retrieve case IDs, use the find cases API. All non-ASCII characters must be URL encoded.'
+    description: 'The identifier for the case. To retrieve case IDs, use the search cases (`_find)` API. All non-ASCII characters must be URL encoded.'
 });
 
 export const update_case_default_space_request = z.object({
@@ -979,7 +984,7 @@ export const get_case_default_space_request = z.object({
     body: z.optional(z.never()),
     path: z.object({
         caseId: z.string().register(z.globalRegistry, {
-            description: 'The identifier for the case. To retrieve case IDs, use the find cases API. All non-ASCII characters must be URL encoded.'
+            description: 'The identifier for the case. To retrieve case IDs, use the search cases (`_find)` API. All non-ASCII characters must be URL encoded.'
         })
     }),
     query: z.optional(z.object({
@@ -998,7 +1003,7 @@ export const add_case_comment_default_space_request = z.object({
     body: cases_add_case_comment_request,
     path: z.object({
         caseId: z.string().register(z.globalRegistry, {
-            description: 'The identifier for the case. To retrieve case IDs, use the find cases API. All non-ASCII characters must be URL encoded.'
+            description: 'The identifier for the case. To retrieve case IDs, use the search cases (`_find)` API. All non-ASCII characters must be URL encoded.'
         })
     }),
     query: z.optional(z.never()),
@@ -1031,12 +1036,7 @@ export const set_alerts_status_response = z.record(z.string(), z.unknown()).regi
 });
 
 export const set_alert_tags_request = z.object({
-    body: z.object({
-        ids: security_detections_api_alert_ids,
-        tags: security_detections_api_set_alert_tags
-    }).register(z.globalRegistry, {
-        description: 'An object containing tags to add or remove and alert ids the changes will be applied'
-    }),
+    body: security_detections_api_set_alert_tags_body,
     path: z.optional(z.never()),
     query: z.optional(z.never())
 });

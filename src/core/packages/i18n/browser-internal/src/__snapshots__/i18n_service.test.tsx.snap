@@ -43,7 +43,7 @@ exports[`#start() returns \`Context\` component 1`] = `
     \\"euiColumnActions.hideColumn\\": \\"Hide column\\",
     \\"euiColumnActions.moveLeft\\": \\"Move left\\",
     \\"euiColumnActions.moveRight\\": \\"Move right\\",
-    \\"euiColumnSelector.dragHandleAriaLabel\\": \\"Drag handle\\",
+    \\"euiColumnSelector.dragHandleAriaLabel\\": \\"drag handle\\",
     \\"euiColumnSelector.hideAll\\": \\"Hide all\\",
     \\"euiColumnSelector.selectAll\\": \\"Show all\\",
     \\"euiColumnSelector.button\\": \\"Columns\\",
