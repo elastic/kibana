@@ -37,9 +37,17 @@ apiTest.describe(
         expect(response.body).toHaveProperty('steps');
         expect(Array.isArray(response.body.steps)).toBe(true);
 
-        expect(APPROVED_STEP_DEFINITIONS, {
-          message: 'Registered step definitions do not match approved step definitions',
-        }).toMatchObject(expect.arrayContaining(response.body.steps));
+        for (const step of response.body.steps) {
+          const approvedStep = APPROVED_STEP_DEFINITIONS.find(({ id }) => id === step.id);
+
+          expect(approvedStep, {
+            message: `Step "${step.id}" is not in the approved list`,
+          }).toBeDefined();
+
+          expect(approvedStep?.handlerHash, {
+            message: `Step "${step.id}" has an invalid handler hash`,
+          }).toBe(step.handlerHash);
+        }
       }
     );
   }
