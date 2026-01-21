@@ -6,11 +6,9 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { I18nProvider } from '@kbn/i18n-react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { CreatePolicyModal } from './create_new_policy_modal';
-
-const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 describe('CreatePolicyModal', () => {
   const policyNames = ['logs-default', 'metrics-prod', 'my-policy'];
