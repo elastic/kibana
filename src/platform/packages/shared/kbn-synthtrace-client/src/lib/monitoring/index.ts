@@ -11,10 +11,13 @@ import { cluster } from './cluster';
 import type { ClusterStatsDocument } from './cluster_stats';
 import { kibana } from './kibana';
 import type { KibanaStatsDocument } from './kibana_stats';
+import { nodeStats } from './node_stats';
+import type { NodeStatsDocument } from './node_stats';
 
-export type MonitoringDocument = ClusterStatsDocument | KibanaStatsDocument;
+export type MonitoringDocument = ClusterStatsDocument | KibanaStatsDocument | NodeStatsDocument;
 
 export const monitoring = {
   cluster,
   kibana,
+  nodeStats,
 };
