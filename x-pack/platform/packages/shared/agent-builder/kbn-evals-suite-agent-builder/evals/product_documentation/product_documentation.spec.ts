@@ -151,7 +151,7 @@ evaluate.describe('AgentBuilder product documentation tool', { tag: '@svlOblt' }
 
       await evaluateDataset({
         dataset: {
-          name: 'agentBuilder: product-documentation-tool',
+          name: 'agent builder: product-documentation-tool',
           description:
             'Base evals for Agent Builder product documentation tool: tool-only usage + grounding constraints.',
           examples: [
