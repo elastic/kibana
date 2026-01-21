@@ -250,31 +250,37 @@ export class DiscoverPageObject extends FtrService {
     await this.retry.try(async () => {
       await this.testSubjects.click('unifiedHistogramBreakdownSelectorButton');
       await this.testSubjects.existOrFail('unifiedHistogramBreakdownSelectorSelectable');
+    });
 
-      const searchInput = await this.testSubjects.find(
-        'unifiedHistogramBreakdownSelectorSelectorSearch'
+    const searchInput = await this.testSubjects.find(
+      'unifiedHistogramBreakdownSelectorSelectorSearch'
+    );
+
+    await searchInput.type(field, { charByChar: true });
+
+    await this.retry.waitFor('options to be filtered', async () => {
+      const isSearching = await this.testSubjects.getAttribute(
+        'unifiedHistogramBreakdownSelectorSelectable',
+        'data-is-searching'
       );
+      return isSearching === 'false';
+    });
 
-      await searchInput.type(field, { charByChar: true });
+    const optionValue = value ?? field;
 
-      const optionValue = value ?? field;
+    await this.find.clickDisplayedByCssSelector(
+      `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${optionValue}"]`
+    );
 
-      await this.find.clickDisplayedByCssSelector(
-        `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${optionValue}"]`
-      );
+    await this.testSubjects.missingOrFail('unifiedHistogramBreakdownSelectorSelectable');
 
-      await this.testSubjects.missingOrFail('unifiedHistogramBreakdownSelectorSelectable');
-
+    await this.retry.waitFor('the value to be selected', async () => {
       const breakdownButton = await this.testSubjects.find(
         'unifiedHistogramBreakdownSelectorButton'
       );
-      const hasSelectedValue =
-        (await breakdownButton.getAttribute('data-selected-value')) === optionValue;
-      const hasSelectedField = (await breakdownButton.getVisibleText()) === field;
-
-      expect(hasSelectedValue || hasSelectedField).to.equal(
-        true,
-        `Expected hasSelectedValue (${hasSelectedValue}) or hasSelectedField (${hasSelectedField}) to be true`
+      return (
+        (await breakdownButton.getAttribute('data-selected-value')) === optionValue ||
+        (await breakdownButton.getVisibleText()) === field
       );
     });
   }
