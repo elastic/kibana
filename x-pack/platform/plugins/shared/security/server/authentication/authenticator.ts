@@ -908,17 +908,11 @@ export class Authenticator {
     if (!existingSessionValue) {
       const startTime = performance.now();
 
-      if (isNewSessionAuthenticated) {
-        console.log('Creating regular session KURTTTTTT');
-
-        newSessionValue = await this.session.create(request, {
-          username: authenticationResult.user?.username,
-          userProfileId,
-          provider,
-          state: authenticationResult.shouldUpdateState() ? authenticationResult.state : null,
-        });
-      } else {
-        console.log('Creating an intermediate session KURTTTTTT');
+      if (
+        !isNewSessionAuthenticated &&
+        providerInstance.shouldUtilizeCustomOptionsForSessionCookie()
+      ) {
+        this.logger.debug(`Creating intermediate session for provider "${provider.name}".`);
         newSessionValue = await this.session.create(
           request,
           {
@@ -928,6 +922,13 @@ export class Authenticator {
           },
           true
         );
+      } else {
+        newSessionValue = await this.session.create(request, {
+          username: authenticationResult.user?.username,
+          userProfileId,
+          provider,
+          state: authenticationResult.shouldUpdateState() ? authenticationResult.state : null,
+        });
       }
 
       const duration = performance.now() - startTime;

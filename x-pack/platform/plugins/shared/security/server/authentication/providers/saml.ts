@@ -137,6 +137,17 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
   }
 
   /**
+   * Indicates whether custom options for session cookie should be utilized.
+   *
+   * Cookies representing the intermediate session require special configuration (SameSite=None and Secure)
+   * to ensure they are sent by browsers during the SAML authentication handshake even after the
+   * 2-minute window has passed
+   */
+  public shouldUtilizeCustomOptionsForSessionCookie() {
+    return true;
+  }
+
+  /**
    * Determines whether the intermediate session state should be invalidated after a successful login.
    *
    * For SAML authentication, multiple login attempts can occur concurrently (e.g., when a user opens

@@ -143,6 +143,7 @@ describe('Authenticator', () => {
       logout: jest.fn().mockResolvedValue(DeauthenticationResult.notHandled()),
       getHTTPAuthenticationScheme: jest.fn(),
       shouldInvalidateIntermediateSessionAfterLogin: jest.fn().mockReturnValue(true),
+      shouldUtilizeCustomOptionsForSessionCookie: jest.fn().mockReturnValue(false),
     };
 
     mockBasicAuthenticationProvider = {
@@ -151,6 +152,7 @@ describe('Authenticator', () => {
       logout: jest.fn().mockResolvedValue(DeauthenticationResult.notHandled()),
       getHTTPAuthenticationScheme: jest.fn(),
       shouldInvalidateIntermediateSessionAfterLogin: jest.fn().mockReturnValue(true),
+      shouldUtilizeCustomOptionsForSessionCookie: jest.fn().mockReturnValue(false),
     };
 
     mockSamlAuthenticationProvider = {
@@ -159,6 +161,7 @@ describe('Authenticator', () => {
       logout: jest.fn().mockResolvedValue(DeauthenticationResult.notHandled()),
       getHTTPAuthenticationScheme: jest.fn(),
       shouldInvalidateIntermediateSessionAfterLogin: jest.fn().mockReturnValue(true),
+      shouldUtilizeCustomOptionsForSessionCookie: jest.fn().mockReturnValue(false),
     };
 
     jest.requireMock('./providers/http').HTTPAuthenticationProvider.mockImplementation(() => ({
@@ -730,6 +733,7 @@ describe('Authenticator', () => {
           logout: jest.fn(),
           getHTTPAuthenticationScheme: jest.fn(),
           shouldInvalidateIntermediateSessionAfterLogin: jest.fn().mockReturnValue(true),
+          shouldUtilizeCustomOptionsForSessionCookie: jest.fn().mockReturnValue(true),
         };
 
         mockSAMLAuthenticationProvider2 = {
@@ -738,6 +742,7 @@ describe('Authenticator', () => {
           logout: jest.fn(),
           getHTTPAuthenticationScheme: jest.fn(),
           shouldInvalidateIntermediateSessionAfterLogin: jest.fn().mockReturnValue(true),
+          shouldUtilizeCustomOptionsForSessionCookie: jest.fn().mockReturnValue(true),
         };
 
         jest
@@ -832,11 +837,15 @@ describe('Authenticator', () => {
           provider: { type: 'saml', name: 'saml1' },
           state: { result: '200' },
         });
-        expect(mockOptions.session.create).toHaveBeenCalledWith(request, {
-          username: undefined,
-          provider: { type: 'saml', name: 'saml1' },
-          state: { result: '302' },
-        });
+        expect(mockOptions.session.create).toHaveBeenCalledWith(
+          request,
+          {
+            username: undefined,
+            provider: { type: 'saml', name: 'saml1' },
+            state: { result: '302' },
+          },
+          true
+        );
 
         expect(mockBasicAuthenticationProvider.login).not.toHaveBeenCalled();
         expect(mockSAMLAuthenticationProvider2.login).not.toHaveBeenCalled();

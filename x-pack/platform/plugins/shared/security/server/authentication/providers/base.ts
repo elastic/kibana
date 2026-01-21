@@ -82,6 +82,15 @@ export abstract class BaseAuthenticationProvider {
   }
 
   /**
+   * Determines whether custom options should be utilized when setting session cookie.
+   *
+   * Currently only the SAML provider requires this to set SameSite=None; Secure on the intermediate session cookie.
+   */
+  shouldUtilizeCustomOptionsForSessionCookie() {
+    return false;
+  }
+
+  /**
    * Determines whether intermediate session should be invalidated after a successful login.
    * Some providers need to have their state checked to make sure all pending login attempts have
    * completed before invalidating the session. This is particularly important for the SAML Provider,

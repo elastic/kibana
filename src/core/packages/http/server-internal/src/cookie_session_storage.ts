@@ -32,6 +32,10 @@ class ScopedCookieSessionStorage<T extends object> implements SessionStorage<T> 
     private readonly basePath: string | undefined
   ) {}
 
+  private getResponseToolkit(): ResponseToolkit {
+    return (this.request.cookieAuth as unknown as { h: ResponseToolkit }).h;
+  }
+
   public async get(): Promise<T | null> {
     try {
       const session = await this.server.auth.test('security-cookie', this.request);
@@ -80,7 +84,7 @@ class ScopedCookieSessionStorage<T extends object> implements SessionStorage<T> 
   public set(sessionValue: T, options?: SessionStorageSetOptions) {
     if (options) {
       // Use custom cookie options
-      const h = (this.request.cookieAuth as any).h as ResponseToolkit;
+      const h = this.getResponseToolkit();
       const isSecure = options?.isSecure ?? this.cookieOptions.isSecure;
       const sameSite = options?.sameSite ?? this.cookieOptions.sameSite;
 
@@ -97,7 +101,7 @@ class ScopedCookieSessionStorage<T extends object> implements SessionStorage<T> 
   public clear(options?: SessionStorageSetOptions) {
     if (options) {
       // Use custom cookie options to clear
-      const h = (this.request.cookieAuth as any).h as ResponseToolkit;
+      const h = this.getResponseToolkit();
       const path = this.basePath === undefined ? '/' : this.basePath;
 
       h.unstate(this.cookieOptions.name, { path });
