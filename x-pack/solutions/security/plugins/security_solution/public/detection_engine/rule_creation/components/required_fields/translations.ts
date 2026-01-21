@@ -31,7 +31,7 @@ export const FIELD_TYPE = i18n.translate(
 export const OPEN_HELP_POPOVER_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.requiredFields.openHelpPopoverAriaLabel',
   {
-    defaultMessage: 'Open help popover',
+    defaultMessage: 'Required fields help',
   }
 );
 

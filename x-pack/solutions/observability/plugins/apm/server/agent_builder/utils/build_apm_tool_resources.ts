@@ -12,6 +12,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { ApmDataAccessServices } from '@kbn/apm-data-access-plugin/server';
 import { firstValueFrom } from 'rxjs';
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
@@ -24,6 +25,7 @@ import type { ApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
 
 export interface ApmToolResources {
   apmEventClient: Awaited<ReturnType<typeof getApmEventClient>>;
+  apmDataAccessServices: ApmDataAccessServices;
   randomSampler: Awaited<ReturnType<typeof getRandomSampler>>;
   mlClient: Awaited<ReturnType<typeof getMlClient>>;
   apmAlertsClient: ApmAlertsClient;
@@ -114,5 +116,15 @@ export async function buildApmToolResources({
     apmAlertsClientPromise,
   ]);
 
-  return { apmEventClient, randomSampler, mlClient, apmAlertsClient, esClient: esScoped, soClient };
+  const apmDataAccessServices = plugins.apmDataAccess.getServices({ apmEventClient });
+
+  return {
+    apmEventClient,
+    apmDataAccessServices,
+    randomSampler,
+    mlClient,
+    apmAlertsClient,
+    esClient: esScoped,
+    soClient,
+  };
 }

@@ -73,6 +73,9 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/scout_tests.yml'));
 
+    // A temporary pipeline for UIAM tests that should be removed when the main Scout pipeline supports custom configs.
+    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/scout_uiam_tests.yml'));
+
     if (await doAnyChangesMatch([/^src\/platform\/packages\/private\/kbn-handlebars/])) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/kbn_handlebars.yml'));
     }
@@ -544,6 +547,20 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       GITHUB_PR_LABELS.includes('ci:bench-jest')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/jest_bench.yml'));
+    }
+
+    if (
+      (await doAnyChangesMatch([
+        /^src\/platform\/packages\/shared\/kbn-es/,
+        /^src\/platform\/packages\/shared\/kbn-ftr-benchmarks/,
+        /^src\/platform\/packages\/shared\/kbn-ftr-common-functional-services/,
+        /^src\/platform\/packages\/shared\/kbn-ftr-common-functional-ui-services/,
+        /^src\/platform\/packages\/shared\/kbn-test/,
+        /^src\/setup_node_env/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:bench-ftr')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ftr_bench.yml'));
     }
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));

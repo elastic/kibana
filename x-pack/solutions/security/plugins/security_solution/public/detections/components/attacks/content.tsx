@@ -82,12 +82,12 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
   const { data } = useFindAttackDiscoveries({ http, isAssistantEnabled: true });
   const aiConnectorNames = useMemo(() => data?.connector_names ?? [], [data]);
 
-  // showing / hiding the flyout:
-  const [showFlyout, setShowFlyout] = useState<boolean>(false);
-  const openFlyout = useCallback(() => {
-    setShowFlyout(true);
+  // showing / hiding the schedules flyout:
+  const [showSchedulesFlyout, setShowSchedulesFlyout] = useState<boolean>(false);
+  const openSchedulesFlyout = useCallback(() => {
+    setShowSchedulesFlyout(true);
   }, []);
-  const onClose = useCallback(() => setShowFlyout(false), []);
+  const onCloseSchedulesFlyout = useCallback(() => setShowSchedulesFlyout(false), []);
   const [assignees, setAssignees] = useState<AssigneesIdsSelection[]>([]);
 
   const onAssigneesSelectionChange = useCallback(
@@ -141,7 +141,7 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
                 />
               </EuiFlexItem>
               <EuiFlexItem>
-                <Schedule openFlyout={openFlyout} />
+                <Schedule openFlyout={openSchedulesFlyout} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </HeaderPage>
@@ -149,6 +149,7 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
           <EuiSpacer size="l" />
           <FiltersSection
             dataView={dataView}
+            pageFilters={pageFilters}
             setStatusFilter={setStatusFilter}
             setPageFilters={setPageFilters}
             setPageFilterHandler={setPageFilterHandler}
@@ -156,9 +157,15 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
           <EuiSpacer size="l" />
         </Display>
 
-        <TableSection dataView={dataView} statusFilter={statusFilter} pageFilters={pageFilters} />
+        <TableSection
+          dataView={dataView}
+          statusFilter={statusFilter}
+          pageFilters={pageFilters}
+          assignees={assignees}
+          openSchedulesFlyout={openSchedulesFlyout}
+        />
 
-        {showFlyout && <SchedulesFlyout onClose={onClose} />}
+        {showSchedulesFlyout && <SchedulesFlyout onClose={onCloseSchedulesFlyout} />}
       </SecuritySolutionPageWrapper>
     </StyledFullHeightContainer>
   );

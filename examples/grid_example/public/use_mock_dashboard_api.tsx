@@ -39,10 +39,7 @@ export const useMockDashboardApi = ({
 
     return {
       getSerializedStateForChild: (id: string) => {
-        return {
-          rawState: panels$.getValue()[id].explicitInput,
-          references: [],
-        };
+        return panels$.getValue()[id].explicitInput;
       },
       children$: new BehaviorSubject({}),
       timeRange$: new BehaviorSubject<TimeRange>({
@@ -79,7 +76,7 @@ export const useMockDashboardApi = ({
         const newId = v4();
         otherPanels[newId] = {
           ...oldPanel,
-          explicitInput: { ...(newPanel.serializedState?.rawState ?? {}), id: newId },
+          explicitInput: { ...(newPanel.serializedState ?? {}), id: newId },
         };
         mockDashboardApi.panels$.next(otherPanels);
         return newId;
@@ -106,7 +103,7 @@ export const useMockDashboardApi = ({
               i: newId,
             },
             explicitInput: {
-              ...(panelPackage.serializedState?.rawState ?? {}),
+              ...(panelPackage.serializedState ?? {}),
               id: newId,
             },
           },

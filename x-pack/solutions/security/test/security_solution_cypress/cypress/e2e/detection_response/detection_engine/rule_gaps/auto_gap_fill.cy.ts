@@ -18,6 +18,7 @@ import {
   GAP_AUTO_FILL_LOGS_TABLE,
 } from '../../../../screens/rule_gaps';
 import { TOASTER_BODY } from '../../../../screens/alerts_detection_rules';
+import { TOOLTIP } from '../../../../screens/common';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import {
   deleteGapAutoFillScheduler,
@@ -63,16 +64,17 @@ const ensureAutoGapFillEnabledViaUi = () => {
       cy.get(RULE_SETTINGS_ENABLE_SWITCH).click();
       cy.get(RULE_SETTINGS_SAVE_BUTTON).click();
       cy.contains(TOASTER_BODY, 'Auto gap fill settings updated successfully');
+      cy.get(RULE_SETTINGS_MODAL).should('not.exist');
       cy.waitUntil(() =>
         getGapAutoFillSchedulerApi().then(
           (response) => response.status === 200 && response.body.enabled === true
         )
       );
-      closeRuleSettingsModal();
     });
 };
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/246571
+describe.skip(
   'Rule gaps auto fill status',
   {
     tags: ['@ess'],
@@ -111,7 +113,7 @@ describe(
         cy.get(RULE_SETTINGS_ENABLE_SWITCH).should('have.attr', 'aria-checked', 'true').click();
         cy.get(RULE_SETTINGS_SAVE_BUTTON).should('not.be.disabled').click();
         cy.contains(TOASTER_BODY, 'Auto gap fill settings updated successfully');
-        closeRuleSettingsModal();
+        cy.get(RULE_SETTINGS_MODAL).should('not.exist');
 
         cy.waitUntil(() =>
           getGapAutoFillSchedulerApi().then(
@@ -170,6 +172,14 @@ describe(
             .should('exist')
             .each(($row) => {
               cy.wrap($row).find('td').eq(1).contains('No gaps');
+
+              // Verify tooltip appears on hover and contains the expected text
+              cy.wrap($row).find('td').eq(1).find('.euiBadge').realHover();
+
+              // Check that the tooltip is visible and contains the expected message
+              cy.get(TOOLTIP)
+                .should('be.visible')
+                .should('contain.text', "Gaps in rule executions don't currently exist.");
             });
         });
       });

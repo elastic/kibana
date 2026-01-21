@@ -240,6 +240,10 @@ export interface ValidationErrors {
     message: string;
     type: { name: string | number };
   };
+  unmappedColumnWarning: {
+    message: string;
+    type: { name: string | number };
+  };
   unknownFunction: {
     message: string;
     type: { name: string };
@@ -251,6 +255,14 @@ export interface ValidationErrors {
   unknownSetting: {
     message: string;
     type: { name: string };
+  };
+  unknownCastingType: {
+    message: string;
+    type: { castType: string };
+  };
+  invalidInlineCast: {
+    message: string;
+    type: { castType: string; valueType: string };
   };
   functionNotAllowedHere: {
     message: string;
@@ -404,3 +416,5 @@ export function supportsArithmeticOperations(type: string): boolean {
 }
 
 export const ESQL_STRING_TYPES = ['keyword', 'text'] as const;
+
+export const ESQL_NAMED_PARAMS_TYPE = 'function_named_parameters' as const;

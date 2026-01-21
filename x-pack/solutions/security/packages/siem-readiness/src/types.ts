@@ -69,3 +69,19 @@ export interface ResultDocument {
   indexId?: string;
   ilmPhase?: string;
 }
+
+export interface RelatedIntegrationRuleResponse {
+  related_integrations?: Array<{
+    package: string;
+    version?: string;
+    integration?: string;
+  }>;
+}
+
+export interface SiemReadinessPackageInfo {
+  id: string;
+  name: string;
+  title: string;
+  version: string;
+  status: string;
+}

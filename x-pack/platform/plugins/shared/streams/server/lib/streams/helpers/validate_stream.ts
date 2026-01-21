@@ -15,6 +15,8 @@ import type {
   DateProcessor,
   DissectProcessor,
   GrokProcessor,
+  JoinProcessor,
+  LowercaseProcessor,
   MathProcessor,
   ProcessorType,
   RemoveByPrefixProcessor,
@@ -23,6 +25,8 @@ import type {
   ReplaceProcessor,
   SetProcessor,
   StreamlangProcessorDefinition,
+  TrimProcessor,
+  UppercaseProcessor,
 } from '@kbn/streamlang';
 import {
   isActionBlock,
@@ -31,6 +35,7 @@ import {
   isNotCondition,
   isOrCondition,
   isConditionBlock,
+  isConditionComplete,
   extractFieldsFromMathExpression,
 } from '@kbn/streamlang';
 import type { StreamlangStep } from '@kbn/streamlang/types/streamlang';
@@ -95,6 +100,12 @@ function checkFieldName(fieldName: string) {
 }
 
 function validateCondition(condition: Condition) {
+  // Check if the condition is complete (all required values filled)
+  // This catches incomplete range conditions, empty fields, etc.
+  if (!isConditionComplete(condition)) {
+    throw new MalformedStreamError('Condition is incomplete: all required values must be filled');
+  }
+
   if (isAndCondition(condition)) {
     condition.and.forEach(validateCondition);
   } else if (isOrCondition(condition)) {
@@ -148,6 +159,30 @@ const actionStepValidators: {
     // Also validate field references in the expression
     const expressionFields = extractFieldsFromMathExpression(step.expression);
     for (const field of expressionFields) {
+      checkFieldName(field);
+    }
+  },
+  uppercase: (step: UppercaseProcessor) => {
+    checkFieldName(step.from);
+    if ('to' in step && step.to) {
+      checkFieldName(step.to);
+    }
+  },
+  lowercase: (step: LowercaseProcessor) => {
+    checkFieldName(step.from);
+    if ('to' in step && step.to) {
+      checkFieldName(step.to);
+    }
+  },
+  trim: (step: TrimProcessor) => {
+    checkFieldName(step.from);
+    if ('to' in step && step.to) {
+      checkFieldName(step.to);
+    }
+  },
+  join: (step: JoinProcessor) => {
+    checkFieldName(step.to);
+    for (const field of step.from) {
       checkFieldName(field);
     }
   },
@@ -208,17 +243,4 @@ export function validateBracketsInFieldNames(definition: Streams.ingest.all.Defi
   if (definition.ingest.processing?.steps) {
     validateSteps(definition.ingest.processing.steps);
   }
-}
-
-export function validateSettings(definition: Streams.ingest.all.Definition, isServerless: boolean) {
-  if (!isServerless) {
-    return;
-  }
-
-  const serverlessAllowList = ['index.refresh_interval'];
-  Object.keys(definition.ingest.settings).forEach((setting) => {
-    if (!serverlessAllowList.includes(setting)) {
-      throw new Error(`Setting [${setting}] is not allowed in serverless`);
-    }
-  });
 }

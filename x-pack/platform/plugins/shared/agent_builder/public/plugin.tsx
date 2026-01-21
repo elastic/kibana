@@ -26,12 +26,14 @@ import {
   DocLinksService,
   NavigationService,
   ToolsService,
+  EventsService,
   type AgentBuilderInternalService,
 } from './services';
 import { createPublicAttachmentContract } from './services/attachments';
 import { createPublicToolContract } from './services/tools';
-import { registerWorkflowSteps } from './step_types';
 import { createPublicAgentsContract } from './services/agents';
+import { createPublicEventsContract } from './services/events';
+import { registerWorkflowSteps } from './step_types';
 import type {
   ConfigSchema,
   AgentBuilderPluginSetup,
@@ -60,7 +62,10 @@ export class AgentBuilderPlugin
     navigationService: NavigationService;
   };
   private activeFlyoutRef: ConversationFlyoutRef | null = null;
-  private updateFlyoutPropsCallback: ((props: EmbeddableConversationProps) => void) | null = null;
+  private flyoutCallbacks: {
+    updateProps: (props: EmbeddableConversationProps) => void;
+    resetBrowserApiTools: () => void;
+  } | null = null;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
@@ -103,7 +108,8 @@ export class AgentBuilderPlugin
 
     const agentService = new AgentService({ http });
     const attachmentsService = new AttachmentsService();
-    const chatService = new ChatService({ http });
+    const eventsService = new EventsService();
+    const chatService = new ChatService({ http, events: eventsService });
     const conversationsService = new ConversationsService({ http });
     const docLinksService = new DocLinksService(core.docLinks.links);
     const toolsService = new ToolsService({ http });
@@ -125,6 +131,7 @@ export class AgentBuilderPlugin
       toolsService,
       startDependencies,
       accessChecker,
+      eventsService,
     };
 
     this.internalServices = internalServices;
@@ -135,8 +142,8 @@ export class AgentBuilderPlugin
       const config = options ?? this.conversationFlyoutActiveConfig;
 
       // If a flyout is already open, update its props instead of creating a new one
-      if (this.activeFlyoutRef && this.updateFlyoutPropsCallback) {
-        this.updateFlyoutPropsCallback(config);
+      if (this.activeFlyoutRef && this.flyoutCallbacks) {
+        this.flyoutCallbacks.updateProps(config);
         return { flyoutRef: this.activeFlyoutRef };
       }
 
@@ -144,12 +151,12 @@ export class AgentBuilderPlugin
       const { flyoutRef } = openConversationFlyout(config, {
         coreStart: core,
         services: internalServices,
-        onPropsUpdate: (callback) => {
-          this.updateFlyoutPropsCallback = callback;
+        onRegisterCallbacks: (callbacks) => {
+          this.flyoutCallbacks = callbacks;
         },
         onClose: () => {
           this.activeFlyoutRef = null;
-          this.updateFlyoutPropsCallback = null;
+          this.flyoutCallbacks = null;
         },
       });
 
@@ -162,17 +169,22 @@ export class AgentBuilderPlugin
       agents: createPublicAgentsContract({ agentService }),
       attachments: createPublicAttachmentContract({ attachmentsService }),
       tools: createPublicToolContract({ toolsService }),
+      events: createPublicEventsContract({ eventsService }),
       setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => {
         // set config until flyout is next opened
         this.conversationFlyoutActiveConfig = config;
         // if there is already an active flyout, update its props
-        if (this.activeFlyoutRef && this.updateFlyoutPropsCallback) {
-          this.updateFlyoutPropsCallback(config);
+        if (this.activeFlyoutRef && this.flyoutCallbacks) {
+          this.flyoutCallbacks.updateProps(config);
           return { flyoutRef: this.activeFlyoutRef };
         }
       },
       clearConversationFlyoutActiveConfig: () => {
         this.conversationFlyoutActiveConfig = {};
+        if (this.activeFlyoutRef && this.flyoutCallbacks) {
+          // Removes stale browserApiTools from the flyout
+          this.flyoutCallbacks.resetBrowserApiTools();
+        }
       },
       openConversationFlyout: (options?: OpenConversationFlyoutOptions) => {
         return openFlyoutInternal(options);
@@ -183,7 +195,7 @@ export class AgentBuilderPlugin
           // Be defensive: clear local references immediately in case the underlying overlay doesn't
           // synchronously invoke our onClose callback.
           this.activeFlyoutRef = null;
-          this.updateFlyoutPropsCallback = null;
+          this.flyoutCallbacks = null;
           flyoutRef.close();
           return;
         }

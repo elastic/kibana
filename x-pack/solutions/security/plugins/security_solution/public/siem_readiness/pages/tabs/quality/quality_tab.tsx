@@ -20,7 +20,6 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { useSiemReadinessApi } from '@kbn/siem-readiness';
 import type { IndexInfo, ResultDocument } from '@kbn/siem-readiness';
-import { mockQualityResponse } from '../../../../../server/lib/siem_readiness/routes/mock_quality_results';
 import {
   CategoryAccordionTable,
   type CategoryData,
@@ -35,23 +34,22 @@ interface IndexInfoWithStatus extends IndexInfo {
 }
 
 export const QualityTab: React.FC = () => {
-  const { getReadinessCategories } = useSiemReadinessApi();
-  const { data, isLoading, error } = getReadinessCategories;
-
-  const indexResultsData = mockQualityResponse;
+  const { getReadinessCategories, getIndexQualityResultsLatest } = useSiemReadinessApi();
+  const { data: getReadinessCategoriesData } = getReadinessCategories;
+  const { data: getIndexQualityData } = getIndexQualityResultsLatest;
 
   // Create a lookup map for index results by indexName
   const indexResultsMap = useMemo(() => {
-    if (!indexResultsData) return new Map<string, ResultDocument>();
+    if (!getIndexQualityData) return new Map<string, ResultDocument>();
 
-    return new Map(indexResultsData.map((result) => [result.indexName, result]));
-  }, [indexResultsData]);
+    return new Map(getIndexQualityData.map((result) => [result.indexName, result]));
+  }, [getIndexQualityData]);
 
   // Prepare categories data with computed status field
   const categories: Array<CategoryData<IndexInfoWithStatus>> = useMemo(() => {
-    if (!data?.mainCategoriesMap) return [];
+    if (!getReadinessCategoriesData?.mainCategoriesMap) return [];
 
-    return data.mainCategoriesMap.map((category) => ({
+    return getReadinessCategoriesData.mainCategoriesMap.map((category) => ({
       category: category.category,
       items: category.indices.map((index) => {
         const result = indexResultsMap.get(index.indexName);
@@ -66,7 +64,7 @@ export const QualityTab: React.FC = () => {
         };
       }),
     }));
-  }, [data?.mainCategoriesMap, indexResultsMap]);
+  }, [getReadinessCategoriesData?.mainCategoriesMap, indexResultsMap]);
 
   // Render function for accordion extra action (right side badges/stats)
   const renderExtraAction = (category: CategoryData<IndexInfoWithStatus>) => {
@@ -254,7 +252,7 @@ export const QualityTab: React.FC = () => {
     []
   );
 
-  if (isLoading) {
+  if (getReadinessCategories.isLoading) {
     return (
       <>
         <EuiSpacer size="m" />
@@ -267,7 +265,7 @@ export const QualityTab: React.FC = () => {
     );
   }
 
-  if (error) {
+  if (getReadinessCategories.error) {
     return (
       <>
         <EuiSpacer size="m" />
@@ -279,7 +277,7 @@ export const QualityTab: React.FC = () => {
           iconType="error"
           announceOnMount
         >
-          <p>{(error as Error).message}</p>
+          <p>{(getReadinessCategories.error as Error).message}</p>
         </EuiCallOut>
       </>
     );

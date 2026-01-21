@@ -41,9 +41,11 @@ export function createAddErrorBudgetPanelAction(
         embeddable.addNewPanel(
           {
             panelType: SLO_ERROR_BUDGET_ID,
-            serializedState: { rawState: initialState },
+            serializedState: initialState,
           },
-          true
+          {
+            displaySuccessMessage: true,
+          }
         );
       } catch (e) {
         return Promise.reject();

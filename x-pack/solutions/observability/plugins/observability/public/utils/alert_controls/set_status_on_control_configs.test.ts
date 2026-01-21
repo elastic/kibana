@@ -7,24 +7,28 @@
 
 import { DEFAULT_CONTROLS } from '@kbn/alerts-ui-shared/src/alert_filter_controls/constants';
 import { setStatusOnControlConfigs } from './set_status_on_control_configs';
+import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
+import type { Writable } from '@kbn/utility-types';
+
+const defaultControls = DEFAULT_CONTROLS as Writable<FilterControlConfig>[];
 
 describe('setStatusOnControlConfigs()', () => {
   it('Should return a default controlConfig with status if controlConfig is undefined', () => {
-    const updatedControlConfigs = DEFAULT_CONTROLS;
+    const updatedControlConfigs = defaultControls;
     updatedControlConfigs[0].selectedOptions = ['recovered'];
 
     expect(setStatusOnControlConfigs('recovered')).toEqual(updatedControlConfigs);
   });
 
   it('Should return empty selectedOptions if status is ALL', () => {
-    const updatedControlConfigs = DEFAULT_CONTROLS;
+    const updatedControlConfigs = defaultControls;
     updatedControlConfigs[0].selectedOptions = [];
 
     expect(setStatusOnControlConfigs('all')).toEqual(updatedControlConfigs);
   });
 
   it('Should return controlConfig with current selectedOptions when status is not the first item in config', () => {
-    const controlConfigs = [DEFAULT_CONTROLS[1], DEFAULT_CONTROLS[0]];
+    const controlConfigs = [defaultControls[1], defaultControls[0]];
     const updatedControlConfigs = controlConfigs;
     updatedControlConfigs[1].selectedOptions = ['active'];
 

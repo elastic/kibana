@@ -7,24 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type DashboardState, prefixReferencesFromPanel } from '../../../common';
+import { omit } from 'lodash';
+import { type DashboardState } from '../../../common';
 import type { DashboardChildState, DashboardLayout } from './types';
 import type { DashboardSection } from '../../../server';
 
 export function serializeLayout(
   layout: DashboardLayout,
   childState: DashboardChildState
-): Pick<DashboardState, 'panels' | 'references'> {
+): Pick<DashboardState, 'panels' | 'pinned_panels'> {
   const sections: { [sectionId: string]: DashboardSection } = {};
   Object.entries(layout.sections).forEach(([sectionId, sectionState]) => {
     sections[sectionId] = { ...sectionState, uid: sectionId, panels: [] };
   });
 
-  const references: DashboardState['references'] = [];
   const panels: DashboardState['panels'] = [];
   Object.entries(layout.panels).forEach(([panelId, { grid, type }]) => {
-    const config = childState[panelId]?.rawState ?? {};
-    references.push(...prefixReferencesFromPanel(panelId, childState[panelId]?.references ?? []));
+    const config = childState[panelId] ?? {};
 
     const { sectionId, ...restOfGridData } = grid; // drop section ID
     const panelState = {
@@ -43,6 +42,14 @@ export function serializeLayout(
 
   return {
     panels: [...panels, ...Object.values(sections)],
-    references,
+    pinned_panels: Object.entries(layout.pinnedPanels)
+      .sort(([, { order: orderA }], [, { order: orderB }]) => orderA - orderB)
+      .map(([id, panel]) => {
+        return {
+          uid: id,
+          ...omit(panel, 'order'),
+          config: childState[id],
+        } as Required<DashboardState>['pinned_panels'][number];
+      }),
   };
 }

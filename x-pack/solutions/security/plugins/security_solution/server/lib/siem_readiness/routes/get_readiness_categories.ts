@@ -7,7 +7,6 @@
 
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { mock_agg_result } from './mock_categories';
 import { GET_SIEM_READINESS_CATEGORIES_API_PATH } from '../../../../common/api/siem_readiness/constants';
 import { API_VERSIONS } from '../../../../common/constants';
 import type { SiemReadinessRoutesDeps } from '../types';
@@ -100,7 +99,7 @@ export const getReadinessCategoriesRoute = (
           const core = await context.core;
           const esClient = core.elasticsearch.client.asCurrentUser;
 
-          const searchResult2 = await esClient.search({
+          const searchResult = await esClient.search({
             index: '*',
             size: 0,
             aggs: {
@@ -120,8 +119,6 @@ export const getReadinessCategoriesRoute = (
               },
             },
           });
-
-          const searchResult = mock_agg_result;
 
           // Format the ES aggregation response into raw category groups
           const rawCategoryMap: Record<string, IndexInfo[]> = {};
