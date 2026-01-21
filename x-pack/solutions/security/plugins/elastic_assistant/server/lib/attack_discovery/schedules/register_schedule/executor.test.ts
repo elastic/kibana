@@ -13,6 +13,10 @@ import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { analyticsServiceMock } from '@kbn/core/server/mocks';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import {
+  ELASTIC_MANAGED_LLM_CONNECTOR_ID,
+  ANTHROPIC_CLAUDE_SONNET_3_7_CONNECTOR_ID,
+} from '@kbn/elastic-assistant-common';
 
 import { attackDiscoveryScheduleExecutor } from './executor';
 import { findDocuments } from '../../../../ai_assistant_data_clients/find';
@@ -603,5 +607,35 @@ describe('attackDiscoveryScheduleExecutor', () => {
     );
 
     expect(createTaskRunError).toHaveBeenCalledWith(error, TaskErrorSource.USER);
+  });
+
+  it('should resolve outdated connector ID to the new one before generating discoveries', async () => {
+    const options = {
+      ...executorOptions,
+      params: {
+        ...params,
+        apiConfig: {
+          ...params.apiConfig,
+          connectorId: ELASTIC_MANAGED_LLM_CONNECTOR_ID,
+        },
+      },
+    } as unknown as RuleExecutorOptions;
+
+    await attackDiscoveryScheduleExecutor({
+      options,
+      logger: mockLogger,
+      publicBaseUrl: undefined,
+      telemetry: mockTelemetry,
+    });
+
+    expect(generateAttackDiscoveries).toHaveBeenCalledWith(
+      expect.objectContaining({
+        config: expect.objectContaining({
+          apiConfig: expect.objectContaining({
+            connectorId: ANTHROPIC_CLAUDE_SONNET_3_7_CONNECTOR_ID,
+          }),
+        }),
+      })
+    );
   });
 });
