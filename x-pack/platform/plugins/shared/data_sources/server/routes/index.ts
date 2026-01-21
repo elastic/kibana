@@ -13,7 +13,10 @@ import type {
   SavedObjectsFindResponse,
   StartServicesAccessor,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { connectorsSpecs } from '@kbn/connector-specs';
+import { v4 } from 'uuid';
 import {
   createDataSourceAndRelatedResources,
   deleteDataSourceAndRelatedResources,
@@ -26,9 +29,57 @@ import type {
 } from '../types';
 import { convertSOtoAPIResponse, createDataSourceRequestSchema } from './schema';
 import { API_BASE_PATH } from '../../common/constants';
+import { TYPE } from '../tasks/bulk_delete_task';
 
 // Constants
-const MAX_PAGE_SIZE = 1000;
+// Note: MAX_PAGE_SIZE removed as bulk delete now uses task manager with point-in-time finder
+
+/**
+ * Builds the secrets object for a connector based on its spec
+ * @param connectorType - The connector type ID (e.g., '.notion')
+ * @param token - The authentication token
+ * @returns The secrets object to pass to the actions client
+ * @throws Error if the connector spec is not found
+ * @internal exported for testing
+ */
+export function buildSecretsFromConnectorSpec(
+  connectorType: string,
+  token: string
+): Record<string, string> {
+  const connectorSpec = Object.values(connectorsSpecs).find(
+    (spec) => spec.metadata.id === connectorType
+  );
+  if (!connectorSpec) {
+    throw new Error(`Stack connector spec not found for type "${connectorType}"`);
+  }
+
+  const hasBearerAuth = connectorSpec.auth?.types.some((authType) => {
+    const typeId = typeof authType === 'string' ? authType : authType.type;
+    return typeId === 'bearer';
+  });
+
+  const secrets: Record<string, string> = {};
+  if (hasBearerAuth) {
+    secrets.authType = 'bearer';
+    secrets.token = token;
+  } else {
+    const apiKeyHeaderAuth = connectorSpec.auth?.types.find((authType) => {
+      const typeId = typeof authType === 'string' ? authType : authType.type;
+      return typeId === 'api_key_header';
+    });
+
+    const headerField =
+      typeof apiKeyHeaderAuth !== 'string' && apiKeyHeaderAuth?.defaults?.headerField
+        ? String(apiKeyHeaderAuth.defaults.headerField)
+        : 'ApiKey'; // default fallback
+
+    secrets.authType = 'api_key_header';
+    secrets.apiKey = token;
+    secrets.headerField = headerField;
+  }
+
+  return secrets;
+}
 
 function createErrorResponse(
   response: KibanaResponseFactory,
@@ -286,68 +337,128 @@ export function registerRoutes(dependencies: RouteDependencies) {
       },
     },
     async (context, request, response) => {
-      const coreContext = await context.core;
-
       try {
-        const savedObjectsClient = coreContext.savedObjects.client;
-        const findResponse: SavedObjectsFindResponse<DataSourceAttributes> =
-          await savedObjectsClient.find({
-            type: DATA_SOURCE_SAVED_OBJECT_TYPE,
-            perPage: MAX_PAGE_SIZE,
-          });
-        const dataSources = findResponse.saved_objects;
+        const [, plugins] = await getStartServices();
+        const taskManager = plugins.taskManager;
 
-        logger.debug(`Found ${dataSources.length} data source(s) to delete`);
-
-        if (dataSources.length === 0) {
-          return response.ok({
+        if (!taskManager) {
+          logger.error('Task Manager is not available');
+          return response.customError({
+            statusCode: 503,
             body: {
-              success: true,
-              deletedCount: 0,
-              fullyDeletedCount: 0,
-              partiallyDeletedCount: 0,
+              message: 'Task Manager is not available',
             },
           });
         }
 
-        // Delete all related resources and saved objects for each data source
-        const [, { actions, agentBuilder }] = await getStartServices();
-        const actionsClient = await actions.getActionsClientWithRequest(request);
-        const toolRegistry = await agentBuilder.tools.getRegistry({ request });
+        const taskId = v4();
+        await taskManager.ensureScheduled(
+          {
+            id: taskId,
+            taskType: TYPE,
+            scope: ['dataSources'],
+            state: { isDone: false, deletedCount: 0, errors: [] },
+            runAt: new Date(Date.now() + 3 * 1000),
+            params: {},
+          },
+          { request }
+        );
 
-        let fullyDeletedCount = 0;
-        let partiallyDeletedCount = 0;
-
-        // Process each data source individually to handle partial failures
-        for (const dataSource of dataSources) {
-          const result = await deleteDataSourceAndRelatedResources({
-            dataSource,
-            savedObjectsClient,
-            actionsClient,
-            toolRegistry,
-            workflowManagement,
-            request,
-            logger,
-          });
-
-          if (result.fullyDeleted) {
-            fullyDeletedCount++;
-          } else {
-            partiallyDeletedCount++;
-          }
-        }
-
+        logger.info(`Scheduled bulk delete task: ${taskId}`);
         return response.ok({
           body: {
-            success: true,
-            deletedCount: dataSources.length,
-            fullyDeletedCount,
-            partiallyDeletedCount,
+            taskId,
           },
         });
       } catch (error) {
-        logger.error(`Failed to delete all data sources: ${(error as Error).message}`);
-        return createErrorResponse(response, 'Failed to delete all data sources', error as Error);
+        logger.error(`Failed to schedule bulk delete task: ${(error as Error).message}`);
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: `Failed to schedule bulk delete task: ${(error as Error).message}`,
+          },
+        });
+      }
+    }
+  );
+
+  // Get bulk delete status
+  router.get(
+    {
+      path: `${API_BASE_PATH}/_bulk_delete/{taskId}`,
+      validate: {
+        params: schema.object({ taskId: schema.string() }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Authorization is delegated to underlying service plugins',
+        },
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const [, plugins] = await getStartServices();
+        const taskManager = plugins.taskManager;
+
+        if (!taskManager) {
+          return response.customError({
+            statusCode: 503,
+            body: {
+              message: 'Task Manager is not available',
+            },
+          });
+        }
+
+        let task;
+        try {
+          task = await taskManager.get(request.params.taskId);
+        } catch (error) {
+          // If it's a "not found" error, return task not found response
+          if (SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
+            return response.ok({
+              body: {
+                isDone: true,
+                deletedCount: 0,
+                error: 'Task not found',
+              },
+            });
+          }
+          // For other errors, rethrow to be caught by outer catch block
+          throw error;
+        }
+
+        if (!task) {
+          return response.ok({
+            body: {
+              isDone: true,
+              deletedCount: 0,
+              error: 'Task not found',
+            },
+          });
+        }
+
+        const state = (task.state || {}) as {
+          isDone: boolean;
+          deletedCount: number;
+          errors: Array<{ dataSourceId: string; error: string }>;
+        };
+
+        return response.ok({
+          body: {
+            isDone: state.isDone || false,
+            deletedCount: state.deletedCount || 0,
+            errors: state.errors || [],
+          },
+        });
+      } catch (error) {
+        logger.error(`Failed to get bulk delete status: ${(error as Error).message}`);
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: `Failed to get bulk delete status: ${(error as Error).message}`,
+          },
+        });
       }
     }
   );

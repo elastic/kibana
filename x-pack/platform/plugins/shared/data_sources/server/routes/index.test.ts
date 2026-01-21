@@ -610,60 +610,73 @@ describe('registerRoutes', () => {
   });
 
   describe('DELETE /api/data_sources', () => {
-    it('should delete all data sources and return aggregated results', async () => {
-      const mockDataSources = [
-        {
-          id: 'data-source-1',
-          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
-          attributes: {
-            name: 'Data Source 1',
-            type: 'notion',
-            config: {},
-            createdAt: '2024-01-01T00:00:00.000Z',
-            updatedAt: '2024-01-01T00:00:00.000Z',
-            workflowIds: ['workflow-1'],
-            toolIds: ['tool-1'],
-            kscIds: ['ksc-1'],
-          },
-        },
-        {
-          id: 'data-source-2',
-          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
-          attributes: {
-            name: 'Data Source 2',
-            type: 'notion',
-            config: {},
-            createdAt: '2024-01-02T00:00:00.000Z',
-            updatedAt: '2024-01-02T00:00:00.000Z',
-            workflowIds: ['workflow-2'],
-            toolIds: ['tool-2'],
-            kscIds: ['ksc-2'],
-          },
-        },
-      ];
+    it('should schedule task and return taskId immediately', async () => {
+      const mockTaskManager = {
+        ensureScheduled: jest.fn().mockResolvedValue({
+          id: 'test-task-id',
+          taskType: 'data-sources:bulk-delete-task',
+          state: { isDone: false, deletedCount: 0, errors: [] },
+        }),
+      };
 
-      mockSavedObjectsClient.find.mockResolvedValue({
-        saved_objects: mockDataSources as any,
-        total: 2,
-        per_page: 1000,
-        page: 1,
-      });
+      mockGetStartServices.mockResolvedValue([
+        {},
+        {
+          actions: {
+            getActionsClientWithRequest: jest.fn().mockResolvedValue(mockActionsClient),
+          },
+          dataCatalog: mockDataCatalog,
+          agentBuilder: {
+            tools: {
+              getRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
+            },
+          },
+          taskManager: mockTaskManager,
+        },
+      ]);
 
-      // First data source fully deleted, second partially deleted
-      mockDeleteDataSourceAndRelatedResources
-        .mockResolvedValueOnce({
-          success: true,
-          fullyDeleted: true,
+      registerRoutes(dependencies);
+
+      const routeHandler = mockRouter.delete.mock.calls[0][1];
+      const mockRequest = httpServerMock.createKibanaRequest();
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(createMockContext(), mockRequest, mockResponse);
+
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith(
+        expect.objectContaining({
+          taskType: 'data-sources:bulk-delete-task',
+          scope: ['dataSources'],
+          state: { isDone: false, deletedCount: 0, errors: [] },
+        }),
+        expect.objectContaining({
+          request: expect.any(Object),
         })
-        .mockResolvedValueOnce({
-          success: true,
-          fullyDeleted: false,
-          remaining: {
-            kscIds: ['ksc-2'],
-            toolIds: [],
-            workflowIds: [],
+      );
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: expect.objectContaining({
+          taskId: expect.any(String),
+        }),
+      });
+    });
+
+    it('should return 503 when task manager is not available', async () => {
+      mockGetStartServices.mockResolvedValue([
+        {},
+        {
+          actions: {
+            getActionsClientWithRequest: jest.fn().mockResolvedValue(mockActionsClient),
           },
-        });
+          dataCatalog: mockDataCatalog,
+          agentBuilder: {
+            tools: {
+              getRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
+            },
+          },
+          taskManager: undefined,
+        },
+      ]);
 
       registerRoutes(dependencies);
 
@@ -673,46 +686,34 @@ describe('registerRoutes', () => {
 
       await routeHandler(createMockContext(), mockRequest, mockResponse);
 
-      expect(mockDeleteDataSourceAndRelatedResources).toHaveBeenCalledTimes(2);
-      expect(mockResponse.ok).toHaveBeenCalledWith({
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 503,
         body: {
-          success: true,
-          deletedCount: 2,
-          fullyDeletedCount: 1,
-          partiallyDeletedCount: 1,
+          message: 'Task Manager is not available',
         },
       });
     });
 
-    it('should handle empty data sources list', async () => {
-      mockSavedObjectsClient.find.mockResolvedValue({
-        saved_objects: [],
-        total: 0,
-        per_page: 1000,
-        page: 1,
-      });
+    it('should handle errors when task scheduling fails', async () => {
+      const mockTaskManager = {
+        ensureScheduled: jest.fn().mockRejectedValue(new Error('Failed to schedule task')),
+      };
 
-      registerRoutes(dependencies);
-
-      const routeHandler = mockRouter.delete.mock.calls[0][1];
-      const mockRequest = httpServerMock.createKibanaRequest();
-      const mockResponse = httpServerMock.createResponseFactory();
-
-      await routeHandler(createMockContext(), mockRequest, mockResponse);
-
-      expect(mockResponse.ok).toHaveBeenCalledWith({
-        body: {
-          success: true,
-          deletedCount: 0,
-          fullyDeletedCount: 0,
-          partiallyDeletedCount: 0,
+      mockGetStartServices.mockResolvedValue([
+        {},
+        {
+          actions: {
+            getActionsClientWithRequest: jest.fn().mockResolvedValue(mockActionsClient),
+          },
+          dataCatalog: mockDataCatalog,
+          agentBuilder: {
+            tools: {
+              getRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
+            },
+          },
+          taskManager: mockTaskManager,
         },
-      });
-      expect(mockDeleteDataSourceAndRelatedResources).not.toHaveBeenCalled();
-    });
-
-    it('should handle errors when finding data sources fails', async () => {
-      mockSavedObjectsClient.find.mockRejectedValue(new Error('Find failed'));
+      ]);
 
       registerRoutes(dependencies);
 
@@ -725,7 +726,7 @@ describe('registerRoutes', () => {
       expect(mockResponse.customError).toHaveBeenCalledWith({
         statusCode: 500,
         body: {
-          message: 'Failed to delete all data sources: Find failed',
+          message: 'Failed to schedule bulk delete task: Failed to schedule task',
         },
       });
     });
@@ -757,7 +758,10 @@ describe('registerRoutes', () => {
 
       registerRoutes(dependencies);
 
-      const routeHandler = mockRouter.delete.mock.calls[1][1];
+      const deleteCall = (mockRouter.delete as jest.Mock).mock.calls.find(
+        (call) => call[0].path?.includes('{id}')
+      );
+      const routeHandler = deleteCall?.[1];
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { id: 'data-source-1' },
       });
@@ -783,6 +787,9 @@ describe('registerRoutes', () => {
     });
 
     it('should return partial deletion result', async () => {
+      // Reset the mock to clear any previous implementations
+      mockDeleteDataSourceAndRelatedResources.mockReset();
+
       const mockDataSource = {
         id: 'data-source-1',
         type: DATA_SOURCE_SAVED_OBJECT_TYPE,
@@ -812,7 +819,15 @@ describe('registerRoutes', () => {
 
       registerRoutes(dependencies);
 
-      const routeHandler = mockRouter.delete.mock.calls[1][1];
+      const deleteCall = (mockRouter.delete as jest.Mock).mock.calls.find(
+        (call) => call[0].path?.includes('{id}')
+      );
+      const routeHandler = deleteCall?.[1];
+      
+      if (!routeHandler) {
+        throw new Error('Route handler not found for DELETE /api/data_sources/{id}');
+      }
+      
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { id: 'data-source-1' },
       });
@@ -820,6 +835,7 @@ describe('registerRoutes', () => {
 
       await routeHandler(createMockContext(), mockRequest, mockResponse);
 
+      expect(mockDeleteDataSourceAndRelatedResources).toHaveBeenCalledTimes(1);
       expect(mockResponse.ok).toHaveBeenCalledWith({
         body: {
           success: true,
@@ -838,7 +854,10 @@ describe('registerRoutes', () => {
 
       registerRoutes(dependencies);
 
-      const routeHandler = mockRouter.delete.mock.calls[1][1];
+      const deleteCall = (mockRouter.delete as jest.Mock).mock.calls.find(
+        (call) => call[0].path?.includes('{id}')
+      );
+      const routeHandler = deleteCall?.[1];
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { id: 'nonexistent' },
       });

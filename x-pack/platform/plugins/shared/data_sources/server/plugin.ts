@@ -12,6 +12,7 @@ import type {
   Logger,
   Plugin,
 } from '@kbn/core/server';
+import { mapValues } from 'lodash';
 import { registerRoutes } from './routes';
 import { registerDataSources } from './sources';
 import type {
@@ -22,6 +23,7 @@ import type {
 } from './types';
 import { registerUISettings } from './register';
 import { setupSavedObjects } from './saved_objects';
+import { BulkDeleteTask } from './tasks/bulk_delete_task';
 
 export class DataSourcesServerPlugin
   implements
@@ -52,6 +54,25 @@ export class DataSourcesServerPlugin
 
     // Register saved objects type
     setupSavedObjects(savedObjects);
+
+    // Register bulk delete task if Task Manager is available
+    if (plugins.taskManager) {
+      const mappedPlugins = mapValues(plugins, (value, key) => {
+        return {
+          setup: value,
+          start: () =>
+            core.getStartServices().then(([, pluginStart]) => {
+              return pluginStart[key as keyof DataSourcesServerStartDependencies];
+            }),
+        };
+      }) as any;
+
+      new BulkDeleteTask({
+        core,
+        logFactory: this.logger,
+        plugins: mappedPlugins,
+      });
+    }
 
     // Register HTTP routes
     const router = core.http.createRouter();
