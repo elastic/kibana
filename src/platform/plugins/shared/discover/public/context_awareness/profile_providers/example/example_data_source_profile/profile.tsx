@@ -19,6 +19,7 @@ import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 import { useExampleContext } from '../example_context';
 import { ChartWithCustomButtons } from './components';
 import { CustomDocView } from './components/custom_doc_view';
+import { RestorableStateDocView } from './components/restorable_state_doc_view';
 
 export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvider<{
   formatRecord: (flattenedRecord: Record<string, unknown>) => string;
@@ -96,6 +97,13 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
                   updateESQLQuery={updateESQLQuery}
                 />
               ),
+            });
+
+            registry.add({
+              id: 'doc_view_restorable_state_example',
+              title: 'Restorable State Example',
+              order: 1,
+              render: (props) => <RestorableStateDocView {...props} />,
             });
 
             return prevValue.docViewsRegistry(registry);
