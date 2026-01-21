@@ -177,3 +177,35 @@
 # Maximum number of documents loaded by each shard to generate autocomplete suggestions.
 # This value must be a whole number greater than zero. Defaults to 100_000
 #unifiedSearch.autocomplete.valueSuggestions.terminateAfter: 100000
+# Elastic Managed LLMs
+xpack.actions.preconfigured:
+  Anthropic-Claude-Sonnet-3-7:
+    name: Anthropic Claude Sonnet 3.7
+    actionTypeId: .inference
+    exposeConfig: true
+    config:
+      provider: "elastic"
+      taskType: "chat_completion"
+      inferenceId: ".rainbow-sprinkles-elastic"
+      providerConfig:
+        model_id: "rainbow-sprinkles"
+  Anthropic-Claude-Sonnet-4-5:
+    name: Anthropic Claude Sonnet 4.5
+    actionTypeId: .inference
+    exposeConfig: true
+    config:
+      provider: "elastic"
+      taskType: "chat_completion"
+      inferenceId: ".gp-llm-v2-chat_completion"
+      providerConfig:
+        model_id: "gp-llm-v2"
+  OpenAI-GPT-OSS-120B:
+    name: OpenAI GPT-OSS 120B
+    actionTypeId: .inference
+    exposeConfig: true
+    config:
+      provider: "elastic"
+      taskType: "chat_completion"
+      inferenceId: ".openai-gpt-oss-120b-chat_completion"
+      providerConfig:
+        model_id: "openai-gpt-oss-120b"

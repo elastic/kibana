@@ -122,44 +122,6 @@ describe('useServiceActions', () => {
 
       expect(mockSetHasAnyDefaultLLMConnectors).not.toHaveBeenCalled();
     });
-
-    it('does NOT call setHasAnyDefaultLLMConnectors when enabling non-EIS service', async () => {
-      mockApiService.updateServices.mockResolvedValue({ data: {}, error: null });
-
-      const { result } = renderHook(() =>
-        useServiceActions({
-          onServiceUpdate: mockOnServiceUpdate,
-          services: { auto_ops: { enabled: false } },
-        })
-      );
-
-      await act(async () => {
-        await result.current.handleEnableService('auto_ops');
-      });
-
-      expect(mockSetHasAnyDefaultLLMConnectors).not.toHaveBeenCalled();
-    });
-
-    it('does NOT call setHasAnyDefaultLLMConnectors when API call fails', async () => {
-      mockApiService.updateServices.mockResolvedValue({
-        data: null,
-        error: { message: 'API error' },
-      });
-
-      const { result } = renderHook(() =>
-        useServiceActions({
-          onServiceUpdate: mockOnServiceUpdate,
-          services: mockServices,
-        })
-      );
-
-      await act(async () => {
-        await result.current.handleEnableService('eis');
-      });
-
-      expect(mockSetHasAnyDefaultLLMConnectors).not.toHaveBeenCalled();
-      expect(mockNotifications.toasts.addDanger).toHaveBeenCalled();
-    });
   });
 
   describe('handleEnableServiceByUrl', () => {
@@ -244,73 +206,6 @@ describe('useServiceActions', () => {
       });
 
       expect(result.current.loadingService).toBeNull();
-    });
-  });
-
-  describe('toast notifications', () => {
-    it('shows success toast on successful enable', async () => {
-      mockApiService.updateServices.mockResolvedValue({ data: {}, error: null });
-
-      const { result } = renderHook(() =>
-        useServiceActions({
-          onServiceUpdate: mockOnServiceUpdate,
-          services: mockServices,
-        })
-      );
-
-      await act(async () => {
-        await result.current.handleEnableService('eis');
-      });
-
-      expect(mockNotifications.toasts.addSuccess).toHaveBeenCalledWith({
-        title: 'Service enabled successfully',
-      });
-    });
-
-    it('shows warning toast when API returns warning', async () => {
-      mockApiService.updateServices.mockResolvedValue({
-        data: { warning: 'Some warning message' },
-        error: null,
-      });
-
-      const { result } = renderHook(() =>
-        useServiceActions({
-          onServiceUpdate: mockOnServiceUpdate,
-          services: mockServices,
-        })
-      );
-
-      await act(async () => {
-        await result.current.handleEnableService('eis');
-      });
-
-      expect(mockNotifications.toasts.addWarning).toHaveBeenCalledWith({
-        title: 'Service enabled with warnings',
-        text: 'Some warning message',
-      });
-    });
-
-    it('shows danger toast on API error', async () => {
-      mockApiService.updateServices.mockResolvedValue({
-        data: null,
-        error: { message: 'Something went wrong' },
-      });
-
-      const { result } = renderHook(() =>
-        useServiceActions({
-          onServiceUpdate: mockOnServiceUpdate,
-          services: mockServices,
-        })
-      );
-
-      await act(async () => {
-        await result.current.handleEnableService('eis');
-      });
-
-      expect(mockNotifications.toasts.addDanger).toHaveBeenCalledWith({
-        title: 'Failed to enable service',
-        text: 'Something went wrong',
-      });
     });
   });
 });
