@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import {
   EuiSpacer,
   EuiLoadingSpinner,
@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -25,6 +26,14 @@ import {
   type CategoryData,
   type FilterOption,
 } from '../../components/category_accordion_table';
+import { useSiemReadinessCases } from '../../../hooks/use_siem_readiness_cases';
+import { useBasePath } from '../../../../common/lib/kibana';
+import { QualityWarningPrompt } from './quality_warning_prompt';
+import {
+  buildQualityCaseDescription,
+  getQualityCaseTitle,
+  getQualityCaseTags,
+} from './quality_add_case_details';
 
 // Extended IndexInfo with computed fields
 interface IndexInfoWithStatus extends IndexInfo {
@@ -34,6 +43,8 @@ interface IndexInfoWithStatus extends IndexInfo {
 }
 
 export const QualityTab: React.FC = () => {
+  const basePath = useBasePath();
+  const { openNewCaseFlyout } = useSiemReadinessCases();
   const { getReadinessCategories, getIndexQualityResultsLatest } = useSiemReadinessApi();
   const { data: getReadinessCategoriesData } = getReadinessCategories;
   const { data: getIndexQualityData } = getIndexQualityResultsLatest;
@@ -65,6 +76,31 @@ export const QualityTab: React.FC = () => {
       }),
     }));
   }, [getReadinessCategoriesData?.mainCategoriesMap, indexResultsMap]);
+
+  // Calculate total incompatible indices
+  const totalIncompatibleIndices = useMemo(() => {
+    return categories.reduce(
+      (sum, category) =>
+        sum + category.items.filter((item) => item.status === 'incompatible').length,
+      0
+    );
+  }, [categories]);
+
+  const hasIncompatibleIndices = totalIncompatibleIndices > 0;
+
+  // Case description
+  const caseDescription = useMemo(
+    () => buildQualityCaseDescription(categories, basePath),
+    [categories, basePath]
+  );
+
+  const handleCreateCase = useCallback(() => {
+    openNewCaseFlyout({
+      title: getQualityCaseTitle(),
+      description: caseDescription,
+      tags: getQualityCaseTags(),
+    });
+  }, [openNewCaseFlyout, caseDescription]);
 
   // Render function for accordion extra action (right side badges/stats)
   const renderExtraAction = (category: CategoryData<IndexInfoWithStatus>) => {
@@ -229,27 +265,27 @@ export const QualityTab: React.FC = () => {
           defaultMessage: 'Actions',
         }),
         width: '15%',
-        actions: [
-          {
-            name: i18n.translate('xpack.securitySolution.siemReadiness.quality.action.view', {
-              defaultMessage: 'View Data quality',
-            }),
-            description: i18n.translate(
-              'xpack.securitySolution.siemReadiness.quality.action.view.description',
-              {
-                defaultMessage: 'View data quality details',
-              }
-            ),
-            type: 'icon',
-            icon: 'eye',
-            onClick: () => {
-              // Placeholder - will be implemented later
-            },
-          },
-        ],
+        render: () => {
+          const dataQualityUrl = `${basePath}/app/security/data_quality`;
+          return (
+            <div style={{ textAlign: 'right' }}>
+              <EuiButtonEmpty
+                size="xs"
+                href={dataQualityUrl}
+                target="_blank"
+                iconType="popout"
+                iconSide="right"
+              >
+                {i18n.translate('xpack.securitySolution.siemReadiness.quality.action.view', {
+                  defaultMessage: 'View Data quality',
+                })}
+              </EuiButtonEmpty>
+            </div>
+          );
+        },
       },
     ],
-    []
+    [basePath]
   );
 
   if (getReadinessCategories.isLoading) {
@@ -307,6 +343,38 @@ export const QualityTab: React.FC = () => {
 
   return (
     <>
+      <EuiSpacer size="m" />
+      {hasIncompatibleIndices && (
+        <>
+          <QualityWarningPrompt incompatibleIndicesCount={totalIncompatibleIndices} />
+          <EuiSpacer size="m" />
+        </>
+      )}
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem>
+          <EuiText size="s" color="subdued">
+            {i18n.translate('xpack.securitySolution.siemReadiness.quality.description', {
+              defaultMessage:
+                'See which indices fail ECS checks or have missing fields. Schema errors can stop rules, dashboards, and correlations from working correctly.',
+            })}
+          </EuiText>
+        </EuiFlexItem>
+        {hasIncompatibleIndices && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconSide="right"
+              size="s"
+              iconType="plusInCircle"
+              onClick={handleCreateCase}
+              data-test-subj="createNewCaseButton"
+            >
+              {i18n.translate('xpack.securitySolution.siemReadiness.quality.createCase', {
+                defaultMessage: 'Create new case',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
       <EuiSpacer size="m" />
       <CategoryAccordionTable
         categories={categories}
