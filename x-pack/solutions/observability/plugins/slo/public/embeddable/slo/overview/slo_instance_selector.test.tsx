@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, screen, within, waitFor, fireEvent } from '@testing-library/react';
+import { screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { SloInstanceSelector } from './slo_instance_selector';
