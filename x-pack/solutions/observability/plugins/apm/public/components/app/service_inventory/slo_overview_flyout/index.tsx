@@ -123,20 +123,20 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
 
   const filtersQuery = useMemo(() => {
     const filters: Array<Record<string, unknown>> = [
-      { match_phrase: { 'service.name': serviceName } },
+      { term: { 'service.name': serviceName } },
       {
-        bool: {
-          minimum_should_match: 1,
-          should: [
-            { match_phrase: { 'slo.indicator.type': 'sli.apm.transactionDuration' } },
-            { match_phrase: { 'slo.indicator.type': 'sli.apm.transactionErrorRate' } },
-          ],
+        terms: {
+          'slo.indicator.type': ['sli.apm.transactionDuration', 'sli.apm.transactionErrorRate'],
         },
       },
     ];
 
     if (environment && environment !== 'ENVIRONMENT_ALL') {
-      filters.push({ match_phrase: { 'service.environment': environment } });
+      filters.push({ term: { 'service.environment': environment } });
+    }
+
+    if (selectedStatuses.length > 0) {
+      filters.push({ terms: { status: selectedStatuses } });
     }
 
     return JSON.stringify({
@@ -145,7 +145,16 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
       should: [],
       must_not: [],
     });
-  }, [serviceName, environment]);
+  }, [serviceName, environment, selectedStatuses]);
+
+  const kqlQuery = useMemo(() => {
+    const trimmed = searchQuery.trim();
+    return trimmed || undefined;
+  }, [searchQuery]);
+
+  useEffect(() => {
+    setPage(0);
+  }, [selectedStatuses, searchQuery]);
 
   // Fetch SLOs and alerts in parallel
   useEffect(() => {
@@ -164,6 +173,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
             version: '2023-10-31',
             query: {
               filters: filtersQuery,
+              ...(kqlQuery && { kqlQuery }),
               page: String(page + 1), // API uses 1-based indexing
               perPage: String(perPage),
               sortBy: 'status',
@@ -262,7 +272,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
     return () => {
       isMounted = false;
     };
-  }, [http, filtersQuery, page, perPage]);
+  }, [http, filtersQuery, kqlQuery, page, perPage]);
 
   const getActiveAlertsForSlo = useCallback(
     (sloItem: SLOWithSummaryResponse) => {
@@ -310,24 +320,11 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
     return counts;
   }, [sloData]);
 
-  const filteredSlos = useMemo(() => {
+  // Sort SLOs by alerts count (alerts data is fetched separately, so we sort client-side)
+  const sortedSlos = useMemo(() => {
     if (!sloData.length) return [];
 
-    const filtered = sloData.filter((sloItem) => {
-      if (
-        selectedStatuses.length > 0 &&
-        !selectedStatuses.includes(sloItem.summary?.status as SloStatusFilter)
-      ) {
-        return false;
-      }
-
-      if (searchQuery && !sloItem.name.toLowerCase().includes(searchQuery.toLowerCase())) {
-        return false;
-      }
-      return true;
-    });
-
-    return filtered.sort((a, b) => {
+    return [...sloData].sort((a, b) => {
       const alertsA = activeAlerts.get(`${a.id}|${a.instanceId ?? ALL_VALUE}`) ?? 0;
       const alertsB = activeAlerts.get(`${b.id}|${b.instanceId ?? ALL_VALUE}`) ?? 0;
 
@@ -335,12 +332,13 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
         return alertsB - alertsA;
       }
 
+      // Secondary sort by status priority (API already sorts by status, but we maintain consistency)
       const statusPriorityA = STATUS_PRIORITY[a.summary?.status ?? 'HEALTHY'] ?? 0;
       const statusPriorityB = STATUS_PRIORITY[b.summary?.status ?? 'HEALTHY'] ?? 0;
 
       return statusPriorityB - statusPriorityA;
     });
-  }, [sloData, selectedStatuses, searchQuery, activeAlerts]);
+  }, [sloData, activeAlerts]);
 
   const sloAppUrl = useMemo(() => {
     const searchParams = rison.encode({
@@ -703,7 +701,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
         )}
 
         <EuiBasicTable<SLOWithSummaryResponse>
-          items={filteredSlos}
+          items={sortedSlos}
           columns={columns}
           loading={isLoading}
           tableCaption={i18n.translate('xpack.apm.sloOverviewFlyout.tableCaption', {
