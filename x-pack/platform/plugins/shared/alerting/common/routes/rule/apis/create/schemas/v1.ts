@@ -7,13 +7,13 @@
 
 import { schema } from '@kbn/config-schema';
 import { createRuleParamsExamplesV1 } from '@kbn/response-ops-rule-params';
+import { EsQueryRuleParamsSchemaV1 } from '@kbn/response-ops-rule-params/es_query';
+import { IndexThresholdRuleParamsSchemaV1 } from '@kbn/response-ops-rule-params/index_threshold';
 import { validateDurationV1, validateHoursV1, validateTimezoneV1 } from '../../../validation';
 import { notifyWhenSchemaV1, alertDelaySchemaV1 } from '../../../response';
 import { artifactsSchemaV1 } from '../../../request';
 import { alertsFilterQuerySchemaV1 } from '../../../../alerts_filter_query';
 import { flappingSchemaV2 } from '../../../common';
-import { EsQueryRuleParamsSchemaV1 } from '@kbn/response-ops-rule-params/es_query';
-import { IndexThresholdRuleParamsSchemaV1 } from '@kbn/response-ops-rule-params/index_threshold';
 
 export const actionFrequencySchema = schema.object({
   summary: schema.boolean({
