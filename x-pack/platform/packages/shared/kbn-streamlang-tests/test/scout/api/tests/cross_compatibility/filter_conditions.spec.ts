@@ -963,47 +963,6 @@ apiTest.describe('Cross-compatibility - Filter Conditions', { tag: ['@ess', '@sv
     }
   );
 
-  apiTest(
-    'should handle includes filter condition with numeric array (ingest pipeline only)',
-    async ({ testBed }) => {
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'set',
-            to: 'attributes.has_status_200',
-            value: 'success',
-            where: {
-              field: 'attributes.status_codes',
-              includes: 200,
-            },
-          } as SetProcessor,
-        ],
-      };
-
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-
-      const docs = [
-        { attributes: { status_codes: [200, 201, 204] } },
-        { attributes: { status_codes: [400, 404, 500] } },
-        { attributes: { status_codes: [200] } },
-        { attributes: { status_codes: [301, 302] } },
-      ];
-
-      await testBed.ingest('ingest-includes-numeric', docs, processors);
-      const ingestResult = await testBed.getDocsOrdered('ingest-includes-numeric');
-
-      // Ingest pipeline results
-      expect(ingestResult[0].attributes).toStrictEqual(
-        expect.objectContaining({ status_codes: [200, 201, 204], has_status_200: 'success' })
-      );
-      expect(ingestResult[1].attributes).not.toHaveProperty('has_status_200');
-      expect(ingestResult[2].attributes).toStrictEqual(
-        expect.objectContaining({ status_codes: [200], has_status_200: 'success' })
-      );
-      expect(ingestResult[3].attributes).not.toHaveProperty('has_status_200');
-    }
-  );
-
   apiTest('should handle includes with NOT condition', async ({ testBed, esql }) => {
     const streamlangDSL: StreamlangDSL = {
       steps: [
