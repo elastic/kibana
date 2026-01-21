@@ -6,8 +6,7 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
-import type { Enricher } from '@kbn/index-management-shared-types';
-import type { Index } from '..';
+import type { Enricher, EnricherResponse } from '@kbn/index-management-shared-types';
 
 export class IndexDataEnricher {
   private readonly _enrichers: Enricher[] = [];
@@ -16,9 +15,7 @@ export class IndexDataEnricher {
     this._enrichers.push(enricher);
   }
 
-  public enrichIndices = (
-    client: HttpSetup
-  ): Promise<{ indices?: Index[]; error?: string; errorSource?: string }>[] => {
+  public enrichIndices = (client: HttpSetup): Promise<EnricherResponse>[] => {
     return this.enrichers.map((enricher) => enricher(client));
   };
 

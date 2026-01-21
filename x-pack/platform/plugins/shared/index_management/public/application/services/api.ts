@@ -165,6 +165,7 @@ export async function loadIndices(onIndicesLoaded: (indices: Index[]) => void) {
           });
           onIndicesLoaded(Object.values(indices));
         } else {
+          // todo need to add these to state
           console.error(enriched.error);
         }
       })
