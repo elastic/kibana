@@ -14,10 +14,12 @@ import {
   API_VERSIONS,
   APP_ID,
   ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+  PAD_INSTALL_URL,
 } from '../../../../../../common/constants';
 
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
+import { withMinimumLicense } from '../../../utils/with_minimum_license';
 
 export const padInstallRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -27,7 +29,7 @@ export const padInstallRoute = (
   router.versioned
     .post({
       access: 'public',
-      path: '/api/entity_analytics/privileged_user_monitoring/pad/install',
+      path: PAD_INSTALL_URL,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -39,37 +41,39 @@ export const padInstallRoute = (
         version: API_VERSIONS.public.v1,
         validate: {},
       },
+      withMinimumLicense(
+        async (
+          context,
+          request,
+          response
+        ): Promise<IKibanaResponse<InstallPrivilegedAccessDetectionPackageResponse>> => {
+          const siemResponse = buildSiemResponse(response);
+          const secSol = await context.securitySolution;
 
-      async (
-        context,
-        request,
-        response
-      ): Promise<IKibanaResponse<InstallPrivilegedAccessDetectionPackageResponse>> => {
-        const siemResponse = buildSiemResponse(response);
-        const secSol = await context.securitySolution;
+          await assertAdvancedSettingsEnabled(
+            await context.core,
+            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
+          );
 
-        await assertAdvancedSettingsEnabled(
-          await context.core,
-          ENABLE_PRIVILEGED_USER_MONITORING_SETTING
-        );
-
-        try {
-          const clientResponse = await secSol
-            .getPadPackageInstallationClient()
-            .installPrivilegedAccessDetectionPackage();
-          return response.ok({
-            body: {
-              ...clientResponse,
-            },
-          });
-        } catch (e) {
-          const error = transformError(e);
-          logger.error(`Error PAD installation: ${error.message}`);
-          return siemResponse.error({
-            statusCode: error.statusCode,
-            body: error.message,
-          });
-        }
-      }
+          try {
+            const clientResponse = await secSol
+              .getPadPackageInstallationClient()
+              .installPrivilegedAccessDetectionPackage();
+            return response.ok({
+              body: {
+                ...clientResponse,
+              },
+            });
+          } catch (e) {
+            const error = transformError(e);
+            logger.error(`Error PAD installation: ${error.message}`);
+            return siemResponse.error({
+              statusCode: error.statusCode,
+              body: error.message,
+            });
+          }
+        },
+        'platinum'
+      )
     );
 };
