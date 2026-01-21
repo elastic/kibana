@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { JsonModelSchema } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
@@ -31,8 +32,7 @@ export const MetadataSchema = z.record(z.string(), z.any());
 export const InputSchema = z.object({
   prompt: z.string(),
   systemPrompt: z.string().optional(),
-  // TODO: replace with proper JsonSchema7 zod schema when https://github.com/elastic/kibana/pull/244223 is merged and released
-  schema: z.any().optional(),
+  schema: JsonModelSchema.optional(),
   temperature: z.number().min(0).max(1).optional(),
 });
 
