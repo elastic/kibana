@@ -46,6 +46,11 @@ export function transformControlGroupIn(controls?: ControlsGroupState) {
               },
             };
           }
+        } else {
+          transformedControlState = {
+            ...transformedControlState,
+            explicitInput: controlState.config as StoredPinnedControlState['explicitInput'],
+          };
         }
       } catch (transformInError) {
         // do not prevent save if transformIn throws
