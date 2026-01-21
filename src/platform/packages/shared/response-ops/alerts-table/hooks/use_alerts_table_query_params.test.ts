@@ -134,5 +134,20 @@ describe('useAlertsTableQueryParams', () => {
     });
 
     expect(mockSetPageIndex).toHaveBeenCalledTimes(2);
+    expect(mockSetPageIndex).toHaveBeenCalledWith(0);
+  });
+
+  it('should reset pageIndex when filters are applied', () => {
+    const highPageOptions = { ...defaultOptions, pageIndex: 5 };
+    const { rerender } = renderHook((options: UseAlertsTableQueryParamsOptions = highPageOptions) =>
+      useAlertsTableQueryParams(options)
+    );
+
+    rerender({
+      ...highPageOptions,
+      query: changedOptions.query!,
+    });
+
+    expect(mockSetPageIndex).toHaveBeenCalledWith(0);
   });
 });
