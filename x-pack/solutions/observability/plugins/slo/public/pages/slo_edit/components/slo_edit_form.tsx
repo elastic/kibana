@@ -23,12 +23,22 @@ export interface Props {
   initialValues?: CreateSLOForm;
   slo?: GetSLOResponse;
   onFlyoutClose?: () => void;
-  formSettings: FormSettings;
+  formSettings?: FormSettings;
 }
 
-export function SloEditForm({ slo, initialValues, onFlyoutClose, formSettings }: Props) {
+const DEFAULT_FORM_SETTINGS: FormSettings = {
+  isEditMode: false,
+  allowedIndicatorTypes: [],
+};
+
+export function SloEditForm({
+  slo,
+  initialValues,
+  onFlyoutClose,
+  formSettings = DEFAULT_FORM_SETTINGS,
+}: Props) {
   const { isEditMode = false } = formSettings;
-  assertValidProps({ formSettings, slo, onFlyoutClose });
+  assertValidProps({ isEditMode, slo, onFlyoutClose });
 
   const form = useForm<CreateSLOForm>({
     defaultValues: initialValues ?? SLO_EDIT_FORM_DEFAULT_VALUES,
@@ -88,8 +98,15 @@ export function SloEditForm({ slo, initialValues, onFlyoutClose, formSettings }:
   );
 }
 
-function assertValidProps({ slo, onFlyoutClose, formSettings }: Props) {
-  const { isEditMode = false } = formSettings;
+function assertValidProps({
+  slo,
+  onFlyoutClose,
+  isEditMode,
+}: {
+  slo: Props['slo'];
+  onFlyoutClose: Props['onFlyoutClose'];
+  isEditMode: boolean;
+}) {
   const isFlyout = Boolean(onFlyoutClose);
   if ((isEditMode || !!slo) && isFlyout) {
     throw new Error('SLO Form cannot be in edit mode within a flyout');

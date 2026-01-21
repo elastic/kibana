@@ -25,7 +25,7 @@ export default function CreateSLOFormFlyout({
 }: {
   onClose: () => void;
   initialValues: RecursivePartial<CreateSLOInput>;
-  formSettings: FormSettings;
+  formSettings?: FormSettings;
 }) {
   const formInitialValues = transformPartialSLODataToFormState(initialValues);
 
