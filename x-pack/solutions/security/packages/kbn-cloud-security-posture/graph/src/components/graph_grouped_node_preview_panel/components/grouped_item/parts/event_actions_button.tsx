@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef, useMemo } from 'react';
-import { EuiButtonIcon } from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
+import { EuiButtonIcon, EuiPopover, EuiListGroup, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useGraphPopoverState } from '../../../../popovers/primitives/use_graph_popover_state';
-import { ListGraphPopover } from '../../../../popovers/primitives/list_graph_popover';
+import { PopoverListItem } from '../../../../popovers/primitives/popover_list_item';
 import {
   GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID,
   GROUPED_ITEM_ACTIONS_POPOVER_TEST_ID,
@@ -36,44 +35,52 @@ export interface EventActionsButtonProps {
  * Emits grouped item click via pub-sub for event/alert details.
  */
 export const EventActionsButton = ({ item }: EventActionsButtonProps) => {
-  const buttonRef = useRef<HTMLButtonElement | null>(null);
-  const { state, actions } = useGraphPopoverState('grouped-item-event-actions-popover');
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const handleClick = useCallback(() => {
-    if (buttonRef.current) {
-      actions.openPopover(buttonRef.current);
-    }
-  }, [actions]);
+  const closePopover = useCallback(() => setIsPopoverOpen(false), []);
+  const togglePopover = useCallback(() => setIsPopoverOpen((prev) => !prev), []);
 
-  // Generate items with onClick handlers directly
-  const items = useMemo(
-    () =>
-      getLabelExpandItems({
-        nodeLabel: item.action ?? '',
-        isFilterActive,
-        previewItem: item,
-        onClose: actions.closePopover,
-      }),
-    [item, actions.closePopover]
-  );
+  // Generate items fresh on each render to reflect current filter state
+  const items = getLabelExpandItems({
+    nodeLabel: item.action ?? '',
+    isFilterActive,
+    previewItem: item,
+    onClose: closePopover,
+  });
 
   return (
-    <>
-      <EuiButtonIcon
-        buttonRef={buttonRef}
-        iconType="boxesVertical"
-        aria-label={actionsButtonAriaLabel}
-        color="text"
-        onClick={handleClick}
-        data-test-subj={GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID}
-      />
-      <ListGraphPopover
-        isOpen={state.isOpen}
-        anchorElement={state.anchorElement}
-        closePopover={actions.closePopover}
-        items={items}
-        testSubject={GROUPED_ITEM_ACTIONS_POPOVER_TEST_ID}
-      />
-    </>
+    <EuiPopover
+      button={
+        <EuiButtonIcon
+          iconType="boxesHorizontal"
+          aria-label={actionsButtonAriaLabel}
+          color="text"
+          onClick={togglePopover}
+          data-test-subj={GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID}
+        />
+      }
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      panelPaddingSize="none"
+      anchorPosition="rightCenter"
+      data-test-subj={GROUPED_ITEM_ACTIONS_POPOVER_TEST_ID}
+    >
+      <EuiListGroup gutterSize="none" bordered={false} flush={true} size="l">
+        {items.map((popoverItem, index) => {
+          if (popoverItem.type === 'separator') {
+            return <EuiHorizontalRule key={index} margin="none" size="full" />;
+          }
+          return (
+            <PopoverListItem
+              key={index}
+              iconType={popoverItem.iconType}
+              label={popoverItem.label}
+              onClick={popoverItem.onClick}
+              data-test-subj={popoverItem.testSubject}
+            />
+          );
+        })}
+      </EuiListGroup>
+    </EuiPopover>
   );
 };
