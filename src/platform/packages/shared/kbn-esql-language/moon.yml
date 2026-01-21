@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/esql-types'
   - '@kbn/core-pricing-common'
   - '@kbn/licensing-types'
+  - '@kbn/field-types'
 tags:
   - shared-common
   - package
