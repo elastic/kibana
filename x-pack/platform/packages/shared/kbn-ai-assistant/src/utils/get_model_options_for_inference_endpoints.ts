@@ -11,6 +11,7 @@ import {
   ELSER_ON_ML_NODE_INFERENCE_ID,
   E5_SMALL_INFERENCE_ID,
   ELSER_IN_EIS_INFERENCE_ID,
+  JINA_EMBEDDINGS_V3_INFERENCE_ID,
 } from '@kbn/observability-ai-assistant-plugin/public';
 
 export interface ModelOptionsData {
@@ -49,6 +50,21 @@ export const e5SmallDescription = i18n.translate(
   }
 );
 
+export const jinaEmbeddingsV3Title = i18n.translate(
+  'xpack.aiAssistant.welcomeMessage.knowledgeBase.model.jinaEmbeddingsV3Title',
+  {
+    defaultMessage: 'Jina Embeddings v3',
+  }
+);
+
+export const jinaEmbeddingsV3Description = i18n.translate(
+  'xpack.aiAssistant.welcomeMessage.knowledgeBase.model.jinaEmbeddingsV3Description',
+  {
+    defaultMessage:
+      'A multilingual embedding model that supports long inputs (up to 8192 tokens) for retrieval, text similarity, classification, and clustering tasks.',
+  }
+);
+
 const PRECONFIGURED_INFERENCE_ENDPOINT_METADATA: Record<
   string,
   { title: string; description: string }
@@ -65,14 +81,34 @@ const PRECONFIGURED_INFERENCE_ENDPOINT_METADATA: Record<
     title: e5SmallTitle,
     description: e5SmallDescription,
   },
+  [JINA_EMBEDDINGS_V3_INFERENCE_ID]: {
+    title: jinaEmbeddingsV3Title,
+    description: jinaEmbeddingsV3Description,
+  },
 };
 
 export const getModelOptionsForInferenceEndpoints = ({
   endpoints,
+  isKnowledgeBaseInstalled = false,
 }: {
   endpoints: InferenceAPIConfigResponse[];
+  isKnowledgeBaseInstalled?: boolean;
 }): ModelOptionsData[] => {
   const hasElserEIS = endpoints.some((ep) => ep.inference_id === ELSER_IN_EIS_INFERENCE_ID);
+  const hasJina = endpoints.some((ep) => ep.inference_id === JINA_EMBEDDINGS_V3_INFERENCE_ID);
+
+  // For users who haven't installed the knowledge base yet, only show Jina as the model option
+  // as it's the recommended model for new installations
+  if (!isKnowledgeBaseInstalled && hasJina) {
+    const jinaMeta = PRECONFIGURED_INFERENCE_ENDPOINT_METADATA[JINA_EMBEDDINGS_V3_INFERENCE_ID];
+    return [
+      {
+        key: JINA_EMBEDDINGS_V3_INFERENCE_ID,
+        label: jinaMeta.title,
+        description: jinaMeta.description,
+      },
+    ];
+  }
 
   return endpoints
     .filter((endpoint) => {

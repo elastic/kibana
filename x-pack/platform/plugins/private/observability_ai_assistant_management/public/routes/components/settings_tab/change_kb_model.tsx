@@ -45,8 +45,13 @@ export function ChangeKbModel({
 
   const { inferenceEndpoints, isLoading: isLoadingEndpoints, error } = useInferenceEndpoints();
 
+  // Show all model options if KB is installed, otherwise only show Jina for new installations
+  const isKnowledgeBaseInstalled =
+    knowledgeBase.status?.value?.inferenceModelState !== InferenceModelState.NOT_INSTALLED;
+
   const modelOptions: ModelOptionsData[] = getModelOptionsForInferenceEndpoints({
     endpoints: inferenceEndpoints,
+    isKnowledgeBaseInstalled,
   });
 
   const [selectedInferenceId, setSelectedInferenceId] = useState(
