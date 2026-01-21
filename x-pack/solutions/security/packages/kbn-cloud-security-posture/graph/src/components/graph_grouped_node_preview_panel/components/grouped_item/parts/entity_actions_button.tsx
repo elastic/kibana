@@ -45,7 +45,7 @@ export const EntityActionsButton = ({ item }: EntityActionsButtonProps) => {
     nodeId: item.id,
     onShowEntityDetails: item.availableInEntityStore ? () => emitPreviewAction(item) : undefined,
     onClose: closePopover,
-    enabledItems: {
+    shouldRender: {
       showActionsByEntity: true,
       showActionsOnEntity: true,
       showRelatedEvents: true,

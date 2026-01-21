@@ -9,7 +9,7 @@ import { useCallback } from 'react';
 import { useNodeExpandPopover } from './use_node_expand_popover';
 import type { NodeProps, NodeViewModel } from '../../types';
 import { GRAPH_NODE_EXPAND_POPOVER_TEST_ID } from '../../test_ids';
-import { getEntityExpandItems } from './get_entity_expand_items';
+import { getEntityExpandItems, getSourceNamespaceFromNode } from './get_entity_expand_items';
 import { getNodeDocumentMode, isEntityNodeEnriched } from '../../utils';
 
 /**
@@ -34,9 +34,9 @@ export const useEntityNodeExpandPopover = (onOpenEventPreview?: (node: NodeViewM
 
       return getEntityExpandItems({
         nodeId: node.id,
-        nodeData: node.data,
+        sourceNamespace: getSourceNamespaceFromNode(node.data),
         onShowEntityDetails: onOpenEventPreview ? () => onOpenEventPreview(node.data) : undefined,
-        enabledItems: {
+        shouldRender: {
           // Filter actions only for single-entity mode
           showActionsByEntity: isSingleEntity,
           showActionsOnEntity: isSingleEntity,
@@ -46,7 +46,7 @@ export const useEntityNodeExpandPopover = (onOpenEventPreview?: (node: NodeViewM
             (isSingleEntity || isGroupedEntities) && onOpenEventPreview !== undefined,
         },
         // Disable entity details if not enriched (single-entity mode)
-        entityDetailsDisabled: isSingleEntity && !isEnriched,
+        showEntityDetailsDisabled: isSingleEntity && !isEnriched,
       });
     },
     [onOpenEventPreview]

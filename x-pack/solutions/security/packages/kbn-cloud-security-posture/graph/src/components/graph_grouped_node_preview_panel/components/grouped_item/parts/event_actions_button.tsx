@@ -8,6 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import { EuiButtonIcon, EuiPopover, EuiListGroup, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { DOCUMENT_TYPE_ALERT } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { PopoverListItem } from '../../../../popovers/primitives/popover_list_item';
 import {
   GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID,
@@ -45,10 +46,11 @@ export const EventActionsButton = ({ item }: EventActionsButtonProps) => {
     nodeLabel: item.action ?? '',
     onShowEventDetails: () => emitPreviewAction(item),
     onClose: closePopover,
-    enabledItems: {
+    shouldRender: {
       showEventsWithAction: true,
       showEventDetails: true,
     },
+    isSingleAlert: item.itemType === DOCUMENT_TYPE_ALERT,
   });
 
   return (

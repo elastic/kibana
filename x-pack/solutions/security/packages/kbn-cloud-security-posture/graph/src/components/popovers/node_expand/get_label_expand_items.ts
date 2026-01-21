@@ -22,7 +22,7 @@ import { EVENT_ACTION } from '../../../common/constants';
  * Opt-in configuration for which items to render in the label expand popover.
  * All items default to false - consumers must explicitly enable the items they want.
  */
-export interface LabelExpandEnabledItems {
+export interface LabelExpandShouldRender {
   /** Show "Show events with this action" filter toggle */
   showEventsWithAction?: boolean;
   /** Show "Show event details" preview action */
@@ -40,9 +40,9 @@ export interface GetLabelExpandItemsOptions {
   /** Callback to close the popover */
   onClose?: () => void;
   /** Opt-in configuration for which items to render. All default to false. */
-  enabledItems: LabelExpandEnabledItems;
-  /** Label for event details item. Defaults to 'Show event details'. */
-  eventDetailsLabel?: string;
+  shouldRender: LabelExpandShouldRender;
+  /** Whether this is a single alert node. Changes label to "Show alert details". Defaults to false. */
+  isSingleAlert?: boolean;
 }
 
 /**
@@ -54,12 +54,12 @@ export interface GetLabelExpandItemsOptions {
 export const getLabelExpandItems = (
   options: GetLabelExpandItemsOptions
 ): Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps> => {
-  const { nodeLabel, onShowEventDetails, onClose, enabledItems, eventDetailsLabel } = options;
+  const { nodeLabel, onShowEventDetails, onClose, shouldRender, isSingleAlert = false } = options;
 
   const items: Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps> = [];
 
   // Filter action item
-  if (enabledItems.showEventsWithAction) {
+  if (shouldRender.showEventsWithAction) {
     const eventsWithActionActive = isFilterActive(EVENT_ACTION, nodeLabel);
     items.push({
       type: 'item',
@@ -87,22 +87,27 @@ export const getLabelExpandItems = (
   }
 
   // Event details item (with optional separator if filter items exist)
-  if (enabledItems.showEventDetails) {
+  if (shouldRender.showEventDetails) {
     // Add separator if there are filter items before the event details
     if (items.length > 0) {
       items.push({ type: 'separator' });
     }
 
-    const defaultLabel = i18n.translate(
-      'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showEventDetails',
-      { defaultMessage: 'Show event details' }
-    );
+    const eventDetailsLabel = isSingleAlert
+      ? i18n.translate(
+          'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showAlertDetails',
+          { defaultMessage: 'Show alert details' }
+        )
+      : i18n.translate(
+          'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showEventDetails',
+          { defaultMessage: 'Show event details' }
+        );
 
     items.push({
       type: 'item',
       iconType: 'expand',
       testSubject: GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
-      label: eventDetailsLabel ?? defaultLabel,
+      label: eventDetailsLabel,
       onClick: () => {
         onShowEventDetails?.();
         onClose?.();

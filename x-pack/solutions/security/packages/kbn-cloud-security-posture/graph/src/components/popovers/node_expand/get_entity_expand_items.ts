@@ -12,7 +12,6 @@ import type {
 } from '../primitives/list_graph_popover';
 import { emitFilterAction } from '../../filters/filter_pub_sub';
 import { isFilterActive } from '../../filters/filter_state';
-import type { NodeViewModel } from '../../types';
 import {
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID,
@@ -64,7 +63,7 @@ export const getTargetFieldFromNamespace = (sourceNamespace: string | undefined)
  * Opt-in configuration for which items to render in the entity expand popover.
  * All items default to false - consumers must explicitly enable the items they want.
  */
-export interface EntityExpandEnabledItems {
+export interface EntityExpandShouldRender {
   /** Show "Show this entity's actions" filter toggle */
   showActionsByEntity?: boolean;
   /** Show "Show actions done to this entity" filter toggle */
@@ -81,16 +80,20 @@ export interface EntityExpandEnabledItems {
 export interface GetEntityExpandItemsOptions {
   /** The node ID */
   nodeId: string;
-  /** The node data (required for deriving filter fields from source namespace) */
-  nodeData?: NodeViewModel;
+  /**
+   * The source namespace from node data (e.g., 'user', 'host', 'service', 'entity').
+   * Used to derive the correct ECS field names for actor and target filters.
+   * Can be obtained using getSourceNamespaceFromNode(nodeData).
+   */
+  sourceNamespace?: string;
   /** Callback to show entity details. Called when "Show entity details" is clicked. */
   onShowEntityDetails?: () => void;
   /** Callback to close the popover */
   onClose?: () => void;
   /** Opt-in configuration for which items to render. All default to false. */
-  enabledItems: EntityExpandEnabledItems;
+  shouldRender: EntityExpandShouldRender;
   /** Whether entity details should be disabled (shown but not clickable). Defaults to false. */
-  entityDetailsDisabled?: boolean;
+  showEntityDetailsDisabled?: boolean;
 }
 
 const DISABLED_TOOLTIP = i18n.translate(
@@ -109,22 +112,21 @@ export const getEntityExpandItems = (
 ): Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps> => {
   const {
     nodeId,
-    nodeData,
+    sourceNamespace,
     onShowEntityDetails,
     onClose,
-    enabledItems,
-    entityDetailsDisabled = false,
+    shouldRender,
+    showEntityDetailsDisabled = false,
   } = options;
 
-  // Determine fields from node data
-  const sourceNamespace = nodeData ? getSourceNamespaceFromNode(nodeData) : undefined;
+  // Derive ECS field names from source namespace
   const actorField = getActorFieldFromNamespace(sourceNamespace);
   const targetField = getTargetFieldFromNamespace(sourceNamespace);
 
   const items: Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps> = [];
 
   // Filter action items
-  if (enabledItems.showActionsByEntity) {
+  if (shouldRender.showActionsByEntity) {
     const actionsByEntityActive = isFilterActive(actorField, nodeId);
     items.push({
       type: 'item',
@@ -151,7 +153,7 @@ export const getEntityExpandItems = (
     });
   }
 
-  if (enabledItems.showActionsOnEntity) {
+  if (shouldRender.showActionsOnEntity) {
     const actionsOnEntityActive = isFilterActive(targetField, nodeId);
     items.push({
       type: 'item',
@@ -178,7 +180,7 @@ export const getEntityExpandItems = (
     });
   }
 
-  if (enabledItems.showRelatedEvents) {
+  if (shouldRender.showRelatedEvents) {
     const relatedEventsActive = isFilterActive(RELATED_ENTITY, nodeId);
     items.push({
       type: 'item',
@@ -206,7 +208,7 @@ export const getEntityExpandItems = (
   }
 
   // Entity details item (with optional separator if filter items exist)
-  if (enabledItems.showEntityDetails) {
+  if (shouldRender.showEntityDetails) {
     // Add separator if there are filter items before the entity details
     if (items.length > 0) {
       items.push({ type: 'separator' });
@@ -225,11 +227,11 @@ export const getEntityExpandItems = (
         'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetails',
         { defaultMessage: 'Show entity details' }
       ),
-      disabled: entityDetailsDisabled,
+      disabled: showEntityDetailsDisabled,
       onClick: handleEntityDetailsClick,
-      showToolTip: entityDetailsDisabled,
-      toolTipText: entityDetailsDisabled ? DISABLED_TOOLTIP : undefined,
-      toolTipProps: entityDetailsDisabled
+      showToolTip: showEntityDetailsDisabled,
+      toolTipText: showEntityDetailsDisabled ? DISABLED_TOOLTIP : undefined,
+      toolTipProps: showEntityDetailsDisabled
         ? {
             position: 'bottom',
             'data-test-subj': GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID,

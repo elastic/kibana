@@ -6,7 +6,6 @@
  */
 
 import { useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
 import { useNodeExpandPopover } from './use_node_expand_popover';
 import type { NodeProps, NodeViewModel } from '../../types';
 import { GRAPH_LABEL_EXPAND_POPOVER_TEST_ID } from '../../test_ids';
@@ -40,19 +39,14 @@ export const useLabelNodeExpandPopover = (onOpenEventPreview?: (node: NodeViewMo
       return getLabelExpandItems({
         nodeLabel,
         onShowEventDetails: onOpenEventPreview ? () => onOpenEventPreview(node.data) : undefined,
-        enabledItems: {
+        shouldRender: {
           // Always show filter action for label nodes
           showEventsWithAction: true,
           // Event details for single events/alerts or grouped events when handler available
           showEventDetails:
             (isSingleAlert || isSingleEvent || isGroupedEvents) && onOpenEventPreview !== undefined,
         },
-        eventDetailsLabel: isSingleAlert
-          ? i18n.translate(
-              'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showAlertDetails',
-              { defaultMessage: 'Show alert details' }
-            )
-          : undefined,
+        isSingleAlert,
       });
     },
     [onOpenEventPreview]
