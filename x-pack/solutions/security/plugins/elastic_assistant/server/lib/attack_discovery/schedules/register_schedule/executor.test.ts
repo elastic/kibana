@@ -15,7 +15,7 @@ import { analyticsServiceMock } from '@kbn/core/server/mocks';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import {
   ELASTIC_MANAGED_LLM_CONNECTOR_ID,
-  ANTHROPIC_CLAUDE_SONNET_3_7_CONNECTOR_ID,
+  LATEST_ELASTIC_MANAGED_CONNECTOR_ID,
 } from '@kbn/elastic-assistant-common';
 
 import { attackDiscoveryScheduleExecutor } from './executor';
@@ -632,7 +632,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
       expect.objectContaining({
         config: expect.objectContaining({
           apiConfig: expect.objectContaining({
-            connectorId: ANTHROPIC_CLAUDE_SONNET_3_7_CONNECTOR_ID,
+            connectorId: LATEST_ELASTIC_MANAGED_CONNECTOR_ID,
           }),
         }),
       })

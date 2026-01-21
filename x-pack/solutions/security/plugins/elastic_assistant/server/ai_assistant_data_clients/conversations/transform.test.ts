@@ -8,7 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import {
   ELASTIC_MANAGED_LLM_CONNECTOR_ID,
-  ANTHROPIC_CLAUDE_SONNET_3_7_CONNECTOR_ID,
+  LATEST_ELASTIC_MANAGED_CONNECTOR_ID,
 } from '@kbn/elastic-assistant-common';
 
 import {
@@ -130,7 +130,7 @@ describe('transforms', () => {
           connector_id: ELASTIC_MANAGED_LLM_CONNECTOR_ID,
         } as EsConversationSchema['api_config'],
       });
-      expect(message.apiConfig?.connectorId).toBe(ANTHROPIC_CLAUDE_SONNET_3_7_CONNECTOR_ID);
+      expect(message.apiConfig?.connectorId).toBe(LATEST_ELASTIC_MANAGED_CONNECTOR_ID);
     });
 
     it('should correctly transform ES conversation with unmapped connector ID', () => {

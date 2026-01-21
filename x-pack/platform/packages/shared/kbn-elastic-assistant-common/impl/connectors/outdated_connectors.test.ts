@@ -10,20 +10,20 @@ import {
   ELASTIC_MANAGED_LLM_CONNECTOR_ID,
   GENERAL_PURPOSE_LLM_V1_CONNECTOR_ID,
   GENERAL_PURPOSE_LLM_V2_CONNECTOR_ID,
-  ANTHROPIC_CLAUDE_SONNET_3_7_CONNECTOR_ID,
+  LATEST_ELASTIC_MANAGED_CONNECTOR_ID,
 } from './outdated_connectors';
 
 describe('outdated_connectors', () => {
   describe('resolveConnectorId', () => {
-    it('resolves ELASTIC_MANAGED_LLM_CONNECTOR_ID to ANTHROPIC_CLAUDE_SONNET_3_7_CONNECTOR_ID', () => {
+    it('resolves ELASTIC_MANAGED_LLM_CONNECTOR_ID to LATEST_ELASTIC_MANAGED_CONNECTOR_ID', () => {
       expect(resolveConnectorId(ELASTIC_MANAGED_LLM_CONNECTOR_ID)).toBe(
-        ANTHROPIC_CLAUDE_SONNET_3_7_CONNECTOR_ID
+        LATEST_ELASTIC_MANAGED_CONNECTOR_ID
       );
     });
 
-    it('resolves GENERAL_PURPOSE_LLM_V1_CONNECTOR_ID to ANTHROPIC_CLAUDE_SONNET_3_7_CONNECTOR_ID', () => {
+    it('resolves GENERAL_PURPOSE_LLM_V1_CONNECTOR_ID to LATEST_ELASTIC_MANAGED_CONNECTOR_ID', () => {
       expect(resolveConnectorId(GENERAL_PURPOSE_LLM_V1_CONNECTOR_ID)).toBe(
-        ANTHROPIC_CLAUDE_SONNET_3_7_CONNECTOR_ID
+        LATEST_ELASTIC_MANAGED_CONNECTOR_ID
       );
     });
 
@@ -38,9 +38,9 @@ describe('outdated_connectors', () => {
       expect(resolveConnectorId(connectorId)).toBe(connectorId);
     });
 
-    it('returns ANTHROPIC_CLAUDE_SONNET_3_7_CONNECTOR_ID if passed directly', () => {
-      expect(resolveConnectorId(ANTHROPIC_CLAUDE_SONNET_3_7_CONNECTOR_ID)).toBe(
-        ANTHROPIC_CLAUDE_SONNET_3_7_CONNECTOR_ID
+    it('returns LATEST_ELASTIC_MANAGED_CONNECTOR_ID if passed directly', () => {
+      expect(resolveConnectorId(LATEST_ELASTIC_MANAGED_CONNECTOR_ID)).toBe(
+        LATEST_ELASTIC_MANAGED_CONNECTOR_ID
       );
     });
   });
