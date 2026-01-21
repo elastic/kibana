@@ -34,25 +34,23 @@ export function getColorCategories(
       const multiKeys = accessors.reduce<string[]>((keys, accessor) => {
         const hasValue = Object.hasOwn(row, accessor);
         if (!hasValue) {
-          return keys;
+          keys.push(getValueKey(null));
+        } else {
+          const rawValue: RawValue = row[accessor];
+          const key = getValueKey(rawValue);
+          keys.push(key);
         }
-        const rawValue: RawValue = row[accessor];
-        const key = getValueKey(rawValue);
-
-        keys.push(key);
-
         return keys;
       }, []);
-      if (multiKeys.length === accessors.length) {
-        const value = new MultiFieldKey({
-          key: multiKeys,
-        });
-        const serializedValue = value.serialize();
-        if (!seen.has(value.toString())) {
-          // TODO is passing the right legacy move value?
-          acc.push(legacyMode ? value : serializedValue);
-          seen.add(value.toString());
-        }
+
+      const value = new MultiFieldKey({
+        key: multiKeys,
+      });
+      const serializedValue = value.serialize();
+      if (!seen.has(value.toString())) {
+        // TODO is passing the right legacy move value?
+        acc.push(legacyMode ? value : serializedValue);
+        seen.add(value.toString());
       }
     } else {
       const accessor = accessors[0];
