@@ -23,19 +23,25 @@ const gaugeStateSharedOptionsSchema = {
   shape: schema.maybe(
     schema.oneOf(
       [
-        schema.object({
-          type: schema.literal('bullet'),
-          direction: schema.oneOf([schema.literal('horizontal'), schema.literal('vertical')], {
-            defaultValue: 'horizontal',
-          }),
-        }),
-        schema.object({
-          type: schema.oneOf([
-            schema.literal('circle'),
-            schema.literal('semiCircle'),
-            schema.literal('arc'),
-          ]),
-        }),
+        schema.object(
+          {
+            type: schema.literal('bullet'),
+            direction: schema.oneOf([schema.literal('horizontal'), schema.literal('vertical')], {
+              defaultValue: 'horizontal',
+            }),
+          },
+          { meta: { id: 'gaugeShapeBullet', description: 'Bullet gauge shape' } }
+        ),
+        schema.object(
+          {
+            type: schema.oneOf([
+              schema.literal('circle'),
+              schema.literal('semiCircle'),
+              schema.literal('arc'),
+            ]),
+          },
+          { meta: { id: 'gaugeShapeCircular', description: 'Circular gauge shape' } }
+        ),
       ],
       { defaultValue: { type: 'bullet', direction: 'horizontal' } }
     )
@@ -107,42 +113,48 @@ const gaugeStateMetricOptionsSchema = {
   ),
 };
 
-export const gaugeStateSchemaNoESQL = schema.object({
-  type: schema.literal('gauge'),
-  ...sharedPanelInfoSchema,
-  ...dslOnlyPanelInfoSchema,
-  ...layerSettingsSchema,
-  ...datasetSchema,
-  ...gaugeStateSharedOptionsSchema,
-  /**
-   * Primary value configuration, must define operation.
-   */
-  metric: mergeAllMetricsWithChartDimensionSchema(
-    schema.object({
-      ...gaugeStateMetricOptionsSchema,
-      ...gaugeStateMetricInnerNoESQLOpsSchema,
-    })
-  ),
-});
+export const gaugeStateSchemaNoESQL = schema.object(
+  {
+    type: schema.literal('gauge'),
+    ...sharedPanelInfoSchema,
+    ...dslOnlyPanelInfoSchema,
+    ...layerSettingsSchema,
+    ...datasetSchema,
+    ...gaugeStateSharedOptionsSchema,
+    /**
+     * Primary value configuration, must define operation.
+     */
+    metric: mergeAllMetricsWithChartDimensionSchema(
+      schema.object({
+        ...gaugeStateMetricOptionsSchema,
+        ...gaugeStateMetricInnerNoESQLOpsSchema,
+      })
+    ),
+  },
+  { meta: { id: 'gaugeNoESQL' } }
+);
 
-export const gaugeStateSchemaESQL = schema.object({
-  type: schema.literal('gauge'),
-  ...sharedPanelInfoSchema,
-  ...layerSettingsSchema,
-  ...datasetEsqlTableSchema,
-  ...gaugeStateSharedOptionsSchema,
-  /**
-   * Primary value configuration, must define operation.
-   */
-  metric: schema.allOf([
-    schema.object({
-      ...genericOperationOptionsSchema,
-      ...gaugeStateMetricOptionsSchema,
-      ...gaugeStateMetricInnerESQLOpsSchema,
-    }),
-    esqlColumnSchema,
-  ]),
-});
+export const gaugeStateSchemaESQL = schema.object(
+  {
+    type: schema.literal('gauge'),
+    ...sharedPanelInfoSchema,
+    ...layerSettingsSchema,
+    ...datasetEsqlTableSchema,
+    ...gaugeStateSharedOptionsSchema,
+    /**
+     * Primary value configuration, must define operation.
+     */
+    metric: schema.allOf([
+      schema.object({
+        ...genericOperationOptionsSchema,
+        ...gaugeStateMetricOptionsSchema,
+        ...gaugeStateMetricInnerESQLOpsSchema,
+      }),
+      esqlColumnSchema,
+    ]),
+  },
+  { meta: { id: 'gaugeESQL' } }
+);
 
 export const gaugeStateSchema = schema.oneOf([gaugeStateSchemaNoESQL, gaugeStateSchemaESQL], {
   meta: { id: 'gaugeChartSchema' },

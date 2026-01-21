@@ -149,7 +149,9 @@ export const datasetEsqlTableSchema = {
   dataset: datasetEsqlTableTypeSchema,
 };
 
-const anyDatasetSchema = schema.oneOf([datasetTypeSchema, datasetEsqlTableTypeSchema]);
+const anyDatasetSchema = schema.oneOf([datasetTypeSchema, datasetEsqlTableTypeSchema], {
+  meta: { id: 'datasetSchema' },
+});
 
 export type DatasetType = TypeOf<typeof anyDatasetSchema>;
 export type DatasetTypeNoESQL = TypeOf<typeof datasetTypeSchema>;

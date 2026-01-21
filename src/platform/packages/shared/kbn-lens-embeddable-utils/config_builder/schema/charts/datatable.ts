@@ -11,7 +11,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_HEADER_ROW_HEIGHT_LINES, DEFAULT_ROW_HEIGHT_LINES } from '@kbn/lens-common';
 import { omit } from 'lodash';
-import { esqlColumnSchema, genericOperationOptionsSchema } from '../metric_ops';
+import { esqlColumn, esqlColumnSchema, genericOperationOptionsSchema } from '../metric_ops';
 import { applyColorToSchema, colorByValueSchema, colorMappingSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import {
@@ -95,6 +95,7 @@ const datatableStateSharedOptionsSchema = {
       },
       {
         meta: {
+          id: 'datatableDensity',
           description: 'Density configuration for the datatable',
         },
       }
@@ -303,6 +304,7 @@ export const datatableStateSchemaNoESQL = schema.object(
   {
     validate: validateSorting,
     meta: {
+      id: 'datatableNoESQL',
       description: 'Datatable state configuration for standard queries',
     },
   }
@@ -320,9 +322,7 @@ export const datatableStateSchemaESQL = schema.object(
      */
     metrics: schema.arrayOf(
       schema.allOf([
-        schema.object({
-          ...genericOperationOptionsSchema,
-        }),
+        schema.object(genericOperationOptionsSchema),
         datatableStateMetricsOptionsSchema,
         esqlColumnSchema,
       ]),
@@ -336,7 +336,7 @@ export const datatableStateSchemaESQL = schema.object(
      * Row configuration, optional operations.
      */
     rows: schema.maybe(
-      schema.arrayOf(schema.allOf([datatableStateRowsOptionsSchema, esqlColumnSchema]), {
+      schema.arrayOf(datatableStateRowsOptionsSchema.extends(esqlColumn), {
         minSize: 1,
         maxSize: 50,
         meta: { description: 'Array of operations to split the datatable rows by' },
@@ -356,6 +356,7 @@ export const datatableStateSchemaESQL = schema.object(
   {
     validate: validateSorting,
     meta: {
+      id: 'datatableESQL',
       description: 'Datatable state configuration for ES|QL queries',
     },
   }

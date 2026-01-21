@@ -22,11 +22,11 @@ import {
 } from '../shared';
 import {
   legendNestedSchema,
-  legendSizeSchema,
   legendVisibleSchema,
   valueDisplaySchema,
 } from './partition_shared';
 import {
+  legendSizeSchema,
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
@@ -42,6 +42,7 @@ const treemapSharedStateSchema = {
       },
       {
         meta: {
+          id: 'treemapLegend',
           description: 'Configuration for the treemap chart legend appearance and behavior',
         },
       }
@@ -148,6 +149,7 @@ export const treemapStateSchemaNoESQL = schema.object(
   },
   {
     meta: {
+      id: 'treemapNoESQL',
       description:
         'Treemap chart configuration schema for data source queries (non-ES|QL mode), defining metrics and breakdown dimensions',
     },
@@ -210,6 +212,7 @@ const treemapStateSchemaESQL = schema.object(
   },
   {
     meta: {
+      id: 'treemapESQL',
       description:
         'Treemap chart configuration schema for ES|QL queries, defining metrics and breakdown dimensions using column-based configuration',
     },

@@ -27,36 +27,42 @@ const regionMapStateRegionOptionsSchema = schema.object({
   ),
 });
 
-export const regionMapStateSchemaNoESQL = schema.object({
-  type: schema.literal('region_map'),
-  ...sharedPanelInfoSchema,
-  ...dslOnlyPanelInfoSchema,
-  ...layerSettingsSchema,
-  ...datasetSchema,
-  /**
-   * Metric configuration
-   */
-  metric: fieldMetricOrFormulaOperationDefinitionSchema,
-  /**
-   * Configure how to break down to regions
-   */
-  region: mergeAllBucketsWithChartDimensionSchema(regionMapStateRegionOptionsSchema),
-});
+export const regionMapStateSchemaNoESQL = schema.object(
+  {
+    type: schema.literal('region_map'),
+    ...sharedPanelInfoSchema,
+    ...dslOnlyPanelInfoSchema,
+    ...layerSettingsSchema,
+    ...datasetSchema,
+    /**
+     * Metric configuration
+     */
+    metric: fieldMetricOrFormulaOperationDefinitionSchema,
+    /**
+     * Configure how to break down to regions
+     */
+    region: mergeAllBucketsWithChartDimensionSchema(regionMapStateRegionOptionsSchema),
+  },
+  { meta: { id: 'regionMapNoESQL' } }
+);
 
-export const regionMapStateSchemaESQL = schema.object({
-  type: schema.literal('region_map'),
-  ...sharedPanelInfoSchema,
-  ...layerSettingsSchema,
-  ...datasetEsqlTableSchema,
-  /**
-   * Metric configuration
-   */
-  metric: schema.allOf([schema.object(genericOperationOptionsSchema), esqlColumnSchema]),
-  /**
-   * Configure how to break down to regions
-   */
-  region: schema.allOf([regionMapStateRegionOptionsSchema, esqlColumnSchema]),
-});
+export const regionMapStateSchemaESQL = schema.object(
+  {
+    type: schema.literal('region_map'),
+    ...sharedPanelInfoSchema,
+    ...layerSettingsSchema,
+    ...datasetEsqlTableSchema,
+    /**
+     * Metric configuration
+     */
+    metric: schema.allOf([schema.object(genericOperationOptionsSchema), esqlColumnSchema]),
+    /**
+     * Configure how to break down to regions
+     */
+    region: schema.allOf([regionMapStateRegionOptionsSchema, esqlColumnSchema]),
+  },
+  { meta: { id: 'regionMapESQL' } }
+);
 
 export const regionMapStateSchema = schema.oneOf(
   [regionMapStateSchemaNoESQL, regionMapStateSchemaESQL],

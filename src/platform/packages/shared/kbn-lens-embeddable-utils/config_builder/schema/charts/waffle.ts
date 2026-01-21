@@ -19,8 +19,9 @@ import {
   sharedPanelInfoSchema,
   legendTruncateAfterLinesSchema,
 } from '../shared';
-import { legendVisibleSchema, legendSizeSchema, valueDisplaySchema } from './partition_shared';
+import { legendVisibleSchema, valueDisplaySchema } from './partition_shared';
 import {
+  legendSizeSchema,
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
@@ -47,7 +48,7 @@ export const waffleStateSharedSchema = {
         visible: legendVisibleSchema,
         size: legendSizeSchema,
       },
-      { meta: { description: 'Legend configuration for waffle chart' } }
+      { meta: { id: 'waffleLegend', description: 'Legend configuration for waffle chart' } }
     )
   ),
   value_display: valueDisplaySchema,
@@ -124,7 +125,7 @@ export const waffleStateSchemaNoESQL = schema.object(
     ),
   },
   {
-    meta: { description: 'Waffle chart configuration for standard queries' },
+    meta: { id: 'waffleNoESQL', description: 'Waffle chart configuration for standard queries' },
     validate: validateGroupings,
   }
 );
@@ -164,7 +165,7 @@ const waffleStateSchemaESQL = schema.object(
     ),
   },
   {
-    meta: { description: 'Waffle chart configuration for ES|QL queries' },
+    meta: { id: 'waffleESQL', description: 'Waffle chart configuration for ES|QL queries' },
     validate: validateGroupings,
   }
 );

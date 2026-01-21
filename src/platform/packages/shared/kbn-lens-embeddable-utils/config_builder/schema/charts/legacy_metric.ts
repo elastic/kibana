@@ -76,32 +76,38 @@ const legacyMetricStateMetricOptionsSchema = schema.object({
   color: schema.maybe(colorByValueAbsolute),
 });
 
-export const legacyMetricStateSchemaNoESQL = schema.object({
-  type: schema.literal('legacy_metric'),
-  ...sharedPanelInfoSchema,
-  ...dslOnlyPanelInfoSchema,
-  ...layerSettingsSchema,
-  ...datasetSchema,
-  /**
-   * Metric configuration, must define operation.
-   */
-  metric: mergeAllMetricsWithChartDimensionSchema(legacyMetricStateMetricOptionsSchema),
-});
+export const legacyMetricStateSchemaNoESQL = schema.object(
+  {
+    type: schema.literal('legacy_metric'),
+    ...sharedPanelInfoSchema,
+    ...dslOnlyPanelInfoSchema,
+    ...layerSettingsSchema,
+    ...datasetSchema,
+    /**
+     * Metric configuration, must define operation.
+     */
+    metric: mergeAllMetricsWithChartDimensionSchema(legacyMetricStateMetricOptionsSchema),
+  },
+  { meta: { id: 'legacyMetricNoESQL' } }
+);
 
-const esqlLegacyMetricState = schema.object({
-  type: schema.literal('legacy_metric'),
-  ...sharedPanelInfoSchema,
-  ...layerSettingsSchema,
-  ...datasetEsqlTableSchema,
-  /**
-   * Metric configuration, must define operation.
-   */
-  metric: schema.allOf([
-    schema.object(genericOperationOptionsSchema),
-    legacyMetricStateMetricOptionsSchema,
-    esqlColumnSchema,
-  ]),
-});
+const esqlLegacyMetricState = schema.object(
+  {
+    type: schema.literal('legacy_metric'),
+    ...sharedPanelInfoSchema,
+    ...layerSettingsSchema,
+    ...datasetEsqlTableSchema,
+    /**
+     * Metric configuration, must define operation.
+     */
+    metric: schema.allOf([
+      schema.object(genericOperationOptionsSchema),
+      legacyMetricStateMetricOptionsSchema,
+      esqlColumnSchema,
+    ]),
+  },
+  { meta: { id: 'legacyMetricESQL' } }
+);
 
 export const legacyMetricStateSchema = schema.oneOf(
   [legacyMetricStateSchemaNoESQL, esqlLegacyMetricState],

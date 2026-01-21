@@ -22,10 +22,10 @@ import {
 import {
   legendNestedSchema,
   legendVisibleSchema,
-  legendSizeSchema,
   valueDisplaySchema,
 } from './partition_shared';
 import {
+  legendSizeSchema,
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
@@ -41,6 +41,7 @@ const mosaicStateSharedSchema = {
       },
       {
         meta: {
+          id: 'mosaicLegend',
           description: 'Legend configuration for mosaic chart appearance and behavior',
         },
       }
@@ -150,6 +151,7 @@ export const mosaicStateSchemaNoESQL = schema.object(
   },
   {
     meta: {
+      id: 'mosaicNoESQL',
       description:
         'Mosaic chart configuration schema for data source queries (non-ES|QL mode), defining metrics and breakdown dimensions',
     },
@@ -204,6 +206,7 @@ const mosaicStateSchemaESQL = schema.object(
   },
   {
     meta: {
+      id: 'mosaicESQL',
       description:
         'Mosaic chart configuration schema for ES|QL queries, defining metrics and breakdown dimensions using column-based configuration',
     },

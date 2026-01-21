@@ -17,6 +17,19 @@ import {
 } from './constants';
 import { filterSchema, unifiedSearchFilterSchema } from './filter';
 
+export const labelSharedProp = {
+  /**
+   * Label for the operation
+   */
+  label: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'Label for the operation',
+      },
+    })
+  ),
+};
+
 export const sharedPanelInfoSchema = {
   /**
    * The title of the chart displayed in the panel.
@@ -116,7 +129,12 @@ export const collapseBySchema = schema.oneOf(
      */
     schema.literal('min'),
   ],
-  { meta: { description: 'Collapse by function description', id: 'collapseBySchema' } }
+  {
+    meta: {
+      id: 'collapseBy',
+      description: 'Collapse by function description',
+    },
+  }
 );
 
 const layerSettingsSchemaWrapped = schema.object(layerSettingsSchema);

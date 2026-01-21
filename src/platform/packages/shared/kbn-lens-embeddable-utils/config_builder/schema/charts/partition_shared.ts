@@ -15,19 +15,6 @@ export const legendVisibleSchema = schema.maybe(
   })
 );
 
-export const legendSizeSchema = schema.maybe(
-  schema.oneOf(
-    [
-      schema.literal('auto'),
-      schema.literal('small'),
-      schema.literal('medium'),
-      schema.literal('large'),
-      schema.literal('xlarge'),
-    ],
-    { meta: { description: 'Legend size: auto, small, medium, large, or xlarge' } }
-  )
-);
-
 export const valueDisplaySchema = schema.maybe(
   schema.object(
     {

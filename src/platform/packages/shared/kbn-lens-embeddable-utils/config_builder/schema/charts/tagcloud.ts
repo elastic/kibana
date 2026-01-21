@@ -65,42 +65,50 @@ const tagcloudStateSharedOptionsSchema = {
   ),
 };
 
-export const tagcloudStateSchemaNoESQL = schema.object({
-  type: schema.literal('tagcloud'),
-  ...sharedPanelInfoSchema,
-  ...dslOnlyPanelInfoSchema,
-  ...layerSettingsSchema,
-  ...datasetSchema,
-  ...tagcloudStateSharedOptionsSchema,
-  /**
-   * Primary value configuration, must define operation.
-   */
-  metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(tagcloudStateMetricOptionsSchema),
-  /**
-   * Configure how to break down to tags
-   */
-  tag_by: mergeAllBucketsWithChartDimensionSchema(tagcloudStateTagsByOptionsSchema),
-});
+export const tagcloudStateSchemaNoESQL = schema.object(
+  {
+    type: schema.literal('tagcloud'),
+    ...sharedPanelInfoSchema,
+    ...dslOnlyPanelInfoSchema,
+    ...layerSettingsSchema,
+    ...datasetSchema,
+    ...tagcloudStateSharedOptionsSchema,
+    /**
+     * Primary value configuration, must define operation.
+     */
+    metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
+      tagcloudStateMetricOptionsSchema
+    ),
+    /**
+     * Configure how to break down to tags
+     */
+    tag_by: mergeAllBucketsWithChartDimensionSchema(tagcloudStateTagsByOptionsSchema),
+  },
+  { meta: { id: 'tagcloudNoESQL' } }
+);
 
-export const tagcloudStateSchemaESQL = schema.object({
-  type: schema.literal('tagcloud'),
-  ...sharedPanelInfoSchema,
-  ...layerSettingsSchema,
-  ...datasetEsqlTableSchema,
-  ...tagcloudStateSharedOptionsSchema,
-  /**
-   * Primary value configuration, must define operation.
-   */
-  metric: schema.allOf([
-    schema.object(genericOperationOptionsSchema),
-    tagcloudStateMetricOptionsSchema,
-    esqlColumnSchema,
-  ]),
-  /**
-   * Configure how to break down the metric (e.g. show one metric per term).
-   */
-  tag_by: schema.allOf([tagcloudStateTagsByOptionsSchema, esqlColumnSchema]),
-});
+export const tagcloudStateSchemaESQL = schema.object(
+  {
+    type: schema.literal('tagcloud'),
+    ...sharedPanelInfoSchema,
+    ...layerSettingsSchema,
+    ...datasetEsqlTableSchema,
+    ...tagcloudStateSharedOptionsSchema,
+    /**
+     * Primary value configuration, must define operation.
+     */
+    metric: schema.allOf([
+      schema.object(genericOperationOptionsSchema),
+      tagcloudStateMetricOptionsSchema,
+      esqlColumnSchema,
+    ]),
+    /**
+     * Configure how to break down the metric (e.g. show one metric per term).
+     */
+    tag_by: schema.allOf([tagcloudStateTagsByOptionsSchema, esqlColumnSchema]),
+  },
+  { meta: { id: 'tagcloudESQL' } }
+);
 
 export const tagcloudStateSchema = schema.oneOf(
   [tagcloudStateSchemaNoESQL, tagcloudStateSchemaESQL],

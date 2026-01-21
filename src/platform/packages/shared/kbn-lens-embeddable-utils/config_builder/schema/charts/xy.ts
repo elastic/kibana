@@ -181,52 +181,65 @@ const sharedLegendSchema = {
  */
 const xySharedSettings = {
   legend: schema.maybe(
-    schema.oneOf([
-      schema.object(
-        {
-          ...sharedLegendSchema,
-          inside: schema.maybe(schema.literal(false)),
-          position: schema.maybe(
-            schema.oneOf([
-              schema.literal('top'),
-              schema.literal('bottom'),
-              schema.literal('left'),
-              schema.literal('right'),
-            ])
-          ),
-          size: schema.maybe(
-            schema.oneOf([
-              schema.literal('small'),
-              schema.literal('medium'),
-              schema.literal('large'),
-              schema.literal('xlarge'),
-            ])
-          ),
-        },
-        { meta: { description: 'External legend positioned outside the chart' } }
-      ),
-      schema.object(
-        {
-          ...sharedLegendSchema,
-          inside: schema.literal(true),
-          columns: schema.maybe(
-            schema.number({ min: 1, max: 5, meta: { description: 'Number of legend columns' } })
-          ),
-          alignment: schema.maybe(
-            schema.oneOf(
-              [
-                schema.literal('top_right'),
-                schema.literal('bottom_right'),
-                schema.literal('top_left'),
-                schema.literal('bottom_left'),
-              ],
-              { meta: { description: 'Legend alignment inside the chart' } }
-            )
-          ),
-        },
-        { meta: { description: 'Internal legend positioned inside the chart' } }
-      ),
-    ])
+    schema.oneOf(
+      [
+        schema.object(
+          {
+            ...sharedLegendSchema,
+            inside: schema.maybe(schema.literal(false)),
+            position: schema.maybe(
+              schema.oneOf([
+                schema.literal('top'),
+                schema.literal('bottom'),
+                schema.literal('left'),
+                schema.literal('right'),
+              ])
+            ),
+            size: schema.maybe(
+              schema.oneOf([
+                schema.literal('small'),
+                schema.literal('medium'),
+                schema.literal('large'),
+                schema.literal('xlarge'),
+              ])
+            ),
+          },
+          {
+            meta: {
+              id: 'xyLegendOutside',
+              description: 'External legend positioned outside the chart',
+            },
+          }
+        ),
+        schema.object(
+          {
+            ...sharedLegendSchema,
+            inside: schema.literal(true),
+            columns: schema.maybe(
+              schema.number({ min: 1, max: 5, meta: { description: 'Number of legend columns' } })
+            ),
+            alignment: schema.maybe(
+              schema.oneOf(
+                [
+                  schema.literal('top_right'),
+                  schema.literal('bottom_right'),
+                  schema.literal('top_left'),
+                  schema.literal('bottom_left'),
+                ],
+                { meta: { description: 'Legend alignment inside the chart' } }
+              )
+            ),
+          },
+          {
+            meta: {
+              id: 'xyLegendInside',
+              description: 'Internal legend positioned inside the chart',
+            },
+          }
+        ),
+      ],
+      { meta: { id: 'xyLegend', description: 'Legend configuration for XY chart' } }
+    )
   ),
 
   fitting: schema.maybe(
@@ -253,6 +266,7 @@ const xySharedSettings = {
       },
       {
         meta: {
+          id: 'xyFitting',
           description:
             'Missing data interpolation configuration (only valid fitting types applied per chart type)',
         },
@@ -293,7 +307,7 @@ const xySharedSettings = {
         left: schema.maybe(yAxisSchema),
         right: schema.maybe(yAxisSchema),
       },
-      { meta: { description: 'Axis configuration for X, left Y, and right Y axes' } }
+      { meta: { id: 'xyAxis', description: 'Axis configuration for X, left Y, and right Y axes' } }
     )
   ),
   decorations: schema.maybe(
@@ -332,7 +346,12 @@ const xySharedSettings = {
           schema.boolean({ meta: { description: 'Show value labels (alternative property)' } })
         ),
       },
-      { meta: { description: 'Visual enhancements and styling options for the chart' } }
+      {
+        meta: {
+          id: 'xyDecorations',
+          description: 'Visual enhancements and styling options for the chart',
+        },
+      }
     )
   ),
 };
@@ -375,11 +394,19 @@ const xyDataLayerSchemaNoESQL = schema.object(
     ),
     x: schema.maybe(
       mergeAllBucketsWithChartDimensionSchema(
-        schema.object({}, { meta: { description: 'X-axis bucket configuration' } })
+        schema.object(
+          {},
+          { meta: { id: 'xyXMetricNoESQL', description: 'X-axis bucket configuration' } }
+        )
       )
     ),
   },
-  { meta: { description: 'Data layer for standard queries with metrics and buckets' } }
+  {
+    meta: {
+      id: 'xyLayerNoESQL',
+      description: 'Data layer for standard queries with metrics and buckets',
+    },
+  }
 );
 
 /**
@@ -403,32 +430,37 @@ const xyDataLayerSchemaESQL = schema.object(
     ),
     x: schema.maybe(esqlColumnSchema),
   },
-  { meta: { description: 'Data layer for ES|QL queries with column references' } }
+  {
+    meta: { id: 'xyLayerESQL', description: 'Data layer for ES|QL queries with column references' },
+  }
 );
 
 const getListOfAvailableIcons = (description: string) =>
-  schema.oneOf([
-    schema.oneOf([
-      schema.literal('empty'),
-      schema.literal('asterisk'),
-      schema.literal('alert'),
-      schema.literal('bell'),
-      schema.literal('bolt'),
-      schema.literal('bug'),
-      schema.literal('circle'),
-      schema.literal('editorComment'),
-      schema.literal('flag'),
-      schema.literal('heart'),
-    ]),
-    schema.oneOf([
-      schema.literal('mapMarker'),
-      schema.literal('pinFilled'),
-      schema.literal('starEmpty'),
-      schema.literal('starFilled'),
-      schema.literal('tag'),
-      schema.literal('triangle'),
-    ]),
-  ]);
+  schema.oneOf(
+    [
+      schema.oneOf([
+        schema.literal('empty'),
+        schema.literal('asterisk'),
+        schema.literal('alert'),
+        schema.literal('bell'),
+        schema.literal('bolt'),
+        schema.literal('bug'),
+        schema.literal('circle'),
+        schema.literal('editorComment'),
+        schema.literal('flag'),
+        schema.literal('heart'),
+      ]),
+      schema.oneOf([
+        schema.literal('mapMarker'),
+        schema.literal('pinFilled'),
+        schema.literal('starEmpty'),
+        schema.literal('starFilled'),
+        schema.literal('tag'),
+        schema.literal('triangle'),
+      ]),
+    ],
+    { meta: { description } }
+  );
 
 const STROKE_WIDTH_MIN = 1;
 const STROKE_WIDTH_MAX = 10;
@@ -480,13 +512,21 @@ const referenceLineLayerSchemaNoESQL = schema.object(
     thresholds: schema.arrayOf(
       mergeAllMetricsWithChartDimensionSchemaWithStaticOps(
         schema.object(referenceLineLayerShared, {
-          meta: { description: 'Reference line threshold configuration' },
+          meta: {
+            id: 'xyReferenceLineThresholdNoESQL',
+            description: 'Reference line threshold configuration',
+          },
         })
       ),
       { meta: { description: 'Array of reference line thresholds' }, minSize: 1, maxSize: 100 }
     ),
   },
-  { meta: { description: 'Reference line layer for standard queries' } }
+  {
+    meta: {
+      id: 'xyReferenceLineLayerNoESQL',
+      description: 'Reference line layer for standard queries',
+    },
+  }
 );
 
 /**
@@ -511,7 +551,9 @@ const referenceLineLayerSchemaESQL = schema.object(
       }
     ),
   },
-  { meta: { description: 'Reference line layer for ES|QL queries' } }
+  {
+    meta: { id: 'xyReferenceLineLayerESQL', description: 'Reference line layer for ES|QL queries' },
+  }
 );
 
 /**
@@ -589,7 +631,12 @@ const annotationQuery = schema.object(
       )
     ),
   },
-  { meta: { description: 'Annotation from query results matching a filter' } }
+  {
+    meta: {
+      id: 'xyAnnotationQuery',
+      description: 'Annotation from query results matching a filter',
+    },
+  }
 );
 
 /**
@@ -607,7 +654,12 @@ const annotationManualEvent = schema.object(
       })
     ),
   },
-  { meta: { description: 'Manual point annotation at specific timestamp' } }
+  {
+    meta: {
+      id: 'xyAnnotationManualEvent',
+      description: 'Manual point annotation at specific timestamp',
+    },
+  }
 );
 
 /**
@@ -632,7 +684,12 @@ const annotationManualRange = schema.object(
       })
     ),
   },
-  { meta: { description: 'Manual range annotation spanning time interval' } }
+  {
+    meta: {
+      id: 'xyAnnotationManualRange',
+      description: 'Manual range annotation spanning time interval',
+    },
+  }
 );
 
 /**
@@ -648,7 +705,12 @@ const annotationLayerSchema = schema.object(
       { meta: { description: 'Array of annotation configurations' }, minSize: 1, maxSize: 100 }
     ),
   },
-  { meta: { description: 'Layer containing annotations (query-based, points, and ranges)' } }
+  {
+    meta: {
+      id: 'xyAnnotationLayerNoESQL',
+      description: 'Layer containing annotations (query-based, points, and ranges)',
+    },
+  }
 );
 
 /**

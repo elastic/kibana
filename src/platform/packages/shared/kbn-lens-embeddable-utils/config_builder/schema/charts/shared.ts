@@ -31,6 +31,21 @@ import {
   bucketFiltersOperationSchema,
 } from '../bucket_ops';
 
+export const legendSizeSchema = schema.maybe(
+  schema.oneOf(
+    [
+      schema.literal('auto'),
+      schema.literal('small'),
+      schema.literal('medium'),
+      schema.literal('large'),
+      schema.literal('xlarge'),
+    ],
+    {
+      meta: { id: 'legendSize', description: 'Legend size: auto, small, medium, large, or xlarge' },
+    }
+  )
+);
+
 /**
  * Best to not use dynamic schema building logic
  * so the possible combinations are declared here explicitly:

@@ -9,6 +9,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { omit } from 'lodash';
 import { filterSchema } from './filter';
 import { formatSchema } from './format';
 import {
@@ -19,19 +20,11 @@ import {
   LENS_STATIC_VALUE_DEFAULT,
 } from './constants';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../transforms/columns/utils';
+import { labelSharedProp } from './shared';
 
 export const genericOperationOptionsSchema = {
   ...formatSchema,
-  /**
-   * Label for the operation
-   */
-  label: schema.maybe(
-    schema.string({
-      meta: {
-        description: 'Label for the operation',
-      },
-    })
-  ),
+  ...labelSharedProp,
 };
 
 export const staticOperationDefinitionSchema = schema.object(
@@ -48,8 +41,38 @@ export const staticOperationDefinitionSchema = schema.object(
       defaultValue: LENS_STATIC_VALUE_DEFAULT,
     }),
   },
-  { meta: { id: 'staticOperationDefinitionSchema' } }
+  { meta: { id: 'staticOperationDefinition' } }
 );
+
+const advancedOperationSettings = {
+  /**
+   * Reduced time range
+   */
+  reduced_time_range: schema.maybe(
+    schema.string({
+      meta: { id: 'operationReducedTimeRangeSetting', description: 'Reduced time range' },
+    })
+  ),
+  /**
+   * Time shift
+   */
+  time_shift: schema.maybe(
+    schema.string({ meta: { id: 'operationTimeShiftSetting', description: 'Time shift' } })
+  ),
+  /**
+   * Filter
+   */
+  filter: schema.maybe(filterSchema),
+  /**
+   * Time scale
+   */
+  time_scale: schema.maybe(
+    schema.oneOf(
+      [schema.literal('s'), schema.literal('m'), schema.literal('h'), schema.literal('d')],
+      { meta: { id: 'operationTimeScaleSetting', description: 'Time scale' } }
+    )
+  ),
+};
 
 export const formulaOperationDefinitionSchema = schema.object(
   {
@@ -63,16 +86,7 @@ export const formulaOperationDefinitionSchema = schema.object(
         description: 'Formula',
       },
     }),
-    /**
-     * Filter
-     */
-    filter: schema.maybe(filterSchema),
-    /**
-     * Reduced time range
-     */
-    reduced_time_range: schema.maybe(
-      schema.string({ meta: { description: 'Reduced time range' } })
-    ),
+    ...omit(advancedOperationSettings, ['time_shift']),
     /**
      * Custom scaling for the entire formula
      */
@@ -83,47 +97,26 @@ export const formulaOperationDefinitionSchema = schema.object(
       )
     ),
   },
-  { meta: { id: 'formulaOperationDefinitionSchema' } }
+  { meta: { id: 'formulaOperation' } }
 );
 
-export const esqlColumnSchema = schema.object(
-  {
-    /**
-     * Value
-     */
-    operation: schema.literal('value'),
-    column: schema.string({
-      meta: {
-        description: 'Column to use',
-      },
-    }),
-  }
-  // { meta: { id: 'esqlColumnSchema' } }
-);
+export const esqlColumn = {
+  /**
+   * Value
+   */
+  operation: schema.literal('value'),
+  column: schema.string({
+    meta: {
+      description: 'Column to use',
+    },
+  }),
+};
+
+export const esqlColumnSchema = schema.object(esqlColumn);
 
 export const metricOperationSharedSchema = {
   ...genericOperationOptionsSchema,
-  /**
-   * Time scale
-   */
-  time_scale: schema.maybe(
-    schema.oneOf(
-      [schema.literal('s'), schema.literal('m'), schema.literal('h'), schema.literal('d')],
-      { meta: { description: 'Time scale' } }
-    )
-  ),
-  /**
-   * Reduced time range
-   */
-  reduced_time_range: schema.maybe(schema.string({ meta: { description: 'Reduced time range' } })),
-  /**
-   * Time shift
-   */
-  time_shift: schema.maybe(schema.string({ meta: { description: 'Time shift' } })),
-  /**
-   * Filter
-   */
-  filter: schema.maybe(filterSchema),
+  ...advancedOperationSettings,
 };
 
 export const fieldBasedOperationSharedSchema = {
@@ -154,19 +147,18 @@ export const countMetricOperationSchema = schema.object(
      * Select the operation type
      */
     operation: schema.literal('count'),
-    /**
-     * Field to be used for the metric
-     */
-    field: schema.maybe(schema.string()),
   },
-  { meta: { id: 'countMetricOperationSchema' } }
+  { meta: { id: 'countMetricOperation' } }
 );
 
-export const uniqueCountMetricOperationSchema = schema.object({
-  ...fieldBasedOperationSharedSchema,
-  ...emptyAsNullSchemaRawObject,
-  operation: schema.literal('unique_count'),
-});
+export const uniqueCountMetricOperationSchema = schema.object(
+  {
+    ...fieldBasedOperationSharedSchema,
+    ...emptyAsNullSchemaRawObject,
+    operation: schema.literal('unique_count'),
+  },
+  { meta: { id: 'uniqueCountMetricOperation' } }
+);
 
 export const metricOperationSchema = schema.object(
   {
@@ -179,7 +171,7 @@ export const metricOperationSchema = schema.object(
       schema.literal('standard_deviation'),
     ]),
   },
-  { meta: { id: 'minMaxAvgMedianStdDevMetricOperationSchema' } }
+  { meta: { id: 'minMaxAvgMedianStdDevMetricOperation' } }
 );
 
 export const sumMetricOperationSchema = schema.object(
@@ -188,7 +180,7 @@ export const sumMetricOperationSchema = schema.object(
     ...emptyAsNullSchemaRawObject,
     operation: schema.literal('sum'),
   },
-  { meta: { id: 'sumMetricOperationSchema' } }
+  { meta: { id: 'sumMetricOperation' } }
 );
 
 export const lastValueOperationSchema = schema.object(
@@ -201,7 +193,7 @@ export const lastValueOperationSchema = schema.object(
       defaultValue: LENS_LAST_VALUE_DEFAULT_SHOW_ARRAY_VALUES,
     }),
   },
-  { meta: { id: 'lastValueOperationSchema' } }
+  { meta: { id: 'lastValueOperation' } }
 );
 
 export const percentileOperationSchema = schema.object(
@@ -213,7 +205,7 @@ export const percentileOperationSchema = schema.object(
       defaultValue: LENS_PERCENTILE_DEFAULT_VALUE,
     }),
   },
-  { meta: { id: 'percentileOperationSchema' } }
+  { meta: { id: 'percentileOperation' } }
 );
 
 export const percentileRanksOperationSchema = schema.object(
@@ -225,18 +217,21 @@ export const percentileRanksOperationSchema = schema.object(
       defaultValue: LENS_PERCENTILE_RANK_DEFAULT_VALUE,
     }),
   },
-  { meta: { id: 'percentileRanksOperationSchema' } }
+  { meta: { id: 'percentileRanksOperation' } }
 );
 
-export const fieldMetricOperationsSchema = schema.oneOf([
-  countMetricOperationSchema,
-  uniqueCountMetricOperationSchema,
-  metricOperationSchema,
-  sumMetricOperationSchema,
-  lastValueOperationSchema,
-  percentileOperationSchema,
-  percentileRanksOperationSchema,
-]);
+export const fieldMetricOperationsSchema = schema.oneOf(
+  [
+    countMetricOperationSchema,
+    uniqueCountMetricOperationSchema,
+    metricOperationSchema,
+    sumMetricOperationSchema,
+    lastValueOperationSchema,
+    percentileOperationSchema,
+    percentileRanksOperationSchema,
+  ],
+  { meta: { id: 'fieldMetricOperations' } }
+);
 
 export const differencesOperationSchema = schema.object(
   {
@@ -244,7 +239,7 @@ export const differencesOperationSchema = schema.object(
     operation: schema.literal('differences'),
     of: fieldMetricOperationsSchema,
   },
-  { meta: { id: 'differencesOperationSchema' } }
+  { meta: { id: 'differencesOperation' } }
 );
 
 export const movingAverageOperationSchema = schema.object(
@@ -257,7 +252,7 @@ export const movingAverageOperationSchema = schema.object(
       defaultValue: LENS_MOVING_AVERAGE_DEFAULT_WINDOW,
     }),
   },
-  { meta: { id: 'movingAverageOperationSchema' } }
+  { meta: { id: 'movingAverageOperation' } }
 );
 
 export const cumulativeSumOperationSchema = schema.object(
@@ -265,7 +260,7 @@ export const cumulativeSumOperationSchema = schema.object(
     ...fieldBasedOperationSharedSchema,
     operation: schema.literal('cumulative_sum'),
   },
-  { meta: { id: 'cumulativeSumOperationSchema' } }
+  { meta: { id: 'cumulativeSumOperation' } }
 );
 
 export const counterRateOperationSchema = schema.object(
@@ -273,7 +268,7 @@ export const counterRateOperationSchema = schema.object(
     ...fieldBasedOperationSharedSchema,
     operation: schema.literal('counter_rate'),
   },
-  { meta: { id: 'counterRateOperationSchema' } }
+  { meta: { id: 'counterRateOperation' } }
 );
 
 export const metricOperationDefinitionSchema = schema.oneOf([

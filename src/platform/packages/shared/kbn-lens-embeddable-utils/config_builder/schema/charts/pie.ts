@@ -20,15 +20,11 @@ import {
   sharedPanelInfoSchema,
 } from '../shared';
 import {
+  legendSizeSchema,
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
-import {
-  legendNestedSchema,
-  legendSizeSchema,
-  legendVisibleSchema,
-  valueDisplaySchema,
-} from './partition_shared';
+import { legendNestedSchema, legendVisibleSchema, valueDisplaySchema } from './partition_shared';
 
 /**
  * Shared visualization options for pie/donut charts including legend, value display, and label positioning
@@ -42,7 +38,7 @@ const pieStateSharedSchema = {
         visible: legendVisibleSchema,
         size: legendSizeSchema,
       },
-      { meta: { description: 'Legend configuration for pie/donut chart' } }
+      { meta: { id: 'pieLegend', description: 'Legend configuration for pie/donut chart' } }
     )
   ),
   value_display: valueDisplaySchema,
@@ -145,7 +141,7 @@ export const pieStateSchemaNoESQL = schema.object(
     ),
   },
   {
-    meta: { description: 'Pie/donut chart configuration for standard queries' },
+    meta: { id: 'pieNoESQL', description: 'Pie/donut chart configuration for standard queries' },
     validate: validateGroupings,
   }
 );
@@ -189,7 +185,7 @@ const pieStateSchemaESQL = schema.object(
     ),
   },
   {
-    meta: { description: 'Pie/donut chart configuration for ES|QL queries' },
+    meta: { id: 'pieESQL', description: 'Pie/donut chart configuration for ES|QL queries' },
     validate: validateGroupings,
   }
 );

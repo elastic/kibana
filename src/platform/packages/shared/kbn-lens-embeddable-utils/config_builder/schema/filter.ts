@@ -49,15 +49,19 @@ export const filterWithLabelSchema = schema.object(
 
 export type LensApiFilterType = typeof filterSchema.type;
 
-const FilterQueryType = schema.object({
-  match_phrase: schema.maybe(schema.any({})),
-  prefix: schema.maybe(schema.any({})),
-  exists: schema.maybe(schema.any({})),
-  match: schema.maybe(schema.any({})),
-  wildcard: schema.maybe(schema.any({})),
-  bool: schema.maybe(schema.any({})),
-  range: schema.maybe(schema.any({})),
-});
+const FilterQueryType = schema.object(
+  {
+    match_phrase: schema.maybe(schema.any({})),
+    prefix: schema.maybe(schema.any({})),
+    exists: schema.maybe(schema.any({})),
+    match: schema.maybe(schema.any({})),
+    wildcard: schema.maybe(schema.any({})),
+    bool: schema.maybe(schema.any({})),
+    range: schema.maybe(schema.any({})),
+    terms: schema.maybe(schema.any({})),
+  },
+  { meta: { id: 'filterQueryTypeSchema' } }
+);
 
 /**
  * Unified search filter schema that can accept either a full filter object or a simple query string.

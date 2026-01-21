@@ -20,19 +20,7 @@ import {
   LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT,
 } from './constants';
 import { formatSchema } from './format';
-
-const labelSharedProp = {
-  /**
-   * Label for the operation
-   */
-  label: schema.maybe(
-    schema.string({
-      meta: {
-        description: 'Label for the operation',
-      },
-    })
-  ),
-};
+import { labelSharedProp } from './shared';
 
 export const bucketDateHistogramOperationSchema = schema.object(
   {
