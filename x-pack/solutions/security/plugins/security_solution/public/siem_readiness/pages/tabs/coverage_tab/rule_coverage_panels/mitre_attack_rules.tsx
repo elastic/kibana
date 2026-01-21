@@ -22,7 +22,7 @@ import {
   useIndicesDocCounts,
   useIntegrationDisplayNames,
 } from '@kbn/siem-readiness';
-import type { SiemReadinessPackageInfo, RelatedIntegrationRuleResponse } from '@kbn/siem-readiness';
+import type { SiemReadinessPackageInfo } from '@kbn/siem-readiness';
 import { useBasePath } from '../../../../../common/lib/kibana';
 import { IntegrationSelectablePopover } from '../../../components/integrations_selectable_popover';
 
@@ -31,13 +31,18 @@ const getIntegrationUrl = (basePath: string, integration: string): string => {
   return integration ? `${baseUrl}/${integration}` : baseUrl;
 };
 
-interface DetectionRule extends RelatedIntegrationRuleResponse {
+interface DetectionRule {
   rule_id?: string;
   id?: string;
   name?: string;
   enabled?: boolean;
   threat?: ThreatElement[];
   index?: string | string[];
+  related_integrations?: Array<{
+    package: string;
+    version?: string;
+    integration?: string;
+  }>;
 }
 
 interface ThreatElement {
@@ -127,9 +132,12 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
     if (!getDetectionRules.data?.data) return [];
 
     const indices = new Set<string>();
-    getDetectionRules.data.data.forEach((rule: DetectionRule) => {
-      if (rule.enabled && rule.index) {
-        const ruleIndexArray = Array.isArray(rule.index) ? rule.index : [rule.index];
+    getDetectionRules.data.data.forEach((rule) => {
+      const detectionRule = rule as DetectionRule;
+      if (detectionRule.enabled && detectionRule.index) {
+        const ruleIndexArray = Array.isArray(detectionRule.index)
+          ? detectionRule.index
+          : [detectionRule.index];
         ruleIndexArray.forEach((index) => indices.add(index));
       }
     });
@@ -145,14 +153,15 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
 
     const allThreatElements: ThreatElement[] = [];
 
-    getDetectionRules.data.data.forEach((rule: DetectionRule) => {
+    getDetectionRules.data.data.forEach((rule) => {
+      const detectionRule = rule as DetectionRule;
       // Only include enabled rules
-      if (rule.enabled && rule.threat && Array.isArray(rule.threat)) {
-        rule.threat.forEach((threatElement) => {
+      if (detectionRule.enabled && detectionRule.threat && Array.isArray(detectionRule.threat)) {
+        detectionRule.threat.forEach((threatElement) => {
           allThreatElements.push({
             ...threatElement,
-            rule_id: rule.rule_id || rule.id || '',
-            rule_name: rule.name || '',
+            rule_id: detectionRule.rule_id || detectionRule.id || '',
+            rule_name: detectionRule.name || '',
           });
         });
       }
@@ -230,6 +239,41 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
     return uniqueRuleIds.size;
   }, [threatFields, staticTactics]);
 
+  // Extract integrations from enabled rules with rule data
+  const integrationsFromEnabledRules = useMemo(() => {
+    if (!getDetectionRules.data?.data) return [];
+
+    return getDetectionRules.data.data
+      .map((rule) => rule as DetectionRule)
+      .filter((detectionRule) => detectionRule.enabled)
+      .map((detectionRule) => {
+        const ruleId = detectionRule.rule_id || detectionRule.id || '';
+        const relatedIntegrations = detectionRule.related_integrations || [];
+        const ruleThreat = detectionRule.threat || [];
+        const ruleIndexArray = Array.isArray(detectionRule.index)
+          ? detectionRule.index
+          : detectionRule.index
+          ? [detectionRule.index]
+          : [];
+
+        // Get missing integrations for this rule
+        const missingIntegrations = relatedIntegrations
+          .filter((integration) => {
+            const packageName = integration.package;
+            return packageName && !installedIntegrationNames.includes(packageName);
+          })
+          .map((integration) => integration.package)
+          .filter((name): name is string => typeof name === 'string');
+
+        return {
+          ruleId,
+          missingIntegrations,
+          ruleThreat,
+          ruleIndexArray,
+        };
+      });
+  }, [getDetectionRules.data, installedIntegrationNames]);
+
   // Calculate missing integrations by MITRE tactic using rule data
   const missingIntegrationsByTactic = useMemo((): Map<string, MissingIntegrationsData> => {
     const tacticMap = new Map<
@@ -245,62 +289,44 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
     });
 
     // Process each rule to find missing integrations per tactic
-    getDetectionRules.data?.data?.forEach((rule: DetectionRule) => {
-      if (!rule.enabled) return;
+    integrationsFromEnabledRules.forEach(
+      ({ ruleId, missingIntegrations, ruleThreat, ruleIndexArray }) => {
+        // Map rule data to its MITRE tactics
+        ruleThreat.forEach((threatElement) => {
+          if (threatElement.tactic && threatElement.tactic.name) {
+            const tacticName = threatElement.tactic.name.trim();
 
-      const ruleId = rule.rule_id || rule.id || '';
-      const relatedIntegrations = rule.related_integrations || [];
-      const ruleThreat = rule.threat || [];
-      const ruleIndexArray = Array.isArray(rule.index)
-        ? rule.index
-        : rule.index
-        ? [rule.index]
-        : [];
+            // Find matching static tactic
+            const matchingStaticTactic = staticTactics.find(
+              (staticTactic) => staticTactic.toLowerCase() === tacticName.toLowerCase()
+            );
 
-      // Get missing integrations for this rule
-      const missingIntegrations = relatedIntegrations
-        .filter((integration) => {
-          const packageName = integration.package;
-          return packageName && !installedIntegrationNames.includes(packageName);
-        })
-        .map((integration) => integration.package)
-        .filter((name): name is string => typeof name === 'string');
+            if (matchingStaticTactic) {
+              const tacticData = tacticMap.get(matchingStaticTactic);
+              if (tacticData) {
+                // Add missing integrations if any
+                if (missingIntegrations.length > 0) {
+                  missingIntegrations.forEach((integration) => {
+                    tacticData.missingIntegrations.add(integration);
+                  });
+                }
 
-      // Map rule data to its MITRE tactics
-      ruleThreat.forEach((threatElement) => {
-        if (threatElement.tactic && threatElement.tactic.name) {
-          const tacticName = threatElement.tactic.name.trim();
-
-          // Find matching static tactic
-          const matchingStaticTactic = staticTactics.find(
-            (staticTactic) => staticTactic.toLowerCase() === tacticName.toLowerCase()
-          );
-
-          if (matchingStaticTactic) {
-            const tacticData = tacticMap.get(matchingStaticTactic);
-            if (tacticData) {
-              // Add missing integrations if any
-              if (missingIntegrations.length > 0) {
-                missingIntegrations.forEach((integration) => {
-                  tacticData.missingIntegrations.add(integration);
-                });
-              }
-
-              // Add rule with its indices to tactic
-              if (!tacticData.ruleMap.has(ruleId)) {
-                tacticData.ruleMap.set(ruleId, new Set<string>());
-              }
-              const ruleIndicesSet = tacticData.ruleMap.get(ruleId);
-              if (ruleIndicesSet) {
-                ruleIndexArray.forEach((index) => {
-                  ruleIndicesSet.add(index);
-                });
+                // Add rule with its indices to tactic
+                if (!tacticData.ruleMap.has(ruleId)) {
+                  tacticData.ruleMap.set(ruleId, new Set<string>());
+                }
+                const ruleIndicesSet = tacticData.ruleMap.get(ruleId);
+                if (ruleIndicesSet) {
+                  ruleIndexArray.forEach((index) => {
+                    ruleIndicesSet.add(index);
+                  });
+                }
               }
             }
           }
-        }
-      });
-    });
+        });
+      }
+    );
 
     const result = new Map<string, MissingIntegrationsData>();
     tacticMap.forEach((value, key) => {
@@ -327,7 +353,7 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
     });
 
     return result;
-  }, [staticTactics, getDetectionRules.data, installedIntegrationNames, docCounts]);
+  }, [staticTactics, integrationsFromEnabledRules, docCounts]);
   // console.log(missingIntegrationsByTactic);
   const treemapData = useMemo((): TreemapDataItem[] => {
     return staticTactics.map((tacticName, index) => {
