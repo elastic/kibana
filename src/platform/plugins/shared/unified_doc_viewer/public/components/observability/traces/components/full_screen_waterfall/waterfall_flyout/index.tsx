@@ -71,7 +71,6 @@ const FlyoutTabs = ({ onClick, selectedTabId }: FlyoutTabsProps) => {
 
 export interface Props {
   title: string;
-  flyoutId: string;
   onCloseFlyout: () => void;
   hit: DataTableRecord | null;
   loading: boolean;
@@ -79,15 +78,7 @@ export interface Props {
   children: React.ReactNode;
 }
 
-export function WaterfallFlyout({
-  onCloseFlyout,
-  dataView,
-  hit,
-  loading,
-  children,
-  title,
-  flyoutId,
-}: Props) {
+export function WaterfallFlyout({ onCloseFlyout, dataView, hit, loading, children, title }: Props) {
   const [selectedTabId, setSelectedTabId] = useState(tabIds.OVERVIEW);
   const flyoutTitleId = useGeneratedHtmlId();
 
@@ -96,7 +87,6 @@ export function WaterfallFlyout({
       includeFixedHeadersInFocusTrap={false}
       onClose={onCloseFlyout}
       aria-labelledby={flyoutTitleId}
-      id={flyoutId}
     >
       <EuiFlyoutHeader>
         <EuiSkeletonTitle isLoading={loading}>

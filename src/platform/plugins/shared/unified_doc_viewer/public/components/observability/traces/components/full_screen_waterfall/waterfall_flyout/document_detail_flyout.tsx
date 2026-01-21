@@ -18,8 +18,6 @@ import { useLogFlyoutData, LogFlyoutContent, type LogFlyoutData } from './logs_f
 
 export type DocumentType = typeof spanFlyoutId | typeof logsFlyoutId;
 
-const FLYOUT_ID = 'documentDetailFlyout';
-
 interface FlyoutContentProps {
   isSpanType: boolean;
   hit: DataTableRecord;
@@ -75,7 +73,6 @@ export function DocumentDetailFlyout({
 
   return (
     <WaterfallFlyout
-      flyoutId={FLYOUT_ID}
       onCloseFlyout={onCloseFlyout}
       dataView={dataView}
       hit={hit}

@@ -65,10 +65,9 @@ jest.mock('./logs_flyout', () => ({
 }));
 
 jest.mock('.', () => ({
-  WaterfallFlyout: ({ flyoutId, onCloseFlyout, dataView, hit, loading, title, children }: any) => (
+  WaterfallFlyout: ({ onCloseFlyout, dataView, hit, loading, title, children }: any) => (
     <div
       data-test-subj="waterfallFlyout"
-      data-flyout-id={flyoutId}
       data-loading={loading}
       data-title={title}
       data-has-hit={!!hit}
@@ -173,7 +172,6 @@ describe('DocumentDetailFlyout', () => {
       render(<DocumentDetailFlyout {...defaultSpanProps} />);
 
       const flyout = screen.getByTestId('waterfallFlyout');
-      expect(flyout).toHaveAttribute('data-flyout-id', 'documentDetailFlyout');
       expect(flyout).toHaveAttribute('data-loading', 'false');
       expect(flyout).toHaveAttribute('data-title', 'Span document');
       expect(flyout).toHaveAttribute('data-has-hit', 'true');
@@ -183,7 +181,6 @@ describe('DocumentDetailFlyout', () => {
       render(<DocumentDetailFlyout {...defaultLogProps} />);
 
       const flyout = screen.getByTestId('waterfallFlyout');
-      expect(flyout).toHaveAttribute('data-flyout-id', 'documentDetailFlyout');
       expect(flyout).toHaveAttribute('data-loading', 'false');
       expect(flyout).toHaveAttribute('data-title', 'Log document');
       expect(flyout).toHaveAttribute('data-has-hit', 'true');

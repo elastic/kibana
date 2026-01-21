@@ -46,7 +46,6 @@ describe('WaterfallFlyout', () => {
 
   const defaultProps: Props = {
     title: 'Test Flyout Title',
-    flyoutId: 'testFlyoutId',
     onCloseFlyout: jest.fn(),
     hit: mockHit,
     loading: false,
