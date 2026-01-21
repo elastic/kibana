@@ -14,7 +14,7 @@ import { TestProviders } from '../../../../common/mock';
 // Mock the hooks
 const mockUseFetchAnonymizationFields = jest.fn();
 const mockUseAssistantContext = jest.fn();
-const mockUseLoadConnectors = jest.fn();
+const mockUseLoadInferenceConnectors = jest.fn();
 const mockUseSpaceId = jest.fn();
 const mockUseStoredAssistantConnectorId = jest.fn();
 const mockUseAssistantAvailability = jest.fn();
@@ -24,7 +24,6 @@ const mockUseHasEntityHighlightsLicense = jest.fn();
 jest.mock('@kbn/elastic-assistant', () => ({
   useAssistantContext: () => mockUseAssistantContext(),
   useFetchAnonymizationFields: () => mockUseFetchAnonymizationFields(),
-  useLoadConnectors: () => mockUseLoadConnectors(),
   AssistantProvider: ({ children }: { children: React.ReactNode }) => (
     <div data-test-subj="assistant-provider">{children}</div>
   ),
@@ -74,6 +73,10 @@ jest.mock('../../../../agent_builder/hooks/use_agent_builder_attachment', () => 
   }),
 }));
 
+jest.mock('../hooks/use_inference_connectors', () => ({
+  useLoadInferenceConnectors: () => mockUseLoadInferenceConnectors(),
+}));
+
 describe('EntityHighlights', () => {
   const defaultProps = {
     entityIdentifier: 'test-user',
@@ -100,13 +103,16 @@ describe('EntityHighlights', () => {
     settings: { client: { get: jest.fn() } },
   };
   const defaultLoadConnectors = {
-    data: [
-      {
-        id: 'connector-1',
-        name: 'Test Connector',
-        actionTypeId: '.gen-ai',
-      },
-    ],
+    data: {
+      hasConnectors: true,
+      connectors: [
+        {
+          connectorId: 'connector-1',
+          name: 'Test Connector',
+          actionTypeId: '.gen-ai',
+        },
+      ],
+    },
   };
   const defaultSpaceId = 'default';
   const defaultStoredAssistantConnectorId = ['connector-1', jest.fn()];
@@ -128,7 +134,7 @@ describe('EntityHighlights', () => {
     // Set up default mock implementations
     mockUseFetchAnonymizationFields.mockReturnValue(defaultAnonymizationFields);
     mockUseAssistantContext.mockReturnValue(defaultAssistantContext);
-    mockUseLoadConnectors.mockReturnValue(defaultLoadConnectors);
+    mockUseLoadInferenceConnectors.mockReturnValue(defaultLoadConnectors);
     mockUseSpaceId.mockReturnValue(defaultSpaceId);
     mockUseStoredAssistantConnectorId.mockReturnValue(defaultStoredAssistantConnectorId);
     mockUseAssistantAvailability.mockReturnValue(defaultAssistantAvailability);
@@ -173,7 +179,25 @@ describe('EntityHighlights', () => {
     expect(screen.queryByText('Entity summary')).not.toBeInTheDocument();
   });
 
-  it('shows generate button when no assistant result and not loading', () => {
+  it(`shows "Add Connector" button when no assistant result, not loading and no connectors`, () => {
+    mockUseLoadInferenceConnectors.mockReturnValueOnce({
+      data: { hasConnectors: false, connectors: [] },
+    });
+    render(<EntityHighlightsAccordion {...defaultProps} />, {
+      wrapper: TestProviders,
+    });
+
+    const addConnectorButton = screen.getByText('Add connector');
+    expect(addConnectorButton).toBeInTheDocument();
+    expect(addConnectorButton).not.toBeDisabled();
+    expect(
+      screen.getByText(
+        'No AI connector is configured. Please configure an AI connector to generate a summary.'
+      )
+    ).toBeInTheDocument();
+  });
+
+  it(`shows "Generate" button when no assistant result and not loading when connectors are available`, () => {
     render(<EntityHighlightsAccordion {...defaultProps} />, {
       wrapper: TestProviders,
     });
@@ -192,22 +216,6 @@ describe('EntityHighlights', () => {
     fireEvent.click(generateButton);
 
     expect(mockFetchEntityHighlights).toHaveBeenCalled();
-  });
-
-  it('does not render generate button when no connector ID is available', () => {
-    mockUseLoadConnectors.mockReturnValue({ data: [] });
-    mockUseStoredAssistantConnectorId.mockReturnValue(['', jest.fn()]);
-
-    render(<EntityHighlightsAccordion {...defaultProps} />, {
-      wrapper: TestProviders,
-    });
-
-    expect(screen.queryByRole('button', { name: 'Generate' })).not.toBeInTheDocument();
-    expect(
-      screen.getByText(
-        'No AI connector is configured. Please configure an AI connector to generate a summary.'
-      )
-    ).toBeInTheDocument();
   });
 
   it('shows loading state with skeleton text and loading message', () => {
