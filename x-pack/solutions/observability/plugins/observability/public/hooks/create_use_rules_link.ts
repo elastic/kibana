@@ -17,7 +17,7 @@ export const createUseRulesLink =
         }
       : {
           app: 'observability',
-          pathname: '/rules',
+          pathname: '/alerts/rules',
         };
 
     return useLinkProps(linkProps, options);

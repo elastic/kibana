@@ -41,6 +41,7 @@ import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { getRuleStatusPanelLazy } from './common/get_rule_status_panel';
 import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
+import type { ExperimentalFeatures } from '../common/experimental_features';
 import type { AlertSummaryWidgetDependencies } from './application/sections/alert_summary_widget/types';
 import { isRuleSnoozed } from './application/lib';
 import { getNextRuleSnoozeSchedule } from './application/sections/rules_list/components/notify_badge/helpers';
@@ -138,6 +139,22 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
           snoozeSchedule: rule.snoozeSchedule,
         }),
       };
+    },
+    getIsExperimentalFeatureEnabled: (feature: keyof ExperimentalFeatures) => {
+      const experimentalFeatures: ExperimentalFeatures = {
+        unifiedRulesPage: false,
+        rulesListDatagrid: false,
+        stackAlertsPage: false,
+        ruleTagFilter: false,
+        ruleStatusFilter: false,
+        rulesDetailLogs: false,
+        ruleUseExecutionStatus: false,
+        ruleKqlBar: false,
+        isMustacheAutocompleteOn: false,
+        showMustacheAutocompleteSwitch: false,
+        alertDeletionSettingsEnabled: false,
+      };
+      return experimentalFeatures[feature] === true;
     },
   };
 }
