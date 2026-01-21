@@ -41,6 +41,7 @@ dependsOn:
   - '@kbn/rollup'
   - '@kbn/licensing-types'
   - '@kbn/data-view-validation'
+  - '@kbn/index-management-shared-types'
 tags:
   - plugin
   - prod
