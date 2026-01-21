@@ -7,18 +7,20 @@
 import React from 'react';
 import type { UncontrolledStreamsAppSearchBarProps } from './uncontrolled_streams_app_bar';
 import { UncontrolledStreamsAppSearchBar } from './uncontrolled_streams_app_bar';
-import { useTimeRangeSync } from '../../hooks/use_time_range_sync';
+import { useTimeRange } from '../../hooks/use_time_range';
+import { useTimeRangeUpdate } from '../../hooks/use_time_range_update';
 
 export type StreamsAppSearchBarProps = UncontrolledStreamsAppSearchBarProps;
 
 export function StreamsAppSearchBar({ onQuerySubmit, ...props }: StreamsAppSearchBarProps) {
-  const { rangeFrom, rangeTo, handleTimeChange } = useTimeRangeSync();
+  const { rangeFrom, rangeTo } = useTimeRange();
+  const { updateTimeRange } = useTimeRangeUpdate();
 
   return (
     <UncontrolledStreamsAppSearchBar
       onQuerySubmit={({ dateRange, query }, isUpdate) => {
         if (dateRange) {
-          handleTimeChange(dateRange);
+          updateTimeRange(dateRange);
         }
         onQuerySubmit?.({ dateRange, query }, isUpdate);
       }}

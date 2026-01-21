@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useLayoutEffect, useCallback } from 'react';
+import React, { useLayoutEffect, useEffect, useCallback } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { useKibana } from '../../hooks/use_kibana';
@@ -33,6 +33,8 @@ function useDateRangeRedirect() {
   // Parse URL params synchronously during render
   const searchParams = new URLSearchParams(location.search);
   const isDateRangeSet = searchParams.has('rangeFrom') && searchParams.has('rangeTo');
+  const rangeFrom = searchParams.get('rangeFrom');
+  const rangeTo = searchParams.get('rangeTo');
 
   const redirect = useCallback(() => {
     const timePickerTimeDefaults = uiSettings.get<TimePickerTimeDefaults>(
@@ -51,15 +53,18 @@ function useDateRangeRedirect() {
     });
   }, [history, location, queryService, uiSettings]);
 
-  return { isDateRangeSet, redirect };
+  return { isDateRangeSet, rangeFrom, rangeTo, redirect, queryService };
 }
 
 /**
  * Component that ensures time range params (rangeFrom/rangeTo) are present in the URL.
  * If they are missing, it blocks rendering and redirects to add default values.
+ *
+ * Also syncs URL time params to the global timefilter on mount and URL changes.
+ * This ensures components using useTimefilter() get the correct time from URL.
  */
 export function DateRangeRedirect({ children }: { children: React.ReactNode }) {
-  const { isDateRangeSet, redirect } = useDateRangeRedirect();
+  const { isDateRangeSet, rangeFrom, rangeTo, redirect, queryService } = useDateRangeRedirect();
 
   // Use useLayoutEffect to redirect before paint, avoiding the
   // "Cannot update a component while rendering" warning
@@ -68,6 +73,18 @@ export function DateRangeRedirect({ children }: { children: React.ReactNode }) {
       redirect();
     }
   }, [isDateRangeSet, redirect]);
+
+  useEffect(() => {
+    if (rangeFrom && rangeTo) {
+      const currentTime = queryService.timefilter.timefilter.getTime();
+      if (currentTime.from !== rangeFrom || currentTime.to !== rangeTo) {
+        queryService.timefilter.timefilter.setTime({
+          from: rangeFrom,
+          to: rangeTo,
+        });
+      }
+    }
+  }, [rangeFrom, rangeTo, queryService]);
 
   // Block rendering until time params are set
   if (!isDateRangeSet) {

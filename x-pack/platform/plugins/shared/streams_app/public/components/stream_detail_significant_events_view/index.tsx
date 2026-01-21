@@ -17,7 +17,8 @@ import { EditSignificantEventFlyout } from './edit_significant_event_flyout';
 import { useFetchSignificantEvents } from '../../hooks/use_fetch_significant_events';
 import { useSignificantEventsApi } from '../../hooks/use_significant_events_api';
 import { useTimefilter } from '../../hooks/use_timefilter';
-import { useTimeRangeSync } from '../../hooks/use_time_range_sync';
+import { useTimeRange } from '../../hooks/use_time_range';
+import { useTimeRangeUpdate } from '../../hooks/use_time_range_update';
 import { LoadingPanel } from '../loading_panel';
 import type { Flow } from './add_significant_event_flyout/types';
 import { SignificantEventsTable } from './significant_events_table';
@@ -35,7 +36,8 @@ interface Props {
 }
 
 export function StreamDetailSignificantEventsView({ definition }: Props) {
-  const { rangeFrom, rangeTo, startMs, endMs, handleTimeChange } = useTimeRangeSync();
+  const { rangeFrom, rangeTo, startMs, endMs } = useTimeRange();
+  const { updateTimeRange } = useTimeRangeUpdate();
   const { refresh } = useTimefilter();
   const {
     dependencies: {
@@ -163,7 +165,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                   if (isEqual(queryN.dateRange, dateRange)) {
                     refresh();
                   } else if (queryN.dateRange) {
-                    handleTimeChange(queryN.dateRange);
+                    updateTimeRange(queryN.dateRange);
                     setDateRange(queryN.dateRange);
                   }
                 }}

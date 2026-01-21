@@ -44,14 +44,13 @@ const streamsAppRoutes = {
           defaultMessage: 'Streams',
         })}
         path="/"
-        params={{ query: {} }}
       >
         <StreamsAppPageTemplate>
           <Outlet />
         </StreamsAppPageTemplate>
       </StreamsAppRouterBreadcrumb>
     ),
-    params: t.type({
+    params: t.partial({
       query: optionalQueryParams,
     }),
     children: {

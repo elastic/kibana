@@ -8,6 +8,10 @@
 import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { useStreamsAppParams } from './use_streams_app_params';
 
+// Default time range (matches Kibana's default)
+const DEFAULT_FROM = 'now-15m';
+const DEFAULT_TO = 'now';
+
 /**
  * Hook to get the current time range from URL params.
  * Assumes DateRangeRedirect has ensured time params are present in the URL.
@@ -17,8 +21,9 @@ export function useTimeRange() {
   // DateRangeRedirect ensures rangeFrom/rangeTo are always present
   const { query } = useStreamsAppParams('/*');
 
-  const rangeFrom = query.rangeFrom!;
-  const rangeTo = query.rangeTo!;
+  // Fallback to defaults for TypeScript safety (DateRangeRedirect ensures these exist at runtime)
+  const rangeFrom = query?.rangeFrom ?? DEFAULT_FROM;
+  const rangeTo = query?.rangeTo ?? DEFAULT_TO;
 
   // Convert relative times (e.g., "now-15m") to absolute timestamps
   const { from: start, to: end } = getAbsoluteTimeRange(
