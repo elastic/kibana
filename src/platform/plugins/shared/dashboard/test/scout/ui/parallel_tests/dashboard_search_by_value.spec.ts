@@ -15,7 +15,7 @@ const KIBANA_ARCHIVE_PATH =
 // The saved search name - use dashes like FTR does (matches fixture title when dashes become spaces)
 const SAVED_SEARCH_NAME = 'Rendering-Test:-saved-search';
 
-spaceTest.describe('Dashboard saved searches by value', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+spaceTest.describe('Dashboard saved searches by value', { tag: tags.ESS_ONLY }, () => {
   const expectPanelLinkedToLibrary = async (pageObjects: { dashboard: any }, title: string) => {
     await pageObjects.dashboard.switchToEditMode();
     await expect

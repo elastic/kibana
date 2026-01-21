@@ -36,7 +36,7 @@ const getPanelDrilldownCounts = (
   return { panelsWithDrilldowns };
 };
 
-spaceTest.describe('Visualize migration smoke (7.12.1)', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+spaceTest.describe('Visualize migration smoke (7.12.1)', { tag: tags.ESS_ONLY }, () => {
   spaceTest.beforeAll(async ({ scoutSpace, kbnClient }) => {
     await scoutSpace.savedObjects.cleanStandardList();
     const imported = await scoutSpace.savedObjects.load(EXPORT_PATH);

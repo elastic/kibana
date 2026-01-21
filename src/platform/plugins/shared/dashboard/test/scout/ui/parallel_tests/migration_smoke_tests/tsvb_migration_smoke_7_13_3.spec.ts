@@ -22,7 +22,7 @@ const DATA_VIEW_TITLE = 'logstash*';
 
 let dashboardId = '';
 
-spaceTest.describe('TSVB migration smoke (7.13.3)', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+spaceTest.describe('TSVB migration smoke (7.13.3)', { tag: tags.ESS_ONLY }, () => {
   spaceTest.beforeAll(async ({ scoutSpace, kbnClient }) => {
     await scoutSpace.savedObjects.cleanStandardList();
     const imported = await scoutSpace.savedObjects.load(EXPORT_PATH);

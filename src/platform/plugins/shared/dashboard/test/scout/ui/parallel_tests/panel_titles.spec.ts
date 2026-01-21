@@ -19,7 +19,7 @@ const MARKDOWN_CONTENT = 'Panel title test markdown';
 
 let lensSavedObjectId = '';
 
-spaceTest.describe('Dashboard panel titles', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+spaceTest.describe('Dashboard panel titles', { tag: tags.ESS_ONLY }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     const importedObjects = await scoutSpace.savedObjects.load(KIBANA_ARCHIVE_PATH);
     const lensObject = importedObjects.find(

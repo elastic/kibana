@@ -54,7 +54,7 @@ const getSelectionsString = async (page: ScoutPage, controlId: string) => {
   return (selectionText || buttonText).trim();
 };
 
-spaceTest.describe('Controls migration smoke (8.0.0)', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+spaceTest.describe('Controls migration smoke (8.0.0)', { tag: tags.ESS_ONLY }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
     const imported = await scoutSpace.savedObjects.load(EXPORT_PATH);

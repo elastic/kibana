@@ -17,7 +17,7 @@ const LENS_TITLE = 'Artistpreviouslyknownaslens';
 
 let lensSavedObjectId = '';
 
-spaceTest.describe('Dashboard lens by value', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+spaceTest.describe('Dashboard lens by value', { tag: tags.ESS_ONLY }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     const importedObjects = await scoutSpace.savedObjects.load(KIBANA_ARCHIVE_PATH);
     const lensObject = importedObjects.find(

@@ -39,7 +39,7 @@ const getChartDebugState = async (page: ScoutPage, panelIndex: number) => {
 };
 
 // eslint-disable-next-line playwright/no-skipped-test
-spaceTest.describe.skip('Sync colors', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+spaceTest.describe.skip('Sync colors', { tag: tags.ESS_ONLY }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.load(KIBANA_ARCHIVE_PATH);
   });

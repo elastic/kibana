@@ -13,7 +13,7 @@ import type { PageObjects, ScoutPage } from '@kbn/scout';
 const KIBANA_ARCHIVE_PATH =
   'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json';
 
-spaceTest.describe('Dashboard maps by value', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+spaceTest.describe('Dashboard maps by value', { tag: tags.ESS_ONLY }, () => {
   let mapCounter = 0;
   let dashboardUrl = '';
 

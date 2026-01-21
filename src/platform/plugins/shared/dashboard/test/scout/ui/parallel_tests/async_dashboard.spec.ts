@@ -74,7 +74,7 @@ const SAMPLE_DATA_RANGE = [
   },
 ];
 
-spaceTest.describe('Sample data dashboard', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+spaceTest.describe('Sample data dashboard', { tag: tags.ESS_ONLY }, () => {
   spaceTest.beforeAll(async ({ kbnClient, scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
     await scoutSpace.uiSettings.set({

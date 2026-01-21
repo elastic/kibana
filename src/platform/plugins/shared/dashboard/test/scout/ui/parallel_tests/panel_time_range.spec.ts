@@ -15,7 +15,7 @@ const KIBANA_ARCHIVE_PATH =
 const DATA_VIEW_NAME = 'logstash-*';
 const LENS_TITLE = 'Artistpreviouslyknownaslens';
 
-spaceTest.describe('Dashboard panel custom time range', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+spaceTest.describe('Dashboard panel custom time range', { tag: tags.ESS_ONLY }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.load(KIBANA_ARCHIVE_PATH);
     await scoutSpace.uiSettings.setDefaultIndex(DATA_VIEW_NAME);

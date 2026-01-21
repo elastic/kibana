@@ -12,7 +12,7 @@ import { spaceTest, expect, tags } from '@kbn/scout';
 const DASHBOARD_FIXTURES_PATH =
   'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana';
 
-spaceTest.describe('Dashboard panel listing', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+spaceTest.describe('Dashboard panel listing', { tag: tags.ESS_ONLY }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.load(DASHBOARD_FIXTURES_PATH);
     await scoutSpace.uiSettings.set({
