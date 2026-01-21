@@ -37,18 +37,21 @@ interface Props {
 }
 
 export const ControlDisplaySettingsPopover: React.FC<Props> = ({ api, displayName, iconType }) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
   const initialState = useMemo(
     () => ({
       width: DEFAULT_CONTROL_WIDTH,
       grow: DEFAULT_CONTROL_GROW,
       ...api.parentApi.getLayout(api.uuid),
     }),
-    [api]
+    // We should re-calculate `initialState` when the popover opens/closes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [api, isPopoverOpen]
   );
+
   const [width, setWidth] = useState<ControlWidth>(initialState.width as ControlWidth);
   const [grow, setGrow] = useState<boolean>(initialState.grow);
-
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onClose = useCallback(() => {
     setIsPopoverOpen(false);
@@ -116,13 +119,22 @@ export const ControlDisplaySettingsPopover: React.FC<Props> = ({ api, displayNam
       <EuiPopoverFooter paddingSize="s">
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem>
-            <EuiButtonEmpty size="s" onClick={onClose}>
+            <EuiButtonEmpty
+              size="s"
+              onClick={() => {
+                onClose();
+                setWidth(initialState.width);
+                setGrow(initialState.grow);
+              }}
+            >
               Cancel
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiButton
               size="s"
+              fill
+              disabled={grow === initialState.grow && width === initialState.width}
               onClick={() => {
                 onClose();
                 api.parentApi.setLayout(api.uuid, { ...initialState, grow, width });
