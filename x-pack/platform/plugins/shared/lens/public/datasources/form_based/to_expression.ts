@@ -361,7 +361,7 @@ function getExpressionForLayer(
       });
 
       esAggsIdMap = updatedEsAggsIdMap;
-    } else if (isFormBasedEsqlMode) {
+    } else {
       // The esAggsIdMap from getESQLForLayer uses the common OriginalColumn type,
       // but the local OriginalColumn type includes more properties. The runtime
       // objects have all the necessary properties via the spread operator in getESQLForLayer.
