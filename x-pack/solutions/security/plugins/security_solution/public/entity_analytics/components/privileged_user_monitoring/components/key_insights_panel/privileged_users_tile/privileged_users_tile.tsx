@@ -10,8 +10,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getPrivilegedMonitorUsersIndex } from '../../../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 import { createKeyInsightsPanelFormBasedLensAttributes } from '../common/lens_attributes';
-import { getPrivilegedUsersDslFilter } from './esql_query';
+import { getPrivilegedUsersDslFilter } from './privileged_user_count_filter';
 import { KeyInsightsTile } from '../common/key_insights_tile';
+
 
 export const PrivilegedUsersTile: React.FC<{
   spaceId: string;
