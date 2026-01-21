@@ -123,6 +123,10 @@ export interface MonacoEditorProps {
    * An event emitted when the content of the current model has changed.
    */
   onChange?: ChangeHandler;
+  /**
+   * Optional z-index to override the default z-index of the overflow widgets container.
+   */
+  overflowWidgetsContainerZIndexOverride?: number;
 }
 
 // initialize supported languages
@@ -130,6 +134,8 @@ initializeSupportedLanguages();
 
 export const OVERFLOW_WIDGETS_TEST_ID = 'kbnCodeEditorEditorOverflowWidgetsContainer';
 const OVERFLOW_WIDGETS_CONTAINER_CLASS = 'monaco-editor-overflowing-widgets-container';
+const OVERFLOW_WIDGETS_CONTAINER_STACKING_OVERRIDE_CLASS =
+  'monaco-editor-overflowing-widgets-container-stacking-override';
 
 export function MonacoEditor({
   width = '100%',
@@ -144,6 +150,7 @@ export function MonacoEditor({
   editorWillUnmount,
   onChange,
   className,
+  overflowWidgetsContainerZIndexOverride,
 }: MonacoEditorProps) {
   const containerElement = useRef<HTMLDivElement | null>(null);
   const overflowWidgetsDomNode = useRef<HTMLDivElement | null>(null);
@@ -369,11 +376,19 @@ export function MonacoEditor({
           [`.${OVERFLOW_WIDGETS_CONTAINER_CLASS}`]: {
             zIndex: Number(_euiTheme?.levels?.maskBelowHeader ?? 1000) - 2,
           },
-          // When the editor is inside a flyout, ensure the overflow widgets are above the flyout and modification is scoped to each instance
+          // When the editor is inside a flyout, ensure the overflow widgets are above the flyout and scoped to each instance
           [`:has(.euiFlyout [class*="monaco-editor"][id="${instanceId}"]) .${OVERFLOW_WIDGETS_CONTAINER_CLASS}[id="${instanceId}"]`]:
             {
               zIndex: _euiTheme?.levels?.menu ?? 2000,
             },
+          // Allow the overflow widgets container z-index to be overridden
+          ...(overflowWidgetsContainerZIndexOverride
+            ? {
+                [`.${OVERFLOW_WIDGETS_CONTAINER_STACKING_OVERRIDE_CLASS}[id="${instanceId}"]`]: {
+                  zIndex: overflowWidgetsContainerZIndexOverride,
+                },
+              }
+            : {}),
         })}
       />
     </>

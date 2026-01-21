@@ -41,7 +41,8 @@ import {
 } from './mods';
 import { styles } from './editor.styles';
 
-export interface CodeEditorProps {
+export interface CodeEditorProps
+  extends Pick<ReactMonacoEditorProps, 'overflowWidgetsContainerZIndexOverride'> {
   /** Width of editor. Defaults to 100%. */
   width?: string | number;
 
@@ -204,7 +205,6 @@ export interface CodeEditorProps {
    */
   onFocus?: () => void;
   onBlur?: () => void;
-
   /**
    * Enables the suggestion widget repositioning. Enabled by default.
    * Disabled for cases like embedded console.
@@ -252,6 +252,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   onFocus,
   onBlur,
   enableSuggestWidgetRepositioning = true,
+  overflowWidgetsContainerZIndexOverride,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { registerContextMenuActions, unregisterContextMenuActions } = useContextMenuUtils();
@@ -643,6 +644,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             editorWillMount={_editorWillMount}
             editorDidMount={_editorDidMount}
             editorWillUnmount={_editorWillUnmount}
+            overflowWidgetsContainerZIndexOverride={overflowWidgetsContainerZIndexOverride}
             options={{
               padding: allowFullScreen || isCopyable ? { top: 24 } : {},
               renderLineHighlight: 'none',
