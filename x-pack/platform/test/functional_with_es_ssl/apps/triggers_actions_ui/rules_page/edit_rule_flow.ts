@@ -194,7 +194,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('Edit from rule details page', () => {
       it('navigates to edit page when clicking edit button from details', async () => {
         // Navigate directly to rule details page
-        await pageObjects.common.navigateToUrl('rules', `/${testRuleId}`, {
+        await pageObjects.common.navigateToUrl('rules', testRuleId, {
           shouldUseHashForSubUrl: false,
         });
         await pageObjects.header.waitUntilLoadingHasFinished();
@@ -275,7 +275,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('returns to rule details page after clicking cancel from details', async () => {
         // Navigate to rule details page
-        await pageObjects.common.navigateToUrl('rules', `/${testRuleId}`, {
+        await pageObjects.common.navigateToUrl('rules', testRuleId, {
           shouldUseHashForSubUrl: false,
         });
         await pageObjects.header.waitUntilLoadingHasFinished();
