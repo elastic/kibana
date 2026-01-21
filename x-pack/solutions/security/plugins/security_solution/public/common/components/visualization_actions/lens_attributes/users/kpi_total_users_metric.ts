@@ -38,7 +38,7 @@ export const getKpiTotalUsersMetricLensAttributes = (spaceId?: string): LensAttr
                   label: ' ',
                   operationType: 'unique_count',
                   scale: 'ratio',
-                  sourceField: 'user.entity.id',
+                  sourceField: 'user.name',
                 },
               },
               incompleteColumns: {},

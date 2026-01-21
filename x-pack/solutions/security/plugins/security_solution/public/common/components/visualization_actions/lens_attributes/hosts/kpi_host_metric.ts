@@ -38,7 +38,7 @@ export const getKpiHostMetricLensAttributes = (spaceId?: string): LensAttributes
                   label: ' ',
                   operationType: 'unique_count',
                   scale: 'ratio',
-                  sourceField: 'entity.id',
+                  sourceField: 'host.name',
                 },
               },
               incompleteColumns: {},
