@@ -23,7 +23,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { SupportedHostOsType } from '../../../../../../common/endpoint/constants';
 import { SCRIPT_TAGS } from '../../../../../../common/endpoint/service/scripts_library/constants';
 import { PopoverItems } from '../../../../../common/components/popover_items';
-import { useAppUrl } from '../../../../../common/lib/kibana';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { useFormatBytes } from '../../../../../common/components/formatted_bytes';
 import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../../common/constants';
@@ -38,7 +37,6 @@ import type {
 } from '../../../../../../common/endpoint/types';
 import { scriptsLibraryLabels as tableLabels } from '../../translations';
 import { ScriptNameNavLink } from './script_name_nav_link';
-import { getScriptsDetailPath } from '../../../../common/url_routing';
 import { ScriptTablePlatformBadges } from './platform_badges';
 
 const SCRIPTS_TABLE_COLUMN_WIDTHS = Object.freeze({
@@ -53,18 +51,14 @@ const SCRIPTS_TABLE_COLUMN_WIDTHS = Object.freeze({
 
 interface GetScriptsLibraryTableColumnsProps {
   formatBytes: (bytes: number) => string;
-  getAppUrl: ReturnType<typeof useAppUrl>['getAppUrl'];
   getTestId: (suffix?: string | undefined) => string | undefined;
   queryParams: ScriptsLibraryTableProps['queryParams'];
-  searchParams: ScriptsLibraryTableProps['searchParams'];
 }
 
 const getScriptsLibraryTableColumns = ({
   formatBytes,
-  getAppUrl,
   getTestId,
   queryParams,
-  searchParams,
 }: GetScriptsLibraryTableColumnsProps) => {
   const columns = [
     {
@@ -74,16 +68,12 @@ const getScriptsLibraryTableColumns = ({
       width: SCRIPTS_TABLE_COLUMN_WIDTHS.name,
       truncateText: true,
       render: (name: string, item: EndpointScript) => {
-        const toRoutePath = getScriptsDetailPath({
-          query: { ...queryParams, selectedScriptId: item.id, show: 'details' },
-          search: searchParams,
-        });
-        const toRouteUrl = getAppUrl({ path: toRoutePath });
         return (
           <EuiToolTip content={name} anchorClassName="eui-textTruncate">
             <ScriptNameNavLink
               name={name}
-              href={toRouteUrl}
+              queryParams={queryParams}
+              scriptId={item.id}
               data-test-subj={`${getTestId(`column-name-${item.id}`)}`}
             />
           </EuiToolTip>
@@ -203,7 +193,6 @@ export interface ScriptsLibraryTableProps {
   items: ScriptItems;
   onChange: OnChangeTable;
   queryParams: ListScriptsRequestQuery;
-  searchParams: string;
   sort: {
     field?: SortableScriptLibraryFields;
     direction?: SortDirection;
@@ -218,12 +207,10 @@ export const ScriptsLibraryTable = memo<ScriptsLibraryTableProps>(
     items,
     onChange,
     queryParams,
-    searchParams,
     sort,
     totalItemCount,
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
-    const { getAppUrl } = useAppUrl();
     const formatBytes = useFormatBytes();
     const { pagination: paginationFromUrlParams } = useUrlPagination();
     const sorting = useMemo(
@@ -284,11 +271,9 @@ export const ScriptsLibraryTable = memo<ScriptsLibraryTableProps>(
         getScriptsLibraryTableColumns({
           formatBytes,
           getTestId,
-          getAppUrl,
           queryParams,
-          searchParams,
         }),
-      [formatBytes, getTestId, getAppUrl, queryParams, searchParams]
+      [formatBytes, getTestId, queryParams]
     );
 
     const setTableRowProps = useCallback((scriptData: ScriptItems[number]) => {

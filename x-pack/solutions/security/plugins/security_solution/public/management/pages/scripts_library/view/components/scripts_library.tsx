@@ -6,7 +6,6 @@
  */
 
 import React, { memo, useEffect, useMemo, useCallback, useState } from 'react';
-import { useLocation } from 'react-router-dom';
 import type { SortableScriptLibraryFields } from '../../../../../../common/endpoint/types';
 import type { ListScriptsRequestQuery } from '../../../../../../common/api/endpoint';
 import { useToasts } from '../../../../../common/lib/kibana';
@@ -29,7 +28,6 @@ export const ScriptsLibrary = memo(() => {
   } = useScriptsLibraryUrlParams();
 
   const { canReadScriptsLibrary } = useUserPrivileges().endpointPrivileges;
-  const { search: searchParams } = useLocation();
 
   const [queryParams, setQueryParams] = useState<ListScriptsRequestQuery>({
     kuery: kueryFromUrl,
@@ -106,7 +104,6 @@ export const ScriptsLibrary = memo(() => {
           onChange={onChangeScriptsTable}
           queryParams={queryParams}
           totalItemCount={totalItemCount}
-          searchParams={searchParams}
           sort={{
             field: scriptsData?.sortField as SortableScriptLibraryFields,
             direction: scriptsData?.sortDirection,
