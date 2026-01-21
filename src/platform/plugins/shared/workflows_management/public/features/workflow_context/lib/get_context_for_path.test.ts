@@ -14,6 +14,8 @@ import { WorkflowGraph } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod/v4';
 import { getContextSchemaForPath } from './get_context_for_path';
 
+jest.mock('./get_output_schema_for_step_type');
+
 describe('getContextSchemaForPath', () => {
   const definition = {
     version: '1' as const,
