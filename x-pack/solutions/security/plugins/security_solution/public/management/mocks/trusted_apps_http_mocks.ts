@@ -7,7 +7,7 @@
 
 import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import {
-  ENDPOINT_TRUSTED_APPS_LIST_ID,
+  ENDPOINT_ARTIFACT_LISTS,
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
@@ -65,7 +65,7 @@ export const trustedAppsGetListHttpMocks =
         const perPage = apiQueryParams.per_page ?? 10;
         const data = Array.from({ length: Math.min(perPage, 50) }, () =>
           generator.generate({
-            list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
+            list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
             os_types: ['windows'],
             tags: [GLOBAL_ARTIFACT_TAG],
           })
@@ -117,7 +117,7 @@ export const trustedAppPutHttpMocks = httpHandlerMockFactory<TrustedAppPutHttpMo
         created_by: 'elastic',
         updated_at: '2021-10-13T16:02:55.856Z',
         updated_by: 'elastic',
-        list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
+        list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
         _version: 'abc',
         tie_breaker_id: '1111',
       };
