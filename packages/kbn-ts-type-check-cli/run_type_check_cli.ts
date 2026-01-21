@@ -25,6 +25,7 @@ import {
 import { archiveTSBuildArtifacts } from './src/archive/archive_ts_build_artifacts';
 import { restoreTSBuildArtifacts } from './src/archive/restore_ts_build_artifacts';
 import { LOCAL_CACHE_ROOT } from './src/archive/constants';
+import { isCiEnvironment } from './src/archive/utils';
 
 const rel = (from: string, to: string) => {
   const path = Path.relative(from, to);
@@ -169,7 +170,13 @@ run(
 
     if (shouldUseArchive) {
       if (hasLocalChanges) {
-        log.info('Skipping TypeScript cache archive because uncommitted changes were detected.');
+        const message = `uncommitted changes were detected after the TypeScript build. TypeScript cache artifacts must be generated from a clean working tree.`;
+
+        if (isCiEnvironment()) {
+          throw new Error(`Canceling TypeScript cache archive because ${message}`);
+        }
+
+        log.info(`Skipping TypeScript cache archive because ${message}`);
       } else {
         await archiveTSBuildArtifacts(log);
       }
