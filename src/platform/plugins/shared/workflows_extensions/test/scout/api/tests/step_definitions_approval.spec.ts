@@ -14,7 +14,7 @@ import { COMMON_HEADERS } from '../fixtures/constants';
 
 apiTest.describe(
   'Workflows Extensions - Custom Step Definitions Approval',
-  { tag: ['@ess', '@svlSearch', '@svlSecurity', '@svlOblt'] },
+  { tag: ['@ess', '@svlSearch', '@svlSecurity', '@svlOblt', '@svlWorkplaceAI'] },
   () => {
     let adminApiCredentials: RoleApiCredentials;
 

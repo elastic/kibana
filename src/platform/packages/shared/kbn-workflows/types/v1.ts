@@ -446,7 +446,7 @@ export interface StepPropertyHandler<T = unknown> {
    * Entity selection configuration for the property.
    * Provides a unified interface for search, resolution, and decoration of entity references.
    */
-  selection?: PropertySelectionHandler<T>;
+  selection?: PropertySelectionHandler<Exclude<T, undefined>>;
 }
 
 export interface PropertySelectionHandler<T = unknown> {
