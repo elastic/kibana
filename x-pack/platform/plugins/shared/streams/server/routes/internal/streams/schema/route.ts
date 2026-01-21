@@ -284,9 +284,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       streamDefinition
     );
 
-    const hasErrors = simulation.docs
-      // .filter((doc) => doc.doc.error !== undefined)
-      .some((doc) => doc.doc.error !== undefined);
+    const hasErrors = simulation.docs.some((doc) => doc.doc.error !== undefined);
 
     if (hasErrors) {
       const documentWithError = simulation.docs.find((doc) => doc.doc.error !== undefined);
