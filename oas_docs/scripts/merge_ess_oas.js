@@ -10,7 +10,7 @@
 require('@kbn/setup-node-env');
 const { merge } = require('@kbn/openapi-bundler');
 const { REPO_ROOT } = require('@kbn/repo-info');
-const { componentizeObjectSchemas } = require('./componentize');
+const { extractComponents } = require('./extract_components');
 
 /**
  * Merges all Kibana ESS related OpenAPI spec files into a single file
@@ -54,5 +54,5 @@ const { componentizeObjectSchemas } = require('./componentize');
       prototypeDocument: `${REPO_ROOT}/oas_docs/kibana.info.yaml`,
     },
   });
-  await componentizeObjectSchemas(`${REPO_ROOT}/oas_docs/output/kibana.yaml`);
+  await extractComponents(`${REPO_ROOT}/oas_docs/output/kibana.yaml`);
 })();

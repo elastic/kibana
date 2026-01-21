@@ -10,7 +10,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const yaml = require('js-yaml');
-const { componentizeObjectSchemas } = require('../componentize');
+const { componentizeObjectSchemas } = require('./componentize');
 
 // initial test cases
 // TODO: add test cases for failed extractions, naming strategy, edge cases, etc.
@@ -79,6 +79,22 @@ describe('componentizeObjectSchemas', () => {
       // Check that components were created
       expect(result.components.schemas).toBeDefined();
       expect(Object.keys(result.components.schemas).length).toBe(2);
+      // check the structure and placement of the components
+      const componentNames = Object.keys(result.components.schemas);
+      const comp1 = result.components.schemas[componentNames[0]];
+      const comp2 = result.components.schemas[componentNames[1]];
+      expect(comp1).toHaveProperty('type', 'object');
+      expect(comp2).toHaveProperty('type', 'object');
+      expect(comp1).toMatchInlineSnapshot(`
+        Object {
+          "properties": Object {
+            "a": Object {
+              "type": "string",
+            },
+          },
+          "type": "object",
+        }
+      `);
     });
 
     it('should handle nested oneOf in properties', async () => {
@@ -332,7 +348,7 @@ describe('componentizeObjectSchemas', () => {
       fs.writeFileSync(testFile, yaml.dump(testDoc));
 
       // Should not throw or hang
-      await expect(componentizeObjectSchemas(testFile, { log: mockLog })).resolves.not.toThrow();
+      await expect(componentizeObjectSchemas(testFile, { log: mockLog })).resolves.not.toThrow(); // we might want to throw though
 
       // Should warn about max depth
       expect(mockLog.warn).toHaveBeenCalledWith(expect.stringContaining('Max depth reached'));
