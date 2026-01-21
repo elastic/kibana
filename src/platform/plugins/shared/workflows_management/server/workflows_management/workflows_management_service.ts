@@ -122,6 +122,18 @@ export class WorkflowsService {
     this.security = security;
   }
 
+  public getUserProfileUid(request: KibanaRequest): string | undefined {
+    if (!this.security) {
+      return undefined;
+    }
+    try {
+      const user = this.security.authc.getCurrentUser(request);
+      return user?.profile_uid ?? undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
   private async initialize(
     getCoreStart: () => Promise<CoreStart>,
     getPluginsStart: () => Promise<WorkflowsServerPluginStartDeps>

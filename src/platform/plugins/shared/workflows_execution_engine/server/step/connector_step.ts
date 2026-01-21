@@ -82,12 +82,14 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
         throw new Error(`Connector ID is required`);
       }
 
+      const userProfileUid = this.stepExecutionRuntime.getUserProfileUid();
       const output = await this.connectorExecutor.execute(
         stepType,
         connectorIdRendered,
         renderedInputs,
         step.spaceId,
-        this.stepExecutionRuntime.abortController
+        this.stepExecutionRuntime.abortController,
+        userProfileUid
       );
 
       const { data, status, message, serviceMessage } = output;

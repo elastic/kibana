@@ -282,6 +282,8 @@ export const oauthCallbackRoute = (
 
           const config = rawAction.attributes.config;
           const secrets = rawAction.attributes.secrets;
+          const authMode = (rawAction.attributes as any).authMode ?? 'shared';
+
           // Extract OAuth config - for connector specs, secrets are stored directly
           const clientId = secrets.clientId || config?.clientId;
           const clientSecret = secrets.clientSecret;
@@ -311,32 +313,56 @@ export const oauthCallbackRoute = (
             `Successfully exchanged authorization code for access token for connectorId: ${oauthState.connectorId}`
           );
 
-          // Store tokens - first delete any existing tokens for this connector then create a new token record
-          const connectorTokenClient = new ConnectorTokenClient({
-            encryptedSavedObjectsClient: encryptedSavedObjects.getClient({
-              includedHiddenTypes: ['connector_token'],
-            }),
-            unsecuredSavedObjectsClient: core.savedObjects.getClient({
-              includedHiddenTypes: ['connector_token'],
-            }),
-            logger: routeLogger,
-          });
-          await connectorTokenClient.deleteConnectorTokens({
-            connectorId: oauthState.connectorId,
-            tokenType: 'access_token',
-          });
           // Some providers return "bearer" instead of "Bearer", but expect "Bearer" in the header,
           // so we normalize the token type, i.e., capitalize first letter (e.g., "bearer" -> "Bearer")
           const normalizedTokenType = startCase(tokenResult.tokenType);
           const formattedToken = `${normalizedTokenType} ${tokenResult.accessToken}`;
-          await connectorTokenClient.createWithRefreshToken({
-            connectorId: oauthState.connectorId,
-            accessToken: formattedToken,
-            refreshToken: tokenResult.refreshToken,
-            expiresIn: tokenResult.expiresIn,
-            refreshTokenExpiresIn: tokenResult.refreshTokenExpiresIn,
-            tokenType: 'access_token',
+
+          const connectorTokenClient = new ConnectorTokenClient({
+            encryptedSavedObjectsClient: encryptedSavedObjects.getClient({
+              includedHiddenTypes: ['connector_token', 'user_connector_token'],
+            }),
+            unsecuredSavedObjectsClient: core.savedObjects.getClient({
+              includedHiddenTypes: ['connector_token', 'user_connector_token'],
+            }),
+            logger: routeLogger,
           });
+
+          if (authMode === 'personal') {
+            if (!currentUser.profile_uid) {
+              throw new Error('User profile UID required for personal credentials');
+            }
+
+            await connectorTokenClient.deleteConnectorTokens({
+              profileUid: currentUser.profile_uid,
+              connectorId: oauthState.connectorId,
+              credentialType: 'oauth',
+            });
+
+            await connectorTokenClient.createWithRefreshToken({
+              profileUid: currentUser.profile_uid,
+              connectorId: oauthState.connectorId,
+              accessToken: formattedToken,
+              refreshToken: tokenResult.refreshToken,
+              expiresIn: tokenResult.expiresIn,
+              refreshTokenExpiresIn: tokenResult.refreshTokenExpiresIn,
+              credentialType: 'oauth',
+            });
+          } else {
+            await connectorTokenClient.deleteConnectorTokens({
+              connectorId: oauthState.connectorId,
+              tokenType: 'access_token',
+            });
+
+            await connectorTokenClient.createWithRefreshToken({
+              connectorId: oauthState.connectorId,
+              accessToken: formattedToken,
+              refreshToken: tokenResult.refreshToken,
+              expiresIn: tokenResult.expiresIn,
+              refreshTokenExpiresIn: tokenResult.refreshTokenExpiresIn,
+              tokenType: 'access_token',
+            });
+          }
 
           // Clean up state
           await oauthStateClient.delete(oauthState.id);

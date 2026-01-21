@@ -86,6 +86,14 @@ export class StepExecutionRuntime {
     return this.workflowExecutionState.getWorkflowExecution();
   }
 
+  public getUserProfileUid(): string | undefined {
+    const context = this.workflowExecution.context;
+    if (context && typeof context === 'object' && 'userProfileUid' in context) {
+      return context.userProfileUid as string | undefined;
+    }
+    return undefined;
+  }
+
   public stepExecutionExists(): boolean {
     return !!this.workflowExecutionState.getStepExecution(this.stepExecutionId);
   }

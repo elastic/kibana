@@ -13,9 +13,11 @@ export const transformCreateConnectorBody = ({
   name,
   config,
   secrets,
+  auth_mode: authMode,
 }: CreateConnectorRequestBodyV1): ConnectorCreateParams['action'] => ({
   actionTypeId,
   name,
   config,
   secrets,
+  authMode,
 });
