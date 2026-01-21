@@ -35,7 +35,7 @@ apiTest.describe(`Alerting Rules helpers`, { tag: ['@svlSecurity', '@ess'] }, ()
       tags: ['test'],
     });
     expect(createdResponse).toHaveStatusCode(200);
-    expect(createdResponse).toHaveData({ enabled: false });
+    expect(createdResponse).toHavePayload({ enabled: false });
     ruleId = createdResponse.data.id;
   });
 
@@ -51,7 +51,7 @@ apiTest.describe(`Alerting Rules helpers`, { tag: ['@svlSecurity', '@ess'] }, ()
   apiTest(`should fetch alert with 'alerting.rules.get'`, async ({ apiServices }) => {
     const fetchedResponse: ApiResponse = await apiServices.alerting.rules.get(ruleId);
     expect(fetchedResponse).toHaveStatusCode(200);
-    expect(fetchedResponse).toHaveData({
+    expect(fetchedResponse).toHavePayload({
       enabled: false,
       name: alertName,
       rule_type_id: ruleTypeId,
@@ -63,7 +63,7 @@ apiTest.describe(`Alerting Rules helpers`, { tag: ['@svlSecurity', '@ess'] }, ()
       name: updatedAlertName,
     });
     expect(updatedResponse).toHaveStatusCode(200);
-    expect(updatedResponse).toHaveData({ name: updatedAlertName });
+    expect(updatedResponse).toHavePayload({ name: updatedAlertName });
   });
 
   apiTest('should enable/disable rule', async ({ apiServices }) => {
@@ -71,14 +71,14 @@ apiTest.describe(`Alerting Rules helpers`, { tag: ['@svlSecurity', '@ess'] }, ()
       await apiServices.alerting.rules.enable(ruleId);
       const fetchedResponse: ApiResponse = await apiServices.alerting.rules.get(ruleId);
       expect(fetchedResponse).toHaveStatusCode(200);
-      expect(fetchedResponse).toHaveData({ enabled: true });
+      expect(fetchedResponse).toHavePayload({ enabled: true });
     });
 
     await apiTest.step(`with 'alerting.rules.disable'`, async () => {
       await apiServices.alerting.rules.disable(ruleId);
       const fetchedResponse: ApiResponse = await apiServices.alerting.rules.get(ruleId);
       expect(fetchedResponse).toHaveStatusCode(200);
-      expect(fetchedResponse).toHaveData({ enabled: false });
+      expect(fetchedResponse).toHavePayload({ enabled: false });
     });
   });
 
@@ -90,7 +90,7 @@ apiTest.describe(`Alerting Rules helpers`, { tag: ['@svlSecurity', '@ess'] }, ()
       page: 1,
     });
     expect(foundResponse).toHaveStatusCode(200);
-    expect(foundResponse).toHaveData({ data: [{ name: alertName, id: ruleId }] });
+    expect(foundResponse).toHavePayload({ data: [{ name: alertName, id: ruleId }] });
   });
 
   apiTest(`should mute/unmute rule`, async ({ apiServices }) => {
@@ -99,7 +99,7 @@ apiTest.describe(`Alerting Rules helpers`, { tag: ['@svlSecurity', '@ess'] }, ()
 
       const fetchedResponse: ApiResponse = await apiServices.alerting.rules.get(ruleId);
       expect(fetchedResponse).toHaveStatusCode(200);
-      expect(fetchedResponse).toHaveData({ mute_all: true });
+      expect(fetchedResponse).toHavePayload({ mute_all: true });
     });
 
     await apiTest.step('alerting.rules.unmuteAll', async () => {
@@ -107,7 +107,7 @@ apiTest.describe(`Alerting Rules helpers`, { tag: ['@svlSecurity', '@ess'] }, ()
 
       const fetchedResponse: ApiResponse = await apiServices.alerting.rules.get(ruleId);
       expect(fetchedResponse).toHaveStatusCode(200);
-      expect(fetchedResponse).toHaveData({ mute_all: false });
+      expect(fetchedResponse).toHavePayload({ mute_all: false });
     });
   });
 
@@ -118,7 +118,7 @@ apiTest.describe(`Alerting Rules helpers`, { tag: ['@svlSecurity', '@ess'] }, ()
 
       const fetchedResponse: ApiResponse = await apiServices.alerting.rules.get(ruleId);
       expect(fetchedResponse).toHaveStatusCode(200);
-      expect(fetchedResponse).toHaveData({ muted_alert_ids: [mockAlertId] });
+      expect(fetchedResponse).toHavePayload({ muted_alert_ids: [mockAlertId] });
     });
 
     await apiTest.step('alerting.rules.unmuteAlert', async () => {
@@ -127,7 +127,7 @@ apiTest.describe(`Alerting Rules helpers`, { tag: ['@svlSecurity', '@ess'] }, ()
 
       const fetchedResponse: ApiResponse = await apiServices.alerting.rules.get(ruleId);
       expect(fetchedResponse).toHaveStatusCode(200);
-      expect(fetchedResponse).not.toHaveData({ muted_alert_ids: [mockAlertId] });
+      expect(fetchedResponse).not.toHavePayload({ muted_alert_ids: [mockAlertId] });
     });
   });
 

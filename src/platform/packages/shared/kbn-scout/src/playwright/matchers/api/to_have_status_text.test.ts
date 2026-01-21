@@ -11,7 +11,10 @@ import { expect as apiExpect } from '.';
 
 describe('toHaveStatusText', () => {
   it('should pass when status text matches', () => {
+    // kbnClient interface (statusText)
     expect(() => apiExpect({ statusText: 'OK' }).toHaveStatusText('OK')).not.toThrow();
+    // apiClient interface (statusMessage)
+    expect(() => apiExpect({ statusMessage: 'OK' }).toHaveStatusText('OK')).not.toThrow();
   });
 
   it('should fail when status text does not match', () => {

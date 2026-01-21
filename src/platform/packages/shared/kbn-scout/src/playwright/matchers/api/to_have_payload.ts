@@ -10,7 +10,7 @@
 import { expect as baseExpect } from '@playwright/test';
 import { createMatcherError } from './utils';
 
-export interface ToHaveDataOptions {
+export interface ToHavePayloadOptions {
   exactMatch?: boolean;
 }
 
@@ -49,36 +49,36 @@ function toPartialMatch(expected: unknown): unknown {
 }
 
 /**
- * Asserts that the response data matches the expected value.
+ * Asserts that the response payload matches the expected value.
  *
- * @param expected - The expected value. If omitted, checks that data is not null/undefined.
+ * @param expected - The expected value. If omitted, checks that payload is not null/undefined.
  * @param options.exactMatch - If true, performs exact matching for objects/arrays.
  *
  * @example
  * // Basic usage
- * expect(response).toHaveData();                                   // checks data is not null/undefined
- * expect(response).toHaveData({ id: 1 });                          // partial match (default)
- * expect(response).toHaveData({ id: 1 }, { exactMatch: true });    // exact match
- * expect(response).toHaveData('success');                          // exact match for primitives
- * expect(response).toHaveData({ items: [{ name: 'foo' }] });       // at least one item with name 'foo'
+ * expect(response).toHavePayload();                                   // checks payload is not null/undefined
+ * expect(response).toHavePayload({ id: 1 });                          // partial match (default)
+ * expect(response).toHavePayload({ id: 1 }, { exactMatch: true });    // exact match
+ * expect(response).toHavePayload('success');                          // exact match for primitives
+ * expect(response).toHavePayload({ items: [{ name: 'foo' }] });       // at least one item with name 'foo'
  *
  * // With asymmetric matchers for flexible assertions
- * expect(response).toHaveData({ metadata: expect.toBeDefined() });
- * expect(response).toHaveData({ count: expect.toBeGreaterThan(0) });
- * expect(response).toHaveData({ comments: expect.toHaveLength(3) });
+ * expect(response).toHavePayload({ metadata: expect.toBeDefined() });
+ * expect(response).toHavePayload({ count: expect.toBeGreaterThan(0) });
+ * expect(response).toHavePayload({ comments: expect.toHaveLength(3) });
  */
-export function toHaveData<T extends { data: unknown }>(
+export function toHavePayload<T extends { data: unknown } | { body: unknown }>(
   obj: T,
   expected?: unknown,
-  options?: ToHaveDataOptions,
+  options?: ToHavePayloadOptions,
   isNegated = false
 ): void {
-  const actual = obj.data;
+  const actual = 'data' in obj ? obj.data : obj.body;
 
   if (expected === undefined) {
     const hasValue = actual !== null && actual !== undefined;
     if ((!hasValue && !isNegated) || (hasValue && isNegated)) {
-      throw createMatcherError('defined', 'toHaveData', actual, isNegated);
+      throw createMatcherError('defined', 'toHavePayload', actual, isNegated);
     }
     return;
   }
@@ -102,6 +102,6 @@ export function toHaveData<T extends { data: unknown }>(
   } catch {
     const actualDisplay = typeof actual === 'object' ? JSON.stringify(actual) : actual;
     const expectedDisplay = typeof expected === 'object' ? JSON.stringify(expected) : expected;
-    throw createMatcherError(expectedDisplay, 'toHaveData', actualDisplay, isNegated);
+    throw createMatcherError(expectedDisplay, 'toHavePayload', actualDisplay, isNegated);
   }
 }

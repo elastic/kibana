@@ -17,12 +17,12 @@ import { createMatcherError } from './utils';
  * expect(response).toHaveStatusText('OK');
  * expect(response).not.toHaveStatusText('Not Found');
  */
-export function toHaveStatusText<T extends { statusText: unknown }>(
+export function toHaveStatusText<T extends { statusText: unknown } | { statusMessage: unknown }>(
   obj: T,
   expected: string,
   isNegated = false
 ): void {
-  const actual = obj.statusText;
+  const actual = 'statusText' in obj ? obj.statusText : obj.statusMessage;
   try {
     if (isNegated) {
       baseExpect(actual).not.toBe(expected);

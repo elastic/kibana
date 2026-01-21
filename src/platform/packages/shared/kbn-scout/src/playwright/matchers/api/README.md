@@ -2,11 +2,12 @@
 
 ## Summary
 
-Create a Scout API custom `expect` with dynamic matchers for API testing and restricted exposure to Playwright’s default matchers. This is to assist developers with API-specific assertions and enforce best practices
+Create a Scout API custom `expect` with dynamic matchers for API testing and restricted exposure to Playwright's default matchers. This is to assist developers with API-specific assertions and enforce best practices
 
 **Key Features:**
 
 - Custom matchers for API-specific assertions
+- Supports both `apiClient` and `kbnClient` response interfaces
 - Matchers created at runtime based on asserted object's properties
 - Full TypeScript support for dynamically generated matchers
 - Partial and exact matching provided
@@ -27,15 +28,15 @@ Custom `expect` function that provides type-safe, API-focused matchers based on 
 ```typescript
 import { expect } from '@kbn/scout/api';
 
-// Example response object from an API call
+// Example response object from apiClient
 const response = {
-  status: 200,
-  statusText: 'OK',
+  statusCode: 200,
+  statusMessage: 'OK',
   headers: {
     'Content-Type': 'application/json',
     'Set-Cookie': ['session=abc', 'token=xyz'], // array values joined as 'session=abc, token=xyz'
   },
-  data: {
+  body: {
     cases: [{ id: 'case-123', title: 'Test Case', version: 'WzEsMV0=' }],
     total: 1,
   },
@@ -46,17 +47,17 @@ expect(response).toHaveStatusCode(200);
 expect(response).toHaveStatusCode({ oneOf: [200, 201] });
 expect(response).not.toHaveStatusCode(500);
 
-// Data assertions with partial matching (default)
-expect(response).toHaveData({ total: 1 });
-expect(response).toHaveData({ cases: [{ id: 'case-123' }] });
+// Payload assertions with partial matching (default)
+expect(response).toHavePayload({ total: 1 });
+expect(response).toHavePayload({ cases: [{ id: 'case-123' }] });
 
 // Asymmetric matchers for flexible assertions
-expect(response).toHaveData({ cases: expect.toHaveLength() }); // or pass exact length
-expect(response).toHaveData({ total: expect.toBeGreaterThan(0) });
-expect(response).toHaveData({ cases: [{ version: expect.toBeDefined() }] });
+expect(response).toHavePayload({ cases: expect.toHaveLength() }); // checks length > 0, or pass exact length
+expect(response).toHavePayload({ total: expect.toBeGreaterThan(0) });
+expect(response).toHavePayload({ cases: [{ version: expect.toBeDefined() }] });
 
-// Data assertions with exact matching
-expect(response).toHaveData(
+// Payload assertions with exact matching
+expect(response).toHavePayload(
   {
     total: 1,
     cases: [
@@ -77,7 +78,7 @@ expect(response).toHaveHeaders({ 'set-cookie': 'session=abc, token=xyz' }); // a
 // Status text
 expect(response).toHaveStatusText('OK');
 
-// Value assertions (restricted to toBeDefined only)
+// Value assertions (restricted)
 expect(response.data.cases[0].version).toBeDefined();
 ```
 
@@ -86,11 +87,11 @@ expect(response.data.cases[0].version).toBeDefined();
 Matchers are dynamically created at runtime based on object properties, with static type inference providing accurate autocomplete and compile-time checking:
 
 ```typescript
-const response = { status: 200, data: { id: 'abc' } }; // no statusText
+const response = { statusCode: 200, body: { id: 'abc' } }; // no statusMessage
 
 expect(response).toHaveStatusCode(200); // ✅ available
-expect(response).toHaveData({ id: 'abc' }); // ✅ available
-expect(response).toHaveStatusText('OK'); // ❌ type error - statusText not in response
+expect(response).toHavePayload({ id: 'abc' }); // ✅ available
+expect(response).toHaveStatusText('OK'); // ❌ type error - statusMessage not in response
 ```
 
 ### Restricted Value Matchers
@@ -102,11 +103,11 @@ Default playwright's value matchers are restricted to guide developers toward AP
 expect(response.data.version).toBeDefined();
 
 // NOT available: ❌
-expect(response.data.cases).toHaveLength(1);
-expect(response.data.cases[0].id).toBe(caseId);
+expect(response.body.cases).toHaveLength(1);
+expect(response.body.cases[0].id).toBe(caseId);
 
 // Instead do this: ✅
-expect(response).toHaveData({ cases: { id: caseId } });
+expect(response).toHavePayload({ cases: { id: caseId } });
 ```
 
 ---
@@ -125,7 +126,7 @@ expect(data.status).toBe('open');
 // ✅ After: Scout API expect with partial matching
 const response = await apiServices.cases.create({ ... });
 expect(response).toHaveStatusCode(200);
-expect(response).toHaveData({ owner: caseOwner, status: 'open' });
+expect(response).toHavePayload({ owner: caseOwner, status: 'open' });
 ```
 
 ---

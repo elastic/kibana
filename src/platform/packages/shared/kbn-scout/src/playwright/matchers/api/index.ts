@@ -18,12 +18,12 @@ import { asymmetricMatchers } from './asymmetric_matchers';
  * @example
  * const response: { status: number } = await getApiResponse();
  * expect(response).toHaveStatusCode(200);  // ✅ status exists
- * expect(response).toHaveData({ id: 1 });  // ❌ data doesn't exist
+ * expect(response).toHavePayload({ id: 1 });  // ❌ data doesn't exist
  * expect(response.status).toBe(200);       // ✅ value matchers always work
  *
  * // Asymmetric matchers for flexible assertions
- * expect(response).toHaveData({ count: expect.toBeGreaterThan(0) });
- * expect(response).toHaveData({ metadata: expect.toBeDefined() });
+ * expect(response).toHavePayload({ count: expect.toBeGreaterThan(0) });
+ * expect(response).toHavePayload({ metadata: expect.toBeDefined() });
  */
 function expectFn<T>(actual: T): MatchersFor<T>;
 function expectFn(actual: unknown) {

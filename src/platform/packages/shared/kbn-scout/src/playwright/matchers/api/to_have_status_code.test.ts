@@ -11,7 +11,10 @@ import { expect as apiExpect } from '.';
 
 describe('toHaveStatusCode', () => {
   it('should pass when status code matches', () => {
+    // kbnClient interface (status)
     expect(() => apiExpect({ status: 200 }).toHaveStatusCode(200)).not.toThrow();
+    // apiClient interface (statusCode)
+    expect(() => apiExpect({ statusCode: 200 }).toHaveStatusCode(200)).not.toThrow();
   });
 
   it('should fail when status code does not match', () => {

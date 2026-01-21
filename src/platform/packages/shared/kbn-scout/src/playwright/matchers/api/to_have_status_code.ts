@@ -24,12 +24,12 @@ export interface ToHaveStatusCodeOptions {
  * expect(response).toHaveStatusCode({ oneOf: [200, 201] });
  * expect(response).not.toHaveStatusCode(404);
  */
-export function toHaveStatusCode<T extends { status: unknown }>(
+export function toHaveStatusCode<T extends { status: unknown } | { statusCode: unknown }>(
   obj: T,
   expected: number | ToHaveStatusCodeOptions,
   isNegated = false
 ): void {
-  const actual = obj.status;
+  const actual = 'status' in obj ? obj.status : obj.statusCode;
   const codes = typeof expected === 'number' ? [expected] : expected.oneOf;
 
   try {

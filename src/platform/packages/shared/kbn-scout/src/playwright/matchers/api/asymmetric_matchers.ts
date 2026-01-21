@@ -13,7 +13,7 @@ import type { AsymmetricMatcher, AsymmetricMatchers } from './types';
 const ASYMMETRIC_MATCHER_SYMBOL = Symbol.for('jest.asymmetricMatcher');
 
 /**
- * Creates a custom asymmetric matcher that can be used inside toHaveData().
+ * Creates a custom asymmetric matcher that can be used inside toHavePayload().
  */
 function createAsymmetricMatcher(
   matchFn: (actual: unknown) => boolean,
@@ -29,11 +29,11 @@ function createAsymmetricMatcher(
 
 /**
  * Asymmetric matchers for flexible value assertions.
- * These can be used inside toHaveData() for partial matching.
+ * These can be used inside toHavePayload() for partial matching.
  *
  * @example
- * expect(response).toHaveData({ metadata: expect.toBeDefined() });
- * expect(response).toHaveData({ count: expect.toBeGreaterThan(0) });
+ * expect(response).toHavePayload({ metadata: expect.toBeDefined() });
+ * expect(response).toHavePayload({ count: expect.toBeGreaterThan(0) });
  */
 export const asymmetricMatchers: AsymmetricMatchers = {
   /** Matches any value that is not null or undefined */

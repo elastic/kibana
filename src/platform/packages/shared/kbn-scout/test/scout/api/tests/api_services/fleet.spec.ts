@@ -78,7 +78,7 @@ apiTest.describe('Fleet Agent Policies Management', { tag: ['@svlSecurity', '@es
     });
 
     expect(response).toHaveStatusCode(200);
-    expect(response).toHaveData({ page: 1, perPage: 10 });
+    expect(response).toHavePayload({ page: 1, perPage: 10 });
   });
 
   apiTest('should create an agent policy with additional parameters', async ({ apiServices }) => {
@@ -96,7 +96,7 @@ apiTest.describe('Fleet Agent Policies Management', { tag: ['@svlSecurity', '@es
     );
 
     expect(response).toHaveStatusCode(200);
-    expect(response).toHaveData({
+    expect(response).toHavePayload({
       item: { name: paramsPolicyName, namespace: paramsPolicyNamespace },
     });
 
@@ -125,7 +125,7 @@ apiTest.describe('Fleet Agent Policies Management', { tag: ['@svlSecurity', '@es
     );
 
     expect(updateResponse).toHaveStatusCode(200);
-    expect(updateResponse).toHaveData({ item: { name: updatedName } });
+    expect(updateResponse).toHavePayload({ item: { name: updatedName } });
   });
 
   apiTest('should bulk get agent policies', async ({ apiServices }) => {
@@ -146,7 +146,7 @@ apiTest.describe('Fleet Agent Policies Management', { tag: ['@svlSecurity', '@es
     // Bulk get the policies
     const bulkResponse: ApiResponse = await apiServices.fleet.agent_policies.bulkGet(policyIds);
     expect(bulkResponse).toHaveStatusCode(200);
-    expect(bulkResponse).toHaveData({
+    expect(bulkResponse).toHavePayload({
       items: [{ id: policy1Response.data.item.id }, { id: policy2Response.data.item.id }],
     });
     // Clean up both policies
@@ -203,7 +203,7 @@ apiTest.describe('Fleet Outputs Management', { tag: ['@svlSecurity', '@ess'] }, 
     const response: ApiResponse = await apiServices.fleet.outputs.getOutputs();
 
     expect(response).toHaveStatusCode(200);
-    expect(response).toHaveData({ items: expect.toHaveLength() });
+    expect(response).toHavePayload({ items: expect.toHaveLength() });
   });
 
   apiTest('should get a specific output by ID', async ({ apiServices }) => {
@@ -217,7 +217,7 @@ apiTest.describe('Fleet Outputs Management', { tag: ['@svlSecurity', '@ess'] }, 
     const response: ApiResponse = await apiServices.fleet.outputs.getOutput(existingOutput.id);
 
     expect(response).toHaveStatusCode(200);
-    expect(response).toHaveData({ item: { id: existingOutput.id } });
+    expect(response).toHavePayload({ item: { id: existingOutput.id } });
   });
 
   apiTest('should create an output with additional parameters', async ({ apiServices }) => {
@@ -235,7 +235,7 @@ apiTest.describe('Fleet Outputs Management', { tag: ['@svlSecurity', '@ess'] }, 
     );
 
     expect(response).toHaveStatusCode(200);
-    expect(response).toHaveData({ item: { name: outputName, is_default: false } });
+    expect(response).toHavePayload({ item: { name: outputName, is_default: false } });
 
     outputId = response.data.item.id;
   });
@@ -287,7 +287,7 @@ apiTest.describe('Fleet Server Hosts Management', { tag: ['@svlSecurity', '@ess'
     });
 
     expect(response).toHaveStatusCode(200);
-    expect(response).toHaveData({
+    expect(response).toHavePayload({
       item: { name: hostName, is_default: false, is_internal: true },
     });
 

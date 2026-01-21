@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ToHaveDataOptions } from './to_have_data';
+import type { ToHavePayloadOptions } from './to_have_payload';
 
 import type { ToHaveStatusCodeOptions } from './to_have_status_code';
 
@@ -23,17 +23,19 @@ export interface HeadersMatchers {
   toHaveHeaders(headers: Record<string, string>): void;
 }
 
-export interface DataMatchers {
-  toHaveData(expected?: unknown, options?: ToHaveDataOptions): void;
+export interface PayloadMatchers {
+  toHavePayload(expected?: unknown, options?: ToHavePayloadOptions): void;
 }
 
 type IsAny<T> = 0 extends 1 & T ? true : false;
 
 /** Builds conditional response matchers based on properties in T */
-type ResponseMatchersFor<T> = (T extends { status: number } ? StatusMatchers : {}) &
-  (T extends { statusText: string } ? StatusTextMatchers : {}) &
+type ResponseMatchersFor<T> = (T extends { status: number } | { statusCode: number }
+  ? StatusMatchers
+  : {}) &
+  (T extends { statusText: string } | { statusMessage: string } ? StatusTextMatchers : {}) &
   (T extends { headers: object } ? HeadersMatchers : {}) &
-  (T extends { data: unknown } ? DataMatchers : {});
+  (T extends { data: unknown } | { body: unknown } ? PayloadMatchers : {});
 
 /**
  * Returns matchers based on the input type T.
@@ -54,7 +56,7 @@ export interface ValueMatchers {
 }
 
 /**
- * Represents an asymmetric matcher that can be used inside toHaveData().
+ * Represents an asymmetric matcher that can be used inside toHavePayload().
  * These matchers are identified by Jest/Playwright via the $$typeof symbol.
  */
 export interface AsymmetricMatcher {
@@ -66,7 +68,7 @@ export interface AsymmetricMatcher {
 
 /**
  * Custom asymmetric matchers available on the expect object.
- * These can be used inside toHaveData() for flexible value matching.
+ * These can be used inside toHavePayload() for flexible value matching.
  */
 export interface AsymmetricMatchers {
   /** Matches any value that is not null or undefined */
