@@ -350,3 +350,114 @@ test('createAPIKey() throws when security plugin createAPIKey throws an error', 
     `"TLS disabled"`
   );
 });
+
+test('create() calls getSpaceId to derive spaceId from request', async () => {
+  const factory = new RulesClientFactory();
+  factory.initialize(rulesClientFactoryParams);
+  const request = mockRouter.createKibanaRequest();
+
+  savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
+  alertingAuthorizationClientFactory.createForSpace.mockResolvedValue(
+    alertingAuthorization as unknown as AlertingAuthorization
+  );
+
+  await factory.create(request, savedObjectsService);
+
+  expect(rulesClientFactoryParams.getSpaceId).toHaveBeenCalledWith(request);
+  expect(alertingAuthorizationClientFactory.createForSpace).toHaveBeenCalledWith(
+    request,
+    'default'
+  );
+});
+
+test('createWithSpaceId() uses the provided spaceId instead of deriving from request', async () => {
+  const factory = new RulesClientFactory();
+  factory.initialize(rulesClientFactoryParams);
+  const request = mockRouter.createKibanaRequest();
+
+  savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
+  alertingAuthorizationClientFactory.createForSpace.mockResolvedValue(
+    alertingAuthorization as unknown as AlertingAuthorization
+  );
+
+  await factory.createWithSpaceId(request, savedObjectsService, 'custom-space');
+
+  // getSpaceId should NOT be called when using createWithSpaceId
+  expect(rulesClientFactoryParams.getSpaceId).not.toHaveBeenCalled();
+
+  // createForSpace should be called with the provided spaceId
+  expect(alertingAuthorizationClientFactory.createForSpace).toHaveBeenCalledWith(
+    request,
+    'custom-space'
+  );
+
+  // Saved objects client should be scoped to the custom namespace
+  expect(savedObjectsClient.asScopedToNamespace).toHaveBeenCalledWith('custom-space');
+
+  // RulesClient should be created with the custom spaceId
+  expect(jest.requireMock('./rules_client').RulesClient).toHaveBeenCalledWith(
+    expect.objectContaining({
+      spaceId: 'custom-space',
+    })
+  );
+});
+
+test('create() uses request-derived client methods for actions and event log', async () => {
+  const factory = new RulesClientFactory();
+  factory.initialize(rulesClientFactoryParams);
+  const request = mockRouter.createKibanaRequest();
+
+  savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
+  alertingAuthorizationClientFactory.createForSpace.mockResolvedValue(
+    alertingAuthorization as unknown as AlertingAuthorization
+  );
+
+  await factory.create(request, savedObjectsService);
+
+  const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+  // Call getActionsClient and verify it uses the request-derived method
+  await constructorCall.getActionsClient();
+  expect(rulesClientFactoryParams.actions.getActionsClientWithRequest).toHaveBeenCalledWith(
+    request
+  );
+  expect(
+    rulesClientFactoryParams.actions.getActionsClientWithRequestInSpace
+  ).not.toHaveBeenCalled();
+
+  // Call getEventLogClient and verify it uses the request-derived method
+  await constructorCall.getEventLogClient();
+  expect(rulesClientFactoryParams.eventLog.getClient).toHaveBeenCalledWith(request);
+  expect(rulesClientFactoryParams.eventLog.getClientWithRequestInSpace).not.toHaveBeenCalled();
+});
+
+test('createWithSpaceId() uses space-scoped client methods for actions and event log', async () => {
+  const factory = new RulesClientFactory();
+  factory.initialize(rulesClientFactoryParams);
+  const request = mockRouter.createKibanaRequest();
+
+  savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
+  alertingAuthorizationClientFactory.createForSpace.mockResolvedValue(
+    alertingAuthorization as unknown as AlertingAuthorization
+  );
+
+  await factory.createWithSpaceId(request, savedObjectsService, 'custom-space');
+
+  const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+  // Call getActionsClient and verify it uses the space-scoped method
+  await constructorCall.getActionsClient();
+  expect(rulesClientFactoryParams.actions.getActionsClientWithRequestInSpace).toHaveBeenCalledWith(
+    request,
+    'custom-space'
+  );
+  expect(rulesClientFactoryParams.actions.getActionsClientWithRequest).not.toHaveBeenCalled();
+
+  // Call getEventLogClient and verify it uses the space-scoped method
+  await constructorCall.getEventLogClient();
+  expect(rulesClientFactoryParams.eventLog.getClientWithRequestInSpace).toHaveBeenCalledWith(
+    request,
+    'custom-space'
+  );
+  expect(rulesClientFactoryParams.eventLog.getClient).not.toHaveBeenCalled();
+});
