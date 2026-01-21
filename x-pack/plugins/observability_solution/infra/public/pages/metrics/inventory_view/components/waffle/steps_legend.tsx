@@ -49,13 +49,20 @@ export const StepLegend: React.FC<Props> = ({ legend, formatter }) => {
 
 const StepLegendContainer = euiStyled.div`
   display: flex;
+  flex-direction: column;
   padding: 10px 40px 10px 10px;
+  max-height: 50vh;
+  overflow-y: auto;
 `;
 
 const StepContainer = euiStyled.div`
   display: flex;
-  margin-right: 20px
+  margin-bottom: 8px;
   align-items: center;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
 `;
 
 const StepSquare = euiStyled.div`

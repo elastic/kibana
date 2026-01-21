@@ -16,10 +16,11 @@ export const createLegend = (
   name: InventoryColorPalette,
   steps: number = 10,
   reverse: boolean = false,
-  rules: InfraWaffleMapStepRule[] = []
+  rules: InfraWaffleMapStepRule[] = [],
+  type: 'gradient' | 'steps' = 'gradient'
 ): InfraWaffleMapLegend => {
   const paletteColors = getColorPalette(name, steps, reverse);
-  return rules.length > 0
+  return type === 'steps' && rules.length > 0
     ? {
         type: 'steps',
         rules,
