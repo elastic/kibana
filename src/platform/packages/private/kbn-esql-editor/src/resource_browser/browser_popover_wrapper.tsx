@@ -345,7 +345,8 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
             setIsIntegrationPopoverOpen(false);
           }}
           panelPaddingSize="none"
-          panelStyle={{ transform: `translateX(220px)` }}
+          offset={-35} // Move popover up to align with the filter button
+          panelStyle={{ transform: `translateX(215px)` }}
         >
           <EuiSelectable
             options={integrationFilterOptions}
@@ -405,7 +406,8 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
               isOpen={isFilterPopoverOpen}
               closePopover={() => setIsFilterPopoverOpen(false)}
               panelPaddingSize="none"
-              panelStyle={{ transform: `translateX(${euiTheme.size.xxxl})` }}
+              panelStyle={{ transform: `translateX(45px)` }}
+              offset={-35} // Move popover up to align with the filter button
             >
               <EuiPopoverTitle paddingSize="s">{i18nKeys.filterTitle}</EuiPopoverTitle>
               <EuiSelectable
