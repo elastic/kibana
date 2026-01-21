@@ -13,6 +13,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { isGroupingBucket } from '@kbn/grouping/src';
 import type { ParsedGroupingAggregation, RawBucket } from '@kbn/grouping/src';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+
 import { AttackDetailsRightPanelKey } from '../../../../flyout/attack_details/constants/panel_keys';
 import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
 import { PageScope } from '../../../../data_view_manager/constants';
@@ -41,6 +42,7 @@ import type { AssigneesIdsSelection } from '../../../../common/components/assign
 
 import { AttackDetailsContainer } from './attack_details/attack_details_container';
 import { AlertsTab } from './attack_details/alerts_tab';
+import { EmptyResultsPrompt } from './empty_results_prompt';
 import { groupingOptions, groupingSettings } from './grouping_configs';
 import * as i18n from './translations';
 import { buildConnectorIdFilter } from './filtering_configs';
@@ -59,6 +61,7 @@ export interface TableSectionProps {
    * This is an array of Status values, such as ['open', 'acknowledged', 'closed', 'in-progress']
    */
   statusFilter: Status[];
+
   /**
    * The page filters retrieved from the FiltersSection component to filter the table
    */
@@ -72,6 +75,11 @@ export interface TableSectionProps {
    * The list of selected connectors ID to filter the table
    */
   selectedConnectorNames: string[];
+
+  /**
+   * Callback to open the schedules flyout
+   */
+  openSchedulesFlyout: () => void;
 }
 
 /**
@@ -84,6 +92,7 @@ export const TableSection = React.memo(
     pageFilters,
     assignees,
     selectedConnectorNames,
+    openSchedulesFlyout,
   }: TableSectionProps) => {
     const getGlobalFiltersQuerySelector = useMemo(
       () => inputsSelectors.globalFiltersQuerySelector(),
@@ -256,6 +265,11 @@ export const TableSection = React.memo(
       [openAttackDetailsFlyout]
     );
 
+    const emptyGroupingComponent = useMemo(
+      () => <EmptyResultsPrompt openSchedulesFlyout={openSchedulesFlyout} />,
+      [openSchedulesFlyout]
+    );
+
     return (
       <div data-test-subj={TABLE_SECTION_TEST_ID}>
         <GroupedAlertsTable
@@ -278,6 +292,7 @@ export const TableSection = React.memo(
           pageScope={PageScope.attacks} // allow filtering and grouping by attack fields
           settings={groupingSettings}
           getAdditionalActionButtons={getAdditionalActionButtons}
+          emptyGroupingComponent={emptyGroupingComponent}
         />
       </div>
     );
