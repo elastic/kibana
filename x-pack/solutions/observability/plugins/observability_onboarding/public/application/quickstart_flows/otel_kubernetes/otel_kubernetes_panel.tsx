@@ -74,8 +74,12 @@ export const OtelKubernetesPanel: React.FC = () => {
   );
   const isManagedOtlpServiceAvailable = useManagedOtlpServiceAvailability();
 
-  const { isEnabled: isWiredStreamsAvailable, isLoading: isWiredStreamsLoading } =
-    useWiredStreamsStatus();
+  const {
+    isEnabled: isWiredStreamsEnabled,
+    isLoading: isWiredStreamsLoading,
+    isEnabling,
+    enableWiredStreams,
+  } = useWiredStreamsStatus();
   const [ingestionMode, setIngestionMode] = useState<IngestionMode>('classic');
   const useWiredStreams = ingestionMode === 'wired';
 
@@ -149,11 +153,15 @@ export const OtelKubernetesPanel: React.FC = () => {
             ),
             children: installStackCommand ? (
               <>
-                {isWiredStreamsAvailable && !isWiredStreamsLoading && (
+                {!isWiredStreamsLoading && (
                   <WiredStreamsIngestionSelector
                     ingestionMode={ingestionMode}
                     onChange={setIngestionMode}
                     streamsDocLink={docLinks?.links.observability.logsStreams}
+                    isWiredStreamsEnabled={isWiredStreamsEnabled}
+                    isEnabling={isEnabling}
+                    flowType="otel_kubernetes"
+                    onEnableWiredStreams={enableWiredStreams}
                   />
                 )}
                 <p>

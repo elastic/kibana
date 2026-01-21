@@ -91,8 +91,12 @@ export const OtelLogsPanel: React.FC = () => {
   );
   const isManagedOtlpServiceAvailable = useManagedOtlpServiceAvailability();
 
-  const { isEnabled: isWiredStreamsAvailable, isLoading: isWiredStreamsLoading } =
-    useWiredStreamsStatus();
+  const {
+    isEnabled: isWiredStreamsEnabled,
+    isLoading: isWiredStreamsLoading,
+    isEnabling,
+    enableWiredStreams,
+  } = useWiredStreamsStatus();
   const [ingestionMode, setIngestionMode] = useState<IngestionMode>('classic');
   const useWiredStreams = ingestionMode === 'wired';
 
@@ -197,7 +201,7 @@ export const OtelLogsPanel: React.FC = () => {
                 <EuiFlexGroup direction="column" gutterSize="l">
                   <EuiFlexItem grow={false}>
                     <EuiFlexGroup direction="column" gutterSize="s">
-                      {isWiredStreamsAvailable && !isWiredStreamsLoading && (
+                      {!isWiredStreamsLoading && (
                         <EuiText size="xs">
                           <strong>
                             {i18n.translate(
@@ -231,12 +235,16 @@ export const OtelLogsPanel: React.FC = () => {
                     </EuiFlexGroup>
                   </EuiFlexItem>
 
-                  {isWiredStreamsAvailable && !isWiredStreamsLoading && (
+                  {!isWiredStreamsLoading && (
                     <EuiFlexItem grow={false}>
                       <WiredStreamsIngestionSelector
                         ingestionMode={ingestionMode}
                         onChange={setIngestionMode}
                         streamsDocLink={docLinks?.links.observability.logsStreams}
+                        isWiredStreamsEnabled={isWiredStreamsEnabled}
+                        isEnabling={isEnabling}
+                        flowType="otel_host"
+                        onEnableWiredStreams={enableWiredStreams}
                       />
                     </EuiFlexItem>
                   )}

@@ -20,6 +20,7 @@ export interface OnboardingApiService {
     payload?: object
   ) => Promise<void>;
   enableWiredStreams: () => Promise<void>;
+  disableWiredStreams: () => Promise<void>;
   getWiredStreamsStatus: () => Promise<WiredStreamsStatus>;
 }
 
@@ -45,6 +46,13 @@ export const getOnboardingApiHelper = (kbnClient: KbnClient): OnboardingApiServi
       await kbnClient.request({
         method: 'POST',
         path: '/api/streams/_enable',
+      });
+    },
+
+    disableWiredStreams: async () => {
+      await kbnClient.request({
+        method: 'POST',
+        path: '/api/streams/_disable',
       });
     },
 

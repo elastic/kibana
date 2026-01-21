@@ -55,8 +55,12 @@ export const AutoDetectPanel: FunctionComponent = () => {
     ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
   );
 
-  const { isEnabled: isWiredStreamsAvailable, isLoading: isWiredStreamsLoading } =
-    useWiredStreamsStatus();
+  const {
+    isEnabled: isWiredStreamsEnabled,
+    isLoading: isWiredStreamsLoading,
+    isEnabling,
+    enableWiredStreams,
+  } = useWiredStreamsStatus();
   const [ingestionMode, setIngestionMode] = useState<IngestionMode>('classic');
   const useWiredStreams = ingestionMode === 'wired';
 
@@ -114,11 +118,15 @@ export const AutoDetectPanel: FunctionComponent = () => {
             status: status === 'notStarted' ? 'current' : 'complete',
             children: command ? (
               <>
-                {isWiredStreamsAvailable && !isWiredStreamsLoading && (
+                {!isWiredStreamsLoading && (
                   <WiredStreamsIngestionSelector
                     ingestionMode={ingestionMode}
                     onChange={setIngestionMode}
                     streamsDocLink={docLinks?.links.observability.logsStreams}
+                    isWiredStreamsEnabled={isWiredStreamsEnabled}
+                    isEnabling={isEnabling}
+                    flowType="auto_detect"
+                    onEnableWiredStreams={enableWiredStreams}
                   />
                 )}
                 <EuiText>

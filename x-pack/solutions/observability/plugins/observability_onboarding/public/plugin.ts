@@ -41,6 +41,7 @@ import {
   OBSERVABILITY_ONBOARDING_FLOW_PROGRESS_TELEMETRY_EVENT,
   OBSERVABILITY_ONBOARDING_FLOW_ERROR_TELEMETRY_EVENT,
   OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT,
+  OBSERVABILITY_ONBOARDING_WIRED_STREAMS_AUTO_ENABLED_EVENT,
 } from '../common/telemetry_events';
 
 export type ObservabilityOnboardingPluginSetup = void;
@@ -132,6 +133,7 @@ export class ObservabilityOnboardingPlugin
     core.analytics.registerEventType(
       OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT
     );
+    core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_WIRED_STREAMS_AUTO_ENABLED_EVENT);
 
     return {
       locators: this.locators,

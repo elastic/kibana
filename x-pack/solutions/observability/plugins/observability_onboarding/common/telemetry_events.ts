@@ -308,3 +308,33 @@ export const OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT: Eve
     context: flowContextSchema,
   },
 };
+
+export const OBSERVABILITY_ONBOARDING_WIRED_STREAMS_AUTO_ENABLED_EVENT: EventTypeOpts<{
+  flow_type: string;
+  success: boolean;
+  error_message?: string;
+}> = {
+  eventType: 'observability_onboarding_wired_streams_auto_enabled',
+  schema: {
+    flow_type: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'The onboarding flow type where auto-enable was triggered (otel_host, otel_kubernetes, elastic_agent_kubernetes, auto_detect)',
+      },
+    },
+    success: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether the auto-enable operation succeeded',
+      },
+    },
+    error_message: {
+      type: 'text',
+      _meta: {
+        description: 'Error message if auto-enable failed',
+        optional: true,
+      },
+    },
+  },
+};

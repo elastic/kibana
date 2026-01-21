@@ -226,4 +226,25 @@ export class OnboardingApp {
   async getKubernetesCommandContent(): Promise<string> {
     return (await this.kubernetesCodeSnippet.textContent()) ?? '';
   }
+
+  // Enable Wired Streams Modal
+  public get enableWiredStreamsModal() {
+    return this.page.getByTestId('observabilityOnboardingEnableWiredStreamsModal');
+  }
+
+  public get enableWiredStreamsCancelButton() {
+    return this.page.getByTestId('observabilityOnboardingEnableWiredStreamsCancelButton');
+  }
+
+  public get enableWiredStreamsConfirmButton() {
+    return this.page.getByTestId('observabilityOnboardingEnableWiredStreamsConfirmButton');
+  }
+
+  async cancelEnableWiredStreamsModal() {
+    await this.enableWiredStreamsCancelButton.click();
+  }
+
+  async confirmEnableWiredStreamsModal() {
+    await this.enableWiredStreamsConfirmButton.click();
+  }
 }
