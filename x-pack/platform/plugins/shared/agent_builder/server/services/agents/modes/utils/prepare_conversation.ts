@@ -86,7 +86,7 @@ const mergeInputAttachmentsIntoAttachmentState = async (
     if (input.id) {
       const existing = attachmentStateManager.get(input.id);
       if (existing) {
-        attachmentStateManager.update(input.id, {
+        await attachmentStateManager.update(input.id, {
           data: input.data,
           ...(input.hidden !== undefined ? { hidden: input.hidden } : {}),
         });
