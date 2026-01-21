@@ -10,6 +10,7 @@ import { DraftGrokExpression } from '@kbn/grok-ui';
 import type {
   ConvertProcessor,
   GrokProcessor,
+  JoinProcessor,
   LowercaseProcessor,
   MathProcessor,
   ProcessorType,
@@ -49,6 +50,7 @@ import type {
   DropFormState,
   EnrichmentDataSourceWithUIAttributes,
   GrokFormState,
+  JoinFormState,
   LowercaseFormState,
   ManualIngestPipelineFormState,
   MathFormState,
@@ -74,6 +76,7 @@ export const SPECIALISED_TYPES = [
   'uppercase',
   'lowercase',
   'trim',
+  'join',
 ];
 
 interface FormStateDependencies {
@@ -247,6 +250,16 @@ const defaultTrimProcessorFormState = (): TrimFormState => ({
   where: ALWAYS_CONDITION,
 });
 
+const defaultJoinProcessorFormState = (): JoinFormState => ({
+  action: 'join' as const,
+  from: [],
+  to: '',
+  delimiter: '',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
 const defaultMathProcessorFormState = (): MathFormState => ({
   action: 'math' as const,
   expression: '',
@@ -279,6 +292,7 @@ const defaultProcessorFormStateByType: Record<
   lowercase: defaultLowercaseProcessorFormState,
   trim: defaultTrimProcessorFormState,
   set: defaultSetProcessorFormState,
+  join: defaultJoinProcessorFormState,
   ...configDrivenDefaultFormStates,
 };
 
@@ -321,7 +335,8 @@ export const getFormStateFromActionStep = (
     step.action === 'math' ||
     step.action === 'uppercase' ||
     step.action === 'lowercase' ||
-    step.action === 'trim'
+    step.action === 'trim' ||
+    step.action === 'join'
   ) {
     const { customIdentifier, parentId, ...restStep } = step;
     return structuredClone({
@@ -572,6 +587,20 @@ export const convertFormStateToProcessor = (
           description,
           where: 'where' in formState ? formState.where : undefined,
         } as TrimProcessor,
+      };
+    }
+
+    if (formState.action === 'join') {
+      const { from, to, ignore_failure } = formState;
+      return {
+        processorDefinition: {
+          action: 'join',
+          from,
+          to,
+          ignore_failure,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as JoinProcessor,
       };
     }
 
