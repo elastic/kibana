@@ -63,7 +63,7 @@ export const AllRuleCoveragePanel: React.FC = () => {
   const integrationsFromEnabledRules = useMemo(() => {
     if (!getDetectionRules.data?.data || getDetectionRules.data.data.length === 0) {
       return {
-        allIntegrations: [],
+        relatedIntegrationNames: [],
         installedIntegrationNames: [],
       };
     }
@@ -81,24 +81,24 @@ export const AllRuleCoveragePanel: React.FC = () => {
     });
 
     return {
-      allIntegrations: Array.from(integrationsSet),
+      relatedIntegrationNames: Array.from(integrationsSet),
       installedIntegrationNames: getInstalledIntegrations.map((item) => item.name),
     };
   }, [getDetectionRules.data?.data, getInstalledIntegrations]);
 
   const installedIntegrationsOptions = useMemo(() => {
-    const validIntegrations = integrationsFromEnabledRules.allIntegrations.filter((integration) =>
-      integrationsFromEnabledRules.installedIntegrationNames.includes(integration)
+    const installedIntegrations = integrationsFromEnabledRules.relatedIntegrationNames.filter(
+      (integration) => integrationsFromEnabledRules.installedIntegrationNames.includes(integration)
     );
 
-    return validIntegrations.map((integration) => ({
+    return installedIntegrations.map((integration) => ({
       label: getIntegrationDisplayName(integration),
       key: integration,
     }));
   }, [integrationsFromEnabledRules, getIntegrationDisplayName]);
 
   const missingIntegrationsOptions = useMemo(() => {
-    const missingIntegrations = integrationsFromEnabledRules.allIntegrations.filter(
+    const missingIntegrations = integrationsFromEnabledRules.relatedIntegrationNames.filter(
       (integration) => !integrationsFromEnabledRules.installedIntegrationNames.includes(integration)
     );
 
