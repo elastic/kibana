@@ -67,7 +67,7 @@ const createFormatContext = (agentContext: AgentHandlerContext): AttachmentForma
 /**
  * Promote legacy per-round attachments into conversation-level versioned attachments.
  **/
-const mergeInputAttachmentsIntoAttachmentState = (
+const mergeInputAttachmentsIntoAttachmentState = async (
   attachmentStateManager: AttachmentStateManager,
   inputs: AttachmentInput[]
 ) => {
@@ -101,7 +101,7 @@ const mergeInputAttachmentsIntoAttachmentState = (
       continue;
     }
 
-    const created = attachmentStateManager.add({
+    const created = await attachmentStateManager.add({
       ...(input.id ? { id: input.id } : {}),
       type: input.type,
       data: input.data,
@@ -136,7 +136,7 @@ export const prepareConversation = async ({
     ...(previousRounds.flatMap((r) => r.input.attachments ?? []) as AttachmentInput[]),
     ...((nextInput.attachments ?? []) as AttachmentInput[]),
   ];
-  mergeInputAttachmentsIntoAttachmentState(attachmentStateManager, legacyInputs);
+  await mergeInputAttachmentsIntoAttachmentState(attachmentStateManager, legacyInputs);
 
   const strippedNextInput: ConverseInput = { ...nextInput, attachments: [] };
   const processedNextInput = await prepareRoundInput({
