@@ -74,6 +74,7 @@ export function getRequiredPermissionsForActions({
     delete_queries,
     unlink_assets,
     unlink_systems,
+    unlink_features,
     update_failure_store,
     ...rest
   } = actionsByType;

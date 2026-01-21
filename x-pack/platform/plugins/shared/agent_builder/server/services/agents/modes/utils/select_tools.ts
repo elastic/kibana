@@ -42,8 +42,6 @@ export const selectTools = async ({
     .flatMap((attachment) => attachment.tools)
     .map((tool) => attachmentsService.convertAttachmentTool(tool));
 
-  // this are not passed to the agents for now.
-  // @ts-ignore
   const versionedAttachmentTools = createVersionedAttachmentTools({
     attachmentStateManager: conversation.attachmentStateManager,
     runner,
@@ -56,7 +54,7 @@ export const selectTools = async ({
     request,
   });
 
-  return [...attachmentBoundTools, ...registryTools];
+  return [...attachmentBoundTools, ...versionedAttachmentTools, ...registryTools];
 };
 
 /**

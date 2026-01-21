@@ -12,30 +12,12 @@ import { getVersionsFile } from '#pipeline-utils';
 import {
   getArtifactBuildTriggers,
   getArtifactSnapshotPipelineTriggers,
-  getESForwardPipelineTriggers,
   getArtifactStagingPipelineTriggers,
 } from './pipeline';
 
 const versionsFile = getVersionsFile();
 
 describe('pipeline trigger combinations', () => {
-  it('should trigger the correct pipelines for "es-forward"', () => {
-    const esForwardTriggers = getESForwardPipelineTriggers();
-    // tests 7.17 against 8.x versions
-    const targets = versionsFile.versions.filter((v) => v.branch.startsWith('8.'));
-
-    expect(esForwardTriggers.length).toEqual(targets.length);
-
-    expect(esForwardTriggers.every((trigger) => trigger.build?.branch === '7.17')).toBe(true);
-
-    const targetedManifests = esForwardTriggers.map((t) => t.build?.env?.ES_SNAPSHOT_MANIFEST);
-    targets.forEach((t) =>
-      expect(targetedManifests).toContain(
-        `https://storage.googleapis.com/kibana-ci-es-snapshots-daily/${t.version}/manifest-latest-verified.json`
-      )
-    );
-  });
-
   it('should trigger the correct pipelines for "artifacts-snapshot"', () => {
     const snapshotTriggers = getArtifactSnapshotPipelineTriggers();
     // triggers for all open branches
@@ -49,10 +31,9 @@ describe('pipeline trigger combinations', () => {
 
   it('should trigger the correct pipelines for "artifacts-trigger"', () => {
     const triggerTriggers = getArtifactBuildTriggers();
-    // all branches that have fixed versions, and excluding 7.17 (i.e. not 7.17, [0-9].x and main)
+    // all branches that have fixed versions, (i.e. [0-9].x and main)
     const branches = versionsFile.versions
       .filter((v) => v.branch.match(/[0-9]{1,2}\.[0-9]{1,2}/))
-      .filter((v) => v.branch !== '7.17')
       .map((v) => v.branch);
 
     expect(triggerTriggers.length).toEqual(branches.length);

@@ -35,6 +35,8 @@
           "GroupingQuery"
         ],
         "path": "src/platform/packages/shared/kbn-grouping/src/containers/query/index.ts",
+        "lineNumber": 43,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -49,6 +51,8 @@
               "GroupingQueryArgs"
             ],
             "path": "src/platform/packages/shared/kbn-grouping/src/containers/query/index.ts",
+            "lineNumber": 43,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -72,6 +76,8 @@
           "(groupKeys: string[]) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-grouping/src/components/index.tsx",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -88,6 +94,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-grouping/src/components/index.tsx",
+            "lineNumber": 22,
+            "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -115,6 +123,8 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/kbn-grouping/src/hooks/use_grouping.tsx",
+        "lineNumber": 114,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -130,6 +140,8 @@
               "<T>"
             ],
             "path": "src/platform/packages/shared/kbn-grouping/src/hooks/use_grouping.tsx",
+            "lineNumber": 114,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -148,6 +160,8 @@
         "label": "GroupOption",
         "description": [],
         "path": "src/platform/packages/shared/kbn-grouping/src/hooks/types.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -159,6 +173,8 @@
             "label": "key",
             "description": [],
             "path": "src/platform/packages/shared/kbn-grouping/src/hooks/types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -170,6 +186,8 @@
             "label": "label",
             "description": [],
             "path": "src/platform/packages/shared/kbn-grouping/src/hooks/types.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -184,6 +202,8 @@
         "label": "GroupSettings",
         "description": [],
         "path": "src/platform/packages/shared/kbn-grouping/src/hooks/types.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -200,6 +220,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-grouping/src/hooks/types.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -216,6 +238,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-grouping/src/hooks/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -232,6 +256,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-grouping/src/hooks/types.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -248,6 +274,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-grouping/src/hooks/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -264,6 +292,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-grouping/src/hooks/types.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -278,6 +308,8 @@
         "label": "GroupStatsItem",
         "description": [],
         "path": "src/platform/packages/shared/kbn-grouping/src/components/types.ts",
+        "lineNumber": 71,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -289,6 +321,8 @@
             "label": "title",
             "description": [],
             "path": "src/platform/packages/shared/kbn-grouping/src/components/types.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -303,6 +337,8 @@
               "JSX.Element | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-grouping/src/components/types.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -318,6 +354,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-grouping/src/components/types.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -420,6 +458,8 @@
           "<T>; onChangeGroupsItemsPerPage?: ((size: number) => void) | undefined; onChangeGroupsPage?: ((index: number) => void) | undefined; groupingLevel?: number | undefined; additionalToolbarControls?: JSX.Element[] | undefined; itemsPerPage: number; onGroupClose: () => void; }"
         ],
         "path": "src/platform/packages/shared/kbn-grouping/src/hooks/use_grouping.tsx",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -438,6 +478,8 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/kbn-grouping/src/components/types.ts",
+        "lineNumber": 61,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -455,6 +497,8 @@
           "; }"
         ],
         "path": "src/platform/packages/shared/kbn-grouping/src/containers/query/types.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -471,6 +515,8 @@
           " & T"
         ],
         "path": "src/platform/packages/shared/kbn-grouping/src/components/types.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -20,7 +20,7 @@ import {
   OPENAPI_TS_OUTPUT_FILENAME,
   OPENAPI_TS_OUTPUT_FOLDER_PATH,
 } from './constants';
-import { INCLUDED_OPERATIONS } from './included_operations';
+import { INCLUDED_OPERATIONS, OPERATION_TYPE_OVERRIDES } from './included_operations';
 import { isHttpMethod } from '../..';
 import type { HttpMethod } from '../../types/latest';
 import {
@@ -245,11 +245,13 @@ function generateContractMetasFromPath(
       continue;
     }
 
-    const type = `kibana.${toSnakeCase(operationId)}`;
+    // Use type override if available, otherwise use the default operationId
+    const typeBaseName = OPERATION_TYPE_OVERRIDES[operationId] ?? operationId;
+    const type = `kibana.${typeBaseName}`;
     const summary = operation.summary ?? null;
     const description = operation.description ?? null;
     const parameterTypes = generateParameterTypes([operation], openApiDocument);
-    const contractName = generateContractName(operationId);
+    const contractName = generateContractName(typeBaseName);
     const schemaImports = [getRequestSchemaName(operationId), getResponseSchemaName(operationId)];
     const paramsSchemaString = generateParamsSchemaString([operationId], {
       // Adding fetcher to all kibana contracts at build time
@@ -266,7 +268,7 @@ function generateContractMetasFromPath(
       documentation: getDocumentationUrl(operation),
       parameterTypes,
 
-      fileName: `kibana.${toSnakeCase(camelToSnake(operationId))}.gen.ts`,
+      fileName: `kibana.${toSnakeCase(camelToSnake(typeBaseName))}.gen.ts`,
       contractName,
       operations: [
         {

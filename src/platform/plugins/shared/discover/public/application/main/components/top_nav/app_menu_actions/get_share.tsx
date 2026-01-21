@@ -61,7 +61,7 @@ export const getShareAppMenuItem = ({
       isEsqlMode
     );
 
-    const { locator, discoverFeatureFlags } = services;
+    const { locator } = services;
     const { timefilter } = services.data.query.timefilter;
     const timeRange = timefilter.getTime();
     const refreshInterval = timefilter.getRefreshInterval();
@@ -79,9 +79,7 @@ export const getShareAppMenuItem = ({
       refreshInterval,
     };
 
-    const tabsEnabled = discoverFeatureFlags.getTabsEnabled();
-
-    if (tabsEnabled && currentTab) {
+    if (currentTab) {
       params.tab = {
         id: currentTab.id,
         label: currentTab.label,
@@ -138,7 +136,7 @@ export const getShareAppMenuItem = ({
             },
           },
           link: {
-            draftModeCallOut: tabsEnabled,
+            draftModeCallOut: true,
           },
         },
       },

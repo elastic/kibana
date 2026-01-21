@@ -146,6 +146,7 @@ dependsOn:
   - '@kbn/file-upload-plugin'
   - '@kbn/file-upload'
   - '@kbn/file-upload-common'
+  - '@kbn/kql'
 tags:
   - plugin
   - prod

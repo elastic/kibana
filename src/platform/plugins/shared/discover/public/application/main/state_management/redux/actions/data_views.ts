@@ -30,7 +30,7 @@ export const setDataView: InternalStateThunkActionCreator<
     const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
 
     if (dataView.id !== currentDataView$.getValue()?.id) {
-      dispatch(internalStateSlice.actions.setExpandedDoc({ expandedDoc: undefined }));
+      dispatch(internalStateSlice.actions.setExpandedDoc({ tabId, expandedDoc: undefined }));
     }
 
     currentDataView$.next(dataView);

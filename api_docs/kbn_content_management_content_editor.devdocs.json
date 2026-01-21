@@ -18,6 +18,8 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/content-management/content_editor/src/services.tsx",
+        "lineNumber": 125,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -34,6 +36,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/content-management/content_editor/src/services.tsx",
+            "lineNumber": 127,
+            "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -57,6 +61,8 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/content-management/content_editor/src/services.tsx",
+        "lineNumber": 59,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -73,6 +79,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/content-management/content_editor/src/services.tsx",
+            "lineNumber": 59,
+            "columnNumber": 72,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -100,6 +108,8 @@
           ") => () => void"
         ],
         "path": "src/platform/packages/shared/content-management/content_editor/src/open_content_editor.tsx",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -116,6 +126,8 @@
         "label": "SavedObjectsReference",
         "description": [],
         "path": "src/platform/packages/shared/content-management/content_editor/src/services.tsx",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -127,6 +139,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/shared/content-management/content_editor/src/services.tsx",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -138,6 +152,8 @@
             "label": "name",
             "description": [],
             "path": "src/platform/packages/shared/content-management/content_editor/src/services.tsx",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -149,6 +165,8 @@
             "label": "type",
             "description": [],
             "path": "src/platform/packages/shared/content-management/content_editor/src/services.tsx",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -173,6 +191,8 @@
           " | undefined; appendRows?: React.ReactNode; }"
         ],
         "path": "src/platform/packages/shared/content-management/content_editor/src/open_content_editor.tsx",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

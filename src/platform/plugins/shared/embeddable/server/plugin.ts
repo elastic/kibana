@@ -25,9 +25,12 @@ import {
   getTelemetryFunction,
 } from './persistable_state';
 import { getAllMigrations } from './persistable_state/get_all_migrations';
-import type { EmbeddableTransforms } from '../common';
-import { EnhancementsRegistry } from '../common/enhancements/registry';
-import type { EnhancementRegistryDefinition } from '../common/enhancements/types';
+import type {
+  EmbeddableTransforms,
+  TransformEnhancementsIn,
+  TransformEnhancementsOut,
+} from '../common';
+import { enhancementsPersistableState } from '../common/bwc/enhancements/enhancements_persistable_state';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
@@ -40,10 +43,9 @@ export interface EmbeddableSetup extends PersistableStateService<EmbeddableState
    * On write, transformIn is used to extract references and convert EmbeddableState into StoredEmbeddableState.
    */
   registerTransforms: (type: string, transforms: EmbeddableTransforms<any, any>) => void;
-  registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;
   getAllMigrations: () => MigrateFunctionsObject;
-  transformEnhancementsIn: EnhancementsRegistry['transformIn'];
-  transformEnhancementsOut: EnhancementsRegistry['transformOut'];
+  transformEnhancementsIn: TransformEnhancementsIn;
+  transformEnhancementsOut: TransformEnhancementsOut;
 }
 
 export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> & {
@@ -57,15 +59,11 @@ export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> &
 
 export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
-  private enhancementsRegistry = new EnhancementsRegistry();
   private migrateFn: PersistableStateMigrateFn | undefined;
   private transformsRegistry: { [key: string]: EmbeddableTransforms<any, any> } = {};
 
   public setup(core: CoreSetup) {
-    this.migrateFn = getMigrateFunction(
-      this.getEmbeddableFactory,
-      this.enhancementsRegistry.getEnhancement
-    );
+    this.migrateFn = getMigrateFunction(this.getEmbeddableFactory);
     return {
       registerEmbeddableFactory: this.registerEmbeddableFactory,
       registerTransforms: (type: string, transforms: EmbeddableTransforms<any, any>) => {
@@ -75,27 +73,13 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
         this.transformsRegistry[type] = transforms;
       },
-      registerEnhancement: this.enhancementsRegistry.registerEnhancement,
-      transformEnhancementsIn: this.enhancementsRegistry.transformIn,
-      transformEnhancementsOut: this.enhancementsRegistry.transformOut,
-      telemetry: getTelemetryFunction(
-        this.getEmbeddableFactory,
-        this.enhancementsRegistry.getEnhancement
-      ),
-      extract: getExtractFunction(
-        this.getEmbeddableFactory,
-        this.enhancementsRegistry.getEnhancement
-      ),
-      inject: getInjectFunction(
-        this.getEmbeddableFactory,
-        this.enhancementsRegistry.getEnhancement
-      ),
+      transformEnhancementsIn: enhancementsPersistableState.extract,
+      transformEnhancementsOut: enhancementsPersistableState.inject,
+      telemetry: getTelemetryFunction(this.getEmbeddableFactory),
+      extract: getExtractFunction(this.getEmbeddableFactory),
+      inject: getInjectFunction(this.getEmbeddableFactory),
       getAllMigrations: () =>
-        getAllMigrations(
-          Array.from(this.embeddableFactories.values()),
-          this.enhancementsRegistry.getEnhancements(),
-          this.migrateFn!
-        ),
+        getAllMigrations(Array.from(this.embeddableFactories.values()), this.migrateFn!),
     };
   }
 
@@ -103,29 +87,16 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
     return {
       getEmbeddableSchemas: () =>
         Object.values(this.transformsRegistry)
-          .map((transforms) => transforms.schema)
+          .map((transforms) => transforms?.getSchema?.())
           .filter((schema) => Boolean(schema)) as ObjectType[],
       getTransforms: (type: string) => {
         return this.transformsRegistry[type];
       },
-      telemetry: getTelemetryFunction(
-        this.getEmbeddableFactory,
-        this.enhancementsRegistry.getEnhancement
-      ),
-      extract: getExtractFunction(
-        this.getEmbeddableFactory,
-        this.enhancementsRegistry.getEnhancement
-      ),
-      inject: getInjectFunction(
-        this.getEmbeddableFactory,
-        this.enhancementsRegistry.getEnhancement
-      ),
+      telemetry: getTelemetryFunction(this.getEmbeddableFactory),
+      extract: getExtractFunction(this.getEmbeddableFactory),
+      inject: getInjectFunction(this.getEmbeddableFactory),
       getAllMigrations: () =>
-        getAllMigrations(
-          Array.from(this.embeddableFactories.values()),
-          this.enhancementsRegistry.getEnhancements(),
-          this.migrateFn!
-        ),
+        getAllMigrations(Array.from(this.embeddableFactories.values()), this.migrateFn!),
     };
   }
 

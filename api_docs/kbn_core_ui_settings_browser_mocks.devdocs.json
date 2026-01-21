@@ -15,6 +15,8 @@
         "label": "settingsServiceMock",
         "description": [],
         "path": "src/core/packages/ui-settings/browser-mocks/src/settings_service.mock.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -29,6 +31,8 @@
               "() => any"
             ],
             "path": "src/core/packages/ui-settings/browser-mocks/src/settings_service.mock.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -49,6 +53,8 @@
               ">; }"
             ],
             "path": "src/core/packages/ui-settings/browser-mocks/src/settings_service.mock.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -69,6 +75,8 @@
               ">; }"
             ],
             "path": "src/core/packages/ui-settings/browser-mocks/src/settings_service.mock.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -85,6 +93,8 @@
         "label": "uiSettingsServiceMock",
         "description": [],
         "path": "src/core/packages/ui-settings/browser-mocks/src/ui_settings_service.mock.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -99,6 +109,8 @@
               "() => any"
             ],
             "path": "src/core/packages/ui-settings/browser-mocks/src/ui_settings_service.mock.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -117,6 +129,8 @@
               ">"
             ],
             "path": "src/core/packages/ui-settings/browser-mocks/src/ui_settings_service.mock.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -135,6 +149,8 @@
               ">"
             ],
             "path": "src/core/packages/ui-settings/browser-mocks/src/ui_settings_service.mock.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

@@ -185,18 +185,18 @@ async function extractAzureCloudConnectorSecrets(
     };
 
     logger.debug(
-      `Extracted Azure cloud connector vars: tenant_id=${!!tenantIdWithSecretRef}, client_id=${!!clientIdWithSecretRef}, azure_credentials=${!!azureCredentials}`
+      `Extracted Azure cloud connector vars: tenant_id=${!!tenantIdWithSecretRef}, client_id=${!!clientIdWithSecretRef}, azure_credentials=[REDACTED]`
     );
 
     return azureCloudConnectorVars;
   }
 
   logger.error(
-    `Missing required Azure vars: tenant_id=${!!tenantIdVar}, client_id=${!!clientIdVar}, azure_credentials=${!!azureCredentials}`
+    `Missing required Azure vars: tenant_id=${!!tenantIdVar}, client_id=${!!clientIdVar}, azure_credentials=[REDACTED]`
   );
   throw new CloudConnectorInvalidVarsError(
     'Missing required Azure cloud connector variables: ' +
-      `tenant_id=${!!tenantIdVar}, client_id=${!!clientIdVar}, azure_credentials=${!!azureCredentials}`
+      `tenant_id=${!!tenantIdVar}, client_id=${!!clientIdVar}, azure_credentials=[REDACTED]`
   );
 }
 

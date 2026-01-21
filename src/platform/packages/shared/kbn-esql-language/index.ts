@@ -33,6 +33,7 @@ export type {
   ESQLForkParens,
 } from './src/types';
 
+export * from './src/constants';
 export * from './src/parser';
 export * from './src/ast';
 export * from './src/composer';

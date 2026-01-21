@@ -13,7 +13,7 @@ import type {
   EntityStoreRequestHandlerContext,
   EntityStoreStartPlugins,
 } from './types';
-import { ResourcesService } from './domain/resources_service';
+import { AssetManager } from './domain/asset_manager';
 import { FeatureFlags } from './infra/feature_flags';
 
 interface EntityStoreApiRequestHandlerContextDeps {
@@ -36,11 +36,16 @@ export async function createRequestHandlerContext({
   coreSetup,
 }: EntityStoreApiRequestHandlerContextDeps): Promise<EntityStoreApiRequestHandlerContext> {
   const core = await context.core;
+  const taskManagerStart = await getTaskManagerStart(coreSetup);
+
   return {
     core,
     logger,
-    resourcesService: new ResourcesService(logger),
+    assetManager: new AssetManager(
+      logger,
+      core.elasticsearch.client.asCurrentUser,
+      taskManagerStart
+    ),
     featureFlags: new FeatureFlags(core.uiSettings.client),
-    taskManagerStart: await getTaskManagerStart(coreSetup),
   };
 }

@@ -56,7 +56,7 @@ export const GrokPatternAISuggestions = ({
   const abortController = useAbortController();
   const [suggestionsState, refreshSuggestions] = useGrokPatternSuggestion(abortController);
 
-  const fieldValue = useWatch<ProcessorFormState, 'from'>({ name: 'from' });
+  const fieldValue = useWatch<ProcessorFormState, 'from'>({ name: 'from' }) as string;
   const isValidField = useMemo(() => {
     return Boolean(
       fieldValue &&

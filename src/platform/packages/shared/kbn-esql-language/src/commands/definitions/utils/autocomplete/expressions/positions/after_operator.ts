@@ -44,7 +44,8 @@ export async function suggestAfterOperator(ctx: ExpressionContext): Promise<ISug
   if (specialSuggestions) {
     return specialSuggestions;
   }
-  const getExprType = (expression: ESQLAstItem) => getExpressionType(expression, context?.columns);
+  const getExprType = (expression: ESQLAstItem) =>
+    getExpressionType(expression, context?.columns, context?.unmappedFieldsStrategy);
 
   const { complete, reason } = isOperatorComplete(rightmostOperator, getExprType);
 

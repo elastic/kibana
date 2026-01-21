@@ -20,11 +20,18 @@ import type {
   UppercaseProcessor,
   LowercaseProcessor,
   TrimProcessor,
+  JoinProcessor,
 } from '../../../../types/processors';
 import type { StreamlangDSL } from '../../../../types/streamlang';
 
 export const comprehensiveTestDSL: StreamlangDSL = {
   steps: [
+    {
+      action: 'join',
+      from: ['field1', 'field2', 'field3'],
+      to: 'my_joined_field',
+      delimiter: ', ',
+    } as JoinProcessor,
     {
       action: 'uppercase',
       from: 'message',

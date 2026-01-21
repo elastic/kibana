@@ -26,6 +26,8 @@
         "label": "LintTarget",
         "description": [],
         "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -40,6 +42,8 @@
               "any"
             ],
             "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -54,6 +58,8 @@
                   "string"
                 ],
                 "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+                "lineNumber": 17,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -69,6 +75,8 @@
                   "string"
                 ],
                 "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+                "lineNumber": 22,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -84,6 +92,8 @@
                   "string"
                 ],
                 "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+                "lineNumber": 27,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -99,6 +109,8 @@
                   "string"
                 ],
                 "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+                "lineNumber": 32,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -119,6 +131,8 @@
               "(pkgRel: string) => string"
             ],
             "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -133,6 +147,8 @@
                   "string"
                 ],
                 "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+                "lineNumber": 41,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -153,6 +169,8 @@
               "(abs: string) => string"
             ],
             "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -167,6 +185,8 @@
                   "string"
                 ],
                 "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+                "lineNumber": 48,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -192,6 +212,8 @@
               }
             ],
             "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -215,6 +237,8 @@
               }
             ],
             "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -231,6 +255,8 @@
               "() => any"
             ],
             "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -247,6 +273,8 @@
               "() => any"
             ],
             "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -280,6 +308,8 @@
           }
         ],
         "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+        "lineNumber": 69,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -294,6 +324,8 @@
               "any"
             ],
             "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -308,6 +340,8 @@
                   "Package"
                 ],
                 "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+                "lineNumber": 71,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -330,6 +364,8 @@
                   " | undefined"
                 ],
                 "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+                "lineNumber": 75,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -364,6 +400,8 @@
               "; }"
             ],
             "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -400,6 +438,8 @@
           ">"
         ],
         "path": "packages/kbn-repo-linter/lib/rule.ts",
+        "lineNumber": 63,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -431,6 +471,8 @@
               }
             ],
             "path": "packages/kbn-repo-linter/lib/rule.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -445,6 +487,8 @@
                   "string"
                 ],
                 "path": "packages/kbn-repo-linter/lib/rule.ts",
+                "lineNumber": 64,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -457,6 +501,8 @@
                 "label": "options",
                 "description": [],
                 "path": "packages/kbn-repo-linter/lib/rule.ts",
+                "lineNumber": 64,
+                "columnNumber": 40,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -489,6 +535,8 @@
                       "[]>"
                     ],
                     "path": "packages/kbn-repo-linter/lib/rule.ts",
+                    "lineNumber": 64,
+                    "columnNumber": 42,
                     "deprecated": false,
                     "trackAdoption": false,
                     "returnComment": [],
@@ -504,6 +552,8 @@
                           "T"
                         ],
                         "path": "packages/kbn-repo-linter/lib/rule.ts",
+                        "lineNumber": 27,
+                        "columnNumber": 3,
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -542,6 +592,8 @@
           }
         ],
         "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+        "lineNumber": 89,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -556,6 +608,8 @@
               "any"
             ],
             "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -576,6 +630,8 @@
                   }
                 ],
                 "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+                "lineNumber": 90,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -610,6 +666,8 @@
               "; }"
             ],
             "path": "packages/kbn-repo-linter/lib/lint_target.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -646,6 +704,8 @@
           ">"
         ],
         "path": "packages/kbn-repo-linter/lib/rule.ts",
+        "lineNumber": 69,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -677,6 +737,8 @@
               }
             ],
             "path": "packages/kbn-repo-linter/lib/rule.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -691,6 +753,8 @@
                   "string"
                 ],
                 "path": "packages/kbn-repo-linter/lib/rule.ts",
+                "lineNumber": 70,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -703,6 +767,8 @@
                 "label": "options",
                 "description": [],
                 "path": "packages/kbn-repo-linter/lib/rule.ts",
+                "lineNumber": 70,
+                "columnNumber": 40,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -735,6 +801,8 @@
                       "[]>"
                     ],
                     "path": "packages/kbn-repo-linter/lib/rule.ts",
+                    "lineNumber": 70,
+                    "columnNumber": 42,
                     "deprecated": false,
                     "trackAdoption": false,
                     "returnComment": [],
@@ -750,6 +818,8 @@
                           "T"
                         ],
                         "path": "packages/kbn-repo-linter/lib/rule.ts",
+                        "lineNumber": 27,
+                        "columnNumber": 3,
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -786,6 +856,8 @@
           "<T>) => Promise<{ lintingErrorCount: number; }>"
         ],
         "path": "packages/kbn-repo-linter/lib/run_lint_rules.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -806,6 +878,8 @@
               }
             ],
             "path": "packages/kbn-repo-linter/lib/run_lint_rules.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -821,6 +895,8 @@
               "T[]"
             ],
             "path": "packages/kbn-repo-linter/lib/run_lint_rules.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -836,6 +912,8 @@
               "R[]"
             ],
             "path": "packages/kbn-repo-linter/lib/run_lint_rules.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -852,6 +930,8 @@
               "<T>"
             ],
             "path": "packages/kbn-repo-linter/lib/run_lint_rules.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

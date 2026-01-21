@@ -22,8 +22,18 @@ export interface FormattedRelativeEnhancedProps extends Intl.RelativeTimeFormatO
   fullDateTooltip?: boolean;
   fullDateTooltipPosition?: 'top' | 'right' | 'bottom' | 'left';
 }
+
+// Only show "year" unit if the date is more than this many days ago.
+// This prevents "last year" from showing for dates that are only a few weeks/months old
+// but cross the year boundary (e.g., Dec 20 viewed on Jan 10).
+const MIN_DAYS_FOR_YEAR_UNIT = 180; // 6 months
+
 /**
- * Mimic `FormattedRelative` previous behavior from formatJS v2
+ * Mimic `FormattedRelative` previous behavior from formatJS v2,
+ * with a fix for year boundaries to avoid misleading "last year" displays.
+ *
+ * The only change from the original: when selectUnit returns "year" but the actual
+ * difference is less than MIN_DAYS_FOR_YEAR_UNIT, we recalculate using months instead.
  */
 export const FormattedRelativeEnhanced = ({
   value: valueInput,
@@ -35,9 +45,28 @@ export const FormattedRelativeEnhanced = ({
   ...rest
 }: FormattedRelativeEnhancedProps) => {
   const valueDate = moment(valueInput).isValid() ? moment(valueInput).toDate() : new Date();
-  const fullDateFormatted = useFormattedDateTime(valueDate);
 
-  const { value, unit } = selectUnit(valueDate, new Date(), thresholds);
+  let { value, unit } = selectUnit(valueDate, new Date(), thresholds);
+
+  // Fix for year boundary issue: if selectUnit chose "year" but less than MIN_DAYS_FOR_YEAR_UNIT
+  // have passed, use a more appropriate unit to avoid misleading "last year" for recent dates
+  if (unit === 'year') {
+    const diffDays = Math.abs(moment().diff(moment(valueDate), 'days'));
+    if (diffDays < MIN_DAYS_FOR_YEAR_UNIT) {
+      // Use the original selectUnit result's value sign to determine past/future
+      const isPast = value < 0;
+      const diffMonths = Math.abs(moment().diff(moment(valueDate), 'months'));
+      if (diffMonths >= 1) {
+        value = isPast ? -diffMonths : diffMonths;
+        unit = 'month';
+      } else {
+        // Less than a month - use weeks
+        const diffWeeks = Math.round(diffDays / 7);
+        value = isPast ? -diffWeeks : diffWeeks;
+        unit = 'week';
+      }
+    }
+  }
 
   if (unit === 'second') {
     return i18n.translate('workflows.formattedRelativeEnhanced.justNow', {
@@ -59,8 +88,26 @@ export const FormattedRelativeEnhanced = ({
   }
 
   return (
-    <EuiToolTip content={fullDateFormatted} position={fullDateTooltipPosition}>
+    <WithTooltip valueDate={valueDate} fullDateTooltipPosition={fullDateTooltipPosition}>
       {content}
-    </EuiToolTip>
+    </WithTooltip>
   );
 };
+
+// Separate component to avoid calling useFormattedDateTime when fullDateTooltip is false
+function WithTooltip({
+  children,
+  valueDate,
+  fullDateTooltipPosition,
+}: {
+  children: React.ReactElement;
+  valueDate: Date;
+  fullDateTooltipPosition?: 'top' | 'right' | 'bottom' | 'left';
+}) {
+  const fullDateFormatted = useFormattedDateTime(valueDate);
+  return (
+    <EuiToolTip content={fullDateFormatted} position={fullDateTooltipPosition}>
+      {children}
+    </EuiToolTip>
+  );
+}

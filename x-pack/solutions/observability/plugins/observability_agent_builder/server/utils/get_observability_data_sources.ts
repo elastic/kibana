@@ -16,6 +16,13 @@ import type {
   ObservabilityAgentBuilderPluginStartDependencies,
 } from '../types';
 
+export interface ObservabilityDataSources {
+  apmIndexPatterns: APMIndices;
+  logIndexPatterns: string[];
+  metricIndexPatterns: string[];
+  alertsIndexPattern: string[];
+}
+
 export async function getObservabilityDataSources({
   core,
   plugins,
@@ -27,16 +34,11 @@ export async function getObservabilityDataSources({
   >;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   logger: Logger;
-}): Promise<{
-  apmIndexPatterns: APMIndices;
-  logIndexPatterns: string[];
-  metricIndexPatterns: string[];
-  alertsIndexPattern: string[];
-}> {
+}): Promise<ObservabilityDataSources> {
   const apmIndexPatterns = await getApmIndices({ core, plugins, logger });
   const logIndexPatterns = await getLogsIndices({ core, logger });
   const metricIndexPatterns = await getMetricsIndices({ core, plugins, logger });
-  const alertsIndexPattern = ['alerts-observability-*'];
+  const alertsIndexPattern = ['.alerts-observability.*'];
 
   return {
     apmIndexPatterns,

@@ -8,10 +8,6 @@
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import type { ApmDocumentType } from '@kbn/apm-data-access-plugin/common';
 import {
-  getPreferredBucketSizeAndDataSource,
-  getBucketSize,
-} from '@kbn/apm-data-access-plugin/common';
-import {
   calculateFailedTransactionRate,
   getOutcomeAggregation,
   calculateThroughputWithRange,
@@ -25,6 +21,7 @@ import type {
 import { parseDatemath } from '../../utils/time';
 import { buildApmResources } from '../../utils/build_apm_resources';
 import { timeRangeFilter, kqlFilter as buildKqlFilter } from '../../utils/dsl_filters';
+import { getPreferredDocumentSource } from '../../utils/get_preferred_document_source';
 
 export interface TraceMetricsItem {
   group: string;
@@ -68,30 +65,12 @@ export async function getToolHandler({
 
   const startMs = parseDatemath(start);
   const endMs = parseDatemath(end);
-
-  // Get preferred document source based on groupBy, filter, and data availability
-  const kueryParts: string[] = [];
-  if (kqlFilter) {
-    kueryParts.push(kqlFilter);
-  }
-  kueryParts.push(`${groupBy}: *`);
-  const kuery = kueryParts.join(' AND ');
-
-  const documentSources = await apmDataAccessServices.getDocumentSources({
+  const source = await getPreferredDocumentSource({
+    apmDataAccessServices,
     start: startMs,
     end: endMs,
-    kuery,
-  });
-
-  const { bucketSize } = getBucketSize({
-    start: startMs,
-    end: endMs,
-    numBuckets: 100,
-  });
-
-  const { source } = getPreferredBucketSizeAndDataSource({
-    sources: documentSources,
-    bucketSizeInSeconds: bucketSize,
+    groupBy,
+    kqlFilter,
   });
 
   const { rollupInterval, hasDurationSummaryField } = source;

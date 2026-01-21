@@ -93,7 +93,6 @@ enabled:
   - src/platform/test/functional/apps/discover/tabs/config.ts
   - src/platform/test/functional/apps/discover/tabs2/config.ts
   - src/platform/test/functional/apps/discover/tabs3/config.ts
-  - src/platform/test/functional/apps/discover/tabs_disabled/config.ts
   - src/platform/test/functional/apps/getting_started/config.ts
   - src/platform/test/functional/apps/home/config.ts
   - src/platform/test/functional/apps/kibana_overview/config.ts

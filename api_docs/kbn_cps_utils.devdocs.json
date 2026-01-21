@@ -22,6 +22,8 @@
           ") => React.JSX.Element | null"
         ],
         "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
+        "lineNumber": 38,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,6 +44,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
+            "lineNumber": 38,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -63,6 +67,8 @@
           "({ cpsManager }: ProjectPickerContainerProps) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker_container.tsx",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -77,6 +83,8 @@
               "ProjectPickerContainerProps"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker_container.tsx",
+            "lineNumber": 26,
+            "columnNumber": 79,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -104,6 +112,8 @@
           ") => React.JSX.Element | null"
         ],
         "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker_content.tsx",
+        "lineNumber": 52,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -124,6 +134,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker_content.tsx",
+            "lineNumber": 52,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -142,6 +154,8 @@
         "label": "CPSProject",
         "description": [],
         "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -153,6 +167,8 @@
             "label": "_id",
             "description": [],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -164,6 +180,8 @@
             "label": "_alias",
             "description": [],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -175,6 +193,8 @@
             "label": "_type",
             "description": [],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -186,6 +206,8 @@
             "label": "_organisation",
             "description": [],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -200,6 +222,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -214,6 +238,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -228,6 +254,8 @@
               "[key: string]:  string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -242,6 +270,8 @@
         "label": "ICPSManager",
         "description": [],
         "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -264,6 +294,8 @@
               " | null>"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -288,6 +320,8 @@
               " | null>"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -314,6 +348,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -338,6 +374,8 @@
               ") => void"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -358,6 +396,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+                "lineNumber": 49,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -383,6 +423,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -406,6 +448,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -432,6 +476,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -455,6 +501,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -471,6 +519,8 @@
         "label": "ProjectPickerContentProps",
         "description": [],
         "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker_content.tsx",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -485,6 +535,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker_content.tsx",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -507,6 +559,8 @@
               ") => void"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker_content.tsx",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -527,6 +581,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker_content.tsx",
+                "lineNumber": 34,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -553,6 +609,8 @@
               " | null>"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker_content.tsx",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -569,6 +627,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker_content.tsx",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -583,6 +643,8 @@
         "label": "ProjectPickerProps",
         "description": [],
         "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -597,6 +659,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -619,6 +683,8 @@
               ") => void"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -639,6 +705,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
+                "lineNumber": 33,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -665,6 +733,8 @@
               " | null>"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -681,6 +751,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -695,6 +767,8 @@
         "label": "ProjectsData",
         "description": [],
         "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -716,6 +790,8 @@
               " | null"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -737,6 +813,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -751,6 +829,8 @@
         "label": "ProjectTagsResponse",
         "description": [],
         "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -773,6 +853,8 @@
               "; }"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -795,6 +877,8 @@
               "; }"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -813,6 +897,8 @@
           "\nAccess levels for project routing picker"
         ],
         "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -830,6 +916,8 @@
           "\"_alias:*\" | \"_alias:_origin\""
         ],
         "path": "src/platform/packages/shared/kbn-cps-utils/constants.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -849,6 +937,8 @@
           "{ readonly ALL: \"_alias:*\"; readonly ORIGIN: \"_alias:_origin\"; }"
         ],
         "path": "src/platform/packages/shared/kbn-cps-utils/constants.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

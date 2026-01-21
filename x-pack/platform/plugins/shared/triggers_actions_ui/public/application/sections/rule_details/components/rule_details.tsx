@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
+import useObservable from 'react-use/lib/useObservable';
 import {
   EuiPageHeader,
   EuiText,
@@ -37,7 +38,7 @@ import {
   hasExecuteActionsCapability,
   hasManageApiKeysCapability,
 } from '../../../lib/capabilities';
-import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
+import { getRulesBreadcrumbWithHref } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
 import type {
   Rule,
@@ -50,7 +51,8 @@ import type { ComponentOpts as BulkOperationsComponentOpts } from '../../common/
 import { withBulkRuleOperations } from '../../common/components/with_bulk_rule_api_operations';
 import { RuleRouteWithApi } from './rule_route';
 import { ViewInApp } from './view_in_app';
-import { routeToRules } from '../../../constants';
+import { ViewLinkedObject } from './view_linked_object';
+import { routeToHome } from '../../../constants';
 import {
   rulesErrorReasonTranslationsMapping,
   rulesWarningReasonTranslationsMapping,
@@ -94,7 +96,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
 }) => {
   const history = useHistory();
   const {
-    application: { capabilities, navigateToApp },
+    application,
     ruleTypeRegistry,
     setBreadcrumbs,
     chrome,
@@ -104,6 +106,9 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     userProfile,
     notifications: { toasts },
   } = useKibana().services;
+  const { capabilities, navigateToApp, getUrlForApp, isAppRegistered, currentAppId$ } = application;
+  const currentAppId = useObservable(currentAppId$, undefined);
+  const isInRulesApp = currentAppId === 'rules';
 
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
   const [rulesToUpdateAPIKey, setRulesToUpdateAPIKey] = useState<string[]>([]);
@@ -122,7 +127,8 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
 
   // Set breadcrumb and page title
   useEffect(() => {
-    setBreadcrumbs([getAlertingSectionBreadcrumb('rules', true), { text: rule.name }]);
+    const rulesBreadcrumbWithAppPath = getRulesBreadcrumbWithHref(isAppRegistered, getUrlForApp);
+    setBreadcrumbs([rulesBreadcrumbWithAppPath, { text: rule.name }]);
     chrome.docTitle.change(getCurrentDocTitle('rules'));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -225,10 +231,6 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     hasEditButton,
   ]);
 
-  const goToRulesList = () => {
-    history.push(routeToRules);
-  };
-
   const getRuleStatusErrorReasonText = () => {
     if (rule.executionStatus.error && rule.executionStatus.error.reason) {
       return rulesErrorReasonTranslationsMapping[rule.executionStatus.error.reason];
@@ -288,7 +290,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     });
     showToast({ action: 'DELETE', errors, total });
     setRulesToDelete([]);
-    goToRulesList();
+    history.push(routeToHome);
   };
 
   const onDeleteCancel = () => {
@@ -459,7 +461,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
               defaultMessage="Refresh"
             />
           </EuiButtonEmpty>,
-          <ViewInApp rule={rule} />,
+          isInRulesApp ? <ViewLinkedObject rule={rule} /> : <ViewInApp rule={rule} />,
         ]}
       />
       <EuiPageSection>

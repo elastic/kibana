@@ -88,6 +88,7 @@ describe('tab mapping utils', () => {
           },
           "duplicatedFromId": "0",
           "esqlVariables": Array [],
+          "expandedDoc": undefined,
           "forceFetchOnSelect": false,
           "globalState": Object {
             "refreshInterval": Object {
@@ -168,6 +169,7 @@ describe('tab mapping utils', () => {
           },
           "duplicatedFromId": "0",
           "esqlVariables": Array [],
+          "expandedDoc": undefined,
           "forceFetchOnSelect": false,
           "globalState": Object {
             "refreshInterval": Object {

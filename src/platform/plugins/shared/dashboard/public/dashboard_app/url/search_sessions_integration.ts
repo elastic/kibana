@@ -78,9 +78,9 @@ function getLocatorParams({
 }): DashboardLocatorParams {
   const savedObjectId = dashboardApi.savedObjectId$.value;
 
-  const { panels, controlGroupInput } = dashboardInternalApi.serializeLayout() as Pick<
+  const { panels, pinned_panels } = dashboardInternalApi.serializeLayout() as Pick<
     DashboardLocatorParams,
-    'panels' | 'controlGroupInput'
+    'panels' | 'pinned_panels'
   >;
 
   return {
@@ -102,7 +102,7 @@ function getLocatorParams({
           value: 0,
         }
       : undefined,
-    controlGroupInput,
+    pinned_panels,
     panels,
   };
 }

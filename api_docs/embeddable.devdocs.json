@@ -12,6 +12,8 @@
           "\nA wrapper around the session storage which provides strongly typed helper methods\nfor common incoming and outgoing states used by the embeddable infrastructure.\n"
         ],
         "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -23,6 +25,8 @@
             "label": "isTransferInProgress",
             "description": [],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -37,6 +41,8 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -53,6 +59,8 @@
                   " | undefined) => Promise<void>"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
+                "lineNumber": 35,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -69,6 +77,8 @@
                   "<string | undefined>"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
+                "lineNumber": 36,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -86,6 +96,8 @@
                   "> | undefined"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
+                "lineNumber": 37,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -108,6 +120,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
+                "lineNumber": 38,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -128,6 +142,8 @@
               "(appId: string) => string | undefined"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -144,6 +160,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
+                "lineNumber": 52,
+                "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -172,6 +190,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -188,6 +208,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
+                "lineNumber": 61,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -205,6 +227,8 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
+                "lineNumber": 62,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -225,6 +249,8 @@
               "(appId?: string | undefined) => void"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -241,6 +267,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
+                "lineNumber": 86,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -269,6 +297,8 @@
               "<object>[] | undefined"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -285,6 +315,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
+                "lineNumber": 105,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -302,6 +334,8 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
+                "lineNumber": 106,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -330,6 +364,8 @@
               "; } | undefined) => Promise<void>"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -344,6 +380,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
+                "lineNumber": 123,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -356,6 +394,8 @@
                 "label": "options",
                 "description": [],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
+                "lineNumber": 124,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -370,6 +410,8 @@
                       "string | undefined"
                     ],
                     "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
+                    "lineNumber": 125,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -384,6 +426,8 @@
                       "boolean | undefined"
                     ],
                     "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
+                    "lineNumber": 126,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -398,6 +442,8 @@
                       "boolean | undefined"
                     ],
                     "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
+                    "lineNumber": 127,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -418,6 +464,8 @@
                       }
                     ],
                     "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
+                    "lineNumber": 128,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -447,6 +495,8 @@
               "<SerializedStateType>[]; } | undefined) => Promise<void>"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
+            "lineNumber": 138,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -461,6 +511,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
+                "lineNumber": 143,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -473,6 +525,8 @@
                 "label": "options",
                 "description": [],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
+                "lineNumber": 144,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -487,6 +541,8 @@
                       "string | undefined"
                     ],
                     "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
+                    "lineNumber": 144,
+                    "columnNumber": 17,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -508,6 +564,8 @@
                       "<SerializedStateType>[]"
                     ],
                     "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
+                    "lineNumber": 144,
+                    "columnNumber": 32,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -537,6 +595,8 @@
           " extends Error"
         ],
         "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/panel_incompatible_error.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -548,6 +608,8 @@
             "label": "code",
             "description": [],
             "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/panel_incompatible_error.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -562,6 +624,8 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/panel_incompatible_error.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -588,6 +652,8 @@
           " extends Error"
         ],
         "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/panel_not_found_error.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -599,6 +665,8 @@
             "label": "code",
             "description": [],
             "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/panel_not_found_error.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -613,6 +681,8 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/panel_not_found_error.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -676,6 +746,8 @@
           "<Api, {}>, \"showShadow\" | \"showBorder\" | \"showBadges\" | \"showNotifications\" | \"hideLoader\" | \"hideHeader\" | \"hideInspector\" | \"getActions\" | \"setDragHandles\"> | undefined; hidePanelChrome?: boolean | undefined; }) => React.JSX.Element"
         ],
         "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -687,6 +759,8 @@
             "label": "{\n  type,\n  maybeId,\n  getParentApi,\n  panelProps,\n  onApiAvailable,\n  hidePanelChrome,\n}",
             "description": [],
             "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
+            "lineNumber": 37,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -698,6 +772,8 @@
                 "label": "type",
                 "description": [],
                 "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
+                "lineNumber": 38,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -712,6 +788,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
+                "lineNumber": 39,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -726,6 +804,8 @@
                   "() => ParentApi"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
+                "lineNumber": 40,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [],
@@ -742,6 +822,8 @@
                   "((api: Api) => void) | undefined"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
+                "lineNumber": 41,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -756,6 +838,8 @@
                       "Api"
                     ],
                     "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
+                    "lineNumber": 41,
+                    "columnNumber": 21,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -782,6 +866,8 @@
                   "<Api, {}>, \"showShadow\" | \"showBorder\" | \"showBadges\" | \"showNotifications\" | \"hideLoader\" | \"hideHeader\" | \"hideInspector\" | \"getActions\" | \"setDragHandles\"> | undefined"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
+                "lineNumber": 42,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -796,6 +882,8 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
+                "lineNumber": 54,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -831,6 +919,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+        "lineNumber": 156,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -851,6 +941,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+            "lineNumber": 157,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -885,6 +977,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+        "lineNumber": 168,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -905,6 +999,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+            "lineNumber": 169,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -939,6 +1035,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+        "lineNumber": 172,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -959,6 +1057,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+            "lineNumber": 172,
+            "columnNumber": 42,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -993,6 +1093,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+        "lineNumber": 144,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1013,6 +1115,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+            "lineNumber": 145,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1050,6 +1154,8 @@
           ">[]"
         ],
         "path": "src/platform/plugins/shared/embeddable/public/add_from_library/registry.ts",
+        "lineNumber": 63,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -1106,6 +1212,8 @@
           "<SerializedState>"
         ],
         "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/types.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -1121,6 +1229,8 @@
           "\nA state package that contains information an editor will need to create or edit an embeddable then redirect back."
         ],
         "path": "src/platform/plugins/shared/embeddable/public/state_transfer/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1132,6 +1242,8 @@
             "label": "originatingApp",
             "description": [],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1146,6 +1258,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1160,6 +1274,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1174,6 +1290,8 @@
               "object | undefined"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1190,6 +1308,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1216,6 +1336,8 @@
           "<SerializedState, Api>"
         ],
         "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/types.ts",
+        "lineNumber": 64,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1229,6 +1351,8 @@
               "\nA unique key for the type of this embeddable. The React Embeddable Renderer will use this type\nto find this factory."
             ],
             "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/types.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1247,6 +1371,8 @@
               "<SerializedState, Api>) => Promise<{ Component: React.FC<{}>; api: Api; }>"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/types.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1262,6 +1388,8 @@
                   "<SerializedState, Api>"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/types.ts",
+                "lineNumber": 86,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1292,6 +1420,8 @@
           "<SerializedState>"
         ],
         "path": "src/platform/plugins/shared/embeddable/public/state_transfer/types.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1303,6 +1433,8 @@
             "label": "type",
             "description": [],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/types.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1317,6 +1449,8 @@
               "SerializedState"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1331,6 +1465,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/types.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1345,6 +1481,8 @@
               "{ width?: number | undefined; height?: number | undefined; } | undefined"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1361,43 +1499,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "embeddable",
-        "id": "def-public.EnhancementRegistryDefinition",
-        "type": "Interface",
-        "tags": [],
-        "label": "EnhancementRegistryDefinition",
-        "description": [],
-        "signature": [
-          "EnhancementRegistryDefinition",
-          "<P> extends Partial<",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.PersistableState",
-            "text": "PersistableState"
-          },
-          "<P>>"
-        ],
-        "path": "src/platform/plugins/shared/embeddable/common/enhancements/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.EnhancementRegistryDefinition.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "src/platform/plugins/shared/embeddable/common/enhancements/types.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1418,6 +1521,8 @@
           "\"CELL_VALUE_TRIGGER\""
         ],
         "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+        "lineNumber": 133,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1449,6 +1554,8 @@
           " | undefined; }[]; }"
         ],
         "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1494,6 +1601,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+        "lineNumber": 61,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1509,6 +1618,8 @@
           "\"CONTEXT_MENU_TRIGGER\""
         ],
         "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+        "lineNumber": 67,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1524,6 +1635,8 @@
           "\"MULTI_VALUE_CLICK_TRIGGER\""
         ],
         "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+        "lineNumber": 122,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1563,6 +1676,8 @@
           " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; }; }"
         ],
         "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1578,6 +1693,8 @@
           "\"PANEL_BADGE_TRIGGER\""
         ],
         "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+        "lineNumber": 78,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1593,6 +1710,8 @@
           "\"PANEL_NOTIFICATION_TRIGGER\""
         ],
         "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+        "lineNumber": 89,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1624,6 +1743,8 @@
           "; column: number; range: number[]; timeFieldName?: string | undefined; }; }"
         ],
         "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1639,6 +1760,8 @@
           "\"SELECT_RANGE_TRIGGER\""
         ],
         "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+        "lineNumber": 100,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1654,6 +1777,8 @@
           "\"VALUE_CLICK_TRIGGER\""
         ],
         "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+        "lineNumber": 111,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1685,6 +1810,8 @@
           ", \"columns\" | \"rows\">; column: number; row: number; value: any; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; }; }"
         ],
         "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1699,6 +1826,8 @@
         "label": "ADD_PANEL_ANNOTATION_GROUP",
         "description": [],
         "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1710,6 +1839,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1724,6 +1855,8 @@
               "() => string"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1737,6 +1870,8 @@
             "label": "order",
             "description": [],
             "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1751,6 +1886,8 @@
         "label": "ADD_PANEL_LEGACY_GROUP",
         "description": [],
         "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+        "lineNumber": 43,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1762,6 +1899,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1776,6 +1915,8 @@
               "() => string"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1792,6 +1933,8 @@
               "() => string"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1805,6 +1948,8 @@
             "label": "order",
             "description": [],
             "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1819,6 +1964,8 @@
         "label": "ADD_PANEL_OTHER_GROUP",
         "description": [],
         "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+        "lineNumber": 33,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1830,6 +1977,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1844,6 +1993,8 @@
               "() => string"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1860,6 +2011,8 @@
               "() => string"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1873,6 +2026,8 @@
             "label": "order",
             "description": [],
             "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1887,6 +2042,8 @@
         "label": "ADD_PANEL_VISUALIZATION_GROUP",
         "description": [],
         "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1898,6 +2055,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1912,6 +2071,8 @@
               "() => string"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1928,6 +2089,8 @@
               "() => string"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1941,6 +2104,8 @@
             "label": "order",
             "description": [],
             "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1955,6 +2120,8 @@
         "label": "cellValueTrigger",
         "description": [],
         "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+        "lineNumber": 134,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1966,6 +2133,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+            "lineNumber": 135,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1977,6 +2146,8 @@
             "label": "title",
             "description": [],
             "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+            "lineNumber": 136,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1988,6 +2159,8 @@
             "label": "description",
             "description": [],
             "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+            "lineNumber": 139,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2002,6 +2175,8 @@
         "label": "contextMenuTrigger",
         "description": [],
         "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+        "lineNumber": 68,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2013,6 +2188,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2024,6 +2201,8 @@
             "label": "title",
             "description": [],
             "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2035,6 +2214,8 @@
             "label": "description",
             "description": [],
             "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2049,6 +2230,8 @@
         "label": "panelBadgeTrigger",
         "description": [],
         "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+        "lineNumber": 79,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2060,6 +2243,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2071,6 +2256,8 @@
             "label": "title",
             "description": [],
             "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2082,6 +2269,8 @@
             "label": "description",
             "description": [],
             "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2096,6 +2285,8 @@
         "label": "panelNotificationTrigger",
         "description": [],
         "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+        "lineNumber": 90,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2107,6 +2298,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2118,6 +2311,8 @@
             "label": "title",
             "description": [],
             "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2129,6 +2324,8 @@
             "label": "description",
             "description": [],
             "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2144,6 +2341,8 @@
       "label": "EmbeddableSetup",
       "description": [],
       "path": "src/platform/plugins/shared/embeddable/public/types.ts",
+      "lineNumber": 40,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -2218,6 +2417,8 @@
             "<TSavedObjectAttributes>) => string) | undefined; }) => void"
           ],
           "path": "src/platform/plugins/shared/embeddable/public/types.ts",
+          "lineNumber": 41,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -2283,6 +2484,8 @@
                 "<TSavedObjectAttributes>) => string) | undefined; }"
               ],
               "path": "src/platform/plugins/shared/embeddable/public/add_from_library/registry.ts",
+              "lineNumber": 30,
+              "columnNumber": 93,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -2325,6 +2528,8 @@
             "<SerializedState, Api>>) => void"
           ],
           "path": "src/platform/plugins/shared/embeddable/public/types.ts",
+          "lineNumber": 69,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -2337,6 +2542,8 @@
               "label": "type",
               "description": [],
               "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_registry.ts",
+              "lineNumber": 26,
+              "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
             },
@@ -2359,6 +2566,8 @@
                 "<SerializedState, Api>>"
               ],
               "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_registry.ts",
+              "lineNumber": 27,
+              "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false,
               "returnComment": [],
@@ -2395,6 +2604,8 @@
             "[] | undefined, id?: string | undefined) => object) | undefined>) => void"
           ],
           "path": "src/platform/plugins/shared/embeddable/public/types.ts",
+          "lineNumber": 74,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -2409,6 +2620,8 @@
                 "string"
               ],
               "path": "src/platform/plugins/shared/embeddable/public/types.ts",
+              "lineNumber": 79,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -2440,65 +2653,8 @@
                 "[] | undefined, id?: string | undefined) => object) | undefined>"
               ],
               "path": "src/platform/plugins/shared/embeddable/public/types.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": []
-        },
-        {
-          "parentPluginId": "embeddable",
-          "id": "def-public.EmbeddableSetup.registerEnhancement",
-          "type": "Function",
-          "tags": [
-            "deprecated"
-          ],
-          "label": "registerEnhancement",
-          "description": [],
-          "signature": [
-            "(enhancement: ",
-            "EnhancementRegistryDefinition",
-            "<",
-            {
-              "pluginId": "@kbn/utility-types",
-              "scope": "common",
-              "docId": "kibKbnUtilityTypesPluginApi",
-              "section": "def-common.SerializableRecord",
-              "text": "SerializableRecord"
-            },
-            ">) => void"
-          ],
-          "path": "src/platform/plugins/shared/embeddable/public/types.ts",
-          "deprecated": true,
-          "trackAdoption": false,
-          "references": [
-            {
-              "plugin": "uiActionsEnhanced",
-              "path": "src/platform/plugins/shared/ui_actions_enhanced/public/plugin.ts"
-            }
-          ],
-          "children": [
-            {
-              "parentPluginId": "embeddable",
-              "id": "def-public.EmbeddableSetup.registerEnhancement.$1",
-              "type": "Object",
-              "tags": [],
-              "label": "enhancement",
-              "description": [],
-              "signature": [
-                "EnhancementRegistryDefinition",
-                "<",
-                {
-                  "pluginId": "@kbn/utility-types",
-                  "scope": "common",
-                  "docId": "kibKbnUtilityTypesPluginApi",
-                  "section": "def-common.SerializableRecord",
-                  "text": "SerializableRecord"
-                },
-                ">"
-              ],
-              "path": "src/platform/plugins/shared/embeddable/public/types.ts",
+              "lineNumber": 80,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -2514,7 +2670,23 @@
           "label": "transformEnhancementsIn",
           "description": [],
           "signature": [
-            "(enhancementsState: { [key: string]: unknown; }) => { enhancementsState: { [key: string]: unknown; }; enhancementsReferences: ",
+            "(enhancementsState: ",
+            {
+              "pluginId": "@kbn/utility-types",
+              "scope": "common",
+              "docId": "kibKbnUtilityTypesPluginApi",
+              "section": "def-common.SerializableRecord",
+              "text": "SerializableRecord"
+            },
+            ") => { state: ",
+            {
+              "pluginId": "@kbn/utility-types",
+              "scope": "common",
+              "docId": "kibKbnUtilityTypesPluginApi",
+              "section": "def-common.SerializableRecord",
+              "text": "SerializableRecord"
+            },
+            "; references: ",
             {
               "pluginId": "@kbn/content-management-utils",
               "scope": "server",
@@ -2525,6 +2697,8 @@
             "[]; }"
           ],
           "path": "src/platform/plugins/shared/embeddable/public/types.ts",
+          "lineNumber": 83,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -2537,9 +2711,17 @@
               "label": "enhancementsState",
               "description": [],
               "signature": [
-                "{ [key: string]: unknown; }"
+                {
+                  "pluginId": "@kbn/utility-types",
+                  "scope": "common",
+                  "docId": "kibKbnUtilityTypesPluginApi",
+                  "section": "def-common.SerializableRecord",
+                  "text": "SerializableRecord"
+                }
               ],
-              "path": "src/platform/plugins/shared/embeddable/common/enhancements/registry.ts",
+              "path": "src/platform/plugins/shared/embeddable/common/index.ts",
+              "lineNumber": 21,
+              "columnNumber": 40,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -2553,7 +2735,15 @@
           "label": "transformEnhancementsOut",
           "description": [],
           "signature": [
-            "(enhancementsState: { [key: string]: unknown; }, references: ",
+            "(enhancementsState: ",
+            {
+              "pluginId": "@kbn/utility-types",
+              "scope": "common",
+              "docId": "kibKbnUtilityTypesPluginApi",
+              "section": "def-common.SerializableRecord",
+              "text": "SerializableRecord"
+            },
+            ", references: ",
             {
               "pluginId": "@kbn/content-management-utils",
               "scope": "server",
@@ -2561,9 +2751,18 @@
               "section": "def-server.Reference",
               "text": "Reference"
             },
-            "[]) => { [key: string]: unknown; }"
+            "[]) => ",
+            {
+              "pluginId": "@kbn/utility-types",
+              "scope": "common",
+              "docId": "kibKbnUtilityTypesPluginApi",
+              "section": "def-common.SerializableRecord",
+              "text": "SerializableRecord"
+            }
           ],
           "path": "src/platform/plugins/shared/embeddable/public/types.ts",
+          "lineNumber": 84,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -2576,9 +2775,17 @@
               "label": "enhancementsState",
               "description": [],
               "signature": [
-                "{ [key: string]: unknown; }"
+                {
+                  "pluginId": "@kbn/utility-types",
+                  "scope": "common",
+                  "docId": "kibKbnUtilityTypesPluginApi",
+                  "section": "def-common.SerializableRecord",
+                  "text": "SerializableRecord"
+                }
               ],
-              "path": "src/platform/plugins/shared/embeddable/common/enhancements/registry.ts",
+              "path": "src/platform/plugins/shared/embeddable/common/index.ts",
+              "lineNumber": 27,
+              "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
             },
@@ -2599,7 +2806,9 @@
                 },
                 "[]"
               ],
-              "path": "src/platform/plugins/shared/embeddable/common/enhancements/registry.ts",
+              "path": "src/platform/plugins/shared/embeddable/common/index.ts",
+              "lineNumber": 28,
+              "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -2617,6 +2826,8 @@
       "label": "EmbeddableStart",
       "description": [],
       "path": "src/platform/plugins/shared/embeddable/public/types.ts",
+      "lineNumber": 87,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -2633,6 +2844,8 @@
             ">>"
           ],
           "path": "src/platform/plugins/shared/embeddable/public/types.ts",
+          "lineNumber": 88,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -2664,6 +2877,8 @@
             }
           ],
           "path": "src/platform/plugins/shared/embeddable/public/types.ts",
+          "lineNumber": 89,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -2685,6 +2900,8 @@
                 " | undefined"
               ],
               "path": "src/platform/plugins/shared/embeddable/public/types.ts",
+              "lineNumber": 89,
+              "columnNumber": 22,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -2719,6 +2936,8 @@
             "[] | undefined, id?: string | undefined) => object) | undefined>"
           ],
           "path": "src/platform/plugins/shared/embeddable/public/types.ts",
+          "lineNumber": 90,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -2733,6 +2952,8 @@
                 "string"
               ],
               "path": "src/platform/plugins/shared/embeddable/public/types.ts",
+              "lineNumber": 91,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -2751,6 +2972,8 @@
             "(type: string) => boolean"
           ],
           "path": "src/platform/plugins/shared/embeddable/public/types.ts",
+          "lineNumber": 93,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -2765,54 +2988,8 @@
                 "string"
               ],
               "path": "src/platform/plugins/shared/embeddable/public/types.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": []
-        },
-        {
-          "parentPluginId": "embeddable",
-          "id": "def-public.EmbeddableStart.getEnhancement",
-          "type": "Function",
-          "tags": [],
-          "label": "getEnhancement",
-          "description": [],
-          "signature": [
-            "(enhancementId: string) => ",
-            {
-              "pluginId": "kibanaUtils",
-              "scope": "common",
-              "docId": "kibKibanaUtilsPluginApi",
-              "section": "def-common.PersistableState",
-              "text": "PersistableState"
-            },
-            "<",
-            {
-              "pluginId": "@kbn/utility-types",
-              "scope": "common",
-              "docId": "kibKbnUtilityTypesPluginApi",
-              "section": "def-common.SerializableRecord",
-              "text": "SerializableRecord"
-            },
-            ">"
-          ],
-          "path": "src/platform/plugins/shared/embeddable/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [
-            {
-              "parentPluginId": "embeddable",
-              "id": "def-public.EmbeddableStart.getEnhancement.$1",
-              "type": "string",
-              "tags": [],
-              "label": "enhancementId",
-              "description": [],
-              "signature": [
-                "string"
-              ],
-              "path": "src/platform/plugins/shared/embeddable/public/types.ts",
+              "lineNumber": 93,
+              "columnNumber": 27,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -2855,6 +3032,8 @@
           "<P>>"
         ],
         "path": "src/platform/plugins/shared/embeddable/server/types.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2866,43 +3045,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/embeddable/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "embeddable",
-        "id": "def-server.EnhancementRegistryDefinition",
-        "type": "Interface",
-        "tags": [],
-        "label": "EnhancementRegistryDefinition",
-        "description": [],
-        "signature": [
-          "EnhancementRegistryDefinition",
-          "<P> extends Partial<",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.PersistableState",
-            "text": "PersistableState"
-          },
-          "<P>>"
-        ],
-        "path": "src/platform/plugins/shared/embeddable/common/enhancements/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-server.EnhancementRegistryDefinition.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "src/platform/plugins/shared/embeddable/common/enhancements/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2938,6 +3082,8 @@
           ">"
         ],
         "path": "src/platform/plugins/shared/embeddable/server/persistable_state/types.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2961,6 +3107,8 @@
           " | undefined; type: string; }"
         ],
         "path": "src/platform/plugins/shared/embeddable/server/persistable_state/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3001,6 +3149,8 @@
         ">"
       ],
       "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
+      "lineNumber": 35,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -3031,6 +3181,8 @@
             ">) => void"
           ],
           "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
+          "lineNumber": 36,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -3060,6 +3212,8 @@
                 ">"
               ],
               "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
+              "lineNumber": 36,
+              "columnNumber": 31,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -3086,6 +3240,8 @@
             "<any, any>) => void"
           ],
           "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
+          "lineNumber": 45,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -3100,6 +3256,8 @@
                 "string"
               ],
               "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
+              "lineNumber": 45,
+              "columnNumber": 24,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -3122,57 +3280,8 @@
                 "<any, any>"
               ],
               "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": []
-        },
-        {
-          "parentPluginId": "embeddable",
-          "id": "def-server.EmbeddableSetup.registerEnhancement",
-          "type": "Function",
-          "tags": [],
-          "label": "registerEnhancement",
-          "description": [],
-          "signature": [
-            "(enhancement: ",
-            "EnhancementRegistryDefinition",
-            "<",
-            {
-              "pluginId": "@kbn/utility-types",
-              "scope": "common",
-              "docId": "kibKbnUtilityTypesPluginApi",
-              "section": "def-common.SerializableRecord",
-              "text": "SerializableRecord"
-            },
-            ">) => void"
-          ],
-          "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [
-            {
-              "parentPluginId": "embeddable",
-              "id": "def-server.EmbeddableSetup.registerEnhancement.$1",
-              "type": "Object",
-              "tags": [],
-              "label": "enhancement",
-              "description": [],
-              "signature": [
-                "EnhancementRegistryDefinition",
-                "<",
-                {
-                  "pluginId": "@kbn/utility-types",
-                  "scope": "common",
-                  "docId": "kibKbnUtilityTypesPluginApi",
-                  "section": "def-common.SerializableRecord",
-                  "text": "SerializableRecord"
-                },
-                ">"
-              ],
-              "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
+              "lineNumber": 45,
+              "columnNumber": 38,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -3198,6 +3307,8 @@
             }
           ],
           "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
+          "lineNumber": 46,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -3211,7 +3322,23 @@
           "label": "transformEnhancementsIn",
           "description": [],
           "signature": [
-            "(enhancementsState: { [key: string]: unknown; }) => { enhancementsState: { [key: string]: unknown; }; enhancementsReferences: ",
+            "(enhancementsState: ",
+            {
+              "pluginId": "@kbn/utility-types",
+              "scope": "common",
+              "docId": "kibKbnUtilityTypesPluginApi",
+              "section": "def-common.SerializableRecord",
+              "text": "SerializableRecord"
+            },
+            ") => { state: ",
+            {
+              "pluginId": "@kbn/utility-types",
+              "scope": "common",
+              "docId": "kibKbnUtilityTypesPluginApi",
+              "section": "def-common.SerializableRecord",
+              "text": "SerializableRecord"
+            },
+            "; references: ",
             {
               "pluginId": "@kbn/content-management-utils",
               "scope": "server",
@@ -3222,6 +3349,8 @@
             "[]; }"
           ],
           "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
+          "lineNumber": 47,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -3234,9 +3363,17 @@
               "label": "enhancementsState",
               "description": [],
               "signature": [
-                "{ [key: string]: unknown; }"
+                {
+                  "pluginId": "@kbn/utility-types",
+                  "scope": "common",
+                  "docId": "kibKbnUtilityTypesPluginApi",
+                  "section": "def-common.SerializableRecord",
+                  "text": "SerializableRecord"
+                }
               ],
-              "path": "src/platform/plugins/shared/embeddable/common/enhancements/registry.ts",
+              "path": "src/platform/plugins/shared/embeddable/common/index.ts",
+              "lineNumber": 21,
+              "columnNumber": 40,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -3250,7 +3387,15 @@
           "label": "transformEnhancementsOut",
           "description": [],
           "signature": [
-            "(enhancementsState: { [key: string]: unknown; }, references: ",
+            "(enhancementsState: ",
+            {
+              "pluginId": "@kbn/utility-types",
+              "scope": "common",
+              "docId": "kibKbnUtilityTypesPluginApi",
+              "section": "def-common.SerializableRecord",
+              "text": "SerializableRecord"
+            },
+            ", references: ",
             {
               "pluginId": "@kbn/content-management-utils",
               "scope": "server",
@@ -3258,9 +3403,18 @@
               "section": "def-server.Reference",
               "text": "Reference"
             },
-            "[]) => { [key: string]: unknown; }"
+            "[]) => ",
+            {
+              "pluginId": "@kbn/utility-types",
+              "scope": "common",
+              "docId": "kibKbnUtilityTypesPluginApi",
+              "section": "def-common.SerializableRecord",
+              "text": "SerializableRecord"
+            }
           ],
           "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
+          "lineNumber": 48,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -3273,9 +3427,17 @@
               "label": "enhancementsState",
               "description": [],
               "signature": [
-                "{ [key: string]: unknown; }"
+                {
+                  "pluginId": "@kbn/utility-types",
+                  "scope": "common",
+                  "docId": "kibKbnUtilityTypesPluginApi",
+                  "section": "def-common.SerializableRecord",
+                  "text": "SerializableRecord"
+                }
               ],
-              "path": "src/platform/plugins/shared/embeddable/common/enhancements/registry.ts",
+              "path": "src/platform/plugins/shared/embeddable/common/index.ts",
+              "lineNumber": 27,
+              "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
             },
@@ -3296,7 +3458,9 @@
                 },
                 "[]"
               ],
-              "path": "src/platform/plugins/shared/embeddable/common/enhancements/registry.ts",
+              "path": "src/platform/plugins/shared/embeddable/common/index.ts",
+              "lineNumber": 28,
+              "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -3348,6 +3512,8 @@
         "<object, object> | undefined; }"
       ],
       "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
+      "lineNumber": 51,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -3384,6 +3550,8 @@
           "<P>>"
         ],
         "path": "src/platform/plugins/shared/embeddable/server/types.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3395,6 +3563,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/embeddable/server/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3430,6 +3600,8 @@
           ">"
         ],
         "path": "src/platform/plugins/shared/embeddable/server/persistable_state/types.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3453,6 +3625,8 @@
           " | undefined; type: string; }"
         ],
         "path": "src/platform/plugins/shared/embeddable/server/persistable_state/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3500,8 +3674,164 @@
           "<object> | undefined; throwOnUnmappedPanel?: ((config: EmbeddableState) => void) | undefined; }"
         ],
         "path": "src/platform/plugins/shared/embeddable/common/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-common.TransformEnhancementsIn",
+        "type": "Type",
+        "tags": [],
+        "label": "TransformEnhancementsIn",
+        "description": [],
+        "signature": [
+          "(enhancementsState: ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ") => { state: ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          "; references: ",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
+          "[]; }"
+        ],
+        "path": "src/platform/plugins/shared/embeddable/common/index.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-common.TransformEnhancementsIn.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "enhancementsState",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              }
+            ],
+            "path": "src/platform/plugins/shared/embeddable/common/index.ts",
+            "lineNumber": 21,
+            "columnNumber": 40,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-common.TransformEnhancementsOut",
+        "type": "Type",
+        "tags": [],
+        "label": "TransformEnhancementsOut",
+        "description": [],
+        "signature": [
+          "(enhancementsState: ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ", references: ",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
+          "[]) => ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
+        "path": "src/platform/plugins/shared/embeddable/common/index.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-common.TransformEnhancementsOut.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "enhancementsState",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              }
+            ],
+            "path": "src/platform/plugins/shared/embeddable/common/index.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-common.TransformEnhancementsOut.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.Reference",
+                "text": "Reference"
+              },
+              "[]"
+            ],
+            "path": "src/platform/plugins/shared/embeddable/common/index.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],

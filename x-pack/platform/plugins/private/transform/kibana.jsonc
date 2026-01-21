@@ -22,6 +22,7 @@
       "triggersActionsUi",
       "fieldFormats",
       "unifiedSearch",
+      "kql",
       "charts",
       "savedObjectsFinder",
       "savedObjectsManagement",

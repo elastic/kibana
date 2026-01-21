@@ -42,7 +42,6 @@ dependsOn:
   - '@kbn/css-utils'
   - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/alerting-plugin'
-  - '@kbn/core-ui-settings-server'
   - '@kbn/logging-mocks'
   - '@kbn/discover-utils'
   - '@kbn/storybook'
@@ -82,6 +81,7 @@ dependsOn:
   - '@kbn/alerts-as-data-utils'
   - '@kbn/shared-ux-utility'
   - '@kbn/licensing-types'
+  - '@kbn/core-lifecycle-server-mocks'
 tags:
   - plugin
   - prod

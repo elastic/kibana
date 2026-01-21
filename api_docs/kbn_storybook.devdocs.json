@@ -30,6 +30,8 @@
           "({ configDir, name }: { configDir: string; name: string; }) => void"
         ],
         "path": "src/platform/packages/shared/kbn-storybook/src/lib/run_storybook_cli.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -41,6 +43,8 @@
             "label": "{ configDir, name }",
             "description": [],
             "path": "src/platform/packages/shared/kbn-storybook/src/lib/run_storybook_cli.ts",
+            "lineNumber": 37,
+            "columnNumber": 54,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -52,6 +56,8 @@
                 "label": "configDir",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-storybook/src/lib/run_storybook_cli.ts",
+                "lineNumber": 37,
+                "columnNumber": 56,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -63,6 +69,8 @@
                 "label": "name",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-storybook/src/lib/run_storybook_cli.ts",
+                "lineNumber": 37,
+                "columnNumber": 75,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -93,6 +101,8 @@
           "StorybookConfig"
         ],
         "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -109,6 +119,8 @@
               " | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -129,6 +141,8 @@
           "\"borealis.light\" | \"borealis.dark\""
         ],
         "path": "src/platform/packages/shared/kbn-storybook/src/lib/themes.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -143,6 +157,8 @@
         "label": "defaultConfig",
         "description": [],
         "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
+        "lineNumber": 44,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -157,6 +173,8 @@
               "(string | { name: string; options: { rules: ({ test: RegExp; use: string[]; } | { test: RegExp; exclude: RegExp; use: ({ loader: string; } | { loader: string; options: { importLoaders: number; }; } | { loader: string; options: { postcssOptions: { config: string; }; }; } | { loader: string; options: { additionalData(content: string, loaderContext: any): string; implementation: any; sassOptions: { includePaths: string[]; quietDeps: boolean; silenceDeprecations: string[]; }; }; })[]; })[]; }; })[]"
             ],
             "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -171,6 +189,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -182,6 +202,8 @@
             "label": "framework",
             "description": [],
             "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -196,6 +218,8 @@
                   "\"@storybook/react-webpack5\""
                 ],
                 "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
+                "lineNumber": 110,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -207,6 +231,8 @@
                 "label": "options",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
+                "lineNumber": 111,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": []
@@ -221,6 +247,8 @@
             "label": "typescript",
             "description": [],
             "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -235,6 +263,8 @@
                   "false"
                 ],
                 "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
+                "lineNumber": 114,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -248,6 +278,8 @@
             "label": "core",
             "description": [],
             "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
+            "lineNumber": 116,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -262,6 +294,8 @@
                   "true"
                 ],
                 "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
+                "lineNumber": 117,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -278,6 +312,8 @@
               "(config: any, options: any) => Promise<any>"
             ],
             "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
+            "lineNumber": 119,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -292,6 +328,8 @@
                   "any"
                 ],
                 "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
+                "lineNumber": 119,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -307,6 +345,8 @@
                   "any"
                 ],
                 "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
+                "lineNumber": 119,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -330,6 +370,8 @@
               "Configuration"
             ],
             "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
+            "lineNumber": 145,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -344,6 +386,8 @@
                   "Configuration"
                 ],
                 "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
+                "lineNumber": 145,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -359,6 +403,8 @@
                   "Options"
                 ],
                 "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
+                "lineNumber": 145,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -377,6 +423,8 @@
               "(head: string | undefined) => string"
             ],
             "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
+            "lineNumber": 219,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -391,6 +439,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
+                "lineNumber": 219,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -409,6 +459,8 @@
               "(string | { from: string; to: string; })[]"
             ],
             "path": "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
+            "lineNumber": 241,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -426,6 +478,8 @@
           "readonly [\"borealis.light\", \"borealis.dark\"]"
         ],
         "path": "src/platform/packages/shared/kbn-storybook/src/lib/themes.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

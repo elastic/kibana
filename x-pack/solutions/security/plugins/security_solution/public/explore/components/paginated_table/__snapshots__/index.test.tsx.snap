@@ -390,7 +390,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
         </table>
       </div>
       <div
-        class="euiFlexGroup emotion-euiFlexGroup-l-spaceBetween-center-row"
+        class="euiFlexGroup emotion-euiFlexGroup-m-spaceBetween-center-row"
       >
         <div
           class="euiFlexItem emotion-euiFlexItem-growZero"

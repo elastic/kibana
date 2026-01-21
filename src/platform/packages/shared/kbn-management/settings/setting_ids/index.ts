@@ -74,8 +74,8 @@ export const BANNERS_TEXT_COLOR_ID = 'banners:textColor';
 export const BANNERS_LINK_COLOR_ID = 'banners:linkColor';
 export const BANNERS_BACKGROUND_COLOR_ID = 'banners:backgroundColor';
 
-// Data connectors settings
-export const DATA_CONNECTORS_ENABLED_SETTING_ID = 'dataConnectors:enabled';
+// Data sources settings
+export const DATA_SOURCES_ENABLED_SETTING_ID = 'dataSources:enabled';
 
 // Discover settings
 export const CONTEXT_DEFAULT_SIZE_ID = 'context:defaultSize';

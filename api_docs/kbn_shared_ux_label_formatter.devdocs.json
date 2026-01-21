@@ -16,6 +16,8 @@
           "(label: string) => string"
         ],
         "path": "src/platform/packages/shared/shared-ux/label_formatter/src/to_sentence_case.ts",
+        "lineNumber": 59,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -32,6 +34,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/shared-ux/label_formatter/src/to_sentence_case.ts",
+            "lineNumber": 70,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

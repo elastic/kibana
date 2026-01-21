@@ -36,7 +36,6 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
         tags: ['mcp', 'oas-tag:agent builder'],
         xsrfRequired: false,
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },

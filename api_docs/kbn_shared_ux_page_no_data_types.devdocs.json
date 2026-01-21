@@ -12,6 +12,8 @@
         "label": "ActionCardProps",
         "description": [],
         "path": "src/platform/packages/shared/shared-ux/page/no_data/types/index.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -36,6 +38,8 @@
               "; }"
             ],
             "path": "src/platform/packages/shared/shared-ux/page/no_data/types/index.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -69,6 +73,8 @@
           }
         ],
         "path": "src/platform/packages/shared/shared-ux/page/no_data/types/index.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -90,6 +96,8 @@
           ", \"icon\"> & { title?: string | undefined; description?: React.ReactNode; canAccessFleet?: boolean | undefined; buttonText?: string | undefined; buttonIsDisabled?: boolean | undefined; disabledButtonTooltipText?: string | undefined; href?: string | undefined; docsLink?: string | undefined; onClick?: ((e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined; 'data-test-subj'?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/no_data/types/index.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -107,6 +115,8 @@
           "KibanaDependencies"
         ],
         "path": "src/platform/packages/shared/shared-ux/page/no_data/types/index.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -130,6 +140,8 @@
           }
         ],
         "path": "src/platform/packages/shared/shared-ux/page/no_data/types/index.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
@@ -13,12 +14,17 @@ import { resetSyncPrivateCleanUpState } from '../../../tasks/sync_private_locati
 export const cleanupPrivateLocationRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'PUT',
   path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS_CLEANUP,
-  validate: {},
+  validate: {
+    query: schema.object({
+      hasAlreadyDoneCleanup: schema.maybe(schema.boolean()),
+    }),
+  },
   requiredPrivileges: [PRIVATE_LOCATION_WRITE_API],
   handler: async (routeContext) => {
-    const { server } = routeContext;
+    const { server, request } = routeContext;
+    const { hasAlreadyDoneCleanup } = request.query;
 
-    await resetSyncPrivateCleanUpState({ server });
+    await resetSyncPrivateCleanUpState({ server, hasAlreadyDoneCleanup });
 
     return {
       success: true,

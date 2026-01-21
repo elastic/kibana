@@ -55,6 +55,7 @@ import type {
   UnlinkSystemsAction,
   UpdateIngestSettingsAction,
   UpdateFailureStoreAction,
+  UnlinkFeaturesAction,
 } from './types';
 
 /**
@@ -91,6 +92,7 @@ export class ExecutionPlan {
       delete_queries: [],
       unlink_assets: [],
       unlink_systems: [],
+      unlink_features: [],
       update_ingest_settings: [],
     };
   }
@@ -182,6 +184,7 @@ export class ExecutionPlan {
         delete_queries,
         unlink_assets,
         unlink_systems,
+        unlink_features,
         update_ingest_settings,
         ...rest
       } = this.actionsByType;
@@ -224,6 +227,7 @@ export class ExecutionPlan {
         this.deleteQueries(delete_queries),
         this.unlinkAssets(unlink_assets),
         this.unlinkSystems(unlink_systems),
+        this.unlinkFeatures(unlink_features),
       ]);
 
       await this.upsertAndDeleteDotStreamsDocuments([
@@ -269,6 +273,16 @@ export class ExecutionPlan {
       actions.map((action) =>
         this.dependencies.systemClient.syncSystemList(action.request.name, [])
       )
+    );
+  }
+
+  private async unlinkFeatures(actions: UnlinkFeaturesAction[]) {
+    if (actions.length === 0) {
+      return;
+    }
+
+    return Promise.all(
+      actions.map((action) => this.dependencies.featureClient.deleteFeatures(action.request.name))
     );
   }
 

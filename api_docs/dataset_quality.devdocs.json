@@ -10,6 +10,8 @@
         "label": "DataStreamsStatsService",
         "description": [],
         "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/data_streams_stats_service.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -24,6 +26,8 @@
               "() => void"
             ],
             "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/data_streams_stats_service.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -43,6 +47,8 @@
               "DataStreamsStatsServiceStart"
             ],
             "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/data_streams_stats_service.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -57,6 +63,8 @@
                   "DataStreamsStatsServiceStartDeps"
                 ],
                 "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/data_streams_stats_service.ts",
+                "lineNumber": 20,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -80,6 +88,8 @@
           "({ totalDocs, count }: { totalDocs?: number | undefined; count?: number | undefined; }) => number"
         ],
         "path": "x-pack/platform/plugins/shared/dataset_quality/public/utils/calculate_percentage.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -91,6 +101,8 @@
             "label": "{ totalDocs, count }",
             "description": [],
             "path": "x-pack/platform/plugins/shared/dataset_quality/public/utils/calculate_percentage.ts",
+            "lineNumber": 8,
+            "columnNumber": 59,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -105,6 +117,8 @@
                   "number | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/dataset_quality/public/utils/calculate_percentage.ts",
+                "lineNumber": 8,
+                "columnNumber": 61,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -119,6 +133,8 @@
                   "number | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/dataset_quality/public/utils/calculate_percentage.ts",
+                "lineNumber": 8,
+                "columnNumber": 81,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -147,6 +163,8 @@
           "; verbose?: boolean | undefined; showTooltip?: boolean | undefined; dataTestSubj?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/dataset_quality/public/components/quality_indicator/dataset_quality_indicator.tsx",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -158,6 +176,8 @@
             "label": "{\n  isLoading,\n  quality,\n  verbose = false,\n  showTooltip = false,\n  dataTestSubj,\n}",
             "description": [],
             "path": "x-pack/platform/plugins/shared/dataset_quality/public/components/quality_indicator/dataset_quality_indicator.tsx",
+            "lineNumber": 29,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -169,6 +189,8 @@
                 "label": "isLoading",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/dataset_quality/public/components/quality_indicator/dataset_quality_indicator.tsx",
+                "lineNumber": 30,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -183,6 +205,8 @@
                   "\"good\" | \"poor\" | \"degraded\""
                 ],
                 "path": "x-pack/platform/plugins/shared/dataset_quality/public/components/quality_indicator/dataset_quality_indicator.tsx",
+                "lineNumber": 31,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -197,6 +221,8 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/dataset_quality/public/components/quality_indicator/dataset_quality_indicator.tsx",
+                "lineNumber": 32,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -211,6 +237,8 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/dataset_quality/public/components/quality_indicator/dataset_quality_indicator.tsx",
+                "lineNumber": 33,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -225,6 +253,8 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/dataset_quality/public/components/quality_indicator/dataset_quality_indicator.tsx",
+                "lineNumber": 34,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -244,6 +274,8 @@
         "label": "IDataStreamsStatsClient",
         "description": [],
         "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/types.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -258,6 +290,8 @@
               "(params: { types: (\"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\")[]; }) => Promise<{ datasetTypesPrivileges: { [x: string]: { canMonitor: boolean; canReadFailureStore: boolean; canManageFailureStore: boolean; } & { canRead: boolean; }; }; }>"
             ],
             "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/types.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -272,6 +306,8 @@
                   "{ types: (\"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\")[]; }"
                 ],
                 "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/types.ts",
+                "lineNumber": 41,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -290,6 +326,8 @@
               "(params?: (({ types: (\"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\")[]; } | { datasetQuery: string; }) & { includeCreationDate?: boolean | undefined; }) | undefined) => Promise<{ datasetUserPrivileges: { datasetsPrivilages: { [x: string]: { canMonitor: boolean; canReadFailureStore: boolean; canManageFailureStore: boolean; } & { canRead: boolean; }; }; canViewIntegrations: boolean; }; dataStreamsStats: ({ name: string; userPrivileges: { canMonitor: boolean; canReadFailureStore: boolean; canManageFailureStore: boolean; }; } & { size?: string | undefined; sizeBytes?: number | undefined; lastActivity?: number | undefined; integration?: string | undefined; totalDocs?: number | undefined; creationDate?: number | undefined; hasFailureStore?: boolean | undefined; customRetentionPeriod?: string | undefined; defaultRetentionPeriod?: string | undefined; })[]; }>"
             ],
             "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -304,6 +342,8 @@
                   "(({ types: (\"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\")[]; } | { datasetQuery: string; }) & { includeCreationDate?: boolean | undefined; }) | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/types.ts",
+                "lineNumber": 43,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -322,6 +362,8 @@
               "(params?: ({ start: string; end: string; } & { types: (\"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\")[]; } & { datasetQuery?: string | undefined; }) | undefined) => Promise<{ dataset: string; count: number; }[]>"
             ],
             "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -336,6 +378,8 @@
                   "({ start: string; end: string; } & { types: (\"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\")[]; } & { datasetQuery?: string | undefined; }) | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/types.ts",
+                "lineNumber": 45,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -354,6 +398,8 @@
               "(params?: ({ start: string; end: string; } & { types: (\"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\")[]; } & { datasetQuery?: string | undefined; }) | undefined) => Promise<{ dataset: string; count: number; }[]>"
             ],
             "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/types.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -368,6 +414,8 @@
                   "({ start: string; end: string; } & { types: (\"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\")[]; } & { datasetQuery?: string | undefined; }) | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/types.ts",
+                "lineNumber": 48,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -386,6 +434,8 @@
               "(params: { start: string; end: string; } & { type: \"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\"; }) => Promise<{ dataset: string; count: number; }[]>"
             ],
             "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/types.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -400,6 +450,8 @@
                   "{ start: string; end: string; } & { type: \"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\"; }"
                 ],
                 "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/types.ts",
+                "lineNumber": 50,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -420,6 +472,8 @@
               "[]>"
             ],
             "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/types.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -436,6 +490,8 @@
               "(params: { start: string; end: string; } & { types: (\"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\")[]; } & { dataStream?: string | undefined; }) => Promise<{ aggregatable: boolean; datasets: string[]; }>"
             ],
             "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/types.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -450,6 +506,8 @@
                   "{ start: string; end: string; } & { types: (\"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\")[]; } & { dataStream?: string | undefined; }"
                 ],
                 "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/types.ts",
+                "lineNumber": 53,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -470,6 +528,8 @@
               ") => Promise<{ headers: { [x: string]: unknown; }; }>"
             ],
             "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/types.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -484,6 +544,8 @@
                   "UpdateFailureStoreParams"
                 ],
                 "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/data_streams_stats/types.ts",
+                "lineNumber": 55,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -508,6 +570,8 @@
           "{ datasetUserPrivileges: { datasetsPrivilages: { [x: string]: { canMonitor: boolean; canReadFailureStore: boolean; canManageFailureStore: boolean; } & { canRead: boolean; }; }; canViewIntegrations: boolean; }; dataStreamsStats: ({ name: string; userPrivileges: { canMonitor: boolean; canReadFailureStore: boolean; canManageFailureStore: boolean; }; } & { size?: string | undefined; sizeBytes?: number | undefined; lastActivity?: number | undefined; integration?: string | undefined; totalDocs?: number | undefined; creationDate?: number | undefined; hasFailureStore?: boolean | undefined; customRetentionPeriod?: string | undefined; defaultRetentionPeriod?: string | undefined; })[]; }"
         ],
         "path": "x-pack/platform/plugins/shared/dataset_quality/common/data_streams_stats/types.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -522,6 +586,8 @@
       "label": "DatasetQualityPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/dataset_quality/public/types.ts",
+      "lineNumber": 30,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -536,6 +602,8 @@
       "label": "DatasetQualityPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/dataset_quality/public/types.ts",
+      "lineNumber": 32,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -554,6 +622,8 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/dataset_quality/public/types.ts",
+          "lineNumber": 33,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -572,6 +642,8 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/dataset_quality/public/types.ts",
+          "lineNumber": 34,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -589,6 +661,8 @@
                 "> | undefined; }"
               ],
               "path": "x-pack/platform/plugins/shared/dataset_quality/public/controller/dataset_quality/create_controller.ts",
+              "lineNumber": 31,
+              "columnNumber": 10,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -609,6 +683,8 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/dataset_quality/public/types.ts",
+          "lineNumber": 35,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -629,6 +705,8 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/dataset_quality/public/types.ts",
+          "lineNumber": 36,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -648,6 +726,8 @@
                 " | undefined; refreshDefinition?: (() => void) | undefined; }"
               ],
               "path": "x-pack/platform/plugins/shared/dataset_quality/public/controller/dataset_quality_details/create_controller.ts",
+              "lineNumber": 33,
+              "columnNumber": 10,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -680,6 +760,8 @@
           "(dataStreamName: string) => { type: \"profiling\" | \"metrics\" | \"synthetics\" | \"traces\" | \"logs\"; dataset: string; namespace: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/dataset_quality/common/utils/dataset_name.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -694,6 +776,8 @@
               "string"
             ],
             "path": "x-pack/platform/plugins/shared/dataset_quality/common/utils/dataset_name.ts",
+            "lineNumber": 30,
+            "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -720,6 +804,8 @@
           }
         ],
         "path": "x-pack/platform/plugins/shared/dataset_quality/common/utils/quality_helpers.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -734,6 +820,8 @@
               "number[]"
             ],
             "path": "x-pack/platform/plugins/shared/dataset_quality/common/utils/quality_helpers.ts",
+            "lineNumber": 11,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -752,6 +840,8 @@
         "label": "DatasetQualityConfig",
         "description": [],
         "path": "x-pack/platform/plugins/shared/dataset_quality/common/plugin_config.ts",
+        "lineNumber": 9,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -1291,6 +1381,8 @@
           " ? ClientRequestParamsOfType<TRouteParamsRT> : TRouteParamsRT extends undefined ? {} : never : never"
         ],
         "path": "x-pack/platform/plugins/shared/dataset_quality/common/rest/create_call_dataset_quality_api.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1808,6 +1900,8 @@
           " | undefined; } | undefined> ? TWrappedResponseType : TReturnType : never"
         ],
         "path": "x-pack/platform/plugins/shared/dataset_quality/common/rest/create_call_dataset_quality_api.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1825,6 +1919,8 @@
           ", \"body\"> & { pathname: string; method?: string | undefined; body?: any; }"
         ],
         "path": "x-pack/platform/plugins/shared/dataset_quality/common/fetch_options.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1840,6 +1936,8 @@
           "\"good\" | \"poor\" | \"degraded\""
         ],
         "path": "x-pack/platform/plugins/shared/dataset_quality/common/types/quality_types.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1854,6 +1952,8 @@
         "label": "DEFAULT_DATEPICKER_REFRESH",
         "description": [],
         "path": "x-pack/platform/plugins/shared/dataset_quality/common/constants.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1865,6 +1965,8 @@
             "label": "value",
             "description": [],
             "path": "x-pack/platform/plugins/shared/dataset_quality/common/constants.ts",
+            "lineNumber": 32,
+            "columnNumber": 45,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1876,6 +1978,8 @@
             "label": "pause",
             "description": [],
             "path": "x-pack/platform/plugins/shared/dataset_quality/common/constants.ts",
+            "lineNumber": 32,
+            "columnNumber": 59,
             "deprecated": false,
             "trackAdoption": false
           }

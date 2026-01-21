@@ -19,6 +19,7 @@ import type {
   ToolCallStep,
   ToolProgressEvent,
   ToolResultEvent,
+  RuntimeAgentConfigurationOverrides,
 } from '@kbn/agent-builder-common';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import {
@@ -43,6 +44,7 @@ import type {
   ModelProvider,
   ModelProviderStats,
 } from '@kbn/agent-builder-server/runner';
+import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { getCurrentTraceId } from '../../../../tracing';
 import type { ConvertedEvents } from '../default/convert_graph_events';
 import { isFinalStateEvent } from '../default/events';
@@ -63,6 +65,8 @@ export const addRoundCompleteEvent = ({
   getConversationState,
   modelProvider,
   stateManager,
+  attachmentStateManager,
+  configurationOverrides,
 }: {
   pendingRound: ConversationRound | undefined;
   userInput: RoundInput;
@@ -70,7 +74,9 @@ export const addRoundCompleteEvent = ({
   modelProvider: ModelProvider;
   stateManager: ConversationStateManager;
   getConversationState: () => ConversationInternalState;
+  attachmentStateManager: AttachmentStateManager;
   endTime?: Date;
+  configurationOverrides?: RuntimeAgentConfigurationOverrides;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
   return (events$) => {
     const shared$ = events$.pipe(share());
@@ -98,12 +104,19 @@ export const addRoundCompleteEvent = ({
 
           round.state = buildRoundState({ round, events, stateManager });
 
+          // Add configuration overrides to the round if provided
+          if (configurationOverrides) {
+            round.configuration_overrides = configurationOverrides;
+          }
+
           const event: RoundCompleteEvent = {
             type: ChatEventType.roundComplete,
             data: {
               round,
               resumed: pendingRound !== undefined,
               conversation_state: getConversationState(),
+              attachments: attachmentStateManager.getAll(),
+              configuration_overrides: configurationOverrides,
             },
           };
 

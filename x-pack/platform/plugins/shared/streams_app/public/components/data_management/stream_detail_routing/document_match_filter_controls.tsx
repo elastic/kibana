@@ -49,6 +49,10 @@ export const DocumentMatchFilterControls = ({
   const hasNoValue =
     isDisabled || matchedDocumentPercentage === undefined || matchedDocumentPercentage === null;
 
+  if (hasNoValue) {
+    return null;
+  }
+
   return (
     <EuiFlexItem grow={false} data-test-subj="routingPreviewFilterControls">
       <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -62,14 +66,11 @@ export const DocumentMatchFilterControls = ({
               data-test-subj="routingPreviewMatchedFilterButton"
               hasActiveFilters={documentMatchFilter === 'matched'}
               onClick={() => handleFilterChanged('matched')}
-              isDisabled={hasNoValue}
               isSelected={documentMatchFilter === 'matched'}
               badgeColor="success"
               grow={false}
               isToggle
-              numActiveFilters={
-                hasNoValue ? '' : percentageFormatter.format(matchedDocumentPercentage)
-              }
+              numActiveFilters={percentageFormatter.format(matchedDocumentPercentage)}
             >
               {i18n.translate('xpack.streams.streamDetail.preview.filter.matched', {
                 defaultMessage: 'Matched',
@@ -83,16 +84,13 @@ export const DocumentMatchFilterControls = ({
               data-test-subj="routingPreviewUnmatchedFilterButton"
               hasActiveFilters={documentMatchFilter === 'unmatched'}
               onClick={() => handleFilterChanged('unmatched')}
-              isDisabled={hasNoValue}
               isSelected={documentMatchFilter === 'unmatched'}
               badgeColor="accent"
               grow={false}
               isToggle
-              numActiveFilters={
-                hasNoValue
-                  ? ''
-                  : percentageFormatter.format(Math.max(1 - matchedDocumentPercentage, 0))
-              }
+              numActiveFilters={percentageFormatter.format(
+                Math.max(1 - matchedDocumentPercentage, 0)
+              )}
             >
               {i18n.translate('xpack.streams.streamDetail.preview.filter.unmatched', {
                 defaultMessage: 'Unmatched',

@@ -8,6 +8,7 @@
  */
 
 import { getFieldValue } from '@kbn/discover-utils';
+import React from 'react';
 import type { DocumentProfileProvider } from '../../../profiles';
 import { DocumentType, SolutionType } from '../../../profiles';
 import type { ProfileProviderServices } from '../../profile_provider_services';
@@ -34,7 +35,7 @@ export const createSecurityDocumentProfileProvider: SecurityProfileProviderFacto
               id: 'doc_view_alerts_overview',
               title: i18n.overviewTabTitle(isAlert),
               order: 0,
-              component: AlertEventOverviewLazy,
+              render: (props) => <AlertEventOverviewLazy {...props} />,
             });
 
             return prevDocViewer.docViewsRegistry(registry);

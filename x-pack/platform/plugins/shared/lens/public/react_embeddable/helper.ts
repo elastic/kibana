@@ -169,7 +169,7 @@ export function getStructuredDatasourceStates(
 export function transformFromApiConfig(state: LensSerializedAPIConfig): LensSerializedState {
   const builder = getLensBuilder();
 
-  if (!builder) {
+  if (!builder?.isEnabled) {
     // builder not enabled, return the state as is
     return state as LensSerializedState;
   }
@@ -208,7 +208,7 @@ export function transformToApiConfig(state: LensSerializedState): LensByValueSer
 
   const builder = getLensBuilder();
 
-  if (!builder) {
+  if (!builder?.isEnabled) {
     // builder not enabled, return the state as is
     return state as LensByValueSerializedAPIConfig;
   }

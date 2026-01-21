@@ -19,6 +19,8 @@
           "ToastOptions"
         ],
         "path": "src/core/packages/notifications/browser/src/types.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -32,6 +34,8 @@
               "\nThe title of the toast and the dialog when expanding the message."
             ],
             "path": "src/core/packages/notifications/browser/src/types.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -48,6 +52,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/notifications/browser/src/types.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -64,6 +70,8 @@
           "\nMethods for adding and removing global toast messages. See {@link ToastsApi}."
         ],
         "path": "src/core/packages/notifications/browser/src/types.ts",
+        "lineNumber": 65,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -82,6 +90,8 @@
               "[]>"
             ],
             "path": "src/core/packages/notifications/browser/src/types.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -101,6 +111,8 @@
               "Toast"
             ],
             "path": "src/core/packages/notifications/browser/src/types.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -115,6 +127,8 @@
                   "ToastInput"
                 ],
                 "path": "src/core/packages/notifications/browser/src/types.ts",
+                "lineNumber": 71,
+                "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -135,6 +149,8 @@
               ") => void"
             ],
             "path": "src/core/packages/notifications/browser/src/types.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -150,6 +166,8 @@
                   "Toast"
                 ],
                 "path": "src/core/packages/notifications/browser/src/types.ts",
+                "lineNumber": 72,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -171,6 +189,8 @@
               "Toast"
             ],
             "path": "src/core/packages/notifications/browser/src/types.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -185,6 +205,8 @@
                   "ToastInput"
                 ],
                 "path": "src/core/packages/notifications/browser/src/types.ts",
+                "lineNumber": 73,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -200,6 +222,8 @@
                   "any"
                 ],
                 "path": "src/core/packages/notifications/browser/src/types.ts",
+                "lineNumber": 73,
+                "columnNumber": 39,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -221,6 +245,8 @@
               "Toast"
             ],
             "path": "src/core/packages/notifications/browser/src/types.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -235,6 +261,8 @@
                   "ToastInput"
                 ],
                 "path": "src/core/packages/notifications/browser/src/types.ts",
+                "lineNumber": 74,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -250,6 +278,8 @@
                   "any"
                 ],
                 "path": "src/core/packages/notifications/browser/src/types.ts",
+                "lineNumber": 74,
+                "columnNumber": 42,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -271,6 +301,8 @@
               "Toast"
             ],
             "path": "src/core/packages/notifications/browser/src/types.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -285,6 +317,8 @@
                   "ToastInput"
                 ],
                 "path": "src/core/packages/notifications/browser/src/types.ts",
+                "lineNumber": 75,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -300,6 +334,8 @@
                   "any"
                 ],
                 "path": "src/core/packages/notifications/browser/src/types.ts",
+                "lineNumber": 75,
+                "columnNumber": 42,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -321,6 +357,8 @@
               "Toast"
             ],
             "path": "src/core/packages/notifications/browser/src/types.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -335,6 +373,8 @@
                   "ToastInput"
                 ],
                 "path": "src/core/packages/notifications/browser/src/types.ts",
+                "lineNumber": 76,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -350,6 +390,8 @@
                   "any"
                 ],
                 "path": "src/core/packages/notifications/browser/src/types.ts",
+                "lineNumber": 76,
+                "columnNumber": 41,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -371,6 +413,8 @@
               "Toast"
             ],
             "path": "src/core/packages/notifications/browser/src/types.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -385,6 +429,8 @@
                   "Error"
                 ],
                 "path": "src/core/packages/notifications/browser/src/types.ts",
+                "lineNumber": 77,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -400,6 +446,8 @@
                   "ErrorToastOptions"
                 ],
                 "path": "src/core/packages/notifications/browser/src/types.ts",
+                "lineNumber": 77,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -420,6 +468,8 @@
         "label": "NotificationCoordinatorPublicApi",
         "description": [],
         "path": "src/core/packages/notifications/browser/src/types.ts",
+        "lineNumber": 88,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -442,6 +492,8 @@
               "<T>"
             ],
             "path": "src/core/packages/notifications/browser/src/types.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -457,6 +509,8 @@
                   "<T>"
                 ],
                 "path": "src/core/packages/notifications/browser/src/types.ts",
+                "lineNumber": 102,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -474,6 +528,8 @@
                   ") => boolean"
                 ],
                 "path": "src/core/packages/notifications/browser/src/types.ts",
+                "lineNumber": 103,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -494,6 +550,8 @@
               "() => void"
             ],
             "path": "src/core/packages/notifications/browser/src/types.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -512,6 +570,8 @@
               "() => void"
             ],
             "path": "src/core/packages/notifications/browser/src/types.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -533,6 +593,8 @@
               ">"
             ],
             "path": "src/core/packages/notifications/browser/src/types.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -549,6 +611,8 @@
           "\nSpecifies the internal state of {@link NotificationCoordinatorPublicApi}."
         ],
         "path": "src/core/packages/notifications/browser/src/types.ts",
+        "lineNumber": 80,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -560,6 +624,8 @@
             "label": "locked",
             "description": [],
             "path": "src/core/packages/notifications/browser/src/types.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -574,6 +640,8 @@
               "string | null"
             ],
             "path": "src/core/packages/notifications/browser/src/types.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -588,6 +656,8 @@
         "label": "NotificationsSetup",
         "description": [],
         "path": "src/core/packages/notifications/browser/src/contracts.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -604,6 +674,8 @@
               "IToasts"
             ],
             "path": "src/core/packages/notifications/browser/src/contracts.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -621,6 +693,8 @@
               "NotificationCoordinatorPublicApi"
             ],
             "path": "src/core/packages/notifications/browser/src/contracts.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -633,6 +707,8 @@
                 "label": "registrar",
                 "description": [],
                 "path": "src/core/packages/notifications/browser/src/types.ts",
+                "lineNumber": 124,
+                "columnNumber": 40,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -649,6 +725,8 @@
         "label": "NotificationsStart",
         "description": [],
         "path": "src/core/packages/notifications/browser/src/contracts.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -665,6 +743,8 @@
               "IToasts"
             ],
             "path": "src/core/packages/notifications/browser/src/contracts.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -679,6 +759,8 @@
               "(options: { title: string; error: Error; }) => void"
             ],
             "path": "src/core/packages/notifications/browser/src/contracts.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -690,6 +772,8 @@
                 "label": "options",
                 "description": [],
                 "path": "src/core/packages/notifications/browser/src/contracts.ts",
+                "lineNumber": 38,
+                "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -701,6 +785,8 @@
                     "label": "title",
                     "description": [],
                     "path": "src/core/packages/notifications/browser/src/contracts.ts",
+                    "lineNumber": 38,
+                    "columnNumber": 32,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -715,6 +801,8 @@
                       "Error"
                     ],
                     "path": "src/core/packages/notifications/browser/src/contracts.ts",
+                    "lineNumber": 38,
+                    "columnNumber": 47,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -736,6 +824,8 @@
           "\nOptions available for {@link IToasts} APIs."
         ],
         "path": "src/core/packages/notifications/browser/src/types.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -752,6 +842,8 @@
               "number | undefined"
             ],
             "path": "src/core/packages/notifications/browser/src/types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -775,6 +867,8 @@
           "NotificationCoordinatorPublicApi"
         ],
         "path": "src/core/packages/notifications/browser/src/types.ts",
+        "lineNumber": 119,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -787,6 +881,8 @@
             "label": "registrar",
             "description": [],
             "path": "src/core/packages/notifications/browser/src/types.ts",
+            "lineNumber": 124,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -810,6 +906,8 @@
           "<HTMLElement> | undefined; } & { id: string; }"
         ],
         "path": "src/core/packages/notifications/browser/src/types.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -828,6 +926,8 @@
           "ToastInputFields"
         ],
         "path": "src/core/packages/notifications/browser/src/types.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -851,6 +951,8 @@
           "<HTMLElement> | undefined; }"
         ],
         "path": "src/core/packages/notifications/browser/src/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -868,6 +970,8 @@
           "IToasts"
         ],
         "path": "src/core/packages/notifications/browser/src/contracts.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -885,6 +989,8 @@
           "IToasts"
         ],
         "path": "src/core/packages/notifications/browser/src/contracts.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

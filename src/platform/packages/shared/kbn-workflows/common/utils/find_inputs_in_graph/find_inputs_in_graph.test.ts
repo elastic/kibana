@@ -60,6 +60,33 @@ describe('findInputsInGraph', () => {
         const inputs = findInputsInGraph(stepGraph);
         expect(inputs).toEqual({});
       });
+
+      it('should extract template variables from foreach expression with template syntax', () => {
+        const workflowWithTemplateForEach = {
+          steps: [
+            {
+              name: 'foreachstep',
+              type: 'foreach',
+              foreach: '{{ inputs.people }}',
+              steps: [
+                {
+                  name: 'log-step',
+                  type: 'console',
+                  with: {
+                    message: '{{ foreach.item }}',
+                  },
+                } as ConnectorStep,
+              ],
+            },
+          ],
+        } as WorkflowYaml;
+        const graph = WorkflowGraph.fromWorkflowDefinition(workflowWithTemplateForEach);
+        const stepGraph = graph.getStepGraph('foreachstep');
+        const inputs = findInputsInGraph(stepGraph);
+        expect(inputs).toEqual({
+          foreachstep: ['inputs.people'],
+        });
+      });
     });
 
     describe('nested foreach', () => {
@@ -129,6 +156,55 @@ describe('findInputsInGraph', () => {
           ifstep: ['event.rule.name', 'steps.analysis.output'],
         })
       );
+    });
+  });
+
+  describe('if step with template expressions in condition', () => {
+    const workflow = {
+      steps: [
+        {
+          name: 'iterate_people',
+          type: 'foreach',
+          foreach: '{{ inputs.people }}',
+          steps: [
+            {
+              name: 'check_if_favorite',
+              type: 'if',
+              condition: 'foreach.item: {{ consts.favorite_person }}',
+              steps: [
+                {
+                  name: 'greet_favorite',
+                  type: 'console',
+                  with: {
+                    message: 'Hello, favorite!',
+                  },
+                } as ConnectorStep,
+              ],
+            } as IfStep,
+          ],
+        } as ForEachStep,
+      ],
+    } as WorkflowYaml;
+
+    it('should extract both KQL fields and template variables from if condition', () => {
+      const graph = WorkflowGraph.fromWorkflowDefinition(workflow);
+      const stepGraph = graph.getStepGraph('check_if_favorite');
+      const inputs = findInputsInGraph(stepGraph);
+      // Should not throw KQLSyntaxError and should extract variables from template
+      expect(inputs).toEqual(
+        expect.objectContaining({
+          check_if_favorite: expect.arrayContaining(['consts.favorite_person']),
+        })
+      );
+    });
+
+    it('should not throw when extracting inputs from foreach with nested if containing template expressions', () => {
+      const graph = WorkflowGraph.fromWorkflowDefinition(workflow);
+      // This should not throw a KQLSyntaxError
+      expect(() => {
+        const stepGraph = graph.getStepGraph('iterate_people');
+        findInputsInGraph(stepGraph);
+      }).not.toThrow();
     });
   });
 });

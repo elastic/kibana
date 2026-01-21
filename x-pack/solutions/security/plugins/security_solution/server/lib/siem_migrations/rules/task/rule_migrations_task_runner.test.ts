@@ -77,6 +77,7 @@ describe('RuleMigrationTaskRunner', () => {
     abortController = new AbortController();
     taskRunner = new RuleMigrationTaskRunner(
       'test-migration-id',
+      'splunk',
       mockRequest,
       mockUser,
       abortController,

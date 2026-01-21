@@ -84,3 +84,6 @@ export type { RoleApiCredentials } from '@kbn/scout';
 
 // Re-exported Playwright types
 export type { Locator, CDPSession } from '@kbn/scout';
+
+// Re-exported utility for overriding synthtrace clients
+export { getSynthtraceClient } from '@kbn/scout';

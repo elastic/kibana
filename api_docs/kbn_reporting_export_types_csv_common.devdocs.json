@@ -47,6 +47,8 @@
           }
         ],
         "path": "src/platform/packages/private/kbn-reporting/export_types/csv_common/lib/get_query_from_job.ts",
+        "lineNumber": 36,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -67,6 +69,8 @@
               }
             ],
             "path": "src/platform/packages/private/kbn-reporting/export_types/csv_common/lib/get_query_from_job.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -82,6 +86,8 @@
               "CsvConfigType"
             ],
             "path": "src/platform/packages/private/kbn-reporting/export_types/csv_common/lib/get_query_from_job.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -97,6 +103,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/private/kbn-reporting/export_types/csv_common/lib/get_query_from_job.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -117,6 +125,8 @@
           "\nType to wrap the untyped object returned when\ngetting the query from SearchSource service"
         ],
         "path": "src/platform/packages/private/kbn-reporting/export_types/csv_common/lib/get_query_from_job.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -131,6 +141,8 @@
               "SearchRequest"
             ],
             "path": "src/platform/packages/private/kbn-reporting/export_types/csv_common/lib/get_query_from_job.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -156,6 +168,8 @@
           "BasePayloadV2"
         ],
         "path": "src/platform/packages/private/kbn-reporting/export_types/csv_common/index.ts",
+        "lineNumber": 54,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -170,6 +184,8 @@
               "\"search\""
             ],
             "path": "src/platform/packages/private/kbn-reporting/export_types/csv_common/index.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -184,6 +200,8 @@
               "\"scroll\" | \"pit\""
             ],
             "path": "src/platform/packages/private/kbn-reporting/export_types/csv_common/index.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -204,6 +222,8 @@
           "\"csv_searchsource\""
         ],
         "path": "src/platform/packages/private/kbn-reporting/export_types/csv_common/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -221,6 +241,8 @@
           "\"csv\""
         ],
         "path": "src/platform/packages/private/kbn-reporting/export_types/csv_common/index.ts",
+        "lineNumber": 65,
+        "columnNumber": 14,
         "deprecated": true,
         "trackAdoption": false,
         "references": [
@@ -246,6 +268,8 @@
           "\"csv_v2\""
         ],
         "path": "src/platform/packages/private/kbn-reporting/export_types/csv_common/constants.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -261,6 +285,8 @@
           "\"csv_searchsource\""
         ],
         "path": "src/platform/packages/private/kbn-reporting/export_types/csv_common/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -276,6 +302,8 @@
           "\"csv_v2\""
         ],
         "path": "src/platform/packages/private/kbn-reporting/export_types/csv_common/constants.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -291,6 +319,8 @@
           "\"generateCsvReport\""
         ],
         "path": "src/platform/packages/private/kbn-reporting/export_types/csv_common/index.ts",
+        "lineNumber": 59,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -328,6 +358,8 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/private/kbn-reporting/export_types/csv_common/index.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -365,6 +397,8 @@
           ">[]; }"
         ],
         "path": "src/platform/packages/private/kbn-reporting/export_types/csv_common/index.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -381,6 +415,8 @@
           "BaseParams"
         ],
         "path": "src/platform/packages/private/kbn-reporting/export_types/csv_common/index.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -400,6 +436,8 @@
           ", \"title\"> & { title?: string | undefined; }"
         ],
         "path": "src/platform/packages/private/kbn-reporting/export_types/csv_common/index.ts",
+        "lineNumber": 48,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -416,6 +454,8 @@
           "BaseParams"
         ],
         "path": "src/platform/packages/private/kbn-reporting/export_types/csv_common/index.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -432,6 +472,8 @@
           "BasePayload"
         ],
         "path": "src/platform/packages/private/kbn-reporting/export_types/csv_common/index.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

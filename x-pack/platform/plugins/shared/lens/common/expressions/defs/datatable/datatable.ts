@@ -24,6 +24,7 @@ export interface DatatableArgs {
   headerRowHeightLines?: number;
   pageSize?: PagingState['size'];
   density?: DataGridDensity;
+  showRowNumbers?: boolean;
 }
 
 /**
@@ -89,6 +90,10 @@ export const getDatatable = (
     },
     density: {
       types: ['string'],
+      help: '',
+    },
+    showRowNumbers: {
+      types: ['boolean'],
       help: '',
     },
   },

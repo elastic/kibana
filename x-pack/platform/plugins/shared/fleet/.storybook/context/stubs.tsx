@@ -13,6 +13,7 @@ export const stubbedStartServices = {
   data: {} as FleetStartServices['data'],
   dataViews: {} as FleetStartServices['dataViews'],
   unifiedSearch: {} as FleetStartServices['unifiedSearch'],
+  kql: {} as FleetStartServices['kql'],
   deprecations: {} as FleetStartServices['deprecations'],
   fatalErrors: {} as FleetStartServices['fatalErrors'],
   navigation: {} as FleetStartServices['navigation'],

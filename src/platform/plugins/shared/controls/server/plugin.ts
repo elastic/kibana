@@ -11,7 +11,7 @@ import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-consta
 import type { CoreSetup, Plugin } from '@kbn/core/server';
 import type { PluginSetup as DataSetup } from '@kbn/data-plugin/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import type { PluginSetup as UnifiedSearchSetup } from '@kbn/unified-search-plugin/server';
+import type { PluginSetup as KqlSetup } from '@kbn/kql/server';
 
 import { registerDataControlTransforms } from '../common/transforms/data_controls/register_data_control_transforms';
 import { setupOptionsListClusterSettingsRoute } from './options_list/options_list_cluster_settings_route';
@@ -20,11 +20,11 @@ import { setupOptionsListSuggestionsRoute } from './options_list/options_list_su
 interface SetupDeps {
   embeddable: EmbeddableSetup;
   data: DataSetup;
-  unifiedSearch: UnifiedSearchSetup;
+  kql: KqlSetup;
 }
 
 export class ControlsPlugin implements Plugin<object, object, SetupDeps> {
-  public setup(core: CoreSetup, { embeddable, unifiedSearch }: SetupDeps) {
+  public setup(core: CoreSetup, { embeddable, kql }: SetupDeps) {
     registerDataControlTransforms(embeddable, OPTIONS_LIST_CONTROL, 'optionsListDataView', [
       'optionsListDataView',
       'optionsListControlDataView',
@@ -36,7 +36,7 @@ export class ControlsPlugin implements Plugin<object, object, SetupDeps> {
     ]);
 
     setupOptionsListClusterSettingsRoute(core);
-    setupOptionsListSuggestionsRoute(core, unifiedSearch.autocomplete.getAutocompleteSettings);
+    setupOptionsListSuggestionsRoute(core, kql.autocomplete.getAutocompleteSettings);
     return {};
   }
 

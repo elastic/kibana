@@ -970,7 +970,7 @@ exports[`View policy flyout shows all phases 1`] = `
       class="euiFlyoutFooter emotion-euiFlyoutFooter"
     >
       <div
-        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-stretch-row"
       >
         <div
           class="euiFlexItem emotion-euiFlexItem-growZero"

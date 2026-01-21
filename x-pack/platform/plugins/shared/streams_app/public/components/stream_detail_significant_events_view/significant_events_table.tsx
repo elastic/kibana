@@ -23,7 +23,7 @@ import { SignificantEventsHistogramChart } from './significant_events_histogram'
 import { buildDiscoverParams } from './utils/discover_helpers';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { useStreamFeatures } from '../stream_detail_features/stream_features/hooks/use_stream_features';
-import { SeverityBadge } from './severity_badge';
+import { SeverityBadge } from '../significant_events_discovery/components/severity_badge';
 
 export function SignificantEventsTable({
   definition,

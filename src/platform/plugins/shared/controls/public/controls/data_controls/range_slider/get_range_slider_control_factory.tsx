@@ -172,9 +172,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
       );
 
       /** Output filters when selections and/or filter meta data changes */
-      const sectionId$ = apiHasSections(parentApi)
-        ? parentApi.getPanelSection$(uuid)
-        : of(undefined);
+      const sectionId$ = apiHasSections(parentApi) ? parentApi.panelSection$(uuid) : of(undefined);
 
       const outputFilterSubscription = combineLatest([
         dataControlManager.api.dataViews$,

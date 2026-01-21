@@ -50,6 +50,7 @@ export const createAgentHandler = ({
         browserApiTools,
         structuredOutput,
         outputSchema,
+        configurationOverrides,
       },
       context
     );

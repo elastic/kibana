@@ -6,6 +6,7 @@
  */
 
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { test } from './fixtures/base_page';
 import { assertEnv } from '../lib/assert_env';
@@ -23,6 +24,9 @@ test('Otel Host', async ({ page, onboardingHomePage, otelHostFlowPage, hostsOver
 
   await onboardingHomePage.selectHostUseCase();
   await onboardingHomePage.selectOtelHostQuickstart();
+
+  const osName = process.env.OS_NAME || os.platform();
+  await otelHostFlowPage.selectPlatform(osName);
 
   await otelHostFlowPage.copyCollectorDownloadSnippetToClipboard();
   const collectorDownloadSnippet = (await page.evaluate(
@@ -50,7 +54,8 @@ test('Otel Host', async ({ page, onboardingHomePage, otelHostFlowPage, hostsOver
 
   if (!isLogsEssentialsMode) {
     await otelHostFlowPage.clickHostsOverviewCTA();
-    await hostsOverviewPage.assertCpuPercentageNotEmpty();
+    const hostname = os.hostname();
+    await hostsOverviewPage.assertHostCpuNotEmpty(hostname);
   } else {
     await otelHostFlowPage.clickLogsExplorationCTA();
 

@@ -33,6 +33,8 @@
           "\"securitySolution:entityStoreEnableV2\""
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -48,6 +50,8 @@
           "\"entityStore\""
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -63,6 +67,8 @@
           "\"Entity Store\""
         ],
         "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

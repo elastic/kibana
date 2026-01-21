@@ -47,6 +47,7 @@ import { hasElserOnMlNodeSemanticTextField } from '../../../../../components/map
 import { useMappingsStateListener } from '../../../../../components/mappings_editor/use_state_listener';
 import { parseMappings } from '../../../../../shared/parse_mappings';
 import { useUserPrivileges } from '../../../../../services/api';
+import { useLicense } from '../../../../../../hooks/use_license';
 
 interface Props {
   indexDetails: Index;
@@ -70,10 +71,10 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
     core,
     plugins: { cloud, share },
     services: { extensionsService },
-    canUseEis,
   } = useAppContext();
   const state = useMappingsState();
   const { data: mappingsData, resendRequest } = useLoadIndexMappings(name || '');
+  const { isAtLeastEnterprise } = useLicense();
 
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(curlDefinition);
   const [elasticsearchUrl, setElasticsearchUrl] = useState<string>('');
@@ -92,7 +93,7 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
   const isLarge = useIsWithinBreakpoints(['xl']);
 
   const shouldShowEisUpdateCallout =
-    (cloud?.isCloudEnabled && (canUseEis || cloud?.isServerlessEnabled)) ?? false;
+    (cloud?.isCloudEnabled && (isAtLeastEnterprise() || cloud?.isServerlessEnabled)) ?? false;
 
   const { parsedDefaultValue } = useMemo(
     () => parseMappings(mappingsData ?? undefined),

@@ -7,13 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConnectorContractUnion, ConnectorTypeInfo } from '@kbn/workflows';
+import type {
+  BaseConnectorContract,
+  ConnectorContractUnion,
+  ConnectorTypeInfo,
+  StepPropertyHandler,
+} from '@kbn/workflows';
 import {
   generateYamlSchemaFromConnectors,
   getElasticsearchConnectors,
   getKibanaConnectors,
 } from '@kbn/workflows';
-import type { BaseConnectorContract } from '@kbn/workflows/types/v1';
 import { z } from '@kbn/zod/v4';
 
 // Import connector schemas from the organized structure
@@ -82,30 +86,33 @@ function getSubActionOutputSchema(actionTypeId: string, subActionName: string): 
  * Get registered step definitions from workflowExtensions, converted to BaseConnectorContract
  */
 function getRegisteredStepDefinitions(): BaseConnectorContract[] {
-  return stepSchemas.getAllRegisteredStepDefinitions().map((stepDefinition) => {
-    const definition = {
-      type: stepDefinition.id,
-      paramsSchema: stepDefinition.inputSchema,
-      outputSchema: stepDefinition.outputSchema,
-      configSchema: stepDefinition.configSchema,
-      summary: null,
-      description: null,
-    };
-
-    if (stepSchemas.isPublicStepDefinition(stepDefinition)) {
-      // Only public step definitions have documentation and examples
-      return {
-        ...definition,
-        summary: stepDefinition.label,
-        description: stepDefinition.description ?? null,
-        documentation: stepDefinition.documentation?.url,
-        examples: stepDefinition.documentation?.examples
-          ? { snippet: stepDefinition.documentation?.examples.join('\n') }
-          : undefined,
+  return stepSchemas
+    .getAllRegisteredStepDefinitions()
+    .map((stepDefinition): BaseConnectorContract => {
+      const definition = {
+        type: stepDefinition.id,
+        paramsSchema: stepDefinition.inputSchema,
+        outputSchema: stepDefinition.outputSchema,
+        configSchema: stepDefinition.configSchema,
+        summary: null,
+        description: null,
       };
-    }
-    return definition;
-  });
+
+      if (stepSchemas.isPublicStepDefinition(stepDefinition)) {
+        // Only public step definitions have documentation and examples
+        return {
+          ...definition,
+          summary: stepDefinition.label,
+          description: stepDefinition.description ?? null,
+          documentation: stepDefinition.documentation?.url,
+          examples: stepDefinition.documentation?.examples
+            ? { snippet: stepDefinition.documentation?.examples.join('\n') }
+            : undefined,
+          editorHandlers: stepDefinition.editorHandlers,
+        };
+      }
+      return definition;
+    });
 }
 
 /**
@@ -360,4 +367,13 @@ export const getWorkflowZodSchemaLoose = (
 ): z.ZodTypeAny => {
   const allConnectors = getAllConnectorsWithDynamicInternal(dynamicConnectorTypes);
   return generateYamlSchemaFromConnectors(allConnectors, true);
+};
+
+export const getPropertyHandler = (
+  stepType: string,
+  scope: 'config' | 'input',
+  propertyKey: string
+): StepPropertyHandler | null => {
+  const connector = stepSchemas.getAllConnectorsMapCache()?.get(stepType);
+  return connector?.editorHandlers?.[scope]?.[propertyKey] ?? null;
 };

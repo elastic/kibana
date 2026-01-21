@@ -22,10 +22,11 @@ import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ExecutionStatus } from '@kbn/workflows';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations';
+import { FormattedRelativeEnhanced } from '../../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced';
 import { getExecutionStatusColors, getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
 
@@ -91,7 +92,7 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
                 {startedAt ? (
                   <EuiToolTip position="left" content={formattedDate}>
                     <EuiText size="xs" tabIndex={0} color="subdued">
-                      <FormattedRelative value={startedAt} />
+                      <FormattedRelativeEnhanced value={startedAt} />
                     </EuiText>
                   </EuiToolTip>
                 ) : (

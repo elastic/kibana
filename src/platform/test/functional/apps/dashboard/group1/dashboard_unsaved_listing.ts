@@ -136,8 +136,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await dashboard.waitForRenderComplete();
 
-      // wait for the unsaved changes badge to appear.
-      await dashboard.expectUnsavedChangesBadge();
+      // wait for the unsaved changes notification indicator to appear.
+      await dashboard.ensureHasUnsavedChangesNotification({ retry: true });
 
       // ensure that the unsaved listing exists
       await dashboard.gotoDashboardLandingPage();

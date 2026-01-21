@@ -32,6 +32,8 @@
           "<T>) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/components/alerts_grouping.tsx",
+        "lineNumber": 309,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -54,6 +56,8 @@
               "<T>"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/components/alerts_grouping.tsx",
+            "lineNumber": 310,
+            "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -75,6 +79,8 @@
           "> | null) => void; }"
         ],
         "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/contexts/alerts_grouping_context.tsx",
+        "lineNumber": 36,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -89,6 +95,8 @@
               "string"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/contexts/alerts_grouping_context.tsx",
+            "lineNumber": 36,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -107,6 +115,8 @@
         "label": "AlertsGroupAggregationBucket",
         "description": [],
         "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
+        "lineNumber": 112,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -118,6 +128,8 @@
             "label": "key",
             "description": [],
             "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -129,6 +141,8 @@
             "label": "doc_count",
             "description": [],
             "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -143,6 +157,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
+            "lineNumber": 115,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -157,6 +173,8 @@
               "{ value: number; } | undefined"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
+            "lineNumber": 116,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -181,6 +199,8 @@
           "<T>"
         ],
         "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -205,6 +225,8 @@
               "[]) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -226,6 +248,8 @@
                   "[]"
                 ],
                 "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
+                "lineNumber": 36,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -247,6 +271,8 @@
               "<T> | undefined"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -264,6 +290,8 @@
               "<T> | undefined"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -287,6 +315,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -310,6 +340,8 @@
               "[]"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -400,6 +432,8 @@
               "[]; }) | undefined"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -423,6 +457,8 @@
               "[]"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -439,6 +475,8 @@
               "string[]"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -455,6 +493,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -468,6 +508,8 @@
               "\nTime filter start"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -481,6 +523,8 @@
               "\nTime filter end"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -497,6 +541,8 @@
               "{ query: string | { [key: string]: any; }; language: string; }"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -513,6 +559,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -526,6 +574,8 @@
               "\nID used to retrieve the current grouping configuration from the state"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -550,6 +600,8 @@
               "[]"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -564,6 +616,8 @@
                   "string"
                 ],
                 "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
+                "lineNumber": 93,
+                "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -596,6 +650,8 @@
               "; }"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -612,6 +668,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -630,6 +688,8 @@
               ") => void) | undefined"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -644,6 +704,8 @@
                   "GroupModel"
                 ],
                 "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
+                "lineNumber": 109,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -662,6 +724,8 @@
         "label": "BaseAlertsGroupAggregations",
         "description": [],
         "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
+        "lineNumber": 121,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -684,6 +748,8 @@
               "[]; }"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
+            "lineNumber": 122,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -698,6 +764,8 @@
               "{ value: number; }"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
+            "lineNumber": 127,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -712,6 +780,8 @@
               "{ value: number; }"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
+            "lineNumber": 130,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

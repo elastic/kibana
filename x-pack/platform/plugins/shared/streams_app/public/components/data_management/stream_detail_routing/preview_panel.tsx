@@ -38,9 +38,14 @@ import { RowSelectionContext } from '../shared/preview_table';
 
 export function PreviewPanel() {
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
+  const samplesSnapshot = useStreamSamplesSelector((snapshot) => snapshot);
   const { definition } = routingSnapshot.context;
   const canCreateRoutingRules = routingSnapshot.can({ type: 'routingRule.create' });
   const maxNestingLevel = getSegments(definition.stream.name).length >= MAX_NESTING_LEVEL;
+
+  const documents = selectPreviewDocuments(samplesSnapshot.context);
+  const hasDocuments = !isEmpty(documents);
+  const isLoadingDocuments = samplesSnapshot.matches({ fetching: { documents: 'loading' } });
 
   let content;
 
@@ -62,16 +67,31 @@ export function PreviewPanel() {
   return (
     <>
       <EuiFlexItem grow={false} data-test-subj="streamsAppRoutingPreviewPanel">
-        <EuiFlexGroup justifyContent="spaceBetween" wrap>
-          <EuiFlexGroup component="span" gutterSize="s">
-            <EuiIcon type="inspect" />
-            <strong data-test-subj="streamsAppRoutingPreviewPanelHeader">
-              {i18n.translate('xpack.streams.streamDetail.preview.header', {
-                defaultMessage: 'Data Preview',
-              })}
-            </strong>
-          </EuiFlexGroup>
-          <StreamsAppSearchBar showDatePicker />
+        <EuiFlexGroup direction="column" gutterSize="xs">
+          <EuiFlexItem>
+            <EuiFlexGroup justifyContent="spaceBetween" wrap>
+              <EuiFlexGroup direction="column" gutterSize="xs">
+                <EuiFlexGroup component="span" gutterSize="s">
+                  <EuiIcon type="inspect" />
+                  <strong data-test-subj="streamsAppRoutingPreviewPanelHeader">
+                    {i18n.translate('xpack.streams.streamDetail.preview.header', {
+                      defaultMessage: 'Data Preview',
+                    })}
+                  </strong>
+                </EuiFlexGroup>
+                {!hasDocuments && !isLoadingDocuments && (
+                  <EuiFlexItem>
+                    <EuiText size="xs" color="subdued">
+                      {i18n.translate('xpack.streams.streamDetail.preview.viewingZeroDocuments', {
+                        defaultMessage: 'Viewing 0 documents',
+                      })}
+                    </EuiText>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+              <StreamsAppSearchBar showDatePicker />
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow>{content}</EuiFlexItem>
@@ -193,14 +213,22 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
     content = (
       <EuiEmptyPrompt
         data-test-subj="streamsAppRoutingPreviewEmptyPrompt"
-        icon={<AssetImage type="noResults" />}
+        icon={<AssetImage size="small" type="noDocuments" />}
         titleSize="xxs"
         title={
           <h2 data-test-subj="streamsAppRoutingPreviewEmptyPromptTitle">
             {i18n.translate('xpack.streams.streamDetail.preview.empty', {
-              defaultMessage: 'No documents to preview',
+              defaultMessage: 'No documents found',
             })}
           </h2>
+        }
+        body={
+          <EuiText size="s" data-test-subj="streamsAppRoutingPreviewEmptyPromptBody">
+            {i18n.translate('xpack.streams.streamDetail.preview.emptyBody', {
+              defaultMessage:
+                "Try a different time range or data sample. Changes can still be applied, but we can't confirm they'll work as expected.",
+            })}
+          </EuiText>
         }
       />
     );

@@ -519,6 +519,137 @@ describe('UserProfileService', () => {
         mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
       ).toHaveBeenCalledWith({ grant_type: 'access_token', access_token: 'some-token' });
     });
+
+    it('retries activation if initially fails with 503 error', async () => {
+      jest.useFakeTimers({ legacyFakeTimers: true });
+
+      const failureReason = new errors.ResponseError(
+        securityMock.createApiResponse({ statusCode: 503, body: 'some message' })
+      );
+      mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
+        .mockRejectedValueOnce(failureReason)
+        .mockResolvedValueOnce(
+          userProfileMock.createWithSecurity() as unknown as SecurityActivateUserProfileResponse
+        );
+
+      const startContract = userProfileService.start(mockStartParams);
+      const activatePromise = startContract.activate({
+        type: 'accessToken',
+        accessToken: 'some-token',
+      });
+      await nextTick();
+      jest.runAllTimers();
+
+      await expect(activatePromise).resolves.toMatchInlineSnapshot(`
+              Object {
+                "data": Object {},
+                "enabled": true,
+                "labels": Object {},
+                "uid": "some-profile-uid",
+                "user": Object {
+                  "email": "some@email",
+                  "full_name": undefined,
+                  "realm_domain": "some-realm-domain",
+                  "realm_name": "some-realm",
+                  "roles": Array [],
+                  "username": "some-username",
+                },
+              }
+            `);
+      expect(
+        mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
+      ).toHaveBeenCalledTimes(2);
+      expect(
+        mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
+      ).toHaveBeenCalledWith({ grant_type: 'access_token', access_token: 'some-token' });
+    });
+
+    it('fails if activation with 503 error exceeds max retries', async () => {
+      jest.useFakeTimers({ legacyFakeTimers: true });
+
+      const failureReason = new errors.ResponseError(
+        securityMock.createApiResponse({ statusCode: 503, body: 'service unavailable' })
+      );
+      mockStartParams.clusterClient.asInternalUser.security.activateUserProfile.mockRejectedValue(
+        failureReason
+      );
+
+      const startContract = userProfileService.start(mockStartParams);
+
+      // Initial activation attempt.
+      const activatePromise = startContract.activate({
+        type: 'accessToken',
+        accessToken: 'some-token',
+      });
+
+      // Re-try 9 more times.
+      for (const _ of Array.from({ length: 9 })) {
+        await nextTick();
+        jest.runAllTimers();
+      }
+
+      await expect(activatePromise).rejects.toBe(failureReason);
+      expect(
+        mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
+      ).toHaveBeenCalledTimes(10);
+      expect(
+        mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
+      ).toHaveBeenCalledWith({ grant_type: 'access_token', access_token: 'some-token' });
+    });
+
+    it('retries activation if fails with both 409 and 503 errors', async () => {
+      jest.useFakeTimers({ legacyFakeTimers: true });
+
+      const conflict409 = new errors.ResponseError(
+        securityMock.createApiResponse({ statusCode: 409, body: 'conflict' })
+      );
+      const serviceUnavailable503 = new errors.ResponseError(
+        securityMock.createApiResponse({ statusCode: 503, body: 'service unavailable' })
+      );
+      mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
+        .mockRejectedValueOnce(conflict409)
+        .mockRejectedValueOnce(serviceUnavailable503)
+        .mockResolvedValueOnce(
+          userProfileMock.createWithSecurity() as unknown as SecurityActivateUserProfileResponse
+        );
+
+      const startContract = userProfileService.start(mockStartParams);
+      const activatePromise = startContract.activate({
+        type: 'accessToken',
+        accessToken: 'some-token',
+      });
+
+      // Wait for first retry (409)
+      await nextTick();
+      jest.runAllTimers();
+
+      // Wait for second retry (503)
+      await nextTick();
+      jest.runAllTimers();
+
+      await expect(activatePromise).resolves.toMatchInlineSnapshot(`
+              Object {
+                "data": Object {},
+                "enabled": true,
+                "labels": Object {},
+                "uid": "some-profile-uid",
+                "user": Object {
+                  "email": "some@email",
+                  "full_name": undefined,
+                  "realm_domain": "some-realm-domain",
+                  "realm_name": "some-realm",
+                  "roles": Array [],
+                  "username": "some-username",
+                },
+              }
+            `);
+      expect(
+        mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
+      ).toHaveBeenCalledTimes(3);
+      expect(
+        mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
+      ).toHaveBeenCalledWith({ grant_type: 'access_token', access_token: 'some-token' });
+    });
   });
 
   describe('#bulkGet', () => {

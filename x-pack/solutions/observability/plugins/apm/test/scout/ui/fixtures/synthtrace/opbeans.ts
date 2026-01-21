@@ -11,12 +11,14 @@ import type { SpanLink } from '@kbn/apm-types/es_schemas_raw';
 import {
   ERROR_MESSAGE,
   PRODUCT_TRANSACTION_NAME,
+  PRODUCT_BY_ID_TRANSACTION_NAME,
   SERVICE_OPBEANS_JAVA,
   SERVICE_OPBEANS_NODE,
   SERVICE_OPBEANS_RUM,
   SERVICE_GO,
   SERVICE_NODE,
   OPBEANS_JAVA_INSTANCE,
+  PRODUCTION_ENVIRONMENT,
 } from '../constants';
 
 const SERVICE_GO_TRANSACTION_NAMES = ['GET', 'PUT', 'DELETE', 'UPDATE'].flatMap((method) =>
@@ -62,7 +64,7 @@ export function opbeans({
   const opbeansJava = apm
     .service({
       name: SERVICE_OPBEANS_JAVA,
-      environment: 'production',
+      environment: PRODUCTION_ENVIRONMENT,
       agentName: 'java',
     })
     .instance(OPBEANS_JAVA_INSTANCE)
@@ -71,21 +73,21 @@ export function opbeans({
   const opbeansNode = apm
     .service({
       name: SERVICE_OPBEANS_NODE,
-      environment: 'production',
+      environment: PRODUCTION_ENVIRONMENT,
       agentName: 'nodejs',
     })
     .instance('opbeans-node-prod-1');
 
   const opbeansRum = apm.browser({
     serviceName: SERVICE_OPBEANS_RUM,
-    environment: 'production',
+    environment: PRODUCTION_ENVIRONMENT,
     userAgent: apm.getChromeUserAgentDefaults(),
   });
 
   const opbeansGo = apm
     .service({
       name: SERVICE_GO,
-      environment: 'production',
+      environment: PRODUCTION_ENVIRONMENT,
       agentName: 'go',
     })
     .instance('service-go-prod-1');
@@ -93,7 +95,7 @@ export function opbeans({
   const serviceNode = apm
     .service({
       name: SERVICE_NODE,
-      environment: 'production',
+      environment: PRODUCTION_ENVIRONMENT,
       agentName: 'nodejs',
     })
     .instance('service-node-prod-1');
@@ -196,7 +198,7 @@ export function opbeans({
               .duration(900)
           ),
         opbeansNode
-          .transaction({ transactionName: 'GET /api/product/:id' })
+          .transaction({ transactionName: PRODUCT_BY_ID_TRANSACTION_NAME })
           .timestamp(timestamp)
           .duration(500)
           .success(),

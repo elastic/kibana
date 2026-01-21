@@ -38,14 +38,12 @@ export const useStateManagers = ({
   urlStateStorage,
   customizationContext,
 }: UseStateManagers): UseStateManagersReturn => {
-  const tabsEnabled = services.discoverFeatureFlags.getTabsEnabled();
-
   // syncing with the _tab part URL
   const [tabsStorageManager] = useState(() =>
     createTabsStorageManager({
       urlStateStorage,
       storage: services.storage,
-      enabled: tabsEnabled,
+      enabled: true,
     })
   );
 

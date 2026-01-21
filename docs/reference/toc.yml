@@ -37,6 +37,7 @@ toc:
           - file: connectors-kibana/bedrock-action-type.md
           - file: connectors-kibana/elastic-managed-llm.md
           - file: connectors-kibana/gemini-action-type.md
+          - file: connectors-kibana/mcp-action-type.md
           - file: connectors-kibana/openai-action-type.md
       - file: connectors-kibana/elastic-connectors.md
         children:
@@ -75,6 +76,7 @@ toc:
           - file: connectors-kibana/alienvault-otx-action-type.md
           - file: connectors-kibana/brave-search-action-type.md
           - file: connectors-kibana/greynoise-action-type.md
+          - file: connectors-kibana/jina-action-type.md
           - file: connectors-kibana/notion-action-type.md
           - file: connectors-kibana/shodan-action-type.md
           - file: connectors-kibana/urlvoid-action-type.md
