@@ -171,6 +171,8 @@ oas_docs/output/kibana.serverless.tmp*.yaml
 oas_docs/output/kibana.tmp*.yaml
 oas_docs/output/kibana.new.yaml
 oas_docs/output/kibana.serverless.new.yaml
+oas_docs/bundle.json
+oas_docs/bundle.serverless.json
 
 .codeql
 .dependency-graph-log.json
