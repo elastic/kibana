@@ -6,16 +6,16 @@
  */
 
 import { buildLogsExtractionEsqlQuery } from './logs_extraction_query_builder';
-import { entitiesDefinitionRegistry, getEntityDefinition } from '../definitions/registry';
-import type { EntityType } from '../definitions/entity_schema';
+import { getEntityDefinition } from '../definitions/registry';
+import { EntityType } from '../definitions/entity_schema';
 
 describe('buildLogsExtractionEsqlQuery', () => {
-  Object.keys(entitiesDefinitionRegistry).forEach((type) => {
+  Object.values(EntityType.Values).forEach((type) => {
     it(`generates the expected query for ${type} entity description`, () => {
       const query = buildLogsExtractionEsqlQuery({
         indexPatterns: ['test-index-*'],
         latestIndex: 'latest-index',
-        entityDefinition: getEntityDefinition({ type: type as EntityType }),
+        entityDefinition: getEntityDefinition({ type }),
         maxPageSearchSize: 10000,
         fromDateISO: '2022-01-01T00:00:00.000Z',
         toDateISO: '2022-01-01T23:59:59.999Z',
