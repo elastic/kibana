@@ -9,11 +9,8 @@ import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
-import type { CoreSetup, Logger } from '@kbn/core/server';
-import type {
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
-} from '../../types';
+import type { Logger } from '@kbn/core/server';
+import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
 import { getToolHandler } from './handler';
@@ -31,10 +28,12 @@ export const defaultFields = [
   'kibana.alert.instance.id',
   'kibana.alert.reason',
   'kibana.alert.rule.category',
+  'kibana.alert.rule.consumer',
   'kibana.alert.rule.name',
+  'kibana.alert.rule.rule_type_id',
   'kibana.alert.rule.tags',
-  'kibana.alert.start',
   'kibana.alert.status',
+  'kibana.alert.evaluation.threshold',
   'kibana.alert.time_range.gte',
   'kibana.alert.time_range.lte',
   'kibana.alert.workflow_status',
@@ -54,13 +53,23 @@ export const defaultFields = [
 
 const getAlertsSchema = z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
-  query: z.string().min(1).describe('Natural language query to guide relevant field selection.'),
-  kqlFilter: z.string().optional().describe('Filter alerts by field:value pairs'),
+  kqlFilter: z
+    .string()
+    .optional()
+    .describe(
+      'Optional KQL (Kibana Query Language) filter to narrow down alerts. Examples: \'service.name: "frontend"\' (alerts for the frontend service), \'service.name: "checkout" AND host.name: "web-*"\', \'kibana.alert.rule.name: "High CPU"\'.'
+    ),
   includeRecovered: z
     .boolean()
     .optional()
     .describe(
       'Whether to include recovered/closed alerts. Defaults to false, which means only active alerts will be returned.'
+    ),
+  fields: z
+    .array(z.string())
+    .optional()
+    .describe(
+      'Optional list of fields to include in the alert documents. If not specified, a default set of common alert fields is returned. Use this to request specific fields like "error.message", "url.full", or any custom alert fields.'
     ),
 });
 
@@ -68,10 +77,7 @@ export function createGetAlertsTool({
   core,
   logger,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   logger: Logger;
 }): StaticToolRegistration<typeof getAlertsSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof getAlertsSchema> = {
@@ -94,24 +100,17 @@ Supports filtering by status (active/recovered) and KQL queries.`,
       },
     },
     handler: async (toolParams, { request }) => {
-      const {
-        start = DEFAULT_TIME_RANGE.start,
-        end = DEFAULT_TIME_RANGE.end,
-        kqlFilter,
-        includeRecovered,
-        query,
-      } = toolParams;
+      const { start, end, kqlFilter, includeRecovered, fields } = toolParams;
 
       try {
-        const { alerts, selectedFields, total } = await getToolHandler({
+        const { alerts, total } = await getToolHandler({
           core,
           request,
-          logger,
           start,
           end,
-          query,
           kqlFilter,
           includeRecovered,
+          fields,
         });
 
         return {
@@ -121,7 +120,6 @@ Supports filtering by status (active/recovered) and KQL queries.`,
               data: {
                 total,
                 alerts,
-                selectedFields: selectedFields.length === 0 ? defaultFields : selectedFields,
               },
             },
           ],

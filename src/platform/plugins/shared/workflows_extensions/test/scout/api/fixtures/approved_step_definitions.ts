@@ -25,8 +25,12 @@
  */
 export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string }> = [
   {
-    id: 'agentBuilder.runAgent',
-    handlerHash: '5900dff8945512df13e3e082cec3750deddb8ca43675bde01e452b263c2f2d9d',
+    id: 'ai.agent',
+    handlerHash: 'af7364aa959fe541e304241fbaddcc21d22382f6421686f666fd67641d3fac2b',
+  },
+  {
+    id: 'ai.classify',
+    handlerHash: '544ebbf2b32840510958ced5ddc6109712a11b260ab22d13fa8c83d5265aa481',
   },
   {
     id: 'ai.prompt',
@@ -47,5 +51,9 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   {
     id: 'data.regex_replace',
     handlerHash: '95c4970a0154de57472d394bc05514c6dcc483b74abb008b2950a5816398aaae',
+  },
+  {
+    id: 'search.rerank',
+    handlerHash: '2bdde599ac1b8f38faecbd72a2d17a3d7b2740b874e047e92e9c30ba0ff01a4f',
   },
 ];

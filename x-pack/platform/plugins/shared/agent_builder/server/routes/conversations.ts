@@ -37,7 +37,6 @@ export function registerConversationRoutes({
       options: {
         tags: ['conversation', 'oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
@@ -91,7 +90,6 @@ export function registerConversationRoutes({
       options: {
         tags: ['conversation', 'oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
@@ -138,7 +136,6 @@ export function registerConversationRoutes({
       options: {
         tags: ['conversation', 'oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },

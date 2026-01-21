@@ -12,6 +12,11 @@ import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { analyticsServiceMock } from '@kbn/core/server/mocks';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import {
+  ELASTIC_MANAGED_LLM_CONNECTOR_ID,
+  LATEST_ELASTIC_MANAGED_CONNECTOR_ID,
+} from '@kbn/elastic-assistant-common';
 
 import { attackDiscoveryScheduleExecutor } from './executor';
 import { findDocuments } from '../../../../ai_assistant_data_clients/find';
@@ -28,6 +33,7 @@ import { mockAttackDiscoveries } from '../../evaluation/__mocks__/mock_attack_di
 import { getFindAnonymizationFieldsResultWithSingleHit } from '../../../../__mocks__/response';
 import { deduplicateAttackDiscoveries } from '../../persistence/deduplication';
 import * as transforms from '../../persistence/transforms/transform_to_alert_documents';
+import { isInvalidAnonymizationError } from '../../../../routes/attack_discovery/public/post/helpers/throw_if_invalid_anonymization';
 
 jest.mock('../../../../ai_assistant_data_clients/find', () => ({
   ...jest.requireActual('../../../../ai_assistant_data_clients/find'),
@@ -37,6 +43,12 @@ jest.mock('../../../../routes/attack_discovery/helpers/generate_discoveries', ()
   ...jest.requireActual('../../../../routes/attack_discovery/helpers/generate_discoveries'),
   generateAttackDiscoveries: jest.fn(),
 }));
+jest.mock('../../../../routes/attack_discovery/helpers/filter_hallucinated_alerts', () => ({
+  filterHallucinatedAlerts: jest.fn().mockImplementation(({ attackDiscoveries }) => {
+    // By default, pass through all discoveries (no filtering)
+    return Promise.resolve(attackDiscoveries);
+  }),
+}));
 jest.mock('../../../../routes/attack_discovery/helpers/telemetry', () => ({
   ...jest.requireActual('../../../../routes/attack_discovery/helpers/telemetry'),
   reportAttackDiscoveryGenerationFailure: jest.fn(),
@@ -45,6 +57,18 @@ jest.mock('../../../../routes/attack_discovery/helpers/telemetry', () => ({
 jest.mock('../../persistence/deduplication', () => ({
   ...jest.requireActual('../../persistence/deduplication'),
   deduplicateAttackDiscoveries: jest.fn(),
+}));
+
+jest.mock(
+  '../../../../routes/attack_discovery/public/post/helpers/throw_if_invalid_anonymization',
+  () => ({
+    isInvalidAnonymizationError: jest.fn(),
+  })
+);
+
+jest.mock('@kbn/task-manager-plugin/server', () => ({
+  createTaskRunError: jest.fn((error, source) => ({ message: error.message, source })),
+  TaskErrorSource: { USER: 'USER' },
 }));
 
 describe('attackDiscoveryScheduleExecutor', () => {
@@ -269,6 +293,27 @@ describe('attackDiscoveryScheduleExecutor', () => {
       size: 123,
       start: 'now-24h',
       telemetry: mockTelemetry,
+    });
+  });
+
+  it('calls filterHallucinatedAlerts with the expected parameters', async () => {
+    const { filterHallucinatedAlerts } = jest.requireMock(
+      '../../../../routes/attack_discovery/helpers/filter_hallucinated_alerts'
+    );
+    const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+
+    await attackDiscoveryScheduleExecutor({
+      options,
+      logger: mockLogger,
+      publicBaseUrl: undefined,
+      telemetry: mockTelemetry,
+    });
+
+    expect(filterHallucinatedAlerts).toHaveBeenCalledWith({
+      attackDiscoveries: mockAttackDiscoveries,
+      alertsIndexPattern: params.alertsIndexPattern,
+      esClient: services.scopedClusterClient.asCurrentUser,
+      logger: mockLogger,
     });
   });
 
@@ -542,5 +587,55 @@ describe('attackDiscoveryScheduleExecutor', () => {
     expect(firstCallArg.alertsParams.enableFieldRendering).toBe(true);
 
     spy.mockRestore();
+  });
+
+  it('throws TaskRunError when isInvalidAnonymizationError returns true', async () => {
+    const error = new Error('Invalid Anonymization');
+    (generateAttackDiscoveries as jest.Mock).mockRejectedValue(error);
+    (isInvalidAnonymizationError as jest.Mock).mockReturnValue(true);
+    const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+
+    await expect(
+      attackDiscoveryScheduleExecutor({
+        options,
+        logger: mockLogger,
+        publicBaseUrl: undefined,
+        telemetry: mockTelemetry,
+      })
+    ).rejects.toEqual(
+      expect.objectContaining({ message: error.message, source: TaskErrorSource.USER })
+    );
+
+    expect(createTaskRunError).toHaveBeenCalledWith(error, TaskErrorSource.USER);
+  });
+
+  it('should resolve outdated connector ID to the new one before generating discoveries', async () => {
+    const options = {
+      ...executorOptions,
+      params: {
+        ...params,
+        apiConfig: {
+          ...params.apiConfig,
+          connectorId: ELASTIC_MANAGED_LLM_CONNECTOR_ID,
+        },
+      },
+    } as unknown as RuleExecutorOptions;
+
+    await attackDiscoveryScheduleExecutor({
+      options,
+      logger: mockLogger,
+      publicBaseUrl: undefined,
+      telemetry: mockTelemetry,
+    });
+
+    expect(generateAttackDiscoveries).toHaveBeenCalledWith(
+      expect.objectContaining({
+        config: expect.objectContaining({
+          apiConfig: expect.objectContaining({
+            connectorId: LATEST_ELASTIC_MANAGED_CONNECTOR_ID,
+          }),
+        }),
+      })
+    );
   });
 });

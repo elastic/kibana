@@ -118,6 +118,7 @@ export const treemapStateSchemaNoESQL = schema.object(
       ),
       {
         minSize: 1,
+        maxSize: 100,
         meta: {
           description: 'Array of metric configurations: minimum 1 (recommended).',
         },
@@ -131,6 +132,7 @@ export const treemapStateSchemaNoESQL = schema.object(
         mergeAllBucketsWithChartDimensionSchema(partitionStateBreakdownByOptionsSchema),
         {
           minSize: 1,
+          maxSize: 100,
           meta: {
             description: 'Array of grouping dimensions (minimum 1, maximum 2 for non collapsed).',
           },
@@ -173,6 +175,7 @@ const treemapStateSchemaESQL = schema.object(
       ),
       {
         minSize: 1,
+        maxSize: 100,
         meta: {
           description: 'Array of metric configurations: minimum 1 (recommended)',
         },
@@ -191,6 +194,7 @@ const treemapStateSchemaESQL = schema.object(
         }),
         {
           minSize: 1,
+          maxSize: 100,
           meta: {
             description: 'Array of grouping dimensions (minimum 1, maximum 2 for non collapsed).',
           },

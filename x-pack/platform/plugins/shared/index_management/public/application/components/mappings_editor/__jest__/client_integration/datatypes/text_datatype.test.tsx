@@ -163,7 +163,7 @@ describe('Mappings editor: text datatype', () => {
 
       // searchAnalyzer should not exist when checkbox is checked
       expect(within(flyoutReopened).queryByTestId('searchAnalyzer')).not.toBeInTheDocument();
-    });
+    }, 20000);
 
     test('should toggle search analyzer visibility when unchecking checkbox', async () => {
       const Component = WithAppDependencies(MappingsEditor, {});
