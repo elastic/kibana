@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import type { CoreSetup, IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/types';
-import type {
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
-} from '../../types';
+import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
 import { getLogsIndices } from '../../utils/get_logs_indices';
 import { getTypedSearch } from '../../utils/get_typed_search';
 import { getTotalHits } from '../../utils/get_total_hits';
 import { timeRangeFilter, kqlFilter } from '../../utils/dsl_filters';
 import { parseDatemath } from '../../utils/time';
+import { warningAndAboveLogFilter } from '../../utils/ecs_otel_fields';
 
 export async function getToolHandler({
   core,
@@ -27,10 +25,7 @@ export async function getToolHandler({
   kqlFilter: kuery,
   fields,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   logger: Logger;
   esClient: IScopedClusterClient;
   index?: string;
@@ -49,46 +44,38 @@ export async function getToolHandler({
     { exists: { field: 'message' } },
   ];
 
-  const lowSeverityLogLevels = [
-    {
-      terms: {
-        'log.level': ['trace', 'debug', 'info'].flatMap((level) => [
-          level.toLowerCase(),
-          level.toUpperCase(),
-        ]),
-      },
-    },
-  ];
-
   const [highSeverityCategories, lowSeverityCategories] = await Promise.all([
-    getFilteredLogCategories({
+    getLogCategories({
       esClient,
       logsIndices,
-      boolQuery: { filter: boolFilters, must_not: lowSeverityLogLevels },
+      boolQuery: { filter: boolFilters, must: [warningAndAboveLogFilter()] },
       logger,
       categoryCount: 20,
       fields,
+      field: 'message',
     }),
-    getFilteredLogCategories({
+    getLogCategories({
       esClient,
       logsIndices,
-      boolQuery: { filter: boolFilters, must: lowSeverityLogLevels },
+      boolQuery: { filter: boolFilters, must_not: [warningAndAboveLogFilter()] },
       logger,
       categoryCount: 10,
       fields,
+      field: 'message',
     }),
   ]);
 
   return { highSeverityCategories, lowSeverityCategories };
 }
 
-export async function getFilteredLogCategories({
+export async function getLogCategories({
   esClient,
   logsIndices,
   boolQuery,
   logger,
   categoryCount,
   fields,
+  field = 'message',
 }: {
   esClient: IScopedClusterClient;
   logsIndices: string[];
@@ -96,6 +83,7 @@ export async function getFilteredLogCategories({
   logger: Logger;
   categoryCount: number;
   fields: string[];
+  field?: string;
 }) {
   const search = getTypedSearch(esClient.asCurrentUser);
 
@@ -109,7 +97,9 @@ export async function getFilteredLogCategories({
 
   const totalHits = getTotalHits(countResponse);
   if (totalHits === 0) {
-    logger.debug('No log documents found for the given query.');
+    logger.debug(
+      `No log documents found for field "${field}", filter: ${JSON.stringify(boolQuery)}`
+    );
     return undefined;
   }
 
@@ -121,7 +111,7 @@ export async function getFilteredLogCategories({
   logger.debug(
     `Total log documents: ${totalHits}, using sampling probability: ${samplingProbability.toFixed(
       4
-    )} using filter: ${JSON.stringify(boolQuery)}`
+    )} for field "${field}", filter: ${JSON.stringify(boolQuery)}`
   );
 
   const response = await search({
@@ -135,7 +125,7 @@ export async function getFilteredLogCategories({
         aggs: {
           categories: {
             categorize_text: {
-              field: 'message',
+              field,
               size: categoryCount,
               min_doc_count: 1,
             },
@@ -144,7 +134,7 @@ export async function getFilteredLogCategories({
                 top_hits: {
                   size: 1,
                   _source: false,
-                  fields: ['message', '@timestamp', ...fields],
+                  fields: [field, '@timestamp', ...fields],
                   sort: {
                     '@timestamp': { order: 'desc' },
                   },

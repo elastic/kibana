@@ -23,6 +23,8 @@
       "label": "DashboardAgentPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/dashboard_agent/server/types.ts",
+      "lineNumber": 24,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -37,6 +39,8 @@
       "label": "DashboardAgentPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/dashboard_agent/server/types.ts",
+      "lineNumber": 27,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -63,6 +67,8 @@
           "\"platform.dashboard\""
         ],
         "path": "x-pack/platform/plugins/shared/dashboard_agent/common/constants.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -82,6 +88,8 @@
           "{ readonly createDashboard: string; readonly updateDashboard: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/dashboard_agent/common/constants.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
