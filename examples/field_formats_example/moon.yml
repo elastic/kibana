@@ -24,6 +24,7 @@ dependsOn:
   - '@kbn/data-plugin'
   - '@kbn/data-view-field-editor-plugin'
   - '@kbn/field-types'
+  - '@kbn/i18n'
 tags:
   - plugin
   - prod
