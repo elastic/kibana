@@ -78,7 +78,12 @@ export function toHavePayload<T extends { data: unknown } | { body: unknown }>(
   if (expected === undefined) {
     const hasValue = actual !== null && actual !== undefined;
     if ((!hasValue && !isNegated) || (hasValue && isNegated)) {
-      throw createMatcherError('defined', 'toHavePayload', actual, isNegated);
+      throw createMatcherError({
+        expected: 'defined',
+        matcherName: 'toHavePayload',
+        received: actual,
+        isNegated,
+      });
     }
     return;
   }
@@ -102,6 +107,11 @@ export function toHavePayload<T extends { data: unknown } | { body: unknown }>(
   } catch {
     const actualDisplay = typeof actual === 'object' ? JSON.stringify(actual) : actual;
     const expectedDisplay = typeof expected === 'object' ? JSON.stringify(expected) : expected;
-    throw createMatcherError(expectedDisplay, 'toHavePayload', actualDisplay, isNegated);
+    throw createMatcherError({
+      expected: expectedDisplay,
+      matcherName: 'toHavePayload',
+      received: actualDisplay,
+      isNegated,
+    });
   }
 }

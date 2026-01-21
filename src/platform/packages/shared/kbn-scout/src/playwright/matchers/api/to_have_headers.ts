@@ -42,11 +42,11 @@ export function toHaveHeaders<T extends { headers: unknown }>(
       baseExpect(actualHeaders).toMatchObject(normalizedExpected);
     }
   } catch {
-    throw createMatcherError(
-      JSON.stringify(normalizedExpected),
-      'toHaveHeaders',
-      JSON.stringify(actualHeaders),
-      isNegated
-    );
+    throw createMatcherError({
+      expected: JSON.stringify(normalizedExpected),
+      matcherName: 'toHaveHeaders',
+      received: JSON.stringify(actualHeaders),
+      isNegated,
+    });
   }
 }

@@ -30,6 +30,11 @@ export function toHaveStatusText<T extends { statusText: unknown } | { statusMes
       baseExpect(actual).toBe(expected);
     }
   } catch {
-    throw createMatcherError(expected, 'toHaveStatusText', actual, isNegated);
+    throw createMatcherError({
+      expected,
+      matcherName: 'toHaveStatusText',
+      received: actual,
+      isNegated,
+    });
   }
 }

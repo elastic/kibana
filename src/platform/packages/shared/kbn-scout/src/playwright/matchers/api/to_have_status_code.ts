@@ -39,6 +39,11 @@ export function toHaveStatusCode<T extends { status: unknown } | { statusCode: u
       baseExpect(codes).toContain(actual);
     }
   } catch {
-    throw createMatcherError(expected, 'toHaveStatusCode', actual, isNegated);
+    throw createMatcherError({
+      expected,
+      matcherName: 'toHaveStatusCode',
+      received: actual,
+      isNegated,
+    });
   }
 }
