@@ -38,6 +38,7 @@ export const DEFAULT_LEGEND: WaffleLegendOptions = {
   steps: 10,
   rules: [],
   reverseColors: false,
+  type: 'gradient',
 };
 
 export const DEFAULT_WAFFLE_OPTIONS_STATE: WaffleOptionsState = {

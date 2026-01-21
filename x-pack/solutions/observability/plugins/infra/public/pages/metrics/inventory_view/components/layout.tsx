@@ -69,6 +69,7 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
   const legendRules = legend?.rules ?? DEFAULT_LEGEND.rules;
   const legendSteps = legend?.steps ?? DEFAULT_LEGEND.steps;
   const legendReverseColors = legend?.reverseColors ?? DEFAULT_LEGEND.reverseColors;
+  const legendType = legend?.type ?? 'gradient';
   const AUTO_REFRESH_INTERVAL = 5 * 1000;
 
   const { hasEcsSchema, hasSemconvSchema, hasEcsK8sIntegration, hasSemconvK8sIntegration } =
@@ -85,7 +86,7 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
   const options = {
     formatter: InfraFormatterType.percent,
     formatTemplate: '{{value}}',
-    legend: createLegend(legendPalette, legendSteps, legendReverseColors, legendRules),
+    legend: createLegend(legendPalette, legendSteps, legendReverseColors, legendRules, legendType),
     metric,
     sort,
     groupBy,

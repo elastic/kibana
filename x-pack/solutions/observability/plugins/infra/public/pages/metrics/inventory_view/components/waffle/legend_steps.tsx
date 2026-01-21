@@ -17,7 +17,7 @@ import {
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
 export interface LegendStep {
@@ -54,11 +54,13 @@ function ColorCell({ color, onChange }: ColorCellProps) {
   );
 }
 
-export function LegendSteps({ steps, onChange }: LegendStepsProps) {
-  const minSteps = 2;
-  const maxSteps = 18; // Same values as color palette selector in LegendControls.
+const MAX_STEPS = 18;
+const MIN_STEPS = 2;
+const MAX_CONTAINER_HEIGHT = 500;
 
+export function LegendSteps({ steps, onChange }: LegendStepsProps) {
   const { euiTheme } = useEuiTheme();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const updateStep = useCallback(
     (step: LegendStep, updates: Partial<LegendStep>) => {
@@ -80,13 +82,19 @@ export function LegendSteps({ steps, onChange }: LegendStepsProps) {
   );
 
   const handleAddStep = useCallback(() => {
-    const lastStep = steps[steps.length - 1];
     const newStep: LegendStep = {
       color: euiTheme.colors.textSubdued,
       label: '',
-      value: lastStep ? lastStep.value + 1 : 0,
+      value: 0,
     };
     onChange([...steps, newStep]);
+
+    // Scroll to bottom after adding a step
+    requestAnimationFrame(() => {
+      if (scrollContainerRef.current) {
+        scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+      }
+    });
   }, [steps, onChange, euiTheme.colors.textSubdued]);
 
   const columns: Array<EuiBasicTableColumn<LegendStep>> = useMemo(
@@ -154,7 +162,7 @@ export function LegendSteps({ steps, onChange }: LegendStepsProps) {
             iconType="trash"
             size="xs"
             onClick={() => handleDeleteStep(item)}
-            disabled={steps.length <= minSteps}
+            disabled={steps.length <= MIN_STEPS}
             data-test-subj="infraLegendStepsDeleteStepButton"
           />
         ),
@@ -165,18 +173,26 @@ export function LegendSteps({ steps, onChange }: LegendStepsProps) {
 
   return (
     <>
-      <EuiBasicTable
-        columns={columns}
-        items={steps}
-        tableLayout="auto"
-        responsiveBreakpoint={false}
-        tableCaption={i18n.translate('xpack.infra.legendSteps.tableCaption', {
-          defaultMessage: 'Legend steps configuration',
-        })}
-        rowProps={(item) => ({
-          'data-test-subj': `legendStepRow-${item.value}`,
-        })}
-      />
+      <div
+        ref={scrollContainerRef}
+        style={{
+          maxHeight: MAX_CONTAINER_HEIGHT,
+          overflowY: 'auto',
+        }}
+      >
+        <EuiBasicTable
+          columns={columns}
+          items={steps}
+          tableLayout="auto"
+          responsiveBreakpoint={false}
+          tableCaption={i18n.translate('xpack.infra.legendSteps.tableCaption', {
+            defaultMessage: 'Legend steps configuration',
+          })}
+          rowProps={(item) => ({
+            'data-test-subj': `legendStepRow-${item.value}`,
+          })}
+        />
+      </div>
       <EuiSpacer size="s" />
       <EuiButton
         color="text"
@@ -184,7 +200,7 @@ export function LegendSteps({ steps, onChange }: LegendStepsProps) {
         onClick={handleAddStep}
         iconType="plus"
         data-test-subj="infraLegendStepsAddStepButton"
-        disabled={steps.length >= maxSteps}
+        disabled={steps.length >= MAX_STEPS}
       >
         {i18n.translate('xpack.infra.legendSteps.addStepButtonLabel', {
           defaultMessage: 'Add step',

@@ -61,7 +61,7 @@ export const transformRequestToMetricsAPIRequest = async ({
   };
 
   const includeTimeseries =
-    snapshotRequest.includeTimeseries ??
+    snapshotRequest.includeTimeseries ||
     Object.values(transformed).some((metric) =>
       Object.values(metric.aggregations).some(isDerivativeAgg)
     );

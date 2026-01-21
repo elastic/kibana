@@ -77,13 +77,20 @@ interface DraftState {
 const createDraftState = (
   autoBounds: boolean,
   boundsOverride: InfraWaffleMapBounds,
-  options: WaffleLegendOptions
-): DraftState => ({
-  auto: autoBounds,
-  bounds: convertBoundsToPercents(boundsOverride),
-  legend: options,
-  type: options.type || 'gradient',
-});
+  options: WaffleLegendOptions,
+  defaultSteps?: LegendStep[]
+): DraftState => {
+  const type = options.type || 'gradient';
+  return {
+    auto: autoBounds,
+    bounds: convertBoundsToPercents(boundsOverride),
+    legend: {
+      ...options,
+      rules: type === 'steps' ? options.rules ?? defaultSteps : options.rules,
+    },
+    type,
+  };
+};
 
 export const LegendControls = ({
   autoBounds,
@@ -92,12 +99,8 @@ export const LegendControls = ({
   dataBounds,
   options,
 }: Props) => {
-  const [isPopoverOpen, setPopoverState] = useState(false);
-  const [draft, setDraft] = useState<DraftState>(() =>
-    createDraftState(autoBounds, boundsOverride, options)
-  );
-
   const { euiTheme } = useEuiTheme();
+  const [isPopoverOpen, setPopoverState] = useState(false);
   const defaultLegendSteps = useMemo<LegendStep[]>(
     () => [
       { color: euiTheme.colors.severity.success, label: 'OK', value: 0 },
@@ -106,6 +109,9 @@ export const LegendControls = ({
       { color: euiTheme.colors.severity.unknown, label: 'UNKNOWN', value: 3 },
     ],
     [euiTheme.colors.severity]
+  );
+  const [draft, setDraft] = useState<DraftState>(() =>
+    createDraftState(autoBounds, boundsOverride, options, defaultLegendSteps)
   );
 
   useEffect(() => {
@@ -116,9 +122,9 @@ export const LegendControls = ({
 
   // Sync draft state from current values when opening popover
   const handleOpenPopover = useCallback(() => {
-    setDraft(createDraftState(autoBounds, boundsOverride, options));
+    setDraft(createDraftState(autoBounds, boundsOverride, options, defaultLegendSteps));
     setPopoverState(true);
-  }, [autoBounds, boundsOverride, options]);
+  }, [autoBounds, boundsOverride, options, defaultLegendSteps]);
 
   const buttonComponent = (
     <EuiButtonIcon
@@ -181,9 +187,9 @@ export const LegendControls = ({
   }, [onChange, draft]);
 
   const handleCancelClick = useCallback(() => {
-    setDraft(createDraftState(autoBounds, boundsOverride, options));
+    setDraft(createDraftState(autoBounds, boundsOverride, options, defaultLegendSteps));
     setPopoverState(false);
-  }, [autoBounds, boundsOverride, options]);
+  }, [autoBounds, boundsOverride, options, defaultLegendSteps]);
 
   const handleStepsChange = useCallback<NonNullable<EuiRangeProps['onChange']>>((e) => {
     const steps = parseInt((e.target as HTMLInputElement).value, 10);
@@ -199,7 +205,7 @@ export const LegendControls = ({
     setDraft((prev) => ({ ...prev, legend: { ...prev.legend, rules } }));
   }, []);
 
-  const originalState = createDraftState(autoBounds, boundsOverride, options);
+  const originalState = createDraftState(autoBounds, boundsOverride, options, defaultLegendSteps);
   const commited = isEqual(draft, originalState);
 
   const boundsValidRange = draft.bounds.min < draft.bounds.max;
@@ -209,10 +215,8 @@ export const LegendControls = ({
     draft.legend.reverseColors
   );
 
-  const currentRules: LegendStep[] = draft.legend.rules || defaultLegendSteps;
   const stepsValid =
-    draft.type !== 'steps' ||
-    currentRules.every((step) => step.label?.trim() && typeof step.value === 'number');
+    draft.type !== 'steps' || draft.legend.rules?.every((step) => step.label?.trim());
 
   const isFormValid = draft.type === 'gradient' ? boundsValidRange : stepsValid;
 

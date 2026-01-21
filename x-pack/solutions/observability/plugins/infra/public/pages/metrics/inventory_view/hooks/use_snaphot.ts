@@ -58,7 +58,7 @@ const buildPayload = (args: UseSnapshotRequest): SnapshotRequest => {
     dropPartialBuckets = true,
     kuery,
     groupBy = null,
-    includeTimeseries = false,
+    includeTimeseries,
     metrics,
     nodeType,
     overrideCompositeSize,
