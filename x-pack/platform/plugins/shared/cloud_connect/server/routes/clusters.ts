@@ -15,6 +15,7 @@ import { CloudConnectClient } from '../services/cloud_connect_client';
 import { createStorageService } from '../lib/create_storage_service';
 import { enableInferenceCCM, disableInferenceCCM } from '../services/inference_ccm';
 import { updateDefaultLLMActions } from '../lib/update_default_llm_actions';
+import { waitForInferenceEndpoint } from '../lib/wait_for_inference_endpoint';
 
 interface CloudConnectedStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
@@ -349,12 +350,12 @@ export const registerClustersRoute = ({
           // Update default LLM actions if needed, this always needs to happen
           // after updating the service.
           //
-          // We need to add a delay given that inference_ccm API changes can take
-          // a few seconds and if we try to update the actions right after we might
-          // run into a race condition. From local testing it seems to take about 1-2s.
+          // We poll for a known inference endpoint to verify CCM setup is complete
+          // before creating the default LLM connectors. This avoids race conditions
+          // where the inference endpoints aren't ready yet.
           try {
             if (eisRequest?.enabled) {
-              await new Promise((r) => setTimeout(r, 3000));
+              await waitForInferenceEndpoint(esClient, logger);
               await updateDefaultLLMActions(getStartServices, request, logger);
             }
           } catch (llmActionsError) {
