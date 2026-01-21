@@ -14,7 +14,7 @@ import type {
 import { CONNECTOR_ID } from '@kbn/connector-schemas/server_log/constants';
 import type { ServerLogActionParams } from '../types';
 
-const DEFAULT_PARAMS = { level: 'info', message: undefined };
+const DEFAULT_PARAMS: ServerLogActionParams = { message: '' };
 
 export function getConnectorType(): ConnectorTypeModel<unknown, unknown, ServerLogActionParams> {
   return {

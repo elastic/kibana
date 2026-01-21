@@ -14,7 +14,7 @@ import type {
 import { CONNECTOR_ID } from '@kbn/connector-schemas/teams/constants';
 import type { TeamsActionParams, TeamsSecrets } from '../types';
 
-const DEFAULT_PARAMS = { message: undefined };
+const DEFAULT_PARAMS: TeamsActionParams = { message: '' };
 
 export function getConnectorType(): ConnectorTypeModel<unknown, TeamsSecrets, TeamsActionParams> {
   return {
