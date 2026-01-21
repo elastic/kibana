@@ -212,14 +212,15 @@ class AppContextService {
   }
 
   public getInternalUserSOClient(request?: KibanaRequest) {
-    if (!request) {
-      return appContextService.getSavedObjects().getUnsafeInternalClient({
+    if (request) {
+      return appContextService.getSavedObjects().getScopedClient(request, {
         includedHiddenTypes: this.includedHiddenTypes,
       });
     }
 
-    // soClient as kibana internal users, be careful on how you use it, security is not enabled
-    return this.getInternalUserSOClientWithoutSpaceExtension();
+    return appContextService.getSavedObjects().getUnsafeInternalClient({
+      includedHiddenTypes: this.includedHiddenTypes,
+    });
   }
 
   public getInternalUserSOClientWithoutSpaceExtension() {
