@@ -35,6 +35,10 @@ export interface ExpandableSectionProps {
    */
   localStorageKey?: string;
   /**
+   * Optional string, if provided it will be used as the key to store the expanded/collapsed state boolean by section local storage
+   */
+  sectionId?: string;
+  /**
    * Prefix data-test-subj to use for the header and expandable section of the accordion
    */
   ['data-test-subj']?: string;
@@ -51,6 +55,7 @@ export const ExpandableSection: VFC<ExpandableSectionProps> = ({
   children,
   gutterSize = 'none',
   localStorageKey,
+  sectionId,
   'data-test-subj': dataTestSub,
 }) => {
   const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });
@@ -68,7 +73,7 @@ export const ExpandableSection: VFC<ExpandableSectionProps> = ({
   return (
     <EuiAccordion
       forceState={state}
-      onToggle={() => toggle(localStorageKey)}
+      onToggle={() => toggle({ localStorageKey, title: sectionId })}
       id={accordionId}
       buttonContent={header}
     >

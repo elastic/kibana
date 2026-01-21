@@ -10,15 +10,19 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useExpandSection } from '../../shared/hooks/use_expand_section';
 import { ExpandableSection } from '../../shared/components/expandable_section';
-import { ATTACK_DETAILS_FLYOUT_PREFIX } from '../constants/test_ids';
+import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 
-const KEY = `${ATTACK_DETAILS_FLYOUT_PREFIX}-insights`;
+const KEY = 'insights';
 
 /**
  * Renders the Overview tab - InsightsSection content in the Attack Details flyout.
  */
 export const InsightsSection = memo(() => {
-  const expanded = useExpandSection({ title: KEY, defaultValue: true });
+  const expanded = useExpandSection({
+    storageKey: FLYOUT_STORAGE_KEYS.ATTACK_DETAILS_OVERVIEW_TAB_EXPANDED_SECTIONS,
+    title: KEY,
+    defaultValue: false,
+  });
 
   return (
     <ExpandableSection
@@ -29,7 +33,8 @@ export const InsightsSection = memo(() => {
           defaultMessage="Insights"
         />
       }
-      localStorageKey={KEY}
+      localStorageKey={FLYOUT_STORAGE_KEYS.ATTACK_DETAILS_OVERVIEW_TAB_EXPANDED_SECTIONS}
+      sectionId={KEY}
       gutterSize="s"
       data-test-subj={KEY}
     >

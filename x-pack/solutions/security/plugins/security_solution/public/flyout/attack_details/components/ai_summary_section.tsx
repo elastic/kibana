@@ -12,9 +12,9 @@ import { EuiIcon } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useExpandSection } from '../../shared/hooks/use_expand_section';
 import { ExpandableSection } from '../../shared/components/expandable_section';
-import { ATTACK_DETAILS_FLYOUT_PREFIX } from '../constants/test_ids';
+import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 
-const KEY = `${ATTACK_DETAILS_FLYOUT_PREFIX}-AIsummary`;
+const KEY = 'AISummary';
 
 /**
  * Renders the AI Summary section in the Overview tab of the Attack Details flyout.
@@ -23,7 +23,11 @@ const KEY = `${ATTACK_DETAILS_FLYOUT_PREFIX}-AIsummary`;
  * and persists its expanded state.
  */
 export const AISummarySection = memo(() => {
-  const expanded = useExpandSection({ title: KEY, defaultValue: true });
+  const expanded = useExpandSection({
+    storageKey: FLYOUT_STORAGE_KEYS.ATTACK_DETAILS_OVERVIEW_TAB_EXPANDED_SECTIONS,
+    title: KEY,
+    defaultValue: true,
+  });
 
   return (
     <ExpandableSection
@@ -43,7 +47,8 @@ export const AISummarySection = memo(() => {
           />
         </>
       }
-      localStorageKey={KEY}
+      localStorageKey={FLYOUT_STORAGE_KEYS.ATTACK_DETAILS_OVERVIEW_TAB_EXPANDED_SECTIONS}
+      sectionId={KEY}
       gutterSize="s"
       data-test-subj={KEY}
     >
