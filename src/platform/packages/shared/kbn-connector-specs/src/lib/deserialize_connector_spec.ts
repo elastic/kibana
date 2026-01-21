@@ -7,42 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { ZodDiscriminatedUnion, ZodObject, type ZodType } from '@kbn/zod/v4';
+import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 
-import { fromJSONSchema } from './from_json_schema';
-export { fromJSONSchema, extractUiMeta, type JsonSchema } from './from_json_schema';
-
-export interface ConnectorZodSchema extends z.ZodObject {
-  shape: {
-    config: z.ZodObject;
-    secrets: z.ZodDiscriminatedUnion;
-  };
+interface ConnectorShape {
+  config: ZodObject<Record<string, ZodType>>;
+  secrets: ZodDiscriminatedUnion;
 }
 
-export function isConnectorZodSchema(schema: z.ZodType | undefined): schema is ConnectorZodSchema {
-  if (!schema || !(schema instanceof z.ZodObject)) {
-    return false;
-  }
-
-  const shape = schema.shape as Record<string, z.ZodType> | undefined;
-  if (!shape) {
-    return false;
-  }
-
-  const hasConfig = 'config' in shape && shape.config instanceof z.ZodObject;
-  const hasSecrets = 'secrets' in shape && shape.secrets instanceof z.ZodDiscriminatedUnion;
-
-  return hasConfig && hasSecrets;
-}
+export type ConnectorZodSchema = ZodObject<ConnectorShape> & {
+  shape: ConnectorShape;
+};
 
 export function fromConnectorSpecSchema(
   jsonSchema: Record<string, unknown>
 ): ConnectorZodSchema | undefined {
   const schema = fromJSONSchema(jsonSchema);
 
-  if (isConnectorZodSchema(schema)) {
-    return schema;
+  if (
+    !schema ||
+    !(schema instanceof ZodObject) ||
+    !schema.shape ||
+    !('config' in schema.shape) ||
+    !(schema.shape.config instanceof ZodObject) ||
+    !('secrets' in schema.shape) ||
+    !(schema.shape.secrets instanceof ZodDiscriminatedUnion)
+  ) {
+    return undefined;
   }
 
-  return undefined;
+  return schema as ConnectorZodSchema;
 }

@@ -603,25 +603,20 @@ describe('extractSchemaCore', () => {
 
   describe('meta preservation after JSON Schema round-trip', () => {
     it('should preserve meta on URL field after unwrapping round-tripped schema', () => {
-      // This simulates what happens when a spec is serialized, sent to client, and parsed
-      // The schema structure is: ZodDefault(ZodOptional(ZodUrl)) with meta on wrapper
       const innerSchema = z.url();
       const optionalSchema = innerSchema.optional();
       const defaultSchema = optionalSchema.default('https://example.com');
 
-      // Simulate meta being attached to the wrapper (as parseObject does)
       z.globalRegistry.add(defaultSchema, { label: 'Test URL', placeholder: 'https://' });
 
       const { schema: unwrapped } = extractSchemaCore(defaultSchema);
 
-      // After unwrapping, the inner schema (ZodUrl) should have the meta
       const meta = getMeta(unwrapped);
       expect(meta.label).toBe('Test URL');
       expect(meta.placeholder).toBe('https://');
     });
 
     it('should preserve meta when meta exists on both wrapper and inner schema', () => {
-      // This tests the merge order: wrapper meta should be merged with inner meta
       const innerSchema = z.string();
       z.globalRegistry.add(innerSchema, { label: 'Inner Label', sensitive: true });
 
@@ -630,7 +625,6 @@ describe('extractSchemaCore', () => {
 
       const { schema: unwrapped } = extractSchemaCore(optionalSchema);
 
-      // Inner schema meta should take precedence (merge order: wrapper, then inner)
       const meta = getMeta(unwrapped);
       expect(meta.label).toBe('Inner Label'); // Inner wins
       expect(meta.sensitive).toBe(true); // From inner
@@ -638,19 +632,19 @@ describe('extractSchemaCore', () => {
     });
 
     it('should preserve meta through multiple wrapper layers like parseObject creates', () => {
-      // parseObject creates: parseJsonSchema(returns base with meta) -> .optional() -> .default() -> setMeta(wrapper)
       const baseSchema = z.url();
       z.globalRegistry.add(baseSchema, { label: 'Base Label', widget: 'text' });
 
       const optionalSchema = baseSchema.optional();
       const defaultSchema = optionalSchema.default('https://default.com');
-      z.globalRegistry.add(defaultSchema, { label: 'Browse URL', placeholder: 'https://r.jina.ai' });
+      z.globalRegistry.add(defaultSchema, {
+        label: 'Browse URL',
+        placeholder: 'https://r.jina.ai',
+      });
 
       const { schema: unwrapped } = extractSchemaCore(defaultSchema);
 
-      // Check that we get the correct merged meta
       const meta = getMeta(unwrapped);
-      // Base label should win because of merge order: ...wrapperMeta, ...innerMeta
       expect(meta.label).toBe('Base Label');
       expect(meta.widget).toBe('text');
       expect(meta.placeholder).toBe('https://r.jina.ai');

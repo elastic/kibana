@@ -12,10 +12,4 @@ export { generateSecretsSchemaFromSpec } from './generate_secrets_schema_from_sp
 export { configureAxiosInstanceWithSsl } from './configure_axios_instance_with_ssl';
 export { serializeConnectorSpec } from './serialize_connector_spec';
 
-export {
-  fromConnectorSpecSchema,
-  isConnectorZodSchema,
-  extractUiMeta,
-  type ConnectorZodSchema,
-  type JsonSchema,
-} from './deserialize_connector_spec';
+export { fromConnectorSpecSchema, type ConnectorZodSchema } from './deserialize_connector_spec';

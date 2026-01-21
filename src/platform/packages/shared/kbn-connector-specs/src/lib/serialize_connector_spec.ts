@@ -11,17 +11,6 @@ import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../connector_spec';
 import { generateSecretsSchemaFromSpec } from './generate_secrets_schema_from_spec';
 
-/**
- * Serializes a ConnectorSpec into a JSON Schema-based payload suitable for
- * client-side form generation and validation.
- *
- * UI metadata (label, sensitive, placeholder, etc.) is preserved as direct
- * properties in the JSON Schema output, which follows Zod v4's default behavior.
- *
- * Returns:
- * - metadata: unchanged from the spec
- * - schema: JSON Schema for { config, secrets } with UI metadata properties
- */
 export function serializeConnectorSpec(spec: ConnectorSpec) {
   const combinedZodSchema = z.object({
     config: spec.schema ?? z.object({}),

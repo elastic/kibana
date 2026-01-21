@@ -16,10 +16,7 @@ import { EuiText } from '@elastic/eui';
 import type { FormConfig, ResolvedMetaFunctions } from './form';
 import { getWidgetComponent } from './widgets';
 import { extractSchemaCore } from './schema_extract_core';
-import {
-  addMeta as defaultAddMeta,
-  getMeta as defaultGetMeta,
-} from './schema_connector_metadata';
+import { addMeta as defaultAddMeta, getMeta as defaultGetMeta } from './schema_connector_metadata';
 
 const OPTIONAL_LABEL = i18n.translate('responseOps.formGenerator.fieldBuilder.optionalLabel', {
   defaultMessage: 'Optional',
@@ -54,6 +51,7 @@ export const getFieldFromSchema = ({
   path,
   formConfig,
 }: GetFieldFromSchemaProps) => {
+  // Some schemas are wrapped (e.g., with ZodOptional or ZodDefault), so we unwrap them to get the underlying schema. Because we might unwrap default values, we also extract the default value here.
   const { schema, defaultValue, isOptional } = extractSchemaCore(outerSchema);
 
   return {
@@ -78,6 +76,8 @@ export const getFieldFromSchema = ({
         });
 
         if (errors.length > 0) {
+          // Join multiple Zod error messages into a single string
+          // The ValidationFunc type requires message to be a string, not an array
           return { path: formPath, message: errors.join(', ') };
         }
 
@@ -107,6 +107,7 @@ export const getFieldsFromSchema = <T extends z.ZodRawShape>({
     const fieldMeta = getMeta(fieldSchema);
     const path = rootPath ? `${rootPath}.${key}` : key;
 
+    // If the form or parent schema is disabled, propagate that to the field schema
     if (isFormOrParentDisabled && fieldMeta.disabled !== false) {
       addMeta(fieldSchema, { disabled: true });
     }
@@ -134,6 +135,7 @@ export const renderField = ({
   const { getMeta, addMeta } = meta;
   const { schema, validate, path, formConfig, defaultValue, isOptional } = field;
 
+  // getWidgetComponent might update meta information, therefore we get the meta after calling it
   const WidgetComponent = getWidgetComponent(schema, { getMeta, addMeta });
   const { label, helpText, disabled, placeholder } = getMeta(schema);
 
