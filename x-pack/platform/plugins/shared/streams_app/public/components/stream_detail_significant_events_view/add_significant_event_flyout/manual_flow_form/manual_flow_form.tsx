@@ -23,7 +23,7 @@ import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { validateQuery } from '../common/validate_query';
 import { SeveritySelector } from '../common/severity_selector';
-import { ALL_DATA_OPTION } from '../../feature_selector';
+import { ALL_DATA_OPTION } from '../../system_selector';
 
 interface Props {
   definition: Streams.all.Definition;
@@ -31,7 +31,7 @@ interface Props {
   isSubmitting: boolean;
   setQuery: (query: StreamQueryKql) => void;
   setCanSave: (canSave: boolean) => void;
-  features: System[];
+  systems: System[];
   dataViews: DataView[];
 }
 
@@ -41,7 +41,7 @@ export function ManualFlowForm({
   setQuery,
   setCanSave,
   isSubmitting,
-  features,
+  systems,
   dataViews,
 }: Props) {
   const [touched, setTouched] = useState({
@@ -61,9 +61,9 @@ export function ManualFlowForm({
 
   const options = [
     { value: ALL_DATA_OPTION.value, inputDisplay: ALL_DATA_OPTION.label },
-    ...features.map((feature) => ({
-      value: feature,
-      inputDisplay: feature.name,
+    ...systems.map((system) => ({
+      value: system,
+      inputDisplay: system.name,
     })),
   ];
 
@@ -123,8 +123,8 @@ export function ManualFlowForm({
             label={
               <EuiFormLabel>
                 {i18n.translate(
-                  'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldFeatureLabel',
-                  { defaultMessage: 'Feature' }
+                  'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldSystemLabel',
+                  { defaultMessage: 'System' }
                 )}
               </EuiFormLabel>
             }
@@ -141,10 +141,10 @@ export function ManualFlowForm({
                   : ALL_DATA_OPTION.value
               }
               placeholder={i18n.translate(
-                'xpack.streams.addSignificantEventFlyout.manualFlow.featurePlaceholder',
-                { defaultMessage: 'Select feature' }
+                'xpack.streams.addSignificantEventFlyout.manualFlow.systemPlaceholder',
+                { defaultMessage: 'Select system' }
               )}
-              disabled={isSubmitting || features.length === 0}
+              disabled={isSubmitting || systems.length === 0}
               onBlur={() => {
                 setTouched((prev) => ({ ...prev, feature: true }));
               }}
