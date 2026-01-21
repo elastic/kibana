@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { StreamQueryKql } from '@kbn/streams-schema';
+import type { StreamQuery } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression } from '@kbn/es-query';
 
-export function validateQuery(query: Partial<StreamQueryKql>): {
+export function validateQuery(query: Partial<StreamQuery>): {
   title: { isInvalid: boolean; error?: string };
   kql: { isInvalid: boolean; error?: string };
 } {

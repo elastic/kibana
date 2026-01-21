@@ -24,6 +24,9 @@ describe('buildEsqlQuery', () => {
     kql: {
       query: kqlQuery,
     },
+    esql: {
+      where: '',
+    },
   });
 
   describe('basic functionality', () => {
@@ -84,6 +87,9 @@ describe('buildEsqlQuery', () => {
       title: 'irrelevant',
       kql: {
         query: 'event.type: "access"',
+      },
+      esql: {
+        where: '',
       },
     };
     const esqlQuery = buildEsqlQuery(indices, query);

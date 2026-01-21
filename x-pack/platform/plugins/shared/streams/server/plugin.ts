@@ -74,7 +74,6 @@ export class StreamsPlugin
   private ebtTelemetryService = new EbtTelemetryService();
   private statsTelemetryService = new StatsTelemetryService();
   private processorSuggestionsService: ProcessorSuggestionsService;
-  private queryService?: QueryService;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
@@ -113,7 +112,6 @@ export class StreamsPlugin
     const systemService = new SystemService(core, this.logger);
     const contentService = new ContentService(core, this.logger);
     const queryService = new QueryService(core, this.logger);
-    this.queryService = queryService;
     const taskService = new TaskService(plugins.taskManager);
 
     const getScopedClients = async ({
@@ -270,13 +268,6 @@ export class StreamsPlugin
     }
 
     this.processorSuggestionsService.setConsoleStart(plugins.console);
-
-    // Run query migration to add esql.where field to existing queries
-    if (this.queryService) {
-      this.queryService
-        .migrateQueriesToEsqlWhere(core.elasticsearch.client.asInternalUser)
-        .catch((err) => this.logger.error(`Query migration failed: ${err.message}`));
-    }
 
     return {};
   }

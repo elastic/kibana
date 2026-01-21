@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { StreamQueryKql, Streams, System } from '@kbn/streams-schema';
+import type { StreamQuery, Streams, System } from '@kbn/streams-schema';
 import { useSignificantEventsApi } from '../../../hooks/use_significant_events_api';
 import { useKibana } from '../../../hooks/use_kibana';
 import type { AIFeatures } from '../../../hooks/use_ai_features';
@@ -31,12 +31,12 @@ export const EditSignificantEventFlyout = ({
   aiFeatures,
 }: {
   refresh: () => void;
-  setQueryToEdit: React.Dispatch<React.SetStateAction<StreamQueryKql | undefined>>;
+  setQueryToEdit: React.Dispatch<React.SetStateAction<StreamQuery | undefined>>;
   initialFlow?: Flow;
   selectedSystems: System[];
   setSelectedSystems: React.Dispatch<React.SetStateAction<System[]>>;
   systems: System[];
-  queryToEdit?: StreamQueryKql;
+  queryToEdit?: StreamQuery;
   definition: Streams.all.GetResponse;
   isEditFlyoutOpen: boolean;
   setIsEditFlyoutOpen: React.Dispatch<React.SetStateAction<boolean>>;
