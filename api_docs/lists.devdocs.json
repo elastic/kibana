@@ -507,7 +507,7 @@
           "\nClass for use for exceptions that are with trusted applications or\nwith rules."
         ],
         "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-        "lineNumber": 103,
+        "lineNumber": 104,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -525,7 +525,7 @@
               "any"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-            "lineNumber": 123,
+            "lineNumber": 124,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -541,7 +541,7 @@
                   "ConstructorOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                "lineNumber": 131,
+                "lineNumber": 132,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -565,7 +565,7 @@
               ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-            "lineNumber": 168,
+            "lineNumber": 169,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -581,7 +581,7 @@
                   "GetExceptionListOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                "lineNumber": 176,
+                "lineNumber": 177,
                 "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -607,7 +607,7 @@
               ") => Promise<{ windows: number; linux: number; macos: number; total: number; } | null>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-            "lineNumber": 185,
+            "lineNumber": 186,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -623,7 +623,7 @@
                   "GetExceptionListSummaryOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                "lineNumber": 195,
+                "lineNumber": 196,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -649,7 +649,7 @@
               ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"included\" | \"excluded\"; type: \"list\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"wildcard\"; value: string; })[]; expire_time: string | undefined; id: string; item_id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-            "lineNumber": 210,
+            "lineNumber": 211,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -665,7 +665,7 @@
                   "GetExceptionListItemOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                "lineNumber": 218,
+                "lineNumber": 219,
                 "columnNumber": 40,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -689,7 +689,7 @@
               "() => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-            "lineNumber": 236,
+            "lineNumber": 237,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -711,7 +711,7 @@
               "() => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-            "lineNumber": 251,
+            "lineNumber": 252,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -735,7 +735,7 @@
               ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"included\" | \"excluded\"; type: \"list\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"wildcard\"; value: string; })[]; expire_time: string | undefined; id: string; item_id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-            "lineNumber": 264,
+            "lineNumber": 265,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -751,7 +751,7 @@
                   "CreateEndpointListItemOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                "lineNumber": 280,
+                "lineNumber": 281,
                 "columnNumber": 42,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -777,7 +777,7 @@
               ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-            "lineNumber": 330,
+            "lineNumber": 331,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -793,7 +793,7 @@
                   "DuplicateExceptionListOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                "lineNumber": 337,
+                "lineNumber": 338,
                 "columnNumber": 50,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -819,7 +819,7 @@
               ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"included\" | \"excluded\"; type: \"list\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"wildcard\"; value: string; })[]; expire_time: string | undefined; id: string; item_id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-            "lineNumber": 352,
+            "lineNumber": 353,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -835,7 +835,7 @@
                   "UpdateEndpointListItemOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                "lineNumber": 371,
+                "lineNumber": 372,
                 "columnNumber": 42,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -861,7 +861,7 @@
               ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"included\" | \"excluded\"; type: \"list\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"wildcard\"; value: string; })[]; expire_time: string | undefined; id: string; item_id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-            "lineNumber": 424,
+            "lineNumber": 425,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -877,7 +877,7 @@
                   "GetEndpointListItemOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                "lineNumber": 431,
+                "lineNumber": 432,
                 "columnNumber": 39,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -903,7 +903,7 @@
               ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; updated_at: string; updated_by: string; version: number; }>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-            "lineNumber": 448,
+            "lineNumber": 449,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -919,7 +919,7 @@
                   "CreateExceptionListOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                "lineNumber": 462,
+                "lineNumber": 463,
                 "columnNumber": 39,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -945,7 +945,7 @@
               ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-            "lineNumber": 489,
+            "lineNumber": 490,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -961,7 +961,7 @@
                   "UpdateExceptionListOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                "lineNumber": 504,
+                "lineNumber": 505,
                 "columnNumber": 39,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -987,7 +987,7 @@
               ") => Promise<{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; updated_at: string; updated_by: string; version: number; } | null>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-            "lineNumber": 533,
+            "lineNumber": 534,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1003,7 +1003,7 @@
                   "DeleteExceptionListOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                "lineNumber": 541,
+                "lineNumber": 542,
                 "columnNumber": 39,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1035,7 +1035,7 @@
               ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"included\" | \"excluded\"; type: \"list\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"wildcard\"; value: string; })[]; expire_time: string | undefined; id: string; item_id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-            "lineNumber": 555,
+            "lineNumber": 556,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1057,7 +1057,7 @@
                   }
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                "lineNumber": 571,
+                "lineNumber": 572,
                 "columnNumber": 43,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1089,7 +1089,7 @@
               ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"included\" | \"excluded\"; type: \"list\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"wildcard\"; value: string; })[]; expire_time: string | undefined; id: string; item_id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-            "lineNumber": 622,
+            "lineNumber": 623,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1111,7 +1111,7 @@
                   }
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                "lineNumber": 644,
+                "lineNumber": 645,
                 "columnNumber": 43,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1143,7 +1143,7 @@
               ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"included\" | \"excluded\"; type: \"list\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"wildcard\"; value: string; })[]; expire_time: string | undefined; id: string; item_id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-            "lineNumber": 697,
+            "lineNumber": 698,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1165,7 +1165,7 @@
                   }
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                "lineNumber": 719,
+                "lineNumber": 720,
                 "columnNumber": 52,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1191,7 +1191,7 @@
               ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"included\" | \"excluded\"; type: \"list\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"wildcard\"; value: string; })[]; expire_time: string | undefined; id: string; item_id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-            "lineNumber": 772,
+            "lineNumber": 773,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1207,7 +1207,7 @@
                   "DeleteExceptionListItemOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                "lineNumber": 780,
+                "lineNumber": 781,
                 "columnNumber": 43,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1233,7 +1233,7 @@
               ") => Promise<void>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-            "lineNumber": 803,
+            "lineNumber": 804,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1249,7 +1249,7 @@
                   "DeleteExceptionListItemByIdOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                "lineNumber": 809,
+                "lineNumber": 810,
                 "columnNumber": 47,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1273,7 +1273,7 @@
               ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"included\" | \"excluded\"; type: \"list\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"wildcard\"; value: string; })[]; expire_time: string | undefined; id: string; item_id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-            "lineNumber": 830,
+            "lineNumber": 831,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1289,7 +1289,7 @@
                   "DeleteEndpointListItemOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                "lineNumber": 838,
+                "lineNumber": 839,
                 "columnNumber": 42,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1313,7 +1313,7 @@
               ") => Promise<({ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"included\" | \"excluded\"; type: \"list\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"wildcard\"; value: string; })[]; expire_time: string | undefined; id: string; item_id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } & { pit?: string | undefined; }) | null>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-            "lineNumber": 860,
+            "lineNumber": 861,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1329,7 +1329,7 @@
                   "FindExceptionListItemOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                "lineNumber": 874,
+                "lineNumber": 875,
                 "columnNumber": 41,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1355,7 +1355,7 @@
               ") => Promise<({ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"included\" | \"excluded\"; type: \"list\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"wildcard\"; value: string; })[]; expire_time: string | undefined; id: string; item_id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } & { pit?: string | undefined; }) | null>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-            "lineNumber": 915,
+            "lineNumber": 916,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1371,7 +1371,7 @@
                   "FindExceptionListsItemOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                "lineNumber": 930,
+                "lineNumber": 931,
                 "columnNumber": 42,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1397,7 +1397,7 @@
               ") => Promise<({ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"included\" | \"excluded\"; type: \"list\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"wildcard\"; value: string; })[]; expire_time: string | undefined; id: string; item_id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } & { pit?: string | undefined; }) | null>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-            "lineNumber": 978,
+            "lineNumber": 979,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1413,7 +1413,7 @@
                   "FindValueListExceptionListsItems"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                "lineNumber": 990,
+                "lineNumber": 991,
                 "columnNumber": 51,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1439,7 +1439,7 @@
               ") => Promise<{ data: { _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; updated_at: string; updated_by: string; version: number; }[]; page: number; per_page: number; total: number; } & { pit?: string | undefined; }>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-            "lineNumber": 1012,
+            "lineNumber": 1013,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1455,7 +1455,7 @@
                   "FindExceptionListOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                "lineNumber": 1025,
+                "lineNumber": 1026,
                 "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1481,7 +1481,7 @@
               ") => Promise<({ data: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"included\" | \"excluded\"; type: \"list\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"wildcard\"; value: string; })[]; expire_time: string | undefined; id: string; item_id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }[]; page: number; per_page: number; total: number; } & { pit?: string | undefined; }) | null>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-            "lineNumber": 1049,
+            "lineNumber": 1050,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1497,7 +1497,7 @@
                   "FindEndpointListItemOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                "lineNumber": 1067,
+                "lineNumber": 1068,
                 "columnNumber": 40,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1531,7 +1531,7 @@
               " | null>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-            "lineNumber": 1107,
+            "lineNumber": 1117,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1547,7 +1547,7 @@
                   "ExportExceptionListAndItemsOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                "lineNumber": 1117,
+                "lineNumber": 1127,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1573,7 +1573,7 @@
               ") => Promise<{ errors: ({ error: { status_code: number; message: string; }; } & { id?: string | undefined; list_id?: string | undefined; item_id?: string | undefined; })[]; success: boolean; success_count: number; success_exception_lists: boolean; success_count_exception_lists: number; success_exception_list_items: boolean; success_count_exception_list_items: number; }>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-            "lineNumber": 1135,
+            "lineNumber": 1145,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1589,7 +1589,7 @@
                   "ImportExceptionListAndItemsOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                "lineNumber": 1143,
+                "lineNumber": 1153,
                 "columnNumber": 47,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1615,7 +1615,7 @@
               ") => Promise<{ errors: ({ error: { status_code: number; message: string; }; } & { id?: string | undefined; list_id?: string | undefined; item_id?: string | undefined; })[]; success: boolean; success_count: number; success_exception_lists: boolean; success_count_exception_lists: number; success_exception_list_items: boolean; success_count_exception_list_items: number; }>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-            "lineNumber": 1175,
+            "lineNumber": 1185,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1631,7 +1631,7 @@
                   "ImportExceptionListAndItemsAsArrayOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                "lineNumber": 1183,
+                "lineNumber": 1193,
                 "columnNumber": 54,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1659,7 +1659,7 @@
               ">"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-            "lineNumber": 1210,
+            "lineNumber": 1220,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1675,7 +1675,7 @@
                   "OpenPointInTimeOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                "lineNumber": 1218,
+                "lineNumber": 1228,
                 "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1703,7 +1703,7 @@
               ">"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-            "lineNumber": 1230,
+            "lineNumber": 1240,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1719,7 +1719,7 @@
                   "ClosePointInTimeOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                "lineNumber": 1237,
+                "lineNumber": 1247,
                 "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1745,7 +1745,7 @@
               ") => Promise<void>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-            "lineNumber": 1247,
+            "lineNumber": 1257,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1761,7 +1761,7 @@
                   "FindExceptionListItemPointInTimeFinderOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                "lineNumber": 1282,
+                "lineNumber": 1292,
                 "columnNumber": 58,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1785,7 +1785,7 @@
               ") => Promise<void>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-            "lineNumber": 1306,
+            "lineNumber": 1316,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1801,7 +1801,7 @@
                   "FindExceptionListPointInTimeFinderOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                "lineNumber": 1340,
+                "lineNumber": 1350,
                 "columnNumber": 54,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1825,7 +1825,7 @@
               ") => Promise<void>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-            "lineNumber": 1362,
+            "lineNumber": 1372,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1841,7 +1841,7 @@
                   "FindExceptionListItemsPointInTimeFinderOptions"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                "lineNumber": 1397,
+                "lineNumber": 1407,
                 "columnNumber": 59,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1865,7 +1865,7 @@
               ") => Promise<void>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-            "lineNumber": 1421,
+            "lineNumber": 1431,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1881,7 +1881,7 @@
                   "FindValueListExceptionListsItemsPointInTimeFinder"
                 ],
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.ts",
-                "lineNumber": 1454,
+                "lineNumber": 1464,
                 "columnNumber": 68,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4878,7 +4878,7 @@
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "WriteResponseBase",
-                ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
+                ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
                 "default",
                 "; helpers: ",
                 "default",
@@ -5441,6 +5441,8 @@
                 " | undefined, options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<boolean>; }; profiling: ",
+                "default",
+                "; project: ",
                 "default",
                 "; putScript: { (this: That, params: ",
                 "PutScriptRequest",
