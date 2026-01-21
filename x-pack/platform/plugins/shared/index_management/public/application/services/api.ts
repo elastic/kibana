@@ -166,12 +166,12 @@ export async function loadIndices(onIndicesLoaded: (indices: Index[]) => void) {
           onIndicesLoaded(Object.values(indices));
         } else {
           // todo need to add these to state
-          console.error(enriched.error);
+          // console.error(enriched.error);
         }
       })
       .catch((error) => {
         // todo errors should be collected and displayed to the user
-        console.error(error);
+        // console.error(error);
       });
   });
 }

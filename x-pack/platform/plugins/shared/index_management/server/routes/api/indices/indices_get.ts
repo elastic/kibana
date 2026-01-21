@@ -8,7 +8,7 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 import type { MeteringStatsResponse } from '../../../lib/types';
-import type { IndexData } from '../../../../common/types/indices';
+import type { Index } from '../../../../common/types/indices';
 
 export function registerIndicesGet({ router, lib: { handleEsError }, config }: RouteDependencies) {
   router.get(
@@ -63,39 +63,40 @@ export function registerIndicesGet({ router, lib: { handleEsError }, config }: R
           statsPromise,
         ]);
 
-        const indexStatsMap = indicesStats.reduce((prev, index) => {
+        const indexStatsMap = indicesStats.reduce<
+          Record<string, { size_in_bytes: number; num_docs: number }>
+        >((prev, index) => {
           prev[index.name] = { size_in_bytes: index.size_in_bytes, num_docs: index.num_docs };
           return prev;
-        }, {} as Record<string, { size_in_bytes: number; num_docs: number }>);
+        }, {});
 
-        const mappedIndices: Record<string, IndexData> = Object.keys(indices).reduce(
-          (prev, indexName: string) => {
-            const indexData = indices[indexName];
-            const aliases = Object.keys(indexData.aliases!);
-            prev[indexName] = {
-              name: indexName,
-              primary: Number(indexData.settings?.index?.number_of_shards),
-              replica: Number(indexData.settings?.index?.number_of_replicas),
-              isFrozen: indexData.settings?.index?.frozen === 'true',
-              hidden: indexData.settings?.index?.hidden === 'true',
-              data_stream: indexData.data_stream,
-              mode: indexData.settings?.index?.mode,
-            };
+        const mappedIndices: Record<string, Index> = Object.keys(indices).reduce<
+          Record<string, Index>
+        >((prev, indexName: string) => {
+          const indexData = indices[indexName];
+          const aliases = Object.keys(indexData.aliases!);
+          prev[indexName] = {
+            name: indexName,
+            primary: Number(indexData.settings?.index?.number_of_shards),
+            replica: Number(indexData.settings?.index?.number_of_replicas),
+            isFrozen: indexData.settings?.index?.frozen === 'true',
+            hidden: indexData.settings?.index?.hidden === 'true',
+            data_stream: indexData.data_stream,
+            mode: indexData.settings?.index?.mode,
+          };
 
-            if (aliases.length) {
-              prev[indexName].aliases = aliases;
-            }
+          if (aliases.length) {
+            prev[indexName].aliases = aliases;
+          }
 
-            if (indexStatsMap[indexName]) {
-              prev[indexName].documents = indexStatsMap[indexName].num_docs ?? 0;
-              prev[indexName].size = new ByteSizeValue(
-                indexStatsMap[indexName].size_in_bytes ?? 0
-              ).toString();
-            }
-            return prev;
-          },
-          {} as Record<string, IndexData>
-        );
+          if (indexStatsMap[indexName]) {
+            prev[indexName].documents = indexStatsMap[indexName].num_docs ?? 0;
+            prev[indexName].size = new ByteSizeValue(
+              indexStatsMap[indexName].size_in_bytes ?? 0
+            ).toString();
+          }
+          return prev;
+        }, {});
 
         return response.ok({ body: mappedIndices });
       } catch (error) {
