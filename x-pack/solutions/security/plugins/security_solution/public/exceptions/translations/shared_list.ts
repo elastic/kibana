@@ -97,13 +97,6 @@ export const EXCEPTION_DELETE_ERROR = i18n.translate(
   }
 );
 
-export const EXCEPTION_LIST_NOT_FOUND_ERROR = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.all.exceptions.listNotFoundError',
-  {
-    defaultMessage: 'Exception list not found. It may have been deleted already.',
-  }
-);
-
 export const exceptionDeleteSuccessMessage = (listName: string) =>
   i18n.translate('xpack.securitySolution.exceptions.referenceModalSuccessDescription', {
     defaultMessage: 'Exception list "{listName}" deleted successfully.',

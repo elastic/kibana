@@ -337,18 +337,8 @@ export const SharedLists = React.memo(() => {
     const exceptionListNamespaceType = referenceModalState.listNamespaceType;
     const exceptionList = exceptionsListsRef[exceptionListId];
 
-    if (!exceptionList) {
-      handleDeleteError(new Error(i18n.EXCEPTION_LIST_NOT_FOUND_ERROR));
-      setReferenceModalState(exceptionReferenceModalInitialState);
-      setShowReferenceErrorModal(false);
-      if (refreshExceptions != null) {
-        refreshExceptions();
-      }
-      return;
-    }
-
-    const relevantRules = exceptionList.rules;
-    const listName = exceptionList.name;
+    const relevantRules = exceptionList?.rules ?? [];
+    const listName = exceptionList?.name ?? '';
 
     try {
       await Promise.all(
