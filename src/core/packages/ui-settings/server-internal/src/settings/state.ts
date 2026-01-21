@@ -20,7 +20,7 @@ export const getStateSettings = (): Record<string, UiSettingsParams> => {
       deprecation: {
         message: i18n.translate('core.ui_settings.params.storeUrl.deprecation', {
           defaultMessage:
-            'The store URLs in session storage setting is deprecated and will not be supported in a future version.',
+            'The \'Store URLs in session storage setting\' is deprecated and will be removed in a future version.',
         }),
         docLinksKey: 'sessionStorageSettings',
       },
