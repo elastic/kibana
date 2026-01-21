@@ -13,6 +13,7 @@ import type {
 } from '../types';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import type { DataSourceAttributes } from '../saved_objects';
+import { deleteDataSourceAndRelatedResources } from '../routes/data_sources_helpers';
 
 export const TYPE = 'data-sources:bulk-delete-task';
 
@@ -84,6 +85,7 @@ export class BulkDeleteTask {
               const toolRegistry = await pluginStart.agentBuilder.tools.getRegistry({
                 request: fakeRequest,
               });
+              const workflowManagement = plugins.workflowsManagement.setup;
 
               let deletedCount = 0;
               const errors: Array<{ dataSourceId: string; error: string }> = [];
@@ -100,42 +102,28 @@ export class BulkDeleteTask {
                   for await (const response of finder.find()) {
                     const dataSources = response.saved_objects;
 
-                    // Collect all kscIds from this batch
-                    const kscIds: string[] = dataSources.flatMap(
-                      (dataSource) => dataSource.attributes.kscIds || []
-                    );
-
-                    // Delete stack connectors
-                    if (kscIds.length > 0) {
-                      try {
-                        const deleteKscPromises = kscIds.map((kscId) =>
-                          actionsClient.delete({ id: kscId }).catch((error) => {
-                            this.logger.warn(
-                              `Failed to delete stack connector ${kscId}: ${error.message}`
-                            );
-                            return null;
-                          })
-                        );
-                        await Promise.all(deleteKscPromises);
-                      } catch (error) {
-                        this.logger.error(
-                          `Failed to delete stack connectors: ${(error as Error).message}`
-                        );
-                      }
-                    }
-
-                    // Delete tools and workflows would be handled by deleteDataSourceAndRelatedResources
-                    // For now, we'll just delete the saved objects
-                    // In a full implementation, we'd call deleteDataSourceAndRelatedResources for each
-
-                    // Delete data source saved objects
+                    // Process each data source individually to handle partial failures
                     for (const dataSource of dataSources) {
                       try {
-                        await savedObjectsClient.delete(
-                          DATA_SOURCE_SAVED_OBJECT_TYPE,
-                          dataSource.id
-                        );
-                        deletedCount++;
+                        const result = await deleteDataSourceAndRelatedResources({
+                          dataSource,
+                          savedObjectsClient,
+                          actionsClient,
+                          toolRegistry,
+                          workflowManagement,
+                          request: fakeRequest,
+                          logger: this.logger,
+                        });
+
+                        if (result.fullyDeleted) {
+                          deletedCount++;
+                        } else {
+                          // Partial deletion - saved object was updated with remaining resources
+                          errors.push({
+                            dataSourceId: dataSource.id,
+                            error: `Partially deleted: some resources failed to delete`,
+                          });
+                        }
                       } catch (error) {
                         const errorMessage = (error as Error).message;
                         this.logger.error(
@@ -149,7 +137,7 @@ export class BulkDeleteTask {
                     }
 
                     this.logger.debug(
-                      `Processed batch: ${deletedCount} deleted, ${errors.length} errors`
+                      `Processed batch: ${deletedCount} fully deleted, ${errors.length} errors`
                     );
                   }
                 } finally {
