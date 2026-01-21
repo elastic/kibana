@@ -32,8 +32,6 @@ import {
   hasLegacyURLTransform,
   getLegacyURLTransform,
 } from './transforms_registry';
-import { enhancementsPersistableState } from '../common/bwc/enhancements/enhancements_persistable_state';
-import { transformEnhancementsOut } from '../common/bwc/enhancements/transform_enhancements_out';
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private stateTransferService: EmbeddableStateTransfer = {} as EmbeddableStateTransfer;
@@ -49,8 +47,6 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       registerReactEmbeddableFactory,
       registerAddFromLibraryType,
       registerLegacyURLTransform,
-      transformEnhancementsIn: enhancementsPersistableState.extract,
-      transformEnhancementsOut,
     };
   }
 

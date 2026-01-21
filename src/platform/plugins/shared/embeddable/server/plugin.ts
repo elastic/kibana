@@ -25,15 +25,11 @@ import {
   getTelemetryFunction,
 } from './persistable_state';
 import { getAllMigrations } from './persistable_state/get_all_migrations';
-import type {
-  EmbeddableTransforms,
-  TransformEnhancementsIn,
-  TransformEnhancementsOut,
-} from '../common';
-import { enhancementsPersistableState } from '../common/bwc/enhancements/enhancements_persistable_state';
-import type { Drilldown } from './drilldowns/types';
+import type { EmbeddableTransforms, EmbeddableTransformsSetup } from '../common';
+import type { DrilldownSetup } from './drilldowns/types';
 import { DrilldownRegistry } from './drilldowns/registry';
-import { transformEnhancementsOut } from '../common/bwc/enhancements/transform_enhancements_out';
+import { getTransformDrilldownsIn } from '../common/drilldowns/transform_drilldowns_in';
+import { getTransformDrilldownsOut } from '../common/drilldowns/transform_drilldowns_out';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
@@ -45,7 +41,7 @@ export interface EmbeddableSetup extends PersistableStateService<EmbeddableState
     State extends { type: string } = { type: string }
   >(
     type: string,
-    drilldown: Drilldown<StoredState, State>
+    drilldown: DrilldownSetup<StoredState, State>
   ) => void;
   /*
    * Use registerTransforms to register transforms and schema for an embeddable type.
@@ -55,10 +51,8 @@ export interface EmbeddableSetup extends PersistableStateService<EmbeddableState
    * On read, transformOut is used to convert StoredEmbeddableState and inject references into EmbeddableState.
    * On write, transformIn is used to extract references and convert EmbeddableState into StoredEmbeddableState.
    */
-  registerTransforms: (type: string, transforms: EmbeddableTransforms<any, any>) => void;
+  registerTransforms: (type: string, transforms: EmbeddableTransformsSetup<any, any>) => void;
   getAllMigrations: () => MigrateFunctionsObject;
-  transformEnhancementsIn: TransformEnhancementsIn;
-  transformEnhancementsOut: TransformEnhancementsOut;
 }
 
 export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> & {
@@ -74,7 +68,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
   private migrateFn: PersistableStateMigrateFn | undefined;
   private drilldownRegistry = new DrilldownRegistry();
-  private transformsRegistry: { [key: string]: EmbeddableTransforms<any, any> } = {};
+  private transformsRegistry: { [key: string]: EmbeddableTransformsSetup<any, any> } = {};
 
   public setup(core: CoreSetup) {
     this.migrateFn = getMigrateFunction(this.getEmbeddableFactory);
@@ -82,15 +76,13 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
       registerEmbeddableFactory: this.registerEmbeddableFactory,
       registerDrilldown: this.drilldownRegistry
         .registerDrilldown as EmbeddableSetup['registerDrilldown'],
-      registerTransforms: (type: string, transforms: EmbeddableTransforms<any, any>) => {
+      registerTransforms: (type: string, transforms: EmbeddableTransformsSetup<any, any>) => {
         if (this.transformsRegistry[type]) {
           throw new Error(`Embeddable transforms for type "${type}" are already registered.`);
         }
 
         this.transformsRegistry[type] = transforms;
       },
-      transformEnhancementsIn: enhancementsPersistableState.extract,
-      transformEnhancementsOut,
       telemetry: getTelemetryFunction(this.getEmbeddableFactory),
       extract: getExtractFunction(this.getEmbeddableFactory),
       inject: getInjectFunction(this.getEmbeddableFactory),
@@ -105,8 +97,18 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
         Object.values(this.transformsRegistry)
           .map((transforms) => transforms?.getSchema?.())
           .filter((schema) => Boolean(schema)) as ObjectType[],
-      getTransforms: (type: string) => {
-        return this.transformsRegistry[type];
+      getTransforms: (embeddableType: string) => {
+        const drilldownTransforms = {
+          transformIn: getTransformDrilldownsIn(
+            (drilldownType: string) =>
+              this.drilldownRegistry.getDrilldown(drilldownType)?.transformIn
+          ),
+          transformOut: getTransformDrilldownsOut(
+            (drilldownType: string) =>
+              this.drilldownRegistry.getDrilldown(drilldownType)?.transformOut
+          ),
+        };
+        return this.transformsRegistry[embeddableType]?.getTransforms?.(drilldownTransforms);
       },
       telemetry: getTelemetryFunction(this.getEmbeddableFactory),
       extract: getExtractFunction(this.getEmbeddableFactory),

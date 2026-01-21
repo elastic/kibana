@@ -9,6 +9,8 @@
 
 import type { Type } from '@kbn/config-schema';
 import type { Reference } from '@kbn/content-management-utils';
+import type { getTransformDrilldownsIn } from './drilldowns/transform_drilldowns_in';
+import type { getTransformDrilldownsOut } from './drilldowns/transform_drilldowns_out';
 
 export type EmbeddableTransforms<
   StoredEmbeddableState extends object = object,
@@ -39,6 +41,16 @@ export type EmbeddableTransforms<
     state: StoredEmbeddableState;
     references?: Reference[];
   };
+};
+
+export type EmbeddableTransformsSetup<
+  StoredEmbeddableState extends object = object,
+  EmbeddableState extends object = object
+> = {
+  getTransforms?: (drilldownTransforms: {
+    transformIn: ReturnType<typeof getTransformDrilldownsIn>;
+    transformOut: ReturnType<typeof getTransformDrilldownsOut>;
+  }) => EmbeddableTransforms<StoredEmbeddableState, EmbeddableState>;
   /**
    * Embeddable containers that include embeddable state in REST APIs, such as dashboard,
    * use schemas to

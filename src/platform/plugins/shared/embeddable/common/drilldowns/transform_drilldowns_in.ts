@@ -11,10 +11,12 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { DrilldownState } from '../../server';
 
 export function getTransformDrilldownsIn(
-  getTranformIn: (type: string) => (state: {}) => {
-    state: {};
-    references?: Reference[];
-  }
+  getTranformIn: (type: string) =>
+    | ((state: { type: string }) => {
+        state: { type: string };
+        references?: Reference[];
+      })
+    | undefined
 ) {
   function transformDrilldownsIn(drilldowns: DrilldownState[]) {
     const references: Reference[] = [];

@@ -8,9 +8,12 @@
  */
 
 import type { EmbeddableTransforms } from '../common';
+import type { getTransformDrilldownsOut } from '../common/drilldowns/transform_drilldowns_out';
 
 const registry: {
-  [key: string]: () => Promise<EmbeddableTransforms['transformOut']>;
+  [key: string]: (
+    transformDrilldownsOut: ReturnType<typeof getTransformDrilldownsOut>
+  ) => Promise<EmbeddableTransforms['transformOut']>;
 } = {};
 
 export function registerLegacyURLTransform(
@@ -25,7 +28,13 @@ export function registerLegacyURLTransform(
 }
 
 export async function getLegacyURLTransform(type: string) {
-  return await registry[type]?.();
+  const { getTransformDrilldownsOut } = await import(
+    '../common/drilldowns/transform_drilldowns_out'
+  );
+  // TODO replace with function that gets transformDrilldownOut from registry
+  const placeholderGetDrilldownTransformOut = (drilldownType: string) => undefined;
+  const transformDrilldownsOut = getTransformDrilldownsOut(placeholderGetDrilldownTransformOut);
+  return await registry[type]?.(transformDrilldownsOut);
 }
 
 export function hasLegacyURLTransform(type: string) {

@@ -13,7 +13,9 @@ import type { DynamicActionsState } from '../bwc/enhancements/dynamic_actions/ty
 import { convertToDrilldowns } from '../bwc/enhancements/convert_to_drilldowns';
 
 export function getTransformDrilldownsOut(
-  getTranformOut: (type: string) => (state: {}, references?: Reference[]) => {}
+  getTranformOut: (
+    type: string
+  ) => ((state: { type: string }, references?: Reference[]) => { type: string }) | undefined
 ) {
   function transformDrilldownsOut(
     state: {

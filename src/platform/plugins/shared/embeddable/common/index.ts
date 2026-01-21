@@ -7,25 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Reference } from '@kbn/content-management-utils';
-import type { SerializableRecord } from '@kbn/utility-types';
-
-export type { EmbeddableTransforms } from './types';
+export type { EmbeddableTransforms, EmbeddableTransformsSetup } from './types';
 
 export type {
   EmbeddableRegistryDefinition,
   EmbeddableStateWithType,
   EmbeddablePersistableStateService,
 } from '../server';
-
-export type TransformEnhancementsIn = (enhancementsState: SerializableRecord) => {
-  state: SerializableRecord;
-  references: Reference[];
-};
-
-export type TransformEnhancementsOut = (
-  enhancementsState: SerializableRecord,
-  references: Reference[]
-) => SerializableRecord;
 
 export { CONTEXT_MENU_TRIGGER, SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from './constants';
