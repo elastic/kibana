@@ -64,7 +64,7 @@ export const registerListScriptsRoute = (
       },
       options: {
         availability: {
-          since: '9.3.0',
+          since: '9.4.0',
           stability: 'stable',
         },
       },

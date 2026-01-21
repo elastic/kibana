@@ -60,7 +60,7 @@
     "backport"
   ],
   "branchLabelMapping": {
-    "^v9.3.0$": "main",
+    "^v9.4.0$": "main",
     "^v(\\d+).(\\d+).\\d+$": "$1.$2"
   },
   "autoMerge": true,

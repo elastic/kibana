@@ -67,7 +67,7 @@ export const registerCreateScriptRoute = (
           maxBytes: endpointContext.serverConfig.maxEndpointScriptFileSize,
         },
         availability: {
-          since: '9.3.0',
+          since: '9.4.0',
           stability: 'stable',
         },
       },

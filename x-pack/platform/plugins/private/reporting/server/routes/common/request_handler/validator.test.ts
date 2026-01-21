@@ -28,7 +28,7 @@ describe('validateJobParams', () => {
       isEsqlMode: true,
       objectType: 'search',
       title: 'Discover session',
-      version: '9.3.0',
+      version: '9.4.0',
     } as unknown as BaseParams;
 
     expect(() => validateJobParams(validParams)).not.toThrow();
