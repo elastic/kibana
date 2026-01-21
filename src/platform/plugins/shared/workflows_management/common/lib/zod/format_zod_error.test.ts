@@ -108,7 +108,7 @@ describe('formatZodError', () => {
     const result = formatZodError(mockError as any, simpleSchema);
 
     // Should fall back to original message since path doesn't exist in schema
-    expect(result.message).toBe('Expected "0 | 1 | 2"');
+    expect(result.message).toBe('Expected "0 | 1 | 2" at nonexistent');
   });
 });
 
