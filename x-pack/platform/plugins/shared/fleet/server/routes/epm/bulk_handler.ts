@@ -17,7 +17,6 @@ import type {
   FleetRequestHandler,
   GetOneBulkOperationPackagesRequestSchema,
 } from '../../types';
-import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
 import type {
   BulkOperationPackagesResponse,
@@ -66,20 +65,21 @@ export const postBulkUpgradePackagesHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const savedObjectsClient = fleetContext.internalSoClient;
   const spaceId = fleetContext.spaceId;
-  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
-  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
 
   const taskManagerStart = getTaskManagerStart();
   await validateInstalledPackages(savedObjectsClient, request.body.packages, 'upgrade');
 
-  const taskId = await scheduleBulkUpgrade(taskManagerStart, {
-    authorizationHeader,
-    spaceId,
-    packages: request.body.packages,
-    upgradePackagePolicies: request.body.upgrade_package_policies,
-    force: request.body.force,
-    prerelease: request.body.prerelease,
-  });
+  const taskId = await scheduleBulkUpgrade(
+    taskManagerStart,
+    {
+      spaceId,
+      packages: request.body.packages,
+      upgradePackagePolicies: request.body.upgrade_package_policies,
+      force: request.body.force,
+      prerelease: request.body.prerelease,
+    },
+    request
+  );
 
   const body: BulkOperationPackagesResponse = {
     taskId,
@@ -98,10 +98,14 @@ export const postBulkUninstallPackagesHandler: FleetRequestHandler<
   const taskManagerStart = getTaskManagerStart();
   await validateInstalledPackages(savedObjectsClient, request.body.packages, 'uninstall');
 
-  const taskId = await scheduleBulkUninstall(taskManagerStart, {
-    packages: request.body.packages,
-    force: request.body.force,
-  });
+  const taskId = await scheduleBulkUninstall(
+    taskManagerStart,
+    {
+      packages: request.body.packages,
+      force: request.body.force,
+    },
+    request
+  );
 
   const body: BulkOperationPackagesResponse = {
     taskId,
@@ -158,14 +162,18 @@ export const postBulkRollbackPackagesHandler: FleetRequestHandler<
   const taskManagerStart = getTaskManagerStart();
   await validateInstalledPackages(savedObjectsClient, request.body.packages, 'rollback');
 
-  const taskId = await scheduleBulkRollback(taskManagerStart, {
-    packages: request.body.packages,
-    spaceId,
-    packagePolicyIdsForCurrentUser: await getPackagePolicyIdsForCurrentUser(
-      request,
-      request.body.packages
-    ),
-  });
+  const taskId = await scheduleBulkRollback(
+    taskManagerStart,
+    {
+      packages: request.body.packages,
+      spaceId,
+      packagePolicyIdsForCurrentUser: await getPackagePolicyIdsForCurrentUser(
+        request,
+        request.body.packages
+      ),
+    },
+    request
+  );
 
   const body: BulkOperationPackagesResponse = {
     taskId,

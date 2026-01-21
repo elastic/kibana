@@ -20,6 +20,7 @@ import type {
   SavedObjectsUpdateResponse,
   SavedObjectsFindOptions,
   Logger,
+  KibanaRequest,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
@@ -42,8 +43,6 @@ import {
   policyHasFleetServer,
   policyHasSyntheticsIntegration,
 } from '../../common/services';
-
-import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
 import {
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -412,7 +411,7 @@ class AgentPolicyService {
     options: {
       id?: string;
       user?: AuthenticatedUser;
-      authorizationHeader?: HTTPAuthorizationHeader | null;
+      request?: KibanaRequest;
       skipDeploy?: boolean;
       hasFleetServer?: boolean;
     } = {}
@@ -506,7 +505,7 @@ class AgentPolicyService {
       monitoringEnabled,
       spaceId,
       user,
-      authorizationHeader,
+      request,
       force,
       forcePackagePolicyCreation,
     },
@@ -521,7 +520,7 @@ class AgentPolicyService {
       monitoringEnabled?: string[];
       spaceId: string;
       user?: AuthenticatedUser;
-      authorizationHeader?: HTTPAuthorizationHeader | null;
+      request?: KibanaRequest;
       /** Pass force to all following calls: package install, policy creation */
       force?: boolean;
       /** Pass force only to package policy creation */
@@ -542,7 +541,7 @@ class AgentPolicyService {
       monitoringEnabled,
       spaceId,
       user,
-      authorizationHeader,
+      request,
       force,
       forcePackagePolicyCreation,
     });
@@ -568,9 +567,10 @@ class AgentPolicyService {
             spaceId,
             user,
             bumpRevision: false,
-            authorizationHeader,
             force,
-          }
+          },
+          undefined,
+          request
         );
 
         createdPackagePolicyIds.push(createdPackagePolicy.id);
@@ -952,7 +952,7 @@ class AgentPolicyService {
       user?: AuthenticatedUser;
       force?: boolean;
       spaceId?: string;
-      authorizationHeader?: HTTPAuthorizationHeader | null;
+      request?: KibanaRequest;
       skipValidation?: boolean;
       bumpRevision?: boolean;
       requestSpaceId?: string;
@@ -1029,7 +1029,7 @@ class AgentPolicyService {
         esClient,
         packagesToInstall,
         spaceId: options?.spaceId || DEFAULT_SPACE_ID,
-        authorizationHeader: options?.authorizationHeader,
+        request: options?.request,
         force: options?.force,
       });
     }

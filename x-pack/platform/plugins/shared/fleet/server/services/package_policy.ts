@@ -37,8 +37,6 @@ import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import { catchAndSetErrorStackTrace, rethrowIfInstanceOrWrap } from '../errors/utils';
 
-import { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
-
 import {
   packageToPackagePolicy,
   isPackageLimited,
@@ -372,7 +370,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     esClient: ElasticsearchClient,
     packagePolicy: NewPackagePolicy,
     options: {
-      authorizationHeader?: HTTPAuthorizationHeader | null;
       spaceId?: string;
       id?: string;
       user?: AuthenticatedUser;
@@ -399,12 +396,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const useSpaceAwareness = await isSpaceAwarenessEnabled();
     const packagePolicyId = options?.id || uuidv4();
-
-    let authorizationHeader = options.authorizationHeader;
-
-    if (!authorizationHeader && request) {
-      authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
-    }
 
     const savedObjectType = await getPackagePolicySavedObjectType();
     const basePkgInfo =
@@ -504,7 +495,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         pkgName: enrichedPackagePolicy.package.name,
         pkgVersion: enrichedPackagePolicy.package.version,
         force: options?.force,
-        authorizationHeader,
+        request,
       });
     }
 
@@ -719,7 +710,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       bumpRevision?: boolean;
       force?: true;
       asyncDeploy?: boolean;
-    }
+    },
+    request?: KibanaRequest
   ): Promise<{
     created: PackagePolicy[];
     failed: Array<{ packagePolicy: NewPackagePolicy; error?: Error | SavedObjectError }>;
@@ -3205,7 +3197,6 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
     esClient: ElasticsearchClient,
     packagePolicy: NewPackagePolicy,
     options?: {
-      authorizationHeader?: HTTPAuthorizationHeader | null;
       spaceId?: string;
       id?: string;
       user?: AuthenticatedUser;
