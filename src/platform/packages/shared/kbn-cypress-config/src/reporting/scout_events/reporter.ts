@@ -23,7 +23,6 @@ import {
 } from '@kbn/scout-reporting';
 import {
   type CodeOwnersEntry,
-  type CodeOwnerArea,
   getOwningTeamsForPath,
   getCodeOwnersEntries,
   findAreaForCodeOwner,
@@ -103,10 +102,8 @@ export class ScoutCypressReporter {
     return getOwningTeamsForPath(filePath, this.codeOwnersEntries);
   }
 
-  private getOwnerAreas(owners: string[]): CodeOwnerArea[] {
-    return owners
-      .map((owner) => findAreaForCodeOwner(owner))
-      .filter((area) => area !== undefined) as CodeOwnerArea[];
+  private getOwnerAreas(owners: string[]): string[] {
+    return owners.map((owner) => findAreaForCodeOwner(owner) ?? 'unknown');
   }
 
   private getScoutFileInfoForPath(filePath: string): ScoutFileInfo {
