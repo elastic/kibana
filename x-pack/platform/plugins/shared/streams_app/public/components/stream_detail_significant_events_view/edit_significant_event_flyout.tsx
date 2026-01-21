@@ -14,6 +14,7 @@ import type { AIFeatures } from '../../hooks/use_ai_features';
 import { AddSignificantEventFlyout } from './add_significant_event_flyout/add_significant_event_flyout';
 import type { Flow, SaveData } from './add_significant_event_flyout/types';
 import { getStreamTypeFromDefinition } from '../../util/get_stream_type_from_definition';
+import { getFormattedError } from '../../util/errors';
 
 export const EditSignificantEventFlyout = ({
   queryToEdit,
@@ -90,12 +91,12 @@ export const EditSignificantEventFlyout = ({
                 });
               },
               (error) => {
-                notifications.showErrorDialog({
+                notifications.toasts.addError(error, {
                   title: i18n.translate(
                     'xpack.streams.significantEvents.savedSingle.errorToastTitle',
                     { defaultMessage: `Could not save significant event query` }
                   ),
-                  error,
+                  toastMessage: getFormattedError(error).message,
                 });
               }
             );

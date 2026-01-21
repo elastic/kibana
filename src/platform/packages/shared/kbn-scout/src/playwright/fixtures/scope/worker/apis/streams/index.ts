@@ -11,7 +11,7 @@ import type { Condition, StreamlangDSL } from '@kbn/streamlang';
 import type { IngestStream, IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
 import { WiredStream } from '@kbn/streams-schema/src/models/ingest/wired';
 import { ClassicStream } from '@kbn/streams-schema/src/models/ingest/classic';
-import type { RoutingStatus } from '@kbn/streams-schema';
+import type { Feature, RoutingStatus } from '@kbn/streams-schema';
 import { omit } from 'lodash';
 import type { KbnClient, ScoutLogger } from '../../../../../../common';
 import { measurePerformanceAsync } from '../../../../../../common';
@@ -36,6 +36,9 @@ export interface StreamsApiService {
     streamName: string,
     getProcessors: StreamlangDSL | ((prevProcessors: StreamlangDSL) => StreamlangDSL)
   ) => Promise<void>;
+  enableSignificantEvents: () => Promise<void>;
+  disableSignificantEvents: () => Promise<void>;
+  upsertFeature: (streamName: string, feature: Feature) => Promise<void>;
 }
 
 export const getStreamsApiService = ({
@@ -185,6 +188,25 @@ export const getStreamsApiService = ({
               ...processing,
             },
           },
+        });
+      });
+    },
+    enableSignificantEvents: async () => {
+      await kbnClient.uiSettings.update({
+        'observability:streamsEnableSignificantEvents': true,
+      });
+    },
+    disableSignificantEvents: async () => {
+      await kbnClient.uiSettings.update({
+        'observability:streamsEnableSignificantEvents': false,
+      });
+    },
+    upsertFeature: async (streamName: string, feature: Feature) => {
+      await measurePerformanceAsync(log, 'streamsApi.upsertFeature', async () => {
+        await kbnClient.request({
+          method: 'PUT',
+          path: `${basePath}/internal/streams/${streamName}/features/${feature.type}/${feature.name}`,
+          body: feature,
         });
       });
     },

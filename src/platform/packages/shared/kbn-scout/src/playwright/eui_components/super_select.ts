@@ -66,10 +66,8 @@ export class EuiSuperSelectWrapper {
       throw new Error('Cannot select option: super select is disabled');
     }
 
-    let isToggled = false;
     if (!(await this.getIsDropdownOpened())) {
       await this.toggleDropdown();
-      isToggled = true;
     }
 
     // Find the option in the list box with id="value" or data-test-subj="option-type-${value}"
@@ -82,13 +80,15 @@ export class EuiSuperSelectWrapper {
       await optionById.click();
     } else if ((await optionByTestSubj.count()) > 0) {
       await optionByTestSubj.click();
+    } else if ((await this.dropdown.locator('[role="option"]').getByText(value).count()) > 0) {
+      await this.dropdown.locator('[role="option"]').getByText(value).click();
     } else {
       throw new Error(`Could not find option with value "${value}" in Eui Super Select`);
     }
 
     // Wait for dropdown to close
     await this.dropdown.waitFor({ state: 'detached' });
-    if (isToggled) {
+    if (await this.getIsDropdownOpened()) {
       await this.toggleDropdown();
     }
   }

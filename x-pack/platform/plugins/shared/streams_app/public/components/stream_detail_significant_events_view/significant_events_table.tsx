@@ -61,6 +61,7 @@ export function SignificantEventsTable({
       name: i18n.translate('xpack.streams.significantEventsTable.titleColumnTitle', {
         defaultMessage: 'Title',
       }),
+      'data-test-subj': 'significant_events_table_title_column',
       render: (_, record) =>
         discoverLocator ? (
           <EuiLink
@@ -80,6 +81,7 @@ export function SignificantEventsTable({
     },
     {
       field: 'query',
+      'data-test-subj': 'significant_events_table_feature_column',
       name: i18n.translate('xpack.streams.significantEventsTable.feature', {
         defaultMessage: 'Feature',
       }),
@@ -121,6 +123,7 @@ export function SignificantEventsTable({
       name: i18n.translate('xpack.streams.significantEventsTable.queryText', {
         defaultMessage: 'Query',
       }),
+      'data-test-subj': 'significant_events_table_query_column',
       render: (query: StreamQuery) => {
         if (!query.kql.query) {
           return '--';
@@ -131,6 +134,7 @@ export function SignificantEventsTable({
     },
     {
       field: 'query',
+      'data-test-subj': 'significant_events_table_severity_column',
       name: i18n.translate('xpack.streams.significantEventsTable.severityColumnTitle', {
         defaultMessage: 'Severity',
       }),
@@ -224,6 +228,7 @@ export function SignificantEventsTable({
   return (
     <>
       <EuiBasicTable
+        data-test-subj="significant_events_table"
         tableCaption={i18n.translate('xpack.streams.significantEventsTable.tableCaption', {
           defaultMessage: 'Significant events',
         })}

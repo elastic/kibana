@@ -106,6 +106,7 @@ export function ManualFlowForm({
             }
           >
             <EuiFieldText
+              data-test-subj="significant_events_form_title_input"
               value={query?.title}
               disabled={isSubmitting}
               onBlur={() => {
@@ -153,6 +154,7 @@ export function ManualFlowForm({
             }
           >
             <EuiSuperSelect
+              data-test-subj="significant_events_form_feature_select"
               options={options}
               valueOfSelected={
                 query.feature
