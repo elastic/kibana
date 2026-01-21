@@ -11,7 +11,7 @@ import type { Streams, StreamQueryKql, System } from '@kbn/streams-schema';
 import type { TimeRange } from '@kbn/es-query';
 import { compact, isEqual } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
-import { useStreamFeatures } from '../stream_detail_features/stream_features/hooks/use_stream_features';
+import { useStreamSystems } from '../stream_detail_systems/stream_systems/hooks/use_stream_systems';
 import { useKibana } from '../../hooks/use_kibana';
 import { EditSignificantEventFlyout } from './edit_significant_event_flyout';
 import { useFetchSignificantEvents } from '../../hooks/use_fetch_significant_events';
@@ -23,7 +23,7 @@ import { SignificantEventsTable } from './significant_events_table';
 import { EmptyState } from './empty_state';
 import {
   OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM,
-  SELECTED_FEATURES_URL_PARAM,
+  SELECTED_SYSTEMS_URL_PARAM,
 } from '../../constants';
 import { SignificantEventsHistogramChart } from './significant_events_histogram';
 import { formatChangePoint } from './utils/change_point';
@@ -47,7 +47,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     return niceTimeFormatter([timeState.start, timeState.end]);
   }, [timeState.start, timeState.end]);
 
-  const { features, refreshFeatures, featuresLoading } = useStreamFeatures(definition.stream.name);
+  const { systems, refreshSystems, systemsLoading } = useStreamSystems(definition.stream.name);
   const [query, setQuery] = useState<string>('');
   const significantEventsFetchState = useFetchSignificantEvents({
     name: definition.stream.name,
@@ -58,36 +58,34 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
   const [initialFlow, setInitialFlow] = useState<Flow | undefined>('ai');
 
-  const [selectedFeatures, setSelectedFeatures] = useState<System[]>([]);
+  const [selectedSystems, setSelectedSystems] = useState<System[]>([]);
   const [queryToEdit, setQueryToEdit] = useState<StreamQueryKql | undefined>();
   const [dateRange, setDateRange] = useState<TimeRange>(timeState.timeRange);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get(OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM) === 'true' && features.length > 0) {
+    if (urlParams.get(OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM) === 'true' && systems.length > 0) {
       setIsEditFlyoutOpen(true);
 
-      // Parse selected features from URL parameters
-      const selectedFeaturesParam = urlParams.get(SELECTED_FEATURES_URL_PARAM);
+      // Parse selected systems from URL parameters
+      const selectedSystemsParam = urlParams.get(SELECTED_SYSTEMS_URL_PARAM);
 
-      if (selectedFeaturesParam) {
-        const selectedFeatureNames = selectedFeaturesParam.split(',').filter((name) => name.trim());
-        setSelectedFeatures(
-          features.filter((feature) => selectedFeatureNames.includes(feature.name))
-        );
+      if (selectedSystemsParam) {
+        const selectedSystemNames = selectedSystemsParam.split(',').filter((name) => name.trim());
+        setSelectedSystems(systems.filter((system) => selectedSystemNames.includes(system.name)));
       }
 
       // Clean up the URL parameters after opening the flyout
       const newUrl = new URL(window.location.href);
       newUrl.searchParams.delete(OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM);
-      newUrl.searchParams.delete(SELECTED_FEATURES_URL_PARAM);
+      newUrl.searchParams.delete(SELECTED_SYSTEMS_URL_PARAM);
       window.history.replaceState({}, '', newUrl.toString());
     }
-  }, [features]);
+  }, [systems]);
 
   if (
     !significantEventsFetchState.data &&
-    (featuresLoading || significantEventsFetchState.isLoading)
+    (systemsLoading || significantEventsFetchState.isLoading)
   ) {
     return <LoadingPanel size="xxl" />;
   }
@@ -101,10 +99,10 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
       queryToEdit={queryToEdit}
       setQueryToEdit={setQueryToEdit}
       initialFlow={initialFlow}
-      selectedFeatures={selectedFeatures}
-      setSelectedFeatures={setSelectedFeatures}
-      features={features}
-      refreshFeatures={refreshFeatures}
+      selectedSystems={selectedSystems}
+      setSelectedSystems={setSelectedSystems}
+      systems={systems}
+      refreshSystems={refreshSystems}
       generateOnMount={generateOnMount}
       aiFeatures={aiFeatures}
     />
@@ -120,11 +118,11 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     return (
       <>
         <EmptyState
-          features={features}
-          selectedFeatures={selectedFeatures}
-          onFeaturesChange={setSelectedFeatures}
+          systems={systems}
+          selectedSystems={selectedSystems}
+          onSystemsChange={setSelectedSystems}
           definition={definition.stream}
-          refreshFeatures={refreshFeatures}
+          refreshSystems={refreshSystems}
           onManualEntryClick={() => {
             setQueryToEdit(undefined);
             setInitialFlow('manual');
@@ -178,7 +176,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                 size="s"
                 color="primary"
                 onClick={() => {
-                  setSelectedFeatures([]);
+                  setSelectedSystems([]);
                   setIsEditFlyoutOpen(true);
                   setQueryToEdit(undefined);
                 }}
@@ -249,7 +247,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {editFlyout(selectedFeatures.length > 0)}
+      {editFlyout(selectedSystems.length > 0)}
     </>
   );
 }
