@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import type {
-  IngestProcessorContainer,
-  IngestSimulateRequest,
-} from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
+import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { FlattenRecord } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
-import { transpileIngestPipeline } from '@kbn/streamlang';
+import type { StreamlangDSL } from '@kbn/streamlang';
 import type { StreamsClient } from '../../../../lib/streams/client';
 import { FAILURE_STORE_SELECTOR } from '../../../../../common/constants';
+import { simulateProcessing } from './simulation_handler';
 
 const DEFAULT_SAMPLE_SIZE = 100;
 
@@ -33,6 +31,7 @@ export interface FailureStoreSamplesDeps {
   params: FailureStoreSamplesParams;
   scopedClusterClient: IScopedClusterClient;
   streamsClient: StreamsClient;
+  fieldsMetadataClient: IFieldsMetadataClient;
 }
 
 export interface FailureStoreSamplesResponse {
@@ -47,6 +46,7 @@ export const getFailureStoreSamples = async ({
   params,
   scopedClusterClient,
   streamsClient,
+  fieldsMetadataClient,
 }: FailureStoreSamplesDeps): Promise<FailureStoreSamplesResponse> => {
   const { name } = params.path;
   const size = params.query?.size ?? DEFAULT_SAMPLE_SIZE;
@@ -73,20 +73,29 @@ export const getFailureStoreSamples = async ({
   }
 
   // 3. Collect and combine processing steps from all ancestors (root to current stream)
-  const combinedProcessors = collectAncestorProcessors(ancestors, stream);
+  const combinedProcessing = collectAncestorProcessing(ancestors, stream);
 
-  // If no processors are configured, return the raw documents
-  if (combinedProcessors.length === 0) {
+  // If no processing steps are configured, return the raw documents
+  if (combinedProcessing.steps.length === 0) {
     return { documents: failureStoreDocs };
   }
 
-  // 4. Run simulation with combined processors
-  const processedDocs = await simulateWithProcessors({
+  // 4. Run simulation with combined processing using the existing simulateProcessing function
+  const simulationResult = await simulateProcessing({
+    params: {
+      path: { name },
+      body: {
+        processing: combinedProcessing,
+        documents: failureStoreDocs,
+      },
+    },
     scopedClusterClient,
-    documents: failureStoreDocs,
-    processors: combinedProcessors,
-    streamName: name,
+    streamsClient,
+    fieldsMetadataClient,
   });
+
+  // 5. Extract the processed document sources from the simulation result
+  const processedDocs = simulationResult.documents.map((docReport) => docReport.value);
 
   return { documents: processedDocs };
 };
@@ -146,77 +155,34 @@ async function fetchFailureStoreDocuments({
 /**
  * Collects and combines processing steps from all ancestors in order from root to current stream.
  * This ensures processors are applied in the correct order as they would be during normal ingestion.
+ * Returns a combined StreamlangDSL that can be passed to simulateProcessing.
  */
-function collectAncestorProcessors(
+function collectAncestorProcessing(
   ancestors: Streams.WiredStream.Definition[],
   currentStream: Streams.all.Definition
-): IngestProcessorContainer[] {
-  const allProcessors: IngestProcessorContainer[] = [];
+): StreamlangDSL {
+  const allSteps: StreamlangDSL['steps'] = [];
 
   // Sort ancestors from root (shortest name) to closest parent
   const sortedAncestors = [...ancestors].sort((a, b) => a.name.length - b.name.length);
 
-  // Add processors from each ancestor
+  // Add processing steps from each ancestor
   for (const ancestor of sortedAncestors) {
     if (ancestor.ingest.processing.steps.length > 0) {
-      const transpiledProcessors = transpileIngestPipeline(ancestor.ingest.processing).processors;
-      allProcessors.push(...transpiledProcessors);
+      allSteps.push(...ancestor.ingest.processing.steps);
     }
   }
 
-  // Add processors from the current stream if it's a wired or classic stream with processing
+  // Add processing steps from the current stream if it's a wired or classic stream
   if (Streams.WiredStream.Definition.is(currentStream)) {
     if (currentStream.ingest.processing.steps.length > 0) {
-      const transpiledProcessors = transpileIngestPipeline(
-        currentStream.ingest.processing
-      ).processors;
-      allProcessors.push(...transpiledProcessors);
+      allSteps.push(...currentStream.ingest.processing.steps);
     }
   } else if (Streams.ClassicStream.Definition.is(currentStream)) {
     if (currentStream.ingest.processing.steps.length > 0) {
-      const transpiledProcessors = transpileIngestPipeline(
-        currentStream.ingest.processing
-      ).processors;
-      allProcessors.push(...transpiledProcessors);
+      allSteps.push(...currentStream.ingest.processing.steps);
     }
   }
 
-  return allProcessors;
-}
-
-/**
- * Runs the ingest pipeline simulation with the given processors on the documents.
- */
-async function simulateWithProcessors({
-  scopedClusterClient,
-  documents,
-  processors,
-  streamName,
-}: {
-  scopedClusterClient: IScopedClusterClient;
-  documents: FlattenRecord[];
-  processors: IngestProcessorContainer[];
-  streamName: string;
-}): Promise<FlattenRecord[]> {
-  const simulationBody: IngestSimulateRequest = {
-    docs: documents.map((doc, index) => ({
-      _index: streamName,
-      _id: index.toString(),
-      _source: doc,
-    })),
-    pipeline: {
-      processors,
-    },
-  };
-
-  const simulationResult = await scopedClusterClient.asCurrentUser.ingest.simulate(simulationBody);
-
-  // Extract the processed documents from the simulation result
-  return simulationResult.docs.map((docResult) => {
-    if ('doc' in docResult && docResult.doc?._source) {
-      return docResult.doc._source as FlattenRecord;
-    }
-    // If simulation failed for this doc, return the original
-    return documents[parseInt(docResult.doc?._id ?? '0', 10)] ?? {};
-  });
+  return { steps: allSteps };
 }

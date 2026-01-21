@@ -48,10 +48,6 @@ export const DATA_SOURCES_I18N = {
       'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.addDataSource.menu.addCustomSamples',
       { defaultMessage: 'Add custom docs samples' }
     ),
-    addFailureStore: i18n.translate(
-      'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.addDataSource.menu.addFailureStore',
-      { defaultMessage: 'Add documents from failure store' }
-    ),
   },
   dataSourceCard: {
     enabled: i18n.translate(

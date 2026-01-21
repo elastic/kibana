@@ -250,7 +250,7 @@ export const failureStoreSamplesRoute = createServerRoute({
   },
   params: failureStoreSamplesParamsSchema,
   handler: async ({ params, request, getScopedClients }): Promise<FailureStoreSamplesResponse> => {
-    const { scopedClusterClient, streamsClient } = await getScopedClients({
+    const { scopedClusterClient, streamsClient, fieldsMetadataClient } = await getScopedClients({
       request,
     });
 
@@ -277,7 +277,12 @@ export const failureStoreSamplesRoute = createServerRoute({
       throw new SecurityError(`Failure store is not enabled for stream ${params.path.name}`);
     }
 
-    return getFailureStoreSamples({ params, scopedClusterClient, streamsClient });
+    return getFailureStoreSamples({
+      params,
+      scopedClusterClient,
+      streamsClient,
+      fieldsMetadataClient,
+    });
   },
 });
 

@@ -8,12 +8,10 @@
 import React from 'react';
 import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { useBoolean } from '@kbn/react-hooks';
-import { isEnabledFailureStore } from '@kbn/streams-schema';
 import { DATA_SOURCES_I18N } from './translations';
 import {
   createDefaultCustomSamplesDataSource,
   defaultKqlSamplesDataSource,
-  createFailureStoreDataSource,
 } from '../state_management/stream_enrichment_state_machine/utils';
 import {
   useStreamEnrichmentEvents,
@@ -23,16 +21,7 @@ import {
 export const AddDataSourcesContextMenu = () => {
   const { addDataSource } = useStreamEnrichmentEvents();
   const streamName = useStreamEnrichmentSelector((state) => state.context.definition.stream.name);
-  const effectiveFailureStore = useStreamEnrichmentSelector(
-    (state) => state.context.definition.effective_failure_store
-  );
-  const canReadFailureStore = useStreamEnrichmentSelector(
-    (state) => state.context.definition.privileges?.read_failure_store ?? false
-  );
   const [isOpen, { toggle: toggleMenu, off: closeMenu }] = useBoolean();
-
-  const isFailureStoreAvailable =
-    isEnabledFailureStore(effectiveFailureStore) && canReadFailureStore;
 
   const menuItems = [
     {
@@ -53,19 +42,6 @@ export const AddDataSourcesContextMenu = () => {
         closeMenu();
       },
     },
-    ...(isFailureStoreAvailable
-      ? [
-          {
-            name: DATA_SOURCES_I18N.contextMenu.addFailureStore,
-            icon: 'warning',
-            'data-test-subj': 'streamsAppProcessingAddFailureStoreDataSource',
-            onClick: () => {
-              addDataSource(createFailureStoreDataSource(streamName));
-              closeMenu();
-            },
-          },
-        ]
-      : []),
   ];
 
   return (

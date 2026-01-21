@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { GrokCollection } from '@kbn/grok-ui';
-import { Streams } from '@kbn/streams-schema';
+import { isEnabledFailureStore, Streams } from '@kbn/streams-schema';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate5';
 import { assign, cancel, forwardTo, raise, sendTo, setup, stopChild } from 'xstate5';
@@ -50,6 +50,7 @@ import { yamlModeMachine } from '../yaml_mode_machine';
 import { setupGrokCollectionActor } from './setup_grok_collection_actor';
 import { createUrlInitializerActor, createUrlSyncAction } from './url_state_actor';
 import {
+  createFailureStoreDataSource,
   defaultEnrichmentUrlState,
   getActiveDataSourceRef,
   getActiveDataSourceSamples,
@@ -205,11 +206,24 @@ export const streamEnrichmentMachine = setup({
     stopInteractiveMode: stopChild('interactiveMode'),
     stopYamlMode: stopChild('yamlMode'),
     /* Data sources actions */
-    setupDataSources: assign((assignArgs) => ({
-      dataSourcesRefs: assignArgs.context.urlState.dataSources.map((dataSource) =>
-        spawnDataSource(dataSource, assignArgs)
-      ),
-    })),
+    setupDataSources: assign((assignArgs) => {
+      const { definition, urlState } = assignArgs.context;
+      const dataSources = [...urlState.dataSources];
+
+      // Add failure store data source by default if available and not already present
+      const isFailureStoreAvailable =
+        isEnabledFailureStore(definition.effective_failure_store) &&
+        definition.privileges?.read_failure_store;
+      const hasFailureStoreDataSource = dataSources.some((ds) => ds.type === 'failure-store');
+
+      if (isFailureStoreAvailable && !hasFailureStoreDataSource) {
+        dataSources.push(createFailureStoreDataSource(definition.stream.name));
+      }
+
+      return {
+        dataSourcesRefs: dataSources.map((dataSource) => spawnDataSource(dataSource, assignArgs)),
+      };
+    }),
     addDataSource: assign((assignArgs, { dataSource }: { dataSource: EnrichmentDataSource }) => {
       const newDataSourceRef = spawnDataSource(dataSource, assignArgs);
 
