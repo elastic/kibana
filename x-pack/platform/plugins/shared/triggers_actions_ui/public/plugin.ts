@@ -44,6 +44,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-browser/src/triggers';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { Rule, RuleUiAction } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 
@@ -175,6 +176,7 @@ interface PluginsStart {
   licensing: LicensingPluginStart;
   serverless?: ServerlessPluginStart;
   fieldFormats: FieldFormatsRegistry;
+  kql: KqlPluginStart;
   lens: LensPublicStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   uiActions: UiActionsStart;
@@ -317,6 +319,7 @@ export class Plugin
             actionTypeRegistry,
             ruleTypeRegistry,
             kibanaFeatures,
+            kql: pluginsStart.kql,
             licensing: pluginsStart.licensing,
             expressions: pluginsStart.expressions,
             isServerless: !!pluginsStart.serverless,
@@ -419,6 +422,7 @@ export class Plugin
             actionTypeRegistry,
             ruleTypeRegistry,
             kibanaFeatures,
+            kql: pluginsStart.kql,
             licensing: pluginsStart.licensing,
             expressions: pluginsStart.expressions,
             isServerless,
@@ -491,6 +495,7 @@ export class Plugin
             actionTypeRegistry,
             ruleTypeRegistry,
             kibanaFeatures,
+            kql: pluginsStart.kql,
             licensing: pluginsStart.licensing,
             expressions: pluginsStart.expressions,
             isServerless,

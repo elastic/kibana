@@ -43,6 +43,7 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import type { ActionTypeRegistryContract, RuleTypeRegistryContract } from '../types';
 import type { Section } from './constants';
@@ -78,6 +79,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   kibanaFeatures: KibanaFeature[];
   element: HTMLElement;
   i18n: I18nStart;
+  kql: KqlPluginStart;
   theme: ThemeServiceStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   licensing: LicensingPluginStart;

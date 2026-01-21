@@ -21,6 +21,7 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 
 export const createStartServicesMock = (): TriggersAndActionsUiServices => {
   const core = coreMock.createStart();
@@ -68,6 +69,7 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
     expressions: expressionsPluginMock.createStartContract(),
     isServerless: false,
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
+    kql: kqlPluginMock.createStartContract(),
     lens: lensPluginMock.createStartContract(),
     fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
   } as TriggersAndActionsUiServices;

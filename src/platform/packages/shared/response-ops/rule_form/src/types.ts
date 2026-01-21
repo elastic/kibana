@@ -26,6 +26,7 @@ import type { ActionConnector, ActionTypeRegistryContract } from '@kbn/alerts-ui
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type {
   MinimumScheduleInterval,
   Rule,
@@ -70,6 +71,7 @@ export interface RuleFormPlugins {
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   docLinks: DocLinksStart;
+  kql: KqlPluginStart;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   fieldsMetadata: FieldsMetadataPublicStart;

@@ -24,6 +24,7 @@
       "features",
       "files",
       "inspector",
+      "kql",
       "lens",
       "observabilityShared",
       "ruleRegistry",
@@ -66,7 +67,6 @@
       "logsShared",
       "kibanaReact",
       "kibanaUtils",
-      "kql",
       "stackAlerts",
       "spaces",
       "observabilityAgentBuilder"
