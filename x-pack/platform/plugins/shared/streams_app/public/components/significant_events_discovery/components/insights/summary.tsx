@@ -36,13 +36,19 @@ export function Summary({ count }: { count: number }) {
   const {
     scheduleInsightsIdentificationTask,
     getInsightsIdentificationTaskStatus,
+    acknowledgeInsightsIdentificationTask,
     cancelInsightsIdentificationTask,
   } = useInsightsApi();
 
   const [{ value: task }, getTaskStatus] = useAsyncFn(getInsightsIdentificationTaskStatus);
-  const [{ loading: isSchedulingTask }, scheduleTask] = useAsyncFn(
-    scheduleInsightsIdentificationTask
-  );
+  const [{ loading: isSchedulingTask }, scheduleTask] = useAsyncFn(async (connectorId: string) => {
+    /**
+     * Combining scheduling and immediate status update to prevent
+     * React updating the UI in between states causing flickering
+     */
+    await scheduleInsightsIdentificationTask(connectorId);
+    await getTaskStatus();
+  });
 
   useEffect(() => {
     getTaskStatus();
@@ -73,12 +79,28 @@ export function Summary({ count }: { count: number }) {
     }
 
     await scheduleTask(aiFeatures?.genAiConnectors.selectedConnector);
-    getTaskStatus();
+  };
+
+  const onRegenerateSummaryClick = async () => {
+    if (!aiFeatures?.genAiConnectors.selectedConnector) {
+      return;
+    }
+
+    await acknowledgeInsightsIdentificationTask();
+    await scheduleTask(aiFeatures?.genAiConnectors.selectedConnector);
+
+    setSummary(null);
   };
 
   const onCancelClick = async () => {
     await cancelInsightsIdentificationTask();
+    getTaskStatus();
   };
+
+  const isGenerateButtonPending =
+    task?.status === TaskStatus.InProgress ||
+    task?.status === TaskStatus.BeingCanceled ||
+    isSchedulingTask;
 
   if (summary) {
     return (
@@ -98,6 +120,19 @@ export function Summary({ count }: { count: number }) {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <FeedbackButtons />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill={true}
+                    iconType="refresh"
+                    onClick={onRegenerateSummaryClick}
+                    disabled={isSchedulingTask}
+                    isLoading={isSchedulingTask}
+                  >
+                    {i18n.translate('xpack.streams.summary.regenerateInsightsButtonLabel', {
+                      defaultMessage: 'Re-generate insights',
+                    })}
+                  </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>
@@ -171,23 +206,26 @@ export function Summary({ count }: { count: number }) {
                               defaultMessage: 'Generate insights',
                             }
                           ),
-                    onClick: () => {
-                      onGenerateSummaryClick();
-                    },
-                    isDisabled:
-                      summary !== null ||
-                      task?.status === TaskStatus.InProgress ||
-                      isSchedulingTask,
-                    isLoading: task?.status === TaskStatus.InProgress,
+                    onClick: onGenerateSummaryClick,
+                    isDisabled: isGenerateButtonPending,
+                    isLoading: isGenerateButtonPending,
                     'data-test-subj': 'significant_events_generate_summary_button',
                   }}
                 />
 
-                {task?.status === TaskStatus.InProgress && (
-                  <EuiButton onClick={onCancelClick}>
-                    {i18n.translate('xpack.streams.summary.cancelButtonLabel', {
-                      defaultMessage: 'Cancel',
-                    })}
+                {(task?.status === TaskStatus.InProgress ||
+                  task?.status === TaskStatus.BeingCanceled) && (
+                  <EuiButton
+                    onClick={onCancelClick}
+                    isDisabled={task?.status === TaskStatus.BeingCanceled}
+                  >
+                    {task?.status === TaskStatus.BeingCanceled
+                      ? i18n.translate('xpack.streams.summary.cancellingTaskButtonLabel', {
+                          defaultMessage: 'Cancelling',
+                        })
+                      : i18n.translate('xpack.streams.summary.cancelTaskButtonLabel', {
+                          defaultMessage: 'Cancel',
+                        })}
                   </EuiButton>
                 )}
               </EuiFlexGroup>
