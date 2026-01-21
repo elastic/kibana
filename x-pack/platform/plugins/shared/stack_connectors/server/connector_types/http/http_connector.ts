@@ -168,7 +168,7 @@ export async function executor(
     services,
   } = execOptions;
 
-  const { method, path, body, query, headers: paramsHeaders, timeout, fetcher } = params;
+  const { method, path, body, query, headers: paramsHeaders, fetcher } = params;
 
   const baseUrl = config.url || params.url;
   if (!baseUrl) {
@@ -235,7 +235,6 @@ export async function executor(
       configurationUtilities,
       sslOverrides,
       connectorUsageCollector,
-      timeout,
       keepAlive,
       maxRedirects,
     })
