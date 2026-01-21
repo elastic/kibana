@@ -102,7 +102,7 @@ export class ScoutPlaywrightReporter implements Reporter {
 
     return {
       path: filePath,
-      owner: fileOwners,
+      owner: fileOwners.length > 0 ? fileOwners : 'unknown',
       area: areas.length > 0 ? areas : 'unknown',
     };
   }
