@@ -41,7 +41,7 @@ async function generateElasticsearchSettingsDefinitions(): Promise<void> {
       const settingName = setting.name;
       const modifiedSetting = {
         ...setting,
-        ignoreAsSuggestion: SETTINGS_TO_EXCLUDE.has(settingName),
+        ignoreAsSuggestion: setting.snapshotOnly || SETTINGS_TO_EXCLUDE.has(settingName),
       };
       return `const ${camelCase(settingName)} = ${JSON.stringify(modifiedSetting, null, 2)};`;
     })
