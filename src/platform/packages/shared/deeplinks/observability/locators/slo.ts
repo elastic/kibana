@@ -39,4 +39,5 @@ export interface SloDetailsHistoryLocatorParams extends SerializableRecord {
 
 export interface SloListLocatorParams extends SerializableRecord {
   kqlQuery?: string;
+  filters?: SerializableRecord[];
 }

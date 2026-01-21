@@ -5,15 +5,28 @@
  * 2.0.
  */
 
+import {
+  rulesLocatorID,
+  sloListLocatorID,
+  type RulesLocatorParams,
+  type SloListLocatorParams,
+} from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { ApmRuleType } from '@kbn/rule-data-utils';
-import rison from '@kbn/rison';
 import { useMemo } from 'react';
 import type { ServiceListItem } from '../../../../../common/service_inventory';
 import type { ApmIndicatorType } from '../../../../../common/slo_indicator_types';
+import { APM_SLO_INDICATOR_TYPES } from '../../../../../common/slo_indicator_types';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
 import type { TableActions } from '../../../shared/managed_table';
+
+const APM_RULE_TYPES = [
+  'apm.anomaly',
+  'apm.error_rate',
+  'apm.transaction_error_rate',
+  'apm.transaction_duration',
+];
 
 interface UseServiceActionsParams {
   openAlertFlyout: (ruleType: ApmRuleType, serviceName: string) => void;
@@ -29,8 +42,10 @@ export function useServiceActions({
   openAlertFlyout,
   openSloFlyout,
 }: UseServiceActionsParams): UseServiceActionsReturn {
-  const { core, plugins } = useApmPluginContext();
+  const { core, plugins, share } = useApmPluginContext();
   const { capabilities } = core.application;
+  const rulesLocator = share.url.locators.get<RulesLocatorParams>(rulesLocatorID);
+  const sloListLocator = share.url.locators.get<SloListLocatorParams>(sloListLocatorID);
 
   const { canSaveAlerts } = getAlertingCapabilities(plugins, capabilities);
   const canSaveApmAlerts = !!(capabilities.apm.save && canSaveAlerts);
@@ -101,19 +116,13 @@ export function useServiceActions({
             }),
             icon: 'tableOfContents',
             onClick: (item) => {
-              const { basePath } = core.http;
-              const rulesUrl = basePath.prepend(
-                `/app/observability/alerts/rules?_a=${rison.encode({
-                  search: `service.name:${item.serviceName}`,
-                  type: [
-                    'apm.anomaly',
-                    'apm.error_rate',
-                    'apm.transaction_error_rate',
-                    'apm.transaction_duration',
-                  ],
-                })}`
-              );
-              window.location.href = rulesUrl;
+              const rulesUrl = rulesLocator?.getRedirectUrl({
+                search: `service.name:${item.serviceName}`,
+                type: APM_RULE_TYPES,
+              });
+              if (rulesUrl) {
+                window.location.href = rulesUrl;
+              }
             },
           },
         ],
@@ -152,54 +161,44 @@ export function useServiceActions({
             }),
             icon: 'tableOfContents',
             onClick: (item) => {
-              const { basePath } = core.http;
-              const slosUrl = basePath.prepend(
-                `/app/slos?search=${rison.encode({
-                  filters: [
-                    {
-                      meta: {
-                        alias: null,
-                        disabled: false,
-                        key: 'service.name',
-                        negate: false,
-                        params: { query: item.serviceName },
-                        type: 'phrase',
-                      },
-                      query: {
-                        match_phrase: { 'service.name': item.serviceName },
+              const slosUrl = sloListLocator?.getRedirectUrl({
+                filters: [
+                  {
+                    meta: {
+                      alias: null,
+                      disabled: false,
+                      key: 'service.name',
+                      negate: false,
+                      params: { query: item.serviceName },
+                      type: 'phrase',
+                    },
+                    query: {
+                      match_phrase: { 'service.name': item.serviceName },
+                    },
+                  },
+                  {
+                    meta: {
+                      alias: null,
+                      disabled: false,
+                      key: 'slo.indicator.type',
+                      negate: false,
+                      params: [...APM_SLO_INDICATOR_TYPES],
+                      type: 'phrases',
+                    },
+                    query: {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: APM_SLO_INDICATOR_TYPES.map((type) => ({
+                          match_phrase: { 'slo.indicator.type': type },
+                        })),
                       },
                     },
-                    {
-                      meta: {
-                        alias: null,
-                        disabled: false,
-                        key: 'slo.indicator.type',
-                        negate: false,
-                        params: ['sli.apm.transactionDuration', 'sli.apm.transactionErrorRate'],
-                        type: 'phrases',
-                      },
-                      query: {
-                        bool: {
-                          minimum_should_match: 1,
-                          should: [
-                            {
-                              match_phrase: {
-                                'slo.indicator.type': 'sli.apm.transactionDuration',
-                              },
-                            },
-                            {
-                              match_phrase: {
-                                'slo.indicator.type': 'sli.apm.transactionErrorRate',
-                              },
-                            },
-                          ],
-                        },
-                      },
-                    },
-                  ],
-                })}`
-              );
-              window.location.href = slosUrl;
+                  },
+                ],
+              });
+              if (slosUrl) {
+                window.location.href = slosUrl;
+              }
             },
           },
         ],
@@ -207,7 +206,14 @@ export function useServiceActions({
     }
 
     return actionsList;
-  }, [openAlertFlyout, openSloFlyout, core.http, canSaveApmAlerts, canWriteSlos]);
+  }, [
+    openAlertFlyout,
+    openSloFlyout,
+    canSaveApmAlerts,
+    canWriteSlos,
+    rulesLocator,
+    sloListLocator,
+  ]);
 
   return { actions, showActionsColumn };
 }
