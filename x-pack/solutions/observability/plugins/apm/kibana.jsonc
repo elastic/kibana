@@ -30,6 +30,7 @@
       "triggersActionsUi",
       "share",
       "unifiedSearch",
+      "kql",
       "dataViews",
       "lens",
       "maps",

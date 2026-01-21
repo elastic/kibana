@@ -28,6 +28,7 @@ import {
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 import type { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
+import { isMac } from '@kbn/shared-ux-utility';
 import type { DataErrorsControl, ESQLEditorDeps } from '../types';
 import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
 import { HistoryAndStarredQueriesTabs, QueryHistoryAction } from './history_starred_queries';
@@ -35,7 +36,6 @@ import { KeyboardShortcuts } from './keyboard_shortcuts';
 import { QueryWrapComponent } from './query_wrap_component';
 import { QuickSearchAction } from '../editor_visor/quick_search_action';
 
-const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const COMMAND_KEY = isMac ? '⌘' : '^';
 
 interface EditorFooterProps {
