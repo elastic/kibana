@@ -21,7 +21,11 @@ export const CreatePackagePolicyPage: React.FC<{}> = () => {
   const { search } = useLocation();
   const { params } = useRouteMatch<AddToPolicyParams>();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
-  const useMultiPageLayout = useMemo(() => queryParams.has('useMultiPageLayout'), [queryParams]);
+  const useMultiPageLayout = useMemo(
+    () =>
+      queryParams.has('useMultiPageLayout') && queryParams.get('useMultiPageLayout') !== 'false',
+    [queryParams]
+  );
   const queryParamsPolicyId = useMemo(
     () => queryParams.get('policyId') ?? undefined,
     [queryParams]

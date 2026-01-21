@@ -526,7 +526,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'dataConnectors:enabled': {
+  'dataSources:enabled': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -707,12 +707,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Enable Significant events discovery in Streams.',
-    },
-  },
-  'observability:streamsEnableGroupStreams': {
-    type: 'boolean',
-    _meta: {
-      description: 'Enable Group streams in Streams',
     },
   },
   'observability:streamsEnableAttachments': {

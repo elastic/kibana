@@ -14,13 +14,10 @@ import type {
   StaticToolRegistration,
   ToolHandlerReturn,
 } from '@kbn/agent-builder-server';
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
-import type {
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
-} from '../../types';
+import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import { getToolHandler } from './handler';
 
@@ -67,10 +64,7 @@ export function createGetHostsTool({
   logger,
   dataRegistry,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   logger: Logger;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
 }): StaticToolRegistration<typeof getHostsSchema> {
@@ -98,12 +92,7 @@ Returns host names, metrics (CPU percentage, memory usage, disk space, network r
       toolParams,
       { request }
     ): Promise<ToolHandlerReturn<GetHostsToolResult | ErrorResult>> => {
-      const {
-        start = DEFAULT_TIME_RANGE.start,
-        end = DEFAULT_TIME_RANGE.end,
-        limit = DEFAULT_LIMIT,
-        kqlFilter,
-      } = toolParams;
+      const { start, end, limit = DEFAULT_LIMIT, kqlFilter } = toolParams;
 
       try {
         const { hosts, total } = await getToolHandler({

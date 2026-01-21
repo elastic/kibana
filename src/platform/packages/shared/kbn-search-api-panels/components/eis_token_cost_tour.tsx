@@ -74,6 +74,7 @@ export const EisTokenCostTour = ({
           <p>{i18n.EIS_COSTS_TOUR_DESCRIPTION}</p>
         </EuiText>
       }
+      display="block"
       isStepOpen={isPromoVisible}
       anchorPosition={anchorPosition}
       step={1}
@@ -86,7 +87,7 @@ export const EisTokenCostTour = ({
           onClick={onDismissPromo}
           aria-label={i18n.EIS_COSTS_TOUR_DISMISS_ARIA}
         >
-          {i18n.EIS_TOUR_DISMISS}
+          {i18n.TOUR_DISMISS}
         </EuiButtonEmpty>,
         ...(ctaLink
           ? [
@@ -101,7 +102,7 @@ export const EisTokenCostTour = ({
                 iconSide="right"
                 iconType="popout"
               >
-                {i18n.EIS_TOUR_CTA}
+                {i18n.TOUR_CTA}
               </EuiButton>,
             ]
           : []),
