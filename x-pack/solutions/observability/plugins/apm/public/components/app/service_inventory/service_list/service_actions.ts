@@ -115,15 +115,11 @@ export function useServiceActions({
               defaultMessage: 'Manage rules',
             }),
             icon: 'tableOfContents',
-            onClick: (item) => {
-              const rulesUrl = rulesLocator?.getRedirectUrl({
+            href: (item) =>
+              rulesLocator?.getRedirectUrl({
                 search: `service.name:${item.serviceName}`,
                 type: APM_RULE_TYPES,
-              });
-              if (rulesUrl) {
-                window.location.href = rulesUrl;
-              }
-            },
+              }),
           },
         ],
       });
@@ -160,8 +156,8 @@ export function useServiceActions({
               defaultMessage: 'Manage SLOs',
             }),
             icon: 'tableOfContents',
-            onClick: (item) => {
-              const slosUrl = sloListLocator?.getRedirectUrl({
+            href: (item) =>
+              sloListLocator?.getRedirectUrl({
                 filters: [
                   {
                     meta: {
@@ -195,11 +191,7 @@ export function useServiceActions({
                     },
                   },
                 ],
-              });
-              if (slosUrl) {
-                window.location.href = slosUrl;
-              }
-            },
+              }),
           },
         ],
       });
