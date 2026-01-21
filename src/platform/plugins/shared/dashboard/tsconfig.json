@@ -99,7 +99,8 @@
     "@kbn/cps",
     "@kbn/core-chrome-app-menu-components",
     "@kbn/core-chrome-app-menu",
-    "@kbn/test-jest-helpers"
+    "@kbn/test-jest-helpers",
+    "@kbn/image-embeddable-plugin"
   ],
   "exclude": ["target/**/*"]
 }
