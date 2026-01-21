@@ -21,7 +21,5 @@ export default createTestConfig({
 
   // include settings from project controller
   esServerArgs: [],
-  kbnServerArgs: [
-    `--xpack.trigger_actions_ui.enableExperimental=${JSON.stringify(['unifiedRulesPage'])}`,
-  ],
+  kbnServerArgs: [],
 });
