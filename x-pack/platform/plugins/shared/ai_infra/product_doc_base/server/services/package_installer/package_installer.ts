@@ -75,7 +75,7 @@ export class PackageInstaller {
     this.esClient = esClient;
     this.productDocClient = productDocClient;
     this.artifactsFolder = artifactsFolder;
-    this.artifactRepositoryUrl = artifactRepositoryProxyUrl ?? artifactRepositoryUrl;
+    this.artifactRepositoryUrl = artifactRepositoryUrl;
     this.artifactRepositoryProxyUrl = artifactRepositoryProxyUrl;
     this.currentVersion = majorMinor(kibanaVersion);
     this.log = logger;
