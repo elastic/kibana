@@ -10,6 +10,11 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import type {
+  EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectsPluginStart,
+} from '@kbn/encrypted-saved-objects-plugin/server';
 import type {
   CoreRequestHandlerContext,
   CustomRequestHandlerContext,
@@ -25,12 +30,15 @@ import type { LogsExtractionClient } from './domain/logs_extraction_client';
 export interface EntityStoreSetupPlugins {
   taskManager: TaskManagerSetupContract;
   spaces: SpacesPluginSetup;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
 }
 
 export interface EntityStoreStartPlugins {
   taskManager: TaskManagerStartContract;
   spaces: SpacesPluginStart;
   dataViews: DataViewsPluginStart;
+  security?: SecurityPluginStart;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
 }
 
 export interface EntityStoreApiRequestHandlerContext {

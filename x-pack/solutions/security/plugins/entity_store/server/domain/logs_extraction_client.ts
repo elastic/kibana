@@ -44,18 +44,18 @@ export class LogsExtractionClient {
     type: EntityType,
     opts?: LogsExtractionOptions
   ): Promise<ExtractedLogsSummary> {
-    const logger = this.logger.get('logsExtraction').get(type);
-    logger.debug('starting entity extraction');
+    this.logger.debug('starting entity extraction');
 
     try {
       const entityDefinition = getEntityDefinition({ type });
 
       const maxPageSearchSize = 10000; // get from config in the saved object
-      const indexPatterns = await this.getIndexPatterns(type, logger);
+      const indexPatterns = await this.getIndexPatterns(type);
       const latestIndex = getLatestEntitiesIndexName(type, this.namespace);
 
       // Needs to be fetched from the saved object
-      const fromDateISO = opts?.fromDateISO || moment().utc().subtract(1, 'minute').toISOString();
+      // 5min lookback just to make sure we are getting data in this testing stage
+      const fromDateISO = opts?.fromDateISO || moment().utc().subtract(5, 'minute').toISOString();
       const toDateISO = opts?.toDateISO || moment().utc().toISOString();
 
       const query = buildLogsExtractionEsqlQuery({
@@ -67,16 +67,16 @@ export class LogsExtractionClient {
         toDateISO,
       });
 
-      logger.debug(`Running query to extract logs from ${fromDateISO} to ${toDateISO}`);
+      this.logger.debug(`Running query to extract logs from ${fromDateISO} to ${toDateISO}`);
       const esqlResponse = await executeEsqlQuery({ esClient: this.esClient, query });
 
-      logger.debug(`Found ${esqlResponse.values.length}, ingesting them`);
+      this.logger.debug(`Found ${esqlResponse.values.length}, ingesting them`);
       await ingestEntities({
         esClient: this.esClient,
         esqlResponse,
         esIdField: HASHED_ID,
         targetIndex: latestIndex,
-        logger,
+        logger: this.logger,
       });
       return {
         success: true,
@@ -85,13 +85,13 @@ export class LogsExtractionClient {
       };
     } catch (error) {
       // store error on saved object
-      logger.error(error);
+      this.logger.error(error);
       return { success: false, error };
     }
   }
 
   // We need to include index patterns provided manually by the customer
-  private async getIndexPatterns(type: EntityType, logger: Logger) {
+  private async getIndexPatterns(type: EntityType) {
     const resetIndex = getResetEntitiesIndexName(type, this.namespace);
     const alertsIndex = alertsIndexName(this.namespace);
     const secSolIndices = [];
@@ -102,8 +102,8 @@ export class LogsExtractionClient {
       );
       secSolIndices.push(...secSolDataView.getIndexPattern().split(','));
     } catch (error) {
-      logger.error('Problems find security solution data view indices, defaulting to logs-*');
-      logger.error(error);
+      this.logger.error('Problems find security solution data view indices, defaulting to logs-*');
+      this.logger.error(error);
       secSolIndices.push('logs-*');
     }
 
