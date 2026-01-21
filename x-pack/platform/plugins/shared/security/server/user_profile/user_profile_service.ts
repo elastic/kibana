@@ -152,7 +152,6 @@ export class UserProfileService {
         console.log(`***** activateRequest: ${JSON.stringify(activateRequest)}`);
         const response = await clusterClient.asInternalUser.security.activateUserProfile({
           ...activateRequest,
-          // querystring: { data: prefixCommaSeparatedValues('*', KIBANA_DATA_ROOT) },
         });
 
         this.logger.debug(`Successfully activated profile for "${response.user.username}".`);
@@ -314,7 +313,7 @@ export class UserProfileService {
               error
             )}`
           );
-          // throw error; // Gracefully return null instead of throwing
+          // throw error; // Gracefully return null
         }
       }
     }
