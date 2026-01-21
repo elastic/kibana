@@ -6,7 +6,7 @@
  */
 
 import { isEqual } from 'lodash';
-import type { StreamQueryKql } from '@kbn/streams-schema';
+import type { StreamQuery } from '@kbn/streams-schema';
 import type { QueryClient } from '../../lib/streams/assets/query/query_client';
 import { StatusError } from '../../lib/streams/errors/status_error';
 
@@ -21,7 +21,7 @@ export async function assertFeatureNotChanged({
 }: {
   queryClient: QueryClient;
   streamName: string;
-  queries: Array<{ id: string; feature: StreamQueryKql['feature'] }>;
+  queries: Array<{ id: string; feature: StreamQuery['feature'] }>;
 }): Promise<void> {
   if (queries.length === 0) return;
 
