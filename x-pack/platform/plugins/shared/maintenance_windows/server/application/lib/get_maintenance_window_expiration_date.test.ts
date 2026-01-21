@@ -27,7 +27,6 @@ describe('getMaintenanceWindowExpirationDate', () => {
           onWeekDay: ['MO', 'FR'],
         },
       },
-      duration: 1 * 60 * 60 * 1000,
     });
     expect(result).toEqual('2024-03-25T00:30:00.000Z');
   });
@@ -38,7 +37,6 @@ describe('getMaintenanceWindowExpirationDate', () => {
         start: '2023-03-25T09:00:00.000Z',
         duration: '1h',
       },
-      duration: 1 * 60 * 60 * 1000,
     });
     expect(result).toEqual('2023-03-25T10:00:00.000Z');
   });

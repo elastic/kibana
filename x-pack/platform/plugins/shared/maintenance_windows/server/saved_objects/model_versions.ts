@@ -11,7 +11,7 @@ import type {
 } from '@kbn/core-saved-objects-server';
 import type { TypeOf } from '@kbn/config-schema';
 import { rawMaintenanceWindowSchemaV1, rawMaintenanceWindowSchemaV2 } from './schema';
-import { transformRRuleToCustomSchedule } from '../routes/schemas/schedule';
+import { transformRRuleToCustomSchedule } from '../lib/transforms/rrule_to_custom/latest';
 
 type MaintenanceWindowV1 = TypeOf<typeof rawMaintenanceWindowSchemaV1>;
 type MaintenanceWindowV2 = TypeOf<typeof rawMaintenanceWindowSchemaV2>;

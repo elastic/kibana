@@ -7,11 +7,11 @@
 
 import { maintenanceWindowModelVersions } from './model_versions';
 import { rawMaintenanceWindowSchemaV1, rawMaintenanceWindowSchemaV2 } from './schema';
-import { transformRRuleToCustomSchedule } from '../routes/schemas/schedule';
+import { transformRRuleToCustomSchedule } from '../lib/transforms/rrule_to_custom/latest';
 import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-server';
 
 jest.mock('./schema');
-jest.mock('../routes/schemas/schedule');
+jest.mock('../lib/transforms/rrule_to_custom/latest');
 
 describe('maintenanceWindowModelVersions', () => {
   describe('version 1', () => {
@@ -106,6 +106,7 @@ describe('maintenanceWindowModelVersions', () => {
           recurring: {
             end: '2026-01-08T23:59:59.999Z',
             every: '1h',
+            onWeekDay: ['-1MO', 'TU', 'WE', 'TH', '+4FR'],
           },
         };
         mockTransformRRuleToCustomSchedule.mockReturnValue(mockSchedule);
@@ -121,6 +122,7 @@ describe('maintenanceWindowModelVersions', () => {
               freq: 4,
               interval: 1,
               until: '2026-01-08T23:59:59.999Z',
+              byweekday: ['-1MO', 'TU', 'WE', 'TH', '+4FR'],
             },
             enabled: true,
           },
@@ -147,6 +149,7 @@ describe('maintenanceWindowModelVersions', () => {
             freq: 4,
             interval: 1,
             until: '2026-01-08T23:59:59.999Z',
+            byweekday: ['-1MO', 'TU', 'WE', 'TH', '+4FR'],
           },
         });
         expect(result).toEqual({
@@ -158,6 +161,15 @@ describe('maintenanceWindowModelVersions', () => {
       });
 
       it('should transform scopedQuery to scope when scope does not exist', () => {
+        mockTransformRRuleToCustomSchedule.mockReturnValue({
+          start: '2026-01-08T12:01:17.327Z',
+          timezone: 'Europe/London',
+          duration: '30m',
+          recurring: {
+            every: '1h',
+            end: '2026-01-08T23:59:59.999Z',
+          },
+        });
         const mockDocument = {
           id: 'test-id',
           type: 'maintenance-window',
@@ -170,17 +182,30 @@ describe('maintenanceWindowModelVersions', () => {
               interval: 1,
               until: '2026-01-08T23:59:59.999Z',
             },
-            scopedQuery: { kql: 'test: query' },
-            schedule: {
-              custom: {
-                duration: '30m',
-                start: '2026-01-08T12:01:17.327Z',
-                timezone: 'Europe/London',
-                recurring: {
-                  end: '2026-01-08T23:59:59.999Z',
-                  every: '1h',
+            scopedQuery: {
+              filters: [
+                {
+                  $state: {
+                    store: 'appState',
+                  },
+                  meta: {
+                    disabled: false,
+                    negate: false,
+                    alias: null,
+                    key: '_id',
+                    field: '_id',
+                    value: 'exists',
+                    type: 'exists',
+                  },
+                  query: {
+                    exists: {
+                      field: '_id',
+                    },
+                  },
                 },
-              },
+              ],
+              kql: 'test: query',
+              dsl: `{"bool":{"must":[],"filter":[{"bool":{"should":[{"match":{"test":"query"}}],"minimum_should_match":1}},{"exists":{"field":"_id"}}],"should":[],"must_not":[]}}`,
             },
             enabled: true,
           },
@@ -202,25 +227,58 @@ describe('maintenanceWindowModelVersions', () => {
         expect(result).toEqual({
           attributes: {
             ...mockDocument.attributes,
+            schedule: {
+              custom: {
+                duration: '30m',
+                recurring: {
+                  end: '2026-01-08T23:59:59.999Z',
+                  every: '1h',
+                },
+                start: '2026-01-08T12:01:17.327Z',
+                timezone: 'Europe/London',
+              },
+            },
             scope: {
-              alerting: { kql: 'test: query' },
+              alerting: {
+                dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match":{"test":"query"}}],"minimum_should_match":1}},{"exists":{"field":"_id"}}],"should":[],"must_not":[]}}',
+                filters: [
+                  {
+                    $state: {
+                      store: 'appState',
+                    },
+                    meta: {
+                      alias: null,
+                      disabled: false,
+                      field: '_id',
+                      key: '_id',
+                      negate: false,
+                      type: 'exists',
+                      value: 'exists',
+                    },
+                    query: {
+                      exists: {
+                        field: '_id',
+                      },
+                    },
+                  },
+                ],
+                kql: 'test: query',
+              },
             },
           },
         });
       });
 
       it('should handle document without scopedQuery', () => {
-        const existingSchedule = {
-          custom: {
-            duration: '30m',
-            start: '2026-01-08T12:01:17.327Z',
-            timezone: 'Europe/London',
-            recurring: {
-              end: '2026-01-08T23:59:59.999Z',
-              every: '1h',
-            },
+        mockTransformRRuleToCustomSchedule.mockReturnValue({
+          start: '2026-01-08T12:01:17.327Z',
+          timezone: 'Europe/London',
+          duration: '30m',
+          recurring: {
+            every: '1h',
+            end: '2026-01-08T23:59:59.999Z',
           },
-        };
+        });
 
         const mockDocument = {
           id: 'test-id',
@@ -234,7 +292,6 @@ describe('maintenanceWindowModelVersions', () => {
               interval: 1,
               until: '2026-01-08T23:59:59.999Z',
             },
-            schedule: existingSchedule,
             title: 'Test Window',
             enabled: true,
           },
@@ -256,6 +313,17 @@ describe('maintenanceWindowModelVersions', () => {
         expect(result).toEqual({
           attributes: {
             ...mockDocument.attributes,
+            schedule: {
+              custom: {
+                duration: '30m',
+                recurring: {
+                  end: '2026-01-08T23:59:59.999Z',
+                  every: '1h',
+                },
+                start: '2026-01-08T12:01:17.327Z',
+                timezone: 'Europe/London',
+              },
+            },
             scope: undefined,
           },
         });

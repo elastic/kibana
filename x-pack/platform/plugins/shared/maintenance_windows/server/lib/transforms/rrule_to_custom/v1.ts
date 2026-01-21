@@ -8,8 +8,8 @@
 import moment from 'moment-timezone';
 import { isEmpty, isUndefined, omitBy } from 'lodash';
 import { Frequency } from '@kbn/rrule';
-import type { RRule } from '../../../../../application/types';
-import type { ScheduleRequest } from '../../types/v1';
+import type { RRule } from '../../../application/types';
+import type { ScheduleRequest } from '../../../routes/schemas/schedule/types/v1';
 
 const DEFAULT_INTERVAL = 1;
 
@@ -32,20 +32,23 @@ const transformFrequencyToEvery = (frequency: Frequency) => {
 
 const getDurationInString = (duration: number): string => {
   const durationInDays = moment.duration(duration, 'milliseconds').asDays();
-  if (durationInDays > 1) {
+  if (durationInDays > 1 && Number.isInteger(durationInDays)) {
     return `${durationInDays}d`;
   }
 
   const durationInHours = moment.duration(duration, 'milliseconds').asHours();
-  if (durationInHours > 1) {
+  if (durationInHours > 1 && Number.isInteger(durationInHours)) {
     return `${durationInHours}h`;
   }
 
   const durationInSeconds = moment.duration(duration, 'milliseconds').asSeconds();
   if (durationInSeconds % 60 === 0) {
     return `${durationInSeconds / 60}m`;
+  } else if (Number.isInteger(durationInSeconds)) {
+    return `${durationInSeconds}s`;
   }
-  return `${durationInSeconds}s`;
+
+  return `${duration}ms`;
 };
 
 export const transformRRuleToCustomSchedule = (snoozeSchedule: {

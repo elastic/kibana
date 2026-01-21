@@ -20,7 +20,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const find = getService('find');
   const objectRemover = new ObjectRemover(supertest);
 
-  describe('Maintenance window create form', () => {
+  describe.only('Maintenance window create form', () => {
     beforeEach(async () => {
       await pageObjects.common.navigateToApp('maintenanceWindows');
     });

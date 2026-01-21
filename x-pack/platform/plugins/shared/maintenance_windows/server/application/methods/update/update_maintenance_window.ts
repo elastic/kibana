@@ -98,18 +98,16 @@ async function updateWithOCC(
 
     const expirationDate: string = getMaintenanceWindowExpirationDate({
       schedule: schedule ? schedule.custom : maintenanceWindow.schedule.custom,
-      duration: duration ? duration : maintenanceWindow.duration,
     });
 
     const modificationMetadata = await getModificationMetadata();
 
     let events = generateMaintenanceWindowEvents({
       schedule: schedule ? schedule.custom : maintenanceWindow.schedule.custom,
-      duration: typeof duration === 'number' ? duration : maintenanceWindow.duration,
       expirationDate,
     });
 
-    if (!shouldRegenerateEvents({ maintenanceWindow, schedule: schedule?.custom, duration })) {
+    if (!shouldRegenerateEvents({ maintenanceWindow, schedule: schedule?.custom })) {
       events = mergeEvents({ oldEvents: maintenanceWindow.events, newEvents: events });
     }
 

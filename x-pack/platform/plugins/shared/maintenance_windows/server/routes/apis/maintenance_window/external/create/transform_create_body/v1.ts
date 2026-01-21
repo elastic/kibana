@@ -7,10 +7,8 @@
 
 import type { CreateMaintenanceWindowRequestBodyV1 } from '../../../../../schemas/maintenance_window/external/request/create';
 import type { CreateMaintenanceWindowParams } from '../../../../../../application/methods/create/types';
-import {
-  getDurationInMilliseconds,
-  transformCustomScheduleToRRule,
-} from '../../../../../schemas/schedule';
+import { transformCustomScheduleToRRule } from '../../../../../../lib/transforms/custom_to_rrule/latest';
+import { getDurationInMilliseconds } from '../../../../../../lib/transforms/custom_to_rrule/util';
 
 /**
  *  This function converts from the external, human readable, Maintenance Window creation/POST

@@ -69,7 +69,6 @@ async function finishWithOCC(
     // Generate new events with new expiration date
     const newEvents = generateMaintenanceWindowEvents({
       schedule: maintenanceWindow.schedule.custom,
-      duration: maintenanceWindow.duration,
       expirationDate: expirationDate.toISOString(),
     });
 

@@ -6,9 +6,12 @@
  */
 
 import { Frequency } from '@kbn/rrule';
-import type { RRuleRequestV1 } from '../../../r_rule';
-import type { ScheduleRequest } from '../../types/v1';
-import { DEFAULT_TIMEZONE, INTERVAL_FREQUENCY_REGEXP } from '../../constants';
+import type { RRuleRequestV1 } from '../../../routes/schemas/r_rule';
+import type { ScheduleRequest } from '../../../routes/schemas/schedule/types/v1';
+import {
+  DEFAULT_TIMEZONE,
+  INTERVAL_FREQUENCY_REGEXP,
+} from '../../../routes/schemas/schedule/constants';
 
 const transformEveryToFrequency = (frequency?: string) => {
   switch (frequency) {

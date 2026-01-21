@@ -68,7 +68,6 @@ export async function createMaintenanceWindow(
 
   const expirationDate = getMaintenanceWindowExpirationDate({
     schedule: schedule.custom,
-    duration,
   });
 
   const modificationMetadata = await getModificationMetadata();
@@ -76,7 +75,6 @@ export async function createMaintenanceWindow(
   const events = generateMaintenanceWindowEvents({
     schedule: schedule.custom,
     expirationDate,
-    duration,
   });
   const maintenanceWindowAttributes = transformMaintenanceWindowToMaintenanceWindowAttributes({
     title,
@@ -91,7 +89,6 @@ export async function createMaintenanceWindow(
     ...(scopedQueryWithGeneratedValue
       ? { scope: { alerting: scopedQueryWithGeneratedValue } }
       : {}),
-
     ...modificationMetadata,
   });
 

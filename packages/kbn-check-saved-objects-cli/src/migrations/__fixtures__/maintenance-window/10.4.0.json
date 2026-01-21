@@ -8,7 +8,8 @@
         "tzid": "UTC",
         "dtstart": "2023-02-26T00:00:00.000Z",
         "freq": 2,
-        "count": 2
+        "count": 2,
+        "byweekday": ["MO"]
       },
       "events": [
         {
@@ -41,7 +42,8 @@
         "tzid": "UTC",
         "dtstart": "2023-02-26T00:00:00.000Z",
         "freq": 2,
-        "count": 2
+        "count": 2,
+        "byweekday": ["MO"]
       },
       "events": [
         {
@@ -70,7 +72,8 @@
           "timezone": "UTC",
           "recurring": {
             "every": "1w",
-            "occurrences": 2
+            "occurrences": 2,
+            "onWeekDay": ["MO"]
           }
         }
       },
@@ -78,7 +81,7 @@
         "alerting": {
           "kql": "kibana.alert.rule.name : \"Elasticsearch query rule\"",
           "filters": [],
-          "dsl": "{\"bool\":{\"must\":[],\"filter\":[{\"bool\":{\"should\":[{\"match_phrase\":{\"kibana.alert. rule.name\":\"Elasticsearch query rule\"}}],\"minimum_should_match\":1}}],\"should\":[],\"must_not\":[]}}"
+          "dsl": "{\"bool\":{\"must\":[],\"filter\":[{\"bool\":{\"should\":[{\"match_phrase\":{\"kibana.alert.rule.name\":\"Elasticsearch query rule\"}}],\"minimum_should_match\":1}}],\"should\":[],\"must_not\":[]}}"
         }
       }
     }

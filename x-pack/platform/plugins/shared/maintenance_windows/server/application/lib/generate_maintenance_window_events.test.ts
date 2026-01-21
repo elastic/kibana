@@ -20,7 +20,6 @@ describe('generateMaintenanceWindowEvents', () => {
   it('should generate events for rrule repeating daily', () => {
     // Create rrule with expiration date at: 2023-03-13T00:00:00.000Z
     const result = generateMaintenanceWindowEvents({
-      duration: 1 * 60 * 60 * 1000,
       expirationDate: moment(new Date('2023-02-27T00:00:00.000Z'))
         .tz('UTC')
         .add(2, 'weeks')
@@ -52,7 +51,6 @@ describe('generateMaintenanceWindowEvents', () => {
   it('should generate events for rrule repeating weekly', () => {
     // Create rrule with expiration date at: 2023-04-03T00:00:00.000Z
     const result = generateMaintenanceWindowEvents({
-      duration: 1 * 60 * 60 * 1000,
       expirationDate: moment(new Date('2023-02-27T00:00:00.000Z'))
         .tz('UTC')
         .add(5, 'weeks')
@@ -84,7 +82,6 @@ describe('generateMaintenanceWindowEvents', () => {
   it('should generate events for rrule repeating monthly', () => {
     // Create rrule with expiration date at: 2023-10-27T00:00:00.000Z
     const result = generateMaintenanceWindowEvents({
-      duration: 1 * 60 * 60 * 1000,
       expirationDate: moment(new Date('2023-02-27T00:00:00.000Z'))
         .tz('UTC')
         .add(8, 'months')
@@ -115,7 +112,6 @@ describe('generateMaintenanceWindowEvents', () => {
 
   it('should generate events for rrule repeating by specific days', () => {
     const result = generateMaintenanceWindowEvents({
-      duration: 1 * 60 * 60 * 1000,
       expirationDate: moment(new Date('2023-02-27T00:00:00.000Z'))
         .tz('UTC')
         .add(5, 'weeks')
@@ -147,7 +143,6 @@ describe('generateMaintenanceWindowEvents', () => {
 
   it('should generate events starting with start date', () => {
     const result = generateMaintenanceWindowEvents({
-      duration: 1 * 60 * 60 * 1000,
       expirationDate: moment(new Date('2023-02-27T00:00:00.000Z'))
         .tz('UTC')
         .add(5, 'weeks')
@@ -177,7 +172,6 @@ describe('generateMaintenanceWindowEvents', () => {
           maintenanceWindow: {
             id: '1',
             title: 'Test MW',
-            duration: 3600000,
             enabled: true,
             schedule: {
               custom: {
@@ -189,7 +183,13 @@ describe('generateMaintenanceWindowEvents', () => {
               },
             },
           } as MaintenanceWindow,
-          duration: 7200000,
+          schedule: {
+            duration: '2h',
+            start: '2023-02-27T00:00:00.000Z',
+            recurring: {
+              every: '1d',
+            },
+          },
         })
       ).toBe(true);
     });
@@ -212,10 +212,10 @@ describe('generateMaintenanceWindowEvents', () => {
             },
           } as MaintenanceWindow,
           schedule: {
-            duration: '2h',
+            duration: '1h',
             start: '2023-02-27T00:00:00.000Z',
             recurring: {
-              every: '1d',
+              every: '1w',
             },
           },
         })
@@ -239,6 +239,13 @@ describe('generateMaintenanceWindowEvents', () => {
               },
             },
           } as MaintenanceWindow,
+          schedule: {
+            duration: '1h',
+            start: '2023-02-27T00:00:00.000Z',
+            recurring: {
+              every: '1d',
+            },
+          },
         })
       ).toBe(false);
     });

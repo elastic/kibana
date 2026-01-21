@@ -10,24 +10,21 @@ import moment from 'moment-timezone';
 import { RRule } from '@kbn/rrule';
 import type { DateRange } from '../../../common';
 import type { MaintenanceWindow, Schedule } from '../types';
-import {
-  getDurationInMilliseconds,
-  transformCustomScheduleToRRule,
-} from '../../routes/schemas/schedule';
+import { transformCustomScheduleToRRule } from '../../lib/transforms/custom_to_rrule/latest';
+import { getDurationInMilliseconds } from '../../lib/transforms/custom_to_rrule/util';
 
 export interface GenerateMaintenanceWindowEventsParams {
   schedule: Schedule;
   expirationDate: string;
-  duration: number;
   startDate?: string;
 }
 
 export const generateMaintenanceWindowEvents = ({
   schedule,
   expirationDate,
-  duration,
   startDate,
 }: GenerateMaintenanceWindowEventsParams) => {
+  const duration = getDurationInMilliseconds(schedule.duration);
   const { rRule } = transformCustomScheduleToRRule(schedule);
   const { dtstart, until, byweekday, ...rest } = rRule;
 
@@ -65,18 +62,18 @@ export const generateMaintenanceWindowEvents = ({
 export const shouldRegenerateEvents = ({
   maintenanceWindow,
   schedule,
-  duration,
 }: {
   maintenanceWindow: MaintenanceWindow;
   schedule?: Schedule;
-  duration?: number;
 }): boolean => {
   // If the schedule fails a deep equality check (there is a change), we should regenerate events
-  const transformedDuration = getDurationInMilliseconds(maintenanceWindow.schedule.custom.duration);
-
   if (schedule && !_.isEqual(schedule, maintenanceWindow.schedule.custom)) {
     return true;
   }
+
+  const duration = schedule && getDurationInMilliseconds(schedule.duration);
+  const transformedDuration = getDurationInMilliseconds(maintenanceWindow.schedule.custom.duration);
+
   // If the duration changes, we should regenerate events
   if (typeof duration === 'number' && duration !== transformedDuration) {
     return true;

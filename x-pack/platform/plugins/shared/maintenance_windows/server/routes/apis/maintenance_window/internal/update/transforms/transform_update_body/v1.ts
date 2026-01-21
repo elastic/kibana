@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { transformRRuleToCustomSchedule } from '../../../../../../schemas/schedule';
+import { transformRRuleToCustomSchedule } from '../../../../../../../lib/transforms/rrule_to_custom/latest';
 import type { UpdateMaintenanceWindowRequestBodyV1 } from '../../../../../../schemas/maintenance_window/internal/request/update';
 import type { UpdateMaintenanceWindowParams } from '../../../../../../../application/methods/update/types';
 

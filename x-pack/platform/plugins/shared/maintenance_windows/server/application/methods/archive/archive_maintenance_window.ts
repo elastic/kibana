@@ -71,7 +71,6 @@ async function archiveWithOCC(
         oldEvents: attributes.events,
         newEvents: generateMaintenanceWindowEvents({
           schedule: attributes.schedule.custom,
-          duration: attributes.duration,
           expirationDate,
         }),
       });
