@@ -13,6 +13,7 @@ import type {
   EsWorkflowStepExecution,
   WorkflowExecutionDto,
 } from '@kbn/workflows';
+import { isTerminalStatus } from '@kbn/workflows';
 import { searchStepExecutions } from './search_step_executions';
 import { stringifyWorkflowDefinition } from '../../../common/lib/yaml';
 
@@ -59,6 +60,12 @@ export const getWorkflowExecution = async ({
     // Verify spaceId matches for security/multi-tenancy
     if (!doc || doc.spaceId !== spaceId) {
       return null;
+    }
+
+    // If workflow is in terminal status, refresh the steps index to ensure
+    // all steps are visible (they may have been written with refresh: false)
+    if (isTerminalStatus(doc.status)) {
+      await esClient.indices.refresh({ index: stepsExecutionIndex });
     }
 
     const stepExecutions = await searchStepExecutions({
