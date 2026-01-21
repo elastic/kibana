@@ -6,9 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { SuggestionCategory } from '../../../../shared/sorting/types';
 import type { MapParameters } from './map_expression';
-import { getCommandMapExpressionSuggestions, parseMapValues } from './map_expression';
+import { getCommandMapExpressionSuggestions } from './map_expression';
 
 describe('getCommandMapExpressionSuggestions', () => {
   const availableParameters: MapParameters = {
@@ -177,132 +176,6 @@ describe('getCommandMapExpressionSuggestions', () => {
         });
         expect(suggestions).toEqual([]);
       });
-    });
-  });
-});
-
-describe('parseMapValues', () => {
-  it('should infer string type when values exist', () => {
-    const values = ['value1', 'value2'];
-    const parsedValues = parseMapValues(values, 'values for string', '');
-    expect(parsedValues).toEqual({
-      type: 'string',
-      description: 'values for string',
-      suggestions: [
-        {
-          category: SuggestionCategory.CONSTANT_VALUE,
-          detail: 'value1',
-          kind: 'Constant',
-          label: 'value1',
-          text: 'value1',
-        },
-        {
-          category: SuggestionCategory.CONSTANT_VALUE,
-          detail: 'value2',
-          kind: 'Constant',
-          label: 'value2',
-          text: 'value2',
-        },
-      ],
-    });
-  });
-
-  it('should infer number type when values exist', () => {
-    const values = ['2', '2.5', '-3'];
-    const parsedValues = parseMapValues(values, 'values for number', '');
-    expect(parsedValues).toEqual({
-      type: 'number',
-      description: 'values for number',
-      suggestions: [
-        {
-          category: SuggestionCategory.CONSTANT_VALUE,
-          detail: '2',
-          kind: 'Constant',
-          label: '2',
-          text: '2',
-        },
-        {
-          category: SuggestionCategory.CONSTANT_VALUE,
-          detail: '2.5',
-          kind: 'Constant',
-          label: '2.5',
-          text: '2.5',
-        },
-        {
-          category: SuggestionCategory.CONSTANT_VALUE,
-          detail: '-3',
-          kind: 'Constant',
-          label: '-3',
-          text: '-3',
-        },
-      ],
-    });
-  });
-
-  it('should infer boolean type when values exist', () => {
-    const values = ['true', 'false', 'TRUE', 'FALSE'];
-    const parsedValues = parseMapValues(values, 'values for boolean', '');
-    expect(parsedValues).toEqual({
-      type: 'boolean',
-      description: 'values for boolean',
-      suggestions: [
-        {
-          category: SuggestionCategory.CONSTANT_VALUE,
-          detail: 'true',
-          kind: 'Constant',
-          label: 'true',
-          text: 'true',
-        },
-        {
-          category: SuggestionCategory.CONSTANT_VALUE,
-          detail: 'false',
-          kind: 'Constant',
-          label: 'false',
-          text: 'false',
-        },
-        {
-          category: SuggestionCategory.CONSTANT_VALUE,
-          detail: 'TRUE',
-          kind: 'Constant',
-          label: 'TRUE',
-          text: 'TRUE',
-        },
-        {
-          category: SuggestionCategory.CONSTANT_VALUE,
-          detail: 'FALSE',
-          kind: 'Constant',
-          label: 'FALSE',
-          text: 'FALSE',
-        },
-      ],
-    });
-  });
-
-  it('should infer values type (number) from definition when no values are provided', () => {
-    const values: string[] = [];
-    const parsedValues = parseMapValues(
-      values,
-      'values for multiple number types',
-      'integer, double, float'
-    );
-    expect(parsedValues).toEqual({
-      type: 'number',
-      description: 'values for multiple number types',
-      suggestions: [],
-    });
-  });
-
-  it('should infer values type (string) from definition when no values are provided', () => {
-    const values: string[] = [];
-    const parsedValues = parseMapValues(
-      values,
-      'values for multiple string types',
-      'keyword, text'
-    );
-    expect(parsedValues).toEqual({
-      type: 'string',
-      description: 'values for multiple string types',
-      suggestions: [],
     });
   });
 });

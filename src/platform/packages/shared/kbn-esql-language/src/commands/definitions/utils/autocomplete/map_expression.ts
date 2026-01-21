@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { castEsToKbnFieldTypeName } from '@kbn/field-types';
+import { castEsToKbnFieldTypeName, KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { ISuggestionItem } from '../../../registry/types';
 import {
   buildAddValuePlaceholder,
@@ -32,7 +32,7 @@ export interface MapParameterValues {
   description?: string;
 }
 
-export type MapParameters = Record<string, MapParameterValues & { rawTypes: string[] }>;
+export type MapParameters = Record<string, MapParameterValues & { rawType?: string }>;
 
 /**
  * This function provides suggestions for map expressions within a command.
@@ -103,7 +103,7 @@ export function getCommandMapExpressionSuggestions(
         type === 'string'
           ? {
               ...suggestion,
-              detail: description || suggestion.detail,
+              detail: suggestion.detail || description,
               text: `"${suggestion.text}"`,
               filterText: `"${suggestion.text}"`,
               rangeToReplace,
@@ -147,6 +147,12 @@ export function isInsideMapExpression(text: string): boolean {
   return getMapNestingLevel(text) > 0;
 }
 
+const TypeMap: Partial<Record<KBN_FIELD_TYPES, MapValueType>> = {
+  [KBN_FIELD_TYPES.STRING]: 'string',
+  [KBN_FIELD_TYPES.NUMBER]: 'number',
+  [KBN_FIELD_TYPES.BOOLEAN]: 'boolean',
+};
+
 /**
  * Parses a mapParams definition string into MapParameters.
  *
@@ -166,49 +172,19 @@ export function parseMapParams(mapParamsStr: string): MapParameters {
       .split(',')
       .map((val) => val.trim().replace(STRIP_SINGLE_QUOTES_REGEX, ''))
       .filter(Boolean);
-    const mappedTypesFromDefinition = rawTypes
-      .split(',')
-      .map((type) => castEsToKbnFieldTypeName(type.trim()));
+    const parsedTypesFromDefinition = rawTypes.split(',');
+    const mappedTypesFromDefinition = parsedTypesFromDefinition.map((type) =>
+      castEsToKbnFieldTypeName(type.trim())
+    );
     const uniqueMappedTypes = Array.from(new Set(mappedTypesFromDefinition));
 
     result[paramName] = {
-      ...parseMapValues(values, description),
-      rawTypes: uniqueMappedTypes,
+      type: TypeMap[uniqueMappedTypes[0]] || 'string',
+      rawType: parsedTypesFromDefinition[0],
+      description,
+      suggestions: values.map((value) => buildMapValueCompleteItem(value)),
     };
   }
 
   return result;
-}
-
-/**
- * Parses a comma-separated values string and infers the type.
- * Returns suggestions for each value.
- */
-export function parseMapValues(values: string[], description: string): MapParameterValues {
-  if (values.length === 0) {
-    return { type: 'string', suggestions: [], description };
-  }
-
-  const type = inferMapValueType(values);
-  const suggestions = values.map((value) => buildMapValueCompleteItem(value));
-
-  return { type, suggestions, description };
-}
-
-/**
- * Infers MapValueType from an array of value strings.
- */
-function inferMapValueType(values: string[]): MapValueType {
-  const isBoolean = (val: string) => val.toLowerCase() === 'true' || val.toLowerCase() === 'false';
-  const isNumber = (val: string) => /^-?\d+(\.\d+)?$/.test(val);
-
-  if (values.every(isBoolean)) {
-    return 'boolean';
-  }
-
-  if (values.every(isNumber)) {
-    return 'number';
-  }
-
-  return 'string';
 }

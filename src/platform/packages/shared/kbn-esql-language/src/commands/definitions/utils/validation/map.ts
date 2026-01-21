@@ -42,16 +42,17 @@ export function validateMap(
       }
 
       const paramValueType = getExpressionType(param.value);
+      const { type, rawType } = mapParamsDefinition[paramKey];
       if (
         mapParamsDefinition[paramKey] &&
         param.incomplete === false &&
-        !mapParamsDefinition[paramKey].rawTypes.includes(paramValueType)
+        !(rawType === paramValueType)
       ) {
         return getMessageFromId({
           messageId: 'invalidMapParameterValueType',
           values: {
             paramName: paramKey,
-            expectedTypes: mapParamsDefinition[paramKey].rawTypes.join(', '),
+            expectedType: rawType || type,
             actualType: paramValueType,
           },
           locations: param.value.location,
