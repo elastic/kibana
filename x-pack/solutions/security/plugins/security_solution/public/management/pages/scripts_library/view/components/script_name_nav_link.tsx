@@ -7,15 +7,25 @@
 
 import React, { memo } from 'react';
 import { EuiLink } from '@elastic/eui';
+import { getScriptsDetailPath } from '../../../../common/url_routing';
+import { useAppUrl } from '../../../../../common/lib/kibana';
+import type { ScriptsLibraryTableProps } from './scripts_library_table';
 
 export interface ScriptNameNavLinkProps {
   name: string;
-  href: string;
+  queryParams: ScriptsLibraryTableProps['queryParams'];
+  scriptId: string;
   'data-test-subj'?: string;
 }
 
 export const ScriptNameNavLink = memo<ScriptNameNavLinkProps>(
-  ({ name, href, 'data-test-subj': dataTestSubj }) => {
+  ({ name, queryParams, scriptId, 'data-test-subj': dataTestSubj }) => {
+    const { getAppUrl } = useAppUrl();
+    const toRoutePath = getScriptsDetailPath({
+      query: { ...queryParams, selectedScriptId: scriptId, show: 'details' },
+    });
+    const href = getAppUrl({ path: toRoutePath });
+
     return (
       <EuiLink
         data-test-subj={dataTestSubj}
