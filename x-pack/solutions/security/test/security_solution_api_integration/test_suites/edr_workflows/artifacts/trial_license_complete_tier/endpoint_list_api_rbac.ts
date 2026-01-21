@@ -6,8 +6,8 @@
  */
 
 import type TestAgent from 'supertest/lib/agent';
-import expect from '@kbn/expect';
-import { ENDPOINT_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import expect from '@kbn/expect/expect';
+import { ENDPOINT_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { GLOBAL_ARTIFACT_TAG } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/constants';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
 import type {
@@ -30,6 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
   const utils = getService('securitySolutionUtils');
   const config = getService('config');
+  const retry = getService('retry');
 
   const IS_ENDPOINT_EXCEPTION_MOVE_FF_ENABLED = (
     config.get('kbnTestServer.serverArgs', []) as string[]
@@ -398,18 +399,20 @@ export default function ({ getService }: FtrProviderContext) {
         await rolesUsersProvider.loader.delete('endpoint_exceptions_read_no_so_write');
       });
 
-      beforeEach(async () => {
-        await endpointArtifactTestResources.deleteList(
-          'endpoint_list',
-          endpointPolicyManagerSupertest
-        );
-      });
-
       it('should return 404 when endpoint list does not exist', async () => {
-        await readOnlyNoSoWriteSupertest
+        await retry.tryForTime(10000, async () => {
+          const deleteResponse = await endpointPolicyManagerSupertest
+            .delete(`${EXCEPTION_LIST_URL}?list_id=endpoint_list&namespace_type=agnostic`)
+            .set('kbn-xsrf', 'true');
+
+          expect(deleteResponse.status).to.be(404);
+        });
+
+        const response = await readOnlyNoSoWriteSupertest
           .get(`${ENDPOINT_LIST_ITEM_URL}/_find?page=1&per_page=1&sort_field=name&sort_order=asc`)
-          .set('kbn-xsrf', 'true')
-          .expect(404);
+          .set('kbn-xsrf', 'true');
+
+        expect(response.status).to.be(404);
       });
     });
   });
