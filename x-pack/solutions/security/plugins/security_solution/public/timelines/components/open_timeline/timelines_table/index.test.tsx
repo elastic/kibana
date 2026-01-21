@@ -8,7 +8,6 @@
 import { cloneDeep } from 'lodash/fp';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 import { render, screen } from '@testing-library/react';
 
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';
@@ -18,10 +17,7 @@ import { TimelinesTable } from '.';
 import { getMockTimelinesTableProps } from './mocks';
 
 import * as i18n from '../translations';
-import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 import { TestProvidersComponent, createMockStore, mockGlobalState } from '../../../../common/mock';
-
-const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -35,9 +31,7 @@ describe('TimelinesTable', () => {
   test('it renders the select all timelines header checkbox when actionTimelineToShow has the action selectable', () => {
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
-          <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
-        </ThemeProvider>
+        <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
       </TestProvidersComponent>
     );
 
@@ -51,9 +45,7 @@ describe('TimelinesTable', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
-          <TimelinesTable {...testProps} />
-        </ThemeProvider>
+        <TimelinesTable {...testProps} />
       </TestProvidersComponent>
     );
 
@@ -67,9 +59,7 @@ describe('TimelinesTable', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
-          <TimelinesTable {...testProps} />
-        </ThemeProvider>
+        <TimelinesTable {...testProps} />
       </TestProvidersComponent>
     );
 
@@ -83,9 +73,7 @@ describe('TimelinesTable', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
-          <TimelinesTable {...testProps} />
-        </ThemeProvider>
+        <TimelinesTable {...testProps} />
       </TestProvidersComponent>
     );
 
@@ -102,9 +90,7 @@ describe('TimelinesTable', () => {
   test('it renders the delete timeline (trash icon) when actionTimelineToShow has the delete action', () => {
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
-          <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
-        </ThemeProvider>
+        <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
       </TestProvidersComponent>
     );
 
@@ -118,9 +104,7 @@ describe('TimelinesTable', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
-          <TimelinesTable {...testProps} />
-        </ThemeProvider>
+        <TimelinesTable {...testProps} />
       </TestProvidersComponent>
     );
 
@@ -130,9 +114,7 @@ describe('TimelinesTable', () => {
   test('it renders the rows per page selector when showExtendedColumns is true', () => {
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
-          <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
-        </ThemeProvider>
+        <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
       </TestProvidersComponent>
     );
 
@@ -146,9 +128,7 @@ describe('TimelinesTable', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
-          <TimelinesTable {...testProps} />
-        </ThemeProvider>
+        <TimelinesTable {...testProps} />
       </TestProvidersComponent>
     );
 
@@ -164,9 +144,7 @@ describe('TimelinesTable', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
-          <TimelinesTable {...testProps} />
-        </ThemeProvider>
+        <TimelinesTable {...testProps} />
       </TestProvidersComponent>
     );
 
@@ -178,9 +156,7 @@ describe('TimelinesTable', () => {
   test('it sorts the Last Modified column in descending order when showExtendedColumns is true ', () => {
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
-          <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
-        </ThemeProvider>
+        <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
       </TestProvidersComponent>
     );
 
@@ -194,9 +170,7 @@ describe('TimelinesTable', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
-          <TimelinesTable {...testProps} />
-        </ThemeProvider>
+        <TimelinesTable {...testProps} />
       </TestProvidersComponent>
     );
 
@@ -210,9 +184,7 @@ describe('TimelinesTable', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
-          <TimelinesTable {...testProps} />
-        </ThemeProvider>
+        <TimelinesTable {...testProps} />
       </TestProvidersComponent>
     );
 
@@ -227,9 +199,7 @@ describe('TimelinesTable', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
-          <TimelinesTable {...testProps} />
-        </ThemeProvider>
+        <TimelinesTable {...testProps} />
       </TestProvidersComponent>
     );
 
@@ -251,9 +221,7 @@ describe('TimelinesTable', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
-          <TimelinesTable {...testProps} />
-        </ThemeProvider>
+        <TimelinesTable {...testProps} />
       </TestProvidersComponent>
     );
 
@@ -274,9 +242,7 @@ describe('TimelinesTable', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
-          <TimelinesTable {...testProps} />
-        </ThemeProvider>
+        <TimelinesTable {...testProps} />
       </TestProvidersComponent>
     );
 
@@ -291,9 +257,7 @@ describe('TimelinesTable', () => {
   test('it disables the table loading animation when isLoading is false', () => {
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
-          <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
-        </ThemeProvider>
+        <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
       </TestProvidersComponent>
     );
 
@@ -316,9 +280,7 @@ describe('TimelinesTable', () => {
 
     render(
       <TestProvidersComponent store={storeWithPendingDeletes}>
-        <ThemeProvider theme={mockTheme}>
-          <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
-        </ThemeProvider>
+        <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
       </TestProvidersComponent>
     );
 

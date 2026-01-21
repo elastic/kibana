@@ -8,7 +8,6 @@
 import { cloneDeep, omit } from 'lodash/fp';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';
@@ -19,10 +18,7 @@ import { TimelinesTable } from '.';
 
 import * as i18n from '../translations';
 import { getMockTimelinesTableProps } from './mocks';
-import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 import { TestProvidersComponent } from '../../../../common/mock';
-
-const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -40,9 +36,7 @@ describe('#getExtendedColumns', () => {
       };
       const wrapper = mountWithIntl(
         <TestProvidersComponent>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...testProps} />
-          </ThemeProvider>
+          <TimelinesTable {...testProps} />
         </TestProvidersComponent>
       );
 
@@ -55,9 +49,7 @@ describe('#getExtendedColumns', () => {
       };
       const wrapper = mountWithIntl(
         <TestProvidersComponent>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...testProps} />
-          </ThemeProvider>
+          <TimelinesTable {...testProps} />
         </TestProvidersComponent>
       );
 
@@ -73,9 +65,7 @@ describe('#getExtendedColumns', () => {
       };
       const wrapper = mountWithIntl(
         <TestProvidersComponent>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...testProps} />
-          </ThemeProvider>
+          <TimelinesTable {...testProps} />
         </TestProvidersComponent>
       );
 

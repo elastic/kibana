@@ -8,7 +8,6 @@
 import type { EuiButtonIconProps } from '@elastic/eui';
 import { cloneDeep, omit } from 'lodash/fp';
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
 
 import '../../../../common/mock/formatted_relative';
@@ -22,10 +21,7 @@ import { TimelinesTable } from '.';
 
 import * as i18n from '../translations';
 import { getMockTimelinesTableProps } from './mocks';
-import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 import { TestProvidersComponent } from '../../../../common/mock';
-
-const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -45,9 +41,7 @@ describe('#getCommonColumns', () => {
       };
       const wrapper = mountWithI18nProvider(
         <TestProvidersComponent>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...testProps} />
-          </ThemeProvider>
+          <TimelinesTable {...testProps} />
         </TestProvidersComponent>
       );
 
@@ -62,9 +56,7 @@ describe('#getCommonColumns', () => {
       };
       const wrapper = mountWithI18nProvider(
         <TestProvidersComponent>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...testProps} />
-          </ThemeProvider>
+          <TimelinesTable {...testProps} />
         </TestProvidersComponent>
       );
       expect(wrapper.find('[data-test-subj="expand-notes"]').exists()).toBe(false);
@@ -78,9 +70,7 @@ describe('#getCommonColumns', () => {
       };
       const wrapper = mountWithI18nProvider(
         <TestProvidersComponent>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...testProps} />
-          </ThemeProvider>
+          <TimelinesTable {...testProps} />
         </TestProvidersComponent>
       );
       expect(wrapper.find('[data-test-subj="expand-notes"]').exists()).toBe(false);
@@ -94,9 +84,7 @@ describe('#getCommonColumns', () => {
       };
       const wrapper = mountWithI18nProvider(
         <TestProvidersComponent>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...testProps} />
-          </ThemeProvider>
+          <TimelinesTable {...testProps} />
         </TestProvidersComponent>
       );
       expect(wrapper.find('[data-test-subj="expand-notes"]').exists()).toBe(false);
@@ -111,9 +99,7 @@ describe('#getCommonColumns', () => {
       };
       const wrapper = mountWithI18nProvider(
         <TestProvidersComponent>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...testProps} />
-          </ThemeProvider>
+          <TimelinesTable {...testProps} />
         </TestProvidersComponent>
       );
       expect(wrapper.find('[data-test-subj="expand-notes"]').exists()).toBe(false);
@@ -127,9 +113,7 @@ describe('#getCommonColumns', () => {
       };
       const wrapper = mountWithI18nProvider(
         <TestProvidersComponent>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...testProps} />
-          </ThemeProvider>
+          <TimelinesTable {...testProps} />
         </TestProvidersComponent>
       );
       expect(wrapper.find('[data-test-subj="expand-notes"]').exists()).toBe(false);
@@ -143,9 +127,7 @@ describe('#getCommonColumns', () => {
       };
       const wrapper = mountWithI18nProvider(
         <TestProvidersComponent>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...testProps} />
-          </ThemeProvider>
+          <TimelinesTable {...testProps} />
         </TestProvidersComponent>
       );
       const props = wrapper
@@ -171,9 +153,7 @@ describe('#getCommonColumns', () => {
       };
       const wrapper = mountWithI18nProvider(
         <TestProvidersComponent>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...testProps} />
-          </ThemeProvider>
+          <TimelinesTable {...testProps} />
         </TestProvidersComponent>
       );
       const props = wrapper
@@ -198,11 +178,10 @@ describe('#getCommonColumns', () => {
         itemIdToExpandedNotesRowMap,
         onToggleShowNotes,
       };
+
       const wrapper = mountWithI18nProvider(
         <TestProvidersComponent>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...testProps} />
-          </ThemeProvider>
+          <TimelinesTable {...testProps} />
         </TestProvidersComponent>
       );
       wrapper.find('[data-test-subj="expand-notes"]').first().simulate('click');
@@ -235,9 +214,7 @@ describe('#getCommonColumns', () => {
 
       const wrapper = mountWithI18nProvider(
         <TestProvidersComponent>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...testProps} />
-          </ThemeProvider>
+          <TimelinesTable {...testProps} />
         </TestProvidersComponent>
       );
 
@@ -256,9 +233,7 @@ describe('#getCommonColumns', () => {
       };
       const wrapper = mountWithI18nProvider(
         <TestProvidersComponent>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...testProps} />
-          </ThemeProvider>
+          <TimelinesTable {...testProps} />
         </TestProvidersComponent>
       );
 
@@ -271,9 +246,7 @@ describe('#getCommonColumns', () => {
       };
       const wrapper = mountWithI18nProvider(
         <TestProvidersComponent>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...testProps} />
-          </ThemeProvider>
+          <TimelinesTable {...testProps} />
         </TestProvidersComponent>
       );
 
@@ -295,9 +268,7 @@ describe('#getCommonColumns', () => {
       };
       const wrapper = mountWithI18nProvider(
         <TestProvidersComponent>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...testProps} />
-          </ThemeProvider>
+          <TimelinesTable {...testProps} />
         </TestProvidersComponent>
       );
 
@@ -317,9 +288,7 @@ describe('#getCommonColumns', () => {
       };
       const wrapper = mountWithI18nProvider(
         <TestProvidersComponent>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...testProps} />
-          </ThemeProvider>
+          <TimelinesTable {...testProps} />
         </TestProvidersComponent>
       );
 
@@ -341,9 +310,7 @@ describe('#getCommonColumns', () => {
       };
       const wrapper = mountWithI18nProvider(
         <TestProvidersComponent>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...testProps} />
-          </ThemeProvider>
+          <TimelinesTable {...testProps} />
         </TestProvidersComponent>
       );
 
@@ -362,9 +329,7 @@ describe('#getCommonColumns', () => {
       };
       const wrapper = mountWithI18nProvider(
         <TestProvidersComponent>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...testProps} />
-          </ThemeProvider>
+          <TimelinesTable {...testProps} />
         </TestProvidersComponent>
       );
 
@@ -386,9 +351,7 @@ describe('#getCommonColumns', () => {
       };
       const wrapper = mountWithI18nProvider(
         <TestProvidersComponent>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...testProps} />
-          </ThemeProvider>
+          <TimelinesTable {...testProps} />
         </TestProvidersComponent>
       );
 
@@ -403,9 +366,7 @@ describe('#getCommonColumns', () => {
     test('it renders a hyperlink when the timeline has a saved object id', () => {
       const wrapper = mountWithI18nProvider(
         <TestProvidersComponent>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
-          </ThemeProvider>
+          <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
         </TestProvidersComponent>
       );
 
@@ -427,9 +388,7 @@ describe('#getCommonColumns', () => {
       };
       const wrapper = mountWithI18nProvider(
         <TestProvidersComponent>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...testProps} />
-          </ThemeProvider>
+          <TimelinesTable {...testProps} />
         </TestProvidersComponent>
       );
 
@@ -450,9 +409,7 @@ describe('#getCommonColumns', () => {
       };
       const wrapper = mountWithI18nProvider(
         <TestProvidersComponent>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...testProps} />
-          </ThemeProvider>
+          <TimelinesTable {...testProps} />
         </TestProvidersComponent>
       );
 
@@ -472,9 +429,7 @@ describe('#getCommonColumns', () => {
     test('it renders the expected column name', () => {
       const wrapper = mountWithI18nProvider(
         <TestProvidersComponent>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
-          </ThemeProvider>
+          <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
         </TestProvidersComponent>
       );
 
@@ -484,9 +439,7 @@ describe('#getCommonColumns', () => {
     test('it renders the description when the timeline has a description', () => {
       const wrapper = mountWithI18nProvider(
         <TestProvidersComponent>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
-          </ThemeProvider>
+          <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
         </TestProvidersComponent>
       );
 
@@ -500,9 +453,7 @@ describe('#getCommonColumns', () => {
 
       const wrapper = mountWithI18nProvider(
         <TestProvidersComponent>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...getMockTimelinesTableProps(missingDescription)} />
-          </ThemeProvider>
+          <TimelinesTable {...getMockTimelinesTableProps(missingDescription)} />
         </TestProvidersComponent>
       );
       expect(wrapper.find('[data-test-subj="description"]').first().text()).toEqual(
@@ -520,9 +471,7 @@ describe('#getCommonColumns', () => {
       };
       const wrapper = mountWithI18nProvider(
         <TestProvidersComponent>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...testProps} />
-          </ThemeProvider>
+          <TimelinesTable {...testProps} />
         </TestProvidersComponent>
       );
       expect(wrapper.find('[data-test-subj="description"]').first().text()).toEqual(
@@ -535,9 +484,7 @@ describe('#getCommonColumns', () => {
     test('it renders the expected column name', () => {
       const wrapper = mountWithI18nProvider(
         <TestProvidersComponent>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
-          </ThemeProvider>
+          <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
         </TestProvidersComponent>
       );
 
@@ -547,9 +494,7 @@ describe('#getCommonColumns', () => {
     test('it renders the last modified (updated) date when the timeline has an updated property', () => {
       const wrapper = mountWithI18nProvider(
         <TestProvidersComponent>
-          <ThemeProvider theme={mockTheme}>
-            <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
-          </ThemeProvider>
+          <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
         </TestProvidersComponent>
       );
 
@@ -564,9 +509,7 @@ describe('#getCommonColumns', () => {
 
     const wrapper = mountWithI18nProvider(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
-          <TimelinesTable {...getMockTimelinesTableProps(missingUpdated)} />
-        </ThemeProvider>
+        <TimelinesTable {...getMockTimelinesTableProps(missingUpdated)} />
       </TestProvidersComponent>
     );
     expect(wrapper.find('[data-test-subj="updated"]').first().text()).toEqual(getEmptyValue());

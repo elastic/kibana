@@ -8,17 +8,13 @@
 import { cloneDeep, omit } from 'lodash/fp';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';
 import type { TimelinesTableProps } from '.';
 import { TimelinesTable } from '.';
 import type { OpenTimelineResult } from '../types';
 import { getMockTimelinesTableProps } from './mocks';
-import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 import { TestProvidersComponent } from '../../../../common/mock';
-
-const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -32,9 +28,7 @@ describe('#getActionsColumns', () => {
   test('it renders the pinned events header icon', () => {
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
-          <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
-        </ThemeProvider>
+        <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
       </TestProvidersComponent>
     );
 
@@ -48,9 +42,7 @@ describe('#getActionsColumns', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
-          <TimelinesTable {...testProps} />
-        </ThemeProvider>
+        <TimelinesTable {...testProps} />
       </TestProvidersComponent>
     );
 
@@ -60,9 +52,7 @@ describe('#getActionsColumns', () => {
   test('it renders the notes count header icon', () => {
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
-          <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
-        </ThemeProvider>
+        <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
       </TestProvidersComponent>
     );
 
@@ -76,9 +66,7 @@ describe('#getActionsColumns', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
-          <TimelinesTable {...testProps} />
-        </ThemeProvider>
+        <TimelinesTable {...testProps} />
       </TestProvidersComponent>
     );
 
@@ -88,9 +76,7 @@ describe('#getActionsColumns', () => {
   test('it renders the favorites header icon', () => {
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
-          <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
-        </ThemeProvider>
+        <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
       </TestProvidersComponent>
     );
 
@@ -104,9 +90,7 @@ describe('#getActionsColumns', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
-          <TimelinesTable {...testProps} />
-        </ThemeProvider>
+        <TimelinesTable {...testProps} />
       </TestProvidersComponent>
     );
 
@@ -120,9 +104,7 @@ describe('#getActionsColumns', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
-          <TimelinesTable {...testProps} />
-        </ThemeProvider>
+        <TimelinesTable {...testProps} />
       </TestProvidersComponent>
     );
 
@@ -136,9 +118,7 @@ describe('#getActionsColumns', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
-          <TimelinesTable {...testProps} />
-        </ThemeProvider>
+        <TimelinesTable {...testProps} />
       </TestProvidersComponent>
     );
 
@@ -163,9 +143,7 @@ describe('#getActionsColumns', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
-          <TimelinesTable {...testProps} />
-        </ThemeProvider>
+        <TimelinesTable {...testProps} />
       </TestProvidersComponent>
     );
 
@@ -194,9 +172,7 @@ describe('#getActionsColumns', () => {
     };
     const wrapper = mountWithIntl(
       <TestProvidersComponent>
-        <ThemeProvider theme={mockTheme}>
-          <TimelinesTable {...testProps} />
-        </ThemeProvider>
+        <TimelinesTable {...testProps} />
       </TestProvidersComponent>
     );
 
