@@ -16,13 +16,6 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
 import type { TableActions } from '../../../shared/managed_table';
 
-const APM_RULE_TYPES = [
-  'apm.anomaly',
-  'apm.error_rate',
-  'apm.transaction_error_rate',
-  'apm.transaction_duration',
-];
-
 interface UseServiceActionsParams {
   openAlertFlyout: (ruleType: ApmRuleType, serviceName: string) => void;
   openSloFlyout: (indicatorType: ApmIndicatorType, serviceName: string) => void;
