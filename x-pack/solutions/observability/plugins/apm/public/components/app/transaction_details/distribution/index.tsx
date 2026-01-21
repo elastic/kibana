@@ -73,9 +73,9 @@ export function TransactionDistribution({
     entryTransactionId: transactionId,
   });
 
-  const markerCurrentEvent = waterfallFetchResult.useLegacy
-    ? waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc.transaction.duration.us
-    : unifiedWaterfallFetchResult.entryTransaction?.transaction?.duration?.us;
+  const markerCurrentEvent = waterfallFetchResult.useUnified
+    ? unifiedWaterfallFetchResult.entryTransaction?.transaction?.duration?.us
+    : waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc.transaction.duration.us;
 
   const { chartData, hasData, percentileThresholdValue, status, totalDocCount } =
     useTransactionDistributionChartData();
@@ -214,7 +214,7 @@ export function TransactionDistribution({
           onShowCriticalPathChange={onShowCriticalPathChange}
           logsTableConfig={logsTableConfig}
           onLogsTableConfigChange={onLogsTableConfigChange}
-          useLegacy={waterfallFetchResult.useLegacy}
+          useUnified={waterfallFetchResult.useUnified}
           unifiedWaterfallFetchResult={unifiedWaterfallFetchResult}
           entryTransactionId={transactionId}
         />

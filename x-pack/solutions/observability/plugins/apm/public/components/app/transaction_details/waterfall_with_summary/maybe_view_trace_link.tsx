@@ -44,14 +44,14 @@ export function MaybeViewTraceLink({
   transaction,
   waterfall,
   environment,
-  useLegacy = false,
+  useUnified = false,
   traceItems = [],
 }: {
   isLoading: boolean;
   transaction?: ITransaction;
   waterfall: IWaterfall;
   environment: Environment;
-  useLegacy?: boolean;
+  useUnified?: boolean;
   traceItems?: TraceItem[];
 }) {
   const {
@@ -77,7 +77,7 @@ export function MaybeViewTraceLink({
     LatencyAggregationType.avg;
 
   const rootTransactionInfo = useMemo(() => {
-    if (useLegacy) {
+    if (!useUnified) {
       const root = waterfall.rootWaterfallTransaction;
       if (!root) return undefined;
       return {
@@ -100,7 +100,7 @@ export function MaybeViewTraceLink({
       transactionType: root.type,
       serviceEnvironment: root.serviceEnvironment,
     };
-  }, [useLegacy, waterfall.rootWaterfallTransaction, traceItems]);
+  }, [useUnified, waterfall.rootWaterfallTransaction, traceItems]);
 
   if (isLoading || !transaction) {
     return <FullTraceButton isLoading={isLoading} />;

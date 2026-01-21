@@ -64,17 +64,17 @@ export function TraceExplorerWaterfall() {
     entryTransactionId: transactionId,
   });
 
-  const serviceName = waterfallFetchResult.useLegacy
-    ? waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc.service.name
-    : unifiedWaterfallFetchResult.entryTransaction?.service.name;
+  const serviceName = waterfallFetchResult.useUnified
+    ? unifiedWaterfallFetchResult.entryTransaction?.service.name
+    : waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc.service.name;
 
-  const activeStatus = waterfallFetchResult.useLegacy
-    ? waterfallFetchResult.status
-    : unifiedWaterfallFetchResult.status;
+  const activeStatus = waterfallFetchResult.useUnified
+    ? unifiedWaterfallFetchResult.status
+    : waterfallFetchResult.status;
 
-  const traceDocsTotal = waterfallFetchResult.useLegacy
-    ? waterfallFetchResult.waterfall.traceDocsTotal
-    : unifiedWaterfallFetchResult.traceItems.length;
+  const traceDocsTotal = waterfallFetchResult.useUnified
+    ? unifiedWaterfallFetchResult.traceItems.length
+    : waterfallFetchResult.waterfall.traceDocsTotal;
 
   useEffect(() => {
     if (activeStatus === FETCH_STATUS.SUCCESS) {
@@ -126,11 +126,11 @@ export function TraceExplorerWaterfall() {
     [history]
   );
 
-  const isWaterfallLoading = waterfallFetchResult.useLegacy
-    ? waterfallFetchResult.status === FETCH_STATUS.LOADING &&
-      !waterfallFetchResult.waterfall.entryWaterfallTransaction
-    : unifiedWaterfallFetchResult.status === FETCH_STATUS.LOADING &&
-      !unifiedWaterfallFetchResult.entryTransaction;
+  const isWaterfallLoading = waterfallFetchResult.useUnified
+    ? unifiedWaterfallFetchResult.status === FETCH_STATUS.LOADING &&
+      !unifiedWaterfallFetchResult.entryTransaction
+    : waterfallFetchResult.status === FETCH_STATUS.LOADING &&
+      !waterfallFetchResult.waterfall.entryWaterfallTransaction;
 
   return (
     <ResettingHeightRetainer reset={!isWaterfallLoading}>
@@ -147,7 +147,7 @@ export function TraceExplorerWaterfall() {
         serviceName={serviceName}
         showCriticalPath={showCriticalPath}
         onShowCriticalPathChange={onShowCriticalPathChange}
-        useLegacy={waterfallFetchResult.useLegacy}
+        useUnified={waterfallFetchResult.useUnified}
         unifiedWaterfallFetchResult={unifiedWaterfallFetchResult}
         entryTransactionId={transactionId}
       />

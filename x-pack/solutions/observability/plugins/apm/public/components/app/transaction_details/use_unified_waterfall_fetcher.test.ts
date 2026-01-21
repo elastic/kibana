@@ -16,10 +16,11 @@ describe('useUnifiedWaterfallFetcher', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // By default, useUnified = true (enabled) for most tests
     mockUseKibana.mockReturnValue({
       services: {
         uiSettings: {
-          get: jest.fn().mockReturnValue(false),
+          get: jest.fn().mockReturnValue(true),
         },
       },
     } as any);
@@ -118,11 +119,12 @@ describe('useUnifiedWaterfallFetcher', () => {
     expect(mockCallApmApi).not.toHaveBeenCalled();
   });
 
-  it('does not call API when useLegacy is true', () => {
+  it('does not call API when useUnified is false (default)', () => {
+    // useUnified = false means legacy is used, so unified fetcher should skip API call
     mockUseKibana.mockReturnValue({
       services: {
         uiSettings: {
-          get: jest.fn().mockReturnValue(true),
+          get: jest.fn().mockReturnValue(false),
         },
       },
     } as any);
@@ -213,7 +215,7 @@ describe('useUnifiedWaterfallFetcher', () => {
       '2025-01-15T01:00:00.000Z',
       'tx-1',
       'test-service',
-      false,
+      true,
     ]);
   });
 });

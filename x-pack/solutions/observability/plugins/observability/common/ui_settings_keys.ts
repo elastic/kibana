@@ -28,6 +28,6 @@ export const profilingAWSCostDiscountRate = 'observability:profilingAWSCostDisco
 export const profilingCostPervCPUPerHour = 'observability:profilingCostPervCPUPerHour';
 export const profilingAzureCostDiscountRate = 'observability:profilingAzureCostDiscountRate';
 export const apmEnableTransactionProfiling = 'observability:apmEnableTransactionProfiling';
-export const apmUseLegacyTraceWaterfall = 'observability:apmUseLegacyTraceWaterfall';
+export const apmUseUnifiedTraceWaterfall = 'observability:apmUseUnifiedTraceWaterfall';
 export const searchExcludedDataTiers = 'observability:searchExcludedDataTiers';
 export const enableDiagnosticMode = 'observability:enableDiagnosticMode';

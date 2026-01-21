@@ -110,9 +110,9 @@ export function DependencyOperationDetailView() {
     entryTransactionId: selectedSample?.transactionId,
   });
 
-  const serviceName = waterfallFetch.useLegacy
-    ? waterfallFetch.waterfall.entryWaterfallTransaction?.doc.service.name
-    : unifiedWaterfallFetchResult.entryTransaction?.service.name;
+  const serviceName = waterfallFetch.useUnified
+    ? unifiedWaterfallFetchResult.entryTransaction?.service.name
+    : waterfallFetch.waterfall.entryWaterfallTransaction?.doc.service.name;
 
   const queryRef = useRef(query);
 
@@ -133,11 +133,11 @@ export function DependencyOperationDetailView() {
   const isWaterfallLoading =
     spanFetch.status === FETCH_STATUS.NOT_INITIATED ||
     (spanFetch.status === FETCH_STATUS.LOADING && samples.length === 0) ||
-    (waterfallFetch.useLegacy
-      ? waterfallFetch.status === FETCH_STATUS.LOADING &&
-        !waterfallFetch.waterfall.entryWaterfallTransaction
-      : unifiedWaterfallFetchResult.status === FETCH_STATUS.LOADING &&
-        !unifiedWaterfallFetchResult.entryTransaction);
+    (waterfallFetch.useUnified
+      ? unifiedWaterfallFetchResult.status === FETCH_STATUS.LOADING &&
+        !unifiedWaterfallFetchResult.entryTransaction
+      : waterfallFetch.status === FETCH_STATUS.LOADING &&
+        !waterfallFetch.waterfall.entryWaterfallTransaction);
 
   const onSampleClick = useCallback(
     (sample: any) => {
@@ -208,7 +208,7 @@ export function DependencyOperationDetailView() {
               selectedSample={selectedSample || null}
               showCriticalPath={showCriticalPath}
               onShowCriticalPathChange={onShowCriticalPathChange}
-              useLegacy={waterfallFetch.useLegacy}
+              useUnified={waterfallFetch.useUnified}
               unifiedWaterfallFetchResult={unifiedWaterfallFetchResult}
               entryTransactionId={selectedSample?.transactionId}
             />

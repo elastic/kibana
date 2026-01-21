@@ -44,7 +44,7 @@ interface Props<TSample extends {}> {
   selectedSample?: TSample | null;
   logsTableConfig?: SavedSearchTableConfig;
   onLogsTableConfigChange?: (config: SavedSearchTableConfig) => void;
-  useLegacy: boolean;
+  useUnified: boolean;
   unifiedWaterfallFetchResult: UnifiedWaterfallFetcherResult;
   entryTransactionId?: string;
 }
@@ -65,7 +65,7 @@ export function WaterfallWithSummary<TSample extends {}>({
   selectedSample,
   logsTableConfig,
   onLogsTableConfigChange,
-  useLegacy,
+  useUnified,
   unifiedWaterfallFetchResult,
   entryTransactionId,
 }: Props<TSample>) {
@@ -73,9 +73,9 @@ export function WaterfallWithSummary<TSample extends {}>({
 
   const isControlled = selectedSample !== undefined;
 
-  const activeWaterfallStatus = useLegacy
-    ? waterfallFetchStatus
-    : unifiedWaterfallFetchResult.status;
+  const activeWaterfallStatus = useUnified
+    ? unifiedWaterfallFetchResult.status
+    : waterfallFetchStatus;
 
   const isLoading =
     activeWaterfallStatus === FETCH_STATUS.LOADING ||
@@ -107,9 +107,9 @@ export function WaterfallWithSummary<TSample extends {}>({
       : 0
     : sampleActivePage;
 
-  const entryTransaction = useLegacy
-    ? waterfallFetchResult.entryTransaction
-    : unifiedWaterfallFetchResult.entryTransaction;
+  const entryTransaction = useUnified
+    ? unifiedWaterfallFetchResult.entryTransaction
+    : waterfallFetchResult.entryTransaction;
 
   if (!entryTransaction && traceSamples?.length === 0 && isSucceeded) {
     return (
@@ -164,7 +164,7 @@ export function WaterfallWithSummary<TSample extends {}>({
                   transaction={entryTransaction}
                   waterfall={waterfallFetchResult}
                   environment={environment}
-                  useLegacy={useLegacy}
+                  useUnified={useUnified}
                   traceItems={unifiedWaterfallFetchResult.traceItems}
                 />
               </EuiFlexItem>
@@ -188,14 +188,14 @@ export function WaterfallWithSummary<TSample extends {}>({
         <EuiFlexItem grow={false}>
           <TransactionSummary
             errorCount={
-              useLegacy
-                ? waterfallFetchResult.totalErrorsCount
-                : unifiedWaterfallFetchResult.errors.length
+              useUnified
+                ? unifiedWaterfallFetchResult.errors.length
+                : waterfallFetchResult.totalErrorsCount
             }
             totalDuration={
-              useLegacy
-                ? waterfallFetchResult.rootWaterfallTransaction?.duration
-                : unifiedWaterfallFetchResult.entryTransaction?.transaction?.duration?.us
+              useUnified
+                ? unifiedWaterfallFetchResult.entryTransaction?.transaction?.duration?.us
+                : waterfallFetchResult.rootWaterfallTransaction?.duration
             }
             transaction={entryTransaction}
           />
@@ -215,7 +215,7 @@ export function WaterfallWithSummary<TSample extends {}>({
           onShowCriticalPathChange={onShowCriticalPathChange}
           logsTableConfig={logsTableConfig}
           onLogsTableConfigChange={onLogsTableConfigChange}
-          useLegacy={useLegacy}
+          useUnified={useUnified}
           unifiedWaterfallFetchResult={unifiedWaterfallFetchResult}
           entryTransactionId={entryTransactionId}
         />
