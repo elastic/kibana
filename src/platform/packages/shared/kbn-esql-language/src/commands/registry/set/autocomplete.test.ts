@@ -11,6 +11,7 @@ import { autocomplete } from './autocomplete';
 import type { ICommandCallbacks } from '../types';
 import { expectSuggestions } from '../../../__tests__/commands/autocomplete';
 import { settings } from '../../definitions/generated/settings';
+import { parseMapParams } from '../../definitions/utils/autocomplete/map_expression';
 
 const setExpectSuggestions = (
   query: string,
@@ -86,8 +87,8 @@ describe('SET Autocomplete', () => {
 
       it('suggests common project routing values for partial input', async () => {
         await setExpectSuggestions('SET project_routing = "_alias:', [
-          '"_alias: *";',
-          '"_alias:_origin";',
+          '_alias: *',
+          '_alias:_origin',
         ]);
       });
     });
@@ -103,15 +104,17 @@ describe('SET Autocomplete', () => {
     });
 
     describe('Approximate setting', () => {
+      const setting = settings.find((s) => s.name === 'approximate') as unknown as {
+        mapParams: string;
+      };
       it('suggests parameter names after assignment operator', async () => {
         await setExpectSuggestions('SET approximate = ', ['false;', 'true;', '{ $0 };']);
       });
 
       it('suggests map parameter names after selecting the map option', async () => {
-        await setExpectSuggestions('SET approximate = { ', [
-          '"confidence_level": ',
-          '"num_rows": ',
-        ]);
+        const parameters = parseMapParams(setting?.mapParams || '');
+        const paramNames = Object.keys(parameters).map((paramName) => `"${paramName}": `);
+        await setExpectSuggestions('SET approximate = { ', paramNames);
       });
 
       it('suggests map parameter name after completing a parameter entry', async () => {
@@ -120,8 +123,20 @@ describe('SET Autocomplete', () => {
         ]);
       });
 
-      it('suggests map parameter values after parameter name and colon', async () => {
-        await setExpectSuggestions('SET approximate = { "num_rows": ', []);
+      it('suggests map parameter values after parameter name and colon: num_rows', async () => {
+        await setExpectSuggestions('SET approximate = { "num_rows": ', [
+          '100000',
+          '1000000',
+          '500000',
+        ]);
+      });
+
+      it('suggests map parameter values after parameter name and colon:confidence_level', async () => {
+        await setExpectSuggestions('SET approximate = { "confidence_level": ', [
+          '0.99',
+          '0.95',
+          '0.9',
+        ]);
       });
     });
   });

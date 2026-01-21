@@ -78,13 +78,13 @@ describe('SET Validation', () => {
 
     test('errors on approximate setting with map_param value and invalid parameter name', () => {
       setExpectErrors('set approximate = { "invalid_param": 1000 }', [
-        'Unknown map parameter "invalid_param". Available parameters are: {"num_rows":["integer"],"confidence_level":["double"]}.',
+        'Unknown parameter "invalid_param".',
       ]);
     });
 
     test('errors on approximate setting with map_param value and invalid parameter type', () => {
       setExpectErrors('set approximate = { "num_rows": "not_an_integer" }', [
-        'Invalid value type for map parameter "num_rows". Expected types: integer. Actual type: keyword.',
+        'Invalid type for parameter "num_rows". Expected type: integer. Received: keyword.',
       ]);
     });
 
