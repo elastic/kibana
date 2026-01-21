@@ -6,7 +6,6 @@
  */
 
 /* eslint-disable complexity */
-// TODO: Disabling complexity is temporary till this component is refactored as part of lists UI integration
 
 import {
   EuiButtonIcon,
