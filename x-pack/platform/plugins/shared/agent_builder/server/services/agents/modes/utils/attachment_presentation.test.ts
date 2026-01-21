@@ -98,7 +98,7 @@ describe('attachment_presentation', () => {
       expect(result.content).toContain('count="2"');
     });
 
-    it('should truncate large content in inline mode', () => {
+    it('should truncate large content in inline mode and set hasTruncatedContent', () => {
       const largeContent = 'x'.repeat(15000);
       const attachments = [createMockAttachment('1', 'text', largeContent)];
 
@@ -106,6 +106,15 @@ describe('attachment_presentation', () => {
 
       expect(result.content).toContain('[content truncated');
       expect(result.content.length).toBeLessThan(largeContent.length);
+      expect(result.hasTruncatedContent).toBe(true);
+    });
+
+    it('should set hasTruncatedContent to false when content is not truncated', () => {
+      const attachments = [createMockAttachment('1', 'text', 'Short content')];
+
+      const result = prepareAttachmentPresentation(attachments);
+
+      expect(result.hasTruncatedContent).toBe(false);
     });
 
     it('should handle visualization_ref type as JSON', () => {
@@ -156,14 +165,26 @@ describe('attachment_presentation', () => {
       expect(prompt).toBe('');
     });
 
-    it('should return inline mode instructions', () => {
+    it('should return inline mode instructions when content is not truncated', () => {
       const attachments = [createMockAttachment('1', 'text', 'Content')];
       const presentation = prepareAttachmentPresentation(attachments);
       const prompt = getAttachmentSystemPrompt(presentation);
 
       expect(prompt).toContain('1 attachment');
-      expect(prompt).toContain('shown inline');
-      expect(prompt).not.toContain('MUST use attachment tools');
+      expect(prompt).toContain("you don't need to read it");
+      expect(prompt).not.toContain('MUST call attachment_read');
+    });
+
+    it('should return inline mode instructions with attachment_read guidance when content is truncated', () => {
+      const largeContent = 'x'.repeat(15000);
+      const attachments = [createMockAttachment('1', 'text', largeContent)];
+      const presentation = prepareAttachmentPresentation(attachments, { maxContentLength: 10000 });
+      const prompt = getAttachmentSystemPrompt(presentation);
+
+      expect(prompt).toContain('1 attachment');
+      expect(prompt).toContain('some attachments were truncated');
+      expect(prompt).toContain('MUST call attachment_read');
+      expect(prompt).not.toContain("you don't need to read it");
     });
 
     it('should return summary mode instructions', () => {
