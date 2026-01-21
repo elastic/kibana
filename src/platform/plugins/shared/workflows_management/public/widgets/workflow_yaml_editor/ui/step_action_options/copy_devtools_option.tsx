@@ -128,7 +128,7 @@ function generateConsoleFormat(requestInfo: RequestOptions): string {
   const queryParams = requestInfo.query;
   const queryString = queryParams ? `?${new URLSearchParams(queryParams).toString()}` : '';
 
-  const lines = [`${requestInfo.method} ${requestInfo.path}${queryString}`];
+  const lines = [`${requestInfo.method} ${decodeURIComponent(requestInfo.path)}${queryString}`];
 
   if (requestInfo.bulkBody && requestInfo.bulkBody.length > 0) {
     requestInfo.bulkBody.forEach((operation: Record<string, unknown>) => {
