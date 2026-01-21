@@ -98,7 +98,6 @@ const meta = {
         {...props}
         {...(props.supportNodePreviewPopover
           ? {
-              onOpenEventPreview: action('onOpenEventPreview'),
               onOpenNetworkPreview: action('onOpenNetworkPreview'),
             }
           : {})}
@@ -122,7 +121,7 @@ const meta = {
     supportNodePreviewPopover: {
       control: { type: 'boolean' },
       description:
-        'Enable or disable the support for node preview popover (When disabled `Show event details` list item is not shown)',
+        'Enable or disable the support for node preview popover (controls network preview popover)',
     },
   },
   args: {

@@ -6,25 +6,11 @@
  */
 
 import { useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
 import { useNodeExpandPopover } from './use_node_expand_popover';
-import type { NodeProps } from '../../types';
-import {
-  GRAPH_NODE_EXPAND_POPOVER_TEST_ID,
-  GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID,
-} from '../../test_ids';
-import type {
-  ItemExpandPopoverListItemProps,
-  SeparatorExpandPopoverListItemProps,
-} from '../primitives/list_graph_popover';
+import type { NodeProps, NodeViewModel } from '../../types';
+import { GRAPH_NODE_EXPAND_POPOVER_TEST_ID } from '../../test_ids';
 import { isFilterActive } from '../../filters/filter_state';
-import { emitFilterAction } from '../../filters/filter_pub_sub';
-import { getEntityExpandItems, createEntityExpandInput } from './get_entity_expand_items';
-
-const DISABLED_TOOLTIP = i18n.translate(
-  'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetailsTooltipText',
-  { defaultMessage: 'Details not available' }
-);
+import { getEntityExpandItems } from './get_entity_expand_items';
 
 /**
  * Hook to handle the entity node expand popover.
@@ -33,76 +19,29 @@ const DISABLED_TOOLTIP = i18n.translate(
  *
  * Uses pub-sub pattern for filter state management - reads from filterState$ and emits to filterAction$.
  *
- * @param onShowEntityDetailsClick - Optional callback when entity details is clicked.
+ * @param onOpenEventPreview - Optional callback to open event preview with full node data.
+ *                             If provided, clicking "Show entity details" calls this callback.
+ *                             If not provided, it emits via previewAction$ pub-sub.
  * @returns The entity node expand popover.
  */
-export const useEntityNodeExpandPopover = (
-  onShowEntityDetailsClick?: (node: NodeProps) => void
-) => {
+export const useEntityNodeExpandPopover = (onOpenEventPreview?: (node: NodeViewModel) => void) => {
   const itemsFn = useCallback(
-    (
-      node: NodeProps
-    ): Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps> => {
-      // Create input for item generation using node.id (React Flow node id)
-      const input = createEntityExpandInput(node.id, node.data, Boolean(onShowEntityDetailsClick));
-
-      // Generate items with labels using pure function
-      const popoverItems = getEntityExpandItems(input, isFilterActive);
-
-      if (popoverItems.length === 0) {
-        return [];
-      }
-
-      // Convert items to popover list items with click handlers
-      // Separators are passed through as-is, action items get onClick handlers
-      return popoverItems.map(
-        (popoverItem): ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps => {
-          if (popoverItem.type === 'separator') {
-            return popoverItem;
-          }
-
-          return {
-            type: 'item',
-            iconType: popoverItem.iconType,
-            testSubject: popoverItem.testSubject,
-            label: popoverItem.label,
-            disabled: popoverItem.disabled,
-            onClick: () => {
-              if (popoverItem.type === 'show-entity-details') {
-                onShowEntityDetailsClick?.(node);
-              } else if (
-                popoverItem.field &&
-                popoverItem.value &&
-                popoverItem.currentAction &&
-                popoverItem.filterActionType
-              ) {
-                // Emit filter action via pub-sub
-                emitFilterAction({
-                  type: popoverItem.filterActionType,
-                  field: popoverItem.field,
-                  value: popoverItem.value,
-                  action: popoverItem.currentAction,
-                });
-              }
-            },
-            showToolTip: popoverItem.disabled,
-            toolTipText: popoverItem.disabled ? DISABLED_TOOLTIP : undefined,
-            toolTipProps: popoverItem.disabled
-              ? {
-                  position: 'bottom',
-                  'data-test-subj': GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID,
-                }
-              : undefined,
-          };
-        }
-      );
+    (node: NodeProps) => {
+      return getEntityExpandItems({
+        nodeId: node.id,
+        nodeData: node.data,
+        isFilterActive,
+        onOpenEventPreview,
+      });
     },
-    [onShowEntityDetailsClick]
+    [onOpenEventPreview]
   );
+
   const entityNodeExpandPopover = useNodeExpandPopover({
     id: 'entity-node-expand-popover',
     itemsFn,
     testSubject: GRAPH_NODE_EXPAND_POPOVER_TEST_ID,
   });
+
   return entityNodeExpandPopover;
 };

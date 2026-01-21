@@ -18,9 +18,9 @@ import {
   getSingleDocumentData,
   GraphGroupedNodePreviewPanelKey,
   GROUP_PREVIEW_BANNER,
-  groupedItemClick$,
   NETWORK_PREVIEW_BANNER,
   type NodeViewModel,
+  previewAction$,
 } from '@kbn/cloud-security-posture-graph';
 import { type NodeDocumentDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import {
@@ -199,9 +199,9 @@ export const GraphVisualization: React.FC = memo(() => {
     [toasts, openPreviewPanel, scopeId, dataViewIndexPattern]
   );
 
-  // Subscribe to grouped item click events emitted by graph package
+  // Subscribe to preview actions emitted by graph package
   useEffect(() => {
-    const sub = groupedItemClick$.subscribe((item: EntityOrEventItem) => {
+    const sub = previewAction$.subscribe((item: EntityOrEventItem) => {
       if (item.itemType === DOCUMENT_TYPE_ENTITY) {
         openPreviewPanel({
           id: GenericEntityPanelKey,

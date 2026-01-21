@@ -17,7 +17,7 @@ import { Panel } from '@xyflow/react';
 import { getEsQueryConfig } from '@kbn/data-service';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
-import { Graph, isEntityNode, type NodeProps } from '../../..';
+import { Graph, isEntityNode } from '../../..';
 import { Callout } from '../callout/callout';
 import { type UseFetchGraphDataParams, useFetchGraphData } from '../../hooks/use_fetch_graph_data';
 import { useGraphCallout } from '../../hooks/use_graph_callout';
@@ -39,10 +39,10 @@ import { GRAPH_SCOPE_ID } from '../constants';
 import { useGraphFilters } from '../filters/use_graph_filters';
 
 const useGraphPopovers = ({
-  nodeDetailsClickHandler,
+  onOpenEventPreview,
   onOpenNetworkPreview,
 }: {
-  nodeDetailsClickHandler?: (node: NodeProps) => void;
+  onOpenEventPreview?: (node: NodeViewModel) => void;
   onOpenNetworkPreview?: (ip: string, scopeId: string) => void;
 }) => {
   const [currentIps, setCurrentIps] = useState<string[]>([]);
@@ -51,8 +51,8 @@ const useGraphPopovers = ({
     null
   );
   const [currentEventText, setCurrentEventText] = useState<string>('');
-  const nodeExpandPopover = useEntityNodeExpandPopover(nodeDetailsClickHandler);
-  const labelExpandPopover = useLabelNodeExpandPopover(nodeDetailsClickHandler);
+  const nodeExpandPopover = useEntityNodeExpandPopover(onOpenEventPreview);
+  const labelExpandPopover = useLabelNodeExpandPopover(onOpenEventPreview);
   const ipPopover = useIpPopover(currentIps, GRAPH_SCOPE_ID);
   const countryFlagsPopover = useCountryFlagsPopover(currentCountryCodes);
   const eventPopover = useEventDetailsPopover(currentEventAnalysis, currentEventText);
@@ -293,13 +293,6 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       }
     }, [error, isError, notifications]);
 
-    const nodeDetailsClickHandler = useCallback(
-      (node: NodeProps) => {
-        onOpenEventPreview?.(node.data);
-      },
-      [onOpenEventPreview]
-    );
-
     const {
       nodeExpandPopover,
       labelExpandPopover,
@@ -311,7 +304,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       createCountryClickHandler,
       createEventClickHandler,
     } = useGraphPopovers({
-      nodeDetailsClickHandler: onOpenEventPreview ? nodeDetailsClickHandler : undefined,
+      onOpenEventPreview,
       onOpenNetworkPreview,
     });
 

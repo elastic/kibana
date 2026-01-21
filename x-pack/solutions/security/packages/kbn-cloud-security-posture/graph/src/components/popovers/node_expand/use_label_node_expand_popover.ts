@@ -7,15 +7,10 @@
 
 import { useCallback } from 'react';
 import { useNodeExpandPopover } from './use_node_expand_popover';
-import type { NodeProps } from '../../types';
+import type { NodeProps, NodeViewModel } from '../../types';
 import { GRAPH_LABEL_EXPAND_POPOVER_TEST_ID } from '../../test_ids';
-import type {
-  ItemExpandPopoverListItemProps,
-  SeparatorExpandPopoverListItemProps,
-} from '../primitives/list_graph_popover';
 import { isFilterActive } from '../../filters/filter_state';
-import { emitFilterAction } from '../../filters/filter_pub_sub';
-import { getLabelExpandItems, createLabelExpandInput } from './get_label_expand_items';
+import { getLabelExpandItems } from './get_label_expand_items';
 
 /**
  * Hook to handle the label node expand popover.
@@ -24,64 +19,26 @@ import { getLabelExpandItems, createLabelExpandInput } from './get_label_expand_
  *
  * Uses pub-sub pattern for filter state management - reads from filterState$ and emits to filterAction$.
  *
- * @param onShowEventDetailsClick - Optional callback when event details is clicked.
+ * @param onOpenEventPreview - Optional callback to open event preview with full node data.
+ *                             If provided, clicking "Show event details" calls this callback.
+ *                             If not provided, it emits via previewAction$ pub-sub.
  * @returns The label node expand popover.
  */
-export const useLabelNodeExpandPopover = (onShowEventDetailsClick?: (node: NodeProps) => void) => {
+export const useLabelNodeExpandPopover = (onOpenEventPreview?: (node: NodeViewModel) => void) => {
   const itemsFn = useCallback(
-    (
-      node: NodeProps
-    ): Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps> => {
-      // Create input for item generation
-      const input = createLabelExpandInput(node.data);
+    (node: NodeProps) => {
+      // Extract the label from node data
+      const nodeLabel =
+        'label' in node.data && typeof node.data.label === 'string' ? node.data.label : '';
 
-      // Generate items with labels using pure function
-      const popoverItems = getLabelExpandItems(
-        input,
+      return getLabelExpandItems({
+        nodeLabel,
+        nodeData: node.data,
         isFilterActive,
-        Boolean(onShowEventDetailsClick)
-      );
-
-      if (popoverItems.length === 0) {
-        return [];
-      }
-
-      // Convert items to popover list items with click handlers
-      // Separators are passed through as-is, action items get onClick handlers
-      return popoverItems.map(
-        (popoverItem): ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps => {
-          if (popoverItem.type === 'separator') {
-            return popoverItem;
-          }
-
-          return {
-            type: 'item',
-            iconType: popoverItem.iconType,
-            testSubject: popoverItem.testSubject,
-            label: popoverItem.label,
-            onClick: () => {
-              if (popoverItem.type === 'show-event-details') {
-                onShowEventDetailsClick?.(node);
-              } else if (
-                popoverItem.field &&
-                popoverItem.value &&
-                popoverItem.currentAction &&
-                popoverItem.filterActionType
-              ) {
-                // Emit filter action via pub-sub
-                emitFilterAction({
-                  type: popoverItem.filterActionType,
-                  field: popoverItem.field,
-                  value: popoverItem.value,
-                  action: popoverItem.currentAction,
-                });
-              }
-            },
-          };
-        }
-      );
+        onOpenEventPreview,
+      });
     },
-    [onShowEventDetailsClick]
+    [onOpenEventPreview]
   );
 
   const labelNodeExpandPopover = useNodeExpandPopover({

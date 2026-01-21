@@ -6,6 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type {
+  ItemExpandPopoverListItemProps,
+  SeparatorExpandPopoverListItemProps,
+} from '../primitives/list_graph_popover';
+import { emitFilterAction } from '../../filters/filter_pub_sub';
+import { emitPreviewAction } from '../../preview_pub_sub';
 import type { NodeViewModel } from '../../types';
 import { getNodeDocumentMode, isEntityNodeEnriched } from '../../utils';
 import {
@@ -13,71 +19,10 @@ import {
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
+  GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID,
 } from '../../test_ids';
 import { RELATED_ENTITY } from '../../../common/constants';
-import type { FilterActionType } from '../../filters/filter_pub_sub';
-
-/**
- * Separator item for visual grouping in the popover.
- */
-interface SeparatorItem {
-  type: 'separator';
-}
-
-/**
- * Entity expand popover item with label included.
- * Contains all the data needed to render a menu item.
- * onClick handler is NOT included - the caller must bind it.
- */
-export interface EntityExpandPopoverItem {
-  /** Unique item type identifier */
-  type:
-    | 'show-actions-by-entity'
-    | 'show-actions-on-entity'
-    | 'show-related-events'
-    | 'show-entity-details';
-  /** Icon to display */
-  iconType: string;
-  /** Test subject for automation */
-  testSubject: string;
-  /** Resolved i18n label */
-  label: string;
-  /** The field to filter on (for filter actions) */
-  field?: string;
-  /** The value to filter for */
-  value?: string;
-  /** Current toggle state - 'show' means filter is not active, 'hide' means it is */
-  currentAction?: 'show' | 'hide';
-  /** Filter action type to emit when clicked */
-  filterActionType?: FilterActionType;
-  /** Whether this item should be disabled */
-  disabled?: boolean;
-  /** Tooltip text when disabled */
-  disabledTooltip?: string;
-}
-
-/**
- * Union type for all possible items returned by getEntityExpandItems,
- * including separators for visual grouping.
- */
-export type EntityExpandPopoverItemOrSeparator = EntityExpandPopoverItem | SeparatorItem;
-
-/**
- * Input for entity expand item generation.
- * Contains the minimal data needed to generate items.
- */
-export interface EntityExpandInput {
-  /** Entity ID (node.id) */
-  id: string;
-  /** Node document mode */
-  docMode: ReturnType<typeof getNodeDocumentMode>;
-  /** Actor field derived from source namespace (e.g., 'user.entity.id') */
-  actorField: string;
-  /** Target field derived from source namespace (e.g., 'user.target.entity.id') */
-  targetField: string;
-  /** Whether entity details action should be disabled */
-  entityDetailsDisabled: boolean;
-}
+import type { EntityOrEventItem } from '../../graph_grouped_node_preview_panel/components/grouped_item/types';
 
 /**
  * Helper function to extract ecsParentField from the entity object in the first document.
@@ -118,54 +63,63 @@ export const getTargetFieldFromNamespace = (sourceNamespace: string | undefined)
 };
 
 /**
- * Create EntityExpandInput from a NodeProps (with node.id from React Flow).
- * Helper to extract the necessary data for item generation.
- *
- * @param nodeId - The node id (from NodeProps.id, the React Flow node id)
- * @param nodeData - The node data (NodeViewModel)
- * @param hasEntityDetailsHandler - Whether entity details handler is available
+ * Options for generating entity expand popover items.
  */
-export const createEntityExpandInput = (
-  nodeId: string,
-  nodeData: NodeViewModel,
-  hasEntityDetailsHandler: boolean
-): EntityExpandInput => {
-  const sourceNamespace = getSourceNamespaceFromNode(nodeData);
-  const actorField = getActorFieldFromNamespace(sourceNamespace);
-  const targetField = getTargetFieldFromNamespace(sourceNamespace);
-  const docMode = getNodeDocumentMode(nodeData);
+export interface GetEntityExpandItemsOptions {
+  /** The node ID */
+  nodeId: string;
+  /** The node data */
+  nodeData?: NodeViewModel;
+  /** Function to check if a filter is currently active */
+  isFilterActive: (field: string, value: string) => boolean;
+  /** Callback to open event preview with full node data (for graph node popovers) */
+  onOpenEventPreview?: (node: NodeViewModel) => void;
+  /** Item to use for preview action via pub-sub (for flyout action buttons) */
+  previewItem?: EntityOrEventItem;
+  /** Callback to close the popover */
+  onClose?: () => void;
+}
 
-  const entityDetailsDisabled =
-    !hasEntityDetailsHandler ||
-    !['single-entity', 'grouped-entities'].includes(docMode) ||
-    (docMode === 'single-entity' && !isEntityNodeEnriched(nodeData));
-
-  return {
-    id: nodeId,
-    docMode,
-    actorField,
-    targetField,
-    entityDetailsDisabled,
-  };
-};
+const DISABLED_TOOLTIP = i18n.translate(
+  'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetailsTooltipText',
+  { defaultMessage: 'Details not available' }
+);
 
 /**
- * Generates entity expand popover items with labels and separators included.
- * Returns complete items ready for rendering - caller only needs to bind onClick handlers.
- *
- * @param input - Entity expand input containing node data
- * @param isFilterActive - Function to check if a filter is currently active
- * @returns Array of items with labels and separators
+ * Generates entity expand popover items with onClick handlers.
+ * Returns items ready to be rendered directly in ListGraphPopover.
  */
 export const getEntityExpandItems = (
-  input: EntityExpandInput,
-  isFilterActive: (field: string, value: string) => boolean
-): EntityExpandPopoverItemOrSeparator[] => {
-  const { id, docMode, actorField, targetField, entityDetailsDisabled } = input;
+  options: GetEntityExpandItemsOptions
+): Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps> => {
+  const { nodeId, nodeData, isFilterActive, onOpenEventPreview, previewItem, onClose } = options;
 
-  // Entity details item (shared between single-entity and grouped-entities)
-  const entityDetailsItem: EntityExpandPopoverItem = {
-    type: 'show-entity-details',
+  // Determine document mode and fields from node data
+  const docMode = nodeData ? getNodeDocumentMode(nodeData) : 'single-entity';
+  const sourceNamespace = nodeData ? getSourceNamespaceFromNode(nodeData) : undefined;
+  const actorField = getActorFieldFromNamespace(sourceNamespace);
+  const targetField = getTargetFieldFromNamespace(sourceNamespace);
+
+  // Determine if entity details should be disabled
+  const hasPreviewAction = onOpenEventPreview !== undefined || previewItem !== undefined;
+  const entityDetailsDisabled =
+    !hasPreviewAction ||
+    !['single-entity', 'grouped-entities'].includes(docMode) ||
+    (docMode === 'single-entity' && nodeData !== undefined && !isEntityNodeEnriched(nodeData));
+
+  // Create the entity details click handler
+  const handleEntityDetailsClick = () => {
+    if (onOpenEventPreview && nodeData) {
+      onOpenEventPreview(nodeData);
+    } else if (previewItem) {
+      emitPreviewAction(previewItem);
+    }
+    onClose?.();
+  };
+
+  // Entity details item
+  const entityDetailsItem: ItemExpandPopoverListItemProps = {
+    type: 'item',
     iconType: 'expand',
     testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
     label: i18n.translate(
@@ -173,11 +127,14 @@ export const getEntityExpandItems = (
       { defaultMessage: 'Show entity details' }
     ),
     disabled: entityDetailsDisabled,
-    disabledTooltip: entityDetailsDisabled
-      ? i18n.translate(
-          'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetailsTooltipText',
-          { defaultMessage: 'Details not available' }
-        )
+    onClick: handleEntityDetailsClick,
+    showToolTip: entityDetailsDisabled,
+    toolTipText: entityDetailsDisabled ? DISABLED_TOOLTIP : undefined,
+    toolTipProps: entityDetailsDisabled
+      ? {
+          position: 'bottom',
+          'data-test-subj': GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID,
+        }
       : undefined,
   };
 
@@ -188,13 +145,13 @@ export const getEntityExpandItems = (
 
   // For 'single-entity', show filter actions + separator + entity details
   if (docMode === 'single-entity') {
-    const actionsByEntityActive = isFilterActive(actorField, id);
-    const actionsOnEntityActive = isFilterActive(targetField, id);
-    const relatedEventsActive = isFilterActive(RELATED_ENTITY, id);
+    const actionsByEntityActive = isFilterActive(actorField, nodeId);
+    const actionsOnEntityActive = isFilterActive(targetField, nodeId);
+    const relatedEventsActive = isFilterActive(RELATED_ENTITY, nodeId);
 
     return [
       {
-        type: 'show-actions-by-entity',
+        type: 'item',
         iconType: 'sortRight',
         testSubject: GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
         label: actionsByEntityActive
@@ -206,13 +163,18 @@ export const getEntityExpandItems = (
               'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showThisEntitysActions',
               { defaultMessage: "Show this entity's actions" }
             ),
-        field: actorField,
-        value: id,
-        currentAction: actionsByEntityActive ? 'hide' : 'show',
-        filterActionType: 'TOGGLE_ACTIONS_BY_ENTITY',
+        onClick: () => {
+          emitFilterAction({
+            type: 'TOGGLE_ACTIONS_BY_ENTITY',
+            field: actorField,
+            value: nodeId,
+            action: actionsByEntityActive ? 'hide' : 'show',
+          });
+          onClose?.();
+        },
       },
       {
-        type: 'show-actions-on-entity',
+        type: 'item',
         iconType: 'sortLeft',
         testSubject: GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID,
         label: actionsOnEntityActive
@@ -224,13 +186,18 @@ export const getEntityExpandItems = (
               'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showActionsDoneToThisEntity',
               { defaultMessage: 'Show actions done to this entity' }
             ),
-        field: targetField,
-        value: id,
-        currentAction: actionsOnEntityActive ? 'hide' : 'show',
-        filterActionType: 'TOGGLE_ACTIONS_ON_ENTITY',
+        onClick: () => {
+          emitFilterAction({
+            type: 'TOGGLE_ACTIONS_ON_ENTITY',
+            field: targetField,
+            value: nodeId,
+            action: actionsOnEntityActive ? 'hide' : 'show',
+          });
+          onClose?.();
+        },
       },
       {
-        type: 'show-related-events',
+        type: 'item',
         iconType: 'analyzeEvent',
         testSubject: GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID,
         label: relatedEventsActive
@@ -242,10 +209,15 @@ export const getEntityExpandItems = (
               'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showRelatedEntities',
               { defaultMessage: 'Show related events' }
             ),
-        field: RELATED_ENTITY,
-        value: id,
-        currentAction: relatedEventsActive ? 'hide' : 'show',
-        filterActionType: 'TOGGLE_RELATED_EVENTS',
+        onClick: () => {
+          emitFilterAction({
+            type: 'TOGGLE_RELATED_EVENTS',
+            field: RELATED_ENTITY,
+            value: nodeId,
+            action: relatedEventsActive ? 'hide' : 'show',
+          });
+          onClose?.();
+        },
       },
       { type: 'separator' },
       entityDetailsItem,

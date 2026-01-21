@@ -18,8 +18,6 @@ import {
 } from '../../test_ids';
 import { EVENT_ACTION } from '../../../common/constants';
 
-const mockOnShowEventDetailsClick = jest.fn();
-
 // Mock isFilterActive to control filter state in tests
 const mockIsFilterActive = jest.fn();
 
@@ -30,6 +28,12 @@ jest.mock('../../filters/filter_state', () => ({
 }));
 jest.mock('../../filters/filter_pub_sub', () => ({
   emitFilterAction: (...args: unknown[]) => mockEmitFilterAction(...args),
+}));
+
+// Mock emitPreviewAction to verify preview emissions
+const mockEmitPreviewAction = jest.fn();
+jest.mock('../../preview_pub_sub', () => ({
+  emitPreviewAction: (...args: unknown[]) => mockEmitPreviewAction(...args),
 }));
 
 // Mock useLabelExpandGraphPopover to capture and expose itemsFn
@@ -84,9 +88,9 @@ describe('useLabelNodeExpandPopover', () => {
   });
 
   describe('itemsFn - generates menu items', () => {
-    it('should return show events item and event details item when onShowEventDetailsClick is provided', () => {
+    it('should return show events item (event details disabled without proper docMode)', () => {
       const node = createMockLabelNode();
-      renderHook(() => useLabelNodeExpandPopover(mockOnShowEventDetailsClick));
+      renderHook(() => useLabelNodeExpandPopover());
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
@@ -103,7 +107,7 @@ describe('useLabelNodeExpandPopover', () => {
 
     it('should not show event details item when doc mode is not appropriate', () => {
       const node = createMockLabelNode();
-      renderHook(() => useLabelNodeExpandPopover(mockOnShowEventDetailsClick));
+      renderHook(() => useLabelNodeExpandPopover());
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
@@ -124,7 +128,7 @@ describe('useLabelNodeExpandPopover', () => {
       mockIsFilterActive.mockReturnValue(false);
 
       const node = createMockLabelNode();
-      renderHook(() => useLabelNodeExpandPopover(mockOnShowEventDetailsClick));
+      renderHook(() => useLabelNodeExpandPopover());
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
@@ -144,7 +148,7 @@ describe('useLabelNodeExpandPopover', () => {
       mockIsFilterActive.mockReturnValue(true);
 
       const node = createMockLabelNode();
-      renderHook(() => useLabelNodeExpandPopover(mockOnShowEventDetailsClick));
+      renderHook(() => useLabelNodeExpandPopover());
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
@@ -166,7 +170,7 @@ describe('useLabelNodeExpandPopover', () => {
       mockIsFilterActive.mockReturnValue(false);
 
       const node = createMockLabelNode();
-      renderHook(() => useLabelNodeExpandPopover(mockOnShowEventDetailsClick));
+      renderHook(() => useLabelNodeExpandPopover());
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
@@ -193,7 +197,7 @@ describe('useLabelNodeExpandPopover', () => {
       mockIsFilterActive.mockReturnValue(true);
 
       const node = createMockLabelNode();
-      renderHook(() => useLabelNodeExpandPopover(mockOnShowEventDetailsClick));
+      renderHook(() => useLabelNodeExpandPopover());
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);

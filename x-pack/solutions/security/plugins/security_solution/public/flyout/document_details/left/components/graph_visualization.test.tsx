@@ -8,7 +8,7 @@
 import React from 'react';
 import '@testing-library/jest-dom';
 import { render, waitFor } from '@testing-library/react';
-import { GraphInvestigation, type NodeViewModel } from '@kbn/cloud-security-posture-graph';
+import { GraphInvestigation } from '@kbn/cloud-security-posture-graph';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { GraphVisualization } from './graph_visualization';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
@@ -42,14 +42,22 @@ jest.mock('@kbn/cloud-security-posture-graph', () => {
   const { GraphGroupedNodePreviewPanelKey, GROUP_PREVIEW_BANNER } = jest.requireActual(
     '@kbn/cloud-security-posture-graph/src/components/graph_grouped_node_preview_panel/constants'
   );
+  const { isEntityItem } = jest.requireActual(
+    '@kbn/cloud-security-posture-graph/src/components/graph_grouped_node_preview_panel/components/grouped_item/types'
+  );
+
+  // Create a shared Subject that can be accessed in tests
+  const mockPreviewAction$ = new Subject();
 
   return {
     // Mocked GraphInvestigation component
     GraphInvestigation: jest.fn(),
-    // Real RxJS Subject for groupedItemClick$
-    groupedItemClick$: new Subject(),
+    // Real RxJS Subject for previewAction$ (and deprecated groupedItemClick$ alias)
+    previewAction$: mockPreviewAction$,
+    groupedItemClick$: mockPreviewAction$,
     // Use actual utility functions
     isEntityNode,
+    isEntityItem,
     getNodeDocumentMode,
     hasNodeDocumentsData,
     getSingleDocumentData,
@@ -128,7 +136,7 @@ describe('GraphVisualization', () => {
     jest.resetAllMocks();
   });
 
-  describe('onOpenEventPreview', () => {
+  describe('previewAction$ subscription', () => {
     it('renders GraphInvestigation component', async () => {
       const { getByTestId } = render(<GraphVisualization />);
       expect(getByTestId(GRAPH_VISUALIZATION_TEST_ID)).toBeInTheDocument();
@@ -139,184 +147,48 @@ describe('GraphVisualization', () => {
       });
     });
 
-    it('calls open grouped events preview for alert with event - normal alert case', async () => {
+    it('opens alert preview panel when alert item is emitted', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { previewAction$ } = require('@kbn/cloud-security-posture-graph');
+
       const { getByTestId } = render(<GraphVisualization />);
       expect(getByTestId(GRAPH_VISUALIZATION_TEST_ID)).toBeInTheDocument();
 
-      // Wait for lazy-loaded GraphInvestigation to appear
+      // Wait for lazy-loaded GraphInvestigation to appear and subscription to be active
       await waitFor(() => {
         expect(getByTestId(GRAPH_INVESTIGATION_TEST_ID)).toBeInTheDocument();
       });
 
-      expect(GraphInvestigation).toHaveBeenCalledTimes(1);
-      expect(jest.mocked(GraphInvestigation).mock.calls[0][0]).toHaveProperty('onOpenEventPreview');
-      const onOpenEventPreview =
-        jest.mocked(GraphInvestigation).mock.calls[0][0].onOpenEventPreview;
-
-      // Act - Alert nodes contain both the event and alert documents
-      onOpenEventPreview?.({
-        id: 'node-1',
-        shape: 'label',
-        color: 'danger',
-        documentsData: [
-          {
-            index: 'event-index',
-            id: 'event-id',
-            type: 'event',
-            event: { id: 'event-id' },
-          },
-          {
-            index: 'alert-index',
-            id: 'alert-id',
-            type: 'alert',
-            event: { id: 'alert-id' },
-          },
-        ],
-      } satisfies NodeViewModel);
-
-      // Assert - should open grouped events preview panel (not single alert preview)
-      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'graphGroupedNodePreviewPanel',
-          params: {
-            id: 'node-1',
-            scopeId: 'test-scope',
-            isPreviewMode: true,
-            banner: expect.objectContaining({ backgroundColor: 'warning', textColor: 'warning' }),
-            docMode: 'grouped-events',
-            dataViewId: 'experimental-data-view-pattern',
-            documentIds: ['event-id', 'alert-id'],
-          },
-        })
-      );
-    });
-
-    it('calls open event preview callback for event', async () => {
-      const { getByTestId } = render(<GraphVisualization />);
-      expect(getByTestId(GRAPH_VISUALIZATION_TEST_ID)).toBeInTheDocument();
-
-      // Wait for lazy-loaded GraphInvestigation to appear
-      await waitFor(() => {
-        expect(getByTestId(GRAPH_INVESTIGATION_TEST_ID)).toBeInTheDocument();
+      // Act - Emit an alert item through pub-sub
+      previewAction$.next({
+        itemType: 'alert',
+        id: 'alert-1',
+        docId: 'alert-doc-id',
+        index: 'alert-index',
+        action: 'login-failed',
       });
 
-      expect(GraphInvestigation).toHaveBeenCalledTimes(1);
-      expect(jest.mocked(GraphInvestigation).mock.calls[0][0]).toHaveProperty('onOpenEventPreview');
-      const onOpenEventPreview =
-        jest.mocked(GraphInvestigation).mock.calls[0][0].onOpenEventPreview;
-
-      // Act
-      onOpenEventPreview?.({
-        id: 'node-1',
-        shape: 'label',
-        color: 'danger',
-        documentsData: [
-          {
-            index: 'event-index',
-            id: 'event-id',
-            type: 'event',
-          },
-        ],
-      } satisfies NodeViewModel);
-
-      // Assert
-      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'document-details-preview',
-          params: {
-            id: 'event-id',
-            indexName: 'event-index',
-            banner: expect.objectContaining({ title: 'Preview event details' }),
-            scopeId: 'test-scope',
-            isPreviewMode: true,
-          },
-        })
-      );
-    });
-
-    it('should not call open entity preview callback for entity - without entity data', async () => {
-      const { getByTestId } = render(<GraphVisualization />);
-      expect(getByTestId(GRAPH_VISUALIZATION_TEST_ID)).toBeInTheDocument();
-
-      // Wait for lazy-loaded GraphInvestigation to appear
+      // Assert - should open alert preview panel
       await waitFor(() => {
-        expect(getByTestId(GRAPH_INVESTIGATION_TEST_ID)).toBeInTheDocument();
-      });
-
-      expect(GraphInvestigation).toHaveBeenCalledTimes(1);
-      expect(jest.mocked(GraphInvestigation).mock.calls[0][0]).toHaveProperty('onOpenEventPreview');
-      const onOpenEventPreview =
-        jest.mocked(GraphInvestigation).mock.calls[0][0].onOpenEventPreview;
-
-      // Act
-      onOpenEventPreview?.({
-        id: 'node-1',
-        shape: 'hexagon',
-        color: 'primary',
-        documentsData: [
-          {
-            index: 'entity-index',
-            id: 'entity-id',
-            type: 'entity',
-          },
-        ],
-      } satisfies NodeViewModel);
-
-      // Assert
-      expect(mockFlyoutApi.openPreviewPanel).not.toHaveBeenCalled();
-    });
-
-    it('calls open entity preview callback for entity - with entity data', async () => {
-      const { getByTestId } = render(<GraphVisualization />);
-      expect(getByTestId(GRAPH_VISUALIZATION_TEST_ID)).toBeInTheDocument();
-
-      // Wait for lazy-loaded GraphInvestigation to appear
-      await waitFor(() => {
-        expect(getByTestId(GRAPH_INVESTIGATION_TEST_ID)).toBeInTheDocument();
-      });
-
-      expect(GraphInvestigation).toHaveBeenCalledTimes(1);
-      expect(jest.mocked(GraphInvestigation).mock.calls[0][0]).toHaveProperty('onOpenEventPreview');
-      const onOpenEventPreview =
-        jest.mocked(GraphInvestigation).mock.calls[0][0].onOpenEventPreview;
-
-      // Act
-      onOpenEventPreview?.({
-        id: 'node-1',
-        shape: 'hexagon',
-        color: 'primary',
-        documentsData: [
-          {
-            index: 'entity-index',
-            id: 'entity-id',
-            type: 'entity',
-            entity: {
-              name: 'Admin',
-              type: 'Identity',
-              sub_type: 'Test User',
-              availableInEntityStore: true,
-              ecsParentField: 'entity',
+        expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: 'document-details-preview',
+            params: {
+              id: 'alert-doc-id',
+              indexName: 'alert-index',
+              banner: expect.objectContaining({ title: 'Preview alert details' }),
+              scopeId: 'test-scope',
+              isPreviewMode: true,
             },
-          },
-        ],
-      } satisfies NodeViewModel);
-
-      // Assert
-      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'generic-entity-panel',
-          params: {
-            entityId: 'entity-id',
-            scopeId: 'test-scope',
-            isPreviewMode: true,
-            banner: expect.objectContaining({ title: 'Preview entity details' }),
-            isEngineMetadataExist: true,
-          },
-        })
-      );
+          })
+        );
+      });
     });
 
-    it('shows danger toast when cannot open event preview - documentsData is empty', async () => {
+    it('opens event preview panel when event item is emitted', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { previewAction$ } = require('@kbn/cloud-security-posture-graph');
+
       const { getByTestId } = render(<GraphVisualization />);
       expect(getByTestId(GRAPH_VISUALIZATION_TEST_ID)).toBeInTheDocument();
 
@@ -325,25 +197,36 @@ describe('GraphVisualization', () => {
         expect(getByTestId(GRAPH_INVESTIGATION_TEST_ID)).toBeInTheDocument();
       });
 
-      expect(GraphInvestigation).toHaveBeenCalledTimes(1);
-      expect(jest.mocked(GraphInvestigation).mock.calls[0][0]).toHaveProperty('onOpenEventPreview');
-      const onOpenEventPreview =
-        jest.mocked(GraphInvestigation).mock.calls[0][0].onOpenEventPreview;
+      // Act - Emit an event item through pub-sub
+      previewAction$.next({
+        itemType: 'event',
+        id: 'event-1',
+        docId: 'event-doc-id',
+        index: 'event-index',
+        action: 'file-created',
+      });
 
-      // Act
-      onOpenEventPreview?.({
-        id: 'node-1',
-        shape: 'label',
-        color: 'danger',
-        documentsData: [],
-      } satisfies NodeViewModel);
-
-      // Assert
-      expect(mockFlyoutApi.openPreviewPanel).not.toHaveBeenCalled();
-      expect(mockToasts.addDanger).toHaveBeenCalled();
+      // Assert - should open event preview panel
+      await waitFor(() => {
+        expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: 'document-details-preview',
+            params: {
+              id: 'event-doc-id',
+              indexName: 'event-index',
+              banner: expect.objectContaining({ title: 'Preview event details' }),
+              scopeId: 'test-scope',
+              isPreviewMode: true,
+            },
+          })
+        );
+      });
     });
 
-    it('calls open grouped entities preview for multiple entities', async () => {
+    it('opens entity preview panel when entity item is emitted', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { previewAction$ } = require('@kbn/cloud-security-posture-graph');
+
       const { getByTestId } = render(<GraphVisualization />);
       expect(getByTestId(GRAPH_VISUALIZATION_TEST_ID)).toBeInTheDocument();
 
@@ -352,95 +235,37 @@ describe('GraphVisualization', () => {
         expect(getByTestId(GRAPH_INVESTIGATION_TEST_ID)).toBeInTheDocument();
       });
 
-      expect(GraphInvestigation).toHaveBeenCalledTimes(1);
-      expect(jest.mocked(GraphInvestigation).mock.calls[0][0]).toHaveProperty('onOpenEventPreview');
-      const onOpenEventPreview =
-        jest.mocked(GraphInvestigation).mock.calls[0][0].onOpenEventPreview;
+      // Act - Emit an entity item through pub-sub
+      previewAction$.next({
+        itemType: 'entity',
+        id: 'entity-id',
+        label: 'Admin User',
+        type: 'Identity',
+        subType: 'IAM User',
+        availableInEntityStore: true,
+      });
 
-      // Act - Grouped entities node with multiple entity documents
-      onOpenEventPreview?.({
-        id: 'grouped-entity-node',
-        shape: 'rectangle',
-        color: 'primary',
-        icon: 'user',
-        count: 3,
-        documentsData: [
-          {
-            id: 'entity-1',
-            type: 'entity',
-            entity: {
-              name: 'User 1',
-              type: 'Identity',
-              sub_type: 'IAM User',
-              ecsParentField: 'user',
-              availableInEntityStore: true,
+      // Assert - should open entity preview panel
+      await waitFor(() => {
+        expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: 'generic-entity-panel',
+            params: {
+              entityId: 'entity-id',
+              scopeId: 'test-scope',
+              isPreviewMode: true,
+              banner: expect.objectContaining({ title: 'Preview entity details' }),
+              isEngineMetadataExist: true,
             },
-          },
-          {
-            id: 'entity-2',
-            type: 'entity',
-            entity: {
-              name: 'User 2',
-              type: 'Identity',
-              sub_type: 'IAM User',
-              ecsParentField: 'user',
-              availableInEntityStore: true,
-            },
-          },
-          {
-            id: 'entity-3',
-            type: 'entity',
-            entity: {
-              ecsParentField: 'user',
-              availableInEntityStore: false,
-            },
-          },
-        ],
-      } satisfies NodeViewModel);
-
-      // Assert - should open grouped entities preview panel
-      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'graphGroupedNodePreviewPanel',
-          params: {
-            id: 'grouped-entity-node',
-            scopeId: 'test-scope',
-            isPreviewMode: true,
-            banner: expect.objectContaining({ backgroundColor: 'warning', textColor: 'warning' }),
-            docMode: 'grouped-entities',
-            entityItems: [
-              {
-                itemType: 'entity',
-                id: 'entity-1',
-                type: 'Identity',
-                subType: 'IAM User',
-                icon: 'user',
-                availableInEntityStore: true,
-              },
-              {
-                itemType: 'entity',
-                id: 'entity-2',
-                type: 'Identity',
-                subType: 'IAM User',
-                icon: 'user',
-                availableInEntityStore: true,
-              },
-              {
-                itemType: 'entity',
-                id: 'entity-3',
-                type: undefined,
-                subType: undefined,
-                icon: 'user',
-                availableInEntityStore: false,
-              },
-            ],
-          },
-        })
-      );
-      expect(mockToasts.addDanger).not.toHaveBeenCalled();
+          })
+        );
+      });
     });
 
-    it('calls open grouped events preview for multiple events', async () => {
+    it('opens entity preview panel with isEngineMetadataExist false when entity not in store', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { previewAction$ } = require('@kbn/cloud-security-posture-graph');
+
       const { getByTestId } = render(<GraphVisualization />);
       expect(getByTestId(GRAPH_VISUALIZATION_TEST_ID)).toBeInTheDocument();
 
@@ -449,48 +274,43 @@ describe('GraphVisualization', () => {
         expect(getByTestId(GRAPH_INVESTIGATION_TEST_ID)).toBeInTheDocument();
       });
 
+      // Act - Emit an entity item without availableInEntityStore
+      previewAction$.next({
+        itemType: 'entity',
+        id: 'entity-id',
+        label: 'Unknown User',
+        availableInEntityStore: false,
+      });
+
+      // Assert - should open entity preview panel with isEngineMetadataExist false
+      await waitFor(() => {
+        expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: 'generic-entity-panel',
+            params: {
+              entityId: 'entity-id',
+              scopeId: 'test-scope',
+              isPreviewMode: true,
+              banner: expect.objectContaining({ title: 'Preview entity details' }),
+              isEngineMetadataExist: false,
+            },
+          })
+        );
+      });
+    });
+
+    it('GraphInvestigation does not receive onOpenEventPreview prop', async () => {
+      const { getByTestId } = render(<GraphVisualization />);
+
+      await waitFor(() => {
+        expect(getByTestId(GRAPH_INVESTIGATION_TEST_ID)).toBeInTheDocument();
+      });
+
       expect(GraphInvestigation).toHaveBeenCalledTimes(1);
-      expect(jest.mocked(GraphInvestigation).mock.calls[0][0]).toHaveProperty('onOpenEventPreview');
-      const onOpenEventPreview =
-        jest.mocked(GraphInvestigation).mock.calls[0][0].onOpenEventPreview;
-
-      // Act
-      onOpenEventPreview?.({
-        id: 'node-1',
-        shape: 'label',
-        color: 'danger',
-        documentsData: [
-          {
-            index: 'event-index',
-            id: 'event-id-1',
-            type: 'event',
-            event: { id: 'event-id-1' },
-          },
-          {
-            index: 'event-index',
-            id: 'event-id-2',
-            type: 'event',
-            event: { id: 'event-id-2' },
-          },
-        ],
-      } satisfies NodeViewModel);
-
-      // Assert - should open grouped events preview panel
-      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'graphGroupedNodePreviewPanel',
-          params: {
-            id: 'node-1',
-            scopeId: 'test-scope',
-            isPreviewMode: true,
-            banner: expect.objectContaining({ backgroundColor: 'warning', textColor: 'warning' }),
-            docMode: 'grouped-events',
-            dataViewId: 'experimental-data-view-pattern',
-            documentIds: ['event-id-1', 'event-id-2'],
-          },
-        })
+      // Verify onOpenEventPreview is NOT passed (pub-sub is used instead)
+      expect(jest.mocked(GraphInvestigation).mock.calls[0][0]).not.toHaveProperty(
+        'onOpenEventPreview'
       );
-      expect(mockToasts.addDanger).not.toHaveBeenCalled();
     });
   });
 

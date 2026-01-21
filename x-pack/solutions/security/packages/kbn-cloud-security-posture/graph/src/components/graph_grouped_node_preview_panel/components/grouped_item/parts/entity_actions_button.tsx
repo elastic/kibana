@@ -10,22 +10,13 @@ import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useGraphPopoverState } from '../../../../popovers/primitives/use_graph_popover_state';
 import { ListGraphPopover } from '../../../../popovers/primitives/list_graph_popover';
-import type {
-  ItemExpandPopoverListItemProps,
-  SeparatorExpandPopoverListItemProps,
-} from '../../../../popovers/primitives/list_graph_popover';
 import {
   GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID,
   GROUPED_ITEM_ACTIONS_POPOVER_TEST_ID,
 } from '../../../test_ids';
 import type { EntityItem } from '../types';
 import { isFilterActive } from '../../../../filters/filter_state';
-import { emitFilterAction } from '../../../../filters/filter_pub_sub';
-import { emitPreviewAction } from '../../../../preview_pub_sub';
-import {
-  getEntityExpandItems,
-  type EntityExpandInput,
-} from '../../../../popovers/node_expand/get_entity_expand_items';
+import { getEntityExpandItems } from '../../../../popovers/node_expand/get_entity_expand_items';
 
 const actionsButtonAriaLabel = i18n.translate(
   'securitySolutionPackages.csp.graph.groupedItem.actionsButton.ariaLabel',
@@ -54,60 +45,17 @@ export const EntityActionsButton = ({ item }: EntityActionsButtonProps) => {
     }
   }, [actions]);
 
-  // Create input for item generation - treat as single-entity since we're in flyout
-  const input: EntityExpandInput = useMemo(
-    () => ({
-      id: item.id,
-      docMode: 'single-entity', // In flyout, we treat entities as single
-      actorField: 'entity.id', // Default field - could be extended based on item.type
-      targetField: 'entity.target.id',
-      entityDetailsDisabled: false, // Entity details always enabled in flyout
-    }),
-    [item.id]
+  // Generate items with onClick handlers directly
+  const items = useMemo(
+    () =>
+      getEntityExpandItems({
+        nodeId: item.id,
+        isFilterActive,
+        previewItem: item,
+        onClose: actions.closePopover,
+      }),
+    [item, actions.closePopover]
   );
-
-  // Generate items with labels
-  const popoverItems = useMemo(() => getEntityExpandItems(input, isFilterActive), [input]);
-
-  // Convert items to popover list items
-  // Separators are passed through as-is, action items get onClick handlers
-  const items: Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps> =
-    useMemo(() => {
-      return popoverItems.map(
-        (popoverItem): ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps => {
-          if (popoverItem.type === 'separator') {
-            return popoverItem;
-          }
-
-          return {
-            type: 'item' as const,
-            iconType: popoverItem.iconType,
-            testSubject: popoverItem.testSubject,
-            label: popoverItem.label,
-            disabled: popoverItem.disabled,
-            onClick: () => {
-              if (popoverItem.type === 'show-entity-details') {
-                emitPreviewAction(item);
-              } else if (
-                popoverItem.field &&
-                popoverItem.value &&
-                popoverItem.currentAction &&
-                popoverItem.filterActionType
-              ) {
-                // Emit filter action via pub-sub
-                emitFilterAction({
-                  type: popoverItem.filterActionType,
-                  field: popoverItem.field,
-                  value: popoverItem.value,
-                  action: popoverItem.currentAction,
-                });
-              }
-              actions.closePopover();
-            },
-          };
-        }
-      );
-    }, [popoverItems, item, actions]);
 
   return (
     <>
