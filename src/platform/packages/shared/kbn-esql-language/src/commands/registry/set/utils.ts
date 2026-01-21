@@ -10,8 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { UnmappedFieldsStrategy, type ISuggestionItem } from '../types';
 import type { ESQLAstItem } from '../../../types';
 import { isMap, SuggestionCategory } from '../../../..';
-import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
-import { SignatureAnalyzer } from '../../definitions/utils/autocomplete/expressions/signature_analyzer';
+import {
+  getCommandMapExpressionSuggestions,
+  parseMapParams,
+} from '../../definitions/utils/autocomplete/map_expression';
 import { settings } from '../../definitions/generated/settings';
 
 const getProjectRoutingCommonCompletionItems = (): ISuggestionItem[] => {
@@ -78,11 +80,8 @@ const getApproximateCompletionItems = (
   settingRightSide: ESQLAstItem | null
 ): ISuggestionItem[] => {
   if (isMap(settingRightSide)) {
-    // casting the object because typescript is not able to infer the 'mapParams' property
     const approximateSetting = settings.find((s) => s.name === 'approximate') as ApproximateSetting;
-    const availableParameters = SignatureAnalyzer.parseMapParams(
-      approximateSetting?.mapParams || ''
-    );
+    const availableParameters = parseMapParams(approximateSetting?.mapParams || '');
     return getCommandMapExpressionSuggestions(innerText, availableParameters);
   }
   return [

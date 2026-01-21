@@ -22,6 +22,7 @@ import {
   DOUBLE_QUOTED_STRING_REGEX,
   getCommandMapExpressionSuggestions,
   isInsideMapExpression,
+  parseMapParams,
 } from '../map_expression';
 import { SignatureAnalyzer } from './signature_analyzer';
 import type {
@@ -213,7 +214,7 @@ function getMapExpressionSuggestions(innerText: string): ISuggestionItem[] | nul
     return null;
   }
 
-  const availableParameters = SignatureAnalyzer.parseMapParams(mapParamsStr);
+  const availableParameters = parseMapParams(mapParamsStr);
   if (Object.keys(availableParameters).length === 0) {
     return null;
   }

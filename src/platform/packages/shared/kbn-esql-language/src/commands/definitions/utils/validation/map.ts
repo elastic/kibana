@@ -9,23 +9,10 @@
 
 import type { ESQLMessage, ESQLSingleAstItem } from '../../../../types';
 import type { SupportedDataType } from '../../..';
-import { MAP_PARAMS_REGEX } from '../autocomplete/expressions/signature_analyzer';
 import { getExpressionType } from '../expressions';
 import { getMessageFromId } from '../errors';
 import { isMap } from '../../../../ast/is';
-
-function getValuesTypeFromMapParamDefinition(mapParamsStr: string): Record<string, string[]> {
-  const result: Record<string, string[]> = {};
-
-  for (const match of mapParamsStr.matchAll(MAP_PARAMS_REGEX)) {
-    const paramName = match[1];
-    const rawType = match[4] ?? 'keyword';
-    const typesFromDefinition = rawType.split(',').map((type) => type.trim() ?? 'keyword');
-    result[paramName] = typesFromDefinition;
-  }
-
-  return result;
-}
+import { parseMapParams } from '../autocomplete/map_expression';
 
 // the setting 'approximate' uses 'map_param' as a type,
 // whereas the expression type in the AST is 'function_named_parameters'.
@@ -41,7 +28,7 @@ export function validateMap(
   const valueType = TypeMap[expressionType] || expressionType;
 
   if (valueType === 'map_param' && isMap(mapValue) && mapDefinition) {
-    const mapParamsDefinition = getValuesTypeFromMapParamDefinition(mapDefinition);
+    const mapParamsDefinition = parseMapParams(mapDefinition);
     const mapParamsEntries = mapValue.entries;
 
     for (const param of mapParamsEntries) {
@@ -58,13 +45,13 @@ export function validateMap(
       if (
         mapParamsDefinition[paramKey] &&
         param.incomplete === false &&
-        !mapParamsDefinition[paramKey].includes(paramValueType)
+        !mapParamsDefinition[paramKey].rawTypes.includes(paramValueType)
       ) {
         return getMessageFromId({
           messageId: 'invalidMapParameterValueType',
           values: {
             paramName: paramKey,
-            expectedTypes: mapParamsDefinition[paramKey].join(', '),
+            expectedTypes: mapParamsDefinition[paramKey].rawTypes.join(', '),
             actualType: paramValueType,
           },
           locations: param.value.location,
