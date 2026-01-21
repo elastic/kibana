@@ -5,51 +5,40 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo } from 'react';
 import {
-  EuiText,
   EuiSpacer,
-  EuiAccordion,
-  EuiInMemoryTable,
   EuiLoadingSpinner,
   EuiCallOut,
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
-  EuiFieldSearch,
-  EuiFilterGroup,
-  EuiFilterButton,
-  useEuiTheme,
+  EuiText,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { useSiemReadinessApi } from '@kbn/siem-readiness';
-import type { IndexInfo, CategoryGroup, ResultDocument } from '@kbn/siem-readiness';
+import type { IndexInfo, ResultDocument } from '@kbn/siem-readiness';
 import { mockQualityResponse } from '../../../../../server/lib/siem_readiness/routes/mock_quality_results';
+import {
+  CategoryAccordionTable,
+  type CategoryData,
+  type FilterOption,
+} from '../../components/category_accordion_table';
 
-const STATUS_BADGE_CONFIG = {
-  'Actions required': { color: 'warning', label: 'Actions required' },
-  Healthy: { color: 'success', label: 'Healthy' },
-} as const;
-
-type StatusFilter = 'all' | 'incompatible' | 'healthy';
+// Extended IndexInfo with computed fields
+interface IndexInfoWithStatus extends IndexInfo {
+  status: 'incompatible' | 'healthy';
+  incompatibleFieldCount: number;
+  checkedAt: number | undefined;
+}
 
 export const QualityTab: React.FC = () => {
-  const { getReadinessCategories, getIndexResultsLatest } = useSiemReadinessApi();
+  const { getReadinessCategories } = useSiemReadinessApi();
   const { data, isLoading, error } = getReadinessCategories;
-  // const { data: indexResultsData } = getIndexResultsLatest;
 
   const indexResultsData = mockQualityResponse;
-  const { euiTheme } = useEuiTheme();
-
-  // Track which accordions are open
-  const [openAccordions, setOpenAccordions] = useState<Record<string, boolean>>({});
-
-  // Search and filter state
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
 
   // Create a lookup map for index results by indexName
   const indexResultsMap = useMemo(() => {
@@ -58,56 +47,114 @@ export const QualityTab: React.FC = () => {
     return new Map(indexResultsData.map((result) => [result.indexName, result]));
   }, [indexResultsData]);
 
-  const toggleAccordion = (categoryName: string) => {
-    setOpenAccordions((prev) => ({
-      ...prev,
-      [categoryName]: !prev[categoryName],
-    }));
-  };
+  // Prepare categories data with computed status field
+  const categories: Array<CategoryData<IndexInfoWithStatus>> = useMemo(() => {
+    if (!data?.mainCategoriesMap) return [];
 
-  // Filter indices based on search query and status filter
-  const filterIndices = useCallback(
-    (indices: IndexInfo[]): IndexInfo[] => {
-      return indices.filter((index) => {
-        // Search filter
-        const matchesSearch = searchQuery
-          ? index.indexName.toLowerCase().includes(searchQuery.toLowerCase())
-          : true;
-
-        // Status filter
+    return data.mainCategoriesMap.map((category) => ({
+      category: category.category,
+      items: category.indices.map((index) => {
         const result = indexResultsMap.get(index.indexName);
         const incompatibleCount = result?.incompatibleFieldCount ?? 0;
         const isIncompatible = incompatibleCount > 0;
 
-        const matchesStatus =
-          statusFilter === 'all' ||
-          (statusFilter === 'incompatible' && isIncompatible) ||
-          (statusFilter === 'healthy' && !isIncompatible);
+        return {
+          ...index,
+          status: isIncompatible ? ('incompatible' as const) : ('healthy' as const),
+          incompatibleFieldCount: incompatibleCount,
+          checkedAt: result?.checkedAt,
+        };
+      }),
+    }));
+  }, [data?.mainCategoriesMap, indexResultsMap]);
 
-        return matchesSearch && matchesStatus;
-      });
+  // Render function for accordion extra action (right side badges/stats)
+  const renderExtraAction = (category: CategoryData<IndexInfoWithStatus>) => {
+    const hasIncompatibleFields = category.items.some((item) => item.incompatibleFieldCount > 0);
+    const status = hasIncompatibleFields ? 'Actions required' : 'Healthy';
+    const statusColor = hasIncompatibleFields ? 'warning' : 'success';
+
+    const totalIncompatibleFields = category.items.reduce(
+      (sum, item) => sum + item.incompatibleFieldCount,
+      0
+    );
+    const affectedIndices = new Set(category.items.map((index) => index.indexName.split('-')[0]))
+      .size;
+    const totalDataSources = category.items.length;
+
+    return (
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('xpack.securitySolution.siemReadiness.quality.status.label', {
+              defaultMessage: 'Status:',
+            })}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color={statusColor}>{status}</EuiBadge>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {'|'}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {i18n.translate(
+              'xpack.securitySolution.siemReadiness.quality.incompatibleFields.label',
+              {
+                defaultMessage: 'Incompatible Fields:',
+              }
+            )}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="hollow">{totalIncompatibleFields}</EuiBadge>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {'|'}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('xpack.securitySolution.siemReadiness.quality.affectedIndices.label', {
+              defaultMessage: 'Affected indices:',
+            })}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="hollow">{`${affectedIndices}/${totalDataSources}`}</EuiBadge>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
+
+  // Filter options for the component
+  const filterOptions: FilterOption[] = [
+    {
+      value: 'all',
+      label: i18n.translate('xpack.securitySolution.siemReadiness.quality.filter.all', {
+        defaultMessage: 'All',
+      }),
     },
-    [searchQuery, statusFilter, indexResultsMap]
-  );
-
-  // Filter categories to only show those with matching indices
-  const filteredCategories = useMemo(() => {
-    if (!data?.mainCategoriesMap) return [];
-
-    return data.mainCategoriesMap
-      .map((category) => ({
-        ...category,
-        indices: filterIndices(category.indices),
-      }))
-      .filter((category) => category.indices.length > 0);
-  }, [data?.mainCategoriesMap, filterIndices]);
-
-  // Calculate total counts for display
-  const totalIndicesCount = filteredCategories.reduce((sum, cat) => sum + cat.indices.length, 0);
-  const totalGroupsCount = filteredCategories.length;
+    {
+      value: 'incompatible',
+      label: i18n.translate('xpack.securitySolution.siemReadiness.quality.filter.incompatible', {
+        defaultMessage: 'Incompatible',
+      }),
+    },
+    {
+      value: 'healthy',
+      label: i18n.translate('xpack.securitySolution.siemReadiness.quality.filter.healthy', {
+        defaultMessage: 'Healthy',
+      }),
+    },
+  ];
 
   // Define columns for the data source table
-  const columns: Array<EuiBasicTableColumn<IndexInfo>> = useMemo(
+  const columns: Array<EuiBasicTableColumn<IndexInfoWithStatus>> = useMemo(
     () => [
       {
         field: 'indexName',
@@ -119,38 +166,31 @@ export const QualityTab: React.FC = () => {
         width: '40%',
       },
       {
+        field: 'incompatibleFieldCount',
         name: i18n.translate(
           'xpack.securitySolution.siemReadiness.quality.table.column.incompatibleFields',
           {
             defaultMessage: 'Incompatible fields',
           }
         ),
-        sortable: (item: IndexInfo) => {
-          const result = indexResultsMap.get(item.indexName);
-          return result?.incompatibleFieldCount ?? 0;
-        },
+        sortable: true,
         width: '15%',
-        render: (item: IndexInfo) => {
-          const result = indexResultsMap.get(item.indexName);
-          const count = result?.incompatibleFieldCount ?? 0;
-          return <strong>{count}</strong>;
+        render: (incompatibleFieldCount: number) => {
+          return <strong>{incompatibleFieldCount}</strong>;
         },
       },
       {
+        field: 'checkedAt',
         name: i18n.translate(
           'xpack.securitySolution.siemReadiness.quality.table.column.lastChecked',
           {
             defaultMessage: 'Last checked',
           }
         ),
-        sortable: (item: IndexInfo) => {
-          const result = indexResultsMap.get(item.indexName);
-          return result?.checkedAt ?? 0;
-        },
+        sortable: (item: IndexInfoWithStatus) => item?.checkedAt ?? 0,
         width: '15%',
-        render: (item: IndexInfo) => {
-          const result = indexResultsMap.get(item.indexName);
-          if (!result?.checkedAt) {
+        render: (checkedAt: number | undefined) => {
+          if (!checkedAt) {
             return i18n.translate(
               'xpack.securitySolution.siemReadiness.quality.lastChecked.never',
               {
@@ -158,26 +198,20 @@ export const QualityTab: React.FC = () => {
               }
             );
           }
-          return moment(result.checkedAt).fromNow();
+          return moment(checkedAt).fromNow();
         },
       },
       {
         name: i18n.translate('xpack.securitySolution.siemReadiness.quality.table.column.status', {
           defaultMessage: 'Status',
         }),
-        sortable: (item: IndexInfo) => {
-          const result = indexResultsMap.get(item.indexName);
-          const incompatibleCount = result?.incompatibleFieldCount ?? 0;
-          // Return 1 for incompatible, 0 for healthy (so incompatible sorts first)
-          return incompatibleCount > 0 ? 1 : 0;
-        },
+        field: 'status',
+        sortable: true,
         width: '15%',
-        render: (item: IndexInfo) => {
-          const result = indexResultsMap.get(item.indexName);
-          const incompatibleCount = result?.incompatibleFieldCount ?? 0;
-          const isIncompatible = incompatibleCount > 0;
+        render: (status: 'incompatible' | 'healthy') => {
+          const isIncompatible = status === 'incompatible';
           return (
-            <EuiBadge color={isIncompatible ? 'warning' : 'success'}>
+            <EuiBadge color={isIncompatible ? 'danger' : 'success'}>
               {isIncompatible
                 ? i18n.translate(
                     'xpack.securitySolution.siemReadiness.quality.status.incompatible',
@@ -217,34 +251,8 @@ export const QualityTab: React.FC = () => {
         ],
       },
     ],
-    [indexResultsMap]
+    []
   );
-
-  // Calculate stats for each category
-  const getCategoryStats = (category: CategoryGroup) => {
-    const totalDataSources = category.indices.length;
-
-    // Calculate incompatible fields count from indexResultsData
-    const incompatibleFields = category.indices.reduce((sum, index) => {
-      const result = indexResultsMap.get(index.indexName);
-      return sum + (result?.incompatibleFieldCount ?? 0);
-    }, 0);
-
-    const affectedIndices = new Set(category.indices.map((index) => index.indexName.split('-')[0]))
-      .size;
-
-    const hasIncompatibleFields = incompatibleFields > 0;
-    const status: keyof typeof STATUS_BADGE_CONFIG = hasIncompatibleFields
-      ? 'Actions required'
-      : 'Healthy';
-
-    return {
-      totalDataSources,
-      incompatibleFields,
-      affectedIndices,
-      status,
-    };
-  };
 
   if (isLoading) {
     return (
@@ -277,9 +285,7 @@ export const QualityTab: React.FC = () => {
     );
   }
 
-  const mainCategories = data?.mainCategoriesMap ?? [];
-
-  if (mainCategories.length === 0) {
+  if (categories.length === 0) {
     return (
       <>
         <EuiSpacer size="m" />
@@ -304,219 +310,24 @@ export const QualityTab: React.FC = () => {
   return (
     <>
       <EuiSpacer size="m" />
-
-      {/* Search and Filter Controls */}
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s" color="subdued">
-                {i18n.translate('xpack.securitySolution.siemReadiness.quality.showing', {
-                  defaultMessage: 'Showing {indices} of {totalIndices} indices',
-                  values: {
-                    indices: totalIndicesCount,
-                    totalIndices: mainCategories.reduce((sum, cat) => sum + cat.indices.length, 0),
-                  },
-                })}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s" color="subdued">
-                {'|'}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s" color="subdued">
-                {i18n.translate('xpack.securitySolution.siemReadiness.quality.categories', {
-                  defaultMessage: '{count} categories',
-                  values: { count: totalGroupsCount },
-                })}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiFieldSearch
-                placeholder={i18n.translate(
-                  'xpack.securitySolution.siemReadiness.quality.searchPlaceholder',
-                  {
-                    defaultMessage: 'Search indices...',
-                  }
-                )}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                isClearable
-                style={{ width: '300px' }}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFilterGroup>
-                <EuiFilterButton
-                  hasActiveFilters={statusFilter === 'all'}
-                  onClick={() => setStatusFilter('all')}
-                  isSelected={statusFilter === 'all'}
-                  isToggle
-                  withNext
-                >
-                  {i18n.translate('xpack.securitySolution.siemReadiness.quality.filter.all', {
-                    defaultMessage: 'All',
-                  })}
-                </EuiFilterButton>
-                <EuiFilterButton
-                  hasActiveFilters={statusFilter === 'incompatible'}
-                  onClick={() => setStatusFilter('incompatible')}
-                  isSelected={statusFilter === 'incompatible'}
-                  isToggle
-                  withNext
-                >
-                  {i18n.translate(
-                    'xpack.securitySolution.siemReadiness.quality.filter.incompatible',
-                    {
-                      defaultMessage: 'Incompatible',
-                    }
-                  )}
-                </EuiFilterButton>
-                <EuiFilterButton
-                  hasActiveFilters={statusFilter === 'healthy'}
-                  onClick={() => setStatusFilter('healthy')}
-                  isSelected={statusFilter === 'healthy'}
-                  isToggle
-                >
-                  {i18n.translate('xpack.securitySolution.siemReadiness.quality.filter.healthy', {
-                    defaultMessage: 'Healthy',
-                  })}
-                </EuiFilterButton>
-              </EuiFilterGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer size="m" />
-
-      <div
-        style={{
-          border: euiTheme.border.thin,
-          padding: `${euiTheme.size.base} 0`,
-          borderRadius: euiTheme.border.radius.medium,
-        }}
-      >
-        {filteredCategories.map((category, index) => {
-          const stats = getCategoryStats(category);
-          const statusConfig = STATUS_BADGE_CONFIG[stats.status];
-
-          return (
-            <React.Fragment key={category.category}>
-              <EuiAccordion
-                style={{ padding: `0 ${euiTheme.size.base}` }}
-                id={`accordion-${category.category}`}
-                buttonContent={
-                  <EuiText size="m" style={{ padding: `${euiTheme.size.base} 0` }}>
-                    <strong>{category.category}</strong>
-                  </EuiText>
-                }
-                extraAction={
-                  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="xs" color="subdued">
-                        {i18n.translate(
-                          'xpack.securitySolution.siemReadiness.quality.status.label',
-                          {
-                            defaultMessage: 'Status:',
-                          }
-                        )}
-                      </EuiText>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge color={statusConfig.color}>{statusConfig.label}</EuiBadge>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="xs" color="subdued">
-                        {'|'}
-                      </EuiText>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="xs" color="subdued">
-                        {i18n.translate(
-                          'xpack.securitySolution.siemReadiness.quality.incompatibleFields.label',
-                          {
-                            defaultMessage: 'Incompatible Fields:',
-                          }
-                        )}
-                      </EuiText>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge color="hollow">{stats.incompatibleFields}</EuiBadge>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="xs" color="subdued">
-                        {'|'}
-                      </EuiText>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="xs" color="subdued">
-                        {i18n.translate(
-                          'xpack.securitySolution.siemReadiness.quality.affectedIndices.label',
-                          {
-                            defaultMessage: 'Affected indices:',
-                          }
-                        )}
-                      </EuiText>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge color="hollow">
-                        {`${stats.affectedIndices}/${stats.totalDataSources}`}
-                      </EuiBadge>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                }
-                paddingSize="none"
-                borders="none"
-                forceState={openAccordions[category.category] ? 'open' : 'closed'}
-                onToggle={() => toggleAccordion(category.category)}
-              >
-                {openAccordions[category.category] && (
-                  <>
-                    <EuiSpacer size="m" />
-
-                    <EuiInMemoryTable
-                      style={{
-                        border: euiTheme.border.thin,
-                        padding: euiTheme.size.xl,
-                        borderRadius: euiTheme.border.radius.medium,
-                      }}
-                      items={category.indices}
-                      columns={columns}
-                      sorting={{
-                        sort: {
-                          field: 'indexName',
-                          direction: 'asc',
-                        },
-                      }}
-                      pagination={{
-                        pageSizeOptions: [5, 10, 20],
-                        initialPageSize: 10,
-                      }}
-                      tableCaption={i18n.translate(
-                        'xpack.securitySolution.siemReadiness.quality.table.caption',
-                        {
-                          defaultMessage: 'Indices for {category} category',
-                          values: { category: category.category },
-                        }
-                      )}
-                      tableLayout="auto"
-                    />
-                  </>
-                )}
-              </EuiAccordion>
-              {index < mainCategories.length - 1 && <EuiHorizontalRule margin="m" />}
-            </React.Fragment>
-          );
+      <CategoryAccordionTable
+        categories={categories}
+        columns={columns}
+        renderExtraAction={renderExtraAction}
+        searchField="indexName"
+        filterField="status"
+        searchPlaceholder={i18n.translate(
+          'xpack.securitySolution.siemReadiness.quality.searchPlaceholder',
+          {
+            defaultMessage: 'Search indices...',
+          }
+        )}
+        filterOptions={filterOptions}
+        itemName={i18n.translate('xpack.securitySolution.siemReadiness.quality.itemName', {
+          defaultMessage: 'indices',
         })}
-      </div>
+        defaultSortField="indexName"
+      />
     </>
   );
 };
