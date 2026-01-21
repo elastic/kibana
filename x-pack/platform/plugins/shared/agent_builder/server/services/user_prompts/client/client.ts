@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { createBadRequestError } from '@kbn/onechat-common';
+import { createBadRequestError } from '@kbn/agent-builder-common';
 import { createSpaceDslFilter } from '../../../utils/spaces';
 import type { UserPromptStorage } from './storage';
 import { createStorage } from './storage';

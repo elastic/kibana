@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { createBadRequestError } from '@kbn/onechat-common';
+import { createBadRequestError } from '@kbn/agent-builder-common';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import type {
@@ -42,7 +42,7 @@ export function registerInternalUserPromptsRoutes({
       },
       options: { access: 'internal' },
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
     },
     wrapHandler(async (ctx, request, response) => {
@@ -54,7 +54,7 @@ export function registerInternalUserPromptsRoutes({
         throw createBadRequestError('No user bound to the provided request');
       }
 
-      const space = (await ctx.onechat).spaces.getSpaceId();
+      const space = (await ctx.agentBuilder).spaces.getSpaceId();
       const { query, page, per_page: perPage } = request.query;
 
       const client = createClient({
@@ -88,7 +88,7 @@ export function registerInternalUserPromptsRoutes({
       },
       options: { access: 'internal' },
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
     },
     wrapHandler(async (ctx, request, response) => {
@@ -100,7 +100,7 @@ export function registerInternalUserPromptsRoutes({
         throw createBadRequestError('No user bound to the provided request');
       }
 
-      const space = (await ctx.onechat).spaces.getSpaceId();
+      const space = (await ctx.agentBuilder).spaces.getSpaceId();
       const { prompt_id: promptId } = request.params;
 
       const client = createClient({
@@ -131,7 +131,7 @@ export function registerInternalUserPromptsRoutes({
       },
       options: { access: 'internal' },
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
       },
     },
     wrapHandler(async (ctx, request, response) => {
@@ -143,7 +143,7 @@ export function registerInternalUserPromptsRoutes({
         throw createBadRequestError('No user bound to the provided request');
       }
 
-      const space = (await ctx.onechat).spaces.getSpaceId();
+      const space = (await ctx.agentBuilder).spaces.getSpaceId();
 
       const client = createClient({
         space,
@@ -175,7 +175,7 @@ export function registerInternalUserPromptsRoutes({
       },
       options: { access: 'internal' },
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
       },
     },
     wrapHandler(async (ctx, request, response) => {
@@ -187,7 +187,7 @@ export function registerInternalUserPromptsRoutes({
         throw createBadRequestError('No user bound to the provided request');
       }
 
-      const space = (await ctx.onechat).spaces.getSpaceId();
+      const space = (await ctx.agentBuilder).spaces.getSpaceId();
       const { prompt_id: promptId } = request.params;
 
       const client = createClient({
@@ -216,7 +216,7 @@ export function registerInternalUserPromptsRoutes({
       },
       options: { access: 'internal' },
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
       },
     },
     wrapHandler(async (ctx, request, response) => {
@@ -228,7 +228,7 @@ export function registerInternalUserPromptsRoutes({
         throw createBadRequestError('No user bound to the provided request');
       }
 
-      const space = (await ctx.onechat).spaces.getSpaceId();
+      const space = (await ctx.agentBuilder).spaces.getSpaceId();
       const { prompt_id: promptId } = request.params;
 
       const client = createClient({
@@ -259,7 +259,7 @@ export function registerInternalUserPromptsRoutes({
       },
       options: { access: 'internal' },
       security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
+        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
       },
     },
     wrapHandler(async (ctx, request, response) => {
@@ -271,7 +271,7 @@ export function registerInternalUserPromptsRoutes({
         throw createBadRequestError('No user bound to the provided request');
       }
 
-      const space = (await ctx.onechat).spaces.getSpaceId();
+      const space = (await ctx.agentBuilder).spaces.getSpaceId();
       const { ids } = request.body;
 
       const client = createClient({

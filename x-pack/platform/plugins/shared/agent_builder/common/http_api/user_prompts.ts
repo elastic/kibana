@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SerializedOnechatError } from '@kbn/onechat-common';
+import type { SerializedAgentBuilderError } from '@kbn/agent-builder-common';
 
 export interface UserPrompt {
   id: string;
@@ -59,7 +59,7 @@ interface BulkDeleteUserPromptSuccessResult extends BulkDeleteUserPromptResultBa
 
 interface BulkDeleteUserPromptFailureResult extends BulkDeleteUserPromptResultBase {
   success: false;
-  reason: SerializedOnechatError;
+  reason: SerializedAgentBuilderError;
 }
 
 export type BulkDeleteUserPromptResult =
