@@ -37,7 +37,7 @@ describe('isUrlTemplateValid', () => {
   });
 
   it('rejects URLs that cannot be parsed', () => {
-    const unparsableUrl = `http://${urlTemplatePlaceholder}`;
+    const unparsableUrl = `//`;
     expect(isUrlTemplateValid(unparsableUrl)).toBe(false);
   });
 
