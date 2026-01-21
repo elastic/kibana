@@ -126,7 +126,7 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
         method,
         path: finalPath,
         body: !bulkBody ? requestBody : undefined,
-        bulkBody: bulkBody ? bulkBody : undefined,
+        bulkBody,
       };
 
       return esClient.transport.request(requestOptions);

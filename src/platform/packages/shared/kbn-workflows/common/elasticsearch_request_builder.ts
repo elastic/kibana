@@ -120,7 +120,7 @@ export function buildElasticsearchRequest(
       path: `/${selectedPattern}`,
       body: Object.keys(body).length > 0 ? body : undefined,
       query: Object.keys(queryParams).length > 0 ? queryParams : undefined,
-      bulkBody: bulkBody ? bulkBody : undefined,
+      bulkBody: bulkBody ?? undefined,
     };
 
     // console.log('DEBUG - Final request:', JSON.stringify(result, null, 2));
