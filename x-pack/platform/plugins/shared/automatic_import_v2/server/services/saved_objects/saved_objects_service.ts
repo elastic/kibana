@@ -46,13 +46,6 @@ export class AutomaticImportSavedObjectService {
   }
 
   /**
-   * Data streams are only unique within an integration, so we use a composite saved object id.
-   */
-  private getDataStreamSavedObjectId(integrationId: string, dataStreamId: string) {
-    return `${integrationId}-${dataStreamId}`;
-  }
-
-  /**
    * Helper function to parse and increment a semantic version string (x.y.z)
    * @param currentVersion - Current semantic version string (e.g., "1.0.0")
    * @param incrementType - Optional: Which part to increment: 'major' | 'minor' | 'patch'. Defaults to 'patch'.
@@ -421,8 +414,6 @@ export class AutomaticImportSavedObjectService {
 
     try {
       this.logger.debug(`Creating data stream: ${dataStreamId}`);
-      const compositeId = this.getDataStreamSavedObjectId(integrationId, dataStreamId);
-
       const initialDataStreamData: DataStreamAttributes = {
         integration_id: integrationId,
         data_stream_id: dataStreamId,
@@ -460,96 +451,6 @@ export class AutomaticImportSavedObjectService {
   }
 
   /**
-   * Update a data stream
-   * @param data - The data stream data. Must include an integration_id and data_stream_id.
-   * @param expectedVersion - The expected version for optimistic concurrency control at the application layer. Required to ensure data consistency.
-   * @param versionUpdate - Optional: specify which version part to increment ('major' | 'minor' | 'patch').  Defaults to incrementing 'patch'.
-   * @param options - The options for the update.
-   * @returns The updated data stream
-   */
-  public async updateDataStream(
-    data: DataStreamAttributes,
-    expectedVersion: string,
-    versionUpdate?: 'major' | 'minor' | 'patch',
-    options?: SavedObjectsUpdateOptions<DataStreamAttributes>
-  ): Promise<SavedObjectsUpdateResponse<DataStreamAttributes>> {
-    const {
-      integration_id: integrationId,
-      data_stream_id: dataStreamId,
-      job_info: jobInfo,
-      metadata = { sample_count: 0 },
-      result = {},
-      title,
-      description,
-      input_types: inputTypes,
-    } = data;
-
-    if (!integrationId) {
-      throw new Error('Integration ID is required');
-    }
-
-    if (!dataStreamId) {
-      throw new Error('Data stream ID is required');
-    }
-    try {
-      this.logger.debug(`Updating data stream: ${dataStreamId}`);
-
-      // A Data Stream must always be associated with an Integration
-      const integrationTarget = await this.getIntegration(integrationId);
-      if (!integrationTarget) {
-        throw new Error(`Integration associated with this data stream ${integrationId} not found`);
-      }
-
-      const existingDataStream = await this.getDataStream(dataStreamId, integrationId);
-      const currentVersion = existingDataStream.attributes.metadata?.version || '0.0.0';
-
-      if (currentVersion !== expectedVersion) {
-        throw new Error(
-          `Version conflict: Data stream ${dataStreamId} has been updated. Expected version ${expectedVersion}, but current version is ${currentVersion}. Please fetch the latest version and try again.`
-        );
-      }
-
-      const newVersion = this.incrementSemanticVersion(currentVersion, versionUpdate);
-
-      const dataStreamData: DataStreamAttributes = {
-        integration_id: integrationId,
-        data_stream_id: dataStreamId,
-        created_by: existingDataStream.attributes.created_by,
-        job_info: jobInfo,
-        metadata: {
-          ...metadata,
-          created_at: existingDataStream.attributes.metadata.created_at,
-          version: newVersion,
-        },
-        result: result || {},
-        title: title || existingDataStream.attributes.title,
-        description: description || existingDataStream.attributes.description,
-        input_types: inputTypes || existingDataStream.attributes.input_types,
-      };
-
-      const internalVersion = existingDataStream.version;
-      const compositeId = this.getDataStreamSavedObjectId(integrationId, dataStreamId);
-      return await this.savedObjectsClient.update<DataStreamAttributes>(
-        DATA_STREAM_SAVED_OBJECT_TYPE,
-        compositeId,
-        dataStreamData,
-        {
-          ...options,
-          version: internalVersion,
-        }
-      );
-    } catch (error) {
-      if (SavedObjectsErrorHelpers.isConflictError(error)) {
-        throw new Error(
-          `Data stream ${dataStreamId} has been updated since you last fetched it. Please fetch the latest version and try again.`
-        );
-      }
-      this.logger.error(`Failed to update data stream: ${error}`);
-      throw error;
-    }
-  }
-
-  /**
    * Get a data stream by ID
    * @param dataStreamId - The ID of the data stream
    * @param integrationId - The ID of the integration
@@ -560,7 +461,7 @@ export class AutomaticImportSavedObjectService {
     integrationId: string
   ): Promise<SavedObject<DataStreamAttributes>> {
     try {
-      const compositeId = this.getDataStreamSavedObjectId(integrationId, dataStreamId);
+      const compositeId = this.getDataStreamCompositeId(integrationId, dataStreamId);
       this.logger.debug(`Getting data stream: ${compositeId}`);
       return await this.savedObjectsClient.get<DataStreamAttributes>(
         DATA_STREAM_SAVED_OBJECT_TYPE,
@@ -632,11 +533,10 @@ export class AutomaticImportSavedObjectService {
   public async deleteDataStream(
     integrationId: string,
     dataStreamId: string,
-    integrationId: string,
     options?: SavedObjectsDeleteOptions
   ): Promise<void> {
     try {
-      const compositeId = this.getDataStreamSavedObjectId(integrationId, dataStreamId);
+      const compositeId = this.getDataStreamCompositeId(integrationId, dataStreamId);
       this.logger.debug(`Deleting data stream with id:${compositeId}`);
       await this.savedObjectsClient.delete(DATA_STREAM_SAVED_OBJECT_TYPE, compositeId, options);
     } catch (error) {

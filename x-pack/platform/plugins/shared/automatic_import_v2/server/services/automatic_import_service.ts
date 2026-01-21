@@ -12,8 +12,6 @@ import type {
   SavedObject,
   SavedObjectsDeleteOptions,
   SavedObjectsFindResponse,
-  SavedObjectsUpdateOptions,
-  SavedObjectsUpdateResponse,
   SavedObjectsServiceSetup,
   SavedObjectsClient,
   ElasticsearchClient,
@@ -216,16 +214,6 @@ export class AutomaticImportService {
       },
       authenticatedUser
     );
-  }
-
-  public async updateDataStream(
-    data: DataStreamAttributes,
-    expectedVersion: string,
-    versionUpdate?: 'major' | 'minor' | 'patch',
-    options?: SavedObjectsUpdateOptions<DataStreamAttributes>
-  ): Promise<SavedObjectsUpdateResponse<DataStreamAttributes>> {
-    assert(this.savedObjectService, 'Saved Objects service not initialized.');
-    return this.savedObjectService.updateDataStream(data, expectedVersion, versionUpdate, options);
   }
 
   public async getDataStream(
