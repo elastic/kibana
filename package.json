@@ -1594,6 +1594,7 @@
     "@kbn/failed-test-reporter-cli": "link:packages/kbn-failed-test-reporter-cli",
     "@kbn/find-used-node-modules": "link:packages/kbn-find-used-node-modules",
     "@kbn/fleet-plugin-cypress": "link:x-pack/platform/plugins/shared/fleet/cypress",
+    "@kbn/ftr-benchmarks": "link:src/platform/packages/shared/kbn-ftr-benchmarks",
     "@kbn/ftr-common-functional-services": "link:src/platform/packages/shared/kbn-ftr-common-functional-services",
     "@kbn/ftr-common-functional-ui-services": "link:src/platform/packages/shared/kbn-ftr-common-functional-ui-services",
     "@kbn/ftr-screenshot-filename": "link:src/platform/packages/private/kbn-ftr-screenshot-filename",
