@@ -26,7 +26,7 @@ class SkillTypeRegistryImpl implements SkillTypeRegistry {
 
   register(skill: SkillTypeDefinition) {
     validateSkillTypeDefinition(skill);
-    
+
     if (this.skills.has(skill.id)) {
       throw new Error(`Skill type with id ${skill.id} already registered`);
     }

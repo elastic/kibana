@@ -17,8 +17,6 @@ import type {
 } from './type_utils';
 import type { AgentBuilderBuiltinTool } from '../allow_lists';
 
-
-
 /**
  * Skill directory structure - explicit about how skills are organized.
  *
