@@ -108,7 +108,7 @@ export function generateApiSpecContent(scoutPackage: string, copyrightHeader: st
 import { apiTest, expect, tags } from '${scoutPackage}';
 import { testData } from '../fixtures';
 
-apiTest.describe('Scout api test suite example', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+apiTest.describe('Scout API test suite example', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   let viewerApiCredentials: RoleApiCredentials;
   apiTest.beforeAll(async ({ requestAuth }) => {
     viewerApiCredentials = await requestAuth.getApiKey('viewer');
