@@ -87,15 +87,17 @@ export const getStats = async ({
           type: NodeType.dependency as const,
         },
         value: {
-          count: bucket.total_latency_count.value ?? 0,
+          latency_count: bucket.total_latency_count.value ?? 0,
           latency_sum: bucket.total_latency_sum.value ?? 0,
           error_count: bucket.error_count.doc_count ?? 0,
+          success_and_error_count: bucket.error_and_success_count.doc_count ?? 0,
         },
         timeseries: bucket.timeseries?.buckets.map((dateBucket) => ({
           x: dateBucket.key + offsetInMs,
-          count: dateBucket.total_latency_count.value ?? 0,
+          latency_count: dateBucket.total_latency_count.value ?? 0,
           latency_sum: dateBucket.total_latency_sum.value ?? 0,
           error_count: dateBucket.error_count.doc_count ?? 0,
+          success_and_error_count: dateBucket.error_and_success_count.doc_count ?? 0,
         })),
       };
     }) ?? []
@@ -133,6 +135,13 @@ async function getConnectionStats({
     error_count: {
       filter: {
         bool: { filter: [{ terms: { [EVENT_OUTCOME]: [EventOutcome.failure] } }] },
+      },
+    },
+    error_and_success_count: {
+      filter: {
+        bool: {
+          filter: [{ terms: { [EVENT_OUTCOME]: [EventOutcome.failure, EventOutcome.success] } }],
+        },
       },
     },
   };
