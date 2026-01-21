@@ -17,13 +17,16 @@ import Path from 'path';
 import { URL } from 'url';
 import { parseString } from 'xml2js';
 import { resolveLocalArtifactsPath } from '../utils/local_artifacts';
+import { getFetchOptions } from '../../proxy';
 
 type ArtifactAvailableVersions = Record<ProductName, string[]>;
 
 export const fetchArtifactVersions = async ({
   artifactRepositoryUrl,
+  artifactRepositoryProxyUrl,
 }: {
   artifactRepositoryUrl: string;
+  artifactRepositoryProxyUrl?: string;
 }): Promise<ArtifactAvailableVersions> => {
   const parsedUrl = new URL(artifactRepositoryUrl);
 
@@ -32,7 +35,9 @@ export const fetchArtifactVersions = async ({
     const file = await fetchLocalFile(parsedUrl);
     xml = file.toString();
   } else {
-    const res = await fetch(`${artifactRepositoryUrl}?max-keys=1000`);
+    const fetchUrl = `${artifactRepositoryUrl}?max-keys=1000`;
+    const fetchOptions = getFetchOptions(fetchUrl, artifactRepositoryProxyUrl);
+    const res = await fetch(fetchUrl, fetchOptions);
     xml = await res.text();
   }
 
@@ -96,8 +101,10 @@ interface ListBucketResponse {
  */
 export const fetchSecurityLabsVersions = async ({
   artifactRepositoryUrl,
+  artifactRepositoryProxyUrl,
 }: {
   artifactRepositoryUrl: string;
+  artifactRepositoryProxyUrl?: string;
 }): Promise<string[]> => {
   const parsedUrl = new URL(artifactRepositoryUrl);
 
@@ -106,7 +113,9 @@ export const fetchSecurityLabsVersions = async ({
     const file = await fetchLocalFile(parsedUrl);
     xml = file.toString();
   } else {
-    const res = await fetch(`${artifactRepositoryUrl}?max-keys=1000`);
+    const fetchUrl = `${artifactRepositoryUrl}?max-keys=1000`;
+    const fetchOptions = getFetchOptions(fetchUrl, artifactRepositoryProxyUrl);
+    const res = await fetch(fetchUrl, fetchOptions);
     xml = await res.text();
   }
 
