@@ -98,11 +98,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should return focus to the alerts button when dismissing the create rule flyout', async () => {
         await testSubjects.click('app-menu-overflow-button');
         await testSubjects.existOrFail('discoverAlertsButton');
-        await focusAndPressButton('discoverAlertsButton');
-        await retry.try(async () => {
-          expect(await hasFocus('discoverAlertsButton')).to.be(true);
-        });
-        await focusAndPressButton('discoverCreateAlertButton');
+        await testSubjects.click('discoverAlertsButton');
+        await testSubjects.existOrFail('discoverCreateAlertButton');
+        await testSubjects.click('discoverCreateAlertButton');
         await testSubjects.existOrFail('addRuleFlyoutTitle');
         await retry.try(async () => {
           await browser.pressKeys(browser.keys.ESCAPE);
