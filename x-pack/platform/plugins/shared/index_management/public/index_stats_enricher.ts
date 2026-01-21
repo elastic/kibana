@@ -15,23 +15,6 @@ const SOURCE = i18n.translate('xpack.indexManagement.indexStatsEnricher.source',
   defaultMessage: 'index stats',
 });
 
-const formatByteSize = (valueInBytes: number): string => {
-  // Keep the same output shape as `ByteSizeValue.toString()` (e.g. `248b`, `6.36kb`, `2.35mb`).
-  let value = valueInBytes;
-  let unit: 'b' | 'kb' | 'mb' | 'gb' = 'b';
-
-  for (const nextUnit of ['kb', 'mb', 'gb'] as const) {
-    if (value < 1024) {
-      break;
-    }
-    value = value / 1024;
-    unit = nextUnit;
-  }
-
-  const prettyValue = Number(value.toFixed(2));
-  return `${prettyValue}${unit}`;
-};
-
 export const indexStatsEnricher = async (client: HttpSetup): Promise<EnricherResponse> =>
   client
     .get<IndicesStatsResponse>(`${API_BASE_PATH}/indices_stats`)
