@@ -45,18 +45,16 @@ describe('getEmbeddableAlertsTableFactory', () => {
   );
   const embeddableParams: Parameters<typeof factory.buildEmbeddable>[0] = {
     initialState: {
-      rawState: {
-        timeRange: {
-          from: '2025-01-01T00:00:00.000Z',
-          to: '2025-01-01T01:00:00.000Z',
-        },
-        title: 'Test embeddable alerts table',
-        tableConfig: {
-          solution: 'observability',
-          query: {
-            type: 'alertsFilters',
-            filters: [{ filter: {} }],
-          },
+      timeRange: {
+        from: '2025-01-01T00:00:00.000Z',
+        to: '2025-01-01T01:00:00.000Z',
+      },
+      title: 'Test embeddable alerts table',
+      tableConfig: {
+        solution: 'observability',
+        query: {
+          type: 'alertsFilters',
+          filters: [{ filter: {} }],
         },
       },
     },

@@ -55,7 +55,6 @@ const initialState: DiscoverInternalState = {
   hasUnsavedChanges: false,
   defaultProfileAdHocDataViewIds: [],
   savedDataViews: [],
-  expandedDoc: undefined,
   isESQLToDataViewTransitionModalVisible: false,
   tabsBarVisibility: TabsBarVisibility.default,
   tabs: {
@@ -165,18 +164,43 @@ export const internalStateSlice = createSlice({
 
     setExpandedDoc: (
       state,
-      action: PayloadAction<{
+      action: TabAction<{
         expandedDoc: DataTableRecord | undefined;
         initialDocViewerTabId?: string;
+        initialDocViewerTabState?: object;
       }>
     ) => {
-      state.expandedDoc = action.payload.expandedDoc;
-      state.initialDocViewerTabId = action.payload.initialDocViewerTabId;
+      withTab(state, action.payload, (tab) => {
+        if (tab.expandedDoc?.id !== action.payload.expandedDoc?.id) {
+          // Reset the initialDocViewerTabId and docViewer when changing expandedDoc to a different document
+          tab.initialDocViewerTabId = undefined;
+          tab.uiState.docViewer = {};
+        }
+
+        tab.expandedDoc = action.payload.expandedDoc;
+        tab.initialDocViewerTabId = action.payload.initialDocViewerTabId;
+
+        if (action.payload.initialDocViewerTabId && action.payload.initialDocViewerTabState) {
+          tab.uiState.docViewer = {
+            ...tab.uiState.docViewer,
+            docViewerTabsState: {
+              ...(tab.uiState.docViewer?.docViewerTabsState ?? {}),
+              [action.payload.initialDocViewerTabId]: action.payload.initialDocViewerTabState,
+            },
+          };
+        }
+      });
     },
 
-    discardFlyoutsOnTabChange: (state) => {
-      state.expandedDoc = undefined;
-      state.initialDocViewerTabId = undefined;
+    setInitialDocViewerTabId: (
+      state,
+      action: TabAction<{
+        initialDocViewerTabId: string | undefined;
+      }>
+    ) => {
+      withTab(state, action.payload, (tab) => {
+        tab.initialDocViewerTabId = action.payload.initialDocViewerTabId;
+      });
     },
 
     setDataRequestParams: (state, action: TabAction<Pick<TabState, 'dataRequestParams'>>) =>
@@ -271,8 +295,9 @@ export const internalStateSlice = createSlice({
     resetOnSavedSearchChange: (state, action: TabAction) =>
       withTab(state, action.payload, (tab) => {
         tab.overriddenVisContextAfterInvalidation = undefined;
-        state.expandedDoc = undefined;
-        state.initialDocViewerTabId = undefined;
+        tab.expandedDoc = undefined;
+        tab.initialDocViewerTabId = undefined;
+        tab.uiState.docViewer = {};
       }),
 
     setESQLEditorUiState: (
@@ -345,6 +370,14 @@ export const internalStateSlice = createSlice({
       withTab(state, action.payload, (tab) => {
         tab.uiState.metricsGrid = action.payload.metricsGridState;
       }),
+
+    setDocViewerUiState: (
+      state,
+      action: TabAction<{ docViewerUiState: Partial<TabState['uiState']['docViewer']> }>
+    ) =>
+      withTab(state, action.payload, (tab) => {
+        tab.uiState.docViewer = action.payload.docViewerUiState;
+      }),
   },
   extraReducers: (builder) => {
     builder.addCase(loadDataViewList.fulfilled, (state, action) => {
@@ -395,6 +428,8 @@ export const internalStateSlice = createSlice({
 export const syncLocallyPersistedTabState = createAction<TabActionPayload>(
   'internalState/syncLocallyPersistedTabState'
 );
+
+export const discardFlyoutsOnTabChange = createAction('internalState/discardFlyoutsOnTabChange');
 
 type InternalStateListenerEffect<
   TActionCreator extends PayloadActionCreator<TPayload>,
@@ -453,7 +488,7 @@ const createMiddleware = (options: InternalStateDependencies) => {
   });
 
   startListening({
-    actionCreator: internalStateSlice.actions.discardFlyoutsOnTabChange,
+    actionCreator: discardFlyoutsOnTabChange,
     effect: () => {
       dismissFlyouts([DiscoverFlyouts.lensEdit, DiscoverFlyouts.metricInsights]);
     },

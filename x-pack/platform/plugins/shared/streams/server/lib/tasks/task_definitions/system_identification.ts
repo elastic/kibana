@@ -22,10 +22,15 @@ export interface SystemIdentificationTaskParams {
   end: number;
 }
 
+export const SYSTEMS_IDENTIFICATION_TASK_TYPE = 'streams_systems_identification';
+
+export function getSystemsIdentificationTaskId(streamName: string) {
+  return `${SYSTEMS_IDENTIFICATION_TASK_TYPE}_${streamName}`;
+}
+
 export function createStreamsSystemIdentificationTask(taskContext: TaskContext) {
   return {
-    // TODO: rename to streams_system_identification
-    streams_feature_identification: {
+    [SYSTEMS_IDENTIFICATION_TASK_TYPE]: {
       createTaskRunner: (runContext) => {
         return {
           run: cancellableTask(
@@ -50,7 +55,7 @@ export function createStreamsSystemIdentificationTask(taskContext: TaskContext) 
               });
 
               try {
-                const [{ systems }, stream] = await Promise.all([
+                const [{ systems: currentSystems }, stream] = await Promise.all([
                   systemClient.getSystems(name),
                   streamsClient.getStream(name),
                 ]);
@@ -63,43 +68,35 @@ export function createStreamsSystemIdentificationTask(taskContext: TaskContext) 
                   logger: taskContext.logger,
                 });
 
-                const { featurePromptOverride, descriptionPromptOverride } =
+                const { descriptionPromptOverride, systemsPromptOverride } =
                   await promptsConfigService.getPrompt();
 
-                const results = await identifySystemsWithDescription({
+                const { systems, tokensUsed } = await identifySystemsWithDescription({
                   start,
                   end,
                   esClient,
                   inferenceClient: boundInferenceClient,
                   logger: taskContext.logger.get('system_identification'),
                   stream,
-                  systems,
+                  systems: currentSystems,
                   signal: runContext.abortController.signal,
-                  systemsPromptOverride: featurePromptOverride,
-                  descriptionPromptOverride,
+                  descriptionPrompt: descriptionPromptOverride,
+                  systemsPrompt: systemsPromptOverride,
                   dropUnmapped: true,
                 });
 
                 taskContext.telemetry.trackSystemsIdentified({
-                  count: results.systems.length,
+                  count: systems.length,
                   stream_name: stream.name,
                   stream_type: getStreamTypeFromDefinition(stream),
-                  input_tokens_used: results.tokensUsed.prompt,
-                  output_tokens_used: results.tokensUsed.completion,
+                  input_tokens_used: tokensUsed.prompt,
+                  output_tokens_used: tokensUsed.completion,
                 });
 
-                await taskClient.update<SystemIdentificationTaskParams, IdentifySystemsResult>({
-                  ..._task,
-                  status: 'completed',
-                  task: {
-                    params: {
-                      connectorId,
-                      start,
-                      end,
-                    },
-                    payload: results,
-                  },
-                });
+                await taskClient.complete<
+                  SystemIdentificationTaskParams,
+                  Pick<IdentifySystemsResult, 'systems'>
+                >(_task, { connectorId, start, end }, { systems });
               } catch (error) {
                 // Get connector info for error enrichment
                 const connector = await inferenceClient.getConnectorById(connectorId);
@@ -119,18 +116,11 @@ export function createStreamsSystemIdentificationTask(taskContext: TaskContext) 
                   `Task ${runContext.taskInstance.id} failed: ${errorMessage}`
                 );
 
-                await taskClient.update<SystemIdentificationTaskParams>({
-                  ..._task,
-                  status: 'failed',
-                  task: {
-                    params: {
-                      connectorId,
-                      start,
-                      end,
-                    },
-                    error: errorMessage,
-                  },
-                });
+                await taskClient.fail<SystemIdentificationTaskParams>(
+                  _task,
+                  { connectorId, start, end },
+                  errorMessage
+                );
               }
             },
             runContext,

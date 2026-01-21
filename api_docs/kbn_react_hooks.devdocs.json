@@ -40,6 +40,8 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -54,6 +56,8 @@
               "({}: { signal: AbortSignal; }) => T | Promise<T>"
             ],
             "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -69,6 +73,8 @@
               "any[]"
             ],
             "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -85,6 +91,8 @@
               "<T> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -104,6 +112,8 @@
           "() => { signal: AbortSignal; abort: () => void; refresh: () => void; }"
         ],
         "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abort_controller/use_abort_controller.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -128,6 +138,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-react-hooks/src/use_boolean/use_boolean.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -142,6 +154,8 @@
               "boolean"
             ],
             "path": "src/platform/packages/shared/kbn-react-hooks/src/use_boolean/use_boolean.ts",
+            "lineNumber": 23,
+            "columnNumber": 28,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -168,6 +182,8 @@
           " | undefined) => { run: _.DebouncedFunc<(...args: Parameters<T>) => ReturnType<T>>; cancel: () => void; flush: () => ReturnType<T> | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-react-hooks/src/use_debounce_fn/use_debounce_fn.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -184,6 +200,8 @@
               "T"
             ],
             "path": "src/platform/packages/shared/kbn-react-hooks/src/use_debounce_fn/use_debounce_fn.ts",
+            "lineNumber": 41,
+            "columnNumber": 47,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -202,6 +220,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-react-hooks/src/use_debounce_fn/use_debounce_fn.ts",
+            "lineNumber": 41,
+            "columnNumber": 54,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -224,6 +244,8 @@
           "SerializedStyles"
         ],
         "path": "src/platform/packages/shared/kbn-react-hooks/src/use_error_text_style/use_error_text_style.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -245,6 +267,8 @@
           ".IStandaloneCodeEditor, options?: { flyoutMode?: boolean | undefined; }) => void; destroyResizeChecker: () => void; }"
         ],
         "path": "src/platform/packages/shared/kbn-react-hooks/src/use_resize_checker/use_resize_checker.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -269,6 +293,8 @@
           " | undefined) => { run: _.DebouncedFuncLeading<(...args: Parameters<T>) => ReturnType<T>>; cancel: () => void; flush: () => ReturnType<T>; }"
         ],
         "path": "src/platform/packages/shared/kbn-react-hooks/src/use_throttle_fn/use_throttle_fn.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -285,6 +311,8 @@
               "T"
             ],
             "path": "src/platform/packages/shared/kbn-react-hooks/src/use_throttle_fn/use_throttle_fn.ts",
+            "lineNumber": 38,
+            "columnNumber": 47,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -303,6 +331,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-react-hooks/src/use_throttle_fn/use_throttle_fn.ts",
+            "lineNumber": 38,
+            "columnNumber": 54,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -324,6 +354,8 @@
           "(text: string, maxLength?: number, maxCharLength?: number) => { displayText: string; isExpanded: boolean; toggleExpanded: () => void; shouldTruncate: boolean; }"
         ],
         "path": "src/platform/packages/shared/kbn-react-hooks/src/use_truncate_text/use_truncate_text.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -338,6 +370,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-react-hooks/src/use_truncate_text/use_truncate_text.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -353,6 +387,8 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-react-hooks/src/use_truncate_text/use_truncate_text.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -368,6 +404,8 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-react-hooks/src/use_truncate_text/use_truncate_text.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -386,6 +424,8 @@
         "label": "UseBooleanHandlers",
         "description": [],
         "path": "src/platform/packages/shared/kbn-react-hooks/src/use_boolean/use_boolean.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -400,6 +440,8 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/kbn-react-hooks/src/use_boolean/use_boolean.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -416,6 +458,8 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/kbn-react-hooks/src/use_boolean/use_boolean.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -432,6 +476,8 @@
               "(nextValue?: any) => void"
             ],
             "path": "src/platform/packages/shared/kbn-react-hooks/src/use_boolean/use_boolean.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -447,6 +493,8 @@
                   "any"
                 ],
                 "path": "node_modules/react-use/lib/useToggle.d.ts",
+                "lineNumber": 1,
+                "columnNumber": 64,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -469,6 +517,8 @@
           "(T extends Promise<infer TReturn> ? State<TReturn> : State<T>) & { refresh: () => void; }"
         ],
         "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -494,6 +544,8 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -509,6 +561,8 @@
               "({}: { signal: AbortSignal; } & TAdditionalParameters) => T | Promise<T>"
             ],
             "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -524,6 +578,8 @@
                   "{ signal: AbortSignal; } & TAdditionalParameters"
                 ],
                 "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
+                "lineNumber": 37,
+                "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -540,6 +596,8 @@
               "any[]"
             ],
             "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -556,6 +614,8 @@
               "<T> & TAdditionalOptions) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -581,6 +641,8 @@
           "]"
         ],
         "path": "src/platform/packages/shared/kbn-react-hooks/src/use_boolean/use_boolean.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

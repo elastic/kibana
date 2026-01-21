@@ -19,9 +19,9 @@ jest.mock('./link_destination', () => {
 
 describe('LinksEditor', () => {
   const nonDefaultOptions = {
-    openInNewTab: true,
-    useCurrentDateRange: false,
-    useCurrentFilters: false,
+    open_in_new_tab: true,
+    use_time_range: false,
+    use_filters: false,
   };
 
   const defaultProps = {
@@ -42,7 +42,7 @@ describe('LinksEditor', () => {
 
   const getOptionAriaChecked = (option: string): string | null => {
     return screen
-      .getByTestId(`dashboardDrillDownOptions--${option}--checkbox`)
+      .getByTestId(`dashboardNavigationOptions--${option}--checkbox`)
       .getAttribute('aria-checked');
   };
 
@@ -50,11 +50,11 @@ describe('LinksEditor', () => {
     test('starts with default when options not provided', async () => {
       render(<LinkEditor {...defaultProps} />);
       await waitFor(() => {
-        expect(screen.queryByTestId('dashboardDrillDownOptions')).not.toBeNull(); // wait for lazy load
+        expect(screen.queryByTestId('dashboardNavigationOptions')).not.toBeNull(); // wait for lazy load
       });
 
-      expect(getOptionAriaChecked('useCurrentFilters')).toBe('true');
-      expect(getOptionAriaChecked('useCurrentDateRange')).toBe('true');
+      expect(getOptionAriaChecked('useFilters')).toBe('true');
+      expect(getOptionAriaChecked('useTimeRange')).toBe('true');
       expect(getOptionAriaChecked('openInNewTab')).toBe('false');
     });
 
@@ -69,11 +69,11 @@ describe('LinksEditor', () => {
         />
       );
       await waitFor(() => {
-        expect(screen.queryByTestId('dashboardDrillDownOptions')).not.toBeNull(); // wait for lazy load
+        expect(screen.queryByTestId('dashboardNavigationOptions')).not.toBeNull(); // wait for lazy load
       });
 
-      expect(getOptionAriaChecked('useCurrentFilters')).toBe('false');
-      expect(getOptionAriaChecked('useCurrentDateRange')).toBe('false');
+      expect(getOptionAriaChecked('useFilters')).toBe('false');
+      expect(getOptionAriaChecked('useTimeRange')).toBe('false');
       expect(getOptionAriaChecked('openInNewTab')).toBe('true');
     });
 
@@ -88,7 +88,7 @@ describe('LinksEditor', () => {
         />
       );
       await waitFor(() => {
-        expect(screen.queryByTestId('dashboardDrillDownOptions')).not.toBeNull(); // wait for lazy load
+        expect(screen.queryByTestId('dashboardNavigationOptions')).not.toBeNull(); // wait for lazy load
       });
 
       await userEvent.click(screen.getByTestId('links--linkEditor--linkLabel--input'));

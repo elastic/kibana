@@ -34,6 +34,7 @@ import {
   createNonDataStreamIndex,
   getTableCellsValues,
 } from '../helpers/actions/data_stream_actions';
+import { closeViewFilterPopoverIfOpen } from '../helpers/actions/popover_cleanup';
 
 jest.mock('react-use/lib/useObservable', () => () => jest.fn());
 
@@ -69,6 +70,24 @@ describe('Data Streams tab', () => {
     httpRequestsMockHelpers = env.httpRequestsMockHelpers;
     httpService.setup(httpServiceMock.createSetupContract());
     jest.spyOn(breadcrumbService, 'setBreadcrumbs');
+  });
+
+  afterEach(async () => {
+    // Some tests open popovers just to assert menu items exist; ensure they don't leak across tests.
+    if (screen.queryByTestId('dataStreamActionsContextMenu')) {
+      fireEvent.click(screen.getByTestId('dataStreamActionsPopoverButton'));
+      await waitFor(() => {
+        expect(screen.queryByTestId('dataStreamActionsContextMenu')).not.toBeInTheDocument();
+      });
+    }
+
+    const filterList = screen.queryByTestId('filterList');
+    if (
+      filterList?.getAttribute('data-popover-open') === 'true' &&
+      screen.queryByTestId('viewButton')
+    ) {
+      await closeViewFilterPopoverIfOpen();
+    }
   });
 
   describe('when there are no data streams', () => {
@@ -1160,7 +1179,7 @@ describe('Data Streams tab', () => {
         await detailPanelActions.waitForDetailPanel();
 
         expect(await screen.findByTestId('dataRetentionDetail')).toBeInTheDocument();
-      });
+      }, 20000);
     });
 
     describe('shows all possible states according to who manages the data stream', () => {
