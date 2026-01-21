@@ -23,10 +23,8 @@ describe('Header', () => {
     application: mockApplication,
     breadcrumbs$: Rx.of([]),
     breadcrumbsAppendExtensions$: Rx.of([]),
-    actionMenu$: Rx.of(undefined),
     docLinks: docLinksServiceMock.createStartContract(),
     globalHelpExtensionMenuLinks$: Rx.of([]),
-    headerBanner$: Rx.of(),
     helpExtension$: Rx.of(undefined),
     helpSupportUrl$: Rx.of('app/help'),
     helpMenuLinks$: Rx.of([]),
@@ -54,9 +52,7 @@ describe('Header', () => {
 
   it('renders custom branding logo', async () => {
     const { queryByTestId } = render(
-      <ProjectHeader {...mockProps} customBranding$={Rx.of({ logo: 'foo.jpg' })}>
-        <EuiHeader>Hello, world!</EuiHeader>
-      </ProjectHeader>
+      <ProjectHeader {...mockProps} customBranding$={Rx.of({ logo: 'foo.jpg' })} />
     );
 
     expect(queryByTestId(/customLogo/)).not.toBeNull();

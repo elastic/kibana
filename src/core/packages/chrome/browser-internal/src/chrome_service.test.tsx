@@ -247,17 +247,15 @@ describe('start', () => {
       // Have to do some fanagling to get the type system and enzyme to accept this.
       // Don't capture the snapshot because it's 600+ lines long.
       // Render and assert that no error is thrown
-      render(React.createElement(() => chrome.getLegacyHeaderComponentForFixedLayout()));
+      render(React.createElement(() => chrome.getClassicHeaderComponent()));
     });
 
     it('renders chromeless header', async () => {
       const { chrome, startDeps } = await start({ startDeps: defaultStartDeps() });
 
-      chrome.setIsVisible(false);
-
       render(
         <KibanaRenderContextProvider {...startDeps}>
-          {chrome.getLegacyHeaderComponentForFixedLayout()}
+          {chrome.getChromelessHeader()}
         </KibanaRenderContextProvider>
       );
 
