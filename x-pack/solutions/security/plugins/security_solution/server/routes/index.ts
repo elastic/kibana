@@ -76,7 +76,7 @@ export const initRoutes = (
   isServerless: boolean,
   docLinks: DocLinksServiceSetup,
   endpointContext: EndpointAppContext,
-  trailCompanionDeps: TrialCompanionRoutesDeps
+  trialCompanionDeps: TrialCompanionRoutesDeps
 ) => {
   registerFleetIntegrationsRoutes(router, logger);
   registerLegacyRuleActionsRoutes(router, logger);
@@ -153,5 +153,5 @@ export const initRoutes = (
 
   registerSiemReadinessRoutes({ router, logger });
 
-  registerTrialCompanionRoutes(trailCompanionDeps);
+  registerTrialCompanionRoutes(trialCompanionDeps);
 };

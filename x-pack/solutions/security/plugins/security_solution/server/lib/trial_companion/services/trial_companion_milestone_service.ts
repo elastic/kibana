@@ -135,8 +135,6 @@ export class TrialCompanionMilestoneServiceImpl implements TrialCompanionMilesto
       this.logger.debug(() => `Current milestone from SO: ${JSON.stringify(saved)}`);
 
       const openTODOs: Milestone[] = [];
-      // potential optimization: stop checking once we reach the final milestone, we could check SO in start function
-      // potential optimization: run only detectors for milestones higher than the current one
       for (const d of this.detectors) {
         if (abortSignal.aborted) {
           this.logger.info('Abort signal received, stopping milestone detection');
