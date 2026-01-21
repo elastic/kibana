@@ -124,11 +124,12 @@ export const saveYamlThunk = createAsyncThunk<
       const errorWorkflowDefinition = selectWorkflowDefinition(errorState);
       const errorYamlString = selectYamlString(errorState);
       const errorOriginalWorkflow = selectWorkflow(errorState);
+      const errorId = selectWorkflowId(errorState);
 
       // Report telemetry for failed operation
-      if (id) {
+      if (errorId) {
         telemetry.reportWorkflowUpdated({
-          workflowId: id,
+          workflowId: errorId,
           workflowUpdate: { yaml: errorYamlString },
           workflowDefinition: errorWorkflowDefinition || undefined,
           originalWorkflow: errorOriginalWorkflow?.definition || undefined,
