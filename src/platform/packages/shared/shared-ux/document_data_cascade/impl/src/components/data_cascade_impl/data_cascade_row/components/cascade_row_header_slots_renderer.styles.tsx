@@ -9,7 +9,7 @@
 
 import { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { type UseEuiTheme, euiShadow, useEuiTheme } from '@elastic/eui';
+import { type UseEuiTheme, useEuiTheme } from '@elastic/eui';
 
 export interface ScrollState {
   isScrollable: boolean;
@@ -68,8 +68,6 @@ export const useStyles = (scrollState: ScrollState) => {
     scrollState
   );
 
-  const shadow = euiShadow(euiThemeContext, 'xl', { direction: 'down' });
-
   const slotsScrollButtonBaseStyles = css([
     {
       label: 'slots-scroll-button-base-styles',
@@ -79,7 +77,6 @@ export const useStyles = (scrollState: ScrollState) => {
       zIndex: 1,
       margin: euiThemeContext.euiTheme.size.xxs,
     },
-    shadow,
   ]);
 
   return {
