@@ -13,7 +13,6 @@ import { i18n } from '@kbn/i18n';
 import { flattenObject } from '@kbn/object-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useMemo } from 'react';
-import { WaterfallFlyout } from '..';
 import LogsOverview from '../../../../../../doc_viewer_logs_overview';
 import { useDataSourcesContext } from '../../../../../../../hooks/use_data_sources';
 import { useAdhocDataView } from '../../hooks/use_adhoc_data_view';
@@ -21,23 +20,28 @@ import { useFetchLog } from '../../hooks/use_fetch_log';
 
 export const logsFlyoutId = 'logsFlyout' as const;
 
-export interface LogsFlyoutProps {
-  onCloseFlyout: () => void;
+export interface UseLogFlyoutDataParams {
   id: string;
   index?: string;
-  dataView: DocViewRenderProps['dataView'];
 }
 
-export function LogsFlyout({ onCloseFlyout, id, index, dataView }: LogsFlyoutProps) {
+export interface LogFlyoutData {
+  hit: DataTableRecord | null;
+  loading: boolean;
+  title: string;
+  error: string | null;
+  logDataView: DocViewRenderProps['dataView'] | null;
+}
+
+export function useLogFlyoutData({ id, index }: UseLogFlyoutDataParams): LogFlyoutData {
   const { loading, log, index: resolvedIndex } = useFetchLog({ id, index });
-  const { indexes } = useDataSourcesContext();
   const {
     dataView: logDataView,
     error,
     loading: loadingDataView,
   } = useAdhocDataView({ index: resolvedIndex ?? null });
 
-  const documentAsHit = useMemo<DataTableRecord | null>(() => {
+  const hit = useMemo<DataTableRecord | null>(() => {
     if (!log || !id || !resolvedIndex) return null;
 
     return {
@@ -51,27 +55,33 @@ export function LogsFlyout({ onCloseFlyout, id, index, dataView }: LogsFlyoutPro
     };
   }, [id, log, resolvedIndex]);
 
+  const title = i18n.translate(
+    'unifiedDocViewer.observability.traces.fullScreenWaterfall.logFlyout.title.log',
+    { defaultMessage: 'Log document' }
+  );
+
+  return {
+    hit,
+    loading: loading || loadingDataView,
+    title,
+    error,
+    logDataView,
+  };
+}
+
+export interface LogFlyoutContentProps {
+  hit: DataTableRecord;
+  logDataView: DocViewRenderProps['dataView'];
+  error: string | null;
+}
+
+export function LogFlyoutContent({ hit, logDataView, error }: LogFlyoutContentProps) {
+  const { indexes } = useDataSourcesContext();
+
   return (
-    <WaterfallFlyout
-      flyoutId={logsFlyoutId}
-      onCloseFlyout={onCloseFlyout}
-      dataView={dataView}
-      hit={documentAsHit}
-      loading={loading || loadingDataView}
-      title={i18n.translate(
-        'unifiedDocViewer.observability.traces.fullScreenWaterfall.logFlyout.title.log',
-        { defaultMessage: 'Log document' }
-      )}
-    >
+    <>
       {error ? <EuiCallOut announceOnMount title={error} color="danger" /> : null}
-      {documentAsHit && logDataView ? (
-        <LogsOverview
-          hit={documentAsHit}
-          dataView={logDataView}
-          indexes={indexes}
-          showTraceWaterfall={false}
-        />
-      ) : null}
-    </WaterfallFlyout>
+      <LogsOverview hit={hit} dataView={logDataView} indexes={indexes} showTraceWaterfall={false} />
+    </>
   );
 }

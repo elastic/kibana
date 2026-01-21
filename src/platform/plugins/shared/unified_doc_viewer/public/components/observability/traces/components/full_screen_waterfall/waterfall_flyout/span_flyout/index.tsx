@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import { flattenObject } from '@kbn/object-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useEffect, useMemo, useState } from 'react';
-import { WaterfallFlyout } from '..';
 import type { OverviewApi } from '../../../../doc_viewer_overview/overview';
 import { Overview, type TraceOverviewSections } from '../../../../doc_viewer_overview/overview';
 import { useDataSourcesContext } from '../../../../../../../hooks/use_data_sources';
@@ -21,26 +20,21 @@ import { useFetchSpan } from '../../hooks/use_fetch_span';
 
 export const spanFlyoutId = 'spanDetailFlyout' as const;
 
-export interface SpanFlyoutProps {
+export interface UseSpanFlyoutDataParams {
   spanId: string;
   traceId: string;
-  dataView: DocViewRenderProps['dataView'];
-  onCloseFlyout: () => void;
-  activeSection?: TraceOverviewSections;
 }
 
-export const SpanFlyout = ({
-  spanId,
-  traceId,
-  dataView,
-  onCloseFlyout,
-  activeSection,
-}: SpanFlyoutProps) => {
-  const { span, loading } = useFetchSpan({ spanId, traceId });
-  const { indexes } = useDataSourcesContext();
-  const [flyoutRef, setFlyoutRef] = useState<OverviewApi | null>(null);
+export interface SpanFlyoutData {
+  hit: DataTableRecord | null;
+  loading: boolean;
+  title: string;
+}
 
-  const documentAsHit = useMemo<DataTableRecord | null>(() => {
+export function useSpanFlyoutData({ spanId, traceId }: UseSpanFlyoutDataParams): SpanFlyoutData {
+  const { span, loading } = useFetchSpan({ spanId, traceId });
+
+  const hit = useMemo<DataTableRecord | null>(() => {
     if (!span) return null;
 
     return {
@@ -54,7 +48,38 @@ export const SpanFlyout = ({
     };
   }, [span]);
 
-  const isSpan = isSpanHit(documentAsHit);
+  const isSpan = isSpanHit(hit);
+
+  const title = i18n.translate(
+    'unifiedDocViewer.observability.traces.fullScreenWaterfall.spanFlyout.title',
+    {
+      defaultMessage: '{docType} document',
+      values: {
+        docType: isSpan
+          ? i18n.translate(
+              'unifiedDocViewer.observability.traces.fullScreenWaterfall.spanFlyout.title.span',
+              { defaultMessage: 'Span' }
+            )
+          : i18n.translate(
+              'unifiedDocViewer.observability.traces.fullScreenWaterfall.spanFlyout.title.transction',
+              { defaultMessage: 'Transaction' }
+            ),
+      },
+    }
+  );
+
+  return { hit, loading, title };
+}
+
+export interface SpanFlyoutContentProps {
+  hit: DataTableRecord;
+  dataView: DocViewRenderProps['dataView'];
+  activeSection?: TraceOverviewSections;
+}
+
+export function SpanFlyoutContent({ hit, dataView, activeSection }: SpanFlyoutContentProps) {
+  const { indexes } = useDataSourcesContext();
+  const [flyoutRef, setFlyoutRef] = useState<OverviewApi | null>(null);
 
   useEffect(() => {
     if (activeSection && flyoutRef) {
@@ -63,40 +88,13 @@ export const SpanFlyout = ({
   }, [activeSection, flyoutRef]);
 
   return (
-    <WaterfallFlyout
-      flyoutId={spanFlyoutId}
-      onCloseFlyout={onCloseFlyout}
+    <Overview
+      ref={setFlyoutRef}
+      hit={hit}
+      indexes={indexes}
+      showWaterfall={false}
+      showActions={false}
       dataView={dataView}
-      hit={documentAsHit}
-      loading={loading}
-      title={i18n.translate(
-        'unifiedDocViewer.observability.traces.fullScreenWaterfall.spanFlyout.title',
-        {
-          defaultMessage: '{docType} document',
-          values: {
-            docType: isSpan
-              ? i18n.translate(
-                  'unifiedDocViewer.observability.traces.fullScreenWaterfall.spanFlyout.title.span',
-                  { defaultMessage: 'Span' }
-                )
-              : i18n.translate(
-                  'unifiedDocViewer.observability.traces.fullScreenWaterfall.spanFlyout.title.transction',
-                  { defaultMessage: 'Transaction' }
-                ),
-          },
-        }
-      )}
-    >
-      {documentAsHit ? (
-        <Overview
-          ref={setFlyoutRef}
-          hit={documentAsHit}
-          indexes={indexes}
-          showWaterfall={false}
-          showActions={false}
-          dataView={dataView}
-        />
-      ) : null}
-    </WaterfallFlyout>
+    />
   );
-};
+}
