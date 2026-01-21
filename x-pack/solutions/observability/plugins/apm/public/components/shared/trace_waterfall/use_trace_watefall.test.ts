@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { renderHook } from '@testing-library/react';
 import { WaterfallLegendType } from '../../../../common/waterfall/legend';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
@@ -17,6 +18,7 @@ import {
   createColorLookupMap,
   getRootItemOrFallback,
   TraceDataState,
+  useTraceWaterfall,
 } from './use_trace_waterfall';
 
 jest.mock('@elastic/eui', () => ({
@@ -92,13 +94,11 @@ describe('getFlattenedTraceWaterfall', () => {
     ['serviceName:svcD', 'yellow'],
   ]);
 
-  it('returns a flattened waterfall with correct depth, offset, skew, and color', () => {
+  it('returns a flattened waterfall with correct depth, offset, and skew', () => {
     const result = getTraceWaterfall({
       rootItem: root,
       parentChildMap,
       orphans: [],
-      colorMap: serviceColorsMap,
-      colorBy: WaterfallLegendType.ServiceName,
     });
 
     expect(result.map((i) => i.id)).toEqual(['1', '2', '4', '3']);
@@ -106,7 +106,6 @@ describe('getFlattenedTraceWaterfall', () => {
     expect(result[0]).toMatchObject({
       id: '1',
       depth: 0,
-      color: 'red',
       offset: 0,
       skew: 0,
     });
@@ -114,19 +113,16 @@ describe('getFlattenedTraceWaterfall', () => {
     expect(result[1]).toMatchObject({
       id: '2',
       depth: 1,
-      color: 'blue',
     });
 
     expect(result[2]).toMatchObject({
       id: '4',
       depth: 2,
-      color: 'yellow',
     });
 
     expect(result[3]).toMatchObject({
       id: '3',
       depth: 1,
-      color: 'green',
     });
 
     expect(result[1].offset).toBe(500000); // child1: 0.5s after root
@@ -139,8 +135,6 @@ describe('getFlattenedTraceWaterfall', () => {
       rootItem: root,
       parentChildMap: {},
       orphans: [],
-      colorMap: serviceColorsMap,
-      colorBy: WaterfallLegendType.ServiceName,
     });
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe('1');
@@ -157,8 +151,6 @@ describe('getFlattenedTraceWaterfall', () => {
       rootItem: root,
       parentChildMap: unorderedMap,
       orphans: [],
-      colorMap: serviceColorsMap,
-      colorBy: WaterfallLegendType.ServiceName,
     });
     expect(result.map((i) => i.id)).toEqual(['1', '2', '4', '3']);
   });
@@ -168,8 +160,6 @@ describe('getFlattenedTraceWaterfall', () => {
       rootItem: root,
       parentChildMap: {},
       orphans: [grandchild],
-      colorMap: serviceColorsMap,
-      colorBy: WaterfallLegendType.ServiceName,
     });
 
     expect(result).toHaveLength(2);
@@ -248,8 +238,6 @@ describe('getFlattenedTraceWaterfall', () => {
         rootItem: rootItem!,
         parentChildMap: invalidMap,
         orphans: orphans!,
-        colorMap: serviceColorsMap,
-        colorBy: WaterfallLegendType.ServiceName,
       })
     ).toThrowError('Duplicate span id detected');
   });
@@ -887,5 +875,138 @@ describe('getclockSkew', () => {
       parent: parentWithSkew,
     });
     expect(result).toBe(1000350);
+  });
+});
+
+describe('useTraceWaterfall - legends from filtered subtree', () => {
+  it('calculates legends only from visible subtree when entryTransactionId is provided', () => {
+    const traceItems: TraceItem[] = [
+      {
+        id: 'root',
+        timestampUs: 0,
+        name: 'root-tx',
+        traceId: 'trace1',
+        duration: 1000,
+        serviceName: 'api-gateway',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'transaction',
+      },
+      {
+        id: 'child',
+        parentId: 'root',
+        timestampUs: 100,
+        name: 'child-span',
+        traceId: 'trace1',
+        duration: 500,
+        serviceName: 'email-worker',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
+      },
+      {
+        id: 'unrelated-root',
+        timestampUs: 0,
+        name: 'unrelated-tx',
+        traceId: 'trace1',
+        duration: 2000,
+        serviceName: 'unrelated-service',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'transaction',
+      },
+    ];
+
+    const { result } = renderHook(() =>
+      useTraceWaterfall({
+        traceItems,
+        entryTransactionId: 'child',
+      })
+    );
+
+    const legendValues = result.current.legends.map((l) => l.value);
+
+    expect(legendValues).toContain('email-worker');
+
+    expect(legendValues).not.toContain('unrelated-service');
+    expect(legendValues).not.toContain('api-gateway');
+  });
+
+  it('includes orphans in legends calculation', () => {
+    const traceItems: TraceItem[] = [
+      {
+        id: 'root-tx-1',
+        timestampUs: 0,
+        name: 'root-tx',
+        traceId: 'trace1',
+        duration: 1000,
+        serviceName: 'api-gateway',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'transaction',
+      },
+      {
+        id: 'orphan',
+        parentId: 'missing-parent',
+        timestampUs: 100,
+        name: 'orphan-span',
+        traceId: 'trace1',
+        duration: 500,
+        serviceName: 'orphan-service',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
+      },
+    ];
+
+    const { result } = renderHook(() =>
+      useTraceWaterfall({
+        traceItems,
+      })
+    );
+
+    const legendValues = result.current.legends.map((l) => l.value);
+
+    expect(legendValues).toContain('orphan-service');
+    expect(legendValues).toContain('api-gateway');
+  });
+
+  it('calculates legends from full trace when no entryTransactionId is provided', () => {
+    const traceItems: TraceItem[] = [
+      {
+        id: 'root-tx-1',
+        timestampUs: 0,
+        name: 'root-tx',
+        traceId: 'trace1',
+        duration: 1000,
+        serviceName: 'api-gateway',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'transaction',
+      },
+      {
+        id: 'child',
+        parentId: 'root-tx-1',
+        timestampUs: 100,
+        name: 'child-span',
+        traceId: 'trace1',
+        duration: 500,
+        serviceName: 'email-worker',
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
+      },
+    ];
+
+    const { result } = renderHook(() =>
+      useTraceWaterfall({
+        traceItems,
+      })
+    );
+
+    const legendValues = result.current.legends.map((l) => l.value);
+
+    expect(legendValues).toContain('api-gateway');
+    expect(legendValues).toContain('email-worker');
   });
 });
