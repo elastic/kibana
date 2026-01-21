@@ -29,7 +29,7 @@ export class ConnectorExecutor {
       throw new Error('Connector type is required');
     }
 
-    const runConnectorPromise = this.runConnector(connectorName, inputs, spaceId);
+    const runConnectorPromise = this.runConnector(connectorName, inputs, spaceId, abortController);
     const abortPromise = new Promise<void>((resolve, reject) => {
       abortController.signal.addEventListener('abort', () =>
         reject(new Error(`"${connectorName}" with type "${connectorType}" was aborted`))
@@ -48,13 +48,15 @@ export class ConnectorExecutor {
   private async runConnector(
     connectorName: string,
     connectorParams: Record<string, any>,
-    spaceId: string
+    spaceId: string,
+    abortController: AbortController
   ): Promise<ActionTypeExecutorResult<unknown>> {
     const connectorId = await this.resolveConnectorId(connectorName, spaceId);
 
     return (this.actionsClient as ActionsClient).execute({
       actionId: connectorId,
       params: connectorParams,
+      signal: abortController.signal,
     });
   }
 
