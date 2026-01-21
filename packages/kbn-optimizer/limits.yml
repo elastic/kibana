@@ -121,7 +121,7 @@ pageLoadAssetSize:
   noDataPage: 1749
   observability: 107797
   observabilityAgentBuilder: 7077
-  observabilityAIAssistant: 54556
+  observabilityAIAssistant: 61180
   observabilityAIAssistantApp: 18012
   observabilityAiAssistantManagement: 7126
   observabilityLogsExplorer: 4918
@@ -207,6 +207,6 @@ pageLoadAssetSize:
   visTypeXy: 32342
   visualizations: 38375
   watcher: 10485
-  workflowsExtensions: 76704
+  workflowsExtensions: 76765
   workflowsManagement: 8497
-  workplaceAIApp: 6112
+  workplaceAIApp: 65731
