@@ -12,42 +12,33 @@ import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ElasticsearchGraphNode } from '@kbn/workflows/graph/types';
+import type { RequestOptions } from '@kbn/workflows';
+import { buildElasticsearchRequest, buildKibanaRequest } from '@kbn/workflows';
+import {
+  type ElasticsearchGraphNode,
+  isElasticsearch,
+  isKibana,
+  type KibanaGraphNode,
+} from '@kbn/workflows/graph/types';
 import {
   selectEditorFocusedStepInfo,
   selectEditorWorkflowGraph,
 } from '../../../../entities/workflows/store';
 import { useKibana } from '../../../../hooks/use_kibana';
-import {
-  getElasticsearchRequestInfo,
-  isElasticsearchStep,
-} from '../../lib/elasticsearch_step_utils';
 
-export interface CopyElasticSearchDevToolsOptionProps {
+export interface CopyDevToolsOptionProps {
   onClick: () => void;
 }
 
-export const CopyElasticSearchDevToolsOption: React.FC<CopyElasticSearchDevToolsOptionProps> = ({
-  onClick,
-}) => {
+/**
+ * Combined copy-as-devtools option that works for both Elasticsearch and Kibana steps
+ */
+export const CopyDevToolsOption: React.FC<CopyDevToolsOptionProps> = ({ onClick }) => {
   const workflowGraph = useSelector(selectEditorWorkflowGraph);
   const focusedStepInfo = useSelector(selectEditorFocusedStepInfo);
   const {
     services: { notifications },
   } = useKibana();
-
-  function generateConsoleFormat(
-    requestInfo: { method: string; url: string; data?: string[] },
-    withParams: Record<string, any> // eslint-disable-line @typescript-eslint/no-explicit-any
-  ): string {
-    const lines = [`${requestInfo.method} ${requestInfo.url}`];
-
-    if (requestInfo.data && requestInfo.data.length > 0) {
-      lines.push(...requestInfo.data);
-    }
-
-    return lines.join('\n');
-  }
 
   const copy = useCallback(async () => {
     if (!focusedStepInfo || !workflowGraph) {
@@ -56,21 +47,33 @@ export const CopyElasticSearchDevToolsOption: React.FC<CopyElasticSearchDevTools
 
     try {
       const stepGraph = workflowGraph.getStepGraph(focusedStepInfo.stepId);
-      const elasticSearchNode = stepGraph
-        .getAllNodes()
-        .find((node): node is ElasticsearchGraphNode => isElasticsearchStep(node.stepType));
-      if (!elasticSearchNode) {
+      const allNodes = stepGraph.getAllNodes();
+
+      let consoleFormat: string | null = null;
+
+      // Check for Elasticsearch step
+      const esNode = allNodes.find((node): node is ElasticsearchGraphNode => isElasticsearch(node));
+      if (esNode) {
+        const stepType = esNode.stepType;
+        const requestInfo = buildElasticsearchRequest(stepType, esNode.configuration.with || {});
+        consoleFormat = generateConsoleFormat(requestInfo);
+      }
+
+      // Check for Kibana step
+      const kibanaNode = allNodes.find((node): node is KibanaGraphNode => isKibana(node));
+      if (kibanaNode) {
+        const stepType = kibanaNode.configuration.type;
+        const requestInfo = buildKibanaRequest(stepType, kibanaNode.configuration.with || {});
+        consoleFormat = generateConsoleFormat({
+          ...requestInfo,
+          // request builder returns path prefixed with one slash, but for kibana apis we need two slashes and a kbn prefix
+          path: `kbn:/${requestInfo.path}`,
+        });
+      }
+
+      if (!consoleFormat) {
         return;
       }
-      const stepType = elasticSearchNode.stepType;
-      const requestInfo = getElasticsearchRequestInfo(
-        stepType,
-        elasticSearchNode.configuration.with
-      );
-      const consoleFormat = generateConsoleFormat(
-        requestInfo,
-        elasticSearchNode.configuration.with
-      );
 
       await navigator.clipboard.writeText(consoleFormat);
 
@@ -107,8 +110,8 @@ export const CopyElasticSearchDevToolsOption: React.FC<CopyElasticSearchDevTools
 
   return (
     <EuiContextMenuItem
-      data-test-subj={`actionButton-copy-as-console`}
-      key="elasticsearch-copy-as-console"
+      data-test-subj="actionButton-copy-as-console"
+      key="copy-as-console"
       onClick={copy}
       icon="copy"
     >
@@ -119,3 +122,21 @@ export const CopyElasticSearchDevToolsOption: React.FC<CopyElasticSearchDevTools
     </EuiContextMenuItem>
   );
 };
+
+function generateConsoleFormat(requestInfo: RequestOptions): string {
+  // Handle query params - could be either 'query' or 'params' depending on the builder
+  const queryParams = requestInfo.query;
+  const queryString = queryParams ? `?${new URLSearchParams(queryParams).toString()}` : '';
+
+  const lines = [`${requestInfo.method} ${decodeURIComponent(requestInfo.path)}${queryString}`];
+
+  if (requestInfo.bulkBody && requestInfo.bulkBody.length > 0) {
+    requestInfo.bulkBody.forEach((operation: Record<string, unknown>) => {
+      lines.push(JSON.stringify(operation, null, 2));
+    });
+  } else if (requestInfo.body && Object.keys(requestInfo.body).length > 0) {
+    lines.push(JSON.stringify(requestInfo.body, null, 2));
+  }
+
+  return lines.join('\n');
+}

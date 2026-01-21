@@ -22,7 +22,6 @@ dependsOn:
   - '@kbn/workflows-extensions'
   - '@kbn/zod'
   - '@kbn/i18n'
-  - '@kbn/workflows'
 tags:
   - plugin
   - prod

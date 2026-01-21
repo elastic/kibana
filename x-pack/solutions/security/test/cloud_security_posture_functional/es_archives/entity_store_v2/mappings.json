@@ -4,10 +4,15 @@
     "aliases": {
       "entities-generic-latest": {}
     },
-    "index": ".entities.v1.latest.security_generic_entities-space",
+    "index": ".entities.v2.latest.security_generic_default",
+    "settings": {
+      "index": {
+        "mode": "lookup"
+      }
+    },
     "mappings": {
       "_meta": {
-        "version": "1.6.0"
+        "version": "2.0.0"
       },
       "dynamic_templates": [
         {
@@ -588,6 +593,16 @@
               }
             },
             "type": {
+              "type": "keyword"
+            }
+          }
+        },
+        "service": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "name": {
               "type": "keyword"
             }
           }

@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "1",
-    "index": ".entities.v1.latest.security_generic_entities-space",
+    "index": ".entities.v2.latest.security_generic_entities-space",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -41,7 +41,7 @@
   "type": "doc",
   "value": {
     "id": "2",
-    "index": ".entities.v1.latest.security_generic_entities-space",
+    "index": ".entities.v2.latest.security_generic_entities-space",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -80,7 +80,7 @@
   "type": "doc",
   "value": {
     "id": "3",
-    "index": ".entities.v1.latest.security_generic_entities-space",
+    "index": ".entities.v2.latest.security_generic_entities-space",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -115,7 +115,7 @@
   "type": "doc",
   "value": {
     "id": "4",
-    "index": ".entities.v1.latest.security_generic_entities-space",
+    "index": ".entities.v2.latest.security_generic_entities-space",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -154,7 +154,7 @@
   "type": "doc",
   "value": {
     "id": "5",
-    "index": ".entities.v1.latest.security_generic_entities-space",
+    "index": ".entities.v2.latest.security_generic_entities-space",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -193,7 +193,7 @@
   "type": "doc",
   "value": {
     "id": "6",
-    "index": ".entities.v1.latest.security_generic_entities-space",
+    "index": ".entities.v2.latest.security_generic_entities-space",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -232,7 +232,7 @@
   "type": "doc",
   "value": {
     "id": "7",
-    "index": ".entities.v1.latest.security_generic_entities-space",
+    "index": ".entities.v2.latest.security_generic_entities-space",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -271,7 +271,7 @@
   "type": "doc",
   "value": {
     "id": "8",
-    "index": ".entities.v1.latest.security_generic_entities-space",
+    "index": ".entities.v2.latest.security_generic_entities-space",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -306,7 +306,7 @@
   "type": "doc",
   "value": {
     "id": "9",
-    "index": ".entities.v1.latest.security_generic_entities-space",
+    "index": ".entities.v2.latest.security_generic_entities-space",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -341,7 +341,7 @@
   "type": "doc",
   "value": {
     "id": "10",
-    "index": ".entities.v1.latest.security_generic_entities-space",
+    "index": ".entities.v2.latest.security_generic_entities-space",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -376,7 +376,7 @@
   "type": "doc",
   "value": {
     "id": "11",
-    "index": ".entities.v1.latest.security_generic_entities-space",
+    "index": ".entities.v2.latest.security_generic_entities-space",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -415,7 +415,7 @@
   "type": "doc",
   "value": {
     "id": "12",
-    "index": ".entities.v1.latest.security_generic_entities-space",
+    "index": ".entities.v2.latest.security_generic_entities-space",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -452,7 +452,7 @@
   "type": "doc",
   "value": {
     "id": "13",
-    "index": ".entities.v1.latest.security_generic_entities-space",
+    "index": ".entities.v2.latest.security_generic_entities-space",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
