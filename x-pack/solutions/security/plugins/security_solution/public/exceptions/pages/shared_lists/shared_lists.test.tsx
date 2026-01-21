@@ -201,10 +201,8 @@ describe('SharedLists', () => {
     });
   });
 
-  it('enables the export "endpoint_list" overflow card button when user is restricted to only READ Endpoint Exceptions', async () => {
-    (useEndpointExceptionsCapability as jest.Mock).mockImplementation((feature: string) =>
-      feature === 'showEndpointExceptions' ? true : false
-    );
+  it('renders the "endpoint_list" overflow card button as enabled when user is restricted to only READ Endpoint Exceptions', async () => {
+    (useEndpointExceptionsCapability as jest.Mock).mockReturnValue(false);
 
     const wrapper = render(
       <TestProviders>
@@ -253,7 +251,7 @@ describe('SharedLists', () => {
     expect(allMenuActions[1]).toBeEnabled();
   });
 
-  it('renders overflow card export action as enabled if user is read only', async () => {
+  it('renders export option as enabled when user is restricted to only READ rules', async () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
       rulesPrivileges: {
