@@ -80,6 +80,7 @@ import {
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+  USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 } from './constants/saved_objects';
 import { setupSavedObjects } from './saved_objects';
 import { ACTIONS_FEATURE } from './feature';
@@ -208,6 +209,7 @@ const includedHiddenTypes = [
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+  USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 ];
 
 export class ActionsPlugin
@@ -610,6 +612,31 @@ export class ActionsPlugin
         return instantiateAuthorization(request);
       },
       analyticsService: core.analytics,
+      getCurrentUserProfileIdViaApiKey: async (
+        request: KibanaRequest
+      ): Promise<string | undefined> => {
+        try {
+          const response = await core.elasticsearch.client
+            .asScoped(request)
+            .asCurrentUser.security.getApiKey({
+              with_profile_uid: true,
+            });
+
+          if (response.api_keys && response.api_keys.length > 0) {
+            return response.api_keys[0].profile_uid;
+          } else {
+            logger.debug(
+              `No API keys were returned from query, cannot retrieve associated profile id.`
+            );
+          }
+        } catch (error) {
+          logger.error(
+            `Failed to retrieve API key for user profile retrieval: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        }
+      },
     });
 
     taskRunnerFactory!.initialize({

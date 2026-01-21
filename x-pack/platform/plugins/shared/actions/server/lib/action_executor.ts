@@ -73,6 +73,7 @@ export interface ActionExecutorContext {
   eventLogger: IEventLogger;
   inMemoryConnectors: InMemoryConnector[];
   getActionsAuthorizationWithRequest: (request: KibanaRequest) => ActionsAuthorization;
+  getCurrentUserProfileIdViaApiKey: (request: KibanaRequest) => Promise<string | undefined>;
 }
 
 export interface TaskInfo {
@@ -393,6 +394,17 @@ export class ActionExecutor {
       throw new Error('ActionExecutor not initialized');
     }
 
+    /**
+     * Get profile UID from API key if request is available
+     *
+     * TODO:
+     * - Handle errors thrown by getCurrentUserProfileIdViaApiKey
+     * - Handle cases where no API key is used
+     */
+    const providedProfileUid = request
+      ? await this.actionExecutorContext!.getCurrentUserProfileIdViaApiKey(request)
+      : undefined;
+
     return withSpan(
       {
         name: executeLabel,
@@ -406,7 +418,10 @@ export class ActionExecutor {
 
         const actionInfo = await this.getActionInfoInternal(actionId, namespace.namespace);
 
-        const { actionTypeId, name, config, secrets } = actionInfo;
+        const { actionTypeId, name, config, secrets, rawAction } = actionInfo;
+        const authMode = rawAction?.authMode;
+        // Use provided profileUid (from API key) if available, otherwise fall back to currentUser
+        const profileUid = providedProfileUid ?? currentUser?.profile_uid;
 
         const loggerId = actionTypeId.startsWith('.') ? actionTypeId.substring(1) : actionTypeId;
         const logger = this.actionExecutorContext!.logger.get(loggerId);
@@ -542,6 +557,8 @@ export class ActionExecutor {
             ...(actionType.isSystemActionType ? { request } : {}),
             connectorUsageCollector,
             connectorTokenClient,
+            authMode,
+            profileUid,
           });
 
           if (rawResult && rawResult.status === 'error') {
@@ -581,7 +598,7 @@ export class ActionExecutor {
 
           event.user = event.user || {};
           event.user.name = currentUser?.username;
-          event.user.id = currentUser?.profile_uid;
+          event.user.id = profileUid;
           if (currentUser?.api_key) {
             event.kibana!.user_api_key = {
               name: currentUser.api_key?.name,

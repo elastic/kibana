@@ -68,6 +68,7 @@ describe('create()', () => {
       token: 'testtokenvalue',
     });
     expect(result).toEqual({
+      id: 'shared:mock-saved-object-id',
       connectorId: '123',
       tokenType: 'access_token',
       token: 'testtokenvalue',
@@ -119,7 +120,7 @@ describe('get()', () => {
     expect(result).toEqual({
       hasErrors: false,
       connectorToken: {
-        id: '1',
+        id: 'shared:1',
         connectorId: '123',
         tokenType: 'access_token',
         token: 'testtokenvalue',
@@ -154,7 +155,7 @@ describe('get()', () => {
     });
 
     expect(logger.error.mock.calls[0]).toMatchObject([
-      `Failed to fetch connector_token for connectorId "123" and tokenType: "access_token". Error: Fail`,
+      `Failed to fetch connector_token for connectorId "123", tokenType: "access_token". Error: Fail`,
     ]);
     expect(result).toEqual({ connectorToken: null, hasErrors: true });
   });
@@ -188,7 +189,7 @@ describe('get()', () => {
     });
 
     expect(logger.error.mock.calls[0]).toMatchObject([
-      `Failed to decrypt connector_token for connectorId "123" and tokenType: "access_token". Error: Fail`,
+      `Failed to decrypt connector_token for connectorId "123", tokenType: "access_token". Error: Fail`,
     ]);
     expect(result).toEqual({ connectorToken: null, hasErrors: true });
   });
@@ -229,7 +230,7 @@ describe('get()', () => {
     });
 
     expect(logger.error.mock.calls[0]).toMatchObject([
-      `Failed to get connector_token for connectorId "123" and tokenType: "access_token". Error: expiresAt is not a valid Date "yo"`,
+      `Failed to get connector_token for connectorId "123", tokenType: "access_token". Error: expiresAt is not a valid Date "yo"`,
     ]);
     expect(result).toEqual({ connectorToken: null, hasErrors: true });
   });
@@ -271,6 +272,7 @@ describe('update()', () => {
       expiresAtMillis: expiresAt,
     });
     expect(result).toEqual({
+      id: '1',
       connectorId: '123',
       tokenType: 'access_token',
       token: 'testtokenvalue',
@@ -314,7 +316,7 @@ describe('update()', () => {
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"There is a conflict."`);
     expect(logger.error.mock.calls[0]).toMatchObject([
-      'Failed to update connector_token for id "1" and tokenType: "access_token". Error: There is a conflict.',
+      'Failed to update connector_token for id "1" with connectorId "123", tokenType: "access_token". Error: There is a conflict.',
     ]);
   });
 
@@ -343,7 +345,7 @@ describe('update()', () => {
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"There is a conflict."`);
     expect(logger.error.mock.calls[0]).toMatchObject([
-      'Failed to update connector_token for id "1" and tokenType: "access_token". Error: There is a conflict.',
+      'Failed to update connector_token for id "1" with connectorId "123", tokenType: "access_token". Error: There is a conflict.',
     ]);
   });
 

@@ -9,7 +9,7 @@ import startCase from 'lodash/startCase';
 import pLimit from 'p-limit';
 import type { Logger } from '@kbn/core/server';
 import type { ActionsConfigurationUtilities } from '../actions_config';
-import type { ConnectorTokenClientContract } from '../types';
+import type { ConnectorTokenClientContract, UserConnectorOAuthToken } from '../types';
 import { requestOAuthRefreshToken } from './request_oauth_refresh_token';
 
 // Per-connector locks to prevent concurrent token refreshes for the same connector
@@ -44,6 +44,8 @@ interface GetOAuthAuthorizationCodeAccessTokenOpts {
   };
   connectorTokenClient: ConnectorTokenClientContract;
   scope?: string;
+  authMode?: 'shared' | 'personal';
+  profileUid?: string;
 }
 
 /**
@@ -57,6 +59,8 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
   credentials,
   connectorTokenClient,
   scope,
+  authMode,
+  profileUid,
 }: GetOAuthAuthorizationCodeAccessTokenOpts): Promise<string | null> => {
   const { clientId, tokenUrl, additionalFields, useBasicAuth } = credentials.config;
   const { clientSecret } = credentials.secrets;
@@ -64,6 +68,16 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
   if (!clientId || !clientSecret) {
     logger.warn(`Missing required fields for requesting OAuth Authorization Code access token`);
     return null;
+  }
+
+  const effectiveAuthMode = authMode ?? 'shared';
+  const isPersonalMode = effectiveAuthMode === 'personal';
+
+  if (isPersonalMode) {
+    if (!profileUid) {
+      logger.error(`profileUid is required for personal auth mode on connectorId: ${connectorId}`);
+      return null;
+    }
   }
 
   // Default to true (OAuth 2.0 recommended practice)
@@ -74,10 +88,11 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
 
   return await lock(async () => {
     // Re-fetch token inside lock - another request may have already refreshed it
-    const { connectorToken, hasErrors } = await connectorTokenClient.get({
-      connectorId,
-      tokenType: 'access_token',
-    });
+    const tokenResult = isPersonalMode
+      ? await connectorTokenClient.getOAuthPersonalToken({ profileUid: profileUid!, connectorId })
+      : await connectorTokenClient.get({ connectorId, tokenType: 'access_token' });
+    const connectorToken = tokenResult.connectorToken;
+    const hasErrors = tokenResult.hasErrors;
 
     if (hasErrors) {
       logger.warn(`Errors fetching connector token for connectorId: ${connectorId}`);
@@ -99,11 +114,16 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
     if (expiresAt > now) {
       // Token still valid
       logger.debug(`Using stored access token for connectorId: ${connectorId}`);
-      return connectorToken.token;
+      return isPersonalMode
+        ? (connectorToken as UserConnectorOAuthToken).credentials.accessToken
+        : connectorToken.token;
     }
 
     // Access token expired - attempt refresh
-    if (!connectorToken.refreshToken) {
+    const refreshToken = isPersonalMode
+      ? (connectorToken as UserConnectorOAuthToken).credentials.refreshToken
+      : connectorToken.refreshToken;
+    if (!refreshToken) {
       logger.warn(
         `Access token expired and no refresh token available for connectorId: ${connectorId}. User must re-authorize.`
       );
@@ -111,10 +131,8 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
     }
 
     // Check if the refresh token is expired
-    if (
-      connectorToken.refreshTokenExpiresAt &&
-      Date.parse(connectorToken.refreshTokenExpiresAt) <= now
-    ) {
+    const refreshTokenExpiresAt = connectorToken.refreshTokenExpiresAt;
+    if (refreshTokenExpiresAt && Date.parse(refreshTokenExpiresAt) <= now) {
       logger.warn(`Refresh token expired for connectorId: ${connectorId}. User must re-authorize.`);
       return null;
     }
@@ -126,7 +144,7 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
         tokenUrl,
         logger,
         {
-          refreshToken: connectorToken.refreshToken,
+          refreshToken,
           clientId,
           clientSecret,
           scope,
@@ -142,14 +160,25 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
       const newAccessToken = `${normalizedTokenType} ${tokenResult.accessToken}`;
 
       // Update stored token
-      await connectorTokenClient.updateWithRefreshToken({
-        id: connectorToken.id!,
-        token: newAccessToken,
-        refreshToken: tokenResult.refreshToken || connectorToken.refreshToken,
-        expiresIn: tokenResult.expiresIn,
-        refreshTokenExpiresIn: tokenResult.refreshTokenExpiresIn,
-        tokenType: 'access_token',
-      });
+      if (isPersonalMode) {
+        await connectorTokenClient.updateWithRefreshToken({
+          id: connectorToken.id!,
+          token: newAccessToken,
+          refreshToken: tokenResult.refreshToken || refreshToken,
+          expiresIn: tokenResult.expiresIn,
+          refreshTokenExpiresIn: tokenResult.refreshTokenExpiresIn,
+          credentialType: 'oauth',
+        });
+      } else {
+        await connectorTokenClient.updateWithRefreshToken({
+          id: connectorToken.id!,
+          token: newAccessToken,
+          refreshToken: tokenResult.refreshToken || refreshToken,
+          expiresIn: tokenResult.expiresIn,
+          refreshTokenExpiresIn: tokenResult.refreshTokenExpiresIn,
+          tokenType: 'access_token',
+        });
+      }
 
       return newAccessToken;
     } catch (err) {

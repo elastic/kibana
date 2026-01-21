@@ -14,7 +14,7 @@ import type { ActionInfo } from './action_executor';
 import type { AuthTypeRegistry } from '../auth_types';
 import { getCustomAgents } from './get_custom_agents';
 import type { ActionsConfigurationUtilities } from '../actions_config';
-import type { ConnectorTokenClientContract } from '../types';
+import type { ConnectorTokenClientContract, UserConnectorOAuthToken } from '../types';
 import { getBeforeRedirectFn } from './before_redirect';
 import { getOAuthClientCredentialsAccessToken } from './get_oauth_client_credentials_access_token';
 import { getOAuthAuthorizationCodeAccessToken } from './get_oauth_authorization_code_access_token';
@@ -50,6 +50,8 @@ async function handleOAuth401Error({
   connectorId,
   secrets,
   connectorTokenClient,
+  authMode,
+  profileUid,
   logger,
   configurationUtilities,
   axiosInstance,
@@ -58,6 +60,8 @@ async function handleOAuth401Error({
   connectorId: string;
   secrets: OAuth2RefreshParams;
   connectorTokenClient: ConnectorTokenClientContract;
+  authMode?: 'shared' | 'personal';
+  profileUid?: string;
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
   axiosInstance: AxiosInstance;
@@ -70,13 +74,27 @@ async function handleOAuth401Error({
   error.config._retry = true;
   logger.debug(`Attempting token refresh for connectorId ${connectorId} after 401 error`);
 
+  const effectiveAuthMode = authMode ?? 'shared';
+  const isPersonalMode = effectiveAuthMode === 'personal';
+
+  if (isPersonalMode && !profileUid) {
+    logger.error('profileUid is required for personal auth mode token refresh');
+    return Promise.reject(error);
+  }
+
   try {
     // Fetch current token to get refresh token
-    const { connectorToken, hasErrors } = await connectorTokenClient.get({
-      connectorId,
-      tokenType: 'access_token',
-    });
-    if (hasErrors || !connectorToken?.refreshToken) {
+    const existingTokenResult = isPersonalMode
+      ? await connectorTokenClient.getOAuthPersonalToken({ profileUid: profileUid!, connectorId })
+      : await connectorTokenClient.get({ connectorId, tokenType: 'access_token' });
+    const connectorToken = existingTokenResult.connectorToken;
+    if (existingTokenResult.hasErrors || !connectorToken) {
+      throw new Error('No refresh token available');
+    }
+    const refreshToken = isPersonalMode
+      ? (connectorToken as UserConnectorOAuthToken).credentials.refreshToken
+      : connectorToken.refreshToken;
+    if (!refreshToken) {
       throw new Error('No refresh token available');
     }
 
@@ -90,7 +108,7 @@ async function handleOAuth401Error({
       tokenUrl,
       logger,
       {
-        refreshToken: connectorToken.refreshToken,
+        refreshToken,
         clientId,
         clientSecret,
         scope,
@@ -102,14 +120,25 @@ async function handleOAuth401Error({
     // Update stored token
     const normalizedTokenType = startCase(tokenResult.tokenType);
     const newAccessToken = `${normalizedTokenType} ${tokenResult.accessToken}`;
-    await connectorTokenClient.updateWithRefreshToken({
-      id: connectorToken.id!,
-      token: newAccessToken,
-      refreshToken: tokenResult.refreshToken || connectorToken.refreshToken,
-      expiresIn: tokenResult.expiresIn,
-      refreshTokenExpiresIn: tokenResult.refreshTokenExpiresIn,
-      tokenType: 'access_token',
-    });
+    if (isPersonalMode) {
+      await connectorTokenClient.updateWithRefreshToken({
+        id: connectorToken.id!,
+        token: newAccessToken,
+        refreshToken: tokenResult.refreshToken || refreshToken,
+        expiresIn: tokenResult.expiresIn,
+        refreshTokenExpiresIn: tokenResult.refreshTokenExpiresIn,
+        credentialType: 'oauth',
+      });
+    } else {
+      await connectorTokenClient.updateWithRefreshToken({
+        id: connectorToken.id!,
+        token: newAccessToken,
+        refreshToken: tokenResult.refreshToken || refreshToken,
+        expiresIn: tokenResult.expiresIn,
+        refreshTokenExpiresIn: tokenResult.refreshTokenExpiresIn,
+        tokenType: 'access_token',
+      });
+    }
 
     logger.debug(`Token refreshed successfully for connectorId ${connectorId}. Retrying request.`);
 
@@ -132,6 +161,8 @@ export interface GetAxiosInstanceWithAuthFnOpts {
   connectorId: string;
   connectorTokenClient?: ConnectorTokenClientContract;
   secrets: ValidatedSecrets;
+  authMode?: 'shared' | 'personal';
+  profileUid?: string;
 }
 export type GetAxiosInstanceWithAuthFn = (
   opts: GetAxiosInstanceWithAuthFnOpts
@@ -146,6 +177,8 @@ export const getAxiosInstanceWithAuth = ({
     connectorId,
     secrets,
     connectorTokenClient,
+    authMode,
+    profileUid,
   }: GetAxiosInstanceWithAuthFnOpts) => {
     let authTypeId: string | undefined;
     try {
@@ -208,6 +241,8 @@ export const getAxiosInstanceWithAuth = ({
                 connectorId,
                 secrets: secrets as OAuth2RefreshParams,
                 connectorTokenClient,
+                authMode,
+                profileUid,
                 logger,
                 configurationUtilities,
                 axiosInstance,
@@ -243,6 +278,8 @@ export const getAxiosInstanceWithAuth = ({
               },
               connectorTokenClient,
               scope: opts.scope,
+              authMode,
+              profileUid,
             });
           }
 

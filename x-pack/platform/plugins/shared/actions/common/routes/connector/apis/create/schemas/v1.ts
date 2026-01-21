@@ -29,4 +29,12 @@ export const createConnectorRequestBodySchema = schema.object({
   secrets: schema.recordOf(schema.string(), schema.any({ validate: validateEmptyStrings }), {
     defaultValue: {},
   }),
+  auth_mode: schema.maybe(
+    schema.oneOf([schema.literal('shared'), schema.literal('personal')], {
+      meta: {
+        description:
+          'The authentication mode for the connector. "shared" uses global credentials, "personal" requires per-user OAuth authorization.',
+      },
+    })
+  ),
 });

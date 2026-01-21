@@ -320,6 +320,7 @@ export class WorkflowsManagementApi {
     const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(
       parsedYaml.data as unknown as WorkflowYaml
     );
+
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const executeResponse = await workflowsExecutionEngine.executeWorkflowStep(
       {
