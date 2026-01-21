@@ -14,7 +14,7 @@
 import type { LogDocument } from '@kbn/synthtrace-client';
 import { infra, log } from '@kbn/synthtrace-client';
 import { fakerEN as faker } from '@faker-js/faker';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 import type { LogMessageGenerator } from './helpers/unstructured_logs';
