@@ -181,7 +181,7 @@ function getExpressionForLayer(
     const esqlLayer =
       canUseESQL &&
       getESQLForLayer(esAggEntries, layer, indexPattern, uiSettings, dateRange, nowInstant);
-    const isFormBasedEsqlMode = canUseESQL && esqlLayer && isEsqlQuerySuccess(esqlLayer);
+    const isFormBasedEsqlMode = canUseESQL && isEsqlQuerySuccess(esqlLayer);
 
     if (!isFormBasedEsqlMode) {
       esAggEntries.forEach(([colId, col], index) => {
