@@ -123,6 +123,9 @@ export default function ApiTest({ getService }: ObsFtrProviderContext) {
               'span.destination.service.resource': 'elasticsearch',
               'span.type': 'db',
               'span.subtype': 'elasticsearch',
+              errorRate: 0,
+              latencyMs: 1000000,
+              throughputPerMin: 0.007,
             },
           ]);
         });
@@ -183,6 +186,9 @@ export default function ApiTest({ getService }: ObsFtrProviderContext) {
               'span.destination.service.resource': 'elasticsearch',
               'span.type': 'db',
               'span.subtype': 'elasticsearch',
+              errorRate: 0,
+              latencyMs: 1000000,
+              throughputPerMin: 0.007, // Rounded to 3 decimals
             },
           ]);
         });
