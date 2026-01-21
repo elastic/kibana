@@ -72,9 +72,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
 
       if (selectedSystemsParam) {
         const selectedSystemNames = selectedSystemsParam.split(',').filter((name) => name.trim());
-        setSelectedSystems(
-          systems.filter((system) => selectedSystemNames.includes(system.name))
-        );
+        setSelectedSystems(systems.filter((system) => selectedSystemNames.includes(system.name)));
       }
 
       // Clean up the URL parameters after opening the flyout

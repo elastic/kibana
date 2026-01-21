@@ -103,12 +103,9 @@ export function SystemIdentificationControl({
           );
         },
         'data-test-subj': 'system_identification_identify_systems_button',
-        children: i18n.translate(
-          'xpack.streams.streamDetailView.systemIdentificationButtonLabel',
-          {
-            defaultMessage: 'Identify systems',
-          }
-        ),
+        children: i18n.translate('xpack.streams.streamDetailView.systemIdentificationButtonLabel', {
+          defaultMessage: 'Identify systems',
+        }),
       }}
     />
   );

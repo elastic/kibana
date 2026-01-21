@@ -95,12 +95,9 @@ export const StreamSystemsFlyout = ({
               isDisabled={isUpdating}
               onClick={closeFlyout}
               flush="left"
-              aria-label={i18n.translate(
-                'xpack.streams.streamSystemsFlyout.closeButtonAriaLabel',
-                {
-                  defaultMessage: 'Close flyout',
-                }
-              )}
+              aria-label={i18n.translate('xpack.streams.streamSystemsFlyout.closeButtonAriaLabel', {
+                defaultMessage: 'Close flyout',
+              })}
               data-test-subj="system_identification_close_flyout_button"
             >
               <FormattedMessage

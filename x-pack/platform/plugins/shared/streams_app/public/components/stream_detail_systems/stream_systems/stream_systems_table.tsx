@@ -81,12 +81,9 @@ export function StreamSystemsTable({
       width: '5%',
       actions: [
         {
-          name: i18n.translate(
-            'xpack.streams.streamSystemsTable.columns.actions.cloneActionName',
-            {
-              defaultMessage: 'Clone',
-            }
-          ),
+          name: i18n.translate('xpack.streams.streamSystemsTable.columns.actions.cloneActionName', {
+            defaultMessage: 'Clone',
+          }),
           description: i18n.translate(
             'xpack.streams.streamSystemsTable.columns.actions.cloneActionDescription',
             { defaultMessage: 'Clone this system' }
@@ -128,9 +125,7 @@ export function StreamSystemsTable({
           type: 'icon',
           icon: 'trash',
           onClick: (system: System) => {
-            setSystems(
-              systems.filter((selectedSystem) => selectedSystem.name !== system.name)
-            );
+            setSystems(systems.filter((selectedSystem) => selectedSystem.name !== system.name));
             setSelectedSystemNames(
               new Set(
                 Array.from(selectedSystemNames).filter(
