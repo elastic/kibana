@@ -28,8 +28,7 @@ class ScopedCookieSessionStorage<T extends object> implements SessionStorage<T> 
     private readonly log: Logger,
     private readonly server: Server,
     private readonly request: Request,
-    private readonly cookieOptions: SessionStorageCookieOptions<T>,
-    private readonly basePath: string | undefined
+    private readonly cookieOptions: SessionStorageCookieOptions<T>
   ) {}
 
   private getResponseToolkit(): ResponseToolkit {
@@ -98,17 +97,8 @@ class ScopedCookieSessionStorage<T extends object> implements SessionStorage<T> 
     }
   }
 
-  public clear(options?: SessionStorageSetOptions) {
-    if (options) {
-      // Use custom cookie options to clear
-      const h = this.getResponseToolkit();
-      const path = this.basePath === undefined ? '/' : this.basePath;
-
-      h.unstate(this.cookieOptions.name, { path });
-    } else {
-      // Use default cookie auth
-      return this.request.cookieAuth.clear();
-    }
+  public clear() {
+    return this.request.cookieAuth.clear();
   }
 }
 
@@ -176,8 +166,7 @@ export async function createCookieSessionStorageFactory<T extends object>(
         log,
         server,
         ensureRawRequest(request),
-        cookieOptions,
-        basePath
+        cookieOptions
       );
     },
   };

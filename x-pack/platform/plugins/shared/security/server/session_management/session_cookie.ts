@@ -141,10 +141,9 @@ export class SessionCookie {
   /**
    * Clears session value for the specified request.
    * @param request Request instance to clear session value for.
-   * @param options Optional overrides for cookie attributes (isSecure, sameSite).
    */
-  async clear(request: KibanaRequest, options?: SessionStorageSetOptions) {
-    (await this.cookieSessionValueStorage).asScoped(request).clear(options);
+  async clear(request: KibanaRequest) {
+    (await this.cookieSessionValueStorage).asScoped(request).clear();
   }
 
   /**
