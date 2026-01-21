@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-export * from './utils';
-export {
-  getArtifactListPageUrlPath,
-  extractArtifactListPageUrlSearchParams,
-} from './artifact_list_page_routing';
-
-export { getScriptsLibraryPath, getScriptsDetailPath } from './scripts_list_page_routing';
+export { ScriptsLibrary } from './components/scripts_library';
