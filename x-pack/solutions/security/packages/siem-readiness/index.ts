@@ -10,3 +10,4 @@ export * from './src/constants';
 export * from './src/use_siem_readiness_api';
 export * from './src/use_get_detection_rules_by_integration';
 export * from './src/use_integration_display_names';
+export * from './src/use_indices_doc_counts';

@@ -15,7 +15,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useSiemReadinessApi } from '@kbn/siem-readiness';
+import { useSiemReadinessApi, useIndicesDocCounts } from '@kbn/siem-readiness';
 import type { SiemReadinessPackageInfo, RelatedIntegrationRuleResponse } from '@kbn/siem-readiness';
 interface DetectionRule extends RelatedIntegrationRuleResponse {
   rule_id?: string;
@@ -23,6 +23,7 @@ interface DetectionRule extends RelatedIntegrationRuleResponse {
   name?: string;
   enabled?: boolean;
   threat?: ThreatElement[];
+  index?: string | string[];
 }
 
 interface ThreatElement {
@@ -53,7 +54,7 @@ interface TacticNameCount {
 
 interface MissingIntegrationsData {
   missingIntegrations: string[];
-  ruleIds: string[];
+  ruleIds: Array<{ id: string; indices: string[]; hasDocuments: boolean }>;
 }
 
 interface TreemapDataItem {
@@ -63,6 +64,7 @@ interface TreemapDataItem {
   missingIntegrations: string[];
   missingIntegrationCount: number;
   rulesWithMissingIntegrations: number;
+  rulesWithoutDocuments: number;
   color: string;
   id: string;
   row: number;
@@ -85,6 +87,24 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
   const installedIntegrationNames = useMemo(() => {
     return getInstalledIntegrationsData?.map((item) => item.name) || [];
   }, [getInstalledIntegrationsData]);
+
+  // Collect all unique indices from all enabled rules
+  const allRuleIndices = useMemo(() => {
+    if (!getDetectionRules.data?.data) return [];
+
+    const indices = new Set<string>();
+    getDetectionRules.data.data.forEach((rule: DetectionRule) => {
+      if (rule.enabled && rule.index) {
+        const ruleIndexArray = Array.isArray(rule.index) ? rule.index : [rule.index];
+        ruleIndexArray.forEach((index) => indices.add(index));
+      }
+    });
+
+    return Array.from(indices);
+  }, [getDetectionRules.data]);
+
+  // Get document counts for all indices
+  const { data: docCounts } = useIndicesDocCounts(allRuleIndices);
 
   const threatFields = useMemo((): ThreatElement[] => {
     if (!getDetectionRules.data?.data) return [];
@@ -178,10 +198,16 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
 
   // Calculate missing integrations by MITRE tactic using rule data
   const missingIntegrationsByTactic = useMemo((): Map<string, MissingIntegrationsData> => {
-    const tacticMap = new Map<string, { missingIntegrations: Set<string>; ruleIds: string[] }>();
+    const tacticMap = new Map<
+      string,
+      { missingIntegrations: Set<string>; ruleMap: Map<string, Set<string>> }
+    >();
 
     staticTactics.forEach((tacticName) => {
-      tacticMap.set(tacticName, { missingIntegrations: new Set<string>(), ruleIds: [] });
+      tacticMap.set(tacticName, {
+        missingIntegrations: new Set<string>(),
+        ruleMap: new Map<string, Set<string>>(),
+      });
     });
 
     // Process each rule to find missing integrations per tactic
@@ -191,6 +217,11 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
       const ruleId = rule.rule_id || rule.id || '';
       const relatedIntegrations = rule.related_integrations || [];
       const ruleThreat = rule.threat || [];
+      const ruleIndexArray = Array.isArray(rule.index)
+        ? rule.index
+        : rule.index
+        ? [rule.index]
+        : [];
 
       // Get missing integrations for this rule
       const missingIntegrations = relatedIntegrations
@@ -201,45 +232,69 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
         .map((integration) => integration.package)
         .filter((name): name is string => typeof name === 'string');
 
-      // If this rule has missing integrations, map them to its MITRE tactics
-      if (missingIntegrations.length > 0) {
-        ruleThreat.forEach((threatElement) => {
-          if (threatElement.tactic && threatElement.tactic.name) {
-            const tacticName = threatElement.tactic.name.trim();
+      // Map rule data to its MITRE tactics
+      ruleThreat.forEach((threatElement) => {
+        if (threatElement.tactic && threatElement.tactic.name) {
+          const tacticName = threatElement.tactic.name.trim();
 
-            // Find matching static tactic
-            const matchingStaticTactic = staticTactics.find(
-              (staticTactic) => staticTactic.toLowerCase() === tacticName.toLowerCase()
-            );
+          // Find matching static tactic
+          const matchingStaticTactic = staticTactics.find(
+            (staticTactic) => staticTactic.toLowerCase() === tacticName.toLowerCase()
+          );
 
-            if (matchingStaticTactic) {
-              const tacticData = tacticMap.get(matchingStaticTactic);
-              if (tacticData) {
+          if (matchingStaticTactic) {
+            const tacticData = tacticMap.get(matchingStaticTactic);
+            if (tacticData) {
+              // Add missing integrations if any
+              if (missingIntegrations.length > 0) {
                 missingIntegrations.forEach((integration) => {
                   tacticData.missingIntegrations.add(integration);
                 });
+              }
 
-                if (!tacticData.ruleIds.includes(ruleId)) {
-                  tacticData.ruleIds.push(ruleId);
-                }
+              // Add rule with its indices to tactic
+              if (!tacticData.ruleMap.has(ruleId)) {
+                tacticData.ruleMap.set(ruleId, new Set<string>());
+              }
+              const ruleIndicesSet = tacticData.ruleMap.get(ruleId);
+              if (ruleIndicesSet) {
+                ruleIndexArray.forEach((index) => {
+                  ruleIndicesSet.add(index);
+                });
               }
             }
           }
-        });
-      }
+        }
+      });
     });
 
     const result = new Map<string, MissingIntegrationsData>();
     tacticMap.forEach((value, key) => {
+      const ruleIds = Array.from(value.ruleMap.entries()).map(([id, indicesSet]) => {
+        const ruleIndices = Array.from(indicesSet);
+
+        // Check if any of the rule's indices have documents
+        const hasDocuments = ruleIndices.some((index) => {
+          const docCount = docCounts?.find((dc) => dc.index === index);
+          return docCount && docCount.exists && docCount.docCount > 0;
+        });
+
+        return {
+          id,
+          indices: ruleIndices,
+          hasDocuments,
+        };
+      });
+
       result.set(key, {
         missingIntegrations: Array.from(value.missingIntegrations),
-        ruleIds: value.ruleIds,
+        ruleIds,
       });
     });
 
     return result;
-  }, [staticTactics, getDetectionRules.data, installedIntegrationNames]);
-
+  }, [staticTactics, getDetectionRules.data, installedIntegrationNames, docCounts]);
+  // console.log(missingIntegrationsByTactic);
   const treemapData = useMemo((): TreemapDataItem[] => {
     return staticTactics.map((tacticName, index) => {
       const tacticData = tacticNameCounts.find((t) => t.name === tacticName);
@@ -249,8 +304,11 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
         ruleIds: [],
       };
 
+      // Count rules without documents
+      const rulesWithoutDocuments = missingData.ruleIds.filter((rule) => !rule.hasDocuments).length;
+
       let color;
-      if (missingData.missingIntegrations.length > 0) {
+      if (missingData.missingIntegrations.length > 0 || rulesWithoutDocuments > 0) {
         color = euiTheme.colors.vis.euiColorVis7;
       } else if (count > 0) {
         color = euiTheme.colors.vis.euiColorVis1;
@@ -265,6 +323,7 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
         missingIntegrations: missingData.missingIntegrations,
         missingIntegrationCount: missingData.missingIntegrations.length,
         rulesWithMissingIntegrations: missingData.ruleIds.length,
+        rulesWithoutDocuments,
         color,
         id: `tactic-${index}`,
         row: Math.floor(index / 7),
@@ -379,7 +438,9 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
                       fontSize: euiTheme.size.m,
                     }}
                   >
-                    {`${item.count} rules`}
+                    {item.count > 0
+                      ? `${item.rulesWithoutDocuments}/${item.count} Rules missing data`
+                      : `${item.count} rules`}
                   </div>
                 </div>
               </div>
