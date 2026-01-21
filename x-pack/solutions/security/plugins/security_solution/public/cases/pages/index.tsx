@@ -30,6 +30,7 @@ import { SecuritySolutionPageWrapper } from '../../common/components/page_wrappe
 import { getEndpointDetailsPath } from '../../management/common/routing';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useInsertTimeline } from '../components/use_insert_timeline';
+import { NoPrivileges } from '../../common/components/no_privileges';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import * as timelineMarkdownPlugin from '../../common/components/markdown_editor/plugins/timeline';
@@ -99,7 +100,12 @@ const CaseContainerComponent: React.FC = () => {
   const renderAlertsTable = useCallback(
     (props: CaseViewAlertsTableProps) => {
       if (!hasAlertsRead) {
-        return null;
+        return (
+          <NoPrivileges
+            pageName="alerts"
+            docLinkSelector={(docLinks) => docLinks.siem.privileges}
+          />
+        );
       }
       //  For EASE we need to show the Alert summary page alerts table.
       if (EASE) {
