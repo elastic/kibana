@@ -12,7 +12,7 @@ import type { ComponentType } from 'react';
 import type { z } from '@kbn/zod/v4';
 
 /** Production sidebar app IDs */
-export const VALID_SIDEBAR_APP_IDS = [] as const;
+export const VALID_SIDEBAR_APP_IDS = ['agentBuilder'] as const;
 
 /** Prefix for example/test app IDs */
 export const EXAMPLE_APP_ID_PREFIX = 'sidebarExample';
