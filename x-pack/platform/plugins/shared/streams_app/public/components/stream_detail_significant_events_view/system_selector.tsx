@@ -15,27 +15,27 @@ export const ALL_DATA_OPTION = {
   value: { name: 'All data', type: 'all_data' as const },
 };
 
-export interface FeatureSelectorProps {
-  features: System[];
-  selectedFeatures: System[];
-  onFeaturesChange: (features: System[]) => void;
+export interface SystemSelectorProps {
+  systems: System[];
+  selectedSystems: System[];
+  onSystemsChange: (systems: System[]) => void;
 }
 
-export function FeaturesSelector({
+export function SystemsSelector({
   isDisabled,
-  features,
-  selectedFeatures,
-  onFeaturesChange,
-}: FeatureSelectorProps & { isDisabled: boolean }) {
+  systems,
+  selectedSystems,
+  onSystemsChange,
+}: SystemSelectorProps & { isDisabled: boolean }) {
   const { euiTheme } = useEuiTheme();
-  const options = features.map((feature) => ({ label: feature.name, value: feature }));
+  const options = systems.map((system) => ({ label: system.name, value: system }));
 
   return (
     <EuiFormRow
       label={
         <EuiText css={{ fontWeight: euiTheme.font.weight.semiBold }} size="xs">
-          {i18n.translate('xpack.streams.significantEvents.featuresSelector.featuresLabel', {
-            defaultMessage: 'Select features',
+          {i18n.translate('xpack.streams.significantEvents.systemsSelector.systemsLabel', {
+            defaultMessage: 'Select systems',
           })}
         </EuiText>
       }
@@ -45,19 +45,19 @@ export function FeaturesSelector({
         <EuiSpacer size="s" />
         <EuiComboBox
           placeholder={i18n.translate(
-            'xpack.streams.significantEvents.featuresSelector.featuresPlaceholder',
+            'xpack.streams.significantEvents.systemsSelector.systemsPlaceholder',
             {
-              defaultMessage: 'Select features',
+              defaultMessage: 'Select systems',
             }
           )}
           options={options}
-          isDisabled={features.length === 0 || isDisabled}
-          selectedOptions={selectedFeatures.map((feature) => ({
-            label: feature.name,
-            value: feature,
+          isDisabled={systems.length === 0 || isDisabled}
+          selectedOptions={selectedSystems.map((system) => ({
+            label: system.name,
+            value: system,
           }))}
           onChange={(selected) => {
-            onFeaturesChange(selected.map((option) => option.value as System));
+            onSystemsChange(selected.map((option) => option.value as System));
           }}
         />
       </>

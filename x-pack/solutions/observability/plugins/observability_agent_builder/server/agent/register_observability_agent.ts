@@ -15,8 +15,7 @@ import { OBSERVABILITY_AGENT_TOOL_IDS } from '../tools/register_tools';
 import { OBSERVABILITY_GET_INDEX_INFO_TOOL_ID } from '../tools';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 import { getEntityLinkingInstructions } from './instructions';
-
-export const OBSERVABILITY_AGENT_ID = 'observability.agent';
+import { OBSERVABILITY_AGENT_ID } from '../../common/constants';
 
 export async function registerObservabilityAgent({
   core,

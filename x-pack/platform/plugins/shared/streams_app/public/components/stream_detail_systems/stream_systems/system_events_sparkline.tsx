@@ -13,13 +13,13 @@ import { getLast24HoursTimeRange } from '../../../util/time_range';
 
 const BUCKET_SIZE_MINUTES = 30;
 
-export const FeatureEventsSparklineLast24hrs = ({
-  feature,
+export const SystemEventsSparklineLast24hrs = ({
+  system,
   definition,
   hideAxis = true,
   height = 100,
 }: {
-  feature: System;
+  system: System;
   definition: Streams.all.Definition;
   hideAxis?: boolean;
   height?: number;
@@ -27,15 +27,15 @@ export const FeatureEventsSparklineLast24hrs = ({
   const query = useMemo(
     () => ({
       feature: {
-        name: feature.name,
-        filter: feature.filter,
-        type: feature.type,
+        name: system.name,
+        filter: system.filter,
+        type: system.type,
       },
       kql: { query: '' },
-      id: 'feature-events-sparkline',
-      title: feature.name,
+      id: 'system-events-sparkline',
+      title: system.name,
     }),
-    [feature.name, feature.filter, feature.type]
+    [system.name, system.filter, system.type]
   );
 
   const { noOfBuckets, timeRange }: { noOfBuckets: number; timeRange: AbsoluteTimeRange } =
