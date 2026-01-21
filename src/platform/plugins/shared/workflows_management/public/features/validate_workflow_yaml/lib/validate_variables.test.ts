@@ -253,7 +253,8 @@ describe('validateVariables', () => {
     expect(mockGetContextSchemaForPath).toHaveBeenCalledWith(
       mockWorkflowDefinition,
       mockWorkflowGraph,
-      ['steps', 0, 'params', 'value']
+      ['steps', 0, 'params', 'value'],
+      undefined
     );
     expect(mockValidateVariable).toHaveBeenCalledWith(variable, mockContext);
   });
