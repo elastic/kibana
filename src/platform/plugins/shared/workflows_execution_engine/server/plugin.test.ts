@@ -13,11 +13,7 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
-import {
-  ExecutionStatus,
-  NonTerminalExecutionStatuses,
-  TerminalExecutionStatuses,
-} from '@kbn/workflows';
+import { ExecutionStatus, NonTerminalExecutionStatuses } from '@kbn/workflows';
 import { checkAndSkipIfExistingScheduledExecution } from './execution_functions';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../common';

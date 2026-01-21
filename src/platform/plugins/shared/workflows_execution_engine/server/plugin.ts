@@ -371,7 +371,7 @@ export class WorkflowsExecutionEnginePlugin
                     }
                   : {}),
               };
-              
+
               // Use refresh: 'wait_for' to ensure the execution is immediately searchable
               // for deduplication checks by subsequent scheduled tasks
               await workflowExecutionRepository.createWorkflowExecution(workflowExecution, {
