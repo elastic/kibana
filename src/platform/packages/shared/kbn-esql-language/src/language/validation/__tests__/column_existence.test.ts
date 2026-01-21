@@ -21,4 +21,26 @@ describe('column existence checks', () => {
     const { expectErrors } = await setup();
     await expectErrors('FROM index | FORK (DROP keywordField) (KEEP keywordField)', []);
   });
+
+  it('returns a warning instead of an error when unmapped_fields is LOAD or NULLIFY', async () => {
+    const { expectErrors } = await setup();
+    await expectErrors(
+      'SET unmapped_fields = "LOAD"; FROM index | WHERE unmapped == ""',
+      [],
+      [
+        `"unmapped" column isn't mapped in any searched indices.\nIf you are not intentionally referencing an unmapped field,\ncheck that the field exists or that it is spelled correctly in your query.`,
+      ]
+    );
+  });
+
+  it('only returns one warning for the same unmapped column', async () => {
+    const { expectErrors } = await setup();
+    await expectErrors(
+      'SET unmapped_fields = "LOAD"; FROM index | WHERE unmapped == "" | KEEP unmapped',
+      [],
+      [
+        `"unmapped" column isn't mapped in any searched indices.\nIf you are not intentionally referencing an unmapped field,\ncheck that the field exists or that it is spelled correctly in your query.`,
+      ]
+    );
+  });
 });
