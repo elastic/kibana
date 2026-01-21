@@ -174,6 +174,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               id: 'slow-requests',
               title: 'Slow Requests',
               kql: { query: 'attributes.response_time_ms > 100' },
+              esql: { where: 'KQL("attributes.response_time_ms > 100")' },
             },
           ],
         };

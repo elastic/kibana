@@ -78,7 +78,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await putStream(apiClient, STREAM_NAME, {
           stream,
           ...emptyAssets,
-          queries: [{ id: 'aaa', title: 'OOM Error', kql: { query: "message: 'OOM Error'" } }],
+          queries: [
+            {
+              id: 'aaa',
+              title: 'OOM Error',
+              kql: { query: "message: 'OOM Error'" },
+              esql: { where: 'KQL("message: \'OOM Error\'")' },
+            },
+          ],
         });
         expect(response).to.have.property('acknowledged', true);
 
@@ -88,6 +95,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           id: 'aaa',
           title: 'OOM Error',
           kql: { query: "message: 'OOM Error'" },
+          esql: { where: 'KQL("message: \'OOM Error\'")' },
         });
       });
 
@@ -117,6 +125,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               id: 'logs.queries-test.query1',
               title: 'should not be deleted',
               kql: { query: 'message:"irrelevant"' },
+              esql: { where: 'KQL("message:\\"irrelevant\\"")' },
             },
           ],
         });
@@ -156,6 +165,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               id: 'logs.queries-test.child.query1',
               title: 'must be deleted',
               kql: { query: 'message:"irrelevant"' },
+              esql: { where: 'KQL("message:\\"irrelevant\\"")' },
             },
           ],
         });
@@ -169,11 +179,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               id: 'logs.queries-test.child.first.query1',
               title: 'must be deleted',
               kql: { query: 'message:"irrelevant"' },
+              esql: { where: 'KQL("message:\\"irrelevant\\"")' },
             },
             {
               id: 'logs.queries-test.child.first.query2',
               title: 'must be deleted',
               kql: { query: 'message:"irrelevant"' },
+              esql: { where: 'KQL("message:\\"irrelevant\\"")' },
             },
           ],
         });
@@ -243,7 +255,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         await putStream(apiClient, indexName, {
           ...classicPutBody,
-          queries: [{ id: 'aaa', title: 'OOM Error', kql: { query: "message: 'OOM Error'" } }],
+          queries: [
+            {
+              id: 'aaa',
+              title: 'OOM Error',
+              kql: { query: "message: 'OOM Error'" },
+              esql: { where: 'KQL("message: \'OOM Error\'")' },
+            },
+          ],
         });
 
         streamDefinition = await getStream(apiClient, indexName);
@@ -253,6 +272,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           id: 'aaa',
           title: 'OOM Error',
           kql: { query: "message: 'OOM Error'" },
+          esql: { where: 'KQL("message: \'OOM Error\'")' },
         });
 
         await clean();
