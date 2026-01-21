@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiHeader } from '@elastic/eui';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { render, screen } from '@testing-library/react';
@@ -40,14 +39,9 @@ describe('Header', () => {
   };
 
   it('renders', async () => {
-    render(
-      <ProjectHeader {...mockProps}>
-        <EuiHeader>Hello, world!</EuiHeader>
-      </ProjectHeader>
-    );
+    render(<ProjectHeader {...mockProps} />);
 
-    expect(await screen.findByText('Hello, world!')).toBeVisible();
-    expect(screen.queryByTestId(/customLogo/)).toBeNull();
+    expect(screen.queryByTestId(/nav-header-logo/)).toBeVisible();
   });
 
   it('renders custom branding logo', async () => {
