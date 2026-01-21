@@ -780,9 +780,9 @@ export const mixedChartAttributes: LensAttributes = {
           splitAccessors: ['layer2_terms'],
         },
         {
-          accessorsx: ['layer3_metric1'],
+          accessors: ['layer3_metric1'],
           isHistogram: 'jello',
-          layerIdsss: 'layer3',
+          layerId: 'layer3',
           layerType: 'xxx',
           seriesType: 'area',
           xAccessor: 123,
