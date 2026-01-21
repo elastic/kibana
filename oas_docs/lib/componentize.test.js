@@ -395,8 +395,12 @@ describe('componentizeObjectSchemas', () => {
       expect(componentNames.length).toBe(2);
 
       // Names should include operation ID, Response, status code, and index
-      expect(componentNames[0]).toMatch(/getActionsConnector.*Response.*200.*1/);
-      expect(componentNames[1]).toMatch(/getActionsConnector.*Response.*200.*2/);
+      expect(componentNames[0]).toMatchInlineSnapshot(
+        `"ApiActionsConnector.get.responses.200.content.applicationJson.schema_Get_Response_200_1"`
+      );
+      expect(componentNames[1]).toMatchInlineSnapshot(
+        `"ApiActionsConnector.get.responses.200.content.applicationJson.schema_Get_Response_200_2"`
+      );
     });
 
     it('should handle name collisions', async () => {

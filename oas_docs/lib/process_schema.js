@@ -66,7 +66,7 @@ const createProcessSchema = (components, nameGenerator, stats, log) => {
           log.debug(`Extracted ${name}`);
 
           // Recursively process the extracted item until all compositions are extracted
-          processSchema(item, context, depth + 1);
+          processSchema(item, { ...context, depth: depth + 1 }, depth + 1);
 
           // Return reference
           return { $ref: `#/components/schemas/${name}` };
@@ -77,41 +77,109 @@ const createProcessSchema = (components, nameGenerator, stats, log) => {
     // Recurse into properties
     if (schema.properties && typeof schema.properties === 'object') {
       Object.entries(schema.properties).forEach(([propName, propSchema]) => {
-        processSchema(
-          propSchema,
-          {
-            ...context,
-            propertyPath: [...(context.propertyPath || []), propName],
-            path: `${context.path || ''}.properties.${propName}`,
-          },
-          depth + 1
-        );
+        const propContext = {
+          ...context,
+          propertyPath: [...(context.propertyPath || []), propName],
+          path: `${context.path || ''}.properties.${propName}`,
+        };
+        // Extract nested objects as components
+        // Skip empty objects
+        // Properties are already nested by definition, so always extract them
+        if (
+          propSchema &&
+          typeof propSchema === 'object' &&
+          propSchema.type === 'object' &&
+          propSchema.properties &&
+          Object.keys(propSchema.properties).length > 0
+        ) {
+          const name = nameGenerator(propContext, 'property');
+          // Check if name exists
+          if (components[name]) {
+            log.warn(`Component name already exists: ${name} - appending counter`);
+          }
+          // Store the object schema in components
+          components[name] = { ...propSchema };
+          stats.schemasExtracted++;
+          log.debug(`Extracted property object ${name}`);
+          // Recursively process the extracted object
+          processSchema(propSchema, propContext, depth + 1);
+          // Replace the inline object with a reference
+          schema.properties[propName] = { $ref: `#/components/schemas/${name}` };
+        } else {
+          // Not an object to extract, just recurse
+          processSchema(propSchema, propContext, depth + 1);
+        }
       });
     }
 
     // Recurse into array items
     if (schema.items) {
-      processSchema(
-        schema.items,
-        {
-          ...context,
-          inArray: true,
-          path: `${context.path || ''}.items`,
-        },
-        depth + 1
-      );
+      const itemContext = {
+        ...context,
+        inArray: true,
+        path: `${context.path || ''}.items`,
+      };
+      // Extract nested objects as components
+      // Skip empty objects (objects without properties)
+      // Array items are already nested by definition, so always extract them
+      if (
+        schema.items &&
+        typeof schema.items === 'object' &&
+        schema.items.type === 'object' &&
+        schema.items.properties &&
+        Object.keys(schema.items.properties).length > 0
+      ) {
+        const name = nameGenerator(itemContext, 'arrayItem');
+        // Check if name exists
+        if (components[name]) {
+          log.warn(`Component name already exists: ${name} - appending counter`);
+        }
+        // Store object schema in components
+        components[name] = { ...schema.items };
+        stats.schemasExtracted++;
+        log.debug(`Extracted array item object ${name}`);
+        // process extracted object
+        processSchema(schema.items, itemContext, depth + 1);
+        // Replace inline object with reference
+        schema.items = { $ref: `#/components/schemas/${name}` };
+      } else {
+        // Not an object to extract, just recurse
+        processSchema(schema.items, itemContext, depth + 1);
+      }
     }
 
-    // Recurse into additionalProperties if it's a schema
+    // Recurse into additionalProperties if it's a schema (additionalProperties: <boolean> | {})
     if (schema.additionalProperties && typeof schema.additionalProperties === 'object') {
-      processSchema(
-        schema.additionalProperties,
-        {
-          ...context,
-          path: `${context.path || ''}.additionalProperties`,
-        },
-        depth + 1
-      );
+      const addlPropContext = {
+        ...context,
+        inAdditionalProperties: true,
+        path: `${context.path || ''}.additionalProperties`,
+      };
+      // Extract nested objects as components
+      // Skip empty objects (objects without properties)
+      // AdditionalProperties are already nested by definition, so always extract them
+      if (
+        schema.additionalProperties.type === 'object' &&
+        schema.additionalProperties.properties &&
+        Object.keys(schema.additionalProperties.properties).length > 0
+      ) {
+        const name = nameGenerator(addlPropContext, 'additionalProperty');
+        // Check if name exists
+        if (components[name]) {
+          log.warn(`Component name already exists: ${name} - appending counter`);
+        }
+        // Store the object schema in components
+        components[name] = { ...schema.additionalProperties };
+        stats.schemasExtracted++;
+        log.debug(`Extracted additionalProperties object ${name}`);
+        // Recursively process the extracted object
+        processSchema(schema.additionalProperties, addlPropContext, depth + 1);
+        // Replace the inline object with a reference
+        schema.additionalProperties = { $ref: `#/components/schemas/${name}` };
+      } else {
+        // Not an object to extract, just recurse
+        processSchema(schema.additionalProperties, addlPropContext, depth + 1);
+      }
     }
   }
   return processSchema;
