@@ -537,7 +537,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
               <p>
                 <FormattedMessage
                   id="xpack.cloudConnect.connectedServices.service.missingLLMConnectorsDescription"
-                  defaultMessage="You have a degraded experience because you don't have any configured LLM models. Please reconnect the EIS service to install them."
+                  defaultMessage="Configuring LLM models will provide an enhanced experience. Reconnect EIS to install them."
                 />
               </p>
             </EuiCallOut>
