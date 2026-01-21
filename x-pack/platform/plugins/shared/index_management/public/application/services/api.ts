@@ -145,9 +145,7 @@ export async function loadIndices(onIndicesLoaded: (indices: Index[]) => void) {
   // Run all requests in parallel
   const enrichedPromises = indexDataEnricher.enrichIndices(httpService.httpClient);
 
-  // we'll wait for the main request to complete first so
-  // the index list has stability - unsure if this is an actual
-  // issue but its certainly possible looking at the code
+  // we'll wait for the main request to complete first so the index list has stability
   const indices = await httpService.httpClient.get<Record<string, Index>>(
     `${API_BASE_PATH}/indices_get`
   );
