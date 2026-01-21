@@ -243,7 +243,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   fitToContent,
   accessibilityOverlayEnabled = true,
   enableFindAction,
-  dataTestSubj,
+  dataTestSubj = 'kibanaCodeEditor',
   classNameCss,
   enableCustomContextMenu = false,
   customContextMenuActions = [],
@@ -607,7 +607,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     <div
       css={styles.container}
       onKeyDown={onKeyDown}
-      data-test-subj={dataTestSubj ?? 'kibanaCodeEditor'}
+      data-test-subj={dataTestSubj}
       className="kibanaCodeEditor"
     >
       <Global styles={classNameCss} />

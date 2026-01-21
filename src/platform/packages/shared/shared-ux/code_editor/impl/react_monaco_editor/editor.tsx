@@ -357,9 +357,12 @@ export function MonacoEditor({
       <EuiPortal portalRef={setOverflowWidgetsDomNode} />
       <Global
         styles={({ euiTheme: _euiTheme }) => ({
+          // by default display the overflow widgets below flyouts
           [`.${OVERFLOW_WIDGETS_CONTAINER_CLASS}`]: {
-            // ensure the overflow widgets are above headers and flyouts
-            // Fallback if euiTheme is not available
+            zIndex: Number(_euiTheme?.levels?.maskBelowHeader ?? 1000) - 2,
+          },
+          // When the editor is inside a flyout, ensure the overflow widgets are above the flyout
+          [`:has(.euiFlyout [class*="monaco-editor"]) .${OVERFLOW_WIDGETS_CONTAINER_CLASS}`]: {
             zIndex: _euiTheme?.levels?.menu ?? 2000,
           },
         })}
