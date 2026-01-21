@@ -109,13 +109,32 @@ export const isDisabledLifecycle = createIsNarrowSchema(
 
 export type PhaseName = 'hot' | 'warm' | 'cold' | 'frozen' | 'delete';
 
+export interface IlmPolicyDownsampleAction {
+  /**
+   * The fixed time interval into which the data will be downsampled.
+   */
+  fixed_interval: string;
+}
+
+export interface IlmPolicySearchableSnapshotAction {
+  /**
+   * Repository used to store the snapshot.
+   */
+  snapshot_repository: string;
+}
+
 export interface IlmPolicyPhase {
   name: PhaseName;
   size_in_bytes: number;
   min_age?: string;
 }
 
-export interface IlmPolicyHotPhase extends IlmPolicyPhase {
+export interface IlmPolicyPhaseWithDownsampleAndReadOnly extends IlmPolicyPhase {
+  downsample?: IlmPolicyDownsampleAction;
+  readonly?: boolean;
+}
+
+export interface IlmPolicyHotPhase extends IlmPolicyPhaseWithDownsampleAndReadOnly {
   name: 'hot';
   rollover: {
     max_size?: number | string;
@@ -126,6 +145,16 @@ export interface IlmPolicyHotPhase extends IlmPolicyPhase {
   };
 }
 
+export interface IlmPolicyColdPhase extends IlmPolicyPhaseWithDownsampleAndReadOnly {
+  name: 'cold';
+  searchable_snapshot?: IlmPolicySearchableSnapshotAction;
+}
+
+export interface IlmPolicyFrozenPhase extends IlmPolicyPhase {
+  name: 'frozen';
+  searchable_snapshot?: IlmPolicySearchableSnapshotAction;
+}
+
 export interface IlmPolicyDeletePhase {
   name: 'delete';
   min_age: string;
@@ -133,8 +162,8 @@ export interface IlmPolicyDeletePhase {
 
 export interface IlmPolicyPhases {
   hot?: IlmPolicyHotPhase;
-  warm?: IlmPolicyPhase;
-  cold?: IlmPolicyPhase;
-  frozen?: IlmPolicyPhase;
+  warm?: IlmPolicyPhaseWithDownsampleAndReadOnly;
+  cold?: IlmPolicyColdPhase;
+  frozen?: IlmPolicyFrozenPhase;
   delete?: IlmPolicyDeletePhase;
 }
