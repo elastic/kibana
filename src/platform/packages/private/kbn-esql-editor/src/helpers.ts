@@ -12,7 +12,7 @@ import { euiShadow } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
-import type { MapCache } from 'lodash';
+import { uniqBy, type MapCache } from 'lodash';
 import { useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
@@ -383,4 +383,15 @@ export const filterOutWarningsOverlappingWithErrors = (
   };
 
   return warnings.filter((warning) => !hasOverlap(warning));
+};
+
+export const filterDuplicatedUnmappedColumnWarnings = (
+  warnings: (MonacoMessage & { code: string })[]
+): MonacoMessage[] => {
+  return uniqBy(warnings, (warning) => {
+    if (warning.code === 'unmappedColumnWarning') {
+      return warning.message;
+    }
+    return warning;
+  });
 };

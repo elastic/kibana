@@ -12,6 +12,7 @@ import {
   filterOutWarningsOverlappingWithErrors,
   parseErrors,
   parseWarning,
+  filterDuplicatedUnmappedColumnWarnings,
 } from './helpers';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 
@@ -319,6 +320,53 @@ describe('helpers', function () {
 
       const result = filterOutWarningsOverlappingWithErrors(errors, warnings);
       expect(result).toHaveLength(shouldFilter ? 0 : 1);
+    });
+  });
+
+  describe('filterDuplicatedUnmappedColumnWarnings', function () {
+    const createMessage = (code: string, message: string): MonacoMessage & { code: string } => ({
+      message,
+      code,
+      severity: 1,
+      startLineNumber: 1,
+      startColumn: 1,
+      endLineNumber: 1,
+      endColumn: 1,
+    });
+
+    it('should filter duplicated unmappedColumnWarning warnings', function () {
+      const warnings = [
+        createMessage('unmappedColumnWarning', 'Fields [a] are unmapped'),
+        createMessage('unmappedColumnWarning', 'Fields [a] are unmapped'),
+        createMessage('unmappedColumnWarning', 'Fields [b] are unmapped'),
+      ];
+      expect(filterDuplicatedUnmappedColumnWarnings(warnings)).toEqual([
+        createMessage('unmappedColumnWarning', 'Fields [a] are unmapped'),
+        createMessage('unmappedColumnWarning', 'Fields [b] are unmapped'),
+      ]);
+    });
+
+    it('should not filter other duplicated warnings', function () {
+      const warnings = [
+        createMessage('otherWarning', 'Some warning'),
+        createMessage('otherWarning', 'Some warning'),
+      ];
+      expect(filterDuplicatedUnmappedColumnWarnings(warnings)).toEqual([
+        createMessage('otherWarning', 'Some warning'),
+        createMessage('otherWarning', 'Some warning'),
+      ]);
+    });
+
+    it('should handle mixed warnings', function () {
+      const warnings = [
+        createMessage('unmappedColumnWarning', 'Fields [a] are unmapped'),
+        createMessage('otherWarning', 'Some warning'),
+        createMessage('unmappedColumnWarning', 'Fields [a] are unmapped'),
+      ];
+      expect(filterDuplicatedUnmappedColumnWarnings(warnings)).toEqual([
+        createMessage('unmappedColumnWarning', 'Fields [a] are unmapped'),
+        createMessage('otherWarning', 'Some warning'),
+      ]);
     });
   });
 });
