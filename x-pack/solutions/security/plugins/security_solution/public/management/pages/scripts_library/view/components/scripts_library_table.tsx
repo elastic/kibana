@@ -38,6 +38,7 @@ import type {
 import { scriptsLibraryLabels as tableLabels } from '../../translations';
 import { ScriptNameNavLink } from './script_name_nav_link';
 import { ScriptTablePlatformBadges } from './platform_badges';
+import { ScriptRowActions } from './script_row_actions';
 
 const SCRIPTS_TABLE_COLUMN_WIDTHS = Object.freeze({
   name: '25%',
@@ -52,12 +53,14 @@ const SCRIPTS_TABLE_COLUMN_WIDTHS = Object.freeze({
 interface GetScriptsLibraryTableColumnsProps {
   formatBytes: (bytes: number) => string;
   getTestId: (suffix?: string | undefined) => string | undefined;
+  onDelete: ScriptsLibraryTableProps['onDelete'];
   queryParams: ScriptsLibraryTableProps['queryParams'];
 }
 
 const getScriptsLibraryTableColumns = ({
   formatBytes,
   getTestId,
+  onDelete,
   queryParams,
 }: GetScriptsLibraryTableColumnsProps) => {
   const columns = [
@@ -176,7 +179,13 @@ const getScriptsLibraryTableColumns = ({
       field: '',
       name: tableLabels.table.columns.actions,
       width: SCRIPTS_TABLE_COLUMN_WIDTHS.actions,
-      actions: [],
+      actions: [
+        {
+          render: (item: EndpointScript) => (
+            <ScriptRowActions scriptItem={item} queryParams={queryParams} onDelete={onDelete} />
+          ),
+        },
+      ],
     },
   ];
 
@@ -192,6 +201,7 @@ export interface ScriptsLibraryTableProps {
   isLoading?: boolean;
   items: ScriptItems;
   onChange: OnChangeTable;
+  onDelete: (script: EndpointScript) => void;
   queryParams: ListScriptsRequestQuery;
   sort: {
     field?: SortableScriptLibraryFields;
@@ -206,6 +216,7 @@ export const ScriptsLibraryTable = memo<ScriptsLibraryTableProps>(
     isLoading,
     items,
     onChange,
+    onDelete,
     queryParams,
     sort,
     totalItemCount,
@@ -271,9 +282,10 @@ export const ScriptsLibraryTable = memo<ScriptsLibraryTableProps>(
         getScriptsLibraryTableColumns({
           formatBytes,
           getTestId,
+          onDelete,
           queryParams,
         }),
-      [formatBytes, getTestId, queryParams]
+      [formatBytes, getTestId, onDelete, queryParams]
     );
 
     const setTableRowProps = useCallback((scriptData: ScriptItems[number]) => {

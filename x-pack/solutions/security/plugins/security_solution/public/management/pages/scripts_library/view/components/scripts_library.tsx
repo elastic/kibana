@@ -6,7 +6,10 @@
  */
 
 import React, { memo, useEffect, useMemo, useCallback, useState } from 'react';
-import type { SortableScriptLibraryFields } from '../../../../../../common/endpoint/types';
+import type {
+  EndpointScript,
+  SortableScriptLibraryFields,
+} from '../../../../../../common/endpoint/types';
 import type { ListScriptsRequestQuery } from '../../../../../../common/api/endpoint';
 import { useToasts } from '../../../../../common/lib/kibana';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
@@ -16,6 +19,7 @@ import { useGetEndpointScriptsList } from '../../../../hooks/script_library';
 import { ScriptsLibraryTable, type ScriptsLibraryTableProps } from './scripts_library_table';
 import { useUrlPagination } from '../../../../hooks/use_url_pagination';
 import { useScriptsLibraryUrlParams } from './scripts_library_url_params';
+import { EndpointScriptDeleteModal } from './script_delete_modal';
 
 export const ScriptsLibrary = memo(() => {
   const { addDanger } = useToasts();
@@ -28,6 +32,10 @@ export const ScriptsLibrary = memo(() => {
   } = useScriptsLibraryUrlParams();
 
   const { canReadScriptsLibrary } = useUserPrivileges().endpointPrivileges;
+
+  const [selectedItemForDelete, setSelectedItemForDelete] = useState<undefined | EndpointScript>(
+    undefined
+  );
 
   const [queryParams, setQueryParams] = useState<ListScriptsRequestQuery>({
     kuery: kueryFromUrl,
@@ -59,6 +67,7 @@ export const ScriptsLibrary = memo(() => {
     isFetching,
     isFetched,
     error: scriptsLibraryFetchError,
+    refetch: reFetchEndpointScriptsList,
   } = useGetEndpointScriptsList(queryParams, {
     enabled: canReadScriptsLibrary,
     retry: false,
@@ -83,6 +92,22 @@ export const ScriptsLibrary = memo(() => {
     [setPagingAndSortingParams]
   );
 
+  const onClickDelete = useCallback(
+    (script: EndpointScript) => {
+      setSelectedItemForDelete(script);
+    },
+    [setSelectedItemForDelete]
+  );
+
+  const onDeleteModalSuccess = useCallback(() => {
+    setSelectedItemForDelete(undefined);
+    reFetchEndpointScriptsList();
+  }, [reFetchEndpointScriptsList]);
+
+  const onDeleteModalCancel = useCallback(() => {
+    setSelectedItemForDelete(undefined);
+  }, []);
+
   useEffect(() => {
     if (!isFetching && scriptsLibraryFetchError) {
       addDanger(scriptsLibraryFetchError?.body?.message || scriptsLibraryFetchError.message);
@@ -96,12 +121,22 @@ export const ScriptsLibrary = memo(() => {
       subtitle={pageLabels.pageAboutInfo}
       hideHeader={false}
     >
+      {selectedItemForDelete && (
+        <EndpointScriptDeleteModal
+          scriptName={selectedItemForDelete.name}
+          scriptId={selectedItemForDelete.id}
+          onSuccess={onDeleteModalSuccess}
+          onCancel={onDeleteModalCancel}
+          data-test-subj={'endpointScriptDeleteModal'}
+        />
+      )}
       {isFetched && (
         <ScriptsLibraryTable
           data-test-subj="scriptsLibraryTable"
           items={tableItems}
           isLoading={isFetching}
           onChange={onChangeScriptsTable}
+          onDelete={onClickDelete}
           queryParams={queryParams}
           totalItemCount={totalItemCount}
           sort={{

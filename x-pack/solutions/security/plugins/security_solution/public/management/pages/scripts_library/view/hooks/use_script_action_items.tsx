@@ -12,16 +12,16 @@ import type { ListScriptsRequestQuery } from '../../../../../../common/api/endpo
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import type { ContextMenuItemNavByRouterProps } from '../../../../components/context_menu_with_router_support';
 import type { EndpointScript } from '../../../../../../common/endpoint/types';
-import { scriptsLibraryLabels as tableActionLabels } from '../../translations';
+import { SCRIPT_LIBRARY_LABELS as tableActionLabels } from '../../translations';
 import type { ScriptsLibraryUrlParams } from '../components/scripts_library_url_params';
 import { useAppUrl } from '../../../../../common/lib/kibana';
 
 export const useScriptActionItems = ({
-  onClickDelete,
+  onDelete,
   queryParams,
   script,
 }: {
-  onClickDelete: (script: EndpointScript) => void;
+  onDelete: (script: EndpointScript) => void;
   queryParams: ListScriptsRequestQuery;
   script: EndpointScript;
 }): ContextMenuItemNavByRouterProps[] => {
@@ -47,9 +47,9 @@ export const useScriptActionItems = ({
       ...(canReadScriptsLibrary
         ? [
             {
-              'data-test-subj': 'detailsLink',
+              'data-test-subj': 'actionDetails',
               icon: 'inspect',
-              key: 'detailsLink',
+              key: 'details',
               name: tableActionLabels.table.actions.details,
               href: getAppUrl({ path: toRoutePath('details') }),
               children: renderActionItem(tableActionLabels.table.actions.details),
@@ -59,9 +59,9 @@ export const useScriptActionItems = ({
       ...(canWriteScriptsLibrary
         ? [
             {
-              'data-test-subj': 'editLink',
+              'data-test-subj': 'actionEdit',
               icon: 'pencil',
-              key: 'editLink',
+              key: 'edit',
               name: tableActionLabels.table.actions.edit,
               href: getAppUrl({ path: toRoutePath('edit') }),
               children: renderActionItem(tableActionLabels.table.actions.edit),
@@ -71,9 +71,9 @@ export const useScriptActionItems = ({
       ...(canReadScriptsLibrary
         ? [
             {
-              'data-test-subj': 'downloadLink',
+              'data-test-subj': 'actionDownload',
               icon: 'download',
-              key: 'downloadLink',
+              key: 'download',
               name: tableActionLabels.table.actions.download,
               href: script.downloadUri,
               children: renderActionItem(tableActionLabels.table.actions.download),
@@ -83,16 +83,16 @@ export const useScriptActionItems = ({
       ...(canWriteScriptsLibrary
         ? [
             {
-              'data-test-subj': 'deleteLink',
+              'data-test-subj': 'actionDelete',
               icon: 'trash',
-              key: 'deleteLink',
+              key: 'delete',
               name: tableActionLabels.table.actions.delete,
-              onClick: () => onClickDelete(script),
+              onClick: () => onDelete(script),
               children: renderActionItem(tableActionLabels.table.actions.delete),
             },
           ]
         : []),
     ],
-    [canReadScriptsLibrary, getAppUrl, toRoutePath, canWriteScriptsLibrary, script, onClickDelete]
+    [canReadScriptsLibrary, getAppUrl, toRoutePath, canWriteScriptsLibrary, script, onDelete]
   );
 };
