@@ -49,6 +49,40 @@ describe('convertToDrilldowns', () => {
     `);
   });
 
+  test('should convert discover drilldown event', () => {
+    const enhancements = {
+      dynamicActions: {
+        events: [
+          {
+            action: {
+              config: {
+                openInNewTab: false,
+              },
+              factoryId: 'OPEN_IN_DISCOVER_DRILLDOWN',
+              name: 'Open in Discover',
+            },
+            eventId: '8b3b25b4-1691-4826-82c4-fb6c0478f669',
+            triggers: ['FILTER_TRIGGER'],
+          },
+        ],
+      },
+    };
+    expect(convertToDrilldowns(enhancements)).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "config": Object {
+            "open_in_new_tab": false,
+            "type": "discover_drilldown",
+          },
+          "label": "Open in Discover",
+          "triggers": Array [
+            "FILTER_TRIGGER",
+          ],
+        },
+      ]
+    `);
+  });
+
   test('should convert url drilldown event', () => {
     const enhancements = {
       dynamicActions: {
@@ -87,5 +121,26 @@ describe('convertToDrilldowns', () => {
         },
       ]
     `);
+  });
+
+  test('should discard unknown events', () => {
+    const enhancements = {
+      dynamicActions: {
+        events: [
+          {
+            action: {
+              config: {
+                foo: 'hello',
+              },
+              factoryId: 'UNKNOWN_FACTORY',
+              name: 'I am an unknown event',
+            },
+            eventId: '8b3b25b4-1691-4826-82c4-fb6c0478f669',
+            triggers: ['FILTER_TRIGGER'],
+          },
+        ],
+      },
+    };
+    expect(convertToDrilldowns(enhancements)).toMatchInlineSnapshot(`Array []`);
   });
 });

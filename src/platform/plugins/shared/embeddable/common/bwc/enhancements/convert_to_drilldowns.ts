@@ -13,15 +13,21 @@ import type { DynamicActionsState, SerializedEvent } from './dynamic_actions/typ
 export function convertToDrilldowns(enhancementsState: { dynamicActions?: DynamicActionsState }) {
   if (!enhancementsState?.dynamicActions?.events) return {};
 
-  return enhancementsState.dynamicActions.events.map((event) => {
-    if (event.action.factoryId === 'DASHBOARD_TO_DASHBOARD_DRILLDOWN') {
-      return convertToDashboardDrilldown(event);
-    }
+  return enhancementsState.dynamicActions.events
+    .map((event) => {
+      if (event.action.factoryId === 'DASHBOARD_TO_DASHBOARD_DRILLDOWN') {
+        return convertToDashboardDrilldown(event);
+      }
 
-    if (event.action.factoryId === 'URL_DRILLDOWN') {
-      return convertToUrlDrilldown(event);
-    }
-  });
+      if (event.action.factoryId === 'OPEN_IN_DISCOVER_DRILLDOWN') {
+        return convertToDiscoverDrilldown(event);
+      }
+
+      if (event.action.factoryId === 'URL_DRILLDOWN') {
+        return convertToUrlDrilldown(event);
+      }
+    })
+    .filter((drilldown) => Boolean(drilldown));
 }
 
 function convertToDashboardDrilldown(event: SerializedEvent) {
@@ -36,6 +42,19 @@ function convertToDashboardDrilldown(event: SerializedEvent) {
       open_in_new_tab: openInNewTab ?? false,
       use_time_range: useCurrentDateRange ?? true,
       use_filters: useCurrentFilters ?? true,
+    },
+  };
+}
+
+function convertToDiscoverDrilldown(event: SerializedEvent) {
+  const { openInNewTab } = event.action.config;
+
+  return {
+    label: event.action.name,
+    triggers: event.triggers,
+    config: {
+      type: 'discover_drilldown',
+      open_in_new_tab: openInNewTab ?? false,
     },
   };
 }

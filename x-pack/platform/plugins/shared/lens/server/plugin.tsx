@@ -44,6 +44,7 @@ import { LensStorage } from './content_management';
 import { registerLensAPIRoutes } from './api/routes';
 import { fetchLensFeatureFlags } from '../common';
 import { getLensServerTransforms } from './transforms';
+import { registerDiscoverDrilldown } from './drilldowns/register_discover_drilldown';
 
 export interface PluginSetupContract {
   taskManager?: TaskManagerSetupContract;
@@ -144,6 +145,8 @@ export class LensServerPlugin
       .catch((error) => {
         this.logger.error(error);
       });
+
+    registerDiscoverDrilldown(plugins.embeddable);
 
     return {
       lensEmbeddableFactory,
