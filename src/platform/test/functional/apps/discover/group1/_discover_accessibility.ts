@@ -97,10 +97,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should return focus to the alerts button when dismissing the create rule flyout', async () => {
         await testSubjects.click('app-menu-overflow-button');
+        await testSubjects.existOrFail('discoverAlertsButton');
         await focusAndPressButton('discoverAlertsButton');
-        expect(await hasFocus('discoverAlertsButton')).to.be(true);
+        await retry.try(async () => {
+          expect(await hasFocus('discoverAlertsButton')).to.be(true);
+        });
         await focusAndPressButton('discoverCreateAlertButton');
-        expect(await testSubjects.exists('addRuleFlyoutTitle')).to.be(true);
+        await testSubjects.existOrFail('addRuleFlyoutTitle');
         await retry.try(async () => {
           await browser.pressKeys(browser.keys.ESCAPE);
           // A bug exists with the create rule flyout where sometimes the confirm modal
