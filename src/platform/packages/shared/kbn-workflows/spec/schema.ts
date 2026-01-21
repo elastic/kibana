@@ -459,6 +459,8 @@ export type LegacyWorkflowInput = z.infer<typeof WorkflowInputSchema>;
 export const JsonModelSchema = z
   .object({
     type: z.literal('object').optional(),
+    title: z.string().optional(),
+    description: z.string().optional(),
     properties: z.record(z.string(), z.any()).optional(),
     required: z.array(z.string()).optional(),
     additionalProperties: z.union([z.boolean(), z.any()]).optional(),
