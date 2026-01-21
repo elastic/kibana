@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Filter } from '@kbn/es-query';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import type { ESBoolQuery } from '../../../../../../../common/typed_json';
 
@@ -15,14 +14,6 @@ interface KeyInsightsPanelParams {
   esqlQuery: string;
   dataViewId: string;
   filterQuery: ESBoolQuery | undefined;
-}
-
-interface KeyInsightsPanelFormBasedParams {
-  title: string;
-  label: string;
-  dataViewId: string;
-  dataViewTitle: string;
-  filters: Filter[];
 }
 
 export const createKeyInsightsPanelLensAttributes = ({
@@ -78,80 +69,6 @@ export const createKeyInsightsPanelLensAttributes = ({
       adHocDataViews: {
         [dataViewId]: {
           id: dataViewId,
-        },
-      },
-    },
-    references: [],
-  };
-};
-
-export const createKeyInsightsPanelFormBasedLensAttributes = ({
-  title,
-  label,
-  dataViewId,
-  dataViewTitle,
-  filters,
-}: KeyInsightsPanelFormBasedParams): LensAttributes => {
-  const layerId = 'key-insights-privileged-users-layer';
-  const countColumnId = 'key-insights-privileged-users-count';
-
-  return {
-    title,
-    description: '',
-    visualizationType: 'lnsMetric',
-    state: {
-      visualization: {
-        layerId,
-        layerType: 'data',
-        metricAccessor: countColumnId,
-      },
-      query: {
-        query: '',
-        language: 'kuery',
-      },
-      filters,
-      datasourceStates: {
-        formBased: {
-          layers: {
-            [layerId]: {
-              columns: {
-                [countColumnId]: {
-                  label,
-                  dataType: 'number',
-                  isBucketed: false,
-                  operationType: 'unique_count',
-                  scale: 'ratio',
-                  sourceField: 'user.name',
-                  customLabel: true,
-                },
-              },
-              columnOrder: [countColumnId],
-              incompleteColumns: {},
-            },
-          },
-        },
-        textBased: {
-          layers: {},
-        },
-      },
-      internalReferences: [
-        {
-          type: 'index-pattern',
-          id: dataViewId,
-          name: `indexpattern-datasource-layer-${layerId}`,
-        },
-      ],
-      adHocDataViews: {
-        [dataViewId]: {
-          id: dataViewId,
-          title: dataViewTitle,
-          timeFieldName: '@timestamp',
-          sourceFilters: [],
-          fieldFormats: {},
-          runtimeFieldMap: {},
-          fieldAttrs: {},
-          allowNoIndex: false,
-          name: dataViewTitle,
         },
       },
     },

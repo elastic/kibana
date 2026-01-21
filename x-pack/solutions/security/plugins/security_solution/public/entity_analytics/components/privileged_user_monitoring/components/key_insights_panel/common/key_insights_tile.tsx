@@ -8,7 +8,6 @@
 import React, { useState, useEffect } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import type { ReactElement } from 'react';
 import { isLeft } from 'fp-ts/Either';
 import { createKeyInsightsPanelLensAttributes } from './lens_attributes';
@@ -25,8 +24,7 @@ const LENS_VISUALIZATION_HEIGHT = 140;
 interface KeyInsightsTileProps {
   title: string;
   label: string;
-  getEsqlQuery?: (namespace: string) => EsqlQueryOrInvalidFields;
-  getLensAttributes?: (namespace: string) => LensAttributes;
+  getEsqlQuery: (namespace: string) => EsqlQueryOrInvalidFields;
   id: string;
   inspectTitle: ReactElement;
   spaceId?: string;
@@ -36,7 +34,6 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
   title,
   label,
   getEsqlQuery,
-  getLensAttributes,
   id,
   inspectTitle,
   spaceId: propSpaceId,
@@ -66,7 +63,7 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
     setHasStartedLoading(false);
   }, [timerange.from, timerange.to, filterQuery, effectiveSpaceId]);
 
-  const esqlQuery = getEsqlQuery ? getEsqlQuery(effectiveSpaceId) : null;
+  const esqlQuery = getEsqlQuery(effectiveSpaceId);
 
   // Only show error state if:
   // 1. Loading has started at least once (hasStartedLoading)
@@ -75,7 +72,7 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
   const hasInvalidEsqlQuery = esqlQuery ? isLeft(esqlQuery) : false;
 
   if (
-    hasInvalidEsqlQuery ||
+    isLeft(esqlQuery) ||
     (hasStartedLoading &&
       visualizationResponse &&
       visualizationResponse.loading === false &&
@@ -113,17 +110,13 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
     );
   }
 
-  const esqlQueryString = esqlQuery && !isLeft(esqlQuery) ? esqlQuery.right : '';
-
-  const lensAttributes = getLensAttributes
-    ? getLensAttributes(effectiveSpaceId)
-    : createKeyInsightsPanelLensAttributes({
-        title,
-        label,
-        esqlQuery: esqlQueryString,
-        dataViewId: 'default-dataview',
-        filterQuery,
-      });
+  const lensAttributes = createKeyInsightsPanelLensAttributes({
+    title,
+    label,
+    esqlQuery: esqlQuery.right,
+    dataViewId: 'default-dataview',
+    filterQuery,
+  });
 
   // If we reach here, either still loading or we have a valid response, so show the embeddable
   return (
