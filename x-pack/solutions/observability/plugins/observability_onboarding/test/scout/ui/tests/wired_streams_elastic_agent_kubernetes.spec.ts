@@ -27,7 +27,9 @@ test.describe(
     test('shows ingestion selector with correct options', async ({ pageObjects }) => {
       await test.step('navigate to Elastic Agent Kubernetes flow', async () => {
         await pageObjects.onboarding.selectKubernetesUseCase();
-        await pageObjects.onboarding.clickIntegrationCard('integration-card:kubernetes-quick-start');
+        await pageObjects.onboarding.clickIntegrationCard(
+          'integration-card:kubernetes-quick-start'
+        );
       });
 
       await test.step('ingestion selector is visible with both options', async () => {

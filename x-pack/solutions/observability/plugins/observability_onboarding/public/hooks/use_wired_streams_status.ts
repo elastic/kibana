@@ -123,12 +123,9 @@ export function useWiredStreamsStatus(): UseWiredStreamsStatusResult {
         });
 
         notifications?.toasts.addError(error as Error, {
-          title: i18n.translate(
-            'xpack.observability_onboarding.wiredStreams.enableError.title',
-            {
-              defaultMessage: 'Failed to enable Wired Streams',
-            }
-          ),
+          title: i18n.translate('xpack.observability_onboarding.wiredStreams.enableError.title', {
+            defaultMessage: 'Failed to enable Wired Streams',
+          }),
           toastMessage: i18n.translate(
             'xpack.observability_onboarding.wiredStreams.enableError.message',
             {

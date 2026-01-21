@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ExtendedApiServicesFixture, ExtendedScoutTestFixtures } from '../index';
+import type { ExtendedApiServicesFixture, ExtendedScoutTestFixtures } from '..';
 
 interface WiredStreamsSetupFixtures {
   apiServices: ExtendedApiServicesFixture;
