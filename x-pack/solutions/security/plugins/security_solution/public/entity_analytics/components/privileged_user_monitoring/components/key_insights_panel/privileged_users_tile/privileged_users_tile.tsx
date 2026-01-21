@@ -13,7 +13,6 @@ import { createKeyInsightsPanelFormBasedLensAttributes } from '../common/lens_at
 import { getPrivilegedUsersDslFilter } from './privileged_user_count_filter';
 import { KeyInsightsTile } from '../common/key_insights_tile';
 
-
 export const PrivilegedUsersTile: React.FC<{
   spaceId: string;
 }> = ({ spaceId }) => {
