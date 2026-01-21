@@ -34,6 +34,7 @@ describe('groupByParent', () => {
         serviceName: 'svcA',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'transaction',
       },
       {
         id: '2',
@@ -49,6 +50,7 @@ describe('groupByParent', () => {
         serviceName: 'svcB',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
       {
         id: '3',
@@ -64,6 +66,7 @@ describe('groupByParent', () => {
         serviceName: 'svcC',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
       {
         id: '4',
@@ -79,6 +82,7 @@ describe('groupByParent', () => {
         serviceName: 'svcD',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
     ];
 
@@ -106,6 +110,7 @@ describe('groupByParent', () => {
         serviceName: 'svcA',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'transaction',
       },
     ];
 
@@ -130,6 +135,7 @@ describe('groupByParent', () => {
         serviceName: 'svcB',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
       {
         id: '3',
@@ -145,6 +151,7 @@ describe('groupByParent', () => {
         serviceName: 'svcC',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
     ];
 
@@ -170,6 +177,7 @@ describe('filterMapByCriticalPath', () => {
     errors: [],
     spanLinksCount: { incoming: 0, outgoing: 0 },
     serviceName: 'test-service',
+    docType: 'span',
   });
 
   const mockSegment = (item: TraceWaterfallItem): CriticalPathSegment<TraceWaterfallItem> => ({

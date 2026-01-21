@@ -87,13 +87,6 @@ describe('getFlattenedTraceWaterfall', () => {
     '2': [grandchild],
   };
 
-  const serviceColorsMap = new Map<string, string>([
-    ['serviceName:svcA', 'red'],
-    ['serviceName:svcB', 'blue'],
-    ['serviceName:svcC', 'green'],
-    ['serviceName:svcD', 'yellow'],
-  ]);
-
   it('returns a flattened waterfall with correct depth, offset, and skew', () => {
     const result = getTraceWaterfall({
       rootItem: root,
