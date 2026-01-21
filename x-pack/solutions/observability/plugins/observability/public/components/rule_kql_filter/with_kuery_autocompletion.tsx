@@ -10,7 +10,7 @@ import type { DataViewBase } from '@kbn/es-query';
 import type { KibanaReactContextValue, KibanaServices } from '@kbn/kibana-react-plugin/public';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { QuerySuggestion } from '@kbn/unified-search-plugin/public';
+import type { QuerySuggestion } from '@kbn/kql/public';
 import type { InfraClientStartDeps, RendererFunction } from '../custom_threshold/types';
 
 export interface WithKueryAutocompletionLifecycleProps {
@@ -61,7 +61,7 @@ class WithKueryAutocompletionComponent extends React.Component<
     const { indexPattern } = this.props;
     const language = 'kuery';
     const hasQuerySuggestions =
-      this.props.kibana.services.unifiedSearch.autocomplete.hasQuerySuggestions(language);
+      this.props.kibana.services.kql.autocomplete.hasQuerySuggestions(language);
 
     if (!hasQuerySuggestions) {
       return;
@@ -76,7 +76,7 @@ class WithKueryAutocompletionComponent extends React.Component<
     });
 
     const suggestions =
-      (await this.props.kibana.services.unifiedSearch.autocomplete.getQuerySuggestions({
+      (await this.props.kibana.services.kql.autocomplete.getQuerySuggestions({
         language,
         query: expression,
         selectionStart: cursorPosition,

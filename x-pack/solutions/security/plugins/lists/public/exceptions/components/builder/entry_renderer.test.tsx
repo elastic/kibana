@@ -25,7 +25,7 @@ import { validatePotentialWildcardInput } from '@kbn/securitysolution-utils';
 import { useFindListsBySize } from '@kbn/securitysolution-list-hooks';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { fields, getField } from '@kbn/data-plugin/common/mocks';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { waitFor } from '@testing-library/react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
@@ -40,7 +40,7 @@ jest.mock('@kbn/securitysolution-list-hooks');
 jest.mock('@kbn/securitysolution-utils');
 
 const mockKibanaHttpService = coreMock.createStart().http;
-const { autocomplete: autocompleteStartMock } = unifiedSearchPluginMock.createStartContract();
+const { autocomplete: autocompleteStartMock } = kqlPluginMock.createStartContract();
 const mockResult = getFoundListsBySizeSchemaMock();
 mockResult.largeLists = [];
 

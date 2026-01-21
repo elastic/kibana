@@ -32,6 +32,8 @@
           ") => Promise<void>"
         ],
         "path": "packages/kbn-performance-testing-dataset-extractor/src/extractor.ts",
+        "lineNumber": 41,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,6 +48,8 @@
               "CLIParams"
             ],
             "path": "packages/kbn-performance-testing-dataset-extractor/src/extractor.ts",
+            "lineNumber": 41,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -65,6 +69,8 @@
           "() => Promise<void>"
         ],
         "path": "packages/kbn-performance-testing-dataset-extractor/src/cli.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
