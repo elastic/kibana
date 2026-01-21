@@ -6,6 +6,7 @@
  */
 import type { BoolQuery } from '@kbn/es-query';
 import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import { getDurationFieldForTransactions } from '@kbn/apm-data-access-plugin/server/utils';
 import type { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
 import {
   FAAS_ID,
@@ -24,7 +25,6 @@ import {
   getLatencyAggregation,
   getLatencyValue,
 } from '../../../lib/helpers/latency_aggregation_type';
-import { getDurationFieldForTransactions } from '../../../lib/helpers/transactions';
 
 function searchLatency({
   environment,

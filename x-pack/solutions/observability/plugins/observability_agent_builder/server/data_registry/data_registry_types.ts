@@ -39,10 +39,13 @@ interface ServiceSummary {
 }
 
 export interface APMDownstreamDependency {
-  'service.name'?: string | undefined;
+  'service.name'?: string;
   'span.destination.service.resource': string;
-  'span.type'?: string | undefined;
-  'span.subtype'?: string | undefined;
+  'span.type'?: string;
+  'span.subtype'?: string;
+  errorRate?: number;
+  latencyMs?: number;
+  throughputPerMin?: number;
 }
 
 interface APMError {
@@ -141,15 +144,6 @@ interface InfraHostsResponse {
   nodes: InfraEntityMetricsItem[];
 }
 
-export interface TraceMetricsItem {
-  group: string;
-  latency: number | null;
-  throughput: number;
-  failureRate: number;
-}
-
-type TraceMetricsResponse = TraceMetricsItem[];
-
 export interface ObservabilityAgentBuilderDataRegistryTypes {
   apmErrors: (params: {
     request: KibanaRequest;
@@ -221,12 +215,4 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     query: Record<string, unknown> | undefined;
     hostNames?: string[];
   }) => Promise<InfraHostsResponse>;
-
-  traceMetrics: (params: {
-    request: KibanaRequest;
-    start: string;
-    end: string;
-    kqlFilter?: string;
-    groupBy: string;
-  }) => Promise<TraceMetricsResponse>;
 }
