@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiSelectableOption } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBasicTable,
-  EuiButtonEmpty,
-  EuiComboBox,
+  EuiFilterGroup,
+  EuiFilterButton,
+  EuiPopover,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,6 +24,7 @@ import {
   EuiSpacer,
   EuiStat,
   EuiTablePagination,
+  EuiSelectable,
   EuiText,
   EuiTitle,
   EuiToolTip,
@@ -51,7 +53,7 @@ import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 type SloStatusFilter = 'VIOLATED' | 'DEGRADING' | 'HEALTHY' | 'NO_DATA';
 
-const STATUS_OPTIONS: Array<EuiComboBoxOptionOption<SloStatusFilter>> = [
+const STATUS_OPTIONS: Array<{ label: string; value: SloStatusFilter }> = [
   {
     label: i18n.translate('xpack.apm.sloOverviewFlyout.statusFilter.violated', {
       defaultMessage: 'Violated',
@@ -99,51 +101,6 @@ const STATUS_PRIORITY: Record<string, number> = {
   HEALTHY: 0,
 };
 
-function ClickableStat({
-  count,
-  titleColor,
-  description,
-  tooltip,
-  isLoading,
-  onClick,
-  'data-test-subj': dataTestSubj,
-}: {
-  count: number;
-  titleColor: 'danger' | 'warning' | 'success' | 'subdued';
-  description: string;
-  tooltip: string;
-  isLoading: boolean;
-  onClick: () => void;
-  'data-test-subj': string;
-}) {
-  return (
-    <EuiFlexItem grow>
-      <EuiToolTip content={tooltip}>
-        <EuiButtonEmpty
-          onClick={onClick}
-          flush="both"
-          css={{
-            height: 'auto',
-            color: 'inherit',
-            textDecoration: 'none',
-            '&:hover': { textDecoration: 'none' },
-          }}
-          data-test-subj={dataTestSubj}
-        >
-          <EuiStat
-            title={count}
-            titleSize="s"
-            titleColor={titleColor}
-            description={description}
-            isLoading={isLoading}
-            reverse
-          />
-        </EuiButtonEmpty>
-      </EuiToolTip>
-    </EuiFlexItem>
-  );
-}
-
 export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'sloOverviewFlyout' });
   const { euiTheme } = useEuiTheme();
@@ -151,10 +108,8 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const { link } = useApmRouter();
   const { query } = useApmParams('/services');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedStatFilter, setSelectedStatFilter] = useState<SloStatusFilter | null>(null);
-  const [selectedStatusOptions, setSelectedStatusOptions] = useState<
-    Array<EuiComboBoxOptionOption<SloStatusFilter>>
-  >([]);
+  const [selectedStatuses, setSelectedStatuses] = useState<SloStatusFilter[]>([]);
+  const [isStatusPopoverOpen, setIsStatusPopoverOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [sloData, setSloData] = useState<SLOWithSummaryResponse[]>([]);
   const [totalSlos, setTotalSlos] = useState(0);
@@ -164,19 +119,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(10);
   const percentFormat = uiSettings?.get('format:percent:defaultPattern') ?? '0.00%';
-
   const { environment } = query;
-
-  // Combine stat filter and combo box filter - stat filter takes priority
-  const activeStatusFilter = useMemo(() => {
-    if (selectedStatFilter) {
-      return [selectedStatFilter];
-    }
-    if (selectedStatusOptions.length > 0) {
-      return selectedStatusOptions.map((opt) => opt.value).filter(Boolean) as SloStatusFilter[];
-    }
-    return undefined;
-  }, [selectedStatFilter, selectedStatusOptions]);
 
   const filtersQuery = useMemo(() => {
     const filters: Array<Record<string, unknown>> = [
@@ -196,26 +139,13 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
       filters.push({ match_phrase: { 'service.environment': environment } });
     }
 
-    if (activeStatusFilter && activeStatusFilter.length > 0) {
-      if (activeStatusFilter.length === 1) {
-        filters.push({ term: { status: activeStatusFilter[0] } });
-      } else {
-        filters.push({
-          bool: {
-            should: activeStatusFilter.map((s) => ({ term: { status: s } })),
-            minimum_should_match: 1,
-          },
-        });
-      }
-    }
-
     return JSON.stringify({
       must: [],
       filter: filters,
       should: [],
       must_not: [],
     });
-  }, [serviceName, environment, activeStatusFilter]);
+  }, [serviceName, environment]);
 
   // Fetch SLOs and alerts in parallel
   useEffect(() => {
@@ -383,8 +313,14 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const filteredSlos = useMemo(() => {
     if (!sloData.length) return [];
 
-    // Only apply search filter client-side, status filtering is done via API
     const filtered = sloData.filter((sloItem) => {
+      if (
+        selectedStatuses.length > 0 &&
+        !selectedStatuses.includes(sloItem.summary?.status as SloStatusFilter)
+      ) {
+        return false;
+      }
+
       if (searchQuery && !sloItem.name.toLowerCase().includes(searchQuery.toLowerCase())) {
         return false;
       }
@@ -404,7 +340,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
 
       return statusPriorityB - statusPriorityA;
     });
-  }, [sloData, searchQuery, activeAlerts]);
+  }, [sloData, selectedStatuses, searchQuery, activeAlerts]);
 
   const sloAppUrl = useMemo(() => {
     const searchParams = rison.encode({
@@ -453,6 +389,21 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
     });
   }, [link, serviceName, query]);
 
+  const statusSelectableOptions: EuiSelectableOption[] = useMemo(() => {
+    return STATUS_OPTIONS.map((option) => ({
+      label: option.label,
+      key: option.value,
+      checked: selectedStatuses.includes(option.value) ? 'on' : undefined,
+    }));
+  }, [selectedStatuses]);
+
+  const handleStatusFilterChange = useCallback((options: EuiSelectableOption[]) => {
+    const selected = options
+      .filter((option) => option.checked === 'on')
+      .map((option) => option.key as SloStatusFilter);
+    setSelectedStatuses(selected);
+  }, []);
+
   const handleSloClick = useCallback(
     (sloId: string) => {
       // If the same SLO is already selected, force close and reopen to ensure flyout appears
@@ -490,21 +441,6 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
     setPerPage(newPerPage);
     setPage(0); // Reset to first page when changing items per page
   }, []);
-
-  const handleStatClick = useCallback((status: SloStatusFilter) => {
-    setSelectedStatFilter((prev) => (prev === status ? null : status));
-    setSelectedStatusOptions([]); // Clear combo box selection when using stat filter
-    setPage(0); // Reset to first page when filter changes
-  }, []);
-
-  const handleStatusFilterChange = useCallback(
-    (options: Array<EuiComboBoxOptionOption<SloStatusFilter>>) => {
-      setSelectedStatusOptions(options);
-      setSelectedStatFilter(null); // Clear stat filter when using combo box
-      setPage(0); // Reset to first page when filter changes
-    },
-    []
-  );
 
   const columns: Array<EuiBasicTableColumn<SLOWithSummaryResponse>> = useMemo(
     () => [
@@ -597,6 +533,8 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
     [getActiveAlertsForSlo, handleActiveAlertsClick, handleSloClick, percentFormat]
   );
 
+  const activeFiltersCount = selectedStatuses.length;
+
   return (
     <EuiFlyout onClose={onClose} aria-labelledby={flyoutTitleId} size="s" ownFocus session="start">
       <EuiFlyoutHeader hasBorder>
@@ -632,58 +570,53 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
       <EuiFlyoutBody>
         <EuiPanel hasBorder paddingSize="m">
           <EuiFlexGroup gutterSize="l" responsive={false} justifyContent="spaceBetween">
-            <ClickableStat
-              count={statusCounts.VIOLATED}
-              titleColor="danger"
-              description={i18n.translate('xpack.apm.sloOverviewFlyout.stats.violated', {
-                defaultMessage: 'Violated',
-              })}
-              tooltip={i18n.translate('xpack.apm.sloOverviewFlyout.stats.violated.tooltip', {
-                defaultMessage: 'Click to filter SLOs by Violated status.',
-              })}
-              isLoading={isLoading}
-              onClick={() => handleStatClick('VIOLATED')}
-              data-test-subj="sloOverviewFlyoutStatViolated"
-            />
-            <ClickableStat
-              count={statusCounts.DEGRADING}
-              titleColor="warning"
-              description={i18n.translate('xpack.apm.sloOverviewFlyout.stats.degrading', {
-                defaultMessage: 'Degrading',
-              })}
-              tooltip={i18n.translate('xpack.apm.sloOverviewFlyout.stats.degrading.tooltip', {
-                defaultMessage: 'Click to filter SLOs by Degrading status.',
-              })}
-              isLoading={isLoading}
-              onClick={() => handleStatClick('DEGRADING')}
-              data-test-subj="sloOverviewFlyoutStatDegrading"
-            />
-            <ClickableStat
-              count={statusCounts.HEALTHY}
-              titleColor="success"
-              description={i18n.translate('xpack.apm.sloOverviewFlyout.stats.healthy', {
-                defaultMessage: 'Healthy',
-              })}
-              tooltip={i18n.translate('xpack.apm.sloOverviewFlyout.stats.healthy.tooltip', {
-                defaultMessage: 'Click to filter SLOs by Healthy status.',
-              })}
-              isLoading={isLoading}
-              onClick={() => handleStatClick('HEALTHY')}
-              data-test-subj="sloOverviewFlyoutStatHealthy"
-            />
-            <ClickableStat
-              count={statusCounts.NO_DATA}
-              titleColor="subdued"
-              description={i18n.translate('xpack.apm.sloOverviewFlyout.stats.noData', {
-                defaultMessage: 'No data',
-              })}
-              tooltip={i18n.translate('xpack.apm.sloOverviewFlyout.stats.noData.tooltip', {
-                defaultMessage: 'Click to filter SLOs by No data status.',
-              })}
-              isLoading={isLoading}
-              onClick={() => handleStatClick('NO_DATA')}
-              data-test-subj="sloOverviewFlyoutStatNoData"
-            />
+            <EuiFlexItem grow>
+              <EuiStat
+                title={statusCounts.VIOLATED}
+                titleSize="s"
+                titleColor="danger"
+                description={i18n.translate('xpack.apm.sloOverviewFlyout.stats.violated', {
+                  defaultMessage: 'Violated',
+                })}
+                isLoading={isLoading}
+                reverse
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow>
+              <EuiStat
+                title={statusCounts.DEGRADING}
+                titleSize="s"
+                titleColor="warning"
+                description={i18n.translate('xpack.apm.sloOverviewFlyout.stats.degrading', {
+                  defaultMessage: 'Degrading',
+                })}
+                isLoading={isLoading}
+                reverse
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow>
+              <EuiStat
+                title={statusCounts.HEALTHY}
+                titleSize="s"
+                titleColor="success"
+                description={i18n.translate('xpack.apm.sloOverviewFlyout.stats.healthy', {
+                  defaultMessage: 'Healthy',
+                })}
+                isLoading={isLoading}
+                reverse
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow>
+              <EuiStat
+                title={statusCounts.NO_DATA}
+                titleSize="s"
+                description={i18n.translate('xpack.apm.sloOverviewFlyout.stats.noData', {
+                  defaultMessage: 'No data',
+                })}
+                isLoading={isLoading}
+                reverse
+              />
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
 
@@ -703,21 +636,37 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
               data-test-subj="sloOverviewFlyoutSearch"
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false} style={{ width: 180 }}>
-            <EuiComboBox<SloStatusFilter>
-              placeholder={i18n.translate('xpack.apm.sloOverviewFlyout.statusFilter.all', {
-                defaultMessage: 'All statuses',
-              })}
-              options={STATUS_OPTIONS}
-              selectedOptions={selectedStatusOptions}
-              onChange={handleStatusFilterChange}
-              isClearable
-              compressed
-              data-test-subj="sloOverviewFlyoutStatusFilter"
-              aria-label={i18n.translate('xpack.apm.sloOverviewFlyout.statusFilter.ariaLabel', {
-                defaultMessage: 'Filter by status',
-              })}
-            />
+          <EuiFlexItem grow={false}>
+            <EuiFilterGroup compressed>
+              <EuiPopover
+                button={
+                  <EuiFilterButton
+                    iconType="filter"
+                    onClick={() => setIsStatusPopoverOpen(!isStatusPopoverOpen)}
+                    isSelected={isStatusPopoverOpen}
+                    hasActiveFilters={activeFiltersCount > 0}
+                    numActiveFilters={activeFiltersCount}
+                    data-test-subj="sloOverviewFlyoutStatusFilterButton"
+                  >
+                    {i18n.translate('xpack.apm.sloOverviewFlyout.statusFilterButton', {
+                      defaultMessage: 'Status',
+                    })}
+                  </EuiFilterButton>
+                }
+                isOpen={isStatusPopoverOpen}
+                closePopover={() => setIsStatusPopoverOpen(false)}
+                panelPaddingSize="none"
+                anchorPosition="downLeft"
+              >
+                <EuiSelectable
+                  options={statusSelectableOptions}
+                  onChange={handleStatusFilterChange}
+                  data-test-subj="sloOverviewFlyoutStatusSelectable"
+                >
+                  {(list) => <div style={{ width: 180 }}>{list}</div>}
+                </EuiSelectable>
+              </EuiPopover>
+            </EuiFilterGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
 
