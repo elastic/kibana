@@ -9,18 +9,14 @@ import React from 'react';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { EuiText } from '@elastic/eui';
 
+import { getModelId } from '../../../../utils/get_model_id';
+
 interface ModelProps {
   endpointInfo: InferenceInferenceEndpointInfo;
 }
 
 export const Model: React.FC<ModelProps> = ({ endpointInfo }) => {
-  const serviceSettings = endpointInfo.service_settings;
-  const modelId =
-    'model_id' in serviceSettings
-      ? serviceSettings.model_id
-      : 'model' in serviceSettings
-      ? serviceSettings.model
-      : undefined;
+  const modelId = getModelId(endpointInfo);
 
   if (!modelId) {
     return null;

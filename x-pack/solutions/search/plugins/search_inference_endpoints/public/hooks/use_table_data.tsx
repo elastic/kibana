@@ -17,6 +17,7 @@ import {
   INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES,
   SortOrder,
 } from '../components/all_inference_endpoints/types';
+import { getModelId } from '../utils/get_model_id';
 
 interface UseTableDataReturn {
   tableData: InferenceInferenceEndpointInfo[];
@@ -25,15 +26,6 @@ interface UseTableDataReturn {
   pagination: Pagination;
   sorting: EuiTableSortingType<InferenceInferenceEndpointInfo>;
 }
-
-const getModelId = (endpoint: InferenceInferenceEndpointInfo): string | undefined => {
-  const serviceSettings = endpoint.service_settings;
-  return 'model_id' in serviceSettings
-    ? serviceSettings.model_id
-    : 'model' in serviceSettings
-    ? serviceSettings.model
-    : undefined;
-};
 
 export const useTableData = (
   inferenceEndpoints: InferenceAPIConfigResponse[],
