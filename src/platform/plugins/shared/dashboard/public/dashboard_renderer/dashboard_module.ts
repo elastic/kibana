@@ -10,6 +10,7 @@
 export { DashboardRenderer } from './dashboard_renderer';
 export { DashboardTopNavWithContext } from '../dashboard_top_nav/dashboard_top_nav_with_context';
 export { DashboardListingTable } from '../dashboard_listing/dashboard_listing_table';
+export { DashboardNavigationOptionsEditor } from '../dashboard_navigation/options_editor';
 export { ClonePanelAction } from '../dashboard_actions/clone_panel_action';
 export { ExpandPanelAction } from '../dashboard_actions/expand_panel_action';
 export { FiltersNotificationAction } from '../dashboard_actions/filters_notification_action';
