@@ -34,7 +34,39 @@ import { globalSetupHook } from '../fixtures';
 globalSetupHook(
   'Ingest data to Elasticsearch',
   { tag: ['@ess', '@svlOblt'] },
-  async ({ infraSynthtraceEsClient, logsSynthtraceEsClient, apmSynthtraceEsClient, log }) => {
+  async ({
+    infraSynthtraceEsClient,
+    logsSynthtraceEsClient,
+    apmSynthtraceEsClient,
+    profilingSetup,
+    log,
+  }) => {
+    // Set up Universal Profiling resources and data if needed
+    try {
+      const status = await profilingSetup.checkStatus();
+      log.info('Profiling status:', status);
+
+      if (!status.has_setup) {
+        await profilingSetup.setupResources();
+      } else {
+        log.info('Profiling resources already set up.');
+      }
+
+      if (!status.has_data) {
+        await profilingSetup.loadData();
+      } else {
+        log.info('Profiling data already loaded.');
+      }
+    } catch (error: any) {
+      // If profiling API is not available, log and continue
+      if (error?.response?.status === 404 || error?.response?.status === 500) {
+        log.info('Profiling API not available or error occurred, skipping profiling setup');
+      } else {
+        log.error(`Error setting up profiling: ${error}`);
+        // Don't throw - allow tests to continue
+      }
+    }
+
     await infraSynthtraceEsClient.index(
       generateHostData({
         from: DATE_WITH_HOSTS_DATA_FROM,
