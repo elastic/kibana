@@ -47,17 +47,16 @@ expect(response).toHaveStatusCode(200);
 expect(response).toHaveStatusCode({ oneOf: [200, 201] });
 expect(response).not.toHaveStatusCode(500);
 
-// Payload assertions with partial matching (default)
-expect(response).toHavePayload({ total: 1 });
-expect(response).toHavePayload({ cases: [{ id: 'case-123' }] });
+// Payload assertions with partial matching (default). Use `toHaveData` for kbnClient/apiServices responses
+expect(response).toHaveBody({ total: 1 });
+expect(response).toHaveBody({ cases: [{ id: 'case-123' }] });
 
 // Asymmetric matchers for flexible assertions
-expect(response).toHavePayload({ cases: expect.toHaveLength() }); // checks length > 0, or pass exact length
-expect(response).toHavePayload({ total: expect.toBeGreaterThan(0) });
-expect(response).toHavePayload({ cases: [{ version: expect.toBeDefined() }] });
+expect(response).toHaveBody({ total: expect.toBeGreaterThan(0) });
+expect(response).toHaveBody({ cases: [{ version: expect.toBeDefined() }] });
 
 // Payload assertions with exact matching
-expect(response).toHavePayload(
+expect(response).toHaveBody(
   {
     total: 1,
     cases: [
@@ -79,7 +78,10 @@ expect(response).toHaveHeaders({ 'set-cookie': 'session=abc, token=xyz' }); // a
 expect(response).toHaveStatusText('OK');
 
 // Value assertions (restricted)
-expect(response.data.cases[0].version).toBeDefined();
+expect(response.body.cases[0].version).toBeDefined();
+expect(response.body.total).toStrictEqual(1);
+expect(response.body.total).toBeGreaterThan(0);
+expect(response.body.total).toBeLessThan(100);
 ```
 
 ### Dynamic Matcher Selection
@@ -90,7 +92,7 @@ Matchers are dynamically created at runtime based on object properties, with sta
 const response = { statusCode: 200, body: { id: 'abc' } }; // no statusMessage
 
 expect(response).toHaveStatusCode(200); // ✅ available
-expect(response).toHavePayload({ id: 'abc' }); // ✅ available
+expect(response).toHaveBody({ id: 'abc' }); // ✅ available
 expect(response).toHaveStatusText('OK'); // ❌ type error - statusMessage not in response
 ```
 
@@ -100,14 +102,14 @@ Default playwright's value matchers are restricted to guide developers toward AP
 
 ```typescript
 // Available for checking system-generated values
-expect(response.data.version).toBeDefined();
+expect(response.body.version).toBeDefined();
 
 // NOT available: ❌
 expect(response.body.cases).toHaveLength(1);
 expect(response.body.cases[0].id).toBe(caseId);
 
 // Instead do this: ✅
-expect(response).toHavePayload({ cases: { id: caseId } });
+expect(response).toHaveBody({ cases: [{ id: caseId }] });
 ```
 
 ---
@@ -126,61 +128,49 @@ expect(data.status).toBe('open');
 // ✅ After: Scout API expect with partial matching
 const response = await apiServices.cases.create({ ... });
 expect(response).toHaveStatusCode(200);
-expect(response).toHavePayload({ owner: caseOwner, status: 'open' });
+expect(response).toHaveData({ owner: caseOwner, status: 'open' });
 ```
 
 ---
 
-## Why `toHavePayload` over `toMatchObject`?
+## Why `toHaveBody`/`toHaveData` over `toMatchObject`?
 
-`toHavePayload` is tailored for API testing workflows:
+These matchers are tailored for API testing workflows:
 
-1. **No destructuring needed** - Automatically finds `data` or `body` in the response:
-
-   ```typescript
-   // Instead of:
-   const { data } = response;
-   expect(data).toMatchObject({ id: 1 });
-
-   // Just:
-   expect(response).toHavePayload({ id: 1 });
-   ```
-
-2. **Partial array matching** - `toMatchObject` requires arrays to match exactly in length and order. `toHavePayload` finds matching items anywhere in the array:
+1. **Partial array matching** - `toMatchObject` requires arrays to match exactly in length and order. These matchers find matching items anywhere in the array:
 
    ```typescript
-   // response.data.items = [{ id: 3, title: 'c' }, { id: 1, title: 'a' }, { id: 2, title: 'b' }]
+   // response.body.items = [{ id: 3, title: 'c' }, { id: 1, title: 'a' }, { id: 2, title: 'b' }]
 
    // ❌ toMatchObject fails (wrong order, wrong length)
-   expect(response.data).toMatchObject({ items: [{ id: 1 }] });
+   expect(response.body).toMatchObject({ items: [{ id: 1 }] });
 
-   // ✅ toHavePayload passes (finds id:1 somewhere in the array)
-   expect(response).toHavePayload({ items: [{ id: 1 }] });
+   // ✅ toHaveBody passes (finds id:1 somewhere in the array)
+   expect(response).toHaveBody({ items: [{ id: 1 }] });
    ```
 
-3. **Existence check** - Call without arguments to verify payload exists:
+2. **Existence check** - Call without arguments to verify payload exists:
 
    ```typescript
    // ❌ Manual check
-   expect(response.data).toBeDefined();
+   expect(response.body).toBeDefined();
 
    // ✅ Built-in
-   expect(response).toHavePayload();
+   expect(response).toHaveBody();
    ```
 
-4. **Asymmetric matchers** - Built-in helpers for common checks:
+3. **Custom asymmetric matchers** - Built-in helpers for common checks:
 
    ```typescript
-   expect(response).toHavePayload({
+   expect(response).toHaveBody({
      count: expect.toBeGreaterThan(0),
-     items: expect.toHaveLength(3),
      id: expect.toBeDefined(),
    });
    ```
 
-5. **Exact matching when needed** - Opt-in strict mode:
+4. **Exact matching when needed** - Opt-in strict mode:
    ```typescript
-   expect(response).toHavePayload({ id: 1 }, { exactMatch: true });
+   expect(response).toHaveBody({ id: 1 }, { exactMatch: true });
    ```
 
 ---

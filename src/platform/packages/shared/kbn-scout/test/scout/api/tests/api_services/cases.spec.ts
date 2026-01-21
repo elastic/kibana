@@ -24,7 +24,7 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
       category: 'test',
     });
     expect(response).toHaveStatusCode(200);
-    expect(response).toHavePayload({ owner: caseOwner, status: 'open' });
+    expect(response).toHaveData({ owner: caseOwner, status: 'open' });
     caseId = response.data.id;
   });
 
@@ -53,7 +53,7 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
     ]);
 
     expect(response).toHaveStatusCode(200);
-    expect(response).toHavePayload([{ severity: 'medium' }]);
+    expect(response).toHaveData([{ severity: 'medium' }]);
   });
 
   apiTest('should add a new connector to a case', async ({ apiServices }) => {
@@ -129,7 +129,7 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
     });
 
     expect(response).toHaveStatusCode(200);
-    expect(response).toHavePayload({ totalComment: 1, comments: [{}] });
+    expect(response).toHaveData({ totalComment: 1, comments: [{}] });
 
     // find comment by ID
     const commentId = response.data.comments?.[0]?.id;
@@ -138,7 +138,7 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
     const fetchedResponse = await apiServices.cases.comments.get(caseId, commentId);
 
     expect(fetchedResponse).toHaveStatusCode(200);
-    expect(fetchedResponse).toHavePayload({ comment: 'This is a test comment' });
+    expect(fetchedResponse).toHaveData({ comment: 'This is a test comment' });
   });
 
   apiTest('should post an alert', async ({ apiServices }) => {
@@ -151,12 +151,12 @@ apiTest.describe('Cases Helpers', { tag: ['@svlSecurity', '@ess'] }, () => {
     });
 
     expect(createdAlert).toHaveStatusCode(200);
-    expect(createdAlert).toHavePayload({ totalAlerts: 1 });
+    expect(createdAlert).toHaveData({ totalAlerts: 1 });
   });
 
   apiTest('should search for a case by category', async ({ apiServices }) => {
     const response = await apiServices.cases.find({ category: 'test' });
     expect(response).toHaveStatusCode(200);
-    expect(response).toHavePayload([{ id: caseId }]);
+    expect(response).toHaveData([{ id: caseId }]);
   });
 });

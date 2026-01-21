@@ -23,8 +23,12 @@ export interface HeadersMatchers {
   toHaveHeaders(headers: Record<string, string>): void;
 }
 
-export interface PayloadMatchers {
-  toHavePayload(expected?: unknown, options?: ToHavePayloadOptions): void;
+export interface DataMatchers {
+  toHaveData(expected?: unknown, options?: ToHavePayloadOptions): void;
+}
+
+export interface BodyMatchers {
+  toHaveBody(expected?: unknown, options?: ToHavePayloadOptions): void;
 }
 
 type IsAny<T> = 0 extends 1 & T ? true : false;
@@ -35,7 +39,8 @@ type ResponseMatchersFor<T> = (T extends { status: number } | { statusCode: numb
   : {}) &
   (T extends { statusText: string } | { statusMessage: string } ? StatusTextMatchers : {}) &
   (T extends { headers: object } ? HeadersMatchers : {}) &
-  (T extends { data: unknown } | { body: unknown } ? PayloadMatchers : {});
+  (T extends { data: unknown } ? DataMatchers : {}) &
+  (T extends { body: unknown } ? BodyMatchers : {});
 
 /**
  * Returns matchers based on the input type T.
@@ -51,12 +56,15 @@ export type MatchersFor<T> = IsAny<T> extends true
 
 export interface ValueMatchers {
   toBeDefined(): void;
+  toStrictEqual(expected: unknown): void;
+  toBeGreaterThan(expected: number): void;
+  toBeLessThan(expected: number): void;
 
   not: Omit<ValueMatchers, 'not'>;
 }
 
 /**
- * Represents an asymmetric matcher that can be used inside toHavePayload().
+ * Represents an asymmetric matcher that can be used inside toHaveData()/toHaveBody().
  * These matchers are identified by Jest/Playwright via the $$typeof symbol.
  */
 export interface AsymmetricMatcher {
@@ -68,13 +76,13 @@ export interface AsymmetricMatcher {
 
 /**
  * Custom asymmetric matchers available on the expect object.
- * These can be used inside toHavePayload() for flexible value matching.
+ * These can be used inside toHaveData()/toHaveBody() for flexible value matching.
  */
 export interface AsymmetricMatchers {
   /** Matches any value that is not null or undefined */
   toBeDefined(): AsymmetricMatcher;
   /** Matches any number greater than the specified value */
   toBeGreaterThan(min: number): AsymmetricMatcher;
-  /** Matches any array or string with the specified length, or any length > 0 if not specified */
-  toHaveLength(length?: number): AsymmetricMatcher;
+  /** Matches any number less than the specified value */
+  toBeLessThan(max: number): AsymmetricMatcher;
 }

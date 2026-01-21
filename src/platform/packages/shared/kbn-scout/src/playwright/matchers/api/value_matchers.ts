@@ -18,8 +18,14 @@ export function createValueMatchers(actual: unknown): ValueMatchers {
   const base = baseExpect(actual);
   return {
     toBeDefined: () => base.toBeDefined(),
+    toStrictEqual: (expected: unknown) => base.toStrictEqual(expected),
+    toBeGreaterThan: (expected: number) => base.toBeGreaterThan(expected),
+    toBeLessThan: (expected: number) => base.toBeLessThan(expected),
     not: {
       toBeDefined: () => base.not.toBeDefined(),
+      toStrictEqual: (expected: unknown) => base.not.toStrictEqual(expected),
+      toBeGreaterThan: (expected: number) => base.not.toBeGreaterThan(expected),
+      toBeLessThan: (expected: number) => base.not.toBeLessThan(expected),
     },
   };
 }

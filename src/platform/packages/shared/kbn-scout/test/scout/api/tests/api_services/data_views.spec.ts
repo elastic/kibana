@@ -46,14 +46,14 @@ apiTest.describe('Data Views API Service', { tag: ['@svlSecurity', '@ess'] }, ()
 
     expect(response).toHaveStatusCode(200);
     // Verify our test data view is in the list
-    expect(response).toHavePayload([{ id: dataViewId, title: dataViewTitle }]);
+    expect(response).toHaveData([{ id: dataViewId, title: dataViewTitle }]);
   });
 
   apiTest('should get a single data view by ID with get()', async ({ apiServices }) => {
     const response = await apiServices.dataViews.get(dataViewId);
 
     expect(response).toHaveStatusCode(200);
-    expect(response).toHavePayload({
+    expect(response).toHaveData({
       id: dataViewId,
       title: dataViewTitle,
       version: expect.toBeDefined(),
@@ -143,8 +143,8 @@ apiTest.describe('Data Views API Service', { tag: ['@svlSecurity', '@ess'] }, ()
 
         expect(response).toHaveStatusCode(200);
         // Should contain title1, but not title2
-        expect(response).toHavePayload([{ id: id1, title: title1 }]);
-        expect(response).not.toHavePayload([{ id: id2 }]);
+        expect(response).toHaveData([{ id: id1, title: title1 }]);
+        expect(response).not.toHaveData([{ id: id2 }]);
       } finally {
         // Clean up
         await apiServices.dataViews.delete(id1);
@@ -161,7 +161,7 @@ apiTest.describe('Data Views API Service', { tag: ['@svlSecurity', '@ess'] }, ()
       );
 
       expect(response).toHaveStatusCode(200);
-      expect(response).toHavePayload([], { exactMatch: true });
+      expect(response).toHaveData([], { exactMatch: true });
     }
   );
 
@@ -285,7 +285,7 @@ apiTest.describe('Data Views API Service', { tag: ['@svlSecurity', '@ess'] }, ()
       // Get all and verify all three exist
       const getAllResponse = await apiServices.dataViews.getAll();
       expect(getAllResponse).toHaveStatusCode(200);
-      expect(getAllResponse).toHavePayload([
+      expect(getAllResponse).toHaveData([
         { id: createdIds[0] },
         { id: createdIds[1] },
         { id: createdIds[2] },
@@ -295,7 +295,7 @@ apiTest.describe('Data Views API Service', { tag: ['@svlSecurity', '@ess'] }, ()
       const findResponse = await apiServices.dataViews.find((dv) =>
         dv.title.includes('multi-test')
       );
-      expect(findResponse).toHavePayload([
+      expect(findResponse).toHaveData([
         { id: createdIds[0] },
         { id: createdIds[1] },
         { id: createdIds[2] },
@@ -313,7 +313,7 @@ apiTest.describe('Data Views API Service', { tag: ['@svlSecurity', '@ess'] }, ()
       const remainingResponse = await apiServices.dataViews.find((dv) =>
         createdIds.includes(dv.id)
       );
-      expect(remainingResponse).toHavePayload([{ id: createdIds[2] }]);
+      expect(remainingResponse).toHaveData([{ id: createdIds[2] }]);
     } finally {
       // Clean up all created data views
       await Promise.all(createdIds.map((id) => apiServices.dataViews.delete(id)));

@@ -32,8 +32,7 @@ function createAsymmetricMatcher(
  * These can be used inside toHavePayload() for partial matching.
  *
  * @example
- * expect(response).toHavePayload({ metadata: expect.toBeDefined() });
- * expect(response).toHavePayload({ count: expect.toBeGreaterThan(0) });
+ * expect(response).toHaveBody({ count: expect.toBeGreaterThan(0) });
  */
 export const asymmetricMatchers: AsymmetricMatchers = {
   /** Matches any value that is not null or undefined */
@@ -47,12 +46,10 @@ export const asymmetricMatchers: AsymmetricMatchers = {
       `toBeGreaterThan(${min})`
     ),
 
-  /** Matches any array or string with the specified length, or any length > 0 if not specified */
-  toHaveLength: (length?: number) =>
+  /** Matches any number less than the specified value */
+  toBeLessThan: (max: number) =>
     createAsymmetricMatcher(
-      (actual) =>
-        (Array.isArray(actual) || typeof actual === 'string') &&
-        (length === undefined ? actual.length > 0 : actual.length === length),
-      length === undefined ? 'toHaveLength(> 0)' : `toHaveLength(${length})`
+      (actual) => typeof actual === 'number' && actual < max,
+      `toBeLessThan(${max})`
     ),
 };

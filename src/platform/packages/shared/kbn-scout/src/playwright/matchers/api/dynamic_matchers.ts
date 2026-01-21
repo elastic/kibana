@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { toHavePayload } from './to_have_payload';
+import { toHaveData, toHaveBody } from './to_have_payload';
 import { toHaveHeaders } from './to_have_headers';
 import { toHaveStatusCode } from './to_have_status_code';
 import { toHaveStatusText } from './to_have_status_text';
@@ -53,11 +53,18 @@ export function createDynamicMatchers(
     not.toHaveHeaders = (headers: Record<string, string>) => toHaveHeaders(obj, headers, true);
   }
 
-  if ('data' in obj || 'body' in obj) {
-    matchers.toHavePayload = (expected?: unknown, options?: ToHavePayloadOptions) =>
-      toHavePayload(obj, expected, options);
-    not.toHavePayload = (expected?: unknown, options?: ToHavePayloadOptions) =>
-      toHavePayload(obj, expected, options, true);
+  if ('data' in obj) {
+    matchers.toHaveData = (expected?: unknown, options?: ToHavePayloadOptions) =>
+      toHaveData(obj, expected, options);
+    not.toHaveData = (expected?: unknown, options?: ToHavePayloadOptions) =>
+      toHaveData(obj, expected, options, true);
+  }
+
+  if ('body' in obj) {
+    matchers.toHaveBody = (expected?: unknown, options?: ToHavePayloadOptions) =>
+      toHaveBody(obj, expected, options);
+    not.toHaveBody = (expected?: unknown, options?: ToHavePayloadOptions) =>
+      toHaveBody(obj, expected, options, true);
   }
 
   return { ...matchers, not };

@@ -49,38 +49,21 @@ function toPartialMatch(expected: unknown): unknown {
 }
 
 /**
- * Asserts that the response payload matches the expected value.
- *
- * @param expected - The expected value. If omitted, checks that payload is not null/undefined.
- * @param options.exactMatch - If true, performs exact matching for objects/arrays.
- *
- * @example
- * // Basic usage
- * expect(response).toHavePayload();                                   // checks payload is not null/undefined
- * expect(response).toHavePayload({ id: 1 });                          // partial match (default)
- * expect(response).toHavePayload({ id: 1 }, { exactMatch: true });    // exact match
- * expect(response).toHavePayload('success');                          // exact match for primitives
- * expect(response).toHavePayload({ items: [{ name: 'foo' }] });       // at least one item with name 'foo'
- *
- * // With asymmetric matchers for flexible assertions
- * expect(response).toHavePayload({ metadata: expect.toBeDefined() });
- * expect(response).toHavePayload({ count: expect.toBeGreaterThan(0) });
- * expect(response).toHavePayload({ comments: expect.toHaveLength(3) });
+ * Internal implementation for payload matching.
  */
-export function toHavePayload<T extends { data: unknown } | { body: unknown }>(
-  obj: T,
+function toHavePayloadInternal(
+  actual: unknown,
+  matcherName: string,
   expected?: unknown,
   options?: ToHavePayloadOptions,
   isNegated = false
 ): void {
-  const actual = 'data' in obj ? obj.data : obj.body;
-
   if (expected === undefined) {
     const hasValue = actual !== null && actual !== undefined;
     if ((!hasValue && !isNegated) || (hasValue && isNegated)) {
       throw createMatcherError({
         expected: 'defined',
-        matcherName: 'toHavePayload',
+        matcherName,
         received: actual,
         isNegated,
       });
@@ -109,9 +92,49 @@ export function toHavePayload<T extends { data: unknown } | { body: unknown }>(
     const expectedDisplay = typeof expected === 'object' ? JSON.stringify(expected) : expected;
     throw createMatcherError({
       expected: expectedDisplay,
-      matcherName: 'toHavePayload',
+      matcherName,
       received: actualDisplay,
       isNegated,
     });
   }
+}
+
+/**
+ * Asserts that response.data matches the expected value.
+ * Used with kbnClient/apiServices responses.
+ *
+ * @param expected - The expected value. If omitted, checks that data is not null/undefined.
+ * @param options.exactMatch - If true, performs exact matching for objects/arrays.
+ *
+ * @example
+ * const response = await apiServices.dataViews.get(id);
+ * expect(response).toHaveData({ version: expect.toBeDefined(), items: [{ id: itemId }] });
+ */
+export function toHaveData<T extends { data: unknown }>(
+  obj: T,
+  expected?: unknown,
+  options?: ToHavePayloadOptions,
+  isNegated = false
+): void {
+  toHavePayloadInternal(obj.data, 'toHaveData', expected, options, isNegated);
+}
+
+/**
+ * Asserts that response.body matches the expected value.
+ * Used with apiClient responses.
+ *
+ * @param expected - The expected value. If omitted, checks that body is not null/undefined.
+ * @param options.exactMatch - If true, performs exact matching for objects/arrays.
+ *
+ * @example
+ * const response = await apiClient.get('api/cases');
+ * expect(response).toHaveBody({ version: expect.toBeDefined(), cases: [{ id: caseId }] });
+ */
+export function toHaveBody<T extends { body: unknown }>(
+  obj: T,
+  expected?: unknown,
+  options?: ToHavePayloadOptions,
+  isNegated = false
+): void {
+  toHavePayloadInternal(obj.body, 'toHaveBody', expected, options, isNegated);
 }

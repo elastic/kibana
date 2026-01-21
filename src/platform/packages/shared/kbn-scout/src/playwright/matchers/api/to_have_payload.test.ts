@@ -9,40 +9,37 @@
 
 import { expect as apiExpect } from '.';
 
-describe('toHavePayload', () => {
+describe('toHaveBody', () => {
   describe('existence check (no arguments)', () => {
-    it('passes when data exists (including falsy values like 0, false, "")', () => {
-      // kbnClient interface (data)
-      expect(() => apiExpect({ data: { id: 1 } }).toHavePayload()).not.toThrow();
-      expect(() => apiExpect({ data: 0 }).toHavePayload()).not.toThrow();
-      expect(() => apiExpect({ data: false }).toHavePayload()).not.toThrow();
-      expect(() => apiExpect({ data: '' }).toHavePayload()).not.toThrow();
-      // apiClient interface (body)
-      expect(() => apiExpect({ body: { id: 1 } }).toHavePayload()).not.toThrow();
+    it('passes when body exists (including falsy values like 0, false, "")', () => {
+      expect(() => apiExpect({ body: { id: 1 } }).toHaveBody()).not.toThrow();
+      expect(() => apiExpect({ body: 0 }).toHaveBody()).not.toThrow();
+      expect(() => apiExpect({ body: false }).toHaveBody()).not.toThrow();
+      expect(() => apiExpect({ body: '' }).toHaveBody()).not.toThrow();
     });
 
-    it('fails when data is null or undefined', () => {
-      expect(() => apiExpect({ data: null }).toHavePayload()).toThrow();
-      expect(() => apiExpect({ data: undefined }).toHavePayload()).toThrow();
+    it('fails when body is null or undefined', () => {
+      expect(() => apiExpect({ body: null }).toHaveBody()).toThrow();
+      expect(() => apiExpect({ body: undefined }).toHaveBody()).toThrow();
     });
 
     it('supports negation', () => {
-      expect(() => apiExpect({ data: null }).not.toHavePayload()).not.toThrow();
+      expect(() => apiExpect({ body: null }).not.toHaveBody()).not.toThrow();
     });
   });
 
   describe('primitive matching', () => {
     it('matches primitives exactly', () => {
-      expect(() => apiExpect({ data: 'success' }).toHavePayload('success')).not.toThrow();
-      expect(() => apiExpect({ data: 42 }).toHavePayload(42)).not.toThrow();
-      expect(() => apiExpect({ data: 'a' }).toHavePayload('b')).toThrow();
+      expect(() => apiExpect({ body: 'success' }).toHaveBody('success')).not.toThrow();
+      expect(() => apiExpect({ body: 42 }).toHaveBody(42)).not.toThrow();
+      expect(() => apiExpect({ body: 'a' }).toHaveBody('b')).toThrow();
     });
   });
 
   describe('partial object matching (default)', () => {
-    it('passes when data contains expected properties', () => {
+    it('passes when body contains expected properties', () => {
       expect(() =>
-        apiExpect({ data: { id: 1, name: 'test', extra: 'ignored' } }).toHavePayload({
+        apiExpect({ body: { id: 1, name: 'test', extra: 'ignored' } }).toHaveBody({
           id: 1,
           name: 'test',
         })
@@ -50,38 +47,32 @@ describe('toHavePayload', () => {
     });
 
     it('fails when expected properties are missing', () => {
-      expect(() => apiExpect({ data: { id: 1 } }).toHavePayload({ id: 1, name: 'test' })).toThrow();
+      expect(() => apiExpect({ body: { id: 1 } }).toHaveBody({ id: 1, name: 'test' })).toThrow();
     });
 
     it('supports negation', () => {
-      expect(() => apiExpect({ data: { id: 1 } }).not.toHavePayload({ id: 2 })).not.toThrow();
+      expect(() => apiExpect({ body: { id: 1 } }).not.toHaveBody({ id: 2 })).not.toThrow();
     });
   });
 
   describe('exact matching with { exactMatch: true }', () => {
-    it('fails when data has extra properties', () => {
+    it('fails when body has extra properties', () => {
       expect(() =>
-        apiExpect({ data: { id: 1, extra: 'field' } }).toHavePayload(
-          { id: 1 },
-          { exactMatch: true }
-        )
+        apiExpect({ body: { id: 1, extra: 'field' } }).toHaveBody({ id: 1 }, { exactMatch: true })
       ).toThrow();
     });
 
-    it('passes only when data matches exactly', () => {
+    it('passes only when body matches exactly', () => {
       expect(() =>
-        apiExpect({ data: { id: 1 } }).toHavePayload({ id: 1 }, { exactMatch: true })
+        apiExpect({ body: { id: 1 } }).toHaveBody({ id: 1 }, { exactMatch: true })
       ).not.toThrow();
     });
 
     it('requires exact array length and order', () => {
       expect(() =>
-        apiExpect({ data: [{ id: 1 }, { id: 2 }, { id: 3 }] }).toHavePayload(
-          [{ id: 1 }, { id: 2 }],
-          {
-            exactMatch: true,
-          }
-        )
+        apiExpect({ body: [{ id: 1 }, { id: 2 }, { id: 3 }] }).toHaveBody([{ id: 1 }, { id: 2 }], {
+          exactMatch: true,
+        })
       ).toThrow();
     });
   });
@@ -89,25 +80,23 @@ describe('toHavePayload', () => {
   describe('partial array matching (default)', () => {
     it('allows extra items and ignores order', () => {
       expect(() =>
-        apiExpect({ data: [{ id: 3 }, { id: 1 }, { id: 2 }] }).toHavePayload([{ id: 1 }])
+        apiExpect({ body: [{ id: 3 }, { id: 1 }, { id: 2 }] }).toHaveBody([{ id: 1 }])
       ).not.toThrow();
     });
 
     it('allows extra properties on array items', () => {
       expect(() =>
-        apiExpect({ data: [{ id: 1, extra: 'a' }] }).toHavePayload([{ id: 1 }])
+        apiExpect({ body: [{ id: 1, extra: 'a' }] }).toHaveBody([{ id: 1 }])
       ).not.toThrow();
     });
 
     it('fails when expected item is not found', () => {
-      expect(() =>
-        apiExpect({ data: [{ id: 1 }, { id: 2 }] }).toHavePayload([{ id: 999 }])
-      ).toThrow();
+      expect(() => apiExpect({ body: [{ id: 1 }, { id: 2 }] }).toHaveBody([{ id: 999 }])).toThrow();
     });
   });
 
   describe('deep nesting with parallel branches', () => {
-    const complexData = {
+    const complexBody = {
       meta: { version: '1.0', extra: 'ignored' },
       results: {
         total: 100,
@@ -120,7 +109,7 @@ describe('toHavePayload', () => {
 
     it('matches multiple branches and nested arrays simultaneously', () => {
       expect(() =>
-        apiExpect({ data: complexData }).toHavePayload({
+        apiExpect({ body: complexBody }).toHaveBody({
           meta: { version: '1.0' },
           results: {
             total: 100,
@@ -132,7 +121,7 @@ describe('toHavePayload', () => {
 
     it('fails when any branch does not match', () => {
       expect(() =>
-        apiExpect({ data: complexData }).toHavePayload({
+        apiExpect({ body: complexBody }).toHaveBody({
           meta: { version: '1.0' },
           results: { items: [{ id: 'nonexistent' }] },
         })
@@ -144,7 +133,7 @@ describe('toHavePayload', () => {
     describe('expect.toBeDefined()', () => {
       it('passes for any non-null/undefined value including falsy ones', () => {
         expect(() =>
-          apiExpect({ data: { a: 'str', b: 0, c: '', d: false } }).toHavePayload({
+          apiExpect({ body: { a: 'str', b: 0, c: '', d: false } }).toHaveBody({
             a: apiExpect.toBeDefined(),
             b: apiExpect.toBeDefined(),
             c: apiExpect.toBeDefined(),
@@ -155,10 +144,10 @@ describe('toHavePayload', () => {
 
       it('fails for null or undefined values', () => {
         expect(() =>
-          apiExpect({ data: { a: null } }).toHavePayload({ a: apiExpect.toBeDefined() })
+          apiExpect({ body: { a: null } }).toHaveBody({ a: apiExpect.toBeDefined() })
         ).toThrow();
         expect(() =>
-          apiExpect({ data: { a: undefined } }).toHavePayload({ a: apiExpect.toBeDefined() })
+          apiExpect({ body: { a: undefined } }).toHaveBody({ a: apiExpect.toBeDefined() })
         ).toThrow();
       });
     });
@@ -166,62 +155,60 @@ describe('toHavePayload', () => {
     describe('expect.toBeGreaterThan()', () => {
       it('passes when number exceeds threshold', () => {
         expect(() =>
-          apiExpect({ data: { count: 5 } }).toHavePayload({ count: apiExpect.toBeGreaterThan(0) })
+          apiExpect({ body: { count: 5 } }).toHaveBody({ count: apiExpect.toBeGreaterThan(0) })
         ).not.toThrow();
       });
 
       it('fails when number equals or is below threshold', () => {
         expect(() =>
-          apiExpect({ data: { count: 5 } }).toHavePayload({ count: apiExpect.toBeGreaterThan(5) })
+          apiExpect({ body: { count: 5 } }).toHaveBody({ count: apiExpect.toBeGreaterThan(5) })
         ).toThrow();
         expect(() =>
-          apiExpect({ data: { count: 5 } }).toHavePayload({ count: apiExpect.toBeGreaterThan(10) })
+          apiExpect({ body: { count: 5 } }).toHaveBody({ count: apiExpect.toBeGreaterThan(10) })
         ).toThrow();
       });
+    });
 
-      it('fails for non-number values', () => {
+    describe('expect.toBeLessThan()', () => {
+      it('passes when number is below threshold', () => {
         expect(() =>
-          apiExpect({ data: { name: 'test' } }).toHavePayload({
-            name: apiExpect.toBeGreaterThan(0),
-          })
+          apiExpect({ body: { count: 5 } }).toHaveBody({ count: apiExpect.toBeLessThan(10) })
+        ).not.toThrow();
+      });
+
+      it('fails when number equals or exceeds threshold', () => {
+        expect(() =>
+          apiExpect({ body: { count: 5 } }).toHaveBody({ count: apiExpect.toBeLessThan(5) })
+        ).toThrow();
+        expect(() =>
+          apiExpect({ body: { count: 5 } }).toHaveBody({ count: apiExpect.toBeLessThan(3) })
         ).toThrow();
       });
     });
 
     it('works on nested object properties', () => {
-      const data = { user: { profile: { age: 25, name: 'test' } } };
+      const body = { user: { profile: { age: 25, name: 'test' } } };
       expect(() =>
-        apiExpect({ data }).toHavePayload({
+        apiExpect({ body }).toHaveBody({
           user: { profile: { age: apiExpect.toBeGreaterThan(18) } },
         })
       ).not.toThrow();
     });
 
     it('works on items inside nested arrays', () => {
-      const data = { items: [{ count: 5 }, { count: 10 }] };
+      const body = { items: [{ count: 5 }, { count: 10 }] };
       expect(() =>
-        apiExpect({ data }).toHavePayload({
+        apiExpect({ body }).toHaveBody({
           items: [{ count: apiExpect.toBeGreaterThan(4) }],
         })
       ).not.toThrow();
     });
+  });
 
-    describe('expect.toHaveLength()', () => {
-      it('matches exact length or non-empty when omitted', () => {
-        expect(() =>
-          apiExpect({ data: { items: [1, 2, 3] } }).toHavePayload({
-            items: apiExpect.toHaveLength(3),
-          })
-        ).not.toThrow();
-        expect(() =>
-          apiExpect({ data: { items: [1, 2, 3] } }).toHavePayload({
-            items: apiExpect.toHaveLength(),
-          })
-        ).not.toThrow();
-        expect(() =>
-          apiExpect({ data: { items: [] } }).toHavePayload({ items: apiExpect.toHaveLength() })
-        ).toThrow();
-      });
-    });
+  // toHaveData uses the same internal logic, just operates on 'data' instead of 'body'
+  it('toHaveData works the same way for kbnClient/apiServices responses', () => {
+    expect(() => apiExpect({ data: { id: 1, name: 'test' } }).toHaveData({ id: 1 })).not.toThrow();
+    expect(() => apiExpect({ data: null }).toHaveData()).toThrow();
+    expect(() => apiExpect({ data: null }).not.toHaveData()).not.toThrow();
   });
 });
