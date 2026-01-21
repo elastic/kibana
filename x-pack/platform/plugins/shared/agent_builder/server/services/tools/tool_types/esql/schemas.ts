@@ -8,16 +8,11 @@
 import { schema } from '@kbn/config-schema';
 
 export const paramValueTypeSchema = schema.oneOf([
-  schema.literal('text'),
-  schema.literal('keyword'),
-  schema.literal('long'),
+  schema.literal('string'),
   schema.literal('integer'),
-  schema.literal('double'),
   schema.literal('float'),
   schema.literal('boolean'),
   schema.literal('date'),
-  schema.literal('object'),
-  schema.literal('nested'),
 ]);
 
 export const paramSchema = schema.object({
@@ -27,25 +22,19 @@ export const paramSchema = schema.object({
   defaultValue: schema.conditional(
     schema.siblingRef('optional'),
     true,
-    schema.maybe(
-      schema.oneOf([
-        schema.string(),
-        schema.number(),
-        schema.boolean(),
-        schema.recordOf(schema.string(), schema.any()),
-        schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
-      ])
-    ),
+    schema.maybe(schema.oneOf([schema.string(), schema.number(), schema.boolean()])),
     schema.never()
   ),
 });
 
 export const configurationSchema = schema.object({
+  schema_version: schema.maybe(schema.number()),
   query: schema.string(),
   params: schema.recordOf(schema.string(), paramSchema),
 });
 
 export const configurationUpdateSchema = schema.object({
+  schema_version: schema.maybe(schema.number()),
   query: schema.maybe(schema.string()),
   params: schema.maybe(schema.recordOf(schema.string(), paramSchema)),
 });

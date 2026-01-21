@@ -8,6 +8,7 @@
 import { omit } from 'lodash';
 import type { EsqlToolDefinition } from '@kbn/agent-builder-common';
 import { ToolType } from '@kbn/agent-builder-common';
+import { ESQL_CONFIG_SCHEMA_VERSION } from '@kbn/agent-builder-common/tools/types/esql';
 import type { CreateToolPayload } from '../../../common/http_api/tools';
 import {
   transformEsqlFormDataForCreate,
@@ -32,14 +33,14 @@ describe('transformEsqlFormData', () => {
       params: [
         {
           name: 'param1',
-          type: 'text',
+          type: 'string',
           description: 'A string parameter.',
           source: EsqlParamSource.Custom,
           optional: false,
         },
         {
           name: 'param2',
-          type: 'long',
+          type: 'integer',
           description: 'A number parameter.',
           source: EsqlParamSource.Custom,
           optional: false,
@@ -54,15 +55,16 @@ describe('transformEsqlFormData', () => {
       description: 'A tool for testing.',
       readonly: false,
       configuration: {
+        schema_version: ESQL_CONFIG_SCHEMA_VERSION,
         query: 'FROM my_index | LIMIT 10 | WHERE field1 == ?param1 AND field2 == ?param2',
         params: {
           param1: {
-            type: 'text',
+            type: 'string',
             description: 'A string parameter.',
             optional: false,
           },
           param2: {
-            type: 'long',
+            type: 'integer',
             description: 'A number parameter.',
             optional: false,
           },
@@ -91,7 +93,7 @@ describe('transformEsqlFormData', () => {
       mockFormData.params.push({
         name: 'unusedParam',
         description: 'An unused parameter.',
-        type: 'text',
+        type: 'string',
         source: EsqlParamSource.Custom,
         optional: false,
       });
@@ -101,7 +103,7 @@ describe('transformEsqlFormData', () => {
       expectedTool.configuration.params = {
         param1: {
           description: 'A string parameter.',
-          type: 'text',
+          type: 'string',
           optional: false,
         },
       };
@@ -153,14 +155,14 @@ describe('transformEsqlFormData', () => {
         params: [
           {
             name: 'param1',
-            type: 'text',
+            type: 'string',
             description: 'A string parameter.',
             source: EsqlParamSource.Custom,
             optional: false,
           },
           {
             name: 'param2',
-            type: 'long',
+            type: 'integer',
             description: 'A number parameter.',
             source: EsqlParamSource.Custom,
             optional: false,
@@ -177,7 +179,7 @@ describe('transformEsqlFormData', () => {
           query: 'FROM my_index | LIMIT 10 | WHERE field1 == ?param1',
           params: {
             param1: {
-              type: 'text',
+              type: 'string',
               description: 'A string parameter.',
               optional: false,
             },

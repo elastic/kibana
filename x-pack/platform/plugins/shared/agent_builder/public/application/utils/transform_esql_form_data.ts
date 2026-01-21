@@ -7,6 +7,7 @@
 
 import { getESQLQueryVariables } from '@kbn/esql-utils';
 import type { EsqlToolDefinition, EsqlToolParam } from '@kbn/agent-builder-common';
+import { ESQL_CONFIG_SCHEMA_VERSION } from '@kbn/agent-builder-common/tools/types/esql';
 import { ToolType } from '@kbn/agent-builder-common';
 import { omit } from 'lodash';
 import type { CreateToolPayload, UpdateToolPayload } from '../../../common/http_api/tools';
@@ -51,6 +52,7 @@ export const transformFormDataToEsqlTool = (data: EsqlToolFormData): EsqlToolDef
     description: data.description,
     readonly: false,
     configuration: {
+      schema_version: ESQL_CONFIG_SCHEMA_VERSION,
       query: data.esql,
       params: data.params
         .filter((param) => esqlParams.has(param.name))

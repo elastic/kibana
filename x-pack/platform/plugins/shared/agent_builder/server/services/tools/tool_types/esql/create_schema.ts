@@ -14,15 +14,12 @@ export function createSchemaFromParams(params: EsqlToolConfig['params']): z.ZodO
   for (const [key, param] of Object.entries(params)) {
     let field: z.ZodTypeAny;
     switch (param.type) {
-      case 'text':
-      case 'keyword':
+      case 'string':
         field = z.string();
         break;
-      case 'long':
       case 'integer':
         field = z.number().int();
         break;
-      case 'double':
       case 'float':
         field = z.number();
         break;
@@ -31,12 +28,6 @@ export function createSchemaFromParams(params: EsqlToolConfig['params']): z.ZodO
         break;
       case 'date':
         field = z.string().datetime();
-        break;
-      case 'object':
-        field = z.record(z.unknown());
-        break;
-      case 'nested':
-        field = z.array(z.record(z.unknown()));
         break;
     }
 

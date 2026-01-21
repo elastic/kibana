@@ -8,19 +8,19 @@
 import { ToolType, type ToolDefinition, type ToolDefinitionWithSchema } from '../definition';
 
 /**
+ * Current configuration schema version for persisted ES|QL tools.
+ */
+export const ESQL_CONFIG_SCHEMA_VERSION = 2;
+
+/**
  * Common ES Field Types
  */
 export enum EsqlToolFieldType {
-  TEXT = 'text',
-  KEYWORD = 'keyword',
-  LONG = 'long',
   INTEGER = 'integer',
-  DOUBLE = 'double',
+  STRING = 'string',
   FLOAT = 'float',
   BOOLEAN = 'boolean',
   DATE = 'date',
-  OBJECT = 'object',
-  NESTED = 'nested',
 }
 
 export type EsqlToolFieldTypes = `${EsqlToolFieldType}`;
@@ -28,12 +28,7 @@ export type EsqlToolFieldTypes = `${EsqlToolFieldType}`;
 /**
  * Valid types for parameter values and default values
  */
-export type EsqlToolParamValue =
-  | string
-  | number
-  | boolean
-  | Record<string, unknown>
-  | Array<Record<string, unknown>>;
+export type EsqlToolParamValue = string | number | boolean;
 
 export interface EsqlToolParam {
   /**
@@ -58,6 +53,11 @@ export interface EsqlToolParam {
 // To make compatible with ToolDefinition['configuration']
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type EsqlToolConfig = {
+  /**
+   * This is used to keep backward compatibility while allowing schema changes.
+   * When absent, the config may be in a legacy format and must be converted on read.
+   */
+  schema_version: number;
   query: string;
   params: Record<string, EsqlToolParam>;
 };

@@ -7,6 +7,7 @@
 
 import { createHandler, resolveToolParameters } from './create_handler';
 import type { EsqlToolConfig } from '@kbn/agent-builder-common';
+import { ESQL_CONFIG_SCHEMA_VERSION } from '@kbn/agent-builder-common/tools/types/esql';
 
 // Mock the ES client
 const mockEsClient = {
@@ -33,11 +34,12 @@ describe('createHandler', () => {
   describe('default value handling', () => {
     it('should use default values when LLM omits parameters', async () => {
       const config: EsqlToolConfig = {
+        schema_version: ESQL_CONFIG_SCHEMA_VERSION,
         query: 'FROM users | WHERE status == ?status AND name == ?name',
         params: {
-          status: { type: 'keyword', description: 'User status', optional: true },
+          status: { type: 'string', description: 'User status', optional: true },
           name: {
-            type: 'text',
+            type: 'string',
             description: 'User name',
             optional: true,
             defaultValue: 'John Doe',
@@ -59,11 +61,12 @@ describe('createHandler', () => {
 
     it('should use LLM values when provided, overriding defaults', async () => {
       const config: EsqlToolConfig = {
+        schema_version: ESQL_CONFIG_SCHEMA_VERSION,
         query: 'FROM users | WHERE status == ?status AND name == ?name',
         params: {
-          status: { type: 'keyword', description: 'User status', optional: true },
+          status: { type: 'string', description: 'User status', optional: true },
           name: {
-            type: 'text',
+            type: 'string',
             description: 'User name',
             optional: true,
             defaultValue: 'John Doe',
@@ -85,10 +88,11 @@ describe('createHandler', () => {
 
     it('should use null for optional parameters without defaults', async () => {
       const config: EsqlToolConfig = {
-        query: 'FROM users | WHERE status == ?status',
+        schema_version: ESQL_CONFIG_SCHEMA_VERSION,
+        query: 'FROM users | WHERE status == ?status AND name == ?name',
         params: {
-          status: { type: 'keyword', description: 'User status', optional: true },
-          name: { type: 'text', description: 'User name', optional: true }, // No default
+          status: { type: 'string', description: 'User status', optional: true },
+          name: { type: 'string', description: 'User name', optional: true }, // No default
         },
       };
 
@@ -99,7 +103,7 @@ describe('createHandler', () => {
 
       // Verify ES|QL was called with null for missing parameter
       expect(mockEsClient.asCurrentUser.esql.query).toHaveBeenCalledWith({
-        query: 'FROM users | WHERE status == ?status',
+        query: 'FROM users | WHERE status == ?status AND name == ?name',
         params: [{ status: 'active' }, { name: null }],
       });
     });
@@ -109,13 +113,13 @@ describe('createHandler', () => {
 describe('resolveToolParameters', () => {
   const mockParamDefinitions: EsqlToolConfig['params'] = {
     status: {
-      type: 'keyword',
+      type: 'string',
       description: 'User status',
       optional: true,
       defaultValue: 'active',
     },
     name: {
-      type: 'text',
+      type: 'string',
       description: 'User name',
       optional: true,
     },
@@ -149,5 +153,27 @@ describe('resolveToolParameters', () => {
       status: 'inactive',
       name: null, // no default, so null
     });
+  });
+
+  it('should preserve falsy provided values (0, false, empty string)', () => {
+    const paramDefinitions: EsqlToolConfig['params'] = {
+      count: { type: 'integer', description: 'Count', optional: true, defaultValue: 5 },
+      enabled: { type: 'boolean', description: 'Enabled', optional: true, defaultValue: true },
+      name: { type: 'string', description: 'Name', optional: true, defaultValue: 'default' },
+    };
+
+    const providedParams = { count: 0, enabled: false, name: '' };
+    const result = resolveToolParameters(paramDefinitions, providedParams);
+
+    expect(result).toEqual({ count: 0, enabled: false, name: '' });
+  });
+
+  it('should use null for missing required parameters', () => {
+    const paramDefinitions: EsqlToolConfig['params'] = {
+      requiredParam: { type: 'string', description: 'Required param' },
+    };
+
+    const result = resolveToolParameters(paramDefinitions, {});
+    expect(result).toEqual({ requiredParam: null });
   });
 });
