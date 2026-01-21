@@ -183,7 +183,7 @@ export function generateUiParallelSpecContent(
 import { spaceTest, testData } from '../fixtures';
 
 spaceTest.describe(
-  'Scout parallel ui test suite example',
+  'Scout parallel UI test suite example',
   { tag: tags.DEPLOYMENT_AGNOSTIC },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
