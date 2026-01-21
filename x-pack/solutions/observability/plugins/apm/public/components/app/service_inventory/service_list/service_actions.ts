@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  rulesLocatorID,
-  sloListLocatorID,
-  type RulesLocatorParams,
-  type SloListLocatorParams,
-} from '@kbn/deeplinks-observability';
+import { sloListLocatorID, type SloListLocatorParams } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { useMemo } from 'react';
@@ -44,7 +39,6 @@ export function useServiceActions({
 }: UseServiceActionsParams): UseServiceActionsReturn {
   const { core, plugins, share } = useApmPluginContext();
   const { capabilities } = core.application;
-  const rulesLocator = share.url.locators.get<RulesLocatorParams>(rulesLocatorID);
   const sloListLocator = share.url.locators.get<SloListLocatorParams>(sloListLocatorID);
 
   const { canSaveAlerts } = getAlertingCapabilities(plugins, capabilities);
@@ -108,18 +102,6 @@ export function useServiceActions({
             onClick: (item) => {
               openAlertFlyout(ApmRuleType.ErrorCount, item.serviceName);
             },
-          },
-          {
-            id: 'manageRules',
-            name: i18n.translate('xpack.apm.servicesTable.actions.manageRules', {
-              defaultMessage: 'Manage rules',
-            }),
-            icon: 'tableOfContents',
-            href: (item) =>
-              rulesLocator?.getRedirectUrl({
-                search: `service.name:${item.serviceName}`,
-                type: APM_RULE_TYPES,
-              }),
           },
         ],
       });
@@ -198,14 +180,7 @@ export function useServiceActions({
     }
 
     return actionsList;
-  }, [
-    openAlertFlyout,
-    openSloFlyout,
-    canSaveApmAlerts,
-    canWriteSlos,
-    rulesLocator,
-    sloListLocator,
-  ]);
+  }, [openAlertFlyout, openSloFlyout, canSaveApmAlerts, canWriteSlos, sloListLocator]);
 
   return { actions, showActionsColumn };
 }
