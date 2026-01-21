@@ -524,15 +524,15 @@ export class AutomaticImportSavedObjectService {
 
   /**
    * Delete a data stream by ID
-   * @param integrationId - The ID of the integration
    * @param dataStreamId - The ID of the data stream
+   * @param integrationId - The ID of the integration
    * @param authenticatedUser - The authenticated user
    * @param options - The options for the delete
    * @returns The deleted data stream
    */
   public async deleteDataStream(
-    integrationId: string,
     dataStreamId: string,
+    integrationId: string,
     options?: SavedObjectsDeleteOptions
   ): Promise<void> {
     try {

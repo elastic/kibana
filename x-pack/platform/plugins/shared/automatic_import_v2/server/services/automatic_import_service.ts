@@ -272,7 +272,7 @@ export class AutomaticImportService {
       esClient
     );
     // Delete the data stream from the saved objects
-    await this.savedObjectService.deleteDataStream(integrationId, dataStreamId, options);
+    await this.savedObjectService.deleteDataStream(dataStreamId, integrationId, options);
   }
 
   public async addSamplesToDataStream(
