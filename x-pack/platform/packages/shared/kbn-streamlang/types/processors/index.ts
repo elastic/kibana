@@ -507,7 +507,7 @@ export interface ConcatProcessor extends ProcessorBaseWithWhere {
 
 export const concatProcessorSchema = processorBaseWithWhereSchema.extend({
   action: z.literal('concat'),
-  from: z.array(concatFromSchema),
+  from: z.array(concatFromSchema).nonempty(),
   to: StreamlangTargetField,
   ignore_missing: z.optional(z.boolean()),
 }) satisfies z.Schema<ConcatProcessor>;

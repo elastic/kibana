@@ -172,8 +172,22 @@ const FromBuilderItem = ({
 };
 
 export const ConcatFromBuilder = () => {
+  const {
+    formState: { errors },
+  } = useFormContext<ConcatFormState>();
+
   const { fields, append, remove, move } = useFieldArray<Pick<ConcatFormState, 'from'>>({
     name: 'from',
+    rules: {
+      validate: (value) => {
+        if (value.length === 0) {
+          return i18n.translate('xpack.streams.concatFromBuilder.fromMinLengthError', {
+            defaultMessage: 'At least one field or literal is required.',
+          });
+        }
+        return true;
+      },
+    },
   });
 
   const handleAddField = () => {
@@ -201,6 +215,8 @@ export const ConcatFromBuilder = () => {
           'xpack.streams.streamDetailView.managementTab.enrichment.processor.concatFromBuilderLabel',
           { defaultMessage: 'Combine elements to build the final value' }
         )}
+        isInvalid={Boolean(errors.from)}
+        error={errors.from?.root?.message as string}
       >
         <SortableList onDragItem={handleFromBuilderDrag}>
           <EuiFlexGroup direction="column" gutterSize="s">

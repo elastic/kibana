@@ -441,7 +441,7 @@ const getAvailableProcessors: (
       return (
         <FormattedMessage
           id="xpack.streams.streamDetailView.managementTab.enrichment.processor.concatHelpText"
-          defaultMessage="Use Concat to transform a field with a custom combination."
+          defaultMessage="Join field values and text into a single string and write it to a target field."
         />
       );
     },
