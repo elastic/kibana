@@ -80,18 +80,20 @@ describe('hits counter', function () {
     component2.unmount();
   });
 
-  it('renders with the hit Counter label provided', function () {
+  it('renders with custom hit counter labels', function () {
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     stateContainer.dataState.data$.totalHits$ = new BehaviorSubject({
       fetchStatus: FetchStatus.COMPLETE,
       result: 1899,
     }) as DataTotalHits$;
     stateContainer.dataState.data$.documents$ = getDocuments$();
+
     const component1 = renderWithI18n(
       <HitsCounter
         mode={HitsCounterMode.appended}
         stateContainer={stateContainer}
         hitCounterLabel="kibanana"
+        hitCounterPluralLabel="kibananas"
       />
     );
     expect(screen.getByTestId('discoverQueryHits')).toHaveTextContent('1,899');
@@ -104,12 +106,31 @@ describe('hits counter', function () {
         mode={HitsCounterMode.standalone}
         stateContainer={stateContainer}
         hitCounterLabel="kibanana"
+        hitCounterPluralLabel="kibananas"
       />
     );
     expect(screen.getByTestId('discoverQueryHits')).toHaveTextContent('1,899');
     expect(screen.getByTestId('discoverQueryTotalHits')).toHaveTextContent('1,899 kibananas');
 
     component2.unmount();
+
+    stateContainer.dataState.data$.totalHits$ = new BehaviorSubject({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: 1,
+    }) as DataTotalHits$;
+
+    const component3 = renderWithI18n(
+      <HitsCounter
+        mode={HitsCounterMode.standalone}
+        stateContainer={stateContainer}
+        hitCounterLabel="kibanana"
+        hitCounterPluralLabel="kibananas"
+      />
+    );
+    expect(screen.getByTestId('discoverQueryHits')).toHaveTextContent('1');
+    expect(screen.getByTestId('discoverQueryTotalHits')).toHaveTextContent('1 kibanana');
+
+    component3.unmount();
   });
 
   it('should render a EuiLoadingSpinner when status is partial', () => {
