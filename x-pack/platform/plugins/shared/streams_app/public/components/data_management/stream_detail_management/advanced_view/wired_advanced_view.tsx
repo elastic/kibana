@@ -12,8 +12,8 @@ import type { Streams } from '@kbn/streams-schema';
 import { isRoot } from '@kbn/streams-schema';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition';
-import { StreamFeatureConfiguration } from '../../../stream_detail_features/stream_feature_configuration';
-import { StreamDescription } from '../../../stream_detail_features/stream_description';
+import { StreamSystemConfiguration } from '../../../stream_detail_systems/stream_system_configuration';
+import { StreamDescription } from '../../../stream_detail_systems/stream_description';
 import { IndexConfiguration } from './index_configuration';
 import { DeleteStreamPanel } from './delete_stream';
 import { ImportExportPanel } from './import_export';
@@ -62,7 +62,7 @@ export function WiredAdvancedView({
             aiFeatures={aiFeatures}
           />
           <EuiSpacer />
-          <StreamFeatureConfiguration definition={definition.stream} aiFeatures={aiFeatures} />
+          <StreamSystemConfiguration definition={definition.stream} aiFeatures={aiFeatures} />
           <EuiSpacer />
         </>
       )}

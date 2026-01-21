@@ -12,7 +12,7 @@ import { useQuery } from '@kbn/react-query';
 import { useFetchErrorToast } from '../../../../hooks/use_fetch_error_toast';
 import { useKibana } from '../../../../hooks/use_kibana';
 
-export const useStreamFeatures = (streamName: string) => {
+export const useStreamSystems = (streamName: string) => {
   const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
   const showFetchErrorToast = useFetchErrorToast();
 
@@ -28,23 +28,23 @@ export const useStreamFeatures = (streamName: string) => {
   };
 
   const { data, isLoading, error, refetch } = useQuery<{ systems: System[] }, Error>({
-    queryKey: ['features', streamName],
+    queryKey: ['systems', streamName],
     queryFn: fetchSystems,
     onError: showFetchErrorToast,
   });
 
   const systems = useMemo(() => data?.systems ?? [], [data?.systems]);
 
-  const featuresByName = useMemo(
+  const systemsByName = useMemo(
     () => Object.fromEntries(systems.map((s) => [s.name, s])),
     [systems]
   );
 
   return {
-    refreshFeatures: refetch,
-    features: systems,
-    featuresByName,
-    featuresLoading: isLoading,
+    refreshSystems: refetch,
+    systems,
+    systemsByName,
+    systemsLoading: isLoading,
     error,
   };
 };
