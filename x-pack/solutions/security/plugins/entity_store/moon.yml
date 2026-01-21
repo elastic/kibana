@@ -30,6 +30,7 @@ dependsOn:
   - '@kbn/core-http-server'
   - '@kbn/config-schema'
   - '@kbn/logging-mocks'
+  - '@kbn/spaces-plugin'
 tags:
   - plugin
   - prod
