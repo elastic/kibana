@@ -164,7 +164,6 @@ test.describe('Scout ui test suite example', { tag: tags.DEPLOYMENT_AGNOSTIC }, 
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsPrivilegedUser();
-    await pageObjects.demo.goto();
   });
 
   test('should complete a basic user flow', async ({ pageObjects }) => {
