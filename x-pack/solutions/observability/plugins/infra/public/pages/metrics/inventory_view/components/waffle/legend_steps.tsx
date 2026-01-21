@@ -10,6 +10,7 @@ import {
   type EuiBasicTableColumn,
   EuiButton,
   EuiButtonIcon,
+  EuiCallOut,
   EuiColorPicker,
   EuiColorPickerSwatch,
   EuiFieldNumber,
@@ -58,9 +59,54 @@ const MAX_STEPS = 18;
 const MIN_STEPS = 2;
 const MAX_CONTAINER_HEIGHT = 500;
 
+export function hasLegendStepsDuplicates(steps: LegendStep[]): boolean {
+  const values = steps.map((s) => s.value);
+  const labels = steps.map((s) => s.label.trim()).filter((l) => l !== '');
+
+  const hasDuplicateValues = new Set(values).size !== values.length;
+  const hasDuplicateLabels = new Set(labels).size !== labels.length;
+
+  return hasDuplicateValues || hasDuplicateLabels;
+}
+
 export function LegendSteps({ steps, onChange }: LegendStepsProps) {
   const { euiTheme } = useEuiTheme();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const hasDuplicates = hasLegendStepsDuplicates(steps);
+  const hasEmptyLabels = !steps.every((step) => step.label?.trim());
+
+  const errors: string[] = [];
+  if (hasDuplicates) {
+    errors.push(
+      i18n.translate('xpack.infra.legendSteps.duplicateStepsError', {
+        defaultMessage: 'Steps cannot have duplicate values or labels',
+      })
+    );
+  }
+  if (hasEmptyLabels) {
+    errors.push(
+      i18n.translate('xpack.infra.legendSteps.emptyLabelsError', {
+        defaultMessage: 'All steps must have a label',
+      })
+    );
+  }
+
+  const isDuplicateValue = useCallback(
+    (item: LegendStep, value: number) => {
+      return steps.some((s) => s !== item && s.value === value);
+    },
+    [steps]
+  );
+
+  const isDuplicateLabel = useCallback(
+    (item: LegendStep, label: string) => {
+      // Only check non-empty labels
+      if (!label.trim()) return false;
+      return steps.some((s) => s !== item && s.label.trim() === label.trim());
+    },
+    [steps]
+  );
 
   const updateStep = useCallback(
     (step: LegendStep, updates: Partial<LegendStep>) => {
@@ -119,6 +165,7 @@ export function LegendSteps({ steps, onChange }: LegendStepsProps) {
             compressed
             fullWidth={false}
             value={label}
+            isInvalid={isDuplicateLabel(item, label)}
             placeholder={i18n.translate('xpack.infra.legendSteps.labelPlaceholder', {
               defaultMessage: 'Label',
             })}
@@ -140,8 +187,13 @@ export function LegendSteps({ steps, onChange }: LegendStepsProps) {
           <EuiFieldNumber
             compressed
             fullWidth={false}
+            step={0.01}
             value={value}
-            onChange={(e) => updateStep(item, { value: parseFloat(e.target.value) || 0 })}
+            isInvalid={isDuplicateValue(item, value)}
+            onChange={(e) => {
+              const parsed = parseFloat(e.target.value);
+              updateStep(item, { value: isNaN(parsed) ? 0 : parsed });
+            }}
             aria-label={i18n.translate('xpack.infra.legendSteps.valueInputAriaLabel', {
               defaultMessage: 'Step value',
             })}
@@ -168,11 +220,30 @@ export function LegendSteps({ steps, onChange }: LegendStepsProps) {
         ),
       },
     ],
-    [updateStep, handleDeleteStep, steps.length]
+    [updateStep, handleDeleteStep, steps.length, isDuplicateLabel, isDuplicateValue]
   );
 
   return (
     <>
+      {errors.length > 0 && (
+        <>
+          <EuiCallOut
+            color="danger"
+            iconType="alert"
+            announceOnMount
+            title={i18n.translate('xpack.infra.legendSteps.validationErrorTitle', {
+              defaultMessage: 'Please fix the following errors:',
+            })}
+          >
+            <ul>
+              {errors.map((error, index) => (
+                <li key={index}>{error}</li>
+              ))}
+            </ul>
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
+      )}
       <div
         ref={scrollContainerRef}
         style={{

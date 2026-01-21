@@ -40,7 +40,7 @@ import {
 import { getColorPalette } from '../../lib/get_color_palette';
 import { convertBoundsToPercents } from '../../lib/convert_bounds_to_percents';
 import { ColorLabel } from './color_label';
-import { LegendSteps, type LegendStep } from './legend_steps';
+import { LegendSteps, type LegendStep, hasLegendStepsDuplicates } from './legend_steps';
 import { PalettePreview } from './palette_preview';
 
 export interface Props {
@@ -205,6 +205,24 @@ export const LegendControls = ({
     setDraft((prev) => ({ ...prev, legend: { ...prev.legend, rules } }));
   }, []);
 
+  const handleTypeChange = useCallback(
+    (id: string) => {
+      const newType = id as 'gradient' | 'steps';
+      setDraft((prev) => ({
+        ...prev,
+        type: newType,
+        legend: {
+          ...prev.legend,
+          rules:
+            newType === 'steps' && (!prev.legend.rules || prev.legend.rules.length === 0)
+              ? defaultLegendSteps
+              : prev.legend.rules,
+        },
+      }));
+    },
+    [defaultLegendSteps]
+  );
+
   const originalState = createDraftState(autoBounds, boundsOverride, options, defaultLegendSteps);
   const commited = isEqual(draft, originalState);
 
@@ -216,7 +234,9 @@ export const LegendControls = ({
   );
 
   const stepsValid =
-    draft.type !== 'steps' || draft.legend.rules?.every((step) => step.label?.trim());
+    draft.type !== 'steps' ||
+    (draft.legend.rules?.every((step) => step.label?.trim()) &&
+      !hasLegendStepsDuplicates(draft.legend.rules ?? []));
 
   const isFormValid = draft.type === 'gradient' ? boundsValidRange : stepsValid;
 
@@ -267,7 +287,7 @@ export const LegendControls = ({
             }),
           },
         ]}
-        onChange={(id) => setDraft((prev) => ({ ...prev, type: id as 'gradient' | 'steps' }))}
+        onChange={handleTypeChange}
         type="single"
       />
       <EuiSpacer size="s" />
