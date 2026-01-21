@@ -526,7 +526,6 @@ export class AutomaticImportSavedObjectService {
    * Delete a data stream by ID
    * @param dataStreamId - The ID of the data stream
    * @param integrationId - The ID of the integration
-   * @param authenticatedUser - The authenticated user
    * @param options - The options for the delete
    * @returns The deleted data stream
    */
@@ -543,8 +542,6 @@ export class AutomaticImportSavedObjectService {
       this.logger.error(`Failed to delete data stream ${dataStreamId}: ${error}`);
       throw error;
     }
-
-    // Integration SO no longer stores a denormalized `data_stream_count`.
   }
 
   public async updateDataStreamSavedObjectAttributes(
