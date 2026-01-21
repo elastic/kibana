@@ -56,8 +56,6 @@ export interface ESQLStatsQueryMeta {
 // list of stats functions we support for grouping in the cascade experience
 const SUPPORTED_STATS_COMMAND_OPTION_FUNCTIONS = ['categorize' as const];
 
-const removeWhitespaceFromString = (str: string) => str.replace(/\s+/g, '');
-
 export type SupportedStatsFunction = (typeof SUPPORTED_STATS_COMMAND_OPTION_FUNCTIONS)[number];
 
 const isSupportedStatsFunction = (fnName: string): fnName is SupportedStatsFunction =>
@@ -685,9 +683,7 @@ export const appendFilteringWhereClauseForCascadeLayout = <
   let normalizedFieldName = rawFieldName;
 
   const isFieldUsedInOperatingStatsCommand = Boolean(
-    Object.keys(fieldDeclarationCommandSummary.grouping).some(
-      (key) => removeBackticks(key) === removeBackticks(rawFieldName)
-    )
+    fieldDeclarationCommandSummary.grouping[rawFieldName]
   );
 
   // create placeholder for the insertion anchor command which is the command that is most suited to accept the user's requested filtering operation
@@ -704,13 +700,7 @@ export const appendFilteringWhereClauseForCascadeLayout = <
     const lastStatsCommandFields = statsCommandsFields[statsCommandsFields.length - 1];
     // if the field name is marked as a new field then we know it was declared by the stats command driving the cascade experience,
     // so we set the flag to true and use the stats command as the insertion anchor command
-    const hasNormalizedField = Array.from(lastStatsCommandFields).some(
-      (field) =>
-        removeWhitespaceFromString(removeBackticks(field)) ===
-        removeWhitespaceFromString(removeBackticks(rawFieldName))
-    );
-
-    if (hasNormalizedField) {
+    if (lastStatsCommandFields.has(removeBackticks(rawFieldName).replace(/\s+/g, ''))) {
       isFieldRuntimeDeclared = true;
     } else {
       // otherwise, we need to ascertain that the field was not created by a preceding stats command
