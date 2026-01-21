@@ -61,6 +61,7 @@ import { ColumnHeaderWithTooltip } from './column_header_with_tooltip';
 import { HealthBadge } from './health_badge';
 import { useServiceActions } from './service_actions';
 import type { ApmIndicatorType } from '../../../../../common/slo_indicator_types';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 
 type ServicesDetailedStatisticsAPIResponse =
   APIReturnType<'POST /internal/apm/services/detailed_statistics'>;
@@ -403,12 +404,14 @@ export function ApmServicesTable({
               type: sloFlyoutState.indicatorType,
               params: {
                 service: sloFlyoutState.serviceName,
-                environment: environment === 'ENVIRONMENT_ALL' ? '*' : environment,
+                environment: environment === ENVIRONMENT_ALL.value ? '*' : environment,
               },
             },
           },
           onClose: closeSloFlyout,
-          allowedIndicatorTypes: ['sli.apm.transactionDuration', 'sli.apm.transactionErrorRate'],
+          formSettings: {
+            allowedIndicatorTypes: ['sli.apm.transactionDuration', 'sli.apm.transactionErrorRate'],
+          },
         })
       : null;
 

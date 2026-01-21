@@ -8,7 +8,7 @@
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu, EuiHeaderLink, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import rison from '@kbn/rison';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ALL_VALUE } from '@kbn/slo-schema';
@@ -53,14 +53,14 @@ export function SloPopoverAndFlyout({ canReadSlos, canWriteSlos }: Props) {
   const apmEnvironment = ('environment' in query && query.environment) || ENVIRONMENT_ALL.value;
   const sloEnvironment = apmEnvironment === ENVIRONMENT_ALL.value ? ALL_VALUE : apmEnvironment;
 
-  const openFlyout = (indicatorType: ApmIndicatorType) => {
+  const openFlyout = useCallback((indicatorType: ApmIndicatorType) => {
     setFlyoutState({ isOpen: true, indicatorType });
     setPopoverOpen(false);
-  };
+  }, []);
 
-  const closeFlyout = () => {
+  const closeFlyout = useCallback(() => {
     setFlyoutState({ isOpen: false, indicatorType: null });
-  };
+  }, []);
 
   const manageSlosUrl = useMemo(() => {
     const searchParams = rison.encode({
@@ -89,18 +89,6 @@ export function SloPopoverAndFlyout({ canReadSlos, canWriteSlos }: Props) {
 
     return http?.basePath.prepend(`/app/slos?search=${searchParams}`);
   }, [http?.basePath]);
-
-  const button = (
-    <EuiHeaderLink
-      color="primary"
-      iconType="arrowDown"
-      iconSide="right"
-      onClick={() => setPopoverOpen((prevState) => !prevState)}
-      data-test-subj="apmSlosHeaderLink"
-    >
-      {sloLabel}
-    </EuiHeaderLink>
-  );
 
   const panels: EuiContextMenuPanelDescriptor[] = [
     {
@@ -147,7 +135,9 @@ export function SloPopoverAndFlyout({ canReadSlos, canWriteSlos }: Props) {
             },
           },
           onClose: closeFlyout,
-          allowedIndicatorTypes: ['sli.apm.transactionDuration', 'sli.apm.transactionErrorRate'],
+          formSettings: {
+            allowedIndicatorTypes: ['sli.apm.transactionDuration', 'sli.apm.transactionErrorRate'],
+          },
         })
       : null;
 
@@ -155,7 +145,17 @@ export function SloPopoverAndFlyout({ canReadSlos, canWriteSlos }: Props) {
     <>
       <EuiPopover
         id="slos-menu"
-        button={button}
+        button={
+          <EuiHeaderLink
+            color="primary"
+            iconType="arrowDown"
+            iconSide="right"
+            onClick={() => setPopoverOpen((prevState) => !prevState)}
+            data-test-subj="apmSlosHeaderLink"
+          >
+            {sloLabel}
+          </EuiHeaderLink>
+        }
         isOpen={popoverOpen}
         closePopover={() => setPopoverOpen(false)}
         panelPaddingSize="none"

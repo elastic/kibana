@@ -13,6 +13,9 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 const mockRuleFormFlyout = jest.fn();
 
+const start = '2024-01-01T00:00:00.000Z';
+const end = '2024-01-01T01:00:00.000Z';
+
 jest.mock('@kbn/response-ops-rule-form/flyout', () => ({
   RuleFormFlyout: (props: any) => {
     mockRuleFormFlyout(props);
@@ -59,8 +62,8 @@ jest.mock('../../../../hooks/use_apm_params', () => ({
 
 jest.mock('../../../../hooks/use_time_range', () => ({
   useTimeRange: () => ({
-    start: '2024-01-01T00:00:00.000Z',
-    end: '2024-01-01T01:00:00.000Z',
+    start,
+    end,
   }),
 }));
 
@@ -254,8 +257,8 @@ describe('AlertingFlyout', () => {
       expect(mockRuleFormFlyout).toHaveBeenCalledWith(
         expect.objectContaining({
           initialMetadata: expect.objectContaining({
-            start: '2024-01-01T00:00:00.000Z',
-            end: '2024-01-01T01:00:00.000Z',
+            start,
+            end,
           }),
         })
       );
