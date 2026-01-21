@@ -7,29 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  type IKbnUrlStateStorage,
-  type INullableBaseStateContainer,
-} from '@kbn/kibana-utils-plugin/public';
-import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
+import { type IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { Observable } from 'rxjs';
-import { distinctUntilChanged, from, map, skip } from 'rxjs';
-import { isEqual } from 'lodash';
 import type { DiscoverServices } from '../../..';
 import type { DiscoverDataStateContainer } from './discover_data_state_container';
 import { getDataStateContainer } from './discover_data_state_container';
 import type { DiscoverSearchSessionManager } from './discover_search_session';
 import type { DiscoverAppState } from './redux';
 import type { DiscoverCustomizationContext } from '../../../customizations';
-import type {
-  DiscoverInternalState,
-  InternalStateStore,
-  RuntimeStateManager,
-  TabActionInjector,
-  TabState,
+import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
+import {
+  createTabActionInjector,
+  internalStateActions,
+  selectTab,
+  selectTabRuntimeState,
 } from './redux';
-import { createTabActionInjector, internalStateActions, selectTab } from './redux';
 import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
 import { getSavedSearchContainer } from './discover_saved_search_container';
 
@@ -73,18 +66,6 @@ export interface DiscoverStateContainer {
    * An observable of the current tab's app state
    */
   appState$: Observable<DiscoverAppState>;
-  /**
-   * App state container synced with the `_a` part of the URL
-   */
-  appStateContainer: INullableBaseStateContainer<DiscoverAppState>;
-  /**
-   * An observable of the current tab's global state
-   */
-  globalState$: Observable<GlobalQueryStateFromUrl>;
-  /**
-   * Global state container synced with the `_g` part of the URL
-   */
-  globalStateContainer: INullableBaseStateContainer<GlobalQueryStateFromUrl>;
   /**
    * Data fetching related state
    **/
@@ -162,68 +143,10 @@ export function getDiscoverStateContainer({
     getCurrentTab,
   });
 
-  const getAppState = (state: DiscoverInternalState): DiscoverAppState => {
-    return selectTab(state, tabId).appState;
-  };
-
-  const appState$ = from(internalState).pipe(
-    map(getAppState),
-    distinctUntilChanged((a, b) => isEqual(a, b)),
-    skip(1)
-  );
-
-  const appStateContainer: INullableBaseStateContainer<DiscoverAppState> = {
-    get: () => getAppState(internalState.getState()),
-    set: (appState) => {
-      if (!appState) {
-        return;
-      }
-
-      internalState.dispatch(injectCurrentTab(internalStateActions.setAppState)({ appState }));
-    },
-    state$: appState$,
-  };
-
-  const getGlobalState = (state: DiscoverInternalState): GlobalQueryStateFromUrl => {
-    const tabState = selectTab(state, tabId);
-    const { timeRange: time, refreshInterval, filters } = tabState.globalState;
-
-    return { time, refreshInterval, filters };
-  };
-
-  const globalState$ = from(internalState).pipe(
-    map(getGlobalState),
-    distinctUntilChanged((a, b) => isEqual(a, b)),
-    skip(1)
-  );
-
-  const globalStateContainer: INullableBaseStateContainer<GlobalQueryStateFromUrl> = {
-    get: () => getGlobalState(internalState.getState()),
-    set: (state) => {
-      if (!state) {
-        return;
-      }
-
-      const { time: timeRange, refreshInterval, filters } = state;
-
-      internalState.dispatch(
-        injectCurrentTab(internalStateActions.setGlobalState)({
-          globalState: {
-            timeRange,
-            refreshInterval,
-            filters,
-          },
-        })
-      );
-    },
-    state$: globalState$,
-  };
+  const appState$ = selectTabRuntimeState(runtimeStateManager, tabId).urlSyncObservables.appState$;
 
   return {
     appState$,
-    appStateContainer,
-    globalState$,
-    globalStateContainer,
     internalState,
     internalStateActions,
     injectCurrentTab,

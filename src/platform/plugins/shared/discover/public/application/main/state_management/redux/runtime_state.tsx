@@ -10,15 +10,16 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import React, { type PropsWithChildren, createContext, useContext, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, type Observable, from } from 'rxjs';
 import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
 import { useCurrentTabContext } from './hooks';
 import type { DiscoverStateContainer } from '../discover_state';
 import type { ConnectedCustomizationService } from '../../../../customizations';
 import type { ProfilesManager, ScopedProfilesManager } from '../../../../context_awareness';
-import type { TabState } from './types';
+import type { UrlSyncObservables, DiscoverInternalState, TabState } from './types';
 import type { DiscoverEBTManager, ScopedDiscoverEBTManager } from '../../../../ebt_manager';
 import { selectTab } from './selectors';
+import type { InternalStateStore } from './internal_state';
 
 interface DiscoverRuntimeState {
   adHocDataViews: DataView[];
@@ -47,17 +48,31 @@ type ReactiveRuntimeState<TState, TNullable extends keyof TState = never> = {
 };
 
 export type ReactiveTabRuntimeState = ReactiveRuntimeState<TabRuntimeState, 'currentDataView'> & {
-  syncSubscription: TabSyncSubscription;
+  readonly urlSyncObservables: UrlSyncObservables;
+  onSubscribe: ({ unsubscribeFn }: { unsubscribeFn: () => void }) => void;
+  unsubscribe: () => void;
 };
 
 export type RuntimeStateManager = ReactiveRuntimeState<DiscoverRuntimeState> & {
   tabs: { byId: Record<string, ReactiveTabRuntimeState> };
+  internalState$: Observable<DiscoverInternalState> | undefined;
+  setInternalState$: (internalState: InternalStateStore) => void;
 };
 
-export const createRuntimeStateManager = (): RuntimeStateManager => ({
-  adHocDataViews$: new BehaviorSubject<DataView[]>([]),
-  tabs: { byId: {} },
-});
+export const createRuntimeStateManager = (): RuntimeStateManager => {
+  let internalState$: Observable<DiscoverInternalState> | undefined;
+
+  return {
+    adHocDataViews$: new BehaviorSubject<DataView[]>([]),
+    tabs: { byId: {} },
+    get internalState$() {
+      return internalState$;
+    },
+    setInternalState$: (internalState: InternalStateStore) => {
+      internalState$ = from(internalState);
+    },
+  };
+};
 
 export type InitialUnifiedHistogramLayoutProps = Pick<
   UnifiedHistogramPartialLayoutProps,
@@ -73,18 +88,20 @@ export const createTabRuntimeState = ({
   profilesManager,
   ebtManager,
   initialValues,
+  createUrlSyncObservablesFn,
 }: {
   profilesManager: ProfilesManager;
   ebtManager: DiscoverEBTManager;
   initialValues?: {
     unifiedHistogramLayoutPropsMap?: InitialUnifiedHistogramLayoutPropsMap;
   };
+  createUrlSyncObservablesFn: () => UrlSyncObservables;
 }): ReactiveTabRuntimeState => {
   const scopedEbtManager = ebtManager.createScopedEBTManager();
+  let unsubscribeFn: (() => void) | undefined;
 
   return {
     stateContainer$: new BehaviorSubject<DiscoverStateContainer | undefined>(undefined),
-    syncSubscription: new TabSyncSubscription(),
     customizationService$: new BehaviorSubject<ConnectedCustomizationService | undefined>(
       undefined
     ),
@@ -97,6 +114,14 @@ export const createTabRuntimeState = ({
     ),
     scopedEbtManager$: new BehaviorSubject(scopedEbtManager),
     currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
+    urlSyncObservables: createUrlSyncObservablesFn(),
+    onSubscribe: ({ unsubscribeFn: fn }: { unsubscribeFn: () => void }) => {
+      unsubscribeFn = fn;
+    },
+    unsubscribe: () => {
+      unsubscribeFn?.();
+      unsubscribeFn = undefined;
+    },
   };
 };
 
@@ -195,16 +220,3 @@ const useRuntimeStateContext = () => {
 
 export const useCurrentDataView = () => useRuntimeStateContext().currentDataView;
 export const useAdHocDataViews = () => useRuntimeStateContext().adHocDataViews;
-
-export class TabSyncSubscription {
-  private unsubscribeFn: (() => void) | undefined;
-
-  onSubscribe({ unsubscribeFn }: { unsubscribeFn: () => void }) {
-    this.unsubscribeFn = unsubscribeFn;
-  }
-
-  unsubscribe() {
-    this.unsubscribeFn?.();
-    this.unsubscribeFn = undefined;
-  }
-}

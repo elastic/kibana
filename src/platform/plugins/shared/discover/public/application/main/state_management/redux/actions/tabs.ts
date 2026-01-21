@@ -43,7 +43,7 @@ import { DEFAULT_TAB_STATE } from '../constants';
 import type { DiscoverAppLocatorParams } from '../../../../../../common';
 import { parseAppLocatorParams } from '../../../../../../common/app_locator_get_location';
 import { fetchData } from './tab_state';
-import { initializeAndSync, stopSyncing } from './tab_sync';
+import { initializeAndSync, stopSyncing, createUrlSyncObservables } from './tab_sync';
 
 export const setTabs: InternalStateThunkActionCreator<
   [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
@@ -91,6 +91,7 @@ export const setTabs: InternalStateThunkActionCreator<
             ? selectInitialUnifiedHistogramLayoutPropsMap(runtimeStateManager, tab.duplicatedFromId)
             : undefined,
         },
+        createUrlSyncObservablesFn: () => dispatch(createUrlSyncObservables({ tabId: tab.id })),
       });
     }
 

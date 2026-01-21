@@ -7,18 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { combineLatest, merge, startWith } from 'rxjs';
+import { combineLatest, distinctUntilChanged, map, merge, skip, startWith } from 'rxjs';
+import { isEqual } from 'lodash';
 import {
   connectToQueryState,
+  type GlobalQueryStateFromUrl,
   noSearchSessionStorageCapabilityMessage,
 } from '@kbn/data-plugin/public';
-import { syncState } from '@kbn/kibana-utils-plugin/public';
+import { type INullableBaseStateContainer, syncState } from '@kbn/kibana-utils-plugin/public';
 import { FilterStateStore, isOfAggregateQueryType } from '@kbn/es-query';
 import { type TabActionPayload, type InternalStateThunkActionCreator } from '../internal_state';
 import { selectTab } from '../selectors';
 import { selectTabRuntimeState } from '../runtime_state';
 import { addLog } from '../../../../../utils/add_log';
-import { type DiscoverAppState, internalStateActions } from '..';
+import { internalStateActions } from '..';
+import type { DiscoverAppState, UrlSyncObservables } from '../types';
 import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
 import { getCurrentUrlState } from '../../utils/cleanup_url_state';
 import { buildStateSubscribe } from '../../utils/build_state_subscribe';
@@ -28,6 +31,86 @@ import {
   DataSourceType,
   isDataSourceType,
 } from '../../../../../../common/data_sources';
+
+/**
+ * Create observables and state containers for 2-directional syncing of appState and globalState with the URL
+ */
+export const createUrlSyncObservables: InternalStateThunkActionCreator<
+  [TabActionPayload],
+  UrlSyncObservables
+> = ({ tabId }) =>
+  function createUrlSyncObservablesThunkFn(dispatch, getState, { runtimeStateManager }) {
+    const { internalState$ } = runtimeStateManager;
+
+    if (!internalState$) {
+      throw new Error('Internal state observable is not available in runtime state manager');
+    }
+
+    const getAppState = (): DiscoverAppState => {
+      return selectTab(getState(), tabId).appState;
+    };
+
+    const appState$ = internalState$.pipe(
+      map(getAppState),
+      distinctUntilChanged((a, b) => isEqual(a, b)),
+      skip(1)
+    );
+
+    const appStateContainer: INullableBaseStateContainer<DiscoverAppState> = {
+      get: () => getAppState(),
+      set: (appState) => {
+        if (!appState) {
+          return;
+        }
+
+        dispatch(internalStateActions.setAppState({ tabId, appState }));
+      },
+      state$: appState$,
+    };
+
+    const getGlobalState = (): GlobalQueryStateFromUrl => {
+      const tabState = selectTab(getState(), tabId);
+      const { timeRange: time, refreshInterval, filters } = tabState.globalState;
+
+      return { time, refreshInterval, filters };
+    };
+
+    const globalState$ = internalState$.pipe(
+      map(getGlobalState),
+      distinctUntilChanged((a, b) => isEqual(a, b)),
+      skip(1)
+    );
+
+    const globalStateContainer: INullableBaseStateContainer<GlobalQueryStateFromUrl> = {
+      get: () => getGlobalState(),
+      set: (state) => {
+        if (!state) {
+          return;
+        }
+
+        const { time: timeRange, refreshInterval, filters } = state;
+
+        dispatch(
+          internalStateActions.setGlobalState({
+            tabId,
+            globalState: {
+              timeRange,
+              refreshInterval,
+              filters,
+            },
+          })
+        );
+      },
+      state$: globalState$,
+    };
+
+    return {
+      appState$,
+      appStateContainer,
+      globalState$,
+      globalStateContainer,
+    };
+  };
 
 /**
  * Initializing state containers and start subscribing to changes triggering e.g. data fetching
@@ -46,7 +129,8 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
     }
 
     const savedSearchContainer = stateContainer.savedSearchState;
-    const { appState$, appStateContainer, globalStateContainer } = stateContainer;
+    const { appState$, appStateContainer, globalStateContainer } =
+      tabRuntimeState.urlSyncObservables;
 
     const getCurrentTab = () => selectTab(getState(), tabId);
     const getAppState = (): DiscoverAppState => {
@@ -278,7 +362,7 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
       timefilerUnsubscribe.unsubscribe();
     };
 
-    tabRuntimeState.syncSubscription.onSubscribe({ unsubscribeFn });
+    tabRuntimeState.onSubscribe({ unsubscribeFn });
   };
 
 /**
@@ -287,5 +371,5 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
 export const stopSyncing: InternalStateThunkActionCreator<[TabActionPayload]> = ({ tabId }) =>
   function stopSyncingThunkFn(dispatch, getState, { runtimeStateManager }) {
     const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
-    tabRuntimeState.syncSubscription.unsubscribe();
+    tabRuntimeState.unsubscribe();
   };

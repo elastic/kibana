@@ -523,7 +523,7 @@ export interface InternalStateDependencies {
 const IS_JEST_ENVIRONMENT = typeof jest !== 'undefined';
 
 export const createInternalStateStore = (options: InternalStateDependencies) => {
-  return configureStore({
+  const internalState = configureStore({
     reducer: internalStateSlice.reducer,
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
@@ -534,6 +534,10 @@ export const createInternalStateStore = (options: InternalStateDependencies) => 
       name: 'DiscoverInternalState',
     },
   });
+
+  options.runtimeStateManager.setInternalState$(internalState);
+
+  return internalState;
 };
 
 export type InternalStateStore = ReturnType<typeof createInternalStateStore>;
