@@ -17,6 +17,7 @@ import { api, metrics } from '@elastic/opentelemetry-node/sdk';
 import type { MetricsConfig, MonitoringCollectionConfig } from '@kbn/metrics-config';
 import { fromExternalVariant } from '@kbn/std';
 import { cleanupBeforeExit } from '@kbn/cleanup-before-exit';
+import { duration } from 'moment';
 import { PrometheusExporter } from './prometheus_exporter';
 
 /**
@@ -45,6 +46,7 @@ export function initMetrics(initMetricsOptions: InitMetricsOptions) {
   const { resource, metricsConfig, monitoringCollectionConfig } = initMetricsOptions;
 
   const globalExportIntervalMillis = metricsConfig.interval.asMilliseconds();
+  const globalExportTimeoutMillis = metricsConfig.timeout?.asMilliseconds();
 
   const readers: metrics.IMetricReader[] = [];
 
@@ -77,7 +79,12 @@ export function initMetrics(initMetricsOptions: InitMetricsOptions) {
 
       // We just need to push it as another grpc config
       exporters.push({
-        grpc: { url, headers, exportIntervalMillis, temporalityPreference },
+        grpc: {
+          url,
+          headers,
+          exportInterval: duration(exportIntervalMillis, 'ms'),
+          temporalityPreference,
+        },
       });
     }
   }
@@ -123,12 +130,25 @@ export function initMetrics(initMetricsOptions: InitMetricsOptions) {
           break;
       }
 
-      const exportInterval = variant.value.exportIntervalMillis ?? globalExportIntervalMillis;
+      const exportInterval = variant.value.exportInterval ?? globalExportIntervalMillis;
+      const exportIntervalMillis =
+        typeof exportInterval === 'number' ? exportInterval : exportInterval.asMilliseconds();
+
+      // If the exporter's export timeout is not provided, use the global export timeout only if it is less than the export interval (the client fails if the timeout is higher than the interval).
+      // Otherwise, we use the export interval.
+      let exportTimeoutMillis = variant.value.exportTimeout?.asMilliseconds();
+      if (typeof exportTimeoutMillis !== 'number') {
+        if (globalExportTimeoutMillis && globalExportTimeoutMillis <= exportIntervalMillis) {
+          exportTimeoutMillis = globalExportTimeoutMillis;
+        } else {
+          exportTimeoutMillis = exportIntervalMillis;
+        }
+      }
 
       return new metrics.PeriodicExportingMetricReader({
         exporter,
-        exportIntervalMillis:
-          typeof exportInterval === 'number' ? exportInterval : exportInterval.asMilliseconds(),
+        exportIntervalMillis,
+        exportTimeoutMillis,
       });
     })
   );

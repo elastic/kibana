@@ -223,6 +223,38 @@ exports[`transpile (Streamlang DSL to ingest pipeline) should transpile a variet
 Object {
   "processors": Array [
     Object {
+      "script": Object {
+        "if": undefined,
+        "ignore_failure": undefined,
+        "lang": "painless",
+        "source": "def fields = [];
+boolean allPresent = true;
+
+if (ctx.containsKey('field1') && ctx['field1'] != null) {
+  fields.add(ctx['field1']);
+} else {
+  allPresent = false;
+}
+
+if (ctx.containsKey('field2') && ctx['field2'] != null) {
+  fields.add(ctx['field2']);
+} else {
+  allPresent = false;
+}
+
+if (ctx.containsKey('field3') && ctx['field3'] != null) {
+  fields.add(ctx['field3']);
+} else {
+  allPresent = false;
+}
+
+if (false || allPresent) {
+  ctx['my_joined_field'] = fields.stream().collect(Collectors.joining(', '));
+}",
+        "tag": undefined,
+      },
+    },
+    Object {
       "uppercase": Object {
         "field": "message",
         "target_field": "message_uppercase",

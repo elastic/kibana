@@ -13,8 +13,10 @@ import type { Duration } from 'moment';
  * Common configuration for OTLP metrics exporters
  */
 export interface MetricsExporterCommonConfig {
-  /** Frequency in which the exporter should collect the metrics */
-  exportIntervalMillis?: number | Duration;
+  /** Frequency in which the exporter should collect the metrics. If not provided, the global export interval will be used. */
+  exportInterval?: Duration;
+  /** Timeout for the metrics export. If not provided, the global export timeout will be used. */
+  exportTimeout?: Duration;
   /** The preferred temporality of the metrics. Defaults to `delta`, as it plays better with the ES backend. */
   temporalityPreference: 'delta' | 'cumulative';
 }
@@ -63,6 +65,10 @@ export interface MetricsConfig {
    * The interval at which to export metrics
    */
   interval: Duration;
+  /**
+   * The timeout for the metrics export
+   */
+  timeout?: Duration;
   /**
    * OTLP exporters for metric data
    */

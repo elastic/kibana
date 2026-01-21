@@ -11,7 +11,8 @@ import { schema, type Type } from '@kbn/config-schema';
 import type { MetricsExporterConfig, MetricsConfig } from './types';
 
 const metricsCommonExporterConfigSchema = schema.object({
-  exportIntervalMillis: schema.maybe(schema.duration()),
+  exportInterval: schema.maybe(schema.duration()),
+  exportTimeout: schema.maybe(schema.duration()),
   temporalityPreference: schema.oneOf([schema.literal('cumulative'), schema.literal('delta')], {
     defaultValue: 'delta',
   }),
@@ -49,6 +50,7 @@ export const metricsExporterConfigSchema: Type<MetricsExporterConfig> = schema.o
 export const metricsConfigSchema: Type<MetricsConfig> = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
   interval: schema.duration({ defaultValue: '10s' }),
+  timeout: schema.maybe(schema.duration()),
   exporters: schema.oneOf(
     [metricsExporterConfigSchema, schema.arrayOf(metricsExporterConfigSchema)],
     { defaultValue: [] }
