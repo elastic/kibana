@@ -5,44 +5,6 @@
     "functions": [
       {
         "parentPluginId": "presentationUtil",
-        "id": "def-public.DashboardDrilldownOptionsComponent",
-        "type": "Function",
-        "tags": [],
-        "label": "DashboardDrilldownOptionsComponent",
-        "description": [],
-        "signature": [
-          "React.ForwardRefExoticComponent<",
-          "DashboardDrilldownOptionsProps",
-          " & React.RefAttributes<{}>>"
-        ],
-        "path": "src/platform/plugins/shared/presentation_util/public/components/index.tsx",
-        "lineNumber": 62,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-public.DashboardDrilldownOptionsComponent.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/ts5.0/index.d.ts",
-            "lineNumber": 630,
-            "columnNumber": 10,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "presentationUtil",
         "id": "def-public.LazyDashboardPicker",
         "type": "Function",
         "tags": [],
@@ -905,23 +867,6 @@
     "misc": [
       {
         "parentPluginId": "presentationUtil",
-        "id": "def-public.DashboardDrilldownOptions",
-        "type": "Type",
-        "tags": [],
-        "label": "DashboardDrilldownOptions",
-        "description": [],
-        "signature": [
-          "{ useCurrentFilters: boolean; useCurrentDateRange: boolean; openInNewTab: boolean; }"
-        ],
-        "path": "src/platform/plugins/shared/presentation_util/public/components/dashboard_drilldown_options/types.ts",
-        "lineNumber": 11,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "presentationUtil",
         "id": "def-public.PanelSettings",
         "type": "Type",
         "tags": [],
@@ -948,72 +893,7 @@
         "initialIsOpen": false
       }
     ],
-    "objects": [
-      {
-        "parentPluginId": "presentationUtil",
-        "id": "def-public.DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS",
-        "type": "Object",
-        "tags": [],
-        "label": "DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS",
-        "description": [],
-        "path": "src/platform/plugins/shared/presentation_util/public/components/dashboard_drilldown_options/types.ts",
-        "lineNumber": 17,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-public.DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS.openInNewTab",
-            "type": "boolean",
-            "tags": [],
-            "label": "openInNewTab",
-            "description": [],
-            "signature": [
-              "false"
-            ],
-            "path": "src/platform/plugins/shared/presentation_util/public/components/dashboard_drilldown_options/types.ts",
-            "lineNumber": 18,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-public.DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS.useCurrentDateRange",
-            "type": "boolean",
-            "tags": [],
-            "label": "useCurrentDateRange",
-            "description": [],
-            "signature": [
-              "true"
-            ],
-            "path": "src/platform/plugins/shared/presentation_util/public/components/dashboard_drilldown_options/types.ts",
-            "lineNumber": 19,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "presentationUtil",
-            "id": "def-public.DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS.useCurrentFilters",
-            "type": "boolean",
-            "tags": [],
-            "label": "useCurrentFilters",
-            "description": [],
-            "signature": [
-              "true"
-            ],
-            "path": "src/platform/plugins/shared/presentation_util/public/components/dashboard_drilldown_options/types.ts",
-            "lineNumber": 20,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "objects": [],
     "setup": {
       "parentPluginId": "presentationUtil",
       "id": "def-public.PresentationUtilPluginSetup",
