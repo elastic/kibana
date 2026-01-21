@@ -152,10 +152,6 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
     return trimmed || undefined;
   }, [searchQuery]);
 
-  useEffect(() => {
-    setPage(0);
-  }, [selectedStatuses, searchQuery]);
-
   // Fetch SLOs and alerts in parallel
   useEffect(() => {
     if (!http) return;
@@ -400,6 +396,12 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
       .filter((option) => option.checked === 'on')
       .map((option) => option.key as SloStatusFilter);
     setSelectedStatuses(selected);
+    setPage(0);
+  }, []);
+
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    setPage(0);
   }, []);
 
   const handleSloClick = useCallback(
@@ -627,7 +629,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
                 defaultMessage: 'Search APM SLOs...',
               })}
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={handleSearchChange}
               isClearable
               fullWidth
               compressed
