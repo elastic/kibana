@@ -7,8 +7,43 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ESQLAstCommand } from '@kbn/esql-language';
 import { esqlCommandRegistry, Parser, type ESQLCommandSummary } from '@kbn/esql-language';
 
+function processCommand(
+  command: ESQLAstCommand,
+  query: string,
+  targetSets: {
+    newColumns: Set<string>;
+    renamedColumnsPairs: Set<[string, string]>;
+    metadataColumns: Set<string>;
+  }
+): void {
+  const commandDef = esqlCommandRegistry.getCommandByName(command.name);
+
+  if (commandDef?.methods.summary) {
+    const summary = commandDef.methods.summary(command, query);
+
+    if (summary.newColumns) {
+      summary.newColumns.forEach((col) => targetSets.newColumns.add(col));
+    }
+
+    if (summary.renamedColumnsPairs) {
+      summary.renamedColumnsPairs.forEach((pair) => targetSets.renamedColumnsPairs.add(pair));
+    }
+
+    if (summary.metadataColumns) {
+      summary.metadataColumns.forEach((col) => targetSets.metadataColumns.add(col));
+    }
+  }
+}
+
+/**
+ * Analyzes the provided ES|QL query and returns a summary of new columns,
+ * renamed columns, and metadata columns introduced by the commands in the query.
+ * @param query The ES|QL query string to analyze.
+ * @returns An object containing sets of new columns, renamed column pairs, and metadata columns.
+ */
 export function getQuerySummary(query: string): ESQLCommandSummary {
   const { root } = Parser.parseQuery(query);
 
@@ -17,23 +52,11 @@ export function getQuerySummary(query: string): ESQLCommandSummary {
   const allMetadataColumns = new Set<string>();
 
   for (const command of root.commands) {
-    const commandDef = esqlCommandRegistry.getCommandByName(command.name);
-
-    if (commandDef?.methods.summary) {
-      const summary = commandDef.methods.summary(command, query);
-
-      if (summary.newColumns) {
-        summary.newColumns.forEach((col) => allNewColumns.add(col));
-      }
-
-      if (summary.renamedColumnsPairs) {
-        summary.renamedColumnsPairs.forEach((pair) => allRenamedColumnsPairs.add(pair));
-      }
-
-      if (summary.metadataColumns) {
-        summary.metadataColumns.forEach((col) => allMetadataColumns.add(col));
-      }
-    }
+    processCommand(command, query, {
+      newColumns: allNewColumns,
+      renamedColumnsPairs: allRenamedColumnsPairs,
+      metadataColumns: allMetadataColumns,
+    });
   }
 
   return {
@@ -41,6 +64,42 @@ export function getQuerySummary(query: string): ESQLCommandSummary {
     renamedColumnsPairs: allRenamedColumnsPairs,
     metadataColumns: allMetadataColumns,
   };
+}
+
+/**
+ * Returns an array of summaries, one for each command of the specified type.
+ * If there are multiple commands of the same type, each will have its own summary in the array.
+ */
+export function getQuerySummaryPerCommandType(
+  query: string,
+  commandType: string
+): ESQLCommandSummary[] {
+  const { root } = Parser.parseQuery(query);
+  const summaries: ESQLCommandSummary[] = [];
+
+  for (const command of root.commands) {
+    if (command.name !== commandType) {
+      continue;
+    }
+
+    const allNewColumns = new Set<string>();
+    const allRenamedColumnsPairs = new Set<[string, string]>();
+    const allMetadataColumns = new Set<string>();
+
+    processCommand(command, query, {
+      newColumns: allNewColumns,
+      renamedColumnsPairs: allRenamedColumnsPairs,
+      metadataColumns: allMetadataColumns,
+    });
+
+    summaries.push({
+      newColumns: allNewColumns,
+      renamedColumnsPairs: allRenamedColumnsPairs,
+      metadataColumns: allMetadataColumns,
+    });
+  }
+
+  return summaries;
 }
 
 /**

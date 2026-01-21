@@ -39,6 +39,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { extractCategorizeTokens } from './extract_categorize_tokens';
 import { getOperator, PARAM_TYPES_NO_NEED_IMPLICIT_STRING_CASTING } from './append_to_query/utils';
+import { getQuerySummaryPerCommandType } from './get_query_summary';
 
 type NodeType = 'group' | 'leaf';
 
@@ -133,7 +134,8 @@ function getESQLQueryDataSourceCommand(
  * Returns runtime fields that are created within the query by the STATS command in the query
  */
 function getStatsCommandRuntimeFields(esqlQuery: EsqlQuery) {
-  return Array.from(mutate.commands.stats.summarize(esqlQuery)).map((command) => command.newFields);
+  const querySummary = getQuerySummaryPerCommandType(esqlQuery.print(), 'stats');
+  return querySummary.map((command) => command.newColumns);
 }
 
 /**
@@ -227,13 +229,16 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
     // it will be updated to the actual definition of the group field if it was declared by a preceding stats command
     let groupFieldNode = group;
 
-    if (!summarizedStatsCommand.newFields.has(groupFieldName)) {
+    const statsCommandsFields = getStatsCommandRuntimeFields(esqlQuery);
+    const lastStatsCommandFields = statsCommandsFields[statsCommandsFields.length - 1];
+
+    if (!lastStatsCommandFields.has(groupFieldName)) {
       // get all the new fields created by the stats commands in the query,
       // so we might tell if the command we are operating on is referencing a field that was defined by a preceding command
       const statsCommandRuntimeFields = getStatsCommandRuntimeFields(esqlQuery);
 
       const groupDeclarationStatsCommandLookupIndex = statsCommandRuntimeFields.findIndex((field) =>
-        field.has(groupFieldName)
+        field.has(group.field)
       );
 
       let groupDeclarationCommandSummary: StatsCommandSummary | null = null;
@@ -247,7 +252,7 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
       ) {
         groupDeclarationStatsCommandIndex = groupDeclarationStatsCommandLookupIndex;
         // update the group field node to it's actual definition
-        groupFieldNode = groupDeclarationCommandSummary.grouping[groupFieldName];
+        groupFieldNode = groupDeclarationCommandSummary.grouping[group.field];
       }
     }
 
@@ -402,9 +407,11 @@ export const constructCascadeQuery = ({
 
     // we make an initial assumption that the field was declared by the stats command being operated on
     let fieldDeclarationCommandSummary = summarizedStatsCommand;
+    const statsCommandsFields = getStatsCommandRuntimeFields(EditorESQLQuery);
+    const lastStatsCommandFields = statsCommandsFields[statsCommandsFields.length - 1];
 
     // if field name is not marked as a new field then we want ascertain it wasn't created by a preceding stats command
-    if (!fieldDeclarationCommandSummary.newFields.has(pathSegment)) {
+    if (!lastStatsCommandFields.has(pathSegment)) {
       const statsCommandRuntimeFields = getStatsCommandRuntimeFields(EditorESQLQuery);
 
       const groupDeclarationCommandIndex = statsCommandRuntimeFields.findIndex((field) =>
@@ -676,7 +683,11 @@ export const appendFilteringWhereClauseForCascadeLayout = <
   let normalizedFieldName = rawFieldName;
 
   const isFieldUsedInOperatingStatsCommand = Boolean(
-    fieldDeclarationCommandSummary.grouping[rawFieldName]
+    Object.keys(fieldDeclarationCommandSummary.grouping).some(
+      (key) =>
+        removeBackticks(key).replace(/\s+/g, '') ===
+        removeBackticks(rawFieldName).replace(/\s+/g, '')
+    )
   );
 
   // create placeholder for the insertion anchor command which is the command that is most suited to accept the user's requested filtering operation
@@ -689,9 +700,17 @@ export const appendFilteringWhereClauseForCascadeLayout = <
   let computedFilteringExpression: ESQLAstItem;
 
   if (isFieldUsedInOperatingStatsCommand) {
+    const statsCommandsFields = getStatsCommandRuntimeFields(ESQLQuery);
+    const lastStatsCommandFields = statsCommandsFields[statsCommandsFields.length - 1];
     // if the field name is marked as a new field then we know it was declared by the stats command driving the cascade experience,
     // so we set the flag to true and use the stats command as the insertion anchor command
-    if (fieldDeclarationCommandSummary.newFields.has(rawFieldName)) {
+    const hasNormalizedField = Array.from(lastStatsCommandFields).some(
+      (field) =>
+        removeBackticks(field).replace(/\s+/g, '') ===
+        removeBackticks(rawFieldName).replace(/\s+/g, '')
+    );
+
+    if (hasNormalizedField) {
       isFieldRuntimeDeclared = true;
     } else {
       // otherwise, we need to ascertain that the field was not created by a preceding stats command
@@ -700,7 +719,7 @@ export const appendFilteringWhereClauseForCascadeLayout = <
 
       // attempt to find the index of the stats command that declared the field
       const groupDeclarationCommandIndex = statsCommandRuntimeFields.findIndex((field) =>
-        field.has(rawFieldName)
+        field.has(removeBackticks(rawFieldName))
       );
 
       // if the field was declared in a stats command, then we set the flag to true
