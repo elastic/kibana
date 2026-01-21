@@ -148,6 +148,7 @@ For the Elastic Security 9.3.0 release information, refer to [Elastic Security S
 * Removes the `AI Assistants Settings` privilege [#239144]({{kib-pull}}239144).
 
 **Machine Learning**:
+* Adds an optional `timeout` parameter to the Inference chat model [#248326]({{kib-pull}}248326).
 * Adds Security {{ml}} modules for GCP Audit and Azure Activity Logs [#236849]({{kib-pull}}236849).
 * Removes median line length anomaly detection categorization check [#243827]({{kib-pull}}243827).
 * Adds custom header support to inference endpoints creation UI [#242187]({{kib-pull}}242187).
