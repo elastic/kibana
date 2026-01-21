@@ -10,7 +10,23 @@
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
+import type { RestorableStateProviderProps } from '@kbn/restorable-state';
+import type { ReactElement } from 'react';
 import type { DocViewsRegistry } from './doc_views_registry';
+
+/**
+ * Represents the restorable state for all doc viewer tabs, keyed by tab ID.
+ * Each tab can store its own state as needed.
+ */
+export type DocViewerTabsState = Record<string, unknown>;
+
+export interface DocViewerRestorableState {
+  /**
+   * Represents the restorable state for all doc viewer tabs, keyed by tab ID.
+   * Each tab can store its own state as needed.
+   */
+  docViewerTabsState?: DocViewerTabsState;
+}
 
 export interface FieldMapping {
   filterable?: boolean;
@@ -48,12 +64,14 @@ export interface DocViewRenderProps {
 
 export type DocViewerComponent = React.FC<DocViewRenderProps>;
 
-export interface DocView {
+export type DocViewRenderFunction<TState extends object = object> = (
+  props: DocViewRenderProps & RestorableStateProviderProps<TState>
+) => ReactElement;
+
+export interface DocView<TState extends object = object> {
   id: string;
   order: number;
   title: string;
-  component: DocViewerComponent;
   enabled?: boolean;
+  render: DocViewRenderFunction<TState>;
 }
-
-export type DocViewFactory = () => DocView;
