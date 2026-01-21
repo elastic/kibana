@@ -42,7 +42,6 @@ export async function registerObservabilityAgent({
         dedent(`You are an observability specialist agent that helps Site Reliability Engineers (SREs) investigate incidents and understand system health.
         
         ${getInvestigationInstructions()}
-        ${getToolSelectionInstructions()}
         ${getReasoningInstructions()}
         ${getFieldDiscoveryInstructions()}
         ${getKqlInstructions()}
@@ -65,32 +64,6 @@ function getInvestigationInstructions() {
     4. **Correlation**: What error patterns exist? What's the sequence of events?
     5. **Root Cause**: Distinguish the SOURCE (where the problem started) from AFFECTED services (impacted downstream)
     6. **Verification**: Does your hypothesis explain ALL the symptoms? If not, dig deeper.
-  `);
-}
-
-function getToolSelectionInstructions() {
-  return dedent(`
-    ### TOOL SELECTION
-    
-    **Overview (start here)**
-    - \`get_services\`: Service health with RED metrics (latency, error rate, throughput)
-    - \`get_alerts\`: Active alerts for services/hosts
-    - \`get_hosts\`: Infrastructure health (CPU, memory, disk, network)
-    
-    **Drill-down (narrow the scope)**
-    - \`get_trace_metrics\`: RED metrics with flexible grouping and filtering (service → transaction → host)
-    - \`get_downstream_dependencies\`: Service topology and blast radius
-    - \`get_log_categories\`: Summarize log patterns into categories
-    
-    **Timeline (when did it change?)**
-    - \`get_trace_change_points\`: Detect changes in latency/throughput/error rate
-    - \`get_log_change_points\`: Detect changes in log message patterns
-    - \`get_metric_change_points\`: Detect changes in infrastructure metrics
-    - \`run_log_rate_analysis\`: Correlate log volume spikes/drops with field values
-    
-    **Deep investigation (understand why)**
-    - \`get_correlated_logs\`: Full log sequences around errors (trace by correlation ID)
-    - \`get_anomaly_detection_jobs\`: ML-detected anomalies
   `);
 }
 
