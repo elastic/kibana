@@ -8,13 +8,14 @@
 import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import type { DataSourceAttributes } from '../saved_objects';
 import { convertSOtoAPIResponse } from './schema';
+import type { DataCatalog } from '@kbn/data-catalog-plugin/server';
 
 describe('convertSOtoAPIResponse', () => {
   // Simple helper to create a test catalog
   const createTestCatalog = (iconTypes: Record<string, string>) =>
     ({
       get: (type: string) => (iconTypes[type] ? { iconType: iconTypes[type] } : undefined),
-    } as unknown);
+    } as DataCatalog);
 
   it('should convert SavedObject to API response format', () => {
     const savedObject: SavedObject<DataSourceAttributes> = {
