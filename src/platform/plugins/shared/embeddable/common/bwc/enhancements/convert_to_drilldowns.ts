@@ -10,21 +10,22 @@
 import { generateRefName } from './dynamic_actions/dashboard_drilldown_persistable_state';
 import type { DynamicActionsState, SerializedEvent } from './dynamic_actions/types';
 
-export function convertToDrilldowns(
-  enhancementsState: { dynamicActions?: DynamicActionsState },
-) {
+export function convertToDrilldowns(enhancementsState: { dynamicActions?: DynamicActionsState }) {
   if (!enhancementsState?.dynamicActions?.events) return {};
 
   return enhancementsState.dynamicActions.events.map((event) => {
     if (event.action.factoryId === 'DASHBOARD_TO_DASHBOARD_DRILLDOWN') {
       return convertToDashboardDrilldown(event);
     }
+
+    if (event.action.factoryId === 'URL_DRILLDOWN') {
+      return convertToUrlDrilldown(event);
+    }
   });
 }
 
 function convertToDashboardDrilldown(event: SerializedEvent) {
-  const { openInNewTab, useCurrentDateRange, useCurrentFilters, ...restOfConfig } =
-      event.action.config;
+  const { openInNewTab, useCurrentDateRange, useCurrentFilters } = event.action.config;
 
   return {
     label: event.action.name,
@@ -32,12 +33,27 @@ function convertToDashboardDrilldown(event: SerializedEvent) {
     config: {
       type: 'dashboard_drilldown',
       dashboardRefName: generateRefName(event.eventId),
-      ...restOfConfig,
-      ...(typeof openInNewTab === 'boolean' ? { open_in_new_tab: openInNewTab } : {}),
-      ...(typeof useCurrentDateRange === 'boolean'
-        ? { use_time_range: useCurrentDateRange }
-        : {}),
-      ...(typeof useCurrentFilters === 'boolean' ? { use_filters: useCurrentFilters } : {}),
+      open_in_new_tab: openInNewTab ?? false,
+      use_time_range: useCurrentDateRange ?? true,
+      use_filters: useCurrentFilters ?? true,
+    },
+  };
+}
+
+function convertToUrlDrilldown(event: SerializedEvent) {
+  const { encodeUrl, openInNewTab, url } = event.action.config as {
+    encodeUrl?: boolean;
+    openInNewTab?: boolean;
+    url?: { template?: string };
+  };
+  return {
+    label: event.action.name,
+    triggers: event.triggers,
+    config: {
+      type: 'url_drilldown',
+      encode_url: encodeUrl ?? true,
+      open_in_new_tab: openInNewTab ?? true,
+      url: url?.template ?? '',
     },
   };
 }

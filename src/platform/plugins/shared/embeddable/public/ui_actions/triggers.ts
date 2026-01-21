@@ -65,7 +65,6 @@ export type ChartActionContext =
   | RangeSelectContext
   | RowClickContext;
 
-
 export const contextMenuTrigger: Trigger = {
   id: CONTEXT_MENU_TRIGGER,
   title: i18n.translate('embeddableApi.contextMenuTrigger.title', {

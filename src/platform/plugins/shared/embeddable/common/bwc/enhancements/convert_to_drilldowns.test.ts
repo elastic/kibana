@@ -48,4 +48,44 @@ describe('convertToDrilldowns', () => {
       ]
     `);
   });
+
+  test('should convert url drilldown event', () => {
+    const enhancements = {
+      dynamicActions: {
+        events: [
+          {
+            action: {
+              config: {
+                encodeUrl: true,
+                openInNewTab: true,
+                url: {
+                  template: 'https://localhost/?{{event.key}}',
+                },
+              },
+              factoryId: 'URL_DRILLDOWN',
+              name: 'Go to URL',
+            },
+            eventId: 'c29b72e0-8a32-4214-abe0-6c54c6f804b7',
+            triggers: ['VALUE_CLICK_TRIGGER'],
+          },
+        ],
+      },
+    };
+    expect(convertToDrilldowns(enhancements)).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "config": Object {
+            "encode_url": true,
+            "open_in_new_tab": true,
+            "type": "url_drilldown",
+            "url": "https://localhost/?{{event.key}}",
+          },
+          "label": "Go to URL",
+          "triggers": Array [
+            "VALUE_CLICK_TRIGGER",
+          ],
+        },
+      ]
+    `);
+  });
 });
