@@ -29,6 +29,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const timeout = 150_000;
   // FLAKY: https://github.com/elastic/kibana/issues/246399
+  // FLAKY: https://github.com/elastic/kibana/issues/246400
   describe.skip('When on the Endpoint Policy Details Page', function () {
     targetTags(this, ['@ess', '@serverless']);
 
