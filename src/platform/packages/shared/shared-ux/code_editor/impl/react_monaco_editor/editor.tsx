@@ -29,7 +29,7 @@
 
 import type { monaco as monacoEditor } from '@kbn/monaco';
 import { defaultThemesResolvers, initializeSupportedLanguages, monaco } from '@kbn/monaco';
-import { EuiPortal, type EuiPortalProps, useEuiTheme } from '@elastic/eui';
+import { EuiPortal, type EuiPortalProps, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { Global } from '@emotion/react';
 import * as React from 'react';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
@@ -150,6 +150,8 @@ export function MonacoEditor({
 
   const euiTheme = useEuiTheme();
 
+  const instanceId = useGeneratedHtmlId({ prefix: 'monaco-editor' });
+
   const editor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 
   const _subscription = useRef<monaco.IDisposable | null>(null);
@@ -216,6 +218,7 @@ export function MonacoEditor({
       // for applying styles specific to the overflow widgets container
       overflowWidgetsDomNode.current?.classList.add(OVERFLOW_WIDGETS_CONTAINER_CLASS);
       overflowWidgetsDomNode.current?.setAttribute('data-test-subj', OVERFLOW_WIDGETS_TEST_ID);
+      overflowWidgetsDomNode.current?.setAttribute('id', instanceId);
 
       // Before initializing monaco editor
       const finalOptions = { ...options, ...handleEditorWillMount() };
@@ -352,7 +355,12 @@ export function MonacoEditor({
 
   return (
     <>
-      <div ref={containerElement} style={style} className="react-monaco-editor-container" />
+      <div
+        id={instanceId}
+        ref={containerElement}
+        style={style}
+        className="react-monaco-editor-container"
+      />
       {/** @ts-expect-error -- we are using the portal component to render elements produced by monaco here, so no need to provide the expected children prop  */}
       <EuiPortal portalRef={setOverflowWidgetsDomNode} />
       <Global
@@ -361,10 +369,11 @@ export function MonacoEditor({
           [`.${OVERFLOW_WIDGETS_CONTAINER_CLASS}`]: {
             zIndex: Number(_euiTheme?.levels?.maskBelowHeader ?? 1000) - 2,
           },
-          // When the editor is inside a flyout, ensure the overflow widgets are above the flyout
-          [`:has(.euiFlyout [class*="monaco-editor"]) .${OVERFLOW_WIDGETS_CONTAINER_CLASS}`]: {
-            zIndex: _euiTheme?.levels?.menu ?? 2000,
-          },
+          // When the editor is inside a flyout, ensure the overflow widgets are above the flyout and modification is scoped to each instance
+          [`:has(.euiFlyout [class*="monaco-editor"][id="${instanceId}"]) .${OVERFLOW_WIDGETS_CONTAINER_CLASS}[id="${instanceId}"]`]:
+            {
+              zIndex: _euiTheme?.levels?.menu ?? 2000,
+            },
         })}
       />
     </>
