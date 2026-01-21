@@ -18,6 +18,7 @@ import type { TestResult } from '@jest/types';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { CodeOwnersEntry } from '@kbn/code-owners';
 import {
+  type CodeOwnerArea,
   findAreaForCodeOwner,
   getCodeOwnersEntries,
   getOwningTeamsForPath,
@@ -81,8 +82,17 @@ export class ScoutJestReporter extends BaseReporter {
     return getOwningTeamsForPath(filePath, this.codeOwnersEntries);
   }
 
-  private getOwnerAreas(owners: string[]): string[] {
-    return owners.map((owner) => findAreaForCodeOwner(owner) ?? 'unknown');
+  private getOwnerAreas(owners: string[]): CodeOwnerArea[] | 'unknown' {
+    const areas = owners
+      .map((owner) => findAreaForCodeOwner(owner))
+      .filter((area) => area !== undefined);
+
+    // Report 'unknown' if no area is found as some aggregations may depend on this value to exist
+    if (areas.length === 0) {
+      return 'unknown';
+    }
+
+    return areas;
   }
 
   private getScoutFileInfoForPath(filePath: string): ScoutFileInfo {

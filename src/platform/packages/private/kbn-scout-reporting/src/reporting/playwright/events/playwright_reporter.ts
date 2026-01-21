@@ -25,9 +25,10 @@ import stripANSI from 'strip-ansi';
 import { REPO_ROOT } from '@kbn/repo-info';
 import {
   type CodeOwnersEntry,
+  type CodeOwnerArea,
+  findAreaForCodeOwner,
   getCodeOwnersEntries,
   getOwningTeamsForPath,
-  findAreaForCodeOwner,
 } from '@kbn/code-owners';
 import { SCOUT_TARGET_TYPE, SCOUT_TARGET_MODE } from '@kbn/scout-info';
 import {
@@ -89,8 +90,17 @@ export class ScoutPlaywrightReporter implements Reporter {
     return getOwningTeamsForPath(filePath, this.codeOwnersEntries);
   }
 
-  private getOwnerAreas(owners: string[]): string[] {
-    return owners.map((owner) => findAreaForCodeOwner(owner) ?? 'unknown');
+  private getOwnerAreas(owners: string[]): CodeOwnerArea[] | 'unknown' {
+    const areas = owners
+      .map((owner) => findAreaForCodeOwner(owner))
+      .filter((area) => area !== undefined);
+
+    // Report 'unknown' if no area is found as some aggregations may depend on this value to exist
+    if (areas.length === 0) {
+      return 'unknown';
+    }
+
+    return areas;
   }
 
   private getScoutFileInfoForPath(filePath: string): ScoutFileInfo {
