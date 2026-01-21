@@ -6,24 +6,14 @@
  */
 /* Error Rate */
 
-import React from 'react';
+import React, { type ReactElement } from 'react';
 import type { RecursivePartial } from '@elastic/eui';
-import {
-  EuiFlexItem,
-  EuiPanel,
-  EuiFlexGroup,
-  EuiTitle,
-  EuiIconTip,
-  useEuiTheme,
-  transparentize,
-} from '@elastic/eui';
+import { EuiFlexItem, EuiPanel, EuiFlexGroup, EuiTitle, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { BoolQuery } from '@kbn/es-query';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import type { Theme } from '@elastic/charts';
-import { AlertActiveTimeRangeAnnotation, AlertAnnotation } from '@kbn/observability-alert-details';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { CHART_SETTINGS, DEFAULT_DATE_FORMAT } from './constants';
+import type { Theme, RectAnnotation, LineAnnotation } from '@elastic/charts';
+import type { TopAlert } from '@kbn/observability-plugin/public';
+import { CHART_SETTINGS } from './constants';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { ChartType } from '../../../shared/charts/helper/get_timeseries_color';
 import * as get_timeseries_color from '../../../shared/charts/helper/get_timeseries_color';
@@ -51,6 +41,7 @@ const INITIAL_STATE_ERROR_RATE: ErrorRate = {
 };
 
 function FailedTransactionChart({
+  alert,
   transactionType,
   transactionTypes,
   setTransactionType,
@@ -65,7 +56,10 @@ function FailedTransactionChart({
   filters,
   alertStart,
   alertEnd,
+  threshold,
+  annotations,
 }: {
+  alert: TopAlert;
   transactionType: string;
   transactionTypes?: string[];
   setTransactionType?: (transactionType: string) => void;
@@ -80,11 +74,9 @@ function FailedTransactionChart({
   filters?: BoolQuery;
   alertStart?: number;
   alertEnd?: number;
+  threshold?: ReactElement;
+  annotations?: Array<ReactElement<typeof RectAnnotation | typeof LineAnnotation>>;
 }) {
-  const { euiTheme } = useEuiTheme();
-  const {
-    services: { uiSettings },
-  } = useKibana();
   const { currentPeriodColor: currentPeriodColorErrorRate } =
     get_timeseries_color.getTimeSeriesColor(ChartType.FAILED_TRANSACTION_RATE);
 
@@ -148,28 +140,7 @@ function FailedTransactionChart({
     },
   ];
   const showTransactionTypeSelect = setTransactionType && transactionTypes;
-  const getFailedTransactionChartAdditionalData = () => {
-    if (alertStart) {
-      return [
-        <AlertActiveTimeRangeAnnotation
-          alertStart={alertStart}
-          alertEnd={alertEnd}
-          color={transparentize(euiTheme.colors.danger, 0.2)}
-          id={'alertActiveRect'}
-          key={'alertActiveRect'}
-        />,
-        <AlertAnnotation
-          key={'alertAnnotationStart'}
-          id={'alertAnnotationStart'}
-          alertStart={alertStart}
-          color={euiTheme.colors.danger}
-          dateFormat={
-            (uiSettings && uiSettings.get(UI_SETTINGS.DATE_FORMAT)) || DEFAULT_DATE_FORMAT
-          }
-        />,
-      ];
-    }
-  };
+
   return (
     <EuiFlexItem>
       <EuiPanel hasBorder={true}>
@@ -212,21 +183,29 @@ function FailedTransactionChart({
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-
-        <TimeseriesChart
-          id="errorRate"
-          height={200}
-          showAnnotations={true}
-          annotations={getFailedTransactionChartAdditionalData()}
-          fetchStatus={status}
-          timeseries={timeseriesErrorRate}
-          yLabelFormat={yLabelFormat}
-          yDomain={{ min: 0, max: 1 }}
-          comparisonEnabled={false}
-          customTheme={comparisonChartTheme}
-          timeZone={timeZone}
-          settings={CHART_SETTINGS}
-        />
+        <EuiFlexGroup direction="row" gutterSize="m" alignItems="center">
+          {!!threshold && (
+            <EuiFlexItem style={{ minWidth: 180 }} grow={1}>
+              {threshold}
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={!!threshold ? 5 : undefined}>
+            <TimeseriesChart
+              id="errorRate"
+              height={200}
+              showAnnotations={true}
+              annotations={annotations}
+              fetchStatus={status}
+              timeseries={timeseriesErrorRate}
+              yLabelFormat={yLabelFormat}
+              yDomain={{ min: 0, max: 1 }}
+              comparisonEnabled={false}
+              customTheme={comparisonChartTheme}
+              timeZone={timeZone}
+              settings={CHART_SETTINGS}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPanel>
     </EuiFlexItem>
   );

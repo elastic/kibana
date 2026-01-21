@@ -115,6 +115,10 @@ export function registerApmRuleTypes(observabilityRuleTypeRegistry: Observabilit
     validate: () => ({
       errors: [],
     }),
+    alertDetailsAppSection: lazy(
+      () =>
+        import('../ui_components/alert_details_app_section/transaction_error_rate_alert_details')
+    ),
     requiresAppContext: false,
     defaultActionMessage: transactionErrorRateMessage,
     defaultRecoveryMessage: transactionErrorRateRecoveryMessage,

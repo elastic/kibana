@@ -53,6 +53,7 @@ export function APMAlertingFailedTransactionsChart({
 
   return (
     <FailedTransactionChart
+      alert={alert}
       transactionType={currentTransactionType}
       transactionTypes={transactionTypes}
       setTransactionType={setTransactionType}

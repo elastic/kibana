@@ -18,6 +18,7 @@ import type { TopAlert } from '../typings/alerts';
 
 const ALLOWED_RULE_TYPES = [
   ApmRuleType.TransactionDuration,
+  ApmRuleType.TransactionErrorRate,
   LOG_THRESHOLD_ALERT_TYPE_ID,
   METRIC_THRESHOLD_ALERT_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
@@ -39,6 +40,8 @@ export const isAlertDetailsEnabledPerApp = (
 ): boolean => {
   if (!alert) return false;
   const ruleTypeId = alert.fields[ALERT_RULE_TYPE_ID];
+  console.log('ruleTypeId:', ruleTypeId);
+  console.log('ALLOWED_RULE_TYPES:', ALLOWED_RULE_TYPES);
 
   // The feature flags for alertDetails are not specific enough so we need to check
   // the specific rule types to see if they should be blocked or not.

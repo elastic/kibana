@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Theme } from '@elastic/charts';
+import type { Theme, RectAnnotation, LineAnnotation } from '@elastic/charts';
 import type { RecursivePartial } from '@elastic/eui';
 import type { ReactElement } from 'react';
 import React, { useMemo } from 'react';
@@ -13,18 +13,7 @@ import { EuiFlexItem, EuiPanel, EuiFlexGroup, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { BoolQuery } from '@kbn/es-query';
 import { getDurationFormatter } from '@kbn/observability-plugin/common';
-import { ALERT_RULE_TYPE_ID, ALERT_EVALUATION_THRESHOLD, ALERT_END } from '@kbn/rule-data-utils';
 import type { TopAlert } from '@kbn/observability-plugin/public';
-import {
-  AlertActiveTimeRangeAnnotation,
-  AlertThresholdAnnotation,
-  AlertThresholdTimeRangeRect,
-  AlertAnnotation,
-} from '@kbn/observability-alert-details';
-import { useEuiTheme } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import moment from 'moment';
 import { filterNil } from '../../../shared/charts/latency_chart';
 import { LatencyAggregationTypeSelect } from '../../../shared/charts/latency_chart/latency_aggregation_type_select';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
@@ -36,10 +25,9 @@ import { isTimeComparison } from '../../../shared/time_comparison/get_comparison
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { getLatencyChartSelector } from '../../../../selectors/latency_chart_selectors';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
-import { isLatencyThresholdRuleType } from './helpers';
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
-import { CHART_SETTINGS, DEFAULT_DATE_FORMAT } from './constants';
+import { CHART_SETTINGS } from './constants';
 import { TransactionTypeSelect } from './transaction_type_select';
 import { ViewInAPMButton } from './view_in_apm_button';
 
@@ -63,6 +51,7 @@ function LatencyChart({
   kuery = '',
   filters,
   threshold,
+  annotations,
 }: {
   alert: TopAlert;
   transactionType: string;
@@ -83,6 +72,7 @@ function LatencyChart({
   threshold?: ReactElement;
   kuery?: string;
   filters?: BoolQuery;
+  annotations?: Array<ReactElement<typeof RectAnnotation | typeof LineAnnotation>>;
 }) {
   const preferred = usePreferredDataSourceAndBucketSize({
     start,
@@ -93,10 +83,6 @@ function LatencyChart({
       ? ApmDocumentType.TransactionMetric
       : ApmDocumentType.ServiceTransactionMetric,
   });
-  const { euiTheme } = useEuiTheme();
-  const {
-    services: { uiSettings },
-  } = useKibana();
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end && transactionType && latencyAggregationType && preferred) {
@@ -136,54 +122,6 @@ function LatencyChart({
       filters,
     ]
   );
-  const alertEvalThreshold =
-    customAlertEvaluationThreshold || alert.fields[ALERT_EVALUATION_THRESHOLD];
-
-  const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
-
-  const alertEvalThresholdChartData = alertEvalThreshold
-    ? [
-        <AlertThresholdTimeRangeRect
-          key={'alertThresholdRect'}
-          id={'alertThresholdRect'}
-          threshold={alertEvalThreshold}
-          color={euiTheme.colors.danger}
-        />,
-        <AlertThresholdAnnotation
-          id={'alertThresholdAnnotation'}
-          key={'alertThresholdAnnotation'}
-          color={euiTheme.colors.danger}
-          threshold={alertEvalThreshold}
-        />,
-      ]
-    : [];
-
-  const getLatencyChartAdditionalData = () => {
-    if (
-      isLatencyThresholdRuleType(alert.fields[ALERT_RULE_TYPE_ID]) ||
-      customAlertEvaluationThreshold
-    ) {
-      return [
-        <AlertActiveTimeRangeAnnotation
-          alertStart={alert.start}
-          alertEnd={alertEnd}
-          color={euiTheme.colors.danger}
-          id={'alertActiveRect'}
-          key={'alertActiveRect'}
-        />,
-        <AlertAnnotation
-          key={'alertAnnotationStart'}
-          id={'alertAnnotationStart'}
-          alertStart={alert.start}
-          color={euiTheme.colors.danger}
-          dateFormat={
-            (uiSettings && uiSettings.get(UI_SETTINGS.DATE_FORMAT)) || DEFAULT_DATE_FORMAT
-          }
-        />,
-        ...alertEvalThresholdChartData,
-      ];
-    }
-  };
   const memoizedData = useMemo(
     () =>
       getLatencyChartSelector({
@@ -248,7 +186,7 @@ function LatencyChart({
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiFlexGroup direction="row" gutterSize="m">
+        <EuiFlexGroup direction="row" gutterSize="m" alignItems="center">
           {!!threshold && (
             <EuiFlexItem style={{ minWidth: 180 }} grow={1}>
               {threshold}
@@ -257,7 +195,7 @@ function LatencyChart({
           <EuiFlexItem grow={!!threshold ? 5 : undefined}>
             <TimeseriesChart
               id="latencyChart"
-              annotations={getLatencyChartAdditionalData()}
+              annotations={annotations}
               height={200}
               comparisonEnabled={comparisonEnabled}
               offset={offset}

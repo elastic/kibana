@@ -6,11 +6,19 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import moment from 'moment';
+import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import {
+  AlertActiveTimeRangeAnnotation,
+  AlertThresholdAnnotation,
+  AlertThresholdTimeRangeRect,
+  AlertAnnotation,
+} from '@kbn/observability-alert-details';
 import { formatAlertEvaluationValue, Threshold } from '@kbn/observability-plugin/public';
 import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
@@ -31,16 +39,24 @@ import {
 } from '../../../../../common/es_fields/apm';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { TimeRangeMetadataContextProvider } from '../../../../context/time_range_metadata/time_range_metadata_context';
+import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 import { getComparisonChartTheme } from '../../../shared/time_comparison/get_comparison_chart_theme';
 import FailedTransactionChart from './failed_transaction_chart';
 import { getAggsTypeFromRule } from './helpers';
 import LatencyChart from './latency_chart';
 import ThroughputChart from './throughput_chart';
 import type { AlertDetailsAppSectionProps } from './types';
-import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
+import { ApmAlertsChartsSection } from './apm_alerts_charts_section';
+import { DEFAULT_DATE_FORMAT } from './constants';
 
-export function AlertDetailsAppSection({ rule, alert, timeZone }: AlertDetailsAppSectionProps) {
+export function AlertDetailsAppSection({
+  rule,
+  alert,
+  timeZone,
+  mainChart = 'LatencyChart',
+}: AlertDetailsAppSectionProps & { mainChart: 'LatencyChart' | 'FailedTransactionChart' }) {
   const { services } = useKibana();
+  const { euiTheme } = useEuiTheme();
   createCallApmApi(services as CoreStart);
 
   const alertRuleTypeId = alert.fields[ALERT_RULE_TYPE_ID];
@@ -96,6 +112,102 @@ export function AlertDetailsAppSection({ rule, alert, timeZone }: AlertDetailsAp
     );
   }
 
+  // Annotations: start
+  const alertEvalThreshold = alert.fields[ALERT_EVALUATION_THRESHOLD];
+
+  const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
+  const alertEvalThresholdChartData = alertEvalThreshold
+    ? [
+        <AlertThresholdTimeRangeRect
+          key={'alertThresholdRect'}
+          id={'alertThresholdRect'}
+          threshold={alertEvalThreshold}
+          color={euiTheme.colors.danger}
+        />,
+        <AlertThresholdAnnotation
+          id={'alertThresholdAnnotation'}
+          key={'alertThresholdAnnotation'}
+          color={euiTheme.colors.danger}
+          threshold={alertEvalThreshold}
+        />,
+      ]
+    : [];
+
+  const getAnnotations = () => {
+    return [
+      <AlertActiveTimeRangeAnnotation
+        alertStart={alert.start}
+        alertEnd={alertEnd}
+        color={euiTheme.colors.danger}
+        id={'alertActiveRect'}
+        key={'alertActiveRect'}
+      />,
+      <AlertAnnotation
+        key={'alertAnnotationStart'}
+        id={'alertAnnotationStart'}
+        alertStart={alert.start}
+        color={euiTheme.colors.danger}
+        dateFormat={services.uiSettings!.get(UI_SETTINGS.DATE_FORMAT) || DEFAULT_DATE_FORMAT}
+      />,
+      ...alertEvalThresholdChartData,
+    ];
+  };
+  // Annotations: end
+
+  const latencyChart = (
+    <LatencyChart
+      alert={alert}
+      transactionType={transactionType}
+      transactionName={transactionName}
+      serviceName={serviceName}
+      environment={environment}
+      start={from}
+      end={to}
+      comparisonChartTheme={comparisonChartTheme}
+      timeZone={timeZone}
+      latencyAggregationType={latencyAggregationType}
+      comparisonEnabled={false}
+      offset={''}
+      threshold={mainChart === 'LatencyChart' ? thresholdComponent : undefined}
+      annotations={mainChart === 'LatencyChart' ? getAnnotations() : undefined}
+    />
+  );
+  const throughputChart = (
+    <ThroughputChart
+      transactionType={transactionType}
+      transactionName={transactionName}
+      serviceName={serviceName}
+      environment={environment}
+      start={from}
+      end={to}
+      comparisonChartTheme={comparisonChartTheme}
+      comparisonEnabled={false}
+      offset={''}
+      timeZone={timeZone}
+    />
+  );
+  const failedTransactionChart = (
+    <FailedTransactionChart
+      alert={alert}
+      transactionType={transactionType}
+      transactionName={transactionName}
+      serviceName={serviceName}
+      environment={environment}
+      start={from}
+      end={to}
+      comparisonChartTheme={comparisonChartTheme}
+      timeZone={timeZone}
+      threshold={mainChart !== 'LatencyChart' ? thresholdComponent : undefined}
+      annotations={mainChart !== 'LatencyChart' ? getAnnotations() : undefined}
+    />
+  );
+
+  const mainChartComponent = mainChart === 'LatencyChart' ? latencyChart : failedTransactionChart;
+  const secondaryChartComponents =
+    mainChart === 'LatencyChart'
+      ? [failedTransactionChart, throughputChart]
+      : [latencyChart, throughputChart];
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <TimeRangeMetadataContextProvider
@@ -106,48 +218,10 @@ export function AlertDetailsAppSection({ rule, alert, timeZone }: AlertDetailsAp
         uiSettings={services.uiSettings!}
       >
         <ChartPointerEventContextProvider>
-          <EuiFlexItem>
-            <LatencyChart
-              alert={alert}
-              transactionType={transactionType}
-              transactionName={transactionName}
-              serviceName={serviceName}
-              environment={environment}
-              start={from}
-              end={to}
-              comparisonChartTheme={comparisonChartTheme}
-              timeZone={timeZone}
-              latencyAggregationType={latencyAggregationType}
-              comparisonEnabled={false}
-              offset={''}
-              threshold={thresholdComponent}
-            />
-            <EuiSpacer size="s" />
-            <EuiFlexGroup direction="row" gutterSize="s">
-              <ThroughputChart
-                transactionType={transactionType}
-                transactionName={transactionName}
-                serviceName={serviceName}
-                environment={environment}
-                start={from}
-                end={to}
-                comparisonChartTheme={comparisonChartTheme}
-                comparisonEnabled={false}
-                offset={''}
-                timeZone={timeZone}
-              />
-              <FailedTransactionChart
-                transactionType={transactionType}
-                transactionName={transactionName}
-                serviceName={serviceName}
-                environment={environment}
-                start={from}
-                end={to}
-                comparisonChartTheme={comparisonChartTheme}
-                timeZone={timeZone}
-              />
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          <ApmAlertsChartsSection
+            mainChart={mainChartComponent}
+            secondaryCharts={secondaryChartComponents}
+          />
         </ChartPointerEventContextProvider>
       </TimeRangeMetadataContextProvider>
     </EuiFlexGroup>
