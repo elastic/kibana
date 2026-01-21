@@ -32,23 +32,6 @@ const GraphCollectionOutputSchema = z.object({
   '@odata.nextLink': z.string().optional().describe('URL to fetch next page of results'),
 });
 
-const paginationFields = {
-  top: z.number().optional().describe('Number of results to return'),
-  skip: z.number().optional().describe('Offset for pagination'),
-  skipToken: z.string().optional().describe('Skip token for pagination'),
-};
-
-const withPagination = (schema: z.ZodObject<Record<string, z.ZodTypeAny>>) =>
-  schema.extend(paginationFields).superRefine((data, ctx) => {
-    const { skip, skipToken } = data as { skip?: number; skipToken?: string };
-    if (skip !== undefined && skipToken !== undefined) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'skip and skipToken cannot both be set',
-      });
-    }
-  });
-
 export const SharepointOnline: ConnectorSpec = {
   metadata: {
     id: '.sharepoint-online',
@@ -84,21 +67,15 @@ export const SharepointOnline: ConnectorSpec = {
   actions: {
     getAllSites: {
       isTool: true,
-      input: withPagination(z.object({})).optional(),
+      input: z.object({}).optional(),
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input) => {
-        const typedInput = input as
-          | { top?: number; skip?: number; skipToken?: string }
-          | undefined;
         ctx.log.debug('SharePoint listing all sites');
         const response = await ctx.client.get(
           'https://graph.microsoft.com/v1.0/sites/getAllSites/',
           {
             params: {
               $select: 'id,displayName,webUrl,siteCollection',
-              ...(typedInput?.top !== undefined && { $top: typedInput.top }),
-              ...(typedInput?.skip !== undefined && { $skip: typedInput.skip }),
-              ...(typedInput?.skipToken && { $skiptoken: typedInput.skipToken }),
             },
           }
         );
@@ -108,18 +85,13 @@ export const SharepointOnline: ConnectorSpec = {
 
     getSitePages: {
       isTool: true,
-      input: withPagination(
-        z.object({
-          siteId: z.string().describe('Site ID'),
-        })
-      ),
+      input: z.object({
+        siteId: z.string().describe('Site ID'),
+      }),
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input) => {
         const typedInput = input as {
           siteId: string;
-          top?: number;
-          skip?: number;
-          skipToken?: string;
         };
         ctx.log.debug(`SharePoint listing all pages from siteId ${typedInput.siteId}`);
         const response = await ctx.client.get(
@@ -127,9 +99,6 @@ export const SharepointOnline: ConnectorSpec = {
           {
             params: {
               $select: 'id,title,description,webUrl,createdDateTime,lastModifiedDateTime',
-              ...(typedInput.top !== undefined && { $top: typedInput.top }),
-              ...(typedInput.skip !== undefined && { $skip: typedInput.skip }),
-              ...(typedInput.skipToken && { $skiptoken: typedInput.skipToken }),
             },
           }
         );
@@ -166,18 +135,13 @@ export const SharepointOnline: ConnectorSpec = {
 
     getSiteDrives: {
       isTool: true,
-      input: withPagination(
-        z.object({
-          siteId: z.string().describe('Site ID'),
-        })
-      ),
+      input: z.object({
+        siteId: z.string().describe('Site ID'),
+      }),
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input) => {
         const typedInput = input as {
           siteId: string;
-          top?: number;
-          skip?: number;
-          skipToken?: string;
         };
 
         ctx.log.debug(`SharePoint getting all drives of site ${typedInput.siteId}`);
@@ -187,9 +151,6 @@ export const SharepointOnline: ConnectorSpec = {
             params: {
               $select:
                 'id,name,driveType,webUrl,createdDateTime,lastModifiedDateTime,description,owner',
-              ...(typedInput.top !== undefined && { $top: typedInput.top }),
-              ...(typedInput.skip !== undefined && { $skip: typedInput.skip }),
-              ...(typedInput.skipToken && { $skiptoken: typedInput.skipToken }),
             },
           }
         );
@@ -199,18 +160,15 @@ export const SharepointOnline: ConnectorSpec = {
 
     getSiteLists: {
       isTool: true,
-      input: withPagination(
-        z.object({
+      input: z
+        .object({
           siteId: z.string().describe('Site ID'),
         })
-      ),
+        .strict(),
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input) => {
         const typedInput = input as {
           siteId: string;
-          top?: number;
-          skip?: number;
-          skipToken?: string;
         };
 
         ctx.log.debug(`SharePoint getting all lists of site ${typedInput.siteId}`);
@@ -220,9 +178,6 @@ export const SharepointOnline: ConnectorSpec = {
             params: {
               $select:
                 'id,displayName,name,webUrl,description,createdDateTime,lastModifiedDateTime',
-              ...(typedInput.top !== undefined && { $top: typedInput.top }),
-              ...(typedInput.skip !== undefined && { $skip: typedInput.skip }),
-              ...(typedInput.skipToken && { $skiptoken: typedInput.skipToken }),
             },
           }
         );
@@ -232,20 +187,15 @@ export const SharepointOnline: ConnectorSpec = {
 
     getSiteListItems: {
       isTool: true,
-      input: withPagination(
-        z.object({
-          siteId: z.string().describe('Site ID'),
-          listId: z.string().describe('List ID'),
-        })
-      ),
+      input: z.object({
+        siteId: z.string().describe('Site ID'),
+        listId: z.string().describe('List ID'),
+      }),
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input) => {
         const typedInput = input as {
           siteId: string;
           listId: string;
-          top?: number;
-          skip?: number;
-          skipToken?: string;
         };
 
         ctx.log.debug(`SharePoint getting all items of list ${typedInput.listId} of site ${typedInput.siteId}`);
@@ -255,9 +205,6 @@ export const SharepointOnline: ConnectorSpec = {
             params: {
               $select:
                 'id,webUrl,createdDateTime,lastModifiedDateTime,createdBy,lastModifiedBy',
-              ...(typedInput.top !== undefined && { $top: typedInput.top }),
-              ...(typedInput.skip !== undefined && { $skip: typedInput.skip }),
-              ...(typedInput.skipToken && { $skiptoken: typedInput.skipToken }),
             },
           }
         );

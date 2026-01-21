@@ -195,40 +195,6 @@ describe('SharepointOnline', () => {
         SharepointOnline.actions.getAllSites.handler(mockContext, {})
       ).rejects.toThrow('Access denied');
     });
-
-    it('should pass pagination params', async () => {
-      const mockResponse = {
-        data: { value: [] },
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
-
-      await SharepointOnline.actions.getAllSites.handler(mockContext, {
-        top: 25,
-        skip: 50,
-        skipToken: 'token-123',
-      });
-
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/getAllSites/',
-        {
-          params: {
-            $select: 'id,displayName,webUrl,siteCollection',
-            $top: 25,
-            $skip: 50,
-            $skiptoken: 'token-123',
-          },
-        }
-      );
-    });
-
-    it('should reject skip and skipToken together', () => {
-      expect(() =>
-        SharepointOnline.actions.getAllSites.input.parse({
-          skip: 10,
-          skipToken: 'token-123',
-        })
-      ).toThrow('skip and skipToken cannot both be set');
-    });
   });
 
   describe('getSitePages action', () => {
@@ -315,40 +281,6 @@ describe('SharepointOnline', () => {
           siteId: 'nonexistent-site',
         })
       ).rejects.toThrow('Site not found');
-    });
-
-    it('should pass pagination params', async () => {
-      const mockResponse = {
-        data: { value: [] },
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
-
-      await SharepointOnline.actions.getSitePages.handler(mockContext, {
-        siteId: 'site-123',
-        top: 10,
-        skipToken: 'next-page',
-      });
-
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/site-123/pages/',
-        {
-          params: {
-            $select: 'id,title,description,webUrl,createdDateTime,lastModifiedDateTime',
-            $top: 10,
-            $skiptoken: 'next-page',
-          },
-        }
-      );
-    });
-
-    it('should reject skip and skipToken together', () => {
-      expect(() =>
-        SharepointOnline.actions.getSitePages.input.parse({
-          siteId: 'site-123',
-          skip: 10,
-          skipToken: 'next-page',
-        })
-      ).toThrow('skip and skipToken cannot both be set');
     });
   });
 
@@ -440,41 +372,6 @@ describe('SharepointOnline', () => {
           siteId: 'nonexistent-site',
         })
       ).rejects.toThrow('Site not found');
-    });
-
-    it('should pass pagination params', async () => {
-      const mockResponse = {
-        data: { value: [] },
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
-
-      await SharepointOnline.actions.getSiteDrives.handler(mockContext, {
-        siteId: 'site-123',
-        top: 5,
-        skip: 15,
-      });
-
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/site-123/drives/',
-        {
-          params: {
-            $select:
-              'id,name,driveType,webUrl,createdDateTime,lastModifiedDateTime,description,owner',
-            $top: 5,
-            $skip: 15,
-          },
-        }
-      );
-    });
-
-    it('should reject skip and skipToken together', () => {
-      expect(() =>
-        SharepointOnline.actions.getSiteDrives.input.parse({
-          siteId: 'site-123',
-          skip: 10,
-          skipToken: 'next-page',
-        })
-      ).toThrow('skip and skipToken cannot both be set');
     });
   });
 
@@ -568,37 +465,13 @@ describe('SharepointOnline', () => {
       ).rejects.toThrow('Site not found');
     });
 
-    it('should pass pagination params', async () => {
-      const mockResponse = {
-        data: { value: [] },
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
-
-      await SharepointOnline.actions.getSiteLists.handler(mockContext, {
-        siteId: 'site-123',
-        top: 100,
-      });
-
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/site-123/lists/',
-        {
-          params: {
-            $select:
-              'id,displayName,name,webUrl,description,createdDateTime,lastModifiedDateTime',
-            $top: 100,
-          },
-        }
-      );
-    });
-
-    it('should reject skip and skipToken together', () => {
+    it('should reject pagination params for getSiteLists', () => {
       expect(() =>
         SharepointOnline.actions.getSiteLists.input.parse({
           siteId: 'site-123',
-          skip: 10,
-          skipToken: 'next-page',
+          top: 100,
         })
-      ).toThrow('skip and skipToken cannot both be set');
+      ).toThrow();
     });
   });
 
@@ -701,40 +574,6 @@ describe('SharepointOnline', () => {
           listId: 'list-123',
         })
       ).rejects.toThrow('Site not found');
-    });
-
-    it('should pass pagination params', async () => {
-      const mockResponse = {
-        data: { value: [] },
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
-
-      await SharepointOnline.actions.getSiteListItems.handler(mockContext, {
-        siteId: 'site-123',
-        listId: 'list-456',
-        skipToken: 'next-items',
-      });
-
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/sites/site-123/lists/list-456/items/',
-        {
-          params: {
-            $select: 'id,webUrl,createdDateTime,lastModifiedDateTime,createdBy,lastModifiedBy',
-            $skiptoken: 'next-items',
-          },
-        }
-      );
-    });
-
-    it('should reject skip and skipToken together', () => {
-      expect(() =>
-        SharepointOnline.actions.getSiteListItems.input.parse({
-          siteId: 'site-123',
-          listId: 'list-456',
-          skip: 10,
-          skipToken: 'next-items',
-        })
-      ).toThrow('skip and skipToken cannot both be set');
     });
   });
 

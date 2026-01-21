@@ -48,15 +48,9 @@ export const ConnectorIconsMap: Map<
     '.jina',
     lazy(() => import(/* webpackChunkName: "connectorIconJina" */ './specs/jina/icon/jina')),
   ],
-
   [
     '.sharepoint-online',
-    lazy(
-      () =>
-        import(
-          /* webpackChunkName: "connectorIconsharepointonline" */ './specs/sharepoint_online/icon'
-        )
-    ),
+    lazy(() => import(/* webpackChunkName: "connectorIconsharepointonline" */ './specs/sharepoint_online/icon')),
   ],
   [
     '.abuseipdb',
