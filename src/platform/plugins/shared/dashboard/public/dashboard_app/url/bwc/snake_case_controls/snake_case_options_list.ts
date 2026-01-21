@@ -19,32 +19,51 @@ export function snakeCaseOptionsList(state: {
     const {
       dataViewId,
       displaySettings,
-      fieldName,
       exclude,
+      fieldName,
+      ignoreValidations,
       runPastTimeout,
       searchTechnique,
       selectedOptions,
       singleSelect,
       sort,
       title,
+      useGlobalFilters,
     } = state as StoredOptionsListExplicitInput & { dataViewId?: string };
     return {
       data_view_id: dataViewId ?? '',
-      display_settings: {
-        hide_action_bar: displaySettings?.hideActionBar,
-        hide_exclude: displaySettings?.hideExclude,
-        hide_exists: displaySettings?.hideExists,
-        hide_sort: displaySettings?.hideSort,
-        placeholder: displaySettings?.placeholder,
-      },
       field_name: fieldName ?? '',
-      exclude,
-      run_past_timeout: runPastTimeout,
-      search_technique: searchTechnique as OptionsListDSLControlState['search_technique'],
-      selected_options: selectedOptions,
-      single_select: singleSelect,
-      sort: sort as OptionsListDSLControlState['sort'],
-      title,
+
+      ...(displaySettings && {
+        display_settings: {
+          ...(displaySettings.hideActionBar !== undefined && {
+            hide_action_bar: displaySettings.hideActionBar,
+          }),
+          ...(displaySettings.hideExclude !== undefined && {
+            hide_exclude: displaySettings.hideExclude,
+          }),
+          ...(displaySettings.hideExists !== undefined && {
+            hide_exists: displaySettings.hideExists,
+          }),
+          ...(displaySettings.hideSort !== undefined && {
+            hide_sort: displaySettings.hideSort,
+          }),
+          ...(displaySettings.placeholder && {
+            placeholder: displaySettings.placeholder,
+          }),
+        },
+      }),
+      ...(exclude !== undefined && { exclude }),
+      ...(ignoreValidations !== undefined && { ignore_validations: ignoreValidations }),
+      ...(runPastTimeout && { run_past_timeout: runPastTimeout }),
+      ...(searchTechnique && {
+        search_technique: searchTechnique as OptionsListDSLControlState['search_technique'],
+      }),
+      ...(selectedOptions && { selected_options: selectedOptions }),
+      ...(singleSelect !== undefined && { single_select: singleSelect }),
+      ...(sort && { sort: sort as OptionsListDSLControlState['sort'] }),
+      ...(title && { title }),
+      ...(useGlobalFilters !== undefined && { use_global_filters: useGlobalFilters }),
     };
     //
   } else {

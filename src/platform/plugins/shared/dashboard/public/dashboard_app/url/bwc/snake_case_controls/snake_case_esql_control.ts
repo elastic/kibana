@@ -27,17 +27,29 @@ export function snakeCaseESQLControl(state: {
       esqlQuery,
     } = state as StoredESQLControlExplicitInput;
     return {
-      available_options: availableOptions,
+      ...(availableOptions && { available_options: availableOptions }),
       control_type: controlType as OptionsListESQLControlState['control_type'],
-      display_settings: {
-        hide_action_bar: displaySettings?.hideActionBar,
-        hide_exclude: displaySettings?.hideExclude,
-        hide_exists: displaySettings?.hideExists,
-        hide_sort: displaySettings?.hideSort,
-        placeholder: displaySettings?.placeholder,
-      },
-      selected_options: selectedOptions,
-      single_select: singleSelect,
+      ...(displaySettings && {
+        display_settings: {
+          ...(displaySettings.hideActionBar !== undefined && {
+            hide_action_bar: displaySettings.hideActionBar,
+          }),
+          ...(displaySettings.hideExclude !== undefined && {
+            hide_exclude: displaySettings.hideExclude,
+          }),
+          ...(displaySettings.hideExists !== undefined && {
+            hide_exists: displaySettings.hideExists,
+          }),
+          ...(displaySettings.hideSort !== undefined && {
+            hide_sort: displaySettings.hideSort,
+          }),
+          ...(displaySettings.placeholder && {
+            placeholder: displaySettings.placeholder,
+          }),
+        },
+      }),
+      ...(selectedOptions && { selected_options: selectedOptions }),
+      ...(singleSelect !== undefined && { single_select: singleSelect }),
       variable_name: variableName,
       variable_type: variableType as OptionsListESQLControlState['variable_type'],
       esql_query: esqlQuery,

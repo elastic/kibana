@@ -22,9 +22,13 @@ export function snakeCaseTimeSlider(state: { [key: string]: unknown }): TimeSlid
       timesliceStartAsPercentageOfTimeRange,
     } = state as StoredTimeSliderExplicitInput;
     return {
-      is_anchored: isAnchored,
-      timeslice_end_as_percentage_of_time_range: timesliceEndAsPercentageOfTimeRange,
-      timeslice_start_as_percentage_of_time_range: timesliceStartAsPercentageOfTimeRange,
+      ...(isAnchored !== undefined && { is_anchored: isAnchored }),
+      ...(timesliceEndAsPercentageOfTimeRange && {
+        timeslice_end_as_percentage_of_time_range: timesliceEndAsPercentageOfTimeRange,
+      }),
+      ...(timesliceStartAsPercentageOfTimeRange && {
+        timeslice_start_as_percentage_of_time_range: timesliceStartAsPercentageOfTimeRange,
+      }),
     };
   } else {
     return state as TimeSliderControlState;
