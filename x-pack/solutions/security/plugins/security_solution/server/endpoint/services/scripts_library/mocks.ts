@@ -29,6 +29,7 @@ const generateScriptEntryMock = (overrides: Partial<EndpointScript> = {}): Endpo
     name: 'script one',
     platform: ['linux', 'macos'],
     tags: ['dataCollection'],
+    fileId: 'file-1-2-3',
     fileName: 'my_script.sh',
     fileSize: 12098,
     fileHash: 'e5441eb2bb',

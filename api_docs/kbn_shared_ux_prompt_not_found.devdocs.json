@@ -32,6 +32,8 @@
           "({ actions, title, body }: NotFoundProps) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/prompt/not_found/src/not_found_prompt.tsx",
+        "lineNumber": 38,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,6 +48,8 @@
               "NotFoundProps"
             ],
             "path": "src/platform/packages/shared/shared-ux/prompt/not_found/src/not_found_prompt.tsx",
+            "lineNumber": 38,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

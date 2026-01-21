@@ -9,11 +9,8 @@ import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
-import type { CoreSetup, Logger } from '@kbn/core/server';
-import type {
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
-} from '../../types';
+import type { Logger } from '@kbn/core/server';
+import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
 import { indexDescription, timeRangeSchemaOptional } from '../../utils/tool_schemas';
 import {
   DEFAULT_CORRELATION_IDENTIFIER_FIELDS,
@@ -74,10 +71,7 @@ export function createGetCorrelatedLogsTool({
   core,
   logger,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   logger: Logger;
 }): StaticToolRegistration<typeof getCorrelatedLogsSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof getCorrelatedLogsSchema> = {
@@ -108,8 +102,8 @@ Do NOT use for:
     },
     handler: async (toolParams, { esClient }) => {
       const {
-        start = DEFAULT_TIME_RANGE.start,
-        end = DEFAULT_TIME_RANGE.end,
+        start,
+        end,
         kqlFilter,
         errorLogsOnly = true,
         index,
