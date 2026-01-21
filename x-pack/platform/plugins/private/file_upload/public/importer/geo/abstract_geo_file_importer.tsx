@@ -36,8 +36,10 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
   private _blockSizeInBytes = 0;
   private _totalFeaturesRead = 0;
   private _totalFeaturesImported = 0;
+  private _totalFeaturesSent = 0;
   private _geometryTypesMap = new Map<string, boolean>();
   private _invalidFeatures: ImportFailure[] = [];
+  private _importFailures: ImportFailure[] = [];
   private _geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE =
     ES_FIELD_TYPES.GEO_SHAPE;
   private _smallChunks = false;
@@ -52,6 +54,15 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
 
   public destroy() {
     this._isActive = false;
+  }
+
+  public getCurrentImportStats(): { docCount: number; failures: ImportFailure[] } {
+    const allFailures = [...this._invalidFeatures, ...this._importFailures];
+    const docCount = this._totalFeaturesSent + allFailures.length;
+    return {
+      docCount,
+      failures: allFailures,
+    };
   }
 
   public canPreview() {
@@ -102,6 +113,10 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
       };
     }
 
+    this._importFailures = [];
+    this._totalFeaturesImported = 0;
+    this._totalFeaturesSent = 0;
+
     const maxChunkCharCount = this._smallChunks ? MAX_CHUNK_CHAR_COUNT / 10 : MAX_CHUNK_CHAR_COUNT;
     let success = true;
     const failures: ImportFailure[] = [...this._invalidFeatures];
@@ -115,6 +130,7 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
         return {
           success: false,
           failures,
+          docCount: this._totalFeaturesSent,
         };
       }
 
@@ -195,6 +211,10 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
       };
       while (resp.success === false && retries > 0) {
         try {
+          if (retries === IMPORT_RETRIES) {
+            this._totalFeaturesSent += chunks[i].length;
+          }
+
           resp = await callImportRoute({
             index,
             ingestPipelineId: pipelineId,
@@ -205,6 +225,7 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
             return {
               success: false,
               failures,
+              docCount: this._totalFeaturesSent,
             };
           }
 
@@ -230,6 +251,7 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
           failure.item += this._totalFeaturesImported;
         }
         failures.push(...resp.failures);
+        this._importFailures.push(...resp.failures);
       }
 
       if (resp.success) {

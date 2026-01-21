@@ -90,11 +90,12 @@ export class GeoUploadWizard extends Component<GeoUploadWizardProps, State> {
       !this._sessionTelemetryTracked &&
       (this.state.phase === PHASE.IMPORT || this.state.phase === PHASE.CONFIGURE)
     ) {
-      // Create minimal ImportResults for cancellation tracking
-      const cancelledImportResults: ImportResults = {
+      // Get documents that were uploaded before cancellation
+      const currentStats = this._geoFileImporter?.getCurrentImportStats();
+      const cancelledImportResults = {
         success: false,
-        failures: [],
-        docCount: 0,
+        failures: currentStats?.failures ?? [],
+        docCount: currentStats?.docCount ?? 0,
       };
       const sessionTimeMs = this._getSessionTimeMs();
       this._trackUploadSession(false, false, sessionTimeMs, true);
