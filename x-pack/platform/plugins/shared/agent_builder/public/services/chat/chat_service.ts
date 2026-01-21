@@ -16,11 +16,9 @@ import {
 } from '@kbn/agent-builder-common/agents';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
+import type { RuntimeAgentConfigurationOverrides } from '@kbn/agent-builder-common';
 import { publicApiPath } from '../../../common/constants';
-import type {
-  ChatRequestBodyPayload,
-  ChatConfigurationOverrides,
-} from '../../../common/http_api/chat';
+import type { ChatRequestBodyPayload } from '../../../common/http_api/chat';
 import { unwrapAgentBuilderErrors } from '../utils/errors';
 import type { EventsService } from '../events';
 import { propagateEvents } from './propagate_events';
@@ -32,7 +30,7 @@ interface BaseConverseParams {
   conversationId?: string;
   browserApiTools?: BrowserApiToolMetadata[];
   capabilities?: AgentCapabilities;
-  configurationOverrides?: ChatConfigurationOverrides;
+  configurationOverrides?: RuntimeAgentConfigurationOverrides;
 }
 
 export type ChatParams = BaseConverseParams & {

@@ -7,7 +7,7 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { ToolSelection } from '@kbn/agent-builder-common';
-import type { ChatConfigurationOverrides } from '../../../../common/http_api/chat';
+import type { RuntimeAgentConfigurationOverrides } from '@kbn/agent-builder-common';
 import { useAgentId } from '../../hooks/use_conversation';
 import { useAgentBuilderAgentById } from '../../hooks/agents/use_agent_by_id';
 
@@ -40,7 +40,7 @@ interface AgentOverridesContextValue {
   /** Whether user has made changes */
   isDirty: boolean;
   /** Overrides to send to API (only if dirty) */
-  overrides: ChatConfigurationOverrides | undefined;
+  overrides: RuntimeAgentConfigurationOverrides | undefined;
   /** Set custom instructions */
   setInstructions: (instructions: string) => void;
   /** Toggle a tool's enabled state */
@@ -77,6 +77,11 @@ export const AgentOverridesProvider: React.FC<AgentOverridesProviderProps> = ({ 
     }
   }, [agent, isAgentLoading]);
 
+  // Re-initialize when agent changes
+  useEffect(() => {
+    setIsInitialized(false);
+  }, [agentId]);
+
   useEffect(() => {
     if (!isInitialized) {
       initializeFromAgent();
@@ -107,10 +112,10 @@ export const AgentOverridesProvider: React.FC<AgentOverridesProviderProps> = ({ 
     });
   }, []);
 
-  const overrides = useMemo<ChatConfigurationOverrides | undefined>(() => {
+  const overrides = useMemo<RuntimeAgentConfigurationOverrides | undefined>(() => {
     if (!isDirty) return undefined; // Only provide overrides if dirty
 
-    const result: ChatConfigurationOverrides = {};
+    const result: RuntimeAgentConfigurationOverrides = {};
 
     if (areInstructionsDirty) {
       result.instructions = instructions;
