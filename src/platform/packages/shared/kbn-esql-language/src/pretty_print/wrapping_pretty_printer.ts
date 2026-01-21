@@ -126,7 +126,8 @@ export class WrappingPrettyPrinter {
     return printer.print(query);
   };
 
-  protected readonly opts: Required<WrappingPrettyPrinterOptions>;
+  protected readonly opts: Omit<Required<WrappingPrettyPrinterOptions>, 'mapRepresentation'> &
+    Pick<WrappingPrettyPrinterOptions, 'mapRepresentation'>;
 
   constructor(opts: WrappingPrettyPrinterOptions = {}) {
     this.opts = {
@@ -142,6 +143,7 @@ export class WrappingPrettyPrinter {
       lowercaseOptions: opts.lowercaseOptions ?? opts.lowercase ?? false,
       lowercaseFunctions: opts.lowercaseFunctions ?? opts.lowercase ?? false,
       lowercaseKeywords: opts.lowercaseKeywords ?? opts.lowercase ?? false,
+      mapRepresentation: opts.mapRepresentation,
     };
   }
 
