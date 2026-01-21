@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import type { ISuggestionItem } from '../../../registry/types';
 import {
   buildAddValuePlaceholder,
@@ -20,6 +20,11 @@ import { findFinalWord } from './helpers';
 export const DOUBLE_QUOTED_STRING_REGEX = /"([^"\\]|\\.)*"/g;
 // Extracts all object keys from "key": patterns in JSON-like syntax
 export const OBJECT_KEYS_REGEX = /"([^"]+)"\s*:/g;
+// Parses mapParams format: {name='paramName', values=[val1, val2], description='param desc', type=[valuesType]}
+// Captures: [1] = param name, [2] = comma-separated values
+export const MAP_PARAMS_REGEX =
+  /\{name='([^']+)'(?:,\s*values=\[([^\]]*)\])?[^}]*(?:,\s*description='([^']+)')(?:,\s*type=\[([^\]]*)\])?[^}]*\}/g;
+const STRIP_SINGLE_QUOTES_REGEX = /^'|'$/g;
 
 export interface MapParameterValues {
   type: MapValueType;
@@ -27,7 +32,7 @@ export interface MapParameterValues {
   description?: string;
 }
 
-export type MapParameters = Record<string, MapParameterValues>;
+export type MapParameters = Record<string, MapParameterValues & { rawTypes: string[] }>;
 
 /**
  * This function provides suggestions for map expressions within a command.
@@ -142,34 +147,46 @@ export function isInsideMapExpression(text: string): boolean {
   return getMapNestingLevel(text) > 0;
 }
 
-// can be enhanced later to support more types
-const ESTypesMap: Record<string, MapValueType> = {
-  integer: 'number',
-  double: 'number',
-  float: 'number',
-  boolean: 'boolean',
-  keyword: 'string',
-  text: 'string',
-};
+/**
+ * Parses a mapParams definition string into MapParameters.
+ *
+ * Input:  "{name='boost', values=[2.5], description='Boost value', type=[float]}, {name='analyzer', values=[standard], description='analyzer used', type=[keyword]}"
+ * Output: { boost: { type: 'number', ... }, analyzer: { type: 'string', ... } }
+ */
+export function parseMapParams(mapParamsStr: string): MapParameters {
+  const result: MapParameters = {};
+
+  for (const match of mapParamsStr.matchAll(MAP_PARAMS_REGEX)) {
+    const paramName = match[1];
+    const rawValues = match[2] ?? '';
+    const description = match[3] ?? '';
+    const rawTypes = match[4] ?? 'keyword';
+
+    const values = rawValues
+      .split(',')
+      .map((val) => val.trim().replace(STRIP_SINGLE_QUOTES_REGEX, ''))
+      .filter(Boolean);
+    const mappedTypesFromDefinition = rawTypes
+      .split(',')
+      .map((type) => castEsToKbnFieldTypeName(type.trim()));
+    const uniqueMappedTypes = Array.from(new Set(mappedTypesFromDefinition));
+
+    result[paramName] = {
+      ...parseMapValues(values, description),
+      rawTypes: uniqueMappedTypes,
+    };
+  }
+
+  return result;
+}
 
 /**
  * Parses a comma-separated values string and infers the type.
  * Returns suggestions for each value.
  */
-export function parseMapValues(
-  values: string[],
-  description: string,
-  types: string
-): MapParameterValues {
-  // infer types from definition when no values are provided
-  const mappedTypesFromDefinition = types
-    .split(',')
-    .map((type) => ESTypesMap[type.trim()] ?? 'string');
-  const uniqueMappedTypes = Array.from(new Set(mappedTypesFromDefinition));
+export function parseMapValues(values: string[], description: string): MapParameterValues {
   if (values.length === 0) {
-    // arbitrarily selecting the first type if multiple types are provided in the definition
-    // can be enhanced later to return one or multiple types
-    return { type: uniqueMappedTypes[0], suggestions: [], description };
+    return { type: 'string', suggestions: [], description };
   }
 
   const type = inferMapValueType(values);
