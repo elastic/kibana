@@ -81,10 +81,8 @@ export const bindOutput: PromptCallerFactory = ({
         // For other errors, check retry configuration
         const shouldRetry =
           isRateLimitError ||
-          (retryConfiguration?.retryOn === 'all') ||
-          (retryConfiguration?.retryOn === 'auto' &&
-            statusCode >= 500 &&
-            statusCode < 600);
+          retryConfiguration?.retryOn === 'all' ||
+          (retryConfiguration?.retryOn === 'auto' && statusCode >= 500 && statusCode < 600);
 
         if (!shouldRetry || attempt >= totalRetries) {
           throw error;
@@ -99,7 +97,9 @@ export const bindOutput: PromptCallerFactory = ({
         // Log retry attempt for debugging
         if (isRateLimitError) {
           console.warn(
-            `Rate limit error (429) on attempt ${attempt + 1}/${totalRetries + 1}. Retrying in ${waitTime}ms...`
+            `Rate limit error (429) on attempt ${attempt + 1}/${
+              totalRetries + 1
+            }. Retrying in ${waitTime}ms...`
           );
         }
 
