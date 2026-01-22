@@ -411,7 +411,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               codeEditorAriaLabel: ariaLabel,
             },
           })}
-          data-test-subj={`codeEditorHint codeEditorHint--${isHintActive ? 'active' : 'inactive'}`}
+          data-test-subj="codeEditorHint"
+          data-code-hint-status={isHintActive ? 'active' : 'inactive'}
         />
       </EuiToolTip>
     );
