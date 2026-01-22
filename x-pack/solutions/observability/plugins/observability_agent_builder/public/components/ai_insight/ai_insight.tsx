@@ -193,9 +193,11 @@ export function AiInsight({ title, createStream, buildAttachments }: AiInsightPr
                     })}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <StartConversationButton onClick={handleStartConversation} />
-                </EuiFlexItem>
+                {Boolean(summary && summary.trim()) && (
+                  <EuiFlexItem grow={false}>
+                    <StartConversationButton onClick={handleStartConversation} />
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
             </>
           ) : Boolean(summary && summary.trim()) ? (

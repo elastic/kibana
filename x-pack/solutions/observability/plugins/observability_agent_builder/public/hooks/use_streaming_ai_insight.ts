@@ -122,6 +122,7 @@ export function useStreamingAiInsight(
       };
     } catch (e) {
       handleStreamError(e, setError);
+      setIsLoading(false);
     }
   }, [createStream]);
 

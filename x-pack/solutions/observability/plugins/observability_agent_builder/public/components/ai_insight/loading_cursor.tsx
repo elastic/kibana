@@ -7,11 +7,8 @@
 
 import { css } from '@emotion/react';
 import React from 'react';
-import { useEuiTheme } from '@elastic/eui';
 
 export const LoadingCursor = () => {
-  const { euiTheme } = useEuiTheme();
-
   return (
     <span
       css={css`
@@ -29,7 +26,7 @@ export const LoadingCursor = () => {
         height: 16px;
         margin-left: 2px;
         vertical-align: middle;
-        background-color: ${euiTheme.colors.darkShade};
+        background: rgba(0, 0, 0, 0.25);
         animation: blink 1s infinite;
       `}
     />

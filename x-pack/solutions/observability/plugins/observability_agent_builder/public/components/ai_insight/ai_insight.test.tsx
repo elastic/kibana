@@ -15,6 +15,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { useStreamingAiInsight } from '../../hooks/use_streaming_ai_insight';
+import { OBSERVABILITY_AGENT_ID } from '../../../common/constants';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useUiSetting$: jest.fn(),
@@ -105,12 +106,18 @@ describe('AiInsight', () => {
   });
 
   describe('when an error occurs', () => {
-    it('displays an error banner', () => {
+    it('displays an error banner with error message', () => {
       mockUseStreamingAiInsight.mockReturnValue(createStreamingState({ error: 'Boom' }));
 
-      const { container, unmount } = renderComponent();
+      const { container, getByText, unmount } = renderComponent();
       const toggle = container.querySelector('[data-test-subj="agentBuilderAiInsight"]');
       fireEvent.click(toggle!);
+
+      const errorBanner = container.querySelector('[data-test-subj="AiInsightErrorBanner"]');
+      expect(errorBanner).toBeTruthy();
+
+      expect(getByText('Failed to generate AI insight')).toBeTruthy();
+      expect(getByText('The AI insight could not be generated: Boom')).toBeTruthy();
 
       const retryButton = container.querySelector(
         '[data-test-subj="AiInsightErrorBannerRetryButton"]'
@@ -186,6 +193,7 @@ describe('AiInsight', () => {
       expect(mockOpenConversationFlyout).toHaveBeenCalledWith({
         newConversation: true,
         attachments: [{ type: 'test', data: {} }],
+        agentId: OBSERVABILITY_AGENT_ID,
       });
 
       unmount();
