@@ -65,6 +65,7 @@ export interface UnifiedDocViewerFlyoutProps
   onRemoveColumn: (column: string) => void;
   setExpandedDoc: (doc?: DataTableRecord) => void;
   initialTabId?: string;
+  hideFilteringOnComputedColumns?: boolean;
 }
 
 function getIndexByDocId(hits: DataTableRecord[], id: string) {
@@ -104,6 +105,7 @@ export function UnifiedDocViewerFlyout({
   initialDocViewerState,
   onInitialDocViewerStateChange,
   onUpdateSelectedTabId,
+  hideFilteringOnComputedColumns,
 }: UnifiedDocViewerFlyoutProps) {
   const { euiTheme } = useEuiTheme();
   const isXlScreen = useIsWithinMinBreakpoint('xl');
@@ -221,6 +223,7 @@ export function UnifiedDocViewerFlyout({
         initialDocViewerState={initialDocViewerState}
         onInitialDocViewerStateChange={onInitialDocViewerStateChange}
         onUpdateSelectedTabId={onUpdateSelectedTabId}
+        hideFilteringOnComputedColumns={hideFilteringOnComputedColumns}
       />
     ),
     [
@@ -238,6 +241,7 @@ export function UnifiedDocViewerFlyout({
       euiTheme.base,
       initialTabId,
       initialDocViewerState,
+      hideFilteringOnComputedColumns,
       onInitialDocViewerStateChange,
       onUpdateSelectedTabId,
     ]
