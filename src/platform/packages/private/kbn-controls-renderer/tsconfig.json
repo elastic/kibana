@@ -20,7 +20,6 @@
     "@kbn/es-query",
     "@kbn/esql-utils",
     "@kbn/utility-types",
-    "@kbn/control-group-renderer",
     "@kbn/esql-types"
   ]
 }
