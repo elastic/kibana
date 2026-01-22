@@ -21,3 +21,18 @@ export const packagePolicyHasOtelInputs = (packagePolicyInputs: PackagePolicyInp
   (packagePolicyInputs || []).some(
     (input) => input.type === OTEL_COLLECTOR_INPUT_TYPE && input.enabled
   );
+
+export const packageInfoHasMultipleSignalTypes = (
+  packageInfo: PackageInfo | undefined
+): boolean => {
+  if (!packageInfo) {
+    return false;
+  }
+  // Check if package has available_types defined with more than one signal type
+  const availableTypes = packageInfo.available_types;
+  return (
+    Array.isArray(availableTypes) &&
+    availableTypes.length > 1 &&
+    packageInfoHasOtelInputs(packageInfo)
+  );
+};
