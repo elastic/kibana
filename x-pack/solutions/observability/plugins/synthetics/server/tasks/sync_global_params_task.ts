@@ -23,6 +23,7 @@ const TASK_TYPE = 'Synthetics:Sync-Global-Params-Private-Locations';
 
 interface TaskState extends Record<string, unknown> {
   paramsSpaceToSync: string;
+  modifiedParamKeys?: string[];
 }
 
 export type CustomTaskInstance = Omit<ConcreteTaskInstance, 'state'> & {
@@ -73,6 +74,7 @@ export class SyncGlobalParamsPrivateLocationsTask {
     } = this.serverSetup;
 
     const paramsSpaceToSync = taskInstance.state.paramsSpaceToSync;
+    const modifiedParamKeys = taskInstance.state.modifiedParamKeys;
     if (paramsSpaceToSync) {
       try {
         this.debugLog(`current task state is ${JSON.stringify(taskInstance.state)}`);
@@ -86,6 +88,7 @@ export class SyncGlobalParamsPrivateLocationsTask {
             encryptedSavedObjects,
             spaceIdToSync: paramsSpaceToSync,
             filterByGlobalParams: true,
+            modifiedParamKeys,
           });
           this.debugLog(`Sync of global params succeeded for space  ${paramsSpaceToSync}`);
         }
@@ -95,6 +98,7 @@ export class SyncGlobalParamsPrivateLocationsTask {
           error,
           state: {
             paramsSpaceToSync,
+            modifiedParamKeys,
           },
         };
       }
@@ -109,9 +113,12 @@ export class SyncGlobalParamsPrivateLocationsTask {
 export const asyncGlobalParamsPropagation = async ({
   server,
   paramsSpacesToSync,
+  modifiedParamKeys,
 }: {
   server: SyntheticsServerSetup;
   paramsSpacesToSync: string[];
+  /** Optional array of specific param keys that were modified. Used for granular filtering. */
+  modifiedParamKeys?: string[];
 }) => {
   const {
     pluginsStart: { taskManager },
@@ -127,7 +134,7 @@ export const asyncGlobalParamsPropagation = async ({
         params: {},
         taskType: TASK_TYPE,
         runAt: new Date(Date.now() + 3 * 1000),
-        state: { paramsSpaceToSync: spaceId },
+        state: { paramsSpaceToSync: spaceId, modifiedParamKeys },
       });
     })
   );

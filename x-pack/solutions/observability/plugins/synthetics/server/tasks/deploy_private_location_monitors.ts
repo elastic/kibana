@@ -177,12 +177,15 @@ export class DeployPrivateLocationMonitors {
     soClient,
     spaceIdToSync,
     filterByGlobalParams,
+    modifiedParamKeys,
   }: {
     spaceIdToSync?: string;
     soClient: SavedObjectsClientContract;
     allPrivateLocations: PrivateLocationAttributes[];
     encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
     filterByGlobalParams?: boolean;
+    /** Optional array of specific param keys that were modified. Used for granular filtering. */
+    modifiedParamKeys?: string[];
   }) {
     if (allPrivateLocations.length === 0) {
       this.debugLog('No private locations found, skipping sync of private location monitors');
@@ -195,6 +198,7 @@ export class DeployPrivateLocationMonitors {
         soClient,
         spaceId: spaceIdToSync,
         filterByGlobalParams,
+        modifiedParamKeys,
       });
 
     if (monitorSpaceIds.size === 0) {
@@ -274,6 +278,7 @@ export class DeployPrivateLocationMonitors {
     encryptedSavedObjects,
     spaceId = ALL_SPACES_ID,
     filterByGlobalParams = false,
+    modifiedParamKeys,
   }: {
     soClient: SavedObjectsClientContract;
     encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
@@ -283,6 +288,8 @@ export class DeployPrivateLocationMonitors {
      * This is used during global params sync to avoid unnecessary updates.
      */
     filterByGlobalParams?: boolean;
+    /** Optional array of specific param keys that were modified. Used for granular filtering. */
+    modifiedParamKeys?: string[];
   }) {
     const { syntheticsService } = this.syntheticsMonitorClient;
     const paramsBySpacePromise = syntheticsService.getSyntheticsParams({ spaceId });
@@ -303,7 +310,10 @@ export class DeployPrivateLocationMonitors {
     ]);
 
     return {
-      ...this.mixParamsWithMonitors(monitors, paramsBySpace, { filterByGlobalParams }),
+      ...this.mixParamsWithMonitors(monitors, paramsBySpace, {
+        filterByGlobalParams,
+        modifiedParamKeys,
+      }),
       paramsBySpace,
       maintenanceWindows,
     };
@@ -321,9 +331,9 @@ export class DeployPrivateLocationMonitors {
   mixParamsWithMonitors(
     monitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>>,
     paramsBySpace: Record<string, Record<string, string>>,
-    options: { filterByGlobalParams?: boolean } = {}
+    options: { filterByGlobalParams?: boolean; modifiedParamKeys?: string[] } = {}
   ) {
-    const { filterByGlobalParams = false } = options;
+    const { filterByGlobalParams = false, modifiedParamKeys } = options;
     const configsBySpaces: Record<string, HeartbeatConfig[]> = {};
     const monitorSpaceIds = new Set<string>();
     let skippedMonitorsCount = 0;
@@ -336,8 +346,8 @@ export class DeployPrivateLocationMonitors {
 
       const normalizedMonitor = normalizeSecrets(monitor).attributes as MonitorFields;
 
-      // When syncing for global params changes, skip monitors that don't use any global parameters
-      if (filterByGlobalParams && !monitorUsesGlobalParams(normalizedMonitor)) {
+      // When syncing for global params changes, skip monitors that don't use the modified parameters
+      if (filterByGlobalParams && !monitorUsesGlobalParams(normalizedMonitor, modifiedParamKeys)) {
         skippedMonitorsCount++;
         continue;
       }
@@ -366,7 +376,11 @@ export class DeployPrivateLocationMonitors {
 
     if (filterByGlobalParams && skippedMonitorsCount > 0) {
       this.debugLog(
-        `Filtered out ${skippedMonitorsCount} monitors that do not use global parameters`
+        `Filtered out ${skippedMonitorsCount} monitors that do not use ${
+          modifiedParamKeys
+            ? `the modified parameters: ${modifiedParamKeys.join(', ')}`
+            : 'global parameters'
+        }`
       );
     }
 

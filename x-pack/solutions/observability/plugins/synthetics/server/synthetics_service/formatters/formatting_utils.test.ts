@@ -5,6 +5,7 @@
  * 2.0.
  */
 import {
+  extractParamReferences,
   handleMultilineStringFormatter,
   inlineSourceFormatter,
   monitorUsesGlobalParams,
@@ -282,6 +283,53 @@ describe('handleMultilineStringFormatter', () => {
   });
 });
 
+describe('extractParamReferences', () => {
+  it('extracts single param reference', () => {
+    expect(extractParamReferences('${apiKey}')).toEqual(['apiKey']);
+  });
+
+  it('extracts multiple param references', () => {
+    const result = extractParamReferences('${baseUrl}/api/${version}');
+    expect(result).toEqual(['baseUrl', 'version']);
+  });
+
+  it('returns empty array when no params', () => {
+    expect(extractParamReferences('no params here')).toEqual([]);
+  });
+
+  it('handles params with default values', () => {
+    expect(extractParamReferences('${apiKey:defaultKey}')).toEqual(['apiKey']);
+  });
+
+  it('handles params with optional syntax', () => {
+    expect(extractParamReferences('${apiKey?}')).toEqual(['apiKey']);
+  });
+
+  it('returns unique param names', () => {
+    const result = extractParamReferences('${baseUrl}/api/${baseUrl}/other');
+    expect(result).toEqual(['baseUrl']);
+  });
+
+  it('handles dots in param names', () => {
+    expect(extractParamReferences('${host.name}')).toEqual(['host.name']);
+  });
+
+  it('handles dashes in param names', () => {
+    expect(extractParamReferences('${api-key}')).toEqual(['api-key']);
+  });
+
+  it('handles underscores in param names', () => {
+    expect(extractParamReferences('${api_key}')).toEqual(['api_key']);
+  });
+
+  it('handles complex string with multiple params', () => {
+    const result = extractParamReferences(
+      'https://${user}:${password}@${host}:${port}/path?key=${apiKey}'
+    );
+    expect(result.sort()).toEqual(['apiKey', 'host', 'password', 'port', 'user'].sort());
+  });
+});
+
 describe('valueContainsParams', () => {
   it('returns true for string with params', () => {
     expect(valueContainsParams('${apiKey}')).toBe(true);
@@ -484,6 +532,73 @@ describe('monitorUsesGlobalParams', () => {
       } as SyntheticsMonitor;
 
       expect(monitorUsesGlobalParams(monitor)).toBe(true);
+    });
+
+    it('returns true for browser monitor even with modifiedParamKeys specified', () => {
+      const monitor = {
+        ...baseBrowserMonitor,
+      } as SyntheticsMonitor;
+
+      // Browser monitors always return true regardless of modifiedParamKeys
+      expect(monitorUsesGlobalParams(monitor, ['someKey'])).toBe(true);
+    });
+  });
+
+  describe('with modifiedParamKeys (granular filtering)', () => {
+    it('returns true when monitor uses one of the modified params', () => {
+      const monitor = {
+        ...baseMonitor,
+        [ConfigKey.URLS]: '${baseUrl}/api/health',
+      } as SyntheticsMonitor;
+
+      expect(monitorUsesGlobalParams(monitor, ['baseUrl', 'otherParam'])).toBe(true);
+    });
+
+    it('returns false when monitor does not use any of the modified params', () => {
+      const monitor = {
+        ...baseMonitor,
+        [ConfigKey.URLS]: '${baseUrl}/api/health',
+      } as SyntheticsMonitor;
+
+      expect(monitorUsesGlobalParams(monitor, ['differentParam', 'anotherParam'])).toBe(false);
+    });
+
+    it('returns false when monitor has no params and modifiedParamKeys is specified', () => {
+      const monitor = {
+        ...baseMonitor,
+        [ConfigKey.URLS]: 'https://example.com',
+      } as SyntheticsMonitor;
+
+      expect(monitorUsesGlobalParams(monitor, ['anyParam'])).toBe(false);
+    });
+
+    it('returns true when monitor uses multiple params and one matches', () => {
+      const monitor = {
+        ...baseMonitor,
+        [ConfigKey.URLS]: '${baseUrl}/api',
+        [ConfigKey.USERNAME]: '${username}',
+      } as SyntheticsMonitor;
+
+      expect(monitorUsesGlobalParams(monitor, ['username'])).toBe(true);
+    });
+
+    it('handles empty modifiedParamKeys array (falls back to any params check)', () => {
+      const monitor = {
+        ...baseMonitor,
+        [ConfigKey.URLS]: '${baseUrl}/api',
+      } as SyntheticsMonitor;
+
+      // Empty array should behave like no modifiedParamKeys specified
+      expect(monitorUsesGlobalParams(monitor, [])).toBe(true);
+    });
+
+    it('handles undefined modifiedParamKeys (falls back to any params check)', () => {
+      const monitor = {
+        ...baseMonitor,
+        [ConfigKey.URLS]: '${baseUrl}/api',
+      } as SyntheticsMonitor;
+
+      expect(monitorUsesGlobalParams(monitor, undefined)).toBe(true);
     });
   });
 });

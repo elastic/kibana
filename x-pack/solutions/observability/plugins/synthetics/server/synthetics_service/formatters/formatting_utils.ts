@@ -83,6 +83,33 @@ export const hasNoParams = (strVal: string) => {
 };
 
 /**
+ * Extracts all parameter names referenced in a string using ${paramName} syntax.
+ * Handles optional default values (${paramName:default}) and nested syntax.
+ *
+ * @param strVal - The string to extract parameter references from
+ * @returns Array of unique parameter names found in the string
+ */
+export const extractParamReferences = (strVal: string): string[] => {
+  const matches = strVal.match(SHELL_PARAMS_REGEX);
+  if (!matches) {
+    return [];
+  }
+
+  const paramNames = new Set<string>();
+  for (const match of matches) {
+    // Remove ${ and } and extract just the param name (before any : for defaults)
+    const content = match.slice(2, -1);
+    // Handle ${paramName:default} syntax - extract just the param name
+    const paramName = content.split(':')[0].split('?')[0];
+    if (paramName) {
+      paramNames.add(paramName);
+    }
+  }
+
+  return Array.from(paramNames);
+};
+
+/**
  * Checks if a value (string, object, or array) contains any global parameter references.
  *
  * @param value - The value to check for parameter references
@@ -106,16 +133,22 @@ export const valueContainsParams = (value: unknown): boolean => {
 };
 
 /**
- * Checks if a monitor configuration uses any global parameters.
+ * Checks if a monitor configuration uses global parameters.
  *
  * For lightweight monitors (HTTP, TCP, ICMP): checks for ${paramName} syntax in fields.
  * For browser monitors: always returns true since they access params via JavaScript
  * (params.paramName) which we cannot reliably detect by scanning the script content.
  *
  * @param monitor - The monitor configuration to check
+ * @param modifiedParamKeys - Optional array of specific param keys to check for.
+ *                            If provided, only checks if the monitor uses any of these specific params.
+ *                            If not provided, checks if the monitor uses any global params.
  * @returns true if the monitor uses at least one global parameter reference
  */
-export const monitorUsesGlobalParams = (monitor: SyntheticsMonitor): boolean => {
+export const monitorUsesGlobalParams = (
+  monitor: SyntheticsMonitor,
+  modifiedParamKeys?: string[]
+): boolean => {
   // Browser monitors access params via JavaScript (params.paramName), not ${paramName} syntax.
   // We cannot reliably parse JavaScript to detect param usage, so we always include
   // browser monitors in global params sync to ensure they receive updated param values.
@@ -125,6 +158,7 @@ export const monitorUsesGlobalParams = (monitor: SyntheticsMonitor): boolean => 
 
   // For lightweight monitors (HTTP, TCP, ICMP), check for ${paramName} syntax in fields
   const keysToCheck = Object.keys(monitor) as Array<keyof SyntheticsMonitor>;
+  const referencedParams = new Set<string>();
 
   for (const key of keysToCheck) {
     // Skip fields that don't support parameter substitution
@@ -133,12 +167,23 @@ export const monitorUsesGlobalParams = (monitor: SyntheticsMonitor): boolean => 
     }
 
     const value = monitor[key];
-    if (valueContainsParams(value)) {
-      return true;
+    if (value === null || value === undefined) {
+      continue;
     }
+
+    // Extract param references from the value
+    const strValue = typeof value === 'string' ? value : JSON.stringify(value);
+    const params = extractParamReferences(strValue);
+    params.forEach((p) => referencedParams.add(p));
   }
 
-  return false;
+  // If no specific params to check, return true if any params are referenced
+  if (!modifiedParamKeys || modifiedParamKeys.length === 0) {
+    return referencedParams.size > 0;
+  }
+
+  // Check if any of the modified params are referenced by this monitor
+  return modifiedParamKeys.some((key) => referencedParams.has(key));
 };
 
 export const secondsToCronFormatter: FormatterFn = (fields, key) => {
