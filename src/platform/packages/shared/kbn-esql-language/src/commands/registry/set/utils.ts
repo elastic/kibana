@@ -10,12 +10,11 @@ import { i18n } from '@kbn/i18n';
 import { UnmappedFieldsStrategy, type ISuggestionItem } from '../types';
 import type { ESQLAstItem } from '../../../types';
 import { isMap, SuggestionCategory } from '../../../..';
-import {
-  getCommandMapExpressionSuggestions,
-  parseMapParams,
-} from '../../definitions/utils/autocomplete/map_expression';
+import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
+import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
 import { settings } from '../../definitions/generated/settings';
 import { confidenceLevelValueItems, numOfRowsValueItems } from '../complete_items';
+import { parseMapParams } from '../../definitions/utils/maps';
 
 const getProjectRoutingCommonCompletionItems = (): ISuggestionItem[] => {
   return [
@@ -87,11 +86,13 @@ const getApproximateCompletionItems = (
 ): ISuggestionItem[] => {
   if (isMap(settingRightSide)) {
     const approximateSetting = settings.find((s) => s.name === 'approximate') as ApproximateSetting;
-    const availableParameters = parseMapParams(approximateSetting?.mapParams || '');
+    const parsedParameters = parseMapParams(approximateSetting?.mapParams || '');
+    const availableParameters: MapParameters = { ...parsedParameters };
     availableParameters.confidence_level.suggestions = confidenceLevelValueItems;
     availableParameters.num_rows.suggestions = numOfRowsValueItems;
     return getCommandMapExpressionSuggestions(innerText, availableParameters);
   }
+
   return [
     {
       label: 'false',

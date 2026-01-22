@@ -10,6 +10,7 @@
 import { getExpressionType, getFunctionDefinition } from '../..';
 import { isFunctionExpression } from '../../../../../ast/is';
 import { within } from '../../../../../ast/location';
+import { buildMapValueCompleteItem } from '../../../../registry/complete_items';
 import type { ISuggestionItem } from '../../../../registry/types';
 import { inOperators, nullCheckOperators, patternMatchOperators } from '../../../all_operators';
 import { isExpressionComplete } from '../../expressions';
@@ -18,12 +19,8 @@ import { dispatchPartialOperators } from './operators/partial/dispatcher';
 import { detectIn, detectLike, detectNullCheck } from './operators/partial/utils';
 import { getPosition, type ExpressionPosition } from './position';
 import { dispatchStates } from './positions/dispatcher';
-import {
-  DOUBLE_QUOTED_STRING_REGEX,
-  getCommandMapExpressionSuggestions,
-  isInsideMapExpression,
-  parseMapParams,
-} from '../map_expression';
+import type { MapParameters } from '../map_expression';
+import { DOUBLE_QUOTED_STRING_REGEX, getCommandMapExpressionSuggestions } from '../map_expression';
 import { SignatureAnalyzer } from './signature_analyzer';
 import type {
   ExpressionComputedMetadata,
@@ -33,6 +30,7 @@ import type {
   SuggestForExpressionResult,
 } from './types';
 import { isNullCheckOperator } from './utils';
+import { isInsideMapExpression, parseMapParams } from '../../maps';
 
 const WHITESPACE_REGEX = /\s/;
 const LAST_WORD_BOUNDARY_REGEX = /\b\w(?=\w*$)/;
@@ -214,11 +212,21 @@ function getMapExpressionSuggestions(innerText: string): ISuggestionItem[] | nul
     return null;
   }
 
-  const availableParameters = parseMapParams(mapParamsStr);
-  if (Object.keys(availableParameters).length === 0) {
+  const parsedParamters = parseMapParams(mapParamsStr);
+  if (Object.keys(parsedParamters).length === 0) {
     return null;
   }
 
+  const availableParameters = Object.entries(parsedParamters).reduce<MapParameters>(
+    (acc, [paramName, paramDef]) => {
+      acc[paramName] = {
+        ...paramDef,
+        suggestions: paramDef.values.map((value) => buildMapValueCompleteItem(value)),
+      };
+      return acc;
+    },
+    {}
+  );
   const suggestions = getCommandMapExpressionSuggestions(innerText, availableParameters, true);
   return suggestions.length > 0 ? suggestions : [];
 }

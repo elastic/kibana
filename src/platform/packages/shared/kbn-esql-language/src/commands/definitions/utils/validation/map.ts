@@ -12,7 +12,7 @@ import type { SupportedDataType } from '../../..';
 import { getExpressionType } from '../expressions';
 import { getMessageFromId } from '../errors';
 import { isMap } from '../../../../ast/is';
-import { parseMapParams } from '../autocomplete/map_expression';
+import { parseMapParams } from '../maps';
 
 // the setting 'approximate' uses 'map_param' as a type,
 // whereas the expression type in the AST is 'function_named_parameters'.
