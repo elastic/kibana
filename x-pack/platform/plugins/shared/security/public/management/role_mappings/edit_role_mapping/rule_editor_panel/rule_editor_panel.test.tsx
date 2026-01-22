@@ -110,18 +110,27 @@ describe('RuleEditorPanel', () => {
   });
 
   it('catches errors thrown by child components', () => {
+    // Mock VisualRuleEditor to throw an error
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.spyOn(require('./visual_rule_editor'), 'VisualRuleEditor').mockImplementation(() => {
+      throw new Error('Something awful happened here.');
+    });
+
     const props = {
       rawRules: {},
       onChange: jest.fn(),
       onValidityChange: jest.fn(),
       validateForm: false,
     };
+
     const wrapper = renderView(props);
 
-    wrapper.find(VisualRuleEditor).simulateError(new Error('Something awful happened here.'));
-
+    // Error boundary should have caught the error
     expect(wrapper.find(VisualRuleEditor)).toHaveLength(0);
     expect(wrapper.find(EuiErrorBoundary)).toHaveLength(1);
+    
+    consoleError.mockRestore();
+    jest.restoreAllMocks();
   });
 
   describe('can render a readonly view', () => {
