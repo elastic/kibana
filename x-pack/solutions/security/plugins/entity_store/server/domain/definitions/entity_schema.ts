@@ -25,7 +25,7 @@ const fieldSchema = z.object({
   allowAPIUpdate: z.optional(z.boolean()),
   mapping: mappingSchema,
   source: z.string(),
-  destination: z.optional(z.string()),
+  destination: z.string(),
   retention: retentionOperationSchema,
 });
 

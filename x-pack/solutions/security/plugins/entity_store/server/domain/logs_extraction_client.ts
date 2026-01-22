@@ -99,23 +99,27 @@ export class LogsExtractionClient {
   // TODO: We need to include index patterns provided manually by the customer
   private async getIndexPatterns(type: EntityType) {
     const updatesDataStream = getUpdatesEntitiesDataStreamName(type, this.namespace);
-    const alertsIndex = getAlertsIndexName(this.namespace);
-    const secSolIndices = [];
+    const indexPatterns: string[] = [updatesDataStream];
 
     try {
       const secSolDataView = await this.dataViewsService.get(
         getSecuritySolutionDataViewName(this.namespace)
       );
-      secSolIndices.push(...secSolDataView.getIndexPattern().split(','));
+
+      const alertsIndex = getAlertsIndexName(this.namespace);
+      const cleanIndices = secSolDataView
+        .getIndexPattern()
+        .split(',')
+        .filter((index) => index !== alertsIndex);
+      indexPatterns.push(...cleanIndices);
     } catch (error) {
       this.logger.warn(
         'Problems finding security solution data view indices, defaulting to logs-*'
       );
       this.logger.warn(error);
-      secSolIndices.push('logs-*');
+      indexPatterns.push('logs-*');
     }
 
-    const indexPatterns = [...secSolIndices, alertsIndex, updatesDataStream];
     return indexPatterns;
   }
 }

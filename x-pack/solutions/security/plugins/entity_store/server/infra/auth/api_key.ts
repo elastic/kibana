@@ -56,7 +56,7 @@ const generateEntityStoreAPIKey = async ({
   request: KibanaRequest;
   type: EntityType;
   namespace: string;
-}): Promise<EntityStoreAPIKey | undefined> => {
+}): Promise<EntityStoreAPIKey> => {
   logger.info('Generating Entity Store API key');
 
   const apiKey = await security.authc.apiKeys.grantAsInternalUser(request, {
@@ -68,15 +68,17 @@ const generateEntityStoreAPIKey = async ({
     },
   });
 
-  if (apiKey !== null) {
-    return {
-      id: apiKey.id,
-      name: apiKey.name,
-      apiKey: apiKey.api_key,
-      type,
-      namespace,
-    };
+  if (apiKey === null) {
+    throw new Error('Failed to generate Entity Store API key');
   }
+
+  return {
+    id: apiKey.id,
+    name: apiKey.name,
+    apiKey: apiKey.api_key,
+    type,
+    namespace,
+  };
 };
 
 export const getApiKeyManager = ({
@@ -111,10 +113,6 @@ export const getApiKeyManager = ({
         type,
         namespace,
       });
-
-      if (!apiKey) {
-        throw new Error('Failed to generate API key');
-      }
 
       const soClient = core.savedObjects.getScopedClient(request, {
         excludedExtensions: [SECURITY_EXTENSION_ID],

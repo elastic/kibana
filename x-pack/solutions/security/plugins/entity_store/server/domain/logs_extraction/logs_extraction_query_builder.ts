@@ -20,7 +20,7 @@ const METADATA_FIELDS = ['_index'];
 
 const RECENT_DATA_PREFIX = 'recent';
 // Some fields have only src and we need to fallback to it.
-const recentData = (src: string, dest?: string) => `${RECENT_DATA_PREFIX}.${dest || src}`;
+const recentData = (dest: string) => `${RECENT_DATA_PREFIX}.${dest}`;
 
 interface LogsExtractionQueryParams {
   // source of the query
@@ -83,8 +83,8 @@ function entityIdFilter(idFieldName: string) {
 function recentFieldStats(fields: EntityField[]) {
   return fields
     .map((field) => {
-      const { retention, destination: dest, source: src } = field;
-      const recentDest = recentData(src, dest);
+      const { retention, destination: dest } = field;
+      const recentDest = recentData(dest);
       const castedSrc = castSrcType(field);
       switch (retention.operation) {
         case 'collect_values':
@@ -103,8 +103,8 @@ function recentFieldStats(fields: EntityField[]) {
 function mergedFieldStats({ field: idField }: EntityIdentityField, fields: EntityField[]) {
   return fields
     .map((field) => {
-      const { retention, destination: dest, source: src } = field;
-      const recentDest = castDestType(recentData(src, dest), field);
+      const { retention, destination: dest } = field;
+      const recentDest = castDestType(recentData(dest), field);
       switch (retention.operation) {
         case 'collect_values':
           return `${dest} = MV_DEDUPE(COALESCE(MV_APPEND(${recentDest}, ${dest}), ${recentDest}))`;
@@ -122,7 +122,7 @@ function mergedFieldStats({ field: idField }: EntityIdentityField, fields: Entit
 
 function fieldsToKeep({ field: idField }: EntityIdentityField, fields: EntityField[]) {
   return fields
-    .map(({ destination, source }) => destination || source)
+    .map(({ destination }) => destination)
     .concat([...DEFAULT_FIELDS_TO_KEEP, idField])
     .join(',\n ');
 }
