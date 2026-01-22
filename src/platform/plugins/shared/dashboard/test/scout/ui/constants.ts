@@ -69,3 +69,12 @@ export const SAMPLE_DATA_RANGE = [
     display: 'Last 1 year',
   },
 ];
+
+export const LENS_BASIC_KIBANA_ARCHIVE =
+  'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json';
+export const LENS_BASIC_DATA_VIEW = 'logstash-*';
+export const LENS_BASIC_TITLE = 'Artistpreviouslyknownaslens';
+export const LENS_BASIC_TIME_RANGE = {
+  from: 'Sep 22, 2015 @ 00:00:00.000',
+  to: 'Sep 23, 2015 @ 00:00:00.000',
+};

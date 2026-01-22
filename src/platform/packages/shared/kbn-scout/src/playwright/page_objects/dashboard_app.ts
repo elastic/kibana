@@ -44,7 +44,7 @@ export class DashboardApp {
 
   async openNewDashboard() {
     await this.page.testSubj.click('newItemButton');
-    await this.page.testSubj.waitForSelector('dshDashboardViewport', { state: 'visible' });
+    await this.waitForRenderComplete();
   }
 
   private getSettingsFlyout() {
@@ -438,6 +438,8 @@ export class DashboardApp {
    * Uses the data-render-complete attribute to determine completion.
    */
   async waitForRenderComplete() {
+    await this.page.testSubj.waitForSelector('dshDashboardViewport', { state: 'visible' });
+
     try {
       const count = await this.getSharedItemsCount();
       if (count > 0) {

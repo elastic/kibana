@@ -9,31 +9,29 @@
 
 import { spaceTest, expect, tags } from '@kbn/scout';
 import type { PageObjects } from '@kbn/scout';
-
-const KIBANA_ARCHIVE_PATH =
-  'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json';
-const DATA_VIEW_NAME = 'logstash-*';
-const LENS_TITLE = 'Artistpreviouslyknownaslens';
+import {
+  LENS_BASIC_KIBANA_ARCHIVE,
+  LENS_BASIC_DATA_VIEW,
+  LENS_BASIC_TITLE,
+  LENS_BASIC_TIME_RANGE,
+} from '../constants';
 
 let lensSavedObjectId = '';
 
-spaceTest.describe('Dashboard lens by value', { tag: tags.ESS_ONLY }, () => {
+spaceTest.describe('Lens by-value panels (dashboard)', { tag: tags.ESS_ONLY }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
-    const importedObjects = await scoutSpace.savedObjects.load(KIBANA_ARCHIVE_PATH);
+    const importedObjects = await scoutSpace.savedObjects.load(LENS_BASIC_KIBANA_ARCHIVE);
     const lensObject = importedObjects.find(
-      (savedObject) => savedObject.type === 'lens' && savedObject.title === LENS_TITLE
+      (savedObject) => savedObject.type === 'lens' && savedObject.title === LENS_BASIC_TITLE
     );
     expect(
       lensObject,
-      `Lens saved object "${LENS_TITLE}" was not found in ${KIBANA_ARCHIVE_PATH}`
+      `Lens saved object "${LENS_BASIC_TITLE}" was not found in ${LENS_BASIC_KIBANA_ARCHIVE}`
     ).toBeTruthy();
     lensSavedObjectId = lensObject!.id;
 
-    await scoutSpace.uiSettings.setDefaultIndex(DATA_VIEW_NAME);
-    await scoutSpace.uiSettings.setDefaultTime({
-      from: 'Sep 22, 2015 @ 00:00:00.000',
-      to: 'Sep 23, 2015 @ 00:00:00.000',
-    });
+    await scoutSpace.uiSettings.setDefaultIndex(LENS_BASIC_DATA_VIEW);
+    await scoutSpace.uiSettings.setDefaultTime(LENS_BASIC_TIME_RANGE);
   });
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -48,19 +46,19 @@ spaceTest.describe('Dashboard lens by value', { tag: tags.ESS_ONLY }, () => {
   });
 
   const addByValueLensPanel = async (pageObjects: PageObjects) => {
-    await pageObjects.dashboard.addLens(LENS_TITLE);
-    await pageObjects.dashboard.clonePanel(LENS_TITLE);
-    await pageObjects.dashboard.removePanel(LENS_TITLE);
+    await pageObjects.dashboard.addLens(LENS_BASIC_TITLE);
+    await pageObjects.dashboard.clonePanel(LENS_BASIC_TITLE);
+    await pageObjects.dashboard.removePanel(LENS_BASIC_TITLE);
     await pageObjects.dashboard.waitForRenderComplete();
   };
 
-  spaceTest('can add a lens panel by value', async ({ pageObjects }) => {
+  spaceTest('adds a lens panel by value', async ({ pageObjects }) => {
     await spaceTest.step('add by value panel', async () => {
       await addByValueLensPanel(pageObjects);
     });
 
     await spaceTest.step('verify panel count', async () => {
-      await expect.poll(async () => pageObjects.dashboard.getPanelCount()).toBe(1);
+      expect(await pageObjects.dashboard.getPanelCount()).toBe(1);
     });
   });
 
@@ -72,7 +70,7 @@ spaceTest.describe('Dashboard lens by value', { tag: tags.ESS_ONLY }, () => {
       });
 
       await spaceTest.step('edit panel in Lens and switch to pie', async () => {
-        await pageObjects.dashboard.navigateToLensEditorFromPanel(`${LENS_TITLE} (copy)`);
+        await pageObjects.dashboard.navigateToLensEditorFromPanel(`${LENS_BASIC_TITLE} (copy)`);
         await pageObjects.lens.switchToVisualization('pie');
         await pageObjects.lens.saveAndReturn();
       });
@@ -84,67 +82,54 @@ spaceTest.describe('Dashboard lens by value', { tag: tags.ESS_ONLY }, () => {
     }
   );
 
-  spaceTest(
-    'editing and saving a lens by value panel retains number of panels',
-    async ({ pageObjects }) => {
-      await spaceTest.step('add by value panel', async () => {
-        await addByValueLensPanel(pageObjects);
-      });
+  spaceTest('saving a by-value panel retains panel count', async ({ pageObjects }) => {
+    await spaceTest.step('add by value panel', async () => {
+      await addByValueLensPanel(pageObjects);
+    });
 
-      const originalPanelCount = await pageObjects.dashboard.getPanelCount();
+    const originalPanelCount = await pageObjects.dashboard.getPanelCount();
 
-      await spaceTest.step('edit panel in Lens and switch to treemap', async () => {
-        await pageObjects.dashboard.navigateToLensEditorFromPanel(`${LENS_TITLE} (copy)`);
-        await pageObjects.lens.switchToVisualization('treemap');
-        await pageObjects.lens.saveAndReturn();
-      });
+    await spaceTest.step('edit panel in Lens and switch to treemap', async () => {
+      await pageObjects.dashboard.navigateToLensEditorFromPanel(`${LENS_BASIC_TITLE} (copy)`);
+      await pageObjects.lens.switchToVisualization('treemap');
+      await pageObjects.lens.saveAndReturn();
+    });
 
-      await spaceTest.step('verify panel count unchanged', async () => {
-        await pageObjects.dashboard.waitForRenderComplete();
-        await expect
-          .poll(async () => pageObjects.dashboard.getPanelCount())
-          .toBe(originalPanelCount);
-      });
-    }
-  );
+    await spaceTest.step('verify panel count unchanged', async () => {
+      await pageObjects.dashboard.waitForRenderComplete();
+      expect(await pageObjects.dashboard.getPanelCount()).toBe(originalPanelCount);
+    });
+  });
 
-  spaceTest(
-    'updates panel on dashboard when a by value panel is saved to library',
-    async ({ pageObjects }) => {
-      const newTitle = 'look out library, here I come!';
+  spaceTest('saving to library keeps panel count', async ({ pageObjects }) => {
+    const newTitle = 'look out library, here I come!';
 
-      await spaceTest.step('add by value panel', async () => {
-        await addByValueLensPanel(pageObjects);
-      });
+    await spaceTest.step('add by value panel', async () => {
+      await addByValueLensPanel(pageObjects);
+    });
 
-      const originalPanelCount = await pageObjects.dashboard.getPanelCount();
+    const originalPanelCount = await pageObjects.dashboard.getPanelCount();
 
-      await spaceTest.step('save panel to library from dashboard', async () => {
-        await pageObjects.dashboard.saveToLibrary(newTitle, `${LENS_TITLE} (copy)`);
-      });
+    await spaceTest.step('save panel to library from dashboard', async () => {
+      await pageObjects.dashboard.saveToLibrary(newTitle, `${LENS_BASIC_TITLE} (copy)`);
+    });
 
-      await spaceTest.step('verify panel count and title', async () => {
-        await pageObjects.dashboard.waitForRenderComplete();
-        await expect
-          .poll(async () => pageObjects.dashboard.getPanelCount())
-          .toBe(originalPanelCount);
-        const titles = await pageObjects.dashboard.getPanelTitles();
-        expect(titles).toContain(newTitle);
-      });
-    }
-  );
+    await spaceTest.step('verify panel count and title', async () => {
+      await pageObjects.dashboard.waitForRenderComplete();
+      expect(await pageObjects.dashboard.getPanelCount()).toBe(originalPanelCount);
+      const titles = await pageObjects.dashboard.getPanelTitles();
+      expect(titles).toContain(newTitle);
+    });
+  });
 
-  spaceTest(
-    'is no longer linked to a dashboard after opening Lens directly',
-    async ({ page, pageObjects }) => {
-      await spaceTest.step('open Lens editor directly', async () => {
-        await page.gotoApp('lens', { hash: `/edit/${lensSavedObjectId}` });
-        await pageObjects.lens.waitForLensApp();
-      });
+  spaceTest('opening Lens directly drops dashboard link', async ({ page, pageObjects }) => {
+    await spaceTest.step('open Lens editor directly', async () => {
+      await page.gotoApp('lens', { hash: `/edit/${lensSavedObjectId}` });
+      await pageObjects.lens.waitForLensApp();
+    });
 
-      await spaceTest.step('verify no return-to-origin switch', async () => {
-        await expect(page.testSubj.locator('returnToOriginModeSwitch')).toBeHidden();
-      });
-    }
-  );
+    await spaceTest.step('verify no return-to-origin switch', async () => {
+      await expect(page.testSubj.locator('returnToOriginModeSwitch')).toBeHidden();
+    });
+  });
 });
