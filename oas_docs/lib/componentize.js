@@ -16,15 +16,6 @@ const { createComponentNameGenerator } = require('./component_name_generator');
 const { createProcessSchema } = require('./process_schema');
 
 /**
-- Traverse paths → methods → requests/responses
-- Extract top-level schemas first
-- Recursively find `oneOf`/`anyOf`/`allOf` at ANY depth
-- Extract each item to `components/schemas`
-- Replace with `$ref`
-- Inspired by promote_space_awareness.js
- */
-
-/**
  * Deep clone helper to avoid mutating original object
  */
 const deepClone = (obj) => {
