@@ -245,6 +245,12 @@ function extractModifiedFields(processor: StreamlangProcessorDefinition): string
       }
       break;
 
+    case 'concat':
+      if (processor.to) {
+        fields.push(processor.to);
+      }
+      break;
+
     case 'remove':
     case 'remove_by_prefix':
     case 'drop_document':
@@ -349,7 +355,8 @@ function getProcessorOutputType(
     case 'uppercase':
     case 'lowercase':
     case 'trim':
-      // Dissect, replace, uppercase, lowercase, and trim always produce string output
+    case 'concat':
+      // Dissect, replace, uppercase, lowercase, trim, and concat always produce string output
       return 'string';
 
     case 'date':
@@ -465,6 +472,12 @@ function getExpectedInputType(
       }
       return null;
 
+    case 'concat':
+      if (processor.from.some((from) => from.type === 'field' && from.value === fieldName)) {
+        return ['string'];
+      }
+      return null;
+
     case 'rename':
     case 'set':
     case 'append':
@@ -542,6 +555,11 @@ function trackFieldTypesAndValidate(flattenedSteps: StreamlangProcessorDefinitio
         break;
       case 'join':
         fieldsUsed.push(...step.from);
+        break;
+      case 'concat':
+        fieldsUsed.push(
+          ...step.from.filter((from) => from.type === 'field').map((from) => from.value)
+        );
         break;
       case 'append':
       case 'drop_document':
@@ -767,6 +785,7 @@ function validateProcessorValues(
     case 'lowercase':
     case 'trim':
     case 'join':
+    case 'concat':
     case 'manual_ingest_pipeline':
       // No value validation implemented for these processors yet
       break;
