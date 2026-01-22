@@ -17,7 +17,6 @@ import type { TaskResult } from '../../lib/tasks/types';
 interface ScheduleTaskConfig<TParams extends object> {
   taskType: StreamsTaskType;
   taskId: string;
-  streamName: string;
   params: TParams;
   request: KibanaRequest;
 }
@@ -59,7 +58,6 @@ export async function handleTaskAction<TParams extends object, TPayload extends 
           type: scheduleConfig.taskType,
           id: scheduleConfig.taskId,
           space: '*',
-          stream: scheduleConfig.streamName,
         },
         params: scheduleConfig.params,
         request: scheduleConfig.request,
