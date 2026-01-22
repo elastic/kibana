@@ -19,6 +19,7 @@ import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared/src/maintenance_
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { AlertsGrouping } from '@kbn/alerts-grouping';
 import { rulesLocatorID, type RulesLocatorParams } from '@kbn/deeplinks-observability';
+import { getIsExperimentalFeatureEnabled } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   ObservabilityAlertsTable,
   getColumns,
@@ -264,7 +265,9 @@ function InternalAlertsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const manageRulesHref = http.basePath.prepend('/app/observability/alerts/rules');
+  const manageRulesHref = getIsExperimentalFeatureEnabled('unifiedRulesPage')
+    ? http.basePath.prepend('/app/rules')
+    : http.basePath.prepend('/app/observability/alerts/rules');
 
   return (
     <Provider value={alertSearchBarStateContainer}>
