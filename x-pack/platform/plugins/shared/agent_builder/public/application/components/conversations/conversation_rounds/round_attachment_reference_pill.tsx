@@ -6,24 +6,14 @@
  */
 
 import { css } from '@emotion/css';
-import {
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiIcon,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import type {
   AttachmentRefOperation,
   VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
-import {
-  ATTACHMENT_REF_OPERATION,
-  getVersion,
-} from '@kbn/agent-builder-common/attachments';
+import { ATTACHMENT_REF_OPERATION, getVersion } from '@kbn/agent-builder-common/attachments';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 
 export interface AttachmentReferencePillProps {
@@ -146,4 +136,3 @@ export const AttachmentReferencePill: React.FC<AttachmentReferencePillProps> = (
     </EuiPanel>
   );
 };
-
