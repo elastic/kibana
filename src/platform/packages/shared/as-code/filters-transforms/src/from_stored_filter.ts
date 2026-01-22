@@ -416,7 +416,6 @@ function extractBaseProperties(storedFilter: StoredFilter): Partial<AsCodeFilter
     ...(meta?.isMultiIndex !== undefined ? { is_multi_index: meta.isMultiIndex } : {}),
     ...(meta?.type !== undefined ? { filter_type: meta.type } : {}),
     ...(meta?.key !== undefined ? { key: meta.key } : {}),
-    ...(meta?.value !== undefined ? { value: meta.value } : {}),
   };
 }
 

@@ -95,7 +95,6 @@ export function toStoredFilter(filter: AsCodeFilter, logger?: Logger): StoredFil
           ? { type: filter.filter_type }
           : {}),
         ...(filter.key !== undefined ? { key: filter.key } : {}),
-        ...(filter.value !== undefined ? { value: filter.value } : {}),
       },
     };
 

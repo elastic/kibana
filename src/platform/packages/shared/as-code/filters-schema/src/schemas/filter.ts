@@ -120,14 +120,6 @@ const commonBasePropertiesSchema = schema.object({
       },
     })
   ),
-  value: schema.maybe(
-    schema.string({
-      meta: {
-        description: 'Value metadata from legacy filters for backwards compatibility',
-        deprecated: true,
-      },
-    })
-  ),
 });
 
 // ====================================================================
