@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { mergeTests } from 'playwright/test';
-import { globalSetupHook as baseGlobalSetupHook } from '@kbn/scout';
+import { globalSetupHook as baseGlobalSetupHook, mergeTests } from '@kbn/scout';
 import { profilingSetupFixture } from '../fixtures/worker/profiling/profiling_setup_fixture';
+import { sloDataFixture } from '../fixtures/worker';
 
-// Create a custom global setup hook that includes profiling setup
-export const globalSetupHook = mergeTests(baseGlobalSetupHook, profilingSetupFixture);
+// Create a custom global setup hook that includes profiling / slo setup
+export const globalSetupHook = mergeTests(
+  baseGlobalSetupHook,
+  profilingSetupFixture,
+  sloDataFixture
+);
