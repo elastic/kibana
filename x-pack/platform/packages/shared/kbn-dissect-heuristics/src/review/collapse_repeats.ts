@@ -41,6 +41,8 @@ export function collapseRepeats(ast: DissectAST): DissectAST {
  *
  * Pattern to match:
  * - ... field_X delimiter field_X delimiter field_X
+ * - Can handle mixed delimiters and skip fields
+ * - Also collapses consecutive skip fields at the end
  * - Collapse to: ... field_X (remove delimiters and repeated fields)
  */
 function collapseTrailingRepeats(nodes: DissectASTNode[]): DissectASTNode[] {
@@ -63,8 +65,12 @@ function collapseTrailingRepeats(nodes: DissectASTNode[]): DissectASTNode[] {
 
   const lastField = nodes[lastFieldIndex] as DissectFieldNode;
   const fieldName = lastField.name;
+  const isLastFieldSkip = lastField.modifiers?.skip === true || fieldName === '';
 
   // Find where the repeating sequence starts by walking backwards
+  // Handle two cases:
+  // 1. Named fields: field_X, delim, field_X, delim, %{?}, delim, field_X (mixed delimiters, skip fields interspersed)
+  // 2. Skip fields: %{?}, delim, %{?}, delim, %{?} (consecutive skip fields)
   let sequenceStart = lastFieldIndex;
   let i = lastFieldIndex - 1;
 
@@ -72,20 +78,34 @@ function collapseTrailingRepeats(nodes: DissectASTNode[]): DissectASTNode[] {
     const node = nodes[i];
 
     if (node.type === 'literal') {
-      // Skip the delimiter
+      // Skip any delimiter
       i--;
       continue;
     }
 
     if (node.type === 'field') {
       const field = node as DissectFieldNode;
-      if (field.name === fieldName) {
-        // Found another occurrence of the same field
-        sequenceStart = i;
-        i--;
+      const isSkipField = field.modifiers?.skip === true || field.name === '';
+
+      // Match conditions depend on what the last field is:
+      if (isLastFieldSkip) {
+        // Last field is a skip field - only match other skip fields
+        if (isSkipField) {
+          sequenceStart = i;
+          i--;
+        } else {
+          // Hit a named field, stop
+          break;
+        }
       } else {
-        // Different field, stop here
-        break;
+        // Last field is a named field - match same named field OR skip fields interspersed
+        if (isSkipField || field.name === fieldName) {
+          sequenceStart = i;
+          i--;
+        } else {
+          // Different named field, stop
+          break;
+        }
       }
     } else {
       break;
@@ -220,9 +240,10 @@ function removeRedundantAppend(nodes: DissectASTNode[]): DissectASTNode[] {
  * Find a repeating sequence starting at index
  * Returns null if no valid sequence found
  *
- * Handles two patterns:
+ * Handles three patterns:
  * 1. Same named field repeated: field_X delim field_X delim field_X
  * 2. Named field followed by skip fields: field_X delim %{?} delim %{?}
+ * 3. Mixed: field_X delim field_X delim %{?} delim field_X (treats all as same field)
  */
 function findRepeatSequence(
   nodes: DissectASTNode[],
@@ -251,14 +272,11 @@ function findRepeatSequence(
 
   const repeatDelimiter = (nodes[startIndex + 1] as { type: 'literal'; value: string }).value;
 
-  // Check what the second field is to determine the pattern type
+  // Check what the second field is
   const secondField = nodes[startIndex + 2];
   if (secondField.type !== 'field') {
     return null;
   }
-
-  const secondFieldNode = secondField as DissectFieldNode;
-  const isSkipPattern = secondFieldNode.modifiers?.skip === true || secondFieldNode.name === '';
 
   // Count how many times the pattern repeats: field + delimiter
   let repeatCount = 1;
@@ -271,12 +289,13 @@ function findRepeatSequence(
     }
 
     const currentField = nodes[currentIndex] as DissectFieldNode;
+    const isSkipField = currentField.modifiers?.skip === true || currentField.name === '';
 
-    // For skip patterns, skip fields continue the sequence
-    // For named patterns, must match the exact name
-    const isMatchingField = isSkipPattern
-      ? currentField.modifiers?.skip === true || currentField.name === ''
-      : currentField.name === fieldName;
+    // Match if it's either the same named field OR a skip field
+    // This handles: field_X, field_X, field_X (all same name)
+    //            OR: field_X, %{?}, field_X (skip fields between)
+    //            OR: field_X, %{?}, %{?} (all skip fields)
+    const isMatchingField = isSkipField || currentField.name === fieldName;
 
     if (!isMatchingField) {
       // Different field name - end of sequence
