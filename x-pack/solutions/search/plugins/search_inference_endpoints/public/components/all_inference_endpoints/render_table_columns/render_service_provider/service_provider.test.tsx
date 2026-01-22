@@ -11,16 +11,6 @@ import { ServiceProvider } from './service_provider';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 
-jest.mock('@kbn/ml-trained-models-utils', () => ({
-  ...jest.requireActual('@kbn/ml-trained-models-utils'),
-  ELASTIC_MODEL_DEFINITIONS: {
-    'model-with-mit-license': {
-      license: 'MIT',
-      licenseUrl: 'https://abc.com',
-    },
-  },
-}));
-
 describe('ServiceProvider component', () => {
   const renderComponent = (
     service: ServiceProviderKeys,
@@ -214,24 +204,6 @@ describe('ServiceProvider component', () => {
       expect(icon).toBeInTheDocument();
       expect(screen.queryByText('settings-model-123')).toBeNull();
       expect(screen.getByText('Runs on ML Nodes (resource-based billing)')).toBeInTheDocument();
-    });
-
-    it('renders the MIT license badge if the model is eligible', () => {
-      const modifiedEndpoint = {
-        ...mockEndpoint,
-        service_settings: { ...mockEndpoint.service_settings, model_id: 'model-with-mit-license' },
-      };
-      renderComponent(ServiceProviderKeys.elasticsearch, modifiedEndpoint);
-
-      const mitBadge = screen.getByTestId('mit-license-badge');
-      expect(mitBadge).toBeInTheDocument();
-      expect(mitBadge).toHaveAttribute('href', 'https://abc.com');
-    });
-
-    it('does not render the MIT license badge if the model is not eligible', () => {
-      renderComponent(ServiceProviderKeys.elasticsearch, mockEndpoint);
-
-      expect(screen.queryByTestId('mit-license-badge')).not.toBeInTheDocument();
     });
   });
 

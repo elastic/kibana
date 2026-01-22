@@ -7,9 +7,8 @@
 
 import React from 'react';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
-import { ELASTIC_MODEL_DEFINITIONS } from '@kbn/ml-trained-models-utils';
 
 import * as i18n from './translations';
 
@@ -23,16 +22,6 @@ const descriptions: Record<string, string> = {
 };
 
 export const EndpointModelInfo: React.FC<EndpointModelInfoProps> = ({ endpointInfo }) => {
-  const serviceSettings = endpointInfo.service_settings;
-  const modelId =
-    'model_id' in serviceSettings
-      ? serviceSettings.model_id
-      : 'model' in serviceSettings
-      ? serviceSettings.model
-      : undefined;
-
-  const isEligibleForMITBadge = modelId && ELASTIC_MODEL_DEFINITIONS[modelId]?.license === 'MIT';
-
   const description = endpointInfo?.inference_id.startsWith('.')
     ? descriptions[endpointInfo?.service ?? '']
     : undefined;
@@ -43,27 +32,9 @@ export const EndpointModelInfo: React.FC<EndpointModelInfoProps> = ({ endpointIn
     <EuiFlexGroup gutterSize="xs" direction="column">
       {description && (
         <EuiFlexItem>
-          <EuiFlexGroup gutterSize="xs" direction="row">
-            <EuiFlexItem grow={0}>
-              <EuiText size="s" color="subdued">
-                {description}
-              </EuiText>
-            </EuiFlexItem>
-            {isEligibleForMITBadge ? (
-              <EuiFlexItem grow={0}>
-                <EuiBadge
-                  color="hollow"
-                  iconType="popout"
-                  iconSide="right"
-                  href={ELASTIC_MODEL_DEFINITIONS[modelId].licenseUrl ?? ''}
-                  target="_blank"
-                  data-test-subj={'mit-license-badge'}
-                >
-                  {i18n.MIT_LICENSE}
-                </EuiBadge>
-              </EuiFlexItem>
-            ) : null}
-          </EuiFlexGroup>
+          <EuiText size="s" color="subdued">
+            {description}
+          </EuiText>
         </EuiFlexItem>
       )}
       {attributes && <EuiFlexItem>{attributes}</EuiFlexItem>}
