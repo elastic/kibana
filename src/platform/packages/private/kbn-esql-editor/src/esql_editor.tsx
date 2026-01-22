@@ -98,8 +98,8 @@ import {
   addTabKeybindingRules,
 } from './custom_editor_commands';
 import {
-  IndicesBrowserPopover,
-  FieldsBrowserPopover,
+  DataSourceBrowser,
+  FieldsBrowser,
   useResourcesBadge,
   BROWSER_POPOVER_WIDTH,
 } from './resource_browser';
@@ -1532,7 +1532,7 @@ const ESQLEditorInternal = function ESQLEditor({
 
       {enableIndicesBrowser && (
         <>
-          <IndicesBrowserPopover
+          <DataSourceBrowser
             isOpen={isIndicesBrowserOpen}
             onClose={() => setIsIndicesBrowserOpen(false)}
             onSelectIndex={handleResourceBrowserSelect}
@@ -1540,7 +1540,7 @@ const ESQLEditorInternal = function ESQLEditor({
             getLicense={kibana.services?.esql?.getLicense}
             position={browserPopoverPosition}
           />
-          <FieldsBrowserPopover
+          <FieldsBrowser
             isOpen={isFieldsBrowserOpen}
             onClose={() => setIsFieldsBrowserOpen(false)}
             onSelectField={handleResourceBrowserSelect}

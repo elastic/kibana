@@ -54,7 +54,7 @@ const getSourceTypeKey = (type?: string): string => {
 interface DataSourceBrowserProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectDataSource: (dataSourceName: string, oldLength: number) => void;
+  onSelectIndex: (indexName: string, oldLength: number) => void;
   core: CoreStart;
   getLicense?: () => Promise<ILicense | undefined>;
   position?: { top?: number; left?: number };
@@ -63,7 +63,7 @@ interface DataSourceBrowserProps {
 export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
   isOpen,
   onClose,
-  onSelectDataSource,
+  onSelectIndex,
   core,
   getLicense,
   position,
@@ -135,31 +135,28 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
 
   const i18nKeys = useMemo(
     () => ({
-      title: i18n.translate('esqlEditor.dataSourceBrowser.title', {
+      title: i18n.translate('esqlEditor.indicesBrowser.title', {
         defaultMessage: 'Data sources',
       }),
-      searchPlaceholder: i18n.translate('esqlEditor.dataSourceBrowser.searchPlaceholder', {
+      searchPlaceholder: i18n.translate('esqlEditor.indicesBrowser.searchPlaceholder', {
         defaultMessage: 'Search',
       }),
-      filterTitle: i18n.translate('esqlEditor.dataSourceBrowser.filterTitle', {
+      filterTitle: i18n.translate('esqlEditor.indicesBrowser.filterTitle', {
         defaultMessage: 'Filter by data source type',
       }),
-      integrationFilterTitle: i18n.translate(
-        'esqlEditor.dataSourceBrowser.integrationFilterTitle',
-        {
-          defaultMessage: 'Integrations',
-        }
-      ),
-      closeLabel: i18n.translate('esqlEditor.dataSourceBrowser.closeLabel', {
+      integrationFilterTitle: i18n.translate('esqlEditor.indicesBrowser.integrationFilterTitle', {
+        defaultMessage: 'Integrations',
+      }),
+      closeLabel: i18n.translate('esqlEditor.indicesBrowser.closeLabel', {
         defaultMessage: 'Close',
       }),
-      loading: i18n.translate('esqlEditor.dataSourceBrowser.loading', {
+      loading: i18n.translate('esqlEditor.indicesBrowser.loading', {
         defaultMessage: 'Loading data srources',
       }),
-      empty: i18n.translate('esqlEditor.dataSourceBrowser.empty', {
+      empty: i18n.translate('esqlEditor.indicesBrowser.empty', {
         defaultMessage: 'No data sources found',
       }),
-      noMatches: i18n.translate('esqlEditor.dataSourceBrowser.noMatches', {
+      noMatches: i18n.translate('esqlEditor.indicesBrowser.noMatches', {
         defaultMessage: 'No data sources match your search',
       }),
     }),
@@ -273,9 +270,9 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
 
       const oldLength = selectedItems.join(',').length;
       setSelectedItems(newlySelected);
-      onSelectDataSource(newlySelected.join(','), oldLength);
+      onSelectIndex(newlySelected.join(','), oldLength);
     },
-    [onSelectDataSource, selectedItems]
+    [onSelectIndex, selectedItems]
   );
 
   const handleTypeFilterChange = useCallback(

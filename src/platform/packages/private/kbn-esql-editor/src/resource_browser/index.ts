@@ -13,7 +13,7 @@ export {
   BROWSER_POPOVER_HEIGHT,
 } from './browser_popover_wrapper';
 export type { BrowserPopoverWrapperProps } from './browser_popover_wrapper';
-export { IndicesBrowserPopover } from './indices_browser_popover';
-export { FieldsBrowserPopover } from './fields_browser_popover';
+export { DataSourceBrowser } from './data_source_browser';
+export { FieldsBrowser } from './fields_browser';
 export { useResourcesBadge } from './resources_badge';
 export { findCommandPositions } from './utils';
