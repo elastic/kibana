@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, renderHook } from '@testing-library/react';
+import { render, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import { useGroupTakeActionsItems } from './use_group_take_action_items';
@@ -189,7 +189,7 @@ describe('useGroupTakeActionsItems', () => {
           wrapper: wrapperContainer,
         }
       );
-      await waitFor(() => expect(result.current(getActionItemsParams).items.length).toEqual(0));
+      await waitFor(() => expect(result.current(getActionItemsParams)).toBeUndefined());
     });
   });
 });
