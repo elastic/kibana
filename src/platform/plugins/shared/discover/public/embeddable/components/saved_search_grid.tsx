@@ -83,6 +83,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         query={props.query}
         filters={props.filters}
         docViewerRef={docViewerRef}
+        hideFilteringOnComputedColumns={true}
       />
     ),
     [
