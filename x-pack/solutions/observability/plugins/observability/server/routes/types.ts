@@ -27,6 +27,8 @@ export interface ObservabilityRouteHandlerResources {
 export interface ObservabilityRouteCreateOptions {
   tags?: string[];
   access?: 'public' | 'internal';
+  authRequired?: boolean | 'optional';
+  xsrfRequired?: boolean;
 }
 
 export type AbstractObservabilityServerRouteRepository = ServerRouteRepository;

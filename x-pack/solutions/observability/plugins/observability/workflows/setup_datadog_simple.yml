@@ -1,0 +1,34 @@
+version: '1'
+
+name: Setup Datadog Alerts Integration
+description: Creates webhook in Datadog to send alerts to Kibana
+enabled: true
+
+triggers:
+  - type: manual
+    enabled: true
+
+inputs:
+  - name: webhook_name
+    default: kibana-alerts-webhook
+    type: string
+    description: Name for the webhook in Datadog
+
+steps:
+  - name: create_webhook
+    type: datadog.setupWebhook
+    connector-id: datadog
+    with:
+      webhookName: '{{ inputs.webhook_name }}'
+
+  - name: show_result
+    type: console
+    with:
+      message: |
+        ✅ Webhook created! Result: {{ steps.create_webhook.output | json }}
+        
+        Next steps:
+        1. Go to Datadog → Monitors
+        2. Edit a monitor
+        3. Add @webhook-{{ inputs.webhook_name }} to notifications
+        4. Alerts will now appear in Kibana!

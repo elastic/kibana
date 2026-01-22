@@ -10,12 +10,14 @@ import type { ObservabilityConfig } from '..';
 import { aiAssistantRouteRepository } from './assistant/route';
 import { rulesRouteRepository } from './rules/route';
 import { alertsSuggestedDashboardRepository } from './alerts/route';
+import { eventsRouteRepository } from './events/route';
 
 export function getObservabilityServerRouteRepository(config: ObservabilityConfig) {
   const repository = {
     ...aiAssistantRouteRepository,
     ...rulesRouteRepository,
     ...alertsSuggestedDashboardRepository,
+    ...eventsRouteRepository,
   };
   return repository;
 }

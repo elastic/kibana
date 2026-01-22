@@ -12,6 +12,7 @@ import clock from './icons/clock.svg';
 import console from './icons/console.svg';
 import email from './icons/email.svg';
 import globe from './icons/globe.svg';
+import datadogLogoSvg from './icons/logo_datadog.svg';
 import elasticsearchLogoSvg from './icons/logo_elasticsearch.svg';
 import kibanaLogoSvg from './icons/logo_kibana.svg';
 import slackLogoSvg from './icons/logo_slack.svg';
@@ -23,6 +24,7 @@ import user from './icons/user.svg';
 import warning from './icons/warning.svg';
 
 export const HardcodedIcons: Record<string, string> = {
+  '.datadog': datadogLogoSvg,
   '.slack': slackLogoSvg,
   '.slack_api': slackLogoSvg,
   '.email': email,

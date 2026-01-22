@@ -352,7 +352,7 @@ const ActionsConnectorsList = ({
             {!showFixButton && (
               <RunOperation
                 canExecute={
-                  isStackConnector &&
+                  (isStackConnector || actionType.source === ACTION_TYPE_SOURCES.spec) &&
                   hasExecuteActionsCapability(capabilities, actionType?.subFeature)
                 }
                 item={item}

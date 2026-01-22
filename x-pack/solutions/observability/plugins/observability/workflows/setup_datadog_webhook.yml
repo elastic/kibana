@@ -1,0 +1,106 @@
+version: '1'
+
+name: Setup Datadog Webhook Integration
+description: Creates a webhook integration in Datadog and instruments monitors to send alerts to Kibana
+enabled: true
+
+triggers:
+  - type: manual
+
+inputs:
+  - name: webhook_name
+    default: kibana-alerts-webhook
+    type: string
+    description: Name for the webhook integration in Datadog
+
+steps:
+  # Step 1: Try to get existing webhook
+  - name: get_existing_webhook
+    type: datadog.getWebhook
+    connector-id: datadog
+    on-failure: 
+      continue: true
+    with:
+      webhookName: '{{ inputs.webhook_name }}'
+
+  # Step 2: Check if webhook exists and handle accordingly
+  - name: handle_webhook
+    type: if
+    condition: 'steps.get_existing_webhook.output.exists : true'
+    steps:
+      - name: webhook_exists
+        type: console
+        with:
+          message: >-
+            ✅ Webhook "{{ inputs.webhook_name }}" already exists. Using existing webhook.
+            URL: {{ steps.get_existing_webhook.output.url }}
+    else:
+      - name: create_webhook
+        type: datadog.setupWebhook
+        connector-id: datadog
+        with:
+          webhookName: '{{ inputs.webhook_name }}'
+
+      - name: log_webhook_created
+        type: console
+        with:
+          message: >-
+            ✅ Webhook created: {{ steps.create_webhook.output.webhookName }}
+            URL: {{ steps.create_webhook.output.webhookUrl }}
+
+  # Step 3: List all monitors
+  - name: list_monitors
+    type: datadog.listMonitors
+    connector-id: datadog
+    with:
+      pageSize: 100
+
+  - name: log_monitors_found
+    type: console
+    with:
+      message: >-
+        Found {{ steps.list_monitors.output.total }} monitors to instrument
+
+  # Step 4: Iterate over monitors and instrument each one
+  - name: instrument_each_monitor
+    type: foreach
+    foreach: '{{ steps.list_monitors.output.monitors | json }}'
+    steps:
+      - name: log_instrumenting
+        type: console
+        with:
+          message: >-
+            Instrumenting monitor: {{ foreach.item.name }} (ID: {{ foreach.item.id }})
+
+      - name: instrument_monitor
+        type: datadog.instrumentMonitor
+        connector-id: datadog
+        with:
+          monitorId: '{{ foreach.item.id }}'
+          webhookName: '{{ inputs.webhook_name }}'
+
+      - name: log_result
+        type: console
+        with:
+          message: >-
+            {% if steps.instrument_monitor.output.skipped %}
+            ⚠️ Monitor "{{ foreach.item.name }}" skipped: {{ steps.instrument_monitor.output.reason }}
+            {% elsif steps.instrument_monitor.output.alreadyInstrumented %}
+            ⏭️ Monitor "{{ foreach.item.name }}" already instrumented
+            {% else %}
+            ✅ Monitor "{{ foreach.item.name }}" instrumented successfully
+            {% endif %}
+
+  - name: show_results
+    type: console
+    with:
+      message: |
+        ============================================
+        DATADOG INTEGRATION COMPLETE
+        ============================================
+        
+        Webhook Name: {{ inputs.webhook_name }}
+        Monitors processed: {{ steps.list_monitors.output.total }}
+        
+        When monitors trigger, alerts will appear in Kibana's Observability Alerts page.
+        ============================================
