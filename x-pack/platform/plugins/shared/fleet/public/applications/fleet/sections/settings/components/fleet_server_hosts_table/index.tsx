@@ -172,6 +172,9 @@ export const FleetServerHostsTable: React.FunctionComponent<FleetServerHostsTabl
     <EuiBasicTable
       columns={columns}
       items={fleetServerHosts}
+      tableCaption={i18n.translate('xpack.fleet.settings.fleetServerHostsTable.tableCaption', {
+        defaultMessage: 'Fleet server hosts',
+      })}
       data-test-subj="settingsFleetServerHostsTable"
     />
   );

@@ -194,5 +194,14 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
     ];
   }, [deleteOutput, getHref, authz.fleet.allSettings, enableSyncIntegrations]);
 
-  return <EuiBasicTable columns={columns} items={outputs} data-test-subj="settingsOutputsTable" />;
+  return (
+    <EuiBasicTable
+      columns={columns}
+      items={outputs}
+      data-test-subj="settingsOutputsTable"
+      tableCaption={i18n.translate('xpack.fleet.settings.outputsTable.tableCaption', {
+        defaultMessage: 'Fleet outputs',
+      })}
+    />
+  );
 };
