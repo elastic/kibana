@@ -20,13 +20,11 @@ import type {
 } from '@kbn/discover-utils';
 import { AppMenuRegistry, dismissFlyouts, DiscoverFlyouts } from '@kbn/discover-utils';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
-import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
 import type { RuleTypeWithDescription } from '@kbn/alerts-ui-shared';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import useObservable from 'react-use/lib/useObservable';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { useI18n } from '@kbn/i18n-react';
-import { createDataViewDataSource } from '../../../../../common/data_sources';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import type { AppMenuDiscoverParams } from './app_menu_actions';
@@ -48,7 +46,6 @@ import {
   useCurrentTabSelector,
   useInternalStateDispatch,
 } from '../../state_management/redux';
-import type { DiscoverAppLocatorParams } from '../../../../../common';
 import type { DiscoverAppState } from '../../state_management/redux';
 import { onSaveDiscoverSession } from './save_discover_session';
 import { useDataState } from '../../hooks/use_data_state';
@@ -162,23 +159,12 @@ export const useTopNavLinks = ({
         isEsqlMode && currentDataView.type === ESQL_TYPE
           ? { query: { esql: getInitialESQLQuery(currentDataView, true) } }
           : undefined;
-      const locatorParams: DiscoverAppLocatorParams = defaultEsqlState
-        ? defaultEsqlState
-        : currentDataView.isPersisted()
-        ? { dataViewId: currentDataView.id }
-        : { dataViewSpec: currentDataView.toMinimalSpec() };
+      const locatorParams = defaultEsqlState ?? {
+        dataViewId: currentDataView.id || undefined,
+      };
+      const newSearchUrl = services.locator.getRedirectUrl(locatorParams);
       const newSearchMenuItem = getNewSearchAppMenuItem({
-        onNewSearch: () => {
-          const defaultState: DiscoverAppState = defaultEsqlState ?? {
-            dataSource: currentDataView.id
-              ? createDataViewDataSource({ dataViewId: currentDataView.id })
-              : undefined,
-          };
-          services.application.navigateToApp(DISCOVER_APP_ID, { state: { defaultState } });
-        },
-        onNavigate: () => {
-          services.locator.navigate(locatorParams);
-        },
+        newSearchUrl,
       });
       items.push(newSearchMenuItem);
     }

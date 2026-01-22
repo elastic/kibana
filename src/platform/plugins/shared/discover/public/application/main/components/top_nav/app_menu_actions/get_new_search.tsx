@@ -12,11 +12,9 @@ import { AppMenuActionId } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 
 export const getNewSearchAppMenuItem = ({
-  onNewSearch,
-  onNavigate,
+  newSearchUrl,
 }: {
-  onNewSearch: () => void;
-  onNavigate: () => void;
+  newSearchUrl: string;
 }): DiscoverAppMenuItemType => {
   return {
     id: AppMenuActionId.new,
@@ -26,9 +24,6 @@ export const getNewSearchAppMenuItem = ({
     }),
     iconType: 'plusInCircle',
     testId: 'discoverNewButton',
-    run: () => {
-      onNewSearch();
-      onNavigate();
-    },
+    href: newSearchUrl,
   };
 };
