@@ -42,7 +42,7 @@ const PopoverListItemIcon = ({ color, ...rest }: PopoverListItemIconProps) => (
   </IconContainer>
 );
 
-export const ExpandPopoverListItem = (
+export const PopoverListItem = (
   props: CommonProps &
     Pick<
       EuiListGroupItemProps,
