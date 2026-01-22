@@ -6,8 +6,6 @@
  */
 
 /**
- * Wired Streams Routing for Auto-Detect Flow
- *
  * This module handles routing logs to Wired Streams (the hierarchical `logs` stream)
  * for the auto-detect onboarding flow. Unlike other flows (OTel Host, OTel Kubernetes,
  * Elastic Agent Kubernetes) that use simpler configuration options like `logs_index`,
@@ -48,11 +46,7 @@ interface Stream {
   [key: string]: unknown;
 }
 
-/**
- * Creates the processor that routes logs to Wired Streams.
- * Sets @metadata.raw_index to 'logs' which Elastic Agent uses to override
- * the default data stream routing and send data to the hierarchical logs stream.
- */
+
 export function createWiredStreamsRoutingProcessor(): Processor {
   return {
     add_fields: {
@@ -65,25 +59,6 @@ export function createWiredStreamsRoutingProcessor(): Processor {
 }
 
 
-/**
- * Parses an Elastic Agent YAML config and injects the Wired Streams routing
- * processor into all log-type streams.
- *
- * Handles two common config patterns:
- * 1. Inputs with nested streams (e.g., filestream, logfile integrations):
- *    inputs:
- *      - type: logfile
- *        streams:
- *          - data_stream: { type: logs, dataset: ... }
- *
- * 2. Inputs with direct data_stream (e.g., journald, some custom integrations):
- *    inputs:
- *      - type: journald
- *        data_stream: { type: logs, dataset: ... }
- *
- * Only streams with `data_stream.type === 'logs'` are modified to ensure
- * metrics and other data types continue routing to their normal destinations.
- */
 export function injectWiredStreamsRouting(configYaml: string) {
   const config = load(configYaml);
 
@@ -92,7 +67,6 @@ export function injectWiredStreamsRouting(configYaml: string) {
   }
 
   for (const input of config.inputs) {
-    // Pattern 1: Inputs with nested streams array
     if (input.streams && Array.isArray(input.streams)) {
       for (const stream of input.streams) {
         if (stream.data_stream?.type === 'logs') {
@@ -102,7 +76,6 @@ export function injectWiredStreamsRouting(configYaml: string) {
       }
     }
 
-    // Pattern 2: Inputs with direct data_stream (no nested streams)
     const inputWithDataStream = input as Stream;
     if (!input.streams && inputWithDataStream.data_stream?.type === 'logs') {
       inputWithDataStream.processors = inputWithDataStream.processors || [];
