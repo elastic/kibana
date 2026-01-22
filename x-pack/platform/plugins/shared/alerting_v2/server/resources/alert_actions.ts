@@ -31,7 +31,7 @@ const mappings: estypes.MappingTypeMapping = {
   dynamic: false,
   properties: {
     '@timestamp': { type: 'date' },
-    alert_series_id: { type: 'keyword' },
+    group_hash: { type: 'keyword' },
     last_series_event_timestamp: { type: 'date' },
     actor: { type: 'keyword' },
     action_type: { type: 'keyword' },
@@ -43,10 +43,10 @@ const mappings: estypes.MappingTypeMapping = {
 
 export const alertActionSchema = z.object({
   '@timestamp': z.string(),
-  alert_series_id: z.string(),
+  group_hash: z.string(),
   last_series_event_timestamp: z.string(),
   actor: z.string(),
-  action_type: z.string(),
+  action_type: z.string(), // "fire-event"
   episode_id: z.string(),
   rule_id: z.string(),
   source: z.string(),

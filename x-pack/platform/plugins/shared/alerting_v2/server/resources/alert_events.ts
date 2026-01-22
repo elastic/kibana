@@ -48,8 +48,7 @@ const mappings: estypes.MappingTypeMapping = {
     data: { type: 'flattened' },
     parent_rule_id: { type: 'keyword' },
     status: { type: 'keyword' },
-    alert_id: { type: 'keyword' },
-    alert_series_id: { type: 'keyword' },
+    group_hash: { type: 'keyword' },
     source: { type: 'keyword' },
     episode_id: { type: 'keyword' },
     alert_state: { type: 'keyword' },
@@ -73,8 +72,7 @@ export const commonAlertEventSchema = z.object({
     })
     .optional(),
   data: z.record(z.string(), z.any()).optional(),
-  alert_id: z.string(), // ??
-  alert_series_id: z.string(), // hash(alert_id + grouping key/value)
+  group_hash: z.string(), // hash(alert_id + grouping key/value)
   source: z.string(), // "internal" | "external"
   status: z.enum(['breached', 'recover', 'no_data']),
 });
