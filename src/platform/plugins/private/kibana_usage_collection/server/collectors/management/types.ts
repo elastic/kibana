@@ -42,6 +42,8 @@ export interface UsageStats {
   'observability:enableServiceGroups': boolean;
   'observability:apmAWSLambdaPriceFactor': string;
   'observability:apmAWSLambdaRequestCostPerMillion': number;
+  'observability:enableInfrastructureAssetCustomDashboards': boolean;
+  'observability:enableInfrastructureProfilingIntegration': boolean;
   'observability:apmEnableTableSearchBar': boolean;
   'observability:apmEnableServiceInventoryTableSearchBar': boolean;
   'observability:logSources': string[];

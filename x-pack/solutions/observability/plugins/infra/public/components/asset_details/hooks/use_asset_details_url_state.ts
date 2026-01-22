@@ -61,6 +61,7 @@ const TabIdRT = rt.union([
   rt.literal(ContentTabIds.LOGS),
   rt.literal(ContentTabIds.ANOMALIES),
   rt.literal(ContentTabIds.OSQUERY),
+  rt.literal(ContentTabIds.DASHBOARDS),
 ]);
 
 const AlertStatusRT = rt.union([
