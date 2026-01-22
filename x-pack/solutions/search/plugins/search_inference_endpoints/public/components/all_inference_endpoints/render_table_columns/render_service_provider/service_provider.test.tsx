@@ -60,13 +60,14 @@ describe('ServiceProvider component', () => {
       task_settings: {},
       task_type: 'text_embedding',
     };
-    it('renders the component with service and model details', () => {
+    it('renders the component with service details (model shown in Model column)', () => {
       renderComponent(ServiceProviderKeys.openai, mockEndpoint);
 
       expect(screen.getByText('OpenAI')).toBeInTheDocument();
       const icon = screen.getByTestId('table-column-service-provider-openai');
       expect(icon).toBeInTheDocument();
-      expect(screen.getByText('text-embedding-3-small')).toBeInTheDocument();
+      // Model name is now shown in the dedicated Model column, not in Service column
+      expect(screen.queryByText('text-embedding-3-small')).not.toBeInTheDocument();
     });
   });
 
@@ -87,22 +88,13 @@ describe('ServiceProvider component', () => {
       task_type: 'sparse_embedding',
     };
 
-    it('renders the component with service and model details', () => {
+    it('renders the component with service details (model shown in Model column)', () => {
       renderComponent(ServiceProviderKeys.cohere, mockEndpoint);
 
       expect(screen.getByText('Cohere')).toBeInTheDocument();
       const icon = screen.getByTestId('table-column-service-provider-cohere');
       expect(icon).toBeInTheDocument();
-      expect(screen.getByText('embed-english-light-v3.0')).toBeInTheDocument();
-    });
-
-    it('does not render model_id badge if serviceSettings.model_id is not provided', () => {
-      const modifiedEndpoint = {
-        ...mockEndpoint,
-        service_settings: { ...mockEndpoint.service_settings, model_id: undefined },
-      };
-      renderComponent(ServiceProviderKeys.cohere, modifiedEndpoint);
-
+      // Model name is now shown in the dedicated Model column, not in Service column
       expect(screen.queryByText('embed-english-light-v3.0')).not.toBeInTheDocument();
     });
   });
@@ -178,25 +170,13 @@ describe('ServiceProvider component', () => {
       task_type: 'sparse_embedding',
     };
 
-    it('renders the component with endpoint details', () => {
+    it('renders the component with service details (model shown in Model column)', () => {
       renderComponent(ServiceProviderKeys.mistral, mockEndpoint);
 
       expect(screen.getByText('Mistral')).toBeInTheDocument();
       const icon = screen.getByTestId('table-column-service-provider-mistral');
       expect(icon).toBeInTheDocument();
-      expect(screen.getByText('model-xyz')).toBeInTheDocument();
-    });
-
-    it('does not render model id if not provided', () => {
-      const modifiedEndpoint = {
-        ...mockEndpoint,
-        service_settings: {},
-      };
-      renderComponent(ServiceProviderKeys.mistral, modifiedEndpoint);
-
-      const icon = screen.getByTestId('table-column-service-provider-mistral');
-      expect(icon).toBeInTheDocument();
-      expect(screen.getByText('Mistral')).toBeInTheDocument();
+      // Model name is now shown in the dedicated Model column, not in Service column
       expect(screen.queryByText('model-xyz')).not.toBeInTheDocument();
     });
   });
@@ -213,7 +193,7 @@ describe('ServiceProvider component', () => {
       task_type: 'sparse_embedding',
     };
 
-    it('renders the component with modelId', () => {
+    it('renders the component without model for non-preconfigured endpoints (model shown in Model column)', () => {
       renderComponent(ServiceProviderKeys.elasticsearch, {
         ...mockEndpoint,
         inference_id: 'model-123',
@@ -222,7 +202,8 @@ describe('ServiceProvider component', () => {
       expect(screen.getByText('Elasticsearch')).toBeInTheDocument();
       const icon = screen.getByTestId('table-column-service-provider-elasticsearch');
       expect(icon).toBeInTheDocument();
-      expect(screen.getByText('settings-model-123')).toBeInTheDocument();
+      // Model name is now shown in the dedicated Model column, not in Service column
+      expect(screen.queryByText('settings-model-123')).not.toBeInTheDocument();
     });
 
     it('renders the component with description', () => {
@@ -267,13 +248,14 @@ describe('ServiceProvider component', () => {
       task_type: 'sparse_embedding',
     };
 
-    it('renders the component with service and model details', () => {
+    it('renders the component with service details (model shown in Model column)', () => {
       renderComponent(ServiceProviderKeys.googleaistudio, mockEndpoint);
 
       expect(screen.getByText('Google AI Studio')).toBeInTheDocument();
       const icon = screen.getByTestId('table-column-service-provider-googleaistudio');
       expect(icon).toBeInTheDocument();
-      expect(screen.getByText('model-abc')).toBeInTheDocument();
+      // Model name is now shown in the dedicated Model column, not in Service column
+      expect(screen.queryByText('model-abc')).not.toBeInTheDocument();
     });
   });
 
@@ -289,13 +271,14 @@ describe('ServiceProvider component', () => {
       task_type: 'sparse_embedding',
     };
 
-    it('renders the component with model and service details', () => {
+    it('renders the component with service details (model shown in Model column)', () => {
       renderComponent(ServiceProviderKeys.amazonbedrock, mockEndpoint);
 
       expect(screen.getByText('Amazon Bedrock')).toBeInTheDocument();
       const icon = screen.getByTestId('table-column-service-provider-amazonbedrock');
       expect(icon).toBeInTheDocument();
-      expect(screen.getByText('model-bedrock-xyz')).toBeInTheDocument();
+      // Model name is now shown in the dedicated Model column, not in Service column
+      expect(screen.queryByText('model-bedrock-xyz')).not.toBeInTheDocument();
     });
   });
 

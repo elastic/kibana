@@ -32,18 +32,21 @@ export const EndpointModelInfo: React.FC<EndpointModelInfoProps> = ({ endpointIn
       : undefined;
 
   const isEligibleForMITBadge = modelId && ELASTIC_MODEL_DEFINITIONS[modelId]?.license === 'MIT';
+
   const description = endpointInfo?.inference_id.startsWith('.')
     ? descriptions[endpointInfo?.service ?? '']
     : undefined;
 
+  const attributes = endpointModelAtrributes(endpointInfo);
+
   return (
     <EuiFlexGroup gutterSize="xs" direction="column">
-      {modelId && (
+      {description && (
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="xs" direction="row">
             <EuiFlexItem grow={0}>
               <EuiText size="s" color="subdued">
-                {description ?? modelId}
+                {description}
               </EuiText>
             </EuiFlexItem>
             {isEligibleForMITBadge ? (
@@ -59,11 +62,11 @@ export const EndpointModelInfo: React.FC<EndpointModelInfoProps> = ({ endpointIn
                   {i18n.MIT_LICENSE}
                 </EuiBadge>
               </EuiFlexItem>
-            ) : null}{' '}
+            ) : null}
           </EuiFlexGroup>
         </EuiFlexItem>
       )}
-      <EuiFlexItem>{endpointModelAtrributes(endpointInfo)}</EuiFlexItem>
+      {attributes && <EuiFlexItem>{attributes}</EuiFlexItem>}
     </EuiFlexGroup>
   );
 };
