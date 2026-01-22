@@ -397,6 +397,7 @@ export class CoreSystem {
         overlays,
         targetDomElement: notificationsTargetDomElement,
         rendering,
+        settings,
       });
 
       resolveNotifications!(notifications);
