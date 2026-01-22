@@ -6,14 +6,13 @@
  */
 
 import { z } from '@kbn/zod';
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
+  ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
 import { timeRangeSchemaRequired } from '../../utils/tool_schemas';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
@@ -32,9 +31,9 @@ const getTraceMetricsSchema = z.object({
     ),
   groupBy: z
     .string()
-    .optional()
+    .default('service.name')
     .describe(
-      'Field to group results by. Common fields: "service.name", "transaction.name", "host.name", "container.id". Use low-cardinality fields where possible for meaningful aggregations. If not specified, results are grouped by service.name.'
+      'Field to group results by. Common fields: "service.name", "transaction.name", "host.name", "container.id". Use low-cardinality fields for meaningful aggregations.'
     ),
   latencyType: z
     .enum(['avg', 'p95', 'p99'])
@@ -51,10 +50,7 @@ export function createGetTraceMetricsTool({
   plugins,
   logger,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   logger: Logger;
 }): StaticToolRegistration<typeof getTraceMetricsSchema> {
