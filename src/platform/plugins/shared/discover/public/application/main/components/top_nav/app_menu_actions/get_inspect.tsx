@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DiscoverAppMenuItemType } from '@kbn/discover-utils';
+import { AppMenuActionId, type DiscoverAppMenuItemType } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 
 export const getInspectAppMenuItem = ({
@@ -16,7 +16,7 @@ export const getInspectAppMenuItem = ({
   onOpenInspector: (onClose?: () => void) => void;
 }): DiscoverAppMenuItemType => {
   return {
-    id: 'inspect',
+    id: AppMenuActionId.inspect,
     iconType: 'inspect',
     order: 7,
     label: i18n.translate('discover.localMenu.inspectTitle', {

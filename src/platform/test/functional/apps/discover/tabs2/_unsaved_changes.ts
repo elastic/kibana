@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await discover.hasUnsavedChangesIndicator()).to.be(true);
     });
 
-    it('clears unsaved changes badge on session save', async () => {
+    it('clears unsaved changes indicator on session save', async () => {
       const SEARCH_NAME = `unsaved_changes_${Date.now()}`;
 
       await discover.saveSearch(SEARCH_NAME);

@@ -16,7 +16,7 @@ import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { AppMenuItemType, AppMenuPopoverItem } from '@kbn/core-chrome-app-menu-components';
 import type { ShowShareMenuOptions } from '@kbn/share-plugin/public';
 import type { IntlShape } from '@kbn/i18n-react';
-import type { ShareActionIntents } from '@kbn/share-plugin/public/types';
+import type { ShareIntegration } from '@kbn/share-plugin/public/types';
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import type { DataTotalHitsMsg } from '../../../state_management/discover_data_state_container';
 import { getSharingData, showPublicUrlSwitch } from '../../../../../utils/get_sharing_data';
@@ -24,6 +24,16 @@ import type { DiscoverAppLocatorParams } from '../../../../../../common/app_loca
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
 import type { TabState } from '../../../state_management/redux/types';
+
+interface BuildShareOptionsParams {
+  discoverParams: AppMenuDiscoverParams;
+  services: DiscoverServices;
+  stateContainer: DiscoverStateContainer;
+  currentTab: TabState;
+  persistedDiscoverSession: DiscoverSession | undefined;
+  totalHitsState: DataTotalHitsMsg;
+  hasUnsavedChanges: boolean;
+}
 
 /**
  * Builds share options for both share modal and export integrations
@@ -36,15 +46,7 @@ const buildShareOptions = async ({
   persistedDiscoverSession,
   totalHitsState,
   hasUnsavedChanges,
-}: {
-  discoverParams: AppMenuDiscoverParams;
-  services: DiscoverServices;
-  stateContainer: DiscoverStateContainer;
-  currentTab: TabState;
-  persistedDiscoverSession: DiscoverSession | undefined;
-  totalHitsState: DataTotalHitsMsg;
-  hasUnsavedChanges: boolean;
-}): Promise<Omit<ShowShareMenuOptions, 'anchorElement' | 'asExport'>> => {
+}: BuildShareOptionsParams): Promise<Omit<ShowShareMenuOptions, 'anchorElement' | 'asExport'>> => {
   const { dataView, isEsqlMode } = discoverParams;
 
   const searchSourceSharingData = await getSharingData(
@@ -151,15 +153,7 @@ const buildShareOptions = async ({
  * Generates export menu items from available share integrations
  */
 const getExportItems = (
-  buildShareOptionsParams: {
-    discoverParams: AppMenuDiscoverParams;
-    services: DiscoverServices;
-    stateContainer: DiscoverStateContainer;
-    currentTab: TabState;
-    persistedDiscoverSession: DiscoverSession | undefined;
-    totalHitsState: DataTotalHitsMsg;
-    hasUnsavedChanges: boolean;
-  },
+  buildShareOptionsParams: BuildShareOptionsParams,
   intl: IntlShape
 ): AppMenuPopoverItem[] => {
   const { services } = buildShareOptionsParams;
@@ -199,11 +193,8 @@ const getExportItems = (
   };
 
   const exportItems: AppMenuPopoverItem[] = exportIntegrations
-    .filter(
-      (item: ShareActionIntents): item is typeof item & { shareType: 'integration'; id: string } =>
-        item.shareType === 'integration'
-    )
-    .map((item: ShareActionIntents & { shareType: 'integration'; id: string }) => ({
+    .filter((item): item is ShareIntegration => item.shareType === 'integration')
+    .map((item) => ({
       ...mapIntegrationToMetaData(item.id),
       id: item.id,
       run: async () => {
@@ -212,25 +203,20 @@ const getExportItems = (
         await handler?.();
       },
     }));
-
   const derivativeItems: AppMenuPopoverItem[] = exportDerivatives
     .filter(
-      (
-        item: ShareActionIntents
-      ): item is typeof item & { shareType: 'integration'; id: string; groupId: string } =>
+      (item): item is ShareIntegration =>
         item.shareType === 'integration' && item.groupId === 'exportDerivatives'
     )
-    .map(
-      (item: ShareActionIntents & { shareType: 'integration'; id: string; groupId: string }) => ({
-        ...mapIntegrationToMetaData(item.id),
-        id: item.id,
-        run: async () => {
-          const shareOptions = await buildShareOptions(buildShareOptionsParams);
-          const handler = await services.share?.getExportDerivativeHandler(shareOptions, item.id);
-          await handler?.();
-        },
-      })
-    );
+    .map((item) => ({
+      ...mapIntegrationToMetaData(item.id),
+      id: item.id,
+      run: async () => {
+        const shareOptions = await buildShareOptions(buildShareOptionsParams);
+        const handler = await services.share?.getExportDerivativeHandler(shareOptions, item.id);
+        await handler?.();
+      },
+    }));
 
   return [...exportItems, ...derivativeItems];
 };

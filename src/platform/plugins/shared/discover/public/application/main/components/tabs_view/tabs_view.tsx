@@ -7,17 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useContext, useMemo, useState } from 'react';
-import { EuiResizeObserver, type EuiResizeObserverProps } from '@elastic/eui';
-import { UnifiedTabs, type UnifiedTabsProps, type TabMenuItem } from '@kbn/unified-tabs';
-import useObservable from 'react-use/lib/useObservable';
-import { AppMenuComponent, type AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
-import { METRIC_TYPE } from '@kbn/analytics';
-import { ENABLE_ESQL } from '@kbn/esql-utils';
+import React, { useCallback } from 'react';
+import { EuiResizeObserver } from '@elastic/eui';
+import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
+import { AppMenuComponent } from '@kbn/core-chrome-app-menu-components';
 import { SingleTabView, type SingleTabViewProps } from '../single_tab_view';
-import { discoverTopNavMenuContext } from '../top_nav/discover_topnav_menu';
 import {
   createTabItem,
   internalStateActions,
@@ -27,52 +21,34 @@ import {
   useInternalStateDispatch,
   useInternalStateSelector,
   useCurrentTabRuntimeState,
-  useCurrentTabAction,
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { usePreviewData } from './use_preview_data';
-import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
+import { useAppMenuData } from './use_app_menu_data';
 
 const MAX_TABS_COUNT = 25;
-const APP_MENU_COLLAPSE_THRESHOLD = 800;
 
 export const TabsView = (props: SingleTabViewProps) => {
   const services = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
   const items = useInternalStateSelector(selectAllTabs);
-  const [shouldCollapseAppMenu, setShouldCollapseAppMenu] = useState(false);
   const recentlyClosedItems = useInternalStateSelector(selectRecentlyClosedTabs);
   const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
   const { getPreviewData } = usePreviewData(props.runtimeStateManager);
   const hideTabsBar = useInternalStateSelector(selectIsTabsBarHidden);
   const unsavedTabIds = useInternalStateSelector((state) => state.tabs.unsavedIds);
-  const isEsqlMode = useIsEsqlMode();
   const currentDataView = useCurrentTabRuntimeState(
     props.runtimeStateManager,
     (tab) => tab.currentDataView$
   );
-
-  const transitionFromESQLToDataView = useCurrentTabAction(
-    internalStateActions.transitionFromESQLToDataView
-  );
-
-  // Determine if we should show the ES|QL to Data View transition modal
-  const persistedDiscoverSession = useInternalStateSelector(
-    (state) => state.persistedDiscoverSession
-  );
-  const shouldShowESQLToDataViewTransitionModal =
-    !persistedDiscoverSession || unsavedTabIds.includes(currentTabId);
 
   const scopedEbtManager = useCurrentTabRuntimeState(
     props.runtimeStateManager,
     (state) => state.scopedEbtManager$
   );
 
-  const onResize: EuiResizeObserverProps['onResize'] = useCallback((dimensions) => {
-    if (!dimensions) return;
-    setShouldCollapseAppMenu(dimensions.width < APP_MENU_COLLAPSE_THRESHOLD);
-  }, []);
+  const { shouldCollapseAppMenu, onResize, getAdditionalTabMenuItems, topNavMenuItems } =
+    useAppMenuData({ currentDataView });
 
   const onEvent: UnifiedTabsProps['onEBTEvent'] = useCallback(
     (event) => {
@@ -101,44 +77,6 @@ export const TabsView = (props: SingleTabViewProps) => {
     [currentTabId, props]
   );
 
-  // Provide "Switch to Classic" menu item for tabs when in ES|QL mode
-  const getAdditionalTabMenuItems: UnifiedTabsProps['getAdditionalTabMenuItems'] = useMemo(() => {
-    if (!isEsqlMode || !services.uiSettings.get(ENABLE_ESQL)) {
-      return undefined;
-    }
-
-    return (): TabMenuItem[] => [
-      {
-        'data-test-subj': 'unifiedTabs_tabMenuItem_switchToClassic',
-        name: 'switchToClassic',
-        label: i18n.translate('discover.localMenu.switchToClassicTitle', {
-          defaultMessage: 'Switch to classic',
-        }),
-        onClick: () => {
-          services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:back_to_classic_clicked`);
-          if (
-            shouldShowESQLToDataViewTransitionModal &&
-            !services.storage.get(ESQL_TRANSITION_MODAL_KEY)
-          ) {
-            dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(true));
-          } else {
-            dispatch(transitionFromESQLToDataView({ dataViewId: currentDataView?.id ?? '' }));
-          }
-        },
-      },
-    ];
-  }, [
-    isEsqlMode,
-    services,
-    shouldShowESQLToDataViewTransitionModal,
-    dispatch,
-    transitionFromESQLToDataView,
-    currentDataView,
-  ]);
-
-  const { topNavMenu$ } = useContext(discoverTopNavMenuContext);
-  const topNavMenuItems = useObservable(topNavMenu$, topNavMenu$.getValue());
-
   return (
     /**
      * AppMenuComponent handles responsiveness on its own, however, there are some edge cases e.g opening push flyout
@@ -146,14 +84,7 @@ export const TabsView = (props: SingleTabViewProps) => {
      */
     <EuiResizeObserver onResize={onResize}>
       {(resizeRef) => (
-        <div
-          ref={resizeRef}
-          /** EuiResizeObserver requires the ref container to have defined dimensions. */
-          css={css`
-            height: 100%;
-            width: 100%;
-          `}
-        >
+        <div ref={resizeRef}>
           <UnifiedTabs
             services={services}
             items={items}
@@ -170,10 +101,7 @@ export const TabsView = (props: SingleTabViewProps) => {
             onClearRecentlyClosed={onClearRecentlyClosed}
             getAdditionalTabMenuItems={getAdditionalTabMenuItems}
             appendRight={
-              <AppMenuComponent
-                config={topNavMenuItems as AppMenuConfig}
-                isCollapsed={shouldCollapseAppMenu}
-              />
+              <AppMenuComponent config={topNavMenuItems} isCollapsed={shouldCollapseAppMenu} />
             }
           />
         </div>

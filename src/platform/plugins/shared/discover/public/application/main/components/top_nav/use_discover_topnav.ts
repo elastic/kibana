@@ -47,11 +47,13 @@ export const useDiscoverTopNav = ({
   );
 
   useEffect(() => {
-    services.chrome.setBreadcrumbsBadges(topNavBadges);
-    return () => {
-      services.chrome.setBreadcrumbsBadges([]);
-    };
-  }, [topNavBadges, services.chrome]);
+    if (stateContainer.customizationContext.displayMode === 'standalone') {
+      services.chrome.setBreadcrumbsBadges(topNavBadges);
+      return () => {
+        services.chrome.setBreadcrumbsBadges([]);
+      };
+    }
+  }, [topNavBadges, services.chrome, stateContainer.customizationContext.displayMode]);
 
   const dataView = useCurrentDataView();
   const adHocDataViews = useAdHocDataViews();

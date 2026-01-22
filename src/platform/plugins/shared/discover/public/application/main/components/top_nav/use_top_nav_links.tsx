@@ -266,8 +266,8 @@ export const useTopNavLinks = ({
         }),
         testId: 'discoverSaveButton',
         iconType: 'save',
-        run: () => {
-          onSaveDiscoverSession({
+        run: async () => {
+          await onSaveDiscoverSession({
             services,
             state,
           });

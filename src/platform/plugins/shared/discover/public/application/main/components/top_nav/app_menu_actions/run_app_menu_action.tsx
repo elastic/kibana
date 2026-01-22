@@ -33,19 +33,7 @@ import type { DiscoverServices } from '../../../../../build_services';
 const container = document.createElement('div');
 let isOpen = false;
 
-function cleanup(anchorElement?: HTMLElement, parentTestId?: string) {
-  if (!isOpen) {
-    return;
-  }
-
-  // Check if anchor is in DOM before we remove the container
-  const shouldFocusAnchor = anchorElement && document.body.contains(anchorElement);
-
-  ReactDOM.unmountComponentAtNode(container);
-  document.body.removeChild(container);
-  isOpen = false;
-
-  // Restore focus using the captured state
+function restoreFocus(anchorElement?: HTMLElement, parentTestId?: string) {
   const overflowButton = document.querySelector(
     '[data-test-subj="app-menu-overflow-button"]'
   ) as HTMLElement;
@@ -55,11 +43,23 @@ function cleanup(anchorElement?: HTMLElement, parentTestId?: string) {
       `[data-test-subj="${parentTestId}"]`
     ) as HTMLElement;
     (parentButton || overflowButton)?.focus();
-  } else if (shouldFocusAnchor) {
-    anchorElement!.focus();
+  } else if (anchorElement && document.body.contains(anchorElement)) {
+    anchorElement.focus();
   } else {
     overflowButton?.focus();
   }
+}
+
+function cleanup(anchorElement?: HTMLElement, parentTestId?: string) {
+  if (!isOpen) {
+    return;
+  }
+
+  ReactDOM.unmountComponentAtNode(container);
+  document.body.removeChild(container);
+  isOpen = false;
+
+  restoreFocus(anchorElement, parentTestId);
 }
 
 export async function runAppMenuAction({
@@ -83,20 +83,7 @@ export async function runAppMenuAction({
     cleanup(anchorElement, parentTestId);
     // If cleanup didn't run (no React element), still restore focus
     if (!isOpen) {
-      const overflowButton = document.querySelector(
-        '[data-test-subj="app-menu-overflow-button"]'
-      ) as HTMLElement;
-
-      if (parentTestId) {
-        const parentButton = document.querySelector(
-          `[data-test-subj="${parentTestId}"]`
-        ) as HTMLElement;
-        (parentButton || overflowButton)?.focus();
-      } else if (anchorElement && document.body.contains(anchorElement)) {
-        anchorElement.focus();
-      } else {
-        overflowButton?.focus();
-      }
+      restoreFocus(anchorElement, parentTestId);
     }
   };
 

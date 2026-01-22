@@ -121,7 +121,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await timePicker.startAutoRefresh(30);
       await discover.waitUntilTabIsLoaded();
       await checkUpdatedTimeConfiguration();
-      // changing the time range shouldn't trigger the unsaved changes badge for a discover session with a disabled time range setting
+      // changing the time range shouldn't trigger the unsaved changes indicator for a discover session with a disabled time range setting
       expect(await discover.hasUnsavedChangesIndicator()).to.be(false);
 
       await unifiedTabs.selectTab(0);
@@ -151,7 +151,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await timePicker.setAbsoluteRange(updatedTimeRange.start, updatedTimeRange.end);
       await discover.waitUntilTabIsLoaded();
-      // changing the time range should trigger the unsaved changes badge for a discover session with an enabled time range setting
+      // changing the time range should trigger the unsaved changes indicator for a discover session with an enabled time range setting
       expect(await discover.hasUnsavedChangesIndicator()).to.be(true);
     });
   });

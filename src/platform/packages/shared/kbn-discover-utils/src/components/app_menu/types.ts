@@ -48,7 +48,7 @@ export interface DiscoverAppMenuRunActionParams extends AppMenuRunActionParams {
  */
 export type DiscoverAppMenuRunAction = (
   params: DiscoverAppMenuRunActionParams
-) => ReactElement | void | null | ReactNode;
+) => ReactElement | void | null | ReactNode | Promise<ReactElement | void | null | ReactNode>;
 
 /**
  * Discover-specific popover item with typed run action
