@@ -20,6 +20,11 @@ import {
   getRulesSubFeaturesMapV3,
 } from './v3_features/kibana_sub_features';
 import { getRulesV3BaseKibanaFeature } from './v3_features/kibana_features';
+import {
+  getRulesBaseKibanaSubFeatureIdsV4,
+  getRulesSubFeaturesMapV4,
+} from './v4_features/kibana_sub_features';
+import { getRulesV4BaseKibanaFeature } from './v4_features/kibana_features';
 
 export const getRulesFeature = (
   params: SecurityFeatureParams
@@ -45,5 +50,14 @@ export const getRulesV3Feature = (
   baseKibanaFeature: getRulesV3BaseKibanaFeature(params),
   baseKibanaSubFeatureIds: getRulesBaseKibanaSubFeatureIdsV3(),
   subFeaturesMap: getRulesSubFeaturesMapV3(),
+  productFeatureConfig: rulesDefaultProductFeaturesConfig,
+});
+
+export const getRulesV4Feature = (
+  params: SecurityFeatureParams
+): ProductFeatureParams<ProductFeatureRulesKey, RulesSubFeatureId> => ({
+  baseKibanaFeature: getRulesV4BaseKibanaFeature(params),
+  baseKibanaSubFeatureIds: getRulesBaseKibanaSubFeatureIdsV4(),
+  subFeaturesMap: getRulesSubFeaturesMapV4(),
   productFeatureConfig: rulesDefaultProductFeaturesConfig,
 });
