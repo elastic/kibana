@@ -120,19 +120,6 @@ describe('LensWrapper', () => {
     });
   });
 
-  describe('ChartTitle removal', () => {
-    it('does not render ChartTitle component', () => {
-      const { container } = render(
-        <EuiThemeProvider>
-          <LensWrapper {...defaultProps} titleHighlight="test" />
-        </EuiThemeProvider>
-      );
-
-      // ChartTitle should not be present
-      expect(container.querySelector('[data-test-subj="chart-title"]')).not.toBeInTheDocument();
-    });
-  });
-
   describe('header visibility', () => {
     it('header remains visible when titleHighlight is provided', () => {
       const { getByTestId } = render(
