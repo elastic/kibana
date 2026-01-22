@@ -8,6 +8,7 @@
 import { ConversationRoundStatus, type ConversationRound } from '@kbn/agent-builder-common';
 import {
   ATTACHMENT_REF_OPERATION,
+  ATTACHMENT_REF_ACTOR,
   AttachmentType,
   type Attachment,
 } from '@kbn/agent-builder-common/attachments';
@@ -264,6 +265,7 @@ describe('migrate_attachments', () => {
           attachment_id: 'legacy-1',
           version: 1,
           operation: ATTACHMENT_REF_OPERATION.created,
+          actor: ATTACHMENT_REF_ACTOR.user,
         },
       ]);
     });

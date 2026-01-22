@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server';
@@ -49,8 +50,8 @@ export const createAttachmentReadTool = ({
     }
 
     const versionData = version
-      ? attachmentManager.readVersion(attachmentId, version)
-      : attachmentManager.readLatest(attachmentId);
+      ? attachmentManager.readVersion(attachmentId, version, ATTACHMENT_REF_ACTOR.agent)
+      : attachmentManager.readLatest(attachmentId, ATTACHMENT_REF_ACTOR.agent);
 
     if (!versionData) {
       return {

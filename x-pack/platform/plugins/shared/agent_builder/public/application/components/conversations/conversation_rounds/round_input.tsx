@@ -17,9 +17,11 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import type {
+  Attachment,
   AttachmentVersionRef,
   VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
+import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { ROUNDED_BORDER_RADIUS_LARGE } from '../../../../common.styles';
 import { RoundResponseActions } from './round_response/round_response_actions';
 import { RoundAttachmentReferences } from './round_attachment_references';
@@ -34,9 +36,15 @@ interface RoundInputProps {
   input: string;
   attachmentRefs?: AttachmentVersionRef[];
   conversationAttachments?: VersionedAttachment[];
+  fallbackAttachments?: Attachment[];
 }
 
-export const RoundInput = ({ input, attachmentRefs, conversationAttachments }: RoundInputProps) => {
+export const RoundInput = ({
+  input,
+  attachmentRefs,
+  conversationAttachments,
+  fallbackAttachments,
+}: RoundInputProps) => {
   const { euiTheme } = useEuiTheme();
   const [isHovering, setIsHovering] = useState(false);
 
@@ -74,6 +82,8 @@ export const RoundInput = ({ input, attachmentRefs, conversationAttachments }: R
         <RoundAttachmentReferences
           attachmentRefs={attachmentRefs}
           conversationAttachments={conversationAttachments}
+          fallbackAttachments={fallbackAttachments}
+          actorFilter={[ATTACHMENT_REF_ACTOR.user]}
           justifyContent="flexEnd"
         />
       </EuiFlexItem>

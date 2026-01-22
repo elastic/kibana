@@ -8,7 +8,11 @@
 import type { ConversationRound, ConverseInput, RoundInput } from '@kbn/agent-builder-common';
 import { createInternalError } from '@kbn/agent-builder-common';
 import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import { getLatestVersion, hashContent } from '@kbn/agent-builder-common/attachments';
+import {
+  ATTACHMENT_REF_ACTOR,
+  getLatestVersion,
+  hashContent,
+} from '@kbn/agent-builder-common/attachments';
 import type {
   AttachmentFormatContext,
   AttachmentStateManager,
@@ -86,10 +90,14 @@ const mergeInputAttachmentsIntoAttachmentState = async (
     if (input.id) {
       const existing = attachmentStateManager.get(input.id);
       if (existing) {
-        await attachmentStateManager.update(input.id, {
-          data: input.data,
-          ...(input.hidden !== undefined ? { hidden: input.hidden } : {}),
-        });
+        await attachmentStateManager.update(
+          input.id,
+          {
+            data: input.data,
+            ...(input.hidden !== undefined ? { hidden: input.hidden } : {}),
+          },
+          ATTACHMENT_REF_ACTOR.user
+        );
         continue;
       }
     }
@@ -101,12 +109,15 @@ const mergeInputAttachmentsIntoAttachmentState = async (
       continue;
     }
 
-    const created = await attachmentStateManager.add({
-      ...(input.id ? { id: input.id } : {}),
-      type: input.type,
-      data: input.data,
-      ...(input.hidden !== undefined ? { hidden: input.hidden } : {}),
-    });
+    const created = await attachmentStateManager.add(
+      {
+        ...(input.id ? { id: input.id } : {}),
+        type: input.type,
+        data: input.data,
+        ...(input.hidden !== undefined ? { hidden: input.hidden } : {}),
+      },
+      ATTACHMENT_REF_ACTOR.user
+    );
 
     const latest = getLatestVersion(created);
     if (latest) {

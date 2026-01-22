@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import { ATTACHMENT_REF_OPERATION, hashContent } from '@kbn/agent-builder-common/attachments';
+import type {
+  AttachmentVersionRef,
+  VersionedAttachment,
+} from '@kbn/agent-builder-common/attachments';
+import {
+  ATTACHMENT_REF_ACTOR,
+  ATTACHMENT_REF_OPERATION,
+  hashContent,
+} from '@kbn/agent-builder-common/attachments';
 import {
   createAttachmentStateManager,
   type AttachmentStateManager,
@@ -616,6 +623,7 @@ describe('AttachmentStateManager', () => {
           attachment_id: attachment.id,
           version: 1,
           operation: ATTACHMENT_REF_OPERATION.created,
+          actor: ATTACHMENT_REF_ACTOR.system,
         },
       ]);
     });
@@ -629,6 +637,7 @@ describe('AttachmentStateManager', () => {
           attachment_id: 'att-1',
           version: 1,
           operation: ATTACHMENT_REF_OPERATION.created,
+          actor: ATTACHMENT_REF_ACTOR.system,
         },
       ]);
     });
@@ -647,6 +656,7 @@ describe('AttachmentStateManager', () => {
           attachment_id: 'att-1',
           version: 1,
           operation: ATTACHMENT_REF_OPERATION.read,
+          actor: ATTACHMENT_REF_ACTOR.system,
         },
       ]);
     });

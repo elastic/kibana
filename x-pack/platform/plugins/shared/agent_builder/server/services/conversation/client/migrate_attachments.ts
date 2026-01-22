@@ -14,6 +14,7 @@ import type {
 } from '@kbn/agent-builder-common/attachments';
 import {
   ATTACHMENT_REF_OPERATION,
+  ATTACHMENT_REF_ACTOR,
   hashContent,
   estimateTokens,
 } from '@kbn/agent-builder-common/attachments';
@@ -173,6 +174,7 @@ export const createAttachmentRefs = (
           attachment_id: versionedAttachment.id,
           version: 1, // All migrated attachments start at version 1
           operation: ATTACHMENT_REF_OPERATION.created,
+          actor: ATTACHMENT_REF_ACTOR.user,
         });
       }
     }

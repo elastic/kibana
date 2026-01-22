@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
@@ -48,7 +49,10 @@ export const createAttachmentAddTool = ({
 
     let attachment;
     try {
-      attachment = await attachmentManager.add({ id, type, data, description });
+      attachment = await attachmentManager.add(
+        { id, type, data, description },
+        ATTACHMENT_REF_ACTOR.agent
+      );
     } catch (e) {
       return {
         results: [

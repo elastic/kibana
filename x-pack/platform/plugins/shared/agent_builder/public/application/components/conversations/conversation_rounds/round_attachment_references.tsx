@@ -9,16 +9,25 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, type EuiFlexGroupProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
+  Attachment,
   AttachmentVersionRef,
+  AttachmentRefActor,
   AttachmentRefOperation,
   VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
-import { ATTACHMENT_REF_OPERATION } from '@kbn/agent-builder-common/attachments';
+import {
+  ATTACHMENT_REF_ACTOR,
+  ATTACHMENT_REF_OPERATION,
+  estimateTokens,
+  hashContent,
+} from '@kbn/agent-builder-common/attachments';
 import { AttachmentReferencePill } from './round_attachment_reference_pill';
 
 export interface RoundAttachmentReferencesProps {
   attachmentRefs?: AttachmentVersionRef[];
   conversationAttachments?: VersionedAttachment[];
+  fallbackAttachments?: Attachment[];
+  actorFilter?: AttachmentRefActor[];
   justifyContent?: EuiFlexGroupProps['justifyContent'];
 }
 
@@ -26,6 +35,7 @@ interface ResolvedReference {
   attachment: VersionedAttachment;
   version: number;
   operation: AttachmentRefOperation;
+  actor: AttachmentRefActor;
 }
 
 const labels = {
@@ -42,23 +52,64 @@ const resolveOperation = (
     return refOperation;
   }
 
-  return version === 1
-    ? ATTACHMENT_REF_OPERATION.created
-    : ATTACHMENT_REF_OPERATION.updated;
+  return version === 1 ? ATTACHMENT_REF_OPERATION.created : ATTACHMENT_REF_OPERATION.updated;
+};
+
+const resolveActor = (actor: AttachmentRefActor | undefined): AttachmentRefActor => {
+  return actor ?? ATTACHMENT_REF_ACTOR.system;
+};
+
+const buildFallbackVersionedAttachments = (attachments: Attachment[]): VersionedAttachment[] => {
+  const now = new Date().toISOString();
+  return attachments.map((attachment, index) => ({
+    id: attachment.id ?? `pending-${index}`,
+    type: attachment.type,
+    versions: [
+      {
+        version: 1,
+        data: attachment.data,
+        created_at: now,
+        content_hash: hashContent(attachment.data),
+        estimated_tokens: estimateTokens(attachment.data),
+      },
+    ],
+    current_version: 1,
+    active: true,
+    hidden: attachment.hidden,
+  }));
 };
 
 export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps> = ({
   attachmentRefs,
   conversationAttachments,
+  fallbackAttachments,
+  actorFilter,
   justifyContent = 'flexStart',
 }) => {
   const resolvedReferences = useMemo((): ResolvedReference[] => {
-    if (!attachmentRefs?.length || !conversationAttachments?.length) {
+    const effectiveAttachments =
+      conversationAttachments?.length && conversationAttachments.length > 0
+        ? conversationAttachments
+        : fallbackAttachments?.length
+        ? buildFallbackVersionedAttachments(fallbackAttachments)
+        : [];
+
+    const refs =
+      attachmentRefs?.length || !fallbackAttachments?.length
+        ? attachmentRefs
+        : fallbackAttachments.map((attachment, index) => ({
+            attachment_id: attachment.id ?? `pending-${index}`,
+            version: 1,
+            operation: ATTACHMENT_REF_OPERATION.created,
+            actor: ATTACHMENT_REF_ACTOR.user,
+          }));
+
+    if (!refs?.length || !effectiveAttachments.length) {
       return [];
     }
 
     const attachmentMap = new Map<string, VersionedAttachment>();
-    for (const attachment of conversationAttachments) {
+    for (const attachment of effectiveAttachments) {
       if (attachment.hidden) {
         continue;
       }
@@ -66,9 +117,14 @@ export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps>
     }
 
     const resolved: ResolvedReference[] = [];
-    for (const ref of attachmentRefs) {
+    for (const ref of refs) {
       const attachment = attachmentMap.get(ref.attachment_id);
       if (!attachment) {
+        continue;
+      }
+
+      const actor = resolveActor(ref.actor);
+      if (actorFilter?.length && !actorFilter.includes(actor)) {
         continue;
       }
 
@@ -76,11 +132,12 @@ export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps>
         attachment,
         version: ref.version,
         operation: resolveOperation(ref.operation, ref.version),
+        actor,
       });
     }
 
     return resolved;
-  }, [attachmentRefs, conversationAttachments]);
+  }, [attachmentRefs, conversationAttachments, fallbackAttachments, actorFilter]);
 
   if (resolvedReferences.length === 0) {
     return null;
@@ -97,7 +154,7 @@ export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps>
       data-test-subj="agentBuilderRoundAttachmentReferences"
     >
       {resolvedReferences.map((ref) => (
-        <EuiFlexItem key={`${ref.attachment.id}-v${ref.version}`} grow={false}>
+        <EuiFlexItem key={`${ref.attachment.id}-v${ref.version}-${ref.actor}`} grow={false}>
           <AttachmentReferencePill
             attachment={ref.attachment}
             version={ref.version}
@@ -108,4 +165,3 @@ export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps>
     </EuiFlexGroup>
   );
 };
-

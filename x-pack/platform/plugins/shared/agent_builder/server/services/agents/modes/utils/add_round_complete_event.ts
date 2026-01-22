@@ -21,6 +21,7 @@ import type {
   ToolResultEvent,
 } from '@kbn/agent-builder-common';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
+import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import {
   ChatEventType,
@@ -216,10 +217,16 @@ const mergeAttachmentRefs = (
   if (!previous?.length && !next?.length) return undefined;
   const merged = new Map<string, AttachmentVersionRef>();
   for (const ref of previous ?? []) {
-    merged.set(`${ref.attachment_id}:${ref.version}`, ref);
+    merged.set(
+      `${ref.attachment_id}:${ref.version}:${ref.actor ?? ATTACHMENT_REF_ACTOR.system}`,
+      ref
+    );
   }
   for (const ref of next ?? []) {
-    merged.set(`${ref.attachment_id}:${ref.version}`, ref);
+    merged.set(
+      `${ref.attachment_id}:${ref.version}:${ref.actor ?? ATTACHMENT_REF_ACTOR.system}`,
+      ref
+    );
   }
   return Array.from(merged.values());
 };
