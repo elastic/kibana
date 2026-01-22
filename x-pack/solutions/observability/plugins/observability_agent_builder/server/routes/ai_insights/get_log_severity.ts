@@ -12,23 +12,52 @@ import { WARNING_AND_ABOVE_VALUES } from '../../utils/ecs_otel_fields';
  * - Warning or above (warn, error, critical, fatal) - using isWarningOrAbove()
  */
 
-export function isWarningOrAbove(logEntry: Record<string, unknown>): boolean {
-  // 1. Check log level fields (log.level, level, etc.)
-  const level =
-    (logEntry['log.level'] as string | undefined) ??
-    ((logEntry.log as Record<string, unknown> | undefined)?.level as string | undefined);
+const LOG_LEVEL_FIELDS = ['log.level', 'level', 'severity_text', 'SeverityText', 'severity'];
 
-  if (typeof level === 'string' && WARNING_AND_ABOVE_VALUES.includes(level.toLowerCase())) {
+function isErrorField(fieldName: string): boolean {
+  const lower = fieldName.toLowerCase();
+  return lower.includes('exception') || lower.includes('error');
+}
+
+export function isWarningOrAbove(logEntry: Record<string, unknown>): boolean {
+  // 1. Check log level text fields
+  for (const field of LOG_LEVEL_FIELDS) {
+    const level = logEntry[field];
+    if (typeof level === 'string' && WARNING_AND_ABOVE_VALUES.includes(level.toLowerCase())) {
+      return true;
+    }
+  }
+
+  // 2. Check OTel severity_number (13-24 = Warn/Error/Fatal)
+  const severityNumber = logEntry.severity_number ?? logEntry.SeverityNumber;
+  if (typeof severityNumber === 'number' && severityNumber >= 13) return true;
+
+  // 3. Check HTTP 5xx error status codes
+  const httpStatus = logEntry['http.response.status_code'];
+  if (typeof httpStatus === 'number' && httpStatus >= 500) {
     return true;
   }
 
-  // 2. Check HTTP error status codes
-  const httpStatus = logEntry['http.response.status_code'];
-  if (typeof httpStatus === 'number' && httpStatus >= 400) return true;
+  // 4. Check attributes object (OpenTelemetry)
+  const attributes = logEntry.attributes as Record<string, unknown> | undefined;
+  if (attributes) {
+    for (const key of Object.keys(attributes)) {
+      if (isErrorField(key) && attributes[key] != null) return true;
+    }
+  }
 
-  // 3. Check error.* fields
-  for (const key of Object.keys(logEntry)) {
-    if (key.startsWith('error.') && logEntry[key] != null) {
+  // 5. Check message and body.text fields for error/exception keywords
+  const message = logEntry.message;
+  if (typeof message === 'string') {
+    const lowerMessage = message.toLowerCase();
+    if (lowerMessage.includes('error') || lowerMessage.includes('exception')) {
+      return true;
+    }
+  }
+  const bodyText = (logEntry.body as { text?: string } | undefined)?.text;
+  if (typeof bodyText === 'string') {
+    const lowerBodyText = bodyText.toLowerCase();
+    if (lowerBodyText.includes('error') || lowerBodyText.includes('exception')) {
       return true;
     }
   }

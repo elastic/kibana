@@ -103,9 +103,8 @@ export async function getLogAiInsights({
   const windowStart = moment(logTimestamp).subtract(1, 'hours').toISOString();
   const windowEnd = moment(logTimestamp).add(1, 'hours').toISOString();
 
-  const resourceAttributes = logEntry.resource?.attributes;
-  const serviceName =
-    logEntry.service?.name ?? (resourceAttributes?.['service.name'] as string) ?? '';
+  const resourceAttrs = logEntry.resource?.attributes;
+  const serviceName = logEntry.service?.name ?? (resourceAttrs?.['service.name'] as string) ?? '';
   const serviceEnvironment = logEntry.service?.environment ?? '';
 
   interface ContextPart {
@@ -115,35 +114,33 @@ export async function getLogAiInsights({
 
   const contextParts: ContextPart[] = [];
 
-  if (isErrorOrWarning) {
-    contextParts.push({
-      name: 'CorrelatedLogSequence',
-      handler: async () => {
-        try {
-          const { sequences } = await getCorrelatedLogs({
-            core,
-            logger,
-            esClient,
-            start: windowStart,
-            end: windowEnd,
-            logId: id,
-            errorLogsOnly: true,
-            correlationFields: DEFAULT_CORRELATION_IDENTIFIER_FIELDS,
-            logSourceFields: DEFAULT_LOG_SOURCE_FIELDS,
-            maxSequences: 1,
-            maxLogsPerSequence: 50,
-          });
+  contextParts.push({
+    name: 'CorrelatedLogSequence',
+    handler: async () => {
+      try {
+        const { sequences } = await getCorrelatedLogs({
+          core,
+          logger,
+          esClient,
+          start: windowStart,
+          end: windowEnd,
+          logId: id,
+          errorLogsOnly: true,
+          correlationFields: DEFAULT_CORRELATION_IDENTIFIER_FIELDS,
+          logSourceFields: DEFAULT_LOG_SOURCE_FIELDS,
+          maxSequences: 1,
+          maxLogsPerSequence: 50,
+        });
 
-          return sequences[0] || null;
-        } catch (error) {
-          logger.debug(`Failed to fetch correlated logs: ${error.message}`);
-          return null;
-        }
-      },
-    });
-  }
+        return sequences[0] || null;
+      } catch (error) {
+        logger.debug(`Failed to fetch correlated logs: ${error.message}`);
+        return null;
+      }
+    },
+  });
 
-  if (!isErrorOrWarning && serviceName) {
+  if (serviceName) {
     contextParts.push({
       name: 'ServiceSummary',
       handler: () =>
