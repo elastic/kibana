@@ -103,12 +103,26 @@ describe('useTopNavLinks', () => {
   });
 
   describe('when ES|QL mode is true', () => {
-    it('should return results', () => {
+    it('should NOT include the esql secondary action item', () => {
       const appMenuConfig = setup({
         isEsqlMode: true,
       });
 
       expect(appMenuConfig.items).toBeDefined();
+      expect(appMenuConfig.secondaryActionItem).toBeUndefined();
+    });
+  });
+
+  describe('when ES|QL mode is false (classic mode)', () => {
+    it('should include the esql secondary action item', () => {
+      const appMenuConfig = setup({
+        isEsqlMode: false,
+      });
+
+      expect(appMenuConfig.items).toBeDefined();
+      expect(appMenuConfig.secondaryActionItem).toBeDefined();
+      expect(appMenuConfig.secondaryActionItem?.id).toBe('esql');
+      expect(appMenuConfig.secondaryActionItem?.label).toBe('ES|QL');
     });
   });
 
