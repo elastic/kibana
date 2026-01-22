@@ -609,9 +609,9 @@
         "label": "Props",
         "description": [],
         "signature": [
-          "{ id?: string | undefined; size?: \"m\" | \"s\" | undefined; fontWeight?: ToolbarButtonFontWeights | undefined; \"aria-label\"?: string | undefined; onBlur?: React.FocusEventHandler<HTMLButtonElement> | undefined; onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; 'data-test-subj'?: string | undefined; isLoading?: boolean | undefined; isDisabled?: boolean | undefined; as?: \"standard\" | undefined; fullWidth?: boolean | undefined; iconSide?: ",
+          "{ id?: string | undefined; size?: \"m\" | \"s\" | undefined; fontWeight?: ToolbarButtonFontWeights | undefined; \"aria-label\"?: string | undefined; onBlur?: React.FocusEventHandler<HTMLButtonElement> | undefined; onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; 'data-test-subj'?: string | undefined; isLoading?: boolean | undefined; isDisabled?: boolean | undefined; fullWidth?: boolean | undefined; as?: \"standard\" | undefined; iconSide?: ",
           "ButtonContentIconSide",
-          "; groupPosition?: ButtonPositions | undefined; hasArrow?: boolean | undefined; }"
+          "; hasArrow?: boolean | undefined; groupPosition?: ButtonPositions | undefined; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/button_toolbar/src/buttons/add_from_library/add_from_library.tsx",
         "lineNumber": 15,
