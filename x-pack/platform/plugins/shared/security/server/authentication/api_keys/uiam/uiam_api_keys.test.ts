@@ -13,7 +13,7 @@ import {
 } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/logging';
 
-import { UiamAPIKeys } from './uiam_api_keys';
+import { isUiamCredential, UiamAPIKeys } from './uiam_api_keys';
 import type { SecurityLicense } from '../../../../common';
 import { licenseMock } from '../../../../common/licensing/index.mock';
 import type { UiamServicePublic } from '../../../uiam';
@@ -331,7 +331,7 @@ describe('UiamAPIKeys', () => {
     it('returns true when credentials start with UIAM prefix', () => {
       const authorization = new HTTPAuthorizationHeader('ApiKey', 'essu_credential_123');
 
-      const result = UiamAPIKeys.isUiamCredential(authorization);
+      const result = isUiamCredential(authorization);
 
       expect(result).toBe(true);
     });
@@ -339,7 +339,7 @@ describe('UiamAPIKeys', () => {
     it('returns false when credentials do not start with UIAM prefix', () => {
       const authorization = new HTTPAuthorizationHeader('ApiKey', 'regular_credential_123');
 
-      const result = UiamAPIKeys.isUiamCredential(authorization);
+      const result = isUiamCredential(authorization);
 
       expect(result).toBe(false);
     });
@@ -347,7 +347,7 @@ describe('UiamAPIKeys', () => {
     it('returns false when credentials are empty', () => {
       const authorization = new HTTPAuthorizationHeader('ApiKey', '');
 
-      const result = UiamAPIKeys.isUiamCredential(authorization);
+      const result = isUiamCredential(authorization);
 
       expect(result).toBe(false);
     });

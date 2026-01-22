@@ -6,3 +6,4 @@
  */
 
 export { APIKeys, CreateApiKeyValidationError } from './api_keys';
+export { isUiamCredential } from './uiam';

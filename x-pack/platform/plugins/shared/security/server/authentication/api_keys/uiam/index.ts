@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { UiamAPIKeys } from './uiam_api_keys';
+export { UiamAPIKeys, isUiamCredential } from './uiam_api_keys';
 export type { UiamAPIKeysOptions } from './uiam_api_keys';

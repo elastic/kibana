@@ -24,3 +24,4 @@ export {
   BasicHTTPAuthorizationHeaderCredentials,
   HTTPAuthorizationHeader,
 } from './http_authentication';
+export { isUiamCredential } from './api_keys';
