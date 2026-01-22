@@ -69,7 +69,7 @@ export const SharepointOnline: ConnectorSpec = {
       isTool: true,
       input: z.object({}).optional(),
       output: GraphCollectionOutputSchema,
-      handler: async (ctx, input) => {
+      handler: async (ctx) => {
         ctx.log.debug('SharePoint listing all sites');
         const response = await ctx.client.get(
           'https://graph.microsoft.com/v1.0/sites/getAllSites/',
