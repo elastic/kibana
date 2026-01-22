@@ -1,3 +1,8 @@
+*:focus, *:focus-visible {
+  outline: 4px solid magenta !important;
+  outline-offset: 2px !important;
+}
+
 *, *:before, *:after {
   box-sizing: border-box;
 }
