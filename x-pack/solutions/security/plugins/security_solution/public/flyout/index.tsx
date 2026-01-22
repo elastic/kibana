@@ -69,7 +69,11 @@ import {
   HostPanelKey,
   ServicePanelKey,
   UserPanelKey,
+  EndpointAssetsPanelKey,
+  EndpointAssetsPreviewPanelKey,
 } from './entity_details/shared/constants';
+import type { EndpointAssetsPanelExpandableFlyoutProps } from './entity_details/endpoint_assets/types';
+import { EndpointAssetsPanel } from './entity_details/endpoint_assets';
 import type { ServicePanelExpandableFlyoutProps } from './entity_details/service_right';
 import { ServicePanel } from './entity_details/service_right';
 import type { ServiceDetailsExpandableFlyoutProps } from './entity_details/service_details_left';
@@ -207,6 +211,21 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     key: HostPreviewPanelKey,
     component: (props) => (
       <HostPanel {...(props as HostPanelExpandableFlyoutProps).params} isPreviewMode />
+    ),
+  },
+  {
+    key: EndpointAssetsPanelKey,
+    component: (props) => (
+      <EndpointAssetsPanel {...(props as EndpointAssetsPanelExpandableFlyoutProps).params} />
+    ),
+  },
+  {
+    key: EndpointAssetsPreviewPanelKey,
+    component: (props) => (
+      <EndpointAssetsPanel
+        {...(props as EndpointAssetsPanelExpandableFlyoutProps).params}
+        isPreviewMode
+      />
     ),
   },
   {

@@ -179,6 +179,8 @@ export const ENTITIES_HOST_OVERVIEW_MISCONFIGURATIONS_TEST_ID =
   `${ENTITIES_HOST_OVERVIEW_TEST_ID}Misconfigurations` as const;
 export const ENTITIES_HOST_OVERVIEW_VULNERABILITIES_TEST_ID =
   `${ENTITIES_HOST_OVERVIEW_TEST_ID}Vulnerabilities` as const;
+export const ENTITIES_HOST_OVERVIEW_ENDPOINT_ASSETS_TEST_ID =
+  `${ENTITIES_HOST_OVERVIEW_TEST_ID}EndpointAssets` as const;
 
 /* Threat intelligence */
 
