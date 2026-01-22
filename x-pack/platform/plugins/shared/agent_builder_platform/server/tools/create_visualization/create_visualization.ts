@@ -185,7 +185,7 @@ This tool will:
         let isUpdate = false;
 
         if (attachmentId && attachments.get(attachmentId)) {
-          const updated = attachments.update(attachmentId, {
+          const updated = await attachments.update(attachmentId, {
             data: visualizationData,
             description: `Visualization: ${nlQuery.slice(0, 50)}${
               nlQuery.length > 50 ? '...' : ''
@@ -196,7 +196,7 @@ This tool will:
           isUpdate = true;
           logger.debug(`Updated visualization attachment ${attachmentId} to version ${version}`);
         } else {
-          const newAttachment = attachments.add({
+          const newAttachment = await attachments.add({
             type: VISUALIZATION_ATTACHMENT_TYPE,
             data: visualizationData,
             description: `Visualization: ${nlQuery.slice(0, 50)}${
