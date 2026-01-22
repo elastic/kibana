@@ -145,6 +145,10 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
     const [headerRestrictWidth, setHeaderRestrictWidth] = useState<number | undefined>(undefined);
     const [wrapHeader, setWrapHeader] = useState<boolean>(false);
 
+    const maxInlineSizeStyles = css`
+      max-inline-size: 100%;
+    `;
+
     useEffect(() => {
       const subscriptions = new Subscription();
 
@@ -213,9 +217,6 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
         max-inline-size: ${headerRestrictWidth}px;
         margin-inline: auto;
       `;
-      const maxInlineSizeStyles = css`
-        max-inline-size: 100%;
-      `;
       return (
         <EuiFlexGroup
           justifyContent="spaceBetween"
@@ -258,6 +259,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
       isLoading,
       isRightSectionMounted,
       leftHeaderPortalNode,
+      maxInlineSizeStyles,
       rightHeaderPortalNode,
       wrapHeader,
     ]);
