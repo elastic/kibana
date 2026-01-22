@@ -100,14 +100,3 @@ export async function getExistingParamsInfo(
 
   return { spaces, keys };
 }
-
-/**
- * @deprecated Use getExistingParamsInfo instead
- */
-export async function getExistingParamsSpaces(
-  savedObjectsClient: SavedObjectsClientContract,
-  paramIds: string[]
-) {
-  const { spaces } = await getExistingParamsInfo(savedObjectsClient, paramIds);
-  return spaces;
-}
