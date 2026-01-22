@@ -32,11 +32,11 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { getESQLSources, getEsqlColumns } from '@kbn/esql-utils';
 import { suggest } from '@kbn/esql-language';
-import { zodToJsonSchema } from 'zod-to-json-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { dump, load } from 'js-yaml';
 import { useHistory, useParams } from 'react-router-dom';
 import YAML, { LineCounter } from 'yaml';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 import { createRuleDataSchema } from '../../common/schemas/create_rule_data_schema';
 import type { CreateRuleData } from '../../common/types';
 import { RulesApi } from '../services/rules_api';
@@ -86,78 +86,212 @@ interface QueryContext {
   queryOffset: number;
 }
 
-const createRuleJsonSchema = zodToJsonSchema(createRuleDataSchema, {
-  name: 'CreateRuleData',
-  $refStrategy: 'none',
-});
+// Schema property info extracted from JSON schema
+interface SchemaPropertyInfo {
+  key: string;
+  description?: string;
+  type: 'string' | 'number' | 'boolean' | 'array' | 'object' | 'unknown';
+  isEnum?: boolean;
+  enumValues?: string[];
+}
 
-const resolveSchemaRef = (schema: any, ref?: string) => {
-  if (!ref || !schema || typeof schema !== 'object') {
-    return schema;
+// JSON Schema types
+interface JsonSchema {
+  type?: string | string[];
+  properties?: Record<string, JsonSchema>;
+  items?: JsonSchema;
+  description?: string;
+  enum?: Array<string | number | boolean>;
+  anyOf?: JsonSchema[];
+  oneOf?: JsonSchema[];
+  allOf?: JsonSchema[];
+  $ref?: string;
+  definitions?: Record<string, JsonSchema>;
+  $defs?: Record<string, JsonSchema>;
+  default?: unknown;
+}
+
+// Convert Zod schema to JSON Schema (cached)
+let cachedJsonSchema: JsonSchema | null = null;
+const getJsonSchema = (): JsonSchema => {
+  if (!cachedJsonSchema) {
+    cachedJsonSchema = zodToJsonSchema(createRuleDataSchema, {
+      $refStrategy: 'none',
+      errorMessages: true,
+    }) as JsonSchema;
   }
-  if (!ref.startsWith('#/')) {
-    return schema;
-  }
-  const path = ref
-    .slice(2)
-    .split('/')
-    .map((segment) => decodeURIComponent(segment));
-  let current = schema;
-  for (const segment of path) {
-    if (!current || typeof current !== 'object') {
-      return schema;
-    }
-    current = current[segment];
-  }
-  return current ?? schema;
+  return cachedJsonSchema;
 };
 
-const getRootSchema = () => {
-  const definitionsRoot = createRuleJsonSchema.definitions?.CreateRuleData;
-  if (definitionsRoot) {
-    return definitionsRoot;
+// Resolve anyOf/oneOf to get the actual schema (handles optionals, unions, etc.)
+const resolveSchema = (schema: JsonSchema): JsonSchema => {
+  if (schema.anyOf) {
+    // Find non-null type in anyOf (for optionals)
+    const nonNull = schema.anyOf.find(
+      (s) => s.type !== 'null' && !(Array.isArray(s.type) && s.type.includes('null'))
+    );
+    if (nonNull) return resolveSchema(nonNull);
+    return schema.anyOf[0] ? resolveSchema(schema.anyOf[0]) : schema;
   }
-  const schemaWithRef = createRuleJsonSchema as { $ref?: string };
-  if (schemaWithRef.$ref) {
-    return resolveSchemaRef(createRuleJsonSchema, schemaWithRef.$ref);
+  if (schema.oneOf) {
+    const nonNull = schema.oneOf.find(
+      (s) => s.type !== 'null' && !(Array.isArray(s.type) && s.type.includes('null'))
+    );
+    if (nonNull) return resolveSchema(nonNull);
+    return schema.oneOf[0] ? resolveSchema(schema.oneOf[0]) : schema;
   }
-  return createRuleJsonSchema;
+  if (schema.allOf && schema.allOf.length === 1) {
+    return resolveSchema(schema.allOf[0]);
+  }
+  return schema;
 };
 
-const getSchemaNode = (path: Array<string | number>) => {
-  let current: any = getRootSchema();
+// Get JSON schema node at path
+const getSchemaNode = (path: Array<string | number>): JsonSchema | undefined => {
+  let current: JsonSchema = getJsonSchema();
+
   for (const segment of path) {
-    if (!current || typeof current !== 'object') {
+    current = resolveSchema(current);
+
+    if (typeof segment === 'number') {
+      // Array index
+      if (current.items) {
+        current = current.items;
+        continue;
+      }
       return undefined;
     }
-    if (current.$ref) {
-      current = resolveSchemaRef(createRuleJsonSchema, current.$ref);
-    }
-    if (typeof segment === 'number') {
-      current = current.items;
+
+    // Object property
+    if (current.properties && segment in current.properties) {
+      current = current.properties[segment];
       continue;
     }
-    current = current.properties?.[segment];
+
+    return undefined;
   }
-  if (current?.$ref) {
-    return resolveSchemaRef(createRuleJsonSchema, current.$ref);
-  }
+
   return current;
 };
 
-const getSchemaDescription = (path: string[]) => {
-  return getSchemaNode(path)?.description as string | undefined;
+// Get type from JSON schema
+const getSchemaType = (schema: JsonSchema): SchemaPropertyInfo['type'] => {
+  const resolved = resolveSchema(schema);
+  const type = Array.isArray(resolved.type) ? resolved.type[0] : resolved.type;
+
+  switch (type) {
+    case 'string':
+      return 'string';
+    case 'number':
+    case 'integer':
+      return 'number';
+    case 'boolean':
+      return 'boolean';
+    case 'array':
+      return 'array';
+    case 'object':
+      return 'object';
+    default:
+      return 'unknown';
+  }
 };
 
-const getSchemaProperties = (path: string[]) => {
+// Get properties from JSON schema at path
+const getSchemaProperties = (path: string[]): SchemaPropertyInfo[] => {
   const node = getSchemaNode(path);
-  if (!node || typeof node !== 'object') {
-    return [];
+  if (!node) return [];
+
+  const resolved = resolveSchema(node);
+  if (!resolved.properties) return [];
+
+  return Object.entries(resolved.properties).map(([key, propSchema]) => {
+    const resolvedProp = resolveSchema(propSchema);
+    const type = getSchemaType(propSchema);
+    const isEnum = Boolean(resolvedProp.enum);
+    const enumValues = isEnum ? (resolvedProp.enum as string[]) : undefined;
+
+    return {
+      key,
+      description: propSchema.description ?? resolvedProp.description,
+      type,
+      isEnum,
+      enumValues,
+    };
+  });
+};
+
+// Get schema description at path
+const getSchemaDescription = (path: string[]): string | undefined => {
+  const node = getSchemaNode(path);
+  if (!node) return undefined;
+  const resolved = resolveSchema(node);
+  return node.description ?? resolved.description;
+};
+
+// Get schema type info at path (for value completions)
+const getSchemaTypeInfo = (
+  path: string[]
+): { type: string; isBoolean: boolean; enumValues?: string[] } | undefined => {
+  const node = getSchemaNode(path);
+  if (!node) return undefined;
+
+  const resolved = resolveSchema(node);
+  const type = Array.isArray(resolved.type) ? resolved.type[0] : resolved.type;
+
+  if (type === 'boolean') {
+    return { type: 'boolean', isBoolean: true };
   }
-  return Object.entries(node.properties ?? {}).map(([key, value]) => ({
-    key,
-    schema: value as { description?: string; type?: string },
-  }));
+  if (resolved.enum) {
+    return { type: 'enum', isBoolean: false, enumValues: resolved.enum as string[] };
+  }
+
+  return { type: type ?? 'unknown', isBoolean: false };
+};
+
+// Get existing keys from YAML text at a given indent level
+const getExistingYamlKeys = (text: string, parentPath: string[]): Set<string> => {
+  const keys = new Set<string>();
+  const lines = text.split('\n');
+
+  if (parentPath.length === 0) {
+    // Root level - get all top-level keys
+    for (const line of lines) {
+      const match = /^([A-Za-z0-9_]+)\s*:/.exec(line);
+      if (match) {
+        keys.add(match[1]);
+      }
+    }
+  } else {
+    // Nested level - find parent and get its children
+    let parentIndent = -1;
+    let inParent = false;
+
+    for (const line of lines) {
+      const keyMatch = /^(\s*)([A-Za-z0-9_]+)\s*:/.exec(line);
+
+      if (keyMatch) {
+        const key = keyMatch[2];
+        const keyIndent = keyMatch[1].length;
+
+        if (!inParent && key === parentPath[parentPath.length - 1] && keyIndent === 0) {
+          inParent = true;
+          parentIndent = keyIndent;
+          continue;
+        }
+
+        if (inParent) {
+          if (keyIndent <= parentIndent && line.trim() !== '') {
+            break; // Exited parent scope
+          }
+          if (keyIndent === parentIndent + 2) {
+            keys.add(key);
+          }
+        }
+      }
+    }
+  }
+
+  return keys;
 };
 
 const getCompletionContext = (text: string, position: monaco.Position) => {
@@ -494,27 +628,38 @@ const ensureAlertingYamlLanguage = () => {
         };
       }
 
-      const queryMatch = /^(\s*)query:\s*(.*)$/.exec(line);
+      const queryMatch = /^(\s*)(query)(:)\s*(.*)$/.exec(line);
       if (!queryMatch) {
         return { tokens: tokenizeYamlLine(line), endState: state };
       }
 
       const baseIndent = queryMatch[1].length;
-      const value = queryMatch[2] ?? '';
-      const valueStartIndex = line.indexOf(value);
-      const valueStartOffset = Math.max(valueStartIndex, 0);
+      const keyStart = baseIndent;
+      const keyEnd = keyStart + queryMatch[2].length;
+      const colonPos = keyEnd;
+      const value = queryMatch[4] ?? '';
+      const valueStartIndex = colonPos + 1 + (line.slice(colonPos + 1).length - value.length);
       const trimmedValue = value.trim();
 
+      // Build tokens: key gets 'type.yaml' (same as other YAML keys), colon gets punctuation
+      const baseTokens: monaco.languages.IToken[] = [
+        { startIndex: 0, scopes: 'source.yaml' },
+        { startIndex: keyStart, scopes: 'type.yaml' }, // "query" highlighted as YAML key
+        { startIndex: colonPos, scopes: 'operators.yaml' }, // ":" highlighted as operator
+      ];
+
       if (trimmedValue.startsWith('>') || trimmedValue.startsWith('|')) {
+        // Block scalar indicator - tokenize as YAML
+        const yamlTokens = tokenizeYamlLine(line);
         return {
-          tokens: tokenizeYamlLine(line),
+          tokens: yamlTokens,
           endState: new AlertingYamlState('pending', baseIndent, 0),
         };
       }
 
       if (trimmedValue.length > 0) {
         const rawValue = value.trimStart();
-        const rawValueOffset = valueStartOffset + (value.length - rawValue.length);
+        const rawValueOffset = valueStartIndex + (value.length - rawValue.length);
         const quote = rawValue.startsWith('"') || rawValue.startsWith("'") ? rawValue[0] : null;
         const closingIndex = quote ? rawValue.lastIndexOf(quote) : rawValue.length;
         const queryText = rawValue.slice(
@@ -522,197 +667,258 @@ const ensureAlertingYamlLanguage = () => {
           closingIndex > 0 ? closingIndex : undefined
         );
         const queryOffset = rawValueOffset + (quote ? 1 : 0);
-        const tokens = [
-          { startIndex: 0, scopes: 'source.yaml' },
-          ...tokenizeEsqlLine(queryText, queryOffset),
-        ];
+        const tokens = [...baseTokens, ...tokenizeEsqlLine(queryText, queryOffset)];
         return { tokens, endState: new AlertingYamlState('inline', baseIndent, 0) };
       }
 
-      return { tokens: tokenizeYamlLine(line), endState: state };
+      return { tokens: baseTokens, endState: new AlertingYamlState('pending', baseIndent, 0) };
     },
   });
 };
 
 ensureAlertingYamlLanguage();
 
+/**
+ * Find the ES|QL query context at the cursor position.
+ * Handles inline queries, block scalar queries (| or >), and multi-line continuation.
+ */
 const findYamlQueryContext = (text: string, cursorOffset: number): QueryContext | null => {
   const lines = text.split('\n');
+
+  // Build line start offsets and find cursor line
   const lineStartOffsets: number[] = [];
   let runningOffset = 0;
   let cursorLine = 0;
 
   for (let i = 0; i < lines.length; i++) {
     lineStartOffsets.push(runningOffset);
-    const nextOffset = runningOffset + lines[i].length + 1;
-    if (cursorOffset < nextOffset) {
+    if (cursorOffset >= runningOffset && cursorOffset <= runningOffset + lines[i].length) {
       cursorLine = i;
     }
-    runningOffset = nextOffset;
+    runningOffset += lines[i].length + 1; // +1 for newline
   }
 
-  for (let i = cursorLine; i >= 0; i--) {
-    const line = lines[i];
-    const match = /^(\s*)query:\s*(.*)$/.exec(line);
-    if (!match) {
-      continue;
-    }
+  // Search backwards for the `query:` key
+  for (let queryLineIdx = cursorLine; queryLineIdx >= 0; queryLineIdx--) {
+    const line = lines[queryLineIdx];
+    const queryMatch = /^(\s*)query:\s*(.*)$/.exec(line);
+    if (!queryMatch) continue;
 
-    const baseIndent = match[1].length;
-    const value = match[2] ?? '';
-    const valueStartIndex = line.indexOf(value);
-    const valueStartOffset = lineStartOffsets[i] + Math.max(valueStartIndex, 0);
+    const baseIndent = queryMatch[1].length;
+    const afterColon = queryMatch[2] ?? '';
+    const trimmedAfterColon = afterColon.trim();
 
-    if (value.trim().length > 0 && !/^[>|]/.test(value.trim())) {
-      const rawValue = value.trimStart();
-      const rawValueOffset = valueStartOffset + (value.length - rawValue.length);
-      const quote = rawValue.startsWith('"') || rawValue.startsWith("'") ? rawValue[0] : null;
-      const closingIndex = quote ? rawValue.lastIndexOf(quote) : rawValue.length;
-      const queryStartOffset = rawValueOffset + (quote ? 1 : 0);
-      const queryEndOffset =
-        closingIndex > 0 ? rawValueOffset + closingIndex : rawValueOffset + rawValue.length;
-
-      let continuationIndent = 0;
-      for (let j = i + 1; j < lines.length; j++) {
-        const trimmedLine = lines[j].trim();
-        if (trimmedLine === '') {
-          continue;
-        }
-        const indent = lines[j].match(/^\s*/)?.[0].length ?? 0;
-        if (indent > baseIndent) {
-          continuationIndent = indent;
+    // Case 1: Block scalar (| or >)
+    if (trimmedAfterColon.startsWith('|') || trimmedAfterColon.startsWith('>')) {
+      // Find the block indent from first content line
+      let blockIndent = 0;
+      for (let j = queryLineIdx + 1; j < lines.length; j++) {
+        if (lines[j].trim() === '') continue;
+        const lineIndent = lines[j].match(/^\s*/)?.[0].length ?? 0;
+        if (lineIndent > baseIndent) {
+          blockIndent = lineIndent;
         }
         break;
       }
 
-      if (continuationIndent === 0) {
-        if (cursorOffset < queryStartOffset || cursorOffset > queryEndOffset) {
-          return null;
-        }
-        const queryText = rawValue.slice(
-          quote ? 1 : 0,
-          closingIndex > 0 ? closingIndex : undefined
-        );
-        const queryOffset = Math.max(
-          0,
-          Math.min(queryText.length, cursorOffset - queryStartOffset)
-        );
-        return { queryText, queryOffset };
+      // If no content yet, use cursor indent or default
+      if (blockIndent === 0) {
+        if (cursorLine <= queryLineIdx) return null;
+        const cursorIndent = lines[cursorLine].match(/^\s*/)?.[0].length ?? 0;
+        blockIndent = Math.max(baseIndent + 2, cursorIndent);
       }
 
-      let endLine = i + 1;
+      // Find end of block
+      let endLine = queryLineIdx + 1;
       while (endLine < lines.length) {
         const lineIndent = lines[endLine].match(/^\s*/)?.[0].length ?? 0;
-        if (lines[endLine].trim() !== '' && lineIndent <= baseIndent) {
-          break;
-        }
-        endLine += 1;
+        if (lines[endLine].trim() !== '' && lineIndent < blockIndent) break;
+        endLine++;
       }
 
-      const firstLineQueryText = rawValue.slice(
-        quote ? 1 : 0,
-        closingIndex > 0 ? closingIndex : undefined
+      // Check if cursor is in the block
+      if (cursorLine <= queryLineIdx || cursorLine >= endLine) return null;
+
+      // Extract query lines
+      const queryLines = lines
+        .slice(queryLineIdx + 1, endLine)
+        .map((lineText) => (lineText.length >= blockIndent ? lineText.slice(blockIndent) : ''));
+      const queryText = queryLines.join('\n');
+
+      // Calculate offset within query
+      const cursorLineInQuery = cursorLine - (queryLineIdx + 1);
+      const cursorColInLine = Math.max(
+        0,
+        cursorOffset - lineStartOffsets[cursorLine] - blockIndent
       );
-      const continuationLines = lines.slice(i + 1, endLine).map((lineText) => {
-        const lineIndent = lineText.match(/^\s*/)?.[0].length ?? 0;
-        if (lineIndent > baseIndent) {
-          const sliceIndent = Math.min(continuationIndent, lineIndent);
-          return lineText.slice(sliceIndent);
-        }
-        return '';
-      });
-      const queryText = [firstLineQueryText, ...continuationLines].join('\n');
-
-      if (cursorLine < i || cursorLine >= endLine) {
-        return null;
-      }
-
-      if (cursorLine === i) {
-        if (cursorOffset < queryStartOffset) {
-          return null;
-        }
-        const queryOffset = Math.max(
-          0,
-          Math.min(firstLineQueryText.length, cursorOffset - queryStartOffset)
-        );
-        return { queryText, queryOffset };
-      }
-
-      const cursorLineOffset = cursorOffset - lineStartOffsets[cursorLine];
-      const cursorOffsetInQueryLine = Math.max(0, cursorLineOffset - continuationIndent);
-      const lineOffsetInQuery =
-        firstLineQueryText.length +
-        1 +
-        continuationLines
-          .slice(0, cursorLine - (i + 1))
-          .reduce((acc, curr) => acc + curr.length + 1, 0) +
-        cursorOffsetInQueryLine;
+      const offsetBeforeCursorLine = queryLines
+        .slice(0, cursorLineInQuery)
+        .reduce((acc, l) => acc + l.length + 1, 0);
 
       return {
         queryText,
-        queryOffset: Math.max(0, Math.min(queryText.length, lineOffsetInQuery)),
+        queryOffset: Math.max(
+          0,
+          Math.min(queryText.length, offsetBeforeCursorLine + cursorColInLine)
+        ),
       };
     }
 
-    if (i + 1 >= lines.length) {
+    // Case 2a: Empty value but cursor is on the query line (e.g., "query: " with cursor after colon)
+    if (trimmedAfterColon.length === 0 && cursorLine === queryLineIdx) {
+      // Find where the cursor would be relative to where a value would start
+      const colonIdx = line.indexOf(':');
+      const valueStartCol = colonIdx + 1;
+      const valueStartOffset = lineStartOffsets[queryLineIdx] + valueStartCol;
+
+      // Cursor must be at or after the colon
+      if (cursorOffset >= valueStartOffset) {
+        return {
+          queryText: '',
+          queryOffset: 0,
+        };
+      }
       return null;
     }
 
-    let blockIndent = 0;
-    let firstContentLine = -1;
-    for (let j = i + 1; j < lines.length; j++) {
-      const trimmedLine = lines[j].trim();
-      if (trimmedLine === '') {
-        continue;
+    // Case 2b: Inline value (possibly with continuation lines)
+    if (trimmedAfterColon.length > 0) {
+      // afterColon is already trimmed of leading whitespace by the regex's \s*
+      // So we calculate position by finding where afterColon starts in the line
+      const valueStartCol = line.length - afterColon.length;
+      const valueStartOffset = lineStartOffsets[queryLineIdx] + valueStartCol;
+
+      // Handle quoted strings
+      const quote = afterColon.startsWith('"') || afterColon.startsWith("'") ? afterColon[0] : null;
+      const closingQuoteIdx = quote ? afterColon.lastIndexOf(quote) : -1;
+      const queryStartOffset = valueStartOffset + (quote ? 1 : 0);
+      const queryEndOffset =
+        closingQuoteIdx > 0
+          ? valueStartOffset + closingQuoteIdx
+          : valueStartOffset + afterColon.length;
+
+      // Check for multi-line continuation
+      let continuationIndent = 0;
+      for (let j = queryLineIdx + 1; j < lines.length; j++) {
+        if (lines[j].trim() === '') continue;
+        const lineIndent = lines[j].match(/^\s*/)?.[0].length ?? 0;
+        if (lineIndent > baseIndent) {
+          continuationIndent = lineIndent;
+        }
+        break;
       }
-      const indent = lines[j].match(/^\s*/)?.[0].length ?? 0;
-      if (indent > baseIndent) {
-        blockIndent = indent;
-        firstContentLine = j;
+
+      // Single line query (no continuation)
+      if (continuationIndent === 0) {
+        if (cursorLine !== queryLineIdx) return null;
+        if (cursorOffset < queryStartOffset || cursorOffset > queryEndOffset) return null;
+
+        const queryText = afterColon.slice(
+          quote ? 1 : 0,
+          closingQuoteIdx > 0 ? closingQuoteIdx : undefined
+        );
+        return {
+          queryText,
+          queryOffset: Math.max(0, Math.min(queryText.length, cursorOffset - queryStartOffset)),
+        };
+      }
+
+      // Multi-line with continuation
+      let endLine = queryLineIdx + 1;
+      while (endLine < lines.length) {
+        const lineIndent = lines[endLine].match(/^\s*/)?.[0].length ?? 0;
+        if (lines[endLine].trim() !== '' && lineIndent <= baseIndent) break;
+        endLine++;
+      }
+
+      if (cursorLine < queryLineIdx || cursorLine >= endLine) return null;
+
+      // Build query text
+      const firstLineText = afterColon.slice(
+        quote ? 1 : 0,
+        closingQuoteIdx > 0 ? closingQuoteIdx : undefined
+      );
+      const continuationLines = lines.slice(queryLineIdx + 1, endLine).map((lineText) => {
+        const lineIndent = lineText.match(/^\s*/)?.[0].length ?? 0;
+        return lineIndent >= continuationIndent ? lineText.slice(continuationIndent) : '';
+      });
+      const queryText = [firstLineText, ...continuationLines].join('\n');
+
+      // Calculate offset
+      if (cursorLine === queryLineIdx) {
+        if (cursorOffset < queryStartOffset) return null;
+        return {
+          queryText,
+          queryOffset: Math.max(0, Math.min(firstLineText.length, cursorOffset - queryStartOffset)),
+        };
+      }
+
+      const cursorLineInQuery = cursorLine - (queryLineIdx + 1);
+      const cursorColInLine = Math.max(
+        0,
+        cursorOffset - lineStartOffsets[cursorLine] - continuationIndent
+      );
+      const offsetBeforeCursorLine =
+        firstLineText.length +
+        1 +
+        continuationLines.slice(0, cursorLineInQuery).reduce((acc, l) => acc + l.length + 1, 0);
+
+      return {
+        queryText,
+        queryOffset: Math.max(
+          0,
+          Math.min(queryText.length, offsetBeforeCursorLine + cursorColInLine)
+        ),
+      };
+    }
+
+    // Case 3: Empty value - check if cursor is on a continuation line
+    if (cursorLine <= queryLineIdx) return null;
+
+    // Find block indent from subsequent lines
+    let blockIndent = 0;
+    for (let j = queryLineIdx + 1; j < lines.length; j++) {
+      if (lines[j].trim() === '') continue;
+      const lineIndent = lines[j].match(/^\s*/)?.[0].length ?? 0;
+      if (lineIndent > baseIndent) {
+        blockIndent = lineIndent;
       }
       break;
     }
 
     if (blockIndent === 0) {
-      if (cursorLine <= i) {
-        return null;
-      }
       const cursorIndent = lines[cursorLine].match(/^\s*/)?.[0].length ?? 0;
-      blockIndent = Math.max(baseIndent + 1, cursorIndent);
-      firstContentLine = i + 1;
+      blockIndent = Math.max(baseIndent + 2, cursorIndent);
     }
 
-    let endLine = firstContentLine;
+    // Find end of block
+    let endLine = queryLineIdx + 1;
     while (endLine < lines.length) {
       const lineIndent = lines[endLine].match(/^\s*/)?.[0].length ?? 0;
-      if (lines[endLine].trim() !== '' && lineIndent < blockIndent) {
-        break;
-      }
-      endLine += 1;
+      if (lines[endLine].trim() !== '' && lineIndent < blockIndent) break;
+      endLine++;
     }
 
-    const queryLines = lines.slice(i + 1, endLine).map((lineText) => {
-      if (lineText.length >= blockIndent) {
-        return lineText.slice(blockIndent);
-      }
-      return '';
-    });
+    if (cursorLine >= endLine) return null;
 
+    // Extract query
+    const queryLines = lines
+      .slice(queryLineIdx + 1, endLine)
+      .map((lineText) => (lineText.length >= blockIndent ? lineText.slice(blockIndent) : ''));
     const queryText = queryLines.join('\n');
-    if (cursorLine < i + 1 || cursorLine >= endLine) {
-      return null;
-    }
 
-    const cursorLineOffset = cursorOffset - lineStartOffsets[cursorLine];
-    const cursorOffsetInQueryLine = Math.max(0, cursorLineOffset - blockIndent);
-
-    const lineOffsetInQuery =
-      queryLines.slice(0, cursorLine - (i + 1)).reduce((acc, curr) => acc + curr.length + 1, 0) +
-      cursorOffsetInQueryLine;
+    const cursorLineInQuery = cursorLine - (queryLineIdx + 1);
+    const cursorColInLine = Math.max(0, cursorOffset - lineStartOffsets[cursorLine] - blockIndent);
+    const offsetBeforeCursorLine = queryLines
+      .slice(0, cursorLineInQuery)
+      .reduce((acc, l) => acc + l.length + 1, 0);
 
     return {
       queryText,
-      queryOffset: Math.max(0, Math.min(queryText.length, lineOffsetInQuery)),
+      queryOffset: Math.max(
+        0,
+        Math.min(queryText.length, offsetBeforeCursorLine + cursorColInLine)
+      ),
     };
   }
 
@@ -815,11 +1021,11 @@ export const CreateRulePage = () => {
         }
 
         if (completionContext.isValuePosition && completionContext.currentKey) {
-          const schemaNode = getSchemaNode([
+          const typeInfo = getSchemaTypeInfo([
             ...completionContext.parentPath,
             completionContext.currentKey,
-          ]) as { type?: string; enum?: string[] } | undefined;
-          if (schemaNode?.type === 'boolean') {
+          ]);
+          if (typeInfo?.isBoolean) {
             return {
               suggestions: ['true', 'false'].map((value) => ({
                 label: value,
@@ -829,9 +1035,9 @@ export const CreateRulePage = () => {
               })),
             };
           }
-          if (schemaNode?.enum) {
+          if (typeInfo?.enumValues) {
             return {
-              suggestions: schemaNode.enum.map((value) => ({
+              suggestions: typeInfo.enumValues.map((value) => ({
                 label: value,
                 insertText: value,
                 kind: monaco.languages.CompletionItemKind.Value,
@@ -842,15 +1048,20 @@ export const CreateRulePage = () => {
           return { suggestions: [] };
         }
 
+        // Get schema properties and filter out keys that are already present
         const properties = getSchemaProperties(completionContext.parentPath);
+        const existingKeys = getExistingYamlKeys(fullText, completionContext.parentPath);
+
         return {
-          suggestions: properties.map(({ key, schema }) => ({
-            label: key,
-            insertText: `${key}: `,
-            kind: monaco.languages.CompletionItemKind.Property,
-            documentation: schema.description ? { value: schema.description } : undefined,
-            range,
-          })),
+          suggestions: properties
+            .filter(({ key }) => !existingKeys.has(key))
+            .map(({ key, description }) => ({
+              label: key,
+              insertText: `${key}: `,
+              kind: monaco.languages.CompletionItemKind.Property,
+              documentation: description ? { value: description } : undefined,
+              range,
+            })),
         };
       },
     }),
