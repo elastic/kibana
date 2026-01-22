@@ -22,9 +22,12 @@ import { EXCEPTION_LIST_NAMESPACE } from '@kbn/securitysolution-list-constants';
 
 import {
   APP_ID,
+  CUSTOM_HIGHLIGHTED_FIELDS_SUBFEATURE_EDIT_ID,
+  ENABLE_DISABLE_RULES_SUBFEATURE_ID,
   EXCEPTIONS_API_READ,
   EXCEPTIONS_UI_READ,
   INITIALIZE_SECURITY_SOLUTION,
+  INVESTIGATION_GUIDE_SUBFEATURE_EDIT_ID,
   LEGACY_NOTIFICATIONS_ID,
   LISTS_API_ALL,
   LISTS_API_READ,
@@ -32,6 +35,7 @@ import {
   RULES_API_ALL,
   RULES_API_READ,
   RULES_FEATURE_ID_V3,
+  RULES_FEATURE_ID_V4,
   RULES_UI_EDIT,
   RULES_UI_READ,
   SECURITY_SOLUTION_RULES_APP_ID,
@@ -61,6 +65,18 @@ const alertingFeatures = SECURITY_RULE_TYPES.map((ruleTypeId) => ({
 export const getRulesV3BaseKibanaFeature = (
   params: SecurityFeatureParams
 ): BaseKibanaFeatureConfig => ({
+  deprecated: {
+    notice: i18n.translate(
+      'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionSecurity.deprecationMessage',
+      {
+        defaultMessage: 'The {currentId} permissions are deprecated, please see {latestId}.',
+        values: {
+          currentId: RULES_FEATURE_ID_V3,
+          latestId: RULES_FEATURE_ID_V4,
+        },
+      }
+    ),
+  },
   id: RULES_FEATURE_ID_V3,
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionRulesV3Title',
@@ -78,6 +94,20 @@ export const getRulesV3BaseKibanaFeature = (
   },
   privileges: {
     all: {
+      replacedBy: {
+        default: [{ feature: RULES_FEATURE_ID_V4, privileges: ['all'] }],
+        minimal: [
+          {
+            feature: RULES_FEATURE_ID_V4,
+            privileges: [
+              'minimal_all',
+              INVESTIGATION_GUIDE_SUBFEATURE_EDIT_ID,
+              CUSTOM_HIGHLIGHTED_FIELDS_SUBFEATURE_EDIT_ID,
+              ENABLE_DISABLE_RULES_SUBFEATURE_ID,
+            ],
+          },
+        ],
+      },
       app: [SECURITY_SOLUTION_RULES_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       savedObject: {
@@ -103,6 +133,15 @@ export const getRulesV3BaseKibanaFeature = (
       ],
     },
     read: {
+      replacedBy: {
+        default: [{ feature: RULES_FEATURE_ID_V4, privileges: ['read'] }],
+        minimal: [
+          {
+            feature: RULES_FEATURE_ID_V4,
+            privileges: ['minimal_read'],
+          },
+        ],
+      },
       app: [SECURITY_SOLUTION_RULES_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       savedObject: {

@@ -29,7 +29,6 @@ import {
   LISTS_API_ALL,
   LISTS_API_READ,
   LISTS_API_SUMMARY,
-  RULES_FEATURE_ID_V3,
   SECURITY_UI_SHOW,
   SECURITY_UI_CRUD,
   INITIALIZE_SECURITY_SOLUTION,
@@ -40,8 +39,12 @@ import {
   EXCEPTIONS_API_READ,
   USERS_API_READ,
   RULES_API_ALL,
-  EXCEPTIONS_SUBFEATURE_ALL,
+  EXCEPTIONS_SUBFEATURE_ALL_ID,
   ALERTS_FEATURE_ID,
+  INVESTIGATION_GUIDE_SUBFEATURE_EDIT_ID,
+  CUSTOM_HIGHLIGHTED_FIELDS_SUBFEATURE_EDIT_ID,
+  ENABLE_DISABLE_RULES_SUBFEATURE_ID,
+  RULES_FEATURE_ID_V4,
 } from '../../constants';
 import type { SecurityFeatureParams } from '../types';
 import type { BaseKibanaFeatureConfig } from '../../types';
@@ -108,15 +111,21 @@ export const getSecurityV2BaseKibanaFeature = ({
         default: [
           // note: overriden by product feature endpointArtifactManagement when enabled
           { feature: SECURITY_FEATURE_ID_V5, privileges: ['all'] },
-          { feature: RULES_FEATURE_ID_V3, privileges: ['all'] },
+          { feature: RULES_FEATURE_ID_V4, privileges: ['all'] },
           { feature: ALERTS_FEATURE_ID, privileges: ['all'] },
         ],
         minimal: [
           // note: overriden by product feature endpointArtifactManagement when enabled
           { feature: SECURITY_FEATURE_ID_V5, privileges: ['minimal_all'] },
           {
-            feature: RULES_FEATURE_ID_V3,
-            privileges: ['minimal_all', EXCEPTIONS_SUBFEATURE_ALL],
+            feature: RULES_FEATURE_ID_V4,
+            privileges: [
+              'minimal_all',
+              EXCEPTIONS_SUBFEATURE_ALL_ID,
+              INVESTIGATION_GUIDE_SUBFEATURE_EDIT_ID,
+              CUSTOM_HIGHLIGHTED_FIELDS_SUBFEATURE_EDIT_ID,
+              ENABLE_DISABLE_RULES_SUBFEATURE_ID,
+            ],
           },
           { feature: ALERTS_FEATURE_ID, privileges: ['minimal_all'] },
         ],
@@ -155,13 +164,13 @@ export const getSecurityV2BaseKibanaFeature = ({
       replacedBy: {
         default: [
           { feature: SECURITY_FEATURE_ID_V5, privileges: ['read'] },
-          { feature: RULES_FEATURE_ID_V3, privileges: ['read'] },
+          { feature: RULES_FEATURE_ID_V4, privileges: ['read'] },
           { feature: ALERTS_FEATURE_ID, privileges: ['read'] },
         ],
         minimal: [
           { feature: SECURITY_FEATURE_ID_V5, privileges: ['minimal_read'] },
           {
-            feature: RULES_FEATURE_ID_V3,
+            feature: RULES_FEATURE_ID_V4,
             privileges: ['minimal_read'],
           },
           { feature: ALERTS_FEATURE_ID, privileges: ['minimal_read'] },
