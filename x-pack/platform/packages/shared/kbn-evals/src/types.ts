@@ -114,6 +114,14 @@ export interface EvalsExecutorClient {
       metadata?: Record<string, unknown>;
       task: ExperimentTask<TEvaluationDataset['examples'][number], TTaskOutput>;
       concurrency?: number;
+      /**
+       * Phoenix-only: when true, the executor may trust that the dataset already exists upstream
+       * and should be resolved/loaded externally (e.g. by name) rather than created from the
+       * provided examples.
+       *
+       * The in-Kibana executor ignores this option.
+       */
+      trustUpstreamDataset?: boolean;
     },
     evaluators: Array<Evaluator<TEvaluationDataset['examples'][number], TTaskOutput>>
   ): Promise<RanExperiment>;

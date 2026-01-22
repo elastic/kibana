@@ -266,7 +266,7 @@ export function createEvaluateExternalDataset({
   log,
 }: {
   evaluators: DefaultEvaluators;
-  phoenixClient: KibanaPhoenixClient;
+  phoenixClient: EvalsExecutorClient;
   chatClient: AgentBuilderEvaluationChatClient;
   traceEsClient: EsClient;
   log: ToolingLog;

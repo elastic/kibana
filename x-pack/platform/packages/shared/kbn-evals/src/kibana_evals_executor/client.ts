@@ -60,11 +60,13 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       task,
       metadata: experimentMetadata,
       concurrency,
+      trustUpstreamDataset: _trustUpstreamDataset,
     }: {
       dataset: TEvaluationDataset;
       metadata?: Record<string, unknown>;
       task: ExperimentTask<TEvaluationDataset['examples'][number], TTaskOutput>;
       concurrency?: number;
+      trustUpstreamDataset?: boolean;
     },
     evaluators: Array<Evaluator<TEvaluationDataset['examples'][number], TTaskOutput>>
   ): Promise<RanExperiment> {
