@@ -51,27 +51,25 @@ export function createPlaywrightEvalsConfig({
   // gets the connectors from either the env variable or kibana.yml/kibana.dev.yml
   const connectors = getAvailableConnectors();
 
-  let evaluationConnectorId = process.env.EVALUATION_CONNECTOR_ID
+  const evaluationConnectorId = process.env.EVALUATION_CONNECTOR_ID
     ? String(process.env.EVALUATION_CONNECTOR_ID)
     : undefined;
 
-  if (!evaluationConnectorId) {
-    evaluationConnectorId = connectors[0].id;
-    log.warning(
-      `process.env.EVALUATION_CONNECTOR_ID not set, defaulting to ${evaluationConnectorId}. Please set this for consistent results.`
-    );
-    process.env.EVALUATION_CONNECTOR_ID = evaluationConnectorId;
-  }
+  const evaluationConnector = evaluationConnectorId
+    ? connectors.find((connector) => connector.id === evaluationConnectorId)
+    : undefined;
 
-  const evaluationConnector = connectors.find(
-    (connector) => connector.id === evaluationConnectorId
-  );
-
-  if (!evaluationConnector) {
+  if (evaluationConnectorId && !evaluationConnector) {
     throw new Error(
       `Evaluation connector id ${evaluationConnectorId} was not found, pick one from ${connectors
         .map((connector) => connector.id)
         .join(', ')}`
+    );
+  }
+
+  if (!evaluationConnectorId) {
+    log.warning(
+      `process.env.EVALUATION_CONNECTOR_ID not set, defaulting per-project to the connector under test. Please set this for consistent results.`
     );
   }
 
@@ -91,7 +89,7 @@ export function createPlaywrightEvalsConfig({
             use: {
               ...project.use,
               connector,
-              evaluationConnector,
+              evaluationConnector: evaluationConnector ?? connector,
               repetitions: experimentRepetitions,
             },
           };
