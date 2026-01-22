@@ -36,7 +36,7 @@ export const EditSignificantEventFlyout = ({
   selectedSystems: System[];
   setSelectedSystems: React.Dispatch<React.SetStateAction<System[]>>;
   systems: System[];
-  queryToEdit?: StreamQueryKql;
+  queryToEdit?: StreamQuery;
   definition: Streams.all.GetResponse;
   isEditFlyoutOpen: boolean;
   setIsEditFlyoutOpen: React.Dispatch<React.SetStateAction<boolean>>;
