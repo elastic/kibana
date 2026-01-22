@@ -78,7 +78,7 @@ export const updateRuleRoute = (
           const ruleTypes = alertingContext.listTypes();
 
           // Assert versioned inputs
-          const updateRuleData: UpdateRuleRequestBodyV1<RuleParamsV1> = req.body;
+          const updateRuleData = req.body as unknown as UpdateRuleRequestBodyV1<RuleParamsV1>;
           const updateRuleParams: UpdateRuleRequestParamsV1 = req.params;
 
           try {

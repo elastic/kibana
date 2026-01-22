@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { AlertInstanceContext } from '@kbn/alerting-plugin/server';
-import type { Params } from '@kbn/response-ops-rule-params/index_threshold';
+import type { IndexThresholdRuleParams } from '@kbn/response-ops-rule-params/index_threshold';
 
 // rule type context provided to actions
 export interface ActionContext extends BaseActionContext {
@@ -78,7 +78,7 @@ const RECOVERY_MESSAGE = (name: string, context: BaseActionContext, window: stri
 export function addMessages(
   ruleName: string,
   baseContext: BaseActionContext,
-  params: Params,
+  params: IndexThresholdRuleParams,
   isRecoveryMessage?: boolean
 ): ActionContext {
   const title = isRecoveryMessage

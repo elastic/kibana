@@ -12,13 +12,15 @@ import { schema } from '@kbn/config-schema';
 
 export const baseSchema = schema.object({
   threshold: schema.maybe(schema.number()),
-  duration: schema.string(),
   filterQuery: schema.maybe(schema.string({})),
   filterQueryText: schema.maybe(schema.string({})),
 });
 
-export const stackMonitoringCommonSchema = baseSchema.extends({
-  limit: schema.maybe(schema.string()),
-});
+export const stackMonitoringCommonSchema = baseSchema.extends(
+  {
+    limit: schema.maybe(schema.string()),
+  },
+  { unknowns: 'allow' }
+);
 
 export type StackMonitoringType = TypeOf<typeof stackMonitoringCommonSchema>;
