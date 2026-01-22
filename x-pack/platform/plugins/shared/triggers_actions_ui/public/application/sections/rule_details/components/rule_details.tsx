@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
+import useObservable from 'react-use/lib/useObservable';
 import {
   EuiPageHeader,
   EuiText,
@@ -50,6 +51,7 @@ import type { ComponentOpts as BulkOperationsComponentOpts } from '../../common/
 import { withBulkRuleOperations } from '../../common/components/with_bulk_rule_api_operations';
 import { RuleRouteWithApi } from './rule_route';
 import { ViewInApp } from './view_in_app';
+import { ViewLinkedObject } from './view_linked_object';
 import { routeToHome } from '../../../constants';
 import {
   rulesErrorReasonTranslationsMapping,
@@ -104,7 +106,9 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     userProfile,
     notifications: { toasts },
   } = useKibana().services;
-  const { capabilities, navigateToApp, getUrlForApp, isAppRegistered } = application;
+  const { capabilities, navigateToApp, getUrlForApp, isAppRegistered, currentAppId$ } = application;
+  const currentAppId = useObservable(currentAppId$, undefined);
+  const isInRulesApp = currentAppId === 'rules';
 
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
   const [rulesToUpdateAPIKey, setRulesToUpdateAPIKey] = useState<string[]>([]);
@@ -244,13 +248,26 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   };
 
   const onEditRuleClick = () => {
-    navigateToApp('management', {
-      path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(rule.id)}`,
-      state: {
-        returnApp: 'management',
-        returnPath: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(rule.id)}`,
-      },
-    });
+    if (isInRulesApp) {
+      // Navigate within the rules app using history
+      const { pathname, search, hash } = history.location;
+      const returnPath = `${pathname}${search}${hash}` || `/${rule.id}`;
+      history.push({
+        pathname: getEditRuleRoute(rule.id),
+        state: {
+          returnPath,
+        },
+      });
+    } else {
+      // Navigate to Stack Management for other apps
+      navigateToApp('management', {
+        path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(rule.id)}`,
+        state: {
+          returnApp: 'management',
+          returnPath: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(rule.id)}`,
+        },
+      });
+    }
   };
 
   const editButton = hasEditButton ? (
@@ -457,7 +474,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
               defaultMessage="Refresh"
             />
           </EuiButtonEmpty>,
-          <ViewInApp rule={rule} />,
+          isInRulesApp ? <ViewLinkedObject rule={rule} /> : <ViewInApp rule={rule} />,
         ]}
       />
       <EuiPageSection>

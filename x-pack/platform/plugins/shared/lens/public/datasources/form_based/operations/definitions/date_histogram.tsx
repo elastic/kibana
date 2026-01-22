@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import moment from 'moment';
+import { snakeCase } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -34,7 +35,6 @@ import {
 } from '@kbn/data-plugin/common';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
-import { sanitazeESQLInput } from '@kbn/esql-utils';
 import type {
   DateHistogramIndexPatternColumn,
   DateRange,
@@ -233,16 +233,22 @@ export const dateHistogramOperation: OperationDefinition<
     const { interval } = getTimeZoneAndInterval(column, indexPattern);
     const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
 
-    if (interval === 'auto') {
-      return `BUCKET(${sanitazeESQLInput(column.sourceField)}, ${mapToEsqlInterval(
-        dateRange,
-        calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }) || '1h'
-      )})`;
-    }
-    return `BUCKET(${sanitazeESQLInput(column.sourceField)}, ${mapToEsqlInterval(
-      dateRange,
-      interval
-    )})`;
+    const resolvedInterval =
+      interval === 'auto'
+        ? mapToEsqlInterval(
+            dateRange,
+            calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }) || '1h'
+          )
+        : mapToEsqlInterval(dateRange, interval);
+
+    // Use columnId to make param name unique
+    const fieldKey = `field_${snakeCase(columnId)}`;
+    // The interval is a safe string like '30 minutes' or '1h' - it doesn't need parameter escaping
+    // and should be directly in the template (not as a string parameter which would be quoted)
+    return {
+      template: `BUCKET(??${fieldKey}, ${resolvedInterval})`,
+      params: { [fieldKey]: column.sourceField },
+    };
   },
   toEsAggsFn: (column, columnId, indexPattern) => {
     const { usedField, timeZone, interval } = getTimeZoneAndInterval(column, indexPattern);

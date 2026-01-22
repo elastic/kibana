@@ -181,9 +181,11 @@ describe('Discover state', () => {
     test('pauseAutoRefreshInterval sets refreshInterval.pause to true', async () => {
       history.push('/#?_g=(refreshInterval:(pause:!f,value:5000))');
       expect(getCurrentUrl()).toBe('/#?_g=(refreshInterval:(pause:!f,value:5000))');
-      // TODO: state.actions.setDataView should be async because it calls pauseAutoRefreshInterval which is async.
-      // I found this bug while removing unnecessary awaits, but it will need to be fixed in a follow up PR.
-      state.actions.setDataView(dataViewMock);
+      state.internalState.dispatch(
+        state.injectCurrentTab(internalStateActions.assignNextDataView)({
+          dataView: dataViewMock,
+        })
+      );
       await new Promise(process.nextTick);
       expect(getCurrentUrl()).toBe('/#?_g=(refreshInterval:(pause:!t,value:5000))');
     });
@@ -483,23 +485,6 @@ describe('Discover state', () => {
 
     afterEach(() => {
       jest.clearAllMocks();
-    });
-
-    test('setDataView', async () => {
-      const { state, runtimeStateManager } = await getState('');
-      expect(
-        selectTabRuntimeState(
-          runtimeStateManager,
-          state.getCurrentTab().id
-        ).currentDataView$.getValue()
-      ).toBeUndefined();
-      state.actions.setDataView(dataViewMock);
-      expect(
-        selectTabRuntimeState(
-          runtimeStateManager,
-          state.getCurrentTab().id
-        ).currentDataView$.getValue()
-      ).toBe(dataViewMock);
     });
 
     test('fetchData', async () => {
@@ -1247,7 +1232,7 @@ describe('Discover state', () => {
       const { state, customizationService, getCurrentUrl } = await getState('/', {
         savedSearch: savedSearchMock,
       });
-      const { actions, dataState } = state;
+      const { dataState } = state;
 
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
@@ -1271,7 +1256,11 @@ describe('Discover state', () => {
       expect(getCurrentUrl()).toContain(dataViewMock.id);
 
       // change data view
-      await actions.onChangeDataView(dataViewComplexMock.id!);
+      await state.internalState.dispatch(
+        state.injectCurrentTab(internalStateActions.changeDataView)({
+          dataViewOrDataViewId: dataViewComplexMock.id!,
+        })
+      );
       await new Promise(process.nextTick);
 
       // test changed state, fetch should be called once and URL should be updated
@@ -1282,127 +1271,6 @@ describe('Discover state', () => {
       expect(currentDataView$.getValue()?.id).toBe(dataViewComplexMock.id);
       // check if the changed data view is reflected in the URL
       expect(getCurrentUrl()).toContain(dataViewComplexMock.id);
-      state.actions.stopSyncing();
-    });
-
-    test('onDataViewCreated - persisted data view', async () => {
-      const { state, customizationService, runtimeStateManager } = await getState('/', {
-        savedSearch: savedSearchMock,
-      });
-      await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
-          initializeSingleTabParams: {
-            stateContainer: state,
-            customizationService,
-            dataViewSpec: undefined,
-            defaultUrlState: undefined,
-            esqlControls: undefined,
-          },
-        })
-      );
-      await state.actions.onDataViewCreated(dataViewComplexMock);
-      await waitFor(() => {
-        expect(
-          selectTabRuntimeState(
-            runtimeStateManager,
-            state.getCurrentTab().id
-          ).currentDataView$.getValue()
-        ).toBe(dataViewComplexMock);
-      });
-      expect(state.getCurrentTab().appState.dataSource).toEqual(
-        createDataViewDataSource({ dataViewId: dataViewComplexMock.id! })
-      );
-      const { currentDataView$ } = selectTabRuntimeState(
-        state.runtimeStateManager,
-        state.getCurrentTab().id
-      );
-      expect(currentDataView$.getValue()?.id).toBe(dataViewComplexMock.id);
-      state.actions.stopSyncing();
-    });
-
-    test('onDataViewCreated - ad-hoc data view', async () => {
-      const { state, customizationService, runtimeStateManager } = await getState('/', {
-        savedSearch: savedSearchMock,
-      });
-      await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
-          initializeSingleTabParams: {
-            stateContainer: state,
-            customizationService,
-            dataViewSpec: undefined,
-            defaultUrlState: undefined,
-            esqlControls: undefined,
-          },
-        })
-      );
-      jest
-        .spyOn(mockServices.dataViews, 'get')
-        .mockImplementationOnce((id) =>
-          id === dataViewAdHoc.id ? Promise.resolve(dataViewAdHoc) : Promise.reject()
-        );
-      await state.actions.onDataViewCreated(dataViewAdHoc);
-      await waitFor(() => {
-        expect(
-          selectTabRuntimeState(
-            runtimeStateManager,
-            state.getCurrentTab().id
-          ).currentDataView$.getValue()
-        ).toBe(dataViewAdHoc);
-      });
-      expect(state.getCurrentTab().appState.dataSource).toEqual(
-        createDataViewDataSource({ dataViewId: dataViewAdHoc.id! })
-      );
-      const { currentDataView$ } = selectTabRuntimeState(
-        state.runtimeStateManager,
-        state.getCurrentTab().id
-      );
-      expect(currentDataView$.getValue()?.id).toBe(dataViewAdHoc.id);
-      state.actions.stopSyncing();
-    });
-
-    test('onDataViewEdited - persisted data view', async () => {
-      const { state, customizationService, runtimeStateManager } = await getState('/', {
-        savedSearch: savedSearchMock,
-      });
-      await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
-          initializeSingleTabParams: {
-            stateContainer: state,
-            customizationService,
-            dataViewSpec: undefined,
-            defaultUrlState: undefined,
-            esqlControls: undefined,
-          },
-        })
-      );
-
-      const selectedDataView$ = selectTabRuntimeState(
-        runtimeStateManager,
-        state.getCurrentTab().id
-      ).currentDataView$;
-      const selectedDataViewId = selectedDataView$.getValue()?.id;
-      expect(selectedDataViewId).toBe(dataViewMock.id);
-      await state.actions.onDataViewEdited(dataViewMock);
-      await waitFor(() => {
-        expect(selectedDataView$.getValue()?.id).toBe(selectedDataViewId);
-      });
-      state.actions.stopSyncing();
-    });
-
-    test('onDataViewEdited - ad-hoc data view', async () => {
-      const { state, runtimeStateManager } = await getState('/', { savedSearch: savedSearchMock });
-      state.actions.initializeAndSync();
-      await state.actions.onDataViewCreated(dataViewAdHoc);
-      const previousId = dataViewAdHoc.id;
-      await state.actions.onDataViewEdited(dataViewAdHoc);
-      await waitFor(() => {
-        expect(
-          selectTabRuntimeState(
-            runtimeStateManager,
-            state.getCurrentTab().id
-          ).currentDataView$.getValue()?.id
-        ).not.toBe(previousId);
-      });
       state.actions.stopSyncing();
     });
 
@@ -1422,7 +1290,9 @@ describe('Discover state', () => {
       expect(state.savedSearchState.getState().hideChart).toBe(false);
       state.savedSearchState.update({ nextState: { hideChart: true } });
       expect(state.savedSearchState.getState().hideChart).toBe(true);
-      await state.actions.onOpenSavedSearch(savedSearchMock.id!);
+      await state.internalState.dispatch(
+        internalStateActions.openDiscoverSession({ discoverSessionId: savedSearchMock.id! })
+      );
       expect(state.savedSearchState.getState().hideChart).toBe(false);
       state.actions.stopSyncing();
     });
@@ -1447,29 +1317,10 @@ describe('Discover state', () => {
         })
       );
       expect(state.getCurrentTab().appState.filters).toHaveLength(1);
-      await state.actions.onOpenSavedSearch(savedSearchMock.id!);
-      expect(state.getCurrentTab().appState.filters).toBeUndefined();
-    });
-
-    test('onCreateDefaultAdHocDataView', async () => {
-      const { state, customizationService } = await getState('/', { savedSearch: savedSearchMock });
       await state.internalState.dispatch(
-        state.injectCurrentTab(internalStateActions.initializeSingleTab)({
-          initializeSingleTabParams: {
-            stateContainer: state,
-            customizationService,
-            dataViewSpec: undefined,
-            defaultUrlState: undefined,
-            esqlControls: undefined,
-          },
-        })
+        internalStateActions.openDiscoverSession({ discoverSessionId: savedSearchMock.id! })
       );
-      await state.actions.createAndAppendAdHocDataView({ title: 'ad-hoc-test' });
-      expect(state.getCurrentTab().appState.dataSource).toEqual(
-        createDataViewDataSource({ dataViewId: 'ad-hoc-id' })
-      );
-      expect(state.runtimeStateManager.adHocDataViews$.getValue()[0].id).toBe('ad-hoc-id');
-      state.actions.stopSyncing();
+      expect(state.getCurrentTab().appState.filters).toBeUndefined();
     });
 
     test('resetDiscoverSession - when changing data views', async () => {
@@ -1503,7 +1354,11 @@ describe('Discover state', () => {
       ).toBe(dataViewMock.id);
 
       // Change the data view, this should change the URL and trigger a fetch
-      await state.actions.onChangeDataView(dataViewComplexMock.id!);
+      await state.internalState.dispatch(
+        state.injectCurrentTab(internalStateActions.changeDataView)({
+          dataViewOrDataViewId: dataViewComplexMock.id!,
+        })
+      );
       await new Promise(process.nextTick);
       expect(getCurrentUrl()).toMatchInlineSnapshot(
         `"/#?_tab=(tabId:the-saved-search-id)&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(),dataSource:(dataViewId:data-view-with-various-field-types-id,type:dataView),grid:(),hideChart:!f,interval:auto,sort:!(!(data,desc)))"`
