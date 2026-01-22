@@ -63,5 +63,4 @@ export const registerRoutes = (libs: InfraBackendLibs) => {
   initProfilingRoutes(libs);
   initServicesRoute(libs);
   initCustomDashboardsRoutes(libs.framework);
-  initEntitiesConfigurationRoutes(libs);
 };
