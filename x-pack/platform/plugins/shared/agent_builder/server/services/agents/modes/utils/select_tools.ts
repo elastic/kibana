@@ -54,7 +54,11 @@ export const selectTools = async ({
     request,
   });
 
-  return [...attachmentBoundTools, ...versionedAttachmentTools, ...registryTools];
+  return {
+    attachmentBoundTools,
+    versionedAttachmentTools,
+    registryTools,
+  };
 };
 
 /**

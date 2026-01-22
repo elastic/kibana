@@ -39,6 +39,7 @@ import type { RunAgentParams, RunAgentResponse } from '../run_agent';
 import { browserToolsToLangchain } from '../../../tools/browser_tool_adapter';
 import { steps } from './constants';
 import type { StateType } from './state';
+import { ToolManager } from './tool_manager';
 
 const chatAgentGraphName = 'default-agent-builder-agent';
 
@@ -85,7 +86,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   ensureValidInput({ input: nextInput, conversation });
 
   const pendingRound = getPendingRound(conversation);
-  const conversationTimestamp = pendingRound?.started_at ?? startTime.toISOString();
 
   const model = await modelProvider.getDefaultModel();
   const resolvedCapabilities = resolveCapabilities(capabilities);
@@ -103,7 +103,11 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     context,
   });
 
-  const { attachmentBoundTools, versionedAttachmentTools, registryTools } = await selectTools({
+  const {
+    attachmentBoundTools,
+    versionedAttachmentTools,
+    registryTools,
+  } = await selectTools({
     conversation: processedConversation,
     toolProvider,
     agentConfiguration,
@@ -138,6 +142,12 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const allTools = [...langchainTools, ...browserLangchainTools];
   const allToolIdMappings = new Map([...toolIdMapping, ...browserIdMappings]);
 
+  const toolManager = ToolManager.from({
+    staticTools: allTools,
+    dynamicTools: [],
+    capacity: 20 - allTools.length, // TODO: make this configurable
+  });
+
   const cycleLimit = 10;
   const graphRecursionLimit = getRecursionLimit(cycleLimit);
 
@@ -145,7 +155,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     logger,
     events: { emit: eventEmitter },
     chatModel: model.chatModel,
-    tools: allTools,
+    toolManager: toolManager,
     configuration: resolvedConfiguration,
     capabilities: resolvedCapabilities,
     structuredOutput,
@@ -160,7 +170,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       conversation: processedConversation,
       agentBuilderToLangchainIdMap,
       cycleLimit,
-      conversationTimestamp,
     }),
     {
       version: 'v2',
@@ -234,18 +243,16 @@ const createInitializerCommand = ({
   conversation,
   cycleLimit,
   agentBuilderToLangchainIdMap,
-  conversationTimestamp,
 }: {
   conversation: ProcessedConversation;
   cycleLimit: number;
   agentBuilderToLangchainIdMap: ToolIdMapping;
-  conversationTimestamp: string;
 }): Command => {
   const initialMessages = conversationToLangchainMessages({
     conversation,
   });
 
-  const initialState: Partial<StateType> = { initialMessages, cycleLimit, conversationTimestamp };
+  const initialState: Partial<StateType> = { initialMessages, cycleLimit };
   let startAt = steps.init;
 
   const lastRound = conversation.previousRounds.length
