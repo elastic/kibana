@@ -523,7 +523,7 @@
           "[]"
         ],
         "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
-        "lineNumber": 244,
+        "lineNumber": 264,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -536,7 +536,7 @@
             "label": "{\n  service,\n  correlation,\n  logs,\n  defaults = {},\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
-            "lineNumber": 286,
+            "lineNumber": 306,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -551,7 +551,7 @@
                   "Service name (maps to service.name)"
                 ],
                 "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
-                "lineNumber": 287,
+                "lineNumber": 307,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -569,7 +569,7 @@
                   "{ [x: string]: string; }"
                 ],
                 "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
-                "lineNumber": 289,
+                "lineNumber": 309,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -594,7 +594,7 @@
                   "[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
-                "lineNumber": 291,
+                "lineNumber": 311,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -612,7 +612,7 @@
                   "Record<string, unknown> | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-synthtrace/src/scenarios/agent_builder/tools/get_correlated_logs/correlated_logs.ts",
-                "lineNumber": 293,
+                "lineNumber": 313,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false

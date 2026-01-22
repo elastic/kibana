@@ -12,7 +12,6 @@ import { FLEET_AGENT_LIST_PAGE } from '../../screens/fleet';
 import { createAgentDoc } from '../../tasks/agents';
 import { setupFleetServer } from '../../tasks/fleet_server';
 import { deleteAgentDocs, cleanupAgentPolicies } from '../../tasks/cleanup';
-import { setUISettings } from '../../tasks/ui_settings';
 
 import { request } from '../../tasks/common';
 import { login } from '../../tasks/login';
@@ -98,7 +97,6 @@ describe('View agents list', () => {
     deleteAgentDocs(true);
     cleanupAgentPolicies();
     setupFleetServer();
-    setUISettings('hideAnnouncements', true);
 
     cy.getKibanaVersion().then((version) => {
       docs = createAgentDocs(version);
