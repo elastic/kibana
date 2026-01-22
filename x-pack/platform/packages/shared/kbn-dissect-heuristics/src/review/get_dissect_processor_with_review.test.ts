@@ -449,4 +449,25 @@ describe('getDissectProcessorWithReview', () => {
       '%{+attributes.custom.timestamp} %{+attributes.custom.timestamp} %{+attributes.custom.timestamp} %{resource.attributes.host.name} %{attributes.process.name} %{body.text}'
     );
   });
+
+  it('collapses trailing repeated body.text fields with mixed delimiters', () => {
+    const patternString =
+      '%{+attributes.custom.timestamp} %{+attributes.custom.timestamp}, %{severity_text->} %{attributes.log.logger->} %{+body.text}: %{+body.text}\\%{+body.text}_%{+body.text}_%{+body.text}_%{+body.text}_%{?}_%{+body.text}';
+    const ast = parsePattern(patternString);
+    const collapsed = collapseRepeats(ast);
+    const serialized = serializeAST(collapsed);
+    // Should collapse trailing timestamp fields AND trailing body.text fields
+    expect(serialized).toBe(
+      '%{attributes.custom.timestamp}, %{severity_text->} %{attributes.log.logger->} %{body.text}'
+    );
+  });
+
+  it('collapses repeated fields with skip fields in between', () => {
+    const patternString = '%{body.text} %{body.text} %{?} %{body.text}, %{other.field}';
+    const ast = parsePattern(patternString);
+    const collapsed = collapseRepeats(ast);
+    const serialized = serializeAST(collapsed);
+    // Should collapse the entire sequence: body.text, body.text, skip, body.text -> body.text
+    expect(serialized).toBe('%{body.text}, %{other.field}');
+  });
 });

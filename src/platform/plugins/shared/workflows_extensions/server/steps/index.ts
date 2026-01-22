@@ -10,6 +10,7 @@
 import type { CoreSetup } from '@kbn/core/server';
 import { aiClassifyStepDefinition } from './ai/ai_classify_step/step';
 import { aiPromptStepDefinition } from './ai/ai_prompt_step';
+import { aiSummarizeStepDefinition } from './ai/ai_summarize_step/step';
 import {
   dataDedupeStepDefinition,
   dataMapStepDefinition,
@@ -29,4 +30,5 @@ export const registerInternalStepDefinitions = (
   serverStepRegistry.register(dataRegexReplaceStepDefinition);
   serverStepRegistry.register(aiClassifyStepDefinition(core));
   serverStepRegistry.register(aiPromptStepDefinition(core));
+  serverStepRegistry.register(aiSummarizeStepDefinition(core));
 };
