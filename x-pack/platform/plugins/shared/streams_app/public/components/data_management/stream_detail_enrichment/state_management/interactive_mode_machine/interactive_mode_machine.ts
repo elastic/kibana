@@ -34,6 +34,7 @@ import {
   findInsertIndex,
   insertAtIndex,
   reorderSteps,
+  reorderStepsByDragDrop,
 } from '../stream_enrichment_state_machine/utils';
 import { collectDescendantStepIds } from '../utils';
 import { selectWhetherAnyProcessorBeforePersisted } from './selectors';
@@ -191,6 +192,59 @@ export const interactiveModeMachine = setup({
         stepRefs: [...reorderSteps(context.stepRefs, params.stepId, params.direction)],
       };
     }),
+    reorderStepsByDragDrop: enqueueActions(
+      (
+        { context, enqueue },
+        params: {
+          sourceStepId: string;
+          targetStepId: string;
+          operation: 'before' | 'after' | 'inside';
+        }
+      ) => {
+        const steps = context.stepRefs.map((ref) => ref.getSnapshot().context.step);
+        const targetStep = steps.find((s) => s.customIdentifier === params.targetStepId);
+
+        if (!targetStep) {
+          return;
+        }
+
+        // Determine the new parentId for the source step
+        let newParentId: string | null;
+
+        // Nested inside a where block
+        if (params.operation === 'inside') {
+          newParentId = params.targetStepId;
+        } else {
+          // Use sibling's parentId
+          newParentId = targetStep.parentId ?? null;
+        }
+
+        // Reorder the steps
+        const reorderedStepRefs = reorderStepsByDragDrop(
+          context.stepRefs,
+          params.sourceStepId,
+          params.targetStepId,
+          params.operation
+        );
+
+        // Update context with reordered steps
+        enqueue.assign({
+          stepRefs: [...reorderedStepRefs],
+        });
+
+        // Update the source step actor's parentId
+        const sourceStepRef = reorderedStepRefs.find((ref) => ref.id === params.sourceStepId);
+
+        if (sourceStepRef) {
+          const currentParentId = sourceStepRef.getSnapshot().context.step.parentId;
+
+          if (currentParentId !== newParentId) {
+            // Send event to child actor to update its parentId
+            enqueue.sendTo(sourceStepRef, { type: 'step.changeParent', parentId: newParentId });
+          }
+        }
+      }
+    ),
     reassignSteps: assign(({ context }) => ({
       stepRefs: [...context.stepRefs],
     })),
@@ -462,6 +516,13 @@ export const interactiveModeMachine = setup({
                 { type: 'sendStepsToSimulator', params: ({ event }) => event },
               ],
             },
+            'step.parentChanged': {
+              actions: [
+                { type: 'reassignSteps' },
+                { type: 'syncToDSL' },
+                { type: 'sendStepsToSimulator', params: ({ event }) => event },
+              ],
+            },
             'step.edit': {
               guard: 'hasSimulatePrivileges',
               target: 'editing',
@@ -471,6 +532,14 @@ export const interactiveModeMachine = setup({
               actions: [{ type: 'reorderSteps', params: ({ event }) => event }],
               target: 'idle',
               reenter: true,
+            },
+            'step.reorderByDragDrop': {
+              guard: 'hasSimulatePrivileges',
+              actions: [{ type: 'reorderStepsByDragDrop', params: ({ event }) => event }],
+              target: 'idle',
+              reenter: true,
+              // Re-enter to trigger syncToDSL for sibling reordering.
+              // If parent changes, child will also send a step.parentChanged event (additional sync but safe).
             },
             'step.delete': {
               target: 'idle',
