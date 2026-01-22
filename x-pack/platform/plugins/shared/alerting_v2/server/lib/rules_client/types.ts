@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import type { createRuleDataSchema, updateRuleDataSchema } from './schemas';
-
-export type CreateRuleData = TypeOf<typeof createRuleDataSchema>;
+import type { CreateRuleData, UpdateRuleData } from '@kbn/alerting-rule-schemas';
 
 export interface CreateRuleParams {
   data: CreateRuleData;
@@ -23,7 +20,7 @@ export interface RuleResponse extends CreateRuleData {
   updatedAt: string;
 }
 
-export type UpdateRuleData = TypeOf<typeof updateRuleDataSchema>;
+export type { CreateRuleData, UpdateRuleData };
 
 export interface FindRulesParams {
   page?: number;

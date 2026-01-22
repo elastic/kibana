@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { createRuleDataSchema } from './create_rule_data_schema';
-export { updateRuleDataSchema } from './update_rule_data_schema';
+export * from './src';

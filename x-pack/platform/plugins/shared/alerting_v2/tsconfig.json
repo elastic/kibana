@@ -35,7 +35,9 @@
     "@kbn/logging-mocks",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/es-errors",
+    "@kbn/alerting-rule-schemas",
     "@kbn/zod",
+    "@kbn/zod-helpers",
     "@kbn/core-di-internal"
   ],
   "exclude": [

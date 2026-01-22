@@ -12,6 +12,7 @@ import { inject, injectable } from 'inversify';
 import { Request, Response } from '@kbn/core-di-server';
 import type { TypeOf } from '@kbn/config-schema';
 import type { RouteSecurity } from '@kbn/core-http-server';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
 import { updateRuleDataSchema, type UpdateRuleData } from '../lib/rules_client';
 import { RulesClient } from '../lib/rules_client/rules_client';
@@ -34,7 +35,7 @@ export class UpdateRuleRoute {
   static options = { access: 'internal' } as const;
   static validate = {
     request: {
-      body: updateRuleDataSchema,
+      body: buildRouteValidationWithZod(updateRuleDataSchema),
       params: updateRuleParamsSchema,
     },
   } as const;

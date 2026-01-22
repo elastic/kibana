@@ -200,6 +200,7 @@
     "@kbn/alerting-example-plugin": "link:x-pack/examples/alerting_example",
     "@kbn/alerting-fixture-plugin": "link:x-pack/platform/test/functional_with_es_ssl/plugins/alerts",
     "@kbn/alerting-plugin": "link:x-pack/platform/plugins/shared/alerting",
+    "@kbn/alerting-rule-schemas": "link:x-pack/platform/packages/shared/kbn-alerting-rule-schemas",
     "@kbn/alerting-rule-utils": "link:x-pack/platform/packages/shared/alerting-rule-utils",
     "@kbn/alerting-state-types": "link:x-pack/platform/packages/private/kbn-alerting-state-types",
     "@kbn/alerting-types": "link:src/platform/packages/shared/kbn-alerting-types",

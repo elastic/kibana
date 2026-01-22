@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+export { createRuleDataSchema, updateRuleDataSchema } from '@kbn/alerting-rule-schemas';
 export { RulesClient } from './rules_client';
-export { createRuleDataSchema, updateRuleDataSchema } from './schemas';
 export type {
   CreateRuleData,
   CreateRuleParams,
