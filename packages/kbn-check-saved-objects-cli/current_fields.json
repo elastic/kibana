@@ -395,11 +395,11 @@
     "type"
   ],
   "entity-store-api-key": [
+    "apiKey",
     "id",
     "name",
-    "type",
     "namespace",
-    "apiKey"
+    "type"
   ],
   "epm-packages": [
     "additional_spaces_installed_kibana",

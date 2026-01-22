@@ -1308,6 +1308,18 @@
     "properties": {
       "apiKey": {
         "type": "binary"
+      },
+      "id": {
+        "type": "keyword"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "namespace": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
       }
     }
   },
