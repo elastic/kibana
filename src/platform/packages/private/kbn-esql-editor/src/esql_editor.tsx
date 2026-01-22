@@ -72,6 +72,7 @@ import { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
 import {
   clearCacheWhenOld,
   filterDataErrors,
+  filterDuplicatedWarnings,
   filterOutWarningsOverlappingWithErrors,
   getEditorOverwrites,
   onKeyDownResizeHandler,
@@ -838,7 +839,8 @@ const ESQLEditorInternal = function ESQLEditor({
       trackValidationLatencyEnd(active);
 
       if (active) {
-        setEditorMessages({ errors: allErrors, warnings: allWarnings });
+        const uniqueWarnings = filterDuplicatedWarnings(allWarnings);
+        setEditorMessages({ errors: allErrors, warnings: uniqueWarnings });
         monaco.editor.setModelMarkers(
           editorModel.current,
           'Unified search',

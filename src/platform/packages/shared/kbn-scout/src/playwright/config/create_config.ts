@@ -54,13 +54,13 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
    */
   scoutProjects = options.runGlobalSetup
     ? scoutDefaultProjects.flatMap((project) => [
-        {
-          name: `setup-${project?.name}`,
-          use: project?.use ? { ...project.use } : {},
-          testMatch: /global.setup\.ts/,
-        },
-        { ...project, dependencies: [`setup-${project?.name}`] },
-      ])
+      {
+        name: `setup-${project?.name}`,
+        use: project?.use ? { ...project.use } : {},
+        testMatch: /global.setup\.ts/,
+      },
+      { ...project, dependencies: [`setup-${project?.name}`] },
+    ])
     : scoutDefaultProjects;
 
   return defineConfig<ScoutTestOptions>({
@@ -97,7 +97,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
       screenshot: 'only-on-failure',
       // video: 'retain-on-failure',
       // storageState: './output/reports/state.json', // Store session state (like cookies)
-      timezoneId: 'UTC',
+      timezoneId: 'GMT',
     },
 
     // Timeout for each test, includes test, hooks and fixtures
