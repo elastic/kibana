@@ -27,15 +27,15 @@ const getLogChangePointsSchema = z.object({
   kqlFilter: z
     .string()
     .describe(
-      'A KQL query to filter the log documents. Examples: level:error, service.name:"my-service"'
+      "A KQL query to filter the log documents. Examples: 'log.level: error', 'service.name: \"my-service\"'."
     )
     .optional(),
   messageField: z
     .string()
+    .default('message')
     .describe(
-      'The unstructured text field to run the categorize_text aggregation on. This groups similar logs into patterns. Defaults to message'
-    )
-    .optional(),
+      'The unstructured text field to run the categorize_text aggregation on. This groups similar logs into patterns.'
+    ),
 });
 
 export function createGetLogChangePointsTool({
@@ -65,7 +65,7 @@ Uses "categorize_text" aggregation to group similar unstructured messages into p
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async ({ start, end, index, kqlFilter, messageField = 'message' }, { esClient }) => {
+    handler: async ({ start, end, index, kqlFilter, messageField }, { esClient }) => {
       try {
         const logIndexPatterns = await getLogsIndices({ core, logger });
 

@@ -7,16 +7,16 @@
 
 import expect from '@kbn/expect';
 import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
+import {
+  generateLogChangePointsData,
+  LOG_CHANGE_POINTS_ANALYSIS_WINDOW,
+  LOG_CHANGE_POINTS_DATA_STREAM,
+} from '@kbn/synthtrace';
 import type { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools/get_log_change_points/tool';
 import type { ChangePoint } from '@kbn/observability-agent-builder-plugin/server/utils/get_change_points';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
-import {
-  LOG_CHANGE_POINTS_ANALYSIS_WINDOW,
-  LOG_CHANGE_POINTS_DATA_STREAM,
-  createLogChangePointsData,
-} from '../utils/synthtrace_scenarios/create_log_change_points_data';
 
 interface ToolResult {
   type: ToolResultType.other;
@@ -37,7 +37,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const supertest = await roleScopedSupertest.getSupertestWithRoleScope('admin');
       agentBuilderApiClient = createAgentBuilderApiClient(supertest);
       logsSynthtraceEsClient = synthtrace.createLogsSynthtraceEsClient();
-      await createLogChangePointsData({ logsSynthtraceEsClient });
+      const { client, generator } = generateLogChangePointsData({
+        logsEsClient: logsSynthtraceEsClient,
+      });
+      await client.index(generator);
     });
 
     after(async () => {
