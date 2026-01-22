@@ -52,13 +52,23 @@ spaceTest.describe('Lens by-value panels (dashboard)', { tag: tags.ESS_ONLY }, (
     await pageObjects.dashboard.waitForRenderComplete();
   };
 
-  spaceTest('adds a lens panel by value', async ({ pageObjects }) => {
+  spaceTest('by-value panel retains count after edit', async ({ pageObjects }) => {
     await spaceTest.step('add by value panel', async () => {
       await addByValueLensPanel(pageObjects);
+      expect(await pageObjects.dashboard.getPanelCount()).toBe(1);
     });
 
-    await spaceTest.step('verify panel count', async () => {
-      expect(await pageObjects.dashboard.getPanelCount()).toBe(1);
+    const originalPanelCount = await pageObjects.dashboard.getPanelCount();
+
+    await spaceTest.step('edit panel in Lens and switch to treemap', async () => {
+      await pageObjects.dashboard.navigateToLensEditorFromPanel(`${LENS_BASIC_TITLE} (copy)`);
+      await pageObjects.lens.switchToVisualization('treemap');
+      await pageObjects.lens.saveAndReturn();
+    });
+
+    await spaceTest.step('verify panel count unchanged', async () => {
+      await pageObjects.dashboard.waitForRenderComplete();
+      expect(await pageObjects.dashboard.getPanelCount()).toBe(originalPanelCount);
     });
   });
 
@@ -81,25 +91,6 @@ spaceTest.describe('Lens by-value panels (dashboard)', { tag: tags.ESS_ONLY }, (
       });
     }
   );
-
-  spaceTest('saving a by-value panel retains panel count', async ({ pageObjects }) => {
-    await spaceTest.step('add by value panel', async () => {
-      await addByValueLensPanel(pageObjects);
-    });
-
-    const originalPanelCount = await pageObjects.dashboard.getPanelCount();
-
-    await spaceTest.step('edit panel in Lens and switch to treemap', async () => {
-      await pageObjects.dashboard.navigateToLensEditorFromPanel(`${LENS_BASIC_TITLE} (copy)`);
-      await pageObjects.lens.switchToVisualization('treemap');
-      await pageObjects.lens.saveAndReturn();
-    });
-
-    await spaceTest.step('verify panel count unchanged', async () => {
-      await pageObjects.dashboard.waitForRenderComplete();
-      expect(await pageObjects.dashboard.getPanelCount()).toBe(originalPanelCount);
-    });
-  });
 
   spaceTest('saving to library keeps panel count', async ({ pageObjects }) => {
     const newTitle = 'look out library, here I come!';
