@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/response-ops'
   metadata:
-    sourceRoot: src/platform/packages/shared/response-ops/alerts-apis
+    sourceRoot: x-pack/platform/packages/shared/response-ops/alerts-apis
 dependsOn:
   - '@kbn/core-http-browser'
   - '@kbn/i18n'

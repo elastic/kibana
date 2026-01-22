@@ -25,7 +25,7 @@ import { fetchAlertsFields } from '@kbn/alerts-ui-shared/src/common/apis/fetch_a
 import { searchAlerts } from '@kbn/alerts-ui-shared/src/common/apis/search_alerts/search_alerts';
 import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { getMutedAlertsInstancesByRule } from '@kbn/response-ops-alerts-apis/apis/get_muted_alerts_instances_by_rule';
+import { getMutedAlertsInstancesByRule } from 'x-pack/platform/packages/shared/response-ops/alerts-apis/apis/get_muted_alerts_instances_by_rule';
 import { applicationServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
 import { afterAll } from '@elastic/synthetics';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';

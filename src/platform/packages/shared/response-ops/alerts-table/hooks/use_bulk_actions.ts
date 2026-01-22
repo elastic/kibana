@@ -15,8 +15,8 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import { ALERT_RULE_UUID, ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
-import { useBulkMuteAlerts } from '@kbn/response-ops-alerts-apis/hooks/use_bulk_mute_alerts';
-import { useBulkUnmuteAlerts } from '@kbn/response-ops-alerts-apis/hooks/use_bulk_unmute_alerts';
+import { useBulkMuteAlerts } from 'x-pack/platform/packages/shared/response-ops/alerts-apis/hooks/use_bulk_mute_alerts';
+import { useBulkUnmuteAlerts } from 'x-pack/platform/packages/shared/response-ops/alerts-apis/hooks/use_bulk_unmute_alerts';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
 import type {
   BulkActionsConfig,

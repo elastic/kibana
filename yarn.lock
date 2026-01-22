@@ -8086,7 +8086,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/response-ops-alerts-apis@link:src/platform/packages/shared/response-ops/alerts-apis":
+"@kbn/response-ops-alerts-apis@link:x-pack/platform/packages/shared/response-ops/alerts-apis":
   version "0.0.0"
   uid ""
 

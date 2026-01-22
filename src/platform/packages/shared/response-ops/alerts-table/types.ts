@@ -48,7 +48,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { Alert } from '@kbn/alerting-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldBrowserOptions } from '@kbn/response-ops-alerts-fields-browser';
-import type { MutedAlerts } from '@kbn/response-ops-alerts-apis/types';
+import type { MutedAlerts } from 'x-pack/platform/packages/shared/response-ops/alerts-apis/types';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
