@@ -17,6 +17,7 @@ import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../types';
 import { getToolHandler as getLogCategories } from '../../tools/get_log_categories/handler';
+import { getEntityLinkingInstructions } from '../../agent/register_observability_agent';
 
 /**
  * These types are derived from the generated alerts-as-data schemas:
@@ -239,6 +240,8 @@ async function generateAlertSummary({
     3) Log categories: error messages and exception patterns
     4) Errors: exception patterns with downstream context
     5) Service summary: instance counts, versions, anomalies, and metadata
+
+    ${getEntityLinkingInstructions()}
   `);
 
   const alertDetails = `\`\`\`json\n${JSON.stringify(alertDoc, null, 2)}\n\`\`\``;

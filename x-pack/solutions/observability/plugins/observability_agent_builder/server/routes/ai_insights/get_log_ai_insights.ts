@@ -11,6 +11,7 @@ import { safeJsonStringify } from '@kbn/std';
 import dedent from 'dedent';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import { getLogDocumentById } from './get_log_document_by_id';
+import { getEntityLinkingInstructions } from '../../agent/register_observability_agent';
 
 export interface GetLogAiInsightsParams {
   index: string;
@@ -33,7 +34,10 @@ export async function getLogAiInsights({
 }: GetLogAiInsightsParams): Promise<{ summary: string; context: string }> {
   const systemPrompt = dedent(`
     You are assisting an SRE who is viewing a log entry in the Kibana Logs UI.
-    Using the provided data produce a concise, action-oriented response.`);
+    Using the provided data produce a concise, action-oriented response.
+
+    ${getEntityLinkingInstructions()}
+  `);
 
   const logEntry = await getLogDocumentById({
     esClient: esClient.asCurrentUser,

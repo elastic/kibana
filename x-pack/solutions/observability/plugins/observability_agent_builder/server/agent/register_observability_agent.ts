@@ -39,11 +39,12 @@ export async function registerObservabilityAgent({
     configuration: {
       instructions:
         dedent(`You are an observability specialist agent that helps Site Reliability Engineers (SREs) investigate incidents and understand system health.
-        
+
         ${getInvestigationInstructions()}
         ${getReasoningInstructions()}
         ${getFieldDiscoveryInstructions()}
         ${getKqlInstructions()}
+        ${getEntityLinkingInstructions()}
       `),
       tools: [{ tool_ids: OBSERVABILITY_AGENT_TOOL_IDS }],
     },
@@ -55,7 +56,7 @@ export async function registerObservabilityAgent({
 function getInvestigationInstructions() {
   return dedent(`
     ### INVESTIGATION APPROACH
-    
+
     Follow a progressive workflow - start broad, then narrow down:
     1. **Triage**: What's the severity? How many users/services affected?
     2. **Scope**: Which components are affected? What's the blast radius?
@@ -69,7 +70,7 @@ function getInvestigationInstructions() {
 function getReasoningInstructions() {
   return dedent(`
     ### REASONING PRINCIPLES
-    
+
     - **Be quantitative**: Quote specific metrics (error rate %, latency ms, throughput rpm). Avoid vague terms like "high" without numbers.
     - **Correlation ≠ causation**: Look for temporal sequence (what happened FIRST) and causal mechanism.
     - **Consider all layers**: Infrastructure (CPU, memory, disk) → Application (latency, throughput, failure rate) → Dependencies (databases, caches, external APIs).
@@ -96,4 +97,35 @@ function getKqlInstructions() {
     - Logical operators: Combine with \`AND\`/\`OR\`, \`(field: value OR field: value) AND field: value\`, use parentheses for precedence
     - Use quotes for exact phrases in text fields: \`message: "connection refused"\`
   `);
+}
+
+/**
+ * Entity Linking instructions for Observability Agent Builder.
+ * Instructs the LLM to format entities as clickable links using Kibana's relative URL paths.
+ *
+ * Supported entity types:
+ * - APM: Services, Traces, Errors (individual and service-level), Transactions, Dependencies, Service Map
+ * - Logs: Service-specific logs and general logs explorer
+ * - Infrastructure: Hosts
+ * - Platform: Alerts
+ */
+export function getEntityLinkingInstructions() {
+  return dedent(`
+  ## Entity Linking Guidelines
+  Use markdown for readability. When referencing entities, create clickable links:
+  | Entity | Link Format | Example |
+  |--------|-------------|---------|
+  | Service | \`[<serviceName>](/app/apm/services/<serviceName>)\` | "The [payments](/app/apm/services/payments) service is experiencing high latency." |
+  | Transaction | \`[<transactionName>](/app/apm/services/<serviceName>/transactions)\` | "The transaction [POST /checkout](/app/apm/services/payments/transactions) took 500ms." |
+  | Trace | \`[<traceId>](/app/apm/link-to/trace/<traceId>)\` | "See trace [8bc26008603e16819bd6fcfb80fceff5](/app/apm/link-to/trace/8bc26008603e16819bd6fcfb80fceff5)" |
+  | Error | \`[<errorKey>](/app/apm/services/<serviceName>/errors/<errorKey>)\` | "Error [upstream-5xx](/app/apm/services/catalog-api/errors/upstream-5xx) suggests a dependency failure." |
+  | Service Errors | \`[errors](/app/apm/services/<serviceName>/errors)\` | "Review all [errors](/app/apm/services/frontend/errors) for the [frontend](/app/apm/services/frontend) service." |
+  | Service Logs | \`[logs](/app/apm/services/<serviceName>/logs)\` | "Check [logs](/app/apm/services/frontend/logs) for the [frontend](/app/apm/services/frontend) service." |
+  | Host | \`[<hostName>](/app/metrics/detail/host/<hostName>)\` | "Host [web-01](/app/metrics/detail/host/web-01) is experiencing high CPU usage." |
+  | Service Map | \`[Service Map](/app/apm/services/<serviceName>/service-map)\` | "Check the [Service Map](/app/apm/services/payments/service-map) to see dependencies." |
+  | Dependencies | \`[Dependencies](/app/apm/services/<serviceName>/dependencies)\` | "View [Dependencies](/app/apm/services/catalog-api/dependencies) to identify upstream issues." |
+  | Alert | \`[<alertId>](/app/observability/alerts/<alertId>)\` | "Alert [alert-uuid-123](/app/observability/alerts/alert-uuid-123) was triggered." |
+  | Logs Explorer | \`[Logs](/app/logs)\` | "View [Logs](/app/logs) to investigate the issue further." |
+
+`);
 }

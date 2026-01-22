@@ -16,6 +16,7 @@ import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../../types';
 import { fetchApmErrorContext } from './fetch_apm_error_context';
+import { getEntityLinkingInstructions } from '../../../agent/register_observability_agent';
 
 const ERROR_AI_INSIGHT_SYSTEM_PROMPT = dedent(`
   You are an expert SRE Assistant within Elastic Observability. Your job is to analyze an APM error using ONLY the provided context (APM trace items, related errors, downstream dependencies, and log categories).
@@ -42,6 +43,8 @@ const ERROR_AI_INSIGHT_SYSTEM_PROMPT = dedent(`
   - <TraceErrors>: Related errors within the trace (type, message, culprit, spanId, timestampUs)
   - <TraceServices>: Service aggregates for the trace (serviceName, count, errorCount)
   - <TraceLogCategories>: Categorized log patterns tied to the trace (errorCategory, docCount, sampleMessage)
+
+  ${getEntityLinkingInstructions()}
 `);
 
 const buildUserPrompt = (errorContext: string) => {
