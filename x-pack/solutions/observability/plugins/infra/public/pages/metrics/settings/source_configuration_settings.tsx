@@ -88,10 +88,7 @@ export const SourceConfigurationSettings = ({
     formStateChanges,
     getUnsavedChanges,
   } = useSourceConfigurationFormState(source?.configuration);
-  const infraUiSettings = useEditableSettings([
-    enableInfrastructureProfilingIntegration,
-    enableInfrastructureAssetCustomDashboards,
-  ]);
+  const infraUiSettings = useEditableSettings([enableInfrastructureAssetCustomDashboards]);
 
   const resetAllUnsavedChanges = useCallback(() => {
     resetForm();

@@ -72,14 +72,6 @@ export function FeaturesConfigurationPanel({
           onFieldChange={handleFieldChange}
           unsavedChange={unsavedChanges[enableInfrastructureAssetCustomDashboards]}
         />
-        {featureFlags.profilingEnabled && (
-          <FieldRow
-            field={fields[enableInfrastructureProfilingIntegration]}
-            isSavingEnabled={true}
-            onFieldChange={handleFieldChange}
-            unsavedChange={unsavedChanges[enableInfrastructureProfilingIntegration]}
-          />
-        )}
       </FieldRowProvider>
     </EuiForm>
   );
