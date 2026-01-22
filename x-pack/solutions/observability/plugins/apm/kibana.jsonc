@@ -27,7 +27,6 @@
       "observabilityShared",
       "exploratoryView",
       "ruleRegistry",
-      "slo",
       "triggersActionsUi",
       "share",
       "unifiedSearch",
@@ -63,7 +62,8 @@
       "observabilityAIAssistant",
       "observabilityAgentBuilder",
       "share",
-      "agentBuilder"
+      "agentBuilder",
+      "slo",
     ],
     "requiredBundles": [
       "fleet",
