@@ -37,7 +37,7 @@ interface UseAppMenuDataResult {
   shouldCollapseAppMenu: boolean;
   onResize: EuiResizeObserverProps['onResize'];
   getAdditionalTabMenuItems: UnifiedTabsProps['getAdditionalTabMenuItems'];
-  topNavMenuItems: AppMenuConfig;
+  topNavMenuItems: AppMenuConfig | undefined;
 }
 
 export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAppMenuDataResult => {
@@ -106,6 +106,6 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
     shouldCollapseAppMenu,
     onResize,
     getAdditionalTabMenuItems,
-    topNavMenuItems: topNavMenuItems as AppMenuConfig,
+    topNavMenuItems,
   };
 };

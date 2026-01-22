@@ -20,7 +20,13 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { AppMenuRunActionParams } from '@kbn/core-chrome-app-menu-components';
+import type {
+  AppMenuItemType,
+  AppMenuPopoverItem,
+  AppMenuPrimaryActionItem,
+  AppMenuRunActionParams,
+  AppMenuSecondaryActionItem,
+} from '@kbn/core-chrome-app-menu-components';
 import type {
   DiscoverAppMenuItemType,
   DiscoverAppMenuPopoverItem,
@@ -112,47 +118,67 @@ export async function runAppMenuAction({
   ReactDOM.render(element, container);
 }
 
-export const enhanceAppMenuItemWithRunAction = ({
+/**
+ * Maps Discover-specific menu item types to their corresponding base AppMenu types.
+ */
+type EnhancedAppMenuItem<T> = T extends DiscoverAppMenuItemType
+  ? AppMenuItemType
+  : T extends DiscoverAppMenuPrimaryActionItem
+  ? AppMenuPrimaryActionItem
+  : T extends DiscoverAppMenuSecondaryActionItem
+  ? AppMenuSecondaryActionItem
+  : T extends DiscoverAppMenuPopoverItem
+  ? AppMenuPopoverItem
+  : never;
+
+type DiscoverAppMenuItem =
+  | DiscoverAppMenuItemType
+  | DiscoverAppMenuPrimaryActionItem
+  | DiscoverAppMenuSecondaryActionItem
+  | DiscoverAppMenuPopoverItem;
+
+/**
+ * Transforms Discover-specific menu items into base AppMenu types by replacing
+ * the run action with one that wraps the Discover-specific behavior.
+ * This allows the items to be used with the core AppMenu component.
+ */
+export function enhanceAppMenuItemWithRunAction<T extends DiscoverAppMenuItem>({
   appMenuItem,
   services,
   parentTestId,
 }: {
-  appMenuItem:
-    | DiscoverAppMenuItemType
-    | DiscoverAppMenuPrimaryActionItem
-    | DiscoverAppMenuSecondaryActionItem;
+  appMenuItem: T;
   services: DiscoverServices;
   parentTestId?: string;
-}):
-  | DiscoverAppMenuItemType
-  | DiscoverAppMenuPrimaryActionItem
-  | DiscoverAppMenuSecondaryActionItem => {
-  const itemWithItems = appMenuItem as DiscoverAppMenuPopoverItem;
+}): EnhancedAppMenuItem<T> {
+  const enhancedRun = appMenuItem.run
+    ? (params?: AppMenuRunActionParams) => {
+        if (params) {
+          runAppMenuAction({
+            appMenuItem,
+            anchorElement: params.triggerElement,
+            services,
+            parentTestId,
+          });
+        }
+      }
+    : undefined;
+
+  const enhancedItems =
+    'items' in appMenuItem && Array.isArray(appMenuItem.items)
+      ? appMenuItem.items.map(
+          (nestedItem): AppMenuPopoverItem =>
+            enhanceAppMenuItemWithRunAction({
+              appMenuItem: nestedItem,
+              services,
+              parentTestId: appMenuItem.testId || 'app-menu-overflow-button',
+            })
+        )
+      : undefined;
 
   return {
     ...appMenuItem,
-    items: itemWithItems.items?.map(
-      (nestedItem) =>
-        enhanceAppMenuItemWithRunAction({
-          appMenuItem: nestedItem as
-            | DiscoverAppMenuItemType
-            | DiscoverAppMenuPrimaryActionItem
-            | DiscoverAppMenuSecondaryActionItem,
-          services,
-          parentTestId: appMenuItem.testId || 'app-menu-overflow-button',
-        }) as DiscoverAppMenuPopoverItem
-    ),
-    run: appMenuItem.run
-      ? (params?: AppMenuRunActionParams) => {
-          if (params) {
-            runAppMenuAction({
-              appMenuItem,
-              anchorElement: params.triggerElement,
-              services,
-              parentTestId,
-            });
-          }
-        }
-      : undefined,
-  };
-};
+    items: enhancedItems,
+    run: enhancedRun,
+  } as unknown as EnhancedAppMenuItem<T>;
+}

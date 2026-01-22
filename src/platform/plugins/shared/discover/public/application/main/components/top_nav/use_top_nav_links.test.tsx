@@ -11,7 +11,6 @@ import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import type { DiscoverAppMenuItemType } from '@kbn/discover-utils';
 import { BehaviorSubject } from 'rxjs';
 import { useTopNavLinks } from './use_top_nav_links';
 import type { DiscoverServices } from '../../../../build_services';
@@ -187,8 +186,8 @@ describe('useTopNavLinks', () => {
       expect(exportItem).toBeDefined();
       expect(exportItem?.label).toBe('Export');
 
-      expect((exportItem as DiscoverAppMenuItemType)?.items).toBeDefined();
-      expect((exportItem as DiscoverAppMenuItemType)?.items?.length).toBeGreaterThan(0);
+      expect(exportItem?.items).toBeDefined();
+      expect(exportItem?.items?.length).toBeGreaterThan(0);
 
       const shareItem = appMenuConfig.items?.find((item) => item.id === 'share');
       expect(shareItem).toBeDefined();

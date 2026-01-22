@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { AppMenu } from '@kbn/core-chrome-app-menu';
 import { SingleTabView, type SingleTabViewProps } from '.';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -20,9 +19,7 @@ export const SingleTabViewWithAppMenu = (props: SingleTabViewProps) => {
 
   return (
     <>
-      {topNavMenuItems && (
-        <AppMenu config={topNavMenuItems as AppMenuConfig} setAppMenu={chrome.setAppMenu} />
-      )}
+      {topNavMenuItems && <AppMenu config={topNavMenuItems} setAppMenu={chrome.setAppMenu} />}
       <SingleTabView {...props} />
     </>
   );

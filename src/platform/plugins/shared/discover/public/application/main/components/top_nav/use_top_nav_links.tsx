@@ -12,12 +12,8 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ENABLE_ESQL, getInitialESQLQuery } from '@kbn/esql-utils';
-import type {
-  DiscoverAppMenuItemType,
-  DiscoverAppMenuConfig,
-  DiscoverAppMenuPrimaryActionItem,
-  DiscoverAppMenuSecondaryActionItem,
-} from '@kbn/discover-utils';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { DiscoverAppMenuItemType } from '@kbn/discover-utils';
 import { AppMenuRegistry, dismissFlyouts, DiscoverFlyouts } from '@kbn/discover-utils';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import type { RuleTypeWithDescription } from '@kbn/alerts-ui-shared';
@@ -75,7 +71,7 @@ export const useTopNavLinks = ({
   topNavCustomization: TopNavCustomization | undefined;
   hasShareIntegration: boolean;
   persistedDiscoverSession: DiscoverSession | undefined;
-}): DiscoverAppMenuConfig => {
+}): AppMenuConfig => {
   const intl = useI18n();
   const dispatch = useInternalStateDispatch();
   const currentDataView = useCurrentDataView();
@@ -337,28 +333,27 @@ export const useTopNavLinks = ({
     transitionFromDataViewToESQL,
   ]);
 
-  return useMemo((): DiscoverAppMenuConfig => {
+  return useMemo((): AppMenuConfig => {
     const config = appMenuRegistry.getAppMenuConfig();
 
     return {
-      items: config.items?.map(
-        (item) =>
-          enhanceAppMenuItemWithRunAction({
-            appMenuItem: item,
-            services,
-          }) as DiscoverAppMenuItemType
+      items: config.items?.map((item) =>
+        enhanceAppMenuItemWithRunAction({
+          appMenuItem: item,
+          services,
+        })
       ),
       primaryActionItem: config.primaryActionItem
-        ? (enhanceAppMenuItemWithRunAction({
+        ? enhanceAppMenuItemWithRunAction({
             appMenuItem: config.primaryActionItem,
             services,
-          }) as DiscoverAppMenuPrimaryActionItem)
+          })
         : undefined,
       secondaryActionItem: config.secondaryActionItem
-        ? (enhanceAppMenuItemWithRunAction({
+        ? enhanceAppMenuItemWithRunAction({
             appMenuItem: config.secondaryActionItem,
             services,
-          }) as DiscoverAppMenuSecondaryActionItem)
+          })
         : undefined,
     };
   }, [appMenuRegistry, services]);

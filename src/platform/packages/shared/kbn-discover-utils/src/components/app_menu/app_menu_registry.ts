@@ -8,12 +8,7 @@
  */
 
 import type {
-  AppMenuConfig,
-  AppMenuItemType,
-  AppMenuPrimaryActionItem,
-  AppMenuSecondaryActionItem,
-} from '@kbn/core-chrome-app-menu-components';
-import type {
+  DiscoverAppMenuConfig,
   DiscoverAppMenuItemType,
   DiscoverAppMenuPopoverItem,
   DiscoverAppMenuPrimaryActionItem,
@@ -45,10 +40,12 @@ export class AppMenuRegistry {
    */
   public registerCustomPopoverItem(parentId: string, popoverItem: DiscoverAppMenuPopoverItem) {
     const parent = this.items.get(parentId);
-    this.items.set(parentId, {
-      ...parent,
-      items: [...(parent?.items || []), popoverItem],
-    } as DiscoverAppMenuItemType & { isCustom?: boolean });
+    if (parent) {
+      this.items.set(parentId, {
+        ...parent,
+        items: [...(parent.items || []), popoverItem],
+      });
+    }
   }
 
   /**
@@ -90,17 +87,19 @@ export class AppMenuRegistry {
    */
   public registerPopoverItem(parentId: string, popoverItem: DiscoverAppMenuPopoverItem) {
     const parent = this.items.get(parentId);
-    this.items.set(parentId, {
-      ...parent,
-      items: [...(parent?.items || []), popoverItem],
-    } as DiscoverAppMenuItemType);
+    if (parent) {
+      this.items.set(parentId, {
+        ...parent,
+        items: [...(parent.items || []), popoverItem],
+      });
+    }
   }
 
   /**
    * Get the complete AppMenuConfig.
    * Items with registered popover items will have their items property populated.
    */
-  public getAppMenuConfig(): AppMenuConfig {
+  public getAppMenuConfig(): DiscoverAppMenuConfig {
     const allItems = Array.from(this.items.values());
     const regularItems = allItems.filter((item) => !item.isCustom);
     const customItems = allItems
@@ -110,9 +109,9 @@ export class AppMenuRegistry {
     const cleanItems = [...regularItems, ...customItems].map(({ isCustom, ...item }) => item);
 
     return {
-      items: cleanItems as AppMenuItemType[],
-      primaryActionItem: this.primaryActionItem as AppMenuPrimaryActionItem | undefined,
-      secondaryActionItem: this.secondaryActionItem as AppMenuSecondaryActionItem | undefined,
+      items: cleanItems,
+      primaryActionItem: this.primaryActionItem,
+      secondaryActionItem: this.secondaryActionItem,
     };
   }
 }

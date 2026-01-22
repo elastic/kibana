@@ -176,7 +176,7 @@ describe('run app menu actions', () => {
       const enhanced = enhanceAppMenuItemWithRunAction({
         appMenuItem,
         services: discoverServiceMock,
-      }) as DiscoverAppMenuItemType;
+      });
 
       expect(enhanced.items).toBeDefined();
       expect(enhanced.items?.[0]).toBeDefined();
@@ -197,7 +197,7 @@ describe('run app menu actions', () => {
       const enhanced = enhanceAppMenuItemWithRunAction({
         appMenuItem,
         services: discoverServiceMock,
-      }) as DiscoverAppMenuItemType;
+      });
 
       expect(enhanced.id).toBe('action-1');
       expect(enhanced.order).toBe(5);

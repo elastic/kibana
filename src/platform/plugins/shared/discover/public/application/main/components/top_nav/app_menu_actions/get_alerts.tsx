@@ -38,7 +38,7 @@ const RuleFormFlyoutWithType = RuleFormFlyout<EsQueryAlertMetaData>;
 const CreateAlertFlyout: React.FC<{
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
-  onFinishAction?: () => void;
+  onFinishAction: () => void;
   stateContainer: DiscoverStateContainer;
 }> = ({ stateContainer, discoverParams, services, onFinishAction = () => {} }) => {
   const {
