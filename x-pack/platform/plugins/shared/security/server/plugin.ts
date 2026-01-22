@@ -294,7 +294,7 @@ export class SecurityPlugin
     this.fipsServiceSetup.validateLicenseForFips();
 
     let getTypeRegistrySync: (() => ISavedObjectTypeRegistry) | undefined;
-    core.getStartServices().then(([coreStart]) => {
+    void core.getStartServices().then(([coreStart]) => {
       getTypeRegistrySync = () => coreStart.savedObjects.getTypeRegistry();
     });
 
