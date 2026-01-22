@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const TRANSFORMATIONAL_COMMANDS = ['keep', 'stats'];
+export const TRANSFORMATIONAL_COMMANDS = ['keep', 'stats', 'promql'];
