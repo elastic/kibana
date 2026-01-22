@@ -95,7 +95,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             endpoint: `GET /internal/apm/service-map/dependency`,
             params: {
               query: {
-                dependencyName: 'postgres',
+                dependencies: 'postgres',
                 start: new Date(start).toISOString(),
                 end: new Date(end).toISOString(),
                 environment: 'ENVIRONMENT_ALL',

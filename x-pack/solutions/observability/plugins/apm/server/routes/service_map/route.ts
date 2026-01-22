@@ -15,8 +15,6 @@ import { notifyFeatureUsage } from '../../feature';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { getMlClient } from '../../lib/helpers/get_ml_client';
 import { getServiceMap } from './get_service_map';
-import type { ServiceMapEdgeInfoResponse } from './get_service_map_edge_info';
-import { getServiceMapEdgeInfo } from './get_service_map_edge_info';
 import type { ServiceMapServiceDependencyInfoResponse } from './get_service_map_dependency_node_info';
 import { getServiceMapDependencyNodeInfo } from './get_service_map_dependency_node_info';
 import type { ServiceMapServiceNodeInfoResponse } from './get_service_map_service_node_info';
@@ -152,7 +150,17 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
 const serviceMapDependencyNodeRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-map/dependency',
   params: t.type({
-    query: t.intersection([t.type({ dependencyName: t.string }), environmentRt, rangeRt, offsetRt]),
+    query: t.intersection([
+      t.type({
+        dependencies: t.union([t.string, t.array(t.string)]),
+      }),
+      t.partial({
+        sourceServiceName: t.string,
+      }),
+      environmentRt,
+      rangeRt,
+      offsetRt,
+    ]),
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServiceMapServiceDependencyInfoResponse> => {
@@ -168,63 +176,13 @@ const serviceMapDependencyNodeRoute = createApmServerRoute({
     const apmEventClient = await getApmEventClient(resources);
 
     const {
-      query: { dependencyName, environment, start, end, offset },
+      query: { dependencies, sourceServiceName, environment, start, end, offset },
     } = params;
 
     return getServiceMapDependencyNodeInfo({
       apmEventClient,
-      dependencyName,
-      start,
-      end,
-      environment,
-      offset,
-    });
-  },
-});
-
-const serviceMapEdgeRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/service-map/edge',
-  params: t.type({
-    query: t.intersection([
-      t.type({
-        sourceServiceName: t.string,
-        resources: t.union([t.string, t.array(t.string)]),
-      }),
-      environmentRt,
-      rangeRt,
-      offsetRt,
-    ]),
-  }),
-  security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<ServiceMapEdgeInfoResponse> => {
-    const { config, context, params } = resources;
-
-    if (!config.serviceMapEnabled) {
-      throw Boom.notFound();
-    }
-    const licensingContext = await context.licensing;
-    if (!isActivePlatinumLicense(licensingContext.license)) {
-      throw Boom.forbidden(invalidLicenseMessage);
-    }
-    const apmEventClient = await getApmEventClient(resources);
-
-    const {
-      query: {
-        sourceServiceName,
-        resources: destinationResources,
-        environment,
-        start,
-        end,
-        offset,
-      },
-    } = params;
-
-    return getServiceMapEdgeInfo({
-      apmEventClient,
       sourceServiceName,
-      resources: Array.isArray(destinationResources)
-        ? destinationResources
-        : [destinationResources],
+      dependencies: Array.isArray(dependencies) ? dependencies : [dependencies],
       start,
       end,
       environment,
@@ -237,5 +195,4 @@ export const serviceMapRouteRepository = {
   ...serviceMapRoute,
   ...serviceMapServiceNodeRoute,
   ...serviceMapDependencyNodeRoute,
-  ...serviceMapEdgeRoute,
 };

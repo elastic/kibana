@@ -16,7 +16,7 @@ import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { StatsList } from './stats_list';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 
-type EdgeReturn = APIReturnType<'GET /internal/apm/service-map/edge'>;
+type EdgeReturn = APIReturnType<'GET /internal/apm/service-map/dependency'>;
 
 const INITIAL_STATE: Partial<EdgeReturn> = {
   currentPeriod: undefined,
@@ -34,18 +34,17 @@ export function EdgeContents({ elementData, environment, start, end }: ContentsP
 
   const { offset, comparisonEnabled } = query;
 
-  // Extract source service name and resources from edge data
   const sourceServiceName = edgeData.sourceData[SERVICE_NAME] as string | undefined;
-  const resources = edgeData.resources;
+  const dependencies = edgeData.resources;
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
-      if (sourceServiceName && resources.length > 0) {
-        return callApmApi('GET /internal/apm/service-map/edge', {
+      if (sourceServiceName && dependencies.length > 0) {
+        return callApmApi('GET /internal/apm/service-map/dependency', {
           params: {
             query: {
               sourceServiceName,
-              resources,
+              dependencies,
               environment,
               start,
               end,
@@ -55,7 +54,7 @@ export function EdgeContents({ elementData, environment, start, end }: ContentsP
         });
       }
     },
-    [environment, sourceServiceName, resources, start, end, offset, comparisonEnabled]
+    [environment, sourceServiceName, dependencies, start, end, offset, comparisonEnabled]
   );
 
   const isLoading = status === FETCH_STATUS.LOADING;

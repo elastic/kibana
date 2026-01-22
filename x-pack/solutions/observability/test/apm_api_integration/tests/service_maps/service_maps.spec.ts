@@ -278,7 +278,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
           endpoint: `GET /internal/apm/service-map/dependency`,
           params: {
             query: {
-              dependencyName: 'postgresql',
+              dependencies: 'postgresql',
               start: metadata.start,
               end: metadata.end,
               environment: 'ENVIRONMENT_ALL',
@@ -323,7 +323,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
             endpoint: `GET /internal/apm/service-map/dependency`,
             params: {
               query: {
-                dependencyName: 'postgresql',
+                dependencies: 'postgresql',
                 start: metadata.start,
                 end: metadata.end,
                 environment: 'ENVIRONMENT_ALL',
