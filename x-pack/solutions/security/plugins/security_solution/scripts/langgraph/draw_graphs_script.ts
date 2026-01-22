@@ -10,7 +10,13 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { FakeLLM } from '@langchain/core/utils/testing';
 import fs from 'fs/promises';
 import path from 'path';
-import type { ElasticsearchClient, IScopedClusterClient, KibanaRequest } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  IScopedClusterClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { getRulesMigrationTools } from '../../server/lib/siem_migrations/rules/task/agent/tools';
@@ -25,6 +31,7 @@ import type { EsqlKnowledgeBase } from '../../server/lib/siem_migrations/common/
 import type { RuleMigrationTelemetryClient } from '../../server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client';
 import type { CreateLlmInstance } from '../../server/assistant/tools/esql/utils/common';
 import type { RuleMigrationsDataClient } from '../../server/lib/siem_migrations/rules/data/rule_migrations_data_client';
+import { getBuildAgent } from '../../server/lib/detection_engine/ai_assisted_rule_creation/agent/build_agent_graph';
 
 interface Drawable {
   drawMermaidPng: () => Promise<Blob>;
@@ -89,6 +96,20 @@ async function getGenerateEsqlGraph(logger: Logger): Promise<Drawable> {
   return graph.getGraphAsync({ xray: true });
 }
 
+async function getAiAssistedRuleCreationGraph(logger: Logger): Promise<Drawable> {
+  const graph = await getBuildAgent({
+    model: mockLlm,
+    esClient: {} as unknown as ElasticsearchClient,
+    connectorId: 'test-connector-id',
+    inference: {} as unknown as InferenceServerStart,
+    logger,
+    request: {} as unknown as KibanaRequest,
+    savedObjectsClient: {} as unknown as SavedObjectsClientContract,
+    rulesClient: {} as unknown as RulesClient,
+  });
+  return graph.getGraphAsync({ xray: true });
+}
+
 export const drawGraph = async ({
   getGraphAsync,
   outputFilename,
@@ -122,5 +143,9 @@ export const draw = async () => {
   await drawGraph({
     getGraphAsync: getSiemDashboardMigrationGraph,
     outputFilename: '../../docs/siem_migration/img/dashboard_migration_agent_graph.png',
+  });
+  await drawGraph({
+    getGraphAsync: getAiAssistedRuleCreationGraph,
+    outputFilename: '../../docs/ai_assisted_rule_creation/img/ai_assisted_rule_creation_graph.png',
   });
 };
