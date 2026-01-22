@@ -60,9 +60,7 @@ test.describe(
       ).toBeVisible();
 
       const parentFieldName = 'attributes.parent_field';
-      await page.getByTestId('streamsAppSchemaEditorAddFieldFlyoutFieldName').click();
-      await page.keyboard.type(parentFieldName);
-      await page.keyboard.press('Enter');
+      await pageObjects.streams.typeFieldName(parentFieldName);
       await pageObjects.streams.setFieldMappingType('keyword');
       await page.getByTestId('streamsAppSchemaEditorAddFieldButton').click();
       await pageObjects.streams.reviewStagedFieldMappingChanges();
@@ -102,9 +100,7 @@ test.describe(
 
       // Add an Otel field that should have type recommendation (IP type)
       const ecsFieldName = 'resource.attributes.host.ip';
-      await page.getByTestId('streamsAppSchemaEditorAddFieldFlyoutFieldName').click();
-      await page.keyboard.type(ecsFieldName);
-      await page.keyboard.press('Enter');
+      await pageObjects.streams.typeFieldName(ecsFieldName);
 
       // Wait for ECS/Otel recommendation to load - the /fields_metadata call provides type hints
       // Give extra time for the API response to be processed and the UI to update
@@ -148,9 +144,7 @@ test.describe(
 
       const ecsFieldName = 'attributes.process_id';
       const aliasFieldName = 'process_id';
-      await page.getByTestId('streamsAppSchemaEditorAddFieldFlyoutFieldName').click();
-      await page.keyboard.type(ecsFieldName);
-      await page.keyboard.press('Enter');
+      await pageObjects.streams.typeFieldName(ecsFieldName);
       await pageObjects.streams.setFieldMappingType('keyword');
 
       // Check if the add button is enabled (form should be valid)

@@ -161,7 +161,10 @@ const createIntegrationRoute = (
             description,
           };
 
-          await automaticImportService.createIntegration({ authenticatedUser, integrationParams });
+          await automaticImportService.createUpdateIntegration({
+            authenticatedUser,
+            integrationParams,
+          });
 
           if (dataStreams) {
             const dataStreamsParams: DataStreamParams[] = dataStreams.map((dataStream) => ({
@@ -189,7 +192,6 @@ const createIntegrationRoute = (
           };
           return response.ok({ body });
         } catch (err) {
-          await automaticImportService.deleteIntegration(integrationId);
           logger.error(`createIntegrationRoute: Caught error:`, err);
           const automaticImportResponse = buildAutomaticImportResponse(response);
           return automaticImportResponse.error({
