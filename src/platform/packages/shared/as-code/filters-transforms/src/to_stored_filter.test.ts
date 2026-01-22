@@ -275,7 +275,7 @@ describe('toStoredFilter', () => {
       expect(roundTripFilter.meta.disabled).toBe(originalFilter.meta.disabled);
       expect(roundTripFilter.meta.negate).toBe(originalFilter.meta.negate);
 
-      // Verify filter_type is preserved
+      // Verify meta.type is preserved
       expect(roundTripFilter.meta.type).toBe(originalFilter.meta.type);
 
       // Verify isMultiIndex is preserved
@@ -315,7 +315,6 @@ describe('toStoredFilter', () => {
         expect(asCodeFilter.dsl.query).toEqual(scriptedPhraseFilter.query);
       }
       expect(asCodeFilter.label).toBe('Scripted calculation equals 100');
-      expect(asCodeFilter.filter_type).toBe('phrase');
 
       // Convert back to StoredFilter
       const roundTrip = toStoredFilter(asCodeFilter) as StoredFilter;
@@ -360,7 +359,6 @@ describe('toStoredFilter', () => {
         expect(asCodeFilter.dsl.query).toEqual(scriptedRangeFilter.query);
       }
       expect(asCodeFilter.label).toBe('Scripted calculation between 0 and 100');
-      expect(asCodeFilter.filter_type).toBe('range');
 
       // Convert back to StoredFilter
       const roundTrip = toStoredFilter(asCodeFilter) as StoredFilter;
@@ -406,7 +404,6 @@ describe('toStoredFilter', () => {
       const asCodeFilter = fromStoredFilter(scriptedFilter) as AsCodeFilter;
 
       expect(isDSLFilter(asCodeFilter)).toBe(true);
-      expect(asCodeFilter.filter_type).toBe('phrase');
 
       const roundTrip = toStoredFilter(asCodeFilter) as StoredFilter;
 
@@ -452,7 +449,6 @@ describe('toStoredFilter', () => {
         expect(asCodeFilter.condition.field).toBe('@timestamp');
         expect(asCodeFilter.condition.operator).toBe('range');
       }
-      expect(asCodeFilter.filter_type).toBe('range');
       expect(asCodeFilter.key).toBe('@timestamp');
 
       const roundTrip = toStoredFilter(asCodeFilter) as StoredFilter;
@@ -496,7 +492,6 @@ describe('toStoredFilter', () => {
       if (isConditionFilter(asCodeFilter)) {
         expect(asCodeFilter.condition.field).toBe('event.created');
       }
-      expect(asCodeFilter.filter_type).toBe('range');
 
       // Convert back
       const roundTrip = toStoredFilter(asCodeFilter) as StoredFilter;
