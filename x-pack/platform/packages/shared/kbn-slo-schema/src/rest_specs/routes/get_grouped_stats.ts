@@ -6,15 +6,7 @@
  */
 import * as t from 'io-ts';
 
-const sloBaseParamsSchema = t.partial({
-  /**
-   * Number of buckets to return.
-   * If not provided, the query will use elasticsearch default value of 10.
-   */
-  size: t.number,
-});
-
-const apmSloParamsSchema = t.intersection([
+const apmBodyParamsSchema = t.intersection([
   t.type({
     /**
      * SLO type.
@@ -22,6 +14,11 @@ const apmSloParamsSchema = t.intersection([
     type: t.literal('apm'),
   }),
   t.partial({
+    /**
+     * Number of buckets to return.
+     * If not provided, the query will use elasticsearch default value of 10.
+     */
+    size: t.number,
     /**
      * List of service names to filter by.
      */
@@ -34,26 +31,19 @@ const apmSloParamsSchema = t.intersection([
 ]);
 
 const getSLOGroupedStatsParamsSchema = t.type({
-  body: t.intersection([sloBaseParamsSchema, apmSloParamsSchema]),
+  body: apmBodyParamsSchema,
 });
 
-const groupedStatsResultSchema = t.type({
-  entity: t.string,
-  summary: t.type({
-    violated: t.number,
-    degrading: t.number,
-    healthy: t.number,
-    noData: t.number,
-  }),
-});
+interface GroupedStatsResult {
+  entity: string;
+  summary: { violated: number; degrading: number; healthy: number; noData: number };
+}
 
-const getSLOGroupedStatsResponseSchema = t.type({
-  results: t.array(groupedStatsResultSchema),
-});
+interface GetSLOGroupedStatsResponse {
+  results: Array<GroupedStatsResult>;
+}
 
-type GroupedStatsResult = t.TypeOf<typeof groupedStatsResultSchema>;
 type GetSLOGroupedStatsParams = t.TypeOf<typeof getSLOGroupedStatsParamsSchema>['body'];
-type GetSLOGroupedStatsResponse = t.TypeOf<typeof getSLOGroupedStatsResponseSchema>;
 
 export { getSLOGroupedStatsParamsSchema };
 

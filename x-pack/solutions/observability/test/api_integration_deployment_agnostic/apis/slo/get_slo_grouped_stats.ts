@@ -237,7 +237,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .send({ type: 'unsupported-type' })
         .expect(400);
 
-      expect(response.body.message).to.contain('unsupported-type" does not match expected type');
+      expect(response.body.message).to.contain('"unsupported-type" does not match expected type');
+    });
+
+    it('returns 400 for invalid size parameter', async () => {
+      const response = await supertestWithoutAuth
+        .post(`/internal/slos/_grouped_stats`)
+        .set(adminRoleAuthc.apiKeyHeader)
+        .set(internalHeaders)
+        .send({ type: 'apm', size: 0 })
+        .expect(400);
+
+      expect(response.body.message).to.contain('size must be equal to or greater than');
     });
   });
 }

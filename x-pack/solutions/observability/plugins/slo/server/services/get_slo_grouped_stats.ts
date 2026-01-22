@@ -20,27 +20,30 @@ import type { SLOSettings } from '../domain/models';
 import { typedSearch } from '../utils/queries';
 import { getSummaryIndices } from './utils/get_summary_indices';
 import { excludeStaleSummaryFilter } from './utils/summary_stale_filter';
-import { SLOError } from '../errors/errors';
+import { IllegalArgumentError } from '../errors/errors';
 
 interface SloTypeConfig {
   groupByField: string;
-  indicatorTypes: string[];
   getFilters: (params: GetSLOGroupedStatsParams) => estypes.QueryDslQueryContainer[];
 }
 
 const SLO_TYPE_CONFIG: Record<string, SloTypeConfig> = {
   apm: {
     groupByField: 'service.name',
-    indicatorTypes: [
-      apmTransactionDurationIndicatorTypeSchema.value,
-      apmTransactionErrorRateIndicatorTypeSchema.value,
-    ],
     getFilters: (params) => [
+      ...termsQuery(
+        'slo.indicator.type',
+        apmTransactionDurationIndicatorTypeSchema.value,
+        apmTransactionErrorRateIndicatorTypeSchema.value
+      ),
       ...termsQuery('service.name', ...(params.serviceNames ?? [])),
       ...termQuery('service.environment', params.environment),
     ],
   },
 };
+
+const MAX_SIZE = 1000;
+const MIN_SIZE = 1;
 
 export class GetSLOGroupedStats {
   constructor(
@@ -50,10 +53,17 @@ export class GetSLOGroupedStats {
   ) {}
 
   public async execute(params: GetSLOGroupedStatsParams): Promise<GetSLOGroupedStatsResponse> {
+    const { size } = params;
     const config = this.getConfig(params.type);
 
     if (!config) {
-      throw new SLOError(`Unsupported SLO type: ${params.type}`);
+      throw new IllegalArgumentError(`Unsupported SLO type: ${params.type}`);
+    }
+    if (size < MIN_SIZE) {
+      throw new IllegalArgumentError(`size must be equal to or greater than ${MIN_SIZE}`);
+    }
+    if (size > MAX_SIZE) {
+      throw new IllegalArgumentError(`size cannot be greater than ${MAX_SIZE}`);
     }
 
     const { indices } = await getSummaryIndices(
@@ -68,7 +78,7 @@ export class GetSLOGroupedStats {
         bool: {
           filter: [
             ...termQuery('spaceId', this.spaceId),
-            ...this.getFilters(params, config),
+            ...config.getFilters(params),
             ...excludeStaleSummaryFilter({ settings: this.settings, forceExclude: true }),
           ],
         },
@@ -114,17 +124,5 @@ export class GetSLOGroupedStats {
 
   private getConfig(type: string): SloTypeConfig | undefined {
     return SLO_TYPE_CONFIG[type];
-  }
-
-  private getFilters(
-    params: GetSLOGroupedStatsParams,
-    config?: SloTypeConfig
-  ): estypes.QueryDslQueryContainer[] {
-    if (!config) return [];
-
-    return [
-      ...termsQuery('slo.indicator.type', ...config.indicatorTypes),
-      ...config.getFilters(params),
-    ];
   }
 }
