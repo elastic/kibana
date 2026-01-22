@@ -22,6 +22,19 @@ jest.mock('../hooks/use_paginated_alerts');
 
 jest.mock('@kbn/expandable-flyout');
 
+jest.mock('../../../../common/components/user_privileges', () => ({
+  useUserPrivileges: () => ({
+    timelinePrivileges: {
+      read: true
+    },
+    rulesPrivileges: {
+      rules: {
+        read: true
+      }
+    }
+  })
+}))
+
 const TEST_ID = 'TEST';
 const alertIds = ['id1', 'id2', 'id3'];
 

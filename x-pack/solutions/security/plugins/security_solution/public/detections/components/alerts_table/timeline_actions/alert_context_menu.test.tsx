@@ -17,7 +17,7 @@ import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '..
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
+import { ALERTS_FEATURE_ID, SECURITY_FEATURE_ID } from '../../../../../common/constants';
 
 jest.mock('../../../../common/components/user_privileges');
 
@@ -67,7 +67,7 @@ const mockUseKibanaReturnValue = {
   services: {
     timelines: { ...mockTimelines },
     application: {
-      capabilities: { [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true } },
+      capabilities: { [ALERTS_FEATURE_ID]: { edit: true, read: true }, [SECURITY_FEATURE_ID]: {} },
     },
     cases: {
       ...mockCasesContract(),
@@ -105,7 +105,7 @@ jest.mock('../../../../common/lib/kibana', () => {
 });
 
 jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges', () => ({
-  useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true }),
+  useAlertsPrivileges: jest.fn().mockReturnValue({ hasAlertsAll: true }),
 }));
 
 const actionMenuButton = 'timeline-context-menu-button';

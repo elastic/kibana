@@ -25,7 +25,7 @@ export const useAlertTagsActions = ({
   ecsRowData,
   refetch,
 }: UseAlertTagsActionsProps) => {
-  const { hasIndexWrite } = useAlertsPrivileges();
+  const { hasAlertsAll } = useAlertsPrivileges();
   const alertId = ecsRowData._id;
   const alertTagData = useMemo(() => {
     return [
@@ -72,7 +72,7 @@ export const useAlertTagsActions = ({
   );
 
   return {
-    alertTagsItems: hasIndexWrite ? itemsToReturn : [],
+    alertTagsItems: hasAlertsAll ? itemsToReturn : [],
     alertTagsPanels: panelsToReturn,
   };
 };

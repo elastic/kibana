@@ -20,7 +20,7 @@ jest.mock('../context');
 
 describe('TakeActionButton', () => {
   it('should render component with all options', async () => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: true });
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsAll: true });
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         cases: {

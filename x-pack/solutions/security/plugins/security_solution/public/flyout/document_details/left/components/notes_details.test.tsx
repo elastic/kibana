@@ -86,6 +86,11 @@ describe('NotesDetails', () => {
     useUserPrivilegesMock.mockReturnValue({
       notesPrivileges: { crud: true },
       timelinePrivileges: { crud: true },
+      rulesPrivileges: {
+        rules: {
+          read: true
+        }
+      }
     });
     (useWhichFlyout as jest.Mock).mockReturnValue(Flyouts.timeline);
     (useBasicDataFromDetailsData as jest.Mock).mockReturnValue({ isAlert: true });
@@ -199,6 +204,11 @@ describe('NotesDetails', () => {
     useUserPrivilegesMock.mockReturnValue({
       notesPrivileges: { crud: false },
       timelinePrivileges: { crud: false },
+      rulesPrivileges: {
+        rules: {
+          read: true
+        }
+      }
     });
 
     const { queryByTestId } = renderNotesDetails();
