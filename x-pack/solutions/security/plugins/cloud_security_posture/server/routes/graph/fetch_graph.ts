@@ -15,18 +15,27 @@ import {
   DOCUMENT_TYPE_ENTITY,
   INDEX_PATTERN_REGEX,
 } from '@kbn/cloud-security-posture-common/schema/graph/v1';
-import { getEnrichPolicyId } from '@kbn/cloud-security-posture-common/utils/helpers';
+import {
+  getEnrichPolicyId,
+  getEntitiesLatestIndexName,
+} from '@kbn/cloud-security-posture-common/utils/helpers';
 import {
   GRAPH_ACTOR_ENTITY_FIELDS,
   GRAPH_TARGET_ENTITY_FIELDS,
 } from '@kbn/cloud-security-posture-common/constants';
-import { generateFieldHintCases, concatPropIfExists } from './utils';
+import {
+  generateFieldHintCases,
+  formatJsonProperty,
+  buildLookupJoinEsql,
+  buildEnrichPolicyEsql,
+} from './utils';
 import type { EsQuery, GraphEdge, OriginEventId } from './types';
 
 interface BuildEsqlQueryParams {
   indexPatterns: string[];
   originEventIds: OriginEventId[];
   originAlertIds: OriginEventId[];
+  isLookupIndexAvailable: boolean;
   isEnrichPolicyExists: boolean;
   spaceId: string;
   alertsMappingsIncluded: boolean;
@@ -65,8 +74,12 @@ export const fetchGraph = async ({
     }
   });
 
-  const isEnrichPolicyExists = await checkEnrichPolicyExists(esClient, logger, spaceId);
-
+  // Check if the entities lookup index exists and is in lookup mode (preferred)
+  // If not, fall back to checking if the enrich policy exists (deprecated)
+  const isLookupIndexAvailable = await checkIfEntitiesIndexLookupMode(esClient, logger, spaceId);
+  const isEnrichPolicyExists = isLookupIndexAvailable
+    ? false
+    : await checkEnrichPolicyExists(esClient, logger, spaceId);
   const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
   const alertsMappingsIncluded = indexPatterns.some((indexPattern) =>
     indexPattern.includes(SECURITY_ALERTS_PARTIAL_IDENTIFIER)
@@ -76,6 +89,7 @@ export const fetchGraph = async ({
     indexPatterns,
     originEventIds,
     originAlertIds,
+    isLookupIndexAvailable,
     isEnrichPolicyExists,
     spaceId,
     alertsMappingsIncluded,
@@ -159,6 +173,11 @@ const checkEnrichPolicyExists = async (
       name: getEnrichPolicyId(spaceId),
     });
 
+    logger.debug(
+      `Enrich policy check for [${getEnrichPolicyId(spaceId)}]: found ${
+        policies?.length
+      } policies, policies: ${JSON.stringify(policies?.map((p) => p.config.match?.name))}`
+    );
     return policies.some((policy) => policy.config.match?.name === getEnrichPolicyId(spaceId));
   } catch (error) {
     logger.error(`Error fetching enrich policy ${error.message}`);
@@ -167,10 +186,99 @@ const checkEnrichPolicyExists = async (
   }
 };
 
+/**
+ * Checks if the entities latest index exists and is configured in lookup mode.
+ * This is the preferred method for entity enrichment (replaces deprecated ENRICH policy).
+ */
+const checkIfEntitiesIndexLookupMode = async (
+  esClient: IScopedClusterClient,
+  logger: Logger,
+  spaceId: string
+): Promise<boolean> => {
+  const indexName = getEntitiesLatestIndexName(spaceId);
+  try {
+    const response = await esClient.asInternalUser.indices.getSettings({
+      index: indexName,
+    });
+    const indexSettings = response[indexName];
+    if (!indexSettings) {
+      logger.debug(`Entities index ${indexName} not found`);
+      return false;
+    }
+
+    // Check if index is in lookup mode
+    const mode = indexSettings.settings?.index?.mode;
+    const isLookupMode = mode === 'lookup';
+
+    if (!isLookupMode) {
+      logger.debug(`Entities index ${indexName} exists but is not in lookup mode (mode: ${mode})`);
+    }
+
+    return isLookupMode;
+  } catch (error) {
+    if (error.statusCode === 404) {
+      logger.debug(`Entities index ${indexName} does not exist`);
+      return false;
+    }
+    logger.error(`Error checking entities index ${indexName}: ${error.message}`);
+    return false;
+  }
+};
+
+/**
+ * Generates ESQL statements for building entity fields with enrichment data.
+ * This is used when entity store enrichment is available (via LOOKUP JOIN or ENRICH).
+ * Uses REPLACE to fix "{," pattern that occurs when first property is null.
+ */
+const buildEnrichedEntityFieldsEsql = (): string => {
+  return `// Construct actor and target entities data
+// Build entity field conditionally - only include fields that have values
+// Put required fields first (no comma prefix), optional fields use comma prefix
+| EVAL actorEntityField = CASE(
+    actorEntityName IS NOT NULL OR actorEntityType IS NOT NULL OR actorEntitySubType IS NOT NULL,
+    CONCAT(",\\"entity\\":", "{",
+      "\\"availableInEntityStore\\":true",
+      ",\\"ecsParentField\\":\\"", actorEntityFieldHint, "\\"",
+      ${formatJsonProperty('name', 'actorEntityName')},
+      ${formatJsonProperty('type', 'actorEntityType')},
+      ${formatJsonProperty('sub_type', 'actorEntitySubType')},
+      CASE(
+        actorHostIp IS NOT NULL,
+        CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(actorHostIp), "\\"", "}"),
+        ""
+      ),
+    "}"),
+    CONCAT(",\\"entity\\":", "{",
+      "\\"availableInEntityStore\\":false",
+      ",\\"ecsParentField\\":\\"", actorEntityFieldHint, "\\"",
+    "}")
+  )
+| EVAL targetEntityField = CASE(
+    targetEntityName IS NOT NULL OR targetEntityType IS NOT NULL OR targetEntitySubType IS NOT NULL,
+    CONCAT(",\\"entity\\":", "{",
+      "\\"availableInEntityStore\\":true",
+      ",\\"ecsParentField\\":\\"", targetEntityFieldHint, "\\"",
+      ${formatJsonProperty('name', 'targetEntityName')},
+      ${formatJsonProperty('type', 'targetEntityType')},
+      ${formatJsonProperty('sub_type', 'targetEntitySubType')},
+      CASE(
+        targetHostIp IS NOT NULL,
+        CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(targetHostIp), "\\"", "}"),
+        ""
+      ),
+    "}"),
+    CONCAT(",\\"entity\\":", "{",
+      "\\"availableInEntityStore\\":false",
+      ",\\"ecsParentField\\":\\"", targetEntityFieldHint, "\\"",
+    "}")
+  )`;
+};
+
 const buildEsqlQuery = ({
   indexPatterns,
   originEventIds,
   originAlertIds,
+  isLookupIndexAvailable,
   isEnrichPolicyExists,
   spaceId,
   alertsMappingsIncluded,
@@ -226,52 +334,17 @@ ${targetFieldHintCases},
     ""
 )
 ${
-  isEnrichPolicyExists
+  isLookupIndexAvailable
     ? `
+${buildLookupJoinEsql(getEntitiesLatestIndexName(spaceId))}
 
-| ENRICH ${enrichPolicyName} ON actorEntityId WITH actorEntityName = entity.name, actorEntityType = entity.type, actorEntitySubType = entity.sub_type, actorHostIp = host.ip
-| ENRICH ${enrichPolicyName} ON targetEntityId WITH targetEntityName = entity.name, targetEntityType = entity.type, targetEntitySubType = entity.sub_type, targetHostIp = host.ip
+${buildEnrichedEntityFieldsEsql()}
+`
+    : isEnrichPolicyExists
+    ? `
+${buildEnrichPolicyEsql(enrichPolicyName)}
 
-// Construct actor and target entities data
-// Build entity field conditionally - only include fields that have values
-| EVAL actorEntityField = CASE(
-    actorEntityName IS NOT NULL OR actorEntityType IS NOT NULL OR actorEntitySubType IS NOT NULL,
-    CONCAT(",\\"entity\\":", "{",
-      ${concatPropIfExists('name', 'actorEntityName', false)},
-      ${concatPropIfExists('type', 'actorEntityType')},
-      ${concatPropIfExists('sub_type', 'actorEntitySubType')},
-      CASE(
-        actorHostIp IS NOT NULL,
-        CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(actorHostIp), "\\"", "}"),
-        ""
-      ),
-      ",\\"availableInEntityStore\\":true",
-      ",\\"ecsParentField\\":\\"", actorEntityFieldHint, "\\"",
-    "}"),
-    CONCAT(",\\"entity\\":", "{",
-      "\\"availableInEntityStore\\":false",
-      ",\\"ecsParentField\\":\\"", actorEntityFieldHint, "\\"",
-    "}")
-  )
-| EVAL targetEntityField = CASE(
-    targetEntityName IS NOT NULL OR targetEntityType IS NOT NULL OR targetEntitySubType IS NOT NULL,
-    CONCAT(",\\"entity\\":", "{",
-      ${concatPropIfExists('name', 'targetEntityName', false)},
-      ${concatPropIfExists('type', 'targetEntityType')},
-      ${concatPropIfExists('sub_type', 'targetEntitySubType')},
-      CASE(
-        targetHostIp IS NOT NULL,
-        CONCAT(",\\"host\\":", "{", "\\"ip\\":\\"", TO_STRING(targetHostIp), "\\"", "}"),
-        ""
-      ),
-      ",\\"availableInEntityStore\\":true",
-      ",\\"ecsParentField\\":\\"", targetEntityFieldHint, "\\"",
-    "}"),
-    CONCAT(",\\"entity\\":", "{",
-      "\\"availableInEntityStore\\":false",
-      ",\\"ecsParentField\\":\\"", targetEntityFieldHint, "\\"",
-    "}")
-  )
+${buildEnrichedEntityFieldsEsql()}
 `
     : `
 | EVAL actorEntityField = CONCAT(",\\"entity\\":", "{",

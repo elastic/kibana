@@ -32,8 +32,8 @@ const getProjectRoutingCommonCompletionItems = (): ISuggestionItem[] => {
       category: SuggestionCategory.CONSTANT_VALUE,
     },
     {
-      label: '_alias: *',
-      text: '_alias: *',
+      label: '_alias:*',
+      text: '_alias:*',
       kind: 'Value',
       detail: i18n.translate(
         'kbn-esql-language.esql.autocomplete.set.projectRouting.allProjectsDoc',
