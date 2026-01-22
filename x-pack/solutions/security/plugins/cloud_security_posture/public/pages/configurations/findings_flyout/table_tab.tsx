@@ -75,5 +75,8 @@ export const TableTab = ({ data }: { data: CspFinding }) => (
     sorting={sorting}
     search={search}
     pagination={pagination}
+    tableCaption={i18n.translate('xpack.csp.flyout.tableTab.caption', {
+      defaultMessage: 'Flattened finding field details',
+    })}
   />
 );

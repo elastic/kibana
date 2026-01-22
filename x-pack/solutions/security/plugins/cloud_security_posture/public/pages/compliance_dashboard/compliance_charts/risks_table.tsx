@@ -104,6 +104,9 @@ export const RisksTable = ({
           }
           items={sortedByComplianceScore}
           columns={columns}
+          tableCaption={i18n.translate('xpack.csp.dashboard.risksTable.tableCaption', {
+            defaultMessage: 'Top risks by compliance score',
+          })}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
