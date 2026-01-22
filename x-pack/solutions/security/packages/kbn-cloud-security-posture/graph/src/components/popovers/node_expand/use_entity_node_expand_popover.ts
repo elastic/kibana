@@ -11,14 +11,14 @@ import type { NodeProps, NodeViewModel } from '../../types';
 import { GRAPH_NODE_EXPAND_POPOVER_TEST_ID } from '../../test_ids';
 import { getEntityExpandItems, getSourceNamespaceFromNode } from './get_entity_expand_items';
 import { getNodeDocumentMode, isEntityNodeEnriched } from '../../utils';
-import { getFilterStore } from '../../filters/filter_store';
+import { emitFilterToggle, isFilterActiveForScope } from '../../filters/filter_store';
 
 /**
  * Hook to handle the entity node expand popover.
  * This hook is used to show the popover when the user clicks on the expand button of an entity node.
  * The popover contains the actions to show/hide the actions by entity, actions on entity, and related entities.
  *
- * Uses FilterStore for filter state management - accessed via getFilterStore(scopeId).
+ * Uses filter event bus for filter state management - emits events via emitFilterToggle().
  *
  * @param scopeId - The unique identifier for the graph instance (used to scope filter state)
  * @param onOpenEventPreview - Optional callback to open event preview with full node data.
@@ -36,15 +36,12 @@ export const useEntityNodeExpandPopover = (
       const isGroupedEntities = docMode === 'grouped-entities';
       const isEnriched = isEntityNodeEnriched(node.data);
 
-      // Get the FilterStore for this scope
-      const filterStore = getFilterStore(scopeId);
-
       return getEntityExpandItems({
         nodeId: node.id,
         sourceNamespace: getSourceNamespaceFromNode(node.data),
         onShowEntityDetails: onOpenEventPreview ? () => onOpenEventPreview(node.data) : undefined,
-        isFilterActive: (field, value) => filterStore?.isFilterActive(field, value) ?? false,
-        toggleFilter: (field, value, action) => filterStore?.toggleFilter(field, value, action),
+        isFilterActive: (field, value) => isFilterActiveForScope(scopeId, field, value),
+        toggleFilter: (field, value, action) => emitFilterToggle(scopeId, field, value, action),
         shouldRender: {
           // Filter actions only for single-entity mode
           showActionsByEntity: isSingleEntity,

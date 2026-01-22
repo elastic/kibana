@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { Meta, StoryFn } from '@storybook/react';
 import {
   DOCUMENT_TYPE_ENTITY,
@@ -18,7 +18,6 @@ import type { PanelItems, EntityItem, EventItem, AlertItem } from './components/
 import { LoadingBody } from './components/loading_body';
 import { EmptyBody } from './components/empty_body';
 import { ContentBody } from './components/content_body';
-import { createFilterStore, destroyFilterStore } from '../filters/filter_store';
 
 const STORYBOOK_SCOPE_ID = 'storybook-graph-grouped-panel';
 
@@ -87,12 +86,6 @@ const createAlertItem = (overrides: Partial<AlertItem> = {}): AlertItem => ({
 
 const ContentTemplate: StoryFn<ContentTemplateArgs> = (args) => {
   const items = args.items || [];
-
-  // Set up FilterStore for the story
-  useEffect(() => {
-    createFilterStore(STORYBOOK_SCOPE_ID, 'storybook-data-view');
-    return () => destroyFilterStore(STORYBOOK_SCOPE_ID);
-  }, []);
 
   // Determine the icon and type based on the items
   const firstItem = items[0];
@@ -283,12 +276,6 @@ EventsAndAlertsGroup.parameters = {
 };
 
 export const LargeGroup: StoryFn<ContentTemplateArgs> = () => {
-  // Set up FilterStore for the story
-  useEffect(() => {
-    createFilterStore(STORYBOOK_SCOPE_ID, 'storybook-data-view');
-    return () => destroyFilterStore(STORYBOOK_SCOPE_ID);
-  }, []);
-
   // Generate 100 items
   const allItems = useMemo(
     () =>

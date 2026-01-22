@@ -18,7 +18,24 @@ import {
   GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
 } from '../../test_ids';
-import { createFilterStore, destroyFilterStore, getFilterStore } from '../../filters/filter_store';
+import {
+  __clearEmittedFilterEvents,
+  __getEmittedFilterEvents,
+  isFilterActiveForScope,
+} from '../../filters/filter_store';
+
+// Mock filter_store module to control isFilterActiveForScope
+jest.mock('../../filters/filter_store', () => {
+  const actual = jest.requireActual('../../filters/filter_store');
+  return {
+    ...actual,
+    isFilterActiveForScope: jest.fn(() => false),
+  };
+});
+
+const mockIsFilterActiveForScope = isFilterActiveForScope as jest.MockedFunction<
+  typeof isFilterActiveForScope
+>;
 
 // Mock useNodeExpandGraphPopover to capture and expose itemsFn
 let capturedItemsFn:
@@ -125,22 +142,14 @@ const createMockNode = (
 };
 
 describe('useEntityNodeExpandPopover', () => {
-  // Use unique scopeId per test run to prevent cross-test pollution
-  let scopeId: string;
+  const scopeId = 'test-scope-id';
   const mockOnOpenEventPreview = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     capturedItemsFn = null;
-    // Generate unique scopeId for each test
-    scopeId = `test-scope-${Math.random().toString(36).substring(7)}`;
-    // Create a filter store for the test scope
-    createFilterStore(scopeId, 'test-data-view-id');
-  });
-
-  afterEach(() => {
-    // Clean up the filter store
-    destroyFilterStore(scopeId);
+    __clearEmittedFilterEvents();
+    mockIsFilterActiveForScope.mockReturnValue(false);
   });
 
   describe('itemsFn - single-entity mode', () => {
@@ -357,13 +366,10 @@ describe('useEntityNodeExpandPopover', () => {
     });
 
     it('should show "Hide" labels when filters are active', () => {
-      // Add a filter to make isFilterActive return true
+      // Mock isFilterActiveForScope to return true
+      mockIsFilterActiveForScope.mockReturnValue(true);
+
       const node = createMockNode('single-entity', 'user');
-      const filterStore = getFilterStore(scopeId);
-
-      // Activate a filter first
-      filterStore?.toggleFilter('user.entity.id', node.id, 'show');
-
       renderHook(() => useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview));
 
       expect(capturedItemsFn).not.toBeNull();
@@ -380,8 +386,8 @@ describe('useEntityNodeExpandPopover', () => {
     });
   });
 
-  describe('filter action via FilterStore', () => {
-    it('should toggle filter when filter item is clicked', () => {
+  describe('filter action via event bus', () => {
+    it('should emit filter toggle event when filter item is clicked', () => {
       const node = createMockNode('single-entity', 'user');
       renderHook(() => useEntityNodeExpandPopover(scopeId));
 
@@ -397,9 +403,13 @@ describe('useEntityNodeExpandPopover', () => {
         relatedItem.onClick();
       }
 
-      // After clicking, the filter should be added to the store
-      const filterStore = getFilterStore(scopeId);
-      expect(filterStore?.getFilters().length).toBeGreaterThan(0);
+      // Verify event was emitted
+      const events = __getEmittedFilterEvents();
+      expect(events.length).toBeGreaterThan(0);
+      expect(events[events.length - 1]).toMatchObject({
+        scopeId,
+        action: 'show',
+      });
     });
 
     it('should call onOpenEventPreview callback when entity details item is clicked', () => {

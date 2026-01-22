@@ -5,23 +5,127 @@
  * 2.0.
  */
 
-import { BehaviorSubject, type Subscription } from 'rxjs';
+import { BehaviorSubject, Subject, type Subscription, filter as rxFilter } from 'rxjs';
 import type { Filter } from '@kbn/es-query';
 import { addFilter, removeFilter, containsFilter } from './search_filters';
+
+// =============================================================================
+// Filter Toggle Event Bus
+// =============================================================================
+
+/**
+ * Event emitted when a filter toggle action is requested.
+ * Components emit these events without needing direct FilterStore access.
+ * FilterStore instances subscribe and handle events for their scopeId.
+ */
+export interface FilterToggleEvent {
+  scopeId: string;
+  field: string;
+  value: string;
+  action: 'show' | 'hide';
+}
+
+// Global event bus for filter toggle actions
+const filterToggleEvents$ = new Subject<FilterToggleEvent>();
+
+// Store emitted events for testing purposes
+const emittedFilterEvents: FilterToggleEvent[] = [];
+
+/**
+ * Emit a filter toggle event. Any FilterStore listening for this scopeId
+ * will receive the event and update its filter state.
+ *
+ * This function can be called without having a FilterStore instance.
+ * If no store exists for the scopeId, the event is still emitted (and recorded for testing)
+ * but no filter state will be updated.
+ *
+ * @param scopeId - Unique identifier for the graph instance
+ * @param field - The field to filter on
+ * @param value - The value to filter for
+ * @param action - 'show' to add filter, 'hide' to remove
+ *
+ * @example
+ * ```typescript
+ * // In a component or hook - no FilterStore needed
+ * emitFilterToggle(scopeId, 'user.entity.id', 'user-123', 'show');
+ * ```
+ */
+export const emitFilterToggle = (
+  scopeId: string,
+  field: string,
+  value: string,
+  action: 'show' | 'hide'
+): void => {
+  const event: FilterToggleEvent = { scopeId, field, value, action };
+  emittedFilterEvents.push(event);
+  filterToggleEvents$.next(event);
+};
+
+/**
+ * Check if a filter is active for the given scope, field, and value.
+ * Returns false gracefully if no store exists (no warning logged).
+ *
+ * @param scopeId - Unique identifier for the graph instance
+ * @param field - The field to check
+ * @param value - The value to check
+ * @returns true if the filter is active, false otherwise (including when no store exists)
+ *
+ * @example
+ * ```typescript
+ * // In a component or hook - no FilterStore needed
+ * const isActive = isFilterActiveForScope(scopeId, 'user.entity.id', 'user-123');
+ * ```
+ */
+export const isFilterActiveForScope = (scopeId: string, field: string, value: string): boolean => {
+  const store = stores.get(scopeId);
+  return store?.isFilterActive(field, value) ?? false;
+};
+
+/**
+ * Get all emitted filter events. Primarily for testing.
+ */
+export const __getEmittedFilterEvents = (): FilterToggleEvent[] => {
+  return [...emittedFilterEvents];
+};
+
+/**
+ * Clear all emitted filter events. Primarily for testing.
+ */
+export const __clearEmittedFilterEvents = (): void => {
+  emittedFilterEvents.length = 0;
+};
+
+// =============================================================================
+// FilterStore Class
+// =============================================================================
+
+// Registry of FilterStore instances by scopeId (declared early for isFilterActiveForScope)
+const stores = new Map<string, FilterStore>();
 
 /**
  * FilterStore manages filter state for a specific graph instance.
  * Each graph instance (identified by scopeId) gets its own FilterStore.
  * This allows multiple GraphInvestigation components to maintain isolated filter state.
+ *
+ * FilterStore automatically subscribes to filter toggle events for its scopeId
+ * and updates filter state accordingly.
  */
 export class FilterStore {
   readonly scopeId: string;
   private readonly dataViewId: string;
   private readonly filters$ = new BehaviorSubject<Filter[]>([]);
+  private readonly eventSubscription: Subscription;
 
   constructor(scopeId: string, dataViewId: string) {
     this.scopeId = scopeId;
     this.dataViewId = dataViewId;
+
+    // Subscribe to filter toggle events for this scopeId
+    this.eventSubscription = filterToggleEvents$
+      .pipe(rxFilter((event) => event.scopeId === this.scopeId))
+      .subscribe((event) => {
+        this.toggleFilter(event.field, event.value, event.action);
+      });
   }
 
   /**
@@ -79,16 +183,18 @@ export class FilterStore {
   }
 
   /**
-   * Clean up the store by completing the BehaviorSubject.
+   * Clean up the store by completing the BehaviorSubject and unsubscribing from events.
    * Called when the graph instance unmounts.
    */
   destroy(): void {
+    this.eventSubscription.unsubscribe();
     this.filters$.complete();
   }
 }
 
-// Registry of FilterStore instances by scopeId
-const stores = new Map<string, FilterStore>();
+// =============================================================================
+// Registry Functions
+// =============================================================================
 
 /**
  * Create or get an existing FilterStore for the given scopeId.

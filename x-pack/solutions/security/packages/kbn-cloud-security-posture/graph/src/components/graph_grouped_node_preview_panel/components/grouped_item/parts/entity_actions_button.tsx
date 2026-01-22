@@ -16,7 +16,7 @@ import {
 } from '../../../test_ids';
 import type { EntityItem } from '../types';
 import { getEntityExpandItems } from '../../../../popovers/node_expand/get_entity_expand_items';
-import { getFilterStore } from '../../../../filters/filter_store';
+import { emitFilterToggle, isFilterActiveForScope } from '../../../../filters/filter_store';
 import { GenericEntityPanelKey, GENERIC_ENTITY_PREVIEW_BANNER } from '../../../constants';
 
 const actionsButtonAriaLabel = i18n.translate(
@@ -47,9 +47,6 @@ export const EntityActionsButton = ({ item, scopeId }: EntityActionsButtonProps)
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const togglePopover = useCallback(() => setIsPopoverOpen((prev) => !prev), []);
 
-  // Get the FilterStore for this scope to check current filter state
-  const filterStore = getFilterStore(scopeId);
-
   const handleShowEntityDetails = useCallback(() => {
     openPreviewPanel({
       id: GenericEntityPanelKey,
@@ -69,8 +66,8 @@ export const EntityActionsButton = ({ item, scopeId }: EntityActionsButtonProps)
     sourceNamespace: item.ecsParentField,
     onShowEntityDetails: item.availableInEntityStore ? handleShowEntityDetails : undefined,
     onClose: closePopover,
-    isFilterActive: (field, value) => filterStore?.isFilterActive(field, value) ?? false,
-    toggleFilter: (field, value, action) => filterStore?.toggleFilter(field, value, action),
+    isFilterActive: (field, value) => isFilterActiveForScope(scopeId, field, value),
+    toggleFilter: (field, value, action) => emitFilterToggle(scopeId, field, value, action),
     shouldRender: {
       showActionsByEntity: true,
       showActionsOnEntity: true,

@@ -17,7 +17,7 @@ import {
 } from '../../../test_ids';
 import type { EventItem, AlertItem } from '../types';
 import { getLabelExpandItems } from '../../../../popovers/node_expand/get_label_expand_items';
-import { getFilterStore } from '../../../../filters/filter_store';
+import { emitFilterToggle, isFilterActiveForScope } from '../../../../filters/filter_store';
 import {
   DocumentDetailsPreviewPanelKey,
   ALERT_PREVIEW_BANNER,
@@ -52,9 +52,6 @@ export const EventActionsButton = ({ item, scopeId }: EventActionsButtonProps) =
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const togglePopover = useCallback(() => setIsPopoverOpen((prev) => !prev), []);
 
-  // Get the FilterStore for this scope to check current filter state
-  const filterStore = getFilterStore(scopeId);
-
   const handleShowEventDetails = useCallback(() => {
     openPreviewPanel({
       id: DocumentDetailsPreviewPanelKey,
@@ -73,8 +70,8 @@ export const EventActionsButton = ({ item, scopeId }: EventActionsButtonProps) =
     nodeLabel: item.action ?? '',
     onShowEventDetails: handleShowEventDetails,
     onClose: closePopover,
-    isFilterActive: (field, value) => filterStore?.isFilterActive(field, value) ?? false,
-    toggleFilter: (field, value, action) => filterStore?.toggleFilter(field, value, action),
+    isFilterActive: (field, value) => isFilterActiveForScope(scopeId, field, value),
+    toggleFilter: (field, value, action) => emitFilterToggle(scopeId, field, value, action),
     shouldRender: {
       showEventsWithAction: true,
       showEventDetails: true,
