@@ -14,6 +14,7 @@ import {
   HttpStepSchema,
   KibanaStepSchema,
   WaitStepSchema,
+  WaitForInputStepSchema,
 } from '../../../spec/schema';
 
 export const GraphNodeSchema = z.object({
@@ -68,3 +69,10 @@ export const KibanaGraphNodeSchema = GraphNodeSchema.extend({
   configuration: KibanaStepSchema,
 });
 export type KibanaGraphNode = z.infer<typeof KibanaGraphNodeSchema>;
+
+export const WaitForInputGraphNodeSchema = GraphNodeSchema.extend({
+  id: z.string(),
+  type: z.literal('waitForInput'),
+  configuration: WaitForInputStepSchema,
+});
+export type WaitForInputGraphNode = z.infer<typeof WaitForInputGraphNodeSchema>;

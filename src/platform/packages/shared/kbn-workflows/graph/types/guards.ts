@@ -14,6 +14,7 @@ import type {
   HttpGraphNode,
   KibanaGraphNode,
   WaitGraphNode,
+  WaitForInputGraphNode,
 } from './nodes/base';
 import type {
   EnterConditionBranchNode,
@@ -47,6 +48,9 @@ export const isKibana = (node: GraphNodeUnion): node is KibanaGraphNode =>
 export const isHttp = (node: GraphNodeUnion): node is HttpGraphNode => node.type === 'http';
 
 export const isWait = (node: GraphNodeUnion): node is WaitGraphNode => node.type === 'wait';
+
+export const isWaitForInput = (node: GraphNodeUnion): node is WaitForInputGraphNode =>
+  node.type === 'waitForInput';
 
 export const isDataSet = (node: GraphNodeUnion): node is DataSetGraphNode =>
   node.type === 'data.set';

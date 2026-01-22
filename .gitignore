@@ -182,3 +182,4 @@ src/platform/plugins/shared/console/packaging/react/translations
 
 # Batched commits marker, e.g.: from quick checks
 .collect_commits_marker
+workflows/

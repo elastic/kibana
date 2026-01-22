@@ -7,18 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export interface StartWorkflowExecutionParams {
-  workflowRunId: string;
-  spaceId: string;
-}
+import React from 'react';
+import ReactDOM from 'react-dom';
+import type { CoreStart, AppMountParameters } from '@kbn/core/public';
+import { ChessGamePage } from './components/chess_game_page';
 
-export interface ResumeWorkflowExecutionParams {
-  workflowRunId: string;
-  spaceId: string;
-}
+export const renderApp = (coreStart: CoreStart, { element }: AppMountParameters) => {
+  ReactDOM.render(<ChessGamePage http={coreStart.http} />, element);
 
-export interface WaitForInputTimeoutParams {
-  workflowRunId: string;
-  spaceId: string;
-  stepExecutionId: string;
-}
+  return () => ReactDOM.unmountComponentAtNode(element);
+};

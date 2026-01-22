@@ -1,0 +1,5 @@
+$schema: '../../moon/tasks/moon-cache/moon.yml-schema.json'
+
+language: 'javascript'
+platform: 'node'
+type: 'library'

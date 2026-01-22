@@ -1,0 +1,97 @@
+# =============================================================================
+# Workflow: Chess Game Demo
+# Category: examples
+#
+# This workflow demonstrates human-in-the-loop functionality using the 
+# waitForInput step. It plays a single turn of chess where:
+# 1. AI calculates its move using ai.prompt
+# 2. Waits for human's move using waitForInput
+#
+# For a full game, you would run this workflow multiple times or extend
+# the workflow with a loop.
+#
+# Author: Elastic
+# Created: 2025-01-22
+# Tags: demo, human-in-the-loop, chess
+# =============================================================================
+version: 1
+name: Chess Game Demo
+description: Play chess against an AI using workflow human-in-the-loop functionality
+enabled: true
+tags: ["demo", "human-in-the-loop", "chess"]
+
+# ---------------------------------------------------------------------------
+# TRIGGERS
+# ---------------------------------------------------------------------------
+triggers:
+  - type: manual
+
+# ---------------------------------------------------------------------------
+# INPUTS
+# ---------------------------------------------------------------------------
+inputs:
+  properties:
+    board:
+      type: string
+      description: Current board state in FEN notation
+      default: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+
+# ---------------------------------------------------------------------------
+# STEPS
+# ---------------------------------------------------------------------------
+steps:
+  # Step 1: AI's turn - calculate best move
+  - name: ai_turn
+    type: ai.prompt
+    connector-id: azure_open_ai  # Replace with your AI connector ID
+    with:
+      prompt: |
+        You are a chess engine. Given the current board state in FEN notation,
+        calculate the best move for the current player (White in this case).
+
+        Current board (FEN): {{ inputs.board }}
+
+        Respond with a JSON object containing:
+        - move: The move in UCI notation (e.g., "e2e4", "g1f3")
+        - newBoard: The updated board state in FEN notation after the move
+        - reasoning: Brief explanation of why this move is good
+
+        Only respond with the JSON object, no other text.
+      schema:
+        type: object
+        properties:
+          move:
+            type: string
+            description: The move in UCI notation
+          newBoard:
+            type: string
+            description: Updated FEN notation after the move
+          reasoning:
+            type: string
+            description: Why this move was chosen
+        required:
+          - move
+          - newBoard
+
+  # Step 2: Store AI's move in context
+  - name: store_ai_move
+    type: data.set
+    with:
+      board: '{{ steps.ai_turn.output.content.newBoard }}'
+      lastAiMove: '{{ steps.ai_turn.output.content.move }}'
+      aiReasoning: '{{ steps.ai_turn.output.content.reasoning }}'
+
+  # Step 3: Wait for human's move
+  - name: wait_for_human
+    type: waitForInput
+    with:
+      timeout: 30m
+      message: "Your turn! Enter your move in UCI notation (e.g., e7e5)"
+
+  # Step 4: Store human's move
+  - name: store_human_move
+    type: data.set
+    with:
+      board: '{{ steps.wait_for_human.output.input.newBoard }}'
+      lastHumanMove: '{{ steps.wait_for_human.output.input.move }}'
+      gameStatus: 'turn_complete'

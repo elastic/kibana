@@ -20,12 +20,39 @@ export async function handleExecutionDelay(
 ) {
   const workflowExecution = params.workflowRuntime.getWorkflowExecution();
 
-  if (
-    !stepExecutionRuntime.stepExecution ||
-    stepExecutionRuntime.stepExecution.status !== ExecutionStatus.WAITING
-  ) {
+  if (!stepExecutionRuntime.stepExecution) {
     return;
   }
+
+  const status = stepExecutionRuntime.stepExecution.status;
+
+  // Handle WAITING_FOR_INPUT status - schedule timeout task if configured, but don't auto-resume
+  if (status === ExecutionStatus.WAITING_FOR_INPUT) {
+    params.workflowExecutionState.updateWorkflowExecution({
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+    });
+
+    const timeoutAt = stepExecutionRuntime.stepExecution.state?.timeoutAt;
+    if (typeof timeoutAt === 'string') {
+      // Schedule a timeout task if timeout is configured
+      await params.workflowTaskManager.scheduleWaitForInputTimeoutTask({
+        workflowExecution,
+        stepExecutionId: stepExecutionRuntime.stepExecutionId,
+        timeoutAt: new Date(timeoutAt),
+        fakeRequest: params.fakeRequest,
+      });
+    }
+
+    // For WAITING_FOR_INPUT, we don't auto-resume - the workflow will be resumed
+    // via the resume API endpoint when human input is provided
+    return;
+  }
+
+  // Handle regular WAITING status (time-based delays)
+  if (status !== ExecutionStatus.WAITING) {
+    return;
+  }
+
   const resumeAtFromState = stepExecutionRuntime.stepExecution.state?.resumeAt;
 
   if (typeof resumeAtFromState !== 'string') {

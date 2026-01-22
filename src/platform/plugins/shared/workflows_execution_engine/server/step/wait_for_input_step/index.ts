@@ -7,18 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export interface StartWorkflowExecutionParams {
-  workflowRunId: string;
-  spaceId: string;
-}
-
-export interface ResumeWorkflowExecutionParams {
-  workflowRunId: string;
-  spaceId: string;
-}
-
-export interface WaitForInputTimeoutParams {
-  workflowRunId: string;
-  spaceId: string;
-  stepExecutionId: string;
-}
+export { WaitForInputStepImpl } from './wait_for_input_step';

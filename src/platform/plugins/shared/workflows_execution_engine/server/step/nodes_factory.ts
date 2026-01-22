@@ -61,6 +61,7 @@ import {
   ExitWorkflowTimeoutZoneNodeImpl,
 } from './timeout_zone_step';
 import { WaitStepImpl } from './wait_step/wait_step';
+import { WaitForInputStepImpl } from './wait_for_input_step';
 import type { ConnectorExecutor } from '../connector_executor';
 import type { UrlValidator } from '../lib/url_validator';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
@@ -256,6 +257,14 @@ export class NodesFactory {
         return new ExitIfNodeImpl(stepExecutionRuntime, this.workflowRuntime);
       case 'wait':
         return new WaitStepImpl(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          node as any,
+          stepExecutionRuntime,
+          this.workflowRuntime,
+          stepLogger
+        );
+      case 'waitForInput':
+        return new WaitForInputStepImpl(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           node as any,
           stepExecutionRuntime,

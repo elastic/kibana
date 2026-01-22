@@ -193,6 +193,18 @@ export const WaitStepSchema = BaseStepSchema.extend({
 });
 export type WaitStep = z.infer<typeof WaitStepSchema>;
 
+export const WaitForInputStepSchema = BaseStepSchema.extend({
+  type: z.literal('waitForInput'),
+  with: z
+    .object({
+      timeout: DurationSchema.optional(), // e.g., '5s', '1m', '30m' - time to wait for human input
+      inputSchema: z.record(z.string(), z.unknown()).optional(), // JSON Schema for expected input
+      message: z.string().optional(), // Message to display to the user
+    })
+    .optional(),
+});
+export type WaitForInputStep = z.infer<typeof WaitForInputStepSchema>;
+
 export const DataSetStepSchema = BaseStepSchema.extend({
   type: z.literal('data.set'),
   with: z.record(z.string(), z.unknown()),
@@ -521,6 +533,7 @@ const StepSchema = z.lazy(() =>
     ForEachStepSchema,
     IfStepSchema,
     WaitStepSchema,
+    WaitForInputStepSchema,
     DataSetStepSchema,
     HttpStepSchema,
     ElasticsearchStepSchema,
@@ -539,6 +552,7 @@ export const BuiltInStepTypes = [
   MergeStepSchema.shape.type.value,
   DataSetStepSchema.shape.type.value,
   WaitStepSchema.shape.type.value,
+  WaitForInputStepSchema.shape.type.value,
   HttpStepSchema.shape.type.value,
 ];
 export type BuiltInStepType = (typeof BuiltInStepTypes)[number];

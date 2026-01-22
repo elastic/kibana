@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/chess-workflow-example",
+  "owner": "@elastic/workflows-eng",
+  "description": "Example plugin demonstrating human-in-the-loop workflows with a chess game",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "chessWorkflowExample",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "developerExamples"
+    ],
+    "optionalPlugins": []
+  }
+}

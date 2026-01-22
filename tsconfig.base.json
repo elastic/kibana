@@ -190,6 +190,8 @@
       "@kbn/check-prod-native-modules-cli/*": ["packages/kbn-check-prod-native-modules-cli/*"],
       "@kbn/check-saved-objects-cli": ["packages/kbn-check-saved-objects-cli"],
       "@kbn/check-saved-objects-cli/*": ["packages/kbn-check-saved-objects-cli/*"],
+      "@kbn/chess-workflow-example": ["examples/chess_workflow_example"],
+      "@kbn/chess-workflow-example/*": ["examples/chess_workflow_example/*"],
       "@kbn/ci-stats-core": ["src/platform/packages/private/kbn-ci-stats-core"],
       "@kbn/ci-stats-core/*": ["src/platform/packages/private/kbn-ci-stats-core/*"],
       "@kbn/ci-stats-performance-metrics": ["packages/kbn-ci-stats-performance-metrics"],

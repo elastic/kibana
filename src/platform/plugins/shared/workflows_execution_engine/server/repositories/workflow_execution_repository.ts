@@ -8,12 +8,13 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { EsWorkflowExecution } from '@kbn/workflows';
+import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
-import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
+import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 
 export class WorkflowExecutionRepository {
   private indexName = WORKFLOWS_EXECUTIONS_INDEX;
+  private stepExecutionsIndexName = WORKFLOWS_STEP_EXECUTIONS_INDEX;
 
   constructor(private esClient: ElasticsearchClient) {}
 
@@ -327,5 +328,74 @@ export class WorkflowExecutionRepository {
     return response.hits.hits
       .map((hit) => hit._source?.id ?? hit._id)
       .filter((id): id is string => id !== undefined);
+  }
+
+  /**
+   * Retrieves step executions for a workflow execution by its ID.
+   *
+   * @param workflowRunId - The ID of the workflow execution.
+   * @returns A promise that resolves to an array of step executions.
+   */
+  public async getStepExecutionsByWorkflowRunId(
+    workflowRunId: string
+  ): Promise<EsWorkflowStepExecution[]> {
+    const response = await this.esClient.search<EsWorkflowStepExecution>({
+      index: this.stepExecutionsIndexName,
+      query: {
+        term: { workflowRunId },
+      },
+      size: 1000, // Reasonable limit for step executions in a single workflow
+      sort: [{ startedAt: { order: 'desc' } }],
+    });
+
+    return response.hits.hits
+      .map((hit) => hit._source)
+      .filter((source): source is EsWorkflowStepExecution => source !== undefined);
+  }
+
+  /**
+   * Retrieves a single step execution by its ID.
+   *
+   * @param stepExecutionId - The ID of the step execution.
+   * @returns A promise that resolves to the step execution, or null if not found.
+   */
+  public async getStepExecution(stepExecutionId: string): Promise<EsWorkflowStepExecution | null> {
+    try {
+      const response = await this.esClient.get<EsWorkflowStepExecution>({
+        index: this.stepExecutionsIndexName,
+        id: stepExecutionId,
+      });
+
+      return response._source ?? null;
+    } catch (error: unknown) {
+      // Handle 404 - document not found
+      if (
+        error instanceof Error &&
+        'meta' in error &&
+        (error as { meta?: { statusCode?: number } }).meta?.statusCode === 404
+      ) {
+        return null;
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Updates a step execution document.
+   *
+   * @param stepExecutionId - The ID of the step execution to update.
+   * @param update - The partial update to apply.
+   * @returns A promise that resolves when the update is complete.
+   */
+  public async updateStepExecution(
+    stepExecutionId: string,
+    update: Partial<EsWorkflowStepExecution>
+  ): Promise<void> {
+    await this.esClient.update({
+      index: this.stepExecutionsIndexName,
+      id: stepExecutionId,
+      refresh: false,
+      doc: update,
+    });
   }
 }

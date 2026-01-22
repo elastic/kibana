@@ -37,6 +37,7 @@ import type {
   CancelWorkflowExecution,
   ExecuteWorkflow,
   ExecuteWorkflowStep,
+  ResumeWorkflowExecution,
   ScheduleWorkflow,
   WorkflowsExecutionEnginePluginSetup,
   WorkflowsExecutionEnginePluginSetupDeps,
@@ -50,6 +51,7 @@ import { WorkflowEventLoggerService } from './workflow_event_logger';
 import type {
   ResumeWorkflowExecutionParams,
   StartWorkflowExecutionParams,
+  WaitForInputTimeoutParams,
 } from './workflow_task_manager/types';
 import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
 import { createIndexes } from '../common';
@@ -425,6 +427,85 @@ export class WorkflowsExecutionEnginePlugin
       },
     });
 
+    // Register waitForInput timeout task
+    plugins.taskManager.registerTaskDefinitions({
+      'workflow:waitForInput:timeout': {
+        title: 'Wait For Input Timeout',
+        description: 'Handles timeout for waitForInput steps',
+        timeout: '5m',
+        maxAttempts: 1,
+        createTaskRunner: ({ taskInstance, fakeRequest }) => {
+          if (!fakeRequest) {
+            throw new Error('Cannot handle timeout without Kibana Request');
+          }
+          return {
+            run: async () => {
+              const { workflowRunId, spaceId, stepExecutionId } =
+                taskInstance.params as WaitForInputTimeoutParams;
+
+              const [coreStart, pluginsStart] = await core.getStartServices();
+              await checkLicense(pluginsStart.licensing);
+
+              await this.initialize(coreStart);
+              const esClient = coreStart.elasticsearch.client.asInternalUser;
+              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
+
+              // Get current workflow execution
+              const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
+                workflowRunId,
+                spaceId
+              );
+
+              if (!workflowExecution) {
+                logger.debug(`Workflow execution ${workflowRunId} not found for timeout`);
+                return;
+              }
+
+              // Check if still waiting for input
+              if (workflowExecution.status !== ExecutionStatus.WAITING_FOR_INPUT) {
+                logger.debug(
+                  `Workflow ${workflowRunId} is no longer waiting for input (status: ${workflowExecution.status})`
+                );
+                return;
+              }
+
+              // Find the step execution that is waiting
+              const stepExecution =
+                await workflowExecutionRepository.getStepExecution(stepExecutionId);
+
+              if (!stepExecution || stepExecution.status !== ExecutionStatus.WAITING_FOR_INPUT) {
+                logger.debug(
+                  `Step ${stepExecutionId} is no longer waiting for input or not found`
+                );
+                return;
+              }
+
+              // Mark the step as timed out by setting timedOut flag in state
+              await workflowExecutionRepository.updateStepExecution(stepExecutionId, {
+                state: {
+                  ...(stepExecution.state || {}),
+                  timedOut: true,
+                },
+              });
+
+              logger.debug(`Marked step ${stepExecutionId} as timed out`);
+
+              const workflowTaskManager = new WorkflowTaskManager(pluginsStart.taskManager);
+
+              // Schedule immediate resume to continue workflow
+              await workflowTaskManager.scheduleResumeTask({
+                workflowExecution,
+                resumeAt: new Date(),
+                fakeRequest,
+              });
+
+              logger.debug(`Scheduled resume for timed out workflow ${workflowRunId}`);
+            },
+          };
+        },
+      },
+    });
+
     return {};
   }
 
@@ -710,6 +791,71 @@ export class WorkflowsExecutionEnginePlugin
       await workflowTaskManager.forceRunIdleTasks(workflowExecution.id);
     };
 
+    const resumeWorkflowExecution: ResumeWorkflowExecution = async (
+      workflowExecutionId,
+      input,
+      spaceId,
+      request
+    ) => {
+      await checkLicense(plugins.licensing);
+
+      await this.initialize(coreStart);
+      const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
+        workflowExecutionId,
+        spaceId
+      );
+
+      if (!workflowExecution) {
+        throw new WorkflowExecutionNotFoundError(workflowExecutionId);
+      }
+
+      if (workflowExecution.status !== ExecutionStatus.WAITING_FOR_INPUT) {
+        throw new Error(
+          `Cannot resume workflow execution ${workflowExecutionId}: status is ${workflowExecution.status}, expected ${ExecutionStatus.WAITING_FOR_INPUT}`
+        );
+      }
+
+      // Find the step that is waiting for input
+      const stepExecutions =
+        await workflowExecutionRepository.getStepExecutionsByWorkflowRunId(workflowExecutionId);
+      const waitingStep = stepExecutions.find(
+        (step) => step.status === ExecutionStatus.WAITING_FOR_INPUT
+      );
+
+      if (!waitingStep) {
+        throw new Error(
+          `Cannot find a step waiting for input in workflow execution ${workflowExecutionId}`
+        );
+      }
+
+      // Cancel any existing timeout task if configured
+      const timeoutTaskId = waitingStep.state?.timeoutTaskId as string | undefined;
+      if (timeoutTaskId) {
+        await workflowTaskManager.cancelTask(timeoutTaskId);
+      }
+
+      // Store the human input in the step's state
+      await workflowExecutionRepository.updateStepExecution(waitingStep.id, {
+        state: {
+          ...(waitingStep.state || {}),
+          humanInput: input,
+        },
+      });
+
+      this.logger.debug(
+        `Received human input for step ${waitingStep.stepId} in workflow ${workflowExecutionId}`
+      );
+
+      // Schedule immediate resume
+      await workflowTaskManager.scheduleResumeTask({
+        workflowExecution,
+        resumeAt: new Date(),
+        fakeRequest: request,
+      });
+
+      this.logger.debug(`Scheduled resume for workflow ${workflowExecutionId}`);
+    };
+
     const workflowEventLoggerService = new WorkflowEventLoggerService(
       coreStart.dataStreams,
       this.logger,
@@ -722,6 +868,7 @@ export class WorkflowsExecutionEnginePlugin
       executeWorkflowStep,
       scheduleWorkflow,
       cancelWorkflowExecution,
+      resumeWorkflowExecution,
     };
   }
 

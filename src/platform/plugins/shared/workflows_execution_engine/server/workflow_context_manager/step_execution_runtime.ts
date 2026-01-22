@@ -249,6 +249,60 @@ export class StepExecutionRuntime {
     return true; // successfully entered wait state
   }
 
+  /**
+   * Attempts to enter a wait-for-input state for the step execution.
+   * If human input has been received, it exits the wait state instead.
+   *
+   * When entering a wait-for-input state, the step execution is marked with
+   * `ExecutionStatus.WAITING_FOR_INPUT`. The workflow pauses until the resume API
+   * is called with input data, or until an optional timeout expires.
+   *
+   * @param timeout - Optional timeout duration string (e.g., "5s", "1m", "30m").
+   * @returns A boolean indicating whether the step has entered a wait state (true) or exited it (false).
+   */
+  public tryEnterWaitForInput(timeout?: string): boolean {
+    const humanInput = this.stepExecution?.state?.humanInput;
+    const timedOut = this.stepExecution?.state?.timedOut;
+
+    // Check if we've received input or timed out
+    if (humanInput !== undefined || timedOut) {
+      // Input received or timed out - exit wait state
+      return false;
+    }
+
+    // Check if already in wait-for-input state
+    const waitingForInputSince = this.stepExecution?.state?.waitingForInputSince;
+    if (waitingForInputSince) {
+      // Already in wait state, continue waiting
+      return true;
+    }
+
+    // Enter wait-for-input state
+    const now = new Date();
+    const state: Record<string, unknown> = {
+      ...(this.stepExecution?.state || {}),
+      waitingForInputSince: now.toISOString(),
+    };
+
+    // If timeout is specified, calculate the timeout timestamp
+    if (timeout) {
+      const timeoutMs = parseDuration(timeout);
+      state.timeoutAt = new Date(now.getTime() + timeoutMs).toISOString();
+    }
+
+    this.workflowExecutionState.upsertStep({
+      id: this.stepExecutionId,
+      stepId: this.node.stepId,
+      stepType: this.node.stepType,
+      scopeStack: this.workflowExecution.scopeStack,
+      topologicalIndex: this.topologicalOrder.indexOf(this.node.id),
+      startedAt: this.stepExecution?.startedAt || now.toISOString(),
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+      state,
+    });
+    return true; // successfully entered wait-for-input state
+  }
+
   private logStepStart(stepId: string, stepExecutionId: string): void {
     this.stepLogger?.logInfo(`Step '${stepId}' started`, {
       workflow: { step_id: stepId, step_execution_id: stepExecutionId },

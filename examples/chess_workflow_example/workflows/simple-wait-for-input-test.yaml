@@ -1,0 +1,56 @@
+# =============================================================================
+# Workflow: Simple Wait For Input Test
+# Category: examples
+#
+# This is a minimal workflow to test the waitForInput step.
+# It doesn't require any AI connector - just demonstrates pausing and resuming.
+#
+# Author: Elastic
+# Created: 2025-01-22
+# Tags: demo, human-in-the-loop
+# =============================================================================
+version: 1
+name: Simple Wait For Input Test
+description: Simple test workflow for waitForInput step - demonstrates human-in-the-loop functionality
+enabled: true
+tags: ["demo", "human-in-the-loop"]
+
+# ---------------------------------------------------------------------------
+# TRIGGERS
+# ---------------------------------------------------------------------------
+triggers:
+  - type: manual
+
+# ---------------------------------------------------------------------------
+# STEPS
+# ---------------------------------------------------------------------------
+steps:
+  # Step 1: Set initial state
+  - name: init
+    type: data.set
+    with:
+      message: 'Workflow started, waiting for human input...'
+      step: 1
+
+  # Step 2: Wait for human input
+  - name: wait_for_input
+    type: waitForInput
+    with:
+      timeout: 10m
+      message: 'Please provide your input (any JSON object)'
+
+  # Step 3: Process the input
+  - name: process_input
+    type: data.set
+    with:
+      receivedInput: '{{ steps.wait_for_input.output.input }}'
+      timedOut: '{{ steps.wait_for_input.output.timedOut }}'
+      message: 'Input received!'
+      step: 2
+
+  # Step 4: Finish
+  - name: finish
+    type: data.set
+    with:
+      finalMessage: 'Workflow completed successfully!'
+      step: 3

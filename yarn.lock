@@ -4898,6 +4898,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/chess-workflow-example@link:examples/chess_workflow_example":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ci-stats-core@link:src/platform/packages/private/kbn-ci-stats-core":
   version "0.0.0"
   uid ""
