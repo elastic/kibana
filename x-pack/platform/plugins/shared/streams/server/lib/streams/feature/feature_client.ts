@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { termQuery } from '@kbn/es-query';
+import { dateRangeQuery, termQuery } from '@kbn/es-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IStorageClient } from '@kbn/storage-adapter';
-import type { BaseFeature, Feature, FeatureStatus } from '@kbn/streams-schema';
+import type { BaseFeature, Feature } from '@kbn/streams-schema';
 import objectHash from 'object-hash';
 import { isNotFoundError } from '@kbn/es-errors';
 import {
@@ -23,6 +23,7 @@ import {
   FEATURE_VALUE,
   FEATURE_TAGS,
   FEATURE_META,
+  FEATURE_EXPIRES_AT,
 } from './fields';
 import type { FeatureStorageSettings } from './storage_settings';
 import type { StoredFeature } from './stored_feature';
@@ -37,12 +38,14 @@ interface FeatureBulkDeleteOperation {
 
 export type FeatureBulkOperation = FeatureBulkIndexOperation | FeatureBulkDeleteOperation;
 
+export const MAX_FEATURE_AGE_MS = 1000 * 60 * 60 * 24 * 7; // 7 days
+
 export class FeatureClient {
   constructor(
     private readonly clients: {
       storageClient: IStorageClient<FeatureStorageSettings, StoredFeature>;
     }
-  ) {}
+  ) { }
 
   async clean() {
     await this.clients.storageClient.clean();
@@ -69,23 +72,25 @@ export class FeatureClient {
 
   async getFeatures(
     stream: string,
-    filters?: { status?: FeatureStatus[]; type?: string[] }
+    filters?: { type?: string[] }
   ): Promise<{ hits: Feature[]; total: number }> {
-    const filterClauses: QueryDslQueryContainer[] = [...termQuery(STREAM_NAME, stream)];
+    const filterClauses: QueryDslQueryContainer[] = [
+      ...termQuery(STREAM_NAME, stream),
+      {
+        bool: {
+          should: [
+            { bool: { must_not: { exists: { field: FEATURE_EXPIRES_AT } } } },
+            ...dateRangeQuery(Date.now(), undefined, FEATURE_EXPIRES_AT),
+          ],
+          minimum_should_match: 1,
+        },
+      },
+    ];
 
     if (filters?.type?.length) {
       filterClauses.push({
         bool: {
           should: filters.type.flatMap((type) => termQuery(FEATURE_TYPE, type)),
-          minimum_should_match: 1,
-        },
-      });
-    }
-
-    if (filters?.status?.length) {
-      filterClauses.push({
-        bool: {
-          should: filters.status.flatMap((status) => termQuery(FEATURE_STATUS, status)),
           minimum_should_match: 1,
         },
       });
@@ -151,6 +156,7 @@ function toStorage(stream: string, feature: Feature): StoredFeature {
     [FEATURE_TAGS]: feature.tags,
     [STREAM_NAME]: stream,
     [FEATURE_META]: feature.meta,
+    [FEATURE_EXPIRES_AT]: feature.expires_at,
   };
 }
 
@@ -167,6 +173,7 @@ function fromStorage(feature: StoredFeature): Feature {
     last_seen: feature[FEATURE_LAST_SEEN],
     tags: feature[FEATURE_TAGS],
     meta: feature[FEATURE_META],
+    expires_at: feature[FEATURE_EXPIRES_AT],
   };
 }
 
