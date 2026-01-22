@@ -40,6 +40,7 @@ import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
 
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import { useKibana } from '../../utils/kibana_react';
 import {
   Aggregators,
@@ -58,10 +59,10 @@ const HIDDEN_FILTER_PANEL_OPTIONS: SearchBarProps['hiddenFilterPanelOptions'] = 
   'disableFilter',
 ];
 
-type Props = Omit<
+export type CustomThresholdRuleExpressionProps = Omit<
   RuleTypeParamsExpressionProps<RuleTypeParams & AlertParams, AlertContextMeta>,
   'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data' | 'unifiedSearch'
->;
+> & { kql: KqlPluginStart };
 
 export const defaultExpression: MetricExpression = {
   comparator: COMPARATORS.GREATER_THAN,
@@ -102,8 +103,8 @@ const RECOMMENDED_TIMESIZE_WARNING = i18n.translate(
 );
 
 // eslint-disable-next-line import/no-default-export
-export default function Expressions(props: Props) {
-  const { setRuleParams, ruleParams, errors, metadata, onChangeMetaData } = props;
+export default function Expressions(props: CustomThresholdRuleExpressionProps) {
+  const { setRuleParams, ruleParams, errors, metadata, onChangeMetaData, kql } = props;
   const {
     data,
     dataViews,
@@ -633,6 +634,7 @@ export default function Expressions(props: Props) {
                 errors={(errors[idx] as IErrorObject) || emptyError}
                 expression={e || {}}
                 dataView={derivedIndexPattern}
+                kql={kql}
                 title={
                   ruleParams.criteria.length === 1 ? (
                     <FormattedMessage

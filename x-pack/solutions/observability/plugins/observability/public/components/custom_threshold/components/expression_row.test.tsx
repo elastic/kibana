@@ -13,6 +13,7 @@ import { Aggregators } from '../../../../common/custom_threshold_rule/types';
 import type { MetricExpression } from '../types';
 import { ExpressionRow } from './expression_row';
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import type { KqlPluginStart } from '@kbn/kql/public';
 
 describe('ExpressionRow', () => {
   async function setup(expression: MetricExpression) {
@@ -32,6 +33,7 @@ describe('ExpressionRow', () => {
         ]}
         remove={() => {}}
         addExpression={() => {}}
+        kql={{} as KqlPluginStart}
         key={1}
         expressionId={1}
         setRuleParams={() => {}}

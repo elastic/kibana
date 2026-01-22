@@ -40,7 +40,8 @@
       "fieldsMetadata",
       "esql",
       "savedObjectsTagging",
-      "streams"
+      "streams",
+      "kql"
     ],
     "optionalPlugins": [
       "observabilityAgentBuilder",
@@ -66,7 +67,6 @@
       "logsShared",
       "kibanaReact",
       "kibanaUtils",
-      "kql",
       "stackAlerts",
       "spaces",
       "observabilityAgentBuilder"
