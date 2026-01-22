@@ -6,60 +6,31 @@
  */
 
 import { WARNING_AND_ABOVE_VALUES } from '../../utils/warning_and_above_log_filter';
+import type { LogDocument } from './get_log_document_by_id';
 
 /**
- * These functions analyze individual log entry objects to determine if they are:
- * - Warning or above (warn, error, critical, fatal) - using isWarningOrAbove()
+ * Analyzes a log entry to determine if it is warning level or above
+ * (warn, error, critical, fatal)
  */
-
-const LOG_LEVEL_FIELDS = ['log.level', 'level', 'severity_text', 'SeverityText', 'severity'];
-
-function isErrorField(fieldName: string): boolean {
-  const lower = fieldName.toLowerCase();
-  return lower.includes('exception') || lower.includes('error');
-}
-
-export function isWarningOrAbove(logEntry: Record<string, unknown>): boolean {
-  // 1. Check log level text fields
-  for (const field of LOG_LEVEL_FIELDS) {
-    const level = logEntry[field];
-    if (typeof level === 'string' && WARNING_AND_ABOVE_VALUES.includes(level.toLowerCase())) {
-      return true;
-    }
-  }
-
-  // 2. Check OTel severity_number (13-24 = Warn/Error/Fatal)
-  const severityNumber = logEntry.severity_number ?? logEntry.SeverityNumber;
-  if (typeof severityNumber === 'number' && severityNumber >= 13) return true;
-
-  // 3. Check HTTP 5xx error status codes
-  const httpStatus = logEntry['http.response.status_code'];
-  if (typeof httpStatus === 'number' && httpStatus >= 500) {
+export function isWarningOrAbove(logDocument: LogDocument): boolean {
+  // Check log.level (ECS field, resolves aliases for OTel)
+  const logLevel = logDocument['log.level'];
+  if (typeof logLevel === 'string' && WARNING_AND_ABOVE_VALUES.includes(logLevel.toLowerCase())) {
     return true;
   }
 
-  // 4. Check attributes object (OpenTelemetry)
-  const attributes = logEntry.attributes as Record<string, unknown> | undefined;
-  if (attributes) {
-    for (const key of Object.keys(attributes)) {
-      if (isErrorField(key) && attributes[key] != null) return true;
+  // Check HTTP 5xx error status codes
+  const httpStatus = logDocument['http.response.status_code'];
+  if (httpStatus != null) {
+    const statusCode = parseInt(httpStatus, 10);
+    if (typeof statusCode === 'number' && statusCode >= 500) {
+      return true;
     }
   }
 
-  // 5. Check message and body.text fields for error/exception keywords
-  const message = logEntry.message;
-  if (typeof message === 'string') {
-    const lowerMessage = message.toLowerCase();
-    if (lowerMessage.includes('error') || lowerMessage.includes('exception')) {
-      return true;
-    }
-  }
-  const bodyText = (logEntry.body as { text?: string } | undefined)?.text;
-  if (typeof bodyText === 'string') {
-    const lowerBodyText = bodyText.toLowerCase();
-    if (lowerBodyText.includes('error') || lowerBodyText.includes('exception')) {
-      return true;
-    }
+  // Check for exception/error message presence
+  if (logDocument['exception.message'] || logDocument['error.message']) {
+    return true;
   }
 
   return false;

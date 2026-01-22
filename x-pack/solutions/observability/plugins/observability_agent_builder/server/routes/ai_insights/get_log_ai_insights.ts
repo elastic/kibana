@@ -60,9 +60,7 @@ export async function getLogAiInsights({
   if (!logEntry) {
     throw new Error('Log entry not found');
   }
-
   const isErrorOrWarning = isWarningOrAbove(logEntry);
-
   const systemPrompt = isErrorOrWarning
     ? dedent(`
         You are an expert SRE assistant analyzing an error or warning log entry. Provide a thorough investigation:
