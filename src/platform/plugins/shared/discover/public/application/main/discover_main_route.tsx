@@ -31,10 +31,10 @@ import { useRootProfile, useDefaultAdHocDataViews } from '../../context_awarenes
 import type { SingleTabViewProps } from './components/single_tab_view';
 import {
   BrandedLoadingIndicator,
-  SingleTabView,
   NoDataPage,
   InitializationError,
 } from './components/single_tab_view';
+import { SingleTabViewWithAppMenu } from './components/single_tab_view/single_tab_view_with_app_menu';
 import { useAsyncFunction } from './hooks/use_async_function';
 import { TabsView } from './components/tabs_view';
 import { ChartPortalsRenderer } from './components/chart';
@@ -267,7 +267,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
             {tabsEnabled && customizationContext.displayMode !== 'embedded' ? (
               <TabsView {...props} />
             ) : (
-              <SingleTabView {...props} />
+              <SingleTabViewWithAppMenu {...props} />
             )}
           </>
         </DiscoverTopNavMenuProvider>
