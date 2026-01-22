@@ -29,6 +29,8 @@ import { useRouteMatch } from 'react-router-dom';
 
 import { useQuery } from '@kbn/react-query';
 
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
+
 import {
   DATASET_VAR_NAME,
   DATA_STREAM_TYPE_VAR_NAME,
@@ -56,10 +58,20 @@ import { useAgentless } from '../../../single_page_layout/hooks/setup_technology
 
 import { useIndexTemplateExists } from '../../datastream_hooks';
 
+import type { NewPackagePolicy } from '../../../../../../../../../common';
+import { CloudConnectorSetup } from '../../../../../../../../components/cloud_connector/cloud_connector_setup';
+
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 import { useDataStreamId } from './hooks';
 import { sortDatastreamsByDataset } from './sort_datastreams';
-import { VarGroupSelector, shouldShowVar, isVarRequiredByVarGroup } from './var_group_selector';
+import {
+  VarGroupSelector,
+  shouldShowVar,
+  isVarRequiredByVarGroup,
+  isCloudConnectorSelectedInVarGroups,
+  getCloudProviderFromVarGroupSelection,
+  isCloudConnectorCredentialVar,
+} from './var_group_selector';
 import { useVarGroupSelections } from './hooks';
 
 const ScrollAnchor = styled.div`
@@ -77,6 +89,14 @@ interface Props {
   isEditPage?: boolean;
   totalStreams?: number;
   varGroupSelections?: Record<string, string>;
+  /** Full package policy - needed for CloudConnectorSetup */
+  packagePolicy?: NewPackagePolicy;
+  /** Update package policy callback - needed for CloudConnectorSetup */
+  updatePackagePolicy?: (fields: Partial<NewPackagePolicy>) => void;
+  /** Cloud setup - needed for CloudConnectorSetup */
+  cloud?: CloudSetup;
+  /** Template name - needed for CloudConnectorSetup */
+  templateName?: string;
 }
 
 export const PackagePolicyInputStreamConfig = memo<Props>(
@@ -90,6 +110,10 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     isEditPage,
     totalStreams,
     varGroupSelections = {},
+    packagePolicy,
+    updatePackagePolicy,
+    cloud,
+    templateName,
   }) => {
     const { docLinks } = useStartServices();
     const { isAgentlessEnabled } = useAgentless();
@@ -159,7 +183,30 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
       ? streamVarGroupSelections
       : varGroupSelections;
 
-    // Split vars into required and advanced, filtering by var_group visibility
+    // Check if a cloud connector option is selected in stream-level var_groups
+    const isStreamCloudConnectorSelected = useMemo(
+      () =>
+        hasStreamLevelVarGroups &&
+        isCloudConnectorSelectedInVarGroups(
+          packageInputStream.var_groups,
+          streamVarGroupSelections
+        ),
+      [hasStreamLevelVarGroups, packageInputStream.var_groups, streamVarGroupSelections]
+    );
+
+    // Get the cloud provider from the selected stream-level var_group option
+    const streamCloudProvider = useMemo(
+      () =>
+        hasStreamLevelVarGroups
+          ? getCloudProviderFromVarGroupSelection(
+              packageInputStream.var_groups,
+              streamVarGroupSelections
+            )
+          : undefined,
+      [hasStreamLevelVarGroups, packageInputStream.var_groups, streamVarGroupSelections]
+    );
+
+    // Split vars into required and advanced, filtering by var_group visibility and cloud connector vars
     const [requiredVars, advancedVars] = useMemo(() => {
       const _requiredVars: RegistryVarsEntry[] = [];
       const _advancedVars: RegistryVarsEntry[] = [];
@@ -176,6 +223,18 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
             return; // Skip this var, it's hidden by var_group selection
           }
 
+          // Skip cloud connector credential vars when cloud connector UI is shown
+          if (
+            isStreamCloudConnectorSelected &&
+            isCloudConnectorCredentialVar(
+              varDef.name,
+              packageInputStream.var_groups,
+              streamVarGroupSelections
+            )
+          ) {
+            return; // Skip this var, it's managed by CloudConnectorSetup
+          }
+
           if (isAdvancedVar(varDef)) {
             _advancedVars.push(varDef);
           } else {
@@ -184,7 +243,13 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
         });
       }
       return [_requiredVars, _advancedVars];
-    }, [packageInputStream, effectiveVarGroups, effectiveVarGroupSelections]);
+    }, [
+      packageInputStream,
+      effectiveVarGroups,
+      effectiveVarGroupSelections,
+      isStreamCloudConnectorSelected,
+      streamVarGroupSelections,
+    ]);
 
     // Errors state
     const hasErrors = forceShowErrors && validationHasErrors(inputStreamValidationResults);
@@ -313,6 +378,33 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                     />
                   </EuiFlexItem>
                 ))}
+
+              {/* Cloud Connector Setup - shown when cloud connector var group option is selected at stream level */}
+              {isStreamCloudConnectorSelected &&
+                streamCloudProvider &&
+                packagePolicy &&
+                updatePackagePolicy && (
+                  <EuiFlexItem>
+                    <CloudConnectorSetup
+                      input={packagePolicy.inputs.find((i) => i.enabled) || packagePolicy.inputs[0]}
+                      newPolicy={packagePolicy}
+                      packageInfo={packageInfo}
+                      updatePolicy={({ updatedPolicy }: { updatedPolicy: NewPackagePolicy }) => {
+                        if (updatedPolicy) {
+                          updatePackagePolicy(updatedPolicy);
+                        }
+                      }}
+                      isEditPage={isEditPage}
+                      hasInvalidRequiredVars={
+                        !!forceShowErrors && !!inputStreamValidationResults?.vars
+                      }
+                      cloud={cloud}
+                      cloudProvider={streamCloudProvider}
+                      templateName={templateName || packageInfo.policy_templates?.[0]?.name || ''}
+                      disableNewConnection={isEditPage && !!packagePolicy.cloud_connector_id}
+                    />
+                  </EuiFlexItem>
+                )}
 
               {requiredVars.map((varDef) => {
                 if (!packagePolicyInputStream?.vars) return null;

@@ -115,3 +115,18 @@ export { useGetPackagesQuery, useGetPackageInfoByKeyQuery } from './hooks/use_re
 export { useGetSettingsQuery } from './hooks/use_request/settings';
 export { useLink } from './hooks/use_link';
 export { NamespaceComboBox } from './components/namespace_combo_box';
+
+// Cloud Connector UI components
+export { CloudConnectorSetup } from './components/cloud_connector/cloud_connector_setup';
+export type { CloudConnectorSetupProps } from './components/cloud_connector/cloud_connector_setup';
+export type {
+  UpdatePolicy,
+  CloudConnectorCredentials,
+  AwsCloudConnectorCredentials,
+  AzureCloudConnectorCredentials,
+  CloudConnectorConfig,
+  CloudConnectorField,
+  CloudProviders,
+  NewCloudConnectorFormProps,
+  CloudConnectorFormProps,
+} from './components/cloud_connector/types';

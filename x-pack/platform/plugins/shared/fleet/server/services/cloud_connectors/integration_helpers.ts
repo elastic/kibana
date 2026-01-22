@@ -10,6 +10,11 @@ import {
   isAzureCloudConnectorVars,
 } from '../../../common/services/cloud_connector_helpers';
 import {
+  extractRawCredentialVars,
+  getCredentialSchema,
+  getSecretVarKeys,
+} from '../../../common/services/cloud_connectors';
+import {
   AWS_ACCOUNT_TYPE_VAR_NAME,
   AZURE_ACCOUNT_TYPE_VAR_NAME,
   SINGLE_ACCOUNT,
@@ -17,10 +22,11 @@ import {
 } from '../../../common/constants/cloud_connector';
 
 import type { CloudProvider, CloudConnectorVars, AccountType } from '../../../common/types';
+import type { PackagePolicyConfigRecord } from '../../../common/types/models/package_policy';
 import type { NewPackagePolicy } from '../../types';
 
 /**
- * Extracts the account type from package policy variables
+ * Extracts the account type from package policy variables using the accessor.
  *
  * @param cloudProvider - The cloud provider (aws, azure, gcp)
  * @param packagePolicy - The package policy containing account type vars
@@ -30,10 +36,8 @@ export function extractAccountType(
   cloudProvider: CloudProvider,
   packagePolicy: NewPackagePolicy
 ): AccountType | undefined {
-  // Look for vars in stream vars first, then fall back to package-level vars (for var_groups)
-  const streamVars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
-  const packageVars = packagePolicy.vars;
-  const vars = streamVars || packageVars;
+  // Use the accessor to get vars from the correct location
+  const vars = extractRawCredentialVars(packagePolicy, cloudProvider);
 
   if (!vars) {
     return undefined;
@@ -72,7 +76,51 @@ export function validateAccountType(accountType: string | undefined): AccountTyp
 }
 
 /**
- * Updates package policy with cloud connector secret references
+ * Updates a vars container with secret references using the schema.
+ * Only updates vars that exist in the container and have corresponding secret vars.
+ */
+function updateVarsWithSecrets(
+  vars: PackagePolicyConfigRecord,
+  cloudConnectorVars: CloudConnectorVars,
+  cloudProvider: CloudProvider
+): PackagePolicyConfigRecord {
+  const updatedVars = { ...vars };
+  const schema = getCredentialSchema(cloudProvider);
+  const secretKeys = getSecretVarKeys(cloudProvider);
+  const varsAsRecord = cloudConnectorVars as Record<string, any>;
+
+  for (const varKeyConfig of schema.varKeys) {
+    if (!secretKeys.includes(varKeyConfig.varKey)) {
+      continue;
+    }
+
+    const newValue = varsAsRecord[varKeyConfig.logicalName];
+    if (!newValue) {
+      continue;
+    }
+
+    // Check if the primary key exists in vars
+    if (updatedVars[varKeyConfig.varKey]) {
+      updatedVars[varKeyConfig.varKey] = newValue;
+      continue;
+    }
+
+    // Check alternative keys
+    if (varKeyConfig.alternativeKeys) {
+      for (const altKey of varKeyConfig.alternativeKeys) {
+        if (updatedVars[altKey]) {
+          updatedVars[altKey] = newValue;
+          break;
+        }
+      }
+    }
+  }
+
+  return updatedVars;
+}
+
+/**
+ * Updates package policy with cloud connector secret references.
  * This ensures that extractAndWriteSecrets recognizes these as existing secrets
  * and doesn't attempt to create duplicate secrets.
  * Handles both stream-level vars and package-level vars (for var_groups).
@@ -97,23 +145,11 @@ export function updatePackagePolicyWithCloudConnectorSecrets(
 
   // Update package-level vars if present
   if (hasPackageLevelVars && packagePolicy.vars) {
-    const updatedVars = { ...packagePolicy.vars };
-
-    if (cloudProvider === 'aws') {
-      const awsVars = cloudConnectorVars as any;
-      if (awsVars.external_id && updatedVars.external_id) {
-        updatedVars.external_id = awsVars.external_id;
-      }
-    } else if (cloudProvider === 'azure') {
-      const azureVars = cloudConnectorVars as any;
-      if (azureVars.tenant_id && updatedVars.tenant_id) {
-        updatedVars.tenant_id = azureVars.tenant_id;
-      }
-      if (azureVars.client_id && updatedVars.client_id) {
-        updatedVars.client_id = azureVars.client_id;
-      }
-    }
-
+    const updatedVars = updateVarsWithSecrets(
+      packagePolicy.vars,
+      cloudConnectorVars,
+      cloudProvider
+    );
     updatedPackagePolicy = {
       ...updatedPackagePolicy,
       vars: updatedVars,
@@ -132,31 +168,7 @@ export function updatePackagePolicyWithCloudConnectorSecrets(
           return stream;
         }
 
-        const updatedVars = { ...stream.vars };
-
-        if (cloudProvider === 'aws') {
-          const awsVars = cloudConnectorVars as any;
-          // Update external_id with secret reference
-          if (awsVars.external_id && updatedVars.external_id) {
-            updatedVars.external_id = awsVars.external_id;
-          } else if (awsVars.external_id && updatedVars['aws.credentials.external_id']) {
-            updatedVars['aws.credentials.external_id'] = awsVars.external_id;
-          }
-        } else if (cloudProvider === 'azure') {
-          const azureVars = cloudConnectorVars as any;
-          // Update tenant_id and client_id with secret references
-          if (azureVars.tenant_id && updatedVars.tenant_id) {
-            updatedVars.tenant_id = azureVars.tenant_id;
-          } else if (azureVars.tenant_id && updatedVars['azure.tenant_id']) {
-            updatedVars['azure.tenant_id'] = azureVars.tenant_id;
-          }
-
-          if (azureVars.client_id && updatedVars.client_id) {
-            updatedVars.client_id = azureVars.client_id;
-          } else if (azureVars.client_id && updatedVars['azure.client_id']) {
-            updatedVars['azure.client_id'] = azureVars.client_id;
-          }
-        }
+        const updatedVars = updateVarsWithSecrets(stream.vars, cloudConnectorVars, cloudProvider);
 
         return {
           ...stream,
@@ -180,8 +192,8 @@ export function updatePackagePolicyWithCloudConnectorSecrets(
 }
 
 /**
- * Extracts cloud connector name from package policy variables
- * Used to name cloud connectors based on user input or generate a default name
+ * Extracts cloud connector name from package policy variables using the accessor.
+ * Used to name cloud connectors based on user input or generate a default name.
  *
  * @param packagePolicy - The package policy containing the cloud connector variables
  * @param targetCsp - The target cloud service provider
@@ -193,10 +205,8 @@ export function getCloudConnectorNameFromPackagePolicy(
   targetCsp: CloudProvider,
   policyName: string
 ): string {
-  // Look for vars in stream vars first, then fall back to package-level vars (for var_groups)
-  const streamVars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
-  const packageVars = packagePolicy.vars;
-  const vars = streamVars || packageVars;
+  // Use the accessor to get vars from the correct location
+  const vars = extractRawCredentialVars(packagePolicy, targetCsp);
   const defaultName = `${targetCsp}-cloud-connector: ${policyName}`;
 
   if (!vars) {

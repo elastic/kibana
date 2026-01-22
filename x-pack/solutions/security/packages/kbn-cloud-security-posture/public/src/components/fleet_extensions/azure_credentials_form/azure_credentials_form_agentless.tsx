@@ -17,6 +17,7 @@ import type {
   PackageInfo,
 } from '@kbn/fleet-plugin/common';
 import type { SetupTechnology } from '@kbn/fleet-plugin/common/types';
+import { CloudConnectorSetup } from '@kbn/fleet-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import {
   ARM_TEMPLATE_EXTERNAL_DOC_URL,
@@ -36,7 +37,6 @@ import { AzureInputVarFields } from './azure_input_var_fields';
 import { AzureSetupInfoContent } from './azure_setup_info';
 import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 import { AzureCredentialTypeSelector } from './azure_credential_type_selector';
-import { CloudConnectorSetup } from '../cloud_connector/cloud_connector_setup';
 
 interface AzureCredentialsFormProps {
   newPolicy: NewPackagePolicy;

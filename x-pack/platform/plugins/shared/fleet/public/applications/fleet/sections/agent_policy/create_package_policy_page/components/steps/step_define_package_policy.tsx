@@ -27,6 +27,8 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
+
 import { NamespaceComboBox } from '../../../../../../../components/namespace_combo_box';
 import type { PackageInfo, NewPackagePolicy, RegistryVarsEntry } from '../../../../../types';
 import { Loading } from '../../../../../components';
@@ -35,12 +37,17 @@ import { useGetEpmDatastreams, useStartServices } from '../../../../../hooks';
 import { isAdvancedVar } from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
 
+import { CloudConnectorSetup } from '../../../../../../../components/cloud_connector/cloud_connector_setup';
+
 import {
   PackagePolicyInputVarField,
   VarGroupSelector,
   shouldShowVar,
   useVarGroupSelections,
   isVarRequiredByVarGroup,
+  isCloudConnectorSelectedInVarGroups,
+  getCloudProviderFromVarGroupSelection,
+  isCloudConnectorCredentialVar,
 } from './components';
 import { useOutputs } from './components/hooks';
 
@@ -63,6 +70,8 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   isEditPage?: boolean;
   noAdvancedToggle?: boolean;
   isAgentlessSelected?: boolean;
+  cloud?: CloudSetup;
+  templateName?: string;
 }> = memo(
   ({
     namespacePlaceholder,
@@ -74,6 +83,8 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     noAdvancedToggle = false,
     isEditPage = false,
     isAgentlessSelected = false,
+    cloud,
+    templateName,
   }) => {
     const { docLinks } = useStartServices();
 
@@ -89,7 +100,19 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
         onSelectionsChange: updatePackagePolicy,
       });
 
-    // Package-level vars, filtered by var_group visibility
+    // Check if a cloud connector option is selected in var_groups
+    const isCloudConnectorSelected = useMemo(
+      () => isCloudConnectorSelectedInVarGroups(packageInfo.var_groups, varGroupSelections),
+      [packageInfo.var_groups, varGroupSelections]
+    );
+
+    // Get the cloud provider from the selected var_group option
+    const selectedCloudProvider = useMemo(
+      () => getCloudProviderFromVarGroupSelection(packageInfo.var_groups, varGroupSelections),
+      [packageInfo.var_groups, varGroupSelections]
+    );
+
+    // Package-level vars, filtered by var_group visibility and cloud connector credential vars
     const { requiredVars, advancedVars } = useMemo(() => {
       const _requiredVars: RegistryVarsEntry[] = [];
       const _advancedVars: RegistryVarsEntry[] = [];
@@ -105,6 +128,14 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
             return; // Skip this var, it's hidden by var_group selection
           }
 
+          // Skip cloud connector credential vars when cloud connector UI is shown
+          if (
+            isCloudConnectorSelected &&
+            isCloudConnectorCredentialVar(varDef.name, packageInfo.var_groups, varGroupSelections)
+          ) {
+            return; // Skip this var, it's managed by CloudConnectorSetup
+          }
+
           if (isAdvancedVar(varDef)) {
             _advancedVars.push(varDef);
           } else {
@@ -114,7 +145,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       }
 
       return { requiredVars: _requiredVars, advancedVars: _advancedVars };
-    }, [packageInfo.vars, packageInfo.var_groups, varGroupSelections]);
+    }, [packageInfo.vars, packageInfo.var_groups, varGroupSelections, isCloudConnectorSelected]);
 
     // Outputs
     const {
@@ -276,6 +307,28 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                 />
               </EuiFlexItem>
             ))}
+
+            {/* Cloud Connector Setup - shown when cloud connector var group option is selected */}
+            {isCloudConnectorSelected && selectedCloudProvider && (
+              <EuiFlexItem>
+                <CloudConnectorSetup
+                  input={packagePolicy.inputs[0]}
+                  newPolicy={packagePolicy}
+                  packageInfo={packageInfo}
+                  updatePolicy={({ updatedPolicy }: { updatedPolicy: NewPackagePolicy }) => {
+                    if (updatedPolicy) {
+                      updatePackagePolicy(updatedPolicy);
+                    }
+                  }}
+                  isEditPage={isEditPage}
+                  hasInvalidRequiredVars={submitAttempted && !!validationResults?.vars}
+                  cloud={cloud}
+                  cloudProvider={selectedCloudProvider}
+                  templateName={templateName || packageInfo.policy_templates?.[0]?.name || ''}
+                  disableNewConnection={isEditPage && !!packagePolicy.cloud_connector_id}
+                />
+              </EuiFlexItem>
+            )}
 
             {/* Required vars */}
             {requiredVars.map((varDef) => {

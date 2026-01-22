@@ -15,6 +15,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
+
 import {
   getNormalizedInputs,
   isIntegrationPolicyTemplate,
@@ -70,6 +72,8 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   isEditPage?: boolean;
   isAgentlessSelected?: boolean;
   varGroupSelections?: VarGroupSelection;
+  cloud?: CloudSetup;
+  templateName?: string;
 }> = ({
   packageInfo,
   showOnlyIntegration,
@@ -81,6 +85,8 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   isEditPage = false,
   isAgentlessSelected = false,
   varGroupSelections = {},
+  cloud,
+  templateName,
 }) => {
   const hasIntegrations = useMemo(() => doesPackageHaveIntegrations(packageInfo), [packageInfo]);
   const deploymentMode =
@@ -158,6 +164,10 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                     forceShowErrors={submitAttempted}
                     isEditPage={isEditPage}
                     varGroupSelections={varGroupSelections}
+                    packagePolicy={packagePolicy}
+                    updatePackagePolicy={updatePackagePolicy}
+                    cloud={cloud}
+                    templateName={templateName || policyTemplate.name}
                   />
                   <EuiHorizontalRule margin="m" />
                 </EuiFlexItem>

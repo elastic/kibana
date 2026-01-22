@@ -37,6 +37,23 @@ export interface AzureCloudConnectorVars {
   azure_credentials_cloud_connector_id: CloudConnectorVar;
 }
 
+/**
+ * GCP Cloud Connector vars interface - placeholder for future support.
+ * Uncomment and populate when GCP Cloud Connector is implemented.
+ *
+ * Expected fields:
+ * - project_id: GCP project ID (text)
+ * - credentials_json: Service account credentials (secret)
+ * - service_account_email: Service account email (text)
+ */
+// export interface GcpCloudConnectorVars {
+//   project_id: CloudConnectorVar;
+//   credentials_json: CloudConnectorSecretVar;
+//   service_account_email?: CloudConnectorVar;
+// }
+
+// When GCP is supported, update this union to include GcpCloudConnectorVars:
+// export type CloudConnectorVars = AwsCloudConnectorVars | AzureCloudConnectorVars | GcpCloudConnectorVars;
 export type CloudConnectorVars = AwsCloudConnectorVars | AzureCloudConnectorVars;
 
 export interface CloudConnector {

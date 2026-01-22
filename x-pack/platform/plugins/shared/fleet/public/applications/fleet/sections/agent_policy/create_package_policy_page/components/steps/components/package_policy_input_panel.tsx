@@ -21,7 +21,10 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
+
 import type {
+  NewPackagePolicy,
   NewPackagePolicyInput,
   PackageInfo,
   PackagePolicyInputStream,
@@ -83,6 +86,14 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
   forceShowErrors?: boolean;
   isEditPage?: boolean;
   varGroupSelections?: Record<string, string>;
+  /** Full package policy - needed for CloudConnectorSetup */
+  packagePolicy?: NewPackagePolicy;
+  /** Update package policy callback - needed for CloudConnectorSetup */
+  updatePackagePolicy?: (fields: Partial<NewPackagePolicy>) => void;
+  /** Cloud setup - needed for CloudConnectorSetup */
+  cloud?: CloudSetup;
+  /** Template name - needed for CloudConnectorSetup */
+  templateName?: string;
 }> = memo(
   ({
     packageInput,
@@ -94,6 +105,10 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     forceShowErrors,
     isEditPage = false,
     varGroupSelections = {},
+    packagePolicy,
+    updatePackagePolicy,
+    cloud,
+    templateName,
   }) => {
     const defaultDataStreamId = useDataStreamId();
     const { isAgentlessEnabled } = useAgentless();
@@ -314,6 +329,10 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                   forceShowErrors={forceShowErrors}
                   isEditPage={isEditPage}
                   varGroupSelections={varGroupSelections}
+                  packagePolicy={packagePolicy}
+                  updatePackagePolicy={updatePackagePolicy}
+                  cloud={cloud}
+                  templateName={templateName}
                 />
                 {index !== inputStreams.length - 1 ? (
                   <>

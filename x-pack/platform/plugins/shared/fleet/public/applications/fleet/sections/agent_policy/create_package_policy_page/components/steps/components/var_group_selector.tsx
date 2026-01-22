@@ -216,6 +216,60 @@ export function isCloudConnectorSelectedInVarGroups(
 }
 
 /**
+ * Get the selected cloud connector option from var_groups.
+ * Returns the option if a cloud connector option is selected, undefined otherwise.
+ */
+export function getSelectedCloudConnectorOption(
+  varGroups: RegistryVarGroup[] | undefined,
+  varGroupSelections: VarGroupSelection | undefined
+): RegistryVarGroupOption | undefined {
+  if (!varGroups || !varGroupSelections) return undefined;
+
+  for (const group of varGroups) {
+    const selectedOptionName = varGroupSelections[group.name];
+    if (!selectedOptionName) continue;
+
+    const selectedOption = group.options.find((opt) => opt.name === selectedOptionName);
+    if (selectedOption && isCloudConnectorOption(selectedOption)) {
+      return selectedOption;
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Get the credential var names from a cloud connector var_group option.
+ * These are the vars that should be hidden and managed by the CloudConnectorSetup UI.
+ */
+export function getCloudConnectorCredentialVarNames(
+  varGroups: RegistryVarGroup[] | undefined,
+  varGroupSelections: VarGroupSelection | undefined
+): Set<string> {
+  const credentialVars = new Set<string>();
+  const selectedOption = getSelectedCloudConnectorOption(varGroups, varGroupSelections);
+
+  if (selectedOption) {
+    // All vars in the selected cloud connector option are credential vars
+    selectedOption.vars.forEach((varName) => credentialVars.add(varName));
+  }
+
+  return credentialVars;
+}
+
+/**
+ * Check if a var is a cloud connector credential var that should be hidden
+ * when the CloudConnectorSetup UI is shown.
+ */
+export function isCloudConnectorCredentialVar(
+  varName: string,
+  varGroups: RegistryVarGroup[] | undefined,
+  varGroupSelections: VarGroupSelection | undefined
+): boolean {
+  const credentialVars = getCloudConnectorCredentialVarNames(varGroups, varGroupSelections);
+  return credentialVars.has(varName);
+}
+
+/**
  * VarGroupSelector component renders a dropdown for selecting between
  * mutually exclusive variable groups (e.g., authentication methods).
  */

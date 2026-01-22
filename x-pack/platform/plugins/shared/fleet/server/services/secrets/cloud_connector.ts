@@ -8,10 +8,45 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import type { CloudProvider, CloudConnectorVars } from '../../../common/types';
+import type { PackagePolicyConfigRecordEntry } from '../../../common/types/models/package_policy';
+import {
+  extractRawCredentialVars,
+  getCredentialSchema,
+  getSecretVarKeys,
+} from '../../../common/services/cloud_connectors';
 import type { NewPackagePolicy } from '../../types';
 import { CloudConnectorInvalidVarsError } from '../../errors';
 
 import { createSecrets } from './common';
+
+/**
+ * Finds a var value from a vars container, checking primary key and alternative keys.
+ */
+function findVarByKeys(
+  vars: Record<string, PackagePolicyConfigRecordEntry> | undefined,
+  primaryKey: string,
+  alternativeKeys?: string[]
+): PackagePolicyConfigRecordEntry | undefined {
+  if (!vars) {
+    return undefined;
+  }
+
+  // Check primary key first
+  if (vars[primaryKey]) {
+    return vars[primaryKey];
+  }
+
+  // Check alternative keys
+  if (alternativeKeys) {
+    for (const altKey of alternativeKeys) {
+      if (vars[altKey]) {
+        return vars[altKey];
+      }
+    }
+  }
+
+  return undefined;
+}
 
 /**
  * Extracts cloud connector variables from a package policy's inputs and creates secrets for non-secret-ref values
@@ -32,45 +67,50 @@ export async function extractAndCreateCloudConnectorSecrets(
 ): Promise<CloudConnectorVars | undefined> {
   logger.debug('Extracting package policy vars for cloud connector and creating secrets');
 
-  if (packagePolicy.supports_cloud_connector && cloudProvider === 'aws') {
+  if (!packagePolicy.supports_cloud_connector) {
+    return undefined;
+  }
+
+  if (cloudProvider === 'aws') {
     return await extractAwsCloudConnectorSecrets(packagePolicy, esClient, logger);
   }
 
-  if (packagePolicy.supports_cloud_connector && cloudProvider === 'azure') {
+  if (cloudProvider === 'azure') {
     return await extractAzureCloudConnectorSecrets(packagePolicy, esClient, logger);
   }
+
+  // GCP not yet supported
+  return undefined;
 }
 
 /**
- * Extracts AWS cloud connector variables and creates secrets
+ * Extracts AWS cloud connector variables and creates secrets using the var accessor schema.
  */
 async function extractAwsCloudConnectorSecrets(
   packagePolicy: NewPackagePolicy,
   esClient: ElasticsearchClient,
   logger: Logger
 ): Promise<CloudConnectorVars | undefined> {
-  // Look for vars in both stream vars and package-level vars (for var_groups)
-  // Cloud connector vars may be in either location depending on how the package is configured
-  const streamVars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
-  const packageVars = packagePolicy.vars;
+  const schema = getCredentialSchema('aws');
+  const vars = extractRawCredentialVars(packagePolicy, 'aws');
 
-  if (!streamVars && !packageVars) {
+  if (!vars) {
     logger.error('Package policy must contain vars for AWS cloud connector');
     throw new CloudConnectorInvalidVarsError('Package policy must contain vars');
   }
 
-  // Look for role_arn and external_id in BOTH stream vars and package vars
-  // Check stream vars first, then package vars
-  const roleArn: string =
-    streamVars?.role_arn?.value ||
-    streamVars?.['aws.role_arn']?.value ||
-    packageVars?.role_arn?.value ||
-    packageVars?.['aws.role_arn']?.value;
-  const externalIdVar =
-    streamVars?.external_id ||
-    streamVars?.['aws.credentials.external_id'] ||
-    packageVars?.external_id ||
-    packageVars?.['aws.credentials.external_id'];
+  // Extract vars using schema keys (with alternative key support)
+  const roleArnConfig = schema.varKeys.find((k) => k.logicalName === 'role_arn');
+  const externalIdConfig = schema.varKeys.find((k) => k.logicalName === 'external_id');
+
+  const roleArnVar = roleArnConfig
+    ? findVarByKeys(vars, roleArnConfig.varKey, roleArnConfig.alternativeKeys)
+    : undefined;
+  const externalIdVar = externalIdConfig
+    ? findVarByKeys(vars, externalIdConfig.varKey, externalIdConfig.alternativeKeys)
+    : undefined;
+
+  const roleArn = roleArnVar?.value;
 
   if (roleArn && externalIdVar) {
     let externalIdWithSecretRef: { type: 'password'; value: any };
@@ -121,39 +161,37 @@ async function extractAwsCloudConnectorSecrets(
 }
 
 /**
- * Extracts Azure cloud connector variables and creates secrets
+ * Extracts Azure cloud connector variables and creates secrets using the var accessor schema.
  */
 async function extractAzureCloudConnectorSecrets(
   packagePolicy: NewPackagePolicy,
   esClient: ElasticsearchClient,
   logger: Logger
 ): Promise<CloudConnectorVars | undefined> {
-  // Look for vars in both stream vars and package-level vars (for var_groups)
-  // Cloud connector vars may be in either location depending on how the package is configured
-  const streamVars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
-  const packageVars = packagePolicy.vars;
+  const schema = getCredentialSchema('azure');
+  const vars = extractRawCredentialVars(packagePolicy, 'azure');
 
-  if (!streamVars && !packageVars) {
+  if (!vars) {
     logger.error('Package policy must contain vars for Azure cloud connector');
     throw new CloudConnectorInvalidVarsError('Package policy must contain vars');
   }
 
-  // Look for Azure vars in BOTH stream vars and package vars
-  const tenantIdVar =
-    streamVars?.tenant_id ||
-    streamVars?.['azure.credentials.tenant_id'] ||
-    packageVars?.tenant_id ||
-    packageVars?.['azure.credentials.tenant_id'];
-  const clientIdVar =
-    streamVars?.client_id ||
-    streamVars?.['azure.credentials.client_id'] ||
-    packageVars?.client_id ||
-    packageVars?.['azure.credentials.client_id'];
-  const azureCredentials =
-    streamVars?.azure_credentials_cloud_connector_id ||
-    streamVars?.['azure.credentials.cloud_connector_id'] ||
-    packageVars?.azure_credentials_cloud_connector_id ||
-    packageVars?.['azure.credentials.cloud_connector_id'];
+  // Extract vars using schema keys (with alternative key support)
+  const tenantIdConfig = schema.varKeys.find((k) => k.logicalName === 'tenant_id');
+  const clientIdConfig = schema.varKeys.find((k) => k.logicalName === 'client_id');
+  const credIdConfig = schema.varKeys.find(
+    (k) => k.logicalName === 'azure_credentials_cloud_connector_id'
+  );
+
+  const tenantIdVar = tenantIdConfig
+    ? findVarByKeys(vars, tenantIdConfig.varKey, tenantIdConfig.alternativeKeys)
+    : undefined;
+  const clientIdVar = clientIdConfig
+    ? findVarByKeys(vars, clientIdConfig.varKey, clientIdConfig.alternativeKeys)
+    : undefined;
+  const azureCredentials = credIdConfig
+    ? findVarByKeys(vars, credIdConfig.varKey, credIdConfig.alternativeKeys)
+    : undefined;
 
   if (tenantIdVar && clientIdVar && azureCredentials) {
     let tenantIdWithSecretRef = tenantIdVar;
@@ -228,8 +266,8 @@ async function extractAzureCloudConnectorSecrets(
 }
 
 /**
- * Extracts secret IDs from cloud connector variables for cleanup during deletion
- * This function handles extracting secret references from both AWS and Azure cloud connectors.
+ * Extracts secret IDs from cloud connector variables for cleanup during deletion.
+ * Uses the schema to determine which vars contain secrets.
  *
  * @param cloudProvider - The cloud provider (aws, azure, gcp)
  * @param cloudConnectorVars - The cloud connector variables containing secret references
@@ -240,36 +278,25 @@ export function extractSecretIdsFromCloudConnectorVars(
   cloudConnectorVars: CloudConnectorVars
 ): string[] {
   const secretIds: string[] = [];
+  const secretVarKeys = getSecretVarKeys(cloudProvider);
+  const schema = getCredentialSchema(cloudProvider);
 
-  if (cloudProvider === 'aws') {
-    const awsVars = cloudConnectorVars as any;
-    // AWS has external_id as a secret
-    if (
-      awsVars.external_id?.value &&
-      typeof awsVars.external_id.value === 'object' &&
-      awsVars.external_id.value.isSecretRef &&
-      awsVars.external_id.value.id
-    ) {
-      secretIds.push(awsVars.external_id.value.id);
+  // Map logical names to actual vars
+  const varsAsRecord = cloudConnectorVars as Record<string, any>;
+
+  for (const varKeyConfig of schema.varKeys) {
+    if (!secretVarKeys.includes(varKeyConfig.varKey)) {
+      continue;
     }
-  } else if (cloudProvider === 'azure') {
-    const azureVars = cloudConnectorVars as any;
-    // Azure has tenant_id and client_id as secrets
+
+    const varEntry = varsAsRecord[varKeyConfig.logicalName];
     if (
-      azureVars.tenant_id?.value &&
-      typeof azureVars.tenant_id.value === 'object' &&
-      azureVars.tenant_id.value.isSecretRef &&
-      azureVars.tenant_id.value.id
+      varEntry?.value &&
+      typeof varEntry.value === 'object' &&
+      varEntry.value.isSecretRef &&
+      varEntry.value.id
     ) {
-      secretIds.push(azureVars.tenant_id.value.id);
-    }
-    if (
-      azureVars.client_id?.value &&
-      typeof azureVars.client_id.value === 'object' &&
-      azureVars.client_id.value.isSecretRef &&
-      azureVars.client_id.value.id
-    ) {
-      secretIds.push(azureVars.client_id.value.id);
+      secretIds.push(varEntry.value.id);
     }
   }
 
