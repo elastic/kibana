@@ -24,6 +24,15 @@ export class ExitForeachNodeImpl implements NodeImplementation {
   public run(): void {
     const foreachState = this.stepExecutionRuntime.getCurrentStepState();
 
+    this.workflowLogger.logDebug(
+      `[CHESS_DEBUG] ExitForeach: stepId=${this.node.stepId}, stepExecutionId=${this.stepExecutionRuntime.stepExecutionId}, ` +
+        `foreachState=${foreachState ? JSON.stringify(foreachState) : 'NOT FOUND'}, ` +
+        `stepExecution exists=${this.stepExecutionRuntime.stepExecutionExists()}`,
+      {
+        workflow: { step_id: this.node.stepId },
+      }
+    );
+
     if (!foreachState) {
       throw new Error(`Foreach state for step ${this.node.stepId} not found`);
     }

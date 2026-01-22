@@ -1,0 +1,9 @@
+{
+  "name": "@kbn/chess-workflow-example",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
+  "dependencies": {
+    "chess.js": "^1.4.0"
+  }
+}

@@ -204,6 +204,12 @@ export class WorkflowExecutionRuntimeManager {
 
   public setWorkflowError(error: Error | undefined): void {
     const executionError = error ? ExecutionError.fromError(error) : undefined;
+    if (error) {
+      this.workflowLogger?.logError(`Workflow error occurred: ${error.message}`, error, {
+        event: { action: 'workflow-error', category: ['workflow'] },
+        tags: ['workflow', 'error'],
+      });
+    }
     this.workflowExecutionState.updateWorkflowExecution({
       error: executionError ? executionError.toSerializableObject() : undefined,
     });
@@ -373,6 +379,12 @@ export class WorkflowExecutionRuntimeManager {
   public async resume(): Promise<void> {
     await this.workflowExecutionState.load();
     this.nextNodeId = this.workflowExecution.currentNodeId;
+
+    // Debug logging for resume
+    this.workflowLogger?.logDebug(
+      `[CHESS_DEBUG] Resume: nextNodeId=${this.nextNodeId}, scopeStack=${JSON.stringify(this.workflowExecution.scopeStack)}`
+    );
+
     const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
       status: ExecutionStatus.RUNNING,
     };

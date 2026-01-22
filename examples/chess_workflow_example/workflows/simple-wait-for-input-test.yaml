@@ -9,7 +9,7 @@
 # Created: 2025-01-22
 # Tags: demo, human-in-the-loop
 # =============================================================================
-version: 1
+version: "1"
 name: Simple Wait For Input Test
 description: Simple test workflow for waitForInput step - demonstrates human-in-the-loop functionality
 enabled: true

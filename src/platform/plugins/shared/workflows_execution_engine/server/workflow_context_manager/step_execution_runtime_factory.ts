@@ -29,7 +29,13 @@ import type { IWorkflowEventLogger } from '../workflow_event_logger';
  * detects and removes such self-references to prevent context resolution issues and maintain clean
  * execution state.
  *
+ * Additionally, for `exit-*` nodes (like `exit-foreach`), this function removes the corresponding
+ * scope if the top of the stack has the same `stepId`. This ensures that both `enter-foreach` and
+ * `exit-foreach` nodes for the same step use the same step execution ID.
+ *
  * @param nodeId - The ID of the node for which the step execution runtime is being created
+ * @param stepId - The step ID (YAML step name) of the node
+ * @param nodeType - The type of the node (e.g., 'enter-foreach', 'exit-foreach')
  * @param stackFrames - The current stack frames from the workflow execution
  * @returns Modified stack frames with the current node removed if it was on top, otherwise unchanged
  *
@@ -37,15 +43,32 @@ import type { IWorkflowEventLogger } from '../workflow_event_logger';
  * ```typescript
  * // Scenario: "enter-foreach" node just called enterScope() for itself
  * // stackFrames = [{stepId: "loop", nestedScopes: [{nodeId: "enter-foreach", ...}]}]
- * const cleaned = removeCurrentNodeFromStackFrames("enter-foreach", stackFrames);
+ * const cleaned = removeCurrentNodeFromStackFrames("enter-foreach", "loop", "enter-foreach", stackFrames);
  * // cleaned = [] - the self-reference is removed
+ *
+ * // Scenario: "exit-foreach" node needs to access the same step execution as "enter-foreach"
+ * // stackFrames = [{stepId: "loop", nestedScopes: [{nodeId: "enterForeach_loop", scopeId: "0"}]}]
+ * const cleaned = removeCurrentNodeFromStackFrames("exitForeach_loop", "loop", "exit-foreach", stackFrames);
+ * // cleaned = [] - the scope is removed so exit-foreach has same stepExecutionId as enter-foreach
  * ```
  */
-function removeCurrentNodeFromStackFrames(nodeId: string, stackFrames: StackFrame[]): StackFrame[] {
+function removeCurrentNodeFromStackFrames(
+  nodeId: string,
+  stepId: string,
+  nodeType: string,
+  stackFrames: StackFrame[]
+): StackFrame[] {
   const workflowScopeStack = WorkflowScopeStack.fromStackFrames(stackFrames);
   const onTop = workflowScopeStack.getCurrentScope();
 
+  // Case 1: Direct match - the current node is on top of the stack (self-reference)
   if (onTop?.nodeId === nodeId) {
+    return workflowScopeStack.exitScope().stackFrames;
+  }
+
+  // Case 2: For exit-* nodes, check if the top of the stack has the same stepId
+  // This ensures that exit-foreach uses the same stepExecutionId as enter-foreach
+  if (nodeType.startsWith('exit-') && onTop?.stepId === stepId) {
     return workflowScopeStack.exitScope().stackFrames;
   }
 
@@ -104,12 +127,26 @@ export class StepExecutionRuntimeFactory {
     // During workflow execution, a node may call enterScope() for itself before executing,
     // causing the node to appear on top of its own stack frames. This removes such self-references
     // to prevent context resolution issues during step execution.
-    const modifiedStackFrames = removeCurrentNodeFromStackFrames(nodeId, stackFrames);
+    // For exit-* nodes, we also remove the scope if it matches the stepId to ensure
+    // both enter-* and exit-* nodes use the same step execution ID.
+    const modifiedStackFrames = removeCurrentNodeFromStackFrames(
+      nodeId,
+      node.stepId,
+      node.type,
+      stackFrames
+    );
 
     const stepExecutionId = buildStepExecutionId(
       workflowExecution.id,
       node.stepId,
       modifiedStackFrames
+    );
+
+    // Debug logging for foreach state issues
+    this.params.workflowLogger.logDebug(
+      `[CHESS_DEBUG] StepExecutionRuntime: nodeId=${nodeId}, stepId=${node.stepId}, nodeType=${node.type}, ` +
+        `stepExecutionId=${stepExecutionId}, stackFrames=${JSON.stringify(stackFrames)}, ` +
+        `modifiedStackFrames=${JSON.stringify(modifiedStackFrames)}`
     );
 
     const stepLogger = this.params.workflowLogger.createStepLogger(

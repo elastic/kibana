@@ -22,7 +22,17 @@ export class EnterForeachNodeImpl implements NodeImplementation {
   ) {}
 
   public async run(): Promise<void> {
-    if (!this.stepExecutionRuntime.getCurrentStepState()) {
+    const existingState = this.stepExecutionRuntime.getCurrentStepState();
+    this.workflowLogger.logDebug(
+      `[CHESS_DEBUG] EnterForeach: stepId=${this.node.stepId}, stepExecutionId=${this.stepExecutionRuntime.stepExecutionId}, ` +
+        `existingState=${existingState ? JSON.stringify(existingState) : 'NONE'}, ` +
+        `stepExecution exists=${this.stepExecutionRuntime.stepExecutionExists()}`,
+      {
+        workflow: { step_id: this.node.stepId },
+      }
+    );
+
+    if (!existingState) {
       await this.enterForeach();
     } else {
       this.advanceIteration();

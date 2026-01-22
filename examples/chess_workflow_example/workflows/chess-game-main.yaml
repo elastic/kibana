@@ -2,96 +2,147 @@
 # Workflow: Chess Game Demo
 # Category: examples
 #
-# This workflow demonstrates human-in-the-loop functionality using the 
-# waitForInput step. It plays a single turn of chess where:
-# 1. AI calculates its move using ai.prompt
-# 2. Waits for human's move using waitForInput
+# DESIGN: Use foreach with data.set to maintain state across iterations.
+# The key insight is that `variables.board` contains the LATEST board state
+# from the MOST RECENT data.set step execution.
 #
-# For a full game, you would run this workflow multiple times or extend
-# the workflow with a loop.
+# Turn structure:
+# 1. AI reads current board from variables.board (or inputs.board for turn 1)
+# 2. AI makes a move and stores new board in data.set
+# 3. Human makes a move via waitForInput
+# 4. Human's move is stored in data.set (updating variables.board)
+# 5. Loop continues - AI reads variables.board which now has human's move
 #
 # Author: Elastic
 # Created: 2025-01-22
 # Tags: demo, human-in-the-loop, chess
 # =============================================================================
-version: 1
+version: "1"
 name: Chess Game Demo
 description: Play chess against an AI using workflow human-in-the-loop functionality
 enabled: true
 tags: ["demo", "human-in-the-loop", "chess"]
 
-# ---------------------------------------------------------------------------
-# TRIGGERS
-# ---------------------------------------------------------------------------
 triggers:
   - type: manual
 
-# ---------------------------------------------------------------------------
-# INPUTS
-# ---------------------------------------------------------------------------
 inputs:
   properties:
     board:
       type: string
-      description: Current board state in FEN notation
+      description: Initial board state in FEN notation
       default: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 
-# ---------------------------------------------------------------------------
-# STEPS
-# ---------------------------------------------------------------------------
 steps:
-  # Step 1: AI's turn - calculate best move
-  - name: ai_turn
-    type: ai.prompt
-    connector-id: azure_open_ai  # Replace with your AI connector ID
-    with:
-      prompt: |
-        You are a chess engine. Given the current board state in FEN notation,
-        calculate the best move for the current player (White in this case).
-
-        Current board (FEN): {{ inputs.board }}
-
-        Respond with a JSON object containing:
-        - move: The move in UCI notation (e.g., "e2e4", "g1f3")
-        - newBoard: The updated board state in FEN notation after the move
-        - reasoning: Brief explanation of why this move is good
-
-        Only respond with the JSON object, no other text.
-      schema:
-        type: object
-        properties:
-          move:
-            type: string
-            description: The move in UCI notation
-          newBoard:
-            type: string
-            description: Updated FEN notation after the move
-          reasoning:
-            type: string
-            description: Why this move was chosen
-        required:
-          - move
-          - newBoard
-
-  # Step 2: Store AI's move in context
-  - name: store_ai_move
+  # Initialize game state - this sets variables.board to the initial position
+  - name: init_game
     type: data.set
     with:
-      board: '{{ steps.ai_turn.output.content.newBoard }}'
-      lastAiMove: '{{ steps.ai_turn.output.content.move }}'
-      aiReasoning: '{{ steps.ai_turn.output.content.reasoning }}'
+      board: '{{ inputs.board }}'
+      gameOver: false
+      turnNumber: 0
+      lastMove: ''
+      lastMoveBy: ''
 
-  # Step 3: Wait for human's move
-  - name: wait_for_human
-    type: waitForInput
-    with:
-      timeout: 30m
-      message: "Your turn! Enter your move in UCI notation (e.g., e7e5)"
+  # Main game loop - up to 50 turns (100 half-moves)
+  - name: game_loop
+    type: foreach
+    foreach: '[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50]'
+    steps:
+      # Check if game should continue
+      - name: check_game_continues
+        type: if
+        condition: 'not variables.gameOver: true'
+        steps:
+          # AI's turn - read board from variables (which has the latest state)
+          - name: ai_turn
+            type: ai.prompt
+            with:
+              prompt: |
+                You are a chess engine playing as WHITE. Analyze the board and make the best legal move.
 
-  # Step 4: Store human's move
-  - name: store_human_move
+                Current board state (FEN): {{ variables.board }}
+                Turn number: {{ foreach.item }}
+
+                RULES:
+                1. You are WHITE - only move WHITE pieces (uppercase letters in FEN: R, N, B, Q, K, P)
+                2. Output your move in coordinate notation: [from][to] (e.g., "e2e4", "g1f3", "e1g1" for kingside castle)
+                3. For pawn promotion, add the piece letter: "e7e8q" for queen promotion
+                4. Verify the move is legal according to chess rules
+                5. The newBoard field should contain the FEN after your move, but the move field is the primary output
+
+                FEN REMINDER:
+                - Board is from White's view: rank 8 (black's back rank) is first, rank 1 (white's back rank) is last
+                - After a pawn moves 2 squares, en-passant square is the square the pawn PASSED OVER (rank 3 for white pawns, rank 6 for black pawns)
+                - Use "-" for en-passant if no pawn just moved 2 squares
+
+                Respond with ONLY a JSON object:
+                {
+                  "move": "e2e4",
+                  "newBoard": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1",
+                  "reasoning": "Control the center with king's pawn",
+                  "isCheckmate": false,
+                  "isStalemate": false
+                }
+              outputSchema:
+                type: object
+                properties:
+                  move:
+                    type: string
+                    description: "Move in coordinate notation: [from][to], e.g., e2e4"
+                  newBoard:
+                    type: string
+                    description: "Board state in FEN notation after the move"
+                  reasoning:
+                    type: string
+                    description: "Brief explanation of why this move was chosen"
+                  isCheckmate:
+                    type: boolean
+                    description: "True if this move results in checkmate"
+                  isStalemate:
+                    type: boolean
+                    description: "True if this move results in stalemate"
+                required: [move, newBoard]
+
+          # Store AI's move - this updates variables.board for the next read
+          - name: store_ai_move
+            type: data.set
+            with:
+              board: '{{ steps.ai_turn.output.content.newBoard }}'
+              lastMove: '{{ steps.ai_turn.output.content.move }}'
+              lastMoveBy: 'AI'
+              aiReasoning: '{{ steps.ai_turn.output.content.reasoning }}'
+              turnNumber: '{{ foreach.item }}'
+              gameOver: '{{ steps.ai_turn.output.content.isCheckmate | default: false }}'
+
+          # Check if AI won
+          - name: check_ai_win
+            type: if
+            condition: 'not steps.ai_turn.output.content.isCheckmate: true'
+            steps:
+              # Wait for human's move
+              - name: wait_for_human
+                type: waitForInput
+                with:
+                  timeout: 30m
+                  message: "Turn {{ foreach.item }}: Your move (you are Black)!"
+
+              # Store human's move - this updates variables.board
+              # The NEXT iteration's ai_turn will read this via variables.board
+              - name: store_human_move
+                type: data.set
+                with:
+                  board: '{{ steps.wait_for_human.output.input.newBoard }}'
+                  lastMove: '{{ steps.wait_for_human.output.input.move }}'
+                  lastMoveBy: 'Human'
+                  turnNumber: '{{ foreach.item }}'
+                  gameOver: '{{ steps.wait_for_human.output.input.gameOver | default: false }}'
+
+  # Game over summary
+  - name: game_summary
     type: data.set
     with:
-      board: '{{ steps.wait_for_human.output.input.newBoard }}'
-      lastHumanMove: '{{ steps.wait_for_human.output.input.move }}'
-      gameStatus: 'turn_complete'
+      finalBoard: '{{ variables.board }}'
+      totalTurns: '{{ variables.turnNumber }}'
+      gameStatus: 'completed'
+      message: 'Game ended after {{ variables.turnNumber }} turns'

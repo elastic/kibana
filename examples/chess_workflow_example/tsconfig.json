@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["public/**/*"],
+  "include": ["public/**/*", "node_modules/chess.js/dist/*.d.ts"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/core-http-browser",

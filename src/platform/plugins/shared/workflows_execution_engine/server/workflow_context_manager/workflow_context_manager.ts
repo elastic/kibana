@@ -221,25 +221,62 @@ export class WorkflowContextManager {
   }
 
   /**
-   * Get variables from all data.set steps that are predecessors of the current step.
+   * Get variables from all COMPLETED data.set step executions.
    * Variables are retrieved from step outputs, which are persisted in execution state.
    * This ensures variables survive across wait steps and task resumptions.
+   *
+   * CRITICAL: We collect from ALL completed data.set executions, not just graph predecessors.
+   * This is essential for foreach loops where iteration N needs variables set by iteration N-1,
+   * even though they're not graph predecessors (they're the same step in the graph).
+   *
+   * The algorithm:
+   * 1. Get ALL step executions from the workflow state
+   * 2. Filter to only completed data.set steps
+   * 3. Sort by globalExecutionIndex (chronological order)
+   * 4. Merge outputs in that order so the most recent value for each property wins
    */
   public getVariables(): Record<string, unknown> {
-    const predecessors = this.workflowExecutionGraph.getAllPredecessors(this.node.id);
-    const dataSetSteps = predecessors.filter((node) => node.stepType === 'data.set');
+    // Get ALL step executions, not just graph predecessors
+    const allStepExecutions = this.workflowExecutionState.getAllStepExecutions();
 
-    const variables: Record<string, unknown> = {};
+    // Filter to completed data.set steps and collect their outputs
+    const allDataSetExecutions: Array<{
+      stepId: string;
+      output: Record<string, unknown>;
+      globalExecutionIndex: number;
+    }> = [];
 
-    for (const dataSetStep of dataSetSteps) {
-      const stepExecution = this.workflowExecutionState.getLatestStepExecution(dataSetStep.id);
+    for (const stepExecution of allStepExecutions) {
+      // Only include data.set steps that have completed (have output)
       if (
-        stepExecution?.output &&
+        stepExecution.stepType === 'data.set' &&
+        stepExecution.output &&
         typeof stepExecution.output === 'object' &&
         !Array.isArray(stepExecution.output)
       ) {
-        Object.assign(variables, stepExecution.output);
+        allDataSetExecutions.push({
+          stepId: stepExecution.stepId,
+          output: stepExecution.output as Record<string, unknown>,
+          globalExecutionIndex: stepExecution.globalExecutionIndex ?? 0,
+        });
       }
+    }
+
+    // Sort by globalExecutionIndex to ensure chronological order
+    allDataSetExecutions.sort((a, b) => a.globalExecutionIndex - b.globalExecutionIndex);
+
+    // Debug logging for variables resolution
+    // eslint-disable-next-line no-console
+    console.log(
+      `[CHESS_DEBUG] getVariables: totalStepExecutions=${allStepExecutions.length}, ` +
+        `dataSetSteps=${allDataSetExecutions.length}, ` +
+        `steps=${JSON.stringify(allDataSetExecutions.map((s) => ({ stepId: s.stepId, idx: s.globalExecutionIndex, board: (s.output as any).board?.substring(0, 30) })))}`
+    );
+
+    // Merge variables in chronological order - latest values win
+    const variables: Record<string, unknown> = {};
+    for (const { output } of allDataSetExecutions) {
+      Object.assign(variables, output);
     }
 
     return variables;

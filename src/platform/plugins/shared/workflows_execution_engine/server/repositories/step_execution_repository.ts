@@ -31,6 +31,7 @@ export class StepExecutionRepository {
         match: { workflowRunId: executionId },
       },
       sort: 'startedAt:desc',
+      size: 1000, // Ensure we get all step executions, not just the default 10
     });
 
     return response.hits.hits.map((hit) => hit._source as EsWorkflowStepExecution);
@@ -48,7 +49,12 @@ export class StepExecutionRepository {
     });
 
     const bulkResponse = await this.esClient.bulk({
-      refresh: false, // Performance optimization: documents become searchable after next refresh (~1s)
+      // Use 'wait_for' to ensure documents are immediately searchable after write.
+      // This is critical for workflow resume scenarios (like waitForInput) where the
+      // workflow may resume quickly and needs to find all step executions via search.
+      // Without this, there's a race condition where step executions written just before
+      // pausing may not be found when the workflow resumes (ES eventual consistency).
+      refresh: 'wait_for',
       index: this.indexName,
       body: stepExecutions.flatMap((stepExecution) => [
         { update: { _id: stepExecution.id } },
