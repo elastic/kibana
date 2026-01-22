@@ -12,13 +12,13 @@ import { defaultLLMConnectors } from './default_llm_connectors';
 
 describe('update_default_llm_actions', () => {
   describe('hasAnyDefaultLLMConnectors', () => {
-    it('returns true when inference connector with chat_completion taskType exists', async () => {
+    it('returns true when inference connector with chat_completion taskType and elastic provider exists', async () => {
       const mockActionsClient = {
         getAll: jest.fn().mockResolvedValue([
           {
             id: 'existing-connector',
             actionTypeId: '.inference',
-            config: { taskType: 'chat_completion' },
+            config: { taskType: 'chat_completion', provider: 'elastic' },
           },
         ]),
       } as unknown as ActionsClient;
@@ -92,7 +92,7 @@ describe('update_default_llm_actions', () => {
         {
           id: 'existing-llm',
           actionTypeId: '.inference',
-          config: { taskType: 'chat_completion' },
+          config: { taskType: 'chat_completion', provider: 'elastic' },
         },
       ]);
 
