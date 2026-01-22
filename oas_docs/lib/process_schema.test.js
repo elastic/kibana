@@ -99,10 +99,15 @@ describe('createProcessSchema', () => {
       const context = { operationId: 'testOp' };
       processSchema(schema, context);
 
-      expect(schema);
-      schema.oneOf.forEach((item) => {
-        expect(item).toHaveProperty('$ref');
-        expect(item.$ref).toContain('#/components/schemas/');
+      expect(schema).toEqual({
+        oneOf: [
+          { $ref: '#/components/schemas/MockoneOf0' },
+          { $ref: '#/components/schemas/MockoneOf1' },
+        ],
+      });
+      expect(mockComponents).toEqual({
+        MockoneOf0: { type: 'object', properties: { a: { type: 'string' } } },
+        MockoneOf1: { type: 'object', properties: { b: { type: 'number' } } },
       });
     });
 
@@ -134,9 +139,11 @@ describe('createProcessSchema', () => {
       expect(mockStats.oneOfCount).toBe(2);
       expect(mockStats.schemasExtracted).toBe(2);
       expect(Object.keys(mockComponents).length).toBe(2);
-      const nestedProp = schema.properties.nested;
-      nestedProp.oneOf.forEach((item) => {
-        expect(item).toHaveProperty('$ref');
+      expect(schema.properties.nested).toEqual({
+        oneOf: [
+          { $ref: '#/components/schemas/MockoneOf0' },
+          { $ref: '#/components/schemas/MockoneOf1' },
+        ],
       });
     });
   });
@@ -154,9 +161,15 @@ describe('createProcessSchema', () => {
       };
       processSchema(schema, context);
 
-      expect(schema.anyOf.length).toBe(2);
-      schema.anyOf.forEach((item) => {
-        expect(item).toHaveProperty('$ref');
+      expect(schema).toEqual({
+        anyOf: [
+          { $ref: '#/components/schemas/MockanyOf0' },
+          { $ref: '#/components/schemas/MockanyOf1' },
+        ],
+      });
+      expect(mockComponents).toEqual({
+        MockanyOf0: { type: 'string' },
+        MockanyOf1: { type: 'number' },
       });
     });
 
@@ -165,9 +178,11 @@ describe('createProcessSchema', () => {
       const context = { operationId: 'testOp' };
       processSchema(schema, context);
 
-      schema.anyOf.forEach((item) => {
-        expect(item).toHaveProperty('$ref');
-        expect(item.$ref).toContain('#/components/schemas/');
+      expect(schema).toEqual({
+        anyOf: [
+          { $ref: '#/components/schemas/MockanyOf0' },
+          { $ref: '#/components/schemas/MockanyOf1' },
+        ],
       });
     });
   });
@@ -193,9 +208,15 @@ describe('createProcessSchema', () => {
 
       processSchema(schema, context);
 
-      schema.allOf.forEach((item) => {
-        expect(item).toHaveProperty('$ref');
-        expect(item.$ref).toContain('#/components/schemas/');
+      expect(schema).toEqual({
+        allOf: [
+          { $ref: '#/components/schemas/MockallOf0' },
+          { $ref: '#/components/schemas/MockallOf1' },
+        ],
+      });
+      expect(mockComponents).toEqual({
+        MockallOf0: { type: 'object', properties: { base: { type: 'string' } } },
+        MockallOf1: { type: 'object', properties: { extended: { type: 'number' } } },
       });
     });
   });
@@ -219,11 +240,16 @@ describe('createProcessSchema', () => {
       processSchema(schema, context);
 
       expect(mockStats.schemasExtracted).toBe(2);
-      schema.properties.nested.oneOf.forEach((item) => {
-        expect(item).toHaveProperty('$ref');
-        expect(item.$ref).toContain('#/components/schemas/');
+      expect(schema.properties.nested).toEqual({
+        oneOf: [
+          { $ref: '#/components/schemas/MockoneOf0' },
+          { $ref: '#/components/schemas/MockoneOf1' },
+        ],
       });
-      expect(schema.properties.nested.oneOf[0].$ref).toBeDefined();
+      expect(mockComponents).toEqual({
+        MockoneOf0: { type: 'string' },
+        MockoneOf1: { type: 'number' },
+      });
     });
   });
 

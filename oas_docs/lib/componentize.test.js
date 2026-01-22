@@ -370,13 +370,13 @@ describe('componentizeObjectSchemas', () => {
 
     it('should prevent infinite recursion on deep nesting', async () => {
       // Create a very deeply nested structure
+      // Note: With object extraction, nested objects get converted to $refs which stops recursion
+      // So we need to use a structure that doesn't trigger object extraction (e.g., composition types)
+      // MAX_RECURSION_DEPTH is 100, so create 105 levels to trigger the warning
       let deepSchema = { type: 'string' };
-      for (let i = 0; i < 25; i++) {
+      for (let i = 0; i < 105; i++) {
         deepSchema = {
-          type: 'object',
-          properties: {
-            nested: deepSchema,
-          },
+          oneOf: [deepSchema, { type: 'number' }],
         };
       }
 
