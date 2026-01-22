@@ -84,6 +84,7 @@ import {
   filterByAgent,
   settingDefinitions,
 } from '../../../../common/agent_configuration/setting_definitions';
+import { OTelIndices } from '@kbn/apm-sources-access-plugin/common/config_schema';
 
 type ISavedObjectsClient = Pick<SavedObjectsClient, 'find'>;
 const TIME_RANGES = ['1d', 'all'] as const;
@@ -91,6 +92,7 @@ const AGENT_NAMES_WITHOUT_OTEL = without(AGENT_NAMES, ...OPEN_TELEMETRY_AGENT_NA
 type TimeRange = (typeof TIME_RANGES)[number];
 
 const range1d = { range: { '@timestamp': { gte: 'now-1d' } } };
+const range15m = { range: { '@timestamp': { gte: 'now-15m' } } };
 const timeout = '5m';
 
 interface TelemetryTask {
@@ -101,6 +103,7 @@ interface TelemetryTask {
 export interface TelemetryTaskExecutorParams {
   telemetryClient: TelemetryClient;
   indices: APMIndices;
+  otelIndices: OTelIndices;
   savedObjectsClient: ISavedObjectsClient;
 }
 
@@ -1865,18 +1868,14 @@ export const tasks: TelemetryTask[] = [
   },
   {
     name: 'otel_agents',
-    executor: async ({ indices, telemetryClient }) => {
-      // Use configured indices (includes both APM and OTel patterns)
-      // The existent filter on resource.attributes.agent.name will filter out APM docs
-      const otelIndices = [indices.transaction, indices.span, indices.error];
+    executor: async ({ otelIndices, telemetryClient }) => {
 
-      // OTel field paths (different from APM, unprocessed data doesn't go through APM pipeline)
-      const OTEL_AGENT_NAME = 'resource.attributes.agent.name';
-      const OTEL_SERVICE_NAME = 'resource.attributes.service.name';
+      const otelIndicesList = [otelIndices.transaction, otelIndices.span, otelIndices.error, otelIndices.metric];
+
 
       // the agent name (Exists) filter and aggregations
       const response = await telemetryClient.search({
-        index: otelIndices,
+        index: otelIndicesList,
         ignore_unavailable: true,
         allow_no_indices: true,
         size: 0,
@@ -1887,23 +1886,23 @@ export const tasks: TelemetryTask[] = [
             filter: [
               {
                 exists: {
-                  field: OTEL_AGENT_NAME,
+                  field: AGENT_NAME,
                 },
               },
-              range1d,
+              range15m,
             ],
           },
         },
         aggs: {
           agents: {
             terms: {
-              field: OTEL_AGENT_NAME,
+              field: AGENT_NAME,
               size: 1000,
             },
             aggs: {
               services: {
                 cardinality: {
-                  field: OTEL_SERVICE_NAME,
+                  field: SERVICE_NAME,
                 },
               },
             },
@@ -1912,7 +1911,6 @@ export const tasks: TelemetryTask[] = [
       });
 
 
-      
 
       const otelServicesPerAgent: Record<string, number> = {};
       const otelDocsPerAgent: Record<string, number> = {};
@@ -1929,15 +1927,8 @@ export const tasks: TelemetryTask[] = [
         otelDocsPerAgent[agentName] = bucket.doc_count ?? 0;
       }
 
-      // get index stats (OTel-only patterns, excludes APM indices)
-      const otelOnlyPatterns = [
-        'traces-*.otel-*',
-        'logs-*.otel-*',
-        'metrics-*.otel-*',
-      ];
-      
       const otelStatsResponse = await telemetryClient.indicesStats({
-        index: otelOnlyPatterns,
+        index: otelIndicesList,
         metric: ['store', 'docs'],
       });
 

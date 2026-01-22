@@ -18,11 +18,20 @@ export const indicesSchema = schema.object({
   sourcemap: schema.string({ defaultValue: 'apm-*' }), // Unused: to be deleted
 });
 
+
+export const otelIndicesSchema = schema.object({
+  transaction: schema.string({ defaultValue: 'traces-*.otel-*' }),
+  span: schema.string({ defaultValue: 'traces-*.otel-*' }),
+  error: schema.string({ defaultValue: 'logs-*.otel-*' }),
+  metric: schema.string({ defaultValue: 'metrics-*.otel-*' }),
+});
+
 /**
  * Schema for APM Sources configuration
  */
 export const configSchema = schema.object({
   indices: indicesSchema,
+  otelIndices: otelIndicesSchema,
 });
 
 /**
@@ -33,3 +42,7 @@ export type APMSourcesAccessConfig = TypeOf<typeof configSchema>;
  * Schema for APM indices
  */
 export type APMIndices = APMSourcesAccessConfig['indices'];
+/**
+ * Schema for OTel indices
+ */
+export type OTelIndices = APMSourcesAccessConfig['otelIndices'];

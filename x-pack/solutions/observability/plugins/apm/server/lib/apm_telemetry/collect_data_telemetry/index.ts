@@ -18,6 +18,7 @@ type CollectTelemetryParams = TelemetryTaskExecutorParams & {
 
 export function collectDataTelemetry({
   indices,
+  otelIndices,
   telemetryClient,
   savedObjectsClient,
   isProd,
@@ -30,6 +31,7 @@ export function collectDataTelemetry({
         const time = process.hrtime();
         const next = await task.executor({
           indices,
+          otelIndices,
           telemetryClient,
           savedObjectsClient,
         });

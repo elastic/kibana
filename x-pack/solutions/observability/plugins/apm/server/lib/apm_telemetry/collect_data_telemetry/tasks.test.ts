@@ -7,6 +7,7 @@
 
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
+import type { OTelIndices } from '@kbn/apm-sources-access-plugin/common/config_schema';
 import { tasks } from './tasks';
 import { SERVICE_NAME, SERVICE_ENVIRONMENT, AT_TIMESTAMP } from '../../../../common/es_fields/apm';
 import type { IndicesStatsResponse } from '../telemetry_client';
@@ -18,6 +19,13 @@ describe('data telemetry collection tasks', () => {
     span: 'apm-8.0.0-span',
     transaction: 'apm-8.0.0-transaction',
   } as APMIndices;
+
+  const otelIndices = {
+    error: 'logs-*.otel-*',
+    metric: 'metrics-*.otel-*',
+    span: 'traces-*.otel-*',
+    transaction: 'traces-*.otel-*',
+  } as OTelIndices;
 
   describe('environments', () => {
     const task = tasks.find((t) => t.name === 'environments');
@@ -1073,7 +1081,7 @@ describe('data telemetry collection tasks', () => {
 
       expect(
         await task?.executor({
-          indices,
+          otelIndices,
           telemetryClient: { search, indicesStats },
         } as any)
       ).toEqual({
@@ -1113,7 +1121,7 @@ describe('data telemetry collection tasks', () => {
 
       expect(
         await task?.executor({
-          indices,
+          otelIndices,
           telemetryClient: { search, indicesStats },
         } as any)
       ).toEqual({
@@ -1165,7 +1173,7 @@ describe('data telemetry collection tasks', () => {
       });
 
       const result = await task?.executor({
-        indices,
+        otelIndices,
         telemetryClient: { search, indicesStats },
       } as any);
 
