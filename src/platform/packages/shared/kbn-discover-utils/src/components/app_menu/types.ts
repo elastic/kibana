@@ -83,9 +83,7 @@ export type DiscoverAppMenuSecondaryActionItem = Omit<AppMenuSecondaryActionItem
  * Discover-specific app menu config with typed menu items
  */
 export interface DiscoverAppMenuConfig {
-  items?: Array<
-    DiscoverAppMenuItemType | DiscoverAppMenuPrimaryActionItem | DiscoverAppMenuSecondaryActionItem
-  >;
+  items?: DiscoverAppMenuItemType[];
   primaryActionItem?: DiscoverAppMenuPrimaryActionItem;
   secondaryActionItem?: DiscoverAppMenuSecondaryActionItem;
 }

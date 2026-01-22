@@ -341,8 +341,12 @@ export const useTopNavLinks = ({
     const config = appMenuRegistry.getAppMenuConfig();
 
     return {
-      items: config.items?.map((item) =>
-        enhanceAppMenuItemWithRunAction({ appMenuItem: item, services })
+      items: config.items?.map(
+        (item) =>
+          enhanceAppMenuItemWithRunAction({
+            appMenuItem: item,
+            services,
+          }) as DiscoverAppMenuItemType
       ),
       primaryActionItem: config.primaryActionItem
         ? (enhanceAppMenuItemWithRunAction({
