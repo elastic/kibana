@@ -14,6 +14,7 @@ import type {
   asCodeConditionFilterSchema,
   asCodeGroupFilterSchema,
   asCodeDSLFilterSchema,
+  asCodeSpatialFilterSchema,
 } from './schemas/filter';
 
 /**
@@ -25,3 +26,4 @@ export type AsCodeFilter = Writable<TypeOf<typeof asCodeFilterSchema>>;
 export type AsCodeConditionFilter = Writable<TypeOf<typeof asCodeConditionFilterSchema>>;
 export type AsCodeGroupFilter = Writable<TypeOf<typeof asCodeGroupFilterSchema>>;
 export type AsCodeDSLFilter = Writable<TypeOf<typeof asCodeDSLFilterSchema>>;
+export type AsCodeSpatialFilter = Writable<TypeOf<typeof asCodeSpatialFilterSchema>>;

@@ -16,6 +16,7 @@ import type {
   AsCodeConditionFilter,
   AsCodeGroupFilter,
   AsCodeDSLFilter,
+  AsCodeSpatialFilter,
 } from '@kbn/as-code-filters-schema';
 import { FILTERS } from '@kbn/es-query';
 import type { StoredFilter } from './types';
@@ -137,6 +138,13 @@ export function isDSLFilter(filter: AsCodeFilter): filter is AsCodeDSLFilter {
 }
 
 /**
+ * Type guard to check if filter is a spatial filter
+ */
+export function isSpatialFilter(filter: AsCodeFilter): filter is AsCodeSpatialFilter {
+  return filter.type === 'spatial';
+}
+
+/**
  * Type guard to check if condition is a nested AsCodeGroupFilter
  */
 export function isNestedFilterGroup(
@@ -148,14 +156,15 @@ export function isNestedFilterGroup(
 
 /**
  * Type guard to check if an AsCodeFilter has valid structure
- * Validates that exactly one of condition, group, or dsl is present
+ * Validates that exactly one of condition, group, dsl, or spatial is present
  */
 export function isAsCodeFilter(filter: AsCodeFilter): boolean {
   const hasCondition = isConditionFilter(filter);
   const hasGroup = isGroupFilter(filter);
   const hasDSL = isDSLFilter(filter);
+  const hasSpatial = isSpatialFilter(filter);
 
-  // Exactly one of the three must be true
-  const count = [hasCondition, hasGroup, hasDSL].filter(Boolean).length;
+  // Exactly one of the four must be true
+  const count = [hasCondition, hasGroup, hasDSL, hasSpatial].filter(Boolean).length;
   return count === 1;
 }

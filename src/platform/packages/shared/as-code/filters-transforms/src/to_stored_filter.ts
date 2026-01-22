@@ -16,6 +16,7 @@ import type {
   AsCodeConditionFilter,
   AsCodeGroupFilter,
   AsCodeDSLFilter,
+  AsCodeSpatialFilter,
 } from '@kbn/as-code-filters-schema';
 import type { Logger } from '@kbn/logging';
 import { ASCODE_FILTER_OPERATOR } from '@kbn/as-code-filters-constants';
@@ -26,6 +27,7 @@ import {
   isConditionFilter,
   isGroupFilter,
   isDSLFilter,
+  isSpatialFilter,
   isNestedFilterGroup,
   isAsCodeFilter,
 } from './type_guards';
@@ -111,8 +113,12 @@ export function toStoredFilter(filter: AsCodeFilter, logger?: Logger): StoredFil
       return convertFromDSLFilter(filter, storedFilter);
     }
 
+    if (isSpatialFilter(filter)) {
+      return convertFromSpatialFilter(filter, storedFilter);
+    }
+
     throw new FilterConversionError(
-      'AsCodeFilter must have exactly one of: condition, group, or dsl'
+      'AsCodeFilter must have exactly one of: condition, group, dsl, or spatial'
     );
   } catch (error) {
     logger?.warn(`Failed to convert AsCodeFilter to stored filter: ${error.message}`);
@@ -265,6 +271,23 @@ function convertFromFilterGroup(
       type: FILTERS.COMBINED,
       relation: group.type.toUpperCase(),
       params: filterParams,
+    },
+  };
+}
+
+/**
+ * Convert spatial filter to stored filter with FILTERS.SPATIAL_FILTER type
+ */
+function convertFromSpatialFilter(
+  asCodeFilter: AsCodeSpatialFilter,
+  baseStored: StoredFilter
+): StoredFilter {
+  return {
+    ...baseStored,
+    query: asCodeFilter.dsl.query,
+    meta: {
+      ...baseStored.meta,
+      type: FILTERS.SPATIAL_FILTER,
     },
   };
 }

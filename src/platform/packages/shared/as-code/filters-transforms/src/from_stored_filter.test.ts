@@ -14,6 +14,7 @@ import {
   isConditionFilter,
   isGroupFilter,
   isDSLFilter,
+  isSpatialFilter,
   isRangeConditionFilter,
 } from './type_guards';
 import { spatialFilterFixture } from './__fixtures__/spatial_filter';
@@ -586,14 +587,14 @@ describe('fromStoredFilter', () => {
       }
     });
 
-    it('should preserve spatial filters with geo_shape queries as DSL', () => {
+    it('should preserve spatial filters with geo_shape queries as spatial type', () => {
       const spatialFilter = spatialFilterFixture;
 
       const result = fromStoredFilter(spatialFilter) as AsCodeFilter;
 
-      // Should be converted to DSL format due to geo_shape complexity
-      expect(isDSLFilter(result)).toBe(true);
-      if (isDSLFilter(result)) {
+      // Should be converted to spatial filter type (not DSL)
+      expect(isSpatialFilter(result)).toBe(true);
+      if (isSpatialFilter(result)) {
         expect(result.dsl.query).toEqual(spatialFilter.query);
         expect(result.label).toBe('intersects shape');
         expect(result.disabled).toBe(false);
@@ -607,7 +608,7 @@ describe('fromStoredFilter', () => {
       const result = fromStoredFilter(spatialFilter) as AsCodeFilter;
 
       // Verify is_multi_index is extracted from meta
-      expect(isDSLFilter(result)).toBe(true);
+      expect(isSpatialFilter(result)).toBe(true);
       expect(result.is_multi_index).toBe(true);
     });
   });

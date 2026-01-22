@@ -12,6 +12,7 @@ export {
   asCodeConditionFilterSchema,
   asCodeGroupFilterSchema,
   asCodeDSLFilterSchema,
+  asCodeSpatialFilterSchema,
 } from './src/schemas/filter';
 
 export type {
@@ -19,4 +20,5 @@ export type {
   AsCodeConditionFilter,
   AsCodeGroupFilter,
   AsCodeDSLFilter,
+  AsCodeSpatialFilter,
 } from './src/types';

@@ -262,11 +262,27 @@ export const asCodeDSLFilterSchema = commonBasePropertiesSchema.extends({
 });
 
 /**
+ * Schema for spatial filters
+ * Similar to DSL filters but with type='spatial' to preserve spatial_filter meta.type
+ */
+export const asCodeSpatialFilterSchema = commonBasePropertiesSchema.extends({
+  type: schema.literal('spatial'),
+  dsl: schema.recordOf(schema.string(), schema.any(), {
+    meta: { description: 'Elasticsearch geo query DSL object' },
+  }),
+});
+
+/**
  * Main discriminated union schema for Filter
- * Uses 'type' as discriminator to validate condition, group, or dsl filters
+ * Uses 'type' as discriminator to validate condition, group, dsl, or spatial filters
  */
 export const asCodeFilterSchema = schema.discriminatedUnion(
   'type',
-  [asCodeConditionFilterSchema, asCodeGroupFilterSchema, asCodeDSLFilterSchema],
-  { meta: { description: 'A filter which can be a condition, group, or raw DSL' } }
+  [
+    asCodeConditionFilterSchema,
+    asCodeGroupFilterSchema,
+    asCodeDSLFilterSchema,
+    asCodeSpatialFilterSchema,
+  ],
+  { meta: { description: 'A filter which can be a condition, group, DSL, or spatial' } }
 );

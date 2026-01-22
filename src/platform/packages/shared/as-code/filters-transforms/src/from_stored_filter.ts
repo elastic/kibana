@@ -23,6 +23,7 @@ import type {
   AsCodeConditionFilter,
   AsCodeGroupFilter,
   AsCodeDSLFilter,
+  AsCodeSpatialFilter,
 } from '@kbn/as-code-filters-schema';
 import type { Logger } from '@kbn/logging';
 import { FilterStateStore } from '@kbn/es-query-constants';
@@ -97,9 +98,11 @@ export function fromStoredFilter(storedFilter: unknown, logger?: Logger): AsCode
         case FILTERS.COMBINED:
           return convertCombinedFilter(normalizedFilter, baseProperties);
 
+        case FILTERS.SPATIAL_FILTER:
+          return convertSpatialFilter(normalizedFilter, baseProperties);
+
         case FILTERS.MATCH_ALL:
         case FILTERS.QUERY_STRING:
-        case FILTERS.SPATIAL_FILTER:
         default:
           return convertToDSLFilter(normalizedFilter, baseProperties);
       }
@@ -389,8 +392,23 @@ function convertCombinedFilter(
 }
 
 /**
+ * Convert spatial filters
+ * Similar to DSL but maintains type='spatial' to preserve FILTERS.SPATIAL_FILTER in round-trip
+ */
+function convertSpatialFilter(
+  filter: StoredFilter,
+  baseProperties: Partial<AsCodeFilter>
+): AsCodeSpatialFilter {
+  return {
+    ...baseProperties,
+    type: 'spatial',
+    dsl: convertToRawDSL(filter),
+  };
+}
+
+/**
  * Convert filters that are always preserved as DSL
- * Used for: match_all, query_string, spatial filters (geo_bounding_box, geo_distance, etc.)
+ * Used for: match_all, query_string, etc.
  */
 function convertToDSLFilter(
   filter: StoredFilter,
