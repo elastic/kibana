@@ -36,7 +36,7 @@ export function validateMap(
       if (!mapParamsDefinition[paramKey]) {
         return getMessageFromId({
           messageId: 'unknownMapParameterName',
-          values: { paramName: paramKey, map: JSON.stringify(mapParamsDefinition) },
+          values: { paramName: paramKey },
           locations: param.key.location,
         });
       }

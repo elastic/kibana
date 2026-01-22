@@ -407,10 +407,7 @@ Expected one of:
       return {
         message: i18n.translate('kbn-esql-language.esql.validation.unknownMapParameterName', {
           defaultMessage: 'Unknown parameter "{paramName}".',
-          values: {
-            paramName: out.paramName,
-            map: out.map,
-          },
+          values: { paramName: out.paramName },
         }),
         type: 'error',
       };
