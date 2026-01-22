@@ -14,7 +14,7 @@ import { useExpandSection } from '../../shared/hooks/use_expand_section';
 import { ExpandableSection } from '../../shared/components/expandable_section';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 
-const KEY = 'AISummary';
+const KEY = 'aisummary';
 
 /**
  * Renders the AI Summary section in the Overview tab of the Attack Details flyout.
