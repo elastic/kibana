@@ -15,7 +15,7 @@
  * `get_trace_change_points` tool should detect the change.
  *
  * Baseline: shorter transaction and span durations.
- * Spike window: (`TRACE_CHANGE_POINTS_ANALYSIS_SPIKE_WINDOW`): longer
+ * Spike window (`TRACE_CHANGE_POINTS_ANALYSIS_SPIKE_WINDOW`): longer transaction and span durations.
  *
  * Validate via:
  *
