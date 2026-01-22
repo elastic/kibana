@@ -408,7 +408,7 @@ describe('Agent policy', () => {
         updated_by: 'system',
         schema_version: '1.1.1',
         is_protected: false,
-        fleet_server_host_id: 'default-fleet-server',
+        fleet_server_host_id: 'default-fleet-server-internal',
       });
     });
 
@@ -484,7 +484,7 @@ describe('Agent policy', () => {
         updated_by: 'system',
         schema_version: '1.1.1',
         is_protected: false,
-        fleet_server_host_id: 'default-fleet-server',
+        fleet_server_host_id: 'default-fleet-server-internal',
       });
     });
 

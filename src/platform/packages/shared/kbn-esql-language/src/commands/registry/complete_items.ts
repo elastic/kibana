@@ -18,6 +18,7 @@ import {
   ESQL_COMMON_NUMERIC_TYPES,
   ESQL_NAMED_PARAMS_TYPE,
 } from '../definitions/types';
+import { getPromqlParamDefinitions } from './promql/utils';
 
 const techPreviewLabel = i18n.translate('kbn-esql-language.esql.autocomplete.techPreviewLabel', {
   defaultMessage: `Technical Preview`,
@@ -171,6 +172,19 @@ export function buildMapValueCompleteItem(value: string): ISuggestionItem {
     detail: value,
     category: SuggestionCategory.CONSTANT_VALUE,
   };
+}
+
+export function getPromqlParamKeySuggestions(): ISuggestionItem[] {
+  return getPromqlParamDefinitions().map(({ name, description }) =>
+    withAutoSuggest({
+      label: name,
+      text: `${name} = `,
+      kind: 'Keyword',
+      detail: i18n.translate(`kbn-esql-language.esql.autocomplete.promql.${name}ParamDoc`, {
+        defaultMessage: description,
+      }),
+    })
+  );
 }
 
 export const commaCompleteItem = buildCharCompleteItem(

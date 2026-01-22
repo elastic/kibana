@@ -10,7 +10,8 @@
 import { i18n } from '@kbn/i18n';
 import { isLiteral } from '../../../../ast/is';
 import { getExpressionType } from '..';
-import type { ESQLColumnData } from '../../../registry/types';
+import type { UnmappedFieldsStrategy } from '../../../registry/types';
+import { type ESQLColumnData } from '../../../registry/types';
 import type { ESQLFunction } from '../../../../types';
 import type { FunctionDefinition } from '../../types';
 import { getMatchingSignatures } from '../expressions';
@@ -66,6 +67,7 @@ export function getFormattedFunctionSignature(
   functionDef: FunctionDefinition,
   fnNode?: ESQLFunction,
   columns?: Map<string, ESQLColumnData>,
+  unmappedFieldsStrategy?: UnmappedFieldsStrategy,
   maxTypesToShow?: number
 ): string {
   if (!functionDef.signatures || functionDef.signatures.length === 0) {
@@ -73,7 +75,7 @@ export function getFormattedFunctionSignature(
   }
 
   // Get the signatures that matches the given args so far
-  const signatures = getFilteredSignatures(functionDef, fnNode, columns);
+  const signatures = getFilteredSignatures(functionDef, fnNode, columns, unmappedFieldsStrategy);
 
   const returnTypes = new Set<string>();
   const parameterTypeMap = new Map<string, Set<string>>();
@@ -144,12 +146,15 @@ export function getFormattedFunctionSignature(
 function getFilteredSignatures(
   functionDef: FunctionDefinition,
   fnNode?: ESQLFunction,
-  columns?: Map<string, ESQLColumnData>
+  columns?: Map<string, ESQLColumnData>,
+  unmappedFieldsStrategy?: UnmappedFieldsStrategy
 ): FunctionDefinition['signatures'] {
   let signatures = functionDef.signatures;
 
   if (fnNode && columns && fnNode.args.length > 0) {
-    const argTypes = fnNode.args.map((arg) => getExpressionType(arg, columns));
+    const argTypes = fnNode.args.map((arg) =>
+      getExpressionType(arg, columns, unmappedFieldsStrategy)
+    );
     const literalMask = fnNode.args.map((arg) => isLiteral(arg));
 
     const matchingSignatures = getMatchingSignatures(

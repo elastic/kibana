@@ -224,7 +224,7 @@
               "() => void"
             ],
             "path": "src/platform/plugins/shared/navigation/public/plugin.tsx",
-            "lineNumber": 148,
+            "lineNumber": 151,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -257,7 +257,7 @@
           "<QT>) => React.ReactElement<any, string | React.JSXElementConstructor<any>> | null"
         ],
         "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu.tsx",
-        "lineNumber": 76,
+        "lineNumber": 79,
         "columnNumber": 1,
         "deprecated": true,
         "trackAdoption": false,
@@ -302,7 +302,7 @@
               "<QT>"
             ],
             "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu.tsx",
-            "lineNumber": 80,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -333,7 +333,7 @@
           "[] | undefined; }) => React.JSX.Element | null"
         ],
         "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_badges.tsx",
-        "lineNumber": 26,
+        "lineNumber": 29,
         "columnNumber": 14,
         "deprecated": true,
         "trackAdoption": false,
@@ -347,7 +347,7 @@
             "label": "{ badges }",
             "description": [],
             "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_badges.tsx",
-            "lineNumber": 26,
+            "lineNumber": 29,
             "columnNumber": 46,
             "deprecated": false,
             "trackAdoption": false,
@@ -370,7 +370,7 @@
                   "[] | undefined"
                 ],
                 "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_badges.tsx",
-                "lineNumber": 26,
+                "lineNumber": 29,
                 "columnNumber": 48,
                 "deprecated": false,
                 "trackAdoption": false
@@ -427,14 +427,90 @@
         "parentPluginId": "navigation",
         "id": "def-public.TopNavMenuData",
         "type": "Interface",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "TopNavMenuData",
         "description": [],
         "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-        "lineNumber": 16,
+        "lineNumber": 19,
         "columnNumber": 1,
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "@kbn/lens-common",
+            "path": "src/platform/packages/shared/kbn-lens-common/types.ts"
+          },
+          {
+            "plugin": "@kbn/lens-common",
+            "path": "src/platform/packages/shared/kbn-lens-common/types.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/platform/plugins/shared/visualizations/public/visualize_app/utils/get_top_nav_config.tsx"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/platform/plugins/shared/visualizations/public/visualize_app/utils/get_top_nav_config.tsx"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/platform/plugins/shared/visualizations/public/visualize_app/utils/get_top_nav_config.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/app_plugin/lens_top_nav.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/app_plugin/lens_top_nav.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/app_plugin/lens_top_nav.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/app_plugin/lens_top_nav.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/app_menu_actions/convert_to_top_nav_item.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/app_menu_actions/convert_to_top_nav_item.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/use_top_nav_links.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/use_top_nav_links.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/discover_topnav_menu.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/discover_topnav_menu.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/discover_topnav_menu.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/app.tsx"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/app.tsx"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "navigation",
@@ -447,7 +523,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "lineNumber": 17,
+            "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -463,7 +539,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "lineNumber": 18,
+            "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -476,7 +552,7 @@
             "label": "label",
             "description": [],
             "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "lineNumber": 19,
+            "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -492,7 +568,7 @@
               "(anchorElement: HTMLElement) => void"
             ],
             "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "lineNumber": 20,
+            "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -509,7 +585,7 @@
                   "HTMLElement"
                 ],
                 "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-                "lineNumber": 14,
+                "lineNumber": 17,
                 "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false
@@ -527,7 +603,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "lineNumber": 21,
+            "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -543,7 +619,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "lineNumber": 22,
+            "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -559,7 +635,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "lineNumber": 23,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -575,7 +651,7 @@
               "boolean | (() => boolean) | undefined"
             ],
             "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "lineNumber": 24,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -591,7 +667,7 @@
               "string | (() => string | undefined) | undefined"
             ],
             "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "lineNumber": 25,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -607,7 +683,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "lineNumber": 26,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -773,7 +849,7 @@
               "<{ tooltipContent: React.ReactNode; title?: string | undefined; }, { title: string; tooltipContent?: React.ReactNode; }> & { title: string; tooltipContent?: React.ReactNode; } & { label: React.ReactNode; }) | undefined"
             ],
             "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "lineNumber": 27,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -789,7 +865,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "lineNumber": 28,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -805,7 +881,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "lineNumber": 29,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -821,7 +897,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "lineNumber": 30,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -837,7 +913,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "lineNumber": 31,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -854,7 +930,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "lineNumber": 32,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -870,7 +946,7 @@
               "\"right\" | \"left\" | undefined"
             ],
             "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "lineNumber": 33,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -886,7 +962,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "lineNumber": 34,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -902,7 +978,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "lineNumber": 35,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -918,7 +994,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "lineNumber": 36,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -935,7 +1011,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "lineNumber": 37,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -961,7 +1037,7 @@
               "; }) | undefined"
             ],
             "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "lineNumber": 38,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -986,7 +1062,7 @@
           ">"
         ],
         "path": "src/platform/plugins/shared/navigation/public/types.ts",
-        "lineNumber": 28,
+        "lineNumber": 31,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1003,7 +1079,7 @@
           "\"security\" | \"analytics\" | \"oblt\" | \"es\""
         ],
         "path": "src/platform/plugins/shared/navigation/public/types.ts",
-        "lineNumber": 56,
+        "lineNumber": 68,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1013,7 +1089,9 @@
         "parentPluginId": "navigation",
         "id": "def-public.TopNavMenuBadgeProps",
         "type": "Type",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "TopNavMenuBadgeProps",
         "description": [],
         "signature": [
@@ -1025,15 +1103,63 @@
         "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_badges.tsx",
         "lineNumber": 17,
         "columnNumber": 1,
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "@kbn/managed-content-badge",
+            "path": "src/platform/packages/private/kbn-managed-content-badge/index.ts"
+          },
+          {
+            "plugin": "@kbn/managed-content-badge",
+            "path": "src/platform/packages/private/kbn-managed-content-badge/index.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_top_nav/internal_dashboard_top_nav.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_top_nav/internal_dashboard_top_nav.tsx"
+          },
+          {
+            "plugin": "@kbn/unsaved-changes-badge",
+            "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/utils/get_top_nav_unsaved_changes_badge.tsx"
+          },
+          {
+            "plugin": "@kbn/unsaved-changes-badge",
+            "path": "src/platform/packages/private/kbn-unsaved-changes-badge/src/utils/get_top_nav_unsaved_changes_badge.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/get_top_nav_badges.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/get_top_nav_badges.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/get_top_nav_badges.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/discover_topnav_menu.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/discover_topnav_menu.tsx"
+          }
+        ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "navigation",
         "id": "def-public.TopNavMenuProps",
         "type": "Type",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "TopNavMenuProps",
         "description": [],
         "signature": [
@@ -1076,8 +1202,42 @@
         "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu.tsx",
         "lineNumber": 24,
         "columnNumber": 1,
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/app_plugin/lens_top_nav.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/app_plugin/lens_top_nav.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/app_plugin/lens_top_nav.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/app_plugin/lens_top_nav.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_top_nav/internal_dashboard_top_nav.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_top_nav/internal_dashboard_top_nav.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/search_bar_customization.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/search_bar_customization.ts"
+          }
+        ],
         "initialIsOpen": false
       }
     ],
@@ -1099,7 +1259,9 @@
           "parentPluginId": "navigation",
           "id": "def-public.NavigationPublicSetup.registerMenuItem",
           "type": "Function",
-          "tags": [],
+          "tags": [
+            "deprecated"
+          ],
           "label": "registerMenuItem",
           "description": [],
           "signature": [
@@ -1110,8 +1272,18 @@
           "path": "src/platform/plugins/shared/navigation/public/types.ts",
           "lineNumber": 24,
           "columnNumber": 3,
-          "deprecated": false,
+          "deprecated": true,
           "trackAdoption": false,
+          "references": [
+            {
+              "plugin": "@kbn/test-suites-src",
+              "path": "src/platform/test/plugin_functional/plugins/kbn_top_nav/public/plugin.tsx"
+            },
+            {
+              "plugin": "@kbn/test-suites-src",
+              "path": "src/platform/test/plugin_functional/plugins/kbn_top_nav/public/plugin.tsx"
+            }
+          ],
           "returnComment": [],
           "children": [
             {
@@ -1125,7 +1297,7 @@
                 "RegisteredTopNavMenuData"
               ],
               "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu_extensions_registry.ts",
-              "lineNumber": 24,
+              "lineNumber": 25,
               "columnNumber": 19,
               "deprecated": false,
               "trackAdoption": false
@@ -1144,7 +1316,7 @@
       "label": "NavigationPublicStart",
       "description": [],
       "path": "src/platform/plugins/shared/navigation/public/types.ts",
-      "lineNumber": 30,
+      "lineNumber": 33,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -1234,7 +1406,7 @@
             "<QT>) => React.JSX.Element; }"
           ],
           "path": "src/platform/plugins/shared/navigation/public/types.ts",
-          "lineNumber": 31,
+          "lineNumber": 34,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -1254,7 +1426,7 @@
             ") => void"
           ],
           "path": "src/platform/plugins/shared/navigation/public/types.ts",
-          "lineNumber": 39,
+          "lineNumber": 51,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -1270,7 +1442,7 @@
                 "SolutionNavigation"
               ],
               "path": "src/platform/plugins/shared/navigation/public/types.ts",
-              "lineNumber": 40,
+              "lineNumber": 52,
               "columnNumber": 27,
               "deprecated": false,
               "trackAdoption": false,
@@ -1293,7 +1465,7 @@
             "<boolean>"
           ],
           "path": "src/platform/plugins/shared/navigation/public/types.ts",
-          "lineNumber": 41,
+          "lineNumber": 53,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false

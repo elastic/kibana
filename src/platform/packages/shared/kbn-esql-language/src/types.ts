@@ -681,6 +681,7 @@ export interface ESQLMessage {
   code: string;
   errorType?: 'semantic';
   requiresCallback?: 'getColumnsFor' | 'getSources' | 'getPolicies' | 'getJoinIndices' | string;
+  underlinedWarning?: boolean;
 }
 
 export interface EditorError {
