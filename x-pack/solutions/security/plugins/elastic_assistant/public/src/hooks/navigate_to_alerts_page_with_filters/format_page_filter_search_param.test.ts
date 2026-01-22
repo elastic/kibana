@@ -19,16 +19,7 @@ describe('formatPageFilterSearchParam', () => {
       display_settings: { hide_action_bar: true },
     };
 
-    expect(formatPageFilterSearchParam([filter])).toEqual([
-      {
-        title: 'User',
-        fieldName: 'user.name',
-        selectedOptions: ['test_user'],
-        existsSelected: true,
-        exclude: true,
-        displaySettings: { hideActionBar: true },
-      },
-    ]);
+    expect(formatPageFilterSearchParam([filter])).toEqual([filter]);
   });
 
   it('it sets default values when they are undefined', () => {
@@ -39,11 +30,11 @@ describe('formatPageFilterSearchParam', () => {
     expect(formatPageFilterSearchParam([filter])).toEqual([
       {
         title: 'user.name',
-        selectedOptions: [],
-        fieldName: 'user.name',
-        existsSelected: false,
+        selected_options: [],
+        field_name: 'user.name',
+        exists_selected: false,
         exclude: false,
-        displaySettings: { hideActionBar: false },
+        display_settings: { hide_action_bar: false },
       },
     ]);
   });

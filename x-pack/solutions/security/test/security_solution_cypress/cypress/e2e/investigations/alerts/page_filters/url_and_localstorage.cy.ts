@@ -126,9 +126,11 @@ describe(
 
       const NEW_FILTERS = DEFAULT_DETECTION_PAGE_FILTERS.map((filter) => {
         return {
-          hideActionBar: false,
+          display_settings: {
+            hide_action_bar: false,
+          },
           ...filter,
-          selectedOptions: filter.title === 'Severity' ? ['high'] : filter.selected_options,
+          selected_options: filter.title === 'Severity' ? ['high'] : filter.selected_options,
         };
       });
       const expectedVal = encode(formatPageFilterSearchParam(NEW_FILTERS));
