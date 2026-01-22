@@ -42,7 +42,3 @@ export type ControlsRendererParentApi = Pick<
     registerChildApi: (api: DefaultEmbeddableApi) => void;
     isCompressed?: () => boolean;
   };
-
-export interface HasPrependWrapperRef {
-  prependWrapperRef: React.RefObject<HTMLDivElement>;
-}

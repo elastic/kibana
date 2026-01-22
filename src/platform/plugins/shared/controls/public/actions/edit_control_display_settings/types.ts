@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { apiHasPrependWrapperRef, type HasPrependWrapperRef } from '@kbn/controls-renderer';
+
 import type { PinnedControlLayoutState } from '@kbn/controls-schemas';
 import {
   type IsPinnable,
@@ -47,7 +47,6 @@ export const apiIsPinnableControlApi = (api: unknown | null): api is PinnableCon
     apiHasUniqueId(api) &&
       apiCanBePinned(api) &&
       apiHasParentApi(api) &&
-      apiHasPrependWrapperRef(api) &&
       apiIsPinnableControlParentApi(api.parentApi) &&
       api.parentApi.panelIsPinned(api.uuid)
   );

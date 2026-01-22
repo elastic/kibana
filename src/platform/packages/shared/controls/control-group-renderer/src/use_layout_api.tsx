@@ -60,6 +60,12 @@ export const useLayoutApi = (
 
     return {
       layout$: layout$Ref.current,
+      getLayout: (id: string) => layout$Ref.current.getValue().controls[id],
+      setLayout: (id: string, newLayout: PinnedControlLayoutState) => {
+        layout$Ref.current.next({
+          controls: { ...layout$Ref.current.getValue().controls, [id]: newLayout },
+        });
+      },
       addNewPanel: async <State extends PinnedControlState = PinnedControlState>(
         panelPackage: PanelPackage<State>
       ) => {
