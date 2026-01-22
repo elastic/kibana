@@ -10,8 +10,10 @@
 require('@kbn/setup-node-env');
 const { merge } = require('@kbn/openapi-bundler');
 const { REPO_ROOT } = require('@kbn/repo-info');
+const checkBundle = require('./check_bundles');
 
 (async () => {
+  checkBundle(`${REPO_ROOT}/oas_docs/bundle.serverless.json`);
   await merge({
     sourceGlobs: [
       `${REPO_ROOT}/oas_docs/bundle.serverless.json`,

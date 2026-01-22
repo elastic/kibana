@@ -55,6 +55,7 @@ import type {
   SLOServerSetup,
   SLOServerStart,
 } from './types';
+import { StaleInstancesCleanupTask } from './services/tasks/stale_instances_cleanup_task/stale_instances_cleanup_task';
 
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
 
@@ -68,6 +69,7 @@ export class SLOPlugin
   private readonly isDev: boolean;
   private orphanSummaryCleanupTask?: OrphanSummaryCleanupTask;
   private tempSummaryCleanupTask?: TempSummaryCleanupTask;
+  private staleInstancesCleanupTask?: StaleInstancesCleanupTask;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.logger = this.initContext.logger.get();
@@ -256,6 +258,13 @@ export class SLOPlugin
       config: this.config,
     });
 
+    this.staleInstancesCleanupTask = new StaleInstancesCleanupTask({
+      core,
+      taskManager: plugins.taskManager,
+      logFactory: this.initContext.logger,
+      config: this.config,
+    });
+
     new BulkDeleteTask({
       core,
       taskManager: plugins.taskManager,
@@ -277,6 +286,7 @@ export class SLOPlugin
 
     this.orphanSummaryCleanupTask?.start(plugins).catch(() => {});
     this.tempSummaryCleanupTask?.start(plugins).catch(() => {});
+    this.staleInstancesCleanupTask?.start(plugins).catch(() => {});
 
     return {
       getSloClientWithRequest: (request: KibanaRequest) => {
