@@ -12,7 +12,7 @@ import {
   filterOutWarningsOverlappingWithErrors,
   parseErrors,
   parseWarning,
-  filterDuplicatedUnmappedColumnWarnings,
+  filterDuplicatedWarnings,
 } from './helpers';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 
@@ -334,26 +334,15 @@ describe('helpers', function () {
       endColumn: 1,
     });
 
-    it('should filter duplicated unmappedColumnWarning warnings', function () {
+    it('should filter duplicated warning messages', function () {
       const warnings = [
         createMessage('unmappedColumnWarning', 'Field a is unmapped'),
         createMessage('unmappedColumnWarning', 'Field a is unmapped'),
         createMessage('unmappedColumnWarning', 'Field b is unmapped'),
       ];
-      expect(filterDuplicatedUnmappedColumnWarnings(warnings)).toEqual([
+      expect(filterDuplicatedWarnings(warnings)).toEqual([
         createMessage('unmappedColumnWarning', 'Field a is unmapped'),
         createMessage('unmappedColumnWarning', 'Field b is unmapped'),
-      ]);
-    });
-
-    it('should not filter other duplicated warnings', function () {
-      const warnings = [
-        createMessage('otherWarning', 'Some warning'),
-        createMessage('otherWarning', 'Some warning'),
-      ];
-      expect(filterDuplicatedUnmappedColumnWarnings(warnings)).toEqual([
-        createMessage('otherWarning', 'Some warning'),
-        createMessage('otherWarning', 'Some warning'),
       ]);
     });
   });

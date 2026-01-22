@@ -385,13 +385,10 @@ export const filterOutWarningsOverlappingWithErrors = (
   return warnings.filter((warning) => !hasOverlap(warning));
 };
 
-export const filterDuplicatedUnmappedColumnWarnings = (
+export const filterDuplicatedWarnings = (
   warnings: (MonacoMessage & { code: string })[]
 ): MonacoMessage[] => {
   return uniqBy(warnings, (warning) => {
-    if (warning.code === 'unmappedColumnWarning') {
-      return warning.message;
-    }
-    return warning;
+    return warning.message;
   });
 };
