@@ -36,7 +36,6 @@ dependsOn:
   - '@kbn/lens-plugin'
   - '@kbn/security-plugin'
   - '@kbn/triggers-actions-ui-plugin'
-  - '@kbn/timelines-plugin'
   - '@kbn/spaces-plugin'
   - '@kbn/i18n'
   - '@kbn/rison'

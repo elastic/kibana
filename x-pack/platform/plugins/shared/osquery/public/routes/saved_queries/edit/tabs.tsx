@@ -11,6 +11,7 @@ import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 
 import { ResultsTable } from '../../../results/results_table';
 import { ActionResultsSummary } from '../../../action_results/action_results_summary';
+import type { AddToTimelineHandler } from '../../../types';
 
 const euiTabbedContentCss = {
   'div.euiTabs': {
@@ -27,6 +28,7 @@ interface ResultTabsProps {
   endDate?: string;
   liveQueryActionId?: string;
   error?: string;
+  addToTimeline?: AddToTimelineHandler;
 }
 
 const ResultTabsComponent: React.FC<ResultTabsProps> = ({
@@ -38,6 +40,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
   startDate,
   liveQueryActionId,
   error,
+  addToTimeline,
 }) => {
   const tabs = useMemo(
     () => [
@@ -54,6 +57,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
             endDate={endDate}
             liveQueryActionId={liveQueryActionId}
             error={error}
+            addToTimeline={addToTimeline}
           />
         ),
       },
@@ -86,6 +90,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
       liveQueryActionId,
       error,
       failedAgentsCount,
+      addToTimeline,
     ]
   );
 
