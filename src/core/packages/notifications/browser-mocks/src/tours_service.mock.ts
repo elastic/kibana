@@ -7,22 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type {
-  ErrorToastOptions,
-  ToastOptions,
-  Toast,
-  ToastInput,
-  IToasts,
-  ToastInputFields,
-  NotificationCoordinator,
-  NotificationCoordinatorState,
-  NotificationCoordinatorPublicApi,
-} from './src/types';
-export type {
-  ToastsSetup,
-  ToastsStart,
-  NotificationsSetup,
-  NotificationsStart,
-} from './src/contracts';
-export type { FeedbackStart } from './src/feedback_types';
-export type { ToursStart } from './src/tours_types';
+import type { ToursStart } from '@kbn/core-notifications-browser';
+
+const createStartContract = (): jest.Mocked<ToursStart> => {
+  return {
+    isEnabled: jest.fn().mockReturnValue(true),
+  };
+};
+
+export const toursServiceMock = {
+  createStartContract,
+};
