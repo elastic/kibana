@@ -147,6 +147,9 @@ test.describe('Copy integration', { tag: ['@ess'] }, () => {
 
     await expect(nameInput).toHaveValue(`copy-${packagePolicyName}`);
 
+    // Expand the streams section to access input fields
+    await copyIntegration.clickChangeDefaults();
+
     const pathsInput = copyIntegration.getMultiTextInputRow('nginx.access', 'paths');
     await expect(pathsInput).toHaveValue('/var/log/nginx/test123-access.log*');
 

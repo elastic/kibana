@@ -18,6 +18,13 @@ export class CopyIntegrationPage {
     await this.page.waitForLoadingIndicatorHidden();
   }
 
+  /**
+   * Click the "Change defaults" button to expand the streams section
+   */
+  async clickChangeDefaults() {
+    await this.page.locator('button:has-text("Change defaults")').click();
+  }
+
   getPackagePolicyNameInput() {
     return this.page.testSubj.locator('packagePolicyNameInput');
   }

@@ -174,10 +174,24 @@ describe('Integration package with custom dataset create and edit package policy
   it('should not show pipelines or mappings editor', () => {
     cy.visit(`/app/integrations/detail/${INTEGRATION_TEST_PACKAGE}/policies`);
     cy.getBySel(INTEGRATION_NAME_LINK).contains(packagePolicyName).click();
-    cy.get('[data-test-subj^="advancedStreamOptionsToggle"]').click();
 
-    cy.getBySel(POLICY_EDITOR.INSPECT_PIPELINES_BTN).should('not.exist');
-    cy.getBySel(POLICY_EDITOR.EDIT_MAPPINGS_BTN).should('not.exist');
+    // Expand the streams section to access input fields
+    cy.get('button').contains('Change defaults').click();
+
+    // For integration packages with custom datasets, the advanced options toggle
+    // may not exist if there are no advanced vars and the index template doesn't exist.
+    // In that case, the pipelines/mappings editors are already not shown.
+    cy.get('body').then(($body) => {
+      if ($body.find('[data-test-subj^="advancedStreamOptionsToggle"]').length > 0) {
+        cy.get('[data-test-subj^="advancedStreamOptionsToggle"]').click();
+        cy.getBySel(POLICY_EDITOR.INSPECT_PIPELINES_BTN).should('not.exist');
+        cy.getBySel(POLICY_EDITOR.EDIT_MAPPINGS_BTN).should('not.exist');
+      } else {
+        // If the toggle doesn't exist, pipelines/mappings are already not shown
+        cy.getBySel(POLICY_EDITOR.INSPECT_PIPELINES_BTN).should('not.exist');
+        cy.getBySel(POLICY_EDITOR.EDIT_MAPPINGS_BTN).should('not.exist');
+      }
+    });
   });
 });
 
