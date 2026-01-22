@@ -14,8 +14,12 @@ describe('createAiNavigationTree', () => {
     const primaryNavSection = navigationTree.body[4];
     const children = 'children' in primaryNavSection ? primaryNavSection.children : [];
 
-    const workflowsIndex = children.findIndex((item) => 'link' in item && item.link === 'workflows');
-    const agentsIndex = children.findIndex((item) => 'link' in item && item.link === 'agent_builder');
+    const workflowsIndex = children.findIndex(
+      (item) => 'link' in item && item.link === 'workflows'
+    );
+    const agentsIndex = children.findIndex(
+      (item) => 'link' in item && item.link === 'agent_builder'
+    );
 
     expect(workflowsIndex).toBe(agentsIndex + 1);
   });
@@ -26,9 +30,10 @@ describe('createAiNavigationTree', () => {
     const primaryNavSection = navigationTree.body[4];
     const children = 'children' in primaryNavSection ? primaryNavSection.children : [];
 
-    const workflowsIndex = children.findIndex((item) => 'link' in item && item.link === 'workflows');
+    const workflowsIndex = children.findIndex(
+      (item) => 'link' in item && item.link === 'workflows'
+    );
 
     expect(workflowsIndex).toBe(-1);
   });
 });
-
