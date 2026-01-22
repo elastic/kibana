@@ -139,9 +139,11 @@ describe('getAlertsAppMenuItem', () => {
       (discoverServiceMock.application.getUrlForApp as jest.Mock).mockImplementation(
         (appId: string) => `/app/${appId}`
       );
-      const component = mount();
-      const manageButton = findTestSubject(component, 'discoverManageAlertsButton');
-      expect(manageButton.prop('href')).toContain('/app/rules');
+      const alertsMenuItem = getAlertsMenuItem();
+      const manageAlertsItem = alertsMenuItem.items?.find(
+        (item) => item.testId === 'discoverManageAlertsButton'
+      );
+      expect(manageAlertsItem?.href).toBe('/app/rules');
     });
 
     it('should link to the management page when rules app is not registered', () => {
@@ -149,9 +151,11 @@ describe('getAlertsAppMenuItem', () => {
       (discoverServiceMock.application.getUrlForApp as jest.Mock).mockImplementation(
         (appId: string) => `/app/${appId}`
       );
-      const component = mount();
-      const manageButton = findTestSubject(component, 'discoverManageAlertsButton');
-      expect(manageButton.prop('href')).toContain(
+      const alertsMenuItem = getAlertsMenuItem();
+      const manageAlertsItem = alertsMenuItem.items?.find(
+        (item) => item.testId === 'discoverManageAlertsButton'
+      );
+      expect(manageAlertsItem?.href).toBe(
         '/app/management/insightsAndAlerting/triggersActions/rules'
       );
     });
