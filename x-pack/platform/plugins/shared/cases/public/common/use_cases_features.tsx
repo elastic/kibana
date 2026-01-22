@@ -20,6 +20,7 @@ export interface UseCasesFeatures {
   metricsFeatures: SingleCaseMetricsFeature[];
   isObservablesFeatureEnabled: boolean;
   isExtractObservablesEnabled: boolean;
+  isTemplatesEnabled: boolean;
 }
 
 export const useCasesFeatures = (): UseCasesFeatures => {
@@ -30,9 +31,9 @@ export const useCasesFeatures = (): UseCasesFeatures => {
   const { isAtLeastGold, isAtLeastPlatinum } = useLicense();
   const hasLicenseGreaterThanPlatinum = isAtLeastPlatinum();
   const hasLicenseWithAtLeastGold = isAtLeastGold();
-
   const casesFeatures = useMemo(
     () => ({
+      isTemplatesEnabled: features.templates.enabled,
       isAlertsEnabled: features.alerts.enabled,
       /**
        * If the alerts feature is disabled we will disable everything.
@@ -53,13 +54,14 @@ export const useCasesFeatures = (): UseCasesFeatures => {
         !!features.observables.enabled && !!features.observables.autoExtract,
     }),
     [
+      features.templates.enabled,
       features.alerts.enabled,
       features.alerts.sync,
       features.metrics,
+      features.observables.enabled,
+      features.observables.autoExtract,
       hasLicenseGreaterThanPlatinum,
       assign,
-      features.observables?.enabled,
-      features.observables?.autoExtract,
       hasLicenseWithAtLeastGold,
     ]
   );

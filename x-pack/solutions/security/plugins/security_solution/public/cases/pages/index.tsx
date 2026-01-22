@@ -39,6 +39,7 @@ import { DocumentEventTypes } from '../../common/lib/telemetry';
 import { EaseAlertsTable } from '../components/ease/wrapper';
 import { EventsTableForCases } from '../components/case_events/table';
 import { CASES_FEATURES } from '..';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 const CaseContainerComponent: React.FC = () => {
   const {
@@ -138,7 +139,7 @@ const CaseContainerComponent: React.FC = () => {
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
+  const templates = useIsExperimentalFeatureEnabled('templates');
   return (
     <SecuritySolutionPageWrapper noPadding>
       <CaseDetailsRefreshContext.Provider value={refreshRef}>
@@ -147,6 +148,7 @@ const CaseContainerComponent: React.FC = () => {
           owner: [APP_ID],
           features: {
             ...CASES_FEATURES,
+            templates: { enabled: templates },
             metrics: [
               CaseMetricsFeature.ALERTS_COUNT,
               CaseMetricsFeature.ALERTS_USERS,
