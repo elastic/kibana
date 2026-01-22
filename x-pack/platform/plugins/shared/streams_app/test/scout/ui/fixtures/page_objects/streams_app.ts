@@ -29,6 +29,8 @@ export class StreamsApp {
   public readonly advancedSettingsCodeBlock;
   public readonly kibanaMonacoEditor;
   public readonly saveRoutingRuleButton;
+  public readonly concatFieldInput;
+  public readonly concatLiteralInput;
 
   constructor(private readonly page: ScoutPage) {
     this.processorFieldComboBox = new EuiComboBoxWrapper(
@@ -62,6 +64,8 @@ export class StreamsApp {
     });
     this.kibanaMonacoEditor = new KibanaCodeEditorWrapper(this.page);
     this.saveRoutingRuleButton = this.page.getByTestId('streamsAppStreamDetailRoutingSaveButton');
+    this.concatFieldInput = new EuiSuperSelectWrapper(this.page, 'streamsAppConcatFieldInput');
+    this.concatLiteralInput = this.page.getByTestId('streamsAppConcatLiteralInput');
   }
 
   async goto() {
@@ -1086,5 +1090,21 @@ export class StreamsApp {
 
   async clickProcessorPreviewTab(label: string) {
     await this.page.getByText(label).click();
+  }
+
+  async clickAddConcatField() {
+    await this.page.getByTestId('streamsAppConcatAddFieldButton').click();
+  }
+
+  async clickAddConcatLiteral() {
+    await this.page.getByTestId('streamsAppConcatAddLiteralButton').click();
+  }
+
+  async fillConcatFieldInput(value: string) {
+    await this.concatFieldInput.selectOption(value);
+  }
+
+  async fillConcatLiteralInput(value: string) {
+    await this.concatLiteralInput.fill(value);
   }
 }
