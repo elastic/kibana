@@ -5,31 +5,126 @@
  * 2.0.
  */
 
-import type { ConversationRound, ToolResult } from '@kbn/agent-builder-common';
-import type { ToolResultStore, WritableToolResultStore } from '@kbn/agent-builder-server';
-import { extractConversationToolResults } from './utils';
+import {
+  Conversation,
+  ConversationRound,
+  isToolCallStep,
+  ToolResult,
+  ToolCallWithResult,
+  ToolResultType,
+} from '@kbn/agent-builder-common';
+import type {
+  ToolResultStore,
+  WritableToolResultStore,
+  ToolResultWithMeta,
+} from '@kbn/agent-builder-server/runner';
+import type { EntityStore, StoreProvider, FileEntry } from './fs_store';
+import { StoreEntryType } from './fs_store';
 
-export const createResultStore = (conversation?: ConversationRound[]): WritableToolResultStore => {
-  return new ToolResultStoreImpl(conversation ? extractConversationToolResults(conversation) : []);
+/////
+
+export interface ToolCallEntryMeta {
+  tool_result_type: ToolResultType;
+  tool_id: string;
+  tool_call_id: string;
+}
+
+export type ToolCallFileEntry<TData extends object = object> = FileEntry<TData, ToolCallEntryMeta>;
+
+export const getToolCallEntryPath = ({
+  toolId,
+  toolCallId,
+  toolResultId,
+}: {
+  toolId: string;
+  toolCallId: string;
+  toolResultId: string;
+}): string => {
+  // TODO: sanitize tool id
+  return `/tool_calls/${toolId}/${toolCallId}/${toolResultId}.json`;
+};
+
+export const createToolCallEntry = (result: ToolResultWithMeta): ToolCallFileEntry => {
+  return {
+    type: 'file',
+    path: getToolCallEntryPath({
+      toolId: result.tool_id,
+      toolCallId: result.tool_call_id,
+      toolResultId: result.tool_result_id,
+    }),
+    content: result.data,
+    metadata: {
+      type: StoreEntryType.toolResult,
+      id: result.tool_result_id,
+      content_length: 0, // TODO
+      readonly: true,
+      extra: {
+        tool_result_type: result.tool_result_type,
+        tool_call_id: result.tool_call_id,
+        tool_id: result.tool_id,
+      },
+    },
+  };
+};
+
+/////
+
+const toolCallToResults = (toolCall: ToolCallWithResult): ToolResultWithMeta[] => {
+  return toolCall.results.map((result) => ({
+    tool_result_type: result.type,
+    tool_result_id: result.tool_result_id,
+    tool_call_id: toolCall.tool_call_id,
+    tool_id: toolCall.tool_id,
+    data: result.data,
+  }));
+};
+
+export const extractConversationToolResults = (
+  conversation: ConversationRound[]
+): ToolResultWithMeta[] => {
+  const results: ToolResultWithMeta[] = [];
+  for (const round of conversation) {
+    const toolCalls = round.steps.filter(isToolCallStep).flatMap(toolCallToResults);
+    results.push(...toolCalls);
+  }
+  return results;
+};
+
+export const createResultStore = ({
+  entityStore,
+  conversation,
+}: {
+  entityStore: EntityStore;
+  conversation?: Conversation;
+}): WritableToolResultStore => {
+  const toolResults = extractConversationToolResults(conversation?.rounds ?? []);
+  const toolCallEntries = toolResults.map(createToolCallEntry);
+
+  // TODO: starting here
+
+  // TODO: should use FS storage directly instead, probably
+  toolCallEntries.forEach((entry) => {
+    entityStore.add(entry);
+  });
+
+  const toolResultStoreProvider: StoreProvider = {
+    async connect({ addEntry, removeEntry }) {},
+  };
+
+  return new ToolResultStoreImpl(toolResults);
 };
 
 class ToolResultStoreImpl implements WritableToolResultStore {
-  private readonly results: Map<string, ToolResult> = new Map();
+  private readonly results: Map<string, ToolCallFileEntry> = new Map();
 
-  constructor(results?: ToolResult[]) {
+  constructor(results?: ToolResultWithMeta[]) {
     if (results) {
       this.results = new Map(results.map((result) => [result.tool_result_id, result]));
     }
   }
 
-  asReadonly(): ToolResultStore {
-    return {
-      has: (resultId) => this.has(resultId),
-      get: (resultId) => this.get(resultId),
-    };
-  }
-
-  add(result: ToolResult): void {
+  // TODO: need to change to ToolResultWithMeta
+  add(result: ToolResultWithMeta): void {
     this.results.set(result.tool_result_id, result);
   }
 
@@ -46,5 +141,12 @@ class ToolResultStoreImpl implements WritableToolResultStore {
       throw new Error(`Result with id ${resultId} does not exist`);
     }
     return this.results.get(resultId)!;
+  }
+
+  asReadonly(): ToolResultStore {
+    return {
+      has: (resultId) => this.has(resultId),
+      get: (resultId) => this.get(resultId),
+    };
   }
 }

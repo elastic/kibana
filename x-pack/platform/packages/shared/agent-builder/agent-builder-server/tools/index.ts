@@ -29,5 +29,5 @@ export {
   isToolHandlerInterruptReturn,
   isToolHandlerStandardReturn,
 } from './handler';
-export { getToolResultId, createErrorResult, isToolResultId } from './utils';
+export { getToolResultId, createErrorResult, createOtherResult, isToolResultId } from './utils';
 export type { InternalToolDefinition, InternalToolAvailabilityHandler } from './internal';
