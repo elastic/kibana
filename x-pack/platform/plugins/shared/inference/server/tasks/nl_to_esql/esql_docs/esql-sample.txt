@@ -1,29 +1,21 @@
 # SAMPLE
 
-Collects sample values for a field.
-
-```
-stack: ga 9.1.0
-```
-
+The `SAMPLE` command samples a fraction of the table rows.
 **Syntax**
-`SAMPLE(field, limit)`
+```esql
+SAMPLE probability
+```
 
 ### Parameters
 
-#### `field`
+#### `probability`
 
-The field to collect sample values for.
+The probability that a row is included in the sample. The value must be between 0 and 1, exclusive.
 
-#### `limit`
-
-The maximum number of values to collect.
-
-**Supported types**
-
-**Example**
+**Examples**
 ```esql
 FROM employees
-| STATS sample = SAMPLE(gender, 5)
+| KEEP emp_no
+| SAMPLE 0.05
 ```
 
