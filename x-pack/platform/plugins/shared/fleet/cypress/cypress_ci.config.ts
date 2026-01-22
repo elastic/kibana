@@ -42,11 +42,12 @@ export default defineCypressConfig({
     experimentalMemoryManagement: true,
     numTestsKeptInMemory: 3,
 
-    specPattern: './cypress/e2e/space_awareness/**/*.cy.ts',
+    specPattern: './cypress/e2e/**/*.cy.ts',
     supportFile: './cypress/support/e2e.ts',
+    excludeSpecPattern: './cypress/e2e/space_awareness/**/*.cy.ts',
 
     setupNodeEvents(on, config) {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires, @kbn/imports/no_boundary_crossing
+      // eslint-disable-next-line @typescript-eslint/no-var-requires, @kbn/imports/uniform_imports
       return require('@kbn/fleet-plugin-cypress/plugins')(on, config);
     },
   },
