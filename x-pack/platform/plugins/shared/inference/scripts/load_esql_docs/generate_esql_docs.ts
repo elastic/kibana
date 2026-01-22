@@ -16,6 +16,7 @@ import type { Argv } from 'yargs';
 import yargs from 'yargs';
 import fetch from 'node-fetch';
 import pLimit from 'p-limit';
+import { createHash } from 'crypto';
 import { connectorIdOption, elasticsearchOption, kibanaOption } from '../util/cli_options';
 import { getServiceUrls } from '../util/get_service_urls';
 import { KibanaClient } from '../util/kibana_client';
@@ -80,6 +81,48 @@ function getCommandName(fileName: string): string {
   // Extract command name from filename (e.g., "match.md" -> "match")
   const baseName = Path.basename(fileName, '.md');
   return baseName;
+}
+
+interface FileCache {
+  [sourceFilePath: string]: {
+    hash: string; // Hash of entire source file (for quick check)
+    sections?: {
+      [outputFileName: string]: {
+        hash: string; // Hash of the raw section content before processing
+      };
+    };
+    outputFiles?: string[]; // Array of file names for mapping, no content needed
+    finalFiles?: Array<{ name: string; content: string }>; // After LLM rewriting and enrichment
+  };
+}
+
+/**
+ * Normalize a file path to use only the path after /extracted for cache keys.
+ * This ensures cache keys are stable across runs with different temporary directories.
+ */
+function normalizeCacheKey(filePath: string, extractDir: string): string {
+  // Get the relative path from extractDir
+  const relativePath = Path.relative(extractDir, filePath);
+  // Normalize to use forward slashes (consistent across platforms)
+  return relativePath.split(Path.sep).join('/');
+}
+
+async function loadCache(cachePath: string): Promise<FileCache> {
+  try {
+    const cacheContent = await Fs.readFile(cachePath, 'utf-8');
+    return JSON.parse(cacheContent);
+  } catch (error) {
+    // Cache file doesn't exist or is invalid, return empty cache
+    return {};
+  }
+}
+
+async function saveCache(cachePath: string, cache: FileCache): Promise<void> {
+  await Fs.writeFile(cachePath, JSON.stringify(cache, null, 2), 'utf-8');
+}
+
+function hashContent(content: string): string {
+  return createHash('sha256').update(content).digest('hex');
 }
 /**
  * Rewrite the Syntax section to replace ![Embedded](...) with functionName(param1, param2, ...)
@@ -301,7 +344,11 @@ function convertDefinitionsToMarkdown(content: string): string {
   });
 }
 
-function extractFunctionSections(content: string): Array<{ name: string; content: string }> {
+/**
+ * Extract raw function sections from markdown (before processing)
+ * Returns sections with raw content for hashing
+ */
+function extractRawFunctionSections(content: string): Array<{ name: string; rawContent: string }> {
   // Extract YAML block if present and get content after it
   const yamlBlockRegex = /```yaml\n([\s\S]*?)```([\s\S]*)/;
   const yamlMatch = content.match(yamlBlockRegex);
@@ -318,7 +365,7 @@ function extractFunctionSections(content: string): Array<{ name: string; content
   // Split by ## headings (function sections)
   // Match ## `FUNCTION_NAME` or ## FUNCTION_NAME
   const functionSectionRegex = /^##\s+(?:`)?([^`\n]+)(?:`)?$/gm;
-  const sections: Array<{ name: string; content: string }> = [];
+  const sections: Array<{ name: string; rawContent: string }> = [];
 
   let match: RegExpExecArray | null;
   const functionMatches: Array<{ name: string; startIndex: number }> = [];
@@ -330,7 +377,7 @@ function extractFunctionSections(content: string): Array<{ name: string; content
     functionMatches.push({ name: functionName, startIndex });
   }
 
-  // Extract content for each function section
+  // Extract raw content for each function section (before processing)
   for (let i = 0; i < functionMatches.length; i++) {
     const currentMatch = functionMatches[i];
     const nextMatch = functionMatches[i + 1];
@@ -338,34 +385,50 @@ function extractFunctionSections(content: string): Array<{ name: string; content
     const sectionStart = currentMatch.startIndex;
     const sectionEnd = nextMatch ? nextMatch.startIndex : contentToProcess.length;
 
-    let sectionContent = contentToProcess.substring(sectionStart, sectionEnd).trim();
+    let rawSectionContent = contentToProcess.substring(sectionStart, sectionEnd).trim();
 
     // Remove the ## heading line and keep the rest
-    const lines = sectionContent.split('\n');
+    const lines = rawSectionContent.split('\n');
     if (lines.length > 0 && lines[0].startsWith('##')) {
-      sectionContent = lines.slice(1).join('\n').trim();
+      rawSectionContent = lines.slice(1).join('\n').trim();
     }
 
-    if (sectionContent) {
-      // Convert definitions to markdown format
-      sectionContent = convertDefinitionsToMarkdown(sectionContent);
-
-      // Rewrite syntax section with function signature
-      // Use the original function name (uppercase) from the section header
-      const functionName = currentMatch.name.toUpperCase().replace(/[`'"]/g, '');
-      sectionContent = rewriteSyntaxSection(sectionContent, functionName);
-
-      // Reorganize content: move description to top with function name
-      sectionContent = reorganizeContent(sectionContent, functionName);
-
+    if (rawSectionContent) {
       sections.push({
         name: currentMatch.name.toLowerCase(),
-        content: sectionContent,
+        rawContent: rawSectionContent,
       });
     }
   }
 
   return sections;
+}
+
+/**
+ * Process a raw section into final content
+ */
+function processSection(rawContent: string, functionName: string): string {
+  let sectionContent = rawContent;
+
+  // Convert definitions to markdown format
+  sectionContent = convertDefinitionsToMarkdown(sectionContent);
+
+  // Rewrite syntax section with function signature
+  const functionNameUpper = functionName.toUpperCase().replace(/[`'"]/g, '');
+  sectionContent = rewriteSyntaxSection(sectionContent, functionNameUpper);
+
+  // Reorganize content: move description to top with function name
+  sectionContent = reorganizeContent(sectionContent, functionNameUpper);
+
+  return sectionContent;
+}
+
+function extractFunctionSections(content: string): Array<{ name: string; content: string }> {
+  const rawSections = extractRawFunctionSections(content);
+  return rawSections.map((section) => ({
+    name: section.name,
+    content: processSection(section.rawContent, section.name),
+  }));
 }
 
 interface FileToWrite {
@@ -579,12 +642,58 @@ yargs(process.argv.slice(2))
 
             log.info(`Found ${mdFiles.length} markdown files in commands directory`);
 
+            // Initialize cache
+            const cachePath = Path.join(outDir, '.file-cache.json');
+            const cache = await loadCache(cachePath);
+            let cacheUpdated = false;
+
             const docFiles: Array<{ name: string; content: string }> = [];
+            // Map output file names to source file paths for cache lookup
+            const outputToSourceMap = new Map<string, string>();
 
             // Process commands
             for (const mdFile of mdFiles) {
               const filePath = Path.join(commandsDir, mdFile);
               const content = await Fs.readFile(filePath, 'utf-8');
+              const contentHash = hashContent(content);
+              const cacheKey = normalizeCacheKey(filePath, extractDir);
+
+              // Check if file is cached and unchanged
+              const cached = cache[cacheKey];
+              if (cached && cached.hash === contentHash) {
+                // If finalFiles exist, we'll use them directly in the LLM phase, so skip extraction
+                if (cached.finalFiles && cached.finalFiles.length > 0) {
+                  log.info(
+                    `Skipping extraction for ${mdFile} (hash: ${contentHash.substring(
+                      0,
+                      8
+                    )}...) - will use cached final files`
+                  );
+                  // Populate mapping from finalFiles
+                  for (const finalFile of cached.finalFiles) {
+                    outputToSourceMap.set(finalFile.name, cacheKey);
+                  }
+                  continue;
+                } else if (cached.outputFiles) {
+                  // File is cached but no finalFiles yet - we'll need to extract and process
+                  // Just populate mapping, we'll extract below
+                  log.info(
+                    `File ${mdFile} cached (hash: ${contentHash.substring(
+                      0,
+                      8
+                    )}...), will re-extract for LLM processing`
+                  );
+                  for (const outputFileName of cached.outputFiles) {
+                    outputToSourceMap.set(outputFileName, cacheKey);
+                  }
+                  // Continue to extraction below (don't skip)
+                } else {
+                  continue;
+                }
+              }
+
+              // File changed or not in cache, process it
+              log.info(`Processing ${mdFile} (hash: ${contentHash.substring(0, 8)}...)`);
               let yamlContent = extractYamlCodeBlocks(content);
 
               if (yamlContent) {
@@ -600,10 +709,20 @@ yargs(process.argv.slice(2))
                 yamlContent = reorganizeContent(yamlContent, commandNameUpper);
 
                 const outputFileName = `esql-${commandName}.txt`;
-                docFiles.push({
+                const outputFile = {
                   name: outputFileName,
                   content: yamlContent,
-                });
+                };
+                docFiles.push(outputFile);
+                outputToSourceMap.set(outputFileName, cacheKey);
+
+                // Update cache - only store file names, not content
+                cache[cacheKey] = {
+                  hash: contentHash,
+                  outputFiles: [outputFileName],
+                };
+                cacheUpdated = true;
+
                 log.info(`Extracted YAML from ${mdFile} -> ${outputFileName}`);
               } else {
                 log.warning(`No YAML code blocks found in ${mdFile}, skipping`);
@@ -628,19 +747,114 @@ yargs(process.argv.slice(2))
                 for (const mdFile of functionMdFiles) {
                   const filePath = Path.join(functionsOperatorsDir, mdFile);
                   const content = await Fs.readFile(filePath, 'utf-8');
-                  const functionSections = extractFunctionSections(content);
+                  const contentHash = hashContent(content);
+                  const cacheKey = normalizeCacheKey(filePath, extractDir);
 
-                  if (functionSections.length > 0) {
-                    for (const section of functionSections) {
-                      const outputFileName = `esql-${section.name}.txt`;
-                      docFiles.push({
-                        name: outputFileName,
-                        content: section.content,
-                      });
+                  // Check if file is cached and unchanged
+                  const cached = cache[cacheKey];
+                  if (cached && cached.hash === contentHash) {
+                    // If finalFiles exist, we'll use them directly in the LLM phase, so skip extraction
+                    if (cached.finalFiles && cached.finalFiles.length > 0) {
                       log.info(
-                        `Extracted function ${section.name} from ${mdFile} -> ${outputFileName}`
+                        `Skipping extraction for ${mdFile} (hash: ${contentHash.substring(
+                          0,
+                          8
+                        )}...) - will use cached final files`
                       );
+                      // Populate mapping from finalFiles
+                      for (const finalFile of cached.finalFiles) {
+                        outputToSourceMap.set(finalFile.name, cacheKey);
+                      }
+                      continue;
+                    } else if (cached.outputFiles) {
+                      // File is cached but no finalFiles yet - we'll need to extract and process
+                      // Just populate mapping, we'll extract below
+                      log.info(
+                        `File ${mdFile} cached (hash: ${contentHash.substring(
+                          0,
+                          8
+                        )}...), will re-extract for LLM processing`
+                      );
+                      for (const outputFileName of cached.outputFiles) {
+                        outputToSourceMap.set(outputFileName, cacheKey);
+                      }
+                      // Continue to extraction below (don't skip)
+                    } else {
+                      continue;
                     }
+                  }
+
+                  // Extract raw sections and check which ones have changed
+                  const rawSections = extractRawFunctionSections(content);
+                  const outputFiles: Array<{ name: string; content: string }> = [];
+                  const outputFileNames: string[] = [];
+                  const sectionHashes: { [outputFileName: string]: string } = {};
+
+                  if (rawSections.length > 0) {
+                    // Initialize cache entry if it doesn't exist
+                    if (!cache[cacheKey]) {
+                      cache[cacheKey] = {
+                        hash: contentHash,
+                        sections: {},
+                        outputFiles: [],
+                      };
+                    }
+
+                    for (const section of rawSections) {
+                      const outputFileName = `esql-${section.name}.txt`;
+                      const sectionHash = hashContent(section.rawContent);
+                      sectionHashes[outputFileName] = sectionHash;
+
+                      // Check if this section has changed
+                      const cachedSectionHash = cache[cacheKey].sections?.[outputFileName]?.hash;
+                      const sectionChanged =
+                        !cachedSectionHash || cachedSectionHash !== sectionHash;
+
+                      if (sectionChanged) {
+                        // Process the section
+                        const processedContent = processSection(section.rawContent, section.name);
+                        const outputFile = {
+                          name: outputFileName,
+                          content: processedContent,
+                        };
+                        outputFiles.push(outputFile);
+                        docFiles.push(outputFile);
+                        outputToSourceMap.set(outputFileName, cacheKey);
+                        log.info(
+                          `Extracted function ${section.name} from ${mdFile} -> ${outputFileName} (changed)`
+                        );
+                      } else {
+                        // Section unchanged, skip processing but add to outputFileNames for tracking
+                        log.debug(
+                          `Skipping unchanged section ${section.name} from ${mdFile} -> ${outputFileName}`
+                        );
+                        // Try to get from cache if available
+                        const cachedFinal = cache[cacheKey].finalFiles?.find(
+                          (f) => f.name === outputFileName
+                        );
+                        if (cachedFinal) {
+                          docFiles.push(cachedFinal);
+                        }
+                      }
+
+                      outputFileNames.push(outputFileName);
+                      outputToSourceMap.set(outputFileName, cacheKey);
+                    }
+
+                    // Update cache with section hashes and file list
+                    cache[cacheKey].hash = contentHash;
+                    if (!cache[cacheKey].sections) {
+                      cache[cacheKey].sections = {};
+                    }
+                    for (const [outputFileName, sectionHash] of Object.entries(sectionHashes)) {
+                      if (!cache[cacheKey].sections![outputFileName]) {
+                        cache[cacheKey].sections![outputFileName] = { hash: sectionHash };
+                      } else {
+                        cache[cacheKey].sections![outputFileName].hash = sectionHash;
+                      }
+                    }
+                    cache[cacheKey].outputFiles = outputFileNames;
+                    cacheUpdated = true;
                   } else {
                     log.warning(`No function sections found in ${mdFile}, skipping`);
                   }
@@ -655,45 +869,125 @@ yargs(process.argv.slice(2))
             // Use LLM to rewrite documentation if connectorId is provided
             let finalDocFiles = docFiles;
             if (inferenceClient) {
-              log.info(`Rewriting ${docFiles.length} documents using LLM...`);
-              finalDocFiles = await generateDoc({
-                docFiles,
-                inferenceClient,
-                log,
+              // Check if all files have cached final versions
+              const allCached = docFiles.every((file) => {
+                const sourcePath = outputToSourceMap.get(file.name);
+                if (!sourcePath) return false;
+                const cached = cache[sourcePath];
+                return cached?.finalFiles?.some((f) => f.name === file.name);
               });
-              log.info(`Successfully rewritten ${finalDocFiles.length} documents`);
 
-              // Enrich documentation with natural language descriptions for ES|QL queries
-              log.info(
-                `Enriching ${finalDocFiles.length} documents with ES|QL query descriptions...`
-              );
-              const limiter = pLimit(10);
-              finalDocFiles = await Promise.all(
-                finalDocFiles.map(async (file) => {
-                  return limiter(async () => {
-                    try {
-                      const enrichedContent = await enrichDocumentation({
-                        content: file.content,
-                        inferenceClient,
-                      });
-                      log.info(`Enriched ${file.name} with ES|QL query descriptions`);
-                      return {
-                        name: file.name,
-                        content: enrichedContent,
-                      };
-                    } catch (error) {
-                      log.warning(
-                        `Failed to enrich ${file.name}: ${
-                          error instanceof Error ? error.message : String(error)
-                        }`
-                      );
-                      // Fall back to original content if enrichment fails
-                      return file;
+              if (allCached && docFiles.length > 0) {
+                log.info(`Using cached final files for all ${docFiles.length} documents`);
+                // Reconstruct finalDocFiles from cache
+                finalDocFiles = docFiles.map((file) => {
+                  const sourcePath = outputToSourceMap.get(file.name);
+                  if (sourcePath) {
+                    const cached = cache[sourcePath];
+                    const cachedFinal = cached?.finalFiles?.find((f) => f.name === file.name);
+                    if (cachedFinal) {
+                      return cachedFinal;
                     }
+                  }
+                  return file;
+                });
+              } else {
+                // Process files that need rewriting/enrichment
+                const filesToProcess: Array<{
+                  name: string;
+                  content: string;
+                  sourcePath?: string;
+                }> = [];
+                const filesFromCache: Array<{ name: string; content: string }> = [];
+
+                for (const file of docFiles) {
+                  const sourcePath = outputToSourceMap.get(file.name);
+                  if (sourcePath) {
+                    const cached = cache[sourcePath];
+                    const cachedFinal = cached?.finalFiles?.find((f) => f.name === file.name);
+                    if (cachedFinal) {
+                      filesFromCache.push(cachedFinal);
+                      continue;
+                    }
+                    filesToProcess.push({ ...file, sourcePath });
+                  } else {
+                    filesToProcess.push(file);
+                  }
+                }
+
+                if (filesToProcess.length > 0) {
+                  log.info(`Rewriting ${filesToProcess.length} documents using LLM...`);
+                  const rewrittenFiles = await generateDoc({
+                    docFiles: filesToProcess,
+                    inferenceClient,
+                    log,
                   });
-                })
-              );
-              log.info(`Successfully enriched ${finalDocFiles.length} documents`);
+                  log.info(`Successfully rewritten ${rewrittenFiles.length} documents`);
+
+                  // Enrich documentation with natural language descriptions for ES|QL queries
+                  log.info(
+                    `Enriching ${rewrittenFiles.length} documents with ES|QL query descriptions...`
+                  );
+                  const limiter = pLimit(10);
+                  const enrichedFiles = await Promise.all(
+                    rewrittenFiles.map(async (file) => {
+                      return limiter(async () => {
+                        try {
+                          const enrichedContent = await enrichDocumentation({
+                            content: file.content,
+                            inferenceClient,
+                          });
+                          log.info(`Enriched ${file.name} with ES|QL query descriptions`);
+                          return {
+                            name: file.name,
+                            content: enrichedContent,
+                          };
+                        } catch (error) {
+                          log.warning(
+                            `Failed to enrich ${file.name}: ${
+                              error instanceof Error ? error.message : String(error)
+                            }`
+                          );
+                          // Fall back to original content if enrichment fails
+                          return file;
+                        }
+                      });
+                    })
+                  );
+                  log.info(`Successfully enriched ${enrichedFiles.length} documents`);
+
+                  // Update cache with final files
+                  for (const file of enrichedFiles) {
+                    const sourcePath = outputToSourceMap.get(file.name);
+                    if (sourcePath) {
+                      const cached = cache[sourcePath];
+                      if (cached) {
+                        if (!cached.finalFiles) {
+                          cached.finalFiles = [];
+                        }
+                        const existingIndex = cached.finalFiles.findIndex(
+                          (f) => f.name === file.name
+                        );
+                        if (existingIndex >= 0) {
+                          cached.finalFiles[existingIndex] = file;
+                        } else {
+                          cached.finalFiles.push(file);
+                        }
+                        // Once finalFiles exist, we don't need outputFiles anymore (they're redundant)
+                        // This saves cache space
+                        if (cached.finalFiles.length > 0) {
+                          delete cached.outputFiles;
+                        }
+                        cacheUpdated = true;
+                      }
+                    }
+                  }
+
+                  finalDocFiles = [...filesFromCache, ...enrichedFiles];
+                } else {
+                  finalDocFiles = filesFromCache;
+                }
+              }
             }
 
             if (!argv.dryRun) {
@@ -711,6 +1005,12 @@ yargs(process.argv.slice(2))
               log.info(`Successfully wrote ${finalDocFiles.length} files to ${outDir}`);
             } else {
               log.info(`Dry run: Would write ${finalDocFiles.length} files to ${outDir}`);
+            }
+
+            // Save cache if it was updated
+            if (cacheUpdated && !argv.dryRun) {
+              await saveCache(cachePath, cache);
+              log.info(`Cache updated and saved to ${cachePath}`);
             }
           } finally {
             // Clean up extraction temp directory (but keep the zip file in _temp_)
