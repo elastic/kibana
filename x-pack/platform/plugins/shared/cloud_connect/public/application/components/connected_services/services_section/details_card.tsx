@@ -13,6 +13,7 @@ import {
   EuiTitle,
   EuiBadge,
   EuiBetaBadge,
+  EuiCallOut,
   EuiText,
   EuiLink,
   EuiButtonEmpty,
@@ -111,7 +112,12 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
   validLicenseTypes,
   currentLicenseType,
 }) => {
-  const { hasConfigurePermission, telemetryService } = useCloudConnectedAppContext();
+  const {
+    hasConfigurePermission,
+    hasActionsSavePrivilege,
+    hasAnyDefaultLLMConnectors,
+    telemetryService,
+  } = useCloudConnectedAppContext();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isLicensePopoverOpen, setIsLicensePopoverOpen] = useState(false);
 
@@ -485,6 +491,58 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
 
         <EuiFlexItem grow={false}>{renderActions()}</EuiFlexItem>
       </EuiFlexGroup>
+
+      {serviceKey === 'eis' && !hasActionsSavePrivilege && !hasAnyDefaultLLMConnectors && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.cloudConnect.connectedServices.service.missingPrivileges',
+              {
+                defaultMessage: 'Missing privileges',
+              }
+            )}
+            color="warning"
+            iconType="warning"
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.cloudConnect.connectedServices.service.missingPrivilegesDescription"
+                defaultMessage="Full LLM functionality requires **Customize sub-feature privileges** to be switched on in the Kibana {privilege} privilege. When it is switched off, some features will be unavailable. Contact your administrator to make this change."
+                values={{
+                  privilege: <strong>Actions and Connectors</strong>,
+                }}
+              />
+            </p>
+          </EuiCallOut>
+        </>
+      )}
+
+      {serviceKey === 'eis' &&
+        enabled &&
+        hasActionsSavePrivilege &&
+        !hasAnyDefaultLLMConnectors && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiCallOut
+              title={i18n.translate(
+                'xpack.cloudConnect.connectedServices.service.missingLLMConnectors',
+                {
+                  defaultMessage: 'Missing LLM connectors',
+                }
+              )}
+              color="warning"
+              iconType="warning"
+            >
+              <p>
+                <FormattedMessage
+                  id="xpack.cloudConnect.connectedServices.service.missingLLMConnectorsDescription"
+                  defaultMessage="Configuring LLM models will provide an enhanced experience. Reconnect EIS to install them."
+                />
+              </p>
+            </EuiCallOut>
+          </>
+        )}
     </EuiPanel>
   );
 };
