@@ -24,6 +24,9 @@ import { GLOBAL_RESOURCE } from '@kbn/security-plugin-types-server';
 
 import { ResourceSerializer } from './resource_serializer';
 import { validateEsPrivilegeResponse } from './validate_es_response';
+import { HTTPAuthorizationHeader } from '..';
+import type { UiamServicePublic } from '../uiam';
+import { isUiamCredential } from '../uiam';
 
 interface CheckPrivilegesActions {
   login: string;
@@ -32,6 +35,7 @@ interface CheckPrivilegesActions {
 export function checkPrivilegesFactory(
   actions: CheckPrivilegesActions,
   getClusterClient: () => Promise<IClusterClient>,
+  getUiamService: () => UiamServicePublic | undefined,
   applicationName: string
 ) {
   const createApplicationPrivilegesCheck = (
@@ -52,6 +56,27 @@ export function checkPrivilegesFactory(
       ]),
     };
   };
+
+  async function getScopedClusterClient(request: KibanaRequest) {
+    const clusterClient = await getClusterClient();
+
+    // If we're not in UIAM mode or if the request is not a fake request, use request scope directly.
+    const uiam = getUiamService();
+    if (!uiam || request.isFakeRequest === false) {
+      return clusterClient.asScoped(request);
+    }
+
+    // In UIAM mode and for fake requests, it's still possible that the request is authenticated with non-UIAM credentials.
+    const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+    if (!authorizationHeader || !isUiamCredential(authorizationHeader)) {
+      return clusterClient.asScoped(request);
+    }
+
+    // For UIAM credentials, we need to add the UIAM authentication header to the scoped client.
+    return clusterClient.asScoped({
+      headers: { ...request.headers, ...uiam.getEsClientAuthenticationHeader() },
+    });
+  }
 
   function checkUserProfilesPrivileges(userProfileUids: Set<string>): CheckUserProfilesPrivileges {
     const checkPrivilegesAtResources = async (
@@ -107,8 +132,8 @@ export function checkPrivilegesFactory(
         { requireLoginAction }
       );
 
-      const clusterClient = await getClusterClient();
-      const body = await clusterClient.asScoped(request).asCurrentUser.security.hasPrivileges({
+      const clusterClient = await getScopedClusterClient(request);
+      const body = await clusterClient.asCurrentUser.security.hasPrivileges({
         cluster: privileges.elasticsearch?.cluster as estypes.SecurityClusterPrivilege[],
         index: Object.entries(privileges.elasticsearch?.index ?? {}).map(
           ([name, indexPrivileges]) => ({

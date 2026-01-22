@@ -47,6 +47,7 @@ describe('#checkPrivilegesWithRequest.atSpace', () => {
     const { checkPrivilegesWithRequest } = checkPrivilegesFactory(
       mockActions,
       () => Promise.resolve(mockClusterClient),
+      () => undefined,
       application
     );
     const request = httpServerMock.createKibanaRequest();
@@ -851,6 +852,7 @@ describe('#checkPrivilegesWithRequest.atSpace', () => {
     const { checkPrivilegesWithRequest } = checkPrivilegesFactory(
       mockActions,
       () => Promise.resolve(mockClusterClient),
+      () => undefined,
       application
     );
     const request = httpServerMock.createKibanaRequest();
@@ -886,6 +888,7 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
     const { checkPrivilegesWithRequest } = checkPrivilegesFactory(
       mockActions,
       () => Promise.resolve(mockClusterClient),
+      () => undefined,
       application
     );
     const request = httpServerMock.createKibanaRequest();
@@ -2021,6 +2024,7 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
     const { checkPrivilegesWithRequest } = checkPrivilegesFactory(
       mockActions,
       () => Promise.resolve(mockClusterClient),
+      () => undefined,
       application
     );
     const request = httpServerMock.createKibanaRequest();
@@ -2055,6 +2059,7 @@ describe('#checkPrivilegesWithRequest.globally', () => {
     const { checkPrivilegesWithRequest } = checkPrivilegesFactory(
       mockActions,
       () => Promise.resolve(mockClusterClient),
+      () => undefined,
       application
     );
     const request = httpServerMock.createKibanaRequest();
@@ -2869,6 +2874,7 @@ describe('#checkPrivilegesWithRequest.globally', () => {
     const { checkPrivilegesWithRequest } = checkPrivilegesFactory(
       mockActions,
       () => Promise.resolve(mockClusterClient),
+      () => undefined,
       application
     );
     const request = httpServerMock.createKibanaRequest();
@@ -2903,6 +2909,7 @@ describe('#checkUserProfilesPrivileges.atSpace', () => {
     const { checkUserProfilesPrivileges } = checkPrivilegesFactory(
       mockActions,
       () => Promise.resolve(mockClusterClient),
+      () => undefined,
       application
     );
     const checkPrivileges = checkUserProfilesPrivileges(new Set(options.uids));
