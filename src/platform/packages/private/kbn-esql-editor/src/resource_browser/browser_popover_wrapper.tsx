@@ -13,21 +13,18 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectable,
-  EuiNotificationBadge,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   useEuiTheme,
   EuiFilterButton,
-  EuiLink,
   EuiIcon,
   logicalCSS,
   mathWithUnits,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 
 export const BROWSER_POPOVER_WIDTH = 400;
 export const BROWSER_POPOVER_HEIGHT = 500;
@@ -55,18 +52,14 @@ const filterButtonStyle = ({ euiTheme }: UseEuiTheme) => css`
 `;
 
 export interface BrowserPopoverWrapperProps<TItem> {
+  items: EuiSelectableOption[];
   isOpen: boolean;
   onClose: () => void;
-  onSelect: (selectedItems: string, oldLength: number) => void;
+  onSelect: (options: EuiSelectableOption[]) => void;
   position?: { top?: number; left?: number };
   // Data fetching
   fetchData: () => Promise<TItem[]>;
   // Type extraction
-  getTypeKey: (item: TItem) => string;
-  getTypeLabel: (typeKey: string) => string;
-  getTypeIcon?: (typeKey: string) => ReactNode;
-  // Option creation
-  createOptions: (items: TItem[], selectedItems: string[]) => EuiSelectableOption[];
   // i18n keys
   i18nKeys: {
     title: string;
@@ -77,29 +70,31 @@ export interface BrowserPopoverWrapperProps<TItem> {
     empty: string;
     noMatches: string;
   };
+  numTypes: number;
+  numActiveFilters: number;
+  filterPanel: ReactNode;
+  isLoading: boolean;
+  searchValue: string;
+  setSearchValue: (value: string) => void;
 }
 
 export function BrowserPopoverWrapper<TItem extends { name: string }>({
+  items,
   isOpen,
   onClose,
   onSelect,
   position,
   fetchData,
-  getTypeKey,
-  getTypeLabel,
-  getTypeIcon,
-  createOptions,
   i18nKeys,
+  numTypes,
+  numActiveFilters,
+  filterPanel,
+  isLoading,
+  searchValue,
+  setSearchValue,
 }: BrowserPopoverWrapperProps<TItem>) {
   const { euiTheme } = useEuiTheme();
-  const [items, setItems] = useState<TItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [searchValue, setSearchValue] = useState('');
-  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [isFilterPopoverOpen, setIsFilterPopoverOpen] = useState(false);
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const [selectedIntegrations, setSelectedIntegrations] = useState<string[]>([]);
-  const [isIntegrationPopoverOpen, setIsIntegrationPopoverOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const closeButtonRef = useRef<HTMLElement | null>(null);
   const filterButtonRef = useRef<HTMLElement | null>(null);
@@ -135,35 +130,6 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
     }
   }, [isOpen]);
 
-  // Reset state when popover opens
-  useEffect(() => {
-    if (isOpen) {
-      // Clear all selections and filters when popover opens
-      setSelectedItems([]);
-      setSearchValue('');
-      setSelectedTypes([]);
-      setSelectedIntegrations([]);
-      setIsFilterPopoverOpen(false);
-      setIsIntegrationPopoverOpen(false);
-    }
-  }, [isOpen]);
-
-  // Fetch data when popover opens
-  useEffect(() => {
-    if (isOpen) {
-      setIsLoading(true);
-      fetchData()
-        .then((fetchedItems) => {
-          setItems(fetchedItems);
-          setIsLoading(false);
-        })
-        .catch(() => {
-          setItems([]);
-          setIsLoading(false);
-        });
-    }
-  }, [isOpen, fetchData]);
-
   // Focus the search input when popover opens
   useEffect(() => {
     if (isOpen && !isLoading) {
@@ -174,149 +140,14 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
     }
   }, [isOpen, isLoading]);
 
-  // Get unique types from items
-  const availableTypes = useMemo(() => {
-    const typeSet = new Set<string>();
-    items.forEach((item) => {
-      const typeKey = getTypeKey(item);
-      typeSet.add(typeKey);
-    });
-    return Array.from(typeSet).sort();
-  }, [items, getTypeKey]);
-
-  const typeCounts = useMemo(() => {
-    const counts = new Map<string, number>();
-    items.forEach((item) => {
-      const typeKey = getTypeKey(item);
-      counts.set(typeKey, (counts.get(typeKey) ?? 0) + 1);
-    });
-    return counts;
-  }, [items, getTypeKey]);
-
-  // Extract unique integration names from integration items
-  const availableIntegrations = useMemo(() => {
-    const integrationSet = new Set<string>();
-    items.forEach((item) => {
-      const typeKey = getTypeKey(item);
-      if (typeKey === 'integration') {
-        const integrationName = (item as any).integrationName;
-        if (integrationName) {
-          integrationSet.add(integrationName);
-        }
-      }
-    });
-    return Array.from(integrationSet).sort();
-  }, [items, getTypeKey]);
-
-  // Count items per integration
-  const integrationCounts = useMemo(() => {
-    const counts = new Map<string, number>();
-    items.forEach((item) => {
-      const typeKey = getTypeKey(item);
-      if (typeKey === 'integration') {
-        const integrationName = (item as any).integrationName;
-        if (integrationName) {
-          counts.set(integrationName, (counts.get(integrationName) ?? 0) + 1);
-        }
-      }
-    });
-    return counts;
-  }, [items, getTypeKey]);
-
-  // Create integration filter options
-  const integrationFilterOptions: EuiSelectableOption[] = useMemo(() => {
-    return availableIntegrations.map((integrationName) => ({
-      key: integrationName,
-      label: integrationName,
-      checked: selectedIntegrations.includes(integrationName) ? ('on' as const) : undefined,
-      append: (
-        <EuiNotificationBadge color="subdued" size="m">
-          {integrationCounts.get(integrationName) ?? 0}
-        </EuiNotificationBadge>
-      ),
-    }));
-  }, [availableIntegrations, selectedIntegrations, integrationCounts]);
-
-  const options: EuiSelectableOption[] = useMemo(() => {
-    return createOptions(items, selectedItems);
-  }, [items, selectedItems, createOptions]);
-
-  const filteredOptions = useMemo(() => {
-    let filtered = options;
-
-    // Filter by search value
-    if (searchValue.trim()) {
-      const searchLower = searchValue.toLowerCase();
-      filtered = filtered.filter((option) => option.label?.toLowerCase().includes(searchLower));
-    }
-
-    // Filter by selected types and integrations
-    if (selectedTypes.length > 0 || selectedIntegrations.length > 0) {
-      filtered = filtered.filter((option) => {
-        // Check if option has typeKey in data (set by createOptions)
-        const typeKey = option.data?.typeKey as string | undefined;
-
-        if (typeKey === 'integration' && availableIntegrations.length > 0) {
-          const integrationName = option.data?.integrationName as string | undefined;
-          return integrationName && selectedIntegrations.includes(integrationName);
-        }
-
-        if (!typeKey || !selectedTypes.includes(typeKey)) {
-          return false;
-        }
-
-        return true;
-      });
-    }
-
-    return filtered;
-  }, [options, searchValue, selectedTypes, selectedIntegrations, availableIntegrations.length]);
-
-  const handleSelectionChange = useCallback(
-    (newOptions: EuiSelectableOption[]) => {
-      const newlySelected = newOptions
-        .filter((o) => o.checked === 'on')
-        .map((o) => o.key as string)
-        .filter(Boolean);
-
-      const oldLength = selectedItems.join(',').length;
-      setSelectedItems(newlySelected);
-      onSelect(newlySelected.join(','), oldLength);
-    },
-    [onSelect, selectedItems]
-  );
-
-  const handleTypeFilterChange = useCallback(
-    (newOptions: EuiSelectableOption[], changedOption: EuiSelectableOption | undefined) => {
-      if (changedOption?.key === 'integration') {
-        setIsIntegrationPopoverOpen(true);
-      } else {
-        const selected = newOptions
-          .filter((opt) => opt.checked === 'on')
-          .map((opt) => opt.key as string);
-        setSelectedTypes(selected);
-      }
-    },
-    []
-  );
-
-  const handleIntegrationFilterChange = useCallback((newOptions: EuiSelectableOption[]) => {
-    const selected = newOptions
-      .filter((opt) => opt.checked === 'on')
-      .map((opt) => opt.key as string);
-    setSelectedIntegrations(selected);
-  }, []);
-
   const filterButton = (
     <EuiFilterButton
-      aria-label={i18n.translate('unifiedFieldList.fieldTypeFilter.filterByTypeAriaLabel', {
-        defaultMessage: 'Filter by type',
-      })}
+      aria-label={i18nKeys.filterTitle}
       color="text"
       isSelected={isFilterPopoverOpen}
-      numFilters={availableTypes.length + availableIntegrations.length}
-      hasActiveFilters={selectedTypes.length > 0 || selectedIntegrations.length > 0}
-      numActiveFilters={selectedTypes.length + selectedIntegrations.length}
+      numFilters={numTypes}
+      hasActiveFilters={numActiveFilters > 0}
+      numActiveFilters={numActiveFilters}
       css={filterButtonStyle}
       onClick={() => setIsFilterPopoverOpen(!isFilterPopoverOpen)}
       buttonRef={setFilterButtonRef}
@@ -324,62 +155,6 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
       <EuiIcon type="filter" />
     </EuiFilterButton>
   );
-
-  // Overwriting the border style as setting listProps.bordered to false doesn't work
-  const filterListStyles = useMemo(
-    () => css`
-      .euiSelectableListItem {
-        border-top: none;
-        border-bottom: none;
-      }
-    `,
-    []
-  );
-
-  // Create filter options for the type filter popover
-  const typeFilterOptions: EuiSelectableOption[] = useMemo(() => {
-    return availableTypes.map((typeKey) => {
-      const isIntegration = typeKey === 'integration';
-      const hasIntegrations = availableIntegrations.length > 0;
-
-      return {
-        key: typeKey,
-        label: getTypeLabel(typeKey),
-        checked: selectedTypes.includes(typeKey) ? ('on' as const) : undefined,
-        prepend: getTypeIcon?.(typeKey),
-        append: (
-          <>
-            {isIntegration && hasIntegrations ? (
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                {selectedIntegrations.length > 0 && (
-                  <EuiFlexItem grow={false}>
-                    <EuiNotificationBadge color="accent" size="s">
-                      {selectedIntegrations.length}
-                    </EuiNotificationBadge>
-                  </EuiFlexItem>
-                )}
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="arrowRight" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ) : (
-              <EuiNotificationBadge color="subdued" size="m">
-                {typeCounts.get(typeKey) ?? 0}
-              </EuiNotificationBadge>
-            )}
-          </>
-        ),
-      };
-    });
-  }, [
-    availableTypes,
-    selectedTypes,
-    getTypeLabel,
-    getTypeIcon,
-    typeCounts,
-    availableIntegrations.length,
-    selectedIntegrations,
-  ]);
 
   return (
     <EuiPopover
@@ -418,60 +193,12 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
               panelStyle={{ transform: `translateX(60px)` }}
               offset={-35} // Move popover up to align with the filter button
             >
-              {isIntegrationPopoverOpen ? (
-                <>
-                  <EuiPopoverTitle
-                    paddingSize="s"
-                    onClick={() => setIsIntegrationPopoverOpen(false)}
-                  >
-                    <EuiIcon type="arrowLeft" />
-                      &emsp;
-                    <EuiLink color="text">
-                      Integrations
-                    </EuiLink>
-                  </EuiPopoverTitle>
-                  <EuiSelectable
-                    options={integrationFilterOptions}
-                    onChange={handleIntegrationFilterChange}
-                    listProps={{
-                      bordered: false,
-                    }}
-                  >
-                    {(integrationList) => (
-                      <div css={filterListStyles} style={{ width: '250px', maxHeight: 250, overflowY: 'auto' }}>
-                        {integrationList}
-                      </div>
-                    )}
-                  </EuiSelectable>
-                </>
-              ) : (
-                <>
-                  <EuiPopoverTitle paddingSize="s">{i18nKeys.filterTitle}</EuiPopoverTitle>
-                  <EuiSelectable
-                    options={typeFilterOptions}
-                    onChange={(newOptions, event, changedOption) =>
-                      handleTypeFilterChange(newOptions, changedOption)
-                    }
-                    listProps={{
-                      bordered: false, // Doesn't work so we overwrite the border style with filterListStyles
-                    }}
-                  >
-                    {(list) => (
-                      <div
-                        css={filterListStyles}
-                        style={{ width: '250px', maxHeight: 250, overflowY: 'auto' }}
-                      >
-                        {list}
-                      </div>
-                    )}
-                  </EuiSelectable>
-                </>
-              )}
+              {filterPanel}
             </EuiPopover>
           ),
         }}
-        options={filteredOptions}
-        onChange={handleSelectionChange}
+        options={items}
+        onChange={onSelect}
         isLoading={isLoading}
         loadingMessage={i18nKeys.loading}
         emptyMessage={i18nKeys.empty}
