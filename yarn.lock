@@ -4674,7 +4674,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/alerting-v2-schemas@link:x-pack/platform/packages/shared/kbn-alerting-v2-schemas":
+"@kbn/alerting-rule-schemas@link:x-pack/platform/packages/shared/kbn-alerting-rule-schemas":
   version "0.0.0"
   uid ""
 
