@@ -9,7 +9,7 @@ import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
-import { PromptLayout, type PromptLayoutVariant } from './prompt_layout';
+import { PromptLayout, type PromptLayoutVariant } from '../../common/prompt_layout';
 import { useAssetBasePath } from '../../../hooks/use_asset_base_path';
 
 export interface NoPrivilegePromptProps {

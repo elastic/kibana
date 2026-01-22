@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiImage, EuiText } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React from 'react';
+import type { IconType } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiImage, EuiText, EuiIcon } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 const defaultPromptStyles = css`
   .euiEmptyPrompt__main {
@@ -17,17 +18,19 @@ const defaultPromptStyles = css`
 
 export type PromptLayoutVariant = 'default' | 'embeddable';
 
-export interface PromptLayoutProps {
-  imageSrc: string;
+type IconProps = { imageSrc: string; iconType?: never } | { imageSrc?: never; iconType: IconType };
+
+export type PromptLayoutProps = {
   title: React.ReactNode;
   subtitle: React.ReactNode;
   primaryButton: React.ReactNode;
   secondaryButton?: React.ReactNode;
   variant?: PromptLayoutVariant;
-}
+} & IconProps;
 
 export const PromptLayout: React.FC<PromptLayoutProps> = ({
   imageSrc,
+  iconType,
   title,
   subtitle,
   primaryButton,
@@ -38,12 +41,19 @@ export const PromptLayout: React.FC<PromptLayoutProps> = ({
 
   const isEmbeddable = variant === 'embeddable';
 
+  let iconContent: React.ReactNode;
+  if (imageSrc) {
+    iconContent = <EuiImage src={imageSrc} alt="" size="s" />;
+  } else if (iconType) {
+    iconContent = <EuiIcon type={iconType} size="xxl" />;
+  }
+
   return (
     <EuiEmptyPrompt
       css={isEmbeddable ? undefined : defaultPromptStyles}
       hasShadow={!isEmbeddable}
       color={isEmbeddable ? 'transparent' : 'plain'}
-      icon={<EuiImage src={imageSrc} alt="" size="s" />}
+      icon={iconContent}
       title={<h2>{title}</h2>}
       body={
         <EuiText color="subdued" textAlign="center">
