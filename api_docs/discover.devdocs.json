@@ -89,7 +89,7 @@
           "DataMsg"
         ],
         "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_data_state_container.ts",
-        "lineNumber": 71,
+        "lineNumber": 70,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -112,7 +112,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_data_state_container.ts",
-            "lineNumber": 72,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -135,7 +135,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_data_state_container.ts",
-            "lineNumber": 73,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -151,7 +151,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_data_state_container.ts",
-            "lineNumber": 74,
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -168,7 +168,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_data_state_container.ts",
-            "lineNumber": 75,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2412,7 +2412,7 @@
           "DiscoverStateContainer"
         ],
         "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
-        "lineNumber": 15,
+        "lineNumber": 18,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2443,7 +2443,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
-            "lineNumber": 19,
+            "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2465,7 +2465,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
-                "lineNumber": 19,
+                "lineNumber": 22,
                 "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2473,6 +2473,50 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.ExtendedDiscoverStateContainer.internalActions",
+            "type": "Object",
+            "tags": [],
+            "label": "internalActions",
+            "description": [
+              "\nA selection of prodived Redux actions from the internal state"
+            ],
+            "signature": [
+              "{ fetchData: ",
+              "InternalStateThunkActionCreator",
+              "<[",
+              "TabActionPayload",
+              "<{ initial?: boolean | undefined; }>], void>; openDiscoverSession: ",
+              "AsyncThunk",
+              "<void, { discoverSessionId: string; }, { state: ",
+              "DiscoverInternalState",
+              "; dispatch: ((action: ",
+              "Action",
+              "<\"listenerMiddleware/add\">) => ",
+              "UnsubscribeListener",
+              ") & ",
+              "ThunkDispatch",
+              "<",
+              "DiscoverInternalState",
+              ", ",
+              "InternalStateDependencies",
+              ", ",
+              "AnyAction",
+              "> & ",
+              "Dispatch",
+              "<",
+              "AnyAction",
+              ">; extra: ",
+              "InternalStateDependencies",
+              "; rejectValue?: unknown; serializedErrorType?: unknown; pendingMeta?: unknown; fulfilledMeta?: unknown; rejectedMeta?: unknown; }>; }"
+            ],
+            "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3298,7 +3342,7 @@
           ") => void | (() => void) | Promise<void | (() => void)>"
         ],
         "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
-        "lineNumber": 27,
+        "lineNumber": 38,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3315,7 +3359,7 @@
               "CustomizationCallbackContext"
             ],
             "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
-            "lineNumber": 28,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3769,7 +3813,7 @@
             "section": "def-public.UseUnifiedHistogramProps",
             "text": "UseUnifiedHistogramProps"
           },
-          ", \"onBrushEnd\" | \"onFilter\" | \"withDefaultActions\" | \"disabledActions\">"
+          ", \"onBrushEnd\" | \"withDefaultActions\" | \"disabledActions\" | \"onFilter\">"
         ],
         "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/histogram_customization.tsx",
         "lineNumber": 16,
