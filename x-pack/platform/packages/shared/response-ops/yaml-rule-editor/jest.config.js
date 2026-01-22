@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export * from './rule_data_schema';
-export { validateDuration, validateEsqlQuery } from './validation';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/response-ops/yaml-rule-editor'],
+};

@@ -55,10 +55,10 @@ export class RulesClient {
   public async createRule(params: CreateRuleParams): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
 
-    const createValidationResult = createRuleDataSchema.safeParse(params.data);
-    if (!createValidationResult.success) {
+    const parsed = createRuleDataSchema.safeParse(params.data);
+    if (!parsed.success) {
       throw Boom.badRequest(
-        `Error validating create rule data - ${stringifyZodError(createValidationResult.error)}`
+        `Error validating create rule data - ${stringifyZodError(parsed.error)}`
       );
     }
 
@@ -66,14 +66,14 @@ export class RulesClient {
     const nowIso = new Date().toISOString();
 
     const ruleAttributes: RuleSavedObjectAttributes = {
-      name: params.data.name,
-      tags: params.data.tags ?? [],
-      schedule: params.data.schedule,
-      enabled: params.data.enabled,
-      query: params.data.query,
-      timeField: params.data.timeField,
-      lookbackWindow: params.data.lookbackWindow,
-      groupingKey: params.data.groupingKey ?? [],
+      name: parsed.data.name,
+      tags: parsed.data.tags,
+      schedule: parsed.data.schedule,
+      enabled: parsed.data.enabled,
+      query: parsed.data.query,
+      timeField: parsed.data.timeField,
+      lookbackWindow: parsed.data.lookbackWindow,
+      groupingKey: parsed.data.groupingKey,
       createdBy: username,
       createdAt: nowIso,
       updatedBy: username,
@@ -124,10 +124,10 @@ export class RulesClient {
   }): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
 
-    const updateValidationResult = updateRuleDataSchema.safeParse(data);
-    if (!updateValidationResult.success) {
+    const parsed = updateRuleDataSchema.safeParse(data);
+    if (!parsed.success) {
       throw Boom.badRequest(
-        `Error validating update rule data - ${stringifyZodError(updateValidationResult.error)}`
+        `Error validating update rule data - ${stringifyZodError(parsed.error)}`
       );
     }
 
@@ -148,11 +148,12 @@ export class RulesClient {
     }
 
     const wasEnabled = Boolean(existingAttrs.enabled);
-    const willBeEnabled = data.enabled !== undefined ? Boolean(data.enabled) : wasEnabled;
+    const willBeEnabled =
+      parsed.data.enabled !== undefined ? Boolean(parsed.data.enabled) : wasEnabled;
 
     const nextAttrs: RuleSavedObjectAttributes = {
       ...existingAttrs,
-      ...data,
+      ...parsed.data,
       updatedBy: username,
       updatedAt: nowIso,
     };

@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './rule_data_schema';
-export { validateDuration, validateEsqlQuery } from './validation';
+export * from './src';
