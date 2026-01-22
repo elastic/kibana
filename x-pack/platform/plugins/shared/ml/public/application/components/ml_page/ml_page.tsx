@@ -213,6 +213,9 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
         max-inline-size: ${headerRestrictWidth}px;
         margin-inline: auto;
       `;
+      const maxInlineSizeStyles = css`
+        max-inline-size: 100%;
+      `;
       return (
         <EuiFlexGroup
           justifyContent="spaceBetween"
@@ -232,7 +235,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPageHeaderSection>
-          <EuiPageHeaderSection>
+          <EuiPageHeaderSection css={maxInlineSizeStyles}>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               {isRightSectionMounted ? (
                 <EuiFlexItem grow={false}>
@@ -240,7 +243,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
                 </EuiFlexItem>
               ) : null}
               {activeRoute.enableDatePicker ? (
-                <EuiFlexItem grow={false}>
+                <EuiFlexItem grow={false} css={maxInlineSizeStyles}>
                   <DatePickerWrapper isLoading={isLoading} width="full" />
                 </EuiFlexItem>
               ) : null}
