@@ -287,6 +287,16 @@ export const CONSOLE_COMMANDS = {
     about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.runscript.about', {
       defaultMessage: 'Run a script on the host',
     }),
+    title: i18n.translate('xpack.securitySolution.endpointConsoleCommands.runscript.title', {
+      defaultMessage: 'Run a script on the host',
+    }),
+    privileges: i18n.translate(
+      'xpack.securitySolution.endpointConsoleCommands.runscript.privileges',
+      {
+        defaultMessage:
+          'Insufficient privileges to create runscript actions. Contact your Kibana administrator if you think you should have this permission.',
+      }
+    ),
   },
   cancel: {
     about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.cancel.about', {

@@ -44,15 +44,15 @@ const ActionTypeFieldComponent = ({
       },
     },
   } = useKibana().services;
-  const isAutomatedRunsScriptEnabled = useIsExperimentalFeatureEnabled(
+  const isAutomatedRunScriptEnabled = useIsExperimentalFeatureEnabled(
     'responseActionsEndpointAutomatedRunScript'
   );
 
   const enabledActions = useMemo(() => {
     return ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS.filter((command) => {
-      return command !== 'runscript' || isAutomatedRunsScriptEnabled;
+      return command !== 'runscript' || isAutomatedRunScriptEnabled;
     });
-  }, [isAutomatedRunsScriptEnabled]);
+  }, [isAutomatedRunScriptEnabled]);
 
   const fieldOptions = useMemo(
     () =>

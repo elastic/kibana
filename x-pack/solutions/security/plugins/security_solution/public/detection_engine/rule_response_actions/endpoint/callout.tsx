@@ -10,7 +10,6 @@ import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { get } from 'lodash';
-import { CONSOLE_COMMANDS } from '../../../management/common/translations';
 
 interface EndpointCallOutProps {
   basePath: string;
@@ -20,8 +19,6 @@ interface EndpointCallOutProps {
 const EndpointActionCalloutComponent = ({ basePath, editDisabled }: EndpointCallOutProps) => {
   const [data] = useFormData();
   const currentCommand = get(data, `${basePath}.command`);
-
-  // FIXME:PT FIX BUG below.... When `editDisabled` is true, the message displayed assumes the user selected `isolate` when in reality it could have been one of the other response actions
 
   if (editDisabled) {
     return (
@@ -38,7 +35,12 @@ const EndpointActionCalloutComponent = ({ basePath, editDisabled }: EndpointCall
             />
           }
         >
-          <EuiText size={'xs'}>{CONSOLE_COMMANDS.isolate.privileges}</EuiText>
+          <EuiText size={'xs'}>
+            <FormattedMessage
+              id="xpack.securitySolution.responseActionsList.endpoint.privilegesDescription"
+              defaultMessage="You do not have the required privileges to run this action. Please contact your administrator to request the necessary privileges."
+            />
+          </EuiText>
         </EuiCallOut>
         <EuiSpacer size="s" />
       </>
