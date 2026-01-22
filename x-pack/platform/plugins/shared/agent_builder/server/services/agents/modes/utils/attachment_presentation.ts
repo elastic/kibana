@@ -8,6 +8,7 @@
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { isAttachmentActive, getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import { generateXmlTree, type XmlNode } from '@kbn/agent-builder-genai-utils/tools/utils';
+import type { BaseMessageLike } from '@langchain/core/messages';
 
 /**
  * Presentation mode for attachments in the LLM context.
@@ -191,13 +192,14 @@ export const getAttachmentSystemPrompt = (presentation: AttachmentPresentation):
   if (presentation.mode === 'inline') {
     return `## Conversation Attachments
 
-The user has ${presentation.activeCount} attachment(s) in this conversation. The full content is shown above in XML format.
+The user has ${presentation.activeCount} attachment(s) in this conversation. The content is shown above in XML format.
 
 You can:
+- Read attachments using attachment_read(id) to get full content if truncated
 - Update attachments using attachment_update(id, data) to modify content
 - Add new attachments using attachment_add(type, data) to store information
 
-Since the content is shown inline, you don't need to read it - just reference it directly.`;
+If you see "[content truncated, use attachment_read for full content]", you MUST call attachment_read(id) to get the complete content before analyzing or referencing that attachment.`;
   }
 
   return `## Conversation Attachments
@@ -212,4 +214,20 @@ You MUST use attachment tools to access content:
 - Compare versions using attachment_diff(id, from_version, to_version)
 
 Always read an attachment before referencing its content in your response.`;
+};
+
+/**
+ * Builds the system message(s) used to expose conversation-level attachments to the LLM
+ * (attachment XML + handling instructions).
+ */
+export const getConversationAttachmentsSystemMessages = (
+  presentation?: AttachmentPresentation
+): BaseMessageLike[] => {
+  if (!presentation || presentation.activeCount <= 0) {
+    return [];
+  }
+
+  return [
+    ['system', `${presentation.content}\n\n${getAttachmentSystemPrompt(presentation)}`] as const,
+  ];
 };
