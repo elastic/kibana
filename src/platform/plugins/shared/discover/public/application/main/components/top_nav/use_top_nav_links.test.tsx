@@ -121,8 +121,10 @@ describe('useTopNavLinks', () => {
           "testId": "discoverOpenButton",
         },
         Object {
+          "color": "primary",
           "description": "Save session",
           "emphasize": true,
+          "fill": true,
           "iconType": "save",
           "id": "save",
           "label": "Save",
@@ -177,8 +179,10 @@ describe('useTopNavLinks', () => {
             "testId": "discoverOpenButton",
           },
           Object {
+            "color": "primary",
             "description": "Save session",
             "emphasize": true,
+            "fill": true,
             "iconType": "save",
             "id": "save",
             "label": "Save",
@@ -249,8 +253,10 @@ describe('useTopNavLinks', () => {
             "testId": "shareTopNavButton",
           },
           Object {
+            "color": "primary",
             "description": "Save session",
             "emphasize": true,
+            "fill": true,
             "iconType": "save",
             "id": "save",
             "label": "Save",
