@@ -87,7 +87,13 @@ export function registerDataProviders({
     'apmErrors',
     async ({ request, serviceName, serviceEnvironment, start, end }) => {
       const { apmEventClient } = await buildApmToolResources({ core, plugins, request, logger });
-      return getApmErrors({ apmEventClient, serviceName, serviceEnvironment, start, end });
+      return getApmErrors({
+        apmEventClient,
+        serviceName,
+        serviceEnvironment: serviceEnvironment ? serviceEnvironment : ENVIRONMENT_ALL.value,
+        start,
+        end,
+      });
     }
   );
 

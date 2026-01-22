@@ -148,7 +148,7 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
   apmErrors: (params: {
     request: KibanaRequest;
     serviceName: string;
-    serviceEnvironment: string;
+    serviceEnvironment?: string;
     start: string;
     end: string;
   }) => Promise<APMError[]>;
