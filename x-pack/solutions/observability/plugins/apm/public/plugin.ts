@@ -175,7 +175,7 @@ export interface ApmPluginStartDeps {
   discoverShared: DiscoverSharedPublicStart;
   agentBuilder?: AgentBuilderPluginStart;
   observabilityAgentBuilder?: ObservabilityAgentBuilderPluginPublicStart;
-  slo: SLOPublicStart;
+  slo?: SLOPublicStart;
 }
 
 const applicationsTitle = i18n.translate('xpack.apm.navigation.rootTitle', {
