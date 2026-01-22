@@ -133,7 +133,7 @@ export const EmbeddableAccessBoundary: React.FC<EmbeddableAccessBoundaryProps> =
   if (!accessState.hasRequiredLicense) {
     return (
       <AccessDeniedWrapper onClose={onClose}>
-        <UpgradeLicensePrompt variant="embeddable" />
+        <UpgradeLicensePrompt />
       </AccessDeniedWrapper>
     );
   }
@@ -141,7 +141,7 @@ export const EmbeddableAccessBoundary: React.FC<EmbeddableAccessBoundaryProps> =
   if (!hasShowPrivilege) {
     return (
       <AccessDeniedWrapper onClose={onClose}>
-        <NoPrivilegePrompt variant="embeddable" />
+        <NoPrivilegePrompt />
       </AccessDeniedWrapper>
     );
   }
@@ -149,7 +149,7 @@ export const EmbeddableAccessBoundary: React.FC<EmbeddableAccessBoundaryProps> =
   if (!accessState.hasLlmConnector) {
     return (
       <AccessDeniedWrapper onClose={onClose}>
-        <AddLlmConnectionPrompt variant="embeddable" />
+        <AddLlmConnectionPrompt />
       </AccessDeniedWrapper>
     );
   }

@@ -7,18 +7,24 @@
 
 import React, { useCallback } from 'react';
 import { EuiButton } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useConversationContext } from '../../context/conversation/conversation_context';
 import { PromptLayout } from './prompt_layout';
 import { useNavigation } from '../../hooks/use_navigation';
 import { appPaths } from '../../utils/app_paths';
 
-export type AppErrorType = 'GENERIC_ERROR' | 'CONVERSATION_NOT_FOUND';
+export type AppErrorType =
+  | 'GENERIC_ERROR'
+  | 'CONVERSATION_NOT_FOUND'
+  | 'MISSING_PRIVILEGES'
+  | 'UPGRADE_LICENSE'
+  | 'ADD_LLM_CONNECTION';
 
 interface ErrorDetails {
   title: string;
   description: string;
-  icon: string;
+  icon?: IconType;
 }
 
 const ERROR_DETAILS_MAPPINGS: Record<AppErrorType, ErrorDetails> = {
@@ -45,6 +51,32 @@ const ERROR_DETAILS_MAPPINGS: Record<AppErrorType, ErrorDetails> = {
     ),
     icon: 'search',
   },
+  MISSING_PRIVILEGES: {
+    title: i18n.translate('xpack.agentBuilder.access.prompt.noPrivilege.title', {
+      defaultMessage: 'Access denied',
+    }),
+    description: i18n.translate('xpack.agentBuilder.access.prompt.noPrivilege.description', {
+      defaultMessage:
+        "You don't have the required privileges to access the Agent Builder. Please contact your administrator.",
+    }),
+  },
+  UPGRADE_LICENSE: {
+    title: i18n.translate('xpack.agentBuilder.access.prompt.upgradeLicense.title', {
+      defaultMessage: 'Upgrade your cluster license',
+    }),
+    description: i18n.translate('xpack.agentBuilder.access.prompt.upgradeLicense.description', {
+      defaultMessage: 'Your cluster needs an Enterprise license to use the Elastic Agent Builder.',
+    }),
+  },
+  ADD_LLM_CONNECTION: {
+    title: i18n.translate('xpack.agentBuilder.access.prompt.addLlm.title', {
+      defaultMessage: 'No Large Language Model detected',
+    }),
+    description: i18n.translate('xpack.agentBuilder.access.prompt.addLlm.description', {
+      defaultMessage:
+        'Select a model to integrate with your chat experience. You can also set up your connection.',
+    }),
+  },
 };
 
 const NEW_CONVERSATION_BUTTON_LABEL = i18n.translate(
@@ -56,6 +88,9 @@ const NEW_CONVERSATION_BUTTON_LABEL = i18n.translate(
 
 interface AppErrorPromptProps {
   errorType: AppErrorType;
+  imageSrc?: string;
+  primaryButton?: React.ReactNode;
+  secondaryButton?: React.ReactNode;
 }
 
 const StartNewConversationAction: React.FC = () => {
@@ -84,7 +119,12 @@ export const getErrorTypeFromStatus = (status?: number): AppErrorType => {
   return 'GENERIC_ERROR';
 };
 
-export const AppErrorPrompt: React.FC<AppErrorPromptProps> = ({ errorType }) => {
+export const AppErrorPrompt: React.FC<AppErrorPromptProps> = ({
+  errorType,
+  imageSrc,
+  primaryButton,
+  secondaryButton,
+}) => {
   const { isEmbeddedContext } = useConversationContext();
   const errorDetails = ERROR_DETAILS_MAPPINGS[errorType];
 
@@ -92,9 +132,11 @@ export const AppErrorPrompt: React.FC<AppErrorPromptProps> = ({ errorType }) => 
     <PromptLayout
       variant={isEmbeddedContext ? 'embeddable' : 'default'}
       iconType={errorDetails.icon}
+      imageSrc={imageSrc}
       title={errorDetails.title}
       subtitle={errorDetails.description}
-      primaryButton={<StartNewConversationAction />}
+      primaryButton={primaryButton ?? <StartNewConversationAction />}
+      secondaryButton={secondaryButton ?? null}
     />
   );
 };

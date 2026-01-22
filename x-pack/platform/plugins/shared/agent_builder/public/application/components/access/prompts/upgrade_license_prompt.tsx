@@ -8,17 +8,13 @@
 import { EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PromptLayout, type PromptLayoutVariant } from '../../common/prompt_layout';
+import { AppErrorPrompt } from '../../common/error_prompt';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useAssetBasePath } from '../../../hooks/use_asset_base_path';
 
 const SUBSCRIPTIONS_LINK = 'https://www.elastic.co/subscriptions';
 
-export interface UpgradeLicensePromptProps {
-  variant?: PromptLayoutVariant;
-}
-
-export const UpgradeLicensePrompt: React.FC<UpgradeLicensePromptProps> = ({ variant }) => {
+export const UpgradeLicensePrompt: React.FC = () => {
   const assetBasePath = useAssetBasePath();
   const { colorMode } = useEuiTheme();
   const { navigationService } = useAgentBuilderServices();
@@ -46,22 +42,10 @@ export const UpgradeLicensePrompt: React.FC<UpgradeLicensePromptProps> = ({ vari
   ) : undefined;
 
   return (
-    <PromptLayout
-      variant={variant}
+    <AppErrorPrompt
+      errorType="UPGRADE_LICENSE"
       imageSrc={
         colorMode === 'LIGHT' ? `${assetBasePath}/lock_light.svg` : `${assetBasePath}/lock_dark.svg`
-      }
-      title={
-        <FormattedMessage
-          id="xpack.agentBuilder.access.prompt.upgradeLicense.title"
-          defaultMessage="Upgrade your cluster license"
-        />
-      }
-      subtitle={
-        <FormattedMessage
-          id="xpack.agentBuilder.access.prompt.upgradeLicense.description"
-          defaultMessage="Your cluster needs an Enterprise license to use the Elastic Agent Builder."
-        />
       }
       primaryButton={primaryButton}
       secondaryButton={secondaryButton}

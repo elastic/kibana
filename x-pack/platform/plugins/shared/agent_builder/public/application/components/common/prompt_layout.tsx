@@ -18,7 +18,10 @@ const defaultPromptStyles = css`
 
 export type PromptLayoutVariant = 'default' | 'embeddable';
 
-type IconProps = { imageSrc: string; iconType?: never } | { imageSrc?: never; iconType: IconType };
+interface IconProps {
+  imageSrc?: string;
+  iconType?: IconType;
+}
 
 export type PromptLayoutProps = {
   title: React.ReactNode;
