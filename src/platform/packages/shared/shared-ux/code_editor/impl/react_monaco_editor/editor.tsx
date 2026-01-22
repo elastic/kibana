@@ -29,8 +29,7 @@
 
 import type { monaco as monacoEditor } from '@kbn/monaco';
 import { defaultThemesResolvers, initializeSupportedLanguages, monaco } from '@kbn/monaco';
-import { EuiPortal, type EuiPortalProps, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
-import { Global } from '@emotion/react';
+import { EuiPortal, type EuiPortalProps, useEuiTheme } from '@elastic/eui';
 import * as React from 'react';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 
@@ -134,8 +133,10 @@ initializeSupportedLanguages();
 
 export const OVERFLOW_WIDGETS_TEST_ID = 'kbnCodeEditorEditorOverflowWidgetsContainer';
 const OVERFLOW_WIDGETS_CONTAINER_CLASS = 'monaco-editor-overflowing-widgets-container';
-const OVERFLOW_WIDGETS_CONTAINER_STACKING_OVERRIDE_CLASS =
-  'monaco-editor-overflowing-widgets-container-stacking-override';
+// eui flyout z-index is 1000 and highly unlikely to change, so we hardcode values here
+// we want to ensure the overflow widgets appear above or below the flyout as needed depending on where the editor is rendered
+const OVERFLOW_WIDGETS_Z_INDEX_BELOW_EUI_FLYOUT = 900;
+const OVERFLOW_WIDGETS_Z_INDEX_ABOVE_EUI_FLYOUT = 1100;
 
 export function MonacoEditor({
   width = '100%',
@@ -156,8 +157,6 @@ export function MonacoEditor({
   const overflowWidgetsDomNode = useRef<HTMLDivElement | null>(null);
 
   const euiTheme = useEuiTheme();
-
-  const instanceId = useGeneratedHtmlId({ prefix: 'monaco-editor' });
 
   const editor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 
@@ -225,7 +224,18 @@ export function MonacoEditor({
       // for applying styles specific to the overflow widgets container
       overflowWidgetsDomNode.current?.classList.add(OVERFLOW_WIDGETS_CONTAINER_CLASS);
       overflowWidgetsDomNode.current?.setAttribute('data-test-subj', OVERFLOW_WIDGETS_TEST_ID);
-      overflowWidgetsDomNode.current?.setAttribute('id', instanceId);
+
+      // handle special case of editor being rendered inside an EUI flyout,
+      // in which case we want to ensure the overflow widgets appear above the flyout z-index
+      const isInsideFlyout = containerElement.current!.closest('.euiFlyout') !== null;
+
+      const defaultZIndex = isInsideFlyout
+        ? OVERFLOW_WIDGETS_Z_INDEX_ABOVE_EUI_FLYOUT
+        : OVERFLOW_WIDGETS_Z_INDEX_BELOW_EUI_FLYOUT;
+
+      overflowWidgetsDomNode.current!.style.zIndex = String(
+        overflowWidgetsContainerZIndexOverride ?? defaultZIndex
+      );
 
       // Before initializing monaco editor
       const finalOptions = { ...options, ...handleEditorWillMount() };
@@ -362,35 +372,9 @@ export function MonacoEditor({
 
   return (
     <>
-      <div
-        id={instanceId}
-        ref={containerElement}
-        style={style}
-        className="react-monaco-editor-container"
-      />
+      <div ref={containerElement} style={style} className="react-monaco-editor-container" />
       {/** @ts-expect-error -- we are using the portal component to render elements produced by monaco here, so no need to provide the expected children prop  */}
       <EuiPortal portalRef={setOverflowWidgetsDomNode} />
-      <Global
-        styles={({ euiTheme: _euiTheme }) => ({
-          // by default display the overflow widgets below flyouts
-          [`.${OVERFLOW_WIDGETS_CONTAINER_CLASS}`]: {
-            zIndex: Number(_euiTheme?.levels?.maskBelowHeader ?? 1000) - 2,
-          },
-          // When the editor is inside a flyout, ensure the overflow widgets are above the flyout and scoped to each instance
-          [`:has(.euiFlyout [class*="monaco-editor"][id="${instanceId}"]) .${OVERFLOW_WIDGETS_CONTAINER_CLASS}[id="${instanceId}"]`]:
-            {
-              zIndex: _euiTheme?.levels?.menu ?? 2000,
-            },
-          // Allow the overflow widgets container z-index to be overridden
-          ...(overflowWidgetsContainerZIndexOverride
-            ? {
-                [`.${OVERFLOW_WIDGETS_CONTAINER_STACKING_OVERRIDE_CLASS}[id="${instanceId}"]`]: {
-                  zIndex: overflowWidgetsContainerZIndexOverride,
-                },
-              }
-            : {}),
-        })}
-      />
     </>
   );
 }
