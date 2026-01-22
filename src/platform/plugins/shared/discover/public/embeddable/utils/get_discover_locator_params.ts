@@ -16,6 +16,9 @@ import {
 
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { getEsqlControls } from '@kbn/controls-renderer';
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
+import type { ESQLControlState } from '@kbn/esql-types';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { type PublishesSavedSearch } from '../types';
 import type { DiscoverAppLocatorParams } from '../../../common';
 
@@ -38,7 +41,8 @@ export const getDiscoverLocatorParams = (
         dataViewId: dataView?.id,
         dataViewSpec: dataView?.toMinimalSpec(),
         esqlControls: presentationContainer
-          ? getEsqlControls(presentationContainer, query)
+          ? (getEsqlControls(presentationContainer, query) as ControlPanelsState<ESQLControlState> &
+              SerializableRecord)
           : undefined,
         timeRange: savedSearch?.timeRange,
         refreshInterval: savedSearch?.refreshInterval,

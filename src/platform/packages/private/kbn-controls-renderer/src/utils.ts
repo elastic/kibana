@@ -11,10 +11,9 @@ import type { PresentationContainer } from '@kbn/presentation-containers';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
-import type { Serializable, SerializableRecord } from '@kbn/utility-types';
+import type { Serializable } from '@kbn/utility-types';
 import { apiHasSerializableState, apiHasType, apiHasUniqueId } from '@kbn/presentation-publishing';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
-import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { ESQLControlState } from '@kbn/esql-types';
 import { omit } from 'lodash';
 import type { HasPrependWrapperRef, PublishesControlsLayout } from './types';
@@ -75,5 +74,5 @@ export function getEsqlControls(
     {}
   );
 
-  return esqlControlState as ControlPanelsState<ESQLControlState> & SerializableRecord;
+  return esqlControlState;
 }
