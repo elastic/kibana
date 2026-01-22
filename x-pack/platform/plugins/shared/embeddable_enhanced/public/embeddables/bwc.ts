@@ -8,8 +8,10 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { DynamicActionsSerializedState } from './types';
 
+//
 // Temporary work around - REST APIs use DrilldownState but client still uses EnhancementsState
 // Remove when client code supports DrilldownState
+//
 
 export function extractEnhancements(state: DynamicActionsSerializedState) {
   if (!state.drilldowns || !state.drilldowns.length) {
