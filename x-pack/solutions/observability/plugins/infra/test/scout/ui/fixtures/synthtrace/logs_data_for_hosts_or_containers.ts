@@ -5,25 +5,26 @@
  * 2.0.
  */
 
+import type { LogDocument, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { generateShortId, log, timerange } from '@kbn/synthtrace-client';
+import { LOG_LEVELS } from '../constants';
 
-export function generateLogsDataForHosts({
+export function generateLogsDataForHostsOrContainers({
   from,
   to,
-  hosts,
-}: {
-  from: string;
-  to: string;
-  hosts: Array<{ hostName: string }>;
-}) {
+  hostNames,
+  containerIds,
+}:
+  | {
+      from: string;
+      to: string;
+    } & (
+      | { hostNames: string[]; containerIds?: undefined }
+      | { containerIds: string[]; hostNames?: undefined }
+    )): SynthtraceGenerator<LogDocument> {
   const range = timerange(from, to);
 
   // Logs Data logic
-  const MESSAGE_LOG_LEVELS = [
-    { message: 'A simple log', level: 'info' },
-    { message: 'Yet another debug log', level: 'debug' },
-    { message: 'Error with certificate: "ca_trusted_fingerprint"', level: 'error' },
-  ];
   const CLOUD_PROVIDERS = ['gcp', 'aws', 'azure'];
   const CLOUD_REGION = ['eu-central-1', 'us-east-1', 'area-51'];
 
@@ -34,25 +35,32 @@ export function generateLogsDataForHosts({
   ];
 
   return range
-    .interval('30s')
+    .interval('10s')
     .rate(1)
-    .generator((timestamp) =>
-      hosts.flatMap(({ hostName }) => {
-        const index = Math.floor(Math.random() * MESSAGE_LOG_LEVELS.length);
-        return log
+    .generator((timestamp, indx) =>
+      (hostNames ?? containerIds).flatMap((name) => {
+        const logIndex = indx % LOG_LEVELS.length;
+        const logConfig = log
           .create()
-          .message(MESSAGE_LOG_LEVELS[index].message)
-          .logLevel(MESSAGE_LOG_LEVELS[index].level)
-          .hostName(hostName)
+          .message(LOG_LEVELS[logIndex].message)
+          .logLevel(LOG_LEVELS[logIndex].level);
+
+        if (containerIds) {
+          logConfig.containerId(name);
+        } else {
+          logConfig.hostName(name);
+        }
+
+        return logConfig
           .defaults({
             'trace.id': generateShortId(),
             'agent.name': 'synth-agent',
-            'orchestrator.cluster.name': CLUSTER[index].clusterName,
-            'orchestrator.cluster.id': CLUSTER[index].clusterId,
+            'orchestrator.cluster.name': CLUSTER[logIndex].clusterName,
+            'orchestrator.cluster.id': CLUSTER[logIndex].clusterId,
             'orchestrator.resource.id': generateShortId(),
-            'cloud.provider': CLOUD_PROVIDERS[index],
-            'cloud.region': CLOUD_REGION[index],
-            'cloud.availability_zone': `${CLOUD_REGION[index]}a`,
+            'cloud.provider': CLOUD_PROVIDERS[logIndex],
+            'cloud.region': CLOUD_REGION[logIndex],
+            'cloud.availability_zone': `${CLOUD_REGION[logIndex]}a`,
             'cloud.project.id': generateShortId(),
             'cloud.instance.id': generateShortId(),
             'log.file.path': `/logs/${generateShortId()}/error.txt`,
