@@ -33,13 +33,20 @@ export class DispatcherService {
 
     const result = await this.esClient.esql.query({
       query: `FROM .alerts-events*,.alerts-actions* METADATA _index 
-        | where @timestamp >= ${moment(previousStartedAt).subtract(10, 'minutes').toISOString()}
         | EVAL rule_id = COALESCE(rule.id, rule_id)
         | STATS
-          last_fire = MAX(last_series_event_timestamp) WHERE _index LIKE ".ds-.alerts-actions-*" AND action_type == "fire-event",
-          last_event_timestamp = MAX(@timestamp) WHERE _index LIKE ".ds-.alerts-events-*" and type == "alert"
-            BY rule_id, group_hash, episode_id, episode_status
-        | WHERE last_fire IS NULL OR last_event_timestamp > last_fire`,
+            last_fire = MAX(last_series_event_timestamp) WHERE _index LIKE ".ds-.alerts-actions-*" AND action_type == "fire-event",
+            last_event_timestamp = MAX(@timestamp) WHERE _index LIKE ".ds-.alerts-events-*" and type == "alert"
+              BY rule_id, group_hash, episode_id, episode_status
+        | WHERE last_fire IS NULL OR last_event_timestamp > last_fire
+        | LIMIT 10000`,
+      filter: {
+        range: {
+          '@timestamp': {
+            gte: moment(previousStartedAt).subtract(10, 'minutes').toISOString(),
+          },
+        },
+      },
     });
 
     const next = toRecords<AlertEpisode>({ columns: result.columns, values: result.values });
