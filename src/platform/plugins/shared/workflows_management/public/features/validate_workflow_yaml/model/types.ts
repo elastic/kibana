@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PropertyValidationFn } from '@kbn/workflows';
+import type { PropertySelectionHandler, SelectionContext } from '@kbn/workflows';
 
 interface BaseItem {
   id: string;
@@ -34,7 +34,8 @@ export interface CustomPropertyItem extends BaseItem {
   stepType: string;
   propertyKey: string;
   propertyValue: unknown;
-  validator: PropertyValidationFn;
+  selectionHandler: PropertySelectionHandler;
+  context: SelectionContext;
 }
 
 export interface StepNameInfo {
@@ -102,6 +103,12 @@ interface YamlValidationResultConnectorIdError extends YamlValidationResultBase 
   owner: 'connector-id-validation';
 }
 
+interface YamlValidationResultJsonSchemaDefault extends YamlValidationResultBase {
+  severity: YamlValidationErrorSeverity;
+  message: string;
+  owner: 'json-schema-default-validation';
+}
+
 interface YamlValidationResultCustomPropertyError extends YamlValidationResultBase {
   severity: YamlValidationErrorSeverity;
   message: string;
@@ -123,6 +130,7 @@ export const CUSTOM_YAML_VALIDATION_MARKER_OWNERS = [
   'variable-validation',
   'liquid-template-validation',
   'connector-id-validation',
+  'json-schema-default-validation',
   'custom-property-validation',
 ] as const;
 
@@ -140,5 +148,6 @@ export type YamlValidationResult =
   | YamlValidationResultLiquidTemplate
   | YamlValidationResultConnectorIdError
   | YamlValidationResultConnectorIdValid
+  | YamlValidationResultJsonSchemaDefault
   | YamlValidationResultCustomPropertyError
   | YamlValidationResultCustomPropertyValid;

@@ -47,7 +47,7 @@ export type EmbeddableTransforms<
    *
    * When schema is provided, EmbeddableState is expected to be TypeOf<typeof schema>
    */
-  schema?: Type<object>;
+  getSchema?: () => Type<object> | undefined;
   /**
    * Throws error when panel config is not supported.
    */

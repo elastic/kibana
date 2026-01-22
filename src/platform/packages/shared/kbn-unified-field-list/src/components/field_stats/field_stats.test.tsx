@@ -8,24 +8,21 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import type { ReactWrapper } from 'enzyme';
-import { EuiLoadingSpinner, EuiProgress } from '@elastic/eui';
-import { coreMock } from '@kbn/core/public/mocks';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { act, screen, within } from '@testing-library/react';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { loadFieldStats } from '../../services/field_stats';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { loadFieldStats } from '../../services/field_stats';
+import type { FieldStatsResponse } from '../../types';
 import type { FieldStatsWithKbnQuery } from './field_stats';
 import FieldStats from './field_stats';
 
-jest.mock('../../services/field_stats', () => ({
-  loadFieldStats: jest.fn().mockResolvedValue({}),
-}));
+jest.mock('../../services/field_stats');
 
 const mockedServices = {
   data: dataPluginMock.createStartContract(),
@@ -35,17 +32,7 @@ const mockedServices = {
   uiSettings: coreMock.createStart().uiSettings,
 };
 
-// Similar to wrapper.text() but filtered by a selector
-export const getChildrenTextBySelector = (wrapper: ReactWrapper, selector: string) => {
-  let text = '';
-  const children = wrapper.find(selector);
-
-  children.forEach((element) => {
-    text += element.text();
-  });
-
-  return text;
-};
+const mockedLoadFieldStats = jest.mocked(loadFieldStats);
 
 describe('UnifiedFieldList FieldStats', () => {
   let defaultProps: FieldStatsWithKbnQuery;
@@ -142,38 +129,24 @@ describe('UnifiedFieldList FieldStats', () => {
       'data-test-subj': 'testing',
     };
 
-    (mockedServices.dataViews.get as jest.Mock).mockImplementation(() => {
+    mockedServices.dataViews.get.mockImplementation(() => {
       return Promise.resolve(dataView);
     });
-  });
-
-  async function mountComponent(component: React.ReactElement): Promise<ReactWrapper> {
-    let wrapper: ReactWrapper;
-    await act(async () => {
-      wrapper = await mountWithIntl(component);
-      // wait for lazy modules if any
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      await wrapper.update();
-    });
-
-    return wrapper!;
-  }
-
-  beforeEach(() => {
-    (loadFieldStats as jest.Mock).mockReset();
-    (loadFieldStats as jest.Mock).mockImplementation(() => Promise.resolve({}));
+    mockedLoadFieldStats.mockReset();
+    mockedLoadFieldStats.mockResolvedValue({});
   });
 
   it('should request field stats with correct params', async () => {
-    let resolveFunction: (arg: unknown) => void;
+    const NUMBER_OF_DOCUMENTS = 4633;
+    let resolveFunction!: (value: FieldStatsResponse<string | number>) => void;
 
-    (loadFieldStats as jest.Mock).mockImplementation(() => {
+    mockedLoadFieldStats.mockImplementation(() => {
       return new Promise((resolve) => {
         resolveFunction = resolve;
       });
     });
 
-    const wrapper = await mountComponent(
+    renderWithI18n(
       <FieldStats
         {...defaultProps}
         query={{ query: 'geo.src : "US"', language: 'kuery' }}
@@ -188,7 +161,7 @@ describe('UnifiedFieldList FieldStats', () => {
       />
     );
 
-    expect(loadFieldStats).toHaveBeenCalledWith({
+    expect(mockedLoadFieldStats).toHaveBeenCalledWith({
       abortController: new AbortController(),
       services: { data: mockedServices.data },
       dataView,
@@ -215,13 +188,13 @@ describe('UnifiedFieldList FieldStats', () => {
       field: defaultProps.field,
     });
 
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
+    expect(screen.getByTestId('testing-statsLoading')).toBeVisible();
 
-    await act(async () => {
+    act(() => {
       resolveFunction!({
-        totalDocuments: 4633,
-        sampledDocuments: 4633,
-        sampledValues: 4633,
+        totalDocuments: NUMBER_OF_DOCUMENTS,
+        sampledDocuments: NUMBER_OF_DOCUMENTS,
+        sampledValues: NUMBER_OF_DOCUMENTS,
         histogram: {
           buckets: [{ count: 705, key: 0 }],
         },
@@ -231,23 +204,28 @@ describe('UnifiedFieldList FieldStats', () => {
       });
     });
 
-    await wrapper.update();
+    expect(await screen.findByTestId('testing-statsLoading')).not.toBeInTheDocument();
 
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+    expect(screen.getByText('Top values')).toBeVisible();
+    expect(screen.getByText('Distribution')).toBeVisible();
+    expect(screen.getByTestId('testing-statsFooter')).toHaveTextContent(
+      `Calculated from ${NUMBER_OF_DOCUMENTS} records.`
+    );
 
-    expect(loadFieldStats).toHaveBeenCalledTimes(1);
+    expect(mockedLoadFieldStats).toHaveBeenCalledTimes(1);
   });
 
   it('should request field stats with dsl query', async () => {
-    let resolveFunction: (arg: unknown) => void;
+    const NUMBER_OF_DOCUMENTS = 4633;
+    let resolveFunction!: (value: FieldStatsResponse<string | number>) => void;
 
-    (loadFieldStats as jest.Mock).mockImplementation(() => {
+    mockedLoadFieldStats.mockImplementation(() => {
       return new Promise((resolve) => {
         resolveFunction = resolve;
       });
     });
 
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <FieldStats
         {...{
           services: mockedServices,
@@ -261,9 +239,7 @@ describe('UnifiedFieldList FieldStats', () => {
       />
     );
 
-    await wrapper.update();
-
-    expect(loadFieldStats).toHaveBeenCalledWith({
+    expect(mockedLoadFieldStats).toHaveBeenCalledWith({
       abortController: new AbortController(),
       services: { data: mockedServices.data },
       dataView,
@@ -273,13 +249,13 @@ describe('UnifiedFieldList FieldStats', () => {
       field: defaultProps.field,
     });
 
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
+    expect(screen.getByTestId('testing-statsLoading')).toBeVisible();
 
-    await act(async () => {
+    act(() => {
       resolveFunction!({
-        totalDocuments: 4633,
-        sampledDocuments: 4633,
-        sampledValues: 4633,
+        totalDocuments: NUMBER_OF_DOCUMENTS,
+        sampledDocuments: NUMBER_OF_DOCUMENTS,
+        sampledValues: NUMBER_OF_DOCUMENTS,
         histogram: {
           buckets: [{ count: 705, key: 0 }],
         },
@@ -289,77 +265,91 @@ describe('UnifiedFieldList FieldStats', () => {
       });
     });
 
-    await wrapper.update();
+    expect(await screen.findByTestId('testing-statsLoading')).not.toBeInTheDocument();
 
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+    expect(screen.getByText('Top values')).toBeVisible();
+    expect(screen.getByText('Distribution')).toBeVisible();
+    expect(screen.getByTestId('testing-statsFooter')).toHaveTextContent(
+      `Calculated from ${NUMBER_OF_DOCUMENTS} records.`
+    );
 
-    expect(loadFieldStats).toHaveBeenCalledTimes(1);
+    expect(mockedLoadFieldStats).toHaveBeenCalledTimes(1);
   });
 
   it('should not request field stats for range fields', async () => {
-    const wrapper = await mountComponent(
+    renderWithI18n(
       <FieldStats {...defaultProps} field={dataView.fields.find((f) => f.name === 'ip_range')!} />
     );
 
-    expect(loadFieldStats).toHaveBeenCalled();
+    expect(mockedLoadFieldStats).toHaveBeenCalled();
 
-    expect(wrapper.text()).toBe('Analysis is not available for this field.');
+    expect(await screen.findByText('Analysis is not available for this field.')).toBeVisible();
   });
 
   it('should request field examples for geo fields', async () => {
-    const wrapper = await mountComponent(
+    renderWithI18n(
       <FieldStats {...defaultProps} field={dataView.fields.find((f) => f.name === 'geo_shape')!} />
     );
 
-    expect(loadFieldStats).toHaveBeenCalled();
+    expect(mockedLoadFieldStats).toHaveBeenCalled();
 
-    expect(wrapper.text()).toBe('No field data for the current search.');
+    expect(await screen.findByText('No field data for the current search.')).toBeVisible();
   });
 
   it('should render a message if no data is found', async () => {
-    const wrapper = await mountComponent(<FieldStats {...defaultProps} />);
+    renderWithI18n(<FieldStats {...defaultProps} />);
 
-    expect(loadFieldStats).toHaveBeenCalled();
+    expect(mockedLoadFieldStats).toHaveBeenCalled();
 
-    expect(wrapper.text()).toBe('No field data for the current search.');
+    expect(await screen.findByText('No field data for the current search.')).toBeVisible();
   });
 
   it('should render a message if no data is found in sample', async () => {
-    let resolveFunction: (arg: unknown) => void;
+    const TOTAL_DOCUMENTS = 10000;
+    const SAMPLED_DOCUMENTS = 5000;
+    let resolveFunction!: (value: FieldStatsResponse<string | number>) => void;
 
-    (loadFieldStats as jest.Mock).mockImplementation(() => {
+    mockedLoadFieldStats.mockImplementation(() => {
       return new Promise((resolve) => {
         resolveFunction = resolve;
       });
     });
 
-    const wrapper = await mountComponent(<FieldStats {...defaultProps} />);
+    renderWithI18n(<FieldStats {...defaultProps} />);
 
-    await act(async () => {
+    act(() => {
       resolveFunction!({
-        totalDocuments: 10000,
-        sampledDocuments: 5000,
+        totalDocuments: TOTAL_DOCUMENTS,
+        sampledDocuments: SAMPLED_DOCUMENTS,
         sampledValues: 0,
       });
     });
 
-    await wrapper.update();
+    expect(mockedLoadFieldStats).toHaveBeenCalledTimes(1);
 
-    expect(loadFieldStats).toHaveBeenCalledTimes(1);
-
-    expect(wrapper.text()).toBe('No field data for 5000 sample records.');
+    expect(
+      await screen.findByText(`No field data for ${SAMPLED_DOCUMENTS} sample records.`)
+    ).toBeVisible();
   });
 
   it('should render Top Values field stats correctly for a keyword field', async () => {
-    let resolveFunction: (arg: unknown) => void;
+    const SAMPLED_VALUES = 3248;
+    const SUCCESS_COUNT = 1349;
+    const INFO_COUNT = 1206;
+    const SECURITY_COUNT = 329;
+    const WARNING_COUNT = 164;
+    const ERROR_COUNT = 111;
+    const LOGIN_COUNT = 89;
 
-    (loadFieldStats as jest.Mock).mockImplementation(() => {
+    let resolveFunction!: (value: FieldStatsResponse<string | number>) => void;
+
+    mockedLoadFieldStats.mockImplementation(() => {
       return new Promise((resolve) => {
         resolveFunction = resolve;
       });
     });
 
-    const wrapper = await mountComponent(
+    renderWithI18n(
       <FieldStats
         {...defaultProps}
         query={{ language: 'kuery', query: '' }}
@@ -369,7 +359,7 @@ describe('UnifiedFieldList FieldStats', () => {
       />
     );
 
-    expect(loadFieldStats).toHaveBeenCalledWith({
+    expect(mockedLoadFieldStats).toHaveBeenCalledWith({
       abortController: new AbortController(),
       services: { data: mockedServices.data },
       dataView,
@@ -386,37 +376,37 @@ describe('UnifiedFieldList FieldStats', () => {
       field: defaultProps.field,
     });
 
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
+    expect(screen.getByTestId('testing-statsLoading')).toBeVisible();
 
-    await act(async () => {
+    act(() => {
       resolveFunction!({
         totalDocuments: 1624,
         sampledDocuments: 1624,
-        sampledValues: 3248,
+        sampledValues: SAMPLED_VALUES,
         topValues: {
           buckets: [
             {
-              count: 1349,
+              count: SUCCESS_COUNT,
               key: 'success',
             },
             {
-              count: 1206,
+              count: INFO_COUNT,
               key: 'info',
             },
             {
-              count: 329,
+              count: SECURITY_COUNT,
               key: 'security',
             },
             {
-              count: 164,
+              count: WARNING_COUNT,
               key: 'warning',
             },
             {
-              count: 111,
+              count: ERROR_COUNT,
               key: 'error',
             },
             {
-              count: 89,
+              count: LOGIN_COUNT,
               key: 'login',
             },
           ],
@@ -424,47 +414,56 @@ describe('UnifiedFieldList FieldStats', () => {
       });
     });
 
-    await wrapper.update();
+    expect(await screen.findByTestId('testing-statsLoading')).not.toBeInTheDocument();
 
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-    expect(wrapper.find(EuiProgress)).toHaveLength(6);
+    expect(mockedLoadFieldStats).toHaveBeenCalledTimes(1);
 
-    expect(loadFieldStats).toHaveBeenCalledTimes(1);
-
-    const stats = wrapper.find('[data-test-subj="testing-topValues"]');
-    const firstValue = stats.childAt(0);
-
-    expect(stats).toHaveLength(1);
-    expect(
-      firstValue.find('[data-test-subj="testing-topValues-formattedFieldValue"]').first().text()
-    ).toBe('"success"');
-    expect(
-      firstValue.find('[data-test-subj="testing-topValues-formattedPercentage"]').first().text()
-    ).toBe('41.5%');
-
-    expect(wrapper.find('[data-test-subj="testing-statsFooter"]').first().text()).toBe(
-      'Calculated from 1624 records.'
+    expect(screen.getByText('Top values')).toBeVisible();
+    expect(screen.getByTestId('testing-statsFooter')).toHaveTextContent(
+      `Calculated from 1624 records.`
     );
 
-    expect(wrapper.text()).toContain('Top values');
+    const valuesContainers = screen.getAllByTestId('testing-topValues-bucket');
+    expect(valuesContainers).toHaveLength(6);
 
-    const text = getChildrenTextBySelector(wrapper, 'div.euiProgress__data');
-
-    expect(text).toBe(
-      '"success"41.5%"info"37.1%"security"10.1%"warning"5.0%"error"3.4%"login"2.7%'
+    expect(valuesContainers[0]).toHaveTextContent(
+      `"success"${((SUCCESS_COUNT / SAMPLED_VALUES) * 100).toFixed(1)}%`
+    );
+    expect(valuesContainers[1]).toHaveTextContent(
+      `"info"${((INFO_COUNT / SAMPLED_VALUES) * 100).toFixed(1)}%`
+    );
+    expect(valuesContainers[2]).toHaveTextContent(
+      `"security"${((SECURITY_COUNT / SAMPLED_VALUES) * 100).toFixed(1)}%`
+    );
+    expect(valuesContainers[3]).toHaveTextContent(
+      `"warning"${((WARNING_COUNT / SAMPLED_VALUES) * 100).toFixed(1)}%`
+    );
+    expect(valuesContainers[4]).toHaveTextContent(
+      `"error"${((ERROR_COUNT / SAMPLED_VALUES) * 100).toFixed(1)}%`
+    );
+    expect(valuesContainers[5]).toHaveTextContent(
+      `"login"${((LOGIN_COUNT / SAMPLED_VALUES) * 100).toFixed(1)}%`
     );
   });
 
   it('should render Examples correctly for a non-aggregatable field', async () => {
-    let resolveFunction: (arg: unknown) => void;
+    const SAMPLED_VALUES = 3248;
+    const SUCCESS_COUNT = 1349;
+    const INFO_COUNT = 1206;
+    const SECURITY_COUNT = 329;
+    const WARNING_COUNT = 164;
+    const ERROR_COUNT = 111;
+    const LOGIN_COUNT = 89;
 
-    (loadFieldStats as jest.Mock).mockImplementation(() => {
+    let resolveFunction!: (value: FieldStatsResponse<string | number>) => void;
+
+    mockedLoadFieldStats.mockImplementation(() => {
       return new Promise((resolve) => {
         resolveFunction = resolve;
       });
     });
 
-    const wrapper = await mountComponent(
+    renderWithI18n(
       <FieldStats
         {...defaultProps}
         field={
@@ -477,34 +476,34 @@ describe('UnifiedFieldList FieldStats', () => {
       />
     );
 
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
+    expect(screen.getByTestId('testing-statsLoading')).toBeVisible();
 
-    await act(async () => {
+    act(() => {
       resolveFunction!({
         totalDocuments: 1624,
         sampledDocuments: 1624,
-        sampledValues: 3248,
+        sampledValues: SAMPLED_VALUES,
         topValues: {
           areExamples: true,
           buckets: [
             {
-              count: 1349,
+              count: SUCCESS_COUNT,
               key: 'success',
             },
             {
-              count: 1206,
+              count: INFO_COUNT,
               key: 'info',
             },
             {
-              count: 329,
+              count: SECURITY_COUNT,
               key: 'security',
             },
             {
-              count: 164,
+              count: WARNING_COUNT,
               key: 'warning',
             },
             {
-              count: 111,
+              count: ERROR_COUNT,
               key: 'error',
             },
             {
@@ -516,36 +515,48 @@ describe('UnifiedFieldList FieldStats', () => {
       });
     });
 
-    await wrapper.update();
+    expect(await screen.findByTestId('testing-statsLoading')).not.toBeInTheDocument();
 
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-    expect(wrapper.find(EuiProgress)).toHaveLength(6);
+    expect(mockedLoadFieldStats).toHaveBeenCalledTimes(1);
 
-    expect(loadFieldStats).toHaveBeenCalledTimes(1);
+    expect(screen.getByText('Examples')).toBeVisible();
 
-    expect(wrapper.text()).toContain('Examples');
-
-    const text = getChildrenTextBySelector(wrapper, 'div.euiProgress__data');
-
-    expect(text).toBe(
-      '"success"41.5%"info"37.1%"security"10.1%"warning"5.0%"error"3.4%"login"2.7%'
+    const valuesContainers = screen.getAllByTestId('testing-topValues-bucket');
+    expect(screen.getByTestId('testing-statsFooter')).toHaveTextContent(
+      `Calculated from 1624 records.`
     );
 
-    expect(wrapper.find('[data-test-subj="testing-statsFooter"]').first().text()).toBe(
-      'Calculated from 1624 records.'
+    expect(valuesContainers).toHaveLength(6);
+    expect(valuesContainers[0]).toHaveTextContent(
+      `"success"${((SUCCESS_COUNT / SAMPLED_VALUES) * 100).toFixed(1)}%`
+    );
+    expect(valuesContainers[1]).toHaveTextContent(
+      `"info"${((INFO_COUNT / SAMPLED_VALUES) * 100).toFixed(1)}%`
+    );
+    expect(valuesContainers[2]).toHaveTextContent(
+      `"security"${((SECURITY_COUNT / SAMPLED_VALUES) * 100).toFixed(1)}%`
+    );
+    expect(valuesContainers[3]).toHaveTextContent(
+      `"warning"${((WARNING_COUNT / SAMPLED_VALUES) * 100).toFixed(1)}%`
+    );
+    expect(valuesContainers[4]).toHaveTextContent(
+      `"error"${((ERROR_COUNT / SAMPLED_VALUES) * 100).toFixed(1)}%`
+    );
+    expect(valuesContainers[5]).toHaveTextContent(
+      `"login"${((LOGIN_COUNT / SAMPLED_VALUES) * 100).toFixed(1)}%`
     );
   });
 
   it('should render Histogram field stats correctly for a date field', async () => {
-    let resolveFunction: (arg: unknown) => void;
+    let resolveFunction!: (value: FieldStatsResponse<string | number>) => void;
 
-    (loadFieldStats as jest.Mock).mockImplementation(() => {
+    mockedLoadFieldStats.mockImplementation(() => {
       return new Promise((resolve) => {
         resolveFunction = resolve;
       });
     });
 
-    const wrapper = await mountComponent(
+    renderWithI18n(
       <FieldStats
         {...defaultProps}
         field={dataView.fields[0]}
@@ -556,7 +567,7 @@ describe('UnifiedFieldList FieldStats', () => {
       />
     );
 
-    expect(loadFieldStats).toHaveBeenCalledWith({
+    expect(mockedLoadFieldStats).toHaveBeenCalledWith({
       abortController: new AbortController(),
       services: { data: mockedServices.data },
       dataView,
@@ -573,9 +584,9 @@ describe('UnifiedFieldList FieldStats', () => {
       field: dataView.fields[0],
     });
 
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
+    expect(screen.getByTestId('testing-statsLoading')).toBeVisible();
 
-    await act(async () => {
+    act(() => {
       resolveFunction!({
         totalDocuments: 13,
         histogram: {
@@ -625,36 +636,40 @@ describe('UnifiedFieldList FieldStats', () => {
       });
     });
 
-    await wrapper.update();
+    expect(await screen.findByTestId('testing-statsLoading')).not.toBeInTheDocument();
 
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+    expect(mockedLoadFieldStats).toHaveBeenCalledTimes(1);
 
-    expect(loadFieldStats).toHaveBeenCalledTimes(1);
+    expect(screen.queryByTestId('testing-topValues')).not.toBeInTheDocument();
 
-    expect(wrapper.find('[data-test-subj="testing-topValues"]')).toHaveLength(0);
-    expect(wrapper.find('[data-test-subj="testing-histogram"]')).toHaveLength(1);
-    expect(wrapper.find('[data-test-subj="testing-statsFooter"]').first().text()).toBe(
-      'Calculated from 13 records.'
+    expect(screen.getByText('Time distribution')).toBeVisible();
+    expect(screen.getByTestId('testing-histogram')).toBeVisible();
+    expect(screen.getByTestId('testing-statsFooter')).toHaveTextContent(
+      `Calculated from 13 records.`
     );
-
-    expect(wrapper.text()).toBe('Time distributionCalculated from 13 records.');
   });
 
   it('should render Top Values & Distribution field stats correctly for a number field', async () => {
-    let resolveFunction: (arg: unknown) => void;
+    const SAMPLED_VALUES = 23;
+    const VALUE_1 = 12;
+    const VALUE_2 = 13;
+    const COUNT_1 = 17;
+    const COUNT_2 = 6;
 
-    (loadFieldStats as jest.Mock).mockImplementation(() => {
+    let resolveFunction!: (value: FieldStatsResponse<string | number>) => void;
+
+    mockedLoadFieldStats.mockImplementation(() => {
       return new Promise((resolve) => {
         resolveFunction = resolve;
       });
     });
 
-    const field = dataView.fields.find((f) => f.name === 'machine.ram')!;
+    const FIELD = dataView.fields.find((f) => f.name === 'machine.ram')!;
 
-    const wrapper = await mountComponent(
+    renderWithI18n(
       <FieldStats
         {...defaultProps}
-        field={field}
+        field={FIELD}
         query={{ language: 'kuery', query: '' }}
         filters={[]}
         fromDate="now-1h"
@@ -662,7 +677,7 @@ describe('UnifiedFieldList FieldStats', () => {
       />
     );
 
-    expect(loadFieldStats).toHaveBeenCalledWith({
+    expect(mockedLoadFieldStats).toHaveBeenCalledWith({
       abortController: new AbortController(),
       services: { data: mockedServices.data },
       dataView,
@@ -676,75 +691,85 @@ describe('UnifiedFieldList FieldStats', () => {
           must_not: [],
         },
       },
-      field,
+      field: FIELD,
     });
 
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
+    expect(screen.getByTestId('testing-statsLoading')).toBeVisible();
 
-    await act(async () => {
+    act(() => {
       resolveFunction!({
         totalDocuments: 100,
         sampledDocuments: 23,
-        sampledValues: 23,
+        sampledValues: SAMPLED_VALUES,
         histogram: {
           buckets: [
             {
-              count: 17,
-              key: 12,
+              count: COUNT_1,
+              key: VALUE_1,
             },
             {
-              count: 6,
-              key: 13,
+              count: COUNT_2,
+              key: VALUE_2,
             },
           ],
         },
         topValues: {
           buckets: [
             {
-              count: 17,
-              key: 12,
+              count: COUNT_1,
+              key: VALUE_1,
             },
             {
-              count: 6,
-              key: 13,
+              count: COUNT_2,
+              key: VALUE_2,
             },
           ],
         },
       });
     });
 
-    await wrapper.update();
+    expect(await screen.findByTestId('testing-statsLoading')).not.toBeInTheDocument();
 
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+    expect(mockedLoadFieldStats).toHaveBeenCalledTimes(1);
 
-    expect(loadFieldStats).toHaveBeenCalledTimes(1);
+    expect(screen.getByText('Top values')).toBeVisible();
+    expect(screen.getByText('Distribution')).toBeVisible();
+    expect(screen.getByTestId('testing-statsFooter')).toHaveTextContent(
+      `Calculated from 23 sample records.`
+    );
 
-    expect(wrapper.text()).toContain('Toggle either theTop valuesDistribution');
+    const valuesContainers = screen.getAllByTestId('testing-topValues-bucket');
+    expect(valuesContainers).toHaveLength(2);
 
-    const text = getChildrenTextBySelector(wrapper, 'div.euiProgress__data');
-
-    expect(text).toBe('1273.9%1326.1%');
-
-    expect(wrapper.find('[data-test-subj="testing-statsFooter"]').first().text()).toBe(
-      'Calculated from 23 sample records.'
+    expect(valuesContainers[0]).toHaveTextContent(
+      `${VALUE_1}${((COUNT_1 / SAMPLED_VALUES) * 100).toFixed(1)}%`
+    );
+    expect(valuesContainers[1]).toHaveTextContent(
+      `${VALUE_2}${((COUNT_2 / SAMPLED_VALUES) * 100).toFixed(1)}%`
     );
   });
 
   it('should override the top value bar props with overrideFieldTopValueBar', async () => {
-    let resolveFunction: (arg: unknown) => void;
+    const SAMPLED_VALUES = 23;
+    const VALUE_1 = 12;
+    const VALUE_2 = 13;
+    const COUNT_1 = 17;
+    const COUNT_2 = 6;
 
-    (loadFieldStats as jest.Mock).mockImplementation(() => {
+    let resolveFunction!: (value: FieldStatsResponse<string | number>) => void;
+
+    mockedLoadFieldStats.mockImplementation(() => {
       return new Promise((resolve) => {
         resolveFunction = resolve;
       });
     });
 
-    const field = dataView.fields.find((f) => f.name === 'machine.ram')!;
+    const FIELD = dataView.fields.find((f) => f.name === 'machine.ram')!;
 
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <FieldStats
         {...defaultProps}
-        field={field}
+        field={FIELD}
         query={{ language: 'kuery', query: '' }}
         filters={[]}
         fromDate="now-1h"
@@ -754,67 +779,64 @@ describe('UnifiedFieldList FieldStats', () => {
       />
     );
 
-    await wrapper.update();
+    expect(screen.getByTestId('testing-statsLoading')).toBeVisible();
 
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
-
-    await act(async () => {
+    act(() => {
       resolveFunction!({
         totalDocuments: 100,
         sampledDocuments: 23,
-        sampledValues: 23,
+        sampledValues: SAMPLED_VALUES,
         histogram: {
           buckets: [
             {
-              count: 17,
-              key: 12,
+              count: COUNT_1,
+              key: VALUE_1,
             },
             {
-              count: 6,
-              key: 13,
+              count: COUNT_2,
+              key: VALUE_2,
             },
           ],
         },
         topValues: {
           buckets: [
             {
-              count: 17,
-              key: 12,
+              count: COUNT_1,
+              key: VALUE_1,
             },
             {
-              count: 6,
-              key: 13,
+              count: COUNT_2,
+              key: VALUE_2,
             },
           ],
         },
       });
     });
 
-    await wrapper.update();
+    expect(await screen.findByTestId('testing-statsLoading')).not.toBeInTheDocument();
 
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+    expect(mockedLoadFieldStats).toHaveBeenCalledTimes(1);
 
-    expect(loadFieldStats).toHaveBeenCalledTimes(1);
-
-    expect(wrapper.find(EuiProgress)).toHaveLength(2);
-    expect(wrapper.find(EuiProgress).first().props()).toHaveProperty('color', 'accent');
+    expect(screen.getAllByRole('progressbar')[0].className).toMatch(/accent/);
   });
 
   it('should render a number summary for some fields (time series metric counter)', async () => {
-    let resolveFunction: (arg: unknown) => void;
+    const MIN_VALUE = 29674;
+    const MAX_VALUE = 36821994;
+    let resolveFunction!: (value: FieldStatsResponse<string | number>) => void;
 
-    (loadFieldStats as jest.Mock).mockImplementation(() => {
+    mockedLoadFieldStats.mockImplementation(() => {
       return new Promise((resolve) => {
         resolveFunction = resolve;
       });
     });
 
-    const field = dataView.fields.find((f) => f.name === 'bytes_counter')!;
+    const FIELD = dataView.fields.find((f) => f.name === 'bytes_counter')!;
 
-    const wrapper = await mountComponent(
+    renderWithI18n(
       <FieldStats
         {...defaultProps}
-        field={field}
+        field={FIELD}
         query={{ language: 'kuery', query: '' }}
         filters={[]}
         fromDate="now-1h"
@@ -822,7 +844,7 @@ describe('UnifiedFieldList FieldStats', () => {
       />
     );
 
-    expect(loadFieldStats).toHaveBeenCalledWith({
+    expect(mockedLoadFieldStats).toHaveBeenCalledWith({
       abortController: new AbortController(),
       services: { data: mockedServices.data },
       dataView,
@@ -836,16 +858,16 @@ describe('UnifiedFieldList FieldStats', () => {
           must_not: [],
         },
       },
-      field,
+      field: FIELD,
     });
 
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
+    expect(screen.getByTestId('testing-statsLoading')).toBeVisible();
 
-    await act(async () => {
+    act(() => {
       resolveFunction!({
         numberSummary: {
-          maxValue: 36821994,
-          minValue: 29674,
+          maxValue: MAX_VALUE,
+          minValue: MIN_VALUE,
         },
         sampledDocuments: 5000,
         sampledValues: 5000,
@@ -853,22 +875,29 @@ describe('UnifiedFieldList FieldStats', () => {
       });
     });
 
-    await wrapper.update();
+    expect(await screen.findByTestId('testing-statsLoading')).not.toBeInTheDocument();
 
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+    expect(mockedLoadFieldStats).toHaveBeenCalledTimes(1);
 
-    expect(loadFieldStats).toHaveBeenCalledTimes(1);
+    expect(screen.getByText('Summary')).toBeVisible();
 
-    expect(wrapper.text()).toBe('Summarymin29674max36821994Calculated from 5000 sample records.');
+    const table = screen.getByTestId('testing-numberSummary');
+    const minRow = within(table).getByText('min').closest('tr')!;
+    expect(within(minRow).getByText(String(MIN_VALUE))).toBeVisible();
+
+    const maxRow = within(table).getByText('max').closest('tr')!;
+    expect(within(maxRow).getByText(String(MAX_VALUE))).toBeVisible();
+
+    expect(screen.getByTestId('testing-statsFooter')).toHaveTextContent(
+      `Calculated from 5000 sample records.`
+    );
   });
 
   it('should not request field stats for ES|QL query', async () => {
-    const wrapper = await mountComponent(
-      <FieldStats {...defaultProps} query={{ esql: 'from logs* | limit 10' }} />
-    );
+    renderWithI18n(<FieldStats {...defaultProps} query={{ esql: 'from logs* | limit 10' }} />);
 
-    expect(loadFieldStats).toHaveBeenCalledTimes(0);
+    expect(mockedLoadFieldStats).toHaveBeenCalledTimes(0);
 
-    expect(wrapper.text()).toBe('Analysis is not available for this field.');
+    expect(screen.getByText('Analysis is not available for this field.')).toBeVisible();
   });
 });
