@@ -43,11 +43,7 @@ export function validateMap(
 
       const paramValueType = getExpressionType(param.value);
       const { type, rawType } = mapParamsDefinition[paramKey];
-      if (
-        mapParamsDefinition[paramKey] &&
-        param.incomplete === false &&
-        !(rawType === paramValueType)
-      ) {
+      if (param.incomplete === false && !(rawType === paramValueType)) {
         return getMessageFromId({
           messageId: 'invalidMapParameterValueType',
           values: {
