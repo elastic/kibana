@@ -8,7 +8,6 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { css } from '@emotion/react';
 
 import {
   EuiButton,
@@ -433,11 +432,6 @@ export const FlyoutWithComponent: React.FC = () => (
             description: <SessionFlyout title="Session L" mainSize="fill" />,
           },
         ]}
-        css={css`
-          dt {
-            min-width: 25em;
-          }
-        `}
       />
 
       <EuiSpacer size="m" />
@@ -456,11 +450,6 @@ export const FlyoutWithComponent: React.FC = () => (
             description: <NonSessionFlyout />,
           },
         ]}
-        css={css`
-          dt {
-            min-width: 25em;
-          }
-        `}
       />
     </EuiPanel>
   </>
