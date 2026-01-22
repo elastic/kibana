@@ -15,7 +15,8 @@ import {
   buildLogsExtractionEsqlQuery,
   HASHED_ID,
 } from './logs_extraction/logs_extraction_query_builder';
-import { getLatestEntitiesIndexName, getResetEntitiesIndexName } from './assets/latest_index';
+import { getLatestEntitiesIndexName } from './assets/latest_index';
+import { getUpdatesEntitiesDataStreamName } from './assets/updates_data_stream';
 import { executeEsqlQuery } from '../infra/elasticsearch/esql';
 import { ingestEntities } from '../infra/elasticsearch/ingest';
 import {
@@ -97,7 +98,7 @@ export class LogsExtractionClient {
 
   // TODO: We need to include index patterns provided manually by the customer
   private async getIndexPatterns(type: EntityType) {
-    const resetIndex = getResetEntitiesIndexName(type, this.namespace);
+    const updatesDataStream = getUpdatesEntitiesDataStreamName(type, this.namespace);
     const alertsIndex = getAlertsIndexName(this.namespace);
     const secSolIndices = [];
 
@@ -114,7 +115,7 @@ export class LogsExtractionClient {
       secSolIndices.push('logs-*');
     }
 
-    const indexPatterns = [...secSolIndices, alertsIndex, resetIndex];
+    const indexPatterns = [...secSolIndices, alertsIndex, updatesDataStream];
     return indexPatterns;
   }
 }

@@ -8,41 +8,48 @@
 import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityDefinition } from '../definitions/entity_schema';
 import {
-  ENTITY_RESET,
+  ENTITY_UPDATES,
   ENTITY_BASE_PREFIX,
   ENTITY_SCHEMA_VERSION_V2,
   ECS_MAPPINGS_COMPONENT_TEMPLATE,
   getEntityIndexPattern,
   getEntitiesAliasPattern,
 } from '../constants';
-import { getResetComponentTemplateName } from './component_templates';
+import { getUpdatesComponentTemplateName } from './component_templates';
 
-export const getResetIndexTemplateId = (definition: EntityDefinition) =>
-  `.${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V2}_${ENTITY_RESET}_${definition.id}_index_template` as const;
+const DATA_RETENTION_PERIOD = '1d';
+export const getUpdatesIndexTemplateId = (definition: EntityDefinition) =>
+  `.${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V2}_${ENTITY_UPDATES}_${definition.id}_index_template` as const;
 
-export const getResetEntityIndexTemplateConfig = (
+export const getUpdatesEntityIndexTemplateConfig = (
   definition: EntityDefinition
 ): IndicesPutIndexTemplateRequest => ({
-  name: getResetIndexTemplateId(definition),
+  name: getUpdatesIndexTemplateId(definition),
   _meta: {
     description:
-      "Index template for indices managed by the Elastic Entity Model's entity discovery framework for the latest dataset",
+      'Index template for data streams managed by the Elastic Entity Store ' +
+      'used as for internal asynchronous entity store updates and ensuring that all ' +
+      'necessary mappings are available to be queried by the ESQL query',
     ecs_version: '8.0.0',
     managed: true,
     managed_by: 'security_context_core_analysis',
   },
-  composed_of: [ECS_MAPPINGS_COMPONENT_TEMPLATE, getResetComponentTemplateName(definition.id)],
+  composed_of: [ECS_MAPPINGS_COMPONENT_TEMPLATE, getUpdatesComponentTemplateName(definition.id)],
   index_patterns: [
     getEntityIndexPattern({
       schemaVersion: ENTITY_SCHEMA_VERSION_V2,
-      dataset: ENTITY_RESET,
+      dataset: ENTITY_UPDATES,
       definitionId: definition.id,
     }),
   ],
   priority: 200,
+  data_stream: {},
   template: {
+    lifecycle: {
+      data_retention: DATA_RETENTION_PERIOD,
+    },
     aliases: {
-      [getEntitiesAliasPattern({ type: definition.type, dataset: ENTITY_RESET })]: {},
+      [getEntitiesAliasPattern({ type: definition.type, dataset: ENTITY_UPDATES })]: {},
     },
     mappings: {
       _meta: { n: '1.6.0' },

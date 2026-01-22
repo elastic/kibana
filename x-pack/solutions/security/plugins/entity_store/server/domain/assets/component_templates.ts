@@ -42,17 +42,17 @@ const getIndexMappings = (definition: EntityDefinition): MappingTypeMapping => (
   },
 });
 
-export const getResetComponentTemplateName = (definitionId: string) =>
-  `${definitionId}-reset-latest@platform`;
+export const getUpdatesComponentTemplateName = (definitionId: string) =>
+  `${definitionId}-updates-latest@platform`;
 
-export const getResetEntityDefinitionComponentTemplate = (definition: EntityDefinition) => {
+export const getUpdatesEntityDefinitionComponentTemplate = (definition: EntityDefinition) => {
   return {
-    name: getResetComponentTemplateName(definition.id),
-    template: { settings: { hidden: true }, mappings: getResetIndexMappings(definition) },
+    name: getUpdatesComponentTemplateName(definition.id),
+    template: { settings: { hidden: true }, mappings: getUpdatesIndexMappings(definition) },
   };
 };
 
-const getResetIndexMappings = (definition: EntityDefinition): MappingTypeMapping => ({
+const getUpdatesIndexMappings = (definition: EntityDefinition): MappingTypeMapping => ({
   properties: {
     ...BASE_ENTITY_INDEX_MAPPING,
     ...Object.fromEntries(definition.identityFields.map((c) => [c.field, c.mapping])),

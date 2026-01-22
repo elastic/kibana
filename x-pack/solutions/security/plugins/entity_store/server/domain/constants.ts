@@ -6,7 +6,7 @@
  */
 
 export const ENTITY_LATEST = 'latest' as const;
-export const ENTITY_RESET = 'reset' as const;
+export const ENTITY_UPDATES = 'updates' as const;
 
 export const ENTITY_BASE_PREFIX = 'entities';
 
@@ -15,7 +15,7 @@ export const ENTITY_SCHEMA_VERSION_V2 = 'v2';
 export const ECS_MAPPINGS_COMPONENT_TEMPLATE = 'ecs@mappings';
 
 type SchemaVersion = `v${number}`;
-type Dataset = typeof ENTITY_LATEST | typeof ENTITY_RESET;
+type Dataset = typeof ENTITY_LATEST | typeof ENTITY_UPDATES;
 
 interface IndexPatternOptions<TDataset extends Dataset> {
   dataset: TDataset;
