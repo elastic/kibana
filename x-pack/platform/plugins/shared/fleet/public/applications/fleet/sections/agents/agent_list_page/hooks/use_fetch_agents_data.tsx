@@ -31,6 +31,8 @@ import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../..
 
 import { getKuery } from '../utils/get_kuery';
 
+import { AGENT_POLICY_VERSION_SEPARATOR } from '../../../../../../../common/constants';
+
 import { useSessionAgentListState, defaultAgentListState } from './use_session_agent_list_state';
 
 const REFRESH_INTERVAL_MS = 30000;
@@ -326,8 +328,9 @@ export function useFetchAgentsData() {
           throw new Error('Invalid GET /agents response - no status summary');
         }
         // Fetch agent policies, use a local cache
-        const policyIds = agentsResponse.items.map((agent) => agent.policy_id as string);
-
+        const policyIds = agentsResponse.items.map(
+          (agent) => (agent.policy_id as string).split(AGENT_POLICY_VERSION_SEPARATOR)[0]
+        ); // policy ID without version
         const policies = await fullAgentPolicyFecher.fetchPolicies(policyIds);
 
         const agentPoliciesIndexedById = policies.reduce((acc, agentPolicy) => {
