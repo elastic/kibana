@@ -50,6 +50,7 @@ export interface DiscoverGridFlyoutProps
     doc?: DataTableRecord,
     options?: { initialTabId?: string; initialTabState?: object }
   ) => void;
+  hideFilteringOnComputedColumns?: boolean;
 }
 
 /**
@@ -75,6 +76,7 @@ export function DiscoverGridFlyout({
   initialDocViewerState,
   onInitialDocViewerStateChange,
   onUpdateSelectedTabId,
+  hideFilteringOnComputedColumns,
 }: DiscoverGridFlyoutProps) {
   const services = useDiscoverServices();
   const flyoutCustomization = useDiscoverCustomization('flyout');
@@ -140,6 +142,7 @@ export function DiscoverGridFlyout({
       initialDocViewerState={initialDocViewerState}
       onInitialDocViewerStateChange={onInitialDocViewerStateChange}
       onUpdateSelectedTabId={onUpdateSelectedTabId}
+      hideFilteringOnComputedColumns={hideFilteringOnComputedColumns}
     />
   );
 }

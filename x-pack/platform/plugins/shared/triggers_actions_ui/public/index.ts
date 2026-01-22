@@ -127,4 +127,4 @@ export { validateActionFilterQuery } from './application/lib/value_validators';
 
 export { RULE_PREBUILD_DESCRIPTION_FIELDS } from './application/sections/rule_details/components/rule_detail_description_type';
 
-export type { ExperimentalFeatures } from '../common/experimental_features';
+export { getIsExperimentalFeatureEnabled } from './common/get_experimental_features';
