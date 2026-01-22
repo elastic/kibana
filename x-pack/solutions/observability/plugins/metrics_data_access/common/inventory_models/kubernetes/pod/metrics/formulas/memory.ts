@@ -14,7 +14,7 @@ export const podMemoryUsage: SchemaBasedFormula = {
   }),
   value: {
     ecs: 'average(kubernetes.pod.memory.usage.limit.pct)',
-    semconv: 'average(metrics.k8s.pod.memory.utilization)',
+    semconv: 'average(metrics.k8s.pod.memory_limit_utilization)',
   },
   format: 'percent',
   decimals: 1,

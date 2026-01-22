@@ -22,7 +22,7 @@ export const k8sContainerMemoryUsage: SchemaBasedFormula = {
   label: MEMORY_USAGE_LABEL,
   value: {
     ecs: 'average(kubernetes.container.memory.usage.limit.pct)',
-    semconv: 'average(metrics.k8s.memory.reqeust) / average(metrics.k8s.memory.limit)',
+    semconv: 'average(metrics.k8s.container.memory_limit_utilization)',
   },
   format: 'percent',
   decimals: 1,

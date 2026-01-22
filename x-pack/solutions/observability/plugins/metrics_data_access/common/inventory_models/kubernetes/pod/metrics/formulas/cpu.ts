@@ -14,7 +14,7 @@ export const podCpuUsage: SchemaBasedFormula = {
   }),
   value: {
     ecs: 'average(kubernetes.pod.cpu.usage.limit.pct)',
-    semconv: 'average(metrics.k8s.pod.cpu.utilization) / average(metrics.k8s.node.cpu.allocatable)',
+    semconv: 'average(metrics.k8s.pod.cpu_limit_utilization)',
   },
   format: 'percent',
   decimals: 1,

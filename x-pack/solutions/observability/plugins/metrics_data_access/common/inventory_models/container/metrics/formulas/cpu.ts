@@ -23,7 +23,7 @@ export const k8sContainerCpuUsage: SchemaBasedFormula = {
   label: CPU_USAGE_LABEL,
   value: {
     ecs: 'average(kubernetes.container.cpu.usage.limit.pct)',
-    semconv: 'average(metrics.k8a.container.cpu.limit_utilization)',
+    semconv: 'average(metrics.k8s.container.cpu_limit_utilization)',
   },
   format: 'percent',
   decimals: 1,
