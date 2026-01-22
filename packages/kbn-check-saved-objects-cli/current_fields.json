@@ -1056,7 +1056,11 @@
     "provider"
   ],
   "security-rule": [
+    "name",
+    "risk_score",
     "rule_id",
+    "severity",
+    "tags",
     "version"
   ],
   "security-solution-signals-migration": [
@@ -1302,6 +1306,10 @@
   ],
   "telemetry": [],
   "threshold-explorer-view": [],
+  "trial-companion-nba-milestone": [
+    "dismiss",
+    "openTODOs"
+  ],
   "ui-metric": [
     "count"
   ],

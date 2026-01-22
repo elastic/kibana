@@ -67,8 +67,10 @@ export function registerChatRoutes({
         meta: { description: 'The user input message to send to the agent.' },
       })
     ),
-    confirm: schema.maybe(
-      schema.boolean({ meta: { description: 'Can be used to respond to a confirmation prompt.' } })
+    prompts: schema.maybe(
+      schema.recordOf(schema.string(), schema.object({ allow: schema.boolean() }), {
+        meta: { description: 'Can be used to respond to a confirmation prompt.' },
+      })
     ),
     attachments: schema.maybe(
       schema.arrayOf(
@@ -90,7 +92,12 @@ export function registerChatRoutes({
             })
           ),
         }),
-        { meta: { description: 'Optional attachments to send with the message.' } }
+        {
+          meta: {
+            description:
+              '**Technical Preview; added in 9.3.0.** Optional attachments to send with the message.',
+          },
+        }
       )
     ),
     capabilities: schema.maybe(
@@ -173,12 +180,10 @@ export function registerChatRoutes({
       connector_id: connectorId,
       conversation_id: conversationId,
       input,
-      confirm,
+      prompts,
       capabilities,
       browser_api_tools: browserApiTools,
     } = payload;
-
-    const promptResponse = confirm !== undefined ? { confirmed: confirm } : undefined;
 
     return chatService.converse({
       agentId,
@@ -189,7 +194,7 @@ export function registerChatRoutes({
       abortSignal,
       nextInput: {
         message: input,
-        prompt_response: promptResponse,
+        prompts,
         attachments,
       },
       request,
@@ -212,7 +217,6 @@ export function registerChatRoutes({
         },
         tags: ['oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
@@ -290,7 +294,6 @@ export function registerChatRoutes({
         },
         tags: ['oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },

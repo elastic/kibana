@@ -186,8 +186,8 @@ interface FunctionSuggestionOptions {
   ignored?: string[];
   addComma?: boolean;
   addSpaceAfterFunction?: boolean;
-  openSuggestions?: boolean;
   constantGeneratingOnly?: boolean;
+  suggestOnlyName?: boolean;
 }
 
 interface GetFunctionsSuggestionsParams {
@@ -208,8 +208,8 @@ export function getFunctionsSuggestions({
   const {
     ignored = [],
     addComma = false,
+    suggestOnlyName = false,
     addSpaceAfterFunction = false,
-    openSuggestions = false,
     constantGeneratingOnly = false,
   } = options;
 
@@ -242,15 +242,16 @@ export function getFunctionsSuggestions({
   return filteredFunctions.map((fn) => {
     const suggestion = getFunctionSuggestion(fn);
 
+    if (suggestOnlyName) {
+      suggestion.text = fn.name.toUpperCase();
+      return suggestion;
+    }
+
     if (textSuffix) {
       suggestion.text += textSuffix;
     }
 
-    if (openSuggestions) {
-      return withAutoSuggest(suggestion);
-    }
-
-    return suggestion;
+    return withAutoSuggest(suggestion);
   });
 }
 
@@ -470,7 +471,9 @@ export function getValidSignaturesAndTypesToSuggestNext(
   context: ICommandContext,
   fnDefinition: FunctionDefinition
 ) {
-  const argTypes = node.args.map((arg) => getExpressionType(arg, context?.columns));
+  const argTypes = node.args.map((arg) =>
+    getExpressionType(arg, context?.columns, context?.unmappedFieldsStrategy)
+  );
   const enrichedArgs = node.args.map((arg, idx) => ({
     ...arg,
     dataType: argTypes[idx],

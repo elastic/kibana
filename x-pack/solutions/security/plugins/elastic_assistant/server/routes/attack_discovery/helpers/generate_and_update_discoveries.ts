@@ -28,6 +28,7 @@ import { deduplicateAttackDiscoveries } from '../../../lib/attack_discovery/pers
 import { reportAttackDiscoverySuccessTelemetry } from './report_attack_discovery_success_telemetry';
 import { handleGraphError } from '../public/post/helpers/handle_graph_error';
 import type { AttackDiscoveryDataClient } from '../../../lib/attack_discovery/persistence';
+import { filterHallucinatedAlerts } from './filter_hallucinated_alerts';
 import { generateAttackDiscoveries } from './generate_discoveries';
 
 export interface GenerateAndUpdateAttackDiscoveriesParams {
@@ -65,7 +66,8 @@ export const generateAndUpdateAttackDiscoveries = async ({
   const startTime = moment(); // start timing the generation
 
   // get parameters from the request body
-  const { apiConfig, connectorName, end, filter, replacements, size, start } = config;
+  const { alertsIndexPattern, apiConfig, connectorName, end, filter, replacements, size, start } =
+    config;
 
   let latestReplacements: Replacements = { ...replacements };
 
@@ -99,6 +101,16 @@ export const generateAndUpdateAttackDiscoveries = async ({
 
     const alertsContextCount = anonymizedAlerts.length;
 
+    // Filter out attack discoveries with hallucinated alert IDs
+    // Some LLMs will hallucinate alert IDs that don't exist in the alerts index.
+    // We query Elasticsearch to verify all alert IDs exist before persisting discoveries.
+    const validDiscoveries = await filterHallucinatedAlerts({
+      alertsIndexPattern,
+      attackDiscoveries: attackDiscoveries ?? [],
+      esClient,
+      logger,
+    });
+
     /**
      * Deduplicate attackDiscoveries before creating alerts
      *
@@ -111,7 +123,7 @@ export const generateAndUpdateAttackDiscoveries = async ({
     const indexPattern = dataClient.getAdHocAlertsIndexPattern();
     const dedupedDiscoveries = await deduplicateAttackDiscoveries({
       esClient,
-      attackDiscoveries: attackDiscoveries ?? [],
+      attackDiscoveries: validDiscoveries,
       connectorId: apiConfig.connectorId,
       indexPattern,
       logger,

@@ -22,6 +22,8 @@
           "<{}, unknown>[K]>"
         ],
         "path": "src/core/packages/di/browser/src/services/lifecycle.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -39,6 +41,8 @@
               "K"
             ],
             "path": "src/core/packages/di/common-internal/src/modules/lifecycle.ts",
+            "lineNumber": 24,
+            "columnNumber": 63,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -64,6 +68,8 @@
           "[K]>"
         ],
         "path": "src/core/packages/di/browser/src/services/lifecycle.ts",
+        "lineNumber": 42,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -81,6 +87,8 @@
               "K"
             ],
             "path": "src/core/packages/di/common-internal/src/modules/lifecycle.ts",
+            "lineNumber": 24,
+            "columnNumber": 63,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -106,6 +114,8 @@
           "<object>[K]>"
         ],
         "path": "src/core/packages/di/browser/src/services/lifecycle.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -123,6 +133,8 @@
               "K"
             ],
             "path": "src/core/packages/di/common-internal/src/modules/lifecycle.ts",
+            "lineNumber": 24,
+            "columnNumber": 63,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -146,6 +158,8 @@
           " | undefined"
         ],
         "path": "src/core/packages/di/browser/src/react.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -171,6 +185,8 @@
           " | undefined) => T"
         ],
         "path": "src/core/packages/di/browser/src/react.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -188,6 +204,8 @@
               "<T>"
             ],
             "path": "src/core/packages/di/browser/src/react.ts",
+            "lineNumber": 35,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -206,6 +224,8 @@
               " | undefined"
             ],
             "path": "src/core/packages/di/browser/src/react.ts",
+            "lineNumber": 35,
+            "columnNumber": 62,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -233,6 +253,8 @@
           ") => T | undefined"
         ],
         "path": "src/core/packages/di/browser/src/react.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -250,6 +272,8 @@
               "<T>"
             ],
             "path": "src/core/packages/di/browser/src/react.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -267,6 +291,8 @@
               "OptionalGetOptions"
             ],
             "path": "src/core/packages/di/browser/src/react.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -297,6 +323,8 @@
           "<HistoryLocationState>, any[]>"
         ],
         "path": "src/core/packages/di/browser/src/services/application.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -316,6 +344,8 @@
           "<HistoryLocationState>"
         ],
         "path": "src/core/packages/di/browser/src/services/application.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -336,6 +366,8 @@
               ">"
             ],
             "path": "src/core/packages/di/browser/src/services/application.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -384,6 +416,8 @@
           "<unknown>, any[]>), any[]>"
         ],
         "path": "src/core/packages/di/browser/src/services/application.ts",
+        "lineNumber": 37,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -409,6 +443,8 @@
           "<unknown>, any[]>"
         ],
         "path": "src/core/packages/di/browser/src/services/application.ts",
+        "lineNumber": 45,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -430,6 +466,8 @@
           " | undefined>"
         ],
         "path": "src/core/packages/di/browser/src/react.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

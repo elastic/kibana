@@ -25,7 +25,12 @@ export type EmbeddableTransforms<
   transformOut?: (
     storedState: StoredEmbeddableState,
     panelReferences?: Reference[],
-    containerReferences?: Reference[]
+    containerReferences?: Reference[],
+    /**
+     * @deprecated ID is passed as an argument for legacy reference names that require it
+     * to fetch their old references. It should not be used for new reference names.
+     */
+    id?: string
   ) => EmbeddableState;
   /**
    * Converts EmbeddableState into StoredEmbeddableState and extracts references
@@ -42,7 +47,7 @@ export type EmbeddableTransforms<
    *
    * When schema is provided, EmbeddableState is expected to be TypeOf<typeof schema>
    */
-  schema?: Type<object>;
+  getSchema?: () => Type<object> | undefined;
   /**
    * Throws error when panel config is not supported.
    */

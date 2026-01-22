@@ -28,6 +28,8 @@
         "label": "IEsErrorAttributes",
         "description": [],
         "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,6 +45,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -60,6 +64,8 @@
               ">> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -81,6 +87,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -113,6 +121,8 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/kbn-search-types/src/es_search_types.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -127,6 +137,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/es_search_types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -151,6 +163,8 @@
           "<Params>"
         ],
         "path": "src/platform/packages/shared/kbn-search-types/src/kibana_search_types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -167,6 +181,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/kibana_search_types.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -181,6 +197,8 @@
               "Params | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/kibana_search_types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -205,6 +223,8 @@
           "<RawResponse>"
         ],
         "path": "src/platform/packages/shared/kbn-search-types/src/kibana_search_types.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -221,6 +241,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/kibana_search_types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -237,6 +259,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/kibana_search_types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -253,6 +277,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/kibana_search_types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -269,6 +295,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/kibana_search_types.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -285,6 +313,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/kibana_search_types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -301,6 +331,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/kibana_search_types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -317,6 +349,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/kibana_search_types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -333,6 +367,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/kibana_search_types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -349,6 +385,8 @@
               "RawResponse"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/kibana_search_types.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -372,6 +410,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/kibana_search_types.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -386,6 +426,8 @@
         "label": "ISearchClient",
         "description": [],
         "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -450,6 +492,8 @@
               "<SearchStrategyResponse>"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -465,6 +509,8 @@
                   "SearchStrategyRequest"
                 ],
                 "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+                "lineNumber": 24,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -486,6 +532,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+                "lineNumber": 25,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -512,6 +560,8 @@
               " | undefined) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -524,6 +574,8 @@
                 "label": "id",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+                "lineNumber": 28,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -545,6 +597,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+                "lineNumber": 28,
+                "columnNumber": 49,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -571,6 +625,8 @@
               " | undefined) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -583,6 +639,8 @@
                 "label": "id",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+                "lineNumber": 30,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -594,6 +652,8 @@
                 "label": "keepAlive",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+                "lineNumber": 31,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -615,6 +675,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+                "lineNumber": 32,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -631,6 +693,8 @@
         "label": "ISearchOptions",
         "description": [],
         "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+        "lineNumber": 58,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -647,6 +711,8 @@
               "AbortSignal | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -663,6 +729,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -679,6 +747,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -695,6 +765,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -711,6 +783,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -727,6 +801,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -743,6 +819,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -759,6 +837,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -776,6 +856,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -799,6 +881,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -817,6 +901,8 @@
               ", \"signal\"> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -833,6 +919,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+            "lineNumber": 119,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -849,6 +937,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+            "lineNumber": 124,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -865,6 +955,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -896,6 +988,8 @@
           ">>>"
         ],
         "path": "src/platform/packages/shared/kbn-search-types/src/es_search_types.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -961,6 +1055,8 @@
           "<SearchStrategyResponse>"
         ],
         "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -976,6 +1072,8 @@
               "SearchStrategyRequest"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -997,6 +1095,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1026,6 +1126,8 @@
           "; isStored?: boolean | undefined; isRestore?: boolean | undefined; sessionId?: string | undefined; stream?: boolean | undefined; strategy?: string | undefined; legacyHitsTotal?: boolean | undefined; isSearchStored?: boolean | undefined; retrieveResults?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+        "lineNumber": 135,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1042,6 +1144,8 @@
           "SearchRequest"
         ],
         "path": "src/platform/packages/shared/kbn-search-types/src/es_search_types.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1057,6 +1161,8 @@
           "{ method: string; path: string; querystring?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -44,17 +44,10 @@ export function getErrorRateChart({
   dataSource: DataSource;
   indexes: string;
   filters: string[];
-}): TraceChart {
-  const whereClauses = getWhereClauses(dataSource, filters);
-  return {
-    id: 'error_rate',
-    title: i18n.translate('metricsExperience.grid.error_rate.label', {
-      defaultMessage: 'Error Rate',
-    }),
-    color: chartPalette[6],
-    unit: 'percent',
-    seriesType: 'line',
-    esqlQuery: from(indexes)
+}): TraceChart | null {
+  try {
+    const whereClauses = getWhereClauses(dataSource, filters);
+    const esqlQuery = from(indexes)
       .pipe(
         ...whereClauses,
         dataSource === 'apm'
@@ -68,8 +61,21 @@ export function getErrorRateChart({
         keep('timestamp, error_rate'),
         sort('timestamp')
       )
-      .toString(),
-  };
+      .toString();
+
+    return {
+      id: 'error_rate',
+      title: i18n.translate('metricsExperience.grid.error_rate.label', {
+        defaultMessage: 'Error Rate',
+      }),
+      color: chartPalette[6],
+      unit: 'percent',
+      seriesType: 'line',
+      esqlQuery,
+    };
+  } catch (error) {
+    return null;
+  }
 }
 
 export function getLatencyChart({
@@ -80,17 +86,10 @@ export function getLatencyChart({
   dataSource: DataSource;
   indexes: string;
   filters: string[];
-}): TraceChart {
-  const whereClauses = getWhereClauses(dataSource, filters);
-  return {
-    id: 'latency',
-    title: i18n.translate('metricsExperience.grid.latency.label', {
-      defaultMessage: 'Latency',
-    }),
-    color: chartPalette[2],
-    unit: 'ms',
-    seriesType: 'line',
-    esqlQuery: from(indexes)
+}): TraceChart | null {
+  try {
+    const whereClauses = getWhereClauses(dataSource, filters);
+    const esqlQuery = from(indexes)
       .pipe(
         ...whereClauses,
         dataSource === 'apm'
@@ -98,8 +97,21 @@ export function getLatencyChart({
           : evaluate(`duration_ms = ROUND(${DURATION})/1000/1000`), // otel duration is in ns
         stats(`AVG(duration_ms) BY BUCKET(${AT_TIMESTAMP}, 100, ?_tstart, ?_tend)`)
       )
-      .toString(),
-  };
+      .toString();
+
+    return {
+      id: 'latency',
+      title: i18n.translate('metricsExperience.grid.latency.label', {
+        defaultMessage: 'Latency',
+      }),
+      color: chartPalette[2],
+      unit: 'ms',
+      seriesType: 'line',
+      esqlQuery,
+    };
+  } catch (error) {
+    return null;
+  }
 }
 
 export function getThroughputChart({
@@ -112,21 +124,27 @@ export function getThroughputChart({
   filters: string[];
   dataSource: DataSource;
   fieldName: string;
-}): TraceChart {
-  const whereClauses = getWhereClauses(dataSource, filters);
-  return {
-    id: 'throughput',
-    title: i18n.translate('metricsExperience.grid.throughput.label', {
-      defaultMessage: 'Throughput',
-    }),
-    color: chartPalette[0],
-    unit: 'count',
-    seriesType: 'line',
-    esqlQuery: from(indexes)
+}): TraceChart | null {
+  try {
+    const whereClauses = getWhereClauses(dataSource, filters);
+    const esqlQuery = from(indexes)
       .pipe(
         ...whereClauses,
         stats(`COUNT(${fieldName}) BY BUCKET(${AT_TIMESTAMP}, 100, ?_tstart, ?_tend)`)
       )
-      .toString(),
-  };
+      .toString();
+
+    return {
+      id: 'throughput',
+      title: i18n.translate('metricsExperience.grid.throughput.label', {
+        defaultMessage: 'Throughput',
+      }),
+      color: chartPalette[0],
+      unit: 'count',
+      seriesType: 'line',
+      esqlQuery,
+    };
+  } catch (error) {
+    return null;
+  }
 }
