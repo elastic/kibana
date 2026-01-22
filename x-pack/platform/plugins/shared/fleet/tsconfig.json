@@ -3,11 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "exclude": [
-    "cypress/cypress.config.ts",
-    "cypress/cypress.config.space_awareness.ts",
-    "cypress/cypress_ci.config.ts",
-    "cypress/cypress_ci.config.space_awareness.ts", "target/**/*"],
+  "exclude": ["target/**/*"],
   "include": [
     // add all the folders containing files to be compiled
     ".storybook/**/*",
@@ -18,10 +14,6 @@
     "server/**/*.json",
     "scripts/**/*",
     "package.json",
-    "cypress/cypress.config.ts",
-    "cypress/cypress.config.space_awareness.ts",
-    "cypress/cypress_ci.config.ts",
-    "cypress/cypress_ci.config.space_awareness.ts",
     "../../../../../typings/**/*",
     "test/scout/**/*"
   ],
