@@ -319,6 +319,12 @@ export class FollowerIndicesTable extends PureComponent {
           return (
             <>
               <EuiInMemoryTable
+                tableCaption={i18n.translate(
+                  'xpack.crossClusterReplication.followerIndexList.table.tableCaption',
+                  {
+                    defaultMessage: 'List of follower indices',
+                  }
+                )}
                 items={filteredIndices}
                 itemId="name"
                 columns={this.getTableColumns(actionHandlers)}

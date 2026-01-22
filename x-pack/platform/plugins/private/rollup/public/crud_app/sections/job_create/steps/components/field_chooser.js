@@ -7,6 +7,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiBasicTable,
@@ -128,6 +129,9 @@ export class FieldChooser extends Component {
               rowProps={getRowProps}
               responsive={false}
               data-test-subj={`${dataTestSubj}-table`}
+              tableCaption={i18n.translate('xpack.rollupJobs.fieldChooser.tableCaption', {
+                defaultMessage: 'Available rollup job fields',
+              })}
             />
           </EuiFlyoutBody>
         </EuiFlyout>

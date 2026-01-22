@@ -189,6 +189,12 @@ export const ExpandedRowMessagesPane: FC<ExpandedRowMessagesPaneProps> = ({ tran
         pagination={pagination}
         onChange={onChange}
         sorting={sorting}
+        tableCaption={i18n.translate(
+          'xpack.transform.transformList.transformDetails.messagesPane.tableCaption',
+          {
+            defaultMessage: 'Transform audit messages',
+          }
+        )}
       />
     </EuiPanel>
   );
