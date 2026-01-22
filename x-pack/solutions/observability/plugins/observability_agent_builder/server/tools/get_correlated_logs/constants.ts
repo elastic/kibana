@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-
 // Correlation identifier fields in priority order
 export const DEFAULT_CORRELATION_IDENTIFIER_FIELDS = [
   'trace.id',
@@ -29,52 +27,13 @@ export const DEFAULT_CORRELATION_IDENTIFIER_FIELDS = [
   'process.pid',
 ];
 
-const ERROR_SEVERITY_LEVELS = [
-  'ALERT',
-  'CRIT',
-  'CRITICAL',
-  'EMERGENCY',
-  'ERR',
-  'ERROR',
-  'FATAL',
-  'SEVERE',
-  'WARN',
-  'WARNING',
-].flatMap((level) => [level.toUpperCase(), level.toLowerCase()]);
-
-export const DEFAULT_ERROR_SEVERITY_FILTER: QueryDslQueryContainer = {
-  bool: {
-    minimum_should_match: 1,
-    should: [
-      { terms: { 'log.level': ERROR_SEVERITY_LEVELS } },
-      { terms: { level: ERROR_SEVERITY_LEVELS } },
-      { terms: { severity: ERROR_SEVERITY_LEVELS } },
-      { terms: { 'event.severity': ERROR_SEVERITY_LEVELS } },
-
-      // 2. Syslog Numeric Severities (0=Emergency to 3=Error)
-      { range: { 'syslog.severity': { lte: 3 } } },
-      { range: { 'log.syslog.severity.code': { lte: 3 } } },
-      { range: { severity: { lte: 3 } } },
-
-      // 3. OpenTelemetry Numeric Severities (17=Error to 24=Fatal)
-      { range: { SeverityNumber: { gte: 17 } } },
-
-      // 4. Windows Event Logs (1=Critical, 2=Error)
-      { terms: { 'winlog.level_id': ['1', '2'] } },
-
-      // 5. HTTP Status Codes (Server Access Logs)
-      { range: { 'http.response.status_code': { gte: 500 } } },
-
-      // 6. Presence of error fields
-      { exists: { field: 'error.type' } },
-      { exists: { field: 'error.code' } },
-    ],
-  },
-};
-
 export const DEFAULT_LOG_SOURCE_FIELDS = [
   '@timestamp',
   'message',
+  // OpenTelemetry log fields
+  'body.text',
+  'severity_text',
+  'severity_number',
   // Correlation fields
   ...DEFAULT_CORRELATION_IDENTIFIER_FIELDS,
 

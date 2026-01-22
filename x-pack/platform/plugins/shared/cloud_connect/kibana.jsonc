@@ -17,7 +17,8 @@
     "requiredPlugins": [
       "management",
       "features",
-      "encryptedSavedObjects"
+      "encryptedSavedObjects",
+      "licensing"
     ],
     "optionalPlugins": [
       "cloud"

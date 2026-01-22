@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import {
   AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID,
   AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
-  AGENT_BUILDER_EXTERNAL_MCP_SETTING_ID,
 } from '@kbn/management-settings-ids';
 
 export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServiceSetup }) => {
@@ -40,20 +39,6 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       }),
       name: i18n.translate('xpack.agentBuilder.uiSettings.nav.name', {
         defaultMessage: 'Elastic Agent Builder Navigation Icon',
-      }),
-      schema: schema.boolean(),
-      value: false,
-      technicalPreview: true,
-      requiresPageReload: true,
-      readonly: true,
-      readonlyMode: 'ui',
-    },
-    [AGENT_BUILDER_EXTERNAL_MCP_SETTING_ID]: {
-      description: i18n.translate('xpack.agentBuilder.uiSettings.externalMcp.description', {
-        defaultMessage: 'Enables external MCP server support for Elastic Agent Builder.',
-      }),
-      name: i18n.translate('xpack.agentBuilder.uiSettings.externalMcp.name', {
-        defaultMessage: 'Elastic Agent Builder: External MCP Server support',
       }),
       schema: schema.boolean(),
       value: false,

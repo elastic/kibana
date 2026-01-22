@@ -72,28 +72,6 @@ Tools can come from multiple sources:
 - workflow: A tool that executes a workflow.
 - mcp: A tool provided by an external MCP (Model Context Protocol) server.
 
-### Enabling MCP tools
-
-MCP tools allow you to connect to external MCP servers and use their tools within Agent Builder. To enable MCP tools, add the following to your `kibana.dev.yml`:
-
-```yml
-uiSettings.overrides:
-  agentBuilder:externalMcp: true
-```
-
-Or via API:
-
-```
-POST kbn://internal/kibana/settings
-{
-   "changes": {
-      "agentBuilder:externalMcp": true
-   }
-}
-```
-
-Once enabled, you can create MCP tools by configuring an MCP connector and selecting tools from the connected MCP server.
-
 ### Registering a tool
 
 Please refer to the [Contributor guide](./CONTRIBUTOR_GUIDE.md) for info and examples details.
