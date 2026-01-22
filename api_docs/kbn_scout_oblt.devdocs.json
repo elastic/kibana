@@ -8198,6 +8198,14 @@
                     "references": [
                       {
                         "plugin": "@kbn/scout",
+                        "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/date_picker.ts"
+                      },
+                      {
+                        "plugin": "@kbn/scout",
+                        "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/date_picker.ts"
+                      },
+                      {
+                        "plugin": "@kbn/scout",
                         "path": "src/platform/packages/shared/kbn-scout/test/scout/fixtures/eui_helpers.ts"
                       }
                     ]

@@ -28,7 +28,9 @@ test.describe('Errors', { tag: ['@ess', '@svlOblt'] }, () => {
       await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText(
         testData.SERVICE_OPBEANS_NODE
       );
-      await expect(page.getByText('No errors found')).toBeVisible();
+      await expect(page.getByTestId('apmErrorGroupListEmptyState')).toBeVisible({
+        timeout: testData.EXTENDED_TIMEOUT,
+      });
     });
   });
 
@@ -196,7 +198,9 @@ test.describe('Errors', { tag: ['@ess', '@svlOblt'] }, () => {
     await test.step('typing non-matching text hides results', async () => {
       await errorsPage.tableSearchInput.fill('nonexistent error message');
       await expect(page.getByText(testData.ERROR_MESSAGE)).toBeHidden();
-      await expect(page.getByText('No errors found')).toBeVisible();
+      await expect(page.getByTestId('apmErrorGroupListEmptyState')).toBeVisible({
+        timeout: testData.EXTENDED_TIMEOUT,
+      });
     });
 
     await test.step('clearing the search input shows all errors again', async () => {
