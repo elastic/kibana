@@ -83,6 +83,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         query={props.query}
         filters={props.filters}
         docViewerRef={docViewerRef}
+        hideFilteringOnComputedColumns={true}
       />
     ),
     [
@@ -148,6 +149,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         setExpandedDoc={setExpandedDocWithInitialTab}
         expandedDoc={expandedDoc}
         showMultiFields={props.services.uiSettings.get(SHOW_MULTIFIELDS)}
+        hideFilteringOnComputedColumns={true}
         maxDocFieldsDisplayed={props.services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
         renderDocumentView={enableDocumentViewer ? renderDocumentView : undefined}
         renderCustomToolbar={renderCustomToolbarWithElements}

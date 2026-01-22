@@ -340,6 +340,13 @@ export class DataViewField implements DataViewFieldBase {
   }
 
   /**
+   * Returns true if the field is not part of the index and is a computed column
+   */
+  public get isComputedColumn() {
+    return Boolean(this.spec.isComputedColumn);
+  }
+
+  /**
    * Returns true if field is subtype nested
    */
   public isSubtypeNested() {
