@@ -149,19 +149,14 @@ export class UserProfileService {
     let activationRetriesLeft = ACTIVATION_MAX_RETRIES;
     do {
       try {
-        console.log(`***** activateRequest: ${JSON.stringify(activateRequest)}`);
         const response = await clusterClient.asInternalUser.security.activateUserProfile({
           ...activateRequest,
         });
 
         this.logger.debug(`Successfully activated profile for "${response.user.username}".`);
 
-        console.log(`***** activate RAW USER PROFILE: ${JSON.stringify(response)}`);
-
         return parseUserProfileWithSecurity<{}>(response);
       } catch (err) {
-        console.log(`***** err: ${err.toString()}`);
-
         const detailedErrorMessage = getDetailedErrorMessage(err);
         const statusCode = getErrorStatusCode(err);
         // Retry on 409 (conflict) and 503 (service unavailable) errors
@@ -193,6 +188,127 @@ export class UserProfileService {
   }
 
   /**
+   * Determines the type of authorization from the Authorization header.
+   * @param authHeader The Authorization header value
+   * @returns The type of authorization ('basic', 'apikey', or null if neither)
+   */
+  private getAuthHeaderType(authHeader: string | string[] | undefined): 'basic' | 'apikey' | null {
+    if (!authHeader || typeof authHeader !== 'string') {
+      return null;
+    }
+
+    const normalizedHeader = authHeader.trim().toLowerCase();
+
+    if (normalizedHeader.startsWith('basic ')) {
+      return 'basic';
+    }
+
+    if (normalizedHeader.startsWith('apikey ')) {
+      return 'apikey';
+    }
+
+    return null;
+  }
+
+  /**
+   * Retrieves the current user profile ID from a session-authenticated request.
+   * @param session Session service instance
+   * @param request The HTTP request
+   * @returns The profile ID if found, null otherwise
+   */
+  private async getCurrentUserProfileIdViaSession(
+    session: PublicMethodsOf<Session>,
+    request: UserProfileGetCurrentParams['request']
+  ): Promise<{ profileId?: string; sessionId?: string }> {
+    // ToDo: what is the execution flow with anonymous access?
+    let userSession;
+    try {
+      userSession = await session.get(request);
+    } catch (error) {
+      this.logger.error(`Failed to retrieve user session: ${getDetailedErrorMessage(error)}`);
+      throw error;
+    }
+
+    if (userSession.error) {
+      // ToDo: should we log this as an error or info level?
+      this.logger.debug(`Retrieved user session has error: ${userSession.error.message}`);
+      return {
+        profileId: undefined,
+        sessionId: undefined,
+      };
+    }
+
+    if (!userSession.value.userProfileId) {
+      this.logger.debug(
+        `User profile missing from the current session [sid=${getPrintableSessionId(
+          userSession.value.sid
+        )}].`
+      );
+    }
+
+    return {
+      profileId: userSession.value.userProfileId ?? undefined,
+      sessionId: userSession.value.sid,
+    };
+  }
+
+  /**
+   * Activates the user profile from a Basic auth authenticated request.
+   * @param clusterClient The cluster client
+   * @param request The HTTP request
+   * @returns The activated profile
+   */
+  private async activateProfileViaBasicAuth(
+    clusterClient: IClusterClient,
+    request: UserProfileGetCurrentParams['request']
+  ): Promise<UserProfileWithSecurity | undefined> {
+    const authHeader = request.headers.authorization as string;
+    const base64Credentials = authHeader.trim().substring('basic '.length);
+    const [username, password] = Buffer.from(base64Credentials, 'base64').toString().split(':');
+    if (!username || !password) {
+      this.logger.debug(`Basic credentials are malformed, cannot extract username and password.`);
+      return undefined; // ToDo: or throw? This should never happen as the request should be authenticated already.
+    }
+
+    const activatedProfile = await this.activate(clusterClient, {
+      type: 'password',
+      username,
+      password,
+    }); // ToDo: should we instead catch and wrap the error, or return gracefully with null?ß
+
+    return activatedProfile;
+  }
+
+  /**
+   * Retrieves the user profile ID from an API key authenticated request by retrieving the API Key itself.
+   * @param clusterClient The cluster client
+   * @param request The HTTP request
+   * @returns The profile ID if found, undefined otherwise
+   */
+  private async getCurrentUserProfileIdViaApiKey(
+    clusterClient: IClusterClient,
+    request: UserProfileGetCurrentParams['request']
+  ): Promise<string | undefined> {
+    try {
+      const response = await clusterClient.asScoped(request).asCurrentUser.security.getApiKey({
+        with_profile_uid: true,
+      });
+
+      if (response.api_keys && response.api_keys.length > 0) {
+        return response.api_keys[0].profile_uid;
+      } else {
+        this.logger.debug(
+          `No API keys were returned from query, cannot retrieve associated profile id.`
+        );
+      }
+    } catch (error) {
+      this.logger.error(
+        `Failed to retrieve API key for user profile retrieval: ${getDetailedErrorMessage(error)}`
+      );
+    }
+  }
+
+  /**
    * See {@link UserProfileServiceStart} for documentation.
    */
   private async getCurrent<D extends UserProfileData>(
@@ -200,131 +316,44 @@ export class UserProfileService {
     session: PublicMethodsOf<Session>,
     { request, dataPath }: UserProfileGetCurrentParams
   ) {
-    // === UNAUTHENTICATED REQUEST ====================================================================
-    // If the request is not authenticated, then this function should not attempt to return a profile.
     if (request.auth.isAuthenticated === false) {
-      this.logger.debug('Request is not authenticated, returning null for current user profile.');
+      this.logger.debug(`Request to get current user profile is not authenticated.`);
+      // ToDo: should this throw instead so we can return 401 to the client?
       return null;
     }
 
     let profileId: string | undefined;
-    let userSession;
+    let sessionId: string | undefined;
 
-    const hasCookieHeader =
-      (request.headers.cookie || request.headers.Cookie || request.headers.COOKIE) !== undefined;
+    if (request.headers.cookie) {
+      this.logger.debug(`Request to get current user profile is authenticated via session.`);
+      ({ profileId, sessionId } = await this.getCurrentUserProfileIdViaSession(session, request));
+    } else {
+      const authType = this.getAuthHeaderType(request.headers.authorization);
 
-    const authHeader =
-      request.headers.Authorization ||
-      request.headers.authorization ||
-      request.headers.AUTHORIZATION;
-
-    // console.log(`***** request: ${JSON.stringify(request, null, 2)}`);
-    // console.log(`***** request.headers: ${JSON.stringify(request.headers, null, 2)}`);
-    console.log(`***** has cookie header: ${hasCookieHeader}`);
-    console.log(`***** authHeader: ${authHeader}`);
-
-    // === SESSION =======================================================================================
-    // If the request is associated with a session (no authc header), then the current logic will suffice.
-    if (hasCookieHeader) {
-      try {
-        userSession = await session.get(request);
-      } catch (error) {
-        this.logger.error(`Failed to retrieve user session: ${getDetailedErrorMessage(error)}`);
-        throw error;
-      }
-
-      // ToDo: what is the execution flow with anonymous access?
-      // export enum SessionErrorReason {
-      //   'SESSION_MISSING' = 'SESSION_MISSING',
-      //   'SESSION_EXPIRED' = 'SESSION_EXPIRED',
-      //   'CONCURRENCY_LIMIT' = 'CONCURRENCY_LIMIT',
-      //   'UNEXPECTED_SESSION_ERROR' = 'UNEXPECTED_SESSION_ERROR',
-      // }
-
-      if (userSession.error) {
-        console.log(`***** User session error: ${userSession.error.message}`);
-        return null;
-      }
-
-      profileId = userSession.value.userProfileId;
-
-      if (!profileId) {
+      if (authType === 'basic') {
         this.logger.debug(
-          `User profile missing from the current session [sid=${getPrintableSessionId(
-            userSession.value.sid
-          )}].`
+          `Request to get current user profile is authenticated via Basic credentials.`
         );
-        console.log(`***** User profile missing`);
-        return null;
-      }
-    }
+        const activatedProfile = await this.activateProfileViaBasicAuth(clusterClient, request);
 
-    // === NON SESSION =================================================================================
-    // If the request is authenticated with an 'Authorization' header (and therefore not a session), then:
-    else if (authHeader && typeof authHeader === 'string') {
-      // Determine if it is basic or API key...
-      const isBasicAuth = authHeader.trim().toLowerCase().startsWith('basic ');
-      const isApiKeyAuth = authHeader.trim().toLowerCase().startsWith('apikey ');
-
-      // === BASIC AUTHC ================================================================================
-      // Requests authenticated via Basic auth need to have their profile activated. We can then return
-      // the profile from the activation call.
-      if (isBasicAuth) {
-        this.logger.debug('Request is authenticated via Basic auth, activating user profile...');
-        const base64Credentials = authHeader.trim().substring('basic '.length);
-        const credentials = Buffer.from(base64Credentials, 'base64').toString().split(':');
-        console.log(`***** credentials: ${JSON.stringify(credentials)}`);
-        const username = credentials[0] || '';
-        const password = credentials[1] || '';
-
-        // ToDo: figure out how to filter dataPath on activate
-        const activatedProfile = await this.activate(clusterClient, {
-          type: 'password',
-          username,
-          password,
-        }); // ToDo: catch and wrap error?
-
-        profileId = activatedProfile.uid;
-      }
-
-      // === API KEY ======================================================================================
-      // Requests authenticated via ApiKey need to have their profile id retrieved from the API Key itself.
-      // Using an ES Client scoped with the ApiKey credentials, we can call
-      // /_security/api_key?with_profile_uid=true to retrieve the profile id associated with the API Key.
-      // Important: This step may fail, or may succeed but not return a profile id. We will need to
-      // gracefully handle both of these scenarios.
-      else if (isApiKeyAuth) {
-        this.logger.debug(
-          'Request is authenticated via API key, getting the profile ID for the API key...'
-        );
-
-        try {
-          const response = await clusterClient.asScoped(request).asCurrentUser.security.getApiKey({
-            with_profile_uid: true,
-          });
-
-          if (response.api_keys && response.api_keys.length > 0) {
-            profileId = response.api_keys[0].profile_uid;
-          }
-        } catch (error) {
-          console.log(`***** API key error: ${JSON.stringify(error)}`);
-          this.logger.error(
-            `Failed to retrieve API key for user profile retrieval: ${getDetailedErrorMessage(
-              error
-            )}`
-          );
-          // throw error; // Gracefully return null
+        // It is not possible to select/filter profile data when activating, so unless the dataPath is empty,
+        // we will need to re-fetch the profile like in the other cases (session, API key).
+        if (!dataPath) {
+          return activatedProfile;
         }
+        profileId = activatedProfile?.uid;
+      } else if (authType === 'apikey') {
+        this.logger.debug(`Request to get current user profile is authenticated via API key.`);
+        profileId = await this.getCurrentUserProfileIdViaApiKey(clusterClient, request);
       }
     }
 
-    // === GET THE PROFILE ===============================================================================
     if (!profileId) {
       return null;
     }
 
     let body;
-    console.log(`***** dataPath: ${dataPath}`);
     try {
       body = await clusterClient.asInternalUser.security.getUserProfile({
         uid: profileId,
@@ -333,7 +362,7 @@ export class UserProfileService {
     } catch (error) {
       this.logger.error(
         `Failed to retrieve user profile for the current user${
-          userSession ? ` [sid=${getPrintableSessionId(userSession.value.sid)}]` : ''
+          sessionId ? ` [sid=${getPrintableSessionId(sessionId)}]` : ''
         }: ${getDetailedErrorMessage(error)}`
       );
       throw error;
@@ -342,12 +371,13 @@ export class UserProfileService {
     if (body.profiles.length === 0) {
       this.logger.error(
         `The user profile for the current user${
-          userSession ? ` [sid=${getPrintableSessionId(userSession.value.sid)}]` : ''
+          sessionId ? ` [sid=${getPrintableSessionId(sessionId)}]` : ''
         } is not found.`
       );
       throw new Error(`User profile is not found.`);
     }
 
+    this.logger.debug(`Returning current user profile.`);
     return parseUserProfileWithSecurity<D>(body.profiles[0]);
   }
 
