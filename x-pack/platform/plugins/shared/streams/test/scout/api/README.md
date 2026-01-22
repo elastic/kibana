@@ -1,6 +1,6 @@
-# Streams App - Scout API Tests
+# Streams - Scout API Tests
 
-This directory contains Scout API tests for the Streams App plugin. These tests focus on server-side API functionality without browser interaction, providing fast and reliable test coverage.
+This directory contains Scout API tests for the Streams plugin. These tests focus on server-side API functionality without browser interaction, providing fast and reliable test coverage.
 
 ## Why API Tests?
 
@@ -40,17 +40,17 @@ api/
 
 2. Run the API tests:
    ```bash
-   npx playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/api/playwright.config.ts
+   npx playwright test --config x-pack/platform/plugins/shared/streams/test/scout/api/playwright.config.ts
    ```
 
 ### Running Specific Tests
 
 ```bash
 # Run only routing tests
-npx playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/api/playwright.config.ts -g "routing"
+npx playwright test --config x-pack/platform/plugins/shared/streams/test/scout/api/playwright.config.ts -g "routing"
 
 # Run only processing tests
-npx playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/api/playwright.config.ts -g "processing"
+npx playwright test --config x-pack/platform/plugins/shared/streams/test/scout/api/playwright.config.ts -g "processing"
 ```
 
 ## Test Coverage
@@ -147,5 +147,5 @@ DEBUG=scout:* npx playwright test --config ...
 
 View test artifacts:
 ```bash
-ls -la x-pack/platform/plugins/shared/streams_app/test/scout/api/.scout/
+ls -la x-pack/platform/plugins/shared/streams/test/scout/api/.scout/
 ```
