@@ -225,13 +225,13 @@ export function MonacoEditor({
       overflowWidgetsDomNode.current?.classList.add(OVERFLOW_WIDGETS_CONTAINER_CLASS);
       overflowWidgetsDomNode.current?.setAttribute('data-test-subj', OVERFLOW_WIDGETS_TEST_ID);
 
-      // handle special case of editor being rendered inside an EUI flyout,
-      // in which case we want to ensure the overflow widgets appear above the flyout z-index
-      const isInsideFlyout =
+      // handle special case of editor being rendered inside a container with a high z-index, like an EUI flyout
+      // if this is the case by default we will just raise the overflow widgets container z-index above the flyout (1000)
+      // more specific edge cases can use the z-index override prop
+      const isInsideStackedContainer =
         containerElement.current!.closest('.euiFlyout') !== null || // covers both overlay and push flyouts
         containerElement.current!.closest('[data-euiportal="true"]') !== null; // covers custom portals, like security timeline overlay
-      // by default we cover only a single flyout (1000), more specific edge cases can use the z-index override prop
-      const defaultZIndex = isInsideFlyout
+      const defaultZIndex = isInsideStackedContainer
         ? OVERFLOW_WIDGETS_Z_INDEX_ABOVE_EUI_FLYOUT
         : OVERFLOW_WIDGETS_Z_INDEX_BELOW_EUI_FLYOUT;
 
