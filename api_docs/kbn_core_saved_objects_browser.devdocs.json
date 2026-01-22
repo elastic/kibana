@@ -1,0 +1,106 @@
+{
+  "id": "@kbn/core-saved-objects-browser",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-browser",
+        "id": "def-public.SavedObjectsStart",
+        "type": "Interface",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "SavedObjectsStart",
+        "description": [],
+        "path": "src/core/packages/saved-objects/browser/src/contracts.ts",
+        "deprecated": true,
+        "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/browser/index.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/lifecycle/browser/src/core_start.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/lifecycle/browser/src/core_start.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/lifecycle/browser/src/core_start.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/browser-internal/src/saved_objects_service.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/browser-internal/src/saved_objects_service.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/browser-internal/src/saved_objects_service.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/public/index.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/server/index.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/browser-mocks/src/saved_objects_service.mock.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/browser-mocks/src/saved_objects_service.mock.ts"
+          }
+        ],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-browser",
+            "id": "def-public.SavedObjectsStart.client",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [
+              "{@link SavedObjectsClientContract}"
+            ],
+            "signature": [
+              "SavedObjectsClientContract"
+            ],
+            "path": "src/core/packages/saved-objects/browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
