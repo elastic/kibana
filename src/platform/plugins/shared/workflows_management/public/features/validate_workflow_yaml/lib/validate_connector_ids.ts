@@ -16,28 +16,40 @@ import {
 } from '../../../widgets/workflow_yaml_editor/ui/hooks/use_monaco_hover_click_interceptor';
 import type { ConnectorIdItem, YamlValidationResult } from '../model/types';
 
+const TRANSLATIONS = {
+  manageConnector: i18n.translate('workflows.validateConnectorIds.manageConnectorMessage', {
+    defaultMessage: 'Manage connectors',
+  }),
+  createConnector: i18n.translate('workflows.validateConnectorIds.createConnectorMessage', {
+    defaultMessage: 'Create connector',
+  }),
+  editConnector: i18n.translate('workflows.validateConnectorIds.editConnectorMessage', {
+    defaultMessage: 'Edit connector',
+  }),
+};
+
 export function validateConnectorIds(
   connectorIdItems: ConnectorIdItem[],
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo> | null,
-  connectorsManagementUrl: string | null
+  connectorsManagementUrl: string
 ): YamlValidationResult[] {
   const results: YamlValidationResult[] = [];
 
   if (!dynamicConnectorTypes) {
-    return [
-      {
-        id: 'connector-id-validation',
-        severity: 'error',
-        message: 'Dynamic connector types not found',
-        owner: 'connector-id-validation',
-        startLineNumber: 0,
-        startColumn: 0,
-        endLineNumber: 0,
-        endColumn: 0,
-        afterMessage: null,
-        hoverMessage: null,
-      },
-    ];
+    const errorResult: YamlValidationResult = {
+      id: 'connector-id-validation',
+      severity: 'error',
+      message: 'Dynamic connector types not found',
+      owner: 'connector-id-validation',
+      startLineNumber: 0,
+      startColumn: 0,
+      endLineNumber: 0,
+      endColumn: 0,
+      afterMessage: null,
+      beforeMessage: null,
+      hoverMessage: null,
+    };
+    return [errorResult];
   }
 
   const notReferenceConnectorIds = connectorIdItems.filter(
@@ -54,75 +66,60 @@ export function validateConnectorIds(
       dynamicConnectorTypes
     );
 
-    const instance = instances.find(
-      (ins) => ins.id === connectorIdItem.key || ins.name === connectorIdItem.key
-    );
-
-    const createConnectorMessage = i18n.translate(
-      'workflows.validateConnectorIds.createConnectorMessage',
-      { defaultMessage: 'Create a new {displayName} connector', values: { displayName } }
-    );
+    const instance = instances.find((ins) => ins.id === connectorIdItem.key);
 
     const actionType = getActionTypeFromStepType(connectorIdItem.connectorType);
     const createConnectorLink = createHoverClickActionLink({
       action: WorkflowAction.OpenConnectorFlyout,
       params: { connectorType: actionType },
-      text: createConnectorMessage,
+      text: TRANSLATIONS.createConnector,
     });
 
-    const manageConnectorLink = connectorsManagementUrl
-      ? `<a href="${connectorsManagementUrl}" target="_blank">${i18n.translate(
-          'workflows.validateConnectorIds.manageConnectorMessage',
-          { defaultMessage: 'Manage connectors ↗' }
-        )}</a>`
-      : '';
+    const manageConnectorLink = `[${TRANSLATIONS.manageConnector}](${connectorsManagementUrl})`;
 
     if (!instance) {
-      results.push({
+      const errorResult: YamlValidationResult = {
         id: connectorIdItem.id,
         severity: 'error',
         message: i18n.translate('workflows.validateConnectorIds.connectorNotFoundMessage', {
           defaultMessage:
-            '{displayName} connector "{key}" not found. Add a new connector or choose an existing one',
-          values: { displayName, key: connectorIdItem.key },
+            '{displayName} connector UUID "{id}" not found.\nCreate a new connector or choose an existing one\n',
+          values: { displayName, id: connectorIdItem.key },
         }),
         owner: 'connector-id-validation',
         startLineNumber: connectorIdItem.startLineNumber,
         startColumn: connectorIdItem.startColumn,
         endLineNumber: connectorIdItem.endLineNumber,
         endColumn: connectorIdItem.endColumn,
+        beforeMessage: null,
         afterMessage: null,
-        hoverMessage: `${createConnectorLink} <br /> ${manageConnectorLink}`,
-      });
+        hoverMessage: `${createConnectorLink} | ${manageConnectorLink}`,
+      };
+      results.push(errorResult);
     } else {
-      const editConnectorMessage = i18n.translate(
-        'workflows.validateConnectorIds.editConnectorMessage',
-        {
-          defaultMessage: 'Edit "{connectorName}" connector',
-          values: { connectorName: `${instance.name}` },
-        }
-      );
       const editConnectorLink = createHoverClickActionLink({
         action: WorkflowAction.OpenConnectorEditFlyout,
         params: { connectorType: actionType, connectorId: instance.id },
-        text: editConnectorMessage,
+        text: TRANSLATIONS.editConnector,
       });
 
-      results.push({
+      const validResult: YamlValidationResult = {
         id: connectorIdItem.id,
         severity: 'info',
         message: i18n.translate('workflows.validateConnectorIds.connectorFoundMessage', {
-          defaultMessage: 'Connected to {displayName} connector "{key}"',
-          values: { displayName, key: connectorIdItem.key },
+          defaultMessage: `Successfully connected to {displayName} connector "{name}"\nUUID: {id}\n`,
+          values: { displayName, name: instance.name, id: instance.id },
         }),
         owner: 'connector-id-validation',
         startLineNumber: connectorIdItem.startLineNumber,
         startColumn: connectorIdItem.startColumn,
         endLineNumber: connectorIdItem.endLineNumber,
         endColumn: connectorIdItem.endColumn,
-        afterMessage: `✓ Connected (${displayName} connector, ID: ${instance.id})`,
-        hoverMessage: `${editConnectorLink} <br /> ${createConnectorLink} <br /> ${manageConnectorLink}`,
-      });
+        beforeMessage: `✓ ${instance.name}`,
+        afterMessage: null,
+        hoverMessage: `${editConnectorLink} | ${createConnectorLink} | ${manageConnectorLink}`,
+      };
+      results.push(validResult);
     }
   }
 

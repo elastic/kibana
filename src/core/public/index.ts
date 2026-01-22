@@ -47,7 +47,12 @@ export type {
   PublicUiSettingsParams,
 } from '@kbn/core-ui-settings-browser';
 export type { Capabilities } from '@kbn/core-capabilities-common';
-export type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
+export type {
+  NotificationsSetup,
+  NotificationsStart,
+  FeedbackStart,
+  ToursStart,
+} from '@kbn/core-notifications-browser';
 export type {
   ChromeBadge,
   ChromeBreadcrumb,

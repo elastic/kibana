@@ -8,6 +8,6 @@
  */
 
 export interface IExampleExternalService {
-  getProxies: () => Promise<{ id: string; url: string }[]>;
-  getProxy: (proxyId: string) => Promise<string | null>;
+  getProxies: () => Promise<{ id: string; name: string; url: string }[]>;
+  getProxy: (proxyId: string) => Promise<{ id: string; name: string; url: string } | null>;
 }

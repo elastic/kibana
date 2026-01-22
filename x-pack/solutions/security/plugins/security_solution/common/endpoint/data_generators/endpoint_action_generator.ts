@@ -8,7 +8,11 @@
 import type { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
-import { isMemoryDumpAction, isProcessesAction } from '../service/response_actions/type_guards';
+import {
+  isMemoryDumpAction,
+  isProcessesAction,
+  isRunScriptAction,
+} from '../service/response_actions/type_guards';
 import {
   ACTION_AGENT_FILE_DOWNLOAD_ROUTE,
   ENDPOINT_ACTION_RESPONSES_DS,
@@ -465,6 +469,31 @@ export class EndpointActionGenerator extends BaseDataGenerator {
             disk_free_space: 1234567000,
           },
         };
+      }
+    }
+
+    if (isRunScriptAction(details)) {
+      if (details.isCompleted) {
+        if (!details.outputs) {
+          details.outputs = {};
+        }
+
+        if (details.agentType === 'endpoint') {
+          if (!details.parameters) {
+            details.parameters = {
+              scriptId: 'script-123',
+              scriptInput: 'foo',
+            };
+          }
+
+          for (const agentId of details.agents) {
+            details.outputs[agentId] = this.generateExecuteActionResponseOutput({
+              content: {
+                output_file_id: getFileDownloadId(details, agentId),
+              },
+            });
+          }
+        }
       }
     }
 
