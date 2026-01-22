@@ -153,7 +153,7 @@ describe('useTopNavLinks', () => {
           if (groupId === 'export') {
             return [
               {
-                id: 'export',
+                id: 'csvReports',
                 shareType: 'integration' as const,
                 groupId: 'export',
                 config: () => Promise.resolve({}),
