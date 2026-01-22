@@ -39,6 +39,7 @@ import {
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 import type { FailureStoreSamplesResponse } from './failure_store_samples_handler';
 import { getFailureStoreSamples } from './failure_store_samples_handler';
+import { isNoLLMSuggestionsError } from './no_llm_suggestions_error';
 
 const paramsSchema = z.object({
   path: z.object({ name: z.string() }),
@@ -83,7 +84,7 @@ export interface ProcessingSuggestionBody {
 type GrokSuggestionResponse = Observable<
   ServerSentEventBase<
     'grok_suggestion',
-    { grokProcessor: Awaited<ReturnType<typeof handleProcessingGrokSuggestions>> }
+    { grokProcessor: Awaited<ReturnType<typeof handleProcessingGrokSuggestions>> | null }
   >
 >;
 
@@ -126,6 +127,13 @@ export const processingGrokSuggestionRoute = createServerRoute({
         fieldsMetadataClient,
         signal: getRequestAbortSignal(request),
         logger,
+      }).catch((error) => {
+        if (isNoLLMSuggestionsError(error)) {
+          logger.debug('No LLM suggestions available for grok processing');
+          // Return null to indicate no suggestions were generated
+          return null;
+        }
+        throw error;
       })
     ).pipe(
       map((grokProcessor) => ({
@@ -139,7 +147,7 @@ export const processingGrokSuggestionRoute = createServerRoute({
 type DissectSuggestionResponse = Observable<
   ServerSentEventBase<
     'dissect_suggestion',
-    { dissectProcessor: Awaited<ReturnType<typeof handleProcessingDissectSuggestions>> }
+    { dissectProcessor: Awaited<ReturnType<typeof handleProcessingDissectSuggestions>> | null }
   >
 >;
 
@@ -182,6 +190,13 @@ export const processingDissectSuggestionRoute = createServerRoute({
         fieldsMetadataClient,
         signal: getRequestAbortSignal(request),
         logger,
+      }).catch((error) => {
+        if (isNoLLMSuggestionsError(error)) {
+          logger.debug('No LLM suggestions available for dissect processing');
+          // Return null to indicate no suggestions were generated
+          return null;
+        }
+        throw error;
       })
     ).pipe(
       map((dissectProcessor) => ({

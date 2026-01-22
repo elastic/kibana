@@ -60,6 +60,7 @@ export interface DocViewRenderProps {
   onRemoveColumn?: (columnName: string) => void;
   docViewsRegistry?: DocViewsRegistry | ((prevRegistry: DocViewsRegistry) => DocViewsRegistry);
   decreaseAvailableHeightBy?: number;
+  hideFilteringOnComputedColumns?: boolean;
 }
 
 export type DocViewerComponent = React.FC<DocViewRenderProps>;
