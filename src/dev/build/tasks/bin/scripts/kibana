@@ -41,7 +41,6 @@ if [ "$KBN_ENABLE_JEMALLOC" = 'true' ]; then
     exit 1
   fi
 fi
-KBN_ENABLE_MIMALLOC=true #temporary for testing
 if [ "$KBN_ENABLE_MIMALLOC" = 'true' ]; then
   export LD_PRELOAD='/usr/lib/libmimalloc-secure.so.2'
   if [ ! -f "$LD_PRELOAD" ]; then
