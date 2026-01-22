@@ -12,6 +12,7 @@ import {
   streamsSystemIdentificationIdentifiedEventType,
   streamsDescriptionGeneratedEventType,
   streamsSignificantEventsGeneratedEventType,
+  streamsInsightsGeneratedEventType,
 } from './events';
 import { EbtTelemetryClient } from './client';
 
@@ -27,6 +28,7 @@ export class EbtTelemetryService {
     this.analytics.registerEventType(streamsSystemIdentificationIdentifiedEventType);
     this.analytics.registerEventType(streamsDescriptionGeneratedEventType);
     this.analytics.registerEventType(streamsSignificantEventsGeneratedEventType);
+    this.analytics.registerEventType(streamsInsightsGeneratedEventType);
   }
 
   public getClient() {

@@ -7,8 +7,8 @@
 
 import { z } from '@kbn/zod';
 import type { InsightsResult } from '@kbn/streams-schema';
-import type { InsightsIdentificationTaskParams } from '../../../../lib/tasks/task_definitions/insights_identification';
-import { STREAMS_INSIGHTS_IDENTIFICATION_TASK_TYPE } from '../../../../lib/tasks/task_definitions/insights_identification';
+import type { InsightsIdentificationTaskParams } from '../../../../lib/tasks/task_definitions/insights_discovery';
+import { STREAMS_INSIGHTS_DISCOVERY_TASK_TYPE } from '../../../../lib/tasks/task_definitions/insights_discovery';
 import type { TaskResult } from '../../../../lib/tasks/types';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
@@ -69,8 +69,8 @@ const insightsTaskRoute = createServerRoute({
         ? ({
             action: body.action,
             scheduleConfig: {
-              taskType: STREAMS_INSIGHTS_IDENTIFICATION_TASK_TYPE,
-              taskId: STREAMS_INSIGHTS_IDENTIFICATION_TASK_TYPE,
+              taskType: STREAMS_INSIGHTS_DISCOVERY_TASK_TYPE,
+              taskId: STREAMS_INSIGHTS_DISCOVERY_TASK_TYPE,
               params: await (async (): Promise<InsightsIdentificationTaskParams> => {
                 const connectorId = await resolveConnectorId({
                   connectorId: body.connectorId,
@@ -89,7 +89,7 @@ const insightsTaskRoute = createServerRoute({
 
     return handleTaskAction<InsightsIdentificationTaskParams, InsightsResult>({
       taskClient,
-      taskId: STREAMS_INSIGHTS_IDENTIFICATION_TASK_TYPE,
+      taskId: STREAMS_INSIGHTS_DISCOVERY_TASK_TYPE,
       ...actionParams,
     });
   },
@@ -114,7 +114,7 @@ const insightsStatusRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     return taskClient.getStatus<InsightsIdentificationTaskParams, InsightsResult>(
-      STREAMS_INSIGHTS_IDENTIFICATION_TASK_TYPE
+      STREAMS_INSIGHTS_DISCOVERY_TASK_TYPE
     );
   },
 });

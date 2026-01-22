@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -17,13 +15,15 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import useAsyncFn from 'react-use/lib/useAsyncFn';
+import { i18n } from '@kbn/i18n';
 import { TaskStatus } from '@kbn/streams-schema';
-import { useTaskPolling } from '../../../../hooks/use_task_polling';
-import { useInsightsApi } from '../../../../hooks/use_insights_api';
-import { getFormattedError } from '../../../../util/errors';
+import React, { useEffect, useState } from 'react';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useAIFeatures } from '../../../../hooks/use_ai_features';
+import { useInsightsApi } from '../../../../hooks/use_insights_api';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useTaskPolling } from '../../../../hooks/use_task_polling';
+import { getFormattedError } from '../../../../util/errors';
 import { ConnectorListButton } from '../../../connector_list_button/connector_list_button';
 import { FeedbackButtons } from './feedback_buttons';
 
@@ -128,6 +128,7 @@ export function Summary({ count }: { count: number }) {
                     onClick={onRegenerateSummaryClick}
                     disabled={isSchedulingTask}
                     isLoading={isSchedulingTask}
+                    data-test-subj="significant_events_regenerate_summary_button"
                   >
                     {i18n.translate('xpack.streams.summary.regenerateInsightsButtonLabel', {
                       defaultMessage: 'Re-generate insights',
@@ -209,7 +210,7 @@ export function Summary({ count }: { count: number }) {
                     onClick: onGenerateSummaryClick,
                     isDisabled: isGenerateButtonPending,
                     isLoading: isGenerateButtonPending,
-                    'data-test-subj': 'significant_events_generate_summary_button',
+                    'data-test-subj': 'significant_events_generate_insights_button',
                   }}
                 />
 
@@ -218,6 +219,7 @@ export function Summary({ count }: { count: number }) {
                   <EuiButton
                     onClick={onCancelClick}
                     isDisabled={task?.status === TaskStatus.BeingCanceled}
+                    data-test-subj="significant_events_cancel_insights_generation_button"
                   >
                     {task?.status === TaskStatus.BeingCanceled
                       ? i18n.translate('xpack.streams.summary.cancellingTaskButtonLabel', {

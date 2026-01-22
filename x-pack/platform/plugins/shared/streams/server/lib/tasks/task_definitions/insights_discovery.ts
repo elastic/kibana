@@ -18,11 +18,11 @@ export interface InsightsIdentificationTaskParams {
   connectorId: string;
 }
 
-export const STREAMS_INSIGHTS_IDENTIFICATION_TASK_TYPE = 'streams_insights_identification';
+export const STREAMS_INSIGHTS_DISCOVERY_TASK_TYPE = 'streams_insights_discovery';
 
 export function createStreamsInsightsIdentificationTask(taskContext: TaskContext) {
   return {
-    [STREAMS_INSIGHTS_IDENTIFICATION_TASK_TYPE]: {
+    [STREAMS_INSIGHTS_DISCOVERY_TASK_TYPE]: {
       createTaskRunner: (runContext) => {
         return {
           run: cancellableTask(
@@ -54,6 +54,12 @@ export function createStreamsInsightsIdentificationTask(taskContext: TaskContext
                   inferenceClient: boundInferenceClient,
                   signal: runContext.abortController.signal,
                   logger: taskContext.logger.get('insights_identification'),
+                });
+
+                taskContext.telemetry.trackInsightsGenerated({
+                  input_tokens_used: result.tokenUsage?.prompt ?? 0,
+                  output_tokens_used: result.tokenUsage?.completion ?? 0,
+                  cached_tokens_used: result.tokenUsage?.cached ?? 0,
                 });
 
                 await taskClient.complete<InsightsIdentificationTaskParams, InsightsResult>(
