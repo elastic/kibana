@@ -13,10 +13,16 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const dashboardPanelActions = getService('dashboardPanelActions');
   const filterBar = getService('filterBar');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const { dashboard, header, timePicker } = getPageObjects(['dashboard', 'header', 'timePicker']);
+  const { dashboard, header, timePicker, discover } = getPageObjects([
+    'dashboard',
+    'header',
+    'timePicker',
+    'discover',
+  ]);
 
   describe('discover ES|QL embeddable', () => {
     before(async () => {
@@ -47,6 +53,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should add an ES|QL based Discover session panel to a dashboard', async () => {
       await dashboardAddPanel.addSavedSearch('ES|QL Discover Session');
       await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
+      await dashboard.verifyNoRenderErrors();
+      expect(await dataGrid.getDocCount()).to.be(1000);
+    });
+
+    it('can edit a session and return to the dashboard', async () => {
+      await dashboardAddPanel.addSavedSearch('ES|QL Discover Session');
+      await dashboardPanelActions.clickEdit();
+      await header.waitUntilLoadingHasFinished();
+      await discover.saveSearch('ES|QL Discover Session');
       await dashboard.waitForRenderComplete();
       await dashboard.verifyNoRenderErrors();
       expect(await dataGrid.getDocCount()).to.be(1000);

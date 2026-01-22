@@ -4442,6 +4442,7 @@
         "@opentelemetry/context-async-hooks",
         "@opentelemetry/exporter-metrics-otlp-http",
         "@opentelemetry/exporter-metrics-otlp-grpc",
+        "@opentelemetry/exporter-metrics-otlp-proto",
         "@opentelemetry/exporter-prometheus",
         "@opentelemetry/exporter-trace-otlp-grpc",
         "@opentelemetry/exporter-trace-otlp-http",
