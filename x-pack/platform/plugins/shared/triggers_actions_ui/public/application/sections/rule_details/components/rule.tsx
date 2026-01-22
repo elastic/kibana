@@ -33,7 +33,6 @@ import {
 } from '../../rules_list/translations';
 
 const RuleEventLogList = lazy(() => import('./rule_event_log_list'));
-// const RuleAlertList = lazy(() => import('./rule_alert_list'));
 const RuleDefinition = lazy(() => import('./rule_definition'));
 const AlertsTable = lazy(() => import('@kbn/response-ops-alerts-table')) as AlertsTableType;
 
