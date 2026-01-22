@@ -12,13 +12,11 @@ import type {
   SecuritySuggestUserProfilesResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
 import {
   elasticsearchServiceMock,
   httpServerMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
-import { getApiKeyHeader } from '@kbn/synthtrace/src/cli/utils/get_api_key_header';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { prefixCommaSeparatedValues, UserProfileService } from './user_profile_service';
@@ -74,7 +72,7 @@ describe('UserProfileService', () => {
     let mockRequest: ReturnType<typeof httpServerMock.createKibanaRequest>;
     beforeEach(() => {
       mockRequest = httpServerMock.createKibanaRequest({
-        headers: { Cookie: 'some-cookie' },
+        headers: { cookie: 'some-cookie' },
       });
 
       mockUserProfile = userProfileMock.createWithSecurity({
@@ -303,7 +301,11 @@ describe('UserProfileService', () => {
 
       beforeEach(() => {
         mockBasicRequest = httpServerMock.createKibanaRequest({
-          headers: getBasicAuthHeader({ username: testUsername, password: testPassword }),
+          headers: {
+            authorization: `basic ${Buffer.from(`${testUsername}:${testPassword}`).toString(
+              'base64'
+            )}`,
+          },
         });
       });
 
@@ -396,7 +398,7 @@ describe('UserProfileService', () => {
 
       beforeEach(() => {
         mockApiKeyRequest = httpServerMock.createKibanaRequest({
-          headers: getApiKeyHeader(testApiKeyValue),
+          headers: { authorization: `apikey ${testApiKeyValue}` },
         });
       });
 
