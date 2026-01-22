@@ -48,8 +48,6 @@ const RulesPage = () => {
   } = useKibana().services;
   const currentAppId = useObservable(currentAppId$, undefined);
 
-  const [headerActions, setHeaderActions] = useState<React.ReactNode[] | undefined>();
-
   const { authorizedToReadAnyRules, authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
     http,
     toasts,
@@ -84,17 +82,13 @@ const RulesPage = () => {
     setRuleTypeModalVisibility(true);
   }, []);
 
-  useEffect(() => {
-    const buttons = [
-      ...(authorizedToCreateAnyRules ? [<CreateRuleButton openFlyout={openRuleTypeModal} />] : []),
-      <RulesSettingsLink
-        alertDeleteCategoryIds={['management', 'observability', 'securitySolution']}
-      />,
-      <RulesListDocLink />,
-    ];
-    setHeaderActions(buttons);
-    return () => setHeaderActions([]);
-  }, [authorizedToCreateAnyRules, openRuleTypeModal]);
+  const headerActions = [
+    ...(authorizedToCreateAnyRules ? [<CreateRuleButton openFlyout={openRuleTypeModal} />] : []),
+    <RulesSettingsLink
+      alertDeleteCategoryIds={['management', 'observability', 'securitySolution']}
+    />,
+    <RulesListDocLink />,
+  ];
 
   const onSectionChange = (newSection: Section) => {
     if (newSection === 'logs') {

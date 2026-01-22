@@ -44,7 +44,6 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   },
   history,
 }) => {
-  const [headerActions, setHeaderActions] = useState<React.ReactNode[] | undefined>();
   const {
     chrome,
     setBreadcrumbs,
@@ -90,18 +89,13 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
     setRuleTypeModalVisibility(true);
   }, []);
 
-  useEffect(() => {
-    const buttons = [
-      ...(authorizedToCreateAnyRules ? [<CreateRuleButton openFlyout={openRuleTypeModal} />] : []),
-      <RulesSettingsLink
-        alertDeleteCategoryIds={['management', 'observability', 'securitySolution']}
-      />,
-      <RulesListDocLink />,
-    ];
-
-    setHeaderActions(buttons);
-    return () => setHeaderActions([[]]);
-  }, [authorizedToCreateAnyRules, openRuleTypeModal]);
+  const headerActions = [
+    ...(authorizedToCreateAnyRules ? [<CreateRuleButton openFlyout={openRuleTypeModal} />] : []),
+    <RulesSettingsLink
+      alertDeleteCategoryIds={['management', 'observability', 'securitySolution']}
+    />,
+    <RulesListDocLink />,
+  ];
 
   const renderRulesList = useCallback(() => {
     return suspendedComponentWithProps(
@@ -115,7 +109,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   const renderLogsList = useCallback(() => {
     return (
       <EuiPageTemplate.Section grow={false} paddingSize="none">
-        {suspendedComponentWithProps(LogsList, 'xl')({})}
+        <LogsList />
       </EuiPageTemplate.Section>
     );
   }, []);
