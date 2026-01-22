@@ -44,7 +44,9 @@
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/es-errors",
     "@kbn/zod",
-    "@kbn/core-di-internal"
+    "@kbn/core-di-internal",
+    "@kbn/i18n",
+    "@kbn/zod-helpers"
   ],
   "exclude": [
     "target/**/*"
