@@ -32,7 +32,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
 }: {
   messageId: K;
   values: ErrorValues<K>;
-}): { message: string; type?: 'error' | 'warning' } {
+}): { message: string; type?: 'error' | 'warning'; underlinedWarning?: boolean } {
   // Use a less strict type instead of doing a typecast on each message type
   const out = values as unknown as Record<string, string>;
   // i18n validation wants to the values prop to be declared inline, so need to unpack and redeclare again all props
@@ -43,6 +43,15 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           defaultMessage: 'Unknown column "{name}"',
           values: { name: out.name },
         }),
+      };
+    case 'unmappedColumnWarning':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.unmappedColumnWarning', {
+          defaultMessage: `"{name}" column isn't mapped in any searched indices.\nIf you are not intentionally referencing an unmapped field,\ncheck that the field exists or that it is spelled correctly in your query.`,
+          values: { name: out.name },
+        }),
+        type: 'warning',
+        underlinedWarning: true,
       };
     case 'unknownIndex':
       return {
@@ -395,21 +404,23 @@ export function getMessageFromId<K extends ErrorTypes>({
   values: ErrorValues<K>;
   locations: ESQLLocation;
 }): ESQLMessage {
-  const { message, type = 'error' } = getMessageAndTypeFromId(payload);
-  return createMessage(type, message, locations, payload.messageId);
+  const { message, type = 'error', underlinedWarning } = getMessageAndTypeFromId(payload);
+  return createMessage(type, message, locations, payload.messageId, underlinedWarning);
 }
 
 export function createMessage(
   type: 'error' | 'warning',
   message: string,
   location: ESQLLocation,
-  messageId: string
+  messageId: string,
+  underlinedWarning?: boolean
 ): ESQLMessage {
   return {
     type,
     text: message,
     location,
     code: messageId,
+    underlinedWarning,
   };
 }
 
@@ -475,6 +486,12 @@ export const errors = {
   unknownColumn: (column: ESQLColumn | ESQLIdentifier): ESQLMessage =>
     tagSemanticError(
       errors.byId('unknownColumn', column.location, { name: column.name }),
+      'getColumnsFor'
+    ),
+
+  unmappedColumnWarning: (column: ESQLColumn | ESQLIdentifier): ESQLMessage =>
+    tagSemanticError(
+      errors.byId('unmappedColumnWarning', column.location, { name: column.name }),
       'getColumnsFor'
     ),
 

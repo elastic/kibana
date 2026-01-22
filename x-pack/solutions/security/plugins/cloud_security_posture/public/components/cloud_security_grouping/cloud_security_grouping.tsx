@@ -49,7 +49,6 @@ export const CloudSecurityGroupingLoading = ({
         renderChildComponent: () => <></>,
         onGroupClose: () => {},
         selectedGroup: '',
-        takeActionItems: () => ({ items: [], panels: [] }),
       })}
     </div>
   );
@@ -113,7 +112,6 @@ export const CloudSecurityGrouping = ({
           onChangeGroupsPage,
           renderChildComponent,
           onGroupClose: () => {},
-          takeActionItems: () => ({ items: [], panels: [] }),
         })}
       </div>
     </div>
