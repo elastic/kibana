@@ -122,6 +122,7 @@ export const useFindGapAutoFillSchedulerLogs = ({
   sortDirection,
   statuses,
   enabled,
+  staleTime,
 }: {
   page: number;
   perPage: number;
@@ -129,11 +130,10 @@ export const useFindGapAutoFillSchedulerLogs = ({
   sortDirection: string;
   statuses: string[];
   enabled: boolean;
+  staleTime?: number;
 }) => {
   const spaceId = useSpaceId();
   const schedulerId = getSchedulerId(spaceId);
-
-  const { start, end } = getGapRange(defaultRangeValue);
 
   return useQuery(
     [
@@ -147,6 +147,8 @@ export const useFindGapAutoFillSchedulerLogs = ({
       ...statuses,
     ],
     async ({ signal }) => {
+      const { start, end } = getGapRange(defaultRangeValue);
+
       const response = await findGapAutoFillSchedulerLogs({
         id: schedulerId,
         signal,
@@ -179,6 +181,7 @@ export const useFindGapAutoFillSchedulerLogs = ({
     },
     {
       enabled,
+      staleTime,
     }
   );
 };

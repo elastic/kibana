@@ -220,3 +220,48 @@ export const getGapAutoFillSchedulerApi = () =>
       failOnStatusCode: false,
     })
   );
+
+export const interceptGapAutoFillSchedulerLogsWithErrors = () => {
+  cy.intercept('POST', `${INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH}/*/logs`, (req) => {
+    req.reply({
+      statusCode: 200,
+      body: {
+        page: 1,
+        per_page: 1,
+        total: 2,
+        data: [
+          {
+            id: 'error-log-1',
+            timestamp: new Date().toISOString(),
+            status: 'error',
+            message: 'Failed to schedule gap fill',
+            results: [],
+          },
+        ],
+      },
+    });
+  }).as('getGapAutoFillSchedulerLogsWithErrors');
+};
+
+export const interceptGapAutoFillScheduler = ({ enabled }: { enabled: boolean }) => {
+  cy.intercept('GET', `${INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH}/*`, {
+    statusCode: 200,
+    body: {
+      id: 'gap-auto-fill-scheduler-default',
+      name: 'Gap Auto Fill Scheduler',
+      enabled,
+      gap_fill_range: '24h',
+      max_backfills: 10,
+      num_retries: 3,
+      schedule: {
+        interval: '1h',
+      },
+      scope: 'all',
+      rule_types: [],
+      created_by: 'elastic',
+      updated_by: 'elastic',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    },
+  }).as('getGapAutoFillScheduler');
+};
