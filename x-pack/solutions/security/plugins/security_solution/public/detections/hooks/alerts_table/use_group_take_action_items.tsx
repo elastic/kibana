@@ -208,7 +208,7 @@ export const useGroupTakeActionsItems = ({
     ({ query, tableId, groupNumber, selectedGroup }) => {
       const actionItems: EuiContextMenuPanelItemDescriptor[] = [];
 
-      if (!hasAlertsAll ||!showAlertStatusActions) {
+      if (!hasAlertsAll || !showAlertStatusActions) {
         return;
       }
 

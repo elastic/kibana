@@ -418,7 +418,7 @@ export default function ({ getService }: FtrProviderContext) {
               'minimal_read',
               'security_solution_exceptions_all',
             ],
-            securitySolutionAlertsV1: [ 'all', 'read', 'minimal_all', 'minimal_read' ],
+            securitySolutionAlertsV1: ['all', 'read', 'minimal_all', 'minimal_read'],
             securitySolutionAssistant: [
               'all',
               'read',

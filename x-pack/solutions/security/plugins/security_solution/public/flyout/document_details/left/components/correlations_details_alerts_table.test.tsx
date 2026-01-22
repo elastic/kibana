@@ -25,15 +25,15 @@ jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../common/components/user_privileges', () => ({
   useUserPrivileges: () => ({
     timelinePrivileges: {
-      read: true
+      read: true,
     },
     rulesPrivileges: {
       rules: {
-        read: true
-      }
-    }
-  })
-}))
+        read: true,
+      },
+    },
+  }),
+}));
 
 const TEST_ID = 'TEST';
 const alertIds = ['id1', 'id2', 'id3'];

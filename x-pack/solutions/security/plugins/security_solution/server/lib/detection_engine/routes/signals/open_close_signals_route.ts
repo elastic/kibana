@@ -9,7 +9,10 @@ import { get } from 'lodash';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { ALERTS_API_ALL, ALERTS_API_SIGNAL_UPDATE_DEPRECATED_PRIVILEGE } from '@kbn/security-solution-features/constants';
+import {
+  ALERTS_API_ALL,
+  ALERTS_API_SIGNAL_UPDATE_DEPRECATED_PRIVILEGE,
+} from '@kbn/security-solution-features/constants';
 import { SetAlertsStatusRequestBody } from '../../../../../common/api/detection_engine/signals';
 import { AlertStatusEnum } from '../../../../../common/api/model';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
@@ -40,7 +43,9 @@ export const setSignalsStatusRoute = (
       access: 'public',
       security: {
         authz: {
-          requiredPrivileges: [{anyRequired:[ALERTS_API_ALL, ALERTS_API_SIGNAL_UPDATE_DEPRECATED_PRIVILEGE]}],
+          requiredPrivileges: [
+            { anyRequired: [ALERTS_API_ALL, ALERTS_API_SIGNAL_UPDATE_DEPRECATED_PRIVILEGE] },
+          ],
         },
       },
     })

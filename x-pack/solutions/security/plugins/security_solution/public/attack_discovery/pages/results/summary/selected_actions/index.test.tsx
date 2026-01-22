@@ -52,11 +52,14 @@ jest.mock('../../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assi
   }),
 }));
 
-jest.mock('../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges', () => ({
-  useAlertsPrivileges: () => ({
-    hasAlertsAll: true
+jest.mock(
+  '../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',
+  () => ({
+    useAlertsPrivileges: () => ({
+      hasAlertsAll: true,
+    }),
   })
-}))
+);
 
 describe('SelectedActions', () => {
   const defaultProps = {

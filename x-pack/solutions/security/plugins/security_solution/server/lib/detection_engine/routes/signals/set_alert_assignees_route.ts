@@ -6,7 +6,10 @@
  */
 
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { ALERTS_API_ALL, ALERTS_API_SIGNAL_UPDATE_DEPRECATED_PRIVILEGE } from '@kbn/security-solution-features/constants';
+import {
+  ALERTS_API_ALL,
+  ALERTS_API_SIGNAL_UPDATE_DEPRECATED_PRIVILEGE,
+} from '@kbn/security-solution-features/constants';
 import { SetAlertAssigneesRequestBody } from '../../../../../common/api/detection_engine/alert_assignees';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
@@ -22,7 +25,9 @@ export const setAlertAssigneesRoute = (router: SecuritySolutionPluginRouter) => 
       access: 'public',
       security: {
         authz: {
-          requiredPrivileges: [{anyRequired:[ALERTS_API_ALL, ALERTS_API_SIGNAL_UPDATE_DEPRECATED_PRIVILEGE]}],
+          requiredPrivileges: [
+            { anyRequired: [ALERTS_API_ALL, ALERTS_API_SIGNAL_UPDATE_DEPRECATED_PRIVILEGE] },
+          ],
         },
       },
     })

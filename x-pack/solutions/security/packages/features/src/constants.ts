@@ -101,8 +101,10 @@ export const ALERTS_UI_EXTERNAL_DETECTIONS_PRIVILEGE =
 // Previously users with "ALERTS_API_READ" were able to update alerts (assign, tag, change status)
 // When the alerts feature was introduced, the privilege in the endpoints was changed to `ALERTS_API_ALL`
 // however to ensure backwards compatibility with old features, these permissions were added in the affected places.
-export const ALERTS_API_SIGNAL_UPDATE_DEPRECATED_PRIVILEGE = 'alerts-signal-update-deprecated-privilege' as const;
-export const ALERTS_UI_SIGNAL_UPDATE_DEPRECATED_PRIVILEGE = 'edit_alerts_signal_update_deprecated_privilege' as const;
+export const ALERTS_API_SIGNAL_UPDATE_DEPRECATED_PRIVILEGE =
+  'alerts-signal-update-deprecated-privilege' as const;
+export const ALERTS_UI_SIGNAL_UPDATE_DEPRECATED_PRIVILEGE =
+  'edit_alerts_signal_update_deprecated_privilege' as const;
 
 // Same as the plugin id defined by Cloud Security Posture
 export const CLOUD_POSTURE_APP_ID = 'csp' as const;

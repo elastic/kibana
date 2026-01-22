@@ -88,9 +88,9 @@ describe('NotesDetails', () => {
       timelinePrivileges: { crud: true },
       rulesPrivileges: {
         rules: {
-          read: true
-        }
-      }
+          read: true,
+        },
+      },
     });
     (useWhichFlyout as jest.Mock).mockReturnValue(Flyouts.timeline);
     (useBasicDataFromDetailsData as jest.Mock).mockReturnValue({ isAlert: true });
@@ -206,9 +206,9 @@ describe('NotesDetails', () => {
       timelinePrivileges: { crud: false },
       rulesPrivileges: {
         rules: {
-          read: true
-        }
-      }
+          read: true,
+        },
+      },
     });
 
     const { queryByTestId } = renderNotesDetails();

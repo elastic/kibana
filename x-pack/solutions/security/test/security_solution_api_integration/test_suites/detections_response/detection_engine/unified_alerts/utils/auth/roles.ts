@@ -114,7 +114,6 @@ export const alertsReadNoAttackIndices: Role = {
   },
 };
 
-
 export const attackDiscoveryOnlyAll: Role = {
   name: 'attack_discovery_only_all_spaces',
   privileges: {
