@@ -89,8 +89,8 @@ export const IntegrationManagement = React.memo(() => {
       onSubmit={handleSubmit}
     >
       <IntegrationManagementContents />
-      {/* TODO: Remove after demo */}
-      <pre>{JSON.stringify(integration, null, 2)}</pre>
+      {/* TODO: Remove after demo
+      <pre>{JSON.stringify(integration, null, 2)}</pre> */}
     </IntegrationFormProvider>
   );
 });
