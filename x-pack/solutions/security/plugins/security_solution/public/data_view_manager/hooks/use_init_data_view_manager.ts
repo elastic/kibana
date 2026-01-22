@@ -46,7 +46,7 @@ export const useInitDataViewManager = () => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const attacksAlertsAlignmentEnabled = services.featureFlags.getBooleanValue(
     ATTACKS_ALERTS_ALIGNMENT_ENABLED,
-    false
+    true
   );
 
   const logger = useDataViewManagerLogger('useInitDataViewManager');

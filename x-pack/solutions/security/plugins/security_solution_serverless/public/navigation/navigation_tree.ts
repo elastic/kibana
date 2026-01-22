@@ -47,7 +47,7 @@ export const createNavigationTree = async (
     },
     defaultNavigationTree.dashboards(),
     defaultNavigationTree.rules(),
-    services.featureFlags.getBooleanValue(ATTACKS_ALERTS_ALIGNMENT_ENABLED, false)
+    services.featureFlags.getBooleanValue(ATTACKS_ALERTS_ALIGNMENT_ENABLED, true)
       ? defaultNavigationTree.alertDetections()
       : {
           id: SecurityPageName.alerts,

@@ -66,7 +66,7 @@ export const getFilteredLinks = async (
 
   return Object.freeze([
     dashboardsLinks,
-    core.featureFlags.getBooleanValue(ATTACKS_ALERTS_ALIGNMENT_ENABLED, false)
+    core.featureFlags.getBooleanValue(ATTACKS_ALERTS_ALIGNMENT_ENABLED, true)
       ? alertDetectionsLinks
       : alertsLink,
     alertSummaryLink,

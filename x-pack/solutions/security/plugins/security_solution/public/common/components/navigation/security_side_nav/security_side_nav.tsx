@@ -144,7 +144,7 @@ export const SecuritySideNav: React.FC = () => {
   const categories = useMemo(() => {
     const attacksAlertsAlignmentEnabled = featureFlags.getBooleanValue(
       ATTACKS_ALERTS_ALIGNMENT_ENABLED,
-      false
+      true
     );
     return getNavCategories(attacksAlertsAlignmentEnabled);
   }, [featureFlags]);

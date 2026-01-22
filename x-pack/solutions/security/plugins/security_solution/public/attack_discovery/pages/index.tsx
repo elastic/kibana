@@ -226,7 +226,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
 
   const attacksAlertsAlignmentEnabled = featureFlags.getBooleanValue(
     ATTACKS_ALERTS_ALIGNMENT_ENABLED,
-    false
+    true
   );
 
   return (
