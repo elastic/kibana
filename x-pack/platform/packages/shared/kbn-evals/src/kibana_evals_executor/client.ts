@@ -80,11 +80,19 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
 
       const runJobs: Array<Promise<void>> = [];
 
+      this.options.log.info(
+        `🧪 Starting experiment "Run ID: ${this.options.runId} - Dataset: ${dataset.name}" with ${evaluators.length} evaluators and ${runConcurrency} concurrent runs`
+      );
+
       for (let rep = 0; rep < repetitions; rep++) {
         dataset.examples.forEach((example, exampleIndex) => {
           runJobs.push(
             limiter(async () => {
               const runKey = `${exampleIndex}-${rep}-${randomUUID()}`;
+
+              this.options.log.info(
+                `🔧 Running task "task" on dataset "${datasetId}" (exampleIndex=${exampleIndex}, repetition=${rep})`
+              );
 
               const taskOutput = await task(example);
 
@@ -97,14 +105,24 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                 output: taskOutput,
               };
 
+              this.options.log.info(
+                `🧠 Evaluating run (exampleIndex=${exampleIndex}, repetition=${rep}) with ${evaluators.length} evaluators`
+              );
+
               const results = await Promise.all(
                 evaluators.map(async (evaluator) => {
+                  this.options.log.info(
+                    `🧠 Evaluating run (exampleIndex=${exampleIndex}, repetition=${rep}) with evaluator "${evaluator.name}"`
+                  );
                   const result = await evaluator.evaluate({
                     input: example.input,
                     output: taskOutput,
                     expected: example.output ?? null,
                     metadata: example.metadata ?? {},
                   });
+                  this.options.log.info(
+                    `✅ Evaluator "${evaluator.name}" on run (exampleIndex=${exampleIndex}, repetition=${rep}) completed`
+                  );
                   return { evaluatorName: evaluator.name, result };
                 })
               );
@@ -121,6 +139,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       }
 
       await Promise.all(runJobs);
+      this.options.log.info(`✅ Experiment ${experimentId} completed`);
 
       const ranExperiment: RanExperiment = {
         id: experimentId,
