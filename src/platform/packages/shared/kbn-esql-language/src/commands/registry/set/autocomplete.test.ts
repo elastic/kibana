@@ -11,7 +11,7 @@ import { autocomplete } from './autocomplete';
 import type { ICommandCallbacks } from '../types';
 import { expectSuggestions } from '../../../__tests__/commands/autocomplete';
 import { settings } from '../../definitions/generated/settings';
-import { parseMapParams } from '../../definitions/utils/autocomplete/map_expression';
+import { parseMapParams } from '../../definitions/utils/maps';
 
 const setExpectSuggestions = (
   query: string,
