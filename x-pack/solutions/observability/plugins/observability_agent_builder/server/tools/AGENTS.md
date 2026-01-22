@@ -1,69 +1,26 @@
-# Best Practices for Observability Agent Builder Tools
+# Observability Agent Builder Tools
 
-This document defines best practices for implementing Observability tools in Kibana Agent Builder. These tools are optimized for LLM use in incident investigation scenarios where Site Reliability Engineers (SREs) need to quickly understand what happened and how to fix it.
+## About This Document
+
+**Audience**: LLM coding agents assisting with Observability tool development.
+
+**Team mission**: The Observability AI team builds tools that help Site Reliability Engineers (SREs) investigate incidents and reduce Mean Time To Resolution (MTTR). Tools expose Observability data (logs, metrics, traces) to LLM agents that assist SREs during incident response.
+
+**Include**: Elastic-specific domain knowledge (field mappings, data types, metric computation) and codebase conventions not easily discoverable from existing code.
+
+**Exclude**: Generic advice, info in LLM training data, anything discoverable by reading existing tools.
 
 ---
 
-## 1. SRE Incident Investigation Workflow
+## 1. Tool-to-Investigation Phase Mapping
 
-Understanding how SREs investigate incidents is essential for designing effective tools. The LLM acts as an intelligent assistant that helps SREs answer critical questions faster.
-
-### The Questions SREs Ask
-
-During incident investigation, SREs follow a mental model of progressive diagnosis:
-
-| Phase           | Questions                                                                | Example Tools                                                    |
-| --------------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------- |
-| **Detection**   | Is something wrong? What alerts fired? What's the current system health? | `get_alerts`, `get_services`                                     |
-| **Scope**       | What services/hosts are affected? How widespread is the impact?          | `get_services`, `get_hosts`, `get_trace_metrics`                 |
-| **Timeline**    | When did it start? What changed around that time?                        | `get_trace_metrics` (time series), `run_log_rate_analysis`       |
-| **Correlation** | What errors preceded this? What's the sequence of events?                | `get_correlated_logs`, `get_downstream_dependencies`             |
-| **Root Cause**  | Why did this happen? What's the underlying issue?                        | `get_log_categories`, `get_trace_metrics` (grouped by dimension) |
-| **Resolution**  | How do I fix it? Has this happened before?                               | Documentation tools, runbook integration                         |
-
-Each tool should clearly map to one or more of these investigation phases.
-
-### The RED and USE Methods
-
-Tools exposing metrics should align with industry-standard methodologies:
-
-**RED Method** (for services/request-driven systems):
-
-- **R**ate — requests per second (throughput)
-- **E**rrors — failed requests per second (error rate)
-- **D**uration — latency/response time
-
-**USE Method** (for resources/infrastructure):
-
-- **U**tilization — percentage of resource capacity used
-- **S**aturation — queue depth, waiting work
-- **E**rrors — error counts
-
-### Progressive Disclosure
-
-Design tools to support an investigative workflow where each tool naturally leads to the next:
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│  LEVEL 1: Overview (Wide scope, low detail)                 │
-│  get_services → "12 services. 2 critical, 3 warning."       │
-│  get_alerts   → "5 active alerts. 2 critical."              │
-└─────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────┐
-│  LEVEL 2: Scoped Analysis (Narrower scope, more detail)     │
-│  get_trace_metrics(service=payment) → metrics by endpoint   │
-│  get_log_categories(service=payment) → error patterns       │
-└─────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────┐
-│  LEVEL 3: Deep Investigation (Narrow scope, high detail)    │
-│  get_correlated_logs(trace.id=xyz) → full event sequence    │
-│  get_trace_metrics(groupBy=host.name) → per-host breakdown  │
-└─────────────────────────────────────────────────────────────┘
-```
-
-The `groupBy` parameter is itself a progressive disclosure mechanism—allowing drill-down from service → transaction → host → container.
+| Phase           | Example Tools                                                    |
+| --------------- | ---------------------------------------------------------------- |
+| **Detection**   | `get_alerts`, `get_services`                                     |
+| **Scope**       | `get_services`, `get_hosts`, `get_trace_metrics`                 |
+| **Timeline**    | `get_trace_metrics` (time series), `run_log_rate_analysis`       |
+| **Correlation** | `get_correlated_logs`, `get_downstream_dependencies`             |
+| **Root Cause**  | `get_log_categories`, `get_trace_metrics` (grouped by dimension) |
 
 ---
 
@@ -127,98 +84,116 @@ Use consistent parameter names across all Observability tools:
 | **Grouping**   | `groupBy`     | string | Field to aggregate by                              |
 | **Pagination** | `limit`       | number | Maximum results to return                          |
 
-### Parameter Description Guidelines
-
-- Include 2-3 concrete examples in the description
-- Specify valid values for enums
-- Document default behavior when parameter is omitted
-
 ---
 
 ## 5. ECS and OpenTelemetry Compatibility
 
-Tools must work with both [ECS (Elastic Common Schema)](https://www.elastic.co/docs/reference/ecs/ecs-field-reference) and [OpenTelemetry Semantic Conventions](https://opentelemetry.io/docs/specs/semconv/).
+Tools must work with both ECS (Elastic Common Schema) and OpenTelemetry data. Observability index templates in Elasticsearch provides **field aliases** that map OTel fields to their ECS equivalents, so queries only need to use ECS field names.
 
-### Common Field Mappings
+### Key Points
 
-When querying or filtering, check **both** ECS and OTel field variants:
+1. **Query ECS fields only** — Aliases handle the mapping automatically. For example, query `message` not `body.text` (though `_source` will still show the original field name).
 
-| Concept            | ECS Field                   | OTel Field                       |
-| ------------------ | --------------------------- | -------------------------------- |
-| **Service**        |                             |                                  |
-| Service name       | `service.name`              | `service.name` ✓                 |
-| Service version    | `service.version`           | `service.version` ✓              |
-| Environment        | `service.environment`       | `deployment.environment`         |
-| **Infrastructure** |                             |                                  |
-| Host name          | `host.name`                 | `host.name` ✓                    |
-| Container ID       | `container.id`              | `container.id` ✓                 |
-| Pod name           | `kubernetes.pod.name`       | `k8s.pod.name`                   |
-| Namespace          | `kubernetes.namespace`      | `k8s.namespace.name`             |
-| **Logs**           |                             |                                  |
-| Message            | `message`                   | `Body`                           |
-| Log level          | `log.level`                 | `SeverityText`, `SeverityNumber` |
-| **Traces**         |                             |                                  |
-| Trace ID           | `trace.id`                  | `trace_id`, `TraceId`            |
-| Span ID            | `span.id`                   | `span_id`, `SpanId`              |
-| **HTTP**           |                             |                                  |
-| Status code        | `http.response.status_code` | `http.response.status_code` ✓    |
-| Method             | `http.request.method`       | `http.request.method` ✓          |
+2. **APM metrics are unchanged** — OTel traces are pre-aggregated into the same APM metric format via:
 
-### Common Observability Dimensions
+   - Managed OTLP endpoint (automatic)
+   - Self-managed: [EDOT Collector with Elastic APM Processor](https://www.elastic.co/docs/reference/edot-collector/components/elasticapmprocessor)
 
-Tools that support grouping or filtering should support these common dimensions:
+3. **Full alias list** — See [ECS to OTel aliases](https://gist.github.com/sorenlouv/5ed2a53c3a43504c0fea7a7a992d18af) for complete mappings extracted from Elasticsearch component templates.
 
-#### Service Dimensions
+### Common Aliases
 
-| Field (ECS)           | OTel Equivalent          | Use Case                               |
-| --------------------- | ------------------------ | -------------------------------------- |
-| `service.name`        | `service.name` ✓         | Identify which service is affected     |
-| `service.version`     | `service.version` ✓      | Compare performance across deployments |
-| `service.environment` | `deployment.environment` | Compare staging vs production          |
-
-#### Transaction/Request Dimensions
-
-| Field (ECS)                 | OTel Equivalent               | Use Case                                    |
-| --------------------------- | ----------------------------- | ------------------------------------------- |
-| `transaction.name`          | `span.name` (root span)       | Identify slow/failing endpoints             |
-| `transaction.type`          | `span.kind`                   | Filter by request type (request, page-load) |
-| `http.response.status_code` | `http.response.status_code` ✓ | Analyze by HTTP status (4xx, 5xx errors)    |
-
-#### Infrastructure Dimensions
-
-| Field (ECS)                  | OTel Equivalent       | Use Case                             |
-| ---------------------------- | --------------------- | ------------------------------------ |
-| `host.name`                  | `host.name` ✓         | Identify affected hosts              |
-| `container.id`               | `container.id` ✓      | Identify affected containers         |
-| `kubernetes.pod.name`        | `k8s.pod.name`        | Identify affected K8s pods           |
-| `kubernetes.node.name`       | `k8s.node.name`       | Identify K8s node-level issues       |
-| `kubernetes.deployment.name` | `k8s.deployment.name` | Compare across deployments/rollbacks |
-| `kubernetes.namespace`       | `k8s.namespace.name`  | Filter by K8s namespace              |
-
-#### Cloud Dimensions
-
-| Field (ECS)               | OTel Equivalent             | Use Case                     |
-| ------------------------- | --------------------------- | ---------------------------- |
-| `cloud.provider`          | `cloud.provider` ✓          | Multi-cloud comparison       |
-| `cloud.region`            | `cloud.region` ✓            | Identify regional issues     |
-| `cloud.availability_zone` | `cloud.availability_zone` ✓ | Identify AZ-specific outages |
-
-#### Error Dimensions
-
-| Field (ECS)  | OTel Equivalent  | Use Case                            |
-| ------------ | ---------------- | ----------------------------------- |
-| `error.type` | `exception.type` | Categorize errors by exception type |
+| Query This (ECS)       | Instead of (OTel)        |
+| ---------------------- | ------------------------ |
+| `message`              | `body.text`              |
+| `log.level`            | `severity_text`          |
+| `trace.id`             | `trace_id`               |
+| `span.id`              | `span_id`                |
+| `service.environment`  | `deployment.environment` |
+| `kubernetes.pod.name`  | `k8s.pod.name`           |
+| `kubernetes.namespace` | `k8s.namespace.name`     |
 
 ---
 
-## 6. Documentation Requirements
+## 6. APM Data Types
 
-Each tool should have a concise `README.md`:
+APM data is stored in multiple document types with different field structures. Understanding these is critical for writing correct aggregations.
 
-- Keep it under 50 lines
-- Focus on examples, not implementation details
-- Don't duplicate parameter descriptions from the schema
-- 2-4 examples covering common use cases
+### Transaction Latency Fields
+
+Transaction latency is stored in three different field types depending on the document type:
+
+| Document Type              | Latency Field                    | Field Type                | Notes                                      |
+| -------------------------- | -------------------------------- | ------------------------- | ------------------------------------------ |
+| `TransactionEvent`         | `transaction.duration.us`        | `long`                    | Individual transaction events              |
+| `TransactionMetric`        | `transaction.duration.histogram` | `histogram`               | Pre-aggregated by transaction name         |
+| `ServiceTransactionMetric` | `transaction.duration.summary`   | `aggregate_metric_double` | Pre-aggregated by service (highest rollup) |
+
+**Key insight**: Elasticsearch's `avg` aggregation natively supports all three field types—it computes weighted averages for histograms and uses pre-stored sum/count for aggregate_metric_double. No special handling needed.
+
+**Throughput caveat**: For `ServiceTransactionMetric`, `doc_count` does NOT equal transaction count. Use `value_count` on the appropriate field instead of relying on `_count`.
+
+**Percentiles**: Only `TransactionEvent` and `TransactionMetric` support percentile aggregations. `ServiceTransactionMetric` uses `aggregate_metric_double` which only stores sum/count — thus percentiles cannot be computed.
+
+### Error Rate Fields
+
+For `TransactionEvent` and `TransactionMetric`, each document has `event.outcome` (`success`, `failure`, or `unknown`). Use filter aggregations to count outcomes.
+
+For `ServiceTransactionMetric`, outcomes are pre-aggregated in `event.success_count` (aggregate_metric_double):
+
+- `sum` = number of successful transactions
+- `value_count` = total transactions with known outcome (success + failure)
+- Failure rate = `(value_count - sum) / value_count`
+
+| Document Type              | Field                 | Type                      |
+| -------------------------- | --------------------- | ------------------------- |
+| `TransactionEvent`         | `event.outcome`       | `keyword`                 |
+| `TransactionMetric`        | `event.outcome`       | `keyword`                 |
+| `ServiceTransactionMetric` | `event.success_count` | `aggregate_metric_double` |
+
+### Processor Events and Metricset Names
+
+APM documents are categorized by `processor.event`:
+
+| `processor.event` | Description                   |
+| ----------------- | ----------------------------- |
+| `transaction`     | Individual transaction events |
+| `span`            | Span events                   |
+| `metric`          | All pre-aggregated metrics    |
+| `error`           | Error events                  |
+
+For metric documents, filter by `metricset.name` to query specific types:
+
+| `metricset.name`      | Use case                               |
+| --------------------- | -------------------------------------- |
+| `transaction`         | Transaction metrics (per endpoint)     |
+| `service_transaction` | Service-level metrics (highest rollup) |
+| `service_destination` | Outgoing requests to dependencies      |
+| `span_breakdown`      | Time spent by span type (`span.type`)  |
+| `app`                 | System metrics (CPU, memory)           |
+
+### Service Destination Metrics
+
+Service destination metrics capture **outgoing** request metrics from a service to its dependencies. Use these for dependency/connection performance, not service performance.
+
+| Field                                           | Description                                      |
+| ----------------------------------------------- | ------------------------------------------------ |
+| `span.destination.service.resource`             | Dependency name (e.g., `elasticsearch`, `redis`) |
+| `span.destination.service.response_time.sum.us` | Total latency (sum of all request durations)     |
+| `span.destination.service.response_time.count`  | Number of requests                               |
+| `event.outcome`                                 | `success` or `failure`                           |
+
+**Metrics derivation**:
+
+- Latency: `response_time.sum.us / response_time.count`
+- Throughput: `response_time.count` over time
+- Error rate: Filter by `event.outcome: failure`, divide by total count
+
+**References**:
+
+- [APM Queries Dev Docs](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/apm/dev_docs/apm_queries.md)
+- [Service Destination Metrics (Public Docs)](https://www.elastic.co/docs/solutions/observability/apm/metrics#_service_destination_metrics)
+- [Aggregate Metric Double Field Type](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/aggregate-metric-double)
 
 ---
 
@@ -232,15 +207,7 @@ Each tool should have a concise `README.md`:
 
 ### Synthtrace Scenarios
 
-Every tool MUST have a Synthtrace scenario that generates realistic test data covering:
-
-- Multiple services/entities
-- Different environments
-- Various dimension values (hosts, containers, pods)
-- Success and failure cases
-- Edge cases (empty results, high cardinality)
-
-#### Running a Synthtrace Scenario
+Every tool MUST have a Synthtrace scenario. Run with:
 
 ```bash
 node scripts/synthtrace \
@@ -296,39 +263,21 @@ node scripts/functional_test_runner --config x-pack/solutions/observability/test
 
 The API tests for tools must be added to: `x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/observability_agent_builder/tools/`
 
-Write tests that:
-
-1. Use Synthtrace to generate predictable data
-2. Execute the tool via the API
-3. Assert that the tool produces the expected results
-
 ### Allow list
 
-All new tools **must** be added to the Agent Builder allow list to pass CI:
+All new tools **must** be added to the Agent Builder allow list:
 
 ```
 x-pack/platform/packages/shared/agent-builder/agent-builder-server/allow_lists.ts
 ```
 
-### Required Test Coverage
-
-1. **Basic functionality** — Tool returns expected structure
-2. **Filtering** — Each filter parameter works correctly
-3. **Grouping** — Each supported `groupBy` dimension works (service, transaction, infrastructure)
-4. **Edge cases** — Empty results, invalid filters
-
 ---
 
 ## 8. Pre-Merge Checklist
 
-Before merging a new or updated tool:
-
 - [ ] Tool added to `allow_lists.ts`
-- [ ] Description includes "When to use" section
-- [ ] Description includes "When NOT to use" with alternatives
 - [ ] Works with both ECS and OTel data (where applicable)
-- [ ] Metrics normalized (ms for latency, per-minute for rates, 0-1 for failure rate)
-- [ ] README with 2-4 usage examples
+- [ ] Metrics normalized: ms for latency, per-minute for throughput, 0-1 for failure rate
 - [ ] Synthtrace scenario for test data generation
 - [ ] API integration tests covering filters, groupBy dimensions, and edge cases
 
