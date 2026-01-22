@@ -60,7 +60,10 @@ import { ManagedTable } from '../../../shared/managed_table';
 import { ColumnHeaderWithTooltip } from './column_header_with_tooltip';
 import { HealthBadge } from './health_badge';
 import { useServiceActions } from './service_actions';
-import type { ApmIndicatorType } from '../../../../../common/slo_indicator_types';
+import {
+  APM_SLO_INDICATOR_TYPES,
+  type ApmIndicatorType,
+} from '../../../../../common/slo_indicator_types';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 
 type ServicesDetailedStatisticsAPIResponse =
@@ -410,7 +413,7 @@ export function ApmServicesTable({
           },
           onClose: closeSloFlyout,
           formSettings: {
-            allowedIndicatorTypes: ['sli.apm.transactionDuration', 'sli.apm.transactionErrorRate'],
+            allowedIndicatorTypes: [...APM_SLO_INDICATOR_TYPES],
           },
         })
       : null;

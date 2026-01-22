@@ -10,6 +10,6 @@ import type { IndicatorType } from '@kbn/slo-schema';
 export const APM_SLO_INDICATOR_TYPES = [
   'sli.apm.transactionDuration',
   'sli.apm.transactionErrorRate',
-] as const;
+] as const satisfies readonly IndicatorType[];
 
-export type ApmIndicatorType = Extract<IndicatorType, (typeof APM_SLO_INDICATOR_TYPES)[number]>;
+export type ApmIndicatorType = (typeof APM_SLO_INDICATOR_TYPES)[number];
