@@ -120,8 +120,10 @@ export const alertsTableShowsAssigneesForAllAlerts = (users: string[]) => {
 };
 
 export const alertDetailsFlyoutShowsAssignees = (users: string[]) => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES_VALUE).within(() => {
-    users.forEach((user) => cy.get(`.euiAvatar${ALERT_USER_AVATAR(user)}`).should('exist'));
+  users.forEach((user) => {
+    cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES_VALUE)
+      .find(`.euiAvatar${ALERT_USER_AVATAR(user)}`)
+      .should('be.visible');
   });
 };
 
