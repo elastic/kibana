@@ -31,6 +31,25 @@ describe('getAlertsGroupingQuery', () => {
       })
     );
   });
+
+  it('custom sort is correctly passed to the query', () => {
+    const groupingQuery = getAlertsGroupingQuery({
+      ...sampleData,
+      sort: [{ 'kibana.alert.rule.name': { order: 'asc' } }],
+    });
+    expect(groupingQuery.aggs?.groupByFields.aggs?.bucket_truncate?.bucket_sort?.sort).toEqual([
+      { 'kibana.alert.rule.name': { order: 'asc' } },
+    ]);
+  });
+
+  it('defaults to sorting by unitsCount desc if no sort is provided', () => {
+    const { sort, ...dataWithoutSort } = sampleData;
+    const groupingQuery = getAlertsGroupingQuery(dataWithoutSort);
+    expect(groupingQuery.aggs?.groupByFields.aggs?.bucket_truncate?.bucket_sort?.sort).toEqual([
+      { unitsCount: { order: 'desc' } },
+    ]);
+  });
+
   it('returns default query with aggregations if the field specific metrics was not defined', () => {
     sampleData = {
       ...sampleData,

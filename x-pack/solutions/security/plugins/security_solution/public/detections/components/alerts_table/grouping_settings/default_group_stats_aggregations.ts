@@ -6,6 +6,7 @@
  */
 
 import type { NamedAggregation } from '@kbn/grouping';
+import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
 import { DEFAULT_GROUP_STATS_AGGREGATION } from '../alerts_grouping';
 
 export const SEVERITY_SUB_AGGREGATION = {
@@ -82,6 +83,15 @@ export const defaultGroupStatsAggregations = (field: string): NamedAggregation[]
       break;
     case 'source.ip':
       aggMetrics.push(RULE_COUNT_AGGREGATION, SEVERITY_SUB_AGGREGATION, HOST_COUNT_AGGREGATION);
+      break;
+    case ALERT_ATTACK_IDS:
+      aggMetrics.push({
+        latestTimestamp: {
+          max: {
+            field: '@timestamp',
+          },
+        },
+      });
       break;
     default:
       aggMetrics.push(RULE_COUNT_AGGREGATION);
