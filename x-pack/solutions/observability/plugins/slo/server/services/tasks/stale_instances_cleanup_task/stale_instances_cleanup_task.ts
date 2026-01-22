@@ -17,9 +17,10 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { SLOConfig, SLOPluginStartDependencies } from '../../../types';
-import { cleanupOrphanSummaries } from './cleanup_orphan_summary';
+import { cleanupStaleInstances } from './cleanup_stale_instances';
+import type { TaskState } from './types';
 
-export const TYPE = 'SLO:ORPHAN_SUMMARIES-CLEANUP-TASK';
+export const TYPE = 'slo:stale-instances-cleanup-task';
 
 interface TaskSetupContract {
   taskManager: TaskManagerSetupContract;
@@ -28,7 +29,7 @@ interface TaskSetupContract {
   config: SLOConfig;
 }
 
-export class OrphanSummaryCleanupTask {
+export class StaleInstancesCleanupTask {
   private logger: Logger;
   private config: SLOConfig;
   private wasStarted: boolean = false;
@@ -40,8 +41,9 @@ export class OrphanSummaryCleanupTask {
 
     taskManager.registerTaskDefinitions({
       [TYPE]: {
-        title: 'SLO orphan summary cleanup task',
-        timeout: '3m',
+        title: 'Stale SLO instances cleanup task',
+        description: 'Removes SLO summary documents not updated within configured threshold',
+        timeout: '5m',
         maxAttempts: 1,
         createTaskRunner: ({
           taskInstance,
@@ -76,12 +78,12 @@ export class OrphanSummaryCleanupTask {
       return;
     }
 
-    if (!this.config.sloOrphanSummaryCleanUpTaskEnabled) {
+    if (!this.config.staleInstancesCleanupTaskEnabled) {
       this.logger.debug('Unscheduling task');
       return await plugins.taskManager.removeIfExists(this.taskId);
     }
 
-    this.logger.debug('Scheduling task with [1h] interval');
+    this.logger.debug('Scheduling task with [4h] interval');
     this.wasStarted = true;
 
     try {
@@ -90,13 +92,13 @@ export class OrphanSummaryCleanupTask {
         taskType: TYPE,
         scope: ['observability', 'slo'],
         schedule: {
-          interval: '1h',
+          interval: '4h',
         },
         state: {},
         params: {},
       });
     } catch (e) {
-      this.logger.error(`Error scheduling task, error: ${e}`);
+      this.logger.debug(`Error scheduling task, error: ${e}`);
     }
   }
 
@@ -125,34 +127,24 @@ export class OrphanSummaryCleanupTask {
 
     this.logger.debug(`Task started with previous state: ${JSON.stringify(taskInstance.state)}`);
 
-    const params = this.parseTaskInstanceState(taskInstance);
+    const previousState = this.parseTaskInstanceState(taskInstance);
 
-    try {
-      const result = await cleanupOrphanSummaries(params, {
-        esClient,
-        soClient: internalSoClient,
-        logger: this.logger,
-        abortController,
-      });
+    const result = await cleanupStaleInstances(previousState, {
+      esClient,
+      soClient: internalSoClient,
+      logger: this.logger,
+      abortController,
+    });
 
-      if (result.aborted) {
-        this.logger.debug(`Task aborted, will start from last state next run`);
-        return {
-          state: result.nextState,
-        };
-      }
-
-      this.logger.debug(`Task completed successfully`);
-    } catch (err) {
-      this.logger.debug(`Error: ${err}`);
-    }
+    return { state: result.nextState };
   }
 
-  private parseTaskInstanceState(taskInstance: ConcreteTaskInstance) {
+  private parseTaskInstanceState(taskInstance: ConcreteTaskInstance): TaskState {
     const state = taskInstance.state || {};
 
     return {
       searchAfter: state.searchAfter,
+      deleteTaskId: state.deleteTaskId,
     };
   }
 }
