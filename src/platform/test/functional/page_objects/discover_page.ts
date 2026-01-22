@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
@@ -672,19 +672,23 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async selectDataViewMode() {
-    // Get tab elements and open the menu for the first tab
+    // Find the selected tab and open its menu
     const tabElements = await this.find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]');
-    if (tabElements.length > 0) {
-      const menuButton = await tabElements[0].findByCssSelector(
-        '[data-test-subj^="unifiedTabs_tabMenuBtn_"]'
-      );
-      await menuButton.click();
-      await this.retry.waitFor('tab menu to open', async () => {
-        return await this.testSubjects.exists('unifiedTabs_tabMenuItem_switchToClassic');
-      });
-      await this.testSubjects.click('unifiedTabs_tabMenuItem_switchToClassic');
-      await this.header.waitUntilLoadingHasFinished();
-      await this.waitUntilSearchingHasFinished();
+    for (const tabElement of tabElements) {
+      const tabRoleElement = await tabElement.findByCssSelector('[role="tab"]');
+      if ((await tabRoleElement.getAttribute('aria-selected')) === 'true') {
+        const menuButton = await tabElement.findByCssSelector(
+          '[data-test-subj^="unifiedTabs_tabMenuBtn_"]'
+        );
+        await menuButton.click();
+        await this.retry.waitFor('tab menu to open', async () => {
+          return await this.testSubjects.exists('unifiedTabs_tabMenuItem_switchToClassic');
+        });
+        await this.testSubjects.click('unifiedTabs_tabMenuItem_switchToClassic');
+        await this.header.waitUntilLoadingHasFinished();
+        await this.waitUntilSearchingHasFinished();
+        return;
+      }
     }
   }
 
