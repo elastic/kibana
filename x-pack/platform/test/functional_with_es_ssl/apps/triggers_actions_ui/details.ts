@@ -762,9 +762,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // If the tab exists, click on the alert list
         await pageObjects.triggersActionsUI.maybeClickOnAlertTab();
 
-        // Verify content
-        //  await testSubjects.existOrFail('alertsList');
-
         const { alerts: alertInstances } = await getAlertSummary(rule.id);
 
         const allAlerts = Object.entries(alertInstances).map(([id, alert]: [string, any]) => ({
