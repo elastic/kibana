@@ -24,7 +24,7 @@ import {
 } from './test_ids';
 import { DOCUMENT_TYPE_EVENT } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { GROUPED_PREVIEW_PAGINATION_SETTINGS_KEY } from './use_pagination';
-import { createFilterStore, destroyFilterStore } from '../filters/filter_state';
+import { createFilterStore, destroyFilterStore } from '../filters/filter_store';
 
 // Mock the hook
 jest.mock('./use_fetch_document_details');
@@ -51,17 +51,19 @@ const createMockHookResult = (
   ...overrides,
 });
 
-const TEST_SCOPE_ID = 'test-scope-id';
+const TEST_DATA_VIEW_ID = 'test-data-view-id';
+
+// Use unique scopeId per test run to prevent cross-test pollution
+let TEST_SCOPE_ID: string;
+let defaultProps: {
+  scopeId: string;
+  docMode: 'grouped-entities';
+  dataViewId: string;
+  documentIds: string[];
+  entityItems: EntityItem[];
+};
 
 describe('GraphGroupedNodePreviewPanel', () => {
-  const defaultProps = {
-    scopeId: TEST_SCOPE_ID,
-    docMode: 'grouped-entities' as const,
-    dataViewId: 'test-data-view-id',
-    documentIds: ['doc-1', 'doc-2', 'doc-3'],
-    entityItems: [] as EntityItem[],
-  };
-
   let entityIdCounter = 0;
 
   const createEntityItem = (overrides?: Partial<EntityItem>): EntityItem => {
@@ -76,7 +78,17 @@ describe('GraphGroupedNodePreviewPanel', () => {
   };
 
   beforeEach(() => {
-    createFilterStore(TEST_SCOPE_ID, 'test-data-view-id');
+    // Generate unique scopeId for each test
+    TEST_SCOPE_ID = `test-scope-${Math.random().toString(36).substring(7)}`;
+    // Set defaultProps with the new scopeId
+    defaultProps = {
+      scopeId: TEST_SCOPE_ID,
+      docMode: 'grouped-entities' as const,
+      dataViewId: TEST_DATA_VIEW_ID,
+      documentIds: ['doc-1', 'doc-2', 'doc-3'],
+      entityItems: [] as EntityItem[],
+    };
+    createFilterStore(TEST_SCOPE_ID, TEST_DATA_VIEW_ID);
     jest.clearAllMocks();
     localStorage.clear();
     entityIdCounter = 0;

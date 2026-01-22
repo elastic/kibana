@@ -17,7 +17,7 @@ import {
 } from '../../../test_ids';
 import type { EventItem, AlertItem } from '../types';
 import { getLabelExpandItems } from '../../../../popovers/node_expand/get_label_expand_items';
-import { getFilterStore } from '../../../../filters/filter_state';
+import { getFilterStore } from '../../../../filters/filter_store';
 import {
   DocumentDetailsPreviewPanelKey,
   ALERT_PREVIEW_BANNER,

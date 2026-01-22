@@ -11,7 +11,7 @@ import type { NodeProps, NodeViewModel } from '../../types';
 import { GRAPH_NODE_EXPAND_POPOVER_TEST_ID } from '../../test_ids';
 import { getEntityExpandItems, getSourceNamespaceFromNode } from './get_entity_expand_items';
 import { getNodeDocumentMode, isEntityNodeEnriched } from '../../utils';
-import { getFilterStore } from '../../filters/filter_state';
+import { getFilterStore } from '../../filters/filter_store';
 
 /**
  * Hook to handle the entity node expand popover.

@@ -18,7 +18,7 @@ import type { PanelItems, EntityItem, EventItem, AlertItem } from './components/
 import { LoadingBody } from './components/loading_body';
 import { EmptyBody } from './components/empty_body';
 import { ContentBody } from './components/content_body';
-import { createFilterStore, destroyFilterStore } from '../filters/filter_state';
+import { createFilterStore, destroyFilterStore } from '../filters/filter_store';
 
 const STORYBOOK_SCOPE_ID = 'storybook-graph-grouped-panel';
 

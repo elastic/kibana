@@ -15,7 +15,7 @@ import {
 } from '../../../test_ids';
 import { HeaderRow } from './header_row';
 import type { EntityItem } from '../types';
-import { createFilterStore, destroyFilterStore } from '../../../../filters/filter_state';
+import { createFilterStore, destroyFilterStore } from '../../../../filters/filter_store';
 
 const mockOpenPreviewPanel = jest.fn();
 
@@ -27,10 +27,13 @@ jest.mock('@kbn/expandable-flyout', () => ({
 
 const flushMicrotasks = () => new Promise((r) => setTimeout(r, 0));
 
-const TEST_SCOPE_ID = 'test-scope-id';
+// Use unique scopeId per test run to prevent cross-test pollution
+let TEST_SCOPE_ID: string;
 
 describe('<HeaderRow />', () => {
   beforeEach(() => {
+    // Generate unique scopeId for each test
+    TEST_SCOPE_ID = `test-scope-${Math.random().toString(36).substring(7)}`;
     createFilterStore(TEST_SCOPE_ID, 'test-data-view-id');
     mockOpenPreviewPanel.mockClear();
   });

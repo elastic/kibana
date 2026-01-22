@@ -18,7 +18,7 @@ import {
   GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
 } from '../../test_ids';
-import { createFilterStore, destroyFilterStore, getFilterStore } from '../../filters/filter_state';
+import { createFilterStore, destroyFilterStore, getFilterStore } from '../../filters/filter_store';
 
 // Mock useNodeExpandGraphPopover to capture and expose itemsFn
 let capturedItemsFn:
@@ -125,12 +125,15 @@ const createMockNode = (
 };
 
 describe('useEntityNodeExpandPopover', () => {
-  const scopeId = 'test-scope-id';
+  // Use unique scopeId per test run to prevent cross-test pollution
+  let scopeId: string;
   const mockOnOpenEventPreview = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     capturedItemsFn = null;
+    // Generate unique scopeId for each test
+    scopeId = `test-scope-${Math.random().toString(36).substring(7)}`;
     // Create a filter store for the test scope
     createFilterStore(scopeId, 'test-data-view-id');
   });

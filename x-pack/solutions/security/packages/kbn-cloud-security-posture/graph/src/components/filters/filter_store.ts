@@ -97,6 +97,14 @@ const stores = new Map<string, FilterStore>();
  * @param scopeId - Unique identifier for the graph instance
  * @param dataViewId - The data view ID used when constructing filters
  * @returns The FilterStore instance for this scopeId
+ *
+ * @example
+ * ```typescript
+ * // In a hook or component
+ * const store = createFilterStore(scopeId, dataViewId);
+ * // Later, clean up on unmount
+ * destroyFilterStore(scopeId);
+ * ```
  */
 export const createFilterStore = (scopeId: string, dataViewId: string): FilterStore => {
   const existing = stores.get(scopeId);
@@ -110,13 +118,29 @@ export const createFilterStore = (scopeId: string, dataViewId: string): FilterSt
 
 /**
  * Get an existing FilterStore for the given scopeId.
- * Returns undefined if no store exists for this scopeId.
+ * Logs a warning if no store exists for this scopeId.
  *
  * @param scopeId - Unique identifier for the graph instance
- * @returns The FilterStore instance or undefined
+ * @returns The FilterStore instance or undefined if not found
+ *
+ * @example
+ * ```typescript
+ * const store = getFilterStore(scopeId);
+ * if (store) {
+ *   const isActive = store.isFilterActive('user.entity.id', 'user-123');
+ * }
+ * ```
  */
 export const getFilterStore = (scopeId: string): FilterStore | undefined => {
-  return stores.get(scopeId);
+  const store = stores.get(scopeId);
+  if (!store) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      `[FilterStore] No store found for scopeId: "${scopeId}". ` +
+        `Ensure createFilterStore() was called before accessing the store.`
+    );
+  }
+  return store;
 };
 
 /**

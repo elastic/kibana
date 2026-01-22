@@ -11,7 +11,7 @@ import type { NodeProps, NodeViewModel } from '../../types';
 import { GRAPH_LABEL_EXPAND_POPOVER_TEST_ID } from '../../test_ids';
 import { getLabelExpandItems } from './get_label_expand_items';
 import { getNodeDocumentMode } from '../../utils';
-import { getFilterStore } from '../../filters/filter_state';
+import { getFilterStore } from '../../filters/filter_store';
 
 /**
  * Hook to handle the label node expand popover.

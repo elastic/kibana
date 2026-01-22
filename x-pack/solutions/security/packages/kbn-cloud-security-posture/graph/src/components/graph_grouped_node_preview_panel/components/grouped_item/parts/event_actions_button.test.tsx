@@ -10,7 +10,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { EventActionsButton } from './event_actions_button';
 import type { EventItem, AlertItem } from '../types';
 import { GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID } from '../../../test_ids';
-import { createFilterStore, destroyFilterStore } from '../../../../filters/filter_state';
+import { createFilterStore, destroyFilterStore } from '../../../../filters/filter_store';
 
 // Mock useExpandableFlyoutApi
 const mockOpenPreviewPanel = jest.fn();
@@ -37,10 +37,13 @@ describe('EventActionsButton', () => {
     timestamp: '2025-01-19T00:00:00.000Z',
   };
 
-  const scopeId = 'test-scope-id';
+  // Use unique scopeId per test run to prevent cross-test pollution
+  let scopeId: string;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Generate unique scopeId for each test
+    scopeId = `test-scope-${Math.random().toString(36).substring(7)}`;
     // Create a filter store for the test scope
     createFilterStore(scopeId, 'test-data-view-id');
   });

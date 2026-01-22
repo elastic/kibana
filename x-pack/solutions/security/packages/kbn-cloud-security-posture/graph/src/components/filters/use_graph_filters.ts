@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useReducer, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useSyncExternalStore } from 'react';
 import type { Filter } from '@kbn/es-query';
-import { createFilterStore, destroyFilterStore } from './filter_state';
+import { createFilterStore, destroyFilterStore } from './filter_store';
 
 /**
  * Hook that manages graph filter state for a specific scope.
  *
  * This hook:
  * 1. Creates or retrieves a FilterStore for the given scopeId
- * 2. Subscribes to filter changes from the store
- * 3. Triggers re-render when filters change (from action buttons or SearchBar)
+ * 2. Subscribes to filter changes from the store using useSyncExternalStore
+ * 3. Automatically re-renders when filters change (from action buttons or SearchBar)
  * 4. Provides setSearchFilters for SearchBar's onFiltersUpdated callback
  * 5. Cleans up and destroys the store on unmount
  *
@@ -27,30 +27,38 @@ export const useGraphFilters = (
   scopeId: string,
   dataViewId: string
 ): { searchFilters: Filter[]; setSearchFilters: (filters: Filter[]) => void } => {
-  // Force update mechanism - we don't need the state value, just the re-render trigger
-  const [, forceUpdate] = useReducer((x: number) => x + 1, 0);
-
   // Create or get the FilterStore for this scopeId
-  const storeRef = useRef(createFilterStore(scopeId, dataViewId));
+  const store = useMemo(() => createFilterStore(scopeId, dataViewId), [scopeId, dataViewId]);
 
+  // Clean up store on unmount or when scopeId changes
   useEffect(() => {
-    // Subscribe to filter changes from the store
-    const subscription = storeRef.current.subscribe(() => {
-      // Trigger re-render so GraphInvestigation gets updated filters
-      forceUpdate();
-    });
-
     return () => {
-      subscription.unsubscribe();
       destroyFilterStore(scopeId);
     };
   }, [scopeId]);
 
-  // Callback for SearchBar's onFiltersUpdated - sets filters directly in store
-  const setSearchFilters = useCallback((filters: Filter[]) => {
-    storeRef.current.setFilters(filters);
-  }, []);
+  // Subscribe function for useSyncExternalStore
+  const subscribe = useCallback(
+    (onStoreChange: () => void) => {
+      const subscription = store.subscribe(onStoreChange);
+      return () => subscription.unsubscribe();
+    },
+    [store]
+  );
 
-  // Read from store on every render
-  return { searchFilters: storeRef.current.getFilters(), setSearchFilters };
+  // Snapshot function for useSyncExternalStore
+  const getSnapshot = useCallback(() => store.getFilters(), [store]);
+
+  // Use React 18's useSyncExternalStore for optimal concurrent rendering support
+  const searchFilters = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+
+  // Callback for SearchBar's onFiltersUpdated - sets filters directly in store
+  const setSearchFilters = useCallback(
+    (filters: Filter[]) => {
+      store.setFilters(filters);
+    },
+    [store]
+  );
+
+  return { searchFilters, setSearchFilters };
 };

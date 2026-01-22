@@ -21,7 +21,7 @@ import {
 import { GroupedItem } from './grouped_item';
 import { formatDate } from '@elastic/eui';
 import { LIST_ITEM_DATE_FORMAT } from './parts/timestamp_row';
-import { createFilterStore, destroyFilterStore } from '../../../filters/filter_state';
+import { createFilterStore, destroyFilterStore } from '../../../filters/filter_store';
 import type { EntityOrEventItem } from './types';
 
 const mockOpenPreviewPanel = jest.fn();
@@ -32,10 +32,13 @@ jest.mock('@kbn/expandable-flyout', () => ({
   }),
 }));
 
-const TEST_SCOPE_ID = 'test-scope-id';
+// Use unique scopeId per test run to prevent cross-test pollution
+let TEST_SCOPE_ID: string;
 
 describe('<GroupedItem />', () => {
   beforeEach(() => {
+    // Generate unique scopeId for each test
+    TEST_SCOPE_ID = `test-scope-${Math.random().toString(36).substring(7)}`;
     createFilterStore(TEST_SCOPE_ID, 'test-data-view-id');
   });
 

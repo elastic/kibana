@@ -18,7 +18,7 @@ import type {
   EventItem as EventItemType,
   AlertItem as AlertItemType,
 } from './types';
-import { createFilterStore, destroyFilterStore } from '../../../filters/filter_state';
+import { createFilterStore, destroyFilterStore } from '../../../filters/filter_store';
 
 const STORYBOOK_SCOPE_ID = 'storybook-grouped-item';
 

@@ -16,7 +16,7 @@ import {
 } from '../../../test_ids';
 import type { EntityItem } from '../types';
 import { getEntityExpandItems } from '../../../../popovers/node_expand/get_entity_expand_items';
-import { getFilterStore } from '../../../../filters/filter_state';
+import { getFilterStore } from '../../../../filters/filter_store';
 import { GenericEntityPanelKey, GENERIC_ENTITY_PREVIEW_BANNER } from '../../../constants';
 
 const actionsButtonAriaLabel = i18n.translate(
