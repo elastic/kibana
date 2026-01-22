@@ -46,7 +46,7 @@ test.describe('Annotations List', { tag: ['@ess'] }, () => {
       .scrollIntoViewIfNeeded();
 
     await expect(
-      page.getByTestId('sliChartPanel').locator('[data-testid="echAnnotationMarker"]')
+      page.testSubj.locator('sliChartPanel').locator('[data-testid="echAnnotationMarker"]')
     ).toHaveText('Test annotation');
   });
 
