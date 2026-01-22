@@ -2508,6 +2508,8 @@
       "@kbn/workspaces/*": ["src/platform/packages/shared/kbn-workspaces/*"],
       "@kbn/xstate-utils": ["src/platform/packages/shared/kbn-xstate-utils"],
       "@kbn/xstate-utils/*": ["src/platform/packages/shared/kbn-xstate-utils/*"],
+      "@kbn/yaml-rule-editor": ["x-pack/platform/packages/shared/response-ops/yaml-rule-editor"],
+      "@kbn/yaml-rule-editor/*": ["x-pack/platform/packages/shared/response-ops/yaml-rule-editor/*"],
       "@kbn/yarn-lock-validator": ["packages/kbn-yarn-lock-validator"],
       "@kbn/yarn-lock-validator/*": ["packages/kbn-yarn-lock-validator/*"],
       "@kbn/zod": ["src/platform/packages/shared/kbn-zod"],

@@ -26,8 +26,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { dump, load } from 'js-yaml';
 import { useHistory, useParams } from 'react-router-dom';
 import { createRuleDataSchema, type CreateRuleData } from '@kbn/alerting-v2-schemas';
+import { YamlRuleEditor } from '@kbn/yaml-rule-editor';
 import { RulesApi } from '../services/rules_api';
-import { YamlRuleEditor } from './yaml_rule_editor';
 
 const DEFAULT_RULE_YAML = `name: Example rule
 tags: []
