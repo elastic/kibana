@@ -32,28 +32,19 @@ const mappings: estypes.MappingTypeMapping = {
   properties: {
     '@timestamp': { type: 'date' },
     scheduled_timestamp: { type: 'date' },
-    type: { type: 'keyword' },
+    type: { type: 'keyword' }, // "signal" | "alert"
     rule: {
       properties: {
         id: { type: 'keyword' },
-        tags: { type: 'keyword' },
       },
     },
-    grouping: {
-      properties: {
-        key: { type: 'keyword' },
-        value: { type: 'keyword' },
-      },
-    },
+    source: { type: 'keyword' },
     data: { type: 'flattened' },
-    parent_rule_id: { type: 'keyword' },
     status: { type: 'keyword' },
     group_hash: { type: 'keyword' },
-    source: { type: 'keyword' },
     episode_id: { type: 'keyword' },
-    alert_state: { type: 'keyword' },
-    breach_count: { type: 'long' },
-    recover_count: { type: 'long' },
+    episode_status: { type: 'keyword' },
+    episode_status_count: { type: 'long' },
   },
 };
 
@@ -63,18 +54,11 @@ export const commonAlertEventSchema = z.object({
   parent_rule_id: z.string().optional(),
   rule: z.object({
     id: z.string(),
-    tags: z.array(z.string()).optional(),
   }),
-  grouping: z
-    .object({
-      key: z.string(),
-      value: z.string(),
-    })
-    .optional(),
   data: z.record(z.string(), z.any()).optional(),
-  group_hash: z.string(), // hash(alert_id + grouping key/value)
+  group_hash: z.string(), // hash(rule_id + grouping key/value + source)
   source: z.string(), // "internal" | "external"
-  status: z.enum(['breached', 'recover', 'no_data']),
+  status: z.enum(['breach', 'recover', 'no_data']),
 });
 
 export const signalAlertEventSchema = commonAlertEventSchema.extend({
@@ -84,9 +68,8 @@ export const signalAlertEventSchema = commonAlertEventSchema.extend({
 export const alertAlertEventSchema = commonAlertEventSchema.extend({
   type: z.literal('alert'),
   episode_id: z.string(),
-  alert_state: z.enum(['inactive', 'pending', 'active', 'recovering']),
-  breach_count: z.number(),
-  recover_count: z.number(),
+  episode_status: z.enum(['inactive', 'pending', 'active', 'recovering']), // breach: pending -> active | recover: recovering -> inactive
+  episode_status_count: z.number().optional(),
 });
 
 export const alertEventSchema = z.discriminatedUnion('type', [
