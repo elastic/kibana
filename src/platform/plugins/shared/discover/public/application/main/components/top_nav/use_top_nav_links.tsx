@@ -266,6 +266,7 @@ export const useTopNavLinks = ({
             }),
             testId: 'discoverCancelButton',
             run: services.embeddableEditor.transferBackToEditor,
+            iconType: 'editorUndo',
           },
         ]);
       }
