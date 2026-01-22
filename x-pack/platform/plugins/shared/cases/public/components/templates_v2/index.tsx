@@ -370,8 +370,10 @@ const exampleCaseTemplate = `# This is an example template
 fields:
   - name: severity
     control: select
+    label: Field label
     type: keyword
     metadata:
+      default: low
       options:
         - low
         - moderate

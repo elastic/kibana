@@ -360,7 +360,6 @@ export const patchCase = async ({
   version: string;
   signal?: AbortSignal;
 }): Promise<CasesUI> => {
-  console.log('patch case', updatedCase);
   const response = await KibanaServices.get().http.fetch<Cases>(CASES_URL, {
     method: 'PATCH',
     body: JSON.stringify({ cases: [{ ...updatedCase, id: caseId, version }] }),

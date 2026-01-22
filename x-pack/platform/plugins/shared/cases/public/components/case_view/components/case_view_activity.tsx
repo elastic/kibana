@@ -157,7 +157,6 @@ export const CaseViewActivity = ({
 
   const handleUpdateExtendedFields = useCallback(
     (extendedFields: Record<string, unknown>) => {
-      console.log('handleUpdateExtendedFields', extendedFields);
       onUpdateField({ key: 'extendedFields', value: extendedFields });
     },
     [onUpdateField]
