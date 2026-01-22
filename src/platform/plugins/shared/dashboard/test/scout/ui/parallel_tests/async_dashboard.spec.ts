@@ -8,112 +8,43 @@
  */
 
 import { spaceTest, expect, tags } from '@kbn/scout';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { PageObjects, ScoutPage } from '@kbn/scout';
-
-const SAMPLE_DATA_SET_ID = 'flights';
-const SAMPLE_DATA_DASHBOARD_ID = '7adfa750-4c81-11e8-b3d7-01146121b73d';
-const SAMPLE_DATA_VIEW = 'Kibana Sample Data Flights';
-const SAMPLE_DATA_TIME_RANGE = 'sample_data range';
-
-const SAMPLE_DATA_RANGE = [
-  {
-    from: 'now-30d',
-    to: 'now+40d',
-    display: 'sample data range',
-  },
-  {
-    from: 'now/d',
-    to: 'now/d',
-    display: 'Today',
-  },
-  {
-    from: 'now/w',
-    to: 'now/w',
-    display: 'This week',
-  },
-  {
-    from: 'now-15m',
-    to: 'now',
-    display: 'Last 15 minutes',
-  },
-  {
-    from: 'now-30m',
-    to: 'now',
-    display: 'Last 30 minutes',
-  },
-  {
-    from: 'now-1h',
-    to: 'now',
-    display: 'Last 1 hour',
-  },
-  {
-    from: 'now-24h',
-    to: 'now',
-    display: 'Last 24 hours',
-  },
-  {
-    from: 'now-7d',
-    to: 'now',
-    display: 'Last 7 days',
-  },
-  {
-    from: 'now-30d',
-    to: 'now',
-    display: 'Last 30 days',
-  },
-  {
-    from: 'now-90d',
-    to: 'now',
-    display: 'Last 90 days',
-  },
-  {
-    from: 'now-1y',
-    to: 'now',
-    display: 'Last 1 year',
-  },
-];
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import {
+  SAMPLE_DATA_SET_ID,
+  SAMPLE_DATA_DASHBOARD_ID,
+  SAMPLE_DATA_VIEW,
+  SAMPLE_DATA_TIME_RANGE,
+  SAMPLE_DATA_RANGE,
+} from '../constants';
 
 spaceTest.describe('Sample data dashboard', { tag: tags.ESS_ONLY }, () => {
-  spaceTest.beforeAll(async ({ kbnClient, scoutSpace }) => {
+  spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
-    await scoutSpace.uiSettings.set({
-      [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: JSON.stringify(SAMPLE_DATA_RANGE),
-    });
 
-    try {
-      await kbnClient.request({
-        method: 'DELETE',
-        path: `/s/${scoutSpace.id}/api/sample_data/${SAMPLE_DATA_SET_ID}`,
-      });
-    } catch {
-      // Ignore missing sample data
-    }
+    // remove sample data if it exists
+    await apiServices.sampleData.remove(SAMPLE_DATA_SET_ID, scoutSpace.id);
 
-    await kbnClient.request({
-      method: 'POST',
-      path: `/s/${scoutSpace.id}/api/sample_data/${SAMPLE_DATA_SET_ID}`,
-    });
+    // install sample data
+    await apiServices.sampleData.install(SAMPLE_DATA_SET_ID, scoutSpace.id);
 
     await expect
       .poll(
         async () => {
-          const response = await kbnClient.request({
-            method: 'GET',
-            path: `/s/${scoutSpace.id}/api/data_views`,
-          });
-          const dataViews =
-            (response.data as { data_view?: Array<{ title?: string; name?: string }> } | undefined)
-              ?.data_view ?? [];
-          const hasSampleDataView = dataViews.some(
-            (dataView) => dataView.name === SAMPLE_DATA_VIEW || dataView.title === SAMPLE_DATA_VIEW
+          const { data: dataViews } = await apiServices.dataViews.find(
+            (dataView) => dataView.name === SAMPLE_DATA_VIEW || dataView.title === SAMPLE_DATA_VIEW,
+            scoutSpace.id
           );
-          return hasSampleDataView ? 1 : 0;
+          return dataViews.length;
         },
         // Sample data install can take longer than Scout's default polling window.
         { timeout: 60_000 }
       )
       .toBeGreaterThan(0);
+
+    await scoutSpace.uiSettings.set({
+      [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: JSON.stringify(SAMPLE_DATA_RANGE),
+    });
   });
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -125,16 +56,8 @@ spaceTest.describe('Sample data dashboard', { tag: tags.ESS_ONLY }, () => {
     expect(await pageObjects.discover.getHitCountInt()).toBeGreaterThan(0);
   });
 
-  spaceTest.afterAll(async ({ kbnClient, scoutSpace }) => {
-    try {
-      await kbnClient.request({
-        method: 'DELETE',
-        path: `/s/${scoutSpace.id}/api/sample_data/${SAMPLE_DATA_SET_ID}`,
-      });
-    } catch {
-      // Ignore missing sample data
-    }
-    await scoutSpace.uiSettings.unset(UI_SETTINGS.TIMEPICKER_QUICK_RANGES);
+  spaceTest.afterAll(async ({ apiServices, scoutSpace }) => {
+    await apiServices.sampleData.remove(SAMPLE_DATA_SET_ID, scoutSpace.id);
   });
 
   const openFlightsDashboard = async (page: ScoutPage, pageObjects: PageObjects) => {
@@ -181,7 +104,7 @@ spaceTest.describe('Sample data dashboard', { tag: tags.ESS_ONLY }, () => {
       .toBe(true);
   };
 
-  spaceTest('should launch sample flights data set dashboard', async ({ page, pageObjects }) => {
+  spaceTest('should launch sample flights dataset dashboard', async ({ page, pageObjects }) => {
     await spaceTest.step('open flights dashboard and validate chart', async () => {
       await openFlightsDashboard(page, pageObjects);
     });
