@@ -13,8 +13,10 @@ import {
   type AppContextTestRender,
 } from '../../../../../common/mock/endpoint';
 import { ScriptsLibraryTable, type ScriptsLibraryTableProps } from './scripts_library_table';
-import { SCRIPT_TAGS } from '../../../../../../common/endpoint/service/scripts_library/constants';
-import type { EndpointScript } from '../../../../../../common/endpoint/types';
+import {
+  SCRIPT_TAGS,
+  SORTED_SCRIPT_TAGS_KEYS,
+} from '../../../../../../common/endpoint/service/scripts_library/constants';
 import { APP_SCRIPTS_LIBRARY_PATH, SCRIPTS_LIBRARY_PATH } from '../../../../../../common/constants';
 import { useUserPrivileges as _useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
@@ -71,7 +73,7 @@ describe('ScriptsLibraryTable', () => {
       scriptsGenerator.generate({
         id: 'script-1',
         name: 'Script One',
-        tags: Object.keys(SCRIPT_TAGS) as EndpointScript['tags'],
+        tags: [...SORTED_SCRIPT_TAGS_KEYS],
         updatedBy: 'user2',
         updatedAt: '2026-01-13T10:15:00Z',
       }),
@@ -108,7 +110,7 @@ describe('ScriptsLibraryTable', () => {
       const columns = renderResult.getAllByRole('columnheader');
       expect(columns).toHaveLength(7);
       expect(columns.map((column) => column.textContent).join(',')).toEqual(
-        'Name,Platform,Tags,Updated by,Last updated,Size,Actions'
+        'Name,Platforms,Tags,Updated by,Last updated,Size,Actions'
       );
     });
 

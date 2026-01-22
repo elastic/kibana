@@ -20,7 +20,7 @@ import React, { memo, useCallback } from 'react';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { AutoFocusButton } from '../../../../../common/components/autofocus_button/autofocus_button';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
-import { scriptsLibraryLabels as i18n } from '../../translations';
+import { SCRIPT_LIBRARY_LABELS as i18n } from '../../translations';
 import { useDeleteEndpointScript } from '../../../../hooks/script_library';
 
 interface EndpointScriptDeleteModalProps {
