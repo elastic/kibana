@@ -154,14 +154,16 @@ export const useTopNavLinks = ({
       items.push(backgroundSearchFlyoutMenuItem);
     }
 
-    if (!defaultMenu?.newItem?.disabled) {
+    if (!services.embeddableEditor.isEmbeddedEditor() && !defaultMenu?.newItem?.disabled) {
       const defaultEsqlState: Pick<DiscoverAppState, 'query'> | undefined =
         isEsqlMode && currentDataView.type === ESQL_TYPE
           ? { query: { esql: getInitialESQLQuery(currentDataView, true) } }
           : undefined;
-      const locatorParams = defaultEsqlState ?? {
-        dataViewId: currentDataView.id || undefined,
-      };
+      const locatorParams =
+        defaultEsqlState ??
+        (currentDataView.isPersisted()
+          ? { dataViewId: currentDataView.id }
+          : { dataViewSpec: currentDataView.toMinimalSpec() });
       const newSearchUrl = services.locator.getRedirectUrl(locatorParams);
       const newSearchMenuItem = getNewSearchAppMenuItem({
         newSearchUrl,
@@ -169,7 +171,7 @@ export const useTopNavLinks = ({
       items.push(newSearchMenuItem);
     }
 
-    if (!defaultMenu?.openItem?.disabled) {
+    if (!services.embeddableEditor.isEmbeddedEditor() && !defaultMenu?.openItem?.disabled) {
       const openSearchMenuItem = getOpenSearchAppMenuItem({
         onOpenSavedSearch: (discoverSessionId) =>
           dispatch(internalStateActions.openDiscoverSession({ discoverSessionId })),
@@ -261,7 +263,8 @@ export const useTopNavLinks = ({
         popoverWidth: 150,
         popoverTestId: 'discoverSaveButtonPopover',
         splitButtonProps: {
-          showNotificationIndicator: hasUnsavedChanges,
+          showNotificationIndicator:
+            hasUnsavedChanges && !services.embeddableEditor.isEmbeddedEditor(),
           notifcationIndicatorTooltipContent: hasUnsavedChanges
             ? i18n.translate('discover.localMenu.unsavedChangesTooltip', {
                 defaultMessage: 'You have unsaved changes',
