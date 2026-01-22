@@ -17,7 +17,7 @@ import {
   SAMPLE_DATA_RANGE,
 } from '../constants';
 
-spaceTest.describe('Sample data dashboard', { tag: tags.ESS_ONLY }, () => {
+spaceTest.describe('Flights dashboard (sample data)', { tag: tags.ESS_ONLY }, () => {
   spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
 
@@ -48,58 +48,55 @@ spaceTest.describe('Sample data dashboard', { tag: tags.ESS_ONLY }, () => {
     await apiServices.sampleData.remove(SAMPLE_DATA_SET_ID, scoutSpace.id);
   });
 
-  spaceTest(
-    'should launch sample flights dataset dashboard',
-    async ({ browserAuth, page, pageObjects }) => {
-      await spaceTest.step('login and prepare Discover', async () => {
-        await browserAuth.loginAsAdmin();
-        await pageObjects.discover.goto();
-        await pageObjects.discover.selectDataView(SAMPLE_DATA_VIEW);
-        await pageObjects.datePicker.setCommonlyUsedTime(SAMPLE_DATA_TIME_RANGE);
-        await pageObjects.discover.waitUntilSearchingHasFinished();
-        expect(await pageObjects.discover.getHitCountInt()).toBeGreaterThan(0);
+  spaceTest('loads dashboard and renders panels', async ({ browserAuth, page, pageObjects }) => {
+    await spaceTest.step('login and prepare Discover', async () => {
+      await browserAuth.loginAsAdmin();
+      await pageObjects.discover.goto();
+      await pageObjects.discover.selectDataView(SAMPLE_DATA_VIEW);
+      await pageObjects.datePicker.setCommonlyUsedTime(SAMPLE_DATA_TIME_RANGE);
+      await pageObjects.discover.waitUntilSearchingHasFinished();
+      expect(await pageObjects.discover.getHitCountInt()).toBeGreaterThan(0);
+    });
+
+    await spaceTest.step('open flights dashboard and validate panels', async () => {
+      await pageObjects.dashboard.openDashboardWithId(SAMPLE_DATA_DASHBOARD_ID);
+      await pageObjects.datePicker.setCommonlyUsedTime(SAMPLE_DATA_TIME_RANGE);
+      expect(await pageObjects.dashboard.getPanelCount()).toBeGreaterThan(0);
+    });
+
+    await spaceTest.step('open Discover and verify hits', async () => {
+      await pageObjects.discover.goto();
+      await pageObjects.discover.waitUntilSearchingHasFinished();
+      expect(await pageObjects.discover.getHitCountInt()).toBeGreaterThan(0);
+    });
+
+    await spaceTest.step('return to dashboard and validate panels', async () => {
+      await pageObjects.dashboard.openDashboardWithId(SAMPLE_DATA_DASHBOARD_ID);
+
+      await expect.poll(async () => await pageObjects.dashboard.getControlCount()).toBe(3);
+
+      // check panels rendered
+      await expect.poll(async () => await pageObjects.dashboard.getPanelCount()).toBe(16);
+
+      // check charts rendered
+      await expect
+        .poll(async () => await pageObjects.dashboard.getVisualizationCount('xyVisChart'))
+        .toBe(5);
+
+      // Checking saved searches rendered
+      await expect
+        .poll(async () => await pageObjects.dashboard.getSavedSearchRowCount())
+        .toBeGreaterThan(10);
+
+      // Checking tag clouds rendered
+      const legendLabels = page.locator('[data-testid="echLegendItemLabel"]');
+      const legendTexts = await legendLabels.allInnerTexts();
+      ['Sunny', 'Rain', 'Clear', 'Cloudy', 'Hail'].forEach((value) => {
+        expect(legendTexts).toContain(value);
       });
 
-      await spaceTest.step('open flights dashboard and validate panels', async () => {
-        await pageObjects.dashboard.openDashboardWithId(SAMPLE_DATA_DASHBOARD_ID);
-        await pageObjects.datePicker.setCommonlyUsedTime(SAMPLE_DATA_TIME_RANGE);
-        expect(await pageObjects.dashboard.getPanelCount()).toBeGreaterThan(0);
-      });
-
-      await spaceTest.step('open Discover and verify hits', async () => {
-        await pageObjects.discover.goto();
-        await pageObjects.discover.waitUntilSearchingHasFinished();
-        expect(await pageObjects.discover.getHitCountInt()).toBeGreaterThan(0);
-      });
-
-      await spaceTest.step('return to dashboard and validate panels', async () => {
-        await pageObjects.dashboard.openDashboardWithId(SAMPLE_DATA_DASHBOARD_ID);
-
-        await expect.poll(async () => await pageObjects.dashboard.getControlCount()).toBe(3);
-
-        // check panels rendered
-        await expect.poll(async () => await pageObjects.dashboard.getPanelCount()).toBe(16);
-
-        // check charts rendered
-        await expect
-          .poll(async () => await pageObjects.dashboard.getVisualizationCount('xyVisChart'))
-          .toBe(5);
-
-        // Checking saved searches rendered
-        await expect
-          .poll(async () => await pageObjects.dashboard.getSavedSearchRowCount())
-          .toBeGreaterThan(10);
-
-        // Checking tag clouds rendered
-        const legendLabels = page.locator('[data-testid="echLegendItemLabel"]');
-        const legendTexts = await legendLabels.allInnerTexts();
-        ['Sunny', 'Rain', 'Clear', 'Cloudy', 'Hail'].forEach((value) => {
-          expect(legendTexts).toContain(value);
-        });
-
-        // Checking vega chart rendered
-        await expect(page.locator('.vgaVis__view')).toBeVisible();
-      });
-    }
-  );
+      // Checking vega chart rendered
+      await expect(page.locator('.vgaVis__view')).toBeVisible();
+    });
+  });
 });

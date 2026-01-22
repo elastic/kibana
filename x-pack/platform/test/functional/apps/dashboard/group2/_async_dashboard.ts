@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
       });
-      await header.waitUntilLoadingHasFinished()uiSettings;
+      await header.waitUntilLoadingHasFinished();
       await home.addSampleDataSet('flights');
       await retry.tryForTime(10000, async () => {
         const isInstalled = await home.isSampleDataSetInstalled('flights');
