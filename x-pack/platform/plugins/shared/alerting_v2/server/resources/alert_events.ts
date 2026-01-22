@@ -32,6 +32,7 @@ const mappings: estypes.MappingTypeMapping = {
   properties: {
     '@timestamp': { type: 'date' },
     scheduled_timestamp: { type: 'date' },
+    type: { type: 'keyword' },
     rule: {
       properties: {
         id: { type: 'keyword' },
@@ -50,29 +51,50 @@ const mappings: estypes.MappingTypeMapping = {
     alert_id: { type: 'keyword' },
     alert_series_id: { type: 'keyword' },
     source: { type: 'keyword' },
-    tags: { type: 'keyword' },
+    episode_id: { type: 'keyword' },
+    alert_state: { type: 'keyword' },
+    breach_count: { type: 'long' },
+    recover_count: { type: 'long' },
   },
 };
 
-export const alertEventSchema = z.object({
+export const commonAlertEventSchema = z.object({
   '@timestamp': z.string(),
-  scheduled_timestamp: z.string(),
+  scheduled_timestamp: z.string().optional(),
+  parent_rule_id: z.string().optional(),
   rule: z.object({
     id: z.string(),
-    tags: z.array(z.string()),
+    tags: z.array(z.string()).optional(),
   }),
-  grouping: z.object({
-    key: z.string(),
-    value: z.string(),
-  }),
-  data: z.record(z.string(), z.any()),
-  parent_rule_id: z.string(),
-  status: z.string(),
-  alert_id: z.string(),
-  alert_series_id: z.string(),
-  source: z.string(),
-  tags: z.array(z.string()),
+  grouping: z
+    .object({
+      key: z.string(),
+      value: z.string(),
+    })
+    .optional(),
+  data: z.record(z.string(), z.any()).optional(),
+  alert_id: z.string(), // ??
+  alert_series_id: z.string(), // hash(alert_id + grouping key/value)
+  source: z.string(), // "internal" | "external"
+  status: z.enum(['breached', 'recover', 'no_data']),
 });
+
+export const signalAlertEventSchema = commonAlertEventSchema.extend({
+  type: z.literal('signal'),
+});
+
+export const alertAlertEventSchema = commonAlertEventSchema.extend({
+  type: z.literal('alert'),
+  episode_id: z.string(),
+  alert_state: z.enum(['inactive', 'pending', 'active', 'recovering']),
+  breach_count: z.number(),
+  recover_count: z.number(),
+});
+
+export const alertEventSchema = z.discriminatedUnion('type', [
+  signalAlertEventSchema,
+  alertAlertEventSchema,
+]);
 
 export type AlertEvent = z.infer<typeof alertEventSchema>;
 
