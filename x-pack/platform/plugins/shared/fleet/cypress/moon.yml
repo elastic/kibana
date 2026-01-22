@@ -34,9 +34,5 @@ tags:
 fileGroups:
   src:
     - '**/*'
-    - ./cypress.config.ts
-    - ./cypress.config.space_awareness.ts
-    - ./cypress_ci.config.ts
-    - ./cypress_ci.config.space_awareness.ts
     - '!target/**/*'
 tasks: {}
