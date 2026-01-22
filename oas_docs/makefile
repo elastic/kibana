@@ -25,10 +25,8 @@ space-aware-api-docs: ## Add special space aware description entries
 	@node scripts/promote_space_awareness.js oas_docs/output/kibana.serverless.yaml
 
 .PHONY: merge-api-docs
-merge-api-docs: ## Merge Serverless and ESS Kibana OpenAPI bundles with kbn-openapi-bundler
-  ## append componentizing schema references as the last step in the merge
+merge-api-docs: ## Merge Serverless and ESS Kibana OpenAPI bundles with kbn-openapi-bundler, and convert schemas to component references
 	@node scripts/merge_serverless_oas.js
-  ## append componentizing schema references as the last step in the merge
 	@node scripts/merge_ess_oas.js
 
 .PHONY: merge-api-docs-stateful
@@ -38,6 +36,12 @@ merge-api-docs-stateful: ## Merge only kibana.yaml
 .PHONY: merge-api-docs-serverless
 merge-api-docs-serverless: ## Merge only kibana.serverless.yaml
 	@node scripts/merge_serverless_oas.js
+
+.PHONY: componentize-schemas
+componentize-schemas: ## convert inline object schemas to component references in both kibana.yaml and kibana.serverless.yaml
+	@echo "Converting inline schemas to component references...this might take a while"
+	@node scripts/componentize.js oas_docs/output/kibana.yaml
+	@node scripts/componentize.js oas_docs/output/kibana.serverless.yaml
 
 .PHONY: api-docs-lint
 api-docs-lint: ## Run redocly API docs linter

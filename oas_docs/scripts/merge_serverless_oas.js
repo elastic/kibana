@@ -12,6 +12,11 @@ const { merge } = require('@kbn/openapi-bundler');
 const { componentizeObjectSchemas } = require('./componentize');
 const { REPO_ROOT } = require('@kbn/repo-info');
 
+/**
+ * Merges all Kibana ESS related OpenAPI spec files into a single file
+ * and outputs the result to oas_docs/output/kibana.yaml
+ * then extracts and converts object schemas to components, mutating the output file.
+ */
 (async () => {
   await merge({
     sourceGlobs: [

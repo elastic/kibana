@@ -839,7 +839,7 @@
           ">, \"initialState\" | \"onInitialStateChange\"> & React.RefAttributes<never>>"
         ],
         "path": "src/platform/packages/private/kbn-esql-editor/src/esql_editor.tsx",
-        "lineNumber": 1405,
+        "lineNumber": 1406,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1095,7 +1095,7 @@
           ">, \"initialState\" | \"onInitialStateChange\"> & React.RefAttributes<never>"
         ],
         "path": "src/platform/packages/private/kbn-esql-editor/src/esql_editor.tsx",
-        "lineNumber": 1406,
+        "lineNumber": 1407,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
