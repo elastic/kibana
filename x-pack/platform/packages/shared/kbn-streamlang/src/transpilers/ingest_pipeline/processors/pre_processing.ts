@@ -29,6 +29,7 @@ export const processorFieldRenames: Record<string, Record<string, string>> = {
   lowercase: { from: 'field', to: 'target_field', where: 'if' },
   trim: { from: 'field', to: 'target_field', where: 'if' },
   join: { to: 'field', where: 'if' },
+  concat: { to: 'field', where: 'if' },
   manual_ingest_pipeline: { where: 'if' },
 };
 
