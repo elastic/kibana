@@ -1,33 +1,34 @@
 # TOP
 
-Collects the top values for a field. Includes repeated values.
+The TOP function collects the top values for a specified field, including repeated values.
 
-**Syntax**
+## Syntax
+
 `TOP(field, limit, order, outputField)`
 
 ### Parameters
 
-#### `field`
+#### field
 
 The field to collect the top values for.
 
-#### `limit`
+#### limit
 
 The maximum number of values to collect.
 
-#### `order`
+#### order
 
-The order to calculate the top values. Either `asc` or `desc`, and defaults to `asc` if omitted.
+The order to calculate the top values. Either `asc` or `desc`. If omitted, defaults to `asc`.
 
-#### `outputField`
+#### outputField
 
-The extra field that, if present, will be the output of the TOP call instead of `field`.`stack: ga 9.3`
+Optional. If present, this field will be the output of the TOP call instead of `field`.
 
-**Supported types**
+## Examples
 
-**Example**
+Retrieves the top 3 highest salary values from the employees index in descending order and also calculates the maximum salary.
+
 ```esql
 FROM employees
 | STATS top_salaries = TOP(salary, 3, "desc"), top_salary = MAX(salary)
 ```
-

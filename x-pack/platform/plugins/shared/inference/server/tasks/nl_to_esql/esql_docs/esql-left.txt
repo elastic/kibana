@@ -1,26 +1,27 @@
 # LEFT
 
-Returns the substring that extracts *length* chars from *string* starting from the left.
+The LEFT function returns a substring containing a specified number of characters from the beginning (left side) of a string.
 
-**Syntax**
+## Syntax
+
 `LEFT(string, length)`
 
 ### Parameters
 
-#### `string`
+#### string
 
-The string from which to return a substring.
+The string from which the substring will be extracted.
 
-#### `length`
+#### length
 
-The number of characters to return.
+The number of characters to return from the left side of the string.
 
-**Supported types**
+## Examples
 
-**Example**
+Extracts the first three characters from the `last_name` column for each employee.
+
 ```esql
 FROM employees
 | KEEP last_name
 | EVAL left = LEFT(last_name, 3)
 ```
-

@@ -478,7 +478,6 @@ async function generateDoc({
               command: isCommand,
             })
           );
-          log.info(`Rewritten content: ${rewrittenContent}`);
           filesToWrite.push({
             name: docFile.name,
             content: rewrittenContent,
@@ -517,6 +516,11 @@ yargs(process.argv.slice(2))
         })
         .option('dryRun', {
           describe: 'Do not write or delete any files',
+          boolean: true,
+          default: false,
+        })
+        .option('force', {
+          describe: 'Force update all files even if content hash matches',
           boolean: true,
           default: false,
         })
@@ -657,9 +661,9 @@ yargs(process.argv.slice(2))
               const contentHash = hashContent(content);
               const cacheKey = normalizeCacheKey(filePath, extractDir);
 
-              // Check if file is cached and unchanged
+              // Check if file is cached and unchanged (unless force flag is set)
               const cached = cache[cacheKey];
-              if (cached && cached.hash === contentHash) {
+              if (!argv.force && cached && cached.hash === contentHash) {
                 // File hash matches, populate mapping from cached outputFiles
                 if (cached.outputFiles) {
                   for (const outputFileName of cached.outputFiles) {
@@ -736,9 +740,9 @@ yargs(process.argv.slice(2))
                   const contentHash = hashContent(content);
                   const cacheKey = normalizeCacheKey(filePath, extractDir);
 
-                  // Check if file is cached and unchanged
+                  // Check if file is cached and unchanged (unless force flag is set)
                   const cached = cache[cacheKey];
-                  if (cached && cached.hash === contentHash) {
+                  if (!argv.force && cached && cached.hash === contentHash) {
                     // Source file hasn't changed, skip processing
                     log.debug(
                       `Skipping ${mdFile} (hash: ${contentHash.substring(0, 8)}... unchanged)`
@@ -773,10 +777,10 @@ yargs(process.argv.slice(2))
                       const sectionHash = hashContent(section.rawContent);
                       sectionHashes[outputFileName] = sectionHash;
 
-                      // Check if this section has changed
+                      // Check if this section has changed (unless force flag is set)
                       const cachedSectionHash = cache[cacheKey].sections?.[outputFileName]?.hash;
                       const sectionChanged =
-                        !cachedSectionHash || cachedSectionHash !== sectionHash;
+                        argv.force || !cachedSectionHash || cachedSectionHash !== sectionHash;
 
                       if (sectionChanged) {
                         // Process the section

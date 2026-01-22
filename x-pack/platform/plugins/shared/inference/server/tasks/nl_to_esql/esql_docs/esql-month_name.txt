@@ -14,9 +14,7 @@ Date expression to extract the month name from. If `null`, the function returns 
 
 ## Examples
 
-Extract the month name from a specific date:
-
-Returns the name of the month ("March") for the provided date value.
+Extracts the month name from the provided date value.
 
 ```esql
 ROW dt = to_datetime("1996-03-21T00:00:00.000Z")

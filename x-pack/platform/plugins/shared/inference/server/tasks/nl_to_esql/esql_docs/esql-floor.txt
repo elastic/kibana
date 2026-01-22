@@ -1,26 +1,22 @@
 # FLOOR
 
-Round a number down to the nearest integer.
-<note>
-  This is a noop for `long` (including unsigned) and `integer`.
-  For `double` this picks the closest `double` value to the integer
-  similar to Math.floor.
-</note>
+Rounds a number down to the nearest integer. For `double` values, it selects the closest `double` value to the integer, similar to Math.floor. For `long` (including unsigned) and `integer`, this operation has no effect.
 
-**Syntax**
+## Syntax
+
 `FLOOR(number)`
 
 ### Parameters
 
-#### `number`
+#### number
 
-Numeric expression. If `null`, the function returns `null`.
+Numeric expression to be rounded down. If the value is `null`, the function returns `null`.
 
-**Supported types**
+## Examples
 
-**Example**
+Rounds the value 1.8 down to the nearest integer using the FLOOR function:
+
 ```esql
 ROW a=1.8
 | EVAL a=FLOOR(a)
 ```
-

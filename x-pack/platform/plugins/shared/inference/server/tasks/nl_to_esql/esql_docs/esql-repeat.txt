@@ -1,25 +1,26 @@
 # REPEAT
 
-Returns a string constructed by concatenating `string` with itself the specified `number` of times.
+The REPEAT function returns a string created by concatenating the input string with itself a specified number of times.
 
-**Syntax**
+## Syntax
+
 `REPEAT(string, number)`
 
 ### Parameters
 
-#### `string`
+#### string
 
-String expression.
+String expression to be repeated.
 
-#### `number`
+#### number
 
-Number times to repeat.
+Number of times to repeat the string.
 
-**Supported types**
+## Examples
 
-**Example**
+Repeats the value in column `a` three times and stores the result in a new column `triple_a`:
+
 ```esql
 ROW a = "Hello!"
 | EVAL triple_a = REPEAT(a, 3)
 ```
-

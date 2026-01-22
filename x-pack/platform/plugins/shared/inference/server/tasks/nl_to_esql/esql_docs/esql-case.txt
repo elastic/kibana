@@ -1,28 +1,29 @@
 # CASE
 
-Accepts pairs of conditions and values. The function returns the value that belongs to the first condition that evaluates to `true`.  If the number of arguments is odd, the last argument is the default value which is returned when no condition matches. If the number of arguments is even, and no condition matches, the function returns `null`.
+The CASE function evaluates pairs of conditions and values, returning the value associated with the first condition that evaluates to `true`. If no condition matches, a default value is returned if provided; otherwise, the function returns `null`.
 
-**Syntax**
+## Syntax
+
 `CASE(condition, trueValue, elseValue)`
 
 ### Parameters
 
-#### `condition`
+#### condition
 
-A condition.
+A condition to evaluate.
 
-#### `trueValue`
+#### trueValue
 
-The value that’s returned when the corresponding condition is the first to evaluate to `true`. The default value is returned when no condition matches.
+The value returned when the corresponding condition is the first to evaluate to `true`. If no condition matches, the default value is returned.
 
-#### `elseValue`
+#### elseValue
 
-The value that’s returned when no condition evaluates to `true`.
+(Optional) The value returned when no condition evaluates to `true`.
 
-**Supported types**
+## Examples
 
-**Examples**
-Determine whether employees are monolingual, bilingual, or polyglot:
+Classify employees based on the number of languages they speak as monolingual, bilingual, or polyglot.
+
 ```esql
 FROM employees
 | EVAL type = CASE(
@@ -32,7 +33,8 @@ FROM employees
 | KEEP emp_no, languages, type
 ```
 
-Calculate the total connection success rate based on log messages:
+Assign a success value based on log message content and calculate the average success rate.
+
 ```esql
 FROM sample_data
 | EVAL successful = CASE(
@@ -42,7 +44,8 @@ FROM sample_data
 | STATS success_rate = AVG(successful)
 ```
 
-Calculate an hourly error rate as a percentage of the total number of log messages:
+Flag error messages and compute the average error rate per hour.
+
 ```esql
 FROM sample_data
 | EVAL error = CASE(message LIKE "*error*", 1, 0)
@@ -50,4 +53,3 @@ FROM sample_data
 | STATS error_rate = AVG(error) by hour
 | SORT hour
 ```
-

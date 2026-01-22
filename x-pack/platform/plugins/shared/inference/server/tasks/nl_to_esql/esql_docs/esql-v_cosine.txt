@@ -1,4 +1,24 @@
-Calculates the cosine similarity between the `rgb_vector` column and the vector `[0, 255, 255]` for each color except black, then sorts the results by highest similarity and alphabetically by color.
+# V_COSINE
+
+Calculates the cosine similarity between two dense_vectors.
+
+## Syntax
+
+`V_COSINE(left, right)`
+
+### Parameters
+
+#### left
+
+The first dense_vector used to calculate cosine similarity.
+
+#### right
+
+The second dense_vector used to calculate cosine similarity.
+
+## Examples
+
+Calculates the cosine similarity between each row's `rgb_vector` and the vector `[0, 255, 255]`, filters out rows where the color is "black", and sorts the results by similarity (descending) and color (ascending):
 
 ```esql
 from colors

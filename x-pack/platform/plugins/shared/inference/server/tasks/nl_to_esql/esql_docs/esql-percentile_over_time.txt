@@ -1,4 +1,24 @@
-Calculates the 95th and 99th percentiles of network cost for each cluster in 1-minute intervals.
+# PERCENTILE_OVER_TIME
+
+Calculates the percentile over time for a specified field.
+
+## Syntax
+
+`PERCENTILE_OVER_TIME(field, percentile)`
+
+### Parameters
+
+#### field
+
+The metric field to calculate the percentile for.
+
+#### percentile
+
+The percentile value to compute, specified as a number between 0 and 100.
+
+## Examples
+
+Calculates the maximum 95th and 99th percentiles of the `network.cost` field over time, grouping results by cluster and 1-minute time buckets.
 
 ```esql
 TS k8s

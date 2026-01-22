@@ -14,7 +14,7 @@ The desired bucket size. This must be provided as a time duration or date period
 
 ## Examples
 
-Groups records from `sample_data` into hourly buckets based on `@timestamp`, then calculates the minimum and maximum timestamp in each bucket and sorts the results by the minimum timestamp.
+Groups the `@timestamp` values into hourly buckets and calculates the minimum and maximum timestamp in each bucket, then sorts the results by the minimum timestamp.
 
 ```esql
 FROM sample_data
@@ -22,7 +22,7 @@ FROM sample_data
 | SORT min
 ```
 
-Groups records from `sample_data` into hourly buckets using a string representation for the bucket size, then calculates the minimum and maximum timestamp in each bucket and sorts the results by the minimum timestamp.
+Groups the `@timestamp` values into hourly buckets using a string for the bucket size, calculates the minimum and maximum timestamp in each bucket, and sorts the results by the minimum timestamp.
 
 ```esql
 FROM sample_data

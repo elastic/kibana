@@ -18,7 +18,7 @@ Second dense_vector to calculate l1 norm similarity.
 
 ## Examples
 
-Calculates the l1 norm similarity between each row's `rgb_vector` and the vector `[0, 255, 255]`, then sorts the results by similarity (highest first) and color (alphabetically).
+Calculates the l1 norm similarity between the `rgb_vector` column and the vector `[0, 255, 255]`, then sorts the results by similarity in descending order and color in ascending order.
 
 ```esql
 from colors

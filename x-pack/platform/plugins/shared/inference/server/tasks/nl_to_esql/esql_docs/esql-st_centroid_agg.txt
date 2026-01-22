@@ -1,24 +1,22 @@
 # ST_CENTROID_AGG
 
-Calculate the spatial centroid over a field with spatial point geometry type.
+Calculates the spatial centroid for a field containing spatial point geometry data.
 
-```
-stack: preview
-serverless: preview
-```
+## Syntax
 
-**Syntax**
 `ST_CENTROID_AGG(field)`
 
 ### Parameters
 
-#### `field`
+#### field
 
-**Supported types**
+The column containing spatial point geometry values to aggregate.
 
-**Example**
+## Examples
+
+Calculates the centroid point from all airport locations in the dataset.
+
 ```esql
 FROM airports
 | STATS centroid=ST_CENTROID_AGG(location)
 ```
-

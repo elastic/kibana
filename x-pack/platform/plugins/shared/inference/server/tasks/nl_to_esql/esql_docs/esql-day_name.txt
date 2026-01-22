@@ -14,9 +14,7 @@ Date expression to extract the weekday name from. If `null`, the function return
 
 ## Examples
 
-Extract the weekday name from a specific date:
-
-Returns the name of the weekday for the date "1953-09-02T00:00:00.000Z" and stores it in the `weekday` field.
+Extracts the weekday name from a specific date value.
 
 ```esql
 ROW dt = to_datetime("1953-09-02T00:00:00.000Z")

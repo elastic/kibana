@@ -14,7 +14,7 @@ The value to hash.
 
 ## Examples
 
-Computes the SHA256 hash of the `message` column for all rows where the message is not "Connection error", and displays both the original message and its hash.
+Calculates the SHA256 hash of the `message` column for all rows where the message is not "Connection error", and displays both the original message and its hash.
 
 ```esql
 FROM sample_data

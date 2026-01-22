@@ -1,4 +1,24 @@
-Calculates the maximum average network cost over each 1-minute interval, grouped by cluster.
+# AVG_OVER_TIME
+
+Calculates the average value of a numeric field over a specified time window.
+
+## Syntax
+
+`AVG_OVER_TIME(field, window)`
+
+### Parameters
+
+#### field
+
+The metric field to calculate the average for.
+
+#### window
+
+The time window over which to compute the average.
+
+## Examples
+
+Finds the maximum average network cost per cluster, grouped into 1-minute time buckets.
 
 ```esql
 TS k8s

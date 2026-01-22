@@ -1,62 +1,46 @@
 # MATCH_PHRASE
 
-Use `MATCH_PHRASE` to perform a `match_phrase` on the specified field. Using `MATCH_PHRASE` is equivalent to using the `match_phrase` query in the Elasticsearch Query DSL.
-MatchPhrase can be used on text fields, as well as other field types like keyword, boolean, or date types.
-MatchPhrase is not supported for semantic_text or numeric types.
-MatchPhrase can use function named parameters to specify additional options for the
-match_phrase query.
-All `match_phrase` query parameters are supported.
-`MATCH_PHRASE` returns true if the provided query matches the row.
+The MATCH_PHRASE function performs a phrase match on the specified field, returning true if the provided query matches the row. It is equivalent to the `match_phrase` query in the Query DSL and can be used on text fields, as well as keyword, boolean, or date types. It is not supported for semantic_text or numeric types. All `match_phrase` query parameters are supported, and additional options can be specified using function named parameters.
 
-```
-stack: ga 9.1.0
-```
+## Syntax
 
-**Syntax**
 `MATCH_PHRASE(field, query, options, zero_terms_query, boost, analyzer, slop)`
 
 ### Parameters
 
-#### `field`
+#### field
 
-Field that the query will target.
+The field that the query will target.
 
-#### `query`
+#### query
 
-Value to find in the provided field.
+The value to find in the provided field.
 
-#### `options`
+#### options
 
-(Optional) MatchPhrase additional options as function named parameters. See `match_phrase` for more information.
+Optional. Additional options for the match_phrase query, specified as function named parameters.
 
-**Supported types**
+#### zero_terms_query
 
-**Supported function named parameters**
-### Parameters
+Optional. Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.
 
-#### `zero_terms_query`
+#### boost
 
-(keyword) Indicates whether all documents or none are returned if the analyzer removes all tokens, such as when using a stop filter. Defaults to none.
+Optional. Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.
 
-#### `boost`
+#### analyzer
 
-(float) Floating point number used to decrease or increase the relevance scores of the query. Defaults to 1.0.
+Optional. Analyzer used to convert the text in the query value into tokens. Defaults to the index-time analyzer mapped for the field, or the index’s default analyzer if none is mapped.
 
-#### `analyzer`
+#### slop
 
-(keyword) Analyzer used to convert the text in the query value into token. Defaults to the index-time analyzer mapped for the field. If no analyzer is mapped, the index’s default analyzer is used.
+Optional. Maximum number of positions allowed between matching tokens. Defaults to 0. Transposed terms have a slop of 2.
 
-#### `slop`
+## Examples
 
-(integer) Maximum number of positions allowed between matching tokens. Defaults to 0. Transposed terms have a slop of 2.
-
-**Example**
-```
-stack: ga 9.1.0
-```
-
+Filters the `books` table to only include rows where the `author` field contains the exact phrase "William Faulkner".
 ```esql
 FROM books
 | WHERE MATCH_PHRASE(author, "William Faulkner")
 ```
-
+Filter rows from the `books` table where the `author` field contains the exact phrase "William Faulkner".

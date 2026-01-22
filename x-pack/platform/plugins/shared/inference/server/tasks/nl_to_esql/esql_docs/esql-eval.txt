@@ -1,31 +1,24 @@
 # EVAL
 
-The `EVAL` processing command enables you to append new columns with calculated
-values. `EVAL` supports various functions for calculating values. Refer to
-Functions for more information.
+The EVAL command allows you to add new columns to your results by calculating values using expressions, literals, or functions. You can use existing columns or previously defined columns in your calculations.
 
-The `EVAL` processing command enables you to append new columns with calculated
-values.
-**Syntax**
-```esql
-EVAL [column1 =] value1[, ..., [columnN =] valueN]
-```
+## Syntax
+
+`EVAL [column1 =] value1[, ..., [columnN =] valueN]`
 
 ### Parameters
 
-#### `columnX`
+#### columnX
 
-The column name.
- If a column with the same name already exists, the existing column is dropped.
- If a column name is used more than once, only the rightmost duplicate creates a column.
+The name of the column to be created or replaced. If a column with the same name already exists, it will be dropped and replaced by the new column. If a column name is used more than once, only the rightmost duplicate creates a column.
 
-#### `valueX`
+#### valueX
 
-The value for the column. Can be a literal, an expression, or a
- function.
- Can use columns defined left of this one.
+The value assigned to the column. This can be a literal, an expression, or a function. You can reference columns defined to the left of this one.
 
-**Examples**
+## Examples
+
+Calculate height in feet and centimeters for each employee:
 ```esql
 FROM employees
 | SORT emp_no
@@ -33,8 +26,7 @@ FROM employees
 | EVAL height_feet = height * 3.281, height_cm = height * 100
 ```
 
-If the specified column already exists, the existing column will be dropped, and
-the new column will be appended to the table:
+Replace the existing height column with its value converted to feet:
 ```esql
 FROM employees
 | SORT emp_no
@@ -42,9 +34,7 @@ FROM employees
 | EVAL height = height * 3.281
 ```
 
-Specifying the output column name is optional. If not specified, the new column
-name is equal to the expression. The following query adds a column named
-`height*3.281`:
+Add a new column for height in feet without specifying a name, so the column is named after the expression:
 ```esql
 FROM employees
 | SORT emp_no
@@ -52,12 +42,9 @@ FROM employees
 | EVAL height * 3.281
 ```
 
-Because this name contains special characters,
-it needs to be quoted
-with backticks (```) when using it in subsequent commands:
+Calculate height in feet and then compute the average height in feet, referencing the column with special characters using backticks:
 ```esql
 FROM employees
 | EVAL height * 3.281
 | STATS avg_height_feet = AVG(`height * 3.281`)
 ```
-

@@ -14,11 +14,12 @@ The multi-valued input of numbers or hexadecimal string to convert.
 
 ## Examples
 
-Converts an array of integers `[1, 2, 3]` into a dense_vector and keeps only the resulting vector column.
+Convert an array of integers into a dense_vector:
+
+Takes an array of integers and converts it into a dense_vector, keeping only the resulting vector.
 
 ```esql
-row ints = [1, 2, 3]
-| eval vector = to_dense_vector(ints)
-| keep vector
+ROW ints = [1, 2, 3]
+| EVAL vector = TO_DENSE_VECTOR(ints)
+| KEEP vector
 ```
-This example creates a dense_vector from the array `[1, 2, 3]`.

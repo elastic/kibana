@@ -1,38 +1,34 @@
 # TO_DATETIME
 
-Converts an input value to a date value. A string will only be successfully converted if it’s respecting the format `yyyy-MM-dd'T'HH:mm:ss.SSS'Z'`. To convert dates in other formats, use `DATE_PARSE`.
-<note>
-  Note that when converting from nanosecond resolution to millisecond resolution with this function, the nanosecond date is truncated, not rounded.
-</note>
+The TO_DATETIME function converts an input value to a date value. Strings are only converted successfully if they match the format `yyyy-MM-dd'T'HH:mm:ss.SSS'Z'`. For other date formats, use the `DATE_PARSE` function. When converting from nanosecond to millisecond resolution, the nanosecond date is truncated, not rounded.
 
-**Syntax**
+## Syntax
+
 `TO_DATETIME(field)`
 
 ### Parameters
 
-#### `field`
+#### field
 
-Input value. The input can be a single- or multi-valued column or an expression.
+The input value to convert. This can be a single- or multi-valued column, or an expression.
 
-**Supported types**
+## Examples
 
-**Examples**
+Converts each string in a multi-valued column to a datetime, returning `null` for strings that do not match the required format.
+
 ```esql
 ROW string = ["1953-09-02T00:00:00.000Z", "1964-06-02T00:00:00.000Z", "1964-06-02 00:00:00"]
 | EVAL datetime = TO_DATETIME(string)
 ```
 
-Note that in this example, the last value in the source multi-valued field has not been converted.
-The reason being that if the date format is not respected, the conversion will result in a `null` value.
-When this happens a _Warning_ header is added to the response.
-The header will provide information on the source of the failure:
-`"Line 1:112: evaluation of [TO_DATETIME(string)] failed, treating result as null. "Only first 20 failures recorded."`
-A following header will contain the failure reason and the offending value:
-`"java.lang.IllegalArgumentException: failed to parse date field [1964-06-02 00:00:00] with format [yyyy-MM-dd'T'HH:mm:ss.SSS'Z']"`
-If the input parameter is of a numeric type,
-its value will be interpreted as milliseconds since the Unix epoch. For example:
+Converts integer values representing milliseconds since the Unix epoch to datetime values.
+
 ```esql
 ROW int = [0, 1]
 | EVAL dt = TO_DATETIME(int)
 ```
 
+## Limitations
+
+- Only strings matching the format `yyyy-MM-dd'T'HH:mm:ss.SSS'Z'` are converted; others result in `null`.
+- When converting from nanosecond to millisecond resolution, the value is truncated, not rounded.

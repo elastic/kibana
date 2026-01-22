@@ -18,7 +18,7 @@ The time window over which to compute the derivative.
 
 ## Examples
 
-Calculates the maximum rate of change in `network.cost` for each 5-minute interval and for the pod named "three".
+Calculates the maximum rate of change (derivative) of the `network.cost` field for each 5-minute time bucket and pod named "three".
 
 ```esql
 TS datenanos-k8s

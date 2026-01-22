@@ -10,19 +10,19 @@ The CLAMP function restricts values within a specified range, ensuring that all 
 
 #### field
 
-Numeric expression to be clamped. If the value is `null`, the function returns `null`.
+Numeric expression. If the value is `null`, the function returns `null`.
 
 #### min
 
-The minimum value to clamp data to.
+The minimum value to clamp data into.
 
 #### max
 
-The maximum value to clamp data to.
+The maximum value to clamp data into.
 
 ## Examples
 
-Calculates a new field `full_clamped_cost` by clamping the `network.cost` value between a dynamic minimum and maximum, then keeps only the clamped value and timestamp in the results.
+Clamps the `network.cost` field to a dynamic range, where the minimum is determined by the maximum of 5 and `network.bytes_in`, and the maximum is `network.bytes_in` divided by 100, then keeps only the clamped cost and timestamp.
 
 ```esql
 TS k8s

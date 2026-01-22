@@ -1,13 +1,17 @@
 # GEOSPATIAL PREDICATES
 
-Geospatial predicates are used to perform spatial operations and comparisons between geometric objects, such as points, shapes, and geo-grids. These commands allow you to compute distances, check for intersections, containment, and spatial relationships between geometries.
+Geospatial predicates are functions used to perform spatial operations and comparisons between geometric objects, such as points, shapes, and geo-grids. These commands allow you to compute distances, check for intersections, containment, and spatial relationships between geometries.
 
 ## Syntax
 
 `ST_DISTANCE(geomA, geomB)`
+
 `ST_INTERSECTS(geomA, geomB)`
+
 `ST_DISJOINT(geomA, geomB)`
+
 `ST_CONTAINS(geomA, geomB)`
+
 `ST_WITHIN(geomA, geomB)`
 
 ### Parameters
@@ -22,9 +26,7 @@ Expression representing a geometry. Supported types include `geo_point`, `cartes
 
 ## Examples
 
-Calculate the distance between two points:
-
-Find the distance between the airport's location and its city location for the airport with abbreviation "CPH", and display relevant fields along with the computed distance.
+Calculates the distance between the airport's location and its city location for the airport with abbreviation "CPH".
 
 ```esql
 FROM airports
@@ -33,18 +35,14 @@ FROM airports
 | KEEP abbrev, name, location, city_location, distance
 ```
 
-Check if a location intersects with a polygon:
-
-Filter airports whose location intersects with a specified polygon geometry.
+Filters airports whose location intersects with a specified polygon.
 
 ```esql
 FROM airports
 | WHERE ST_INTERSECTS(location, TO_GEOSHAPE("POLYGON((42 14, 43 14, 43 15, 42 15, 42 14))"))
 ```
 
-Determine if two geometries are disjoint:
-
-Select airport city boundaries that do not overlap with a given polygon, and show key identifying fields.
+Finds airport city boundaries that are completely disjoint from a large specified polygon.
 
 ```esql
 FROM airport_city_boundaries
@@ -52,9 +50,7 @@ FROM airport_city_boundaries
 | KEEP abbrev, airport, region, city, city_location
 ```
 
-Check if a boundary contains a polygon:
-
-Return airport city boundaries that fully contain a specified polygon, including relevant airport and city details.
+Returns airport city boundaries that fully contain a given polygon.
 
 ```esql
 FROM airport_city_boundaries
@@ -62,9 +58,7 @@ FROM airport_city_boundaries
 | KEEP abbrev, airport, region, city, city_location
 ```
 
-Check if a boundary is within a polygon:
-
-Show airport city boundaries that are entirely within a given polygon, along with associated airport and city information.
+Selects airport city boundaries that are entirely within a specified polygon.
 
 ```esql
 FROM airport_city_boundaries

@@ -1,24 +1,20 @@
 # ST_ENVELOPE
 
-Determines the minimum bounding box of the supplied geometry.
+The ST_ENVELOPE function determines the minimum bounding box of the supplied geometry.
 
-```
-stack: preview
-serverless: preview
-```
+## Syntax
 
-**Syntax**
 `ST_ENVELOPE(geometry, point, point, point, point)`
 
 ### Parameters
 
-#### `geometry`
+#### geometry
 
-Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.
+Expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_shape`. If `null`, the function returns `null`.
 
-**Supported types**
+## Examples
 
-**Example**
+Finds the minimum bounding box for the city boundary of Copenhagen airport and displays the abbreviation, airport name, and the bounding box.
 ```esql
 FROM airport_city_boundaries
 | WHERE abbrev == "CPH"
@@ -26,27 +22,7 @@ FROM airport_city_boundaries
 | KEEP abbrev, airport, envelope
 ```
 
-### `ST_XMAX`
-
-```
-stack: preview
-serverless: preview
-```
-
-**Syntax**
-`ST_ENVELOPE(geometry, point, point, point, point)`
-
-### Parameters
-
-#### `point`
-
-Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.
-
-**Description**
-Extracts the maximum value of the `x` coordinates from the supplied geometry. If the geometry is of type `geo_point` or `geo_shape` this is equivalent to extracting the maximum `longitude` value.
-**Supported types**
-
-**Example**
+Calculates the minimum and maximum x and y coordinates from the bounding box of Copenhagen airport's city boundary and displays them along with the abbreviation and airport name.
 ```esql
 FROM airport_city_boundaries
 | WHERE abbrev == "CPH"
@@ -54,91 +30,3 @@ FROM airport_city_boundaries
 | EVAL xmin = ST_XMIN(envelope), xmax = ST_XMAX(envelope), ymin = ST_YMIN(envelope), ymax = ST_YMAX(envelope)
 | KEEP abbrev, airport, xmin, xmax, ymin, ymax
 ```
-
-### `ST_XMIN`
-
-```
-stack: preview
-serverless: preview
-```
-
-**Syntax**
-`ST_ENVELOPE(geometry, point, point, point, point)`
-
-### Parameters
-
-#### `point`
-
-Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.
-
-**Description**
-Extracts the minimum value of the `x` coordinates from the supplied geometry. If the geometry is of type `geo_point` or `geo_shape` this is equivalent to extracting the minimum `longitude` value.
-**Supported types**
-
-**Example**
-```esql
-FROM airport_city_boundaries
-| WHERE abbrev == "CPH"
-| EVAL envelope = ST_ENVELOPE(city_boundary)
-| EVAL xmin = ST_XMIN(envelope), xmax = ST_XMAX(envelope), ymin = ST_YMIN(envelope), ymax = ST_YMAX(envelope)
-| KEEP abbrev, airport, xmin, xmax, ymin, ymax
-```
-
-### `ST_YMAX`
-
-```
-stack: preview
-serverless: preview
-```
-
-**Syntax**
-`ST_ENVELOPE(geometry, point, point, point, point)`
-
-### Parameters
-
-#### `point`
-
-Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.
-
-**Description**
-Extracts the maximum value of the `y` coordinates from the supplied geometry. If the geometry is of type `geo_point` or `geo_shape` this is equivalent to extracting the maximum `latitude` value.
-**Supported types**
-
-**Example**
-```esql
-FROM airport_city_boundaries
-| WHERE abbrev == "CPH"
-| EVAL envelope = ST_ENVELOPE(city_boundary)
-| EVAL xmin = ST_XMIN(envelope), xmax = ST_XMAX(envelope), ymin = ST_YMIN(envelope), ymax = ST_YMAX(envelope)
-| KEEP abbrev, airport, xmin, xmax, ymin, ymax
-```
-
-### `ST_YMIN`
-
-```
-stack: preview
-serverless: preview
-```
-
-**Syntax**
-`ST_ENVELOPE(geometry, point, point, point, point)`
-
-### Parameters
-
-#### `point`
-
-Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.
-
-**Description**
-Extracts the minimum value of the `y` coordinates from the supplied geometry. If the geometry is of type `geo_point` or `geo_shape` this is equivalent to extracting the minimum `latitude` value.
-**Supported types**
-
-**Example**
-```esql
-FROM airport_city_boundaries
-| WHERE abbrev == "CPH"
-| EVAL envelope = ST_ENVELOPE(city_boundary)
-| EVAL xmin = ST_XMIN(envelope), xmax = ST_XMAX(envelope), ymin = ST_YMIN(envelope), ymax = ST_YMAX(envelope)
-| KEEP abbrev, airport, xmin, xmax, ymin, ymax
-```
-

@@ -1,26 +1,27 @@
 # CONCAT
 
-Concatenates two or more strings.
+The CONCAT function combines two or more strings into a single string.
 
-**Syntax**
+## Syntax
+
 `CONCAT(string1, string2)`
 
 ### Parameters
 
-#### `string1`
+#### string1
 
-Strings to concatenate.
+The first string to concatenate.
 
-#### `string2`
+#### string2
 
-Strings to concatenate.
+The second string to concatenate.
 
-**Supported types**
+## Examples
 
-**Example**
+Combines the first and last names of employees into a single full name field:
+
 ```esql
 FROM employees
 | KEEP first_name, last_name
 | EVAL fullname = CONCAT(first_name, " ", last_name)
 ```
-

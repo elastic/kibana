@@ -2,20 +2,21 @@
 
 Returns the hyperbolic cosine of a number.
 
-**Syntax**
+## Syntax
+
 `COSH(number)`
 
 ### Parameters
 
-#### `number`
+#### number
 
 Numeric expression. If `null`, the function returns `null`.
 
-**Supported types**
+## Examples
 
-**Example**
+Calculates the hyperbolic cosine of the value in column `a` (which is set to 1.8).
+
 ```esql
 ROW a=1.8
 | EVAL cosh=COSH(a)
 ```
-

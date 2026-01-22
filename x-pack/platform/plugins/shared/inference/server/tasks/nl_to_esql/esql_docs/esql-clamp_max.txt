@@ -1,6 +1,6 @@
 # CLAMP_MAX
 
-The CLAMP_MAX function limits all input sample values to an upper bound specified by `max`. Any value above `max` is reduced to `max`.
+The CLAMP_MAX function restricts all input sample values to a specified upper bound. Any value above the defined maximum is set to the maximum value.
 
 ## Syntax
 
@@ -18,7 +18,7 @@ The upper bound to which values are clamped.
 
 ## Examples
 
-Calculates the sum of network costs per minute, applying different clamping functions to restrict values within specified bounds.
+Calculates the sum of network costs after clamping values to specified minimum and maximum bounds, grouping results by one-minute time buckets.
 
 ```esql
 TS k8s

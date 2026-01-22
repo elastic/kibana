@@ -1,6 +1,6 @@
 # TOP_SNIPPETS
 
-The TOP_SNIPPETS function extracts the best matching snippets for a given query string from a text field. It works with fields from the text family, such as text and semantic_text, and allows you to control the number and length of the returned snippets.
+The TOP_SNIPPETS function extracts the best matching snippets from a text field based on a given query string. It works with fields from the text family, such as text and semantic_text, and allows you to control the number and length of returned snippets.
 
 ## Syntax
 
@@ -18,26 +18,26 @@ The input text containing only query terms for snippet extraction. Lucene query 
 
 #### options
 
-(Optional) Additional options for TOP_SNIPPETS as function named parameters.
+(Optional) Additional options for snippet extraction, provided as function named parameters.
 
 #### num_words
 
-The maximum number of words to return in each snippet. This helps control inference costs by limiting the size of tokens per snippet.
+(integer) The maximum number of words to return in each snippet. This helps control inference costs by limiting the size of tokens per snippet.
 
 #### num_snippets
 
-The maximum number of matching snippets to return.
+(integer) The maximum number of matching snippets to return.
 
 ## Examples
 
-Extracts the most relevant snippets from the `description` field in the `books` index that match the term "Tolkien".
+Extracts the best matching snippets from the `description` field for records in the `books` index that are relevant to the query "Tolkien".
 
 ```esql
 FROM books
 | EVAL snippets = TOP_SNIPPETS(description, "Tolkien")
 ```
 
-Filters books with "Return" in the title, then extracts up to 3 snippets of up to 25 words each from the `description` field that match the term "Tolkien".
+Filters books with "Return" in the title, then extracts up to 3 snippets of up to 25 words each from the `description` field for the query "Tolkien".
 
 ```esql
 FROM books

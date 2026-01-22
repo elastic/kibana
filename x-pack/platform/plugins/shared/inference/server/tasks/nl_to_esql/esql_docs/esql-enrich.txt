@@ -1,91 +1,59 @@
 # ENRICH
 
-`ENRICH` enables you to add data from existing indices as new columns using an
-enrich policy. Refer to Data enrichment
-for information about setting up a policy.
-!esql enrich
+The ENRICH command allows you to add data from existing indices as new columns using an enrich policy. This is useful for augmenting your data with additional information from other sources. Before using ENRICH, you must create and execute an enrich policy.
 
-<tip>
-  Before you can use `ENRICH`, you need to create and execute an enrich policy.
-</tip>
+## Syntax
 
-`ENRICH` enables you to add data from existing indices as new columns using an
-enrich policy.
-**Syntax**
-```esql
-ENRICH policy [ON match_field] [WITH [new_name1 = ]field1, [new_name2 = ]field2, ...]
-```
+`ENRICH policy [ON match_field] [WITH [new_name1 = ]field1, [new_name2 = ]field2, ...]`
 
 ### Parameters
 
-#### `policy`
+#### policy
 
-The name of the enrich policy.
- You need to create
- and execute
- the enrich policy first.
+The name of the enrich policy. You need to create and execute the enrich policy first.
 
-#### `mode`
+#### mode
 
-The mode of the enrich command in cross cluster ES|QL.
- See enrich across clusters.
+(Optional) The mode of the enrich command in cross cluster usage.
 
-#### `match_field`
+#### match_field
 
-The match field. `ENRICH` uses its value to look for records in the enrich
- index. If not specified, the match will be performed on the column with the same
- name as the `match_field` defined in the enrich policy.
+(Optional) The column used to match records in the enrich index. If not specified, the match is performed on the column with the same name as the match_field defined in the enrich policy.
 
-#### `fieldX`
+#### fieldX
 
-The enrich fields from the enrich index that are added to the result as new
- columns. If a column with the same name as the enrich field already exists, the
- existing column will be replaced by the new column. If not specified, each of
- the enrich fields defined in the policy is added.
- A column with the same name as the enrich field will be dropped unless the
- enrich field is renamed.
+(Optional) The enrich fields from the enrich index to add as new columns. If a column with the same name as the enrich field already exists, it will be replaced. If not specified, all enrich fields defined in the policy are added.
 
-#### `new_nameX`
+#### new_nameX
 
-Enables you to change the name of the column that’s added for each of the enrich
- fields. Defaults to the enrich field name.
- If a column has the same name as the new name, it will be discarded.
- If a name (new or original) occurs more than once, only the rightmost duplicate
- creates a new column.
+(Optional) Allows you to rename the column added for each enrich field. Defaults to the enrich field name. If a column has the same name as the new name, it will be discarded. If a name (new or original) occurs more than once, only the rightmost duplicate creates a new column.
 
-**Examples**
-The following example uses the `languages_policy` enrich policy to add a new
-column for each enrich field defined in the policy. The match is performed using
-the `match_field` defined in the enrich policy and
-requires that the input table has a column with the same name (`language_code`
-in this example). `ENRICH` will look for records in th
-enrich index
-based on the match field value.
+## Examples
+
+Enriches a row by adding all fields defined in the `languages_policy` policy, matching on the `language_code` column.
 ```esql
 ROW language_code = "1"
 | ENRICH languages_policy
 ```
 
-To use a column with a different name than the `match_field` defined in the
-policy as the match field, use `ON <column-name>`:
+Enriches a row by matching on the `a` column instead of the default match field defined in the policy.
 ```esql
 ROW a = "1"
 | ENRICH languages_policy ON a
 ```
 
-By default, each of the enrich fields defined in the policy is added as a
-column. To explicitly select the enrich fields that are added, use
-`WITH <field1>, <field2>, ...`:
+Enriches a row by matching on the `a` column and adding only the `language_name` field from the enrich index.
 ```esql
 ROW a = "1"
 | ENRICH languages_policy ON a WITH language_name
 ```
 
-You can rename the columns that are added using `WITH new_name=<field1>`:
+Enriches a row by matching on the `a` column and adding the `language_name` field as a column named `name`.
 ```esql
 ROW a = "1"
 | ENRICH languages_policy ON a WITH name = language_name
 ```
 
-In case of name collisions, the newly created columns will override existing
-columns.
+## Limitations
+
+Before you can use ENRICH, you must create and execute an enrich policy. If a column name collides with an enrich field or new name, the existing column will be replaced or discarded. If a name occurs more than once, only the rightmost duplicate creates a new column.

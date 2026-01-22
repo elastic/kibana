@@ -1,202 +1,176 @@
 # WHERE
 
-The `WHERE` processing command produces a table that contains all the rows from
-the input table for which the provided condition evaluates to `true`.
-<tip>
-  In case of value exclusions, fields with `null` values will be excluded from search results.
-  In this context a `null` means either there is an explicit `null` value in the document or
-  there is no value at all. For example: `WHERE field != "value"` will be interpreted as
-  `WHERE field != "value" AND field IS NOT NULL`.
-</tip>
+The WHERE command filters rows from the input table based on a condition that evaluates to true. Fields with null values are excluded from results when using value exclusions, meaning WHERE field != "value" is interpreted as WHERE field != "value" AND field IS NOT NULL.
 
-**Syntax**
-```esql
-WHERE expression
-```
+## Syntax
+
+`WHERE expression`
 
 ### Parameters
 
-#### `expression`
+#### expression
 
-A boolean expression.
+A boolean expression used to filter rows.
 
-**Examples**
+## Examples
+
+Filter employees who are still hired:
+
+Returns only employees whose `still_hired` field is true, showing their first and last names.
 ```esql
 FROM employees
 | KEEP first_name, last_name, still_hired
 | WHERE still_hired == true
 ```
 
-Which, if `still_hired` is a boolean field, can be simplified to:
+Simplify the condition when the field is boolean:
+
+Filters employees to include only those who are still hired, using the boolean field directly.
 ```esql
 FROM employees
 | KEEP first_name, last_name, still_hired
 | WHERE still_hired
 ```
 
-Use date math to retrieve data from a specific time range. For example, to
-retrieve the last hour of logs:
+Retrieve logs from the last hour using date math:
+
+Returns log entries from the last hour by comparing the `@timestamp` field to the current time minus one hour.
 ```esql
 FROM sample_data
 | WHERE @timestamp > NOW() - 1 hour
 ```
 
-`WHERE` supports various functions.
-For example the `LENGTH` function:
+Filter rows using a function, such as LENGTH:
+
+Shows employees whose first names are shorter than four characters.
 ```esql
 FROM employees
 | KEEP first_name, last_name, height
 | WHERE LENGTH(first_name) < 4
 ```
 
-For a complete list of all functions, refer to Functions overview.
+Check for NULL values using IS NULL:
 
-### NULL Predicates
-
-For NULL comparison, use the `IS NULL` and `IS NOT NULL` predicates.
-**Example**
+Finds employees whose `birth_date` field is missing or null.
 ```esql
 FROM employees
 | WHERE birth_date IS NULL
 ```
 
-**Example**
+Check for non-NULL values and count employees:
+
+Counts the number of employees who have a non-null value in the `is_rehired` field.
 ```esql
 FROM employees
 | WHERE is_rehired IS NOT NULL
 | STATS COUNT(emp_no)
 ```
 
-### Matching text
+Match text using the MATCH function:
 
-For matching text, you can use full text search functions like `MATCH`.
-Use `MATCH` to perform a
-match query on a specified field.
-Match can be used on text fields, as well as other field types like boolean, dates, and numeric types.
-**Examples**
+Finds books where the `author` field matches the term "Faulkner".
 ```esql
 FROM books
 | WHERE MATCH(author, "Faulkner")
 ```
 
+Match text with multiple terms and keep the title:
+
+Returns book titles that match all the terms "Hobbit", "Back", and "Again" in the `title` field.
 ```esql
 FROM books
 | WHERE MATCH(title, "Hobbit Back Again", {"operator": "AND"})
 | KEEP title;
 ```
 
-<tip>
-  You can also use the shorthand match operator `:` instead of `MATCH`.
-</tip>
+Use the LIKE operator to filter based on string patterns:
 
-### LIKE and RLIKE
-
-Use `LIKE` to filter data based on string patterns using wildcards. `LIKE` usually acts on a field placed on the left-hand side of the operator, but it can also act on a constant (literal) expression. The right-hand side of the operator represents the pattern.
-The following wildcard characters are supported:
-- `*` matches zero or more characters.
-- `?` matches one character.
-
-**Supported types**
-
-**Example**
+Finds employees whose first names match the pattern "?b*", where "?" is any character followed by "b" and any characters after.
 ```esql
 FROM employees
 | WHERE first_name LIKE """?b*"""
 | KEEP first_name, last_name
 ```
 
-Matching the exact characters `*` and `.` will require escaping.
-The escape character is backslash `\`. Since also backslash is a special character in string literals,
-it will require further escaping.
+Escape special characters in LIKE patterns:
+
+Filters rows where the `message` field exactly matches "foo * bar", escaping the asterisk.
 ```esql
 ROW message = "foo * bar"
 | WHERE message LIKE "foo \\* bar"
 ```
 
-To reduce the overhead of escaping, we suggest using triple quotes strings `"""`
+Reduce escaping overhead with triple quotes in LIKE:
+
+Filters rows where the `message` field matches "foo * bar", using triple quotes to simplify escaping.
 ```esql
 ROW message = "foo * bar"
 | WHERE message LIKE """foo \* bar"""
 ```
 
-```
-stack: ga 9.1
-serverless: ga
-```
+Match against multiple LIKE patterns:
 
-Both a single pattern or a list of patterns are supported. If a list of patterns is provided,
-the expression will return true if any of the patterns match.
+Returns rows where the `message` field matches either the pattern "foo*" or "bar?".
 ```esql
 ROW message = "foobar"
 | WHERE message like ("foo*", "bar?")
 ```
 
-Patterns may be specified with REST query placeholders as well
+Use REST query placeholders with LIKE:
+
+Filters employees whose first names match a pattern provided as a REST query parameter.
 ```esql
 FROM employees
 | WHERE first_name LIKE ?pattern
 | KEEP first_name, last_name
 ```
 
-```
-stack: ga 9.3
-```
+Filter using RLIKE with regular expressions:
 
-Use `RLIKE` to filter data based on string patterns using using regular expressions. `RLIKE` usually acts on a field placed on the left-hand side of the operator, but it can also act on a constant (literal) expression. The right-hand side of the operator represents the pattern.
-**Supported types**
-
-**Example**
+Finds employees whose first names match the regular expression ".leja.*".
 ```esql
 FROM employees
 | WHERE first_name RLIKE """.leja.*"""
 | KEEP first_name, last_name
 ```
 
-Matching special characters (eg. `.`, `*`, `(`...) will require escaping.
-The escape character is backslash `\`. Since also backslash is a special character in string literals,
-it will require further escaping.
+Escape special characters in RLIKE patterns:
+
+Filters rows where the `message` field matches the regular expression "foo \( bar", escaping the parenthesis.
 ```esql
 ROW message = "foo ( bar"
 | WHERE message RLIKE "foo \\( bar"
 ```
 
-To reduce the overhead of escaping, we suggest using triple quotes strings `"""`
+Reduce escaping overhead with triple quotes in RLIKE:
+
+Filters rows where the `message` field matches the regular expression "foo \( bar", using triple quotes for easier escaping.
 ```esql
 ROW message = "foo ( bar"
 | WHERE message RLIKE """foo \( bar"""
 ```
 
-```
-stack: ga 9.2
-serverless: ga
-```
+Match against multiple RLIKE patterns:
 
-Both a single pattern or a list of patterns are supported. If a list of patterns is provided,
-the expression will return true if any of the patterns match.
+Returns rows where the `message` field matches either the regular expression "foo.*" or "bar.".
 ```esql
 ROW message = "foobar"
 | WHERE message RLIKE ("foo.*", "bar.")
 ```
 
-Patterns may be specified with REST query placeholders as well
+Use REST query placeholders with RLIKE:
+
+Filters employees whose first names match a regular expression provided as a REST query parameter.
 ```esql
 FROM employees
 | WHERE first_name RLIKE ?pattern
 | KEEP first_name, last_name
 ```
 
-```
-stack: ga 9.3
-```
+Test membership in a list using IN:
 
-### IN
-
-The `IN` operator allows testing whether a field or expression equals an element
-in a list of literals, fields or expressions:
-**Example**
+Keeps rows where the value of `c-a` is in the list (3, b / 2, a).
 ```esql
 ROW a = 1, b = 4, c = 3
 | WHERE c-a IN (3, b / 2, a)
 ```
-
-For a complete list of all operators, refer to Operators.

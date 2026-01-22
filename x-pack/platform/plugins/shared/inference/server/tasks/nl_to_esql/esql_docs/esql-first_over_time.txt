@@ -1,6 +1,6 @@
 # FIRST_OVER_TIME
 
-Calculates the earliest value of a field, where recency is determined by the `@timestamp` field.
+Calculates the earliest value of a field, with recency determined by the `@timestamp` field.
 
 ## Syntax
 
@@ -18,7 +18,7 @@ The time window over which to compute the first value.
 
 ## Examples
 
-Finds the maximum cost by first retrieving the earliest network cost value for each cluster within 1-minute time buckets.
+Finds the maximum network cost from the earliest recorded value, grouped by cluster and 1-minute time intervals:
 
 ```esql
 TS k8s

@@ -1,6 +1,6 @@
 # COUNT_OVER_TIME
 
-Calculates the count over time for a specified field within a given time window.
+Calculates the count of values for a specified field within a given time window.
 
 ## Syntax
 
@@ -10,15 +10,15 @@ Calculates the count over time for a specified field within a given time window.
 
 #### field
 
-The metric field to calculate the count over time for.
+The metric field to calculate the count for.
 
 #### window
 
-The time window over which to compute the count over time.
+The time window over which to compute the count.
 
 ## Examples
 
-Calculates the number of occurrences of `network.cost` in each 1-minute interval, grouped by cluster.
+Counts the number of `network.cost` values for each cluster in one-minute intervals.
 
 ```esql
 TS k8s

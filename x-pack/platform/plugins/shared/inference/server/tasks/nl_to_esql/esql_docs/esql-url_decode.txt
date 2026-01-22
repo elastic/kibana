@@ -1,6 +1,6 @@
 # URL_DECODE
 
-Decodes a URL-encoded string. If the input cannot be decoded, it returns `null` and adds a warning header to the response.
+The URL_DECODE function decodes a URL-encoded string. If the input cannot be decoded, it returns `null` and adds a warning header to the response.
 
 ## Syntax
 
@@ -14,9 +14,7 @@ The URL-encoded string to decode.
 
 ## Examples
 
-Decode a URL-encoded string:
-
-Decodes the URL-encoded value in the column `u` and returns the decoded string.
+Decodes a URL-encoded string representing a URL with query parameters and returns the decoded version.
 
 ```esql
 ROW u = "https%3A%2F%2Fexample.com%2F%3Fx%3Dfoo%20bar%26y%3Dbaz"

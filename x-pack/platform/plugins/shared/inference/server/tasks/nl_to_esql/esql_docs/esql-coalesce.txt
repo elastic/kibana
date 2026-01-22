@@ -1,25 +1,26 @@
 # COALESCE
 
-Returns the first of its arguments that is not null. If all arguments are null, it returns `null`.
+The COALESCE function returns the first argument that is not null. If all arguments are null, it returns `null`.
 
-**Syntax**
+## Syntax
+
 `COALESCE(first, rest)`
 
 ### Parameters
 
-#### `first`
+#### first
 
 Expression to evaluate.
 
-#### `rest`
+#### rest
 
-Other expression to evaluate.
+Other expressions to evaluate.
 
-**Supported types**
+## Examples
 
-**Example**
+Returns the first non-null value between columns `a` and `b`.
+
 ```esql
 ROW a=null, b="b"
 | EVAL COALESCE(a, b)
 ```
-

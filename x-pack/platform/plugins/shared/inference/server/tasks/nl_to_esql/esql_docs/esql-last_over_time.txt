@@ -1,6 +1,6 @@
 # LAST_OVER_TIME
 
-Calculates the latest value of a field, where recency is determined by the `@timestamp` field.
+Calculates the latest value of a field, with recency determined by the `@timestamp` field.
 
 ## Syntax
 
@@ -10,7 +10,7 @@ Calculates the latest value of a field, where recency is determined by the `@tim
 
 #### field
 
-The metric field to calculate the latest value for.
+The metric field for which to calculate the latest value.
 
 #### window
 
@@ -18,7 +18,7 @@ The time window over which to find the latest value.
 
 ## Examples
 
-Calculates the maximum network cost value observed in each cluster and 1-minute time bucket, using the most recent network cost value within each bucket.
+Finds the maximum network cost from the most recent value within each 1-minute interval, grouped by cluster.
 
 ```esql
 TS k8s

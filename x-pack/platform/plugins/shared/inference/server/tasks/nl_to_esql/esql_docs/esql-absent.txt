@@ -14,7 +14,7 @@ Expression that outputs values to be checked for absence.
 
 ## Examples
 
-Checks whether the `languages` field is missing for the employee with `emp_no` 10020.
+Determines whether the `languages` field is missing for employee number 10020.
 
 ```esql
 FROM employees
@@ -22,14 +22,14 @@ FROM employees
 | STATS is_absent = ABSENT(languages)
 ```
 
-Determines if there are any missing `salary` values within each group of `languages`.
+Checks if the `salary` field is absent within each group of employees sharing the same language.
 
 ```esql
 FROM employees
 | STATS is_absent = ABSENT(salary) BY languages
 ```
 
-Returns 1 if the `languages` field is absent for the employee with `emp_no` 10020, and 0 otherwise.
+Returns 1 if the `languages` field is absent and 0 if it is present for employee number 10020.
 
 ```esql
 FROM employees

@@ -1,25 +1,26 @@
 # LEAST
 
-Returns the minimum value from multiple columns. This is similar to `MV_MIN` except it is intended to run on multiple columns at once.
+The LEAST function returns the minimum value from multiple columns. It is designed to evaluate several columns at once and select the smallest value among them.
 
-**Syntax**
+## Syntax
+
 `LEAST(first, rest)`
 
 ### Parameters
 
-#### `first`
+#### first
 
-First of the columns to evaluate.
+The first column to evaluate.
 
-#### `rest`
+#### rest
 
-The rest of the columns to evaluate.
+The remaining columns to evaluate.
 
-**Supported types**
+## Examples
 
-**Example**
+Finds the smaller value between columns `a` and `b` and stores it in a new column `l`:
+
 ```esql
 ROW a = 10, b = 20
 | EVAL l = LEAST(a, b)
 ```
-

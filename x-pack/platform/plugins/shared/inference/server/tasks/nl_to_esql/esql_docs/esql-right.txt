@@ -1,25 +1,24 @@
 # RIGHT
 
-Return the substring that extracts *length* chars from *str* starting from the right.
+The RIGHT function returns a substring by extracting a specified number of characters from the end (right side) of a string.
 
-**Syntax**
+## Syntax
+
 `RIGHT(string, length)`
 
 ### Parameters
 
-#### `string`
+#### string
 
-The string from which to returns a substring.
+The string from which the substring will be extracted.
 
-#### `length`
+#### length
 
-The number of characters to return.
+The number of characters to return from the right end of the string.
 
-**Supported types**
+## Examples
 
-**Example**
-
-Extracts the last three characters from the `last_name` column, sorts the results alphabetically, and limits the output to the first five rows.
+Extracts the last three characters from the `last_name` column for each employee.
 
 ```esql
 FROM employees

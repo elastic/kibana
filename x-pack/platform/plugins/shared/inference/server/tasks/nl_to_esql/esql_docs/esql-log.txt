@@ -1,30 +1,31 @@
 # LOG
 
-Returns the logarithm of a value to a base. The input can be any numeric value, the return value is always a double.  Logs of zero, negative numbers, and base of one return `null` as well as a warning.
+The LOG function calculates the logarithm of a numeric value to a specified base. The result is always a double. If the input value is zero, negative, or the base is one, the function returns `null` and issues a warning.
 
-**Syntax**
+## Syntax
+
 `LOG(base, number)`
 
 ### Parameters
 
-#### `base`
+#### base
 
-Base of logarithm. If `null`, the function returns `null`. If not provided, this function returns the natural logarithm (base e) of a value.
+Base of the logarithm. If `null`, the function returns `null`. If not provided, the function returns the natural logarithm (base e) of the value.
 
-#### `number`
+#### number
 
-Numeric expression. If `null`, the function returns `null`.
+Numeric expression to compute the logarithm for. If `null`, the function returns `null`.
 
-**Supported types**
+## Examples
 
-**Examples**
+Calculates the logarithm of 8 with base 2.
 ```esql
 ROW base = 2.0, value = 8.0
 | EVAL s = LOG(base, value)
 ```
 
+Calculates the natural logarithm (base e) of 100.
 ```esql
 ROW value = 100
 | EVAL s = LOG(value);
 ```
-

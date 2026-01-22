@@ -14,7 +14,7 @@ The numeric field for which to calculate the population variance.
 
 ## Examples
 
-Calculates the population variance of the `height` field for all employees.
+Calculates the population variance of the `height` field across all employees.
 
 ```esql
 FROM employees
