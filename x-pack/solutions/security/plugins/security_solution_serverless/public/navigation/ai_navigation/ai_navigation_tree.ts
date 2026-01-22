@@ -78,7 +78,7 @@ export const createAiNavigationTree = (
       breadcrumbStatus: 'hidden',
       children: [
         {
-          link: 'discover',
+          link: 'discover' as AppDeepLinkId,
         },
         ...(chatExperience === AIChatExperience.Agent
           ? [
@@ -92,7 +92,7 @@ export const createAiNavigationTree = (
         ...(workflowsUiEnabled
           ? [
               {
-                link: 'workflows',
+                link: 'workflows' as AppDeepLinkId,
               },
             ]
           : []),
