@@ -16,7 +16,7 @@ import {
 import type { ListScriptsRequestQuery } from '../../../../../../common/api/endpoint';
 import type { EndpointScript } from '../../../../../../common/endpoint/types';
 import { ContextMenuItemNavByRouter } from '../../../../components/context_menu_with_router_support';
-import { scriptsLibraryLabels as i18n } from '../../translations';
+import { SCRIPT_LIBRARY_LABELS as i18n } from '../../translations';
 import { useScriptActionItems } from '../hooks/use_script_action_items';
 import type { ScriptsLibraryTableProps } from './scripts_library_table';
 

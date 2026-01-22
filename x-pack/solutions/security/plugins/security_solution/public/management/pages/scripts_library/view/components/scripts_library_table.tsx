@@ -21,6 +21,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { SupportedHostOsType } from '../../../../../../common/endpoint/constants';
+import type { ScriptTagKey } from '../../../../../../common/endpoint/service/scripts_library/constants';
 import { SCRIPT_TAGS } from '../../../../../../common/endpoint/service/scripts_library/constants';
 import { PopoverItems } from '../../../../../common/components/popover_items';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
@@ -35,7 +36,7 @@ import type {
   SortableScriptLibraryFields,
   SortDirection,
 } from '../../../../../../common/endpoint/types';
-import { scriptsLibraryLabels as tableLabels } from '../../translations';
+import { SCRIPT_LIBRARY_LABELS as tableLabels } from '../../translations';
 import { ScriptNameNavLink } from './script_name_nav_link';
 import { ScriptTablePlatformBadges } from './platform_badges';
 import { ScriptRowActions } from './script_row_actions';
@@ -105,7 +106,7 @@ const getScriptsLibraryTableColumns = ({
             key={`${sortedTag}-${i}`}
             data-test-subj={getTestId(`tags-${sortedTag}`)}
           >
-            {SCRIPT_TAGS[sortedTag as keyof typeof SCRIPT_TAGS] || sortedTag}
+            {SCRIPT_TAGS[sortedTag as ScriptTagKey] || sortedTag}
           </EuiBadge>
         );
         return (

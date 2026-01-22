@@ -13,7 +13,7 @@ import type {
 import type { ListScriptsRequestQuery } from '../../../../../../common/api/endpoint';
 import { useToasts } from '../../../../../common/lib/kibana';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
-import { scriptsLibraryLabels as pageLabels } from '../../translations';
+import { SCRIPT_LIBRARY_LABELS as pageLabels } from '../../translations';
 import { AdministrationListPage } from '../../../../components/administration_list_page';
 import { useGetEndpointScriptsList } from '../../../../hooks/script_library';
 import { ScriptsLibraryTable, type ScriptsLibraryTableProps } from './scripts_library_table';

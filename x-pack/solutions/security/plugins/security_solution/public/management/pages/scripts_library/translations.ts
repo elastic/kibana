@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const scriptsLibraryLabels = Object.freeze({
+export const SCRIPT_LIBRARY_LABELS = Object.freeze({
   // page labels
   pageTitle: i18n.translate('xpack.securitySolution.scriptsLibrary.pageTitle', {
     defaultMessage: 'Scripts Library',
@@ -29,10 +29,10 @@ export const scriptsLibraryLabels = Object.freeze({
         defaultMessage: 'Name',
       }),
       platform: i18n.translate('xpack.securitySolution.scriptsLibrary.table.platformColumnTitle', {
-        defaultMessage: 'Platform',
+        defaultMessage: 'Platforms',
       }),
       tags: i18n.translate('xpack.securitySolution.scriptsLibrary.table.tagsColumnTitle', {
-        defaultMessage: 'Tags',
+        defaultMessage: 'Types',
       }),
       updatedBy: i18n.translate(
         'xpack.securitySolution.scriptsLibrary.table.modifiedByColumnTitle',
