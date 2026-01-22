@@ -71,7 +71,7 @@ export interface RuleFormPlugins {
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   docLinks: DocLinksStart;
-  kql: KqlPluginStart;
+  kql?: KqlPluginStart;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   fieldsMetadata: FieldsMetadataPublicStart;
