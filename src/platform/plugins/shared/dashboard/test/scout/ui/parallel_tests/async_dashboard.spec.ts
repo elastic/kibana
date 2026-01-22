@@ -75,23 +75,24 @@ spaceTest.describe('Sample data dashboard', { tag: tags.ESS_ONLY }, () => {
       await spaceTest.step('return to dashboard and validate panels', async () => {
         await pageObjects.dashboard.openDashboardWithId(SAMPLE_DATA_DASHBOARD_ID);
 
-        await expect.poll(async () => pageObjects.dashboard.getControlCount()).toBe(3);
-        expect(await pageObjects.dashboard.getPanelCount()).toBeGreaterThan(0);
+        await expect.poll(async () => await pageObjects.dashboard.getControlCount()).toBe(3);
 
-        // Checking charts rendered
+        // check panels rendered
         await expect
-          .poll(async () => pageObjects.dashboard.getVisualizationCount('xyVisChart'))
+          .poll(async () => await pageObjects.dashboard.getPanelCount())
           .toBeGreaterThan(0);
+
+        // check charts rendered
+        await expect
+          .poll(async () => await pageObjects.dashboard.getVisualizationCount('xyVisChart'))
+          .toBeGreaterThan(5);
 
         // Checking saved searches rendered
         await expect
-          .poll(async () => pageObjects.dashboard.getSavedSearchRowCount())
+          .poll(async () => await pageObjects.dashboard.getSavedSearchRowCount())
           .toBeGreaterThan(10);
 
-        // Checking input controls rendered
-        await expect.poll(async () => pageObjects.dashboard.getControlCount()).toBe(3);
-
-        // Checking tag cloud rendered
+        // Checking tag clouds rendered
         const legendLabels = page.locator('[data-testid="echLegendItemLabel"]');
         const legendTexts = await legendLabels.allInnerTexts();
         ['Sunny', 'Rain', 'Clear', 'Cloudy', 'Hail'].forEach((value) => {
