@@ -252,6 +252,39 @@
           ],
           "securitySolutionAssistant": [
             "all"
+          ],
+          "securitySolutionAttackDiscovery": [
+            "all"
+          ],
+          "securitySolutionTimeline": [
+            "all"
+          ],
+          "securitySolutionNotes": [
+            "all"
+          ],
+          "actions": [
+            "read"
+          ],
+          "builtInAlerts": [
+            "all"
+          ],
+          "osquery": [
+            "all"
+          ],
+          "discover_v2": [
+            "all"
+          ],
+          "dashboard_v2": [
+            "all"
+          ],
+          "maps_v2": [
+            "all"
+          ],
+          "visualize_v2": [
+            "all"
+          ],
+          "savedQueryManagement": [
+            "all"
           ]
         },
         "spaces": [
