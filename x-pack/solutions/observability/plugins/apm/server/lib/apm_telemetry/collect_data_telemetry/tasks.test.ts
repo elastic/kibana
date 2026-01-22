@@ -7,7 +7,6 @@
 
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
-import type { OTelIndices } from '@kbn/apm-sources-access-plugin/common/config_schema';
 import { tasks } from './tasks';
 import { SERVICE_NAME, SERVICE_ENVIRONMENT, AT_TIMESTAMP } from '../../../../common/es_fields/apm';
 import type { IndicesStatsResponse } from '../telemetry_client';
@@ -19,13 +18,6 @@ describe('data telemetry collection tasks', () => {
     span: 'apm-8.0.0-span',
     transaction: 'apm-8.0.0-transaction',
   } as APMIndices;
-
-  const otelIndices = {
-    error: 'logs-*.otel-*',
-    metric: 'metrics-*.otel-*',
-    span: 'traces-*.otel-*',
-    transaction: 'traces-*.otel-*',
-  } as OTelIndices;
 
   describe('environments', () => {
     const task = tasks.find((t) => t.name === 'environments');
@@ -1058,12 +1050,10 @@ describe('data telemetry collection tasks', () => {
               {
                 key: 'opentelemetry/nodejs',
                 doc_count: 500,
-                services: { value: 3 },
               },
               {
                 key: 'opentelemetry/python',
                 doc_count: 300,
-                services: { value: 2 },
               },
             ],
           },
@@ -1081,14 +1071,10 @@ describe('data telemetry collection tasks', () => {
 
       expect(
         await task?.executor({
-          otelIndices,
+          indices,
           telemetryClient: { search, indicesStats },
         } as any)
       ).toEqual({
-        otel_services_per_agent: {
-          'opentelemetry/nodejs': 3,
-          'opentelemetry/python': 2,
-        },
         otel_docs_per_agent: {
           'opentelemetry/nodejs': 500,
           'opentelemetry/python': 300,
@@ -1121,11 +1107,10 @@ describe('data telemetry collection tasks', () => {
 
       expect(
         await task?.executor({
-          otelIndices,
+          indices,
           telemetryClient: { search, indicesStats },
         } as any)
       ).toEqual({
-        otel_services_per_agent: {},
         otel_docs_per_agent: {},
         otel_size_per_agent: {},
         otel_total_size_bytes: 0,
@@ -1146,17 +1131,14 @@ describe('data telemetry collection tasks', () => {
               {
                 key: 'opentelemetry/go',
                 doc_count: 50,
-                services: { value: 1 },
               },
               {
                 key: 'unknown',
                 doc_count: 30,
-                services: { value: 1 },
               },
               {
                 key: '',
                 doc_count: 20,
-                services: { value: 1 },
               },
             ],
           },
@@ -1173,13 +1155,10 @@ describe('data telemetry collection tasks', () => {
       });
 
       const result = await task?.executor({
-        otelIndices,
+        indices,
         telemetryClient: { search, indicesStats },
       } as any);
 
-      expect(result?.otel_services_per_agent).toEqual({
-        'opentelemetry/go': 1,
-      });
       expect(result?.otel_docs_per_agent).toEqual({
         'opentelemetry/go': 50,
       });
@@ -1203,12 +1182,10 @@ describe('data telemetry collection tasks', () => {
                 {
                   key: 'opentelemetry/nodejs',
                   doc_count: 300,
-                  services: { value: 2 },
                 },
                 {
                   key: 'opentelemetry/python',
                   doc_count: 200,
-                  services: { value: 1 },
                 },
               ],
             },
@@ -1225,12 +1202,10 @@ describe('data telemetry collection tasks', () => {
                 {
                   key: 'opentelemetry/nodejs',
                   doc_count: 200,
-                  services: { value: 2 },
                 },
                 {
                   key: 'opentelemetry/java',
                   doc_count: 100,
-                  services: { value: 1 },
                 },
               ],
             },
@@ -1247,12 +1222,10 @@ describe('data telemetry collection tasks', () => {
                 {
                   key: 'opentelemetry/python',
                   doc_count: 60,
-                  services: { value: 1 },
                 },
                 {
                   key: 'opentelemetry/java',
                   doc_count: 40,
-                  services: { value: 1 },
                 },
               ],
             },
@@ -1269,17 +1242,13 @@ describe('data telemetry collection tasks', () => {
       });
 
       const result = await task?.executor({
-        otelIndices,
+        indices,
         telemetryClient: { search, indicesStats },
       } as any);
 
       expect(result).toEqual({
         otel_by_signal: {
           traces: {
-            services_per_agent: {
-              'opentelemetry/nodejs': 2,
-              'opentelemetry/python': 1,
-            },
             docs_per_agent: {
               'opentelemetry/nodejs': 300,
               'opentelemetry/python': 200,
@@ -1292,10 +1261,6 @@ describe('data telemetry collection tasks', () => {
             size_1d_bytes: 1000000,
           },
           metrics: {
-            services_per_agent: {
-              'opentelemetry/nodejs': 2,
-              'opentelemetry/java': 1,
-            },
             docs_per_agent: {
               'opentelemetry/nodejs': 200,
               'opentelemetry/java': 100,
@@ -1308,10 +1273,6 @@ describe('data telemetry collection tasks', () => {
             size_1d_bytes: 600000,
           },
           logs: {
-            services_per_agent: {
-              'opentelemetry/python': 1,
-              'opentelemetry/java': 1,
-            },
             docs_per_agent: {
               'opentelemetry/python': 60,
               'opentelemetry/java': 40,
@@ -1343,32 +1304,235 @@ describe('data telemetry collection tasks', () => {
       });
 
       const result = await task?.executor({
-        otelIndices,
+        indices,
         telemetryClient: { search, indicesStats },
       } as any);
 
       expect(result).toEqual({
         otel_by_signal: {
           traces: {
-            services_per_agent: {},
             docs_per_agent: {},
             size_per_agent: {},
             docs_1d: 0,
             size_1d_bytes: 0,
           },
           metrics: {
-            services_per_agent: {},
             docs_per_agent: {},
             size_per_agent: {},
             docs_1d: 0,
             size_1d_bytes: 0,
           },
           logs: {
-            services_per_agent: {},
             docs_per_agent: {},
             size_per_agent: {},
             docs_1d: 0,
             size_1d_bytes: 0,
+          },
+        },
+      });
+    });
+  });
+
+  describe('otel_sdk_distro', () => {
+    const task = tasks.find((t) => t.name === 'otel_sdk_distro');
+
+    it('returns SDK and distro telemetry', async () => {
+      const search = jest.fn().mockResolvedValueOnce({
+        hits: {
+          total: { value: 1000 },
+        },
+        aggregations: {
+          sdk_combinations: {
+            buckets: [
+              {
+                key: {
+                  sdk_name: 'opentelemetry',
+                  sdk_version: '1.20.0',
+                  sdk_language: 'nodejs',
+                  distro_name: null,
+                },
+                doc_count: 500,
+              },
+              {
+                key: {
+                  sdk_name: 'opentelemetry',
+                  sdk_version: '1.19.0',
+                  sdk_language: 'nodejs',
+                  distro_name: null,
+                },
+                doc_count: 200,
+              },
+              {
+                key: {
+                  sdk_name: 'opentelemetry',
+                  sdk_version: '1.15.0',
+                  sdk_language: 'python',
+                  distro_name: 'elastic',
+                },
+                doc_count: 300,
+              },
+              {
+                key: {
+                  sdk_name: 'opentelemetry',
+                  sdk_version: '1.12.0',
+                  sdk_language: 'java',
+                  distro_name: 'elastic',
+                },
+                doc_count: 200,
+              },
+            ],
+          },
+        },
+      });
+
+      const indicesStats = jest.fn().mockResolvedValue({
+        _all: {
+          total: {
+            docs: { count: 10000 },
+            store: { size_in_bytes: 20000000 },
+          },
+        },
+      });
+
+      const result = await task?.executor({
+        indices,
+        telemetryClient: { search, indicesStats },
+      } as any);
+
+      expect(result).toEqual({
+        otel_sdk: {
+          'opentelemetry/nodejs': {
+            docs: 700,
+            versions: {
+              '1.20.0': 500,
+              '1.19.0': 200,
+            },
+          },
+          'opentelemetry/python/elastic': {
+            docs: 300,
+            versions: {
+              '1.15.0': 300,
+            },
+          },
+          'opentelemetry/java/elastic': {
+            docs: 200,
+            versions: {
+              '1.12.0': 200,
+            },
+          },
+        },
+        otel_distro: {
+          elastic: {
+            docs: 500,
+            versions: {
+              '1.15.0': 300,
+              '1.12.0': 200,
+            },
+          },
+        },
+      });
+
+      expect(search).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns empty results when no SDK/distro data', async () => {
+      const search = jest.fn().mockResolvedValue({
+        hits: { total: { value: 0 } },
+        aggregations: {
+          sdk_combinations: { buckets: [] },
+        },
+      });
+
+      const indicesStats = jest.fn().mockResolvedValue({
+        _all: {
+          total: {
+            docs: { count: 0 },
+            store: { size_in_bytes: 0 },
+          },
+        },
+      });
+
+      const result = await task?.executor({
+        indices,
+        telemetryClient: { search, indicesStats },
+      } as any);
+
+      expect(result).toEqual({
+        otel_sdk: {},
+        otel_distro: {},
+      });
+    });
+
+    it('filters out unknown SDK names', async () => {
+      const search = jest.fn().mockResolvedValueOnce({
+        hits: {
+          total: { value: 500 },
+        },
+        aggregations: {
+          sdk_combinations: {
+            buckets: [
+              {
+                key: {
+                  sdk_name: 'opentelemetry',
+                  sdk_version: '1.20.0',
+                  sdk_language: 'nodejs',
+                  distro_name: 'elastic',
+                },
+                doc_count: 300,
+              },
+              {
+                key: {
+                  sdk_name: 'unknown',
+                  sdk_version: '1.0.0',
+                  sdk_language: 'java',
+                  distro_name: null,
+                },
+                doc_count: 100,
+              },
+              {
+                key: {
+                  sdk_name: '',
+                  sdk_version: '1.0.0',
+                  sdk_language: 'python',
+                  distro_name: 'unknown',
+                },
+                doc_count: 100,
+              },
+            ],
+          },
+        },
+      });
+
+      const indicesStats = jest.fn().mockResolvedValue({
+        _all: {
+          total: {
+            docs: { count: 10000 },
+            store: { size_in_bytes: 20000000 },
+          },
+        },
+      });
+
+      const result = await task?.executor({
+        indices,
+        telemetryClient: { search, indicesStats },
+      } as any);
+
+      // Should only include valid SDK/distro names
+      expect(result).toEqual({
+        otel_sdk: {
+          'opentelemetry/nodejs/elastic': {
+            docs: 300,
+            versions: {
+              '1.20.0': 300,
+            },
+          },
+        },
+        otel_distro: {
+          elastic: {
+            docs: 300,
+            versions: {
+              '1.20.0': 300,
+            },
           },
         },
       });

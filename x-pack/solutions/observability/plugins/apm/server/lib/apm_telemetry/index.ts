@@ -13,7 +13,6 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
-import type { OTelIndices } from '@kbn/apm-sources-access-plugin/common/config_schema';
 import {
   APM_TELEMETRY_SAVED_OBJECT_ID,
   APM_TELEMETRY_SAVED_OBJECT_TYPE,
@@ -61,19 +60,10 @@ export async function createApmTelemetry({
   const [coreStart] = await core.getStartServices();
   const savedObjectsClient = await getInternalSavedObjectsClient(coreStart);
   const apmIndices = await getApmIndices(savedObjectsClient);
-  
-  // OTel-specific indices (separate from APM indices)
-  const otelIndices: OTelIndices = {
-    transaction: 'traces-*.otel-*',
-    span: 'traces-*.otel-*',
-    error: 'logs-*.otel-*',
-    metric: 'metrics-*.otel-*',
-  };
 
   const collectAndStore = async () => {
     const dataTelemetry = await collectDataTelemetry({
       indices: apmIndices,
-      otelIndices,
       telemetryClient,
       logger,
       savedObjectsClient,

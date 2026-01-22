@@ -776,15 +776,6 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
       description: 'Estimated size in bytes of OTel documents within the last day',
     },
   },
-  otel_services_per_agent: {
-    DYNAMIC_KEY: {
-      type: 'long',
-      _meta: {
-        description:
-          'Number of services per OTel agent name within the last day (from native OTel indices using resource.attributes.agent.name field)',
-      },
-    },
-  },
   otel_docs_per_agent: {
     DYNAMIC_KEY: {
       type: 'long',
@@ -805,14 +796,6 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
   },
   otel_by_signal: {
     traces: {
-      services_per_agent: {
-        DYNAMIC_KEY: {
-          type: 'long',
-          _meta: {
-            description: 'Number of services per agent for traces (transactions + spans) within the last day',
-          },
-        },
-      },
       docs_per_agent: {
         DYNAMIC_KEY: {
           type: 'long',
@@ -843,14 +826,6 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
       },
     },
     metrics: {
-      services_per_agent: {
-        DYNAMIC_KEY: {
-          type: 'long',
-          _meta: {
-            description: 'Number of services per agent for metrics within the last day',
-          },
-        },
-      },
       docs_per_agent: {
         DYNAMIC_KEY: {
           type: 'long',
@@ -881,14 +856,6 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
       },
     },
     logs: {
-      services_per_agent: {
-        DYNAMIC_KEY: {
-          type: 'long',
-          _meta: {
-            description: 'Number of services per agent for logs (errors) within the last day',
-          },
-        },
-      },
       docs_per_agent: {
         DYNAMIC_KEY: {
           type: 'long',
@@ -915,6 +882,42 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
         type: 'long',
         _meta: {
           description: 'Estimated size in bytes of log documents within the last day',
+        },
+      },
+    },
+  },
+  otel_sdk: {
+    DYNAMIC_KEY: {
+      docs: {
+        type: 'long',
+        _meta: {
+          description: 'Number of documents for this SDK name/language combination within the last day',
+        },
+      },
+      versions: {
+        DYNAMIC_KEY: {
+          type: 'long',
+          _meta: {
+            description: 'Number of documents per SDK version',
+          },
+        },
+      },
+    },
+  },
+  otel_distro: {
+    DYNAMIC_KEY: {
+      docs: {
+        type: 'long',
+        _meta: {
+          description: 'Number of documents for this distro within the last day',
+        },
+      },
+      versions: {
+        DYNAMIC_KEY: {
+          type: 'long',
+          _meta: {
+            description: 'Number of documents per distro version',
+          },
         },
       },
     },
@@ -1659,6 +1662,16 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
           type: 'long',
           _meta: {
             description: 'Execution time in milliseconds for the "otel_agents_by_signal" task',
+          },
+        },
+      },
+    },
+    otel_sdk_distro: {
+      took: {
+        ms: {
+          type: 'long',
+          _meta: {
+            description: 'Execution time in milliseconds for the "otel_sdk_distro" task',
           },
         },
       },
