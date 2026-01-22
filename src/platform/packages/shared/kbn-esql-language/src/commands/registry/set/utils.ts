@@ -118,7 +118,12 @@ const getApproximateCompletionItems = (
       ),
     },
     {
-      label: 'Approximate with parameters',
+      label: i18n.translate(
+        'kbn-esql-language.esql.autocomplete.set.approximate.approximateWithParameters',
+        {
+          defaultMessage: 'Approximate with parameters',
+        }
+      ),
       text: '{ $0 };',
       asSnippet: true,
       kind: 'Reference',

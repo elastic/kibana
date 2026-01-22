@@ -420,7 +420,12 @@ export const rlikePatternItems: ISuggestionItem[] = [
 
 export const confidenceLevelValueItems: ISuggestionItem[] = [
   {
-    label: 'High precision',
+    label: i18n.translate(
+      'kbn-esql-language.esql.autocomplete.set.approximate.highPrecisionLabel',
+      {
+        defaultMessage: 'High precision',
+      }
+    ),
     text: '0.99',
     kind: 'Value',
     detail: i18n.translate(
@@ -432,7 +437,12 @@ export const confidenceLevelValueItems: ISuggestionItem[] = [
     category: SuggestionCategory.VALUE,
   },
   {
-    label: 'Standard',
+    label: i18n.translate(
+      'kbn-esql-language.esql.autocomplete.set.approximate.standardPrecisionLabel',
+      {
+        defaultMessage: 'Standard',
+      }
+    ),
     text: '0.95',
     kind: 'Value',
     detail: i18n.translate(
@@ -444,7 +454,12 @@ export const confidenceLevelValueItems: ISuggestionItem[] = [
     category: SuggestionCategory.VALUE,
   },
   {
-    label: 'Exploratory',
+    label: i18n.translate(
+      'kbn-esql-language.esql.autocomplete.set.approximate.exploratoryPrecisionLabel',
+      {
+        defaultMessage: 'Exploratory',
+      }
+    ),
     text: '0.9',
     kind: 'Value',
     detail: i18n.translate(
@@ -458,7 +473,9 @@ export const confidenceLevelValueItems: ISuggestionItem[] = [
 
 export const numOfRowsValueItems: ISuggestionItem[] = [
   {
-    label: '100K rows',
+    label: i18n.translate('kbn-esql-language.esql.autocomplete.set.approximate.rows100KLabel', {
+      defaultMessage: '100K rows',
+    }),
     text: '100000',
     kind: 'Value',
     detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.approximate.rows100KDetail', {
@@ -467,7 +484,9 @@ export const numOfRowsValueItems: ISuggestionItem[] = [
     category: SuggestionCategory.VALUE,
   },
   {
-    label: '500K rows',
+    label: i18n.translate('kbn-esql-language.esql.autocomplete.set.approximate.rows500KLabel', {
+      defaultMessage: '500K rows',
+    }),
     text: '500000',
     kind: 'Value',
     detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.approximate.rows500KDetail', {
@@ -476,7 +495,9 @@ export const numOfRowsValueItems: ISuggestionItem[] = [
     category: SuggestionCategory.VALUE,
   },
   {
-    label: '1M rows',
+    label: i18n.translate('kbn-esql-language.esql.autocomplete.set.approximate.rows1MLabel', {
+      defaultMessage: '1M rows',
+    }),
     text: '1000000',
     kind: 'Value',
     detail: i18n.translate('kbn-esql-language.esql.autocomplete.set.approximate.rows1MDetail', {
