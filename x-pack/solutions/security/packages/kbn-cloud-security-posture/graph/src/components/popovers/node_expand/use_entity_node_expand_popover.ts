@@ -9,8 +9,9 @@ import type React from 'react';
 import { useCallback } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { useNodeExpandGraphPopover } from './use_node_expand_graph_popover';
-import { getNodeDocumentMode, isEntityNodeEnriched, type NodeProps } from '../../..';
+import { useNodeExpandPopover } from './use_node_expand_popover';
+import { getNodeDocumentMode, isEntityNodeEnriched } from '../../utils';
+import type { NodeProps } from '../../types';
 import {
   GRAPH_NODE_EXPAND_POPOVER_TEST_ID,
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
@@ -18,13 +19,13 @@ import {
   GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID,
-} from '../test_ids';
+} from '../../test_ids';
 import type {
   ItemExpandPopoverListItemProps,
   SeparatorExpandPopoverListItemProps,
-} from './list_group_graph_popover';
-import { RELATED_ENTITY } from '../../common/constants';
-import { addFilter, containsFilter, removeFilter } from './search_filters';
+} from '../primitives/list_graph_popover';
+import { RELATED_ENTITY } from '../../../common/constants';
+import { addFilter, containsFilter, removeFilter } from '../../graph_investigation/search_filters';
 
 type NodeToggleAction = 'show' | 'hide';
 
@@ -269,7 +270,7 @@ export const useEntityNodeExpandPopover = (
       searchFilters,
     ]
   );
-  const entityNodeExpandPopover = useNodeExpandGraphPopover({
+  const entityNodeExpandPopover = useNodeExpandPopover({
     id: 'entity-node-expand-popover',
     itemsFn,
     testSubject: GRAPH_NODE_EXPAND_POPOVER_TEST_ID,
