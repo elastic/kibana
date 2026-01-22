@@ -25,7 +25,7 @@ import type {
   SecurityServiceStart,
   ServiceStatus,
 } from '@kbn/core/server';
-import { DEFAULT_APP_CATEGORIES, SavedObjectsClient, ServiceStatusLevels } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES, ServiceStatusLevels } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { LockManagerService } from '@kbn/lock-manager';
 import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
@@ -51,7 +51,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
 import type { FleetConfigType } from '../common/types';
 import type { FleetAuthz } from '../common';
@@ -865,7 +865,9 @@ export class FleetPlugin
         await backOff(
           async () => {
             await setupFleet(
-              new SavedObjectsClient(core.savedObjects.createInternalRepository()),
+              core.savedObjects.getUnsafeInternalClient({
+                excludedExtensions: [SPACES_EXTENSION_ID],
+              }),
               core.elasticsearch.client.asInternalUser,
               { useLock: true }
             );
@@ -921,7 +923,9 @@ export class FleetPlugin
       }
     })();
 
-    const internalSoClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
+    const internalSoClient = core.savedObjects.getUnsafeInternalClient({
+      excludedExtensions: [SPACES_EXTENSION_ID],
+    });
     return {
       authz: {
         fromRequest: getAuthzFromRequest,
