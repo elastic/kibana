@@ -227,8 +227,10 @@ export function MonacoEditor({
 
       // handle special case of editor being rendered inside an EUI flyout,
       // in which case we want to ensure the overflow widgets appear above the flyout z-index
-      const isInsideFlyout = containerElement.current!.closest('.euiFlyout') !== null;
-
+      const isInsideFlyout =
+        containerElement.current!.closest('.euiFlyout') !== null || // covers both overlay and push flyouts
+        containerElement.current!.closest('[data-euiportal="true"]') !== null; // covers custom portals, like security timeline overlay
+      // by default we cover only a single flyout (1000), more specific edge cases can use the z-index override prop
       const defaultZIndex = isInsideFlyout
         ? OVERFLOW_WIDGETS_Z_INDEX_ABOVE_EUI_FLYOUT
         : OVERFLOW_WIDGETS_Z_INDEX_BELOW_EUI_FLYOUT;
