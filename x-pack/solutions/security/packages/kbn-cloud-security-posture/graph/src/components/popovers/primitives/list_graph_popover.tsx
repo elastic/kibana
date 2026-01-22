@@ -8,8 +8,8 @@
 import React, { memo } from 'react';
 import type { EuiToolTipProps } from '@elastic/eui';
 import { EuiHorizontalRule, EuiListGroup } from '@elastic/eui';
-import { ExpandPopoverListItem } from '../styles';
-import { GraphPopover } from '../../..';
+import { PopoverListItem } from './popover_list_item';
+import { GraphPopover } from './graph_popover';
 
 /**
  * Props for the ListGroupGraphPopover component.
@@ -67,7 +67,7 @@ export interface SeparatorExpandPopoverListItemProps {
 /**
  * A graph popover that displays a list of items.
  */
-export const ListGroupGraphPopover = memo<ListGroupGraphPopoverProps>(
+export const ListGraphPopover = memo<ListGroupGraphPopoverProps>(
   ({ isOpen, anchorElement, closePopover, items, itemsFn, testSubject }) => {
     const listItems = items || itemsFn?.() || [];
 
@@ -86,7 +86,7 @@ export const ListGroupGraphPopover = memo<ListGroupGraphPopoverProps>(
               return <EuiHorizontalRule key={index} margin="none" size="full" />;
             }
             return (
-              <ExpandPopoverListItem
+              <PopoverListItem
                 key={index}
                 iconType={item.iconType}
                 label={item.label}
@@ -105,4 +105,4 @@ export const ListGroupGraphPopover = memo<ListGroupGraphPopoverProps>(
   }
 );
 
-ListGroupGraphPopover.displayName = 'ListGroupGraphPopover';
+ListGraphPopover.displayName = 'ListGraphPopover';

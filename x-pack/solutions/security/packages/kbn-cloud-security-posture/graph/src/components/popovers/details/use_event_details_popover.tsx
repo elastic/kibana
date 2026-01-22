@@ -8,12 +8,12 @@
 import React, { memo, useMemo, useCallback } from 'react';
 import { EuiHorizontalRule, EuiTextTruncate, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { PopoverActions, PopoverState } from '../graph/use_graph_popover';
-import { useGraphPopover } from '../graph/use_graph_popover';
-import { GraphPopover } from '../graph/graph_popover';
-import { LabelNodePopoverContent } from '../node/label_node/label_node_popover';
-import type { DocumentAnalysisOutput } from '../node/label_node/analyze_documents';
-import { GRAPH_EVENTS_POPOVER_ID } from '../test_ids';
+import type { PopoverActions, PopoverState } from '../primitives/use_graph_popover_state';
+import { useGraphPopoverState } from '../primitives/use_graph_popover_state';
+import { GraphPopover } from '../primitives/graph_popover';
+import { LabelNodePopoverContent } from '../../node/label_node/label_node_popover';
+import type { DocumentAnalysisOutput } from '../../node/label_node/analyze_documents';
+import { GRAPH_EVENTS_POPOVER_ID } from '../../test_ids';
 
 export interface UseEventDetailsPopoverReturn {
   /**
@@ -46,7 +46,7 @@ export const useEventDetailsPopover = (
   analysis: DocumentAnalysisOutput | null,
   text: string
 ): UseEventDetailsPopoverReturn => {
-  const { id, state, actions } = useGraphPopover('events-popover');
+  const { id, state, actions } = useGraphPopoverState('events-popover');
   const { euiTheme } = useEuiTheme();
 
   // eslint-disable-next-line react/display-name
