@@ -19,7 +19,6 @@ import { useStreamDetail } from '../../../../hooks/use_stream_detail';
 import { GenerateSuggestionButton } from '../../stream_detail_routing/review_suggestions_form/generate_suggestions_button';
 import { NoStepsEmptyPrompt } from '../empty_prompts';
 import { PipelineSuggestion } from '../pipeline_suggestions/pipeline_suggestion';
-import { SuggestPipelinePanel } from '../pipeline_suggestions/suggest_pipeline_panel';
 import {
   useSimulatorSelector,
   useStreamEnrichmentSelector,
@@ -311,19 +310,17 @@ export const StepsEditor = React.memo(() => {
         <RootSteps stepRefs={stepRefs} />
       ) : // hold off rendering empty prompt while there is a chance we will show the pipeline suggestion prompt
       !canUsePipelineSuggestions && canUsePipelineSuggestionsPending ? null : (
-        <NoStepsEmptyPrompt>
+        <NoStepsEmptyPrompt canUsePipelineSuggestions={!!canUsePipelineSuggestions}>
           {canUsePipelineSuggestions && (
-            <SuggestPipelinePanel>
-              <GenerateSuggestionButton
-                aiFeatures={aiFeatures}
-                isLoading={isLoadingSuggestion}
-                onClick={(connectorId) => suggestPipeline({ connectorId, streamName: stream.name })}
-              >
-                {i18n.translate('xpack.streams.stepsEditor.suggestPipelineButtonLabel', {
-                  defaultMessage: 'Suggest a pipeline',
-                })}
-              </GenerateSuggestionButton>
-            </SuggestPipelinePanel>
+            <GenerateSuggestionButton
+              aiFeatures={aiFeatures}
+              isLoading={isLoadingSuggestion}
+              onClick={(connectorId) => suggestPipeline({ connectorId, streamName: stream.name })}
+            >
+              {i18n.translate('xpack.streams.stepsEditor.suggestPipelineButtonLabel', {
+                defaultMessage: 'Suggest a pipeline',
+              })}
+            </GenerateSuggestionButton>
           )}
         </NoStepsEmptyPrompt>
       )}

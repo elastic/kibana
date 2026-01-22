@@ -9,11 +9,13 @@
 
 // Command registry - the main command registry instance and related utilities
 export * from './registry';
+export type { ESQLCommandSummary } from './registry/types';
 
 // Command definitions - constants, types, and utilities for defining commands
 export * from './definitions/constants';
 export * from './definitions/types';
 export * from './definitions/all_operators';
+export * from './definitions/utils/promql';
 
 // Utilities from definitions
 export { METADATA_FIELDS } from './registry/options/metadata';

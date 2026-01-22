@@ -6,15 +6,14 @@
  */
 
 import { z } from '@kbn/zod';
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
+  ObservabilityAgentBuilderCoreSetup,
+  ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../types';
-import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import { timeRangeSchemaRequired } from '../../utils/tool_schemas';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { getToolHandler } from './handler';
@@ -32,22 +31,19 @@ const getTraceMetricsSchema = z.object({
     ),
   groupBy: z
     .string()
-    .optional()
+    .default('service.name')
     .describe(
-      'Field to group results by. Common fields: "service.name", "transaction.name", "host.name", "container.id". Use low-cardinality fields where possible for meaningful aggregations. If not specified, results are grouped by service.name.'
+      'Field to group results by. Common fields: "service.name", "transaction.name", "host.name", "container.id". Use low-cardinality fields for meaningful aggregations.'
     ),
 });
 
 export function createGetTraceMetricsTool({
   core,
-  dataRegistry,
+  plugins,
   logger,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
-  dataRegistry: ObservabilityAgentBuilderDataRegistry;
+  core: ObservabilityAgentBuilderCoreSetup;
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   logger: Logger;
 }): StaticToolRegistration<typeof getTraceMetricsSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof getTraceMetricsSchema> = {
@@ -90,16 +86,17 @@ Returns an array of items with: group (the groupBy field value), latency (ms), t
     },
     handler: async ({ start, end, kqlFilter, groupBy }, context) => {
       const { request } = context;
-      const groupByField = groupBy || 'service.name';
 
       try {
         const { items } = await getToolHandler({
+          core,
+          plugins,
           request,
-          dataRegistry,
+          logger,
           start,
           end,
           kqlFilter,
-          groupBy: groupByField,
+          groupBy,
         });
 
         return {

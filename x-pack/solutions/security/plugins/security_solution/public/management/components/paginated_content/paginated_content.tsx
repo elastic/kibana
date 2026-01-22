@@ -55,6 +55,7 @@ export interface PaginatedContentProps<T, C extends ComponentWithAnyProps> exten
   contentClassName?: string;
   // Artifact specific decorations to display in the cards
   CardDecorator: React.ComponentType<ArtifactEntryCardDecoratorProps> | undefined;
+  dataUpdatedAt?: number;
   /**
    * Children can be used to define custom content if the default creation of items is not sufficient
    * to accommodate a use case.
@@ -143,6 +144,7 @@ export const PaginatedContent = memo(
     'aria-label': ariaLabel,
     className,
     CardDecorator,
+    dataUpdatedAt,
     children,
   }: PaginatedContentProps<T, C>) => {
     const [itemKeys] = useState<WeakMap<T, string>>(new WeakMap());
@@ -229,7 +231,9 @@ export const PaginatedContent = memo(
             }
           }
 
-          return <Item {...itemComponentProps(item)} key={key} Decorator={CardDecorator} />;
+          const itemKey = dataUpdatedAt ? `${key}-${dataUpdatedAt}` : key;
+
+          return <Item {...itemComponentProps(item)} key={itemKey} Decorator={CardDecorator} />;
         });
       }
       if (!loading)
@@ -245,6 +249,7 @@ export const PaginatedContent = memo(
       itemComponentProps,
       CardDecorator,
       itemKeys,
+      dataUpdatedAt,
     ]);
 
     return (
