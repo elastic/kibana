@@ -160,7 +160,9 @@ export const endpointResponseAction = async (
       break;
 
     case 'runscript':
-      {
+      if (
+        endpointAppContextService.experimentalFeatures.responseActionsEndpointAutomatedRunScript
+      ) {
         const processedAgentIds = new Set<string>();
 
         for (const alert of alerts) {

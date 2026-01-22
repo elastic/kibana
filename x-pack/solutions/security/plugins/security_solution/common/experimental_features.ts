@@ -56,7 +56,7 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsEndpointRunScript: false,
 
   /**
-   * Support for Endpoint `runscript` from rules (automated)
+   * Support for Automated Endpoint `runscript` (from rules)
    * Release: 9.4
    */
   responseActionsEndpointAutomatedRunScript: false,
