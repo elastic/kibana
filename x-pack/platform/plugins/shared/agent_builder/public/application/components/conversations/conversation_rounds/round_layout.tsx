@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import React, { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ConversationRound } from '@kbn/agent-builder-common';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import { isConfirmationPrompt } from '@kbn/agent-builder-common/agents';
 import { RoundInput } from './round_input';
@@ -23,6 +24,7 @@ interface RoundLayoutProps {
   isCurrentRound: boolean;
   scrollContainerHeight: number;
   rawRound: ConversationRound;
+  conversationAttachments?: VersionedAttachment[];
 }
 
 const labels = {
@@ -35,6 +37,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
   isCurrentRound,
   scrollContainerHeight,
   rawRound,
+  conversationAttachments,
 }) => {
   const [roundContainerMinHeight, setRoundContainerMinHeight] = useState(0);
   const [hasBeenLoading, setHasBeenLoading] = useState(false);
@@ -105,7 +108,11 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     >
       {/* Input Message */}
       <EuiFlexItem grow={false}>
-        <RoundInput input={input.message} attachments={input.attachments} />
+        <RoundInput
+          input={input.message}
+          attachmentRefs={input.attachment_refs}
+          conversationAttachments={conversationAttachments}
+        />
       </EuiFlexItem>
 
       {/* Thinking - treat awaiting prompt as loading to show last reasoning event */}
