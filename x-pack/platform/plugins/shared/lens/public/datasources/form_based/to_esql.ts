@@ -139,6 +139,9 @@ export function getESQLForLayer(
     ([_, col]) => !col.isBucketed
   );
 
+  // Collect all params from metrics and buckets
+  const allParamObjects: Array<Record<string, string | number>> = [];
+
   // Process metrics
   const metricsResult: Array<string | EsqlQueryFailure> = metricEsAggsEntries.map(
     ([colId, col], index) => {
@@ -201,7 +204,7 @@ export function getESQLForLayer(
         },
       ];
 
-      let metricESQL = def.toESQL(
+      const rawResult = def.toESQL(
         {
           ...col,
           timeShift: resolveTimeShift(
@@ -218,11 +221,15 @@ export function getESQLForLayer(
         dateRange
       );
 
-      if (!metricESQL) {
+      if (!rawResult) {
         return getEsqlQueryFailedResult('function_not_supported', col.operationType);
       }
 
-      metricESQL = `${esAggsId} = ` + metricESQL;
+      if (rawResult.params) {
+        allParamObjects.push(rawResult.params);
+      }
+
+      let metricESQL = `${esAggsId} = ${rawResult.template}`;
 
       if (wrapInFilter) {
         if (col.filter?.language === 'kuery') {
@@ -349,7 +356,7 @@ export function getESQLForLayer(
         }
       }
 
-      const bucketESQL = def.toESQL(
+      const rawResult = def.toESQL(
         {
           ...col,
           timeShift: resolveTimeShift(
@@ -366,11 +373,15 @@ export function getESQLForLayer(
         dateRange
       );
 
-      if (!bucketESQL) {
+      if (!rawResult) {
         return getEsqlQueryFailedResult('function_not_supported', col.operationType);
       }
 
-      return `${esAggsId} = ${bucketESQL}`;
+      if (rawResult.params) {
+        allParamObjects.push(rawResult.params);
+      }
+
+      return `${esAggsId} = ${rawResult.template}`;
     }
   );
 
@@ -390,7 +401,11 @@ export function getESQLForLayer(
     }
 
     if (metrics.length > 0) {
-      esqlCompose = esqlCompose.pipe(stats(`${metrics.join(', ')} BY ${buckets.join(', ')}`));
+      const statsBody = `${metrics.join(', ')} BY ${buckets.join(', ')}`;
+      const allParams = Object.assign({}, ...allParamObjects);
+      esqlCompose = esqlCompose.pipe(
+        Object.keys(allParams).length > 0 ? stats(statsBody, allParams) : stats(statsBody)
+      );
     }
 
     const sorts = bucketEsAggsEntries.map(([colId, col], index) => {
@@ -409,7 +424,11 @@ export function getESQLForLayer(
     esqlCompose = esqlCompose.pipe(sort(...sorts));
   } else {
     if (metrics.length > 0) {
-      esqlCompose = esqlCompose.pipe(stats(metrics.join(', ')));
+      const statsBody = metrics.join(', ');
+      const allParams = Object.assign({}, ...allParamObjects);
+      esqlCompose = esqlCompose.pipe(
+        Object.keys(allParams).length > 0 ? stats(statsBody, allParams) : stats(statsBody)
+      );
     }
   }
 

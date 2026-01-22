@@ -39,7 +39,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'discover:sampleSize': DEFAULT_SAMPLE_SIZE,
     'discover:rowHeightOption': 0, // single line
     'discover:sampleRowsPerPage': DEFAULT_ROWS_PER_PAGE,
-    hideAnnouncements: true,
   };
 
   describe('discover data grid sample size', function describeIndexTests() {

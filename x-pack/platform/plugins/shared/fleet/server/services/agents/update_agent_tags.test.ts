@@ -25,6 +25,7 @@ jest.mock('../app_context', () => {
       getConfig: () => {},
       getMessageSigningService: jest.fn(),
       getExperimentalFeatures: jest.fn().mockResolvedValue({}),
+      getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
     },
   };
 });
