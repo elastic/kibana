@@ -8,19 +8,19 @@
 import { renderHook } from '@testing-library/react';
 import type { Filter } from '@kbn/es-query';
 import { useEntityNodeExpandPopover } from './use_entity_node_expand_popover';
-import type { NodeProps } from '../types';
+import type { NodeProps } from '../../types';
 import type {
   ItemExpandPopoverListItemProps,
   SeparatorExpandPopoverListItemProps,
-} from './list_group_graph_popover';
+} from '../primitives/list_graph_popover';
 import {
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
-} from '../test_ids';
-import { addFilter } from './search_filters';
-import { RELATED_ENTITY } from '../../common/constants';
+} from '../../test_ids';
+import { addFilter } from '../../graph_investigation/search_filters';
+import { RELATED_ENTITY } from '../../../common/constants';
 
 const mockSetSearchFilters = jest.fn();
 const mockOnShowEntityDetailsClick = jest.fn();
@@ -34,8 +34,8 @@ let capturedItemsFn:
     ) => Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps>)
   | null = null;
 
-jest.mock('./use_node_expand_graph_popover', () => ({
-  useNodeExpandGraphPopover: jest.fn(({ itemsFn }) => {
+jest.mock('./use_node_expand_popover', () => ({
+  useNodeExpandPopover: jest.fn(({ itemsFn }) => {
     capturedItemsFn = itemsFn;
     return {
       id: 'test-popover',

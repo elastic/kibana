@@ -9,10 +9,10 @@ import type { ReactNode } from 'react';
 import React, { memo, useMemo, useCallback } from 'react';
 import { EuiListGroup, useEuiTheme } from '@elastic/eui';
 import styled from '@emotion/styled';
-import type { PopoverActions, PopoverState } from '../graph/use_graph_popover';
-import { useGraphPopover } from '../graph/use_graph_popover';
-import { GraphPopover } from '../graph/graph_popover';
-import { ExpandPopoverListItem } from '../styles';
+import type { PopoverActions, PopoverState } from '../primitives/use_graph_popover_state';
+import { useGraphPopoverState } from '../primitives/use_graph_popover_state';
+import { GraphPopover } from '../primitives/graph_popover';
+import { PopoverListItem } from '../primitives/popover_list_item';
 
 export interface UseNodeDetailsPopoverReturn {
   /**
@@ -75,7 +75,7 @@ export interface UseGenericPopoverProps {
 
 const MAX_VISIBLE_ITEMS = 10;
 
-const StyledExpandPopoverListItem = styled(ExpandPopoverListItem)`
+const StyledPopoverListItem = styled(PopoverListItem)`
   > span {
     min-block-size: unset !important;
     padding-block: unset !important;
@@ -89,7 +89,7 @@ export const useNodeDetailsPopover = ({
   itemTestSubj,
   popoverTestSubj,
 }: UseGenericPopoverProps): UseNodeDetailsPopoverReturn => {
-  const { id, state, actions } = useGraphPopover(popoverId);
+  const { id, state, actions } = useGraphPopoverState(popoverId);
   const { euiTheme } = useEuiTheme();
 
   // Calculate dynamic height based on number of items
@@ -115,7 +115,7 @@ export const useNodeDetailsPopover = ({
         data-test-subj={contentTestSubj}
       >
         {items.map((item) => (
-          <StyledExpandPopoverListItem
+          <StyledPopoverListItem
             key={item.key}
             label={item.label}
             data-test-subj={itemTestSubj}
