@@ -18,11 +18,15 @@ import {
   AT_TIMESTAMP,
   DURATION,
   EVENT_OUTCOME,
+  FAAS_COLDSTART,
   KIND,
   OTEL_SPAN_LINKS_TRACE_ID,
   PARENT_ID,
   PROCESSOR_EVENT,
   SERVICE_NAME,
+  SPAN_COMPOSITE_COUNT,
+  SPAN_COMPOSITE_SUM,
+  SPAN_COMPOSITE_COMPRESSION_STRATEGY,
   SPAN_DURATION,
   SPAN_ID,
   SPAN_LINKS_TRACE_ID,
@@ -39,7 +43,11 @@ import {
   TRANSACTION_NAME,
 } from '../../../common/es_fields/apm';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
-import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
+import type {
+  CompressionStrategy,
+  TraceItem,
+  TraceItemComposite,
+} from '../../../common/waterfall/unified_trace_item';
 import type { LogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
 import { parseOtelDuration } from '../../lib/helpers/parse_otel_duration';
 import { getSpanLinksCountById } from '../span_links/get_linked_children';
@@ -71,6 +79,10 @@ const optionalFields = asMutableArray([
   OTEL_SPAN_LINKS_TRACE_ID,
   SPAN_LINKS_TRACE_ID,
   AGENT_NAME,
+  FAAS_COLDSTART,
+  SPAN_COMPOSITE_COUNT,
+  SPAN_COMPOSITE_SUM,
+  SPAN_COMPOSITE_COMPRESSION_STRATEGY,
 ] as const);
 
 export function getErrorsByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
@@ -232,6 +244,12 @@ export async function getUnifiedTraceItems({
         agentName: event[AGENT_NAME],
         processorEvent: event[PROCESSOR_EVENT],
       }),
+      coldstart: event[FAAS_COLDSTART],
+      composite: resolveComposite(
+        event[SPAN_COMPOSITE_COUNT],
+        event[SPAN_COMPOSITE_SUM],
+        event[SPAN_COMPOSITE_COMPRESSION_STRATEGY]
+      ),
     } satisfies TraceItem;
   });
 
@@ -283,4 +301,19 @@ const resolveStatus = (eventOutcome?: EventOutcome, statusCode?: StatusCode): Ev
   if (statusCode) {
     return { fieldName: STATUS_CODE, value: statusCode };
   }
+};
+
+const isCompressionStrategy = (value?: string): value is CompressionStrategy =>
+  value === 'exact_match' || value === 'same_kind';
+
+const resolveComposite = (
+  count?: number,
+  sum?: number,
+  compressionStrategy?: string
+): TraceItemComposite | undefined => {
+  if (!count || !sum || !isCompressionStrategy(compressionStrategy)) {
+    return undefined;
+  }
+
+  return { count, sum, compressionStrategy };
 };

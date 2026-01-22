@@ -350,13 +350,13 @@ const extractPackagePolicyVars = (
       };
 
       logger.debug(
-        `Extracted Azure cloud connector vars: tenant_id=${!!tenantId}, client_id=${!!clientId}, azure_credentials=${!!azureCredentials}`
+        `Extracted Azure cloud connector vars: tenant_id=${!!tenantId}, client_id=${!!clientId}, azure_credentials=[REDACTED]`
       );
 
       return azureCloudConnectorVars;
     } else {
       logger.error(
-        `Missing required Azure vars: tenant_id=${!!tenantId}, client_id=${!!clientId}, azure_credentials=${!!azureCredentials}`
+        `Missing required Azure vars: tenant_id=${!!tenantId}, client_id=${!!clientId}, azure_credentials=[REDACTED]`
       );
     }
   }
@@ -2201,8 +2201,18 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             policy_id: packagePolicy.policy_id,
             policy_ids: packagePolicy.policy_ids,
           });
+          // Only delete secrets that belong to the package policy itself,
+          // not to cloud connectors (which manage their own secret lifecycle)
           if (packagePolicy?.secret_references?.length) {
-            secretsToDelete.push(...packagePolicy.secret_references.map((s) => s.id));
+            if (!packagePolicy.cloud_connector_id) {
+              // Regular package policy secrets - safe to delete
+              secretsToDelete.push(...packagePolicy.secret_references.map((s) => s.id));
+            } else {
+              // Cloud connector secrets - managed by cloud connector lifecycle
+              logger.debug(
+                `Skipping secret deletion for package policy ${packagePolicy.id} - secrets are managed by cloud connector ${packagePolicy.cloud_connector_id}`
+              );
+            }
           }
         } else if (!success && error) {
           result.push({

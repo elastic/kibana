@@ -32,7 +32,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const log = getService('log');
   const MINUTE = 60 * 1000;
 
-  describe('Endpoint Exceptions', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/249130
+  describe.skip('Endpoint Exceptions', function () {
     targetTags(this, ['@ess', '@serverless']);
     this.timeout(10 * MINUTE);
 

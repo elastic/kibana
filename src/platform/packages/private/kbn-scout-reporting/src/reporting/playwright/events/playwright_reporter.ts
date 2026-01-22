@@ -93,21 +93,23 @@ export class ScoutPlaywrightReporter implements Reporter {
   private getOwnerAreas(owners: string[]): CodeOwnerArea[] {
     return owners
       .map((owner) => findAreaForCodeOwner(owner))
-      .filter((area) => area !== undefined) as CodeOwnerArea[];
+      .filter((area): area is CodeOwnerArea => area !== undefined);
   }
 
   private getScoutFileInfoForPath(filePath: string): ScoutFileInfo {
     const fileOwners = this.getFileOwners(filePath);
+    const areas = this.getOwnerAreas(fileOwners);
 
     return {
       path: filePath,
-      owner: fileOwners,
-      area: this.getOwnerAreas(fileOwners),
+      owner: fileOwners.length > 0 ? fileOwners : 'unknown',
+      area: areas.length > 0 ? areas : 'unknown',
     };
   }
 
   private getScoutConfigCategory(configPath: string): ScoutTestRunConfigCategory {
-    const pattern = /scout\/(api|ui)\//;
+    // Matches scout/{api|ui} or scout_<custom>/{api|ui} and captures api|ui
+    const pattern = /scout(?:_[^/]+)?\/(api|ui)\//;
     const match = configPath.match(pattern);
     if (match) {
       return match[1] === 'api'

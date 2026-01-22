@@ -15,13 +15,13 @@
     ],
     "requiredPlugins": [
       "data",
-      "expressions",
       "dataViews",
       "uiActions",
       "contentManagement",
       "share",
       "fileUpload",
-      "fieldFormats"
+      "fieldFormats",
+      "kql"
     ],
     "requiredBundles": [
       "kibanaReact",

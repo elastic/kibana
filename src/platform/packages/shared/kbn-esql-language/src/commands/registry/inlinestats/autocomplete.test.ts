@@ -11,9 +11,10 @@ import { Parser } from '../../../parser';
 import { mockContext, getMockCallbacks } from '../../../__tests__/commands/context_fixtures';
 import { autocomplete } from './autocomplete';
 import { expectSuggestions } from '../../../__tests__/commands/autocomplete';
-import type { ESQLColumnData, ICommandCallbacks } from '../types';
+import { UnmappedFieldsStrategy, type ESQLColumnData, type ICommandCallbacks } from '../types';
 import { columnsAfter } from './columns_after';
 import { columnsAfter as statsColumnsAfter } from '../stats/columns_after';
+import { additionalFieldsMock } from '../../../__tests__/language/helpers';
 
 const inlineStatsExpectSuggestions = (
   query: string,
@@ -73,8 +74,20 @@ describe('INLINE STATS Multi-token Autocomplete', () => {
       },
     } = Parser.parseQuery(statsQueryString);
 
-    const inlineStatsResult = columnsAfter(inlineStatsCommand, previousCommandFields, queryString);
-    const statsResult = statsColumnsAfter(statsCommand, previousCommandFields, statsQueryString);
+    const inlineStatsResult = columnsAfter(
+      inlineStatsCommand,
+      previousCommandFields,
+      queryString,
+      additionalFieldsMock,
+      UnmappedFieldsStrategy.FAIL
+    );
+    const statsResult = statsColumnsAfter(
+      statsCommand,
+      previousCommandFields,
+      statsQueryString,
+      additionalFieldsMock,
+      UnmappedFieldsStrategy.FAIL
+    );
 
     expect(inlineStatsResult).toEqual<ESQLColumnData[]>([
       { name: 'avg_field1', type: 'double', userDefined: true, location: { min: 22, max: 31 } },
