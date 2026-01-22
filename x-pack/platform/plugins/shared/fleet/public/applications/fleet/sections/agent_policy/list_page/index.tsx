@@ -386,6 +386,9 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
             />
           )
         }
+        tableCaption={i18n.translate('xpack.fleet.agentPolicyList.agentPolicies.tableCaption', {
+          defaultMessage: 'List of agent policies',
+        })}
         items={agentPolicyData ? agentPolicyData.items : []}
         itemId="id"
         columns={columns}
