@@ -16,6 +16,7 @@ import type { BasicRuleInfo } from '../../../basic_rule_info';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
 import type { PrebuiltRuleAssetsFilter } from '../../../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_filter';
 import type { PrebuiltRuleAssetsSort } from '../../../../../../../../common/api/detection_engine/prebuilt_rules/common/prebuilt_rule_assets_sort';
+import type { PrebuiltRuleAsset } from '../../../../model/rule_assets/prebuilt_rule_asset';
 import { createChunkedFilters, chunkedFetch } from '../utils';
 
 type RuleVersionInfo = BasicRuleInfo & {
@@ -24,7 +25,6 @@ type RuleVersionInfo = BasicRuleInfo & {
   risk_score: number;
   severity: string;
 };
-import type { PrebuiltRuleAsset } from '../../../../model/rule_assets/prebuilt_rule_asset';
 
 const SEVERITY_RANK: Record<string, number> = {
   low: 20,
@@ -133,6 +133,8 @@ export async function fetchLatestVersions(
 
   const filteredVersions = filterRuleVersions(latestVersions, filter);
 
+  // Since we fetch from ES in chunks, we can't use ES for sorting.
+  // So we sort here, once all chunks are fetched.
   return sortRuleVersions(filteredVersions, sort);
 }
 
@@ -162,31 +164,41 @@ const filterRuleVersions = (
   });
 };
 
-const sortRuleVersions = (
+type RuleVersionInfoCompareFn = (a: RuleVersionInfo, b: RuleVersionInfo) => number;
+
+function sortRuleVersions(
   versions: RuleVersionInfo[],
   sort?: PrebuiltRuleAssetsSort
-): RuleVersionInfo[] => {
+): RuleVersionInfo[] {
   const sortField = sort?.[0]?.field;
+
   if (!sortField) {
     return versions;
   }
 
   const order = sort?.[0]?.order ?? 'asc';
+
+  return versions.sort(createRuleVersionInfoCompareFn(sortField, order));
+}
+
+function createRuleVersionInfoCompareFn(
+  sortField: string,
+  order: 'asc' | 'desc'
+): RuleVersionInfoCompareFn {
   const direction = order === 'desc' ? -1 : 1;
 
-  return versions.sort((a, b) => {
-    switch (sortField) {
-      case 'name':
-        return a.name.localeCompare(b.name) * direction;
-      case 'risk_score':
-        return (a.risk_score - b.risk_score) * direction;
-      case 'severity': {
+  switch (sortField) {
+    case 'name':
+      return (a, b) => a.name.localeCompare(b.name) * direction;
+    case 'risk_score':
+      return (a, b) => (a.risk_score - b.risk_score) * direction;
+    case 'severity':
+      return (a, b) => {
         const rankA = SEVERITY_RANK[a.severity] ?? -1;
         const rankB = SEVERITY_RANK[b.severity] ?? -1;
         return (rankA - rankB) * direction;
-      }
-      default:
-        return 0;
-    }
-  });
-};
+      };
+    default:
+      return () => 0;
+  }
+}
