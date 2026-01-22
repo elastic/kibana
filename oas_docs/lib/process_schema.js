@@ -80,7 +80,6 @@ const createProcessSchema = (components, nameGenerator, stats, log) => {
         const propContext = {
           ...context,
           propertyPath: [...(context.propertyPath || []), propName],
-          path: `${context.path || ''}.properties.${propName}`,
         };
         // Extract nested objects as components
         // Skip empty objects
@@ -117,7 +116,6 @@ const createProcessSchema = (components, nameGenerator, stats, log) => {
       const itemContext = {
         ...context,
         inArray: true,
-        path: `${context.path || ''}.items`,
       };
       // Extract nested objects as components
       // Skip empty objects (objects without properties)
@@ -153,7 +151,6 @@ const createProcessSchema = (components, nameGenerator, stats, log) => {
       const addlPropContext = {
         ...context,
         inAdditionalProperties: true,
-        path: `${context.path || ''}.additionalProperties`,
       };
       // Extract nested objects as components
       // Skip empty objects (objects without properties)

@@ -133,12 +133,18 @@ describe('componentizeObjectSchemas', () => {
 
       const result = yaml.load(fs.readFileSync(testFile, 'utf8'));
 
-      // Check nested oneOf was extracted
-      const thingSchema =
-        result.paths['/api/test'].get.responses['200'].content['application/json'].schema.properties
-          .thing;
-      expect(thingSchema.oneOf[0].$ref).toBeDefined();
-      expect(thingSchema.oneOf[1].$ref).toBeDefined();
+      // The top-level schema should now be extracted as a component
+      const responseSchema =
+        result.paths['/api/test'].get.responses['200'].content['application/json'].schema;
+      expect(responseSchema.$ref).toBeDefined();
+
+      // Get the extracted component
+      const componentName = responseSchema.$ref.split('/').pop();
+      const extractedSchema = result.components.schemas[componentName];
+
+      // Check nested oneOf was extracted in the component
+      expect(extractedSchema.properties.thing.oneOf[0].$ref).toBeDefined();
+      expect(extractedSchema.properties.thing.oneOf[1].$ref).toBeDefined();
     });
   });
 
@@ -395,12 +401,8 @@ describe('componentizeObjectSchemas', () => {
       expect(componentNames.length).toBe(2);
 
       // Names should include operation ID, Response, status code, and index
-      expect(componentNames[0]).toMatchInlineSnapshot(
-        `"ApiActionsConnector.get.responses.200.content.applicationJson.schema_Get_Response_200_1"`
-      );
-      expect(componentNames[1]).toMatchInlineSnapshot(
-        `"ApiActionsConnector.get.responses.200.content.applicationJson.schema_Get_Response_200_2"`
-      );
+      expect(componentNames[0]).toMatchInlineSnapshot(`"ApiActionsConnector_Get_Response_200_1"`);
+      expect(componentNames[1]).toMatchInlineSnapshot(`"ApiActionsConnector_Get_Response_200_2"`);
     });
 
     it('should handle name collisions', async () => {
@@ -452,6 +454,221 @@ describe('componentizeObjectSchemas', () => {
       const componentNames = Object.keys(result.components.schemas);
       expect(componentNames.length).toBe(2);
       expect(new Set(componentNames).size).toBe(2); // All unique
+    });
+  });
+
+  describe('top-level schema extraction (from componentization example)', () => {
+    it('should extract top-level response schema and nested properties', async () => {
+      const testDoc = {
+        openapi: '3.0.3',
+        info: { title: 'Test', version: '1.0.0' },
+        paths: {
+          '/api/actions/connector/{id}': {
+            get: {
+              operationId: 'get-actions-connector-id',
+              parameters: [
+                {
+                  description: 'An identifier for the connector.',
+                  in: 'path',
+                  name: 'id',
+                  required: true,
+                  schema: { type: 'string' },
+                },
+              ],
+              responses: {
+                200: {
+                  content: {
+                    'application/json': {
+                      schema: {
+                        additionalProperties: false,
+                        type: 'object',
+                        properties: {
+                          config: {
+                            additionalProperties: {},
+                            default: {},
+                            type: 'object',
+                            properties: {
+                              from: { type: 'string' },
+                              host: { type: 'string' },
+                            },
+                          },
+                          connector_type_id: {
+                            description: 'The connector type identifier.',
+                            type: 'string',
+                          },
+                          id: {
+                            description: 'The connector ID.',
+                            type: 'string',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const testFile = path.join(tempDir, 'test.yaml');
+      fs.writeFileSync(testFile, yaml.dump(testDoc));
+
+      await componentizeObjectSchemas(testFile, { log: mockLog });
+
+      const result = yaml.load(fs.readFileSync(testFile, 'utf8'));
+
+      // Check that top-level response schema is now a reference
+      const responseSchema =
+        result.paths['/api/actions/connector/{id}'].get.responses['200'].content['application/json']
+          .schema;
+      expect(responseSchema.$ref).toBe('#/components/schemas/ApiActionsConnector_Get_Response_200');
+
+      // Check that the component was created
+      expect(result.components.schemas.ApiActionsConnector_Get_Response_200).toBeDefined();
+      const topLevelComponent = result.components.schemas.ApiActionsConnector_Get_Response_200;
+      expect(topLevelComponent.type).toBe('object');
+      expect(topLevelComponent.properties).toBeDefined();
+
+      // Check that nested config property is also extracted as a reference
+      expect(topLevelComponent.properties.config.$ref).toBe(
+        '#/components/schemas/ApiActionsConnector_Get_Response_200_Config'
+      );
+
+      // Check that the nested config component exists
+      expect(result.components.schemas.ApiActionsConnector_Get_Response_200_Config).toBeDefined();
+      const configComponent = result.components.schemas.ApiActionsConnector_Get_Response_200_Config;
+      expect(configComponent.type).toBe('object');
+      expect(configComponent.properties.from).toEqual({ type: 'string' });
+      expect(configComponent.properties.host).toEqual({ type: 'string' });
+
+      // Check that simple properties remain inline
+      expect(topLevelComponent.properties.connector_type_id).toEqual({
+        description: 'The connector type identifier.',
+        type: 'string',
+      });
+      expect(topLevelComponent.properties.id).toEqual({
+        description: 'The connector ID.',
+        type: 'string',
+      });
+    });
+
+    it('should extract top-level request schema', async () => {
+      const testDoc = {
+        openapi: '3.0.3',
+        info: { title: 'Test', version: '1.0.0' },
+        paths: {
+          '/api/cases': {
+            post: {
+              operationId: 'create-case',
+              requestBody: {
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      required: ['title'],
+                      properties: {
+                        title: { type: 'string' },
+                        settings: {
+                          type: 'object',
+                          properties: {
+                            syncAlerts: { type: 'boolean' },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              responses: {
+                201: {
+                  content: {
+                    'application/json': {
+                      schema: { type: 'object' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const testFile = path.join(tempDir, 'test.yaml');
+      fs.writeFileSync(testFile, yaml.dump(testDoc));
+
+      await componentizeObjectSchemas(testFile, { log: mockLog });
+
+      const result = yaml.load(fs.readFileSync(testFile, 'utf8'));
+
+      // Check that top-level request schema is now a reference
+      const requestSchema =
+        result.paths['/api/cases'].post.requestBody.content['application/json'].schema;
+      expect(requestSchema.$ref).toBe('#/components/schemas/ApiCases_Post_Request');
+
+      // Check that the component was created
+      expect(result.components.schemas.ApiCases_Post_Request).toBeDefined();
+      const requestComponent = result.components.schemas.ApiCases_Post_Request;
+      expect(requestComponent.type).toBe('object');
+      expect(requestComponent.required).toEqual(['title']);
+
+      // Check that nested settings property is also extracted
+      expect(requestComponent.properties.settings.$ref).toBe(
+        '#/components/schemas/ApiCases_Post_Request_Settings'
+      );
+
+      // Check that the nested settings component exists
+      expect(result.components.schemas.ApiCases_Post_Request_Settings).toBeDefined();
+    });
+
+    it('should not extract schemas that are already references', async () => {
+      const testDoc = {
+        openapi: '3.0.3',
+        info: { title: 'Test', version: '1.0.0' },
+        paths: {
+          '/api/test': {
+            get: {
+              responses: {
+                200: {
+                  content: {
+                    'application/json': {
+                      schema: {
+                        $ref: '#/components/schemas/ExistingSchema',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            ExistingSchema: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+              },
+            },
+          },
+        },
+      };
+
+      const testFile = path.join(tempDir, 'test.yaml');
+      fs.writeFileSync(testFile, yaml.dump(testDoc));
+
+      await componentizeObjectSchemas(testFile, { log: mockLog });
+
+      const result = yaml.load(fs.readFileSync(testFile, 'utf8'));
+
+      // Schema should remain a reference to ExistingSchema
+      const responseSchema =
+        result.paths['/api/test'].get.responses['200'].content['application/json'].schema;
+      expect(responseSchema.$ref).toBe('#/components/schemas/ExistingSchema');
+
+      // Should only have one component (the existing one)
+      expect(Object.keys(result.components.schemas).length).toBe(1);
+      expect(result.components.schemas.ExistingSchema).toBeDefined();
     });
   });
 });
