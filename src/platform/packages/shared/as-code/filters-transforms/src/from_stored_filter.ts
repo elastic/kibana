@@ -27,7 +27,7 @@ import type {
 } from '@kbn/as-code-filters-schema';
 import type { Logger } from '@kbn/logging';
 import { FilterStateStore } from '@kbn/es-query-constants';
-import { ASCODE_FILTER_OPERATOR } from '@kbn/as-code-filters-constants';
+import { ASCODE_FILTER_OPERATOR, ASCODE_FILTER_TYPE } from '@kbn/as-code-filters-constants';
 import { migrateFilter } from '@kbn/es-query';
 import { FILTERS } from '@kbn/es-query';
 import type { StoredFilter } from './types';
@@ -286,7 +286,7 @@ function convertCustomFilter(
   const meta = filter.meta;
   return {
     ...baseProperties,
-    type: 'dsl',
+    type: ASCODE_FILTER_TYPE.DSL,
     dsl: convertToRawDSL(filter),
     ...(meta?.field || meta?.key ? { field: meta.field || meta.key } : {}),
     // Only preserve params for non-combined filters (combined filters use params differently)
@@ -325,7 +325,7 @@ function convertPhrasesFilter(
     const condition = convertToSimpleCondition(filter);
     return {
       ...baseProperties,
-      type: 'condition',
+      type: ASCODE_FILTER_TYPE.CONDITION,
       condition,
     } as AsCodeConditionFilter;
   } catch (error) {
@@ -348,7 +348,7 @@ function convertRangeFilter(
     const condition = convertToSimpleCondition(filter);
     return {
       ...baseProperties,
-      type: 'condition',
+      type: ASCODE_FILTER_TYPE.CONDITION,
       condition,
     } as AsCodeConditionFilter;
   } catch (error) {
@@ -365,7 +365,7 @@ function convertExistsFilter(
     const condition = convertToSimpleCondition(filter);
     return {
       ...baseProperties,
-      type: 'condition',
+      type: ASCODE_FILTER_TYPE.CONDITION,
       condition,
     } as AsCodeConditionFilter;
   } catch (error) {
@@ -382,7 +382,7 @@ function convertCombinedFilter(
     const group = convertToFilterGroup(filter);
     return {
       ...baseProperties,
-      type: 'group',
+      type: ASCODE_FILTER_TYPE.GROUP,
       group,
     };
   } catch (error) {
@@ -401,7 +401,7 @@ function convertSpatialFilter(
 ): AsCodeSpatialFilter {
   return {
     ...baseProperties,
-    type: 'spatial',
+    type: ASCODE_FILTER_TYPE.SPATIAL,
     dsl: convertToRawDSL(filter),
   };
 }
@@ -416,7 +416,7 @@ function convertToDSLFilter(
 ): AsCodeDSLFilter {
   return {
     ...baseProperties,
-    type: 'dsl',
+    type: ASCODE_FILTER_TYPE.DSL,
     dsl: convertToRawDSL(filter),
     ...(filter.meta?.field ? { field: filter.meta.field } : {}),
     // Only preserve params for non-combined filters (combined filters use params differently)

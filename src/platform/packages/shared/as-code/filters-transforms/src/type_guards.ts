@@ -18,6 +18,7 @@ import type {
   AsCodeDSLFilter,
   AsCodeSpatialFilter,
 } from '@kbn/as-code-filters-schema';
+import { ASCODE_FILTER_TYPE } from '@kbn/as-code-filters-constants';
 import { FILTERS } from '@kbn/es-query';
 import type { StoredFilter } from './types';
 
@@ -108,7 +109,7 @@ export function isCombinedFilter(storedFilter: StoredFilter): boolean {
  * Type guard to check if filter has a condition property
  */
 export function isConditionFilter(filter: AsCodeFilter): filter is AsCodeConditionFilter {
-  return filter.type === 'condition';
+  return filter.type === ASCODE_FILTER_TYPE.CONDITION;
 }
 
 /**
@@ -127,21 +128,21 @@ export function isRangeConditionFilter(
  * Type guard to check if filter has a group property
  */
 export function isGroupFilter(filter: AsCodeFilter): filter is AsCodeGroupFilter {
-  return filter.type === 'group';
+  return filter.type === ASCODE_FILTER_TYPE.GROUP;
 }
 
 /**
  * Type guard to check if filter has a dsl property
  */
 export function isDSLFilter(filter: AsCodeFilter): filter is AsCodeDSLFilter {
-  return filter.type === 'dsl';
+  return filter.type === ASCODE_FILTER_TYPE.DSL;
 }
 
 /**
  * Type guard to check if filter is a spatial filter
  */
 export function isSpatialFilter(filter: AsCodeFilter): filter is AsCodeSpatialFilter {
-  return filter.type === 'spatial';
+  return filter.type === ASCODE_FILTER_TYPE.SPATIAL;
 }
 
 /**

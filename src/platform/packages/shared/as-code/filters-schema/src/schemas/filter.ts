@@ -18,6 +18,7 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 import {
   ASCODE_FILTER_OPERATOR,
   ASCODE_GROUPED_CONDITION_TYPE,
+  ASCODE_FILTER_TYPE,
 } from '@kbn/as-code-filters-constants';
 
 // ====================================================================
@@ -182,7 +183,7 @@ interface RecursiveType {
  */
 export const asCodeConditionFilterSchema = commonBasePropertiesSchema.extends(
   {
-    type: schema.literal('condition'),
+    type: schema.literal(ASCODE_FILTER_TYPE.CONDITION),
     condition: conditionSchema,
   },
   { meta: { description: 'Condition filter' } }
@@ -195,7 +196,7 @@ export const asCodeConditionFilterSchema = commonBasePropertiesSchema.extends(
 const GROUP_FILTER_ID = '@kbn/as-code-filters-schema_groupFilter'; // package prefix for global uniqueness in OAS specs
 export const asCodeGroupFilterSchema = commonBasePropertiesSchema.extends(
   {
-    type: schema.literal('group'),
+    type: schema.literal(ASCODE_FILTER_TYPE.GROUP),
     group: schema.object(
       {
         type: schema.oneOf([
@@ -220,7 +221,7 @@ export const asCodeGroupFilterSchema = commonBasePropertiesSchema.extends(
  * Includes field and params properties specific to DSL filters for preserving metadata
  */
 export const asCodeDSLFilterSchema = commonBasePropertiesSchema.extends({
-  type: schema.literal('dsl'),
+  type: schema.literal(ASCODE_FILTER_TYPE.DSL),
   dsl: schema.recordOf(schema.string(), schema.any(), {
     meta: { description: 'Elasticsearch Query DSL object' },
   }),
@@ -246,7 +247,7 @@ export const asCodeDSLFilterSchema = commonBasePropertiesSchema.extends({
  * Similar to DSL filters but with type='spatial' to preserve spatial_filter meta.type
  */
 export const asCodeSpatialFilterSchema = commonBasePropertiesSchema.extends({
-  type: schema.literal('spatial'),
+  type: schema.literal(ASCODE_FILTER_TYPE.SPATIAL),
   dsl: schema.recordOf(schema.string(), schema.any(), {
     meta: { description: 'Elasticsearch geo query DSL object' },
   }),
