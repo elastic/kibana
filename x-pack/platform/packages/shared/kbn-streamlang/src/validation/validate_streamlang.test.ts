@@ -33,6 +33,7 @@ describe('validateStreamlang', () => {
 
       const result = validateStreamlang(dsl, {
         reservedFields: [],
+        streamType: 'wired',
       });
 
       expect(result.isValid).toBe(true);
@@ -52,6 +53,7 @@ describe('validateStreamlang', () => {
 
       const result = validateStreamlang(dsl, {
         reservedFields: [],
+        streamType: 'wired',
       });
 
       expect(result.isValid).toBe(false);
@@ -79,6 +81,7 @@ describe('validateStreamlang', () => {
 
       const result = validateStreamlang(dsl, {
         reservedFields: [],
+        streamType: 'wired',
       });
 
       expect(result.isValid).toBe(false);
@@ -102,6 +105,7 @@ describe('validateStreamlang', () => {
 
       const result = validateStreamlang(dsl, {
         reservedFields: ['@timestamp', 'data_stream.type'],
+        streamType: 'wired',
       });
 
       expect(result.isValid).toBe(false);
@@ -124,6 +128,7 @@ describe('validateStreamlang', () => {
 
       const result = validateStreamlang(dsl, {
         reservedFields: ['@timestamp', 'data_stream.type'],
+        streamType: 'classic',
       });
 
       expect(result.isValid).toBe(true);
@@ -147,6 +152,7 @@ describe('validateStreamlang', () => {
 
       const result = validateStreamlang(dsl, {
         reservedFields: [],
+        streamType: 'wired',
       });
 
       expect(result.isValid).toBe(true);
@@ -168,6 +174,7 @@ describe('validateStreamlang', () => {
 
       const result = validateStreamlang(dsl, {
         reservedFields: [],
+        streamType: 'wired',
       });
 
       expect(result.isValid).toBe(true);
@@ -187,6 +194,7 @@ describe('validateStreamlang', () => {
 
       const result = validateStreamlang(dsl, {
         reservedFields: [],
+        streamType: 'wired',
       });
 
       expect(result.isValid).toBe(false);
@@ -211,6 +219,7 @@ describe('validateStreamlang', () => {
 
       const result = validateStreamlang(dsl, {
         reservedFields: [],
+        streamType: 'wired',
       });
 
       // This should fail because the same field has different types in one pattern
@@ -237,6 +246,7 @@ describe('validateStreamlang', () => {
 
       const result = validateStreamlang(dsl, {
         reservedFields: [],
+        streamType: 'wired',
       });
 
       // This should pass - same field with same type is OK (though unusual)
@@ -259,6 +269,7 @@ describe('validateStreamlang', () => {
 
       const result = validateStreamlang(dsl, {
         reservedFields: [],
+        streamType: 'wired',
       });
 
       expect(result.isValid).toBe(false);
@@ -279,6 +290,7 @@ describe('validateStreamlang', () => {
 
       const result = validateStreamlang(dsl, {
         reservedFields: [],
+        streamType: 'wired',
       });
 
       expect(result.isValid).toBe(true);
@@ -300,6 +312,7 @@ describe('validateStreamlang', () => {
 
       const result = validateStreamlang(dsl, {
         reservedFields: [],
+        streamType: 'wired',
       });
 
       expect(result.isValid).toBe(false);
@@ -322,6 +335,7 @@ describe('validateStreamlang', () => {
 
       const result = validateStreamlang(dsl, {
         reservedFields: [],
+        streamType: 'wired',
       });
 
       expect(result.isValid).toBe(false);
@@ -352,6 +366,7 @@ describe('validateStreamlang', () => {
 
       const result = validateStreamlang(dsl, {
         reservedFields: [],
+        streamType: 'wired',
       });
 
       expect(result.isValid).toBe(false);
@@ -379,6 +394,7 @@ describe('validateStreamlang', () => {
 
       const result = validateStreamlang(dsl, {
         reservedFields: ['@timestamp'],
+        streamType: 'wired',
       });
 
       expect(result.isValid).toBe(false);
@@ -407,6 +423,7 @@ describe('validateStreamlang', () => {
 
       const result = validateStreamlang(dsl, {
         reservedFields: [],
+        streamType: 'wired',
       });
 
       expect(result.isValid).toBe(false);
@@ -424,6 +441,7 @@ describe('validateStreamlang', () => {
 
       const result = validateStreamlang(dsl, {
         reservedFields: ['@timestamp'],
+        streamType: 'wired',
       });
 
       expect(result.isValid).toBe(true);
@@ -470,6 +488,7 @@ describe('validateStreamlang', () => {
 
       const result = validateStreamlang(dsl, {
         reservedFields: [],
+        streamType: 'wired',
       });
 
       expect(result.isValid).toBe(true);
@@ -494,6 +513,7 @@ describe('validateStreamlang', () => {
 
       const result = validateStreamlang(dsl, {
         reservedFields: [],
+        streamType: 'wired',
       });
 
       expect(result.isValid).toBe(true);
@@ -523,6 +543,7 @@ describe('validateStreamlang', () => {
 
       const result = validateStreamlang(dsl, {
         reservedFields: [],
+        streamType: 'wired',
       });
 
       expect(result.isValid).toBe(true);
@@ -559,6 +580,7 @@ describe('validateStreamlang', () => {
 
       const result = validateStreamlang(dsl, {
         reservedFields: [],
+        streamType: 'wired',
       });
 
       expect(result.isValid).toBe(true);
@@ -583,6 +605,7 @@ describe('validateStreamlang', () => {
 
       const result = validateStreamlang(dsl, {
         reservedFields: [],
+        streamType: 'wired',
       });
 
       expect(result.isValid).toBe(false);
@@ -612,6 +635,7 @@ describe('validateStreamlang', () => {
 
         const result = validateStreamlang(dsl, {
           reservedFields: [],
+          streamType: 'wired',
         });
 
         // Grok produces string, date processor expects string - should be valid
@@ -638,6 +662,7 @@ describe('validateStreamlang', () => {
 
         const result = validateStreamlang(dsl, {
           reservedFields: [],
+          streamType: 'wired',
         });
 
         // Dissect produces string, replace expects string - should be valid
@@ -671,6 +696,7 @@ describe('validateStreamlang', () => {
 
         const result = validateStreamlang(dsl, {
           reservedFields: [],
+          streamType: 'wired',
         });
 
         // No type conflicts - all fields are set with their values
@@ -706,6 +732,7 @@ describe('validateStreamlang', () => {
 
         const result = validateStreamlang(dsl, {
           reservedFields: [],
+          streamType: 'wired',
         });
 
         // Grok produces string, convert changes it to number - no validation errors
@@ -740,6 +767,7 @@ describe('validateStreamlang', () => {
 
         const result = validateStreamlang(dsl, {
           reservedFields: [],
+          streamType: 'wired',
         });
 
         // Set creates string field 'abc'
@@ -772,6 +800,7 @@ describe('validateStreamlang', () => {
 
         const result = validateStreamlang(dsl, {
           reservedFields: [],
+          streamType: 'wired',
         });
 
         // Grok with :int produces number, replace expects string - should be invalid
@@ -801,6 +830,7 @@ describe('validateStreamlang', () => {
 
         const result = validateStreamlang(dsl, {
           reservedFields: [],
+          streamType: 'wired',
         });
 
         // Grok with :float produces number, date expects string - should be invalid
@@ -829,6 +859,7 @@ describe('validateStreamlang', () => {
 
         const result = validateStreamlang(dsl, {
           reservedFields: [],
+          streamType: 'wired',
         });
 
         expect(result.isValid).toBe(false);
@@ -861,6 +892,7 @@ describe('validateStreamlang', () => {
 
         const result = validateStreamlang(dsl, {
           reservedFields: [],
+          streamType: 'wired',
         });
 
         expect(result.isValid).toBe(false);
@@ -889,6 +921,7 @@ describe('validateStreamlang', () => {
 
         const result = validateStreamlang(dsl, {
           reservedFields: [],
+          streamType: 'wired',
         });
 
         expect(result.isValid).toBe(false);
@@ -917,6 +950,7 @@ describe('validateStreamlang', () => {
 
         const result = validateStreamlang(dsl, {
           reservedFields: [],
+          streamType: 'wired',
         });
 
         expect(result.isValid).toBe(false);
@@ -956,6 +990,7 @@ describe('validateStreamlang', () => {
 
         const result = validateStreamlang(dsl, {
           reservedFields: [],
+          streamType: 'wired',
         });
 
         expect(result.isValid).toBe(false);
@@ -992,6 +1027,7 @@ describe('validateStreamlang', () => {
 
         const result = validateStreamlang(dsl, {
           reservedFields: [],
+          streamType: 'wired',
         });
 
         // Type should propagate from old_field to new_field, replace should succeed
@@ -1023,6 +1059,7 @@ describe('validateStreamlang', () => {
 
         const result = validateStreamlang(dsl, {
           reservedFields: [],
+          streamType: 'wired',
         });
 
         // Type should propagate through copy_from
@@ -1054,6 +1091,7 @@ describe('validateStreamlang', () => {
 
         const result = validateStreamlang(dsl, {
           reservedFields: [],
+          streamType: 'wired',
         });
 
         // String operations happen before convert, so it's valid
@@ -1085,6 +1123,7 @@ describe('validateStreamlang', () => {
 
         const result = validateStreamlang(dsl, {
           reservedFields: [],
+          streamType: 'wired',
         });
 
         // After convert, it's a number, so replace shouldn't work
@@ -1119,6 +1158,7 @@ describe('validateStreamlang', () => {
 
         const result = validateStreamlang(dsl, {
           reservedFields: [],
+          streamType: 'wired',
         });
 
         // Type should propagate through rename, and then fail on replace
@@ -1153,6 +1193,7 @@ describe('validateStreamlang', () => {
 
         const result = validateStreamlang(dsl, {
           reservedFields: [],
+          streamType: 'wired',
         });
 
         // Type should propagate through copy_from, and then fail on replace
@@ -1184,6 +1225,7 @@ describe('validateStreamlang', () => {
 
         const result = validateStreamlang(dsl, {
           reservedFields: [],
+          streamType: 'wired',
         });
 
         // Unknown type from copy_from, so validation doesn't flag error
@@ -1203,9 +1245,13 @@ describe('validateStreamlang', () => {
         };
 
         // Null values should throw an error during validation
-        expect(() => validateStreamlang(dsl, { reservedFields: [] })).toThrow(
-          'Null values are not supported in type inference'
-        );
+        expect(() =>
+          validateStreamlang(dsl, {
+            reservedFields: [],
+
+            streamType: 'wired',
+          })
+        ).toThrow('Null values are not supported in type inference');
       });
 
       it('should handle date processor producing date type', () => {
@@ -1227,6 +1273,7 @@ describe('validateStreamlang', () => {
 
         const result = validateStreamlang(dsl, {
           reservedFields: [],
+          streamType: 'wired',
         });
 
         // Date processor parses string to date type - valid
@@ -1257,6 +1304,7 @@ describe('validateStreamlang', () => {
 
         const result = validateStreamlang(dsl, {
           reservedFields: [],
+          streamType: 'wired',
         });
 
         // Multiple conversions on same field - last one wins
@@ -1284,6 +1332,7 @@ describe('validateStreamlang', () => {
 
         const result = validateStreamlang(dsl, {
           reservedFields: [],
+          streamType: 'wired',
         });
 
         expect(result.isValid).toBe(false);
@@ -1319,6 +1368,7 @@ describe('validateStreamlang', () => {
 
         const result = validateStreamlang(dsl, {
           reservedFields: [],
+          streamType: 'wired',
         });
 
         expect(result.isValid).toBe(false);
@@ -1354,6 +1404,7 @@ describe('validateStreamlang', () => {
 
         const result = validateStreamlang(dsl, {
           reservedFields: [],
+          streamType: 'wired',
         });
 
         expect(result.isValid).toBe(false);
@@ -1387,6 +1438,7 @@ describe('validateStreamlang', () => {
 
         const result = validateStreamlang(dsl, {
           reservedFields: [],
+          streamType: 'wired',
         });
 
         expect(result.isValid).toBe(false);
@@ -1428,6 +1480,7 @@ describe('validateStreamlang', () => {
 
         const result = validateStreamlang(dsl, {
           reservedFields: [],
+          streamType: 'wired',
         });
 
         expect(result.isValid).toBe(false);
@@ -1461,6 +1514,7 @@ describe('validateStreamlang', () => {
 
         const result = validateStreamlang(dsl, {
           reservedFields: [],
+          streamType: 'wired',
         });
 
         expect(result.isValid).toBe(true);
@@ -1488,6 +1542,7 @@ describe('validateStreamlang', () => {
 
         const result = validateStreamlang(dsl, {
           reservedFields: [],
+          streamType: 'wired',
         });
 
         expect(result.isValid).toBe(true);
@@ -1512,6 +1567,7 @@ describe('validateStreamlang', () => {
 
         const result = validateStreamlang(dsl, {
           reservedFields: [],
+          streamType: 'wired',
         });
 
         expect(result.isValid).toBe(true);
@@ -1536,6 +1592,7 @@ describe('validateStreamlang', () => {
 
         const result = validateStreamlang(dsl, {
           reservedFields: [],
+          streamType: 'wired',
         });
 
         expect(result.isValid).toBe(true);
@@ -1575,6 +1632,7 @@ describe('validateStreamlang', () => {
 
         const result = validateStreamlang(dsl, {
           reservedFields: [],
+          streamType: 'wired',
         });
 
         expect(result.isValid).toBe(false);
@@ -1615,6 +1673,7 @@ describe('validateStreamlang', () => {
 
         const result = validateStreamlang(dsl, {
           reservedFields: [],
+          streamType: 'wired',
         });
 
         expect(result.isValid).toBe(false);
@@ -1659,6 +1718,7 @@ describe('validateStreamlang', () => {
 
         const result = validateStreamlang(dsl, {
           reservedFields: [],
+          streamType: 'wired',
         });
 
         // Should have both mixed type error AND type mismatch error
@@ -1685,7 +1745,7 @@ describe('validateStreamlang', () => {
         ],
       };
 
-      const result = validateStreamlang(dsl, { reservedFields: [] });
+      const result = validateStreamlang(dsl, { reservedFields: [], streamType: 'wired' });
 
       expect(result.isValid).toBe(false);
       expect(result.errors.some((e) => e.type === 'invalid_value')).toBe(true);
@@ -1703,7 +1763,7 @@ describe('validateStreamlang', () => {
         ],
       };
 
-      const result = validateStreamlang(dsl, { reservedFields: [] });
+      const result = validateStreamlang(dsl, { reservedFields: [], streamType: 'wired' });
 
       const valueErrors = result.errors.filter((e) => e.type === 'invalid_value');
       expect(valueErrors).toHaveLength(0);
