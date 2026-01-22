@@ -17,3 +17,21 @@ export {
   type AiPromptStepInputSchema,
   type AiPromptStepOutputSchema,
 } from './ai_prompt_step';
+
+export {
+  AiSummarizeStepCommonDefinition,
+  AiSummarizeStepTypeId,
+  type AiSummarizeStepConfigSchema,
+  type AiSummarizeStepInputSchema,
+  type AiSummarizeStepOutputSchema,
+} from './ai_summarize_step';
+
+export * from './ai_prompt_step';
+export {
+  AiClassifyStepCommonDefinition,
+  AiClassifyStepTypeId,
+  type AiClassifyStepConfigSchema,
+  type AiClassifyStepInputSchema,
+  type AiClassifyStepOutputSchema,
+  buildStructuredOutputSchema,
+} from './ai_classify_step';

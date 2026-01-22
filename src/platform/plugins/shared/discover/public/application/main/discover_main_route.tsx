@@ -104,6 +104,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   const history = useHistory();
   const dispatch = useInternalStateDispatch();
   const rootProfileState = useRootProfile();
+  const tabsEnabled = !services.embeddableEditor.isByValueEditor();
 
   const { initializeProfileDataViews } = useDefaultAdHocDataViews();
   const [mainRouteInitializationState, initializeMainRoute] = useAsyncFunction<InitializeMainRoute>(
@@ -203,7 +204,10 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
         ? `: ${persistedDiscoverSession.title}`
         : '';
       chrome.docTitle.change(`Discover${pageTitleSuffix}`);
-      setBreadcrumbs({ titleBreadcrumbText: persistedDiscoverSession?.title, services });
+      setBreadcrumbs({
+        titleBreadcrumbText: persistedDiscoverSession?.title,
+        services,
+      });
     }
   }, [
     chrome.docTitle,
@@ -260,7 +264,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
                     defaultMessage: 'Discover - Session not yet saved',
                   })}
             </h1>
-            {customizationContext.displayMode !== 'embedded' ? (
+            {tabsEnabled && customizationContext.displayMode !== 'embedded' ? (
               <TabsView {...props} />
             ) : (
               <SingleTabView {...props} />
