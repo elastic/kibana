@@ -40,13 +40,15 @@ export const enrichDocumentationPrompt: PromptTemplate<{
 
       Instructions:
 
+      - Remove any tags from the content. For example: <note>{content}</note> should be rewritten as Note: {content}.
+
       - For each ES|QL example (surrounded by \`\`\`esql code blocks), add a short, concise
         description explaining what the query is doing in a single sentence.
 
       - The description should be clear, succint, and explain the purpose and behavior
         of the query in plain language. Do not prefix with 'This query'.
 
-      - Place the description immediately before or after the code block, whichever makes
+      - Place the description immediately after the code block, whichever makes
         more sense in the context.
 
       - Keep the rest of the content unchanged - only add descriptions for ES|QL queries.
