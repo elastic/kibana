@@ -26,6 +26,7 @@ export const PrivmonUserCsvUploadErrorItem = z.object({
 export type PrivmonUserCsvUploadStats = z.infer<typeof PrivmonUserCsvUploadStats>;
 export const PrivmonUserCsvUploadStats = z.object({
   successful: z.number().int(),
+  successfulPrivilegedUsers: z.number().int(),
   failed: z.number().int(),
   total: z.number().int(),
 });

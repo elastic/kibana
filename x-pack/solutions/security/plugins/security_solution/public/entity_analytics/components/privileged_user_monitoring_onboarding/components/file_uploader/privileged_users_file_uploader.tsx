@@ -123,8 +123,8 @@ export const PrivilegedUsersFileUploader: React.FC<PrivilegedUsersFileUploaderPr
               response: result,
             },
           });
-        } else {
-          onFileUploaded(result.stats.successful);
+        } else {      
+          onFileUploaded(result.stats.successfulPrivilegedUsers);
         }
       } catch (e) {
         dispatch({

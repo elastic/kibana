@@ -52,7 +52,6 @@ export const createPrivilegedUsersCsvService = (dataClient: PrivilegeMonitoringD
       // just like a plain ol' JS accumulator
       results = accumulateUpsertResults(results, upserted);
     }
-
     const softDeletedResults = await softDeleteOmittedUsers(esClient, index, options)(results);
 
     return {
@@ -60,6 +59,7 @@ export const createPrivilegedUsersCsvService = (dataClient: PrivilegeMonitoringD
       stats: {
         failed: softDeletedResults.updated.failed + softDeletedResults.deleted.failed,
         successful: softDeletedResults.updated.successful + softDeletedResults.deleted.successful,
+        successfulPrivilegedUsers: results.successful,
         total:
           softDeletedResults.updated.failed +
           softDeletedResults.updated.successful +

@@ -36,6 +36,7 @@ paths:
                       index: 1
                   stats:
                     successful: 1
+                    successfulPrivilegedUsers: 1
                     failed: 1
                     total: 2
                 properties:
@@ -74,11 +75,14 @@ components:
       properties:
         successful:
           type: integer
+        successfulPrivilegedUsers:
+          type: integer
         failed:
           type: integer
         total:
           type: integer
       required:
         - successful
+        - successfulPrivilegedUsers
         - failed
         - total

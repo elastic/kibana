@@ -48,6 +48,7 @@ describe('reducer', () => {
       stats: {
         total: 10,
         successful: 10,
+        successfulPrivilegedUsers: 10,
         failed: 0,
       },
     };
