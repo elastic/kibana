@@ -329,4 +329,30 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
       });
     }
   });
+
+  test('should update the simulation preview with processed values from concat processor', async ({
+    pageObjects,
+  }) => {
+    await pageObjects.streams.clickAddProcessor();
+    await pageObjects.streams.selectProcessorType('Concat');
+    await pageObjects.streams.fillProcessorFieldInput('attributes.test_concat', {
+      isCustomValue: true,
+    });
+
+    // combine field + literal
+    await pageObjects.streams.clickAddConcatField();
+    await pageObjects.streams.fillConcatFieldInput('input.type');
+    await pageObjects.streams.clickAddConcatLiteral();
+    await pageObjects.streams.fillConcatLiteralInput('_');
+
+    const previewTableRows = await pageObjects.streams.getPreviewTableRows();
+    expect(previewTableRows.length).toBeGreaterThan(0);
+    for (let rowIndex = 0; rowIndex < previewTableRows.length; rowIndex++) {
+      await pageObjects.streams.expectCellValueContains({
+        columnName: 'attributes.test_concat',
+        rowIndex,
+        value: 'logs_',
+      });
+    }
+  });
 });
