@@ -39,6 +39,7 @@ const INITIAL_DATA: MainStatisticsApiResponse & { requestId: string } = {
   items: [],
   serviceOverflowCount: 0,
   maxCountExceeded: false,
+  sortField: ServiceInventoryFieldName.Throughput,
 };
 
 function useServicesMainStatisticsFetcher(searchQuery: string | undefined) {
