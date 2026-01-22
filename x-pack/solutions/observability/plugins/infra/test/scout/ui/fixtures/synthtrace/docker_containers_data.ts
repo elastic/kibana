@@ -20,7 +20,7 @@ export function generateDockerContainersData({
 
   const containers = Array(count)
     .fill(0)
-    .map((_, idx) => infra.dockerContainer(`container-${idx}`));
+    .map((_, idx) => infra.dockerContainer(`cont-${idx}`));
 
   return range
     .interval('30s')
