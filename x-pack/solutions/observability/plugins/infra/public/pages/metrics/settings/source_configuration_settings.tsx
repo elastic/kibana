@@ -13,10 +13,7 @@ import {
   Prompt,
   useEditableSettings,
 } from '@kbn/observability-shared-plugin/public';
-import {
-  enableInfrastructureProfilingIntegration,
-  enableInfrastructureAssetCustomDashboards,
-} from '@kbn/observability-plugin/common';
+import { enableInfrastructureAssetCustomDashboards } from '@kbn/observability-plugin/common';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import {

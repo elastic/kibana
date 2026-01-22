@@ -10,10 +10,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { EuiForm } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import {
-  enableInfrastructureProfilingIntegration,
-  enableInfrastructureAssetCustomDashboards,
-} from '@kbn/observability-plugin/common';
+import { enableInfrastructureAssetCustomDashboards } from '@kbn/observability-plugin/common';
 import type { useEditableSettings } from '@kbn/observability-shared-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
