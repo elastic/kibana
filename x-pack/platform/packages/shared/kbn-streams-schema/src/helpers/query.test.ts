@@ -6,28 +6,33 @@
  */
 
 import type { Condition } from '@kbn/streamlang';
-import { buildEsqlQuery } from './query';
+import { buildEsqlQuery, buildEsqlWhereCondition } from './query';
 import type { StreamQuery } from '../queries';
 
 describe('buildEsqlQuery', () => {
   const createTestQuery = (
     kqlQuery: string,
     featureFilter: Condition = { field: 'some.field', eq: 'some value' }
-  ): StreamQuery => ({
-    id: 'irrelevant',
-    title: 'irrelevant',
-    feature: {
-      name: 'irrelevant',
-      filter: featureFilter,
-      type: 'system',
-    },
-    kql: {
-      query: kqlQuery,
-    },
-    esql: {
-      where: '',
-    },
-  });
+  ): StreamQuery => {
+    const queryWithoutEsql = {
+      id: 'irrelevant',
+      title: 'irrelevant',
+      feature: {
+        name: 'irrelevant',
+        filter: featureFilter,
+        type: 'system' as const,
+      },
+      kql: {
+        query: kqlQuery,
+      },
+    };
+    return {
+      ...queryWithoutEsql,
+      esql: {
+        where: buildEsqlWhereCondition(queryWithoutEsql),
+      },
+    };
+  };
 
   describe('basic functionality', () => {
     it('should build a valid ESQL query with multiple indices', () => {
@@ -82,14 +87,17 @@ describe('buildEsqlQuery', () => {
 
   it('should build query without feature filter', () => {
     const indices = ['logs.child', 'logs.child.*'];
-    const query: StreamQuery = {
+    const queryWithoutEsql = {
       id: 'irrelevant',
       title: 'irrelevant',
       kql: {
         query: 'event.type: "access"',
       },
+    };
+    const query: StreamQuery = {
+      ...queryWithoutEsql,
       esql: {
-        where: '',
+        where: buildEsqlWhereCondition(queryWithoutEsql),
       },
     };
     const esqlQuery = buildEsqlQuery(indices, query);
