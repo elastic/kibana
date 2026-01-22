@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-import { Parser } from '@kbn/esql-language';
-
-export const validateEsqlQuery = (query: string): string | void => {
-  const errors = Parser.parseErrors(query);
-  if (errors.length > 0) {
-    return `Invalid ES|QL query: ${errors[0].message}`;
-  }
-};
+export * from './rule_data_schema';

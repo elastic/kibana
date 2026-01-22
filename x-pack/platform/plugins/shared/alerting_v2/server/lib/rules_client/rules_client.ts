@@ -15,12 +15,13 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { inject, injectable } from 'inversify';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
+import { stringifyZodError } from '@kbn/zod-helpers';
+import { createRuleDataSchema, updateRuleDataSchema } from '@kbn/alerting-v2-schemas';
 
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
 import { RulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service';
-import { createRuleDataSchema, updateRuleDataSchema } from './schemas';
 import type {
   CreateRuleParams,
   FindRulesParams,
@@ -54,10 +55,11 @@ export class RulesClient {
   public async createRule(params: CreateRuleParams): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
 
-    try {
-      createRuleDataSchema.validate(params.data);
-    } catch (error) {
-      throw Boom.badRequest(`Error validating create rule data - ${(error as Error).message}`);
+    const createValidationResult = createRuleDataSchema.safeParse(params.data);
+    if (!createValidationResult.success) {
+      throw Boom.badRequest(
+        `Error validating create rule data - ${stringifyZodError(createValidationResult.error)}`
+      );
     }
 
     const username = await this.getUserName();
@@ -122,10 +124,11 @@ export class RulesClient {
   }): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
 
-    try {
-      updateRuleDataSchema.validate(data);
-    } catch (error) {
-      throw Boom.badRequest(`Error validating update rule data - ${(error as Error).message}`);
+    const updateValidationResult = updateRuleDataSchema.safeParse(data);
+    if (!updateValidationResult.success) {
+      throw Boom.badRequest(
+        `Error validating update rule data - ${stringifyZodError(updateValidationResult.error)}`
+      );
     }
 
     const username = await this.getUserName();

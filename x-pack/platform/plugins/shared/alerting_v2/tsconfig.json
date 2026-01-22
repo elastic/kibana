@@ -28,14 +28,15 @@
     "@kbn/core-di-server",
     "@kbn/esql-utils",
     "@kbn/response-ops-retry-service",
-    "@kbn/esql-language",
     "@kbn/core-http-server-mocks",
     "@kbn/core-security-common",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/logging-mocks",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/es-errors",
+    "@kbn/alerting-v2-schemas",
     "@kbn/zod",
+    "@kbn/zod-helpers",
     "@kbn/core-di-internal"
   ],
   "exclude": [
