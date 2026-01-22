@@ -29,6 +29,8 @@ export class StreamsApp {
   public readonly advancedSettingsCodeBlock;
   public readonly kibanaMonacoEditor;
   public readonly saveRoutingRuleButton;
+  public readonly concatFieldInput;
+  public readonly concatLiteralInput;
 
   constructor(private readonly page: ScoutPage) {
     this.processorFieldComboBox = new EuiComboBoxWrapper(
@@ -62,6 +64,8 @@ export class StreamsApp {
     });
     this.kibanaMonacoEditor = new KibanaCodeEditorWrapper(this.page);
     this.saveRoutingRuleButton = this.page.getByTestId('streamsAppStreamDetailRoutingSaveButton');
+    this.concatFieldInput = new EuiSuperSelectWrapper(this.page, 'streamsAppConcatFieldInput');
+    this.concatLiteralInput = this.page.getByTestId('streamsAppConcatLiteralInput');
   }
 
   async goto() {
@@ -410,18 +414,26 @@ export class StreamsApp {
    */
   async clickAddProcessor(handleContextMenuClick: boolean = true) {
     if (handleContextMenuClick) {
-      await this.page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton').click();
+      // New UI has direct button instead of context menu
+      await this.page.getByTestId('streamsAppStreamDetailEnrichmentCreateProcessorButton').click();
+    } else {
+      // When called from within a condition's context menu, use the old menu item
+      await this.page
+        .getByTestId('streamsAppStreamDetailEnrichmentCreateStepButtonAddProcessor')
+        .click();
     }
-    await this.page
-      .getByTestId('streamsAppStreamDetailEnrichmentCreateStepButtonAddProcessor')
-      .click();
   }
 
-  async clickAddCondition() {
-    await this.page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton').click();
-    await this.page
-      .getByTestId('streamsAppStreamDetailEnrichmentCreateStepButtonAddCondition')
-      .click();
+  async clickAddCondition(handleContextMenuClick: boolean = true) {
+    if (handleContextMenuClick) {
+      // New UI has direct button instead of context menu
+      await this.page.getByTestId('streamsAppStreamDetailEnrichmentCreateConditionButton').click();
+    } else {
+      // When called from within a condition's context menu, use the old menu item
+      await this.page
+        .getByTestId('streamsAppStreamDetailEnrichmentCreateStepButtonAddCondition')
+        .click();
+    }
   }
   async getProcessorPatternText() {
     return await this.page.getByTestId('fullText').locator('.euiText').textContent();
@@ -566,6 +578,19 @@ export class StreamsApp {
     await this.page.keyboard.press('Backspace');
     // Fill with new condition
     await this.page.getByTestId('streamsAppPatternExpression').getByRole('textbox').fill(value);
+  }
+
+  async fillGrokPatternDefinitionsInput(value: string) {
+    await this.page.getByRole('button', { name: 'Advanced settings' }).click();
+    // Clean previous content
+    await this.page.getByTestId('streamsAppPatternDefinitionsEditor').click();
+    await this.page.keyboard.press('Control+A');
+    await this.page.keyboard.press('Backspace');
+    // Fill with new condition
+    await this.page
+      .getByTestId('streamsAppPatternDefinitionsEditor')
+      .getByRole('textbox')
+      .fill(value);
   }
 
   async fillDateProcessorSourceFieldInput(value: string) {
@@ -1058,5 +1083,21 @@ export class StreamsApp {
 
   async clickProcessorPreviewTab(label: string) {
     await this.page.getByText(label).click();
+  }
+
+  async clickAddConcatField() {
+    await this.page.getByTestId('streamsAppConcatAddFieldButton').click();
+  }
+
+  async clickAddConcatLiteral() {
+    await this.page.getByTestId('streamsAppConcatAddLiteralButton').click();
+  }
+
+  async fillConcatFieldInput(value: string) {
+    await this.concatFieldInput.selectOption(value);
+  }
+
+  async fillConcatLiteralInput(value: string) {
+    await this.concatLiteralInput.fill(value);
   }
 }

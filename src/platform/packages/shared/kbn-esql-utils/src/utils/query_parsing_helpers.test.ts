@@ -32,6 +32,7 @@ import {
   hasLimitBeforeAggregate,
   missingSortBeforeLimit,
   hasDateBreakdown,
+  hasOnlySourceCommand,
 } from './query_parsing_helpers';
 
 describe('esql query helpers', () => {
@@ -160,6 +161,18 @@ describe('esql query helpers', () => {
           'from a | WHERE date_nanos::date >= ?_tstart AND date_nanos::date <= ?_tend'
         )
       ).toBe('date_nanos');
+    });
+
+    it('should return @timestamp for PromQL if there is at least one time param', () => {
+      expect(
+        getTimeFieldFromESQLQuery(
+          'PROMQL index = index1 step="5m" start=?_tstart end=?_tend avg(bytes) '
+        )
+      ).toBe('@timestamp');
+    });
+
+    it('should return undefined for PromQL if there is no time param', () => {
+      expect(getTimeFieldFromESQLQuery('PROMQL index = index1 step="5m" ')).toBeUndefined();
     });
   });
 
@@ -1184,6 +1197,36 @@ describe('esql query helpers', () => {
           },
         ])
       ).toBe(true);
+    });
+  });
+
+  describe('hasOnlySourceCommand', () => {
+    it('should return true for queries with only FROM command', () => {
+      expect(hasOnlySourceCommand('FROM index')).toBe(true);
+    });
+
+    it('should return true for queries with only TS command', () => {
+      expect(hasOnlySourceCommand('TS index')).toBe(true);
+    });
+
+    it('should return false for queries with FROM and other commands', () => {
+      expect(hasOnlySourceCommand('FROM index | STATS count()')).toBe(false);
+    });
+
+    it('should return false for queries with TS and other commands', () => {
+      expect(hasOnlySourceCommand('TS index | WHERE field > 0')).toBe(false);
+    });
+
+    it('should return false for empty query', () => {
+      expect(hasOnlySourceCommand('')).toBe(false);
+    });
+
+    it('should return false for queries with only PROMQL command', () => {
+      expect(
+        hasOnlySourceCommand(
+          'PROMQL index = index1 step="5m" start=?_tstart end=?_tend avg(bytes) '
+        )
+      ).toBe(false);
     });
   });
 });

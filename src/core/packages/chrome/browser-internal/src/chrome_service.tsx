@@ -14,6 +14,7 @@ import {
   BehaviorSubject,
   combineLatest,
   filter,
+  from,
   map,
   merge,
   mergeMap,
@@ -418,7 +419,9 @@ export class ChromeService {
           return [
             ...extensions,
             {
-              content: mountReactNode(<HeaderBreadcrumbsBadges badges={badges} />),
+              content: mountReactNode(
+                <HeaderBreadcrumbsBadges badges={badges} isFirst={extensions.length === 0} />
+              ),
             },
           ];
         }),
@@ -433,6 +436,10 @@ export class ChromeService {
     const recentlyAccessed$ = recentlyAccessed.get$();
     const activeDataTestSubj$ = projectNavigation.getActiveDataTestSubj$();
     const feedbackUrlParams$ = projectNavigation.getFeedbackUrlParams$();
+
+    const isFeedbackEnabled = from(
+      getNotifications().then((notifications) => notifications.feedback.isEnabled())
+    );
 
     const navProps: NavigationProps = {
       basePath: http.basePath,
@@ -449,6 +456,7 @@ export class ChromeService {
       isFeedbackBtnVisible$: this.isFeedbackBtnVisible$,
       feedbackUrlParams$,
       onToggleCollapsed: setIsSideNavCollapsed,
+      isFeedbackEnabled$: isFeedbackEnabled,
     };
 
     const getProjectHeader = ({
