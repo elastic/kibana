@@ -3682,46 +3682,9 @@
       "enabled": true
     },
     {
-      "matchDepNames": [
-        "chromedriver"
-      ],
-      "reviewers": [
-        "team:kibana-operations"
-      ],
-      "labels": [
-        "Team:Operations",
-        "release_note:skip",
-        "backport:skip"
-      ],
-      "enabled": true
-    },
-    {
-      "groupName": "chromedriver",
-      "matchDepNames": [
-        "chromedriver"
-      ],
-      "reviewers": [
-        "team:kibana-operations"
-      ],
-      "matchBaseBranches": [
-        "main",
-        "/^[8-9].*/"
-      ],
-      "labels": [
-        "Team:Operations",
-        "release_note:skip",
-        "backport:skip"
-      ],
-      "minimumReleaseAge": "14 days",
-      "enabled": true,
-      "matchUpdateTypes": [
-        "major",
-        "minor"
-      ]
-    },
-    {
       "groupName": "ftr",
       "matchDepNames": [
+        "chromedriver",
         "@types/chromedriver",
         "@types/selenium-webdriver",
         "geckodriver",
@@ -3738,7 +3701,8 @@
       "labels": [
         "Team:Operations",
         "release_note:skip",
-        "backport:skip"
+        "backport:skip",
+        "ci:bench-ftr"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -4470,6 +4434,26 @@
       "enabled": true
     },
     {
+      "groupName": "Nested drag and drop",
+      "matchDepNames": [
+        "@atlaskit/pragmatic-drag-and-drop",
+        "@atlaskit/pragmatic-drag-and-drop-hitbox"
+      ],
+      "reviewers": [
+        "team:obs-onboarding-team"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:obs-onboarding",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
       "groupName": "OpenTelemetry modules",
       "matchDepNames": [
         "@grpc/grpc-js",
@@ -4478,6 +4462,7 @@
         "@opentelemetry/context-async-hooks",
         "@opentelemetry/exporter-metrics-otlp-http",
         "@opentelemetry/exporter-metrics-otlp-grpc",
+        "@opentelemetry/exporter-metrics-otlp-proto",
         "@opentelemetry/exporter-prometheus",
         "@opentelemetry/exporter-trace-otlp-grpc",
         "@opentelemetry/exporter-trace-otlp-http",
