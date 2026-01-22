@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { Filter } from '@kbn/es-query';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { UiCounterMetricType } from '@kbn/analytics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { defaultUnit, firstNonNullValue } from '../helpers';
@@ -57,7 +57,11 @@ export interface GroupingProps<T> {
   renderChildComponent: GroupChildComponentRenderer<T>;
   onGroupClose: () => void;
   selectedGroup: string;
-  takeActionItems?: (groupFilters: Filter[], groupNumber: number) => JSX.Element | undefined;
+  takeActionItems?: (
+    groupFilters: Filter[],
+    groupNumber: number,
+    groupBucket: GroupingBucket<T>
+  ) => JSX.Element | undefined;
   tracker?: (
     type: UiCounterMetricType,
     event: string | string[],
@@ -132,6 +136,19 @@ const GroupingComponent = <T,>({
     return `${groupsUnit(groupCount, selectedGroup, hasNullGroupInCurrentPage || hasNullGroup)}`;
   }, [data?.groupByFields?.buckets, data?.nullGroupItems, groupCount, groupsUnit, selectedGroup]);
 
+  type GetActionItems = Parameters<typeof GroupStats>[0]['takeActionItems'];
+  type GetTakeActionItemsWithBucket = (groupBucket: GroupingBucket<T>) => GetActionItems;
+
+  const getTakeActionItemsWithBucket: GetTakeActionItemsWithBucket = useCallback(
+    (groupBucket) => {
+      if (!takeActionItems) return;
+
+      return (groupFilters, groupNumber) => {
+        return takeActionItems(groupFilters, groupNumber, groupBucket);
+      };
+    },
+    [takeActionItems]
+  );
   const groupPanels = useMemo(
     () =>
       data?.groupByFields?.buckets?.map((groupBucket: GroupingBucket<T>, groupNumber) => {
@@ -162,7 +179,7 @@ const GroupingComponent = <T,>({
                   }
                   groupNumber={groupNumber}
                   stats={getGroupStats && getGroupStats(selectedGroup, groupBucket)}
-                  takeActionItems={takeActionItems}
+                  takeActionItems={getTakeActionItemsWithBucket(groupBucket)}
                   additionalActionButtons={
                     getAdditionalActionButtons &&
                     getAdditionalActionButtons(selectedGroup, groupBucket)
@@ -214,7 +231,7 @@ const GroupingComponent = <T,>({
       onGroupToggle,
       renderChildComponent,
       selectedGroup,
-      takeActionItems,
+      getTakeActionItemsWithBucket,
       tracker,
       trigger,
       unit,
