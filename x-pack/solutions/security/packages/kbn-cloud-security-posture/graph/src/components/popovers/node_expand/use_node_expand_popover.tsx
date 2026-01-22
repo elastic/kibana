@@ -6,14 +6,14 @@
  */
 
 import React, { memo, useCallback, useRef, useState } from 'react';
-import { useGraphPopover } from '../../..';
-import type { ExpandButtonClickCallback, NodeProps } from '../types';
+import { useGraphPopoverState } from '../primitives/use_graph_popover_state';
+import type { ExpandButtonClickCallback, NodeProps } from '../../types';
 import {
-  ListGroupGraphPopover,
+  ListGraphPopover,
   type ItemExpandPopoverListItemProps,
   type SeparatorExpandPopoverListItemProps,
-} from './list_group_graph_popover';
-import type { PopoverActions, PopoverState } from '../graph/use_graph_popover';
+} from '../primitives/list_graph_popover';
+import type { PopoverActions, PopoverState } from '../primitives/use_graph_popover_state';
 
 interface UseNodeExpandGraphPopoverArgs {
   /**
@@ -62,12 +62,12 @@ export interface UseNodeExpandGraphPopoverReturn {
   state: PopoverState;
 }
 
-export const useNodeExpandGraphPopover = ({
+export const useNodeExpandPopover = ({
   id,
   testSubject,
   itemsFn,
 }: UseNodeExpandGraphPopoverArgs): UseNodeExpandGraphPopoverReturn => {
-  const { state, actions } = useGraphPopover(id);
+  const { state, actions } = useGraphPopoverState(id);
   const { openPopover, closePopover } = actions;
 
   const selectedNode = useRef<NodeProps | null>(null);
@@ -134,7 +134,7 @@ export const useNodeExpandGraphPopover = ({
   // It handles the display of the popover and the actions that can be performed on the node
   // eslint-disable-next-line react/display-name
   const PopoverComponent = memo(() => (
-    <ListGroupGraphPopover
+    <ListGraphPopover
       isOpen={state.isOpen}
       anchorElement={state.anchorElement}
       closePopover={closePopoverHandler}
