@@ -347,6 +347,7 @@ export function AddSignificantEventFlyout({
                       <EuiSpacer size="m" />
                       <ManualFlowForm
                         isSubmitting={isSubmitting}
+                        isEditMode={isEditMode}
                         setQuery={(next: StreamQueryKql) => setQueries([next])}
                         query={queries[0]}
                         setCanSave={(next: boolean) => {
