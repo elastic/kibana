@@ -105,7 +105,10 @@ export type ExperimentTask<TExample extends Example, TTaskOutput extends TaskOut
  * Note: the eval suites should depend on this interface (or structural typing), not Phoenix-specific types.
  */
 export interface EvalsExecutorClient {
-  runExperiment<TEvaluationDataset extends EvaluationDataset, TTaskOutput extends TaskOutput = TaskOutput>(
+  runExperiment<
+    TEvaluationDataset extends EvaluationDataset,
+    TTaskOutput extends TaskOutput = TaskOutput
+  >(
     options: {
       dataset: TEvaluationDataset;
       metadata?: Record<string, unknown>;

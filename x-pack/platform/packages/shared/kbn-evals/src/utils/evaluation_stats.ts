@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RanExperiment } from '../types';
 import { mean, median, deviation, min, max } from 'd3';
+import type { RanExperiment } from '../types';
 
 export interface EvaluatorStats {
   mean: number;
@@ -152,9 +152,7 @@ export function calculateOverallStats(datasetScores: DatasetScore[]): Map<string
 /**
  * Complete evaluation results processing - composition function for common workflow
  */
-export async function buildEvaluationResults(
-  experiments: RanExperiment[]
-): Promise<{
+export async function buildEvaluationResults(experiments: RanExperiment[]): Promise<{
   datasetScores: DatasetScore[];
   overallStats: Map<string, EvaluatorStats>;
 }> {

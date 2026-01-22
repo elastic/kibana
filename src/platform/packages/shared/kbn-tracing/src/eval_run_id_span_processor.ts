@@ -22,7 +22,9 @@ const noop = async () => {};
  */
 export class EvalRunIdSpanProcessor implements tracing.SpanProcessor {
   onStart(span: tracing.Span, parentContext: Context): void {
-    const evalRunId = propagation.getBaggage(parentContext)?.getEntry(EVAL_RUN_ID_BAGGAGE_KEY)?.value;
+    const evalRunId = propagation
+      .getBaggage(parentContext)
+      ?.getEntry(EVAL_RUN_ID_BAGGAGE_KEY)?.value;
 
     if (!evalRunId || !span.isRecording?.()) {
       return;
@@ -42,4 +44,3 @@ export class EvalRunIdSpanProcessor implements tracing.SpanProcessor {
     await noop();
   }
 }
-

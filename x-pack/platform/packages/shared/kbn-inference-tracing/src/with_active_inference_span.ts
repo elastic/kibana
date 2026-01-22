@@ -30,7 +30,9 @@ export const withActiveInferenceSpan = createWithActiveSpan(
     }
 
     const { context: parentContext, isRoot } = createInferenceContext();
-    const evalRunId = propagation.getBaggage(parentContext)?.getEntry(EVAL_RUN_ID_BAGGAGE_KEY)?.value;
+    const evalRunId = propagation
+      .getBaggage(parentContext)
+      ?.getEntry(EVAL_RUN_ID_BAGGAGE_KEY)?.value;
 
     return withActiveSpan(
       name,

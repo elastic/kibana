@@ -145,5 +145,3 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
     return this.experiments;
   }
 }
-
-
