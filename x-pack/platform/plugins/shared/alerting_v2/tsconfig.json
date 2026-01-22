@@ -28,7 +28,6 @@
     "@kbn/core-di-server",
     "@kbn/esql-utils",
     "@kbn/response-ops-retry-service",
-    "@kbn/esql-language",
     "@kbn/core-http-server-mocks",
     "@kbn/core-security-common",
     "@kbn/core-elasticsearch-server-mocks",
