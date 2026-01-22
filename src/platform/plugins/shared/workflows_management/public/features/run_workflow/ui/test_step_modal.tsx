@@ -197,6 +197,7 @@ export function TestStepModal({
               color="success"
               iconType="play"
               size="s"
+              data-test-subj="submit-step-run"
             >
               <FormattedMessage id="workflows.testStepModal.submitRunBtn" defaultMessage="Run" />
             </EuiButton>
