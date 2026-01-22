@@ -37,12 +37,13 @@ export async function createRequestHandlerContext({
   return {
     core,
     logger,
-    assetManager: new AssetManager(
+    assetManager: new AssetManager({
       logger,
-      core.elasticsearch.client.asCurrentUser,
-      taskManagerStart,
-      namespace
-    ),
+      esClient: core.elasticsearch.client.asCurrentUser,
+      taskManager: taskManagerStart,
+      savedObjectsClient: core.savedObjects.client,
+      namespace,
+    }),
     featureFlags: new FeatureFlags(core.uiSettings.client),
   };
 }

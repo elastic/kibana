@@ -8,18 +8,34 @@
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { getEntityDefinition } from './definitions/registry';
 import type { EntityType } from './definitions/entity_schema';
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../tasks/extract_entity_task';
 import { installElasticsearchAssets, uninstallElasticsearchAssets } from './assets/install_assets';
 
+interface AssetManagerDependencies {
+  logger: Logger;
+  esClient: ElasticsearchClient;
+  taskManager: TaskManagerStartContract;
+  savedObjectsClient: SavedObjectsClientContract;
+  namespace: string;
+}
+
 export class AssetManager {
-  constructor(
-    private logger: Logger,
-    private esClient: ElasticsearchClient,
-    private taskManager: TaskManagerStartContract,
-    private namespace: string
-  ) {}
+  private readonly logger: Logger;
+  private readonly esClient: ElasticsearchClient;
+  private readonly taskManager: TaskManagerStartContract;
+  private readonly savedObjectsClient: SavedObjectsClientContract;
+  private readonly namespace: string;
+
+  constructor(deps: AssetManagerDependencies) {
+    this.logger = deps.logger;
+    this.esClient = deps.esClient;
+    this.taskManager = deps.taskManager;
+    this.savedObjectsClient = deps.savedObjectsClient;
+    this.namespace = deps.namespace;
+  }
 
   public async init(type: EntityType, logExtractionFrequency?: string) {
     await this.install(type); // TODO: async
