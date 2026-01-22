@@ -501,6 +501,7 @@ paths:
                   stats:
                     failed: 1
                     successful: 1
+                    successfulPrivilegedUsers: 1
                     total: 2
                 type: object
                 properties:
@@ -2320,10 +2321,13 @@ components:
           type: integer
         successful:
           type: integer
+        successfulPrivilegedUsers:
+          type: integer
         total:
           type: integer
       required:
         - successful
+        - successfulPrivilegedUsers
         - failed
         - total
     RiskEngineScheduleNowErrorResponse:
