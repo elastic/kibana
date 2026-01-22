@@ -47,17 +47,16 @@ const mockGroupedAlertsTable = GroupedAlertsTable as unknown as jest.Mock;
 const mockEmptyResultsPrompt = EmptyResultsPrompt as unknown as jest.Mock;
 const mockUseExpandableFlyoutApi = useExpandableFlyoutApi as jest.Mock;
 
+const defaultProps: Parameters<typeof TableSection>[0] = {
+  assignees: [],
+  pageFilters: [],
+  statusFilter: [],
+  dataView,
+  selectedConnectorNames: [],
+  openSchedulesFlyout: jest.fn(),
+};
+
 describe('<TableSection />', () => {
-  const openSchedulesFlyout = jest.fn();
-
-  const defaultProps: Parameters<typeof TableSection>[0] = {
-    assignees: [],
-    pageFilters: [],
-    statusFilter: [],
-    dataView,
-    openSchedulesFlyout,
-  };
-
   beforeEach(() => {
     mockUseGetDefaultGroupTitleRenderers.mockReturnValue({
       defaultGroupTitleRenderers: jest.fn(),
@@ -152,7 +151,7 @@ describe('<TableSection />', () => {
     });
 
     expect(mockEmptyResultsPrompt).toHaveBeenCalledWith(
-      expect.objectContaining({ openSchedulesFlyout }),
+      expect.objectContaining({ openSchedulesFlyout: defaultProps.openSchedulesFlyout }),
       expect.anything()
     );
   });
