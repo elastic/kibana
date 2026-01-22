@@ -86,8 +86,7 @@ export function getConnectionStats({
               latency_count: prev.value.latency_count + current.value.latency_count,
               latency_sum: prev.value.latency_sum + current.value.latency_sum,
               error_count: prev.value.error_count + current.value.error_count,
-              success_and_error_count:
-                prev.value.success_and_error_count + current.value.success_and_error_count,
+              success_count: prev.value.success_count + current.value.success_count,
             },
             timeseries:
               prev.timeseries && current.timeseries
@@ -96,7 +95,7 @@ export function getConnectionStats({
                     latency_count: a.latency_count + b.latency_count,
                     latency_sum: a.latency_sum + b.latency_sum,
                     error_count: a.error_count + b.error_count,
-                    success_and_error_count: a.success_and_error_count + b.success_and_error_count,
+                    success_count: a.success_count + b.success_count,
                   }))
                 : undefined,
           };
@@ -106,7 +105,7 @@ export function getConnectionStats({
             latency_count: 0,
             latency_sum: 0,
             error_count: 0,
-            success_and_error_count: 0,
+            success_count: 0,
           },
           timeseries: [],
         }
@@ -153,14 +152,15 @@ export function getConnectionStats({
         },
         errorRate: {
           value:
-            mergedStats.value.success_and_error_count > 0
-              ? (mergedStats.value.error_count ?? 0) / mergedStats.value.success_and_error_count
+            mergedStats.value.error_count + mergedStats.value.success_count > 0
+              ? (mergedStats.value.error_count ?? 0) / mergedStats.value.error_count +
+                mergedStats.value.success_count
               : null,
           timeseries: mergedStats.timeseries?.map((point) => ({
             x: point.x,
             y:
-              point.success_and_error_count > 0
-                ? (point.error_count ?? 0) / point.success_and_error_count
+              mergedStats.value.error_count + mergedStats.value.success_count > 0
+                ? (point.error_count ?? 0) / (point.error_count + point.success_count)
                 : null,
           })),
         },

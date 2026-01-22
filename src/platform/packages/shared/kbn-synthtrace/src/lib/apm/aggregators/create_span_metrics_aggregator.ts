@@ -60,7 +60,7 @@ export function createSpanMetricsAggregator(flushInterval: string) {
       metric['span.destination.service.response_time.sum.us'] += event['span.duration.us']
         ? event['span.duration.us'] * SPANS_PER_DESTINATION_METRIC
         : 0;
-      metric._doc_count += SPANS_PER_DESTINATION_METRIC;
+      metric._doc_count += 1;
     },
     (metric) => metric
   );
