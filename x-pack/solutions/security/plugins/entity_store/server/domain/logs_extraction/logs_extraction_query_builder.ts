@@ -29,7 +29,6 @@ interface LogsExtractionQueryParams {
   latestIndex: string;
   // contains all the fields and id descriptions
   entityDefinition: EntityDefinition;
-
   // limits amount of logs and entities processed
   maxPageSearchSize: number;
 
@@ -140,6 +139,7 @@ function customFieldEvalLogic() {
     `entity.name = COALESCE(entity.name, entity.id)`,
   ].join(',\n ');
 }
+
 function castSrcType(field: EntityField) {
   switch (field.mapping?.type) {
     case 'keyword':

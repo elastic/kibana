@@ -79,19 +79,20 @@ export class LogsExtractionClient {
         targetIndex: latestIndex,
         logger: this.logger,
       });
+
       return {
         success: true,
         count: esqlResponse.values.length,
         scannedIndices: indexPatterns,
       };
     } catch (error) {
-      // store error on saved object
+      // TODO: store error on saved object
       this.logger.error(error);
       return { success: false, error };
     }
   }
 
-  // We need to include index patterns provided manually by the customer
+  // TODO: We need to include index patterns provided manually by the customer
   private async getIndexPatterns(type: EntityType) {
     const resetIndex = getResetEntitiesIndexName(type, this.namespace);
     const alertsIndex = alertsIndexName(this.namespace);
