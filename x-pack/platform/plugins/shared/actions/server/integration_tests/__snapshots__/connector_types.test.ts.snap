@@ -1370,10 +1370,6 @@ Object {
           },
           "type": "object",
         },
-        "timeout": Object {
-          "exclusiveMinimum": 0,
-          "type": "number",
-        },
         "url": Object {
           "format": "uri",
           "type": "string",
@@ -1467,10 +1463,6 @@ Object {
             "type": "string",
           },
           "type": "object",
-        },
-        "timeout": Object {
-          "exclusiveMinimum": 0,
-          "type": "number",
         },
         "url": Object {
           "format": "uri",
