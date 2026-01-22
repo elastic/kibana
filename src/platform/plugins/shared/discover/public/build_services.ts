@@ -71,6 +71,7 @@ import type { DiscoverSingleDocLocator } from './application/doc/locator';
 import type { DiscoverAppLocator } from '../common';
 import type { ProfilesManager } from './context_awareness';
 import type { DiscoverEBTManager } from './ebt_manager';
+import { EmbeddableEditorService } from './plugin_imports/embeddable_editor_service';
 
 /**
  * Location state of internal Discover history instance
@@ -149,6 +150,7 @@ export interface DiscoverServices {
   logsDataAccess?: LogsDataAccessPluginStart;
   embeddableEnhanced?: EmbeddableEnhancedPluginStart;
   cps?: CPSPluginStart;
+  embeddableEditor: EmbeddableEditorService;
 }
 
 export const buildServices = ({
@@ -245,5 +247,9 @@ export const buildServices = ({
     logsDataAccess: plugins.logsDataAccess,
     embeddableEnhanced: plugins.embeddableEnhanced,
     cps: plugins.cps,
+    embeddableEditor: new EmbeddableEditorService(
+      core.application,
+      plugins.embeddable.getStateTransfer()
+    ),
   };
 };
