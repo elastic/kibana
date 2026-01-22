@@ -62,7 +62,6 @@ export const TimeSeriesExplorerPage: FC<PropsWithChildren<TimeSeriesExplorerPage
             title={i18n.translate('xpack.ml.timeSeriesExplorer.pageTitle', {
               defaultMessage: 'Single Metric Viewer',
             })}
-            breakWord={false}
           />
         </MlPageHeader>
 

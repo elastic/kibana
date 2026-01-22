@@ -121,7 +121,6 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
           title={i18n.translate('xpack.ml.explorer.pageTitle', {
             defaultMessage: 'Anomaly Explorer',
           })}
-          breakWord={false}
         />
       </MlPageHeader>
       <CasesContext owner={[]} permissions={casesPermissions!}>

@@ -12,12 +12,11 @@ import { css } from '@emotion/react';
 
 interface PageTitleProps {
   title: ReactNode;
-  breakWord?: boolean;
 }
 
-export const PageTitle: FC<PageTitleProps> = ({ title, breakWord = true }) => {
+export const PageTitle: FC<PageTitleProps> = ({ title }) => {
   const titleStyles = css`
-    word-break: ${breakWord ? 'break-word' : 'normal'};
+    word-break: normal;
   `;
   return (
     <EuiTitle size="l" css={titleStyles}>
