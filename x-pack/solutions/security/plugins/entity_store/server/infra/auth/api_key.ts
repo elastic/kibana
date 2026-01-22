@@ -19,6 +19,8 @@ export interface EntityStoreAPIKey {
   id: string;
   name: string;
   apiKey: string;
+  type: EntityType;
+  namespace: string;
 }
 
 const ENTITY_STORE_API_KEY_SO_ID = 'entity-store-api-key';
@@ -71,6 +73,8 @@ const generateEntityStoreAPIKey = async ({
       id: apiKey.id,
       name: apiKey.name,
       apiKey: apiKey.api_key,
+      type,
+      namespace,
     };
   }
 };
