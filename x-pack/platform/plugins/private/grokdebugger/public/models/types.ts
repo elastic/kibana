@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/public';
-
-import { GrokDebuggerUIPlugin } from './plugin';
-
-export function plugin(_initializerContext: PluginInitializerContext) {
-  return new GrokDebuggerUIPlugin();
-}
+export type { CustomPatterns, GrokdebuggerResponseParams } from '../../common/types';

@@ -5,16 +5,32 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
+import type { CustomPatterns } from '../../../common/types';
 
 /**
  * Model to capture Grokdebugger request with upstream (ES) helpers.
  */
+export interface DownstreamGrokdebuggerRequest {
+  rawEvent: string;
+  pattern: string;
+  customPatterns?: CustomPatterns;
+}
+
+interface GrokdebuggerRequestProps {
+  rawEvent?: string;
+  pattern?: string;
+  customPatterns?: CustomPatterns;
+}
+
 export class GrokdebuggerRequest {
-  constructor(props) {
-    this.rawEvent = get(props, 'rawEvent', '');
-    this.pattern = get(props, 'pattern', '');
-    this.customPatterns = get(props, 'customPatterns', {});
+  rawEvent: string;
+  pattern: string;
+  customPatterns: CustomPatterns;
+
+  constructor(props: GrokdebuggerRequestProps) {
+    this.rawEvent = props.rawEvent ?? '';
+    this.pattern = props.pattern ?? '';
+    this.customPatterns = props.customPatterns ?? {};
   }
 
   get upstreamJSON() {
@@ -43,14 +59,11 @@ export class GrokdebuggerRequest {
     };
   }
 
-  // generate GrokdebuggerRequest object from kibana
-  static fromDownstreamJSON(downstreamGrokdebuggerRequest) {
-    const opts = {
+  static fromDownstreamJSON(downstreamGrokdebuggerRequest: DownstreamGrokdebuggerRequest) {
+    return new GrokdebuggerRequest({
       rawEvent: downstreamGrokdebuggerRequest.rawEvent,
       pattern: downstreamGrokdebuggerRequest.pattern,
       customPatterns: downstreamGrokdebuggerRequest.customPatterns,
-    };
-
-    return new GrokdebuggerRequest(opts);
+    });
   }
 }

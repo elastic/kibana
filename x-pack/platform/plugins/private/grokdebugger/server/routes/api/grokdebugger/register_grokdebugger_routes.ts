@@ -6,7 +6,8 @@
  */
 
 import { registerGrokSimulateRoute } from './register_grok_simulate_route';
+import type { KibanaFramework } from '../../../lib/kibana_framework';
 
-export function registerGrokdebuggerRoutes(framework) {
+export function registerGrokdebuggerRoutes(framework: KibanaFramework) {
   registerGrokSimulateRoute(framework);
 }
