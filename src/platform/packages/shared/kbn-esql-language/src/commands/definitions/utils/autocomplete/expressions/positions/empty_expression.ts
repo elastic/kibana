@@ -8,7 +8,7 @@
  */
 
 import { ControlTriggerSource, ESQLVariableType } from '@kbn/esql-types';
-import { uniq } from 'lodash';
+import { isEqual, uniq, uniqWith } from 'lodash';
 import { matchesSpecialFunction } from '../utils';
 import { shouldSuggestComma, type CommaContext } from '../comma_decision_engine';
 import type { ExpressionContext } from '../types';
@@ -21,6 +21,7 @@ import type {
   FunctionDefinition,
   FunctionParameter,
   FunctionParameterType,
+  ParameterHint,
 } from '../../../../types';
 import { type ISuggestionItem } from '../../../../../registry/types';
 import { FULL_TEXT_SEARCH_FUNCTIONS } from '../../../../constants';
@@ -28,8 +29,12 @@ import {
   allStarConstant,
   valuePlaceholderConstant,
   defaultValuePlaceholderConstant,
+  buildAddValuePlaceholder,
+  findConstantPlaceholderType,
 } from '../../../../../registry/complete_items';
+import { parametersFromHintsResolvers } from '../../parameters_from_hints';
 
+// functionDefinition is guaranteed by in_function.ts early return
 type FunctionParamContext = NonNullable<ExpressionContext['options']['functionParameterContext']>;
 
 /** Handles suggestions when starting a new expression (empty position) */
@@ -95,9 +100,14 @@ function tryExclusiveSuggestions(
     Boolean(functionParamContext.hasMoreMandatoryArgs),
     options.isCursorFollowedByComma ?? false
   );
-
   if (enumItems.length > 0) {
     return enumItems;
+  }
+
+  // Some parameters suggests special values that are deduced from the hints object provided by ES.
+  const itemsFromHints = buildSuggestionsFromHints(paramDefinitions, ctx);
+  if (itemsFromHints.length > 0) {
+    return itemsFromHints;
   }
 
   return [];
@@ -230,8 +240,8 @@ async function buildFieldAndFunctionSuggestions(
   if (!hasFieldsOnlyParam && !hasConstantOnlyParam) {
     builder.addFunctions({
       types: config.acceptedTypes,
-      ignoredFunctions: functionParamContext.functionsToIgnore || [],
       addComma: config.shouldAddComma,
+      excludeParentFunctions: true,
     });
   }
 
@@ -267,8 +277,6 @@ async function handleDefaultContext(ctx: ExpressionContext): Promise<ISuggestion
     if (suggestFunctions) {
       builder.addFunctions({
         types: acceptedTypes,
-        ignoredFunctions: [],
-        ...(options.openSuggestions !== undefined && { openSuggestions: options.openSuggestions }),
       });
     }
 
@@ -374,6 +382,24 @@ function buildEnumValueSuggestions(
   });
 }
 
+function buildSuggestionsFromHints(
+  paramDefinitions: FunctionParameter[],
+  ctx: ExpressionContext
+): ISuggestionItem[] {
+  // Keep the hints that are unique by entityType + constraints
+  const hints: ParameterHint[] = uniqWith(
+    paramDefinitions.flatMap(({ hint }) => hint ?? []),
+    (a, b) => a.entityType === b.entityType && isEqual(a.constraints, b.constraints)
+  );
+
+  const results = hints.map(
+    (hint) =>
+      parametersFromHintsResolvers[hint.entityType]?.suggestionResolver?.(hint, ctx.context) ?? []
+  );
+
+  return results.flat();
+}
+
 /** Builds suggestions for constant-only literal parameters */
 function buildConstantOnlyLiteralSuggestions(
   paramDefinitions: FunctionParameter[],
@@ -404,5 +430,18 @@ function buildConstantOnlyLiteralSuggestions(
     constantGeneratingOnly: true,
   });
 
-  return builder.build();
+  const suggestions = builder.build();
+
+  // Add placeholder hint ONLY for explicit constantOnly parameters
+  const hasExplicitConstantOnly = paramDefinitions.some(({ constantOnly }) => constantOnly);
+
+  if (hasExplicitConstantOnly) {
+    const placeholderType = findConstantPlaceholderType(types);
+
+    if (placeholderType) {
+      suggestions.push(buildAddValuePlaceholder(placeholderType));
+    }
+  }
+
+  return suggestions;
 }

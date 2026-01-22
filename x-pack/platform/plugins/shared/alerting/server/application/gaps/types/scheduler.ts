@@ -14,7 +14,7 @@ export const GAP_AUTO_FILL_SCHEDULER_TASK_TYPE = 'gap-auto-fill-scheduler-task' 
 export const DEFAULT_RULES_BATCH_SIZE = 100;
 export const DEFAULT_GAPS_PER_PAGE = 5000;
 
-export const DEFAULT_GAP_AUTO_FILL_SCHEDULER_TIMEOUT = '40s' as const;
+export const DEFAULT_GAP_AUTO_FILL_SCHEDULER_TIMEOUT = '60s' as const;
 
 export type GapAutoFillSchedulerLogConfig = Pick<
   SchedulerSoAttributes,

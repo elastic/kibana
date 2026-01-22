@@ -8,6 +8,7 @@
  */
 
 import type { PublishingSubject } from '@kbn/presentation-publishing/publishing_subject';
+import type { PanelPackage } from './presentation_container';
 
 export interface CanDuplicatePanels {
   duplicatePanel: (panelId: string) => void;
@@ -26,4 +27,22 @@ export interface CanExpandPanels {
 
 export const apiCanExpandPanels = (unknownApi: unknown | null): unknownApi is CanExpandPanels => {
   return Boolean((unknownApi as CanExpandPanels)?.expandPanel !== undefined);
+};
+
+export interface CanPinPanels {
+  pinPanel: (panelId: string) => void;
+  unpinPanel: (panelId: string) => void;
+  panelIsPinned: (panelId: string) => boolean;
+  addPinnedPanel: <StateType extends object, ApiType extends unknown = unknown>(
+    panel: PanelPackage<StateType>
+  ) => Promise<ApiType | undefined>;
+}
+
+export const apiCanPinPanels = (api: unknown): api is CanPinPanels => {
+  return (
+    typeof (api as CanPinPanels)?.pinPanel === 'function' &&
+    typeof (api as CanPinPanels)?.unpinPanel === 'function' &&
+    typeof (api as CanPinPanels)?.panelIsPinned === 'function' &&
+    typeof (api as CanPinPanels)?.addPinnedPanel === 'function'
+  );
 };

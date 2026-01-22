@@ -1,0 +1,644 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+      "entities-generic-latest": {}
+    },
+    "index": ".entities.v2.latest.security_generic_entities-space",
+    "settings": {
+      "index": {
+        "mode": "lookup"
+      }
+    },
+    "mappings": {
+      "_meta": {
+        "version": "2.0.0"
+      },
+      "dynamic_templates": [
+        {
+          "ecs_timestamp": {
+            "match": "@timestamp",
+            "mapping": {
+              "ignore_malformed": false,
+              "type": "date"
+            }
+          }
+        },
+        {
+          "ecs_message_match_only_text": {
+            "path_match": [
+              "message",
+              "*.message"
+            ],
+            "unmatch_mapping_type": "object",
+            "mapping": {
+              "type": "match_only_text"
+            }
+          }
+        },
+        {
+          "ecs_non_indexed_keyword": {
+            "path_match": [
+              "*event.original",
+              "*gen_ai.agent.description"
+            ],
+            "mapping": {
+              "doc_values": false,
+              "index": false,
+              "type": "keyword"
+            }
+          }
+        },
+        {
+          "ecs_non_indexed_long": {
+            "path_match": "*.x509.public_key_exponent",
+            "mapping": {
+              "doc_values": false,
+              "index": false,
+              "type": "long"
+            }
+          }
+        },
+        {
+          "ecs_ip": {
+            "path_match": [
+              "ip",
+              "*.ip",
+              "*_ip"
+            ],
+            "match_mapping_type": "string",
+            "mapping": {
+              "type": "ip"
+            }
+          }
+        },
+        {
+          "ecs_wildcard": {
+            "path_match": [
+              "*.io.text",
+              "*.message_id",
+              "*registry.data.strings",
+              "*url.path"
+            ],
+            "unmatch_mapping_type": "object",
+            "mapping": {
+              "type": "wildcard"
+            }
+          }
+        },
+        {
+          "ecs_path_match_wildcard_and_match_only_text": {
+            "path_match": [
+              "*.body.content",
+              "*url.full",
+              "*url.original"
+            ],
+            "unmatch_mapping_type": "object",
+            "mapping": {
+              "fields": {
+                "text": {
+                  "type": "match_only_text"
+                }
+              },
+              "type": "wildcard"
+            }
+          }
+        },
+        {
+          "ecs_match_wildcard_and_match_only_text": {
+            "match": [
+              "*command_line",
+              "*stack_trace"
+            ],
+            "unmatch_mapping_type": "object",
+            "mapping": {
+              "fields": {
+                "text": {
+                  "type": "match_only_text"
+                }
+              },
+              "type": "wildcard"
+            }
+          }
+        },
+        {
+          "ecs_path_match_keyword_and_match_only_text": {
+            "path_match": [
+              "*.title",
+              "*.executable",
+              "*.name",
+              "*.working_directory",
+              "*.full_name",
+              "*file.path",
+              "*file.target_path",
+              "*os.full",
+              "*email.subject",
+              "*vulnerability.description",
+              "*user_agent.original"
+            ],
+            "unmatch_mapping_type": "object",
+            "mapping": {
+              "fields": {
+                "text": {
+                  "type": "match_only_text"
+                }
+              },
+              "type": "keyword"
+            }
+          }
+        },
+        {
+          "ecs_date": {
+            "path_match": [
+              "*.timestamp",
+              "*_timestamp",
+              "*.not_after",
+              "*.not_before",
+              "*.accessed",
+              "created",
+              "*.created",
+              "*.installed",
+              "*.creation_date",
+              "*.ctime",
+              "*.mtime",
+              "ingested",
+              "*.ingested",
+              "*.start",
+              "*.end",
+              "*.indicator.first_seen",
+              "*.indicator.last_seen",
+              "*.indicator.modified_at",
+              "*threat.enrichments.matched.occurred"
+            ],
+            "unmatch_mapping_type": "object",
+            "mapping": {
+              "type": "date"
+            }
+          }
+        },
+        {
+          "ecs_path_match_float": {
+            "path_match": [
+              "*.score.*",
+              "*_score*"
+            ],
+            "path_unmatch": "*.version",
+            "unmatch_mapping_type": "object",
+            "mapping": {
+              "type": "float"
+            }
+          }
+        },
+        {
+          "ecs_usage_double_scaled_float": {
+            "path_match": "*.usage",
+            "match_mapping_type": [
+              "double",
+              "long",
+              "string"
+            ],
+            "mapping": {
+              "scaling_factor": 1000,
+              "type": "scaled_float"
+            }
+          }
+        },
+        {
+          "ecs_geo_point": {
+            "path_match": "*.geo.location",
+            "mapping": {
+              "type": "geo_point"
+            }
+          }
+        },
+        {
+          "ecs_flattened": {
+            "path_match": [
+              "*structured_data",
+              "*exports",
+              "*imports"
+            ],
+            "match_mapping_type": "object",
+            "mapping": {
+              "type": "flattened"
+            }
+          }
+        },
+        {
+          "ecs_gen_ai_integers": {
+            "path_match": [
+              "*gen_ai.request.max_tokens",
+              "*gen_ai.usage.input_tokens",
+              "*gen_ai.usage.output_tokens",
+              "*gen_ai.request.choice.count",
+              "*gen_ai.request.seed"
+            ],
+            "mapping": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "ecs_gen_ai_doubles": {
+            "path_match": [
+              "*gen_ai.request.temperature",
+              "*gen_ai.request.top_k",
+              "*gen_ai.request.frequency_penalty",
+              "*gen_ai.request.presence_penalty",
+              "*gen_ai.request.top_p"
+            ],
+            "mapping": {
+              "type": "double"
+            }
+          }
+        },
+        {
+          "all_strings_to_keywords": {
+            "match_mapping_type": "string",
+            "mapping": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        },
+        {
+          "strings_as_keyword": {
+            "match_mapping_type": "string",
+            "mapping": {
+              "fields": {
+                "text": {
+                  "type": "text"
+                }
+              },
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        },
+        {
+          "entity_metrics": {
+            "path_match": "entity.metrics.*",
+            "match_mapping_type": [
+              "long",
+              "double"
+            ],
+            "mapping": {
+              "type": "{dynamic_type}"
+            }
+          }
+        }
+      ],
+      "date_detection": false,
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "asset": {
+          "properties": {
+            "criticality": {
+              "type": "keyword"
+            }
+          }
+        },
+        "cloud": {
+          "properties": {
+            "account": {
+              "properties": {
+                "id": {
+                  "type": "keyword"
+                },
+                "name": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "availability_zone": {
+              "type": "keyword"
+            },
+            "instance": {
+              "properties": {
+                "id": {
+                  "type": "keyword"
+                },
+                "name": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "machine": {
+              "properties": {
+                "type": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "project": {
+              "properties": {
+                "id": {
+                  "type": "keyword"
+                },
+                "name": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "provider": {
+              "type": "keyword"
+            },
+            "region": {
+              "type": "keyword"
+            },
+            "service": {
+              "properties": {
+                "name": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "entity": {
+          "properties": {
+            "EngineMetadata": {
+              "properties": {
+                "Type": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                }
+              }
+            },
+            "definition_id": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "definition_version": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "display_name": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 1024
+                }
+              }
+            },
+            "id": {
+              "type": "keyword",
+              "fields": {
+                "text": {
+                  "type": "match_only_text"
+                }
+              }
+            },
+            "identity_fields": {
+              "type": "keyword"
+            },
+            "last_seen_timestamp": {
+              "type": "date"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "schema_version": {
+              "type": "keyword",
+              "ignore_above": 1024
+            },
+            "source": {
+              "type": "keyword"
+            },
+            "sub_type": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            },
+            "url": {
+              "type": "keyword"
+            }
+          }
+        },
+        "event": {
+          "properties": {
+            "ingested": {
+              "type": "date"
+            }
+          }
+        },
+        "generic": {
+          "properties": {
+            "risk": {
+              "properties": {
+                "calculated_level": {
+                  "type": "keyword"
+                },
+                "calculated_score": {
+                  "type": "float"
+                },
+                "calculated_score_norm": {
+                  "type": "float"
+                }
+              }
+            }
+          }
+        },
+        "host": {
+          "properties": {
+            "architecture": {
+              "type": "keyword"
+            },
+            "boot": {
+              "properties": {
+                "id": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "cpu": {
+              "properties": {
+                "usage": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "disk": {
+              "properties": {
+                "read": {
+                  "properties": {
+                    "bytes": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "write": {
+                  "properties": {
+                    "bytes": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            },
+            "domain": {
+              "type": "keyword"
+            },
+            "hostname": {
+              "type": "keyword"
+            },
+            "id": {
+              "type": "keyword"
+            },
+            "ip": {
+              "type": "ip"
+            },
+            "mac": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "network": {
+              "properties": {
+                "egress": {
+                  "properties": {
+                    "bytes": {
+                      "type": "keyword"
+                    },
+                    "packets": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "ingress": {
+                  "properties": {
+                    "bytes": {
+                      "type": "keyword"
+                    },
+                    "packets": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            },
+            "pid_ns_ino": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            },
+            "uptime": {
+              "type": "keyword"
+            }
+          }
+        },
+        "labels": {
+          "type": "object"
+        },
+        "orchestrator": {
+          "properties": {
+            "api_version": {
+              "type": "keyword"
+            },
+            "cluster": {
+              "properties": {
+                "id": {
+                  "type": "keyword"
+                },
+                "name": {
+                  "type": "keyword"
+                },
+                "url": {
+                  "type": "keyword"
+                },
+                "version": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "namespace": {
+              "type": "keyword"
+            },
+            "organization": {
+              "type": "keyword"
+            },
+            "resource": {
+              "properties": {
+                "annotation": {
+                  "type": "keyword"
+                },
+                "id": {
+                  "type": "keyword"
+                },
+                "ip": {
+                  "type": "keyword"
+                },
+                "label": {
+                  "type": "keyword"
+                },
+                "name": {
+                  "type": "keyword"
+                },
+                "parent": {
+                  "properties": {
+                    "type": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "type": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "type": {
+              "type": "keyword"
+            }
+          }
+        },
+        "tags": {
+          "type": "keyword",
+          "ignore_above": 1024
+        },
+        "user": {
+          "properties": {
+            "domain": {
+              "type": "keyword"
+            },
+            "email": {
+              "type": "keyword"
+            },
+            "full_name": {
+              "type": "keyword",
+              "fields": {
+                "text": {
+                  "type": "match_only_text"
+                }
+              }
+            },
+            "hash": {
+              "type": "keyword"
+            },
+            "id": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword",
+              "fields": {
+                "text": {
+                  "type": "match_only_text"
+                }
+              }
+            },
+            "roles": {
+              "type": "keyword"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+

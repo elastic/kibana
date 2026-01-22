@@ -12,7 +12,7 @@ export const getMissingSecurityKibanaPrivilegesError = ({
 }) => {
   return {
     error: 'Forbidden',
-    message: `API [${routeDetails}] is unauthorized for user, this action is granted by the Kibana privileges [securitySolution]`,
+    message: `API [${routeDetails}] is unauthorized for user, this action is granted by the Kibana privileges [alerts-read]`,
     statusCode: 403,
   };
 };

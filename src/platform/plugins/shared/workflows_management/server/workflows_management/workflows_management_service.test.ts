@@ -82,6 +82,7 @@ describe('WorkflowsService', () => {
       index: jest.fn().mockResolvedValue({ _id: 'test-id' }),
       update: jest.fn().mockResolvedValue({ _id: 'test-id' }),
       delete: jest.fn().mockResolvedValue({ _id: 'test-id' }),
+      bulk: jest.fn().mockResolvedValue({ items: [] }),
     } as any;
 
     mockLogger = loggerMock.create();
@@ -1193,14 +1194,27 @@ steps:
           total: { value: 1 },
         },
       } as any);
-      mockEsClient.index.mockResolvedValue({ _id: 'test-workflow-id' } as any);
+      mockEsClient.bulk.mockResolvedValue({
+        items: [
+          {
+            index: {
+              _id: 'test-workflow-id',
+              status: 200,
+            },
+          },
+        ],
+      } as any);
 
-      await service.deleteWorkflows(['test-workflow-id'], 'default');
+      const result = await service.deleteWorkflows(['test-workflow-id'], 'default');
+
+      expect(result).toEqual({
+        total: 1,
+        deleted: 1,
+        failures: [],
+      });
 
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          index: '.workflows-workflows',
-          allow_no_indices: true,
           query: {
             bool: {
               must: [{ ids: { values: ['test-workflow-id'] } }, { term: { spaceId: 'default' } }],
@@ -1209,18 +1223,16 @@ steps:
           size: 1,
         })
       );
-      expect(mockEsClient.index).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'test-workflow-id',
-          index: '.workflows-workflows',
-          document: expect.objectContaining({
-            enabled: false,
-            deleted_at: expect.any(Date),
-          }),
-          refresh: 'wait_for',
-          require_alias: true,
-        })
-      );
+      // Verify bulk was called with correct structure
+      const bulkCall = mockEsClient.bulk.mock.calls[0][0];
+      expect(bulkCall.index).toBe('.workflows-workflows');
+      expect(bulkCall.operations).toBeDefined();
+      expect(bulkCall.operations).toHaveLength(2); // metadata + document
+      expect(bulkCall.operations![0]).toEqual({ index: { _id: 'test-workflow-id' } });
+      expect(bulkCall.operations![1]).toMatchObject({
+        enabled: false,
+        deleted_at: expect.any(Date),
+      });
     });
 
     it('should handle not found workflows gracefully', async () => {
@@ -1231,7 +1243,60 @@ steps:
         },
       } as any);
 
-      await expect(service.deleteWorkflows(['non-existent-id'], 'default')).resolves.not.toThrow();
+      const result = await service.deleteWorkflows(['non-existent-id'], 'default');
+
+      expect(result).toEqual({
+        total: 1,
+        deleted: 1,
+        failures: [],
+      });
+    });
+
+    it('should handle partial failures when deleting multiple workflows', async () => {
+      const mockWorkflowDocument2 = {
+        _id: 'workflow-2',
+        _source: {
+          ...mockWorkflowDocument._source,
+          name: 'Test Workflow 2',
+        },
+      };
+
+      // Mock search to return both workflows
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [{ ...mockWorkflowDocument, _id: 'workflow-1' }, mockWorkflowDocument2],
+          total: { value: 2 },
+        },
+      } as any);
+
+      // Mock bulk operation where one succeeds and one fails
+      mockEsClient.bulk.mockResolvedValue({
+        items: [
+          {
+            index: {
+              _id: 'workflow-1',
+              status: 200,
+            },
+          },
+          {
+            index: {
+              _id: 'workflow-2',
+              status: 500,
+              error: {
+                reason: 'Database error',
+              },
+            },
+          },
+        ],
+      } as any);
+
+      const result = await service.deleteWorkflows(['workflow-1', 'workflow-2'], 'default');
+
+      expect(result).toEqual({
+        total: 2,
+        deleted: 1,
+        failures: [{ id: 'workflow-2', error: 'Database error' }],
+      });
     });
   });
 
@@ -1723,24 +1788,18 @@ steps:
 
   describe('getWorkflowExecution', () => {
     it('should return workflow execution with steps', async () => {
-      const mockExecutionResponse = {
-        hits: {
-          hits: [
-            {
-              _id: 'execution-1',
-              _source: {
-                spaceId: 'default',
-                status: 'completed',
-                startedAt: '2023-01-01T00:00:00Z',
-                finishedAt: '2023-01-01T00:05:00Z',
-                duration: 300000,
-                workflowId: 'workflow-1',
-                triggeredBy: 'manual',
-                definition: { steps: [] },
-              },
-            },
-          ],
-          total: { value: 1 },
+      // Mock the get call for execution (using direct GET by ID)
+      const mockExecutionGetResponse = {
+        _id: 'execution-1',
+        _source: {
+          spaceId: 'default',
+          status: 'completed',
+          startedAt: '2023-01-01T00:00:00Z',
+          finishedAt: '2023-01-01T00:05:00Z',
+          duration: 300000,
+          workflowId: 'workflow-1',
+          triggeredBy: 'manual',
+          definition: { steps: [] },
         },
       };
 
@@ -1763,10 +1822,9 @@ steps:
         },
       };
 
-      // Mock both search calls - first for execution, then for step executions
-      mockEsClient.search
-        .mockResolvedValueOnce(mockExecutionResponse as any)
-        .mockResolvedValueOnce(mockStepExecutionsResponse as any);
+      // Mock get for execution and search for step executions
+      mockEsClient.get.mockResolvedValueOnce(mockExecutionGetResponse as any);
+      mockEsClient.search.mockResolvedValueOnce(mockStepExecutionsResponse as any);
 
       const result = await service.getWorkflowExecution('execution-1', 'default');
 
@@ -1774,18 +1832,14 @@ steps:
       expect(result!.id).toBe('execution-1');
       expect(result!.status).toBe('completed');
 
-      // Verify the execution search call
-      expect(mockEsClient.search).toHaveBeenNthCalledWith(1, {
+      // Verify the execution get call (now uses GET instead of search)
+      expect(mockEsClient.get).toHaveBeenCalledWith({
         index: WORKFLOWS_EXECUTIONS_INDEX,
-        query: {
-          bool: {
-            must: [{ ids: { values: ['execution-1'] } }, { term: { spaceId: 'default' } }],
-          },
-        },
+        id: 'execution-1',
       });
 
       // Verify the step executions search call
-      expect(mockEsClient.search).toHaveBeenNthCalledWith(2, {
+      expect(mockEsClient.search).toHaveBeenCalledWith({
         index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
         query: {
           bool: {
@@ -1798,27 +1852,40 @@ steps:
       });
     });
 
-    it('should return null when execution not found', async () => {
-      const mockEmptyResponse = {
-        hits: {
-          hits: [],
-          total: { value: 0 },
-        },
-      };
-
-      mockEsClient.search.mockResolvedValue(mockEmptyResponse as any);
+    it('should return null when execution not found (404)', async () => {
+      // Mock 404 error for document not found
+      const notFoundError = new Error('Not Found') as Error & { meta?: { statusCode?: number } };
+      notFoundError.meta = { statusCode: 404 };
+      mockEsClient.get.mockRejectedValueOnce(notFoundError);
 
       const result = await service.getWorkflowExecution('non-existent', 'default');
 
       expect(result).toBeNull();
     });
 
-    it('should handle search errors', async () => {
-      const error = new Error('Search failed');
-      mockEsClient.search.mockRejectedValue(error);
+    it('should return null when spaceId does not match', async () => {
+      // Mock execution with different spaceId
+      const mockExecutionGetResponse = {
+        _id: 'execution-1',
+        _source: {
+          spaceId: 'different-space',
+          status: 'completed',
+        },
+      };
+
+      mockEsClient.get.mockResolvedValueOnce(mockExecutionGetResponse as any);
+
+      const result = await service.getWorkflowExecution('execution-1', 'default');
+
+      expect(result).toBeNull();
+    });
+
+    it('should handle get errors', async () => {
+      const error = new Error('Get failed');
+      mockEsClient.get.mockRejectedValue(error);
 
       await expect(service.getWorkflowExecution('execution-1', 'default')).rejects.toThrow(
-        'Search failed'
+        'Get failed'
       );
     });
   });

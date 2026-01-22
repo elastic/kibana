@@ -97,9 +97,12 @@
     "xpack.observabilityLogsExplorer": "solutions/observability/plugins/observability_logs_explorer",
     "xpack.observability_onboarding": "solutions/observability/plugins/observability_onboarding",
     "xpack.observabilityShared": "solutions/observability/plugins/observability_shared",
-    "xpack.observabilityLogsOverview": ["platform/packages/shared/logs-overview/src/components"],
     "xpack.onechat": ["platform/plugins/shared/onechat", "platform/packages/shared/onechat"],
     "xpack.osquery": ["platform/plugins/shared/osquery"],
+    "xpack.observabilityLogsOverview": [
+      "platform/packages/shared/logs-overview/src/components"
+  ],
+    "xpack.agentBuilder": ["platform/plugins/shared/agent_builder", "platform/packages/shared/agent-builder"],
     "xpack.painlessLab": "platform/plugins/private/painless_lab",
     "xpack.profiling": ["solutions/observability/plugins/profiling"],
     "xpack.reindexService": "platform/plugins/private/reindex_service",

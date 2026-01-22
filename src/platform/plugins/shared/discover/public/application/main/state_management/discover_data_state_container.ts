@@ -24,7 +24,6 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { DEFAULT_COLUMNS_SETTING, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
@@ -150,7 +149,6 @@ export function getDataStateContainer({
   internalState,
   runtimeStateManager,
   savedSearchContainer,
-  setDataView,
   injectCurrentTab,
   getCurrentTab,
 }: {
@@ -159,7 +157,6 @@ export function getDataStateContainer({
   internalState: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
   savedSearchContainer: DiscoverSavedSearchContainer;
-  setDataView: (dataView: DataView) => void;
   injectCurrentTab: TabActionInjector;
   getCurrentTab: () => TabState;
 }): DiscoverDataStateContainer {
@@ -168,6 +165,8 @@ export function getDataStateContainer({
   const inspectorAdapters = { requests: new RequestAdapter() };
   const fetchChart$ = new ReplaySubject<DiscoverLatestFetchDetails | null>(1);
   const disableNextFetchOnStateChange$ = new BehaviorSubject(false);
+  let numberOfFetches = 0;
+  let unsubscribeIsRequested = false;
 
   /**
    * The observable to trigger data fetching in UI
@@ -255,6 +254,12 @@ export function getDataStateContainer({
     const subscription = fetch$
       .pipe(
         mergeMap(async ({ options }) => {
+          numberOfFetches += 1;
+          if (unsubscribeIsRequested) {
+            unsubscribeIsRequested = false;
+            subscription.unsubscribe();
+          }
+
           const { id: currentTabId, resetDefaultProfileState, dataRequestParams } = getCurrentTab();
           const { scopedProfilesManager$, scopedEbtManager$, currentDataView$ } =
             selectTabRuntimeState(runtimeStateManager, currentTabId);
@@ -431,7 +436,12 @@ export function getDataStateContainer({
       .subscribe();
 
     return () => {
-      subscription.unsubscribe();
+      if (numberOfFetches > 0) {
+        subscription.unsubscribe();
+      } else {
+        // to let the initial fetch to execute properly before unsubscribing
+        unsubscribeIsRequested = true;
+      }
     };
   }
 
@@ -443,7 +453,9 @@ export function getDataStateContainer({
     if (isOfAggregateQueryType(query)) {
       const nextDataView = await getEsqlDataView(query, currentDataView, services);
       if (nextDataView !== currentDataView) {
-        setDataView(nextDataView);
+        internalState.dispatch(
+          injectCurrentTab(internalStateActions.assignNextDataView)({ dataView: nextDataView })
+        );
       }
     }
 

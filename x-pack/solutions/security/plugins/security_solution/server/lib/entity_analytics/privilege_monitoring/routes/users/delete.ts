@@ -13,15 +13,10 @@ import {
   DeletePrivMonUserRequestParams,
   type DeletePrivMonUserResponse,
 } from '../../../../../../common/api/entity_analytics';
-import {
-  API_VERSIONS,
-  APP_ID,
-  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
-  MONITORING_USERS_URL,
-} from '../../../../../../common/constants';
+import { API_VERSIONS, APP_ID, MONITORING_USERS_URL } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
-import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
 import { createPrivilegedUsersCrudService } from '../../users/privileged_users_crud';
+import { withMinimumLicense } from '../../../utils/with_minimum_license';
 
 export const deleteUserRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
   router.versioned
@@ -43,32 +38,31 @@ export const deleteUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<DeletePrivMonUserResponse>> => {
-        const siemResponse = buildSiemResponse(response);
+      withMinimumLicense(
+        async (context, request, response): Promise<IKibanaResponse<DeletePrivMonUserResponse>> => {
+          const siemResponse = buildSiemResponse(response);
 
-        try {
-          await assertAdvancedSettingsEnabled(
-            await context.core,
-            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
-          );
-          const secSol = await context.securitySolution;
-          const { elasticsearch } = await context.core;
-          const crudService = createPrivilegedUsersCrudService({
-            esClient: elasticsearch.client.asCurrentUser,
-            index: getPrivilegedMonitorUsersIndex(secSol.getSpaceId()),
-            logger: secSol.getLogger(),
-          });
+          try {
+            const secSol = await context.securitySolution;
+            const { elasticsearch } = await context.core;
+            const crudService = createPrivilegedUsersCrudService({
+              esClient: elasticsearch.client.asCurrentUser,
+              index: getPrivilegedMonitorUsersIndex(secSol.getSpaceId()),
+              logger: secSol.getLogger(),
+            });
 
-          await crudService.delete(request.params.id);
-          return response.ok({ body: { acknowledged: true } });
-        } catch (e) {
-          const error = transformError(e);
-          logger.error(`Error deleting user: ${error.message}`);
-          return siemResponse.error({
-            statusCode: error.statusCode,
-            body: error.message,
-          });
-        }
-      }
+            await crudService.delete(request.params.id);
+            return response.ok({ body: { acknowledged: true } });
+          } catch (e) {
+            const error = transformError(e);
+            logger.error(`Error deleting user: ${error.message}`);
+            return siemResponse.error({
+              statusCode: error.statusCode,
+              body: error.message,
+            });
+          }
+        },
+        'platinum'
+      )
     );
 };

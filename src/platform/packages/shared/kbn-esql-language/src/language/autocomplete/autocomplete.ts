@@ -17,7 +17,7 @@ import type {
 } from '../../types';
 import { EsqlQuery } from '../../composer';
 import { esqlCommandRegistry } from '../../commands';
-import { Walker } from '../../ast';
+import { isHeaderCommand, Walker } from '../../ast';
 import { parse } from '../../parser';
 import { SuggestionOrderingEngine } from '../../shared';
 import { getCommandAutocompleteDefinitions } from '../../commands/registry/complete_items';
@@ -37,6 +37,7 @@ import { mapRecommendedQueriesFromExtensions } from './recommended_queries_helpe
 import { getQueryForFields } from '../shared/get_query_for_fields';
 import type { GetColumnMapFn } from '../shared/columns_retrieval_helpers';
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
+import { getUnmappedFieldsStrategy } from '../../commands/definitions/utils/settings';
 
 function isSourceCommandSuggestion({ label }: { label: string }) {
   const sourceCommands = esqlCommandRegistry
@@ -245,16 +246,22 @@ async function getSuggestionsWithinCommandExpression(
     return findNewUserDefinedColumn(allUserDefinedColumns);
   };
 
+  const headers = commands.filter((cmd) => isHeaderCommand(cmd));
+  const unmappedFieldsStrategy = getUnmappedFieldsStrategy(headers);
+
+  // Get the context that might be needed by the command itself
   const additionalCommandContext = await getCommandContext(
-    astContext.command.name,
+    astContext.command,
     innerText,
     callbacks
   );
+
   const context = {
     ...references,
     ...additionalCommandContext,
     activeProduct: callbacks?.getActiveProduct?.(),
     isCursorInSubquery: astContext.isCursorInSubquery,
+    unmappedFieldsStrategy,
   };
 
   // does it make sense to have a different context per command?

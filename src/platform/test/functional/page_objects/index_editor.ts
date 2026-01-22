@@ -64,7 +64,9 @@ export class IndexEditorObject extends FtrService {
 
   public async setCellValue(rowIndex: number, columnIndex: number, value: string): Promise<void> {
     await this.testSubjects.click(`indexEditorCellValue-${rowIndex}-${columnIndex}`);
-    await this.testSubjects.setValue('indexEditorCellValueInput', value);
+    const input = await this.testSubjects.find('indexEditorCellValueInput');
+    await input.clearValueWithKeyboard();
+    await input.type(value, { charByChar: true });
     await this.common.pressEnterKey();
   }
 

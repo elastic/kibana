@@ -6,12 +6,15 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiSwitch } from '@elastic/eui';
+import { EuiButtonIcon, EuiSwitch } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { isGroupingBucket } from '@kbn/grouping/src';
-import type { ParsedGroupingAggregation } from '@kbn/grouping/src';
+import type { ParsedGroupingAggregation, RawBucket } from '@kbn/grouping/src';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+
+import { AttackDetailsRightPanelKey } from '../../../../flyout/attack_details/constants/panel_keys';
 import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useGroupTakeActionsItems } from '../../../hooks/alerts_table/use_group_take_action_items';
@@ -26,18 +29,26 @@ import { inputsSelectors } from '../../../../common/store/inputs';
 import { useUserData } from '../../user_info';
 import { useListsConfig } from '../../../containers/detection_engine/lists/use_lists_config';
 import {
+  buildAlertAssigneesFilter,
   buildShowBuildingBlockFilter,
   buildThreatMatchFilter,
 } from '../../alerts_table/default_config';
 import type { Status } from '../../../../../common/api/detection_engine';
 import { GroupedAlertsTable } from '../../alerts_table/alerts_grouping';
-import { AlertsTable } from '../../alerts_table';
 import type { AlertsGroupingAggregation } from '../../alerts_table/grouping_settings/types';
 import { useGetDefaultGroupTitleRenderers } from '../../../hooks/attacks/use_get_default_group_title_renderers';
+import { useAttackGroupHandler } from '../../../hooks/attacks/use_attack_group_handler';
+import type { AssigneesIdsSelection } from '../../../../common/components/assignees/types';
+
+import { AttackDetailsContainer } from './attack_details/attack_details_container';
+import { AlertsTab } from './attack_details/alerts_tab';
+import { EmptyResultsPrompt } from './empty_results_prompt';
 import { groupingOptions, groupingSettings } from './grouping_configs';
 import * as i18n from './translations';
+import { buildConnectorIdFilter } from './filtering_configs';
 
 export const TABLE_SECTION_TEST_ID = 'attacks-page-table-section';
+export const EXPAND_ATTACK_BUTTON_TEST_ID = 'expand-attack-button';
 
 export interface TableSectionProps {
   /**
@@ -50,17 +61,39 @@ export interface TableSectionProps {
    * This is an array of Status values, such as ['open', 'acknowledged', 'closed', 'in-progress']
    */
   statusFilter: Status[];
+
   /**
    * The page filters retrieved from the FiltersSection component to filter the table
    */
   pageFilters: Filter[] | undefined;
+
+  /**
+   * The list of assignees to add to the others filters
+   */
+  assignees: AssigneesIdsSelection[];
+  /**
+   * The list of selected connectors ID to filter the table
+   */
+  selectedConnectorNames: string[];
+
+  /**
+   * Callback to open the schedules flyout
+   */
+  openSchedulesFlyout: () => void;
 }
 
 /**
  * Renders the alerts table with grouping functionality in the attacks page.
  */
 export const TableSection = React.memo(
-  ({ dataView, statusFilter, pageFilters }: TableSectionProps) => {
+  ({
+    dataView,
+    statusFilter,
+    pageFilters,
+    assignees,
+    selectedConnectorNames,
+    openSchedulesFlyout,
+  }: TableSectionProps) => {
     const getGlobalFiltersQuerySelector = useMemo(
       () => inputsSelectors.globalFiltersQuerySelector(),
       []
@@ -86,6 +119,7 @@ export const TableSection = React.memo(
     const showAnonymizedSwitch = useMemo(() => {
       return (
         <EuiSwitch
+          key="show-anonymized-switch"
           checked={showAnonymized}
           compressed={true}
           data-test-subj={`${TABLE_SECTION_TEST_ID}-show-anonymized`}
@@ -96,9 +130,11 @@ export const TableSection = React.memo(
     }, [onToggleShowAnonymized, showAnonymized]);
 
     const [attackIds, setAttackIds] = useState<string[] | undefined>(undefined);
+    const { getAttack, isLoading: isAttacksLoading } = useAttackGroupHandler({ attackIds });
     const { defaultGroupTitleRenderers } = useGetDefaultGroupTitleRenderers({
-      attackIds,
+      getAttack,
       showAnonymized,
+      isLoading: isAttacksLoading,
     });
 
     const onAggregationsChange = useCallback(
@@ -124,8 +160,16 @@ export const TableSection = React.memo(
         ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
         ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
         ...(pageFilters ?? []),
+        ...buildAlertAssigneesFilter(assignees),
+        ...buildConnectorIdFilter(selectedConnectorNames),
       ],
-      [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, pageFilters]
+      [
+        showBuildingBlockAlerts,
+        showOnlyThreatIndicatorAlerts,
+        pageFilters,
+        assignees,
+        selectedConnectorNames,
+      ]
     );
 
     const isLoading = useMemo(
@@ -133,19 +177,37 @@ export const TableSection = React.memo(
       [listsConfigLoading, userInfoLoading, pageFilters]
     );
 
-    const renderAlertTable = useCallback(
-      (groupingFilters: Filter[]) => {
+    const renderChildComponent = useCallback(
+      (
+        groupingFilters: Filter[],
+        selectedGroup?: string,
+        fieldBucket?: RawBucket<AlertsGroupingAggregation>
+      ) => {
+        // attack is undefined for the generic group marked as `-` which means this is the group of alerts that do not belong to any attack.
+        const attack =
+          selectedGroup && fieldBucket ? getAttack(selectedGroup, fieldBucket) : undefined;
+
+        if (!attack) {
+          return (
+            <AlertsTab
+              groupingFilters={groupingFilters}
+              defaultFilters={defaultFilters}
+              isTableLoading={isLoading}
+            />
+          );
+        }
+
         return (
-          <AlertsTable
-            tableType={TableId.alertsOnAttacksPage}
-            inputFilters={[...defaultFilters, ...groupingFilters]}
-            isLoading={isLoading}
-            pageScope={PageScope.alerts} // show only detection alerts
-            disableAdditionalToolbarControls={groupingFilters.length > 0}
+          <AttackDetailsContainer
+            attack={attack}
+            showAnonymized={showAnonymized}
+            groupingFilters={groupingFilters}
+            defaultFilters={defaultFilters}
+            isTableLoading={isLoading}
           />
         );
       },
-      [defaultFilters, isLoading]
+      [defaultFilters, getAttack, isLoading, showAnonymized]
     );
 
     const groupTakeActionItems = useGroupTakeActionsItems({
@@ -165,6 +227,49 @@ export const TableSection = React.memo(
       return dataView.toSpec(true);
     }, [dataView]);
 
+    const { openFlyout } = useExpandableFlyoutApi();
+    const openAttackDetailsFlyout = useCallback(
+      (selectedGroup: string, bucket: RawBucket<AlertsGroupingAggregation>) => {
+        const attack = getAttack(selectedGroup, bucket);
+        if (attack) {
+          openFlyout({
+            right: {
+              id: AttackDetailsRightPanelKey,
+              params: {
+                attackId: attack.id,
+                indexName: dataView.getIndexPattern(),
+              },
+            },
+          });
+        }
+      },
+      [dataView, getAttack, openFlyout]
+    );
+
+    const getAdditionalActionButtons = useCallback(
+      (selectedGroup: string, fieldBucket: RawBucket<AlertsGroupingAggregation>) => {
+        return !isGroupingBucket(fieldBucket) || fieldBucket.isNullGroup
+          ? []
+          : [
+              <EuiButtonIcon
+                key="expand-attack-button"
+                aria-label={i18n.EXPAND_BUTTON_ARIAL_LABEL}
+                data-test-subj={EXPAND_ATTACK_BUTTON_TEST_ID}
+                iconType="expand"
+                onClick={() => openAttackDetailsFlyout(selectedGroup, fieldBucket)}
+                size="s"
+                color="text"
+              />,
+            ];
+      },
+      [openAttackDetailsFlyout]
+    );
+
+    const emptyGroupingComponent = useMemo(
+      () => <EmptyResultsPrompt openSchedulesFlyout={openSchedulesFlyout} />,
+      [openSchedulesFlyout]
+    );
+
     return (
       <div data-test-subj={TABLE_SECTION_TEST_ID}>
         <GroupedAlertsTable
@@ -179,13 +284,15 @@ export const TableSection = React.memo(
           globalQuery={query}
           groupTakeActionItems={groupTakeActionItems}
           loading={isLoading}
-          renderChildComponent={renderAlertTable}
+          renderChildComponent={renderChildComponent}
           tableId={TableId.alertsOnAttacksPage}
           to={to}
           onAggregationsChange={onAggregationsChange}
           additionalToolbarControls={[showAnonymizedSwitch]}
           pageScope={PageScope.attacks} // allow filtering and grouping by attack fields
           settings={groupingSettings}
+          getAdditionalActionButtons={getAdditionalActionButtons}
+          emptyGroupingComponent={emptyGroupingComponent}
         />
       </div>
     );

@@ -22,21 +22,28 @@ import type {
   Signature,
   SupportedDataType,
 } from '../types';
-import { getFunctionDefinition } from './functions';
+import { getFunctionDefinition, getFunctionForInlineCast } from './functions';
 import { isArrayType } from '../types';
 import { getColumnForASTNode } from './shared';
 import type { ESQLColumnData } from '../../registry/types';
+import { UnmappedFieldsStrategy } from '../../registry/types';
 import { TIME_SYSTEM_PARAMS } from './literals';
 import { isMarkerNode } from './ast';
+import { getUnmappedFieldType } from './settings';
 
 // #region type detection
 
 /**
  * Determines the type of the expression
+ * @param root The root AST node of the expression
+ * @param columns Optional map of available columns to resolve column types
+ * @param unmappedFieldsStrategy Strategy to handle unmapped fields, it's only relevant if columns maps is provided
+ * @returns The determined type or 'unknown' if it cannot be determined
  */
 export function getExpressionType(
   root: ESQLAstItem | undefined,
-  columns?: Map<string, ESQLColumnData>
+  columns?: Map<string, ESQLColumnData>,
+  unmappedFieldsStrategy: UnmappedFieldsStrategy = UnmappedFieldsStrategy.FAIL
 ): SupportedDataType | 'unknown' {
   if (!root) {
     return 'unknown';
@@ -46,7 +53,7 @@ export function getExpressionType(
     if (root.length === 0) {
       return 'unknown';
     }
-    return getExpressionType(root[0], columns);
+    return getExpressionType(root[0], columns, unmappedFieldsStrategy);
   }
 
   if (isLiteral(root)) {
@@ -56,20 +63,19 @@ export function getExpressionType(
     return root.literalType;
   }
 
-  // from https://github.com/elastic/elasticsearch/blob/122e7288200ee03e9087c98dff6cebbc94e774aa/docs/reference/esql/functions/kibana/inline_cast.json
   if (isInlineCast(root)) {
-    switch (root.castType) {
-      case 'int':
-        return 'integer';
-      case 'bool':
-        return 'boolean';
-      case 'string':
-        return 'keyword';
-      case 'datetime':
-        return 'date';
-      default:
-        return root.castType;
+    const castFunction = getFunctionForInlineCast(root.castType);
+    if (!castFunction) {
+      return 'unknown';
     }
+
+    const fnDef = getFunctionDefinition(castFunction);
+    if (!fnDef) {
+      return 'unknown';
+    }
+
+    // Safe to get the first one as all cast functions have a single return type
+    return fnDef.signatures[0].returnType;
   }
 
   if (isColumn(root) && columns) {
@@ -80,8 +86,9 @@ export function getExpressionType(
     if (isParamLiteral(lastArg)) {
       return lastArg.literalType;
     }
+
     if (!column) {
-      return 'unknown';
+      return getUnmappedFieldType(unmappedFieldsStrategy);
     }
     if ('hasConflict' in column && column.hasConflict) {
       return 'unknown';
@@ -90,7 +97,11 @@ export function getExpressionType(
   }
 
   if (root.type === 'list') {
-    return getExpressionType(root.values[0], columns);
+    return getExpressionType(root.values[0], columns, unmappedFieldsStrategy);
+  }
+
+  if (root.type === 'map') {
+    return 'function_named_parameters';
   }
 
   if (isFunctionExpression(root)) {
@@ -124,10 +135,12 @@ export function getExpressionType(
        * will be null, which we aren't detecting. But this is ok because we consider
        * userDefinedColumns and fields to be nullable anyways and account for that during validation.
        */
-      return getExpressionType(root.args[root.args.length - 1], columns);
+      return getExpressionType(root.args[root.args.length - 1], columns, unmappedFieldsStrategy);
     }
 
-    const argTypes = root.args.map((arg) => getExpressionType(arg, columns));
+    const argTypes = root.args.map((arg) =>
+      getExpressionType(arg, columns, unmappedFieldsStrategy)
+    );
     const literalMask = root.args.map((arg) => isLiteral(arg));
     const matchingSignatures = getMatchingSignatures(
       fnDefinition.signatures,

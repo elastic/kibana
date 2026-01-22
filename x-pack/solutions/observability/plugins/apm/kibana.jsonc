@@ -31,6 +31,7 @@
       "triggersActionsUi",
       "share",
       "unifiedSearch",
+      "kql",
       "dataViews",
       "lens",
       "maps",
@@ -62,7 +63,7 @@
       "observabilityAIAssistant",
       "observabilityAgentBuilder",
       "share",
-      "onechat"
+      "agentBuilder"
     ],
     "requiredBundles": [
       "fleet",

@@ -88,6 +88,7 @@ dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/connector-schemas'
   - '@kbn/observability-overview-plugin'
+  - '@kbn/kql'
 tags:
   - plugin
   - prod

@@ -83,6 +83,7 @@
     "@kbn/licensing-types",
     "@kbn/connector-schemas",
     "@kbn/observability-overview-plugin",
+    "@kbn/kql",
   ],
   "exclude": ["target/**/*"]
 }

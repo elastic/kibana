@@ -16,59 +16,63 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type { Feature } from '@kbn/streams-schema';
+import type { System, Streams } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
-import type { FeatureSelectorProps } from './feature_selector';
-import { FeaturesSelector } from './feature_selector';
+import type { SystemSelectorProps } from './system_selector';
+import { SystemsSelector } from './system_selector';
 import { AssetImage } from '../asset_image';
 import { ConnectorListButtonBase } from '../connector_list_button/connector_list_button';
 import type { Flow } from './add_significant_event_flyout/types';
 import type { AIFeatures } from '../../hooks/use_ai_features';
+import { SystemIdentificationControl } from './system_identification_control';
 
 export function SignificantEventsGenerationPanel({
-  features,
-  selectedFeatures,
-  onFeaturesChange,
+  systems,
+  selectedSystems,
+  onSystemsChange,
+  definition,
+  refreshSystems,
   onGenerateSuggestionsClick,
-  onFeatureIdentificationClick,
   onManualEntryClick,
   isGeneratingQueries,
   isSavingManualEntry,
   selectedFlow,
   aiFeatures,
-}: FeatureSelectorProps & {
-  onFeatureIdentificationClick: () => void;
+}: SystemSelectorProps & {
+  definition: Streams.all.Definition;
+  refreshSystems: () => void;
   onManualEntryClick: () => void;
-  onGenerateSuggestionsClick: (features: Feature[]) => void;
+  onGenerateSuggestionsClick: (systems: System[]) => void;
   isGeneratingQueries: boolean;
   isSavingManualEntry: boolean;
   selectedFlow?: Flow;
   aiFeatures: AIFeatures | null;
 }) {
-  const [generatingFrom, setGeneratingFrom] = useState<'all_data' | 'features'>(
-    selectedFeatures.length === 0 ? 'all_data' : 'features'
+  const [generatingFrom, setGeneratingFrom] = useState<'all_data' | 'systems'>(
+    selectedSystems.length === 0 ? 'all_data' : 'systems'
   );
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexItem>
-        <EuiPanel hasBorder css={{ 'text-align': 'left' }}>
-          {features.length === 0 ? (
-            <IdentifyFeatures
-              identifyFeatures={onFeatureIdentificationClick}
+        <EuiPanel hasBorder css={{ textAlign: 'left' }}>
+          {systems.length === 0 ? (
+            <IdentifySystems
+              definition={definition}
+              refreshSystems={refreshSystems}
+              aiFeatures={aiFeatures}
               isGeneratingQueries={isGeneratingQueries}
               isSavingManualEntry={isSavingManualEntry}
-              aiFeatures={aiFeatures}
             />
           ) : (
             <GenerationContext
-              features={features}
-              selectedFeatures={selectedFeatures}
-              onFeaturesChange={onFeaturesChange}
+              systems={systems}
+              selectedSystems={selectedSystems}
+              onSystemsChange={onSystemsChange}
               isGeneratingQueries={isGeneratingQueries}
               onGenerateSuggestionsClick={() => {
-                setGeneratingFrom('features');
-                onGenerateSuggestionsClick(selectedFeatures);
+                setGeneratingFrom('systems');
+                onGenerateSuggestionsClick(selectedSystems);
               }}
               generatingFrom={generatingFrom}
               isSavingManualEntry={isSavingManualEntry}
@@ -115,7 +119,7 @@ export function SignificantEventsGenerationPanel({
                 iconType: 'sparkles',
                 onClick: () => {
                   setGeneratingFrom('all_data');
-                  onFeaturesChange([]);
+                  onSystemsChange([]);
                   onGenerateSuggestionsClick([]);
                 },
                 isDisabled: isGeneratingQueries || isSavingManualEntry,
@@ -156,18 +160,18 @@ export function SignificantEventsGenerationPanel({
 }
 
 function GenerationContext({
-  features,
-  selectedFeatures,
-  onFeaturesChange,
+  systems,
+  selectedSystems,
+  onSystemsChange,
   isGeneratingQueries,
   onGenerateSuggestionsClick,
   generatingFrom,
   isSavingManualEntry,
   aiFeatures,
-}: FeatureSelectorProps & {
+}: SystemSelectorProps & {
   isGeneratingQueries: boolean;
   onGenerateSuggestionsClick: () => void;
-  generatingFrom: 'all_data' | 'features';
+  generatingFrom: 'all_data' | 'systems';
   isSavingManualEntry: boolean;
   aiFeatures: AIFeatures | null;
 }) {
@@ -193,7 +197,7 @@ function GenerationContext({
               'xpack.streams.significantEvents.significantEventsGenerationPanel.description',
               {
                 defaultMessage:
-                  'Select the subset of data you want to generate the significant events for.',
+                  'Select the subset of data you want to generate the significant events for. Generation uses the last 24 hours of data.',
               }
             )}
           </EuiText>
@@ -207,11 +211,11 @@ function GenerationContext({
       <EuiSpacer size="s" />
 
       <EuiFlexItem>
-        <FeaturesSelector
+        <SystemsSelector
           isDisabled={isGeneratingQueries || isSavingManualEntry}
-          features={features}
-          selectedFeatures={selectedFeatures}
-          onFeaturesChange={onFeaturesChange}
+          systems={systems}
+          selectedSystems={selectedSystems}
+          onSystemsChange={onSystemsChange}
         />
       </EuiFlexItem>
 
@@ -221,8 +225,8 @@ function GenerationContext({
         <ConnectorListButtonBase
           buttonProps={{
             iconType: 'sparkles',
-            isLoading: isGeneratingQueries && generatingFrom === 'features',
-            isDisabled: isGeneratingQueries || selectedFeatures.length === 0 || isSavingManualEntry,
+            isLoading: isGeneratingQueries && generatingFrom === 'systems',
+            isDisabled: isGeneratingQueries || selectedSystems.length === 0 || isSavingManualEntry,
             onClick: onGenerateSuggestionsClick,
             'data-test-subj': 'significant_events_generate_suggestions_button',
             children: i18n.translate(
@@ -239,16 +243,18 @@ function GenerationContext({
   );
 }
 
-function IdentifyFeatures({
-  identifyFeatures,
+function IdentifySystems({
+  definition,
+  refreshSystems,
+  aiFeatures,
   isGeneratingQueries,
   isSavingManualEntry,
-  aiFeatures,
 }: {
-  identifyFeatures: () => void;
+  definition: Streams.all.Definition;
+  refreshSystems: () => void;
+  aiFeatures: AIFeatures | null;
   isGeneratingQueries: boolean;
   isSavingManualEntry: boolean;
-  aiFeatures: AIFeatures | null;
 }) {
   return (
     <>
@@ -257,9 +263,9 @@ function IdentifyFeatures({
           <EuiTitle size="xs">
             <b>
               {i18n.translate(
-                'xpack.streams.significantEvents.significantEventsGenerationPanel.identifyFeaturesTitle',
+                'xpack.streams.significantEvents.significantEventsGenerationPanel.identifySystemsTitle',
                 {
-                  defaultMessage: 'Identify features',
+                  defaultMessage: 'Identify systems',
                 }
               )}
             </b>
@@ -269,10 +275,10 @@ function IdentifyFeatures({
 
           <EuiText size="s" color="subdued">
             {i18n.translate(
-              'xpack.streams.significantEvents.significantEventsGenerationPanel.indentifyFeaturesDescription',
+              'xpack.streams.significantEvents.significantEventsGenerationPanel.identifySystemsDescription',
               {
                 defaultMessage:
-                  'Features are logical subsets of the data and they provide the best context for the generation of significant events. Identify features first.',
+                  'Systems are logical subsets of the data and they provide the best context for the generation of significant events. Identify systems first. Generation uses the last 24 hours of data.',
               }
             )}
           </EuiText>
@@ -285,21 +291,12 @@ function IdentifyFeatures({
 
       <EuiSpacer size="s" />
 
-      <EuiFlexItem>
-        <ConnectorListButtonBase
-          buttonProps={{
-            iconType: 'sparkles',
-            onClick: () => identifyFeatures(),
-            'data-test-subj': 'significant_events_identify_features_button',
-            isDisabled: isGeneratingQueries || isSavingManualEntry,
-            children: i18n.translate(
-              'xpack.streams.significantEvents.significantEventsGenerationPanel.identifyFeaturesButtonLabel',
-              {
-                defaultMessage: 'Identify features',
-              }
-            ),
-          }}
+      <EuiFlexItem grow={false}>
+        <SystemIdentificationControl
+          definition={definition}
+          refreshSystems={refreshSystems}
           aiFeatures={aiFeatures}
+          disabled={isGeneratingQueries || isSavingManualEntry}
         />
       </EuiFlexItem>
     </>

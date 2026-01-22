@@ -38,6 +38,7 @@
       "triggersActionsUi",
       "usageCollection",
       "unifiedSearch",
+      "kql",
       "charts",
       "fieldsMetadata"
     ],

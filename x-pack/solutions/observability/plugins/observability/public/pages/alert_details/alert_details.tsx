@@ -37,7 +37,10 @@ import { css } from '@emotion/react';
 import { omit } from 'lodash';
 import { usePageReady } from '@kbn/ebt-tools';
 import moment from 'moment';
-import { OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
+import {
+  OBSERVABILITY_AGENT_ID,
+  OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
+} from '@kbn/observability-agent-builder-plugin/public';
 import { ObsCasesContext } from './components/obs_cases_context';
 import { RelatedAlerts } from './components/related_alerts/related_alerts';
 import type { AlertDetailsSource, TabId } from './types';
@@ -92,7 +95,7 @@ export function AlertDetails() {
     http,
     triggersActionsUi: { ruleTypeRegistry },
     observabilityAIAssistant,
-    onechat,
+    agentBuilder,
     uiSettings,
     serverless,
     observabilityAgentBuilder,
@@ -178,15 +181,16 @@ export function AlertDetails() {
 
   // Configure agent builder global flyout with the current alert attachment
   useEffect(() => {
-    if (!onechat) return;
+    if (!agentBuilder) return;
     const alertUuid = alertDetail?.formatted.fields['kibana.alert.uuid'] as string | undefined;
 
     if (!alertUuid) {
       return;
     }
 
-    onechat.setConversationFlyoutActiveConfig({
+    agentBuilder.setConversationFlyoutActiveConfig({
       newConversation: true,
+      agentId: OBSERVABILITY_AGENT_ID,
       attachments: [
         {
           id: alertUuid,
@@ -208,9 +212,9 @@ export function AlertDetails() {
     });
 
     return () => {
-      onechat.clearConversationFlyoutActiveConfig();
+      agentBuilder.clearConversationFlyoutActiveConfig();
     };
-  }, [onechat, alertDetail, alertTitle]);
+  }, [agentBuilder, alertDetail, alertTitle]);
 
   useBreadcrumbs(
     [

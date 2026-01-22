@@ -10,6 +10,8 @@ import type { StreamlangDSL } from '../../types/streamlang';
 import type { StreamlangProcessorDefinition } from '../../types/processors';
 import { flattenSteps } from '../transpilers/shared/flatten_steps';
 import { isAlwaysCondition } from '../../types/conditions';
+import type { Condition } from '../../types/conditions';
+import { isConditionComplete } from '../conditions/helpers';
 import { parseGrokPattern, parseDissectPattern } from '../../types/utils';
 import {
   inferMathExpressionReturnType,
@@ -68,6 +70,7 @@ export interface StreamlangValidationOptions {
    * List of reserved/forbidden field names that cannot be modified by processors
    */
   reservedFields: string[];
+  streamType?: 'classic' | 'wired';
 }
 
 export interface StreamlangValidationResult {
@@ -202,6 +205,17 @@ function extractModifiedFields(processor: StreamlangProcessorDefinition): string
       }
       break;
 
+    case 'uppercase':
+    case 'lowercase':
+    case 'trim':
+      // Uppercase, lowercase, and trim processors can have optional 'to' field, defaults to modifying 'from' in place
+      if (processor.to) {
+        fields.push(processor.to);
+      } else if (processor.from) {
+        fields.push(processor.from);
+      }
+      break;
+
     case 'date':
       // Date processor can have optional 'to' field, defaults to @timestamp
       if (processor.to) {
@@ -220,6 +234,18 @@ function extractModifiedFields(processor: StreamlangProcessorDefinition): string
 
     case 'math':
       // Math processor writes result to 'to' field
+      if (processor.to) {
+        fields.push(processor.to);
+      }
+      break;
+
+    case 'join':
+      if (processor.to) {
+        fields.push(processor.to);
+      }
+      break;
+
+    case 'concat':
       if (processor.to) {
         fields.push(processor.to);
       }
@@ -326,7 +352,11 @@ function getProcessorOutputType(
 
     case 'dissect':
     case 'replace':
-      // Dissect and replace always produce string output
+    case 'uppercase':
+    case 'lowercase':
+    case 'trim':
+    case 'concat':
+      // Dissect, replace, uppercase, lowercase, trim, and concat always produce string output
       return 'string';
 
     case 'date':
@@ -361,6 +391,9 @@ function getProcessorOutputType(
       // Comparison expressions (eq, neq, lt, lte, gt, gte) return boolean
       // All other expressions return number
       return inferMathExpressionReturnType(processor.expression);
+
+    case 'join':
+      return 'string';
 
     case 'remove':
     case 'remove_by_prefix':
@@ -424,6 +457,27 @@ function getExpectedInputType(
       }
       return null;
 
+    case 'uppercase':
+    case 'lowercase':
+    case 'trim':
+      // Uppercase, lowercase, and trim require string input
+      if (processor.from === fieldName) {
+        return ['string'];
+      }
+      return null;
+
+    case 'join':
+      if (processor.from.some((from) => from === fieldName)) {
+        return ['string'];
+      }
+      return null;
+
+    case 'concat':
+      if (processor.from.some((from) => from.type === 'field' && from.value === fieldName)) {
+        return ['string'];
+      }
+      return null;
+
     case 'rename':
     case 'set':
     case 'append':
@@ -484,6 +538,9 @@ function trackFieldTypesAndValidate(flattenedSteps: StreamlangProcessorDefinitio
       case 'remove':
       case 'grok':
       case 'dissect':
+      case 'uppercase':
+      case 'lowercase':
+      case 'trim':
         if (step.from) fieldsUsed.push(step.from);
         break;
       case 'rename':
@@ -495,6 +552,14 @@ function trackFieldTypesAndValidate(flattenedSteps: StreamlangProcessorDefinitio
       case 'math':
         // Math expressions expect numeric inputs for all field references
         fieldsUsed.push(...extractFieldsFromMathExpression(step.expression));
+        break;
+      case 'join':
+        fieldsUsed.push(...step.from);
+        break;
+      case 'concat':
+        fieldsUsed.push(
+          ...step.from.filter((from) => from.type === 'field').map((from) => from.value)
+        );
         break;
       case 'append':
       case 'drop_document':
@@ -716,6 +781,11 @@ function validateProcessorValues(
     case 'remove':
     case 'remove_by_prefix':
     case 'drop_document':
+    case 'uppercase':
+    case 'lowercase':
+    case 'trim':
+    case 'join':
+    case 'concat':
     case 'manual_ingest_pipeline':
       // No value validation implemented for these processors yet
       break;
@@ -728,37 +798,71 @@ function validateProcessorValues(
   return errors;
 }
 
+function validateCondition(
+  condition: Condition | undefined,
+  processorNumber: number,
+  processorId: string
+): StreamlangValidationError[] {
+  const errors: StreamlangValidationError[] = [];
+
+  // Skip if no condition or if it's 'always'
+  if (!condition || isAlwaysCondition(condition)) {
+    return errors;
+  }
+
+  if (!isConditionComplete(condition)) {
+    errors.push({
+      type: 'invalid_value',
+      message: i18n.translate('xpack.streamlang.validation.incompleteCondition', {
+        defaultMessage:
+          'Processor #{processorNumber} has an incomplete condition: all required values must be filled',
+        values: { processorNumber },
+      }),
+      processorId,
+      field: 'where',
+    });
+  }
+
+  return errors;
+}
+
 /**
- * Validates a Streamlang DSL for wired stream requirements, reserved field usage, and type safety.
+ * Validates a Streamlang DSL for condition completeness, processor values, and (for wired streams)
+ * namespacing requirements, reserved field usage, and type safety.
  *
- * This validates that:
+ * For ALL streams, this validates that:
+ * - Conditions are complete (all required values filled, range conditions have both bounds)
+ * - Processor-specific values are valid (expressions, patterns, date formats etc.)
+ *
+ * For WIRED streams only (streamType: 'wired'), this additionally validates that:
  * - All generated fields are properly namespaced (contain at least one dot)
  * - Custom fields are placed in approved namespaces like: attributes, body.structured, resource.attributes
  * - Processors don't modify reserved/system fields
  * - Fields are used with compatible types
- * - Processor-specific values are valid (expressions, patterns, date formats etc.)
  *
  * @param streamlangDSL - The Streamlang DSL to validate
- * @param options - Validation options (reservedFields)
+ * @param options - Validation options (reservedFields, streamType)
  * @returns Validation result with any errors found
  */
 export function validateStreamlang(
   streamlangDSL: StreamlangDSL,
   options: StreamlangValidationOptions
 ): StreamlangValidationResult {
-  const { reservedFields } = options;
+  const { reservedFields, streamType = 'wired' } = options;
   const errors: StreamlangValidationError[] = [];
   let fieldTypesByProcessor = new Map<string, FieldTypeMap>();
 
   // Flatten the steps to get all processors with their conditions resolved
   const flattenedSteps = flattenSteps(streamlangDSL.steps);
 
-  // Track field types and validate type usage
-  const typeResult = trackFieldTypesAndValidate(flattenedSteps);
-  // Add type validation errors
-  errors.push(...typeResult.errors);
-  // Capture field types at each processor
-  fieldTypesByProcessor = typeResult.fieldTypesByProcessor;
+  // Track field types and validate type usage (only for wired streams)
+  if (streamType === 'wired') {
+    const typeResult = trackFieldTypesAndValidate(flattenedSteps);
+    // Add type validation errors
+    errors.push(...typeResult.errors);
+    // Capture field types at each processor
+    fieldTypesByProcessor = typeResult.fieldTypesByProcessor;
+  }
 
   // Check each processor
   for (let i = 0; i < flattenedSteps.length; i++) {
@@ -770,57 +874,66 @@ export function validateStreamlang(
 
     const processorId = step.customIdentifier || `${step.action}_${i}`;
 
-    // Validate processor-specific values (expressions, patterns, formats, etc.)
+    // Validate processor-specific values (expressions, patterns, formats, etc.) - applies to all streams
     const valueErrors = validateProcessorValues(step, i + 1, processorId);
     errors.push(...valueErrors);
 
-    // Extract fields that this processor modifies
-    const modifiedFields = extractModifiedFields(step);
-
-    // Validate namespacing for wired streams
-    const nonNamespacedFields = modifiedFields.filter((field) => !isNamespacedEcsField(field));
-
-    if (nonNamespacedFields.length > 0) {
-      for (const field of nonNamespacedFields) {
-        errors.push({
-          type: 'non_namespaced_field',
-          message: i18n.translate('xpack.streamlang.validation.nonNamespacedFieldMessage', {
-            defaultMessage:
-              'The field "{fieldName}" generated by processor #{processorNumber} ({processorAction}) does not match the streams recommended schema - put custom fields into attributes, body.structured or resource.attributes',
-            values: {
-              fieldName: field,
-              processorNumber: i + 1,
-              processorAction: step.action,
-            },
-          }),
-          processorId,
-          field,
-        });
-      }
+    // Validate conditions - applies to all streams
+    if ('where' in step && step.where) {
+      const conditionErrors = validateCondition(step.where, i + 1, processorId);
+      errors.push(...conditionErrors);
     }
 
-    // Validate reserved fields
-    if (reservedFields.length > 0) {
-      const reservedFieldViolations = modifiedFields.filter((field) =>
-        reservedFields.includes(field)
-      );
+    // Wired stream specific validations: namespacing and reserved fields
+    if (streamType === 'wired') {
+      // Extract fields that this processor modifies
+      const modifiedFields = extractModifiedFields(step);
 
-      if (reservedFieldViolations.length > 0) {
-        for (const field of reservedFieldViolations) {
+      // Validate namespacing for wired streams
+      const nonNamespacedFields = modifiedFields.filter((field) => !isNamespacedEcsField(field));
+
+      if (nonNamespacedFields.length > 0) {
+        for (const field of nonNamespacedFields) {
           errors.push({
-            type: 'reserved_field',
-            message: i18n.translate('xpack.streamlang.validation.reservedFieldMessage', {
+            type: 'non_namespaced_field',
+            message: i18n.translate('xpack.streamlang.validation.nonNamespacedFieldMessage', {
               defaultMessage:
-                'Processor #{processorNumber} ({processorAction}) is trying to modify reserved field "{fieldName}"',
+                'The field "{fieldName}" generated by processor #{processorNumber} ({processorAction}) does not match the streams recommended schema - put custom fields into attributes, body.structured or resource.attributes',
               values: {
+                fieldName: field,
                 processorNumber: i + 1,
                 processorAction: step.action,
-                fieldName: field,
               },
             }),
             processorId,
             field,
           });
+        }
+      }
+
+      // Validate reserved fields
+      if (reservedFields.length > 0) {
+        const reservedFieldViolations = modifiedFields.filter((field) =>
+          reservedFields.includes(field)
+        );
+
+        if (reservedFieldViolations.length > 0) {
+          for (const field of reservedFieldViolations) {
+            errors.push({
+              type: 'reserved_field',
+              message: i18n.translate('xpack.streamlang.validation.reservedFieldMessage', {
+                defaultMessage:
+                  'Processor #{processorNumber} ({processorAction}) is trying to modify reserved field "{fieldName}"',
+                values: {
+                  processorNumber: i + 1,
+                  processorAction: step.action,
+                  fieldName: field,
+                },
+              }),
+              processorId,
+              field,
+            });
+          }
         }
       }
     }

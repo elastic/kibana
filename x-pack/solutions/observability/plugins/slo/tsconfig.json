@@ -52,7 +52,6 @@
     "@kbn/unified-search-plugin",
     "@kbn/std",
     "@kbn/core-lifecycle-browser",
-    "@kbn/controls-plugin",
     "@kbn/cloud-plugin",
     "@kbn/spaces-plugin",
     "@kbn/data-view-editor-plugin",
@@ -114,9 +113,11 @@
     "@kbn/deeplinks-analytics",
     "@kbn/content-management-plugin",
     "@kbn/dashboards-selector",
-    "@kbn/deeplinks-management",
+    "@kbn/control-group-renderer",
     "@kbn/react-query",
+    "@kbn/deeplinks-management",
     "@kbn/deeplinks-observability",
-    "@kbn/observability-overview-plugin"
+    "@kbn/observability-overview-plugin",
+    "@kbn/observability-get-padded-alert-time-range-util"
   ]
 }

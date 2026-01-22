@@ -8,9 +8,13 @@
  */
 
 export { EuiButtonGroupTestHarness } from './eui_button_group_test_harness';
+export { EuiComboBoxTestHarness } from './eui_combo_box_test_harness';
+export { EuiContextMenuTestHarness } from './eui_context_menu_test_harness';
+export { EuiListTestHarness } from './eui_list_test_harness';
+export { EuiPaginationTestHarness } from './eui_pagination_test_harness';
+export { EuiPopoverPanelTestHarness } from './eui_popover_panel_test_harness';
 export { EuiSuperDatePickerTestHarness } from './eui_super_date_picker_test_harness';
 export { EuiSelectTestHarness } from './eui_select_test_harness';
-export { EuiSwitchTestHarness } from './eui_switch_test_harness';
+export { EuiSuperSelectTestHarness } from './eui_super_select_test_harness';
 export { EuiTableTestHarness } from './eui_table_test_harness';
-export { FormErrorTestHarness } from './form_error_test_harness';
 export { getSelectedButtonInGroup } from './util/get_selected_button_in_group';

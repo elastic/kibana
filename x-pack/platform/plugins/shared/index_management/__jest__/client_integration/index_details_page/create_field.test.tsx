@@ -7,39 +7,14 @@
 
 import React from 'react';
 import type { ComponentProps } from 'react';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import { CreateField } from '../../../public/application/components/mappings_editor/components/document_fields/fields/create_field/create_field';
 import type { NormalizedFields } from '../../../public/application/components/mappings_editor/types';
 
-const createInitialFormState = () => ({
-  name: '',
-  type: undefined as string | undefined,
-  subType: undefined as string | undefined,
-});
-
-type FormState = ReturnType<typeof createInitialFormState>;
-
-interface MockForm {
-  submit: jest.Mock<Promise<{ isValid: boolean; data: FormState }>, []>;
-  reset: jest.Mock<void, []>;
-  getErrors: jest.Mock<unknown[], []>;
-  getFormData: jest.Mock<FormState, []>;
-  setFieldValue: jest.Mock<void, [keyof FormState, unknown]>;
-  getFields: jest.Mock<{ name: { value: string } }, []>;
-  subscribe: jest.Mock<{ unsubscribe: () => void }, [unknown?]>;
-}
-
-let mockFormState: FormState = createInitialFormState();
-let mockForm: MockForm | null = null;
-
-const resetForm = () => {
-  mockFormState = createInitialFormState();
-};
-
-const updateMockFormState = (field: keyof FormState, value: unknown) => {
-  mockFormState = { ...mockFormState, [field]: value as never };
-};
+import { getMockForm, resetForm, setMockForm } from './create_field.helpers';
+import type { FormState, MockForm } from './create_field.helpers';
+import { getMockFormState } from './create_field.helpers';
 
 const mockDispatch = jest.fn();
 
@@ -47,6 +22,12 @@ jest.mock('../../../public/application/components/mappings_editor/shared_imports
   const actual = jest.requireActual(
     '../../../public/application/components/mappings_editor/shared_imports'
   );
+  const {
+    getMockFormState: getMockFormStateFromHelpers,
+    resetForm: resetFormState,
+    setMockForm: setMockFormRef,
+    updateMockFormState,
+  } = jest.requireActual('./create_field.helpers') as typeof import('./create_field.helpers');
   const DefaultFormWrapper = ({
     children,
     ...props
@@ -65,7 +46,7 @@ jest.mock('../../../public/application/components/mappings_editor/shared_imports
     }: {
       children: React.ReactNode;
       onSubmit: React.FormEventHandler;
-      FormWrapper?: React.ComponentType<any>;
+      FormWrapper?: React.ComponentType<React.PropsWithChildren<Record<string, unknown>>>;
       form?: unknown;
       [key: string]: unknown;
     }) => {
@@ -78,24 +59,24 @@ jest.mock('../../../public/application/components/mappings_editor/shared_imports
       );
     },
     useForm: () => {
-      const submit = jest.fn(async () => ({ isValid: true, data: mockFormState }));
+      const submit = jest.fn(async () => ({ isValid: true, data: getMockFormStateFromHelpers() }));
       const reset = jest.fn(() => {
-        resetForm();
+        resetFormState();
       });
       const getErrors = jest.fn(() => []);
-      const getFormData = jest.fn(() => mockFormState);
+      const getFormData = jest.fn(() => getMockFormStateFromHelpers());
       const setFieldValue = jest.fn((field: keyof FormState, value: unknown) => {
         updateMockFormState(field, value);
       });
       const getFields = jest.fn(() => ({
-        name: { value: mockFormState.name },
+        name: { value: getMockFormStateFromHelpers().name },
       }));
       const unsubscribe = jest.fn();
       const subscribe = jest.fn((_listener?: unknown) => ({
         unsubscribe,
       }));
 
-      mockForm = {
+      const mockForm: MockForm = {
         submit,
         reset,
         getErrors,
@@ -104,39 +85,52 @@ jest.mock('../../../public/application/components/mappings_editor/shared_imports
         getFields,
         subscribe,
       };
+      setMockFormRef(mockForm);
       return { form: mockForm };
     },
-    useFormData: () => [{ type: mockFormState.type, subType: mockFormState.subType }],
+    useFormData: () => [
+      { type: getMockFormStateFromHelpers().type, subType: getMockFormStateFromHelpers().subType },
+    ],
   };
 });
 
 jest.mock(
   '../../../public/application/components/mappings_editor/components/document_fields/field_parameters',
-  () => ({
-    TypeParameter: ({
-      fieldTypeInputRef,
-      ...rest
-    }: {
-      fieldTypeInputRef: React.RefObject<HTMLInputElement>;
-    }) => {
-      const { isRootLevelField, isMultiField, showDocLink, isSemanticTextEnabled, ...inputProps } =
-        rest as Record<string, unknown>;
-      return (
-        <input {...inputProps} data-test-subj="fieldTypeInput" ref={fieldTypeInputRef} readOnly />
-      );
-    },
-    NameParameter: ({ isSemanticText, ...rest }: { isSemanticText?: boolean }) => (
-      <input
-        {...rest}
-        data-test-subj="nameParameterInput"
-        value={mockFormState.name}
-        onChange={(event) => {
-          updateMockFormState('name', event.target.value);
-        }}
-      />
-    ),
-    SubTypeParameter: () => null,
-  })
+  () => {
+    const { getMockFormState: getMockFormStateFromHelpers, updateMockFormState } =
+      jest.requireActual('./create_field.helpers') as typeof import('./create_field.helpers');
+
+    return {
+      TypeParameter: ({
+        fieldTypeInputRef,
+        ...rest
+      }: {
+        fieldTypeInputRef: React.RefObject<HTMLInputElement>;
+      }) => {
+        const {
+          isRootLevelField,
+          isMultiField,
+          showDocLink,
+          isSemanticTextEnabled,
+          ...inputProps
+        } = rest as Record<string, unknown>;
+        return (
+          <input {...inputProps} data-test-subj="fieldTypeInput" ref={fieldTypeInputRef} readOnly />
+        );
+      },
+      NameParameter: ({ isSemanticText, ...rest }: { isSemanticText?: boolean }) => (
+        <input
+          {...rest}
+          data-test-subj="nameParameterInput"
+          value={getMockFormStateFromHelpers().name}
+          onChange={(event) => {
+            updateMockFormState('name', event.target.value);
+          }}
+        />
+      ),
+      SubTypeParameter: () => null,
+    };
+  }
 );
 
 jest.mock(
@@ -195,18 +189,10 @@ const defaultProps: ComponentProps<typeof CreateField> = {
   isAddingFields: false,
 };
 
-beforeAll(() => {
-  jest.useFakeTimers();
-});
-
-afterAll(() => {
-  jest.useRealTimers();
-});
-
 beforeEach(() => {
   jest.clearAllMocks();
   jest.restoreAllMocks();
-  mockForm = null;
+  setMockForm(null);
   resetForm();
 });
 
@@ -220,16 +206,13 @@ describe('<CreateField />', () => {
         fireEvent.mouseDown(document.body);
         fireEvent.mouseUp(document.body);
         fireEvent.click(document.body);
-        await act(async () => {
-          await jest.runOnlyPendingTimersAsync();
-        });
 
         expect(mockDispatch).toHaveBeenCalledWith({
           type: 'documentField.changeStatus',
           value: 'idle',
         });
 
-        expect(mockForm!.submit).not.toHaveBeenCalled();
+        expect(getMockForm()!.submit).not.toHaveBeenCalled();
       });
     });
 
@@ -248,7 +231,7 @@ describe('<CreateField />', () => {
         fireEvent.mouseUp(document.body);
         fireEvent.click(document.body);
 
-        expect(mockForm!.submit).toHaveBeenCalledTimes(1);
+        expect(getMockForm()!.submit).toHaveBeenCalledTimes(1);
 
         expect(mockDispatch).not.toHaveBeenCalled();
         expect(focusSpy).not.toHaveBeenCalled();
@@ -264,28 +247,26 @@ describe('<CreateField />', () => {
       const nameInput = screen.getByTestId('nameParameterInput');
       fireEvent.change(nameInput, { target: { value: 'semantic_field' } });
 
-      mockForm!.setFieldValue('type', 'keyword');
+      getMockForm()!.setFieldValue('type', 'keyword');
 
       const fieldTypeInput = screen.getByTestId('fieldTypeInput') as HTMLInputElement;
       const focusSpy = jest.spyOn(fieldTypeInput, 'focus');
 
       const addButton = screen.getByTestId('addButton');
       fireEvent.click(addButton);
-      await act(async () => {
-        await jest.runOnlyPendingTimersAsync();
+
+      expect(getMockForm()!.submit).toHaveBeenCalledTimes(1);
+
+      await waitFor(() => {
+        expect(mockDispatch).toHaveBeenCalledWith({
+          type: 'field.add',
+          value: expect.objectContaining({ name: 'semantic_field', type: 'keyword' }),
+        });
+
+        expect(getMockForm()!.reset).toHaveBeenCalledTimes(1);
+        expect(getMockFormState().name).toBe('');
+        expect(focusSpy).toHaveBeenCalled();
       });
-
-      expect(mockForm!.submit).toHaveBeenCalledTimes(1);
-
-      expect(mockDispatch).toHaveBeenCalledWith({
-        type: 'field.add',
-        value: expect.objectContaining({ name: 'semantic_field', type: 'keyword' }),
-      });
-
-      expect(mockForm!.reset).toHaveBeenCalledTimes(1);
-      expect(mockFormState.name).toBe('');
-
-      expect(focusSpy).toHaveBeenCalled();
     });
   });
 });

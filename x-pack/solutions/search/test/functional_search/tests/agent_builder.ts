@@ -13,8 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const searchSpace = getService('searchSpace');
   const appsMenu = getService('appsMenu');
 
-  // Failing: See https://github.com/elastic/kibana/issues/237043
-  describe.skip('Agent Builder', function () {
+  describe('Agent Builder', function () {
     describe('search solution navigation', function () {
       let cleanUp: () => Promise<unknown>;
       let spaceCreated: { id: string } = { id: '' };
@@ -54,8 +53,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('should have agent builder in global nav', async () => {
         await testSubjects.existOrFail('toggleNavButton');
         await appsMenu.openCollapsibleNav();
-        await appsMenu.linkExists('Agent Builder');
-        await appsMenu.clickLink('Agent Builder');
+        await appsMenu.linkExists('Agents');
+        await appsMenu.clickLink('Agents');
         await testSubjects.existOrFail('agentBuilderWrapper');
       });
     });
