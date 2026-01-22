@@ -17,6 +17,7 @@ import { streamlangDSLSchema } from '@kbn/streamlang';
 import { from, map } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import type { Observable } from 'rxjs';
+import { FailureStoreNotEnabledError } from '../../../../lib/streams/errors/failure_store_not_enabled_error';
 import { STREAMS_API_PRIVILEGES, STREAMS_TIERED_ML_FEATURE } from '../../../../../common/constants';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { checkAccess, getFailureStore } from '../../../../lib/streams/stream_crud';
@@ -272,7 +273,9 @@ export const failureStoreSamplesRoute = createServerRoute({
       dataStream: dataStream as DataStreamWithFailureStore,
     });
     if (!isEnabledFailureStore(effectiveFailureStore)) {
-      throw new SecurityError(`Failure store is not enabled for stream ${params.path.name}`);
+      throw new FailureStoreNotEnabledError(
+        `Failure store is not enabled for stream ${params.path.name}`
+      );
     }
 
     return getFailureStoreSamples({
