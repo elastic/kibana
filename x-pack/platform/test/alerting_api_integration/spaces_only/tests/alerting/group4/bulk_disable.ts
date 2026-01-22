@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
-import { ALERT_STATUS } from '@kbn/rule-data-utils';
+import { ALERT_STATUS, ALERT_UUID } from '@kbn/rule-data-utils';
 import { Spaces } from '../../../scenarios';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
@@ -19,8 +19,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
   const retry = getService('retry');
   const supertest = getService('supertest');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/239739
-  describe.skip('bulkDisable', () => {
+  describe('bulkDisable', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     const createRule = async () => {
@@ -71,6 +70,32 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       return alerts;
     };
 
+    const getAlertsById = async (alertIds?: string[]) => {
+      const query: any =
+        alertIds && alertIds.length > 0
+          ? {
+              bool: {
+                must: [
+                  {
+                    terms: {
+                      'kibana.alert.uuid': alertIds,
+                    },
+                  },
+                ],
+              },
+            }
+          : { match_all: {} };
+
+      const {
+        hits: { hits: alerts },
+      } = await es.search({
+        index: alertAsDataIndex,
+        query,
+      });
+
+      return alerts;
+    };
+
     afterEach(async () => {
       await es.deleteByQuery({
         index: alertAsDataIndex,
@@ -87,12 +112,14 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       const createdRule1 = await createRule();
       const createdRule2 = await createRule();
 
+      const alertIds: string[] = [];
       await retry.try(async () => {
         const alerts = await getAlerts([createdRule1, createdRule2]);
 
         expect(alerts.length).eql(4);
         alerts.forEach((activeAlert: any) => {
           expect(activeAlert._source[ALERT_STATUS]).eql('active');
+          alertIds.push(activeAlert._source[ALERT_UUID]);
         });
       });
 
@@ -105,11 +132,13 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         })
         .expect(200);
 
-      const alerts = await getAlerts([createdRule1, createdRule2]);
+      await retry.try(async () => {
+        const alerts = await getAlertsById(alertIds);
 
-      expect(alerts.length).eql(4);
-      alerts.forEach((untrackedAlert: any) => {
-        expect(untrackedAlert._source[ALERT_STATUS]).eql('untracked');
+        expect(alerts.length).eql(4);
+        alerts.forEach((untrackedAlert: any) => {
+          expect(untrackedAlert._source[ALERT_STATUS]).eql('untracked');
+        });
       });
     });
 
@@ -117,12 +146,14 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       const createdRule1 = await createRule();
       const createdRule2 = await createRule();
 
+      const alertIds: string[] = [];
       await retry.try(async () => {
         const alerts = await getAlerts([createdRule1, createdRule2]);
 
         expect(alerts.length).eql(4);
         alerts.forEach((activeAlert: any) => {
           expect(activeAlert._source[ALERT_STATUS]).eql('active');
+          alertIds.push(activeAlert._source[ALERT_UUID]);
         });
       });
 
@@ -135,7 +166,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         })
         .expect(200);
 
-      const alerts = await getAlerts([createdRule1, createdRule2]);
+      const alerts = await getAlertsById(alertIds);
 
       expect(alerts.length).eql(4);
       alerts.forEach((activeAlert: any) => {
