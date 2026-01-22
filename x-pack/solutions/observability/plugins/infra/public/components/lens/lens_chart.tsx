@@ -23,6 +23,7 @@ import type { TooltipContentProps } from './metric_explanation/tooltip_content';
 import { LensWrapper } from './lens_wrapper';
 import { ChartLoadError } from './chart_load_error';
 import { HOST_MISSING_FIELDS } from '../../common/visualizations/constants';
+import { createDataTestSubj } from '../../utils/create_data_test_subj';
 
 const MIN_HEIGHT = 300;
 const DEFAULT_DISABLED_ACTIONS = [
@@ -163,26 +164,17 @@ export const LensChart = React.memo(
       </EuiToolTip>
     );
 
-    function getDataTestSubj() {
-      if (error) {
-        return `${dataTestSubj}-error`;
-      }
-      if (isLoading) {
-        return `${dataTestSubj}-loading`;
-      }
-      if (dataTestSubj) {
-        return dataTestSubj;
-      }
-      return id;
-    }
-
     return (
       <EuiPanel
         hasBorder={!!borderRadius}
         borderRadius={borderRadius}
         hasShadow={false}
         paddingSize={error ? 'm' : 'none'}
-        data-test-subj={getDataTestSubj()}
+        data-test-subj={createDataTestSubj({
+          dataTestSubj: dataTestSubj ?? id,
+          hasError: !!error,
+          isLoading,
+        })}
         css={css`
           position: relative;
           min-height: ${height}px;

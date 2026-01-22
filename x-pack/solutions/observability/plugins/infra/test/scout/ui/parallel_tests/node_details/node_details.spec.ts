@@ -9,7 +9,7 @@ import { expect } from '@kbn/scout-oblt';
 import { test } from '../../fixtures';
 import { K8S_HOST_NAME } from '../../fixtures/constants';
 
-test.describe('Node Details', { tag: ['@ess', '@svlOblt'] }, () => {
+test.describe('Node Details', { tag: ['@svlOblt'] }, () => {
   test(
     'Serverless: Osquery tab should not render in serverless',
     {

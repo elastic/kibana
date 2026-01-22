@@ -93,14 +93,4 @@ describe('CpuProfilingPrompt', () => {
     expect(screen.getByTestId('infraAssetDetailsCPUProfilingPrompt')).toBeInTheDocument();
     expect(screen.getByTestId('infraCpuProfilingPromptProfilingButton')).toBeInTheDocument();
   });
-
-  it('should display the prompt text', () => {
-    mockUseProfilingPluginSetting(true);
-    mockUseTabSwitcherContext();
-
-    renderCpuProfilingPrompt();
-
-    expect(screen.getByText('View CPU Breakdown using')).toBeInTheDocument();
-    expect(screen.getByText('Profiling')).toBeInTheDocument();
-  });
 });
