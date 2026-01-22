@@ -204,7 +204,7 @@
     "@kbn/alerting-state-types": "link:x-pack/platform/packages/private/kbn-alerting-state-types",
     "@kbn/alerting-types": "link:src/platform/packages/shared/kbn-alerting-types",
     "@kbn/alerting-v2-plugin": "link:x-pack/platform/plugins/shared/alerting_v2",
-    "@kbn/alerting-v2-schemas": "link:x-pack/platform/packages/shared/kbn-alerting-v2-schemas",
+    "@kbn/alerting-v2-schemas": "link:x-pack/platform/packages/shared/response-ops/kbn-alerting-v2-schemas",
     "@kbn/alerts-as-data-utils": "link:src/platform/packages/shared/kbn-alerts-as-data-utils",
     "@kbn/alerts-grouping": "link:x-pack/solutions/observability/packages/kbn-alerts-grouping",
     "@kbn/alerts-restricted-fixtures-plugin": "link:x-pack/platform/test/alerting_api_integration/common/plugins/alerts_restricted",
