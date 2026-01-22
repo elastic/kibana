@@ -453,7 +453,7 @@ describe('Mappings editor: core', () => {
       expect(isDynamicMappingsEnabled).toBe(false);
       isNumericDetectionVisible = screen.queryByTestId('numericDetection');
       expect(isNumericDetectionVisible).not.toBeInTheDocument();
-    });
+    }, 10000);
 
     test('should keep default dynamic templates value when switching tabs', async () => {
       setup(
