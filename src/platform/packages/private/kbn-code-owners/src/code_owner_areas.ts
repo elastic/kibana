@@ -51,7 +51,7 @@ export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/stack-monitoring',
     'elastic/workflows-eng',
   ],
-  search: ['elastic/search-design', 'elastic/search-kibana'],
+  search: ['elastic/jinastic', 'elastic/search-design', 'elastic/search-kibana'],
   observability: [
     'elastic/actionable-obs-team',
     'elastic/obs-ai-team',

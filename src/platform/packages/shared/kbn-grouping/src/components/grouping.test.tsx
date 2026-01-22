@@ -18,6 +18,7 @@ import { getTelemetryEvent } from '../telemetry/const';
 
 import { mockGroupingProps, host1Name, host2Name } from './grouping.mock';
 import type { SetRequired } from 'type-fest';
+import { EuiContextMenu } from '@elastic/eui';
 
 const renderChildComponent = jest.fn();
 const takeActionItems = jest.fn(mockGroupingProps.takeActionItems);
@@ -135,7 +136,17 @@ describe('Grouping', () => {
   });
 
   it('Renders a null group and passes the correct filter to take actions and child component', () => {
-    takeActionItems.mockReturnValue({ items: [{ key: '1', name: '1' }], panels: [] });
+    takeActionItems.mockReturnValue(
+      <EuiContextMenu
+        initialPanelId={0}
+        panels={[
+          {
+            id: 0,
+            items: [{ key: '1', name: '1' }],
+          },
+        ]}
+      />
+    );
     render(
       <I18nProvider>
         <Grouping {...testProps} />
