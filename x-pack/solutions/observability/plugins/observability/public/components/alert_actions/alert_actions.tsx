@@ -12,6 +12,7 @@ import {
   EuiContextMenuPanel,
   EuiPopover,
   EuiToolTip,
+  EuiIcon,
 } from '@elastic/eui';
 
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
@@ -27,6 +28,19 @@ import type { GetObservabilityAlertsTableProp, ObservabilityAlertsTableContext }
 import { observabilityFeatureId } from '../..';
 import { ALERT_DETAILS_PAGE_ID } from '../../pages/alert_details/alert_details';
 import { useKibana } from '../../utils/kibana_react';
+import { ALERT_SOURCE } from '../alerts_table/common/get_columns';
+import datadogIcon from '../../assets/icons/datadog.svg';
+
+// Actions API base path
+const ACTIONS_API_PATH = '/api/actions';
+
+/**
+ * Checks if an alert is an external alert (from third-party source)
+ */
+function isExternalAlert(alert: Record<string, unknown>): boolean {
+  const source = alert[ALERT_SOURCE]?.[0] as string | undefined;
+  return !!source && source !== 'kibana' && source !== '--';
+}
 
 export function AlertActions(
   props: React.ComponentProps<GetObservabilityAlertsTableProp<'renderActionsCell'>>
@@ -48,12 +62,19 @@ export function AlertActions(
     cases,
   } = services;
   const isSLODetailsPage = useRouteMatch(SLO_DETAIL_PATH);
-  const { telemetryClient } = useKibana().services;
+  const { telemetryClient, notifications } = useKibana().services;
 
+  const isExternal = isExternalAlert(alert);
   const isInApp = Boolean(tableId === SLO_ALERTS_TABLE_ID && isSLODetailsPage);
 
   const userCasesPermissions = cases?.helpers.canUseCases([observabilityFeatureId]);
   const [viewInAppUrl, setViewInAppUrl] = useState<string>();
+  const [isMutedLocally, setIsMutedLocally] = useState(false);
+
+  // External alert fields
+  const externalUrl = alert['kibana.alert.external_url']?.[0] as string | undefined;
+  const alertSource = alert[ALERT_SOURCE]?.[0] as string | undefined;
+  const connectorId = alert['kibana.alert.connector_id']?.[0] as string | undefined;
 
   const parseObservabilityAlert = useMemo(
     () => parseAlert(observabilityRuleTypeRegistry),
@@ -63,23 +84,31 @@ export function AlertActions(
   const observabilityAlert = parseObservabilityAlert(alert);
 
   useEffect(() => {
-    const alertLink = observabilityAlert.link;
-    if (!observabilityAlert.hasBasePath && prepend) {
-      setViewInAppUrl(prepend(alertLink ?? ''));
+    if (isExternal) {
+      setViewInAppUrl(externalUrl);
     } else {
-      setViewInAppUrl(alertLink);
+      const alertLink = observabilityAlert.link;
+      if (!observabilityAlert.hasBasePath && prepend) {
+        setViewInAppUrl(prepend(alertLink ?? ''));
+      } else {
+        setViewInAppUrl(alertLink);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleViewInAppUrl = useCallback(() => {
-    const alertLink = observabilityAlert.link as unknown as string;
-    if (!observabilityAlert.hasBasePath) {
-      setViewInAppUrl(prepend(alertLink ?? ''));
+    if (isExternal) {
+      setViewInAppUrl(externalUrl);
     } else {
-      setViewInAppUrl(alertLink);
+      const alertLink = observabilityAlert.link as unknown as string;
+      if (!observabilityAlert.hasBasePath) {
+        setViewInAppUrl(prepend(alertLink ?? ''));
+      } else {
+        setViewInAppUrl(alertLink);
+      }
     }
-  }, [observabilityAlert.link, observabilityAlert.hasBasePath, prepend]);
+  }, [isExternal, externalUrl, observabilityAlert.link, observabilityAlert.hasBasePath, prepend]);
 
   const onAddToCase = useCallback(
     ({ isNewCase }: { isNewCase: boolean }) => {
@@ -111,7 +140,263 @@ export function AlertActions(
     setIsPopoverOpen(!isPopoverOpen);
   };
 
-  const actionsMenuItems = [
+  // Handle external alert actions
+  const handleCopyAlertLink = useCallback(() => {
+    if (externalUrl) {
+      navigator.clipboard.writeText(externalUrl);
+      notifications?.toasts.addSuccess({
+        title: i18n.translate('xpack.observability.alerts.actions.linkCopied', {
+          defaultMessage: 'Link copied to clipboard',
+        }),
+      });
+    }
+    closeActionsPopover();
+  }, [externalUrl, notifications, closeActionsPopover]);
+
+  const handleViewInSource = useCallback(() => {
+    if (externalUrl) {
+      window.open(externalUrl, '_blank');
+    }
+    closeActionsPopover();
+  }, [externalUrl, closeActionsPopover]);
+
+  // Extract monitor ID from raw payload (Datadog specific)
+  const getMonitorId = useCallback((): number | undefined => {
+    const rawPayload = alert['kibana.alert.raw_payload']?.[0];
+    if (rawPayload) {
+      try {
+        const payload = typeof rawPayload === 'string' ? JSON.parse(rawPayload) : rawPayload;
+        const rawId = payload.monitor_id || payload.monitorId || payload.alertId;
+        return rawId ? Number(rawId) : undefined;
+      } catch {
+        return undefined;
+      }
+    }
+    return undefined;
+  }, [alert]);
+
+  // Handle mute/unmute action for external alerts via connector
+  const handleMuteToggleInSource = useCallback(async () => {
+    if (!connectorId) {
+      notifications?.toasts.addWarning({
+        title: i18n.translate('xpack.observability.alerts.actions.noConnector', {
+          defaultMessage: 'No connector associated with this alert',
+        }),
+      });
+      closeActionsPopover();
+      return;
+    }
+
+    const monitorId = getMonitorId();
+
+    if (!monitorId || isNaN(monitorId)) {
+      notifications?.toasts.addWarning({
+        title: i18n.translate('xpack.observability.alerts.actions.noMonitorId', {
+          defaultMessage: 'Could not find monitor ID in alert payload',
+        }),
+      });
+      closeActionsPopover();
+      return;
+    }
+
+    const action = isMutedLocally ? 'unmuteMonitor' : 'muteMonitor';
+    const actionLabel = isMutedLocally ? 'unmuted' : 'muted';
+
+    try {
+      const { http } = services;
+
+      // Execute the connector's mute/unmute action
+      const response = await http.post<{
+        status: string;
+        data?: { success?: boolean; error?: string; data?: unknown };
+        message?: string;
+      }>(`${ACTIONS_API_PATH}/connector/${connectorId}/_execute`, {
+        body: JSON.stringify({
+          params: {
+            subAction: action,
+            subActionParams: {
+              monitorId,
+              ...(isMutedLocally && { allScopes: true }), // Unmute all scopes
+            },
+          },
+        }),
+      });
+
+      // Check if the connector execution was successful
+      if (response.status === 'ok' && response.data?.success) {
+        setIsMutedLocally(!isMutedLocally);
+        notifications?.toasts.addSuccess({
+          title: i18n.translate('xpack.observability.alerts.actions.muteToggleSuccess', {
+            defaultMessage: 'Monitor {action} in Datadog',
+            values: { action: actionLabel },
+          }),
+          text: i18n.translate('xpack.observability.alerts.actions.muteToggleSuccessText', {
+            defaultMessage: 'Monitor {monitorId} has been {action}',
+            values: { monitorId, action: actionLabel },
+          }),
+        });
+      } else if (response.status === 'error' || response.data?.error) {
+        throw new Error(response.data?.error || response.message || 'Unknown error');
+      } else {
+        // Assume success if no error
+        setIsMutedLocally(!isMutedLocally);
+        notifications?.toasts.addSuccess({
+          title: i18n.translate('xpack.observability.alerts.actions.muteToggleSuccess', {
+            defaultMessage: 'Monitor {action} in Datadog',
+            values: { action: actionLabel },
+          }),
+        });
+      }
+
+      refresh?.();
+    } catch (error) {
+      notifications?.toasts.addDanger({
+        title: i18n.translate('xpack.observability.alerts.actions.muteToggleError', {
+          defaultMessage: 'Failed to {action} monitor',
+          values: { action: isMutedLocally ? 'unmute' : 'mute' },
+        }),
+        text: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+
+    closeActionsPopover();
+  }, [
+    connectorId,
+    getMonitorId,
+    isMutedLocally,
+    services,
+    notifications,
+    closeActionsPopover,
+    refresh,
+  ]);
+
+  // External alert menu items
+  const externalAlertMenuItems = useMemo(() => {
+    const items: React.ReactElement[] = [];
+
+    if (externalUrl) {
+      items.push(
+        <EuiContextMenuItem
+          data-test-subj="view-in-source-action"
+          key="viewInSource"
+          onClick={handleViewInSource}
+          icon="popout"
+          size="s"
+        >
+          {i18n.translate('xpack.observability.alerts.actions.viewInSource', {
+            defaultMessage: 'View in {source}',
+            values: { source: alertSource || 'Source' },
+          })}
+        </EuiContextMenuItem>
+      );
+
+      items.push(
+        <EuiContextMenuItem
+          data-test-subj="copy-alert-link-action"
+          key="copyAlertLink"
+          onClick={handleCopyAlertLink}
+          icon="copy"
+          size="s"
+        >
+          {i18n.translate('xpack.observability.alerts.actions.copyLink', {
+            defaultMessage: 'Copy link',
+          })}
+        </EuiContextMenuItem>
+      );
+    }
+
+    // Add to case is still available for external alerts
+    if (userCasesPermissions?.createComment && userCasesPermissions?.read) {
+      items.push(
+        <EuiContextMenuItem
+          data-test-subj="add-to-existing-case-action"
+          key="addToExistingCase"
+          onClick={handleAddToExistingCaseClick}
+          icon="folderClosed"
+          size="s"
+        >
+          {i18n.translate('xpack.observability.alerts.actions.addToCase', {
+            defaultMessage: 'Add to existing case',
+          })}
+        </EuiContextMenuItem>,
+        <EuiContextMenuItem
+          data-test-subj="add-to-new-case-action"
+          key="addToNewCase"
+          onClick={handleAddToNewCaseClick}
+          icon="folderOpen"
+          size="s"
+        >
+          {i18n.translate('xpack.observability.alerts.actions.addToNewCase', {
+            defaultMessage: 'Add to new case',
+          })}
+        </EuiContextMenuItem>
+      );
+    }
+
+    // Connector-specific actions - Mute/Unmute alert in source system
+    if (connectorId && alertSource?.toLowerCase() === 'datadog') {
+      items.push(
+        <EuiContextMenuItem
+          data-test-subj="mute-in-source-action"
+          key="muteInSource"
+          onClick={handleMuteToggleInSource}
+          icon={<EuiIcon type={datadogIcon} size="m" />}
+          size="s"
+        >
+          {isMutedLocally
+            ? i18n.translate('xpack.observability.alerts.actions.unmuteInDatadog', {
+                defaultMessage: 'Unmute in Datadog',
+              })
+            : i18n.translate('xpack.observability.alerts.actions.muteInDatadog', {
+                defaultMessage: 'Mute in Datadog',
+              })}
+        </EuiContextMenuItem>
+      );
+    } else if (connectorId) {
+      // For other sources, show disabled mute action with info
+      items.push(
+        <EuiContextMenuItem
+          data-test-subj="mute-in-source-action"
+          key="muteInSource"
+          onClick={() => {
+            notifications?.toasts.addInfo({
+              title: i18n.translate('xpack.observability.alerts.actions.muteNotSupported', {
+                defaultMessage: 'Mute action not yet supported for {source}',
+                values: { source: alertSource || 'this source' },
+              }),
+            });
+            closeActionsPopover();
+          }}
+          icon="bellSlash"
+          size="s"
+          disabled={true}
+        >
+          {i18n.translate('xpack.observability.alerts.actions.muteInSource', {
+            defaultMessage: 'Mute in {source}',
+            values: { source: alertSource || 'Source' },
+          })}
+        </EuiContextMenuItem>
+      );
+    }
+
+    return items;
+  }, [
+    externalUrl,
+    alertSource,
+    connectorId,
+    userCasesPermissions,
+    isMutedLocally,
+    handleViewInSource,
+    handleCopyAlertLink,
+    handleMuteToggleInSource,
+    handleAddToExistingCaseClick,
+    handleAddToNewCaseClick,
+    notifications,
+    closeActionsPopover,
+  ]);
+
+  // Kibana alert menu items
+  const kibanaAlertMenuItems = [
     ...(userCasesPermissions?.createComment && userCasesPermissions?.read
       ? [
           <EuiContextMenuItem
@@ -157,6 +442,8 @@ export function AlertActions(
     ),
   ];
 
+  const actionsMenuItems = isExternal ? externalAlertMenuItems : kibanaAlertMenuItems;
+
   const actionsToolTip =
     actionsMenuItems.length <= 0
       ? i18n.translate('xpack.observability.alertsTable.notEnoughPermissions', {
@@ -171,6 +458,16 @@ export function AlertActions(
   };
 
   const hideViewInApp = isInApp || viewInAppUrl === '' || parentAlert;
+
+  // For external alerts, show "View in Source" instead of "View in app"
+  const viewInAppLabel = isExternal
+    ? i18n.translate('xpack.observability.alertsTable.viewInSourceTextLabel', {
+        defaultMessage: 'View in {source}',
+        values: { source: alertSource || 'Source' },
+      })
+    : i18n.translate('xpack.observability.alertsTable.viewInAppTextLabel', {
+        defaultMessage: 'View in app',
+      });
 
   return (
     <>
@@ -194,21 +491,14 @@ export function AlertActions(
       )}
       {!hideViewInApp && (
         <EuiFlexItem>
-          <EuiToolTip
-            content={i18n.translate('xpack.observability.alertsTable.viewInAppTextLabel', {
-              defaultMessage: 'View in app',
-            })}
-            disableScreenReaderOutput
-          >
+          <EuiToolTip content={viewInAppLabel} disableScreenReaderOutput>
             <EuiButtonIcon
               data-test-subj="o11yAlertActionsButton"
-              aria-label={i18n.translate('xpack.observability.alertsTable.viewInAppTextLabel', {
-                defaultMessage: 'View in app',
-              })}
+              aria-label={viewInAppLabel}
               color="text"
               onMouseOver={handleViewInAppUrl}
-              onClick={() => window.open(viewInAppUrl)}
-              iconType="eye"
+              onClick={() => window.open(viewInAppUrl, isExternal ? '_blank' : '_self')}
+              iconType={isExternal ? 'popout' : 'eye'}
               size="s"
             />
           </EuiToolTip>

@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { BrushEndListener, XYBrushEvent } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiButton } from '@elastic/eui';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import type { BoolQuery, Filter } from '@kbn/es-query';
 import { usePageReady } from '@kbn/ebt-tools';
@@ -53,6 +53,9 @@ import { renderRuleStats } from './components/rule_stats';
 import { mergeBoolQueries } from './helpers/merge_bool_queries';
 import { GroupingToolbarControls } from '../../components/alerts_table/grouping/grouping_toolbar_controls';
 import { AlertsLoader } from './components/alerts_loader';
+import { EVENTS_API_URLS } from '../../../common/types/events';
+import type { ExternalEventInput } from '../../../common/types/events';
+import { GenerateMockEventModal } from '../../components/generate_mock_event_modal';
 
 const ALERTS_SEARCH_BAR_ID = 'alerts-search-bar-o11y';
 const ALERTS_PER_PAGE = 50;
@@ -62,7 +65,8 @@ const DEFAULT_INTERVAL = '60s';
 const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
 const DEFAULT_EMPTY_FILTERS: Filter[] = [];
 
-const tableColumns = getColumns({ showRuleName: true });
+// Include the Source column to show Kibana vs External alerts
+const tableColumns = getColumns({ showRuleName: true, showSource: true });
 
 function InternalAlertsPage() {
   const kibanaServices = useKibana().services;
@@ -119,6 +123,11 @@ function InternalAlertsPage() {
   const { setScreenContext } = observabilityAIAssistant?.service || {};
 
   const ruleTypesWithDescriptions = useGetAvailableRulesWithDescriptions();
+
+  // Generate mock events state
+  const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [lastReloadRequestTime, setLastReloadRequestTime] = useState<number | undefined>(undefined);
 
   const [tableLoading, setTableLoading] = useState(true);
   const [tableCount, setTableCount] = useState(0);
@@ -263,7 +272,64 @@ function InternalAlertsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Generate mock external event
+  const handleGenerateMockEvent = useCallback(
+    async (payload: ExternalEventInput) => {
+      setIsGenerating(true);
+      try {
+        // Use the raw endpoint which bypasses strict io-ts validation
+        await http.post(EVENTS_API_URLS.EVENTS_RAW, {
+          body: JSON.stringify(payload),
+        });
+        toasts.addSuccess({
+          title: i18n.translate('xpack.observability.alerts.generateSuccess', {
+            defaultMessage: 'Generated mock event from {source}',
+            values: { source: payload.source },
+          }),
+        });
+        setLastReloadRequestTime(Date.now());
+        setIsGenerateModalOpen(false);
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : typeof error === 'object' && error !== null && 'body' in error
+            ? (error as { body?: { message?: string } }).body?.message || 'Unknown error'
+            : 'Unknown error';
+        toasts.addDanger({
+          title: i18n.translate('xpack.observability.alerts.generateError', {
+            defaultMessage: 'Failed to generate mock event',
+          }),
+          text: errorMessage,
+        });
+      } finally {
+        setIsGenerating(false);
+      }
+    },
+    [http, toasts]
+  );
+
   const manageRulesHref = http.basePath.prepend('/app/observability/alerts/rules');
+
+  const rightSideItems = [
+    ...renderRuleStats(
+      ruleStats,
+      manageRulesHref,
+      ruleStatsLoading,
+      locators.get<RulesLocatorParams>(rulesLocatorID)
+    ),
+    <EuiButton
+      data-test-subj="o11yInternalAlertsPageGenerateMockEventButton"
+      key="generateMockEventsButton"
+      iconType="beaker"
+      onClick={() => setIsGenerateModalOpen(true)}
+      size="s"
+    >
+      {i18n.translate('xpack.observability.alerts.generateMockButton', {
+        defaultMessage: 'Generate Mock Event',
+      })}
+    </EuiButton>,
+  ];
 
   return (
     <Provider value={alertSearchBarStateContainer}>
@@ -273,12 +339,7 @@ function InternalAlertsPage() {
           pageTitle: (
             <>{i18n.translate('xpack.observability.alertsTitle', { defaultMessage: 'Alerts' })} </>
           ),
-          rightSideItems: renderRuleStats(
-            ruleStats,
-            manageRulesHref,
-            ruleStatsLoading,
-            locators.get<RulesLocatorParams>(rulesLocatorID)
-          ),
+          rightSideItems,
         }}
       >
         <HeaderMenu />
@@ -368,6 +429,7 @@ function InternalAlertsPage() {
                       pageSize={ALERTS_PER_PAGE}
                       onUpdate={onUpdate}
                       columns={tableColumns}
+                      lastReloadRequestTime={lastReloadRequestTime}
                       renderAdditionalToolbarControls={() => (
                         <GroupingToolbarControls
                           groupingId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
@@ -392,6 +454,14 @@ function InternalAlertsPage() {
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
+
+        {isGenerateModalOpen && (
+          <GenerateMockEventModal
+            onClose={() => setIsGenerateModalOpen(false)}
+            onSubmit={handleGenerateMockEvent}
+            isSubmitting={isGenerating}
+          />
+        )}
       </ObservabilityPageTemplate>
     </Provider>
   );

@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiLink, EuiText, EuiFlexGroup } from '@elastic/eui';
+import { EuiLink, EuiText, EuiFlexGroup, EuiBadge, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React from 'react';
+// Import custom provider icons
 import {
   ALERT_DURATION,
   ALERT_SEVERITY,
@@ -27,6 +28,8 @@ import {
 import { isEmpty } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
 import type { JsonValue } from '@kbn/utility-types';
+import sentryIcon from '../../../assets/icons/sentry.svg';
+import datadogIcon from '../../../assets/icons/datadog.svg';
 import {
   RELATED_ACTIONS_COL,
   RELATED_ALERT_REASON,
@@ -43,6 +46,7 @@ import { TimestampTooltip } from './timestamp_tooltip';
 import type { GetObservabilityAlertsTableProp } from '../types';
 import AlertActions from '../../alert_actions/alert_actions';
 import { ElapsedTimestampTooltip } from '../../../../common';
+import { ALERT_SOURCE } from './get_columns';
 
 export const getAlertFieldValue = (alert: Alert, fieldName: string) => {
   // can be updated when working on https://github.com/elastic/kibana/issues/140819
@@ -64,6 +68,73 @@ export const getAlertFieldValue = (alert: Alert, fieldName: string) => {
 };
 
 export type AlertCellRenderers = Record<string, (value: string) => ReactNode>;
+
+/**
+ * Source badge configuration for different alert sources
+ */
+const SOURCE_CONFIG: Record<
+  string,
+  { color: string; icon: string; label: string; textColor?: string }
+> = {
+  kibana: {
+    color: '#00BFB3',
+    icon: 'logoElastic',
+    label: 'Kibana',
+    textColor: 'white',
+  },
+  prometheus: {
+    color: '#E6522C',
+    icon: 'logoPrometheus',
+    label: 'Prometheus',
+    textColor: 'white',
+  },
+  datadog: {
+    color: '#632CA6',
+    icon: datadogIcon,
+    label: 'Datadog',
+    textColor: 'white',
+  },
+  sentry: {
+    color: '#362D59',
+    icon: sentryIcon,
+    label: 'Sentry',
+    textColor: 'white',
+  },
+  pagerduty: {
+    color: '#06AC38',
+    icon: 'bell',
+    label: 'PagerDuty',
+    textColor: 'white',
+  },
+  custom: {
+    color: '#98A2B3',
+    icon: 'globe',
+    label: 'Custom',
+    textColor: 'white',
+  },
+};
+
+/**
+ * Renders a source badge for the alert
+ */
+const SourceBadge = ({ source }: { source: string }) => {
+  // If no source, it's a native Kibana alert
+  const sourceKey = source && source !== '--' ? source.toLowerCase() : 'kibana';
+  const config = SOURCE_CONFIG[sourceKey] || SOURCE_CONFIG.custom;
+
+  return (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiIcon type={config.icon} size="s" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiBadge color={config.color} style={{ color: config.textColor }}>
+          {config.label}
+        </EuiBadge>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 /**
  * This implementation of `EuiDataGrid`'s `renderCellValue`
@@ -126,6 +197,18 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
     [ALERT_RULE_NAME]: (value) => {
       const ruleCategory = getAlertFieldValue(alert, ALERT_RULE_CATEGORY);
       const ruleId = getAlertFieldValue(alert, ALERT_RULE_UUID);
+      const alertSource = getAlertFieldValue(alert, ALERT_SOURCE);
+
+      // For external alerts, don't link to rule details (no rule exists)
+      if (alertSource && alertSource !== '--' && alertSource !== 'kibana') {
+        return (
+          <CellTooltip
+            value={<EuiText size="s">{value}</EuiText>}
+            tooltipContent={`External alert from ${alertSource}`}
+          />
+        );
+      }
+
       const ruleLink = ruleId ? http.basePath.prepend(paths.observability.ruleDetails(ruleId)) : '';
       return (
         <CellTooltip
@@ -137,6 +220,9 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
           tooltipContent={ruleCategory}
         />
       );
+    },
+    [ALERT_SOURCE]: (value) => {
+      return <SourceBadge source={value} />;
     },
     [RELATION_COL]: (value) => {
       return <RelationCol alert={alert} parentAlert={parentAlert!} />;

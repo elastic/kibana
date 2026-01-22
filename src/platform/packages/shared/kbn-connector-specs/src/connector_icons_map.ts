@@ -49,6 +49,8 @@ export const ConnectorIconsMap: Map<
     lazy(() => import(/* webpackChunkName: "connectorIconJina" */ './specs/jina/icon/jina')),
   ],
   [
+    '.datadog',
+    lazy(() => import(/* webpackChunkName: "connectorIconDatadog" */ './specs/datadog/icon')),
     '.abuseipdb',
     lazy(() => import(/* webpackChunkName: "connectorIconAbuseipdb" */ './specs/abuseipdb/icon')),
   ],
