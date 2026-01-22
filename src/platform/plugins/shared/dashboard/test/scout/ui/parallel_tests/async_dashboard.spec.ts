@@ -78,14 +78,12 @@ spaceTest.describe('Sample data dashboard', { tag: tags.ESS_ONLY }, () => {
         await expect.poll(async () => await pageObjects.dashboard.getControlCount()).toBe(3);
 
         // check panels rendered
-        await expect
-          .poll(async () => await pageObjects.dashboard.getPanelCount())
-          .toBeGreaterThan(0);
+        await expect.poll(async () => await pageObjects.dashboard.getPanelCount()).toBe(16);
 
         // check charts rendered
         await expect
           .poll(async () => await pageObjects.dashboard.getVisualizationCount('xyVisChart'))
-          .toBeGreaterThan(5);
+          .toBe(5);
 
         // Checking saved searches rendered
         await expect
