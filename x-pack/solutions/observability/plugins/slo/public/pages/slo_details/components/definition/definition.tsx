@@ -42,7 +42,7 @@ import { DisplayQuery } from '../overview/display_query';
 import { SyntheticsIndicatorOverview } from '../overview/synthetics_indicator_overview';
 import { DefinitionItem } from './definition_item';
 import { LinkedDashboards } from './linked_dashboards';
-import { getTimeRange } from './time_rage_helper';
+import { getTimeRange } from './time_range_helper';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
