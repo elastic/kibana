@@ -50,13 +50,6 @@ export const buildLogsExtractionEsqlQuery = ({
   const idField = identityFields[0];
   const idFieldName = idField.field;
 
-  const cleanFields = fields.filter(
-    // TODO: Investigate support for boolean and date fields in logs extraction.
-    // These types are currently excluded from cleanFields until their ES|QL handling is verified.
-    ({ mapping }) =>
-      mapping?.type !== 'boolean' && mapping?.type !== 'date' && mapping?.type !== 'ip'
-  );
-
   return `FROM ${indexPatterns.join(', ')}
     METADATA ${METADATA_FIELDS.join(', ')}
   | WHERE ${entityIdFilter(idFieldName)}
@@ -68,16 +61,16 @@ export const buildLogsExtractionEsqlQuery = ({
     ${idFieldName} AS ${recentData(idFieldName)}
   | STATS
     ${recentData('timestamp')} = MAX(@timestamp),
-    ${recentFieldStats(cleanFields)}
+    ${recentFieldStats(fields)}
     BY ${recentData(idFieldName)}
   | LOOKUP JOIN ${latestIndex}
       ON ${recentData(idFieldName)} == ${idFieldName}
   | RENAME
     ${recentData(idFieldName)} AS ${idFieldName}
   | EVAL
-    ${mergedFieldStats(idField, cleanFields)},
+    ${mergedFieldStats(idField, fields)},
     ${customFieldEvalLogic()}
-  | KEEP ${fieldsToKeep(idField, cleanFields)}
+  | KEEP ${fieldsToKeep(idField, fields)}
   | LIMIT ${maxPageSearchSize}
   | EVAL ${HASHED_ID} = HASH("${HASH_ALG}", ${MAIN_ENTITY_ID})
   | SORT @timestamp ASC`;
@@ -93,13 +86,14 @@ function recentFieldStats(fields: EntityField[]) {
     .map((field) => {
       const { retention, destination: dest, source: src } = field;
       const recentDest = recentData(src, dest);
+      const castedSrc = castSrcType(field);
       switch (retention.operation) {
         case 'collect_values':
-          return `${recentDest} = MV_DEDUPE(TOP(${castSrcType(field)}, ${retention.maxLength}))`;
+          return `${recentDest} = MV_DEDUPE(TOP(${castedSrc}, ${retention.maxLength}))`;
         case 'prefer_newest_value':
-          return `${recentDest} = LAST(${castSrcType(field)}, @timestamp)`;
+          return `${recentDest} = LAST(${castedSrc}, @timestamp)`;
         case 'prefer_oldest_value':
-          return `${recentDest} = FIRST(${castSrcType(field)}, @timestamp)`;
+          return `${recentDest} = FIRST(${castedSrc}, @timestamp)`;
         default:
           throw new Error('unknown field operation');
       }
@@ -109,8 +103,9 @@ function recentFieldStats(fields: EntityField[]) {
 
 function mergedFieldStats({ field: idField }: EntityIdentityField, fields: EntityField[]) {
   return fields
-    .map(({ retention, destination: dest, source: src }) => {
-      const recentDest = recentData(src, dest);
+    .map((field) => {
+      const { retention, destination: dest, source: src } = field;
+      const recentDest = castDestType(recentData(src, dest), field);
       switch (retention.operation) {
         case 'collect_values':
           return `${dest} = MV_DEDUPE(COALESCE(MV_APPEND(${recentDest}, ${dest}), ${recentDest}))`;
@@ -145,16 +140,32 @@ function castSrcType(field: EntityField) {
     case 'keyword':
       return `TO_STRING(${field.source})`;
     case 'date':
-      return `TO_DATETIME(${field.source})`;
+      return `TO_STRING(${field.source})`;
     case 'boolean':
-      return `TO_BOOLEAN(${field.source})`;
+      return `TO_STRING(${field.source})`;
     case 'long':
       return `TO_LONG(${field.source})`;
     case 'ip':
-      return `TO_IP(${field.source})`;
-    case 'scaled_float': // explicit no cast because it doesn't exist in ESQl
+      return `TO_STRING(${field.source})`;
+    // explicit no cast because it doesn't exist in ESQl
+    // and it's a breaking point
+    case 'scaled_float':
       return `${field.source}`;
     default:
       return field.source;
+  }
+}
+
+function castDestType(fieldName: string, field: EntityField) {
+  // TODO: Investigate why these types are not accepted in LAST/FIRST
+  switch (field.mapping?.type) {
+    case 'boolean':
+      return `TO_BOOLEAN(${fieldName})`;
+    case 'date':
+      return `TO_DATETIME(${fieldName})`;
+    case 'ip':
+      return `TO_IP(${fieldName})`;
+    default:
+      return fieldName;
   }
 }

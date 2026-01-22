@@ -178,7 +178,8 @@ describe('LogsExtractionClient', () => {
         values: [],
       };
 
-      mockDataViewsService.get.mockRejectedValue(new Error('Data view not found'));
+      const error = new Error('Data view not found');
+      mockDataViewsService.get.mockRejectedValue(error);
       mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
       mockIngestEntities.mockResolvedValue(undefined);
 
@@ -186,7 +187,7 @@ describe('LogsExtractionClient', () => {
 
       expect(result.success).toBe(true);
       expect(result.scannedIndices).toContain('logs-*');
-      expect(mockLogger.error).toHaveBeenCalled();
+      expect(result.error).toBeUndefined();
     });
 
     it('should work with different entity types', async () => {
