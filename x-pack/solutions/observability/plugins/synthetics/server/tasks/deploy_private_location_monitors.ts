@@ -178,7 +178,9 @@ export class DeployPrivateLocationMonitors {
     spaceIdToSync,
     filterByGlobalParams,
     modifiedParamKeys,
+    privateLocationId,
   }: {
+    privateLocationId?: string;
     spaceIdToSync?: string;
     soClient: SavedObjectsClientContract;
     allPrivateLocations: PrivateLocationAttributes[];
@@ -196,6 +198,7 @@ export class DeployPrivateLocationMonitors {
       await this.getAllMonitorConfigs({
         encryptedSavedObjects,
         soClient,
+        privateLocationId,
         spaceId: spaceIdToSync,
         filterByGlobalParams,
         modifiedParamKeys,
@@ -217,7 +220,9 @@ export class DeployPrivateLocationMonitors {
         )}`
       );
       await this.deployEditMonitors({
-        allPrivateLocations,
+        allPrivateLocations: allPrivateLocations.filter(
+          (loc) => loc.id === privateLocationId || !privateLocationId
+        ),
         configsBySpaces,
         monitorSpaceIds,
         paramsBySpace,
@@ -279,6 +284,7 @@ export class DeployPrivateLocationMonitors {
     spaceId = ALL_SPACES_ID,
     filterByGlobalParams = false,
     modifiedParamKeys,
+    privateLocationId,
   }: {
     soClient: SavedObjectsClientContract;
     encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
@@ -290,6 +296,7 @@ export class DeployPrivateLocationMonitors {
     filterByGlobalParams?: boolean;
     /** Optional array of specific param keys that were modified. Used for granular filtering. */
     modifiedParamKeys?: string[];
+    privateLocationId?: string;
   }) {
     const { syntheticsService } = this.syntheticsMonitorClient;
     const paramsBySpacePromise = syntheticsService.getSyntheticsParams({ spaceId });
@@ -301,6 +308,9 @@ export class DeployPrivateLocationMonitors {
 
     const monitorsPromise = monitorConfigRepository.findDecryptedMonitors({
       spaceId,
+      ...(privateLocationId && {
+        filter: `${syntheticsMonitorAttributes}.locations.id:"${privateLocationId}"`,
+      }),
     });
 
     const [paramsBySpace, monitors, maintenanceWindows] = await Promise.all([
