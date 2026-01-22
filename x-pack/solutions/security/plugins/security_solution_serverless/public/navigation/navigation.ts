@@ -32,7 +32,10 @@ export const registerSolutionNavigation = async (
   // Get initial chat experience for setting initial navigation tree
   const initialChatExperience = await firstValueFrom(chatExperience$);
 
-  const workflowsUiEnabled$ = services.settings.client.get$<boolean>(WORKFLOWS_UI_SETTING_ID, false);
+  const workflowsUiEnabled$ = services.settings.client.get$<boolean>(
+    WORKFLOWS_UI_SETTING_ID,
+    false
+  );
   const workflowsUiEnabled = await firstValueFrom(workflowsUiEnabled$);
 
   const navigationTree = shouldUseAINavigation
