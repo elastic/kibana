@@ -60,10 +60,11 @@ function transformPanelIn(panel: DashboardPanel): {
   const idx = uid ?? uuidv4();
 
   const transforms = embeddableService?.getTransforms(panel.type);
+  const panelSchema = transforms?.getSchema?.();
 
-  if (transforms?.schema) {
+  if (panelSchema) {
     try {
-      transforms.schema.validate(config);
+      panelSchema.validate(config);
     } catch (error) {
       throw Boom.badRequest(
         `Panel config validation failed. Panel uid: ${uid}, type: ${restPanel.type}, validation error: ${error.message}`
