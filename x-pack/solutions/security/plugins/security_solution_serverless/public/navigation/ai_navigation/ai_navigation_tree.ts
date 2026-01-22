@@ -24,7 +24,8 @@ const SOLUTION_NAME = i18n.translate(
 );
 
 export const createAiNavigationTree = (
-  chatExperience: AIChatExperience = AIChatExperience.Classic
+  chatExperience: AIChatExperience = AIChatExperience.Classic,
+  workflowsUiEnabled: boolean = false
 ): NavigationTreeDefinition => ({
   body: [
     {
@@ -85,6 +86,13 @@ export const createAiNavigationTree = (
                 // TODO: update icon to 'robot' once it's available in EUI
                 icon: LazyIconAgentBuilder,
                 link: 'agent_builder' as AppDeepLinkId,
+              },
+            ]
+          : []),
+        ...(workflowsUiEnabled
+          ? [
+              {
+                link: 'workflows',
               },
             ]
           : []),
