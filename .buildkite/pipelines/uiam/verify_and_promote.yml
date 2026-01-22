@@ -1,0 +1,87 @@
+# https://buildkite.com/elastic/kibana-uiam-verify-and-promote/
+
+### Parameters for this job:
+# PUBLISH_DOCKER_TAG: if set to 1/true, passing runs will promote the tested UIAM image to latest-verified.
+# SKIP_VERIFICATION: if set to 1/true, it will skip running all tests
+# UIAM_IMAGE: the full image path for the docker image to test
+# BUILDKITE_COMMIT: the commit hash of the kibana branch to test
+
+agents:
+  image: family/kibana-ubuntu-2404
+  imageProject: elastic-images-prod
+  provider: gcp
+  machineType: n2-standard-2
+
+steps:
+  - label: 'Annotate runtime parameters'
+    command: .buildkite/scripts/steps/uiam/annotate_runtime_parameters.sh
+
+  - group: '(:kibana: x :key:) Trigger Kibana UIAM test suite'
+    if: "build.env('SKIP_VERIFICATION') != '1' && build.env('SKIP_VERIFICATION') != 'true'"
+    steps:
+      - label: 'Pre-Build'
+        command: .buildkite/scripts/lifecycle/pre_build.sh
+        key: pre-build
+        timeout_in_minutes: 10
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-2
+
+      - label: 'Build Kibana Distribution'
+        command: .buildkite/scripts/steps/build_kibana.sh
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-8
+        key: build
+        if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
+        depends_on: pre-build
+        timeout_in_minutes: 60
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
+      - command: .buildkite/scripts/steps/test/scout_uiam_tests.sh
+        label: 'Scout UIAM Tests'
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+          diskSizeGb: 115
+        key: scout-uiam-tests
+        timeout_in_minutes: 30
+        depends_on:
+          - build
+        env:
+          UIAM_DOCKER_IMAGE: $UIAM_IMAGE
+        retry:
+          automatic:
+            - exit_status: '*'
+              limit: 1
+
+  - wait: ~
+
+  - label: ':arrow_up::key::arrow_up: Promote UIAM docker image'
+    command: .buildkite/scripts/steps/uiam/promote_uiam_image.sh $UIAM_IMAGE
+    key: promote-uiam-image
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+    if: "build.branch == 'main'"
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1
+
+  - wait: ~
+
+  - label: 'Post-Build'
+    command: .buildkite/scripts/lifecycle/post_build.sh
+    timeout_in_minutes: 10

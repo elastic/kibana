@@ -38,9 +38,14 @@ export const COSMOS_DB_EMULATOR_DEFAULT_IMAGE = `${COSMOS_DB_EMULATOR_DOCKER_REP
 
 const UIAM_DOCKER_REGISTRY = 'docker.elastic.co';
 const UIAM_DOCKER_REPO = `${UIAM_DOCKER_REGISTRY}/cloud-ci/uiam`;
-// Taken from GitOps version file for UIAM service (dev env, services/uiam/versions.yaml)
-const UIAM_DOCKER_LATEST_VERIFIED_TAG = 'git-1171ce2fde41';
-export const UIAM_DEFAULT_IMAGE = `${UIAM_DOCKER_REPO}:${UIAM_DOCKER_LATEST_VERIFIED_TAG}`;
+const UIAM_DOCKER_PROMOTED_REPO = `${UIAM_DOCKER_REGISTRY}/kibana-ci/uiam`;
+// Taken from GitOps version file for UIAM service (dev env, services/uiam/versions.yaml).
+// Used for local development to ensure a known-good image version.
+const UIAM_DOCKER_LOCAL_TAG = 'git-1171ce2fde41';
+// Use the promoted :latest-verified image in CI, fall back to specific tag for local development
+export const UIAM_DEFAULT_IMAGE = process.env.CI
+  ? `${UIAM_DOCKER_PROMOTED_REPO}:latest-verified`
+  : `${UIAM_DOCKER_REPO}:${UIAM_DOCKER_LOCAL_TAG}`;
 
 const MAX_HEALTHCHECK_RETRIES = 30;
 

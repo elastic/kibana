@@ -23,6 +23,10 @@ jest.mock('../paths', () => ({
   SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH: '/some_path/uiam_cosmosdb.pfx',
 }));
 
+// Note: The UIAM_DEFAULT_IMAGE uses a different image path when CI env var is set.
+// Tests use inline snapshots that expect the non-CI image path (docker.elastic.co/cloud-ci/uiam:git-*).
+// If CI is set during test execution, snapshot assertions will need to be updated.
+
 beforeEach(() => {
   jest.useFakeTimers().setSystemTime(new Date(Date.UTC(2000, 0, 1)));
   jest.resetAllMocks();
