@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, combineLatest, map } from 'rxjs';
+import { map } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
 import { apiCanPinPanels } from '@kbn/presentation-containers';
@@ -60,15 +60,6 @@ export class EditControlDisplaySettingsAction
   public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {
     return apiHasParentApi(embeddable) && apiCanPinPanels(embeddable.parentApi);
   }
-
-  // public getCompatibilityChangesSubject({ embeddable }: EmbeddableApiContext) {
-  //   return apiIsPinnableControlApi(embeddable)
-  //     ? combineLatest([
-  //         getViewModeSubject(embeddable) ?? new BehaviorSubject(undefined),
-  //         embeddable.parentApi.layout$,
-  //       ]).pipe(map(() => undefined))
-  //     : undefined;
-  // }
 
   public getCompatibilityChangesSubject({ embeddable }: EmbeddableApiContext) {
     return apiIsPinnableControlApi(embeddable)

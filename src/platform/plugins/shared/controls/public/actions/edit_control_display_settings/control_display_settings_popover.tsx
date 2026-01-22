@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiPopoverProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -68,34 +67,28 @@ export const ControlDisplaySettingsPopover: React.FC<Props> = ({ api, displayNam
     setIsPopoverOpen(true);
   }, [api, isPopoverOpen, onClose]);
 
-  const settingsButton = (
-    <EuiToolTip disableScreenReaderOutput content={displayName}>
-      <EuiButtonIcon
-        data-test-subj={`embeddablePanelAction-${ACTION_EDIT_CONTROL_DISPLAY_SETTINGS}`}
-        iconType={iconType}
-        color="text"
-        aria-label={displayName}
-        onClick={onClickButton}
-      />
-    </EuiToolTip>
-  );
-
-  const popoverProps: Omit<EuiPopoverProps, 'button'> = {
-    repositionOnScroll: true,
-    panelPaddingSize: 'm',
-    isOpen: isPopoverOpen,
-    closePopover: onClose,
-    focusTrapProps: {
-      closeOnMouseup: true,
-      clickOutsideDisables: false,
-      onClickOutside: onClose,
-    },
-  };
-
   return (
     <EuiPopover
-      {...popoverProps}
-      button={settingsButton}
+      button={
+        <EuiToolTip disableScreenReaderOutput content={displayName}>
+          <EuiButtonIcon
+            data-test-subj={`embeddablePanelAction-${ACTION_EDIT_CONTROL_DISPLAY_SETTINGS}`}
+            iconType={iconType}
+            color="text"
+            aria-label={displayName}
+            onClick={onClickButton}
+          />
+        </EuiToolTip>
+      }
+      repositionOnScroll
+      panelPaddingSize="m"
+      isOpen={isPopoverOpen}
+      closePopover={onClose}
+      focusTrapProps={{
+        closeOnMouseup: true,
+        clickOutsideDisables: false,
+        onClickOutside: onClose,
+      }}
       data-test-subj={`controlDisplaySettings-${api.uuid}`}
     >
       <EuiFormRow label={strings.minimumWidth} fullWidth>
@@ -123,11 +116,13 @@ export const ControlDisplaySettingsPopover: React.FC<Props> = ({ api, displayNam
               size="s"
               onClick={() => {
                 onClose();
-                setWidth(initialState.width);
+                setWidth(initialState.width as ControlWidth);
                 setGrow(initialState.grow);
               }}
             >
-              Cancel
+              {i18n.translate('controls.displaySettingsPopover.cancelButton', {
+                defaultMessage: 'Cancel',
+              })}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -140,7 +135,9 @@ export const ControlDisplaySettingsPopover: React.FC<Props> = ({ api, displayNam
                 api.parentApi.setLayout(api.uuid, { ...initialState, grow, width });
               }}
             >
-              Apply
+              {i18n.translate('controls.displaySettingsPopover.applyButton', {
+                defaultMessage: 'Apply',
+              })}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
