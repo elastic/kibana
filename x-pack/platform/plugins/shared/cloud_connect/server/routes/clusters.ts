@@ -8,14 +8,18 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { i18n } from '@kbn/i18n';
 import axios from 'axios';
 import { CloudConnectClient } from '../services/cloud_connect_client';
 import { createStorageService } from '../lib/create_storage_service';
 import { enableInferenceCCM, disableInferenceCCM } from '../services/inference_ccm';
+import { updateDefaultLLMActions } from '../lib/update_default_llm_actions';
+import { waitForInferenceEndpoint } from '../lib/wait_for_inference_endpoint';
 
 interface CloudConnectedStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  actions: ActionsPluginStart;
 }
 
 export interface ClustersRouteOptions {
@@ -297,6 +301,7 @@ export const registerClustersRoute = ({
             });
           }
 
+          // Update elastic inference ccm settings
           try {
             if (eisRequest?.enabled) {
               await enableInferenceCCM(esClient, eisKey!, logger);
@@ -340,6 +345,21 @@ export const registerClustersRoute = ({
                 message: (inferenceError as Error).message,
               },
             });
+          }
+
+          // Update default LLM actions if needed, this always needs to happen
+          // after updating the service.
+          //
+          // We poll for a known inference endpoint to verify CCM setup is complete
+          // before creating the default LLM connectors. This avoids race conditions
+          // where the inference endpoints aren't ready yet.
+          try {
+            if (eisRequest?.enabled) {
+              await waitForInferenceEndpoint(esClient, logger);
+              await updateDefaultLLMActions(getStartServices, request, logger);
+            }
+          } catch (llmActionsError) {
+            logger.warn('Failed to update default LLM actions', { error: llmActionsError });
           }
         }
 
