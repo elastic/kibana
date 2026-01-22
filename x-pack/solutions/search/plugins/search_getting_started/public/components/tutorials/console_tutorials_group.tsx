@@ -8,16 +8,19 @@ import { consoleTutorials } from '@kbn/search-code-examples';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 import {
   EuiBadge,
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiText,
   EuiTitle,
   useEuiTheme,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { sortBy } from 'lodash';
 import { useKibana } from '../../hooks/use_kibana';
 import { SearchGettingStartedSectionHeading } from '../section_heading';
 
@@ -34,6 +37,10 @@ interface TutorialMetadata {
 export const ConsoleTutorialsGroup = () => {
   const { application, console: consolePlugin, share } = useKibana().services;
   const { euiTheme } = useEuiTheme();
+  const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
+  const isSmallBreakpoint = useIsWithinBreakpoints(['s']);
+  const tutorialColumns = isSmallBreakpoint ? 1 : isMediumBreakpoint ? 2 : 3;
+
   const tutorials: TutorialMetadata[] = useMemo(
     () => [
       {
@@ -67,7 +74,6 @@ export const ConsoleTutorialsGroup = () => {
         request: consoleTutorials.semanticSearch,
         icon: 'bullseye',
         buttonRef: React.createRef<HTMLButtonElement>(),
-        isNew: true,
       },
       {
         title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.esqlTitle', {
@@ -95,6 +101,7 @@ export const ConsoleTutorialsGroup = () => {
         request: consoleTutorials.timeSeriesDataStreams,
         icon: 'clock',
         buttonRef: React.createRef<HTMLButtonElement>(),
+        isNew: true,
       },
     ],
     []
@@ -143,8 +150,8 @@ export const ConsoleTutorialsGroup = () => {
         icon="commandLine"
       />
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="l" wrap>
-          {tutorials.map((tutorial) => (
+        <EuiFlexGrid columns={tutorialColumns}>
+          {sortBy(tutorials, 'isNew').map((tutorial) => (
             // The card
             <EuiFlexItem key={tutorial.dataTestSubj} grow={true} css={tutorialCardStyles}>
               {/* The card content */}
@@ -194,7 +201,7 @@ export const ConsoleTutorialsGroup = () => {
               />
             </EuiFlexItem>
           ))}
-        </EuiFlexGroup>
+        </EuiFlexGrid>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
