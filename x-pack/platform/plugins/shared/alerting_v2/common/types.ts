@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export { validateEsqlQuery } from '../../../common/validation';
+import type { TypeOf as ZodTypeOf } from '@kbn/zod';
+import type { createRuleDataSchema } from './schemas/create_rule_data_schema';
+
+export type CreateRuleData = ZodTypeOf<typeof createRuleDataSchema>;

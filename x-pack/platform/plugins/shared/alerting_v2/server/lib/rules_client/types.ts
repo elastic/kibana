@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import type { createRuleDataSchema, updateRuleDataSchema } from './schemas';
+import type { TypeOf as ZodTypeOf } from '@kbn/zod';
+import type { CreateRuleData } from '../../../common/types';
+import type { updateRuleDataSchema } from './schemas';
 
-export type CreateRuleData = TypeOf<typeof createRuleDataSchema>;
+export type { CreateRuleData };
 
 export interface CreateRuleParams {
   data: CreateRuleData;
@@ -23,7 +24,7 @@ export interface RuleResponse extends CreateRuleData {
   updatedAt: string;
 }
 
-export type UpdateRuleData = TypeOf<typeof updateRuleDataSchema>;
+export type UpdateRuleData = ZodTypeOf<typeof updateRuleDataSchema>;
 
 export interface FindRulesParams {
   page?: number;

@@ -19,6 +19,7 @@ import { createRuleDataSchema, type CreateRuleData } from '../lib/rules_client';
 import { RulesClient } from '../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_RULE_API_PATH } from './constants';
+import { buildRouteValidationWithZod } from './route_validation';
 
 const createRuleParamsSchema = schema.object({
   id: schema.maybe(schema.string()),
@@ -36,7 +37,7 @@ export class CreateRuleRoute implements RouteHandler {
   static options = { access: 'internal' } as const;
   static validate = {
     request: {
-      body: createRuleDataSchema,
+      body: buildRouteValidationWithZod(createRuleDataSchema),
       params: createRuleParamsSchema,
     },
   } as const;

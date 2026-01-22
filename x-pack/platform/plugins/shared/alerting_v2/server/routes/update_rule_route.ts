@@ -17,6 +17,7 @@ import { updateRuleDataSchema, type UpdateRuleData } from '../lib/rules_client';
 import { RulesClient } from '../lib/rules_client/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_RULE_API_PATH } from './constants';
+import { buildRouteValidationWithZod } from './route_validation';
 
 const updateRuleParamsSchema = schema.object({
   id: schema.string(),
@@ -34,7 +35,7 @@ export class UpdateRuleRoute {
   static options = { access: 'internal' } as const;
   static validate = {
     request: {
-      body: updateRuleDataSchema,
+      body: buildRouteValidationWithZod(updateRuleDataSchema),
       params: updateRuleParamsSchema,
     },
   } as const;

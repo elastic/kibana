@@ -5,13 +5,11 @@
  * 2.0.
  */
 
+import { validateDuration } from '../../common/validation';
+
 const DURATION_RE = /^(\d+)(ms|s|m|h|d|w)$/;
 
-export function validateDuration(value: string): string | void {
-  if (!DURATION_RE.test(value)) {
-    return `Invalid duration "${value}". Expected format like "5m", "1h", "30s", "250ms"`;
-  }
-}
+export { validateDuration };
 
 export function parseDurationToMs(value: string): number {
   const match = value.match(DURATION_RE);
