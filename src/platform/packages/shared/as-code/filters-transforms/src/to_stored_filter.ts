@@ -104,7 +104,6 @@ export function toStoredFilter(filter: AsCodeFilter, logger?: Logger): StoredFil
         ...('is_multi_index' in filter && filter.is_multi_index !== undefined
           ? { isMultiIndex: filter.is_multi_index }
           : {}),
-        ...(filter.key !== undefined ? { key: filter.key } : {}),
       },
     };
 

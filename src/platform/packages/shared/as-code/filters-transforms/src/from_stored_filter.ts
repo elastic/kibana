@@ -439,7 +439,6 @@ function extractBaseProperties(storedFilter: StoredFilter): Partial<AsCodeFilter
     ...(meta?.negate !== undefined ? { negate: meta.negate } : {}),
     ...(meta?.alias != null ? { label: meta.alias } : {}),
     ...(meta?.isMultiIndex !== undefined ? { is_multi_index: meta.isMultiIndex } : {}),
-    ...(meta?.key !== undefined ? { key: meta.key } : {}),
   };
 }
 

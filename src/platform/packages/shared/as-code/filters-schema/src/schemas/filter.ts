@@ -103,14 +103,6 @@ const commonBasePropertiesSchema = schema.object({
       meta: { description: 'Whether this filter can be applied to multiple indices' },
     })
   ),
-  key: schema.maybe(
-    schema.string({
-      meta: {
-        description: 'Field name metadata from legacy filters for backwards compatibility',
-        deprecated: true,
-      },
-    })
-  ),
 });
 
 // ====================================================================

@@ -449,7 +449,6 @@ describe('toStoredFilter', () => {
         expect(asCodeFilter.condition.field).toBe('@timestamp');
         expect(asCodeFilter.condition.operator).toBe('range');
       }
-      expect(asCodeFilter.key).toBe('@timestamp');
 
       const roundTrip = toStoredFilter(asCodeFilter) as StoredFilter;
 
@@ -459,6 +458,7 @@ describe('toStoredFilter', () => {
       expect(roundTrip.query?.range?.['@timestamp'].gte).toBe('2024-01-01T00:00:00.000000000Z');
       expect(roundTrip.query?.range?.['@timestamp'].lte).toBe('2024-01-01T23:59:59.999999999Z');
       expect(roundTrip.meta.type).toBe('range');
+      expect(roundTrip.meta.key).toBe('@timestamp');
     });
 
     it('should handle date range filter with date_time format', () => {
