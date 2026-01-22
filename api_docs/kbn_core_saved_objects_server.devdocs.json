@@ -7236,7 +7236,7 @@
               "\nThe namespace type of the savedObject type this migration is registered for"
             ],
             "signature": [
-              "\"multiple\" | \"single\" | \"agnostic\" | \"multiple-isolated\""
+              "\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""
             ],
             "path": "src/core/packages/saved-objects/server/src/model_version/transformations.ts",
             "lineNumber": 35,
@@ -10933,7 +10933,7 @@
               "\nThe {@link SavedObjectsNamespaceType | namespace type} for the type."
             ],
             "signature": [
-              "\"multiple\" | \"single\" | \"agnostic\" | \"multiple-isolated\""
+              "\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""
             ],
             "path": "src/core/packages/saved-objects/server/src/saved_objects_type.ts",
             "lineNumber": 60,
