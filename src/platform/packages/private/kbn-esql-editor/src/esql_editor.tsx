@@ -984,7 +984,6 @@ const ESQLEditorInternal = function ESQLEditor({
           }
 
           setBrowserPopoverPosition({ top: absoluteTop, left: absoluteLeft });
-          setIsIndicesBrowserOpen(true);
         }
       }
     }
