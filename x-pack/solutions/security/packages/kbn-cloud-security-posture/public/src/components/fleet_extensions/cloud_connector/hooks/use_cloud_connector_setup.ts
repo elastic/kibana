@@ -25,6 +25,8 @@ import {
   AZURE_CLOUD_CONNECTOR_FIELD_NAMES,
   AWS_ACCOUNT_TYPE_INPUT_VAR_NAME,
   AZURE_ACCOUNT_TYPE_INPUT_VAR_NAME,
+  SINGLE_ACCOUNT,
+  ORGANIZATION_ACCOUNT,
 } from '../constants';
 
 export interface UseCloudConnectorSetupReturn {
@@ -89,7 +91,7 @@ export const getAccountTypeFromInputs = (
   const accountTypeValue = extractVarValue(vars[accountTypeVarName]);
   
   // Return the account type if it's a valid AccountType value
-  if (accountTypeValue === 'single-account' || accountTypeValue === 'organization-account') {
+  if (accountTypeValue === SINGLE_ACCOUNT || accountTypeValue === ORGANIZATION_ACCOUNT) {
     return accountTypeValue;
   }
 

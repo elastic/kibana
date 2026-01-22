@@ -63,7 +63,7 @@ export const useGetCloudConnectors = (filterOptions?: CloudConnectorQueryFilterO
 
   return useQuery(
     [CLOUD_CONNECTOR_QUERY_KEY, filterOptions?.cloudProvider, filterOptions?.accountType],
-    () => fetchCloudConnectors(http, { kuery: kuery || undefined }),
+    () => fetchCloudConnectors(http, { kuery }),
     {
       enabled: true,
     }
