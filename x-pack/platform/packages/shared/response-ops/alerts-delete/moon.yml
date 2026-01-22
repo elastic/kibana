@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/response-ops'
   metadata:
-    sourceRoot: src/platform/packages/shared/response-ops/alerts-delete
+    sourceRoot: x-pack/platform/packages/shared/response-ops/alerts-delete
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/core'
