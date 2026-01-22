@@ -336,7 +336,6 @@ export const getSearchEmbeddableFactory = ({
                           api={{ ...api, fetchWarnings$, fetchContext$ }}
                           dataView={dataView!}
                           onAddFilter={
-                            isEsqlMode(savedSearch) ||
                             runtimeState.nonPersistedDisplayOptions?.enableFilters === false
                               ? undefined
                               : onAddFilter
