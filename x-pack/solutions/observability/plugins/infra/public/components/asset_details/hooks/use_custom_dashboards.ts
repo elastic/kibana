@@ -34,7 +34,7 @@ const errorMessages: Record<ActionType, string> = {
 };
 export const useUpdateCustomDashboard = () => {
   const {
-    services: { notifications },
+    services: { http, notifications },
   } = useKibanaContextForPlugin();
 
   const onError = useCallback(
@@ -58,17 +58,14 @@ export const useUpdateCustomDashboard = () => {
         dashboardSavedObjectId,
         dashboardFilterAssetIdEnabled,
       }: InfraSavedCustomDashboard) => {
-        const rawResponse = await services.http.fetch(
-          `/api/infra/${assetType}/custom-dashboards/${id}`,
-          {
-            method: 'PUT',
-            body: JSON.stringify({
-              assetType,
-              dashboardSavedObjectId,
-              dashboardFilterAssetIdEnabled,
-            }),
-          }
-        );
+        const rawResponse = await http.fetch(`/api/infra/${assetType}/custom-dashboards/${id}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            assetType,
+            dashboardSavedObjectId,
+            dashboardFilterAssetIdEnabled,
+          }),
+        });
 
         return decodeOrThrow(InfraCustomDashboardRT)(rawResponse);
       },
@@ -91,7 +88,7 @@ export const useUpdateCustomDashboard = () => {
 
 export const useDeleteCustomDashboard = () => {
   const {
-    services: { notifications },
+    services: { http, notifications },
   } = useKibanaContextForPlugin();
 
   const onError = useCallback(
@@ -116,12 +113,9 @@ export const useDeleteCustomDashboard = () => {
         assetType: InfraCustomDashboardAssetType;
         id: string;
       }) => {
-        const rawResponse = await services.http.fetch(
-          `/api/infra/${assetType}/custom-dashboards/${id}`,
-          {
-            method: 'DELETE',
-          }
-        );
+        const rawResponse = await http.fetch(`/api/infra/${assetType}/custom-dashboards/${id}`, {
+          method: 'DELETE',
+        });
 
         return decodeOrThrow(InfraDeleteCustomDashboardsResponseBodyRT)(rawResponse);
       },
