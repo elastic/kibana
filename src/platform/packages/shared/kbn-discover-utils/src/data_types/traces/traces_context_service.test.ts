@@ -24,6 +24,10 @@ describe('traces_context_service', () => {
     const indices: APMIndices = {
       transaction: 'traces-apm*,apm-*,traces-*.otel-*',
       span: 'traces-apm*,apm-*,traces-*.otel-*',
+      error: '',
+      metric: '',
+      onboarding: '',
+      sourcemap: '',
     };
 
     it('matches individual allowed indices and the full combined list', () => {
