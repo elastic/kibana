@@ -15,7 +15,6 @@ import type {
   DynamicActionsSerializedState,
   EmbeddableDynamicActionsManager,
 } from './embeddables/types';
-import { initializeDynamicActionsManager } from './embeddables/dynamic_actions_manager';
 
 export interface SetupDependencies {
   embeddable: EmbeddableSetup;
@@ -35,7 +34,7 @@ export interface StartContract {
     uuid: string,
     getTitle: () => string | undefined,
     state: DynamicActionsSerializedState
-  ) => EmbeddableDynamicActionsManager;
+  ) => Promise<EmbeddableDynamicActionsManager>;
 }
 
 export class EmbeddableEnhancedPlugin
@@ -49,11 +48,14 @@ export class EmbeddableEnhancedPlugin
 
   public start(core: CoreStart, plugins: StartDependencies): StartContract {
     return {
-      initializeEmbeddableDynamicActions: (
+      initializeEmbeddableDynamicActions: async (
         uuid: string,
         getTitle: () => string | undefined,
         state: DynamicActionsSerializedState
       ) => {
+        const { initializeDynamicActionsManager } = await import(
+          './embeddables/dynamic_actions_manager'
+        );
         return initializeDynamicActionsManager(uuid, getTitle, state, plugins);
       },
     };
