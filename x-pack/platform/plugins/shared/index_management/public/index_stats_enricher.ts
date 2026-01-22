@@ -11,7 +11,7 @@ import type { EnricherResponse } from '@kbn/index-management-shared-types';
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
 import { API_BASE_PATH } from '../common/constants';
-const SOURCE = i18n.translate('xpack.indexManagement.indexStatsEnricher.source', {
+const SOURCE = i18n.translate('xpack.idxMgmt.indexStatsEnricher.source', {
   defaultMessage: 'index stats',
 });
 

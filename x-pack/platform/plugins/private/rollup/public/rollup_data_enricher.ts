@@ -9,7 +9,7 @@ import type { HttpSetup } from '@kbn/core/public';
 import type { RollupGetRollupIndexCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { EnricherResponse } from '@kbn/index-management-shared-types';
 import { i18n } from '@kbn/i18n';
-const SOURCE = i18n.translate('xpack.indexManagement.rollupDataEnricher.source', {
+const SOURCE = i18n.translate('xpack.rollupJobs.rollupDataEnricher.source', {
   defaultMessage: 'rollup',
 });
 

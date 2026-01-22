@@ -9,7 +9,7 @@ import type { IlmExplainLifecycleResponse } from '@elastic/elasticsearch/lib/api
 import type { HttpSetup } from '@kbn/core/public';
 import type { EnricherResponse } from '@kbn/index-management-shared-types';
 import { i18n } from '@kbn/i18n';
-const SOURCE = i18n.translate('xpack.indexManagement.indexLifecycleDataEnricher.source', {
+const SOURCE = i18n.translate('xpack.indexLifecycleMgmt.indexLifecycleDataEnricher.source', {
   defaultMessage: 'index lifecycle',
 });
 
