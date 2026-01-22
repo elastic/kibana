@@ -50,9 +50,7 @@ export function getConnectorIdSuggestionsItems(
       }`,
       sortText: `${instance.isDeprecated ? 'z' : 'a'}_${instance.name}`, // Sort deprecated items last
       preselect: !instance.isDeprecated, // Don't preselect deprecated connectors
-
-      // Add custom attributes for better CSS targeting
-      filterText: `${instance.id} ${connectorName} ${connectorType}`, // Enhanced filter text for better targeting
+      filterText: `${instance.id} ${connectorName} "${connectorName}" '${connectorName}' ${connectorType}`, // Enhanced filter text for better targeting
     });
   });
 

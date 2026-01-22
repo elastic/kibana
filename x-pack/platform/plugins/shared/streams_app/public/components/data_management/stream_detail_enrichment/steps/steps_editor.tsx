@@ -6,7 +6,16 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiAccordion, EuiCode, EuiPanel, EuiText } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiCallOut,
+  EuiCode,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
@@ -247,6 +256,9 @@ export const StepsEditor = React.memo(() => {
   const isViewingSuggestion = useInteractiveModeSelector((snapshot) =>
     snapshot.matches({ pipelineSuggestion: 'viewingSuggestion' })
   );
+  const isNoSuggestionsFound = useInteractiveModeSelector((snapshot) =>
+    snapshot.matches({ pipelineSuggestion: 'noSuggestionsFound' })
+  );
 
   // Pipeline suggestion events
   const { suggestPipeline, clearSuggestedSteps, cancelSuggestion, acceptSuggestion } =
@@ -279,6 +291,53 @@ export const StepsEditor = React.memo(() => {
             cancelSuggestion();
           }}
         />
+      );
+    }
+
+    if (isNoSuggestionsFound) {
+      return (
+        <NoStepsEmptyPrompt canUsePipelineSuggestions={!!canUsePipelineSuggestions}>
+          <div css={{ maxWidth: 400, margin: '0 auto', textAlign: 'left' }}>
+            <EuiCallOut
+              announceOnMount
+              title={i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.pipelineSuggestion.noSuggestionsTitle',
+                { defaultMessage: 'Could not generate suggestions' }
+              )}
+              color="primary"
+              size="s"
+              onDismiss={() => clearSuggestedSteps()}
+            >
+              <p>
+                {i18n.translate(
+                  'xpack.streams.streamDetailView.managementTab.enrichment.pipelineSuggestion.noSuggestionsDescription',
+                  {
+                    defaultMessage:
+                      'The AI assistant was unable to generate pipeline suggestions for your data. You can try again.',
+                  }
+                )}
+              </p>
+              <EuiSpacer size="s" />
+              <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+                <EuiFlexItem grow={false}>
+                  <GenerateSuggestionButton
+                    aiFeatures={aiFeatures}
+                    iconType="refresh"
+                    size="s"
+                    onClick={(connectorId) =>
+                      suggestPipeline({ connectorId, streamName: stream.name })
+                    }
+                    isLoading={false}
+                  >
+                    {i18n.translate('xpack.streams.stepsEditor.tryAgainButtonLabel', {
+                      defaultMessage: 'Try again',
+                    })}
+                  </GenerateSuggestionButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiCallOut>
+          </div>
+        </NoStepsEmptyPrompt>
       );
     }
 
