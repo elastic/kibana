@@ -46,8 +46,6 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
   const shouldAllowConversationRedirectRef = useRef(true);
   const agentIdSyncedRef = useRef(false);
 
-  const hasValidatedConversationRef = useRef(false);
-
   useEffect(() => {
     return () => {
       // On unmount disable conversation redirect
@@ -67,31 +65,6 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
     },
     [shouldAllowConversationRedirectRef, navigateToAgentBuilderUrl]
   );
-
-  const validateConversationId = useCallback(
-    async (id: string) => {
-      try {
-        await conversationsService.get({ conversationId: id });
-      } catch (error) {
-        if (error?.response?.status === 404) {
-          const path = appPaths.chat.new;
-          navigateToAgentBuilderUrl(path, undefined, { shouldStickToBottom: true });
-        }
-      }
-    },
-    [conversationsService, navigateToAgentBuilderUrl]
-  );
-
-  useEffect(() => {
-    if (hasValidatedConversationRef.current) {
-      return;
-    }
-
-    if (conversationId) {
-      void validateConversationId(conversationId);
-      hasValidatedConversationRef.current = true;
-    }
-  }, [conversationId, validateConversationId]);
 
   const onConversationCreated = useCallback(
     ({ conversationId: id }: { conversationId: string }) => {

@@ -9,9 +9,7 @@ import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { agentBuilderDefaultAgentId, ConversationRoundStatus } from '@kbn/agent-builder-common';
-import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { labels } from '../utils/i18n';
 import { queryKeys } from '../query_keys';
 import { newConversationId, createNewRound } from '../utils/new_conversation';
 import { useConversationId } from '../context/conversation/use_conversation_id';
@@ -21,58 +19,46 @@ import { storageKeys } from '../storage_keys';
 import { useSendMessage } from '../context/send_message/send_message_context';
 import { useValidateAgentId } from './agents/use_validate_agent_id';
 import { useConversationContext } from '../context/conversation/conversation_context';
-import { useToasts } from './use_toasts';
 
 export const useConversation = () => {
   const conversationId = useConversationId();
   const { conversationsService } = useAgentBuilderServices();
   const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
   const isSendingMessage = useIsSendingMessage();
-  const { addErrorToast } = useToasts();
 
   const {
     data: conversation,
     isLoading,
     isFetching,
     isFetched,
+    isError,
+    error,
   } = useQuery({
     queryKey,
     // Disable query if we are on a new conversation or if there is a message currently being sent
     // Otherwise a refetch will overwrite our optimistic updates
     enabled: Boolean(conversationId) && !isSendingMessage,
-    queryFn: async () => {
+    queryFn: () => {
       if (!conversationId) {
         return Promise.reject(new Error('Invalid conversation id'));
       }
-      try {
-        return await conversationsService.get({ conversationId });
-      } catch (error) {
-        // Handle conversation not found errors (404)
-        if (error?.response?.status === 404) {
-          addErrorToast({
-            title: labels.tools.conversationNotFoundErrorToast,
-            text: formatAgentBuilderErrorMessage(error),
-          });
-          throw error;
-        }
-        throw error;
-      }
+      return conversationsService.get({ conversationId });
     },
-    retry: (failureCount, error: IHttpFetchError) => {
+    retry: (failureCount, httpError: IHttpFetchError) => {
       // Never retry if conversation doesn't exist
-      if (error?.response?.status === 404) {
+      if (httpError?.response?.status === 404) {
         return false;
       }
       return failureCount < 3;
     },
   });
 
-  return { conversation, isLoading, isFetching, isFetched };
+  return { conversation, isLoading, isFetching, isFetched, isError, error };
 };
 
 export const useConversationStatus = () => {
-  const { isLoading, isFetching, isFetched } = useConversation();
-  return { isLoading, isFetching, isFetched };
+  const { isLoading, isFetching, isFetched, isError, error } = useConversation();
+  return { isLoading, isFetching, isFetched, isError, error };
 };
 
 const useGetNewConversationAgentId = () => {
