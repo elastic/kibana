@@ -12,6 +12,8 @@ import { i18n } from '@kbn/i18n';
  * These are used to provide granular user feedback.
  */
 export type EsqlConversionFailureReason =
+  | 'multi_layer_not_supported'
+  | 'trend_line_not_supported'
   | 'non_utc_timezone'
   | 'formula_not_supported'
   | 'time_shift_not_supported'
@@ -25,6 +27,13 @@ export type EsqlConversionFailureReason =
   | 'unknown';
 
 export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureReason, string> = {
+  multi_layer_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlMultiLayer', {
+    defaultMessage: 'Cannot convert to ES|QL: Multi-layer visualizations are not supported.',
+  }),
+  trend_line_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlTrendLine', {
+    defaultMessage:
+      'Cannot convert to ES|QL: Metric visualization with a trend line are not supported.',
+  }),
   non_utc_timezone: i18n.translate('xpack.lens.config.cannotConvertToEsqlNonUtcTimezone', {
     defaultMessage: 'Cannot convert to ES|QL: UTC timezone is required.',
   }),

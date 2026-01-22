@@ -76,18 +76,14 @@ export const useEsqlConversion = (
     // Guard: trendline check
     if (hasTrendLineLayer(state)) {
       return getEsqlConversionDisabledSettings(
-        i18n.translate('xpack.lens.config.cannotConvertToEsqlMetricWithTrendlineTooltip', {
-          defaultMessage: 'Metric visualization with a trend line are not supported in query mode',
-        })
+        esqlConversionFailureReasonMessages.trend_line_not_supported
       );
     }
 
     // Guard: layer count
     if (layerIds.length > 1) {
       return getEsqlConversionDisabledSettings(
-        i18n.translate('xpack.lens.config.cannotConvertToEsqlMultilayerTooltip', {
-          defaultMessage: 'Multi-layer visualizations cannot be converted to query mode',
-        })
+        esqlConversionFailureReasonMessages.multi_layer_not_supported
       );
     }
 
