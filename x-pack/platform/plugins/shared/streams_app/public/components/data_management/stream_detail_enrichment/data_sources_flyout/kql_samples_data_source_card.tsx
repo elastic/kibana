@@ -87,6 +87,7 @@ export const KqlSamplesDataSourceCard = ({ dataSourceRef }: KqlSamplesDataSource
             query={dataSource.query}
             showFilterBar
             showQueryInput
+            dataTestSubj="streamsAppKqlSamplesSearchBar"
             {...dateFilterProps}
           />
           <EuiSpacer size="s" />

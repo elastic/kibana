@@ -109,9 +109,26 @@ test.describe('Stream data processing - outdated documents', { tag: ['@ess', '@s
     await pageObjects.streams.gotoProcessingTab(OLD_DOCUMENTS_STREAM);
     await pageObjects.streams.clickManageDataSourcesButton();
     await pageObjects.streams.addDataSource('kql');
+    // Scope interactions to the KQL search bar to avoid conflicts with other data sources
+    const kqlSearchBar = page.getByTestId('streamsAppKqlSamplesSearchBar');
     await page.getByTestId('streamsAppKqlSamplesDataSourceNameField').fill('Kql Samples');
-    await pageObjects.datePicker.setAbsoluteRange(oldDocumentsDateRange);
-    await page.getByTestId('querySubmitButton').click();
+    // Set date range within the KQL search bar
+    await kqlSearchBar.getByTestId('superDatePickerShowDatesButton').click();
+    await kqlSearchBar.getByTestId('superDatePickerendDatePopoverButton').click();
+    await page.getByTestId('superDatePickerAbsoluteTab').click();
+    const endDateInput = page.getByTestId('superDatePickerAbsoluteDateInput');
+    await endDateInput.clear();
+    await endDateInput.fill(oldDocumentsDateRange.to);
+    await page.getByTestId('parseAbsoluteDateFormat').click();
+    await page.keyboard.press('Escape');
+    await kqlSearchBar.getByTestId('superDatePickerstartDatePopoverButton').click();
+    await page.getByTestId('superDatePickerAbsoluteTab').click();
+    const startDateInput = page.getByTestId('superDatePickerAbsoluteDateInput');
+    await startDateInput.clear();
+    await startDateInput.fill(oldDocumentsDateRange.from);
+    await page.getByTestId('parseAbsoluteDateFormat').click();
+    await page.keyboard.press('Escape');
+    await kqlSearchBar.getByTestId('querySubmitButton').click();
     await pageObjects.streams.closeFlyout();
 
     await expect(page.getByTestId('streamsAppProcessingOutdatedDocumentsTipAnchor')).toBeVisible();
@@ -132,9 +149,26 @@ test.describe('Stream data processing - outdated documents', { tag: ['@ess', '@s
     await pageObjects.streams.gotoProcessingTab(NEW_DOCUMENTS_STREAM);
     await pageObjects.streams.clickManageDataSourcesButton();
     await pageObjects.streams.addDataSource('kql');
+    // Scope interactions to the KQL search bar to avoid conflicts with other data sources
+    const kqlSearchBar = page.getByTestId('streamsAppKqlSamplesSearchBar');
     await page.getByTestId('streamsAppKqlSamplesDataSourceNameField').fill('Kql Samples');
-    await pageObjects.datePicker.setAbsoluteRange(oldDocumentsDateRange);
-    await page.getByTestId('querySubmitButton').click();
+    // Set date range within the KQL search bar
+    await kqlSearchBar.getByTestId('superDatePickerShowDatesButton').click();
+    await kqlSearchBar.getByTestId('superDatePickerendDatePopoverButton').click();
+    await page.getByTestId('superDatePickerAbsoluteTab').click();
+    const endDateInput = page.getByTestId('superDatePickerAbsoluteDateInput');
+    await endDateInput.clear();
+    await endDateInput.fill(oldDocumentsDateRange.to);
+    await page.getByTestId('parseAbsoluteDateFormat').click();
+    await page.keyboard.press('Escape');
+    await kqlSearchBar.getByTestId('superDatePickerstartDatePopoverButton').click();
+    await page.getByTestId('superDatePickerAbsoluteTab').click();
+    const startDateInput = page.getByTestId('superDatePickerAbsoluteDateInput');
+    await startDateInput.clear();
+    await startDateInput.fill(oldDocumentsDateRange.from);
+    await page.getByTestId('parseAbsoluteDateFormat').click();
+    await page.keyboard.press('Escape');
+    await kqlSearchBar.getByTestId('querySubmitButton').click();
     await pageObjects.streams.closeFlyout();
 
     await expect(page.getByTestId('streamsAppProcessingOutdatedDocumentsTipAnchor')).toBeHidden();
@@ -155,8 +189,10 @@ test.describe('Stream data processing - outdated documents', { tag: ['@ess', '@s
     await pageObjects.streams.gotoProcessingTab(EMPTY_STREAM);
     await pageObjects.streams.clickManageDataSourcesButton();
     await pageObjects.streams.addDataSource('kql');
+    // Scope interactions to the KQL search bar to avoid conflicts with other data sources
+    const kqlSearchBar = page.getByTestId('streamsAppKqlSamplesSearchBar');
     await page.getByTestId('streamsAppKqlSamplesDataSourceNameField').fill('Kql Samples');
-    await page.getByTestId('querySubmitButton').click();
+    await kqlSearchBar.getByTestId('querySubmitButton').click();
     await pageObjects.streams.closeFlyout();
 
     await expect(page.getByTestId('streamsAppProcessingOutdatedDocumentsTipAnchor')).toBeHidden();

@@ -112,6 +112,7 @@ export const FailureStoreDataSourceCard = ({ dataSourceRef }: FailureStoreDataSo
               dateRangeFrom={dataSource.timeRange?.from}
               dateRangeTo={dataSource.timeRange?.to}
               onQuerySubmit={handleQuerySubmit}
+              dataTestSubj="streamsAppFailureStoreSearchBar"
             />
           </EuiFlexItem>
         </EuiFlexGroup>
