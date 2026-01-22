@@ -44,6 +44,7 @@ dependsOn:
   - '@kbn/core-ui-settings-common'
   - '@kbn/setup-node-env'
   - '@kbn/es-errors'
+  - '@kbn/dev-utils'
 tags:
   - plugin
   - prod
