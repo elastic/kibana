@@ -33,12 +33,17 @@ export async function createIndices({ esClient }: CreateIndicesOpts) {
           properties: {
             id: { type: 'keyword' },
             version: { type: 'long' },
-            breach_count: { type: 'long' },
-            recover_count: { type: 'long' },
           },
         },
         data: { type: 'flattened' },
-        status: { type: 'keyword' },
+        // status: { type: 'keyword' }, // inactive | pending | active | recovered
+        status: {
+          properties: {
+            value: { type: 'keyword' },
+            count: { type: 'long' },
+          },
+        },
+        episode_id: { type: 'keyword' },
         group_hash: { type: 'keyword' },
         source: { type: 'keyword' },
       },
@@ -70,30 +75,7 @@ export async function createIndices({ esClient }: CreateIndicesOpts) {
         reason: { type: 'text' },
         destination_id: { type: 'keyword' },
         tag: { type: 'keyword' },
-        max_source_timestmap: { type: 'date' },
-      },
-    },
-  });
-
-  await esClient.indices.delete({ index: ALERT_TRANSITIONS_INDEX }, { ignore: [404] });
-  await new Promise((resolve) => setTimeout(resolve, 100));
-  await esClient.indices.create({
-    index: ALERT_TRANSITIONS_INDEX,
-    settings: {
-      mode: 'lookup',
-    },
-    mappings: {
-      dynamic: false,
-      properties: {
-        '@timestamp': { type: 'date' },
-        // Tuple
-        rule_id: { type: 'keyword' },
-        group_hash: { type: 'keyword' },
-        episode_id: { type: 'keyword' },
-        // Other fields
-        from_state: { type: 'keyword' },
-        to_state: { type: 'keyword' },
-        last_event_timestamp: { type: 'date' },
+        max_source_timestamp: { type: 'date' },
       },
     },
   });

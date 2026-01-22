@@ -17,34 +17,29 @@ export const ADDITIONAL_LOOKBACK_MS = 5000;
 
 // Query for:
 //  - alert events that have been reported since the last time the dispatcher fired them
-export const DISPATCHER_EVENTS_QUERY = `FROM ${ALERT_EVENTS_INDEX}
-  {timeFilter}
-  | RENAME group_hash AS event_group_hash, @timestamp AS event_timestamp
-  | LOOKUP JOIN ${ALERT_ACTIONS_INDEX}
-      ON
-        rule.id == rule_id AND
-          group_hash == event_group_hash AND
-          action_type == "fire-event"
-  | STATS last_fire = MAX(max_source_timestmap), max_event_timestamp = MAX(event_timestamp)
-        BY rule.id, event_group_hash
-  | WHERE last_fire IS NULL OR max_event_timestamp > last_fire
+export const DISPATCHER_EVENTS_QUERY = `FROM .kibana_alert_events, .kibana_alert_actions
+    METADATA _index
+  | EVAL rule_id = COALESCE(rule.id, rule_id)
+  | STATS
+      last_fire = MAX(max_source_timestamp) WHERE
+        _index == ".kibana_alert_actions" AND action_type == "fire-event",
+      last_event_timestamp = MAX(@timestamp) WHERE
+        _index == ".kibana_alert_events"
+        BY rule_id, group_hash
+  | WHERE last_fire IS NULL OR last_event_timestamp > last_fire
   | LIMIT 10000`;
 
 // Query for:
 //  - alert actions that have been created since the last time the dispatcher fired them
-export const DISPATCHER_ACTIONS_QUERY = `FROM ${ALERT_ACTIONS_INDEX}
-  {timeFilter}
-  | WHERE action_type != "fire-action" AND action_type != "fire-event"
-  | RENAME group_hash AS action_group_hash, @timestamp AS action_timestamp,
-      action_type AS action_action_type, rule_id AS action_rule_id
-  | LOOKUP JOIN ${ALERT_ACTIONS_INDEX}
-        ON
-          action_rule_id == rule_id AND
-            action_group_hash == group_hash AND
-            action_type == "fire-action"
-  | STATS last_fire = MAX(max_source_timestmap), max_action_timestamp = MAX(action_timestamp)
-        BY action_rule_id, action_group_hash
-  | WHERE last_fire IS NULL OR max_action_timestamp > last_fire
+export const DISPATCHER_ACTIONS_QUERY = `FROM .kibana_alert_actions
+    METADATA _index
+  | STATS
+      last_fire = MAX(max_source_timestamp) WHERE
+        _index == ".kibana_alert_actions" AND action_type == "fire-action",
+      last_action_timestamp = MAX(@timestamp) WHERE
+        _index == ".kibana_alert_actions" AND action_type != "fire-action" AND action_type != "fire-event"
+        BY rule_id, group_hash
+  | WHERE last_action_timestamp IS NOT NULL AND (last_fire IS NULL OR last_action_timestamp > last_fire)
   | LIMIT 10000`;
 
 export function alertDispatcher({ esClient }: AlertDispatcherOpts) {
@@ -155,10 +150,10 @@ async function dispatchEventsAndActions(
     bulkRequest.push({ index: {} });
     bulkRequest.push({
       '@timestamp': now,
-      rule_id: row['rule.id'],
-      group_hash: row.event_group_hash,
+      rule_id: row.rule_id,
+      group_hash: row.group_hash,
       action_type: `fire-${source}`,
-      max_source_timestamp: row[`max_${source}_timestamp`],
+      max_source_timestamp: row[`last_${source}_timestamp`],
     });
   }
   await esClient.bulk({
