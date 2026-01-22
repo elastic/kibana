@@ -803,6 +803,122 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
       },
     },
   },
+  otel_by_signal: {
+    traces: {
+      services_per_agent: {
+        DYNAMIC_KEY: {
+          type: 'long',
+          _meta: {
+            description: 'Number of services per agent for traces (transactions + spans) within the last day',
+          },
+        },
+      },
+      docs_per_agent: {
+        DYNAMIC_KEY: {
+          type: 'long',
+          _meta: {
+            description: 'Number of documents per agent for traces (transactions + spans) within the last day',
+          },
+        },
+      },
+      size_per_agent: {
+        DYNAMIC_KEY: {
+          type: 'long',
+          _meta: {
+            description: 'Estimated size in bytes per agent for traces within the last day',
+          },
+        },
+      },
+      docs_1d: {
+        type: 'long',
+        _meta: {
+          description: 'Number of trace documents within the last day',
+        },
+      },
+      size_1d_bytes: {
+        type: 'long',
+        _meta: {
+          description: 'Estimated size in bytes of trace documents within the last day',
+        },
+      },
+    },
+    metrics: {
+      services_per_agent: {
+        DYNAMIC_KEY: {
+          type: 'long',
+          _meta: {
+            description: 'Number of services per agent for metrics within the last day',
+          },
+        },
+      },
+      docs_per_agent: {
+        DYNAMIC_KEY: {
+          type: 'long',
+          _meta: {
+            description: 'Number of documents per agent for metrics within the last day',
+          },
+        },
+      },
+      size_per_agent: {
+        DYNAMIC_KEY: {
+          type: 'long',
+          _meta: {
+            description: 'Estimated size in bytes per agent for metrics within the last day',
+          },
+        },
+      },
+      docs_1d: {
+        type: 'long',
+        _meta: {
+          description: 'Number of metric documents within the last day',
+        },
+      },
+      size_1d_bytes: {
+        type: 'long',
+        _meta: {
+          description: 'Estimated size in bytes of metric documents within the last day',
+        },
+      },
+    },
+    logs: {
+      services_per_agent: {
+        DYNAMIC_KEY: {
+          type: 'long',
+          _meta: {
+            description: 'Number of services per agent for logs (errors) within the last day',
+          },
+        },
+      },
+      docs_per_agent: {
+        DYNAMIC_KEY: {
+          type: 'long',
+          _meta: {
+            description: 'Number of documents per agent for logs (errors) within the last day',
+          },
+        },
+      },
+      size_per_agent: {
+        DYNAMIC_KEY: {
+          type: 'long',
+          _meta: {
+            description: 'Estimated size in bytes per agent for logs within the last day',
+          },
+        },
+      },
+      docs_1d: {
+        type: 'long',
+        _meta: {
+          description: 'Number of log documents within the last day',
+        },
+      },
+      size_1d_bytes: {
+        type: 'long',
+        _meta: {
+          description: 'Estimated size in bytes of log documents within the last day',
+        },
+      },
+    },
+  },
   version: {
     apm_server: {
       major: {
@@ -1533,6 +1649,16 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
           type: 'long',
           _meta: {
             description: 'Execution time in milliseconds for the "otel_agents" task',
+          },
+        },
+      },
+    },
+    otel_agents_by_signal: {
+      took: {
+        ms: {
+          type: 'long',
+          _meta: {
+            description: 'Execution time in milliseconds for the "otel_agents_by_signal" task',
           },
         },
       },

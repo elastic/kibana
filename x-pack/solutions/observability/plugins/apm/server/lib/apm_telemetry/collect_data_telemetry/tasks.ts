@@ -92,7 +92,6 @@ const AGENT_NAMES_WITHOUT_OTEL = without(AGENT_NAMES, ...OPEN_TELEMETRY_AGENT_NA
 type TimeRange = (typeof TIME_RANGES)[number];
 
 const range1d = { range: { '@timestamp': { gte: 'now-1d' } } };
-const range15m = { range: { '@timestamp': { gte: 'now-15m' } } };
 const timeout = '5m';
 
 interface TelemetryTask {
@@ -1883,14 +1882,14 @@ export const tasks: TelemetryTask[] = [
         timeout,
         query: {
           bool: {
-            filter: [
-              {
-                exists: {
-                  field: AGENT_NAME,
+              filter: [
+                {
+                  exists: {
+                    field: AGENT_NAME,
+                  },
                 },
-              },
-              range15m,
-            ],
+                range1d,
+              ],
           },
         },
         aggs: {
@@ -1954,6 +1953,127 @@ export const tasks: TelemetryTask[] = [
         otel_total_docs: allTimeDocs,
         otel_1d_docs: docsIn1d,
         otel_1d_size_bytes: estimatedSize1dBytes,
+      };
+    },
+  },
+  {
+    name: 'otel_agents_by_signal',
+    executor: async ({ otelIndices, telemetryClient }) => {
+      // Collect OTel telemetry broken down by signal type (traces, metrics, logs)
+      
+      type SignalStats = {
+        services_per_agent: Record<string, number>;
+        docs_per_agent: Record<string, number>;
+        size_per_agent: Record<string, number>;
+        docs_1d: number;
+        size_1d_bytes: number;
+      };
+
+      const collectStatsForSignal = async (
+        indexPattern: string | string[],
+        signalName: string
+      ): Promise<SignalStats> => {
+        const indices = Array.isArray(indexPattern) ? indexPattern : [indexPattern];
+
+        // Query for agent stats in the last 15 minutes
+        const response = await telemetryClient.search({
+          index: indices,
+          ignore_unavailable: true,
+          allow_no_indices: true,
+          size: 0,
+          track_total_hits: true,
+          timeout,
+          query: {
+            bool: {
+              filter: [
+                {
+                  exists: {
+                    field: AGENT_NAME,
+                  },
+                },
+                range1d,
+              ],
+            },
+          },
+          aggs: {
+            agents: {
+              terms: {
+                field: AGENT_NAME,
+                size: 1000,
+              },
+              aggs: {
+                services: {
+                  cardinality: {
+                    field: SERVICE_NAME,
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        const servicesPerAgent: Record<string, number> = {};
+        const docsPerAgent: Record<string, number> = {};
+
+        const buckets =
+          (response.aggregations?.agents as {
+            buckets?: Array<{ key: string; doc_count: number; services: { value: number } }>;
+          })?.buckets ?? [];
+
+        // Collect per-agent stats
+        for (const bucket of buckets) {
+          const agentName = bucket.key;
+          if (!agentName || agentName === 'unknown' || agentName === '') {
+            continue;
+          }
+          servicesPerAgent[agentName] = bucket.services?.value ?? 0;
+          docsPerAgent[agentName] = bucket.doc_count ?? 0;
+        }
+
+        const docs1d = (response.hits.total as { value: number })?.value ?? 0;
+
+        // Get all-time index stats to calculate average doc size
+        const indicesStatsResponse = await telemetryClient.indicesStats({
+          index: indices,
+          metric: ['store', 'docs'],
+        });
+
+        const totalDocs = indicesStatsResponse._all?.total?.docs?.count ?? 0;
+        const totalSizeBytes = indicesStatsResponse._all?.total?.store?.size_in_bytes ?? 0;
+        const avgDocSizeBytes = totalDocs > 0 ? totalSizeBytes / totalDocs : 0;
+        const estimatedSize1dBytes = totalDocs >= docs1d ? Math.round(docs1d * avgDocSizeBytes) : 0;
+
+        // Calculate size per agent
+        const sizePerAgent: Record<string, number> = {};
+        for (const [agentName, docCount] of Object.entries(docsPerAgent)) {
+          sizePerAgent[agentName] = Math.round(docCount * avgDocSizeBytes);
+        }
+
+        return {
+          services_per_agent: servicesPerAgent,
+          docs_per_agent: docsPerAgent,
+          size_per_agent: sizePerAgent,
+          docs_1d: docs1d,
+          size_1d_bytes: estimatedSize1dBytes,
+        };
+      };
+
+      // Collect stats for each signal type
+      const [tracesStats, metricsStats, logsStats] = await Promise.all([
+        collectStatsForSignal(
+          [otelIndices.transaction, otelIndices.span],
+          'traces'
+        ),
+        collectStatsForSignal(otelIndices.metric, 'metrics'),
+        collectStatsForSignal(otelIndices.error, 'logs'),
+      ]);
+
+      return {
+        otel_by_signal: {
+          traces: tracesStats,
+          metrics: metricsStats,
+          logs: logsStats,
+        },
       };
     },
   },

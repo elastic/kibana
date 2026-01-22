@@ -1185,4 +1185,193 @@ describe('data telemetry collection tasks', () => {
       });
     });
   });
+
+  describe('otel_agents_by_signal', () => {
+    const task = tasks.find((t) => t.name === 'otel_agents_by_signal');
+
+    it('returns OTel telemetry broken down by signal type', async () => {
+      const search = jest
+        .fn()
+        // First call: traces query
+        .mockResolvedValueOnce({
+          hits: {
+            total: { value: 500 },
+          },
+          aggregations: {
+            agents: {
+              buckets: [
+                {
+                  key: 'opentelemetry/nodejs',
+                  doc_count: 300,
+                  services: { value: 2 },
+                },
+                {
+                  key: 'opentelemetry/python',
+                  doc_count: 200,
+                  services: { value: 1 },
+                },
+              ],
+            },
+          },
+        })
+        // Second call: metrics query
+        .mockResolvedValueOnce({
+          hits: {
+            total: { value: 300 },
+          },
+          aggregations: {
+            agents: {
+              buckets: [
+                {
+                  key: 'opentelemetry/nodejs',
+                  doc_count: 200,
+                  services: { value: 2 },
+                },
+                {
+                  key: 'opentelemetry/java',
+                  doc_count: 100,
+                  services: { value: 1 },
+                },
+              ],
+            },
+          },
+        })
+        // Third call: logs query
+        .mockResolvedValueOnce({
+          hits: {
+            total: { value: 100 },
+          },
+          aggregations: {
+            agents: {
+              buckets: [
+                {
+                  key: 'opentelemetry/python',
+                  doc_count: 60,
+                  services: { value: 1 },
+                },
+                {
+                  key: 'opentelemetry/java',
+                  doc_count: 40,
+                  services: { value: 1 },
+                },
+              ],
+            },
+          },
+        });
+
+      const indicesStats = jest.fn().mockResolvedValue({
+        _all: {
+          total: {
+            docs: { count: 10000 },
+            store: { size_in_bytes: 20000000 },
+          },
+        },
+      });
+
+      const result = await task?.executor({
+        otelIndices,
+        telemetryClient: { search, indicesStats },
+      } as any);
+
+      expect(result).toEqual({
+        otel_by_signal: {
+          traces: {
+            services_per_agent: {
+              'opentelemetry/nodejs': 2,
+              'opentelemetry/python': 1,
+            },
+            docs_per_agent: {
+              'opentelemetry/nodejs': 300,
+              'opentelemetry/python': 200,
+            },
+            size_per_agent: {
+              'opentelemetry/nodejs': 600000,
+              'opentelemetry/python': 400000,
+            },
+            docs_1d: 500,
+            size_1d_bytes: 1000000,
+          },
+          metrics: {
+            services_per_agent: {
+              'opentelemetry/nodejs': 2,
+              'opentelemetry/java': 1,
+            },
+            docs_per_agent: {
+              'opentelemetry/nodejs': 200,
+              'opentelemetry/java': 100,
+            },
+            size_per_agent: {
+              'opentelemetry/nodejs': 400000,
+              'opentelemetry/java': 200000,
+            },
+            docs_1d: 300,
+            size_1d_bytes: 600000,
+          },
+          logs: {
+            services_per_agent: {
+              'opentelemetry/python': 1,
+              'opentelemetry/java': 1,
+            },
+            docs_per_agent: {
+              'opentelemetry/python': 60,
+              'opentelemetry/java': 40,
+            },
+            size_per_agent: {
+              'opentelemetry/python': 120000,
+              'opentelemetry/java': 80000,
+            },
+            docs_1d: 100,
+            size_1d_bytes: 200000,
+          },
+        },
+      });
+    });
+
+    it('returns empty results when no OTel data by signal', async () => {
+      const search = jest.fn().mockResolvedValue({
+        hits: { total: { value: 0 } },
+        aggregations: { agents: { buckets: [] } },
+      });
+
+      const indicesStats = jest.fn().mockResolvedValue({
+        _all: {
+          total: {
+            docs: { count: 0 },
+            store: { size_in_bytes: 0 },
+          },
+        },
+      });
+
+      const result = await task?.executor({
+        otelIndices,
+        telemetryClient: { search, indicesStats },
+      } as any);
+
+      expect(result).toEqual({
+        otel_by_signal: {
+          traces: {
+            services_per_agent: {},
+            docs_per_agent: {},
+            size_per_agent: {},
+            docs_1d: 0,
+            size_1d_bytes: 0,
+          },
+          metrics: {
+            services_per_agent: {},
+            docs_per_agent: {},
+            size_per_agent: {},
+            docs_1d: 0,
+            size_1d_bytes: 0,
+          },
+          logs: {
+            services_per_agent: {},
+            docs_per_agent: {},
+            size_per_agent: {},
+            docs_1d: 0,
+            size_1d_bytes: 0,
+          },
+        },
+      });
+    });
+  });
 });

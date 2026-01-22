@@ -84,6 +84,29 @@ export interface APMUsage {
   otel_services_per_agent: Record<string, number>;
   otel_docs_per_agent: Record<string, number>;
   otel_size_per_agent: Record<string, number>;
+  otel_by_signal: {
+    traces: {
+      services_per_agent: Record<string, number>;
+      docs_per_agent: Record<string, number>;
+      size_per_agent: Record<string, number>;
+      docs_1d: number;
+      size_1d_bytes: number;
+    };
+    metrics: {
+      services_per_agent: Record<string, number>;
+      docs_per_agent: Record<string, number>;
+      size_per_agent: Record<string, number>;
+      docs_1d: number;
+      size_1d_bytes: number;
+    };
+    logs: {
+      services_per_agent: Record<string, number>;
+      docs_per_agent: Record<string, number>;
+      size_per_agent: Record<string, number>;
+      docs_1d: number;
+      size_1d_bytes: number;
+    };
+  };
   version: {
     apm_server: {
       minor: number;
