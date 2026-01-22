@@ -119,8 +119,7 @@ export function useWiredStreamsStatus(): UseWiredStreamsStatusResult {
           httpError?.body?.message ||
           httpError?.message ||
           i18n.translate('xpack.observability_onboarding.wiredStreams.enableError.fallback', {
-            defaultMessage:
-              'An unexpected error occurred.',
+            defaultMessage: 'An unexpected error occurred.',
           });
 
         analytics?.reportEvent('observability_onboarding_wired_streams_auto_enabled', {

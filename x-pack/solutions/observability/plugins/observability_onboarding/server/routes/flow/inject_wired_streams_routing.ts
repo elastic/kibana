@@ -46,7 +46,6 @@ interface Stream {
   [key: string]: unknown;
 }
 
-
 export function createWiredStreamsRoutingProcessor(): Processor {
   return {
     add_fields: {
@@ -57,7 +56,6 @@ export function createWiredStreamsRoutingProcessor(): Processor {
     },
   };
 }
-
 
 export function injectWiredStreamsRouting(configYaml: string) {
   const config = load(configYaml);
