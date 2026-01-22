@@ -3,17 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-<<<<<<< HEAD
-  "exclude": [
-    "cypress.config.ts",
-    "cypress.config.space_awareness.ts",
-    "cypress_ci.config.ts",
-    "cypress_ci.config.space_awareness.ts",
-    "target/**/*"
-  ],
-=======
   "exclude": ["target/**/*"],
->>>>>>> 8a98481fba4e (chore(NA): re-arrange cypress setup on tsconfig files within fleet plugin (#249943))
   "include": [
     // add all the folders containing files to be compiled
     ".storybook/**/*",
@@ -131,12 +121,6 @@
     "@kbn/embeddable-plugin",
     "@kbn/setup-node-env",
     "@kbn/react-query",
-<<<<<<< HEAD
     "@kbn/fs"
-=======
-    "@kbn/fs",
-    "@kbn/kql",
-    "@kbn/scout"
->>>>>>> 8a98481fba4e (chore(NA): re-arrange cypress setup on tsconfig files within fleet plugin (#249943))
   ]
 }
