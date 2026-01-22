@@ -38,7 +38,10 @@ const createTopNavMenuContext = () => ({
   topNavBadges$: new BehaviorSubject<TopNavMenuBadgeProps[] | undefined>(undefined),
 });
 
-type DiscoverTopNavMenuContext = ReturnType<typeof createTopNavMenuContext>;
+interface DiscoverTopNavMenuContext {
+  topNavMenu$: BehaviorSubject<TopNavMenuData[] | undefined>;
+  topNavBadges$: BehaviorSubject<TopNavMenuBadgeProps[] | undefined>;
+}
 
 const discoverTopNavMenuContext = createContext<DiscoverTopNavMenuContext>(
   createTopNavMenuContext()
@@ -56,7 +59,7 @@ const PLACEHOLDER_MENU_ITEMS: TopNavMenuData[] = [
 
 export const DiscoverTopNavMenuProvider = ({ children }: PropsWithChildren) => {
   const { setHeaderActionMenu } = useDiscoverServices();
-  const [topNavMenuContext] = useState<DiscoverTopNavMenuContext>(() => createTopNavMenuContext());
+  const [topNavMenuContext] = useState<DiscoverTopNavMenuContext>(createTopNavMenuContext);
 
   const topNavMenu = useObservable(
     topNavMenuContext.topNavMenu$,
