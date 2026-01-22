@@ -13,6 +13,7 @@ import type {
   ESQLControlVariable,
   ESQLSourceResult,
   ESQLFieldWithMetadata,
+  ESQLCallbacks,
 } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
@@ -157,6 +158,7 @@ export interface ICommandCallbacks {
   getJoinIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
   canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
   isServerless?: boolean;
+  getKqlSuggestions?: ESQLCallbacks['getKqlSuggestions'];
 }
 
 export interface ICommandContext {
@@ -261,6 +263,11 @@ export enum Location {
    * In the COMPLETION command
    */
   COMPLETION = 'completion',
+
+  /**
+   * In the PROMQL command (PromQL query expression)
+   */
+  PROMQL = 'promql',
 }
 
 export enum UnmappedFieldsStrategy {

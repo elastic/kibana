@@ -61,6 +61,8 @@ import { shallowEqual } from '../utils/shallow_equal';
 
 import { ESQLMenuPopover, type ESQLMenuPopoverProps } from './esql_menu_popover';
 
+const BUTTON_MIN_WIDTH = 108;
+
 export const strings = {
   getNeedsUpdatingLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.update', {
@@ -695,6 +697,7 @@ export const QueryBarTopRow = React.memo(
             secondaryButtonIcon="backgroundTask"
             secondaryButtonTitle={strings.getSendToBackgroundLabel()}
             size="s"
+            minWidth={BUTTON_MIN_WIDTH}
           >
             {buttonLabelCancel}
           </SplitButton>
@@ -763,6 +766,7 @@ export const QueryBarTopRow = React.memo(
           secondaryButtonIcon="backgroundTask"
           secondaryButtonTitle={strings.getSendToBackgroundLabel()}
           size="s"
+          minWidth={BUTTON_MIN_WIDTH}
         >
           {props.isDirty ? buttonLabelDirty : strings.getRefreshButtonLabel()}
         </SplitButton>
