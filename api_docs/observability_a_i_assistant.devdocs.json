@@ -677,6 +677,123 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.EisKnowledgeBaseCallout",
+        "type": "Function",
+        "tags": [],
+        "label": "EisKnowledgeBaseCallout",
+        "description": [],
+        "signature": [
+          "({ children, isOpen, zIndex, anchorPosition, dismissCallout, }: { children: React.ReactElement<any, string | React.JSXElementConstructor<any>>; isOpen?: boolean | undefined; zIndex?: number | undefined; anchorPosition?: \"upCenter\" | \"upLeft\" | \"upRight\" | \"downCenter\" | \"downLeft\" | \"downRight\" | \"leftCenter\" | \"leftUp\" | \"leftDown\" | \"rightCenter\" | \"rightUp\" | \"rightDown\" | undefined; dismissCallout: () => void; }) => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/components/tour_callout/eis_knowledge_base_callout.tsx",
+        "lineNumber": 16,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.EisKnowledgeBaseCallout.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  children,\n  isOpen = true,\n  zIndex,\n  anchorPosition = 'downCenter',\n  dismissCallout,\n}",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/components/tour_callout/eis_knowledge_base_callout.tsx",
+            "lineNumber": 22,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.EisKnowledgeBaseCallout.$1.children",
+                "type": "Object",
+                "tags": [],
+                "label": "children",
+                "description": [],
+                "signature": [
+                  "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+                ],
+                "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/components/tour_callout/eis_knowledge_base_callout.tsx",
+                "lineNumber": 23,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.EisKnowledgeBaseCallout.$1.isOpen",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "isOpen",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/components/tour_callout/eis_knowledge_base_callout.tsx",
+                "lineNumber": 24,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.EisKnowledgeBaseCallout.$1.zIndex",
+                "type": "number",
+                "tags": [],
+                "label": "zIndex",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/components/tour_callout/eis_knowledge_base_callout.tsx",
+                "lineNumber": 25,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.EisKnowledgeBaseCallout.$1.anchorPosition",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "anchorPosition",
+                "description": [],
+                "signature": [
+                  "\"upCenter\" | \"upLeft\" | \"upRight\" | \"downCenter\" | \"downLeft\" | \"downRight\" | \"leftCenter\" | \"leftUp\" | \"leftDown\" | \"rightCenter\" | \"rightUp\" | \"rightDown\" | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/components/tour_callout/eis_knowledge_base_callout.tsx",
+                "lineNumber": 26,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observabilityAIAssistant",
+                "id": "def-public.EisKnowledgeBaseCallout.$1.dismissCallout",
+                "type": "Function",
+                "tags": [],
+                "label": "dismissCallout",
+                "description": [],
+                "signature": [
+                  "() => void"
+                ],
+                "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/components/tour_callout/eis_knowledge_base_callout.tsx",
+                "lineNumber": 27,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [],
+                "returnComment": []
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
         "id": "def-public.ElasticLlmTourCallout",
         "type": "Function",
         "tags": [],
@@ -1280,6 +1397,43 @@
             ],
             "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_ai_agent_tour_dismissed.ts",
             "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.useEisKnowledgeBaseCalloutDismissed",
+        "type": "Function",
+        "tags": [],
+        "label": "useEisKnowledgeBaseCalloutDismissed",
+        "description": [],
+        "signature": [
+          "(defaultValue: boolean) => [boolean, (isDismissed: boolean) => void]"
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_eis_knowledge_base_callout_dismissed.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.useEisKnowledgeBaseCalloutDismissed.$1",
+            "type": "boolean",
+            "tags": [],
+            "label": "defaultValue",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_eis_knowledge_base_callout_dismissed.ts",
+            "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7652,6 +7806,23 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.EIS_KNOWLEDGE_BASE_CALLOUT_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "EIS_KNOWLEDGE_BASE_CALLOUT_KEY",
+        "description": [],
+        "signature": [
+          "\"observabilityAIAssistant.eisKnowledgeBaseCalloutDismissed\""
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_eis_knowledge_base_callout_dismissed.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
         "id": "def-public.EIS_PRECONFIGURED_INFERENCE_IDS",
         "type": "Array",
         "tags": [],
@@ -7675,7 +7846,7 @@
         "label": "elasticAiAssistantImage",
         "description": [],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/index.ts",
-        "lineNumber": 120,
+        "lineNumber": 121,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
