@@ -40,7 +40,7 @@ export class EntityStorePlugin
     core.http.registerRouteHandlerContext<EntityStoreRequestHandlerContext, typeof PLUGIN_ID>(
       PLUGIN_ID,
       (context, request) =>
-        createRequestHandlerContext({ context, coreSetup: core, logger: this.logger })
+        createRequestHandlerContext({ context, coreSetup: core, logger: this.logger, request })
     );
 
     registerTasks(plugins.taskManager, this.logger, core);

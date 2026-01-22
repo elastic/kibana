@@ -6,9 +6,13 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import {
+  elasticsearchClientMock,
+  type ElasticsearchClientMock,
+} from '@kbn/core-elasticsearch-client-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { loggerMock } from '@kbn/logging-mocks';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../common/constants';
 import { cleanupOrphanSummaries } from './cleanup_orphan_summary';
 
@@ -30,9 +34,9 @@ const createMockAggregationResponse = (
   } as any);
 
 describe('cleanupOrphanSummaries', () => {
-  let esClient: ReturnType<typeof elasticsearchClientMock.createClusterClient>['asInternalUser'];
-  let soClient: ReturnType<typeof savedObjectsClientMock.create>;
-  let logger: ReturnType<typeof loggerMock.create>;
+  let esClient: ElasticsearchClientMock;
+  let soClient: jest.Mocked<SavedObjectsClientContract>;
+  let logger: jest.Mocked<MockedLogger>;
   let abortController: AbortController;
 
   beforeEach(() => {
