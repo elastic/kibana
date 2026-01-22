@@ -33,7 +33,7 @@ interface SharePointSite {
  */
 interface SharePointPage {
   id: string;
-  name: string;
+  title?: string;
   webUrl: string;
 }
 
@@ -62,7 +62,6 @@ interface SharePointList {
  */
 interface SharePointListItem {
   id: string;
-  fields: Record<string, unknown>;
   webUrl: string;
 }
 
@@ -204,12 +203,12 @@ describe('SharepointOnline', () => {
           value: [
             {
               id: 'page-1',
-              name: 'Home.aspx',
+              title: 'Home',
               webUrl: 'https://contoso.sharepoint.com/sites/site1/SitePages/Home.aspx',
             },
             {
               id: 'page-2',
-              name: 'About.aspx',
+              title: 'About',
               webUrl: 'https://contoso.sharepoint.com/sites/site1/SitePages/About.aspx',
             },
           ],
@@ -482,12 +481,10 @@ describe('SharepointOnline', () => {
           value: [
             {
               id: 'item-1',
-              fields: { Title: 'Task 1', Status: 'In Progress' },
               webUrl: 'https://contoso.sharepoint.com/sites/site1/Lists/Tasks/1_.000',
             },
             {
               id: 'item-2',
-              fields: { Title: 'Task 2', Status: 'Completed' },
               webUrl: 'https://contoso.sharepoint.com/sites/site1/Lists/Tasks/2_.000',
             },
           ],
@@ -574,6 +571,149 @@ describe('SharepointOnline', () => {
           listId: 'list-123',
         })
       ).rejects.toThrow('Site not found');
+    });
+  });
+
+  describe('getDriveItems action', () => {
+    it('should list drive root children by driveId', async () => {
+      const mockResponse = {
+        data: {
+          value: [
+            {
+              id: 'item-1',
+              name: 'Document.docx',
+              webUrl: 'https://contoso.sharepoint.com/sites/site1/Document.docx',
+            },
+          ],
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await SharepointOnline.actions.getDriveItems.handler(mockContext, {
+        driveId: 'drive-123',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/drives/drive-123/root/children',
+        {
+          params: {
+            $select: 'id,name,webUrl,createdDateTime,lastModifiedDateTime,size',
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should list drive children by path', async () => {
+      const mockResponse = {
+        data: { value: [] },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await SharepointOnline.actions.getDriveItems.handler(mockContext, {
+        driveId: 'drive-123',
+        path: 'Folder/Subfolder',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/drives/drive-123/root:/Folder/Subfolder:/children',
+        {
+          params: {
+            $select: 'id,name,webUrl,createdDateTime,lastModifiedDateTime,size',
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
+
+  describe('downloadDriveItem action', () => {
+    it('should download drive item content as base64 by default', async () => {
+      const mockResponse = {
+        data: Uint8Array.from([72, 101, 108, 108, 111]),
+        headers: {
+          'content-type': 'text/plain',
+          'content-length': '5',
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await SharepointOnline.actions.downloadDriveItem.handler(mockContext, {
+        driveId: 'drive-123',
+        itemId: 'item-456',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/drives/drive-123/items/item-456/content',
+        { responseType: 'arraybuffer' }
+      );
+      expect(result).toEqual({
+        contentType: 'text/plain',
+        contentLength: '5',
+        data: 'SGVsbG8=',
+      });
+    });
+
+    it('should download drive item content as text', async () => {
+      const mockResponse = {
+        data: Uint8Array.from([72, 101, 108, 108, 111]),
+        headers: {
+          'content-type': 'text/plain',
+          'content-length': '5',
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await SharepointOnline.actions.downloadDriveItem.handler(mockContext, {
+        driveId: 'drive-123',
+        itemId: 'item-456',
+        format: 'text',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/drives/drive-123/items/item-456/content',
+        { responseType: 'arraybuffer' }
+      );
+      expect(result).toEqual({
+        contentType: 'text/plain',
+        contentLength: '5',
+        text: 'Hello',
+      });
+    });
+
+    it('should return a download URL for the drive item', async () => {
+      const mockResponse = {
+        data: {
+          id: 'item-456',
+          name: 'Document.docx',
+          size: 42,
+          webUrl: 'https://contoso.sharepoint.com/sites/site1/Document.docx',
+          '@microsoft.graph.downloadUrl': 'https://download.example.com/file',
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await SharepointOnline.actions.downloadDriveItem.handler(mockContext, {
+        driveId: 'drive-123',
+        itemId: 'item-456',
+        format: 'downloadUrl',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/drives/drive-123/items/item-456',
+        {
+          params: {
+            $select: 'id,name,size,webUrl,@microsoft.graph.downloadUrl',
+          },
+        }
+      );
+      expect(result).toEqual({
+        id: 'item-456',
+        name: 'Document.docx',
+        size: 42,
+        webUrl: 'https://contoso.sharepoint.com/sites/site1/Document.docx',
+        downloadUrl: 'https://download.example.com/file',
+      });
     });
   });
 

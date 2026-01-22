@@ -212,6 +212,84 @@ export const SharepointOnline: ConnectorSpec = {
       },
     },
 
+    getDriveItems: {
+      isTool: true,
+      input: z.object({
+        driveId: z.string().describe('Drive ID'),
+        path: z.string().optional().describe('Path relative to drive root'),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as { driveId: string; path?: string };
+        const baseUrl = `https://graph.microsoft.com/v1.0/drives/${typedInput.driveId}`;
+        const url = typedInput.path
+          ? `${baseUrl}/root:/${typedInput.path}:/children`
+          : `${baseUrl}/root/children`;
+
+        ctx.log.debug(`SharePoint getting drive items from ${url}`);
+        const response = await ctx.client.get(url, {
+          params: {
+            $select: 'id,name,webUrl,createdDateTime,lastModifiedDateTime,size',
+          },
+        });
+        return response.data;
+      },
+    },
+
+    downloadDriveItem: {
+      isTool: true,
+      input: z.object({
+        driveId: z.string().describe('Drive ID'),
+        itemId: z.string().describe('Drive item ID'),
+        format: z
+          .enum(['base64', 'text', 'downloadUrl'])
+          .optional()
+          .default('base64')
+          .describe('Response format (base64, text, or downloadUrl)'),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as {
+          driveId: string;
+          itemId: string;
+          format?: 'base64' | 'text' | 'downloadUrl';
+        };
+        const format = typedInput.format ?? 'base64';
+        const baseUrl = `https://graph.microsoft.com/v1.0/drives/${typedInput.driveId}/items/${typedInput.itemId}`;
+
+        if (format === 'downloadUrl') {
+          ctx.log.debug(`SharePoint getting drive item download URL from ${baseUrl}`);
+          const response = await ctx.client.get(baseUrl, {
+            params: {
+              $select: 'id,name,size,webUrl,@microsoft.graph.downloadUrl',
+            },
+          });
+          return {
+            id: response.data?.id,
+            name: response.data?.name,
+            size: response.data?.size,
+            webUrl: response.data?.webUrl,
+            downloadUrl: response.data?.['@microsoft.graph.downloadUrl'],
+          };
+        }
+
+        const contentUrl = `${baseUrl}/content`;
+        ctx.log.debug(`SharePoint downloading drive item content from ${contentUrl}`);
+        const response = await ctx.client.get(contentUrl, { responseType: 'arraybuffer' });
+        const buffer = Buffer.from(response.data);
+        if (format === 'text') {
+          return {
+            contentType: response.headers?.['content-type'],
+            contentLength: response.headers?.['content-length'],
+            text: buffer.toString('utf8'),
+          };
+        }
+        return {
+          contentType: response.headers?.['content-type'],
+          contentLength: response.headers?.['content-length'],
+          data: buffer.toString('base64'),
+        };
+      },
+    },
+
     callGraphAPI: {
       isTool: true,
       description:
