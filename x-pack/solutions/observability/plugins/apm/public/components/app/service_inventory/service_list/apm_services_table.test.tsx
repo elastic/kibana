@@ -67,6 +67,12 @@ jest.mock('../../../alerting/ui_components/alerting_flyout', () => ({
   AlertingFlyout: () => null,
 }));
 
+jest.mock('../slo_overview_flyout', () => ({
+  SloOverviewFlyout: ({ serviceName }: { serviceName: string }) => (
+    <div data-test-subj="sloOverviewFlyout">SLO Overview Flyout for {serviceName}</div>
+  ),
+}));
+
 const mockUseServiceActions = jest.fn();
 jest.mock('./service_actions', () => ({
   useServiceActions: () => mockUseServiceActions(),
@@ -160,12 +166,14 @@ function renderApmServicesTable({
   status = FETCH_STATUS.SUCCESS,
   displayHealthStatus = false,
   displayAlerts = false,
+  displaySlos = false,
 }: {
   history: MemoryHistory;
   services?: ServiceListItem[];
   status?: FETCH_STATUS;
   displayHealthStatus?: boolean;
   displayAlerts?: boolean;
+  displaySlos?: boolean;
 }) {
   const defaultSortFn = (items: ServiceListItem[]) => items;
 
@@ -178,6 +186,7 @@ function renderApmServicesTable({
           comparisonDataLoading={false}
           displayHealthStatus={displayHealthStatus}
           displayAlerts={displayAlerts}
+          displaySlos={displaySlos}
           initialSortField={ServiceInventoryFieldName.ServiceName}
           initialPageSize={25}
           initialSortDirection="asc"
@@ -250,6 +259,7 @@ describe('ApmServicesTable', () => {
               comparisonDataLoading={false}
               displayHealthStatus={false}
               displayAlerts={false}
+              displaySlos={false}
               initialSortField={ServiceInventoryFieldName.ServiceName}
               initialPageSize={25}
               initialSortDirection="asc"
@@ -274,11 +284,12 @@ describe('ApmServicesTable', () => {
         showTransactionTypeColumn: true,
         breakpoints: { isSmall: true, isLarge: false, isXl: false } as Breakpoints,
         showAlertsColumn: true,
+        showSlosColumn: true,
         link: apmRouter.link,
         serviceOverflowCount: 0,
       });
 
-      expect(columns.length).toBe(8);
+      expect(columns.length).toBe(9);
     });
 
     it('hides health column when showHealthStatusColumn is false', () => {
@@ -289,6 +300,7 @@ describe('ApmServicesTable', () => {
         showTransactionTypeColumn: true,
         breakpoints: { isSmall: true, isLarge: false, isXl: false } as Breakpoints,
         showAlertsColumn: true,
+        showSlosColumn: false,
         link: apmRouter.link,
         serviceOverflowCount: 0,
       });
@@ -305,12 +317,47 @@ describe('ApmServicesTable', () => {
         showTransactionTypeColumn: true,
         breakpoints: { isSmall: true, isLarge: false, isXl: false } as Breakpoints,
         showAlertsColumn: false,
+        showSlosColumn: false,
         link: apmRouter.link,
         serviceOverflowCount: 0,
       });
 
       const hasAlertsColumn = columns.some((c) => c.field === 'alertsCount');
       expect(hasAlertsColumn).toBe(false);
+    });
+
+    it('hides SLOs column when showSlosColumn is false', () => {
+      const columns = getServiceColumns({
+        comparisonDataLoading: false,
+        showHealthStatusColumn: true,
+        query: defaultQuery,
+        showTransactionTypeColumn: true,
+        breakpoints: { isSmall: true, isLarge: false, isXl: false } as Breakpoints,
+        showAlertsColumn: true,
+        showSlosColumn: false,
+        link: apmRouter.link,
+        serviceOverflowCount: 0,
+      });
+
+      const hasSlosColumn = columns.some((c) => c.field === 'sloStatus');
+      expect(hasSlosColumn).toBe(false);
+    });
+
+    it('shows SLOs column when showSlosColumn is true', () => {
+      const columns = getServiceColumns({
+        comparisonDataLoading: false,
+        showHealthStatusColumn: true,
+        query: defaultQuery,
+        showTransactionTypeColumn: true,
+        breakpoints: { isSmall: true, isLarge: false, isXl: false } as Breakpoints,
+        showAlertsColumn: true,
+        showSlosColumn: true,
+        link: apmRouter.link,
+        serviceOverflowCount: 0,
+      });
+
+      const hasSlosColumn = columns.some((c) => c.field === 'sloStatus');
+      expect(hasSlosColumn).toBe(true);
     });
 
     it('hides transaction type column when showTransactionTypeColumn is false', () => {
@@ -321,6 +368,7 @@ describe('ApmServicesTable', () => {
         showTransactionTypeColumn: false,
         breakpoints: { isSmall: true, isLarge: false, isXl: false } as Breakpoints,
         showAlertsColumn: true,
+        showSlosColumn: false,
         link: apmRouter.link,
         serviceOverflowCount: 0,
       });
@@ -337,6 +385,7 @@ describe('ApmServicesTable', () => {
         showTransactionTypeColumn: true,
         breakpoints: { isSmall: false, isLarge: true, isXl: false } as Breakpoints,
         showAlertsColumn: true,
+        showSlosColumn: false,
         link: apmRouter.link,
         serviceOverflowCount: 0,
       });
@@ -378,6 +427,7 @@ describe('ApmServicesTable', () => {
               isXl: true,
             } as Breakpoints,
             showAlertsColumn: true,
+            showSlosColumn: false,
             link: apmRouter.link,
             serviceOverflowCount: 0,
           }).map((c) =>
@@ -421,6 +471,7 @@ describe('ApmServicesTable', () => {
               isXl: true,
             } as Breakpoints,
             showAlertsColumn: true,
+            showSlosColumn: false,
             link: apmRouter.link,
             serviceOverflowCount: 0,
           }).map((c) =>
@@ -454,6 +505,7 @@ describe('ApmServicesTable', () => {
               isXl: true,
             } as Breakpoints,
             showAlertsColumn: true,
+            showSlosColumn: false,
             link: apmRouter.link,
             serviceOverflowCount: 0,
           }).map((c) =>
@@ -496,6 +548,7 @@ describe('ApmServicesTable', () => {
               isXl: false,
             } as Breakpoints,
             showAlertsColumn: true,
+            showSlosColumn: false,
             link: apmRouter.link,
             serviceOverflowCount: 0,
           }).map((c) =>
@@ -749,6 +802,132 @@ describe('ApmServicesTable', () => {
       await screen.findByRole('table');
 
       expect(screen.queryByText('Health')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('SLOs column', () => {
+    it('renders SLOs column when displaySlos is true', async () => {
+      renderApmServicesTable({ history, displaySlos: true });
+
+      await screen.findByRole('table');
+
+      expect(screen.getByText('SLOs (APM)')).toBeInTheDocument();
+    });
+
+    it('does not render SLOs column when displaySlos is false', async () => {
+      renderApmServicesTable({ history, displaySlos: false });
+
+      await screen.findByRole('table');
+
+      expect(screen.queryByText('SLOs (APM)')).not.toBeInTheDocument();
+    });
+
+    it('renders violated SLO badge when service has violated SLOs', async () => {
+      const servicesWithSlos: ServiceListItem[] = [
+        {
+          ...mockService,
+          sloStatus: 'violated',
+          sloCount: 2,
+        },
+      ];
+
+      renderApmServicesTable({ history, services: servicesWithSlos, displaySlos: true });
+
+      await screen.findByRole('table');
+
+      expect(screen.getByTestId('serviceInventorySloViolatedBadge')).toBeInTheDocument();
+      expect(screen.getByText('2 Violated')).toBeInTheDocument();
+    });
+
+    it('renders degrading SLO badge when service has degrading SLOs', async () => {
+      const servicesWithSlos: ServiceListItem[] = [
+        {
+          ...mockService,
+          sloStatus: 'degrading',
+          sloCount: 3,
+        },
+      ];
+
+      renderApmServicesTable({ history, services: servicesWithSlos, displaySlos: true });
+
+      await screen.findByRole('table');
+
+      expect(screen.getByTestId('serviceInventorySloDegradingBadge')).toBeInTheDocument();
+      expect(screen.getByText('3 Degrading')).toBeInTheDocument();
+    });
+
+    it('renders healthy SLO badge when all SLOs are healthy', async () => {
+      const servicesWithSlos: ServiceListItem[] = [
+        {
+          ...mockService,
+          sloStatus: 'healthy',
+          sloCount: 5,
+        },
+      ];
+
+      renderApmServicesTable({ history, services: servicesWithSlos, displaySlos: true });
+
+      await screen.findByRole('table');
+
+      expect(screen.getByTestId('serviceInventorySloHealthyBadge')).toBeInTheDocument();
+      expect(screen.getByText('Healthy')).toBeInTheDocument();
+    });
+
+    it('renders no data SLO badge when SLOs have no data', async () => {
+      const servicesWithSlos: ServiceListItem[] = [
+        {
+          ...mockService,
+          sloStatus: 'noData',
+          sloCount: 1,
+        },
+      ];
+
+      renderApmServicesTable({ history, services: servicesWithSlos, displaySlos: true });
+
+      await screen.findByRole('table');
+
+      expect(screen.getByTestId('serviceInventorySloNoDataBadge')).toBeInTheDocument();
+      expect(screen.getByText('No data')).toBeInTheDocument();
+    });
+
+    it('does not render SLO badge when service has no SLO status', async () => {
+      const servicesWithoutSlos: ServiceListItem[] = [
+        {
+          ...mockService,
+          sloStatus: undefined,
+          sloCount: undefined,
+        },
+      ];
+
+      renderApmServicesTable({ history, services: servicesWithoutSlos, displaySlos: true });
+
+      await screen.findByRole('table');
+
+      expect(screen.queryByTestId('serviceInventorySloViolatedBadge')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('serviceInventorySloDegradingBadge')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('serviceInventorySloHealthyBadge')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('serviceInventorySloNoDataBadge')).not.toBeInTheDocument();
+    });
+
+    it('opens SLO overview flyout when clicking SLO badge', async () => {
+      const servicesWithSlos: ServiceListItem[] = [
+        {
+          ...mockService,
+          sloStatus: 'violated',
+          sloCount: 2,
+        },
+      ];
+
+      renderApmServicesTable({ history, services: servicesWithSlos, displaySlos: true });
+
+      await screen.findByRole('table');
+
+      const sloBadge = screen.getByTestId('serviceInventorySloViolatedBadge');
+      fireEvent.click(sloBadge);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('sloOverviewFlyout')).toBeInTheDocument();
+      });
     });
   });
 });
