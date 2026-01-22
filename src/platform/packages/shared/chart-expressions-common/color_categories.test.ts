@@ -59,7 +59,6 @@ describe('Color Categories', () => {
         0,
         NaN,
         null,
-        undefined,
         '',
         'test-string',
         {
@@ -114,8 +113,7 @@ describe('Color Categories', () => {
         'true',
         '0',
         'NaN',
-        'null',
-        'undefined',
+        '__missing__',
         '',
         'test-string',
         '{"test":"obj"}',
