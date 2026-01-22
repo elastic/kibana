@@ -1788,7 +1788,15 @@
                 "section": "def-common.ES_FIELD_TYPES",
                 "text": "ES_FIELD_TYPES"
               },
-              ".TDIGEST; format?: string | undefined; }; }; }"
+              ".TDIGEST | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".NULL; format?: string | undefined; }; }; }"
             ],
             "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
             "lineNumber": 79,
