@@ -22,7 +22,7 @@ export const formatPageFilterSearchParam = (filters: FilterControlConfig[]) => {
       field_name,
       exists_selected,
       exclude,
-      displaySettings: { hide_action_bar: display_settings.hide_action_bar },
+      display_settings: { hide_action_bar: display_settings.hide_action_bar },
     })
   );
 };

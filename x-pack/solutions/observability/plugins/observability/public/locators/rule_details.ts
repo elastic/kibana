@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CamelCaseFilterControlConfig, FilterControlConfig } from '@kbn/alerts-ui-shared';
+import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import { DEFAULT_CONTROLS } from '@kbn/alerts-ui-shared/src/alert_filter_controls/constants';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
@@ -43,27 +43,13 @@ export class RuleDetailsLocatorDefinition implements LocatorDefinition<RuleDetai
       rangeFrom?: string;
       rangeTo?: string;
       kuery?: string;
-      controlConfigs?: CamelCaseFilterControlConfig[];
+      controlConfigs?: FilterControlConfig[];
     } = {};
 
     appState.rangeFrom = rangeFrom || 'now-15m';
     appState.rangeTo = rangeTo || 'now';
     appState.kuery = kuery || '';
-    const controls = controlConfigs ?? DEFAULT_CONTROLS;
-    appState.controlConfigs = controls.map((control) => {
-      return {
-        title: control.title,
-        fieldName: control.field_name,
-        selectedOptions: control.selected_options,
-        ...(control.display_settings && {
-          displaySettings: {
-            hideActionBar: control.display_settings?.hide_action_bar,
-            hideExists: control.display_settings?.hide_exists,
-          },
-        }),
-        persist: control.persist,
-      } as CamelCaseFilterControlConfig;
-    });
+    appState.controlConfigs = controlConfigs ?? DEFAULT_CONTROLS;
 
     let path = getRuleDetailsPath(ruleId);
 
