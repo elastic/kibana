@@ -54,7 +54,8 @@ export const buildLogsExtractionEsqlQuery = ({
   const cleanFields = fields.filter(
     // boolean and date still not working, maybe the code is not in the snapshot I'm running locally
     // I need to further test
-    ({ mapping }) => mapping?.type !== 'boolean' && mapping?.type !== 'date'
+    ({ mapping }) =>
+      mapping?.type !== 'boolean' && mapping?.type !== 'date' && mapping?.type !== 'ip'
   );
 
   return `FROM ${indexPatterns.join(', ')}
@@ -90,15 +91,16 @@ function entityIdFiler(idFieldName: string) {
 
 function recentFieldStats(fields: EntityField[]) {
   return fields
-    .map(({ retention, destination: dest, source: src }) => {
+    .map((field) => {
+      const { retention, destination: dest, source: src } = field;
       const recentDest = recentData(src, dest);
       switch (retention.operation) {
         case 'collect_values':
-          return `${recentDest} = MV_DEDUPE(TOP(${src}, ${retention.maxLength}))`;
+          return `${recentDest} = MV_DEDUPE(TOP(${castSrcType(field)}, ${retention.maxLength}))`;
         case 'prefer_newest_value':
-          return `${recentDest} = LAST(${src}, @timestamp)`;
+          return `${recentDest} = LAST(${castSrcType(field)}, @timestamp)`;
         case 'prefer_oldest_value':
-          return `${recentDest} = FIRST(${src}, @timestamp)`;
+          return `${recentDest} = FIRST(${castSrcType(field)}, @timestamp)`;
         default:
           throw new Error('unknown field operation');
       }
@@ -137,4 +139,22 @@ function customFieldEvalLogic() {
     `@timestamp = ${recentData('timestamp')}`,
     `entity.name = COALESCE(entity.name, entity.id)`,
   ].join(',\n ');
+}
+function castSrcType(field: EntityField) {
+  switch (field.mapping?.type) {
+    case 'keyword':
+      return `TO_STRING(${field.source})`;
+    case 'date':
+      return `TO_DATETIME(${field.source})`;
+    case 'boolean':
+      return `TO_BOOLEAN(${field.source})`;
+    case 'long':
+      return `TO_LONG(${field.source})`;
+    case 'ip':
+      return `TO_IP(${field.source})`;
+    case 'scaled_float': // explicit no cast because it doesn't exist in ESQl
+      return `${field.source}`;
+    default:
+      return field.source;
+  }
 }
