@@ -297,12 +297,9 @@ export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
     },
   };
 
-  const snapshotTableCaption = i18n.translate(
-    'xpack.snapshotRestore.snapshotList.table.caption',
-    {
-      defaultMessage: 'List of snapshots',
-    }
-  );
+  const snapshotTableCaption = i18n.translate('xpack.snapshotRestore.snapshotList.table.caption', {
+    defaultMessage: 'List of snapshots',
+  });
 
   return (
     <>
