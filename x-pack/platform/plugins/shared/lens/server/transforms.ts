@@ -13,6 +13,7 @@ import { schema } from '@kbn/config-schema';
 import { getLensTransforms } from '../common/transforms';
 import type { LensTransforms } from '../common/transforms/types';
 import { lensItemDataSchema } from './content_management';
+import { isByRefLensConfig } from '../common/transforms/utils';
 
 export const getLensServerTransforms = (
   builder: LensConfigBuilder,
@@ -29,7 +30,10 @@ export const getLensServerTransforms = (
 };
 
 const legacyPanelAttributesSchema = lensItemDataSchema.extends({
-  type: schema.maybe(schema.literal('lens')), // why is this added to the panel state?
+  // Why are these added to the panel attributes?
+  // See https://github.com/elastic/kibana/issues/250115
+  id: schema.maybe(schema.string()),
+  type: schema.maybe(schema.literal('lens')),
 });
 
 const lensByValuePanelSchema = schema.object(
@@ -57,8 +61,10 @@ function getExtraServerTransformProps(
     getSchema: () => {
       return builder.isEnabled ? lensPanelSchema : undefined;
     },
-    throwOnUnmappedPanel: (state: LensSerializedAPIConfig) => {
-      const chartType = builder.getType(state.attributes);
+    throwOnUnmappedPanel: (config: LensSerializedAPIConfig) => {
+      if (isByRefLensConfig(config)) return;
+
+      const chartType = builder.getType(config.attributes);
 
       if (builder.isEnabled && !builder.isSupported(chartType)) {
         throw new Error(`Lens "${chartType}" chart type is not supported`);
