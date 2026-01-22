@@ -15,7 +15,7 @@ import {
 } from '../../../test_ids';
 import { HeaderRow } from './header_row';
 import type { EntityItem } from '../types';
-import { createFilterStore, destroyFilterStore } from '../../../../filters/filter_store';
+import { getOrCreateFilterStore, destroyFilterStore } from '../../../../filters/filter_store';
 
 const mockOpenPreviewPanel = jest.fn();
 
@@ -34,7 +34,7 @@ describe('<HeaderRow />', () => {
   beforeEach(() => {
     // Generate unique scopeId for each test
     TEST_SCOPE_ID = `test-scope-${Math.random().toString(36).substring(7)}`;
-    createFilterStore(TEST_SCOPE_ID, 'test-data-view-id');
+    getOrCreateFilterStore(TEST_SCOPE_ID);
     mockOpenPreviewPanel.mockClear();
   });
 

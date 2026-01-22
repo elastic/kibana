@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useSyncExternalStore } from 'react';
 import type { Filter } from '@kbn/es-query';
-import { createFilterStore, destroyFilterStore } from './filter_store';
+import { getOrCreateFilterStore, destroyFilterStore } from './filter_store';
 
 /**
  * Hook that manages graph filter state for a specific scope.
@@ -27,8 +27,13 @@ export const useGraphFilters = (
   scopeId: string,
   dataViewId: string
 ): { searchFilters: Filter[]; setSearchFilters: (filters: Filter[]) => void } => {
-  // Create or get the FilterStore for this scopeId
-  const store = useMemo(() => createFilterStore(scopeId, dataViewId), [scopeId, dataViewId]);
+  // Get or create the FilterStore for this scopeId
+  const store = useMemo(() => getOrCreateFilterStore(scopeId), [scopeId]);
+
+  // Update dataViewId when it changes
+  useEffect(() => {
+    store.setDataViewId(dataViewId);
+  }, [store, dataViewId]);
 
   // Clean up store on unmount or when scopeId changes
   useEffect(() => {

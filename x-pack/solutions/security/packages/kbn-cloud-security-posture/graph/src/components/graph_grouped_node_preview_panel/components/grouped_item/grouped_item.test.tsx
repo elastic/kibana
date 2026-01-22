@@ -21,7 +21,7 @@ import {
 import { GroupedItem } from './grouped_item';
 import { formatDate } from '@elastic/eui';
 import { LIST_ITEM_DATE_FORMAT } from './parts/timestamp_row';
-import { createFilterStore, destroyFilterStore } from '../../../filters/filter_store';
+import { getOrCreateFilterStore, destroyFilterStore } from '../../../filters/filter_store';
 import type { EntityOrEventItem } from './types';
 
 const mockOpenPreviewPanel = jest.fn();
@@ -39,7 +39,7 @@ describe('<GroupedItem />', () => {
   beforeEach(() => {
     // Generate unique scopeId for each test
     TEST_SCOPE_ID = `test-scope-${Math.random().toString(36).substring(7)}`;
-    createFilterStore(TEST_SCOPE_ID, 'test-data-view-id');
+    getOrCreateFilterStore(TEST_SCOPE_ID);
   });
 
   afterEach(() => {

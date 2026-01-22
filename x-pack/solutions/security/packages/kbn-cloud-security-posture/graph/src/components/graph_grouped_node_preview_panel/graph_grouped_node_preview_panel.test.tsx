@@ -24,7 +24,7 @@ import {
 } from './test_ids';
 import { DOCUMENT_TYPE_EVENT } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { GROUPED_PREVIEW_PAGINATION_SETTINGS_KEY } from './use_pagination';
-import { createFilterStore, destroyFilterStore } from '../filters/filter_store';
+import { getOrCreateFilterStore, destroyFilterStore } from '../filters/filter_store';
 
 // Mock the hook
 jest.mock('./use_fetch_document_details');
@@ -88,7 +88,7 @@ describe('GraphGroupedNodePreviewPanel', () => {
       documentIds: ['doc-1', 'doc-2', 'doc-3'],
       entityItems: [] as EntityItem[],
     };
-    createFilterStore(TEST_SCOPE_ID, TEST_DATA_VIEW_ID);
+    getOrCreateFilterStore(TEST_SCOPE_ID);
     jest.clearAllMocks();
     localStorage.clear();
     entityIdCounter = 0;

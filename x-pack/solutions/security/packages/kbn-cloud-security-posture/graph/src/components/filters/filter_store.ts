@@ -112,13 +112,12 @@ const stores = new Map<string, FilterStore>();
  */
 export class FilterStore {
   readonly scopeId: string;
-  private readonly dataViewId: string;
+  private dataViewId?: string;
   private readonly filters$ = new BehaviorSubject<Filter[]>([]);
   private readonly eventSubscription: Subscription;
 
-  constructor(scopeId: string, dataViewId: string) {
+  constructor(scopeId: string) {
     this.scopeId = scopeId;
-    this.dataViewId = dataViewId;
 
     // Subscribe to filter toggle events for this scopeId
     this.eventSubscription = filterToggleEvents$
@@ -126,6 +125,15 @@ export class FilterStore {
       .subscribe((event) => {
         this.toggleFilter(event.field, event.value, event.action);
       });
+  }
+
+  /**
+   * Set the dataViewId used when constructing filters.
+   */
+  setDataViewId(dataViewId: string): void {
+    if (dataViewId) {
+      this.dataViewId = dataViewId;
+    }
   }
 
   /**
@@ -160,7 +168,7 @@ export class FilterStore {
    */
   toggleFilter(field: string, value: string, action: 'show' | 'hide'): void {
     if (action === 'show') {
-      const newFilters = addFilter(this.dataViewId, this.filters$.value, field, value);
+      const newFilters = addFilter(this.dataViewId ?? '', this.filters$.value, field, value);
       this.filters$.next(newFilters);
     } else {
       const newFilters = removeFilter(this.filters$.value, field, value);
@@ -197,27 +205,26 @@ export class FilterStore {
 // =============================================================================
 
 /**
- * Create or get an existing FilterStore for the given scopeId.
- * If a store already exists for this scopeId, returns the existing one.
+ * Get an existing FilterStore or create a new one for the given scopeId.
  *
  * @param scopeId - Unique identifier for the graph instance
- * @param dataViewId - The data view ID used when constructing filters
  * @returns The FilterStore instance for this scopeId
  *
  * @example
  * ```typescript
  * // In a hook or component
- * const store = createFilterStore(scopeId, dataViewId);
+ * const store = getOrCreateFilterStore(scopeId);
+ * store.setDataViewId(dataViewId);
  * // Later, clean up on unmount
  * destroyFilterStore(scopeId);
  * ```
  */
-export const createFilterStore = (scopeId: string, dataViewId: string): FilterStore => {
+export const getOrCreateFilterStore = (scopeId: string): FilterStore => {
   const existing = stores.get(scopeId);
   if (existing) {
     return existing;
   }
-  const newStore = new FilterStore(scopeId, dataViewId);
+  const newStore = new FilterStore(scopeId);
   stores.set(scopeId, newStore);
   return newStore;
 };
@@ -243,7 +250,7 @@ export const getFilterStore = (scopeId: string): FilterStore | undefined => {
     // eslint-disable-next-line no-console
     console.warn(
       `[FilterStore] No store found for scopeId: "${scopeId}". ` +
-        `Ensure createFilterStore() was called before accessing the store.`
+        `Ensure getOrCreateFilterStore() was called before accessing the store.`
     );
   }
   return store;
