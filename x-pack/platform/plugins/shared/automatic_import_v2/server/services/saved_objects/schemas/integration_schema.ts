@@ -12,8 +12,14 @@ import { MAX_ID_LENGTH, MAX_VERSION_LENGTH, MIN_VERSION_LENGTH } from './constan
 
 export const integrationSchemaV1 = schema.object({
   integration_id: schema.string({ maxLength: MAX_ID_LENGTH, minLength: 1 }),
+  /**
+   * @deprecated This field is kept for backwards compatibility with existing saved objects.
+   * It is no longer written by the service and may be removed in a future major version.
+   */
   data_stream_count: schema.maybe(schema.number()),
   created_by: schema.string({ minLength: 1 }),
+  last_updated_by: schema.maybe(schema.string({ minLength: 1 })),
+  last_updated_at: schema.maybe(schema.string()),
   status: schema.oneOf(
     Object.values(TASK_STATUSES).map((status) => schema.literal(status)) as [Type<string>]
   ),

@@ -6,17 +6,20 @@
  */
 
 import assert from 'node:assert';
-import { hostEntityDescription } from './host';
+
 import type { EntityType } from './entity_schema';
 import { type EntityDefinitionWithoutId, type ManagedEntityDefinition } from './entity_schema';
 import { getEntityDefinitionId } from '../assets/latest_index';
+import { hostEntityDefinition } from './host';
+import { userEntityDefinition } from './user';
+import { serviceEntityDefinition } from './service';
+import { genericEntityDefinition } from './generic';
 
 const entitiesDescriptionRegistry = {
-  host: hostEntityDescription,
-  // TODO: add other entity descriptions
-  user: hostEntityDescription,
-  service: hostEntityDescription,
-  generic: hostEntityDescription,
+  host: hostEntityDefinition,
+  user: userEntityDefinition,
+  service: serviceEntityDefinition,
+  generic: genericEntityDefinition,
 } as const satisfies Record<EntityType, EntityDefinitionWithoutId>;
 
 interface EntityDefinitionParams {

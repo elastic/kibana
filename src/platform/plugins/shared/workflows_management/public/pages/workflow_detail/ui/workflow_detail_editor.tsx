@@ -13,6 +13,7 @@ import { css } from '@emotion/react';
 import React, { useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { i18n } from '@kbn/i18n';
 import type { StepContext } from '@kbn/workflows';
 import {
   WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID,
@@ -21,7 +22,7 @@ import {
 import { useContextOverrideData } from './use_context_override_data';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { selectYamlString } from '../../../entities/workflows/store/workflow_detail/selectors';
-import { ExecutionGraph } from '../../../features/debug-graph/execution_graph';
+import { ExecutionGraph } from '../../../features/debug_graph/execution_graph';
 import { TestStepModal } from '../../../features/run_workflow/ui/test_step_modal';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
@@ -51,7 +52,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
   const workflowYaml = useSelector(selectYamlString) ?? '';
 
   // Hooks
-  const { uiSettings } = useKibana().services;
+  const { uiSettings, notifications } = useKibana().services;
   const { setSelectedExecution } = useWorkflowUrlState();
   const getContextOverrideData = useContextOverrideData();
   const { runIndividualStep } = useWorkflowActions();
@@ -79,15 +80,27 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
   // Step run handlers
   const submitStepRun = useCallback(
     async (stepId: string, mock: Partial<StepContext>) => {
-      const response = await runIndividualStep.mutateAsync({
-        stepId,
-        workflowYaml,
-        contextOverride: mock,
-      });
-      setSelectedExecution(response.workflowExecutionId);
-      closeModal();
+      try {
+        const response = await runIndividualStep.mutateAsync({
+          stepId,
+          workflowYaml,
+          contextOverride: mock,
+        });
+        setSelectedExecution(response.workflowExecutionId);
+        closeModal();
+      } catch (error) {
+        const errorMessage =
+          error.body?.message ||
+          error.message ||
+          'An unexpected error occurred while running the step';
+        notifications.toasts.addError(new Error(errorMessage), {
+          title: i18n.translate('workflows.detail.submitStepRun.error', {
+            defaultMessage: 'Failed to run step',
+          }),
+        });
+      }
     },
-    [runIndividualStep, workflowYaml, setSelectedExecution, closeModal]
+    [runIndividualStep, workflowYaml, setSelectedExecution, closeModal, notifications.toasts]
   );
 
   const handleStepRun = useCallback(
