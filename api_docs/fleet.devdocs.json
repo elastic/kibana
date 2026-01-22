@@ -1748,7 +1748,7 @@
         "label": "DynamicPagePathValues",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-        "lineNumber": 58,
+        "lineNumber": 61,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1764,7 +1764,7 @@
               "[key: string]:  string | boolean"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 59,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6444,7 +6444,7 @@
           "{ readonly Installed: \"installed\"; readonly Installing: \"installing\"; readonly InstallFailed: \"install_failed\"; readonly NotInstalled: \"not_installed\"; }"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/epm.ts",
-        "lineNumber": 110,
+        "lineNumber": 112,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6458,7 +6458,7 @@
         "label": "pagePathGetters",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-        "lineNumber": 119,
+        "lineNumber": 124,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6474,7 +6474,7 @@
               "() => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 124,
+            "lineNumber": 129,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -6492,7 +6492,7 @@
               "() => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 125,
+            "lineNumber": 130,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -6510,7 +6510,7 @@
               "() => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 126,
+            "lineNumber": 131,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -6528,7 +6528,7 @@
               "({ searchTerm, category, subCategory, onlyAgentless, }: { searchTerm?: string | undefined; category?: string | undefined; subCategory?: string | undefined; onlyAgentless?: boolean | undefined; }) => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 127,
+            "lineNumber": 132,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -6541,7 +6541,7 @@
                 "label": "{\n    searchTerm,\n    category,\n    subCategory,\n    onlyAgentless,\n  }",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-                "lineNumber": 132,
+                "lineNumber": 137,
                 "columnNumber": 6,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6557,7 +6557,7 @@
                       "string | undefined"
                     ],
                     "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-                    "lineNumber": 133,
+                    "lineNumber": 138,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -6573,7 +6573,7 @@
                       "string | undefined"
                     ],
                     "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-                    "lineNumber": 134,
+                    "lineNumber": 139,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -6589,7 +6589,7 @@
                       "string | undefined"
                     ],
                     "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-                    "lineNumber": 135,
+                    "lineNumber": 140,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -6605,7 +6605,7 @@
                       "boolean | undefined"
                     ],
                     "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-                    "lineNumber": 136,
+                    "lineNumber": 141,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -6626,7 +6626,7 @@
               "({ query, category }: { query?: string | undefined; category?: string | undefined; }) => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 157,
+            "lineNumber": 162,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -6639,7 +6639,7 @@
                 "label": "{ query, category }",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-                "lineNumber": 157,
+                "lineNumber": 162,
                 "columnNumber": 49,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6655,7 +6655,7 @@
                       "string | undefined"
                     ],
                     "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-                    "lineNumber": 157,
+                    "lineNumber": 162,
                     "columnNumber": 51,
                     "deprecated": false,
                     "trackAdoption": false
@@ -6671,7 +6671,7 @@
                       "string | undefined"
                     ],
                     "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-                    "lineNumber": 157,
+                    "lineNumber": 162,
                     "columnNumber": 67,
                     "deprecated": false,
                     "trackAdoption": false
@@ -6692,7 +6692,7 @@
               "({ query, category, }: { query?: string | undefined; category?: string | undefined; }) => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 162,
+            "lineNumber": 167,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -6705,7 +6705,7 @@
                 "label": "{\n    query,\n    category,\n  }",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-                "lineNumber": 165,
+                "lineNumber": 170,
                 "columnNumber": 6,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6721,7 +6721,7 @@
                       "string | undefined"
                     ],
                     "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-                    "lineNumber": 166,
+                    "lineNumber": 171,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -6737,7 +6737,7 @@
                       "string | undefined"
                     ],
                     "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-                    "lineNumber": 167,
+                    "lineNumber": 172,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -6758,7 +6758,7 @@
               "() => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 173,
+            "lineNumber": 178,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -6784,7 +6784,7 @@
               ") => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 174,
+            "lineNumber": 179,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -6806,7 +6806,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-                "lineNumber": 174,
+                "lineNumber": 179,
                 "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6834,7 +6834,7 @@
               ") => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 178,
+            "lineNumber": 183,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -6856,7 +6856,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-                "lineNumber": 178,
+                "lineNumber": 183,
                 "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6884,7 +6884,7 @@
               ") => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 188,
+            "lineNumber": 193,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -6906,7 +6906,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-                "lineNumber": 188,
+                "lineNumber": 193,
                 "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6934,7 +6934,7 @@
               ") => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 192,
+            "lineNumber": 197,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -6956,7 +6956,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-                "lineNumber": 192,
+                "lineNumber": 197,
                 "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6984,7 +6984,7 @@
               ") => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 196,
+            "lineNumber": 201,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7006,7 +7006,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-                "lineNumber": 196,
+                "lineNumber": 201,
                 "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7034,7 +7034,7 @@
               ") => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 200,
+            "lineNumber": 205,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7056,7 +7056,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-                "lineNumber": 200,
+                "lineNumber": 205,
                 "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7084,7 +7084,7 @@
               ") => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 204,
+            "lineNumber": 209,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7106,7 +7106,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-                "lineNumber": 204,
+                "lineNumber": 209,
                 "columnNumber": 39,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7134,7 +7134,7 @@
               ") => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 208,
+            "lineNumber": 213,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7156,7 +7156,57 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-                "lineNumber": 208,
+                "lineNumber": 213,
+                "columnNumber": 29,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.pagePathGetters.integration_policy_copy",
+            "type": "Function",
+            "tags": [],
+            "label": "integration_policy_copy",
+            "description": [],
+            "signature": [
+              "({ packagePolicyId }: ",
+              {
+                "pluginId": "fleet",
+                "scope": "public",
+                "docId": "kibFleetPluginApi",
+                "section": "def-public.DynamicPagePathValues",
+                "text": "DynamicPagePathValues"
+              },
+              ") => [string, string]"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
+            "lineNumber": 217,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-public.pagePathGetters.integration_policy_copy.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ packagePolicyId }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "fleet",
+                    "scope": "public",
+                    "docId": "kibFleetPluginApi",
+                    "section": "def-public.DynamicPagePathValues",
+                    "text": "DynamicPagePathValues"
+                  }
+                ],
+                "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
+                "lineNumber": 217,
                 "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7186,7 +7236,7 @@
               ") => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 214,
+            "lineNumber": 223,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7208,7 +7258,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-                "lineNumber": 214,
+                "lineNumber": 223,
                 "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7238,7 +7288,7 @@
               ") => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 219,
+            "lineNumber": 228,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7260,7 +7310,59 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-                "lineNumber": 219,
+                "lineNumber": 228,
+                "columnNumber": 44,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.pagePathGetters.integration_policy_copy_from_installed",
+            "type": "Function",
+            "tags": [],
+            "label": "integration_policy_copy_from_installed",
+            "description": [
+              "// Used for breadcrumbs when copying a policy from the installed integrations tab"
+            ],
+            "signature": [
+              "({ packagePolicyId }: ",
+              {
+                "pluginId": "fleet",
+                "scope": "public",
+                "docId": "kibFleetPluginApi",
+                "section": "def-public.DynamicPagePathValues",
+                "text": "DynamicPagePathValues"
+              },
+              ") => [string, string]"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
+            "lineNumber": 233,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-public.pagePathGetters.integration_policy_copy_from_installed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ packagePolicyId }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "fleet",
+                    "scope": "public",
+                    "docId": "kibFleetPluginApi",
+                    "section": "def-public.DynamicPagePathValues",
+                    "text": "DynamicPagePathValues"
+                  }
+                ],
+                "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
+                "lineNumber": 233,
                 "columnNumber": 44,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7290,7 +7392,7 @@
               ") => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 224,
+            "lineNumber": 238,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7312,7 +7414,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-                "lineNumber": 224,
+                "lineNumber": 238,
                 "columnNumber": 42,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7332,7 +7434,7 @@
               "() => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 228,
+            "lineNumber": 242,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7350,7 +7452,7 @@
               "() => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 229,
+            "lineNumber": 243,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7376,7 +7478,7 @@
               ") => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 230,
+            "lineNumber": 244,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7398,7 +7500,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-                "lineNumber": 230,
+                "lineNumber": 244,
                 "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7426,7 +7528,7 @@
               ") => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 234,
+            "lineNumber": 248,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7448,7 +7550,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-                "lineNumber": 234,
+                "lineNumber": 248,
                 "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7476,7 +7578,7 @@
               ") => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 252,
+            "lineNumber": 266,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7498,7 +7600,57 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-                "lineNumber": 252,
+                "lineNumber": 266,
+                "columnNumber": 22,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.pagePathGetters.copy_integration",
+            "type": "Function",
+            "tags": [],
+            "label": "copy_integration",
+            "description": [],
+            "signature": [
+              "({ policyId, packagePolicyId }: ",
+              {
+                "pluginId": "fleet",
+                "scope": "public",
+                "docId": "kibFleetPluginApi",
+                "section": "def-public.DynamicPagePathValues",
+                "text": "DynamicPagePathValues"
+              },
+              ") => [string, string]"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
+            "lineNumber": 270,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-public.pagePathGetters.copy_integration.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ policyId, packagePolicyId }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "fleet",
+                    "scope": "public",
+                    "docId": "kibFleetPluginApi",
+                    "section": "def-public.DynamicPagePathValues",
+                    "text": "DynamicPagePathValues"
+                  }
+                ],
+                "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
+                "lineNumber": 270,
                 "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7526,7 +7678,7 @@
               ") => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 256,
+            "lineNumber": 274,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7548,7 +7700,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-                "lineNumber": 256,
+                "lineNumber": 274,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7576,7 +7728,7 @@
               ") => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 260,
+            "lineNumber": 278,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7598,7 +7750,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-                "lineNumber": 260,
+                "lineNumber": 278,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7626,7 +7778,7 @@
               ") => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 272,
+            "lineNumber": 290,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7648,7 +7800,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-                "lineNumber": 272,
+                "lineNumber": 290,
                 "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7676,7 +7828,7 @@
               ") => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 276,
+            "lineNumber": 294,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7698,7 +7850,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-                "lineNumber": 276,
+                "lineNumber": 294,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7726,7 +7878,7 @@
               ") => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 277,
+            "lineNumber": 295,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7748,7 +7900,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-                "lineNumber": 277,
+                "lineNumber": 295,
                 "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7776,7 +7928,7 @@
               ") => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 278,
+            "lineNumber": 296,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7798,7 +7950,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-                "lineNumber": 278,
+                "lineNumber": 296,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7818,7 +7970,7 @@
               "() => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 279,
+            "lineNumber": 297,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7836,7 +7988,7 @@
               "() => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 280,
+            "lineNumber": 298,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7854,7 +8006,7 @@
               "() => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 281,
+            "lineNumber": 299,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7872,7 +8024,7 @@
               "() => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 282,
+            "lineNumber": 300,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7898,7 +8050,7 @@
               ") => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 283,
+            "lineNumber": 301,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7920,7 +8072,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-                "lineNumber": 283,
+                "lineNumber": 301,
                 "columnNumber": 38,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7940,7 +8092,7 @@
               "() => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 287,
+            "lineNumber": 305,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7958,7 +8110,7 @@
               "() => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 291,
+            "lineNumber": 309,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7984,7 +8136,7 @@
               ") => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 295,
+            "lineNumber": 313,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -8006,7 +8158,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-                "lineNumber": 295,
+                "lineNumber": 313,
                 "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8034,7 +8186,7 @@
               ") => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 299,
+            "lineNumber": 317,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -8056,7 +8208,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-                "lineNumber": 299,
+                "lineNumber": 317,
                 "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8084,7 +8236,7 @@
               ") => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 303,
+            "lineNumber": 321,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -8106,7 +8258,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-                "lineNumber": 303,
+                "lineNumber": 321,
                 "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8126,7 +8278,7 @@
               "() => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 310,
+            "lineNumber": 328,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -8144,7 +8296,7 @@
               "() => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 311,
+            "lineNumber": 329,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -8162,7 +8314,7 @@
               "() => [string, string]"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/constants/page_paths.ts",
-            "lineNumber": 315,
+            "lineNumber": 333,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -33571,7 +33723,7 @@
         "label": "DisplayedAssetTypes",
         "description": [],
         "signature": [
-          "(\"index\" | \"search\" | \"transform\" | \"map\" | \"alert\" | \"tag\" | \"dashboard\" | \"lens\" | \"index-pattern\" | \"ingest_pipeline\" | \"ilm_policy\" | \"visualization\" | \"ml-module\" | \"security-ai-prompt\" | \"security-rule\" | \"csp-rule-template\" | \"alerting_rule_template\" | \"slo_template\" | \"osquery-pack-asset\" | \"osquery-saved-query\" | \"index_template\" | \"component_template\" | \"data_stream_ilm_policy\" | \"ml_model\" | \"knowledge_base\" | \"esql_view\")[]"
+          "(\"index\" | \"search\" | \"transform\" | \"map\" | \"alert\" | \"tag\" | \"dashboard\" | \"lens\" | \"index-pattern\" | \"visualization\" | \"ingest_pipeline\" | \"ilm_policy\" | \"ml-module\" | \"security-ai-prompt\" | \"security-rule\" | \"csp-rule-template\" | \"alerting_rule_template\" | \"slo_template\" | \"osquery-pack-asset\" | \"osquery-saved-query\" | \"index_template\" | \"component_template\" | \"data_stream_ilm_policy\" | \"ml_model\" | \"knowledge_base\" | \"esql_view\")[]"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
         "lineNumber": 115,
