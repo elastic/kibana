@@ -54,6 +54,7 @@ interface FailureStoreCollectorParams {
   index: string;
   telemetryClient: StreamsTelemetryClient;
   streamType: 'wired' | 'classic' | 'unknown';
+  timeRange?: { from: string; to: string };
 }
 
 const SEARCH_TIMEOUT = '10s';
@@ -97,6 +98,7 @@ function getDataCollectorForDataSource(dataSource: EnrichmentDataSourceWithUIAtt
         index: args.index,
         telemetryClient: args.telemetryClient,
         streamType: args.streamType,
+        timeRange: dataSource.timeRange,
       });
   }
   if (dataSource.type === 'kql-samples') {
@@ -121,6 +123,7 @@ function collectFailureStoreData({
   telemetryClient,
   streamType,
   index,
+  timeRange,
 }: FailureStoreCollectorParams): Observable<SampleDocument[]> {
   const abortController = new AbortController();
 
@@ -136,6 +139,8 @@ function collectFailureStoreData({
             path: { name: index },
             query: {
               size: 100,
+              ...(timeRange?.from && { start: timeRange.from }),
+              ...(timeRange?.to && { end: timeRange.to }),
             },
           },
         }

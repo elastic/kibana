@@ -35,6 +35,7 @@ export interface LatestSamplesDataSource extends BaseDataSource {
 
 export interface FailureStoreDataSource extends BaseDataSource {
   type: 'failure-store';
+  timeRange?: TimeRange;
 }
 
 const latestSamplesDataSourceSchema = baseDataSourceSchema.extend({
@@ -43,6 +44,12 @@ const latestSamplesDataSourceSchema = baseDataSourceSchema.extend({
 
 const failureStoreDataSourceSchema = baseDataSourceSchema.extend({
   type: z.literal('failure-store'),
+  timeRange: z
+    .object({
+      from: z.string(),
+      to: z.string(),
+    })
+    .optional(),
 }) satisfies z.Schema<FailureStoreDataSource>;
 
 /**

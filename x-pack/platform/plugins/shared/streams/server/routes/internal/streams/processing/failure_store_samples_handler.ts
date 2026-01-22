@@ -41,6 +41,8 @@ export interface FailureStoreSamplesParams {
   };
   query?: {
     size?: number;
+    start?: string;
+    end?: string;
   };
 }
 
@@ -77,6 +79,8 @@ export const getFailureStoreSamples = async ({
 }: FailureStoreSamplesDeps): Promise<FailureStoreSamplesResponse> => {
   const { name } = params.path;
   const size = params.query?.size ?? DEFAULT_SAMPLE_SIZE;
+  const start = params.query?.start;
+  const end = params.query?.end;
 
   // 1. Check if this is a direct child of a root stream (e.g., logs.child).
   // Direct children have no ancestor processing to apply, so we can optimize by
@@ -86,6 +90,8 @@ export const getFailureStoreSamples = async ({
       scopedClusterClient,
       streamName: name,
       size,
+      start,
+      end,
     });
     return { documents: failureStoreDocs };
   }
@@ -96,6 +102,8 @@ export const getFailureStoreSamples = async ({
     scopedClusterClient,
     streamName: name,
     size,
+    start,
+    end,
   });
 
   if (failureStoreDocs.length === 0) {
@@ -153,21 +161,47 @@ function isDirectChildOfRoot(streamName: string): boolean {
  * Documents in the failure store are wrapped with error metadata. This function
  * unwraps them and returns only the original document sources that can be used
  * for simulation.
+ *
+ * Optionally filters by time range if start/end are provided.
  */
 async function fetchFailureStoreDocuments({
   scopedClusterClient,
   streamName,
   size,
+  start,
+  end,
 }: {
   scopedClusterClient: IScopedClusterClient;
   streamName: string;
   size: number;
+  start?: string;
+  end?: string;
 }): Promise<FlattenRecord[]> {
   try {
+    // Build query with optional time range filter
+    const query =
+      start || end
+        ? {
+            bool: {
+              must: [
+                {
+                  range: {
+                    '@timestamp': {
+                      ...(start && { gte: start }),
+                      ...(end && { lte: end }),
+                    },
+                  },
+                },
+              ],
+            },
+          }
+        : undefined;
+
     const response = await scopedClusterClient.asCurrentUser.search({
       index: `${streamName}${FAILURE_STORE_SELECTOR}`,
       size,
       sort: [{ '@timestamp': { order: 'desc' } }],
+      ...(query && { query }),
     });
 
     // Unwrap the original documents from the failure store wrapper.

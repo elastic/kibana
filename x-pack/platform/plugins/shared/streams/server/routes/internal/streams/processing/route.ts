@@ -230,6 +230,8 @@ const failureStoreSamplesParamsSchema = z.object({
   query: z
     .object({
       size: z.coerce.number().optional(),
+      start: z.string().optional(),
+      end: z.string().optional(),
     })
     .optional(),
 });
