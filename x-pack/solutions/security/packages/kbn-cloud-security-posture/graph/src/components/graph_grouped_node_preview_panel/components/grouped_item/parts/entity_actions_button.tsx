@@ -43,6 +43,7 @@ export const EntityActionsButton = ({ item }: EntityActionsButtonProps) => {
   // Generate items fresh on each render to reflect current filter state
   const items = getEntityExpandItems({
     nodeId: item.id,
+    sourceNamespace: item.ecsParentField,
     onShowEntityDetails: item.availableInEntityStore ? () => emitPreviewAction(item) : undefined,
     onClose: closePopover,
     shouldRender: {
