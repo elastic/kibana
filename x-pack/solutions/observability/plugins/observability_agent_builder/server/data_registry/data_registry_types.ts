@@ -39,10 +39,13 @@ interface ServiceSummary {
 }
 
 export interface APMDownstreamDependency {
-  'service.name'?: string | undefined;
+  'service.name'?: string;
   'span.destination.service.resource': string;
-  'span.type'?: string | undefined;
-  'span.subtype'?: string | undefined;
+  'span.type'?: string;
+  'span.subtype'?: string;
+  errorRate?: number;
+  latencyMs?: number;
+  throughputPerMin?: number;
 }
 
 interface APMError {

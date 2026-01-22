@@ -155,15 +155,24 @@ export async function getAnomalyTimeseries({
               },
             },
             aggs: {
-              top_anomaly: {
-                top_metrics: {
-                  metrics: asMutableArray([
-                    { field: 'record_score' },
-                    { field: 'actual' },
-                  ] as const),
-                  size: 1,
-                  sort: {
-                    record_score: 'desc',
+              record_results: {
+                filter: {
+                  term: {
+                    result_type: 'record',
+                  },
+                },
+                aggs: {
+                  top_anomaly: {
+                    top_metrics: {
+                      metrics: asMutableArray([
+                        { field: 'record_score' },
+                        { field: 'actual' },
+                      ] as const),
+                      size: 1,
+                      sort: {
+                        record_score: 'desc',
+                      },
+                    },
                   },
                 },
               },
@@ -211,10 +220,15 @@ export async function getAnomalyTimeseries({
         anomalies: bucket.timeseries.buckets.map((dateBucket) => ({
           x: dateBucket.key as number,
           y:
-            (dateBucket.top_anomaly.top[0]?.metrics.record_score as number | null | undefined) ??
-            null,
+            (dateBucket.record_results.top_anomaly.top[0]?.metrics.record_score as
+              | number
+              | null
+              | undefined) ?? null,
           actual: divide(
-            (dateBucket.top_anomaly.top[0]?.metrics.actual as number | null | undefined) ?? null,
+            (dateBucket.record_results.top_anomaly.top[0]?.metrics.actual as
+              | number
+              | null
+              | undefined) ?? null,
             divider
           ),
         })),
