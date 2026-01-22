@@ -439,25 +439,16 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
           body?.error?.['security.saml.unsolicited_in_response_to'] ?? undefined;
       }
 
-      const errorParts: string[] = ['Failed to log in with SAML response'];
-
-      if (inResponseToRequestId) {
-        errorParts.push(`SP-initiated, unsolicited InResponseTo: ${inResponseToRequestId}`);
-        if (!state) {
-          // If inResponseToRequestId is present but the state is NOT present this might be a delayed login attempt
-          errorParts.push(`no state - possible delayed login`);
-        }
-        errorParts.push(`current requestIds: ${stateRequestIds}`);
-      } else if (!inResponseToRequestId) {
-        // If inResponseToRequestId is NOT present we can say it's a proper IdP-initiated login
-        errorParts.push(`IDP-initiated`);
-      } else if (!isIdPInitiatedLogin) {
-        errorParts.push(`current requestIds: ${stateRequestIds}`);
-      }
-
-      errorParts.push(`error: ${getDetailedErrorMessage(err)}`);
-
-      this.logger.error(errorParts.join(', '));
+      this.logger.error(
+        [
+          'Failed to log in with SAML response',
+          inResponseToRequestId
+            ? `SP-initiated, unsolicited InResponseTo: ${inResponseToRequestId}`
+            : 'IDP-initiated',
+          state ? `current requestIds: [${stateRequestIds}]` : 'no state',
+          getDetailedErrorMessage(err),
+        ].join(', ')
+      );
 
       // Since we don't know upfront what realm is targeted by the Identity Provider initiated login
       // there is a chance that it failed because of realm mismatch and hence we should return
