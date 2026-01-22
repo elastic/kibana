@@ -277,4 +277,72 @@ describe('TinesConnector', () => {
       });
     });
   });
+
+  describe('logging', () => {
+    it('should log debug messages for api requests', async () => {
+      mockRequest.mockReturnValue({ data: { stories: [], meta: { pages: 1 } } });
+      await connector.getStories(undefined, connectorUsageCollector);
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining(`[tinesApiRequest]. URL: ${url}/api/v1/stories`)
+      );
+    });
+
+    it('should log debug messages for getStories', async () => {
+      mockRequest.mockReturnValue({ data: { stories: [], meta: { pages: 1 } } });
+      await connector.getStories(undefined, connectorUsageCollector);
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining(`[getStories] URL: ${url}/api/v1/stories`)
+      );
+    });
+
+    it('should log debug messages for webhook parameters', async () => {
+      mockRequest
+        .mockReturnValueOnce({
+          data: {
+            ...webhookAgent,
+          },
+        })
+        .mockReturnValueOnce({ data: { took: 5, requestId: '123', status: 'ok' } });
+
+      await connector.runWebhook(
+        {
+          webhook: webhookResult,
+          body: '[]',
+        },
+        connectorUsageCollector
+      );
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining(
+          `[getWebhookParameters] URL: ${url}/api/v1/actions/${webhookAgent.id}`
+        )
+      );
+    });
+
+    it('should log debug messages for run webhook', async () => {
+      mockRequest.mockReturnValue({ data: { took: 5, requestId: '123', status: 'ok' } });
+      await connector.runWebhook(
+        {
+          webhookUrl,
+          body: '[]',
+        },
+        connectorUsageCollector
+      );
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining(`[runWebhook] URL: ${webhookUrl}`)
+      );
+    });
+
+    it('should log debug messages for getWebhooks', async () => {
+      mockRequest.mockReturnValue({ data: { agents: [], meta: { pages: 1 } } });
+      await connector.getWebhooks({ storyId: story.id }, connectorUsageCollector);
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining(`[getWebhooks] URL: ${url}/api/v1/agents, STORY_ID: ${story.id}`)
+      );
+    });
+  });
 });
