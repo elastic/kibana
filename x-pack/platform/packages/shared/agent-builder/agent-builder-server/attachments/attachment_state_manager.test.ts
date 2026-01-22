@@ -639,6 +639,12 @@ describe('AttachmentStateManager', () => {
           operation: ATTACHMENT_REF_OPERATION.created,
           actor: ATTACHMENT_REF_ACTOR.system,
         },
+        {
+          attachment_id: 'att-1',
+          version: 2,
+          operation: ATTACHMENT_REF_OPERATION.updated,
+          actor: ATTACHMENT_REF_ACTOR.system,
+        },
       ]);
     });
 
