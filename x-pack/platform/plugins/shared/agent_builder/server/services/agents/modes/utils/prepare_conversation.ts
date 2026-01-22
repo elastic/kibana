@@ -7,11 +7,8 @@
 
 import type { ConversationRound, ConverseInput, RoundInput } from '@kbn/agent-builder-common';
 import { createInternalError } from '@kbn/agent-builder-common';
-import type {
-  Attachment,
-  AttachmentInput,
-  VersionedAttachment,
-} from '@kbn/agent-builder-common/attachments';
+import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import { getLatestVersion, hashContent } from '@kbn/agent-builder-common/attachments';
 import type {
   AttachmentFormatContext,
   AttachmentStateManager,
@@ -67,24 +64,83 @@ const createFormatContext = (agentContext: AgentHandlerContext): AttachmentForma
   };
 };
 
+/**
+ * Promote legacy per-round attachments into conversation-level versioned attachments.
+ **/
+const mergeInputAttachmentsIntoAttachmentState = (
+  attachmentStateManager: AttachmentStateManager,
+  inputs: AttachmentInput[]
+) => {
+  if (inputs.length === 0) return;
+
+  const existingByContentKey = new Map<string, string>(); // contentKey -> attachmentId
+
+  for (const existing of attachmentStateManager.getAll()) {
+    const latest = getLatestVersion(existing);
+    if (!latest) continue;
+    existingByContentKey.set(`${existing.type}:${latest.content_hash}`, existing.id);
+  }
+
+  for (const input of inputs) {
+    // Prefer stable IDs (if provided)
+    if (input.id) {
+      const existing = attachmentStateManager.get(input.id);
+      if (existing) {
+        attachmentStateManager.update(input.id, {
+          data: input.data,
+          ...(input.hidden !== undefined ? { hidden: input.hidden } : {}),
+        });
+        continue;
+      }
+    }
+
+    const contentHash = hashContent(input.data);
+    const contentKey = `${input.type}:${contentHash}`;
+    if (existingByContentKey.has(contentKey)) {
+      // already present (same content), nothing to do
+      continue;
+    }
+
+    const created = attachmentStateManager.add({
+      ...(input.id ? { id: input.id } : {}),
+      type: input.type,
+      data: input.data,
+      ...(input.hidden !== undefined ? { hidden: input.hidden } : {}),
+    });
+
+    const latest = getLatestVersion(created);
+    if (latest) {
+      existingByContentKey.set(`${created.type}:${latest.content_hash}`, created.id);
+    }
+  }
+};
+
 export const prepareConversation = async ({
   previousRounds,
   nextInput,
   context,
-  conversationAttachments,
   toolRegistry,
 }: {
   previousRounds: ConversationRound[];
   nextInput: ConverseInput;
   context: AgentHandlerContext;
-  conversationAttachments?: VersionedAttachment[];
   toolRegistry?: ToolRegistry;
 }): Promise<ProcessedConversation> => {
   const { attachments: attachmentsService, attachmentStateManager } = context;
   const formatContext = createFormatContext(context);
 
+  // Promote any legacy per-round attachments into conversation-level versioned attachments.
+  // We merge both previous rounds and next input, then strip per-round attachments so the LLM
+  // only sees the v2 conversation-level attachments (via attachment presentation/tools).
+  const legacyInputs: AttachmentInput[] = [
+    ...(previousRounds.flatMap((r) => r.input.attachments ?? []) as AttachmentInput[]),
+    ...((nextInput.attachments ?? []) as AttachmentInput[]),
+  ];
+  mergeInputAttachmentsIntoAttachmentState(attachmentStateManager, legacyInputs);
+
+  const strippedNextInput: ConverseInput = { ...nextInput, attachments: [] };
   const processedNextInput = await prepareRoundInput({
-    input: nextInput,
+    input: strippedNextInput,
     attachmentsService,
     formatContext,
   });
@@ -95,7 +151,11 @@ export const prepareConversation = async ({
 
   const processedRounds = await Promise.all(
     cleanedRounds.map((round) => {
-      return prepareRound({ round, attachmentsService, formatContext });
+      const strippedRound: ConversationRound = {
+        ...round,
+        input: { ...round.input, attachments: [] },
+      };
+      return prepareRound({ round: strippedRound, attachmentsService, formatContext });
     })
   );
 
@@ -104,8 +164,12 @@ export const prepareConversation = async ({
     ...processedRounds.flatMap((round) => round.input.attachments),
   ];
 
+  const conversationAttachmentTypes = attachmentStateManager.getActive().map((a) => a.type);
   const attachmentTypeIds = [
-    ...new Set<string>([...allAttachments.map((attachment) => attachment.attachment.type)]),
+    ...new Set<string>([
+      ...conversationAttachmentTypes,
+      ...allAttachments.map((attachment) => attachment.attachment.type),
+    ]),
   ];
 
   const attachmentTypes = await Promise.all(
@@ -119,9 +183,9 @@ export const prepareConversation = async ({
     })
   );
 
-  const versionedAttachmentPresentation = conversationAttachments
-    ? prepareAttachmentPresentation(conversationAttachments)
-    : undefined;
+  const versionedAttachmentPresentation = prepareAttachmentPresentation(
+    attachmentStateManager.getAll()
+  );
 
   return {
     nextInput: processedNextInput,

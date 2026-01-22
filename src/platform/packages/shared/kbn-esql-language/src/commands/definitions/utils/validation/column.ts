@@ -6,8 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import type { ESQLColumn, ESQLIdentifier, ESQLMessage } from '../../../../types';
-import type { ICommandContext } from '../../../registry/types';
+import { UnmappedFieldsStrategy, type ICommandContext } from '../../../registry/types';
 import { errors } from '../errors';
 import { getColumnExists } from '../columns';
 import { isParametrized } from '../../../../ast/is';
@@ -29,7 +30,11 @@ export class ColumnValidator {
 
   validate(): ESQLMessage[] {
     if (!this.exists) {
-      return [errors.unknownColumn(this.column)];
+      if (this.isUnmappedColumnAllowed) {
+        return [errors.unmappedColumnWarning(this.column)];
+      } else {
+        return [errors.unknownColumn(this.column)];
+      }
     }
 
     return [];
@@ -44,5 +49,13 @@ export class ColumnValidator {
     }
 
     return true;
+  }
+
+  private get isUnmappedColumnAllowed(): boolean {
+    const unmappedFieldsStrategy = this.context.unmappedFieldsStrategy;
+    return (
+      unmappedFieldsStrategy === UnmappedFieldsStrategy.LOAD ||
+      unmappedFieldsStrategy === UnmappedFieldsStrategy.NULLIFY
+    );
   }
 }

@@ -42,6 +42,9 @@
     "@kbn/i18n-react",
     "@kbn/es-ui-shared-plugin",
     "@kbn/ai-assistant-connector-selector-action",
-    "@kbn/management-settings-ids"
+    "@kbn/management-settings-ids",
+    "@kbn/langchain",
+    "@kbn/core-lifecycle-browser-mocks",
+    "@kbn/core-http-server-mocks",
   ]
 }

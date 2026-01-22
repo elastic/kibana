@@ -30,6 +30,8 @@
           "React.NamedExoticComponent<EmptyViewerStateProps>"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/empty_viewer_state/index.tsx",
+        "lineNumber": 131,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -45,6 +47,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -70,6 +74,8 @@
           ">"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
+        "lineNumber": 115,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -85,6 +91,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -110,6 +118,8 @@
           ">"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/comments/index.tsx",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -125,6 +135,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -144,6 +156,8 @@
           ">"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/conditions/index.tsx",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -159,6 +173,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -184,6 +200,8 @@
           ">"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/header/index.tsx",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -199,6 +217,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -224,6 +244,8 @@
           ">"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/meta/index.tsx",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -239,6 +261,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -256,6 +280,8 @@
           "React.NamedExoticComponent<ExceptionItemsProps>"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_items/index.tsx",
+        "lineNumber": 143,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -271,6 +297,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -288,6 +316,8 @@
           "React.NamedExoticComponent<ExceptionListHeaderComponentProps>"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/list_header/index.tsx",
+        "lineNumber": 169,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -303,6 +333,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -320,6 +352,8 @@
           "({ dataTestSubj, linkedRules, securityLinkAnchorComponent, leftIcon, }: MenuItemLinkedRulesProps) => React.ReactElement<any, string | React.JSXElementConstructor<any>>[] | null"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/generate_linked_rules_menu_item/index.tsx",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -334,6 +368,8 @@
               "MenuItemLinkedRulesProps"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/generate_linked_rules_menu_item/index.tsx",
+            "lineNumber": 22,
+            "columnNumber": 46,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -353,6 +389,8 @@
           "React.NamedExoticComponent<HeaderMenuComponentProps>"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/header_menu/index.tsx",
+        "lineNumber": 137,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -368,6 +406,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -393,6 +433,8 @@
           ">"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/pagination/pagination.tsx",
+        "lineNumber": 47,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -408,6 +450,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -425,6 +469,8 @@
           "() => React.JSX.Element"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/partial_code_signature_callout/index.tsx",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -442,6 +488,8 @@
           "React.NamedExoticComponent<SearchBarProps>"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/search_bar/index.tsx",
+        "lineNumber": 120,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -457,6 +505,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -474,6 +524,8 @@
           "({ value, tooltipIconType, tooltipIconText, }: ValueWithSpaceWarningProps) => React.JSX.Element | null"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/value_with_space_warning/value_with_space_warning.tsx",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -488,6 +540,8 @@
               "ValueWithSpaceWarningProps"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/value_with_space_warning/value_with_space_warning.tsx",
+            "lineNumber": 20,
+            "columnNumber": 71,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -507,6 +561,8 @@
           "() => React.JSX.Element"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/wildcard_with_wrong_operator_callout/index.tsx",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -523,6 +579,8 @@
         "label": "Action",
         "description": [],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/header_menu/index.tsx",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -534,6 +592,8 @@
             "label": "key",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/header_menu/index.tsx",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -545,6 +605,8 @@
             "label": "icon",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/header_menu/index.tsx",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -559,6 +621,8 @@
               "string | boolean"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/header_menu/index.tsx",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -573,6 +637,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/header_menu/index.tsx",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -587,6 +653,8 @@
               "(e: React.MouseEvent<Element, MouseEvent>) => void"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/header_menu/index.tsx",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -601,6 +669,8 @@
                   "React.MouseEvent<Element, MouseEvent>"
                 ],
                 "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/header_menu/index.tsx",
+                "lineNumber": 28,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -619,6 +689,8 @@
         "label": "BackOptions",
         "description": [],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/list_header/index.tsx",
+        "lineNumber": 46,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -630,6 +702,8 @@
             "label": "pageId",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/list_header/index.tsx",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -641,6 +715,8 @@
             "label": "path",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/list_header/index.tsx",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -655,6 +731,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/list_header/index.tsx",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -669,6 +747,8 @@
               "(path: string) => void"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/list_header/index.tsx",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -683,6 +763,8 @@
                   "string"
                 ],
                 "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/list_header/index.tsx",
+                "lineNumber": 50,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -701,6 +783,8 @@
         "label": "ExceptionItemCardCommentsProps",
         "description": [],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/comments/index.tsx",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -716,6 +800,8 @@
               "[]"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/comments/index.tsx",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -730,6 +816,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/comments/index.tsx",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -744,6 +832,8 @@
         "label": "ExceptionItemCardHeaderProps",
         "description": [],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/header/index.tsx",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -758,6 +848,8 @@
               "{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"included\" | \"excluded\"; type: \"list\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"wildcard\"; value: string; })[]; expire_time: string | undefined; id: string; item_id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/header/index.tsx",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -772,6 +864,8 @@
               "{ key: string; icon: string; label: string | boolean; onClick: () => void; }[]"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/header/index.tsx",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -786,6 +880,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/header/index.tsx",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -797,6 +893,8 @@
             "label": "dataTestSubj",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/header/index.tsx",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -811,6 +909,8 @@
         "label": "ExceptionItemCardMetaInfoProps",
         "description": [],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/meta/index.tsx",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -825,6 +925,8 @@
               "{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"included\" | \"excluded\"; type: \"list\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"wildcard\"; value: string; })[]; expire_time: string | undefined; id: string; item_id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/meta/index.tsx",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -846,6 +948,8 @@
               "[]"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/meta/index.tsx",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -857,6 +961,8 @@
             "label": "dataTestSubj",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/meta/index.tsx",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -871,6 +977,8 @@
               "\"symbol\" | \"object\" | \"source\" | \"meta\" | \"search\" | \"g\" | \"desc\" | \"filter\" | \"big\" | \"link\" | \"small\" | \"sub\" | \"sup\" | \"text\" | \"map\" | \"head\" | \"style\" | \"clipPath\" | \"mask\" | \"path\" | \"title\" | \"s\" | \"article\" | \"button\" | \"dialog\" | \"figure\" | \"form\" | \"img\" | \"main\" | \"menu\" | \"menuitem\" | \"option\" | \"switch\" | \"table\" | \"time\" | \"code\" | \"label\" | \"data\" | \"slot\" | \"summary\" | \"pattern\" | \"body\" | \"set\" | \"template\" | \"span\" | \"q\" | \"line\" | \"a\" | \"abbr\" | \"address\" | \"area\" | \"aside\" | \"audio\" | \"b\" | \"base\" | \"bdi\" | \"bdo\" | \"blockquote\" | \"br\" | \"canvas\" | \"caption\" | \"center\" | \"cite\" | \"col\" | \"colgroup\" | \"datalist\" | \"dd\" | \"del\" | \"details\" | \"dfn\" | \"div\" | \"dl\" | \"dt\" | \"em\" | \"embed\" | \"fieldset\" | \"figcaption\" | \"footer\" | \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"header\" | \"hgroup\" | \"hr\" | \"html\" | \"i\" | \"iframe\" | \"input\" | \"ins\" | \"kbd\" | \"keygen\" | \"legend\" | \"li\" | \"mark\" | \"meter\" | \"nav\" | \"noindex\" | \"noscript\" | \"ol\" | \"optgroup\" | \"output\" | \"p\" | \"param\" | \"picture\" | \"pre\" | \"progress\" | \"rp\" | \"rt\" | \"ruby\" | \"samp\" | \"script\" | \"section\" | \"select\" | \"strong\" | \"tbody\" | \"td\" | \"textarea\" | \"tfoot\" | \"th\" | \"thead\" | \"tr\" | \"track\" | \"u\" | \"ul\" | \"var\" | \"video\" | \"wbr\" | \"webview\" | \"svg\" | \"animate\" | \"animateMotion\" | \"animateTransform\" | \"circle\" | \"defs\" | \"ellipse\" | \"feBlend\" | \"feColorMatrix\" | \"feComponentTransfer\" | \"feComposite\" | \"feConvolveMatrix\" | \"feDiffuseLighting\" | \"feDisplacementMap\" | \"feDistantLight\" | \"feDropShadow\" | \"feFlood\" | \"feFuncA\" | \"feFuncB\" | \"feFuncG\" | \"feFuncR\" | \"feGaussianBlur\" | \"feImage\" | \"feMerge\" | \"feMergeNode\" | \"feMorphology\" | \"feOffset\" | \"fePointLight\" | \"feSpecularLighting\" | \"feSpotLight\" | \"feTile\" | \"feTurbulence\" | \"foreignObject\" | \"image\" | \"linearGradient\" | \"marker\" | \"metadata\" | \"mpath\" | \"polygon\" | \"polyline\" | \"radialGradient\" | \"rect\" | \"stop\" | \"textPath\" | \"tspan\" | \"use\" | \"view\" | React.ComponentType<any>"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/meta/index.tsx",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -885,6 +993,8 @@
               "\"symbol\" | \"object\" | \"source\" | \"meta\" | \"search\" | \"g\" | \"desc\" | \"filter\" | \"big\" | \"link\" | \"small\" | \"sub\" | \"sup\" | \"text\" | \"map\" | \"head\" | \"style\" | \"clipPath\" | \"mask\" | \"path\" | \"title\" | \"s\" | \"article\" | \"button\" | \"dialog\" | \"figure\" | \"form\" | \"img\" | \"main\" | \"menu\" | \"menuitem\" | \"option\" | \"switch\" | \"table\" | \"time\" | \"code\" | \"label\" | \"data\" | \"slot\" | \"summary\" | \"pattern\" | \"body\" | \"set\" | \"template\" | \"span\" | \"q\" | \"line\" | \"a\" | \"abbr\" | \"address\" | \"area\" | \"aside\" | \"audio\" | \"b\" | \"base\" | \"bdi\" | \"bdo\" | \"blockquote\" | \"br\" | \"canvas\" | \"caption\" | \"center\" | \"cite\" | \"col\" | \"colgroup\" | \"datalist\" | \"dd\" | \"del\" | \"details\" | \"dfn\" | \"div\" | \"dl\" | \"dt\" | \"em\" | \"embed\" | \"fieldset\" | \"figcaption\" | \"footer\" | \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"header\" | \"hgroup\" | \"hr\" | \"html\" | \"i\" | \"iframe\" | \"input\" | \"ins\" | \"kbd\" | \"keygen\" | \"legend\" | \"li\" | \"mark\" | \"meter\" | \"nav\" | \"noindex\" | \"noscript\" | \"ol\" | \"optgroup\" | \"output\" | \"p\" | \"param\" | \"picture\" | \"pre\" | \"progress\" | \"rp\" | \"rt\" | \"ruby\" | \"samp\" | \"script\" | \"section\" | \"select\" | \"strong\" | \"tbody\" | \"td\" | \"textarea\" | \"tfoot\" | \"th\" | \"thead\" | \"tr\" | \"track\" | \"u\" | \"ul\" | \"var\" | \"video\" | \"wbr\" | \"webview\" | \"svg\" | \"animate\" | \"animateMotion\" | \"animateTransform\" | \"circle\" | \"defs\" | \"ellipse\" | \"feBlend\" | \"feColorMatrix\" | \"feComponentTransfer\" | \"feComposite\" | \"feConvolveMatrix\" | \"feDiffuseLighting\" | \"feDisplacementMap\" | \"feDistantLight\" | \"feDropShadow\" | \"feFlood\" | \"feFuncA\" | \"feFuncB\" | \"feFuncG\" | \"feFuncR\" | \"feGaussianBlur\" | \"feImage\" | \"feMerge\" | \"feMergeNode\" | \"feMorphology\" | \"feOffset\" | \"fePointLight\" | \"feSpecularLighting\" | \"feSpotLight\" | \"feTile\" | \"feTurbulence\" | \"foreignObject\" | \"image\" | \"linearGradient\" | \"marker\" | \"metadata\" | \"mpath\" | \"polygon\" | \"polyline\" | \"radialGradient\" | \"rect\" | \"stop\" | \"textPath\" | \"tspan\" | \"use\" | \"view\" | React.ComponentType<any>"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/meta/index.tsx",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -899,6 +1009,8 @@
         "label": "ExceptionItemProps",
         "description": [],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -913,6 +1025,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -927,6 +1041,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -941,6 +1057,8 @@
               "{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"included\" | \"excluded\"; type: \"list\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"wildcard\"; value: string; })[]; expire_time: string | undefined; id: string; item_id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -961,6 +1079,8 @@
               }
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -982,6 +1102,8 @@
               "[]"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -996,6 +1118,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1010,6 +1134,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1024,6 +1150,8 @@
               "\"symbol\" | \"object\" | \"source\" | \"meta\" | \"search\" | \"g\" | \"desc\" | \"filter\" | \"big\" | \"link\" | \"small\" | \"sub\" | \"sup\" | \"text\" | \"map\" | \"head\" | \"style\" | \"clipPath\" | \"mask\" | \"path\" | \"title\" | \"s\" | \"article\" | \"button\" | \"dialog\" | \"figure\" | \"form\" | \"img\" | \"main\" | \"menu\" | \"menuitem\" | \"option\" | \"switch\" | \"table\" | \"time\" | \"code\" | \"label\" | \"data\" | \"slot\" | \"summary\" | \"pattern\" | \"body\" | \"set\" | \"template\" | \"span\" | \"q\" | \"line\" | \"a\" | \"abbr\" | \"address\" | \"area\" | \"aside\" | \"audio\" | \"b\" | \"base\" | \"bdi\" | \"bdo\" | \"blockquote\" | \"br\" | \"canvas\" | \"caption\" | \"center\" | \"cite\" | \"col\" | \"colgroup\" | \"datalist\" | \"dd\" | \"del\" | \"details\" | \"dfn\" | \"div\" | \"dl\" | \"dt\" | \"em\" | \"embed\" | \"fieldset\" | \"figcaption\" | \"footer\" | \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"header\" | \"hgroup\" | \"hr\" | \"html\" | \"i\" | \"iframe\" | \"input\" | \"ins\" | \"kbd\" | \"keygen\" | \"legend\" | \"li\" | \"mark\" | \"meter\" | \"nav\" | \"noindex\" | \"noscript\" | \"ol\" | \"optgroup\" | \"output\" | \"p\" | \"param\" | \"picture\" | \"pre\" | \"progress\" | \"rp\" | \"rt\" | \"ruby\" | \"samp\" | \"script\" | \"section\" | \"select\" | \"strong\" | \"tbody\" | \"td\" | \"textarea\" | \"tfoot\" | \"th\" | \"thead\" | \"tr\" | \"track\" | \"u\" | \"ul\" | \"var\" | \"video\" | \"wbr\" | \"webview\" | \"svg\" | \"animate\" | \"animateMotion\" | \"animateTransform\" | \"circle\" | \"defs\" | \"ellipse\" | \"feBlend\" | \"feColorMatrix\" | \"feComponentTransfer\" | \"feComposite\" | \"feConvolveMatrix\" | \"feDiffuseLighting\" | \"feDisplacementMap\" | \"feDistantLight\" | \"feDropShadow\" | \"feFlood\" | \"feFuncA\" | \"feFuncB\" | \"feFuncG\" | \"feFuncR\" | \"feGaussianBlur\" | \"feImage\" | \"feMerge\" | \"feMergeNode\" | \"feMorphology\" | \"feOffset\" | \"fePointLight\" | \"feSpecularLighting\" | \"feSpotLight\" | \"feTile\" | \"feTurbulence\" | \"foreignObject\" | \"image\" | \"linearGradient\" | \"marker\" | \"metadata\" | \"mpath\" | \"polygon\" | \"polyline\" | \"radialGradient\" | \"rect\" | \"stop\" | \"textPath\" | \"tspan\" | \"use\" | \"view\" | React.ComponentType<any>"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1038,6 +1166,8 @@
               "\"symbol\" | \"object\" | \"source\" | \"meta\" | \"search\" | \"g\" | \"desc\" | \"filter\" | \"big\" | \"link\" | \"small\" | \"sub\" | \"sup\" | \"text\" | \"map\" | \"head\" | \"style\" | \"clipPath\" | \"mask\" | \"path\" | \"title\" | \"s\" | \"article\" | \"button\" | \"dialog\" | \"figure\" | \"form\" | \"img\" | \"main\" | \"menu\" | \"menuitem\" | \"option\" | \"switch\" | \"table\" | \"time\" | \"code\" | \"label\" | \"data\" | \"slot\" | \"summary\" | \"pattern\" | \"body\" | \"set\" | \"template\" | \"span\" | \"q\" | \"line\" | \"a\" | \"abbr\" | \"address\" | \"area\" | \"aside\" | \"audio\" | \"b\" | \"base\" | \"bdi\" | \"bdo\" | \"blockquote\" | \"br\" | \"canvas\" | \"caption\" | \"center\" | \"cite\" | \"col\" | \"colgroup\" | \"datalist\" | \"dd\" | \"del\" | \"details\" | \"dfn\" | \"div\" | \"dl\" | \"dt\" | \"em\" | \"embed\" | \"fieldset\" | \"figcaption\" | \"footer\" | \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"header\" | \"hgroup\" | \"hr\" | \"html\" | \"i\" | \"iframe\" | \"input\" | \"ins\" | \"kbd\" | \"keygen\" | \"legend\" | \"li\" | \"mark\" | \"meter\" | \"nav\" | \"noindex\" | \"noscript\" | \"ol\" | \"optgroup\" | \"output\" | \"p\" | \"param\" | \"picture\" | \"pre\" | \"progress\" | \"rp\" | \"rt\" | \"ruby\" | \"samp\" | \"script\" | \"section\" | \"select\" | \"strong\" | \"tbody\" | \"td\" | \"textarea\" | \"tfoot\" | \"th\" | \"thead\" | \"tr\" | \"track\" | \"u\" | \"ul\" | \"var\" | \"video\" | \"wbr\" | \"webview\" | \"svg\" | \"animate\" | \"animateMotion\" | \"animateTransform\" | \"circle\" | \"defs\" | \"ellipse\" | \"feBlend\" | \"feColorMatrix\" | \"feComponentTransfer\" | \"feComposite\" | \"feConvolveMatrix\" | \"feDiffuseLighting\" | \"feDisplacementMap\" | \"feDistantLight\" | \"feDropShadow\" | \"feFlood\" | \"feFuncA\" | \"feFuncB\" | \"feFuncG\" | \"feFuncR\" | \"feGaussianBlur\" | \"feImage\" | \"feMerge\" | \"feMergeNode\" | \"feMorphology\" | \"feOffset\" | \"fePointLight\" | \"feSpecularLighting\" | \"feSpotLight\" | \"feTile\" | \"feTurbulence\" | \"foreignObject\" | \"image\" | \"linearGradient\" | \"marker\" | \"metadata\" | \"mpath\" | \"polygon\" | \"polyline\" | \"radialGradient\" | \"rect\" | \"stop\" | \"textPath\" | \"tspan\" | \"use\" | \"view\" | React.ComponentType<any>"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1054,6 +1184,8 @@
               "[]"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1068,6 +1200,8 @@
                   "({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]"
                 ],
                 "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
+                "lineNumber": 38,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1094,6 +1228,8 @@
               ") => void"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1114,6 +1250,8 @@
                   }
                 ],
                 "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
+                "lineNumber": 39,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1132,6 +1270,8 @@
               "(item: { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"included\" | \"excluded\"; type: \"list\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"wildcard\"; value: string; })[]; expire_time: string | undefined; id: string; item_id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }) => void"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1146,6 +1286,8 @@
                   "{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"included\" | \"excluded\"; type: \"list\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"included\" | \"excluded\"; type: \"match\"; value: string; } | { field: string; operator: \"included\" | \"excluded\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"included\" | \"excluded\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"included\" | \"excluded\"; type: \"wildcard\"; value: string; })[]; expire_time: string | undefined; id: string; item_id: string; list_id: string; meta: { [key: string]: unknown; } | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }"
                 ],
                 "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
+                "lineNumber": 40,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1164,6 +1306,8 @@
               "\"symbol\" | \"object\" | \"source\" | \"meta\" | \"search\" | \"g\" | \"desc\" | \"filter\" | \"big\" | \"link\" | \"small\" | \"sub\" | \"sup\" | \"text\" | \"map\" | \"head\" | \"style\" | \"clipPath\" | \"mask\" | \"path\" | \"title\" | \"s\" | \"article\" | \"button\" | \"dialog\" | \"figure\" | \"form\" | \"img\" | \"main\" | \"menu\" | \"menuitem\" | \"option\" | \"switch\" | \"table\" | \"time\" | \"code\" | \"label\" | \"data\" | \"slot\" | \"summary\" | \"pattern\" | \"body\" | \"set\" | \"template\" | \"span\" | \"q\" | \"line\" | \"a\" | \"abbr\" | \"address\" | \"area\" | \"aside\" | \"audio\" | \"b\" | \"base\" | \"bdi\" | \"bdo\" | \"blockquote\" | \"br\" | \"canvas\" | \"caption\" | \"center\" | \"cite\" | \"col\" | \"colgroup\" | \"datalist\" | \"dd\" | \"del\" | \"details\" | \"dfn\" | \"div\" | \"dl\" | \"dt\" | \"em\" | \"embed\" | \"fieldset\" | \"figcaption\" | \"footer\" | \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"header\" | \"hgroup\" | \"hr\" | \"html\" | \"i\" | \"iframe\" | \"input\" | \"ins\" | \"kbd\" | \"keygen\" | \"legend\" | \"li\" | \"mark\" | \"meter\" | \"nav\" | \"noindex\" | \"noscript\" | \"ol\" | \"optgroup\" | \"output\" | \"p\" | \"param\" | \"picture\" | \"pre\" | \"progress\" | \"rp\" | \"rt\" | \"ruby\" | \"samp\" | \"script\" | \"section\" | \"select\" | \"strong\" | \"tbody\" | \"td\" | \"textarea\" | \"tfoot\" | \"th\" | \"thead\" | \"tr\" | \"track\" | \"u\" | \"ul\" | \"var\" | \"video\" | \"wbr\" | \"webview\" | \"svg\" | \"animate\" | \"animateMotion\" | \"animateTransform\" | \"circle\" | \"defs\" | \"ellipse\" | \"feBlend\" | \"feColorMatrix\" | \"feComponentTransfer\" | \"feComposite\" | \"feConvolveMatrix\" | \"feDiffuseLighting\" | \"feDisplacementMap\" | \"feDistantLight\" | \"feDropShadow\" | \"feFlood\" | \"feFuncA\" | \"feFuncB\" | \"feFuncG\" | \"feFuncR\" | \"feGaussianBlur\" | \"feImage\" | \"feMerge\" | \"feMergeNode\" | \"feMorphology\" | \"feOffset\" | \"fePointLight\" | \"feSpecularLighting\" | \"feSpotLight\" | \"feTile\" | \"feTurbulence\" | \"foreignObject\" | \"image\" | \"linearGradient\" | \"marker\" | \"metadata\" | \"mpath\" | \"polygon\" | \"polyline\" | \"radialGradient\" | \"rect\" | \"stop\" | \"textPath\" | \"tspan\" | \"use\" | \"view\" | React.ComponentType<any>"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1178,6 +1322,8 @@
         "label": "ExceptionListItemIdentifiers",
         "description": [],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1189,6 +1335,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1200,6 +1348,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1214,6 +1364,8 @@
               "\"single\" | \"agnostic\""
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1228,6 +1380,8 @@
         "label": "ExceptionListSummaryProps",
         "description": [],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1242,6 +1396,8 @@
               "Pagination"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1256,6 +1412,8 @@
               "string | number | null"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1270,6 +1428,8 @@
         "label": "GetExceptionItemProps",
         "description": [],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1286,6 +1446,8 @@
               " & { pageSize: number; }) | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1300,6 +1462,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1314,6 +1478,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1328,6 +1494,8 @@
         "label": "ListDetails",
         "description": [],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+        "lineNumber": 71,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1339,6 +1507,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1353,6 +1523,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1367,6 +1539,8 @@
         "label": "PaginationProps",
         "description": [],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1381,6 +1555,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1395,6 +1571,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1410,6 +1588,8 @@
               " & { pageSize: number; }"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1432,6 +1612,8 @@
               ") => void"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1452,6 +1634,8 @@
                   }
                 ],
                 "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+                "lineNumber": 22,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1470,6 +1654,8 @@
         "label": "Rule",
         "description": [],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+        "lineNumber": 57,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1481,6 +1667,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1492,6 +1680,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1503,6 +1693,8 @@
             "label": "rule_id",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1517,6 +1709,8 @@
               "{ id: string; list_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_devices\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; namespace_type: \"single\" | \"agnostic\"; }[] | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1531,6 +1725,8 @@
         "label": "RuleReference",
         "description": [],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+        "lineNumber": 64,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1542,6 +1738,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1553,6 +1751,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1574,6 +1774,8 @@
               "[]"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1588,6 +1790,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1602,6 +1806,8 @@
         "label": "RuleReferences",
         "description": [],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1623,6 +1829,8 @@
               }
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1639,6 +1847,8 @@
         "label": "ListTypeText",
         "description": [],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1651,6 +1861,8 @@
         "label": "ViewerStatus",
         "description": [],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1668,6 +1880,8 @@
           "\"addException\" | \"editException\" | null"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/types/index.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

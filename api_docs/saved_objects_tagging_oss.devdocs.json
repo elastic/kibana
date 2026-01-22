@@ -14,6 +14,8 @@
           "\nOptions for the {@link SavedObjectsTaggingApiUi.getSearchBarFilter | getSearchBarFilter api}\n"
         ],
         "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+        "lineNumber": 296,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -30,6 +32,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+            "lineNumber": 302,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -46,6 +50,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+            "lineNumber": 319,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -62,6 +68,8 @@
           "\nOptions for the {@link SavedObjectsTaggingApiUi.getTableColumnDefinition | getTableColumnDefinition api}\n"
         ],
         "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+        "lineNumber": 274,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -78,6 +86,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+            "lineNumber": 280,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -92,6 +102,8 @@
         "label": "ITagsCache",
         "description": [],
         "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -116,6 +128,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -144,6 +158,8 @@
               "[]>"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -155,6 +171,8 @@
                 "label": "params",
                 "description": [],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+                "lineNumber": 52,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -169,6 +187,8 @@
                       "boolean | undefined"
                     ],
                     "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+                    "lineNumber": 52,
+                    "columnNumber": 24,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -188,6 +208,8 @@
         "label": "ParsedSearchQuery",
         "description": [],
         "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+        "lineNumber": 327,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -199,6 +221,8 @@
             "label": "searchTerm",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+            "lineNumber": 331,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -214,6 +238,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+            "lineNumber": 332,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -229,6 +255,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+            "lineNumber": 333,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -240,6 +268,8 @@
             "label": "valid",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+            "lineNumber": 334,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -256,6 +286,8 @@
           "\nOptions for the {@link SavedObjectsTaggingApiUi.parseSearchQuery | parseSearchQuery api}\n"
         ],
         "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+        "lineNumber": 337,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -272,6 +304,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+            "lineNumber": 343,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -288,6 +322,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+            "lineNumber": 353,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -302,6 +338,8 @@
         "label": "SavedObjectsTaggingApi",
         "description": [],
         "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -324,6 +362,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -346,6 +386,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -368,6 +410,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -384,6 +428,8 @@
           "\nReact components and utility methods to use the SO tagging feature\n"
         ],
         "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+        "lineNumber": 55,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -408,6 +454,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -422,6 +470,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+                "lineNumber": 66,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -450,6 +500,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -477,6 +529,8 @@
               "SearchFilterConfig"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -498,6 +552,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+                "lineNumber": 84,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -530,6 +586,8 @@
               "<unknown>>"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -551,6 +609,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+                "lineNumber": 101,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -573,6 +633,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -587,6 +649,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+                "lineNumber": 109,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -623,6 +687,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+            "lineNumber": 111,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -639,6 +705,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+                "lineNumber": 154,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -663,6 +731,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+                "lineNumber": 154,
+                "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -687,6 +757,8 @@
               ")[]) => string[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+            "lineNumber": 156,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -705,6 +777,8 @@
                   ")[]"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+                "lineNumber": 160,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -726,6 +800,8 @@
               "SavedObjectReference"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+            "lineNumber": 163,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -740,6 +816,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+                "lineNumber": 166,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -760,6 +838,8 @@
               "(tagName: string) => string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+            "lineNumber": 168,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -774,6 +854,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+                "lineNumber": 172,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -798,6 +880,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+            "lineNumber": 174,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -813,6 +897,8 @@
                   "[]"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+                "lineNumber": 179,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -828,6 +914,8 @@
                   "string[]"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+                "lineNumber": 180,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -854,6 +942,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+            "lineNumber": 183,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -870,6 +960,8 @@
           "\nReact UI components to be used to display the tagging feature in any application.\n"
         ],
         "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+        "lineNumber": 189,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -894,6 +986,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+            "lineNumber": 195,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -909,6 +1003,8 @@
                   "P"
                 ],
                 "path": "node_modules/@types/react/ts5.0/index.d.ts",
+                "lineNumber": 1109,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -923,6 +1019,8 @@
                   "any"
                 ],
                 "path": "node_modules/@types/react/ts5.0/index.d.ts",
+                "lineNumber": 1109,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -949,6 +1047,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+            "lineNumber": 199,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -964,6 +1064,8 @@
                   "P"
                 ],
                 "path": "node_modules/@types/react/ts5.0/index.d.ts",
+                "lineNumber": 1109,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -978,6 +1080,8 @@
                   "any"
                 ],
                 "path": "node_modules/@types/react/ts5.0/index.d.ts",
+                "lineNumber": 1109,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1004,6 +1108,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+            "lineNumber": 203,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1019,6 +1125,8 @@
                   "P"
                 ],
                 "path": "node_modules/@types/react/ts5.0/index.d.ts",
+                "lineNumber": 1109,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1033,6 +1141,8 @@
                   "any"
                 ],
                 "path": "node_modules/@types/react/ts5.0/index.d.ts",
+                "lineNumber": 1109,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1051,6 +1161,8 @@
           "\nProps type for the {@link SavedObjectsTaggingApiUiComponent.TagList | TagList component}\n"
         ],
         "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+        "lineNumber": 211,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1069,6 +1181,8 @@
               "[]; }"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+            "lineNumber": 217,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1093,6 +1207,8 @@
               ") => void) | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+            "lineNumber": 221,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1113,6 +1229,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+                "lineNumber": 224,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1141,6 +1259,8 @@
               ") => JSX.Element) | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+            "lineNumber": 225,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1161,6 +1281,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+                "lineNumber": 228,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1181,6 +1303,8 @@
           "\nProps type for the {@link SavedObjectsTaggingApiUiComponent.TagSelector | TagSelector component}\n"
         ],
         "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+        "lineNumber": 231,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1197,6 +1321,8 @@
               "string[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+            "lineNumber": 237,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1213,6 +1339,8 @@
               "(ids: string[]) => void"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+            "lineNumber": 241,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1227,6 +1355,8 @@
                   "string[]"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+                "lineNumber": 244,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1271,6 +1401,8 @@
           " | { type: \"__create_option__\"; }>> & { initialSelection: string[]; onTagsSelected: (ids: string[]) => void; markOptional?: boolean | undefined; }"
         ],
         "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+        "lineNumber": 247,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1285,6 +1417,8 @@
       "label": "SavedObjectTaggingOssPluginSetup",
       "description": [],
       "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/types.ts",
+      "lineNumber": 12,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1309,6 +1443,8 @@
             ">) => void"
           ],
           "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/types.ts",
+          "lineNumber": 13,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1331,6 +1467,8 @@
                 ">"
               ],
               "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/types.ts",
+              "lineNumber": 22,
+              "columnNumber": 22,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1350,6 +1488,8 @@
       "label": "SavedObjectTaggingOssPluginStart",
       "description": [],
       "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/types.ts",
+      "lineNumber": 25,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1366,6 +1506,8 @@
             "() => boolean"
           ],
           "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/types.ts",
+          "lineNumber": 26,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -1392,6 +1534,8 @@
             " | undefined"
           ],
           "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/types.ts",
+          "lineNumber": 31,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -1422,6 +1566,8 @@
         "label": "CreateTagOptions",
         "description": [],
         "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1436,6 +1582,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1450,6 +1598,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1464,6 +1614,8 @@
               "boolean | \"wait_for\" | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1478,6 +1630,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1492,6 +1646,8 @@
         "label": "GetAllTagsOptions",
         "description": [],
         "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1506,6 +1662,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1520,6 +1678,8 @@
         "label": "ITagsClient",
         "description": [],
         "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1558,6 +1718,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1578,6 +1740,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+                "lineNumber": 38,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1600,6 +1764,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+                "lineNumber": 38,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1626,6 +1792,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1640,6 +1808,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+                "lineNumber": 39,
+                "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1674,6 +1844,8 @@
               "[]>"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1695,6 +1867,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+                "lineNumber": 40,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1721,6 +1895,8 @@
               " | null>"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1735,6 +1911,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+                "lineNumber": 41,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1747,6 +1925,8 @@
                 "label": "options",
                 "description": [],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+                "lineNumber": 41,
+                "columnNumber": 38,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1761,6 +1941,8 @@
                       "boolean | undefined"
                     ],
                     "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+                    "lineNumber": 41,
+                    "columnNumber": 40,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -1780,6 +1962,8 @@
               "(id: string) => Promise<void>"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1794,6 +1978,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+                "lineNumber": 42,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1828,6 +2014,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1842,6 +2030,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+                "lineNumber": 43,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1863,6 +2053,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+                "lineNumber": 43,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1881,6 +2073,8 @@
         "label": "Tag",
         "description": [],
         "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1892,6 +2086,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1903,6 +2099,8 @@
             "label": "managed",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1914,6 +2112,8 @@
             "label": "name",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1925,6 +2125,8 @@
             "label": "description",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1936,6 +2138,8 @@
             "label": "color",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1950,6 +2154,8 @@
         "label": "TagAttributes",
         "description": [],
         "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1961,6 +2167,8 @@
             "label": "name",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1972,6 +2180,8 @@
             "label": "description",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1983,6 +2193,8 @@
             "label": "color",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2011,6 +2223,8 @@
           ", \"id\"> & { id?: string | undefined; }"
         ],
         "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -14,6 +14,7 @@ import {
   isConditionFilter,
   isGroupFilter,
   isDSLFilter,
+  isSpatialFilter,
   isRangeConditionFilter,
 } from './type_guards';
 import { spatialFilterFixture } from './__fixtures__/spatial_filter';
@@ -199,7 +200,11 @@ describe('fromStoredFilter', () => {
     it('should handle negated filters', () => {
       const storedFilter = {
         meta: { key: 'status', negate: true, type: 'phrase' },
-        query: { term: { status: 'inactive' } },
+        query: {
+          match_phrase: {
+            status: 'inactive',
+          },
+        },
       };
 
       const result = fromStoredFilter(storedFilter) as AsCodeFilter;
@@ -212,12 +217,10 @@ describe('fromStoredFilter', () => {
     });
 
     it('should preserve negate property for negated range filter', () => {
-      // Range filters do NOT have an opposition operator (unlike IS/IS_NOT, EXISTS/NOT_EXISTS)
-      // so negate must be preserved in the base properties
       const negatedRangeFilter = {
         meta: {
           disabled: false,
-          negate: true, // CRITICAL: This must be preserved
+          negate: true,
           alias: null,
           key: 'bytes',
           field: 'bytes',
@@ -237,7 +240,6 @@ describe('fromStoredFilter', () => {
 
       expect(result).toBeDefined();
       expect(isConditionFilter(result!)).toBe(true);
-      // CRITICAL: condition.negate MUST be preserved for range filters
       if (isRangeConditionFilter(result!)) {
         expect(result.condition.negate).toBe(true);
       }
@@ -304,10 +306,7 @@ describe('fromStoredFilter', () => {
         meta: {},
         query: {
           match: {
-            message: {
-              type: 'phrase',
-              query: 'test message',
-            },
+            message: 'test message',
           },
         },
       };
@@ -318,26 +317,9 @@ describe('fromStoredFilter', () => {
       if (isDSLFilter(result)) {
         expect(result.dsl.query).toEqual({
           match: {
-            message: {
-              type: 'phrase',
-              query: 'test message',
-            },
+            message: 'test message',
           },
         });
-      }
-    });
-
-    it('should preserve term queries as DSL when meta.type is missing', () => {
-      const storedFilter = {
-        meta: {},
-        query: { term: { username: 'john' } },
-      };
-
-      const result = fromStoredFilter(storedFilter) as AsCodeFilter;
-
-      expect(isDSLFilter(result)).toBe(true);
-      if (isDSLFilter(result)) {
-        expect(result.dsl.query).toEqual({ term: { username: 'john' } });
       }
     });
   });
@@ -605,14 +587,14 @@ describe('fromStoredFilter', () => {
       }
     });
 
-    it('should preserve spatial filters with geo_shape queries as DSL', () => {
+    it('should preserve spatial filters with geo_shape queries as spatial type', () => {
       const spatialFilter = spatialFilterFixture;
 
       const result = fromStoredFilter(spatialFilter) as AsCodeFilter;
 
-      // Should be converted to DSL format due to geo_shape complexity
-      expect(isDSLFilter(result)).toBe(true);
-      if (isDSLFilter(result)) {
+      // Should be converted to spatial filter type (not DSL)
+      expect(isSpatialFilter(result)).toBe(true);
+      if (isSpatialFilter(result)) {
         expect(result.dsl.query).toEqual(spatialFilter.query);
         expect(result.label).toBe('intersects shape');
         expect(result.disabled).toBe(false);
@@ -626,7 +608,7 @@ describe('fromStoredFilter', () => {
       const result = fromStoredFilter(spatialFilter) as AsCodeFilter;
 
       // Verify is_multi_index is extracted from meta
-      expect(isDSLFilter(result)).toBe(true);
+      expect(isSpatialFilter(result)).toBe(true);
       expect(result.is_multi_index).toBe(true);
     });
   });
@@ -642,7 +624,7 @@ describe('fromStoredFilter', () => {
           alias: 'Status Filter',
           negate: true,
         },
-        query: { term: { status: 'active' } },
+        query: { match_phrase: { status: 'active' } },
       };
 
       const result = fromStoredFilter(storedFilter) as AsCodeFilter;

@@ -16,37 +16,11 @@ import type {
   AsCodeConditionFilter,
   AsCodeGroupFilter,
   AsCodeDSLFilter,
+  AsCodeSpatialFilter,
 } from '@kbn/as-code-filters-schema';
+import { ASCODE_FILTER_TYPE } from '@kbn/as-code-filters-constants';
 import { FILTERS } from '@kbn/es-query';
 import type { StoredFilter } from './types';
-
-/**
- * Legacy filter interface for legacy Kibana filter format
- * These filters have query properties at the top level instead of under .query
- */
-interface LegacyFilter {
-  meta?: unknown;
-  $state?: unknown;
-  range?: unknown;
-  exists?: unknown;
-  match_all?: unknown;
-  match?: unknown;
-}
-
-/**
- * Type guard to check if a filter has legacy Kibana filter format properties
- * These filters have query properties at the top level instead of under .query
- */
-export function isLegacyFilter(value: unknown): value is LegacyFilter {
-  if (!value || typeof value !== 'object') {
-    return false;
-  }
-
-  const filter = value as Record<string, unknown>;
-
-  // Check for legacy top-level properties (legacy Kibana filter format)
-  return !!(filter.range || filter.exists || filter.match_all || filter.match);
-}
 
 /**
  * Type guard for query objects with term property
@@ -135,7 +109,7 @@ export function isCombinedFilter(storedFilter: StoredFilter): boolean {
  * Type guard to check if filter has a condition property
  */
 export function isConditionFilter(filter: AsCodeFilter): filter is AsCodeConditionFilter {
-  return 'condition' in filter && filter.condition !== undefined;
+  return filter.type === ASCODE_FILTER_TYPE.CONDITION;
 }
 
 /**
@@ -154,14 +128,21 @@ export function isRangeConditionFilter(
  * Type guard to check if filter has a group property
  */
 export function isGroupFilter(filter: AsCodeFilter): filter is AsCodeGroupFilter {
-  return 'group' in filter && filter.group !== undefined;
+  return filter.type === ASCODE_FILTER_TYPE.GROUP;
 }
 
 /**
  * Type guard to check if filter has a dsl property
  */
 export function isDSLFilter(filter: AsCodeFilter): filter is AsCodeDSLFilter {
-  return 'dsl' in filter && filter.dsl !== undefined;
+  return filter.type === ASCODE_FILTER_TYPE.DSL;
+}
+
+/**
+ * Type guard to check if filter is a spatial filter
+ */
+export function isSpatialFilter(filter: AsCodeFilter): filter is AsCodeSpatialFilter {
+  return filter.type === ASCODE_FILTER_TYPE.SPATIAL;
 }
 
 /**
@@ -176,14 +157,15 @@ export function isNestedFilterGroup(
 
 /**
  * Type guard to check if an AsCodeFilter has valid structure
- * Validates that exactly one of condition, group, or dsl is present
+ * Validates that exactly one of condition, group, dsl, or spatial is present
  */
 export function isAsCodeFilter(filter: AsCodeFilter): boolean {
   const hasCondition = isConditionFilter(filter);
   const hasGroup = isGroupFilter(filter);
   const hasDSL = isDSLFilter(filter);
+  const hasSpatial = isSpatialFilter(filter);
 
-  // Exactly one of the three must be true
-  const count = [hasCondition, hasGroup, hasDSL].filter(Boolean).length;
+  // Exactly one of the four must be true
+  const count = [hasCondition, hasGroup, hasDSL, hasSpatial].filter(Boolean).length;
   return count === 1;
 }

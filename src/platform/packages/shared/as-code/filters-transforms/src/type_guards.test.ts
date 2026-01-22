@@ -19,6 +19,7 @@ describe('Type Guards', () => {
     describe('isConditionFilter', () => {
       it('should detect condition filters', () => {
         const filter: AsCodeConditionFilter = {
+          type: 'condition',
           condition: { field: 'test', operator: 'is', value: 'value' },
         };
         expect(isConditionFilter(filter)).toBe(true);
@@ -26,6 +27,7 @@ describe('Type Guards', () => {
 
       it('should reject non-condition filters', () => {
         const filter: AsCodeGroupFilter = {
+          type: 'group',
           group: { type: 'and', conditions: [] },
         };
         expect(isConditionFilter(filter)).toBe(false);
@@ -35,6 +37,7 @@ describe('Type Guards', () => {
     describe('isGroupFilter', () => {
       it('should detect group filters', () => {
         const filter: AsCodeGroupFilter = {
+          type: 'group',
           group: { type: 'and', conditions: [] },
         };
         expect(isGroupFilter(filter)).toBe(true);
@@ -42,6 +45,7 @@ describe('Type Guards', () => {
 
       it('should reject non-group filters', () => {
         const filter: AsCodeConditionFilter = {
+          type: 'condition',
           condition: { field: 'test', operator: 'is', value: 'value' },
         };
         expect(isGroupFilter(filter)).toBe(false);
@@ -51,6 +55,7 @@ describe('Type Guards', () => {
     describe('isDSLFilter', () => {
       it('should detect DSL filters', () => {
         const filter: AsCodeDSLFilter = {
+          type: 'dsl',
           dsl: { query: { term: { field: 'value' } } },
         };
         expect(isDSLFilter(filter)).toBe(true);
@@ -58,6 +63,7 @@ describe('Type Guards', () => {
 
       it('should reject non-DSL filters', () => {
         const filter: AsCodeConditionFilter = {
+          type: 'condition',
           condition: { field: 'test', operator: 'is', value: 'value' },
         };
         expect(isDSLFilter(filter)).toBe(false);

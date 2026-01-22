@@ -33,6 +33,8 @@
           "MetricReader"
         ],
         "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/prometheus_exporter.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -58,6 +60,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/prometheus_exporter.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -81,6 +85,8 @@
               }
             ],
             "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/prometheus_exporter.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -101,6 +107,8 @@
               "() => void"
             ],
             "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/prometheus_exporter.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -120,6 +128,8 @@
               "AggregationTemporality"
             ],
             "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/prometheus_exporter.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -140,6 +150,8 @@
               "() => Promise<void>"
             ],
             "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/prometheus_exporter.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -160,6 +172,8 @@
               "() => Promise<void>"
             ],
             "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/prometheus_exporter.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -182,6 +196,8 @@
               "<any>>"
             ],
             "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/prometheus_exporter.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -198,6 +214,8 @@
                   "KibanaResponseFactory"
                 ],
                 "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/prometheus_exporter.ts",
+                "lineNumber": 89,
+                "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -231,6 +249,8 @@
           ") => void"
         ],
         "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/init_metrics.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -253,6 +273,8 @@
               }
             ],
             "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/init_metrics.ts",
+            "lineNumber": 43,
+            "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -273,6 +295,8 @@
           "\nOptions to the initMetrics method"
         ],
         "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/init_metrics.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -289,6 +313,8 @@
               "Resource"
             ],
             "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/init_metrics.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -311,6 +337,8 @@
               }
             ],
             "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/init_metrics.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -327,6 +355,8 @@
               "{ readonly enabled: boolean; readonly opentelemetry: Readonly<{} & { metrics: Readonly<{} & { otlp: Readonly<{ url?: string | undefined; headers?: Record<string, string> | undefined; } & { exportIntervalMillis: number; logLevel: string; }>; prometheus: Readonly<{} & { enabled: boolean; }>; }>; }>; }"
             ],
             "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/init_metrics.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

@@ -98,7 +98,10 @@
     "@kbn/core-chrome-layout-utils",
     "@kbn/cps",
     "@kbn/as-code-filters-schema",
-    "@kbn/as-code-filters-transforms"
+    "@kbn/as-code-filters-transforms",
+    "@kbn/core-chrome-app-menu-components",
+    "@kbn/core-chrome-app-menu",
+    "@kbn/test-jest-helpers"
   ],
   "exclude": ["target/**/*"]
 }

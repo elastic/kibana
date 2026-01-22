@@ -14,8 +14,12 @@
  * in * as Code APIs.
  */
 
-import { schema } from '@kbn/config-schema';
-import { ASCODE_FILTER_OPERATOR } from '@kbn/as-code-filters-constants';
+import { schema, type TypeOf } from '@kbn/config-schema';
+import {
+  ASCODE_FILTER_OPERATOR,
+  ASCODE_GROUPED_CONDITION_TYPE,
+  ASCODE_FILTER_TYPE,
+} from '@kbn/as-code-filters-constants';
 
 // ====================================================================
 // CORE FILTER OPERATOR AND VALUE SCHEMAS
@@ -100,31 +104,6 @@ const commonBasePropertiesSchema = schema.object({
       meta: { description: 'Whether this filter can be applied to multiple indices' },
     })
   ),
-  filter_type: schema.maybe(
-    schema.string({
-      meta: {
-        description:
-          'Filter type from legacy filters (e.g., "spatial_filter", "query_string") for backwards compatibility',
-        deprecated: true,
-      },
-    })
-  ),
-  key: schema.maybe(
-    schema.string({
-      meta: {
-        description: 'Field name metadata from legacy filters for backwards compatibility',
-        deprecated: true,
-      },
-    })
-  ),
-  value: schema.maybe(
-    schema.string({
-      meta: {
-        description: 'Value metadata from legacy filters for backwards compatibility',
-        deprecated: true,
-      },
-    })
-  ),
 });
 
 // ====================================================================
@@ -193,8 +172,10 @@ const conditionSchema = schema.oneOf(
 // ====================================================================
 
 interface RecursiveType {
-  name: string;
-  self: undefined | RecursiveType;
+  group: {
+    type: typeof ASCODE_GROUPED_CONDITION_TYPE.AND | typeof ASCODE_GROUPED_CONDITION_TYPE.OR;
+    conditions: Array<TypeOf<typeof conditionSchema> | RecursiveType>;
+  };
 }
 
 /**
@@ -202,6 +183,7 @@ interface RecursiveType {
  */
 export const asCodeConditionFilterSchema = commonBasePropertiesSchema.extends(
   {
+    type: schema.literal(ASCODE_FILTER_TYPE.CONDITION),
     condition: conditionSchema,
   },
   { meta: { description: 'Condition filter' } }
@@ -214,9 +196,13 @@ export const asCodeConditionFilterSchema = commonBasePropertiesSchema.extends(
 const GROUP_FILTER_ID = '@kbn/as-code-filters-schema_groupFilter'; // package prefix for global uniqueness in OAS specs
 export const asCodeGroupFilterSchema = commonBasePropertiesSchema.extends(
   {
+    type: schema.literal(ASCODE_FILTER_TYPE.GROUP),
     group: schema.object(
       {
-        type: schema.oneOf([schema.literal('and'), schema.literal('or')]),
+        type: schema.oneOf([
+          schema.literal(ASCODE_GROUPED_CONDITION_TYPE.AND),
+          schema.literal(ASCODE_GROUPED_CONDITION_TYPE.OR),
+        ]),
         conditions: schema.arrayOf(
           schema.oneOf([
             conditionSchema,
@@ -233,18 +219,16 @@ export const asCodeGroupFilterSchema = commonBasePropertiesSchema.extends(
 /**
  * Schema for DSL filters
  * Includes field and params properties specific to DSL filters for preserving metadata
- * Note: Uses basePropertiesWithNegateSchema to allow negating entire DSL filter
  */
 export const asCodeDSLFilterSchema = commonBasePropertiesSchema.extends({
+  type: schema.literal(ASCODE_FILTER_TYPE.DSL),
   dsl: schema.recordOf(schema.string(), schema.any(), {
     meta: { description: 'Elasticsearch Query DSL object' },
   }),
   field: schema.maybe(
     schema.string({
       meta: {
-        description:
-          'Field name metadata. Critical for backwards compatibility in legacy scripted filters where field cannot be extracted from query.',
-        deprecated: true,
+        description: 'Field name for scripted filters where field cannot be extracted from query.',
       },
     })
   ),
@@ -252,18 +236,34 @@ export const asCodeDSLFilterSchema = commonBasePropertiesSchema.extends({
     schema.any({
       meta: {
         description:
-          'Filter parameters metadata. Preserves display values, formats, and script parameters in legacy filters for backwards compatibility.',
-        deprecated: true,
+          'Filter parameters metadata. May contain display values, formats, and parameters for scripted filters.',
       },
     })
   ),
 });
 
 /**
- * Main discriminated union schema for Filter
- * Ensures exactly one of: condition, group, or dsl is present
+ * Schema for spatial filters
+ * Similar to DSL filters but with type='spatial' to preserve spatial_filter meta.type
  */
-export const asCodeFilterSchema = schema.oneOf(
-  [asCodeConditionFilterSchema, asCodeGroupFilterSchema, asCodeDSLFilterSchema],
-  { meta: { description: 'A filter which can be a condition, group, or raw DSL' } }
+export const asCodeSpatialFilterSchema = commonBasePropertiesSchema.extends({
+  type: schema.literal(ASCODE_FILTER_TYPE.SPATIAL),
+  dsl: schema.recordOf(schema.string(), schema.any(), {
+    meta: { description: 'Elasticsearch geo query DSL object' },
+  }),
+});
+
+/**
+ * Main discriminated union schema for Filter
+ * Uses 'type' as discriminator to validate condition, group, dsl, or spatial filters
+ */
+export const asCodeFilterSchema = schema.discriminatedUnion(
+  'type',
+  [
+    asCodeConditionFilterSchema,
+    asCodeGroupFilterSchema,
+    asCodeDSLFilterSchema,
+    asCodeSpatialFilterSchema,
+  ],
+  { meta: { description: 'A filter which can be a condition, group, DSL, or spatial' } }
 );

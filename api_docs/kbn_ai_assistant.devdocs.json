@@ -66,6 +66,8 @@
           ") => void; }) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+        "lineNumber": 121,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -77,6 +79,8 @@
             "label": "{\n  connectors,\n  currentUser,\n  flyoutPositionMode,\n  initialConversationId,\n  initialMessages,\n  initialTitle,\n  knowledgeBase,\n  showLinkToConversationsApp,\n  onConversationUpdate,\n  onToggleFlyoutPositionMode,\n  navigateToConversation,\n  setIsUpdatingConversationList,\n  refreshConversations,\n  updateDisplayedConversation,\n  onConversationDuplicate,\n  navigateToConnectorsManagementApp,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+            "lineNumber": 138,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -97,6 +101,8 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "lineNumber": 139,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -113,6 +119,8 @@
                   ", \"username\" | \"full_name\" | \"profile_uid\"> | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "lineNumber": 140,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -134,6 +142,8 @@
                   " | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "lineNumber": 141,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -148,6 +158,8 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "lineNumber": 142,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -169,6 +181,8 @@
                   "[] | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "lineNumber": 143,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -183,6 +197,8 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "lineNumber": 144,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -203,6 +219,8 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "lineNumber": 145,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -214,6 +232,8 @@
                 "label": "showLinkToConversationsApp",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "lineNumber": 146,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -228,6 +248,8 @@
                   "(conversation: { conversation: { id: string; title: string; last_updated: string; }; }) => void"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "lineNumber": 147,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -239,6 +261,8 @@
                     "label": "conversation",
                     "description": [],
                     "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                    "lineNumber": 147,
+                    "columnNumber": 40,
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
@@ -253,6 +277,8 @@
                           "{ id: string; title: string; last_updated: string; }"
                         ],
                         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                        "lineNumber": 147,
+                        "columnNumber": 42,
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -280,6 +306,8 @@
                   ") => void"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "lineNumber": 148,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -300,6 +328,8 @@
                       }
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                    "lineNumber": 148,
+                    "columnNumber": 29,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -326,6 +356,8 @@
                   ") => void) | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "lineNumber": 149,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -346,6 +378,8 @@
                       }
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                    "lineNumber": 149,
+                    "columnNumber": 33,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -364,6 +398,8 @@
                   "((conversationId?: string | undefined) => void) | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "lineNumber": 150,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -378,6 +414,8 @@
                       "string | undefined"
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                    "lineNumber": 150,
+                    "columnNumber": 29,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": false
@@ -396,6 +434,8 @@
                   "(isUpdating: boolean) => void"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "lineNumber": 151,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -410,6 +450,8 @@
                       "boolean"
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                    "lineNumber": 151,
+                    "columnNumber": 35,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -428,6 +470,8 @@
                   "() => void"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "lineNumber": 152,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [],
@@ -444,6 +488,8 @@
                   "(id?: string | undefined) => void"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "lineNumber": 153,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -458,6 +504,8 @@
                       "string | undefined"
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                    "lineNumber": 153,
+                    "columnNumber": 33,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": false
@@ -478,6 +526,8 @@
                   ") => void"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                "lineNumber": 154,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -492,6 +542,8 @@
                       "ApplicationStart"
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+                    "lineNumber": 154,
+                    "columnNumber": 39,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -540,6 +592,8 @@
           ") => void) | undefined; isOpen: boolean; onClose: () => void; navigateToConversation?: ((conversationId?: string | undefined) => void) | undefined; hideConversationList?: boolean | undefined; }) => React.JSX.Element | null"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+        "lineNumber": 46,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -551,6 +605,8 @@
             "label": "{\n  initialTitle,\n  initialMessages: initialMessagesFromProps,\n  initialFlyoutPositionMode,\n  onFlyoutPositionModeChange,\n  isOpen,\n  onClose,\n  navigateToConversation,\n  hideConversationList,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+            "lineNumber": 55,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -562,6 +618,8 @@
                 "label": "initialTitle",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+                "lineNumber": 56,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -583,6 +641,8 @@
                   "[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+                "lineNumber": 57,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -604,6 +664,8 @@
                   " | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+                "lineNumber": 58,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -626,6 +688,8 @@
                   ") => void) | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+                "lineNumber": 59,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -646,6 +710,8 @@
                       }
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+                    "lineNumber": 59,
+                    "columnNumber": 33,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -661,6 +727,8 @@
                 "label": "isOpen",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+                "lineNumber": 60,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -675,6 +743,8 @@
                   "() => void"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+                "lineNumber": 61,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [],
@@ -691,6 +761,8 @@
                   "((conversationId?: string | undefined) => void) | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+                "lineNumber": 62,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -705,6 +777,8 @@
                       "string | undefined"
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+                    "lineNumber": 62,
+                    "columnNumber": 29,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": false
@@ -723,6 +797,8 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+                "lineNumber": 63,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -743,6 +819,8 @@
           "({\n  visible,\n  setContainer,\n  style,\n}: { visible?: boolean | undefined; setContainer?: ((element: HTMLDivElement | null) => void) | undefined; style: React.CSSProperties; }) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_inline_edit.tsx",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -754,6 +832,8 @@
             "label": "{\n  visible,\n  setContainer,\n  style,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_inline_edit.tsx",
+            "lineNumber": 15,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -768,6 +848,8 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_inline_edit.tsx",
+                "lineNumber": 16,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -782,6 +864,8 @@
                   "((element: HTMLDivElement | null) => void) | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_inline_edit.tsx",
+                "lineNumber": 17,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -796,6 +880,8 @@
                       "HTMLDivElement | null"
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_inline_edit.tsx",
+                    "lineNumber": 17,
+                    "columnNumber": 19,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": false
@@ -814,6 +900,8 @@
                   "React.CSSProperties"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_inline_edit.tsx",
+                "lineNumber": 18,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -852,6 +940,8 @@
           ", \"username\" | \"full_name\" | \"profile_uid\">; onConversationSelect?: ((conversationId?: string | undefined) => void) | undefined; newConversationHref?: string | undefined; getConversationHref?: ((conversationId: string) => string) | undefined; setIsUpdatingConversationList: (isUpdating: boolean) => void; refreshConversations: () => void; updateDisplayedConversation: (id?: string | undefined) => void; }) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
+        "lineNumber": 67,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -863,6 +953,8 @@
             "label": "{\n  conversations,\n  isLoading,\n  selectedConversationId,\n  currentUser,\n  onConversationSelect,\n  newConversationHref,\n  getConversationHref,\n  setIsUpdatingConversationList,\n  refreshConversations,\n  updateDisplayedConversation,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
+            "lineNumber": 78,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -885,6 +977,8 @@
                   "[]; }> & { refresh: () => void; }"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                "lineNumber": 79,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -896,6 +990,8 @@
                 "label": "isLoading",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                "lineNumber": 80,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -910,6 +1006,8 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                "lineNumber": 81,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -924,6 +1022,8 @@
                   "{ username: string; full_name?: string | undefined; profile_uid?: string | undefined; }"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                "lineNumber": 82,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -938,6 +1038,8 @@
                   "((conversationId?: string | undefined) => void) | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                "lineNumber": 83,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -952,6 +1054,8 @@
                       "string | undefined"
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                    "lineNumber": 83,
+                    "columnNumber": 27,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": false
@@ -970,6 +1074,8 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                "lineNumber": 84,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -984,6 +1090,8 @@
                   "((conversationId: string) => string) | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                "lineNumber": 85,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -998,6 +1106,8 @@
                       "string"
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                    "lineNumber": 85,
+                    "columnNumber": 26,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -1016,6 +1126,8 @@
                   "(isUpdating: boolean) => void"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                "lineNumber": 86,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1030,6 +1142,8 @@
                       "boolean"
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                    "lineNumber": 86,
+                    "columnNumber": 35,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -1048,6 +1162,8 @@
                   "() => void"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                "lineNumber": 87,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [],
@@ -1064,6 +1180,8 @@
                   "(id?: string | undefined) => void"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                "lineNumber": 88,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1078,6 +1196,8 @@
                       "string | undefined"
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/conversation_list.tsx",
+                    "lineNumber": 88,
+                    "columnNumber": 33,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": false
@@ -1102,6 +1222,8 @@
           "({ conversationId, navigateToConversation, getConversationHref, newConversationHref, scopes, }: ConversationViewProps) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/conversation/conversation_view.tsx",
+        "lineNumber": 36,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1116,6 +1238,8 @@
               "ConversationViewProps"
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/conversation/conversation_view.tsx",
+            "lineNumber": 36,
+            "columnNumber": 67,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1144,6 +1268,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/service/create_app_service.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1155,6 +1281,8 @@
             "label": "{\n  pluginsStart,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/service/create_app_service.ts",
+            "lineNumber": 15,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1169,6 +1297,8 @@
                   "AIAssistantPluginStartDependencies"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/service/create_app_service.ts",
+                "lineNumber": 16,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1213,6 +1343,8 @@
           "[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+        "lineNumber": 741,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1234,6 +1366,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+            "lineNumber": 741,
+            "columnNumber": 42,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1255,6 +1389,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
+            "lineNumber": 741,
+            "columnNumber": 63,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1281,6 +1417,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_ai_assistant_app_service.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -1305,6 +1443,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_ai_assistant_chat_service.ts",
+        "lineNumber": 9,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -1322,6 +1462,8 @@
           "({\n  title,\n  children,\n  confirmButtonText,\n}: { title: React.ReactNode; children: React.ReactNode; confirmButtonText: React.ReactNode; }) => { element: React.ReactNode; confirm: () => Promise<boolean>; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_confirm_modal.tsx",
+        "lineNumber": 50,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1333,6 +1475,8 @@
             "label": "{\n  title,\n  children,\n  confirmButtonText,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_confirm_modal.tsx",
+            "lineNumber": 54,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1347,6 +1491,8 @@
                   "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_confirm_modal.tsx",
+                "lineNumber": 55,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1361,6 +1507,8 @@
                   "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_confirm_modal.tsx",
+                "lineNumber": 56,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1375,6 +1523,8 @@
                   "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_confirm_modal.tsx",
+                "lineNumber": 57,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1402,6 +1552,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1413,6 +1565,8 @@
             "label": "{\n  setIsUpdatingConversationList,\n  refreshConversations,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+            "lineNumber": 28,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1427,6 +1581,8 @@
                   "(isUpdating: boolean) => void"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+                "lineNumber": 29,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1441,6 +1597,8 @@
                       "boolean"
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+                    "lineNumber": 29,
+                    "columnNumber": 35,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -1459,6 +1617,8 @@
                   "() => void"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+                "lineNumber": 30,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [],
@@ -1497,6 +1657,8 @@
           "; }[]>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversations_by_date.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1518,6 +1680,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversations_by_date.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1533,6 +1697,8 @@
               "((id: string) => string) | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversations_by_date.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1559,6 +1725,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_genai_connectors.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -1584,6 +1752,8 @@
           "[]; isLoading: boolean; error: Error | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_inference_endpoints.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -1608,6 +1778,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -1633,6 +1805,8 @@
           "[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_scopes.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -1649,6 +1823,8 @@
         "label": "CopyConversationToClipboardParams",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1669,6 +1845,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1690,6 +1868,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1704,6 +1884,8 @@
         "label": "UseConversationContextMenuResult",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1718,6 +1900,8 @@
               "(id: string) => Promise<void>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1732,6 +1916,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+                "lineNumber": 19,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1758,6 +1944,8 @@
               ") => void"
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1778,6 +1966,8 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+                "lineNumber": 20,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1796,6 +1986,8 @@
               "(id: string) => void"
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1810,6 +2002,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+                "lineNumber": 21,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1836,6 +2030,8 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1850,6 +2046,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+                "lineNumber": 22,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1865,6 +2063,8 @@
                   "boolean"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+                "lineNumber": 22,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1883,6 +2083,8 @@
         "label": "UseKnowledgeBaseResult",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1911,6 +2113,8 @@
               "; }> & { refresh: () => void; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1922,6 +2126,8 @@
             "label": "isPolling",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1936,6 +2142,8 @@
               "(inferenceId: string) => Promise<void>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1950,6 +2158,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+                "lineNumber": 23,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1968,6 +2178,8 @@
               "(inferenceId: string) => Promise<void>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1982,6 +2194,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+                "lineNumber": 24,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1997,6 +2211,8 @@
             "label": "isWarmingUpModel",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2008,6 +2224,8 @@
             "label": "isInstalling",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2019,6 +2237,8 @@
             "label": "isProductDocInstalling",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2030,6 +2250,8 @@
             "label": "isProductDocUninstalling",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2044,6 +2266,8 @@
               "(inferenceId: string) => Promise<void>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2058,6 +2282,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+                "lineNumber": 29,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2076,6 +2302,8 @@
               "(inferenceId: string) => Promise<void>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2090,6 +2318,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+                "lineNumber": 30,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2110,6 +2340,8 @@
         "label": "FlyoutPositionMode",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_flyout.tsx",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2133,6 +2365,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/service/create_app_service.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2145,6 +2379,8 @@
         "label": "UseGenAIConnectorsResult",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_genai_connectors.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

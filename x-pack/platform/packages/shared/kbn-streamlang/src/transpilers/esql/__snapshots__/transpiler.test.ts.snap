@@ -21,7 +21,8 @@ Object {
 `;
 
 exports[`transpile - Streamlang DSL to ES|QL) should transpile a variety of processor steps and where blocks 1`] = `
-"  | WHERE NOT(message IS NULL)
+"  | EVAL my_joined_field = CONCAT(field1, \\", \\", field2, \\", \\", field3)
+  | WHERE NOT(message IS NULL)
   | EVAL message_uppercase = TO_UPPER(message)
   | WHERE NOT(message IS NULL)
   | EVAL message_lowercase = TO_LOWER(message)

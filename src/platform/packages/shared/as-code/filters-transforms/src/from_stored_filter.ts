@@ -23,16 +23,16 @@ import type {
   AsCodeConditionFilter,
   AsCodeGroupFilter,
   AsCodeDSLFilter,
+  AsCodeSpatialFilter,
 } from '@kbn/as-code-filters-schema';
 import type { Logger } from '@kbn/logging';
 import { FilterStateStore } from '@kbn/es-query-constants';
-import { ASCODE_FILTER_OPERATOR } from '@kbn/as-code-filters-constants';
+import { ASCODE_FILTER_OPERATOR, ASCODE_FILTER_TYPE } from '@kbn/as-code-filters-constants';
 import { migrateFilter } from '@kbn/es-query';
 import { FILTERS } from '@kbn/es-query';
 import type { StoredFilter } from './types';
 import { FilterConversionError } from './errors';
 import {
-  isLegacyFilter,
   hasTermQuery,
   hasTermsQuery,
   hasRangeQuery,
@@ -70,9 +70,7 @@ export function fromStoredFilter(storedFilter: unknown, logger?: Logger): AsCode
       return undefined;
     }
 
-    const normalizedFilter = (
-      isLegacyFilter(filter) ? migrateFilter(filter) : filter
-    ) as StoredFilter;
+    const normalizedFilter = migrateFilter(filter);
 
     const baseProperties = extractBaseProperties(normalizedFilter);
 
@@ -100,9 +98,11 @@ export function fromStoredFilter(storedFilter: unknown, logger?: Logger): AsCode
         case FILTERS.COMBINED:
           return convertCombinedFilter(normalizedFilter, baseProperties);
 
+        case FILTERS.SPATIAL_FILTER:
+          return convertSpatialFilter(normalizedFilter, baseProperties);
+
         case FILTERS.MATCH_ALL:
         case FILTERS.QUERY_STRING:
-        case FILTERS.SPATIAL_FILTER:
         default:
           return convertToDSLFilter(normalizedFilter, baseProperties);
       }
@@ -156,53 +156,16 @@ function convertToSimpleCondition(storedFilter: StoredFilter): AsCodeConditionFi
     };
   }
 
-  // Handle phrases filter: meta.type='phrases' with bool.should containing match_phrase clauses
+  // Handle phrases filter: meta.type='phrases' with meta.params as array of values
   if (isPhrasesFilter(storedFilter)) {
-    // Extract values from match_phrase clauses
-    const values = query.bool.should
-      .map((clause: unknown) => {
-        if (typeof clause === 'object' && clause !== null && 'match_phrase' in clause) {
-          const matchPhrase = (clause as Record<string, unknown>).match_phrase as Record<
-            string,
-            unknown
-          >;
-          const clauseField = Object.keys(matchPhrase)[0];
-          return matchPhrase[clauseField];
-        }
-        return;
-      })
-      .filter((v: unknown) => v !== undefined) as Array<string | number | boolean>;
-
-    // Validate homogeneous array
+    const values = meta.params as Array<string | number | boolean>;
+    // Validate homogeneous array, fallback to custom DSL filter on failure
     validateHomogeneousArray(values, 'Phrases filter');
 
     return {
       field,
       operator: ASCODE_FILTER_OPERATOR.IS_ONE_OF,
       value: values as string[] | number[] | boolean[],
-      ...(meta.negate && { negate: true }),
-    };
-  }
-
-  if (query.term) {
-    const value = query.term[field];
-    return {
-      field,
-      operator: ASCODE_FILTER_OPERATOR.IS,
-      value,
-      ...(meta.negate && { negate: true }),
-    };
-  }
-
-  if (query.match) {
-    const matchField = Object.keys(query.match)[0];
-    const matchValue = query.match[matchField];
-    const value = typeof matchValue === 'object' ? matchValue.query : matchValue;
-
-    return {
-      field: matchField, // Use the field from the query, not meta
-      operator: ASCODE_FILTER_OPERATOR.IS,
-      value,
       ...(meta.negate && { negate: true }),
     };
   }
@@ -312,19 +275,6 @@ function extractFieldFromQuery(query: unknown): string | null {
 }
 
 /**
- * Helper to remove negate property from base properties
- * For condition filters, negate is represented in the condition.negate flag, not a separate property
- */
-function stripNegateProperty(
-  baseProperties: Partial<AsCodeFilter>
-): Omit<Partial<AsCodeFilter>, 'negate'> {
-  const { negate: _, ...basePropsWithoutNegate } = baseProperties as Partial<AsCodeFilter> & {
-    negate?: boolean;
-  };
-  return basePropsWithoutNegate;
-}
-
-/**
  * TYPE-SPECIFIC CONVERTERS
  * Each function handles a specific FILTERS enum type
  */
@@ -336,6 +286,7 @@ function convertCustomFilter(
   const meta = filter.meta;
   return {
     ...baseProperties,
+    type: ASCODE_FILTER_TYPE.DSL,
     dsl: convertToRawDSL(filter),
     ...(meta?.field || meta?.key ? { field: meta.field || meta.key } : {}),
     // Only preserve params for non-combined filters (combined filters use params differently)
@@ -356,7 +307,8 @@ function convertPhraseFilter(
   try {
     const condition = convertToSimpleCondition(filter);
     return {
-      ...stripNegateProperty(baseProperties),
+      ...baseProperties,
+      type: 'condition',
       condition,
     } as AsCodeConditionFilter;
   } catch (error) {
@@ -372,7 +324,8 @@ function convertPhrasesFilter(
   try {
     const condition = convertToSimpleCondition(filter);
     return {
-      ...stripNegateProperty(baseProperties),
+      ...baseProperties,
+      type: ASCODE_FILTER_TYPE.CONDITION,
       condition,
     } as AsCodeConditionFilter;
   } catch (error) {
@@ -393,11 +346,9 @@ function convertRangeFilter(
 
   try {
     const condition = convertToSimpleCondition(filter);
-    // IMPORTANT: Range filters do NOT strip negate property
-    // Unlike other conditions that encode negation in the operator,
-    // RANGE has no opposition operator, so negate must be preserved as condition.negate
     return {
       ...baseProperties,
+      type: ASCODE_FILTER_TYPE.CONDITION,
       condition,
     } as AsCodeConditionFilter;
   } catch (error) {
@@ -413,7 +364,8 @@ function convertExistsFilter(
   try {
     const condition = convertToSimpleCondition(filter);
     return {
-      ...stripNegateProperty(baseProperties),
+      ...baseProperties,
+      type: ASCODE_FILTER_TYPE.CONDITION,
       condition,
     } as AsCodeConditionFilter;
   } catch (error) {
@@ -430,6 +382,7 @@ function convertCombinedFilter(
     const group = convertToFilterGroup(filter);
     return {
       ...baseProperties,
+      type: ASCODE_FILTER_TYPE.GROUP,
       group,
     };
   } catch (error) {
@@ -439,8 +392,23 @@ function convertCombinedFilter(
 }
 
 /**
+ * Convert spatial filters
+ * Similar to DSL but maintains type='spatial' to preserve FILTERS.SPATIAL_FILTER in round-trip
+ */
+function convertSpatialFilter(
+  filter: StoredFilter,
+  baseProperties: Partial<AsCodeFilter>
+): AsCodeSpatialFilter {
+  return {
+    ...baseProperties,
+    type: ASCODE_FILTER_TYPE.SPATIAL,
+    dsl: convertToRawDSL(filter),
+  };
+}
+
+/**
  * Convert filters that are always preserved as DSL
- * Used for: match_all, query_string, spatial filters (geo_bounding_box, geo_distance, etc.)
+ * Used for: match_all, query_string, etc.
  */
 function convertToDSLFilter(
   filter: StoredFilter,
@@ -448,6 +416,7 @@ function convertToDSLFilter(
 ): AsCodeDSLFilter {
   return {
     ...baseProperties,
+    type: ASCODE_FILTER_TYPE.DSL,
     dsl: convertToRawDSL(filter),
     ...(filter.meta?.field ? { field: filter.meta.field } : {}),
     // Only preserve params for non-combined filters (combined filters use params differently)
@@ -470,9 +439,6 @@ function extractBaseProperties(storedFilter: StoredFilter): Partial<AsCodeFilter
     ...(meta?.negate !== undefined ? { negate: meta.negate } : {}),
     ...(meta?.alias != null ? { label: meta.alias } : {}),
     ...(meta?.isMultiIndex !== undefined ? { is_multi_index: meta.isMultiIndex } : {}),
-    ...(meta?.type !== undefined ? { filter_type: meta.type } : {}),
-    ...(meta?.key !== undefined ? { key: meta.key } : {}),
-    ...(meta?.value !== undefined ? { value: meta.value } : {}),
   };
 }
 

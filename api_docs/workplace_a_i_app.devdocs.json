@@ -15,6 +15,8 @@
       "label": "WorkplaceAIAppPluginSetup",
       "description": [],
       "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/public/types.ts",
+      "lineNumber": 15,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -29,6 +31,8 @@
       "label": "WorkplaceAIAppPluginStart",
       "description": [],
       "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/public/types.ts",
+      "lineNumber": 18,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -51,6 +55,8 @@
       "label": "WorkplaceAIAppPluginSetup",
       "description": [],
       "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/server/types.ts",
+      "lineNumber": 14,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -65,6 +71,8 @@
       "label": "WorkplaceAIAppPluginStart",
       "description": [],
       "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/server/types.ts",
+      "lineNumber": 16,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -89,6 +97,8 @@
           "\"/agents/new\""
         ],
         "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/routes.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -104,6 +114,8 @@
           "\"agents\""
         ],
         "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/routes.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -119,6 +131,8 @@
           "\"/api/agent_builder\""
         ],
         "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/routes.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -134,6 +148,8 @@
           "\"/conversations/new\""
         ],
         "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/routes.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -146,6 +162,8 @@
         "label": "GET_AGENTS_ROUTE",
         "description": [],
         "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/routes.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -158,6 +176,8 @@
         "label": "MCP_SERVER_PATH",
         "description": [],
         "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/routes.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -173,6 +193,8 @@
           "\"management:triggersActionsConnectors\""
         ],
         "path": "x-pack/solutions/workplaceai/plugins/workplace_ai_app/common/routes.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

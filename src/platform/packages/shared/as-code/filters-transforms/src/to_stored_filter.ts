@@ -16,16 +16,29 @@ import type {
   AsCodeConditionFilter,
   AsCodeGroupFilter,
   AsCodeDSLFilter,
+  AsCodeSpatialFilter,
 } from '@kbn/as-code-filters-schema';
 import type { Logger } from '@kbn/logging';
 import { ASCODE_FILTER_OPERATOR } from '@kbn/as-code-filters-constants';
-import { FILTERS } from '@kbn/es-query';
+import {
+  FILTERS,
+  isScriptedRangeFilter,
+  isScriptedPhraseFilter,
+  isPhraseFilter,
+  isRangeFilter,
+  isExistsFilter,
+  isMatchAllFilter,
+  isQueryStringFilter,
+  getFilterField,
+  getPhraseFilterValue,
+} from '@kbn/es-query';
 import { FilterConversionError } from './errors';
 import type { StoredFilter } from './types';
 import {
   isConditionFilter,
   isGroupFilter,
   isDSLFilter,
+  isSpatialFilter,
   isNestedFilterGroup,
   isAsCodeFilter,
 } from './type_guards';
@@ -91,11 +104,6 @@ export function toStoredFilter(filter: AsCodeFilter, logger?: Logger): StoredFil
         ...('is_multi_index' in filter && filter.is_multi_index !== undefined
           ? { isMultiIndex: filter.is_multi_index }
           : {}),
-        ...('filter_type' in filter && filter.filter_type !== undefined
-          ? { type: filter.filter_type }
-          : {}),
-        ...(filter.key !== undefined ? { key: filter.key } : {}),
-        ...(filter.value !== undefined ? { value: filter.value } : {}),
       },
     };
 
@@ -112,8 +120,12 @@ export function toStoredFilter(filter: AsCodeFilter, logger?: Logger): StoredFil
       return convertFromDSLFilter(filter, storedFilter);
     }
 
+    if (isSpatialFilter(filter)) {
+      return convertFromSpatialFilter(filter, storedFilter);
+    }
+
     throw new FilterConversionError(
-      'AsCodeFilter must have exactly one of: condition, group, or dsl'
+      'AsCodeFilter must have exactly one of: condition, group, dsl, or spatial'
     );
   } catch (error) {
     logger?.warn(`Failed to convert AsCodeFilter to stored filter: ${error.message}`);
@@ -197,7 +209,7 @@ function convertFromSimpleCondition(
   // RANGE
   if (condition.operator === ASCODE_FILTER_OPERATOR.RANGE) {
     // Extract format from condition if available
-    const format = 'format' in condition.value ? condition.value.format : undefined;
+    const format = condition.value.format;
 
     // Build range query, including format if present
     const rangeQuery = {
@@ -213,13 +225,7 @@ function convertFromSimpleCondition(
       query: { range: { [condition.field]: rangeQuery } },
       meta: {
         ...baseMeta,
-        params: {
-          ...(condition.value.gte !== undefined && { gte: condition.value.gte }),
-          ...(condition.value.lte !== undefined && { lte: condition.value.lte }),
-          ...(condition.value.gt !== undefined && { gt: condition.value.gt }),
-          ...(condition.value.lt !== undefined && { lt: condition.value.lt }),
-          ...(format && { format }),
-        },
+        params: rangeQuery,
         ...(shouldNegate ? { negate: true } : {}),
       },
     };
@@ -277,85 +283,61 @@ function convertFromFilterGroup(
 }
 
 /**
+ * Convert spatial filter to stored filter with FILTERS.SPATIAL_FILTER type
+ */
+function convertFromSpatialFilter(
+  asCodeFilter: AsCodeSpatialFilter,
+  baseStored: StoredFilter
+): StoredFilter {
+  return {
+    ...baseStored,
+    query: asCodeFilter.dsl.query,
+    meta: {
+      ...baseStored.meta,
+      type: FILTERS.SPATIAL_FILTER,
+    },
+  };
+}
+
+/**
  * Convert DSL filter to stored filter with smart type detection
  */
 function convertFromDSLFilter(
   asCodeFilter: AsCodeDSLFilter,
   baseStored: StoredFilter
 ): StoredFilter {
-  const dsl = asCodeFilter.dsl;
+  const query = asCodeFilter.dsl.query;
 
-  // Use preserved filterType if available
-  if (baseStored.meta.type) {
+  // Build a filter to test with type guard functions
+  const dslFilter: StoredFilter = {
+    ...baseStored,
+    query,
+  };
+
+  // Extract field name using utility function (returns undefined for filters without a field)
+  const detectedField = getFilterField(dslFilter);
+  // Use detected field or fall back to asCodeFilter.field
+  const field = detectedField ?? asCodeFilter.field;
+
+  // Detect type from query structure using existing type guards
+  if (isPhraseFilter(dslFilter)) {
+    const queryValue = getPhraseFilterValue(dslFilter);
+
     return {
       ...baseStored,
-      query: dsl.query,
-      meta: {
-        ...baseStored.meta,
-        // Restore meta.field and meta.params from AsCodeDSLFilter if available
-        // This is critical for scripted filters where field cannot be extracted from query
-        ...(asCodeFilter.field ? { field: asCodeFilter.field } : {}),
-        ...(asCodeFilter.params ? { params: asCodeFilter.params } : {}),
-      },
-    };
-  }
-
-  // Detect type from query structure
-  // Check if this is a phrase filter (match_phrase)
-  if (dsl.query.match_phrase) {
-    const field = Object.keys(dsl.query.match_phrase)[0];
-    const value = dsl.query.match_phrase[field];
-    return {
-      ...baseStored,
-      query: dsl.query,
+      query: dslFilter.query,
       meta: {
         ...baseStored.meta,
         type: FILTERS.PHRASE,
-        params: { query: typeof value === 'object' ? value.query || value : value },
-        ...(asCodeFilter.field ? { field: asCodeFilter.field } : {}),
-      },
-    };
-  }
-
-  // Check if this is a phrase-type match query
-  if (dsl.query.match) {
-    const field = Object.keys(dsl.query.match)[0];
-    const config = dsl.query.match[field];
-
-    if (typeof config === 'object' && config.type === 'phrase') {
-      return {
-        ...baseStored,
-        query: dsl.query,
-        meta: {
-          ...baseStored.meta,
-          type: FILTERS.PHRASE,
-          params: { query: config.query },
-          ...(asCodeFilter.field ? { field: asCodeFilter.field } : {}),
-        },
-      };
-    }
-  }
-
-  // Check if this is a term query
-  if (dsl.query.term) {
-    const field = Object.keys(dsl.query.term)[0];
-    const value = dsl.query.term[field];
-    return {
-      ...baseStored,
-      query: dsl.query,
-      meta: {
-        ...baseStored.meta,
-        type: FILTERS.PHRASE,
-        params: { query: value },
-        ...(asCodeFilter.field ? { field: asCodeFilter.field } : {}),
+        params: { query: queryValue },
+        ...(field ? { field } : {}),
       },
     };
   }
 
   // Check if this is a range query
-  if (dsl.query.range) {
-    const field = Object.keys(dsl.query.range)[0];
-    const rangeParams = dsl.query.range[field];
+  if (isRangeFilter(dslFilter)) {
+    const rangeParams = dslFilter.query.range![field!];
 
     // Detect RANGE_FROM_VALUE (single-bound range) vs regular RANGE (multi-bound)
     let type = FILTERS.RANGE;
@@ -368,97 +350,94 @@ function convertFromDSLFilter(
 
     return {
       ...baseStored,
-      query: dsl.query,
+      query: dslFilter.query,
       meta: {
         ...baseStored.meta,
         type,
         params: rangeParams,
-        ...(asCodeFilter.field ? { field: asCodeFilter.field } : {}),
+        ...(field ? { field } : {}),
       },
     };
   }
 
   // Check if this is an exists query
-  if (dsl.query.exists) {
+  if (isExistsFilter(dslFilter)) {
     return {
       ...baseStored,
-      query: dsl.query,
+      query: dslFilter.query,
       meta: {
         ...baseStored.meta,
         type: FILTERS.EXISTS,
-        ...(asCodeFilter.field ? { field: asCodeFilter.field } : {}),
+        ...(field ? { field } : {}),
         ...(asCodeFilter.params ? { params: asCodeFilter.params } : {}),
       },
     };
   }
 
   // Check if this is a match_all query
-  if (dsl.query.match_all) {
+  if (isMatchAllFilter(dslFilter)) {
     return {
       ...baseStored,
-      query: dsl.query,
+      query: dslFilter.query,
       meta: {
         ...baseStored.meta,
         type: FILTERS.MATCH_ALL,
-        params: dsl.query.match_all,
-        ...(asCodeFilter.field ? { field: asCodeFilter.field } : {}),
+        params: dslFilter.query.match_all,
+        ...(field ? { field } : {}),
       },
     };
   }
 
   // Check if this is a query_string query
-  if (dsl.query.query_string) {
+  if (isQueryStringFilter(dslFilter)) {
     return {
       ...baseStored,
-      query: dsl.query,
+      query: dslFilter.query,
       meta: {
         ...baseStored.meta,
         type: FILTERS.QUERY_STRING,
-        params: dsl.query.query_string,
-        ...(asCodeFilter.field ? { field: asCodeFilter.field } : {}),
+        params: dslFilter.query?.query_string,
+        ...(field ? { field } : {}),
       },
     };
   }
 
-  // Check if this is a spatial filter (geo queries wrapped in bool)
-  if (dsl.query.bool) {
-    const { should, must, filter: boolFilter } = dsl.query.bool;
-    const allClauses = [
-      ...(Array.isArray(should) ? should : []),
-      ...(Array.isArray(must) ? must : []),
-      ...(Array.isArray(boolFilter) ? boolFilter : []),
-    ];
+  // Detect if this is a scripted range filter (has range params in script)
+  if (isScriptedRangeFilter(dslFilter)) {
+    return {
+      ...baseStored,
+      query,
+      meta: {
+        ...baseStored.meta,
+        type: FILTERS.RANGE,
+        ...(field ? { field } : {}),
+        ...(asCodeFilter.params ? { params: asCodeFilter.params } : {}),
+      },
+    };
+  }
 
-    // Check if any clause contains geo queries
-    const hasGeoQuery = allClauses.some(
-      (clause) =>
-        clause &&
-        typeof clause === 'object' &&
-        ('geo_shape' in clause || 'geo_bounding_box' in clause || 'geo_distance' in clause)
-    );
-
-    if (hasGeoQuery) {
-      return {
-        ...baseStored,
-        query: dsl.query,
-        meta: {
-          ...baseStored.meta,
-          type: FILTERS.SPATIAL_FILTER,
-          ...(asCodeFilter.field ? { field: asCodeFilter.field } : {}),
-          ...(asCodeFilter.params ? { params: asCodeFilter.params } : {}),
-        },
-      };
-    }
+  // Check if this is a scripted phrase filter (has 'value' param in script and no range keys)
+  if (isScriptedPhraseFilter(dslFilter)) {
+    return {
+      ...baseStored,
+      query,
+      meta: {
+        ...baseStored.meta,
+        type: FILTERS.PHRASE,
+        ...(field ? { field } : {}),
+        ...(asCodeFilter.params ? { params: asCodeFilter.params } : {}),
+      },
+    };
   }
 
   // Default: custom filter
   return {
     ...baseStored,
-    query: dsl.query,
+    query,
     meta: {
       ...baseStored.meta,
       type: FILTERS.CUSTOM,
-      ...(asCodeFilter.field ? { field: asCodeFilter.field } : {}),
+      ...(field ? { field } : {}),
       ...(asCodeFilter.params ? { params: asCodeFilter.params } : {}),
     },
   };

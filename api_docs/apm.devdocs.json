@@ -12,6 +12,8 @@
         "label": "ConfigSchema",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/apm/public/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -23,6 +25,8 @@
             "label": "serviceMapEnabled",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/apm/public/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -37,6 +41,8 @@
               "{ enabled: boolean; }"
             ],
             "path": "x-pack/solutions/observability/plugins/apm/public/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -48,6 +54,8 @@
             "label": "latestAgentVersionsUrl",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/apm/public/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -59,6 +67,8 @@
             "label": "serverlessOnboarding",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/apm/public/index.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -70,6 +80,8 @@
             "label": "managedServiceUrl",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/apm/public/index.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -84,6 +96,8 @@
               "{ agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; profilingIntegrationAvailable: boolean; ruleFormV2Enabled: boolean; }"
             ],
             "path": "x-pack/solutions/observability/plugins/apm/public/index.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -98,6 +112,8 @@
               "{ enabled: boolean; }"
             ],
             "path": "x-pack/solutions/observability/plugins/apm/public/index.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -147,6 +163,8 @@
         ">; } & { kuery?: string | undefined; rangeFrom?: string | undefined; rangeTo?: string | undefined; }; })>; }"
       ],
       "path": "x-pack/solutions/observability/plugins/apm/public/plugin.ts",
+      "lineNumber": 103,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",
@@ -163,6 +181,8 @@
         "void"
       ],
       "path": "x-pack/solutions/observability/plugins/apm/public/plugin.ts",
+      "lineNumber": 104,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -203,6 +223,8 @@
           ">"
         ],
         "path": "x-pack/solutions/observability/plugins/apm/server/plugin.ts",
+        "lineNumber": 56,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -217,6 +239,8 @@
               "any"
             ],
             "path": "x-pack/solutions/observability/plugins/apm/server/plugin.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -232,6 +256,8 @@
                   "<unknown>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/apm/server/plugin.ts",
+                "lineNumber": 62,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -260,6 +286,8 @@
               "; telemetryCollectionEnabled: boolean; metricsInterval: number; forceSyntheticSource: boolean; latestAgentVersionsUrl: string; serverless: Readonly<{} & { enabled: true; }>; serverlessOnboarding: boolean; managedServiceUrl: string; managedOtlpServiceUrl: string; featureFlags: Readonly<{} & { agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; profilingIntegrationAvailable: boolean; ruleFormV2Enabled: boolean; }>; }>>; }"
             ],
             "path": "x-pack/solutions/observability/plugins/apm/server/plugin.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -277,6 +305,8 @@
                   ", unknown>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/apm/server/plugin.ts",
+                "lineNumber": 66,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -292,6 +322,8 @@
                   "APMPluginSetupDependencies"
                 ],
                 "path": "x-pack/solutions/observability/plugins/apm/server/plugin.ts",
+                "lineNumber": 66,
+                "columnNumber": 61,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -314,6 +346,8 @@
               ") => void"
             ],
             "path": "x-pack/solutions/observability/plugins/apm/server/plugin.ts",
+            "lineNumber": 269,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -328,6 +362,8 @@
                   "CoreStart"
                 ],
                 "path": "x-pack/solutions/observability/plugins/apm/server/plugin.ts",
+                "lineNumber": 269,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -343,6 +379,8 @@
                   "APMPluginStartDependencies"
                 ],
                 "path": "x-pack/solutions/observability/plugins/apm/server/plugin.ts",
+                "lineNumber": 269,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -361,6 +399,8 @@
               "() => void"
             ],
             "path": "x-pack/solutions/observability/plugins/apm/server/plugin.ts",
+            "lineNumber": 293,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -385,6 +425,8 @@
           "\"POST /internal/apm/data_view/static\" | \"GET /internal/apm/data_view/index_pattern\" | \"GET /internal/apm/environments\" | \"GET /internal/apm/services/{serviceName}/errors/groups/main_statistics\" | \"GET /internal/apm/services/{serviceName}/errors/groups/main_statistics_by_transaction_name\" | \"POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics\" | \"GET /internal/apm/services/{serviceName}/errors/{groupId}/samples\" | \"GET /internal/apm/services/{serviceName}/errors/{groupId}/error/{errorId}\" | \"GET /internal/apm/services/{serviceName}/errors/distribution\" | \"GET /internal/apm/services/{serviceName}/errors/{groupId}/top_erroneous_transactions\" | \"POST /internal/apm/latency/overall_distribution/transactions\" | \"POST /internal/apm/latency/overall_distribution/spans\" | \"GET /internal/apm/services/{serviceName}/metrics/charts\" | \"GET /internal/apm/services/{serviceName}/metrics/nodes\" | \"GET /internal/apm/services/{serviceName}/metrics/serverless/charts\" | \"GET /internal/apm/services/{serviceName}/metrics/serverless/summary\" | \"GET /internal/apm/services/{serviceName}/metrics/serverless/functions_overview\" | \"GET /internal/apm/services/{serviceName}/metrics/serverless/active_instances\" | \"GET /internal/apm/observability_overview\" | \"GET /internal/apm/observability_overview/has_data\" | \"GET /internal/apm/service-map\" | \"GET /internal/apm/service-map/service/{serviceName}\" | \"GET /internal/apm/service-map/dependency\" | \"GET /internal/apm/services\" | \"POST /internal/apm/services/detailed_statistics\" | \"GET /internal/apm/services/{serviceName}/metadata/details\" | \"GET /internal/apm/services/{serviceName}/metadata/icons\" | \"GET /internal/apm/services/{serviceName}/agent\" | \"GET /internal/apm/services/{serviceName}/transaction_types\" | \"GET /internal/apm/services/{serviceName}/node/{serviceNodeName}/metadata\" | \"GET /api/apm/services/{serviceName}/annotation/search 2023-10-31\" | \"POST /api/apm/services/{serviceName}/annotation 2023-10-31\" | \"GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}\" | \"GET /internal/apm/services/{serviceName}/throughput\" | \"GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics\" | \"GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics\" | \"GET /internal/apm/services/{serviceName}/dependencies\" | \"GET /internal/apm/services/{serviceName}/dependencies/breakdown\" | \"GET /internal/apm/services/{serviceName}/anomaly_charts\" | \"GET /internal/apm/services/{serviceName}/alerts_count\" | \"GET /internal/apm/service-groups\" | \"GET /internal/apm/service-group\" | \"POST /internal/apm/service-group\" | \"DELETE /internal/apm/service-group\" | \"GET /internal/apm/service-group/services\" | \"GET /internal/apm/service-group/counts\" | \"GET /internal/apm/suggestions\" | \"GET /internal/apm/traces/{traceId}\" | \"GET /internal/apm/unified_traces/{traceId}\" | \"GET /internal/apm/traces\" | \"GET /internal/apm/traces/{traceId}/root_transaction\" | \"GET /internal/apm/unified_traces/{traceId}/root_span\" | \"GET /internal/apm/transactions/{transactionId}\" | \"GET /internal/apm/traces/find\" | \"GET /internal/apm/traces/{traceId}/transactions/{transactionId}\" | \"GET /internal/apm/traces/{traceId}/spans/{spanId}\" | \"GET /internal/apm/transactions\" | \"GET /internal/apm/unified_traces/{traceId}/summary\" | \"GET /internal/apm/unified_traces/{traceId}/errors\" | \"GET /internal/apm/unified_traces/{traceId}/spans/{spanId}\" | \"GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics\" | \"GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics\" | \"GET /internal/apm/services/{serviceName}/transactions/charts/latency\" | \"GET /internal/apm/services/{serviceName}/transactions/traces/samples\" | \"GET /internal/apm/services/{serviceName}/transaction/charts/breakdown\" | \"GET /internal/apm/services/{serviceName}/transactions/charts/error_rate\" | \"GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate\" | \"GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate_by_transaction_name\" | \"GET /internal/apm/rule_types/transaction_error_rate/chart_preview\" | \"GET /internal/apm/rule_types/error_count/chart_preview\" | \"GET /internal/apm/rule_types/transaction_duration/chart_preview\" | \"GET /api/apm/settings/agent-configuration 2023-10-31\" | \"GET /api/apm/settings/agent-configuration/view 2023-10-31\" | \"DELETE /api/apm/settings/agent-configuration 2023-10-31\" | \"PUT /api/apm/settings/agent-configuration 2023-10-31\" | \"POST /api/apm/settings/agent-configuration/search 2023-10-31\" | \"GET /api/apm/settings/agent-configuration/environments 2023-10-31\" | \"GET /api/apm/settings/agent-configuration/agent_name 2023-10-31\" | \"GET /internal/apm/settings/anomaly-detection/jobs\" | \"POST /internal/apm/settings/anomaly-detection/jobs\" | \"GET /internal/apm/settings/anomaly-detection/environments\" | \"POST /internal/apm/settings/anomaly-detection/update_to_v3\" | \"GET /internal/apm/settings/custom_links/transaction\" | \"GET /internal/apm/settings/custom_links\" | \"POST /internal/apm/settings/custom_links\" | \"PUT /internal/apm/settings/custom_links/{id}\" | \"DELETE /internal/apm/settings/custom_links/{id}\" | \"GET /api/apm/sourcemaps 2023-10-31\" | \"POST /api/apm/sourcemaps 2023-10-31\" | \"DELETE /api/apm/sourcemaps/{id} 2023-10-31\" | \"POST /internal/apm/sourcemaps/migrate_fleet_artifacts\" | \"GET /internal/apm/fleet/has_apm_policies\" | \"GET /internal/apm/fleet/agents\" | \"POST /api/apm/fleet/apm_server_schema 2023-10-31\" | \"GET /internal/apm/fleet/apm_server_schema/unsupported\" | \"GET /internal/apm/fleet/migration_check\" | \"POST /internal/apm/fleet/cloud_apm_package_policy\" | \"GET /internal/apm/fleet/java_agent_versions\" | \"GET /internal/apm/dependencies/top_dependencies\" | \"GET /internal/apm/dependencies/upstream_services\" | \"GET /internal/apm/dependencies/metadata\" | \"GET /internal/apm/dependencies/charts/latency\" | \"GET /internal/apm/dependencies/charts/throughput\" | \"GET /internal/apm/dependencies/charts/error_rate\" | \"GET /internal/apm/dependencies/operations\" | \"GET /internal/apm/dependencies/charts/distribution\" | \"GET /internal/apm/dependencies/operations/spans\" | \"POST /internal/apm/dependencies/top_dependencies/statistics\" | \"GET /internal/apm/correlations/field_candidates/transactions\" | \"GET /internal/apm/correlations/field_value_stats/transactions\" | \"POST /internal/apm/correlations/field_value_pairs/transactions\" | \"POST /internal/apm/correlations/significant_correlations/transactions\" | \"POST /internal/apm/correlations/p_values/transactions\" | \"GET /internal/apm/fallback_to_transactions\" | \"GET /internal/apm/has_data\" | \"GET /internal/apm/event_metadata/{processorEvent}/{id}\" | \"GET /internal/apm/agent_keys\" | \"GET /internal/apm/agent_keys/privileges\" | \"POST /internal/apm/api_key/invalidate\" | \"POST /api/apm/agent_keys 2023-10-31\" | \"GET /internal/apm/storage_explorer\" | \"GET /internal/apm/services/{serviceName}/storage_details\" | \"GET /internal/apm/storage_chart\" | \"GET /internal/apm/storage_explorer/privileges\" | \"GET /internal/apm/storage_explorer_summary_stats\" | \"GET /internal/apm/storage_explorer/is_cross_cluster_search\" | \"GET /internal/apm/storage_explorer/get_services\" | \"GET /internal/apm/traces/{traceId}/span_links/{spanId}/parents\" | \"GET /internal/apm/traces/{traceId}/span_links/{spanId}/children\" | \"GET /internal/apm/traces/{traceId}/span_links/{spanId}\" | \"GET /internal/apm/services/{serviceName}/infrastructure_attributes\" | \"GET /internal/apm/debug-telemetry\" | \"GET /internal/apm/time_range_metadata\" | \"GET /internal/apm/get_agents_per_service\" | \"GET /internal/apm/get_latest_agent_versions\" | \"GET /internal/apm/services/{serviceName}/agent_instances\" | \"GET /internal/apm/mobile-services/{serviceName}/error/http_error_rate\" | \"GET /internal/apm/mobile-services/{serviceName}/errors/groups/main_statistics\" | \"POST /internal/apm/mobile-services/{serviceName}/errors/groups/detailed_statistics\" | \"GET /internal/apm/mobile-services/{serviceName}/error_terms\" | \"POST /internal/apm/mobile-services/{serviceName}/crashes/groups/detailed_statistics\" | \"GET /internal/apm/mobile-services/{serviceName}/crashes/groups/main_statistics\" | \"GET /internal/apm/mobile-services/{serviceName}/crashes/distribution\" | \"GET /internal/apm/services/{serviceName}/mobile/filters\" | \"GET /internal/apm/mobile-services/{serviceName}/most_used_charts\" | \"GET /internal/apm/mobile-services/{serviceName}/transactions/charts/sessions\" | \"GET /internal/apm/mobile-services/{serviceName}/transactions/charts/http_requests\" | \"GET /internal/apm/mobile-services/{serviceName}/stats\" | \"GET /internal/apm/mobile-services/{serviceName}/location/stats\" | \"GET /internal/apm/mobile-services/{serviceName}/terms\" | \"GET /internal/apm/mobile-services/{serviceName}/main_statistics\" | \"GET /internal/apm/mobile-services/{serviceName}/detailed_statistics\" | \"GET /internal/apm/diagnostics\" | \"POST /internal/apm/diagnostics/service-map\" | \"POST /internal/apm/assistant/get_apm_timeseries\" | \"GET /internal/apm/assistant/get_downstream_dependencies\" | \"GET /internal/apm/services/{serviceName}/profiling/flamegraph\" | \"GET /internal/apm/profiling/status\" | \"GET /internal/apm/services/{serviceName}/profiling/functions\" | \"GET /internal/apm/services/{serviceName}/profiling/hosts/flamegraph\" | \"GET /internal/apm/services/{serviceName}/profiling/hosts/functions\" | \"POST /internal/apm/custom-dashboard\" | \"DELETE /internal/apm/custom-dashboard\" | \"GET /internal/apm/services/{serviceName}/dashboards\""
         ],
         "path": "x-pack/solutions/observability/plugins/apm/server/routes/apm_routes/get_global_apm_server_route_repository.ts",
+        "lineNumber": 100,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -400,6 +442,8 @@
           "\"apm\""
         ],
         "path": "x-pack/solutions/observability/plugins/apm/common/rules/apm_rule_types.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -417,6 +461,8 @@
           "; readonly telemetryCollectionEnabled: boolean; readonly metricsInterval: number; readonly forceSyntheticSource: boolean; readonly latestAgentVersionsUrl: string; readonly serverless: Readonly<{} & { enabled: true; }>; readonly serverlessOnboarding: boolean; readonly managedServiceUrl: string; readonly managedOtlpServiceUrl: string; readonly featureFlags: Readonly<{} & { agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; profilingIntegrationAvailable: boolean; ruleFormV2Enabled: boolean; }>; }"
         ],
         "path": "x-pack/solutions/observability/plugins/apm/server/index.ts",
+        "lineNumber": 124,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -9320,6 +9366,8 @@
           ">; }"
         ],
         "path": "x-pack/solutions/observability/plugins/apm/server/routes/apm_routes/get_global_apm_server_route_repository.ts",
+        "lineNumber": 95,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -9334,6 +9382,8 @@
       "label": "APMPluginSetup",
       "description": [],
       "path": "x-pack/solutions/observability/plugins/apm/server/types.ts",
+      "lineNumber": 69,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -9351,6 +9401,8 @@
             "; telemetryCollectionEnabled: boolean; metricsInterval: number; forceSyntheticSource: boolean; latestAgentVersionsUrl: string; serverless: Readonly<{} & { enabled: true; }>; serverlessOnboarding: boolean; managedServiceUrl: string; managedOtlpServiceUrl: string; featureFlags: Readonly<{} & { agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; profilingIntegrationAvailable: boolean; ruleFormV2Enabled: boolean; }>; }>>"
           ],
           "path": "x-pack/solutions/observability/plugins/apm/server/types.ts",
+          "lineNumber": 70,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }

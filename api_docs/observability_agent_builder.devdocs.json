@@ -12,6 +12,8 @@
         "label": "AlertAiInsightProps",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/public/components/insights/alert_ai_insight.tsx",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -23,6 +25,8 @@
             "label": "alertId",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/public/components/insights/alert_ai_insight.tsx",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -37,6 +41,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/public/components/insights/alert_ai_insight.tsx",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -51,6 +57,8 @@
         "label": "ErrorSampleAiInsightProps",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/public/components/insights/error_sample_ai_insight.tsx",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -62,6 +70,8 @@
             "label": "errorId",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/public/components/insights/error_sample_ai_insight.tsx",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -73,6 +83,8 @@
             "label": "serviceName",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/public/components/insights/error_sample_ai_insight.tsx",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -84,6 +96,8 @@
             "label": "start",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/public/components/insights/error_sample_ai_insight.tsx",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -95,6 +109,8 @@
             "label": "end",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/public/components/insights/error_sample_ai_insight.tsx",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -106,6 +122,8 @@
             "label": "environment",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/public/components/insights/error_sample_ai_insight.tsx",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -120,6 +138,8 @@
         "label": "ObservabilityAgentBuilderPluginSetupDependencies",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/public/types.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -133,6 +153,8 @@
         "label": "ObservabilityAgentBuilderPluginStartDependencies",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/public/types.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -153,6 +175,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/public/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -173,6 +197,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/public/types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -193,6 +219,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/public/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -213,6 +241,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/public/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -233,6 +263,8 @@
           "\"observability.ai_insight\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -248,6 +280,8 @@
           "\"observability.alert\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -263,6 +297,8 @@
           "\"observability.error\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -278,6 +314,8 @@
           "\"observability.log\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -292,6 +330,8 @@
       "label": "ObservabilityAgentBuilderPluginPublicSetup",
       "description": [],
       "path": "x-pack/solutions/observability/plugins/observability_agent_builder/public/types.ts",
+      "lineNumber": 15,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -306,6 +346,8 @@
       "label": "ObservabilityAgentBuilderPluginPublicStart",
       "description": [],
       "path": "x-pack/solutions/observability/plugins/observability_agent_builder/public/types.ts",
+      "lineNumber": 17,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -328,6 +370,8 @@
             ">"
           ],
           "path": "x-pack/solutions/observability/plugins/observability_agent_builder/public/types.ts",
+          "lineNumber": 18,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -352,6 +396,8 @@
             ">"
           ],
           "path": "x-pack/solutions/observability/plugins/observability_agent_builder/public/types.ts",
+          "lineNumber": 19,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -374,6 +420,8 @@
         "label": "ObservabilityAgentBuilderPluginSetupDependencies",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/types.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -394,6 +442,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/types.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -414,6 +464,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/types.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -428,6 +480,8 @@
               "void"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -450,6 +504,8 @@
               "; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/types.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -470,6 +526,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -485,6 +543,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -505,6 +565,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/types.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -519,6 +581,8 @@
         "label": "ObservabilityAgentBuilderPluginStartDependencies",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/types.ts",
+        "lineNumber": 48,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -539,6 +603,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -559,6 +625,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/types.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -599,6 +667,8 @@
               ">; }; }; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/types.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -613,6 +683,8 @@
               "{}"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/types.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -633,6 +705,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -653,6 +727,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -673,6 +749,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/types.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -693,6 +771,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/types.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -707,6 +787,8 @@
               "void | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/types.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -728,6 +810,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/types.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -810,6 +894,8 @@
           ", { summary: string; context: string; }, undefined>; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/routes/get_global_observability_agent_builder_route_repository.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -824,6 +910,8 @@
       "label": "ObservabilityAgentBuilderPluginSetup",
       "description": [],
       "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/types.ts",
+      "lineNumber": 32,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -842,6 +930,8 @@
             "[K]) => void"
           ],
           "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/types.ts",
+          "lineNumber": 33,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -857,6 +947,8 @@
                 "K"
               ],
               "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/data_registry/data_registry.ts",
+              "lineNumber": 17,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false
             },
@@ -872,6 +964,8 @@
                 "[K]"
               ],
               "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/data_registry/data_registry.ts",
+              "lineNumber": 18,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "returnComment": [],
@@ -894,6 +988,8 @@
         "{ [x: string]: never; }"
       ],
       "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/types.ts",
+      "lineNumber": 36,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -917,6 +1013,8 @@
           "\"observability.ai_insight\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -932,6 +1030,8 @@
           "\"observability.alert\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -947,6 +1047,8 @@
           "\"observability.error\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -962,6 +1064,8 @@
           "\"observability.log\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

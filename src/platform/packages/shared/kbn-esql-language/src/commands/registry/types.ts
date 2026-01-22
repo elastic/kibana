@@ -119,6 +119,7 @@ export interface ESQLUserDefinedColumn {
   type: SupportedDataType | 'unknown';
   userDefined: true;
   location: ESQLLocation; // TODO should this be optional?
+  isUnmappedField?: boolean;
 }
 
 export type ESQLColumnData = ESQLUserDefinedColumn | ESQLFieldWithMetadata;
@@ -170,6 +171,7 @@ export interface ICommandContext {
   histogramBarTarget?: number;
   activeProduct?: PricingProduct | undefined;
   isCursorInSubquery?: boolean;
+  unmappedFieldsStrategy?: UnmappedFieldsStrategy;
 }
 /**
  * This is a list of locations within an ES|QL query.
@@ -258,4 +260,10 @@ export enum Location {
    * In the COMPLETION command
    */
   COMPLETION = 'completion',
+}
+
+export enum UnmappedFieldsStrategy {
+  FAIL = 'FAIL',
+  NULLIFY = 'NULLIFY',
+  LOAD = 'LOAD',
 }

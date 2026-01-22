@@ -28,6 +28,13 @@ import {
 } from './constants';
 import type { IntegrationParams, DataStreamParams } from '../../routes/types';
 
+export interface UpdateDataStreamParams {
+  integrationId: string;
+  dataStreamId: string;
+  ingestPipeline: string;
+  status: keyof typeof TASK_STATUSES;
+}
+
 export class AutomaticImportSavedObjectService {
   private savedObjectsClient: SavedObjectsClient;
   private logger: Logger;
@@ -96,8 +103,6 @@ export class AutomaticImportSavedObjectService {
     }
 
     try {
-      this.logger.debug(`Creating integration: ${integrationId}`);
-
       const initialIntegrationData: IntegrationAttributes = {
         integration_id: integrationId,
         data_stream_count: 0,
@@ -354,7 +359,7 @@ export class AutomaticImportSavedObjectService {
 
       await this.savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, integrationId, options);
 
-      this.logger.info(
+      this.logger.debug(
         `Successfully deleted integration ${integrationId} and ${dataStreamsDeleted} associated data streams`
       );
 
@@ -408,8 +413,6 @@ export class AutomaticImportSavedObjectService {
       throw new Error('Data stream ID is required');
     }
     try {
-      this.logger.debug(`Creating data stream: ${dataStreamId}`);
-
       const initialDataStreamData: DataStreamAttributes = {
         integration_id: integrationId,
         data_stream_id: dataStreamId,
@@ -430,7 +433,6 @@ export class AutomaticImportSavedObjectService {
       };
 
       const compositeId = this.getDataStreamCompositeId(integrationId, dataStreamId);
-
       return await this.savedObjectsClient.create<DataStreamAttributes>(
         DATA_STREAM_SAVED_OBJECT_TYPE,
         initialDataStreamData,
@@ -568,6 +570,49 @@ export class AutomaticImportSavedObjectService {
       this.logger.error(
         `Failed to update integration ${parentIntegrationId} after deleting data stream ${dataStreamId}: ${integrationError}`
       );
+    }
+  }
+
+  public async updateDataStreamSavedObjectAttributes(
+    updateDataStreamParams: UpdateDataStreamParams
+  ): Promise<void> {
+    const { integrationId, dataStreamId, ingestPipeline, status } = updateDataStreamParams;
+
+    if (!integrationId) {
+      throw new Error('Integration ID is required');
+    }
+
+    if (!dataStreamId) {
+      throw new Error('Data stream ID is required');
+    }
+
+    try {
+      const dataStream = await this.getDataStream(dataStreamId, integrationId);
+      if (!dataStream) {
+        throw new Error(`Data stream ${dataStreamId} not found`);
+      }
+
+      const updatedDataStreamData: DataStreamAttributes = {
+        ...dataStream.attributes,
+        result: {
+          ingest_pipeline: ingestPipeline,
+        },
+        job_info: {
+          ...dataStream.attributes.job_info,
+          status,
+        },
+      };
+
+      const compositeId = this.getDataStreamCompositeId(integrationId, dataStreamId);
+
+      await this.savedObjectsClient.update(
+        DATA_STREAM_SAVED_OBJECT_TYPE,
+        compositeId,
+        updatedDataStreamData
+      );
+    } catch (error) {
+      this.logger.error(`Failed to update data stream ${dataStreamId}: ${error}`);
+      throw error;
     }
   }
 }

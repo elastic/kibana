@@ -33,6 +33,8 @@
           "\"ml\""
         ],
         "path": "src/platform/packages/shared/deeplinks/ml/deep_links.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -48,6 +50,8 @@
           "\"ml\" | \"ml:notifications\" | \"ml:nodes\" | \"ml:overview\" | \"ml:memoryUsage\" | \"ml:settings\" | \"ml:dataVisualizer\" | \"ml:logPatternAnalysis\" | \"ml:logRateAnalysis\" | \"ml:singleMetricViewer\" | \"ml:anomalyDetection\" | \"ml:anomalyExplorer\" | \"ml:dataDrift\" | \"ml:dataFrameAnalytics\" | \"ml:resultExplorer\" | \"ml:analyticsMap\" | \"ml:aiOps\" | \"ml:changePointDetections\" | \"ml:modelManagement\" | \"ml:nodesOverview\" | \"ml:esqlDataVisualizer\" | \"ml:fileUpload\" | \"ml:indexDataVisualizer\" | \"ml:calendarSettings\" | \"ml:filterListsSettings\" | \"ml:suppliedConfigurations\""
         ],
         "path": "src/platform/packages/shared/deeplinks/ml/deep_links.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -63,6 +67,8 @@
           "\"notifications\" | \"nodes\" | \"overview\" | \"memoryUsage\" | \"settings\" | \"dataVisualizer\" | \"logPatternAnalysis\" | \"logRateAnalysis\" | \"singleMetricViewer\" | \"anomalyDetection\" | \"anomalyExplorer\" | \"dataDrift\" | \"dataFrameAnalytics\" | \"resultExplorer\" | \"analyticsMap\" | \"aiOps\" | \"changePointDetections\" | \"modelManagement\" | \"nodesOverview\" | \"esqlDataVisualizer\" | \"fileUpload\" | \"indexDataVisualizer\" | \"calendarSettings\" | \"filterListsSettings\" | \"suppliedConfigurations\""
         ],
         "path": "src/platform/packages/shared/deeplinks/ml/deep_links.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

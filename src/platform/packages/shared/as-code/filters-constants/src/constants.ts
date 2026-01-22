@@ -17,3 +17,15 @@ export const ASCODE_FILTER_OPERATOR = {
   EXISTS: 'exists',
   RANGE: 'range',
 } as const;
+
+export const ASCODE_GROUPED_CONDITION_TYPE = {
+  AND: 'and',
+  OR: 'or',
+} as const;
+
+export const ASCODE_FILTER_TYPE = {
+  CONDITION: 'condition',
+  GROUP: 'group',
+  DSL: 'dsl',
+  SPATIAL: 'spatial',
+} as const;

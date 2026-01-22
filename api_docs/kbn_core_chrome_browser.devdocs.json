@@ -12,6 +12,8 @@
         "label": "ChromeBadge",
         "description": [],
         "path": "src/core/packages/chrome/browser/src/types.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -23,6 +25,8 @@
             "label": "text",
             "description": [],
             "path": "src/core/packages/chrome/browser/src/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -34,6 +38,8 @@
             "label": "tooltip",
             "description": [],
             "path": "src/core/packages/chrome/browser/src/types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -49,6 +55,8 @@
               " | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -68,6 +76,8 @@
           "EuiBreadcrumbProps"
         ],
         "path": "src/core/packages/chrome/browser/src/breadcrumb.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -85,6 +95,8 @@
               " | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/breadcrumb.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -99,6 +111,8 @@
         "label": "ChromeBreadcrumbsAppendExtension",
         "description": [],
         "path": "src/core/packages/chrome/browser/src/breadcrumb.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -114,6 +128,8 @@
               "UnmountCallback"
             ],
             "path": "src/core/packages/chrome/browser/src/breadcrumb.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -129,6 +145,8 @@
                   "T"
                 ],
                 "path": "src/core/packages/mount-utils/browser/src/mount_point.ts",
+                "lineNumber": 19,
+                "columnNumber": 64,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -147,6 +165,8 @@
               "number | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/breadcrumb.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -163,6 +183,8 @@
           "\nAPIs for accessing and updating the document title.\n"
         ],
         "path": "src/core/packages/chrome/browser/src/doc_title.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -179,6 +201,8 @@
               "(newTitle: string | string[]) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/doc_title.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -195,6 +219,8 @@
                   "string | string[]"
                 ],
                 "path": "src/core/packages/chrome/browser/src/doc_title.ts",
+                "lineNumber": 40,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -215,6 +241,8 @@
               "() => void"
             ],
             "path": "src/core/packages/chrome/browser/src/doc_title.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -236,6 +264,8 @@
           "ChromeHelpExtensionMenuCustomLink"
         ],
         "path": "src/core/packages/chrome/browser/src/help_extension.ts",
+        "lineNumber": 102,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -249,6 +279,8 @@
               "\nHighest priority items are listed at the top of the list of links."
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -263,6 +295,8 @@
         "label": "ChromeHelpExtension",
         "description": [],
         "path": "src/core/packages/chrome/browser/src/help_extension.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -276,6 +310,8 @@
               "\nProvide your plugin's name to create a header for separation"
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -293,6 +329,8 @@
               "[] | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -311,6 +349,8 @@
               ") => () => void) | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -325,6 +365,8 @@
                   "HTMLDivElement"
                 ],
                 "path": "src/core/packages/chrome/browser/src/help_extension.ts",
+                "lineNumber": 31,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -340,6 +382,8 @@
                   "ChromeHelpMenuActions"
                 ],
                 "path": "src/core/packages/chrome/browser/src/help_extension.ts",
+                "lineNumber": 31,
+                "columnNumber": 39,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -363,6 +407,8 @@
           "ChromeHelpExtensionLinkBase"
         ],
         "path": "src/core/packages/chrome/browser/src/help_extension.ts",
+        "lineNumber": 82,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -379,6 +425,8 @@
               "\"custom\""
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -392,6 +440,8 @@
               "\nURL of the link"
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -408,6 +458,8 @@
               "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -424,6 +476,8 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -443,6 +497,8 @@
           "ChromeHelpExtensionLinkBase"
         ],
         "path": "src/core/packages/chrome/browser/src/help_extension.ts",
+        "lineNumber": 56,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -459,6 +515,8 @@
               "\"discuss\""
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -472,6 +530,8 @@
               "\nURL to discuss page.\ni.e. `https://discuss.elastic.co/c/${appName}`"
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -491,6 +551,8 @@
           "ChromeHelpExtensionLinkBase"
         ],
         "path": "src/core/packages/chrome/browser/src/help_extension.ts",
+        "lineNumber": 69,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -507,6 +569,8 @@
               "\"documentation\""
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -520,6 +584,8 @@
               "\nURL to documentation page.\ni.e. `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/${appName}.html`,"
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -539,6 +605,8 @@
           "ChromeHelpExtensionLinkBase"
         ],
         "path": "src/core/packages/chrome/browser/src/help_extension.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -555,6 +623,8 @@
               "\"github\""
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -571,6 +641,8 @@
               "string[]"
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -587,6 +659,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -601,6 +675,8 @@
         "label": "ChromeHelpMenuActions",
         "description": [],
         "path": "src/core/packages/chrome/browser/src/help_extension.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -615,6 +691,8 @@
               "() => void"
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -631,6 +709,8 @@
         "label": "ChromeHelpMenuLink",
         "description": [],
         "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -642,6 +722,8 @@
             "label": "title",
             "description": [],
             "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -656,6 +738,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -670,6 +754,8 @@
               "(() => void) | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -686,6 +772,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -700,6 +788,8 @@
         "label": "ChromeNavControl",
         "description": [],
         "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -714,6 +804,8 @@
               "number | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -729,6 +821,8 @@
               "UnmountCallback"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -744,6 +838,8 @@
                   "T"
                 ],
                 "path": "src/core/packages/mount-utils/browser/src/mount_point.ts",
+                "lineNumber": 19,
+                "columnNumber": 64,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -762,6 +858,8 @@
           "\n{@link ChromeNavControls | APIs} for registering new controls to be displayed in the navigation bar.\n"
         ],
         "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -780,6 +878,8 @@
               ") => void"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -794,6 +894,8 @@
                   "ChromeNavControl"
                 ],
                 "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
+                "lineNumber": 45,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -816,6 +918,8 @@
               ") => void"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -830,6 +934,8 @@
                   "ChromeNavControl"
                 ],
                 "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
+                "lineNumber": 48,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -852,6 +958,8 @@
               ") => void"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -866,6 +974,8 @@
                   "ChromeNavControl"
                 ],
                 "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
+                "lineNumber": 51,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -888,6 +998,8 @@
               ") => void"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -902,6 +1014,8 @@
                   "ChromeNavControl"
                 ],
                 "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
+                "lineNumber": 54,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -924,6 +1038,8 @@
               "[]) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -939,6 +1055,8 @@
                   "[]"
                 ],
                 "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
+                "lineNumber": 57,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -957,6 +1075,8 @@
         "label": "ChromeNavLink",
         "description": [],
         "path": "src/core/packages/chrome/browser/src/nav_links.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -970,6 +1090,8 @@
               "\nA unique identifier for looking up links."
             ],
             "path": "src/core/packages/chrome/browser/src/nav_links.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -983,6 +1105,8 @@
               "\nThe title of the application."
             ],
             "path": "src/core/packages/chrome/browser/src/nav_links.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1000,6 +1124,8 @@
               " | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_links.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1013,6 +1139,8 @@
               "\nThe base route used to open the root of an application."
             ],
             "path": "src/core/packages/chrome/browser/src/nav_links.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1026,6 +1154,8 @@
               "\nThe route used to open the default path and the deep links of an application."
             ],
             "path": "src/core/packages/chrome/browser/src/nav_links.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1042,6 +1172,8 @@
               "number | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_links.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1058,6 +1190,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_links.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1074,6 +1208,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_links.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1090,6 +1226,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_links.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1103,6 +1241,8 @@
               "\nSettled state between `url`, `baseUrl`, and `active`"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_links.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1122,6 +1262,8 @@
               "[]"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_links.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1138,6 +1280,8 @@
           "\n{@link ChromeNavLinks | APIs} for manipulating nav links.\n"
         ],
         "path": "src/core/packages/chrome/browser/src/nav_links.ts",
+        "lineNumber": 85,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1158,6 +1302,8 @@
               ">[]>"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_links.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1178,6 +1324,8 @@
               " | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_links.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1192,6 +1340,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/chrome/browser/src/nav_links.ts",
+                "lineNumber": 100,
+                "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1214,6 +1364,8 @@
               ">[]"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_links.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1232,6 +1384,8 @@
               "(id: string) => boolean"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_links.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1246,6 +1400,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/chrome/browser/src/nav_links.ts",
+                "lineNumber": 111,
+                "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1266,6 +1422,8 @@
               "() => void"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_links.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1286,6 +1444,8 @@
               "<boolean>"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_links.ts",
+            "lineNumber": 127,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1308,6 +1468,8 @@
           " extends NodeDefinitionBase"
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+        "lineNumber": 162,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1321,6 +1483,8 @@
               "Optional id, if not passed a \"link\" must be provided."
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+            "lineNumber": 172,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1337,6 +1501,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+            "lineNumber": 174,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1350,6 +1516,8 @@
               "Path in the tree of the node"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+            "lineNumber": 176,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1367,6 +1535,8 @@
               " | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+            "lineNumber": 178,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1384,6 +1554,8 @@
               "[] | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+            "lineNumber": 180,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1400,6 +1572,8 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+            "lineNumber": 185,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1416,6 +1590,8 @@
           "\n{@link ChromeRecentlyAccessed | APIs} for recently accessed history."
         ],
         "path": "src/core/packages/chrome/browser/src/recently_accessed.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1432,6 +1608,8 @@
               "(link: string, label: string, id: string) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/recently_accessed.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1448,6 +1626,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/chrome/browser/src/recently_accessed.ts",
+                "lineNumber": 36,
+                "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1465,6 +1645,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/chrome/browser/src/recently_accessed.ts",
+                "lineNumber": 36,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1482,6 +1664,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/chrome/browser/src/recently_accessed.ts",
+                "lineNumber": 36,
+                "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1504,6 +1688,8 @@
               "[]"
             ],
             "path": "src/core/packages/chrome/browser/src/recently_accessed.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1526,6 +1712,8 @@
               "[]>"
             ],
             "path": "src/core/packages/chrome/browser/src/recently_accessed.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1542,6 +1730,8 @@
         "label": "ChromeRecentlyAccessedHistoryItem",
         "description": [],
         "path": "src/core/packages/chrome/browser/src/recently_accessed.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1553,6 +1743,8 @@
             "label": "link",
             "description": [],
             "path": "src/core/packages/chrome/browser/src/recently_accessed.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1564,6 +1756,8 @@
             "label": "label",
             "description": [],
             "path": "src/core/packages/chrome/browser/src/recently_accessed.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1575,6 +1769,8 @@
             "label": "id",
             "description": [],
             "path": "src/core/packages/chrome/browser/src/recently_accessed.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1589,6 +1785,8 @@
         "label": "ChromeSetBreadcrumbsParams",
         "description": [],
         "path": "src/core/packages/chrome/browser/src/breadcrumb.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1609,6 +1807,8 @@
               "[]; absolute?: boolean | undefined; } | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/breadcrumb.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1623,6 +1823,8 @@
         "label": "ChromeSetProjectBreadcrumbsParams",
         "description": [],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+        "lineNumber": 191,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1634,6 +1836,8 @@
             "label": "absolute",
             "description": [],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+            "lineNumber": 193,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1650,6 +1854,8 @@
           "\nChromeSetup exposes APIs available during the setup phase."
         ],
         "path": "src/core/packages/chrome/browser/src/contracts.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -1665,6 +1871,8 @@
           "\nChromeStart allows plugins to customize the global chrome header UI and\nenrich the UX with additional information about the current location of the\nbrowser.\n"
         ],
         "path": "src/core/packages/chrome/browser/src/contracts.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1681,6 +1889,8 @@
               "ChromeNavLinks"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1697,6 +1907,8 @@
               "ChromeNavControls"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1713,6 +1925,8 @@
               "ChromeRecentlyAccessed"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1729,6 +1943,8 @@
               "ChromeDocTitle"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1747,6 +1963,8 @@
               "<boolean>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1765,6 +1983,8 @@
               "(isVisible: boolean) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1779,6 +1999,8 @@
                   "boolean"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
+                "lineNumber": 80,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1803,6 +2025,8 @@
               " | undefined>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1823,6 +2047,8 @@
               " | undefined) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1838,6 +2064,8 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
+                "lineNumber": 90,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1858,6 +2086,8 @@
               "(node: React.ReactNode) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1872,6 +2102,8 @@
                   "React.ReactNode"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
+                "lineNumber": 95,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1896,6 +2128,8 @@
               "[]>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1918,6 +2152,8 @@
               " | undefined) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1933,6 +2169,8 @@
                   "[]"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
+                "lineNumber": 105,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1949,6 +2187,8 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
+                "lineNumber": 105,
+                "columnNumber": 54,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1973,6 +2213,8 @@
               " | undefined>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1993,6 +2235,8 @@
               " | undefined) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2008,6 +2252,8 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
+                "lineNumber": 135,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2032,6 +2278,8 @@
               "[]>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 137,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2052,6 +2300,8 @@
               ") => () => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 142,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2066,6 +2316,8 @@
                   "ChromeBreadcrumbsAppendExtension"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
+                "lineNumber": 146,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2088,6 +2340,8 @@
               "[]) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 149,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2105,6 +2359,8 @@
                   "[]"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
+                "lineNumber": 173,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2129,6 +2385,8 @@
               "> | undefined>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 175,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2149,6 +2407,8 @@
               "> | undefined) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 180,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2165,6 +2425,8 @@
                   "> | undefined"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
+                "lineNumber": 183,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2187,6 +2449,8 @@
               "[]) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 185,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2202,6 +2466,8 @@
                   "[]"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
+                "lineNumber": 188,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2226,6 +2492,8 @@
               "[]>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 190,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2246,6 +2514,8 @@
               ") => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 195,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2260,6 +2530,8 @@
                   "ChromeGlobalHelpExtensionMenuLink"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
+                "lineNumber": 199,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2284,6 +2556,8 @@
               " | undefined>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 202,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2304,6 +2578,8 @@
               " | undefined) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 207,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2319,6 +2595,8 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
+                "lineNumber": 210,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2339,6 +2617,8 @@
               "(url: string) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 212,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2355,6 +2635,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
+                "lineNumber": 216,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2377,6 +2659,8 @@
               "<string>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 218,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2397,6 +2681,8 @@
               " | undefined) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 223,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2412,6 +2698,8 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
+                "lineNumber": 228,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2434,6 +2722,8 @@
               "<boolean>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 230,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2454,6 +2744,8 @@
               ") => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 235,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2470,6 +2762,8 @@
                   "ChromeStyle"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
+                "lineNumber": 239,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2494,6 +2788,8 @@
               ">"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 241,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2514,6 +2810,8 @@
               "<boolean>; setIsFeedbackBtnVisible: (isVisible: boolean) => void; }"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 246,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2532,6 +2830,8 @@
               "<\"security\" | \"workplaceai\" | \"oblt\" | \"es\" | null>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 270,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2548,6 +2848,8 @@
         "label": "ChromeUserBanner",
         "description": [],
         "path": "src/core/packages/chrome/browser/src/types.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2563,6 +2865,8 @@
               "UnmountCallback"
             ],
             "path": "src/core/packages/chrome/browser/src/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2578,6 +2882,8 @@
                   "T"
                 ],
                 "path": "src/core/packages/mount-utils/browser/src/mount_point.ts",
+                "lineNumber": 19,
+                "columnNumber": 64,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2594,6 +2900,8 @@
         "label": "CloudLink",
         "description": [],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+        "lineNumber": 99,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2605,6 +2913,8 @@
             "label": "title",
             "description": [],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+            "lineNumber": 100,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2616,6 +2926,8 @@
             "label": "href",
             "description": [],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2630,6 +2942,8 @@
         "label": "CloudURLs",
         "description": [],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+        "lineNumber": 89,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2644,6 +2958,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2658,6 +2974,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2672,6 +2990,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2686,6 +3006,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2700,6 +3022,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2714,6 +3038,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2728,6 +3054,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2746,6 +3074,8 @@
           "<LinkId, Id, ChildrenId>"
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+        "lineNumber": 221,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2763,6 +3093,8 @@
               "<LinkId, Id, ChildrenId>[]"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+            "lineNumber": 231,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2780,6 +3112,8 @@
               "<LinkId, Id, ChildrenId>[] | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+            "lineNumber": 235,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2794,6 +3128,8 @@
         "label": "NavigationTreeDefinitionUI",
         "description": [],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+        "lineNumber": 243,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2808,6 +3144,8 @@
               "\"security\" | \"workplaceai\" | \"oblt\" | \"es\""
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+            "lineNumber": 252,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2823,6 +3161,8 @@
               "[]"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+            "lineNumber": 253,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2838,6 +3178,8 @@
               "[] | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+            "lineNumber": 254,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2856,6 +3198,8 @@
           "<LinkId, Id, ChildrenId> extends NodeDefinitionBase"
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+        "lineNumber": 196,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2872,6 +3216,8 @@
               "Id | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+            "lineNumber": 209,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2888,6 +3234,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+            "lineNumber": 211,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2904,6 +3252,8 @@
               "LinkId | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+            "lineNumber": 213,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2921,6 +3271,8 @@
               " | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+            "lineNumber": 215,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2938,6 +3290,8 @@
               "<LinkId, Id, ChildrenId>[] | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+            "lineNumber": 217,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2956,6 +3310,8 @@
           "<LinkId>"
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+        "lineNumber": 257,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2972,6 +3328,8 @@
               "\"security\" | \"workplaceai\" | \"oblt\" | \"es\""
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+            "lineNumber": 267,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2985,6 +3343,8 @@
               "Title for the solution navigation."
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+            "lineNumber": 269,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3004,6 +3364,8 @@
               "<LinkId, string, string>>"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+            "lineNumber": 271,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3021,6 +3383,8 @@
               " | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+            "lineNumber": 273,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3037,6 +3401,8 @@
               "LinkId | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+            "lineNumber": 275,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3053,6 +3419,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+            "lineNumber": 277,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3070,9 +3438,11 @@
         "label": "AppDeepLinkId",
         "description": [],
         "signature": [
-          "\"fleet\" | \"graph\" | \"ml\" | \"monitoring\" | \"profiling\" | \"streams\" | \"uptime\" | \"workflows\" | \"metrics\" | \"dashboards\" | \"apm\" | \"synthetics\" | \"ux\" | \"canvas\" | \"logs\" | \"slo\" | \"observabilityAIAssistant\" | \"home\" | \"integrations\" | \"management\" | \"discover\" | \"maps\" | \"visualize\" | \"observability-overview\" | \"dev_tools\" | \"dev_tools:console\" | \"dev_tools:searchprofiler\" | \"dev_tools:painless_lab\" | \"dev_tools:grokdebugger\" | \"ml:notifications\" | \"ml:nodes\" | \"ml:overview\" | \"ml:memoryUsage\" | \"ml:settings\" | \"ml:dataVisualizer\" | \"ml:logPatternAnalysis\" | \"ml:logRateAnalysis\" | \"ml:singleMetricViewer\" | \"ml:anomalyDetection\" | \"ml:anomalyExplorer\" | \"ml:dataDrift\" | \"ml:dataFrameAnalytics\" | \"ml:resultExplorer\" | \"ml:analyticsMap\" | \"ml:aiOps\" | \"ml:changePointDetections\" | \"ml:modelManagement\" | \"ml:nodesOverview\" | \"ml:esqlDataVisualizer\" | \"ml:fileUpload\" | \"ml:indexDataVisualizer\" | \"ml:calendarSettings\" | \"ml:filterListsSettings\" | \"ml:suppliedConfigurations\" | \"osquery\" | \"cloud_connect\" | \"management:transform\" | \"management:watcher\" | \"management:tags\" | \"management:cases\" | \"management:overview\" | \"management:cross_cluster_replication\" | \"management:settings\" | \"management:dataViews\" | \"management:spaces\" | \"management:analytics\" | \"management:users\" | \"management:migrate_data\" | \"management:search_sessions\" | \"management:data_quality\" | \"management:data_usage\" | \"management:filesManagement\" | \"management:trained_models\" | \"management:pipelines\" | \"management:maintenanceWindows\" | \"management:anomaly_detection\" | \"management:roles\" | \"management:reporting\" | \"management:ad_settings\" | \"management:aiAssistantManagementSelection\" | \"management:securityAiAssistantManagement\" | \"management:observabilityAiAssistantManagement\" | \"management:api_keys\" | \"management:content_connectors\" | \"management:license_management\" | \"management:index_lifecycle_management\" | \"management:index_management\" | \"management:ingest_pipelines\" | \"management:jobsListLink\" | \"management:objects\" | \"management:remote_clusters\" | \"management:role_mappings\" | \"management:rollup_jobs\" | \"management:snapshot_restore\" | \"management:supplied_configurations\" | \"management:triggersActions\" | \"management:triggersActionsAlerts\" | \"management:triggersActionsConnectors\" | \"management:upgrade_assistant\" | \"management:genAiSettings\" | \"enterpriseSearch\" | \"enterpriseSearchContent\" | \"enterpriseSearchApplications\" | \"enterpriseSearchAnalytics\" | \"serverlessConnectors\" | \"serverlessWebCrawlers\" | \"searchPlayground\" | \"searchInferenceEndpoints\" | \"searchSynonyms\" | \"searchQueryRules\" | \"searchHomepage\" | \"enterpriseSearchContent:connectors\" | \"enterpriseSearchContent:webCrawlers\" | \"enterpriseSearchApplications:searchApplications\" | \"searchInferenceEndpoints:inferenceEndpoints\" | \"searchSynonyms:synonyms\" | \"elasticsearchIndices\" | \"elasticsearchIndexManagement\" | \"searchGettingStarted\" | \"elasticsearchIndices:createIndex\" | \"observability-logs-explorer\" | \"last-used-logs-viewer\" | \"observabilityOnboarding\" | \"inventory\" | \"logs:anomalies\" | \"logs:settings\" | \"logs:stream\" | \"logs:log-categories\" | \"observability-overview:cases\" | \"observability-overview:rules\" | \"observability-overview:alerts\" | \"observability-overview:cases_create\" | \"observability-overview:cases_configure\" | \"metrics:settings\" | \"metrics:hosts\" | \"metrics:inventory\" | \"metrics:metrics-explorer\" | \"metrics:assetDetails\" | \"apm:services\" | \"apm:traces\" | \"apm:dependencies\" | \"apm:service-map\" | \"apm:settings\" | \"apm:service-groups-list\" | \"apm:storage-explorer\" | \"synthetics:overview\" | \"synthetics:certificates\" | \"uptime:Certificates\" | \"profiling:functions\" | \"profiling:stacktraces\" | \"profiling:flamegraphs\" | \"inventory:datastreams\" | \"streams:overview\" | \"securitySolutionUI\" | \"securitySolutionUI:\" | \"securitySolutionUI:cases\" | \"securitySolutionUI:rules\" | \"securitySolutionUI:dashboards\" | \"securitySolutionUI:alerts\" | \"securitySolutionUI:policy\" | \"securitySolutionUI:overview\" | \"securitySolutionUI:kubernetes\" | \"securitySolutionUI:configurations\" | \"securitySolutionUI:cases_create\" | \"securitySolutionUI:cases_configure\" | \"securitySolutionUI:hosts\" | \"securitySolutionUI:users\" | \"securitySolutionUI:cloud_defend-policies\" | \"securitySolutionUI:cloud_security_posture-dashboard\" | \"securitySolutionUI:cloud_security_posture-vulnerability_dashboard\" | \"securitySolutionUI:cloud_security_posture-findings\" | \"securitySolutionUI:cloud_security_posture-benchmarks\" | \"securitySolutionUI:asset_inventory\" | \"securitySolutionUI:network\" | \"securitySolutionUI:data_quality\" | \"securitySolutionUI:endpoints\" | \"securitySolutionUI:explore\" | \"securitySolutionUI:cloud_defend\" | \"securitySolutionUI:administration\" | \"securitySolutionUI:attacks\" | \"securitySolutionUI:ai_value\" | \"securitySolutionUI:attack_discovery\" | \"securitySolutionUI:blocklist\" | \"securitySolutionUI:alert_detections\" | \"securitySolutionUI:cloud_security_posture-rules\" | \"securitySolutionUI:detections\" | \"securitySolutionUI:detection_response\" | \"securitySolutionUI:endpoint_exceptions\" | \"securitySolutionUI:event_filters\" | \"securitySolutionUI:exceptions\" | \"securitySolutionUI:host_isolation_exceptions\" | \"securitySolutionUI:hosts-all\" | \"securitySolutionUI:hosts-anomalies\" | \"securitySolutionUI:hosts-risk\" | \"securitySolutionUI:hosts-events\" | \"securitySolutionUI:hosts-sessions\" | \"securitySolutionUI:hosts-uncommon_processes\" | \"securitySolutionUI:get_started\" | \"securitySolutionUI:network-anomalies\" | \"securitySolutionUI:network-dns\" | \"securitySolutionUI:network-events\" | \"securitySolutionUI:network-flows\" | \"securitySolutionUI:network-http\" | \"securitySolutionUI:network-tls\" | \"securitySolutionUI:response_actions_history\" | \"securitySolutionUI:rules-add\" | \"securitySolutionUI:rules-create\" | \"securitySolutionUI:rules-landing\" | \"securitySolutionUI:rules-management\" | \"securitySolutionUI:scripts_library\" | \"securitySolutionUI:siem_readiness\" | \"securitySolutionUI:siem_migrations\" | \"securitySolutionUI:siem_migrations-rules\" | \"securitySolutionUI:siem_migrations-dashboards\" | \"securitySolutionUI:threat_intelligence\" | \"securitySolutionUI:timelines\" | \"securitySolutionUI:timelines-templates\" | \"securitySolutionUI:trusted_apps\" | \"securitySolutionUI:trusted_devices\" | \"securitySolutionUI:users-all\" | \"securitySolutionUI:users-anomalies\" | \"securitySolutionUI:users-authentications\" | \"securitySolutionUI:users-events\" | \"securitySolutionUI:users-risk\" | \"securitySolutionUI:entity_analytics\" | \"securitySolutionUI:entity_analytics-management\" | \"securitySolutionUI:entity_analytics-landing\" | \"securitySolutionUI:entity_analytics-privileged_user_monitoring\" | \"securitySolutionUI:entity_analytics-overview\" | \"securitySolutionUI:entity_analytics-threat_hunting\" | \"securitySolutionUI:entity_analytics-entity_store_management\" | \"securitySolutionUI:coverage-overview\" | \"securitySolutionUI:notes\" | \"securitySolutionUI:alert_summary\" | \"securitySolutionUI:configurations-integrations\" | \"securitySolutionUI:configurations-ai_settings\" | \"securitySolutionUI:configurations-basic_rules\" | \"fleet:settings\" | \"fleet:agents\" | \"fleet:policies\" | \"fleet:data_streams\" | \"fleet:enrollment_tokens\" | \"fleet:uninstall_tokens\" | \"workplace_ai\" | \"agent_builder\" | \"agent_builder:agents\" | \"agent_builder:tools\" | \"agent_builder:conversations\" | \"agent_builder:agents_create\" | \"data_connectors\" | \"workflows:workflows\""
+          "\"fleet\" | \"graph\" | \"ml\" | \"monitoring\" | \"profiling\" | \"streams\" | \"uptime\" | \"workflows\" | \"metrics\" | \"dashboards\" | \"apm\" | \"synthetics\" | \"ux\" | \"canvas\" | \"logs\" | \"slo\" | \"observabilityAIAssistant\" | \"home\" | \"integrations\" | \"management\" | \"discover\" | \"maps\" | \"visualize\" | \"observability-overview\" | \"dev_tools\" | \"dev_tools:console\" | \"dev_tools:searchprofiler\" | \"dev_tools:painless_lab\" | \"dev_tools:grokdebugger\" | \"ml:notifications\" | \"ml:nodes\" | \"ml:overview\" | \"ml:memoryUsage\" | \"ml:settings\" | \"ml:dataVisualizer\" | \"ml:logPatternAnalysis\" | \"ml:logRateAnalysis\" | \"ml:singleMetricViewer\" | \"ml:anomalyDetection\" | \"ml:anomalyExplorer\" | \"ml:dataDrift\" | \"ml:dataFrameAnalytics\" | \"ml:resultExplorer\" | \"ml:analyticsMap\" | \"ml:aiOps\" | \"ml:changePointDetections\" | \"ml:modelManagement\" | \"ml:nodesOverview\" | \"ml:esqlDataVisualizer\" | \"ml:fileUpload\" | \"ml:indexDataVisualizer\" | \"ml:calendarSettings\" | \"ml:filterListsSettings\" | \"ml:suppliedConfigurations\" | \"osquery\" | \"cloud_connect\" | \"management:transform\" | \"management:watcher\" | \"management:tags\" | \"management:cases\" | \"management:overview\" | \"management:cross_cluster_replication\" | \"management:settings\" | \"management:dataViews\" | \"management:spaces\" | \"management:analytics\" | \"management:users\" | \"management:migrate_data\" | \"management:search_sessions\" | \"management:data_quality\" | \"management:data_usage\" | \"management:filesManagement\" | \"management:trained_models\" | \"management:pipelines\" | \"management:maintenanceWindows\" | \"management:anomaly_detection\" | \"management:roles\" | \"management:reporting\" | \"management:ad_settings\" | \"management:aiAssistantManagementSelection\" | \"management:securityAiAssistantManagement\" | \"management:observabilityAiAssistantManagement\" | \"management:api_keys\" | \"management:content_connectors\" | \"management:license_management\" | \"management:index_lifecycle_management\" | \"management:index_management\" | \"management:ingest_pipelines\" | \"management:jobsListLink\" | \"management:objects\" | \"management:remote_clusters\" | \"management:role_mappings\" | \"management:rollup_jobs\" | \"management:snapshot_restore\" | \"management:supplied_configurations\" | \"management:triggersActions\" | \"management:triggersActionsAlerts\" | \"management:triggersActionsConnectors\" | \"management:upgrade_assistant\" | \"management:genAiSettings\" | \"enterpriseSearch\" | \"enterpriseSearchContent\" | \"enterpriseSearchApplications\" | \"enterpriseSearchAnalytics\" | \"serverlessConnectors\" | \"serverlessWebCrawlers\" | \"searchPlayground\" | \"searchInferenceEndpoints\" | \"searchSynonyms\" | \"searchQueryRules\" | \"searchHomepage\" | \"enterpriseSearchContent:connectors\" | \"enterpriseSearchContent:webCrawlers\" | \"enterpriseSearchApplications:searchApplications\" | \"searchInferenceEndpoints:inferenceEndpoints\" | \"searchSynonyms:synonyms\" | \"elasticsearchIndices\" | \"elasticsearchIndexManagement\" | \"searchGettingStarted\" | \"elasticsearchIndices:createIndex\" | \"observability-logs-explorer\" | \"last-used-logs-viewer\" | \"observabilityOnboarding\" | \"inventory\" | \"logs:anomalies\" | \"logs:settings\" | \"logs:stream\" | \"logs:log-categories\" | \"observability-overview:cases\" | \"observability-overview:rules\" | \"observability-overview:alerts\" | \"observability-overview:cases_create\" | \"observability-overview:cases_configure\" | \"metrics:settings\" | \"metrics:hosts\" | \"metrics:inventory\" | \"metrics:metrics-explorer\" | \"metrics:assetDetails\" | \"apm:services\" | \"apm:traces\" | \"apm:dependencies\" | \"apm:service-map\" | \"apm:settings\" | \"apm:service-groups-list\" | \"apm:storage-explorer\" | \"synthetics:overview\" | \"synthetics:certificates\" | \"uptime:Certificates\" | \"profiling:functions\" | \"profiling:stacktraces\" | \"profiling:flamegraphs\" | \"inventory:datastreams\" | \"streams:overview\" | \"securitySolutionUI\" | \"securitySolutionUI:\" | \"securitySolutionUI:cases\" | \"securitySolutionUI:rules\" | \"securitySolutionUI:dashboards\" | \"securitySolutionUI:alerts\" | \"securitySolutionUI:policy\" | \"securitySolutionUI:overview\" | \"securitySolutionUI:kubernetes\" | \"securitySolutionUI:configurations\" | \"securitySolutionUI:cases_create\" | \"securitySolutionUI:cases_configure\" | \"securitySolutionUI:hosts\" | \"securitySolutionUI:users\" | \"securitySolutionUI:cloud_defend-policies\" | \"securitySolutionUI:cloud_security_posture-dashboard\" | \"securitySolutionUI:cloud_security_posture-vulnerability_dashboard\" | \"securitySolutionUI:cloud_security_posture-findings\" | \"securitySolutionUI:cloud_security_posture-benchmarks\" | \"securitySolutionUI:asset_inventory\" | \"securitySolutionUI:network\" | \"securitySolutionUI:data_quality\" | \"securitySolutionUI:endpoints\" | \"securitySolutionUI:explore\" | \"securitySolutionUI:cloud_defend\" | \"securitySolutionUI:administration\" | \"securitySolutionUI:attacks\" | \"securitySolutionUI:ai_value\" | \"securitySolutionUI:attack_discovery\" | \"securitySolutionUI:blocklist\" | \"securitySolutionUI:alert_detections\" | \"securitySolutionUI:cloud_security_posture-rules\" | \"securitySolutionUI:detections\" | \"securitySolutionUI:detection_response\" | \"securitySolutionUI:endpoint_exceptions\" | \"securitySolutionUI:event_filters\" | \"securitySolutionUI:exceptions\" | \"securitySolutionUI:host_isolation_exceptions\" | \"securitySolutionUI:hosts-all\" | \"securitySolutionUI:hosts-anomalies\" | \"securitySolutionUI:hosts-risk\" | \"securitySolutionUI:hosts-events\" | \"securitySolutionUI:hosts-sessions\" | \"securitySolutionUI:hosts-uncommon_processes\" | \"securitySolutionUI:get_started\" | \"securitySolutionUI:network-anomalies\" | \"securitySolutionUI:network-dns\" | \"securitySolutionUI:network-events\" | \"securitySolutionUI:network-flows\" | \"securitySolutionUI:network-http\" | \"securitySolutionUI:network-tls\" | \"securitySolutionUI:response_actions_history\" | \"securitySolutionUI:rules-add\" | \"securitySolutionUI:rules-create\" | \"securitySolutionUI:rules-landing\" | \"securitySolutionUI:rules-management\" | \"securitySolutionUI:scripts_library\" | \"securitySolutionUI:siem_readiness\" | \"securitySolutionUI:siem_migrations\" | \"securitySolutionUI:siem_migrations-rules\" | \"securitySolutionUI:siem_migrations-dashboards\" | \"securitySolutionUI:threat_intelligence\" | \"securitySolutionUI:timelines\" | \"securitySolutionUI:timelines-templates\" | \"securitySolutionUI:trusted_apps\" | \"securitySolutionUI:trusted_devices\" | \"securitySolutionUI:users-all\" | \"securitySolutionUI:users-anomalies\" | \"securitySolutionUI:users-authentications\" | \"securitySolutionUI:users-events\" | \"securitySolutionUI:users-risk\" | \"securitySolutionUI:entity_analytics\" | \"securitySolutionUI:entity_analytics-management\" | \"securitySolutionUI:entity_analytics-landing\" | \"securitySolutionUI:entity_analytics-privileged_user_monitoring\" | \"securitySolutionUI:entity_analytics-overview\" | \"securitySolutionUI:entity_analytics-threat_hunting\" | \"securitySolutionUI:entity_analytics-entity_store_management\" | \"securitySolutionUI:coverage-overview\" | \"securitySolutionUI:notes\" | \"securitySolutionUI:alert_summary\" | \"securitySolutionUI:configurations-integrations\" | \"securitySolutionUI:configurations-ai_settings\" | \"securitySolutionUI:configurations-basic_rules\" | \"fleet:settings\" | \"fleet:agents\" | \"fleet:policies\" | \"fleet:data_streams\" | \"fleet:enrollment_tokens\" | \"fleet:uninstall_tokens\" | \"workplace_ai\" | \"agent_builder\" | \"agent_builder:agents\" | \"agent_builder:tools\" | \"agent_builder:conversations\" | \"agent_builder:agents_create\" | \"data_sources\" | \"workflows:workflows\""
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+        "lineNumber": 64,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3112,6 +3482,8 @@
           " | \"securitySolutionUI\" | \"workplace_ai\""
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3130,6 +3502,8 @@
           "> | undefined; renderCustomBadge?: ((props: { badgeText: string; }) => React.ReactElement<any, string | React.JSXElementConstructor<any>>) | undefined; }"
         ],
         "path": "src/core/packages/chrome/browser/src/types.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3147,6 +3521,8 @@
           " | undefined; }"
         ],
         "path": "src/core/packages/chrome/browser/src/help_extension.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3168,6 +3544,8 @@
           "ChromeHelpExtensionMenuDocumentationLink"
         ],
         "path": "src/core/packages/chrome/browser/src/help_extension.ts",
+        "lineNumber": 110,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3183,6 +3561,8 @@
           "\"project\" | \"classic\""
         ],
         "path": "src/core/packages/chrome/browser/src/types.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3198,6 +3578,8 @@
           "\"projects\" | \"deployment\" | \"userAndRoles\" | \"performance\" | \"billingAndSub\" | \"deployments\""
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+        "lineNumber": 80,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3225,6 +3607,8 @@
           " | undefined; }"
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+        "lineNumber": 104,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3246,6 +3630,8 @@
           "<unknown>[] | undefined; iconToString?: string | undefined; nameToString?: string | undefined; }"
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+        "lineNumber": 285,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3261,6 +3647,8 @@
           "\"home\" | \"panelOpener\""
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+        "lineNumber": 110,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3276,6 +3664,8 @@
           "\"home\" | \"panelOpener\""
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+        "lineNumber": 110,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3291,6 +3681,8 @@
           "\"hidden\" | \"visible\""
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+        "lineNumber": 108,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3306,6 +3698,8 @@
           "\"security\" | \"workplaceai\" | \"oblt\" | \"es\""
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3337,6 +3731,8 @@
           "> | undefined; }"
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
+        "lineNumber": 281,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -53,6 +53,7 @@ export {
   QuerySource,
   TelemetryControlCancelledReason,
   type TelemetryQuerySubmittedProps,
+  type TelemetryLatencyProps,
 } from './src/esql_telemetry_types';
 
 export {

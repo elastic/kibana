@@ -10,7 +10,6 @@
 import { ExecutionStatus } from '@kbn/workflows';
 import { catchError } from './catch_error';
 import { handleExecutionDelay } from './handle_execution_delay';
-import { processNodeStackMonitoring } from './run_stack_monitor/process_node_stack_monitoring';
 import { runStackMonitor } from './run_stack_monitor/run_stack_monitor';
 import type { WorkflowExecutionLoopParams } from './types';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
@@ -20,13 +19,14 @@ import type { StepExecutionRuntime } from '../workflow_context_manager/step_exec
  *
  * This function orchestrates the execution of a workflow node by:
  * 1. Creating a context manager for the current step
- * 2. Creating and running the node implementation
- * 3. Running monitoring in parallel to handle cancellation, timeouts, and other control flow
- * 4. Managing error handling and state persistence
+ * 2. Checking in-memory workflow state to skip execution if already cancelled
+ * 3. Creating and running the node implementation
+ * 4. Running monitoring in parallel to handle cancellation, timeouts, and other control flow
+ * 5. Managing error handling and state persistence
  *
  * The execution uses a race condition between the step execution and monitoring to ensure
- * proper cancellation and timeout handling. Monitoring can prevent step execution if
- * conditions like workflow cancellation or timeout occur before the step runs.
+ * proper cancellation and timeout handling. The async monitoring loop runs every 500ms in
+ * parallel with step execution to detect cancellations without blocking step startup.
  *
  * @param params - The workflow execution loop parameters containing:
  *   - workflowRuntime: Runtime instance managing workflow state and navigation
@@ -58,14 +58,10 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     });
 
     /**
-     * Before running the node, we run monitoring once to handle cases where
-     * the step should not be executed at all, e.g., if the workflow has been
-     * cancelled or a timeout has already occurred.
-     */
-    await processNodeStackMonitoring(params, stepExecutionRuntime);
-
-    /**
-     * If the workflow is no longer running after processing the node stack (e.g., cancelled), we skip executing the step.
+     * Check in-memory workflow state to skip execution if workflow is no longer running.
+     * This is instant (no ES call) and catches cancellations that were already detected.
+     * When cancelRequested is true, status is always updated to CANCELLED, so this check
+     * covers both cancellation and other terminal states (COMPLETED, FAILED, etc.).
      */
     if (params.workflowRuntime.getWorkflowExecution().status !== ExecutionStatus.RUNNING) {
       return;
@@ -78,13 +74,13 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
      * Run monitoring in parallel with step execution to handle:
      * - Cancellation detection
      * - Timeout monitoring
-     * - Custom monitoring logic for monitorable nodes
+     * - Custom monitoring logic for monitor-able nodes
      * The order of these promises is important - we want to stop monitoring
      */
     const runMonitorPromise = runStackMonitor(params, stepExecutionRuntime, monitorAbortController);
     let runStepPromise: Promise<void> = Promise.resolve();
 
-    // Sometimes monitoring can prevent the step from running, e.g. when the workflow is cancelled, timeout occured right before running step, etc.
+    // Sometimes monitoring can prevent the step from running, e.g. when the workflow is cancelled, timeout occurred right before running step, etc.
     if (!monitorAbortController.signal.aborted) {
       runStepPromise = Promise.resolve(nodeImplementation.run()).then(
         () => stepExecutionRuntime && handleExecutionDelay(params, stepExecutionRuntime)

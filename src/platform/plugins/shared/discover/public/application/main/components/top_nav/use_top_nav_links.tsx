@@ -43,6 +43,7 @@ import { useProfileAccessor } from '../../../../context_awareness';
 import {
   internalStateActions,
   useCurrentDataView,
+  useCurrentTabAction,
   useCurrentTabSelector,
   useInternalStateDispatch,
 } from '../../state_management/redux';
@@ -147,14 +148,12 @@ export const useTopNavLinks = ({
             services.data.search.showSearchSessionsFlyout({
               appId,
               trackingProps: { openedFrom: 'background search button' },
-              onBackgroundSearchOpened: services.discoverFeatureFlags.getTabsEnabled()
-                ? ({ session, event }) => {
-                    event?.preventDefault();
-                    dispatch(
-                      internalStateActions.openSearchSessionInNewTab({ searchSession: session })
-                    );
-                  }
-                : undefined,
+              onBackgroundSearchOpened: ({ session, event }) => {
+                event?.preventDefault();
+                dispatch(
+                  internalStateActions.openSearchSessionInNewTab({ searchSession: session })
+                );
+              },
             });
           },
         });
@@ -234,6 +233,13 @@ export const useTopNavLinks = ({
     return getAppMenu(discoverParams).appMenuRegistry(newAppMenuRegistry);
   }, [getAppMenuAccessor, discoverParams, appMenuPrimaryAndSecondaryItems]);
 
+  const transitionFromESQLToDataView = useCurrentTabAction(
+    internalStateActions.transitionFromESQLToDataView
+  );
+  const transitionFromDataViewToESQL = useCurrentTabAction(
+    internalStateActions.transitionFromDataViewToESQL
+  );
+
   return useMemo(() => {
     const entries = appMenuRegistry.getSortedItems().map((appMenuItem) =>
       convertAppMenuItemToTopNavItem({
@@ -280,10 +286,10 @@ export const useTopNavLinks = ({
               ) {
                 dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(true));
               } else {
-                state.actions.transitionFromESQLToDataView(dataView.id ?? '');
+                dispatch(transitionFromESQLToDataView({ dataViewId: dataView.id ?? '' }));
               }
             } else {
-              state.actions.transitionFromDataViewToESQL(dataView);
+              dispatch(transitionFromDataViewToESQL({ dataView }));
               services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:try_btn_clicked`);
             }
           }
@@ -328,5 +334,7 @@ export const useTopNavLinks = ({
     shouldShowESQLToDataViewTransitionModal,
     dispatch,
     state,
+    transitionFromESQLToDataView,
+    transitionFromDataViewToESQL,
   ]);
 };
