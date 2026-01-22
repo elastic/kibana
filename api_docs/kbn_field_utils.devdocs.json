@@ -713,7 +713,7 @@
           "(type?: string | undefined) => type is string"
         ],
         "path": "src/platform/packages/shared/kbn-field-utils/src/utils/field_types.ts",
-        "lineNumber": 51,
+        "lineNumber": 52,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -729,7 +729,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-field-utils/src/utils/field_types.ts",
-            "lineNumber": 51,
+            "lineNumber": 52,
             "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
@@ -1112,7 +1112,7 @@
           "string[]"
         ],
         "path": "src/platform/packages/shared/kbn-field-utils/src/utils/field_types.ts",
-        "lineNumber": 49,
+        "lineNumber": 50,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
