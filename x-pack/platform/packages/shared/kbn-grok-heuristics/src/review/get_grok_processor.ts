@@ -40,7 +40,67 @@ export function getGrokProcessor(
   // Map from field entry to range of node indices to skip
   const skipRanges: Array<{ start: number; end: number }> = [];
 
+  // Track fields that should use GREEDYDATA (e.g., multi-column fields at the tail)
+  const fieldsShouldBeGreedy = new Set<string>();
+
+  // First pass: identify repeated field names that end with GREEDYDATA at the tail
+  const fieldNameOccurrences = new Map<string, number[]>(); // fieldName -> array of field indices
+  reviewResult.fields.forEach((field, fieldIndex) => {
+    if (!fieldNameOccurrences.has(field.name)) {
+      fieldNameOccurrences.set(field.name, []);
+    }
+    fieldNameOccurrences.get(field.name)!.push(fieldIndex);
+  });
+
+  // Check which repeated field names should be collapsed to GREEDYDATA
+  fieldNameOccurrences.forEach((indices, fieldName) => {
+    if (indices.length > 1) {
+      // Check if the last occurrence is at the tail and ends with GREEDYDATA
+      const lastFieldIndex = indices[indices.length - 1];
+      const lastField = reviewResult.fields[lastFieldIndex];
+
+      const lastColIndex = nodes.findIndex(
+        (n) => isNamedField(n) && n.id === lastField.columns[lastField.columns.length - 1]
+      );
+      const lastNamedFieldIndex = nodes.reduce(
+        (lastIndex, node, index) => (isNamedField(node) ? index : lastIndex),
+        -1
+      );
+      const isAtTail = lastColIndex === lastNamedFieldIndex;
+      const lastComponent = lastField.grok_components[lastField.grok_components.length - 1];
+      const endsWithGreedy = lastComponent === 'GREEDYDATA';
+
+      if (isAtTail && endsWithGreedy) {
+        // Mark this field to use GREEDYDATA and skip all but the first occurrence
+        fieldsShouldBeGreedy.add(fieldName);
+      }
+    }
+  });
+
+  // Track which fields we've already processed
+  const seenFieldNames = new Set<string>();
+
   reviewResult.fields.forEach((field) => {
+    // Check if this is a repeated field that should be collapsed
+    if (seenFieldNames.has(field.name) && fieldsShouldBeGreedy.has(field.name)) {
+      // Skip all subsequent occurrences
+      const firstColIndex = nodes.findIndex((n) => isNamedField(n) && n.id === field.columns[0]);
+      const lastColIndex = nodes.findIndex(
+        (n) => isNamedField(n) && n.id === field.columns[field.columns.length - 1]
+      );
+
+      if (firstColIndex >= 0 && lastColIndex >= 0) {
+        // Skip from firstColIndex to lastColIndex (inclusive)
+        // Also skip any separators between this and the previous field
+        const prevFieldLastCol = firstColIndex > 0 ? firstColIndex - 1 : firstColIndex;
+        skipRanges.push({ start: prevFieldLastCol, end: lastColIndex });
+      }
+      return;
+    }
+
+    // Mark this field name as seen
+    seenFieldNames.add(field.name);
+
     if (field.columns.length >= 2) {
       // If the last component is GREEDYDATA, all preceding patterns are redundant
       // This should be collapsed to a single GREEDYDATA, not a custom pattern definition
@@ -57,8 +117,32 @@ export function getGrokProcessor(
           skipRanges.push({ start: firstColIndex + 1, end: lastColIndex });
         }
       } else {
-        // Otherwise, it's a true multi-column grouping (e.g., timestamp parts)
-        field.columns.forEach((col) => trueMultiColumnFields.add(col));
+        // Check if this multi-column field is at the tail (end) of the pattern
+        // If so, simplify to GREEDYDATA (samples are too homogenous)
+        const lastColIndex = nodes.findIndex(
+          (n) => isNamedField(n) && n.id === field.columns[field.columns.length - 1]
+        );
+        const lastNamedFieldIndex = nodes.reduce(
+          (lastIndex, node, index) => (isNamedField(node) ? index : lastIndex),
+          -1
+        );
+        const isAtTail = lastColIndex === lastNamedFieldIndex;
+
+        if (isAtTail) {
+          // This is a multi-column field at the tail - force to GREEDYDATA
+          fieldsShouldBeGreedy.add(field.name);
+          const firstColIndex = nodes.findIndex(
+            (n) => isNamedField(n) && n.id === field.columns[0]
+          );
+
+          if (firstColIndex >= 0 && lastColIndex >= 0 && lastColIndex > firstColIndex) {
+            // Skip everything from firstColIndex+1 to lastColIndex (inclusive)
+            skipRanges.push({ start: firstColIndex + 1, end: lastColIndex });
+          }
+        } else {
+          // Otherwise, it's a true multi-column grouping (e.g., timestamp parts)
+          field.columns.forEach((col) => trueMultiColumnFields.add(col));
+        }
       }
     }
   });
@@ -119,8 +203,16 @@ export function getGrokProcessor(
       if (match) {
         const isPartOfMultiColumnGroup = trueMultiColumnFields.has(node.id);
         const isCollapsibleMultiColumn = match.columns.length >= 2 && !isPartOfMultiColumnGroup;
+        const shouldForceGreedy = fieldsShouldBeGreedy.has(match.name);
 
-        if (isCollapsibleMultiColumn) {
+        if (shouldForceGreedy) {
+          // This field has repeated names - force to GREEDYDATA
+          appendNode({
+            id: match.name,
+            component: 'GREEDYDATA',
+            values: node.values,
+          });
+        } else if (isCollapsibleMultiColumn) {
           // Multi-column entry that should collapse to GREEDYDATA
           // Output GREEDYDATA for the first column
           // (subsequent columns and separators are skipped via skipRanges)
