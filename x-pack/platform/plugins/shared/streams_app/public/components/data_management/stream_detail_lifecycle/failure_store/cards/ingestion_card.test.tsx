@@ -10,9 +10,10 @@ import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { IngestionCard } from './ingestion_card';
 
-const makeStats = (bytesPerDay: number) => ({
+const makeStats = (bytesPerDay: number, perDayDocs: number = 100) => ({
   bytesPerDoc: 10,
   bytesPerDay,
+  perDayDocs,
 });
 
 // Helper to ensure react-intl context is available
@@ -23,51 +24,98 @@ describe('IngestionCard', () => {
     jest.clearAllMocks();
   });
 
-  it('renders daily & monthly averages with stats and privileges', () => {
-    renderWithI18n(<IngestionCard hasPrivileges={true} stats={makeStats(1000)} />);
+  describe('daily period', () => {
+    it('renders daily average with stats and privileges', () => {
+      renderWithI18n(<IngestionCard period="daily" hasPrivileges={true} stats={makeStats(1000)} />);
 
-    expect(screen.getByTestId('failureStoreIngestionDaily-metric')).toHaveTextContent('1.0 KB');
-    expect(screen.getByTestId('failureStoreIngestionMonthly-metric')).toHaveTextContent('30.0 KB'); // 1000B * 30 = 30000B = 30.0KB
+      expect(screen.getByTestId('failureStoreIngestion-daily-metric')).toHaveTextContent('1.0 KB');
 
-    // There should be no warning icon when user has privileges
-    expect(
-      screen.queryByTestId('streamsInsufficientPrivileges-ingestionDaily')
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByTestId('streamsInsufficientPrivileges-ingestionMonthly')
-    ).not.toBeInTheDocument();
+      // There should be no warning icon when user has privileges
+      expect(
+        screen.queryByTestId('streamsInsufficientPrivileges-ingestionDaily')
+      ).not.toBeInTheDocument();
+    });
+
+    it('shows dash when stats missing', () => {
+      renderWithI18n(<IngestionCard period="daily" hasPrivileges={true} />);
+
+      expect(screen.getByTestId('failureStoreIngestion-daily-metric')).toHaveTextContent('-');
+    });
+
+    it('shows dash when statsError present even if stats provided', () => {
+      renderWithI18n(
+        <IngestionCard
+          period="daily"
+          hasPrivileges
+          stats={makeStats(2048)}
+          statsError={new Error('boom')}
+        />
+      );
+
+      expect(screen.getByTestId('failureStoreIngestion-daily-metric')).toHaveTextContent('-');
+    });
+
+    it('shows dash when stats provided but bytesPerDay missing', () => {
+      renderWithI18n(
+        <IngestionCard period="daily" hasPrivileges stats={{ someOther: 1 } as any} />
+      );
+
+      expect(screen.getByTestId('failureStoreIngestion-daily-metric')).toHaveTextContent('-');
+    });
+
+    it('renders a warning tooltip when lacking privileges', () => {
+      renderWithI18n(<IngestionCard period="daily" hasPrivileges={false} stats={makeStats(500)} />);
+
+      // Should show warning icon when lacking privileges
+      expect(
+        screen.getByTestId('streamsInsufficientPrivileges-ingestionDaily')
+      ).toBeInTheDocument();
+    });
   });
 
-  it('shows dash for both metrics when stats missing', () => {
-    renderWithI18n(<IngestionCard hasPrivileges={true} />);
+  describe('monthly period', () => {
+    it('renders monthly average with stats and privileges', () => {
+      renderWithI18n(<IngestionCard period="monthly" hasPrivileges stats={makeStats(1000)} />);
 
-    expect(screen.getByTestId('failureStoreIngestionDaily-metric')).toHaveTextContent('-');
-    expect(screen.getByTestId('failureStoreIngestionMonthly-metric')).toHaveTextContent('-');
-  });
+      // 1000B * 30 = 30000B = 30.0KB
+      expect(screen.getByTestId('failureStoreIngestion-monthly-metric')).toHaveTextContent(
+        '30.0 KB'
+      );
 
-  it('shows dash when statsError present even if stats provided', () => {
-    renderWithI18n(
-      <IngestionCard hasPrivileges={true} stats={makeStats(2048)} statsError={new Error('boom')} />
-    );
+      // There should be no warning icon when user has privileges
+      expect(
+        screen.queryByTestId('streamsInsufficientPrivileges-ingestionMonthly')
+      ).not.toBeInTheDocument();
+    });
 
-    expect(screen.getByTestId('failureStoreIngestionDaily-metric')).toHaveTextContent('-');
-    expect(screen.getByTestId('failureStoreIngestionMonthly-metric')).toHaveTextContent('-');
-  });
+    it('shows dash when stats missing', () => {
+      renderWithI18n(<IngestionCard period="monthly" hasPrivileges />);
 
-  it('shows dash when stats provided but bytesPerDay missing', () => {
-    renderWithI18n(<IngestionCard hasPrivileges={true} stats={{ someOther: 1 } as any} />);
+      expect(screen.getByTestId('failureStoreIngestion-monthly-metric')).toHaveTextContent('-');
+    });
 
-    expect(screen.getByTestId('failureStoreIngestionDaily-metric')).toHaveTextContent('-');
-    expect(screen.getByTestId('failureStoreIngestionMonthly-metric')).toHaveTextContent('-');
-  });
+    it('shows dash when statsError present even if stats provided', () => {
+      renderWithI18n(
+        <IngestionCard
+          period="monthly"
+          hasPrivileges
+          stats={makeStats(2048)}
+          statsError={new Error('boom')}
+        />
+      );
 
-  it('renders a warning tooltip when lacking privileges', () => {
-    renderWithI18n(<IngestionCard hasPrivileges={false} stats={makeStats(500)} />);
+      expect(screen.getByTestId('failureStoreIngestion-monthly-metric')).toHaveTextContent('-');
+    });
 
-    // Should show warning icons when lacking privileges
-    expect(screen.getByTestId('streamsInsufficientPrivileges-ingestionDaily')).toBeInTheDocument();
-    expect(
-      screen.getByTestId('streamsInsufficientPrivileges-ingestionMonthly')
-    ).toBeInTheDocument();
+    it('renders a warning tooltip when lacking privileges', () => {
+      renderWithI18n(
+        <IngestionCard period="monthly" hasPrivileges={false} stats={makeStats(500)} />
+      );
+
+      // Should show warning icon when lacking privileges
+      expect(
+        screen.getByTestId('streamsInsufficientPrivileges-ingestionMonthly')
+      ).toBeInTheDocument();
+    });
   });
 });

@@ -17,6 +17,7 @@ export const integrationSavedObjectType: SavedObjectsType = {
     dynamic: false,
     properties: {
       integration_id: { type: 'keyword' },
+      // Deprecated: kept for backwards compatibility with existing saved objects.
       data_stream_count: { type: 'integer' },
       created_by: { type: 'keyword' },
       status: { type: 'keyword' },
