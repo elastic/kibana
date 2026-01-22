@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import {
+import type {
   Conversation,
   ConversationRound,
-  isToolCallStep,
   ToolResult,
   ToolCallWithResult,
   ToolResultType,
 } from '@kbn/agent-builder-common';
+import { isToolCallStep } from '@kbn/agent-builder-common';
 import type {
   ToolResultStore,
   WritableToolResultStore,
   ToolResultWithMeta,
 } from '@kbn/agent-builder-server/runner';
-import type { EntityStore, StoreProvider, FileEntry } from './fs_store';
+import type { FileEntry, MemoryVolume } from './fs_store';
 import { StoreEntryType } from './fs_store';
 
 /////
@@ -91,44 +91,47 @@ export const extractConversationToolResults = (
 };
 
 export const createResultStore = ({
-  entityStore,
+  toolResultsVolume,
   conversation,
 }: {
-  entityStore: EntityStore;
+  toolResultsVolume: MemoryVolume;
   conversation?: Conversation;
 }): WritableToolResultStore => {
   const toolResults = extractConversationToolResults(conversation?.rounds ?? []);
   const toolCallEntries = toolResults.map(createToolCallEntry);
 
-  // TODO: starting here
-
-  // TODO: should use FS storage directly instead, probably
+  // Populate the volume with existing tool results from the conversation
   toolCallEntries.forEach((entry) => {
-    entityStore.add(entry);
+    toolResultsVolume.add(entry);
   });
 
-  const toolResultStoreProvider: StoreProvider = {
-    async connect({ addEntry, removeEntry }) {},
-  };
-
-  return new ToolResultStoreImpl(toolResults);
+  return new ToolResultStoreImpl(toolResults, toolResultsVolume);
 };
 
 class ToolResultStoreImpl implements WritableToolResultStore {
   private readonly results: Map<string, ToolCallFileEntry> = new Map();
+  private readonly volume: MemoryVolume;
 
-  constructor(results?: ToolResultWithMeta[]) {
+  constructor(results: ToolResultWithMeta[] | undefined, volume: MemoryVolume) {
+    this.volume = volume;
     if (results) {
       this.results = new Map(results.map((result) => [result.tool_result_id, result]));
     }
   }
 
-  // TODO: need to change to ToolResultWithMeta
   add(result: ToolResultWithMeta): void {
     this.results.set(result.tool_result_id, result);
+    // Also add to the volume for filesystem access
+    const entry = createToolCallEntry(result);
+    this.volume.add(entry);
   }
 
   delete(resultId: string): boolean {
+    const result = this.results.get(resultId);
+    if (result) {
+      const entry = createToolCallEntry(result);
+      this.volume.remove(entry.path);
+    }
     return this.results.delete(resultId);
   }
 

@@ -42,8 +42,7 @@ import { createPromptManager, getAgentPromptStorageState } from './utils/prompts
 import { createResultStore } from './tool_result_store';
 import { runTool, runInternalTool } from './run_tool';
 import { runAgent } from './run_agent';
-import type { EntityStore } from './fs_store';
-import { createEntityStore } from './fs_store';
+import { VirtualFileSystem, MemoryVolume } from './fs_store';
 
 export interface CreateScopedRunnerDeps {
   // core services
@@ -67,7 +66,7 @@ export interface CreateScopedRunnerDeps {
   // context-aware deps
   resultStore: WritableToolResultStore;
   attachmentStateManager: AttachmentStateManager;
-  entityStore: EntityStore;
+  vfs: VirtualFileSystem;
 }
 
 export type CreateRunnerDeps = Omit<
@@ -79,7 +78,7 @@ export type CreateRunnerDeps = Omit<
   | 'modelProvider'
   | 'promptManager'
   | 'stateManager'
-  | 'entityStore'
+  | 'vfs'
 > & {
   modelProviderFactory: ModelProviderFactoryFn;
 };
@@ -162,8 +161,12 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     nextInput?: ConverseInput;
     promptState?: PromptStorageState;
   }): ScopedRunner => {
-    const entityStore = createEntityStore();
-    const resultStore = createResultStore(conversation);
+    // Create the virtual filesystem with volumes for tool results and attachments
+    const vfs = new VirtualFileSystem();
+    const toolResultsVolume = new MemoryVolume('tool_results');
+    vfs.mount(toolResultsVolume);
+
+    const resultStore = createResultStore({ toolResultsVolume, conversation });
     const attachmentStateManager = createAttachmentStateManager(conversation?.attachments ?? [], {
       getTypeDefinition: runnerDeps.attachmentsService.getTypeDefinition,
     });
@@ -181,7 +184,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       attachmentStateManager,
       stateManager,
       promptManager,
-      entityStore,
+      vfs,
     };
     return createScopedRunner(allDeps);
   };

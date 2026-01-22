@@ -9,7 +9,7 @@ import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/agent-builder-common';
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
-import type { EntityStore } from '../entity_store';
+import type { VirtualFileSystem } from '../virtual_filesystem';
 
 const schema = z.object({
   path: z.string().describe('Path of the file to read'),
@@ -27,9 +27,9 @@ const schema = z.object({
 });
 
 export const readTool = ({
-  entityStore,
+  vfs,
 }: {
-  entityStore: EntityStore;
+  vfs: VirtualFileSystem;
 }): BuiltinToolDefinition<typeof schema> => {
   return {
     id: 'platform.store.read',
@@ -40,11 +40,17 @@ export const readTool = ({
     handler: async ({ path, version, fullContent }, context) => {
       // TODO: handle version
 
-      const entry = await entityStore.get(path);
+      const entry = await vfs.get(path);
 
       if (!entry) {
         return {
           results: [createErrorResult(`Entry '${path}' not found`)],
+        };
+      }
+
+      if (entry.type === 'dir') {
+        return {
+          results: [createErrorResult(`Entry '${path}' is a directory, not a file`)],
         };
       }
 

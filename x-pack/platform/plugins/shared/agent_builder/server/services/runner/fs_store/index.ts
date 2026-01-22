@@ -5,6 +5,28 @@
  * 2.0.
  */
 
-export { createEntityStore, type EntityStore } from './entity_store';
-export type { StoreProvider, FileEntry } from './types';
-export { StoreEntryType } from './types';
+export { VirtualFileSystem } from './virtual_filesystem';
+export { MemoryVolume } from './memory_volume';
+export {
+  StoreEntryType,
+  type IVirtualFileSystem,
+  type Volume,
+  type FileEntry,
+  type DirEntry,
+  type StoreEntry,
+  type StoreEntryMetadata,
+  type MountOptions,
+  type GlobOptions,
+  type ListOptions,
+  type VolumeGlobOptions,
+} from './types';
+export {
+  normalizePath,
+  dirname,
+  basename,
+  joinPath,
+  getPathSegments,
+  isRootPath,
+  getAncestorPaths,
+  getParentPath,
+} from './path_utils';
