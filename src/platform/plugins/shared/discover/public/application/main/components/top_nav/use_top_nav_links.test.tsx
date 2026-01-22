@@ -223,4 +223,83 @@ describe('useTopNavLinks', () => {
       expect(backgroundSearchItem).toBeUndefined();
     });
   });
+
+  describe('save button with unsaved changes', () => {
+    it('should show notification indicator when there are unsaved changes', () => {
+      const appMenuConfig = setup({ hasUnsavedChanges: true });
+
+      expect(appMenuConfig.primaryActionItem).toBeDefined();
+      expect(appMenuConfig.primaryActionItem?.id).toBe('save');
+      expect(appMenuConfig.primaryActionItem?.splitButtonProps?.showNotificationIndicator).toBe(
+        true
+      );
+      expect(
+        appMenuConfig.primaryActionItem?.splitButtonProps?.notifcationIndicatorTooltipContent
+      ).toBe('You have unsaved changes');
+    });
+
+    it('should NOT show notification indicator when there are no unsaved changes', () => {
+      const appMenuConfig = setup({ hasUnsavedChanges: false });
+
+      expect(appMenuConfig.primaryActionItem).toBeDefined();
+      expect(appMenuConfig.primaryActionItem?.id).toBe('save');
+      expect(appMenuConfig.primaryActionItem?.splitButtonProps?.showNotificationIndicator).toBe(
+        false
+      );
+      expect(
+        appMenuConfig.primaryActionItem?.splitButtonProps?.notifcationIndicatorTooltipContent
+      ).toBeUndefined();
+    });
+
+    it('should include Save as and Reset changes options in split button menu', () => {
+      const appMenuConfig = setup({ hasUnsavedChanges: true });
+
+      expect(appMenuConfig.primaryActionItem?.splitButtonProps?.items).toBeDefined();
+      const itemIds = appMenuConfig.primaryActionItem?.splitButtonProps?.items?.map(
+        (item) => item.id
+      );
+      expect(itemIds).toContain('saveAs');
+      expect(itemIds).toContain('resetChanges');
+    });
+
+    it('should have correct labels for split button menu items', () => {
+      const appMenuConfig = setup({ hasUnsavedChanges: true });
+
+      const items = appMenuConfig.primaryActionItem?.splitButtonProps?.items;
+      const saveAsItem = items?.find((item) => item.id === 'saveAs');
+      const resetChangesItem = items?.find((item) => item.id === 'resetChanges');
+
+      expect(saveAsItem?.label).toBe('Save as');
+      expect(resetChangesItem?.label).toBe('Reset changes');
+    });
+
+    it('should have run functions defined for split button menu items', () => {
+      const appMenuConfig = setup({ hasUnsavedChanges: true });
+
+      const items = appMenuConfig.primaryActionItem?.splitButtonProps?.items;
+      const saveAsItem = items?.find((item) => item.id === 'saveAs');
+      const resetChangesItem = items?.find((item) => item.id === 'resetChanges');
+
+      expect(saveAsItem?.run).toBeDefined();
+      expect(resetChangesItem?.run).toBeDefined();
+    });
+
+    it('should disable reset changes button when there are no unsaved changes', () => {
+      const appMenuConfig = setup({ hasUnsavedChanges: false });
+
+      const items = appMenuConfig.primaryActionItem?.splitButtonProps?.items;
+      const resetChangesItem = items?.find((item) => item.id === 'resetChanges');
+
+      expect(resetChangesItem?.disableButton).toBe(true);
+    });
+
+    it('should enable reset changes button when there are unsaved changes', () => {
+      const appMenuConfig = setup({ hasUnsavedChanges: true });
+
+      const items = appMenuConfig.primaryActionItem?.splitButtonProps?.items;
+      const resetChangesItem = items?.find((item) => item.id === 'resetChanges');
+
+      expect(resetChangesItem?.disableButton).toBe(false);
+    });
+  });
 });
