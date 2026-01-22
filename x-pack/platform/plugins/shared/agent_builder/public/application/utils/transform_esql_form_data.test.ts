@@ -8,7 +8,6 @@
 import { omit } from 'lodash';
 import type { EsqlToolDefinition } from '@kbn/agent-builder-common';
 import { ToolType } from '@kbn/agent-builder-common';
-import { ESQL_CONFIG_SCHEMA_VERSION } from '@kbn/agent-builder-common/tools/types/esql';
 import type { CreateToolPayload } from '../../../common/http_api/tools';
 import {
   transformEsqlFormDataForCreate,
@@ -55,7 +54,6 @@ describe('transformEsqlFormData', () => {
       description: 'A tool for testing.',
       readonly: false,
       configuration: {
-        schema_version: ESQL_CONFIG_SCHEMA_VERSION,
         query: 'FROM my_index | LIMIT 10 | WHERE field1 == ?param1 AND field2 == ?param2',
         params: {
           param1: {

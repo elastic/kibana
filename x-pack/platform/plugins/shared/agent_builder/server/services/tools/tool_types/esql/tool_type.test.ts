@@ -7,8 +7,8 @@
 
 import { getEsqlToolType } from './tool_type';
 import type { LegacyEsqlToolConfig } from '@kbn/agent-builder-common/tools/types/esql_legacy';
-import { ESQL_CONFIG_SCHEMA_VERSION } from '@kbn/agent-builder-common/tools/types/esql';
 import type { EsqlToolConfig } from '@kbn/agent-builder-common/tools/types/esql';
+import { ESQL_CONFIG_SCHEMA_VERSION } from '@kbn/agent-builder-common/tools/types/esql';
 
 describe('getEsqlToolType convertFromPersistence', () => {
   it('converts legacy field types and stringifies object defaults', () => {
@@ -65,7 +65,6 @@ describe('getEsqlToolType convertFromPersistence', () => {
     const converted = toolType.convertFromPersistence!(legacyConfig as any, {} as any);
 
     expect(converted).toEqual<EsqlToolConfig>({
-      schema_version: ESQL_CONFIG_SCHEMA_VERSION,
       query: legacyConfig.query,
       params: {
         a: { type: 'string', description: 'a', optional: true, defaultValue: 'hello' },
@@ -90,7 +89,11 @@ describe('getEsqlToolType convertFromPersistence', () => {
   });
 
   it('returns non-legacy configs unchanged', () => {
-    const config: EsqlToolConfig = {
+    const persistedConfig: {
+      schema_version: number;
+      query: string;
+      params: EsqlToolConfig['params'];
+    } = {
       schema_version: ESQL_CONFIG_SCHEMA_VERSION,
       query: 'FROM idx | WHERE a == ?a',
       params: {
@@ -99,8 +102,11 @@ describe('getEsqlToolType convertFromPersistence', () => {
     };
 
     const toolType = getEsqlToolType();
-    const converted = toolType.convertFromPersistence!(config as any, {} as any);
+    const converted = toolType.convertFromPersistence!(persistedConfig as any, {} as any);
 
-    expect(converted).toBe(config);
+    expect(converted).toEqual<EsqlToolConfig>({
+      query: persistedConfig.query,
+      params: persistedConfig.params,
+    });
   });
 });

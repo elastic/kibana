@@ -46,6 +46,15 @@ export interface ToolTypeDefinition<
   ) => TConfig;
 
   /**
+   * Optional conversion hook to produce a persisted config from the runtime config.
+   * This is called when creating/updating tools, just before writing to persistence.
+   *
+   * Useful for keeping runtime config free of persistence-only fields (e.g. schema_version),
+   * while still storing them for migrations and backward compatibility.
+   */
+  convertToPersistence?: (config: TConfig, context: ToolTypeConversionContext) => TPersistedConfig;
+
+  /**
    * Whether to track execution health for tools of this type.
    */
   trackHealth?: boolean;

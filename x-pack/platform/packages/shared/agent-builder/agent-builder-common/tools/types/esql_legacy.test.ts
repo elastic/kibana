@@ -69,6 +69,10 @@ describe('esql_legacy', () => {
       expect(isLegacyEsqlToolConfig({ schema_version: null } as any)).toBe(true);
     });
 
+    it('treats missing schema_version as legacy', () => {
+      expect(isLegacyEsqlToolConfig({} as any)).toBe(true);
+    });
+
     it('treats numeric schema_version as non-legacy', () => {
       expect(isLegacyEsqlToolConfig({ schema_version: 0 } as any)).toBe(false);
       expect(isLegacyEsqlToolConfig({ schema_version: ESQL_CONFIG_SCHEMA_VERSION } as any)).toBe(

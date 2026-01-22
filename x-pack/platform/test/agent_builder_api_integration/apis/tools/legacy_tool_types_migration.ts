@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
-import { ESQL_CONFIG_SCHEMA_VERSION } from '@kbn/agent-builder-common/tools/types/esql';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { deleteTool } from '../../utils/tools';
 
@@ -130,7 +129,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(response.body).to.have.property('configuration');
       expect(response.body.configuration).to.eql({
-        schema_version: ESQL_CONFIG_SCHEMA_VERSION,
         query: legacyConfig.query,
         params: {
           t: {
@@ -204,7 +202,6 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       expect(tool).to.be.ok();
-      expect(tool.configuration.schema_version).to.be(ESQL_CONFIG_SCHEMA_VERSION);
       expect(tool.configuration.params.t.type).to.be('string');
       expect(tool.configuration.params.k.type).to.be('string');
       expect(tool.configuration.params.l.type).to.be('integer');

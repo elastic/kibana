@@ -6,6 +6,7 @@
  */
 
 import { ToolType, type ToolDefinition, type ToolDefinitionWithSchema } from '../definition';
+import type { LegacyEsqlToolConfig } from './esql_legacy';
 
 /**
  * Current configuration schema version for persisted ES|QL tools.
@@ -53,14 +54,12 @@ export interface EsqlToolParam {
 // To make compatible with ToolDefinition['configuration']
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type EsqlToolConfig = {
-  /**
-   * This is used to keep backward compatibility while allowing schema changes.
-   * When absent, the config may be in a legacy format and must be converted on read.
-   */
-  schema_version: number;
   query: string;
   params: Record<string, EsqlToolParam>;
 };
+
+type EsqlToolStorageConfig = EsqlToolConfig & { schema_version: number };
+export type EsqlToolPersistedConfig = EsqlToolStorageConfig | LegacyEsqlToolConfig;
 
 export type EsqlToolDefinition = ToolDefinition<ToolType.esql, EsqlToolConfig>;
 export type EsqlToolDefinitionWithSchema = ToolDefinitionWithSchema<ToolType.esql, EsqlToolConfig>;

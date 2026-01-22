@@ -28,13 +28,11 @@ export const paramSchema = schema.object({
 });
 
 export const configurationSchema = schema.object({
-  schema_version: schema.maybe(schema.number()),
   query: schema.string(),
   params: schema.recordOf(schema.string(), paramSchema),
 });
 
 export const configurationUpdateSchema = schema.object({
-  schema_version: schema.maybe(schema.number()),
   query: schema.maybe(schema.string()),
   params: schema.maybe(schema.recordOf(schema.string(), paramSchema)),
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EsqlToolConfig, EsqlToolParam } from './esql';
+import type { EsqlToolParam, EsqlToolPersistedConfig } from './esql';
 import { EsqlToolFieldType, type EsqlToolFieldTypes, type EsqlToolParamValue } from './esql';
 
 /**
@@ -70,36 +70,26 @@ export const convertLegacyEsqlToolParamDefaultValue = (
 };
 
 export interface LegacyEsqlToolParam extends Omit<EsqlToolParam, 'type' | 'defaultValue'> {
-  /**
-   * Legacy/persisted type values that may exist in older tool definitions.
-   */
   type: LegacyEsqlToolFieldTypes;
-
-  /**
-   * Legacy/persisted default value types that may exist in older tool definitions.
-   */
   defaultValue?: LegacyEsqlToolParamValue;
 }
 
-// To make compatible with ToolDefinition['configuration']
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type LegacyEsqlToolConfig = {
+export interface LegacyEsqlToolConfig {
   /**
    * Legacy persisted configuration marker.
    *
-   * Newer configs use a numeric version; legacy configs are always `null`.
+   * Newer configs use a numeric version; legacy configs are always undefined`.
    */
   schema_version: undefined;
   query: string;
   params: Record<string, LegacyEsqlToolParam>;
-};
+}
 
 /**
  * schema_version is undefined for legacy configs
  */
 export const isLegacyEsqlToolConfig = (
-  config: EsqlToolConfig | LegacyEsqlToolConfig
+  config: EsqlToolPersistedConfig
 ): config is LegacyEsqlToolConfig => {
-  // Legacy configs do not have a numeric schema version (it may be missing or null in persistence).
   return config.schema_version == null;
 };

@@ -10,7 +10,6 @@ import { validateConfig } from './validate_configuration';
 import { validateQuery } from '@kbn/esql-language';
 import type { EsqlToolFieldTypes } from '@kbn/agent-builder-common';
 import { createBadRequestError } from '@kbn/agent-builder-common';
-import { ESQL_CONFIG_SCHEMA_VERSION } from '@kbn/agent-builder-common/tools/types/esql';
 import { configurationSchema, configurationUpdateSchema } from './schemas';
 
 jest.mock('@kbn/esql-language', () => ({
@@ -45,7 +44,6 @@ describe('validateConfig', () => {
   describe('successful validation', () => {
     it('should pass validation with valid query and matching parameters', async () => {
       const config = {
-        schema_version: ESQL_CONFIG_SCHEMA_VERSION,
         query: 'FROM my_cases | WHERE case_id == ?case_id',
         params: {
           case_id: { type: 'string' as EsqlToolFieldTypes, description: 'Case ID' },
@@ -61,7 +59,6 @@ describe('validateConfig', () => {
 
     it('should pass validation with no parameters', async () => {
       const config = {
-        schema_version: ESQL_CONFIG_SCHEMA_VERSION,
         query: 'FROM my_cases | LIMIT 10',
         params: {},
       };
@@ -76,7 +73,6 @@ describe('validateConfig', () => {
   describe('query syntax validation errors', () => {
     it('should throw error when query has syntax errors', async () => {
       const config = {
-        schema_version: ESQL_CONFIG_SCHEMA_VERSION,
         query: 'WHERE case_id == ?case_id',
         params: {},
       };
@@ -108,7 +104,6 @@ describe('validateConfig', () => {
   describe('parameter validation errors', () => {
     it('should throw error when query uses undefined parameters', async () => {
       const config = {
-        schema_version: ESQL_CONFIG_SCHEMA_VERSION,
         query: 'FROM my_cases | WHERE case_id == ?case_id AND owner == ?owner',
         params: {
           case_id: { type: 'string' as EsqlToolFieldTypes, description: 'Case ID' },
@@ -132,7 +127,6 @@ describe('validateConfig', () => {
 
     it('should throw error when multiple parameters are undefined', async () => {
       const config = {
-        schema_version: ESQL_CONFIG_SCHEMA_VERSION,
         query: 'FROM my_cases | WHERE case_id == ?case_id',
         params: {},
       };
@@ -154,7 +148,6 @@ describe('validateConfig', () => {
 
     it('should throw error when defined parameters are not used in query', async () => {
       const config = {
-        schema_version: ESQL_CONFIG_SCHEMA_VERSION,
         query: 'FROM my_cases | WHERE case_id == ?case_id',
         params: {
           case_id: { type: 'string' as EsqlToolFieldTypes, description: 'Case ID' },
@@ -179,7 +172,6 @@ describe('validateConfig', () => {
 
     it('should handle case when no parameters are used in query', async () => {
       const config = {
-        schema_version: ESQL_CONFIG_SCHEMA_VERSION,
         query: 'FROM my_cases | LIMIT 1',
         params: {
           case_id: { type: 'string' as EsqlToolFieldTypes, description: 'Case Id' },
@@ -214,7 +206,6 @@ describe('validateConfig', () => {
     });
 
     const createConfig = (type: EsqlToolFieldTypes, defaultValue: unknown) => ({
-      schema_version: ESQL_CONFIG_SCHEMA_VERSION,
       query: 'FROM my_cases | WHERE field == ?param1',
       params: {
         param1: {
@@ -269,7 +260,6 @@ describe('validateConfig', () => {
     describe('edge cases', () => {
       it('should pass validation when parameter has no defaultValue', async () => {
         const config = {
-          schema_version: ESQL_CONFIG_SCHEMA_VERSION,
           query: 'FROM my_cases | WHERE name == ?param1',
           params: {
             param1: {
@@ -312,7 +302,6 @@ describe('validateConfig', () => {
     it('should reject defaultValue when optional is false', () => {
       expect(() =>
         configurationSchema.validate({
-          schema_version: ESQL_CONFIG_SCHEMA_VERSION,
           query: 'FROM my_cases | WHERE field == ?param1',
           params: {
             param1: { type: 'string', description: 'x', optional: false, defaultValue: 'y' },
@@ -324,7 +313,6 @@ describe('validateConfig', () => {
     it('should reject defaultValue when optional is not set', () => {
       expect(() =>
         configurationSchema.validate({
-          schema_version: ESQL_CONFIG_SCHEMA_VERSION,
           query: 'FROM my_cases | WHERE field == ?param1',
           params: { param1: { type: 'string', description: 'x', defaultValue: 'y' } },
         })

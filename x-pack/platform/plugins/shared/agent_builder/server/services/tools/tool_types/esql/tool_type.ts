@@ -7,9 +7,12 @@
 
 import type { ZodObject } from '@kbn/zod';
 import { ToolType } from '@kbn/agent-builder-common';
-import type { EsqlToolConfig } from '@kbn/agent-builder-common/tools/types/esql';
 import { ESQL_CONFIG_SCHEMA_VERSION } from '@kbn/agent-builder-common/tools/types/esql';
-import type { LegacyEsqlToolConfig } from '@kbn/agent-builder-common/tools/types/esql_legacy';
+import type {
+  EsqlToolConfig,
+  EsqlToolPersistedConfig,
+} from '@kbn/agent-builder-common/tools/types/esql';
+
 import {
   convertLegacyEsqlToolFieldType,
   convertLegacyEsqlToolParamDefaultValue,
@@ -21,11 +24,11 @@ import { createSchemaFromParams } from './create_schema';
 import { validateConfig } from './validate_configuration';
 import { configurationSchema, configurationUpdateSchema } from './schemas';
 
-const convertConfigFromPersistence = (
-  rawConfig: EsqlToolConfig | LegacyEsqlToolConfig
-): EsqlToolConfig => {
+const convertConfigFromPersistence = (rawConfig: EsqlToolPersistedConfig): EsqlToolConfig => {
   if (!isLegacyEsqlToolConfig(rawConfig)) {
-    return rawConfig;
+    // Never propagate schema_version to outside the persistence layer.
+    const { schema_version: _, ...config } = rawConfig;
+    return config;
   }
 
   const params = Object.entries(rawConfig.params).reduce((acc, [paramName, rawParam]) => {
@@ -45,18 +48,24 @@ const convertConfigFromPersistence = (
     return acc;
   }, {} as EsqlToolConfig['params']);
 
-  return { schema_version: ESQL_CONFIG_SCHEMA_VERSION, query: rawConfig.query, params };
+  return { query: rawConfig.query, params };
 };
 
 export const getEsqlToolType = (): ToolTypeDefinition<
   ToolType.esql,
   EsqlToolConfig,
   ZodObject<any>,
-  EsqlToolConfig | LegacyEsqlToolConfig
+  EsqlToolPersistedConfig
 > => {
   return {
     toolType: ToolType.esql,
     convertFromPersistence: (config) => convertConfigFromPersistence(config),
+    convertToPersistence: (config) => {
+      return {
+        ...config,
+        schema_version: ESQL_CONFIG_SCHEMA_VERSION,
+      };
+    },
     getDynamicProps: (config) => {
       return {
         getHandler: () => createHandler(config),
@@ -67,21 +76,16 @@ export const getEsqlToolType = (): ToolTypeDefinition<
     createSchema: configurationSchema,
     updateSchema: configurationUpdateSchema,
     validateForCreate: async ({ config }) => {
-      const nextConfig: EsqlToolConfig = { ...config, schema_version: ESQL_CONFIG_SCHEMA_VERSION };
-      await validateConfig(nextConfig);
-      return nextConfig;
+      await validateConfig(config);
+      return config;
     },
     validateForUpdate: async ({ update, current }) => {
       const mergedConfig = {
         ...current,
         ...update,
       };
-      const nextConfig: EsqlToolConfig = {
-        ...mergedConfig,
-        schema_version: ESQL_CONFIG_SCHEMA_VERSION,
-      };
-      await validateConfig(nextConfig);
-      return nextConfig;
+      await validateConfig(mergedConfig);
+      return mergedConfig;
     },
   };
 };

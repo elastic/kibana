@@ -7,7 +7,6 @@
 
 import { createHandler, resolveToolParameters } from './create_handler';
 import type { EsqlToolConfig } from '@kbn/agent-builder-common';
-import { ESQL_CONFIG_SCHEMA_VERSION } from '@kbn/agent-builder-common/tools/types/esql';
 
 // Mock the ES client
 const mockEsClient = {
@@ -34,7 +33,6 @@ describe('createHandler', () => {
   describe('default value handling', () => {
     it('should use default values when LLM omits parameters', async () => {
       const config: EsqlToolConfig = {
-        schema_version: ESQL_CONFIG_SCHEMA_VERSION,
         query: 'FROM users | WHERE status == ?status AND name == ?name',
         params: {
           status: { type: 'string', description: 'User status', optional: true },
@@ -61,7 +59,6 @@ describe('createHandler', () => {
 
     it('should use LLM values when provided, overriding defaults', async () => {
       const config: EsqlToolConfig = {
-        schema_version: ESQL_CONFIG_SCHEMA_VERSION,
         query: 'FROM users | WHERE status == ?status AND name == ?name',
         params: {
           status: { type: 'string', description: 'User status', optional: true },
@@ -88,7 +85,6 @@ describe('createHandler', () => {
 
     it('should use null for optional parameters without defaults', async () => {
       const config: EsqlToolConfig = {
-        schema_version: ESQL_CONFIG_SCHEMA_VERSION,
         query: 'FROM users | WHERE status == ?status AND name == ?name',
         params: {
           status: { type: 'string', description: 'User status', optional: true },
