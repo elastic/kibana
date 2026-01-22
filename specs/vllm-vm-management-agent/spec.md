@@ -3,25 +3,26 @@
 ## ADDED Requirements
 
 ### Requirement: Remote target configuration (SSH)
-The system MUST support configuring a remote vLLM target using SSH access (host, user, and authentication material) without committing secrets into the repository. The system MUST support both SSH key-based and password-based authentication.
+The system MUST support configuring a remote vLLM target using SSH access via environment variables. Configuration includes host, user, and authentication material (password or key path). The system MUST support both SSH key-based and password-based authentication. Secrets MUST NOT be committed to the repository.
 
-#### Scenario: SSH target configured without storing secrets in repo
-- **GIVEN** a user provides SSH connection parameters (host, username, and either password or key path)
-- **WHEN** the agent stores and uses the configuration
-- **THEN** private keys, passwords, and other secrets are not written into the repo workspace
+#### Scenario: SSH target configured via environment variables
+- **GIVEN** a user provides SSH connection parameters via environment variables (VLLM_SSH_HOST, VLLM_SSH_USER, VLLM_SSH_PASSWORD or VLLM_SSH_KEY_PATH)
+- **WHEN** the agent reads the configuration
+- **THEN** the agent uses the environment variables to establish the SSH connection
+- **AND** private keys, passwords, and other secrets are not written into the repo workspace
 - **AND** logs redact sensitive fields by default
 
 #### Scenario: SSH connection with password authentication
-- **GIVEN** a user provides SSH host, username, and password
+- **GIVEN** environment variables VLLM_SSH_HOST, VLLM_SSH_USER, and VLLM_SSH_PASSWORD are set
 - **WHEN** the agent connects to the remote VM
 - **THEN** the connection succeeds using password authentication
-- **AND** the password is not stored in plain text or committed to the repository
+- **AND** the password is never stored in plain text or committed to the repository
 
 #### Scenario: SSH connection with key-based authentication
-- **GIVEN** a user provides SSH host, username, and private key path
+- **GIVEN** environment variables VLLM_SSH_HOST, VLLM_SSH_USER, and VLLM_SSH_KEY_PATH are set
 - **WHEN** the agent connects to the remote VM
 - **THEN** the connection succeeds using key-based authentication
-- **AND** the private key content is not stored in plain text or committed to the repository
+- **AND** the private key content is never stored in plain text or committed to the repository
 
 ### Requirement: vLLM Docker container lifecycle management
 The system MUST provide allow-listed operations over SSH to manage the vLLM Docker container lifecycle:
@@ -54,13 +55,14 @@ The system MUST provide allow-listed operations over SSH to manage the vLLM Dock
 - **AND** logs are redacted for sensitive information by default
 
 ### Requirement: Service health and readiness checks
-The system MUST check vLLM readiness and health using API-level probes before declaring the service "ready".
+The system MUST check vLLM readiness and health using API-level probes before declaring the service "ready". Health checks MUST verify the OpenAI-compatible `/v1/chat/completions` endpoint is functional.
 
 #### Scenario: Service becomes ready after (re)start
 - **GIVEN** the vLLM container has been started
 - **WHEN** the agent checks readiness
 - **THEN** the agent verifies the health endpoint is successful
-- **AND** the agent verifies the model list endpoint responds successfully
+- **AND** the agent verifies the `/v1/models` endpoint responds successfully
+- **AND** the agent verifies the `/v1/chat/completions` endpoint can process a simple request
 
 #### Scenario: Health check detects service failure
 - **GIVEN** the vLLM container is running but the service is not responding
@@ -113,19 +115,31 @@ The system MUST support a bounded, reproducible configuration search to determin
 - **AND** the search space is bounded to prevent excessive runtime
 
 ### Requirement: Tool-calling conformance gate for Agent Builder
-The system MUST validate that recommended models can reliably produce schema-valid tool calls for a representative Agent Builder tool schema set.
+The system MUST validate that recommended models can reliably produce schema-valid tool calls via the OpenAI-compatible `/v1/chat/completions` API endpoint. The conformance suite MUST support configurable test scenarios. The initial implementation MUST include a simple "hello world" scenario and a basic tool call validation scenario, with support for adding richer scenarios later.
 
 #### Scenario: Model is rejected if tool calls are malformed
 - **GIVEN** a model that produces invalid JSON or schema-invalid tool calls
-- **WHEN** the conformance suite is run
+- **WHEN** the conformance suite is run against `/v1/chat/completions`
 - **THEN** the model is not recommended regardless of raw throughput/latency
 - **AND** the agent records the specific conformance failures
 
-#### Scenario: Model passes conformance gate
+#### Scenario: Model passes conformance gate with hello world
+- **GIVEN** a model deployed and accessible via `/v1/chat/completions`
+- **WHEN** the agent runs the hello world conformance scenario
+- **THEN** the model responds with valid output
+- **AND** the agent records the successful response
+
+#### Scenario: Model passes conformance gate with tool call
 - **GIVEN** a model that produces valid, schema-compliant tool calls
-- **WHEN** the conformance suite is run
+- **WHEN** the agent runs a basic tool call conformance scenario via `/v1/chat/completions`
 - **THEN** the model passes the conformance gate
-- **AND** the agent records evidence of successful tool calls for representative schemas
+- **AND** the agent records evidence of successful tool calls
+
+#### Scenario: Configurable conformance scenarios
+- **GIVEN** a conformance suite with pluggable test scenarios
+- **WHEN** the user wants to add new conformance tests
+- **THEN** the system supports adding custom scenarios without modifying core logic
+- **AND** each scenario can define its own prompts, expected tool schemas, and pass/fail criteria
 
 #### Scenario: Guided decoding improves conformance
 - **GIVEN** a model that has marginal tool-calling reliability
@@ -167,17 +181,27 @@ The system MUST require explicit confirmation for destructive or high-impact ope
 - **THEN** the agent refuses and requests explicit confirmation for high-impact changes
 
 ### Requirement: End-to-end model deployment
-The system MUST support deploying a specified HuggingFace model to the remote VM and ensuring it is running properly. Given SSH credentials (host, username, password or key) and a model identifier, the system MUST handle the complete deployment workflow from connection to verified running service.
+The system MUST support deploying a specified HuggingFace model to the remote VM and ensuring it is running properly. The user provides a HuggingFace model URL (e.g., `https://huggingface.co/meta-llama/Llama-3.1-70B-Instruct` or model identifier like `meta-llama/Llama-3.1-70B-Instruct`), and the agent handles the complete deployment workflow from connection to verified running service. SSH credentials are read from environment variables.
 
-#### Scenario: Deploy model from scratch
-- **GIVEN** SSH host, username, password, and a HuggingFace model identifier
-- **WHEN** the user requests model deployment
+#### Scenario: Deploy model from HuggingFace URL
+- **GIVEN** SSH credentials configured via environment variables and a HuggingFace model URL provided by the user
+- **WHEN** the user requests model deployment with the URL
+- **THEN** the agent connects to the VM via SSH
+- **AND** the agent parses the model identifier from the URL
+- **AND** the agent downloads/verifies the model if not present
+- **AND** the agent configures vLLM with appropriate settings for the hardware
+- **AND** the agent starts the vLLM container with the specified model
+- **AND** the agent verifies the model is running and responding to health checks
+- **AND** the agent confirms the model is accessible via the `/v1/chat/completions` endpoint
+
+#### Scenario: Deploy model from model identifier
+- **GIVEN** SSH credentials configured via environment variables and a HuggingFace model identifier (e.g., `meta-llama/Llama-3.1-70B-Instruct`)
+- **WHEN** the user requests model deployment with the identifier
 - **THEN** the agent connects to the VM via SSH
 - **AND** the agent downloads/verifies the model if not present
 - **AND** the agent configures vLLM with appropriate settings for the hardware
 - **AND** the agent starts the vLLM container with the specified model
 - **AND** the agent verifies the model is running and responding to health checks
-- **AND** the agent confirms the model is accessible via the vLLM API endpoints
 
 #### Scenario: Deploy model with existing model present
 - **GIVEN** a VM with an existing model already deployed
@@ -188,11 +212,11 @@ The system MUST support deploying a specified HuggingFace model to the remote VM
 - **AND** the agent verifies the new model is running correctly
 
 ### Requirement: Automatic disk space management
-The system MUST automatically manage disk space on the remote VM by removing old HuggingFace models when free space is insufficient for new model deployments or operations. The system MUST prioritize removing the oldest models first based on last access time or download timestamp.
+The system MUST automatically manage disk space on the remote VM by removing old HuggingFace models whenever space is insufficient for the current operation. Cleanup is triggered on-demand when needed, not based on arbitrary thresholds. The system MUST prioritize removing the oldest models first based on last access time or download timestamp.
 
-#### Scenario: Remove oldest model when disk space is low
-- **GIVEN** the VM has insufficient free space for a new model deployment
-- **WHEN** the agent detects the space constraint
+#### Scenario: Remove oldest model when disk space is insufficient
+- **GIVEN** the VM has insufficient free space for a new model deployment or operation
+- **WHEN** the agent detects the space constraint during the operation
 - **THEN** the agent identifies the oldest HuggingFace model on the host
 - **AND** the agent removes the oldest model to free space
 - **AND** the agent verifies sufficient space is now available
@@ -209,10 +233,10 @@ The system MUST automatically manage disk space on the remote VM by removing old
 - **GIVEN** a request to deploy a new model
 - **WHEN** the agent checks available disk space
 - **THEN** if insufficient space exists, the agent triggers automatic cleanup before proceeding
-- **AND** if cleanup is insufficient, the agent reports the space constraint and aborts deployment
+- **AND** if cleanup is insufficient (no more models to remove), the agent reports the space constraint and aborts deployment
 
-#### Scenario: Disk space threshold triggers cleanup
-- **GIVEN** a configurable disk space threshold (e.g., <10% free or <50GB free)
-- **WHEN** the agent detects disk space below the threshold
-- **THEN** the agent automatically identifies and removes the oldest models until space is above the threshold
-- **AND** the agent logs all cleanup actions with timestamps and reasons
+#### Scenario: Preserve currently running model during cleanup
+- **GIVEN** a currently running model and insufficient space for a new deployment
+- **WHEN** the agent performs automatic cleanup
+- **THEN** the agent does NOT remove the currently running model without explicit confirmation
+- **AND** the agent removes other cached models first

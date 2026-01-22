@@ -87,8 +87,8 @@ Operational constraints:
 - Persist results and publish ranked recommendations per hardware profile.
 
 ## Open Questions
-- How should the agent store remote target configuration (host, user, password/key path) in a way that aligns with your local Cursor setup?
-- Which Agent Builder tool schemas should form the canonical conformance suite (minimal "hello tools" vs a richer set)?
-- Do we want to enforce a specific API surface (OpenAI-compatible `/v1/chat/completions`) for Agent Builder integration, or support multiple?
-- Should the initial model discovery be "manual curation + benchmark" or fully automated from HuggingFace metadata?
-- What threshold should trigger automatic model cleanup (e.g., <10% free space, <50GB free)?
+- How should the agent store remote target configuration (host, user, password/key path) in a way that aligns with your local Cursor setup? It should be provided as env variables
+- Which Agent Builder tool schemas should form the canonical conformance suite (minimal "hello tools" vs a richer set)? richer set, but it's going to be defined later, it should be possible to use different scenarios, but for now I want a simple hello world + any tool call
+- Do we want to enforce a specific API surface (OpenAI-compatible `/v1/chat/completions`) for Agent Builder integration, or support multiple? for now it should be only `/v1/chat/completions`
+- Should the initial model discovery be "manual curation + benchmark" or fully automated from HuggingFace metadata? Let's start with manual, the idea is to just provide a hugging face model url and the agent should take care of the rest
+- What threshold should trigger automatic model cleanup (e.g., <10% free space, <50GB free)? model cleanup should happen whenever is needed
