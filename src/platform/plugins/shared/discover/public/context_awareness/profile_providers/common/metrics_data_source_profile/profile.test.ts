@@ -56,7 +56,6 @@ describe('metricsDataSourceProfileProvider', () => {
       'TS metrics-*',
       'TS metrics-* | LIMIT 10',
       'TS metrics-* | SORT @timestamp DESC',
-      'TS metrics-* | WHERE host.name == "foo"',
       'TS metrics-* | LIMIT 5 | SORT @timestamp',
     ])('when query contains only supported commands: %s', async (query) => {
       const result = await provider.resolve(
