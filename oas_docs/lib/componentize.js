@@ -44,6 +44,22 @@ const deepClone = (obj) => {
 
 /**
  * Main componentization function
+ * Traverses an OpenAPI document and extracts inline schemas into reusable components.
+ *
+ * Process:
+ * 1. Extracts top-level request/response schemas if they have properties or composition types
+ * 2. Recursively processes nested schemas (properties, array items, additionalProperties)
+ * 3. Extracts oneOf/anyOf/allOf items into separate components
+ * 4. Processes pre-existing components in the document
+ *
+ * @param {string} relativeFilePath - Path to OAS YAML file relative to repository root
+ * @param {Object} options - Configuration options
+ * @param {Object} options.log - Logger instance with info/debug/warn/error methods (defaults to console)
+ * @returns {Promise<void>}
+ *
+ * @example
+ * // Componentize a single file
+ * await componentizeObjectSchemas('oas_docs/bundle.yaml', { log: customLogger });
  */
 const componentizeObjectSchemas = async (relativeFilePath, { log = console } = {}) => {
   const absPath = path.resolve(REPO_ROOT, relativeFilePath);
@@ -66,8 +82,6 @@ const componentizeObjectSchemas = async (relativeFilePath, { log = console } = {
 
     const components = oasDoc.components.schemas;
     // utility to generate unique component names
-    // TODO: allow custom naming strategy via options (using `meta.id` from raw schema)
-    // TODO: extract to separate module if possible
     const nameGenerator = createComponentNameGenerator();
     const stats = {
       schemasExtracted: 0,
@@ -92,8 +106,9 @@ const componentizeObjectSchemas = async (relativeFilePath, { log = console } = {
       log.debug(`Processing path: ${pathName}`);
 
       for (const [method, methodValue] of Object.entries(pathValue)) {
-        // Skip non-methodValue keys including existing `$ref`s (don't overwrite refs)
-        if (['parameters', 'servers', 'description', 'summary', '$ref'].includes(method)) {
+        // Only process HTTP method operations (skip path-level properties)
+        const HTTP_METHODS = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options', 'trace'];
+        if (!HTTP_METHODS.includes(method.toLowerCase())) {
           continue;
         }
 
@@ -115,11 +130,14 @@ const componentizeObjectSchemas = async (relativeFilePath, { log = console } = {
                 log.debug(`Processing request body (${contentType})`);
                 const schema = contentTypeObj.schema;
 
-                // Extract top-level schema if it's an object with properties or compositions
+                // Extract top-level schema if it's an object with properties or has composition types
+                // Objects need properties; composition types (oneOf/anyOf/allOf) don't need to be objects
                 if (
                   !schema.$ref &&
-                  schema.type === 'object' &&
-                  (schema.properties || schema.oneOf || schema.anyOf || schema.allOf)
+                  ((schema.type === 'object' && schema.properties) ||
+                    schema.oneOf ||
+                    schema.anyOf ||
+                    schema.allOf)
                 ) {
                   const requestContext = {
                     ...baseContext,
@@ -168,11 +186,14 @@ const componentizeObjectSchemas = async (relativeFilePath, { log = console } = {
                   log.debug(`Processing response ${statusCode} (${contentType})`);
                   const schema = contentTypeObj.schema;
 
-                  // Extract top-level schema if it's an object with properties or compositions
+                  // Extract top-level schema if it's an object with properties or has composition types
+                  // Objects need properties; composition types (oneOf/anyOf/allOf) don't need to be objects
                   if (
                     !schema.$ref &&
-                    schema.type === 'object' &&
-                    (schema.properties || schema.oneOf || schema.anyOf || schema.allOf)
+                    ((schema.type === 'object' && schema.properties) ||
+                      schema.oneOf ||
+                      schema.anyOf ||
+                      schema.allOf)
                   ) {
                     const responseContext = {
                       ...baseContext,
@@ -216,6 +237,33 @@ const componentizeObjectSchemas = async (relativeFilePath, { log = console } = {
           });
         }
       }
+    }
+
+    // Process pre-existing components (e.g., from overlays or manual additions)
+    // Track which components existed before componentization to avoid infinite loops
+    log.info('Processing existing components...');
+    const preExistingComponentNames = Object.keys(components);
+    const processedComponents = new Set();
+
+    for (const componentName of preExistingComponentNames) {
+      if (processedComponents.has(componentName)) {
+        continue;
+      }
+      processedComponents.add(componentName);
+
+      const componentSchema = components[componentName];
+      log.debug(`Processing existing component: ${componentName}`);
+
+      // Process this component to extract any nested inline schemas
+      // Use a generic context since these components aren't tied to specific operations
+      processSchema(componentSchema, {
+        method: null,
+        path: null,
+        operationId: null,
+        isRequest: undefined,
+        responseCode: null,
+        propertyPath: [],
+      });
     }
 
     // Write to temporary file first

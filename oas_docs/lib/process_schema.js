@@ -9,15 +9,90 @@
 
 const MAX_RECURSION_DEPTH = 20;
 
+/**
+ * Creates a schema processing function that recursively extracts inline schemas into components.
+ *
+ * The processor extracts:
+ * - Composition types (oneOf/anyOf/allOf) into separate components
+ * - Nested object properties into separate components
+ * - Array item objects into separate components
+ * - additionalProperties objects into separate components
+ *
+ * @param {Object} components - The components.schemas object to populate with extracted schemas
+ * @param {Function} nameGenerator - Function to generate unique component names
+ * @param {Object} stats - Statistics object to track extraction metrics
+ * @param {number} stats.schemasExtracted - Counter for total schemas extracted
+ * @param {number} stats.oneOfCount - Counter for oneOf items extracted
+ * @param {number} stats.anyOfCount - Counter for anyOf items extracted
+ * @param {number} stats.allOfCount - Counter for allOf items extracted
+ * @param {number} stats.maxDepth - Maximum recursion depth reached
+ * @param {Object} log - Logger instance with debug/warn methods
+ * @returns {Function} processSchema function
+ *
+ * @example
+ * const components = {};
+ * const nameGen = createComponentNameGenerator();
+ * const stats = { schemasExtracted: 0, oneOfCount: 0, anyOfCount: 0, allOfCount: 0, maxDepth: 0 };
+ * const log = console;
+ * const processSchema = createProcessSchema(components, nameGen, stats, log);
+ *
+ * // Process a schema with oneOf
+ * const schema = {
+ *   oneOf: [
+ *     { type: 'object', properties: { a: { type: 'string' } } },
+ *     { type: 'object', properties: { b: { type: 'number' } } }
+ *   ]
+ * };
+ * processSchema(schema, { method: 'get', path: '/api/test', isRequest: false, responseCode: '200' });
+ *
+ * // Result: schema.oneOf items replaced with $ref, components populated
+ * // schema.oneOf = [{ $ref: '#/components/schemas/...' }, { $ref: '#/components/schemas/...' }]
+ */
 const createProcessSchema = (components, nameGenerator, stats, log) => {
   if (!components || !nameGenerator || !stats || !log) {
     throw new Error('components, nameGenerator, stats, and log are required');
   }
   /**
-   * Recursively process a schema, extracting compositions, properties, array items, and additionalProperties if they're an object
-   * @param {object} schema - The schema to process
-   * @param {object} context - Contextual information (method, path, operationId, propertyPath, isRequest flag, path.)
-   * @param {number} depth - Current recursion depth
+   * Recursively process a schema, extracting compositions, properties, array items, and additionalProperties.
+   *
+   * The function traverses the schema tree and:
+   * 1. Extracts oneOf/anyOf/allOf items into separate components with references
+   * 2. Extracts nested object properties with their own properties into components
+   * 3. Extracts array item objects into components
+   * 4. Extracts additionalProperties objects into components
+   * 5. Recursively processes all extracted schemas
+   *
+   * @param {Object} schema - The schema object to process (modified in place)
+   * @param {Object} context - Contextual information for naming
+   * @param {string|null} context.method - HTTP method (get, post, etc.) or null for components
+   * @param {string|null} context.path - API path (/api/test) or null for components
+   * @param {string|null} context.operationId - OpenAPI operation ID or null
+   * @param {boolean|undefined} context.isRequest - true for request body, false for response, undefined for components
+   * @param {string|null} context.responseCode - HTTP response code (200, 404, etc.) or null
+   * @param {Array<string>} context.propertyPath - Path of nested properties for naming
+   * @param {number} [depth=0] - Current recursion depth (internal use)
+   *
+   * @example
+   * // Process a response schema
+   * processSchema(responseSchema, {
+   *   method: 'get',
+   *   path: '/api/users',
+   *   operationId: 'getUsers',
+   *   isRequest: false,
+   *   responseCode: '200',
+   *   propertyPath: []
+   * });
+   *
+   * @example
+   * // Process a pre-existing component
+   * processSchema(components['MyComponent'], {
+   *   method: null,
+   *   path: null,
+   *   operationId: null,
+   *   isRequest: undefined,
+   *   responseCode: null,
+   *   propertyPath: []
+   * });
    */
   function processSchema(schema, context, depth = 0) {
     // base case: not a schema or the schema isn't an object

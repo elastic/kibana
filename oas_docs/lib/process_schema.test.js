@@ -99,6 +99,7 @@ describe('createProcessSchema', () => {
       const context = { operationId: 'testOp' };
       processSchema(schema, context);
 
+      expect(schema);
       schema.oneOf.forEach((item) => {
         expect(item).toHaveProperty('$ref');
         expect(item.$ref).toContain('#/components/schemas/');

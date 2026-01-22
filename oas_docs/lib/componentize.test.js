@@ -69,32 +69,32 @@ describe('componentizeObjectSchemas', () => {
 
       const result = yaml.load(fs.readFileSync(testFile, 'utf8'));
 
-      // Check that oneOf items are now references
-      const schema =
+      // Top-level oneOf schema should now be extracted as a component
+      const responseSchema =
         result.paths['/api/test'].get.responses['200'].content['application/json'].schema;
-      expect(schema.oneOf).toBeDefined();
-      expect(schema.oneOf[0].$ref).toBeDefined();
-      expect(schema.oneOf[1].$ref).toBeDefined();
+      expect(responseSchema).toEqual({ $ref: '#/components/schemas/ApiTest_Get_Response_200' });
 
-      // Check that components were created
-      expect(result.components.schemas).toBeDefined();
-      expect(Object.keys(result.components.schemas).length).toBe(2);
-      // check the structure and placement of the components
-      const componentNames = Object.keys(result.components.schemas);
-      const comp1 = result.components.schemas[componentNames[0]];
-      const comp2 = result.components.schemas[componentNames[1]];
-      expect(comp1).toHaveProperty('type', 'object');
-      expect(comp2).toHaveProperty('type', 'object');
-      expect(comp1).toMatchInlineSnapshot(`
-        Object {
-          "properties": Object {
-            "a": Object {
-              "type": "string",
-            },
-          },
-          "type": "object",
-        }
-      `);
+      // The extracted component should contain oneOf with refs to sub-components
+      const topLevelComponent = result.components.schemas.ApiTest_Get_Response_200;
+      expect(topLevelComponent).toEqual({
+        oneOf: [
+          { $ref: '#/components/schemas/ApiTest_Get_Response_200_1' },
+          { $ref: '#/components/schemas/ApiTest_Get_Response_200_2' },
+        ],
+      });
+
+      // Check that oneOf items were extracted as components
+      expect(result.components.schemas.ApiTest_Get_Response_200_1).toEqual({
+        type: 'object',
+        properties: { a: { type: 'string' } },
+      });
+      expect(result.components.schemas.ApiTest_Get_Response_200_2).toEqual({
+        type: 'object',
+        properties: { b: { type: 'number' } },
+      });
+
+      // Total: 1 top-level + 2 oneOf items = 3 components
+      expect(Object.keys(result.components.schemas).length).toBe(3);
     });
 
     it('should handle nested oneOf in properties', async () => {
@@ -190,10 +190,29 @@ describe('componentizeObjectSchemas', () => {
 
       const result = yaml.load(fs.readFileSync(testFile, 'utf8'));
 
-      // Check anyOf extraction
-      const schema = result.paths['/api/test'].post.requestBody.content['application/json'].schema;
-      expect(schema.anyOf[0].$ref).toBeDefined();
-      expect(schema.anyOf[1].$ref).toBeDefined();
+      // Top-level anyOf schema should now be extracted as a component
+      const requestSchema =
+        result.paths['/api/test'].post.requestBody.content['application/json'].schema;
+      expect(requestSchema).toEqual({ $ref: '#/components/schemas/ApiTest_Post_Request' });
+
+      // The extracted component should contain anyOf with refs to sub-components
+      const topLevelComponent = result.components.schemas.ApiTest_Post_Request;
+      expect(topLevelComponent).toEqual({
+        anyOf: [
+          { $ref: '#/components/schemas/ApiTest_Post_Request_1' },
+          { $ref: '#/components/schemas/ApiTest_Post_Request_2' },
+        ],
+      });
+
+      // Check that anyOf items were extracted as components
+      expect(result.components.schemas.ApiTest_Post_Request_1).toEqual({
+        type: 'object',
+        properties: { x: { type: 'string' } },
+      });
+      expect(result.components.schemas.ApiTest_Post_Request_2).toEqual({
+        type: 'object',
+        properties: { y: { type: 'number' } },
+      });
     });
   });
 
@@ -231,11 +250,29 @@ describe('componentizeObjectSchemas', () => {
 
       const result = yaml.load(fs.readFileSync(testFile, 'utf8'));
 
-      // Check allOf extraction
-      const schema =
+      // Top-level allOf schema should now be extracted as a component
+      const responseSchema =
         result.paths['/api/test'].get.responses['200'].content['application/json'].schema;
-      expect(schema.allOf[0].$ref).toBeDefined();
-      expect(schema.allOf[1].$ref).toBeDefined();
+      expect(responseSchema).toEqual({ $ref: '#/components/schemas/ApiTest_Get_Response_200' });
+
+      // The extracted component should contain allOf with refs to sub-components
+      const topLevelComponent = result.components.schemas.ApiTest_Get_Response_200;
+      expect(topLevelComponent).toEqual({
+        allOf: [
+          { $ref: '#/components/schemas/ApiTest_Get_Response_200_1' },
+          { $ref: '#/components/schemas/ApiTest_Get_Response_200_2' },
+        ],
+      });
+
+      // Check that allOf items were extracted as components
+      expect(result.components.schemas.ApiTest_Get_Response_200_1).toEqual({
+        type: 'object',
+        properties: { base: { type: 'string' } },
+      });
+      expect(result.components.schemas.ApiTest_Get_Response_200_2).toEqual({
+        type: 'object',
+        properties: { extended: { type: 'number' } },
+      });
     });
   });
 
@@ -278,14 +315,27 @@ describe('componentizeObjectSchemas', () => {
 
       const result = yaml.load(fs.readFileSync(testFile, 'utf8'));
 
-      // Original reference should remain
-      const schema =
+      // Top-level oneOf schema should be extracted as a component
+      const responseSchema =
         result.paths['/api/test'].get.responses['200'].content['application/json'].schema;
-      expect(schema.oneOf[0].$ref).toBe('#/components/schemas/ExistingSchema');
+      expect(responseSchema).toEqual({ $ref: '#/components/schemas/ApiTest_Get_Response_200' });
 
-      // New item should be extracted
-      expect(schema.oneOf[1].$ref).toBeDefined();
-      expect(schema.oneOf[1].$ref).not.toBe('#/components/schemas/ExistingSchema');
+      // The extracted component should contain oneOf with the existing ref preserved and new item extracted
+      const topLevelComponent = result.components.schemas.ApiTest_Get_Response_200;
+      expect(topLevelComponent.oneOf[0]).toEqual({ $ref: '#/components/schemas/ExistingSchema' });
+      // The new item gets indexed as _2 because nameGenerator counts all items (including the skipped $ref)
+      expect(topLevelComponent.oneOf[1]).toEqual({
+        $ref: '#/components/schemas/ApiTest_Get_Response_200_2',
+      });
+
+      // New item should be extracted as a component
+      expect(result.components.schemas.ApiTest_Get_Response_200_2).toEqual({
+        type: 'object',
+        properties: { new: { type: 'string' } },
+      });
+
+      // Original existing schema should still exist
+      expect(result.components.schemas.ExistingSchema).toEqual({ type: 'object' });
     });
 
     it('should handle empty composition arrays', async () => {
@@ -396,13 +446,24 @@ describe('componentizeObjectSchemas', () => {
 
       const result = yaml.load(fs.readFileSync(testFile, 'utf8'));
 
-      // Check component names
+      // Should have 1 top-level component + 2 oneOf items = 3 components
       const componentNames = Object.keys(result.components.schemas);
-      expect(componentNames.length).toBe(2);
+      expect(componentNames.length).toBe(3);
 
-      // Names should include operation ID, Response, status code, and index
-      expect(componentNames[0]).toMatchInlineSnapshot(`"ApiActionsConnector_Get_Response_200_1"`);
-      expect(componentNames[1]).toMatchInlineSnapshot(`"ApiActionsConnector_Get_Response_200_2"`);
+      // Top-level component name
+      expect(result.components.schemas).toHaveProperty('ApiActionsConnector_Get_Response_200');
+
+      // OneOf item names should include index
+      expect(result.components.schemas).toHaveProperty('ApiActionsConnector_Get_Response_200_1');
+      expect(result.components.schemas).toHaveProperty('ApiActionsConnector_Get_Response_200_2');
+
+      // Verify structure
+      expect(result.components.schemas.ApiActionsConnector_Get_Response_200).toEqual({
+        oneOf: [
+          { $ref: '#/components/schemas/ApiActionsConnector_Get_Response_200_1' },
+          { $ref: '#/components/schemas/ApiActionsConnector_Get_Response_200_2' },
+        ],
+      });
     });
 
     it('should handle name collisions', async () => {
@@ -450,10 +511,16 @@ describe('componentizeObjectSchemas', () => {
 
       const result = yaml.load(fs.readFileSync(testFile, 'utf8'));
 
-      // Should have created unique names despite collision
+      // Should have: 2 top-level (GET/POST responses) + 2 oneOf items = 4 components
       const componentNames = Object.keys(result.components.schemas);
-      expect(componentNames.length).toBe(2);
-      expect(new Set(componentNames).size).toBe(2); // All unique
+      expect(componentNames.length).toBe(4);
+      expect(new Set(componentNames).size).toBe(4); // All unique
+
+      // Verify all components have unique names
+      expect(result.components.schemas).toHaveProperty('ApiTest_Get_Response_200');
+      expect(result.components.schemas).toHaveProperty('ApiTest_Get_Response_200_1');
+      expect(result.components.schemas).toHaveProperty('ApiTest_Post_Response_200');
+      expect(result.components.schemas).toHaveProperty('ApiTest_Post_Response_200_1');
     });
   });
 

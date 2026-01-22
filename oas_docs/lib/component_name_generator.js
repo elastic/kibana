@@ -30,14 +30,62 @@ const cleanAndNormalizePath = (pathStr) => {
     .join('');
 };
 
+function toPascalCase(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
+function fromPropertyPaths(propertyPath) {
+  return propertyPath.map((p) => p.charAt(0).toUpperCase() + p.slice(1));
+}
+
+/**
+ * Creates a component name generator with collision detection.
+ *
+ * Naming Strategy:
+ * - Converts API paths to PascalCase (e.g., /api/actions/connector -> ApiActionsConnector)
+ * - Removes path parameters ({id}, {rule_id}) while preserving meaningful segments
+ * - Adds HTTP method in PascalCase (Get, Post, Put, etc.)
+ * - Adds "Request" or "Response" based on context
+ * - Includes response codes (200, 404, etc.)
+ * - Handles nested property paths for detailed naming
+ * - Adds 1-based indexing for composition types (oneOf/anyOf/allOf)
+ * - Ensures uniqueness by appending numeric suffixes on collision
+ *
+ * @returns {Function} generateName function
+ *
+ * @example
+ * const nameGen = createComponentNameGenerator();
+ *
+ * // Basic response schema
+ * nameGen({ method: 'get', path: '/api/actions/connector/{id}', isRequest: false, responseCode: '200' })
+ * // => 'ApiActionsConnector_Get_Response_200'
+ *
+ * // OneOf/AnyOf indexing
+ * nameGen({ method: 'get', path: '/api/actions/connector', isRequest: false, responseCode: '200' }, 'oneOf', 0)
+ * // => 'ApiActionsConnector_Get_Response_200_1'
+ *
+ * // Property schemas
+ * nameGen({ method: 'get', path: '/api/actions/connector/{id}', isRequest: false, responseCode: '200', propertyPath: ['config'] }, 'property')
+ * // => 'ApiActionsConnector_Get_Response_200_Config'
+ *
+ * // Complex paths with parameters and underscores
+ * nameGen({ method: 'get', path: '/api/alerting/rule/{rule_id}/alert/{alert_id}/_unmute', isRequest: false, responseCode: '200' })
+ * // => 'ApiAlertingRuleAlertUnmute_Get_Response_200'
+ */
 const createComponentNameGenerator = () => {
   const nameMap = new Map();
   /**
-   * Generates a unique component name based on context and composition type
-   * @param {object} context - Contextual information (method, path, isRequest flag, responseCode, propertyPath)
-   * @param {string} compositionType - Type of composition ('oneOf', 'anyOf', 'allOf', 'property', 'arrayItem', 'additionalProperty')
-   * @param {number} index - Index for compositions (0-based)
-   * @returns {string} - Generated unique component name
+   * Generates a unique component name based on context and composition type.
+   *
+   * @param {Object} context - Contextual information for naming
+   * @param {string|null} context.method - HTTP method (get, post, etc.) or null for components
+   * @param {string|null} context.path - API path (/api/test) or null for components
+   * @param {boolean|undefined} context.isRequest - true for request, false for response, undefined for components
+   * @param {string|null} context.responseCode - HTTP response code (200, 404, etc.) or null
+   * @param {Array<string>} [context.propertyPath=[]] - Path of nested properties
+   * @param {string} [compositionType] - Type: 'oneOf', 'anyOf', 'allOf', 'property', 'arrayItem', 'additionalProperty'
+   * @param {number} [index] - Index for composition types (0-based, converted to 1-based in name)
+   * @returns {string} Generated unique component name
    */
   return function generateName(context, compositionType, index) {
     const { method, path, isRequest, responseCode, propertyPath = [] } = context;
@@ -53,7 +101,7 @@ const createComponentNameGenerator = () => {
     const parts = [];
     parts.push(buildApiName(path));
     if (method) {
-      parts.push(method.charAt(0).toUpperCase() + method.slice(1).toLowerCase());
+      parts.push(toPascalCase(method));
     }
     // Add request/response type
     if (isRequest !== undefined) {
@@ -67,7 +115,7 @@ const createComponentNameGenerator = () => {
 
     // Add property path (for nested objects)
     if (propertyPath && propertyPath.length > 0) {
-      parts.push(...propertyPath.map((p) => p.charAt(0).toUpperCase() + p.slice(1)));
+      parts.push(...fromPropertyPaths(propertyPath));
     }
 
     // Add composition type suffixes
