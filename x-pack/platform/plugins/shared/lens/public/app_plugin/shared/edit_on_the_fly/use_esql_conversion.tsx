@@ -15,67 +15,19 @@ import type {
 import { partition } from 'lodash';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { getESQLForLayer, isEsqlQuerySuccess } from '../../../datasources/form_based/to_esql';
 import {
-  getESQLForLayer,
-  isEsqlQuerySuccess,
-  type EsqlConversionFailureReason,
-} from '../../../datasources/form_based/to_esql';
+  esqlConversionFailureReasonMessages,
+  getFailureTooltip,
+} from '../../../datasources/form_based/to_esql_failure_reasons';
 import type { ConvertibleLayer } from './convert_to_esql_modal';
 import { operationDefinitionMap } from '../../../datasources/form_based/operations';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { layerTypes } from '../../..';
 
-const cannotConvertToEsqlTooltip = i18n.translate('xpack.lens.config.cannotConvertToEsqlTooltip', {
-  defaultMessage: 'This visualization cannot be converted to ES|QL',
-});
-
-const failureReasonMessages: Record<EsqlConversionFailureReason, string> = {
-  non_utc_timezone: i18n.translate('xpack.lens.config.cannotConvertToEsqlNonUtcTimezone', {
-    defaultMessage: 'Cannot convert to ES|QL: UTC timezone is required.',
-  }),
-  formula_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlFormula', {
-    defaultMessage: 'Cannot convert to ES|QL: Formula operations are not yet supported.',
-  }),
-  time_shift_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlTimeShift', {
-    defaultMessage: 'Cannot convert to ES|QL: Time shift is not yet supported.',
-  }),
-  runtime_field_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlRuntimeField', {
-    defaultMessage: 'Cannot convert to ES|QL: Runtime fields are not yet supported.',
-  }),
-  reduced_time_range_not_supported: i18n.translate(
-    'xpack.lens.config.cannotConvertToEsqlReducedTimeRange',
-    {
-      defaultMessage: 'Cannot convert to ES|QL: Reduced time range is not yet supported.',
-    }
-  ),
-  function_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlOperation', {
-    defaultMessage: 'Cannot convert to ES|QL: One or more functions are not yet supported.',
-  }),
-  drop_partials_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlDropPartials', {
-    defaultMessage: 'Cannot convert to ES|QL: "Drop partial buckets" option is not yet supported.',
-  }),
-  include_empty_rows_not_supported: i18n.translate(
-    'xpack.lens.config.cannotConvertToEsqlIncludeEmptyRows',
-    {
-      defaultMessage: 'Cannot convert to ES|QL: "Include empty rows" option is not yet supported.',
-    }
-  ),
-  terms_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlTerms', {
-    defaultMessage: 'Cannot convert to ES|QL: Top values (terms) aggregation is not yet supported.',
-  }),
-  unknown: i18n.translate('xpack.lens.config.cannotConvertToEsqlUnknown', {
-    defaultMessage: 'Cannot convert to ES|QL: This visualization has unsupported settings.',
-  }),
-};
-
-const getFailureTooltip = (reason: EsqlConversionFailureReason | undefined): string => {
-  if (!reason) {
-    return cannotConvertToEsqlTooltip;
-  }
-  return failureReasonMessages[reason] ?? failureReasonMessages.unknown;
-};
-
-const getEsqlConversionDisabledSettings = (tooltip: string = cannotConvertToEsqlTooltip) => ({
+const getEsqlConversionDisabledSettings = (
+  tooltip: string = esqlConversionFailureReasonMessages.unknown
+) => ({
   isConvertToEsqlButtonDisabled: true,
   convertToEsqlButtonTooltip: tooltip,
   convertibleLayers: [],

@@ -25,25 +25,10 @@ import { convertToAbsoluteDateRange } from '../../utils';
 import type { OriginalColumn } from '../../../common/types';
 import { operationDefinitionMap } from './operations';
 import { resolveTimeShift } from './time_shift_utils';
+import type { EsqlConversionFailureReason } from './to_esql_failure_reasons';
 
 // esAggs column ID manipulation functions
 export const extractAggId = (id: string) => id.split('.')[0].split('-')[2];
-
-/**
- * Specific reasons why ES|QL conversion failed.
- * These are used to provide granular user feedback.
- */
-export type EsqlConversionFailureReason =
-  | 'non_utc_timezone'
-  | 'formula_not_supported'
-  | 'time_shift_not_supported'
-  | 'runtime_field_not_supported'
-  | 'reduced_time_range_not_supported'
-  | 'function_not_supported'
-  | 'drop_partials_not_supported'
-  | 'include_empty_rows_not_supported'
-  | 'terms_not_supported'
-  | 'unknown';
 
 interface EsqlQuerySuccess {
   success: true;
