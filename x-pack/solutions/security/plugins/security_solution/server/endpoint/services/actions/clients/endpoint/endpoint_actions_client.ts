@@ -567,10 +567,25 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       );
     }
 
+    let runscriptActionRequestParams = actionRequest;
+
+    // Apply default for `timeout` if not set on request payload
+    if (
+      !(runscriptActionRequestParams.parameters as EndpointRunScriptActionRequestParams).timeout
+    ) {
+      runscriptActionRequestParams = {
+        ...runscriptActionRequestParams,
+        parameters: {
+          ...runscriptActionRequestParams.parameters,
+          timeout: DEFAULT_EXECUTE_ACTION_TIMEOUT,
+        },
+      };
+    }
+
     return this.handleResponseAction<
       RunScriptActionRequestBody,
       ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
-    >('runscript', actionRequest, options);
+    >('runscript', runscriptActionRequestParams, options);
   }
 
   async getCustomScripts({

@@ -711,6 +711,52 @@ describe('EndpointActionsClient', () => {
         expect.anything()
       );
     });
+
+    it('should send user defined `timeout` value to endpoint', async () => {
+      await expect(
+        endpointActionsClient.runscript(
+          endpointActionClientMock.createRunScriptOptions({
+            parameters: { scriptId: 'script-with-args', timeout: 123456 },
+          })
+        )
+      ).resolves.toEqual(expect.any(Object));
+
+      expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            EndpointActions: expect.objectContaining({
+              data: expect.objectContaining({
+                parameters: expect.objectContaining({ timeout: 123456 }),
+              }),
+            }),
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should include a default `timeout` if one is not provided', async () => {
+      await expect(
+        endpointActionsClient.runscript(
+          endpointActionClientMock.createRunScriptOptions({
+            parameters: { scriptId: 'script-with-args' },
+          })
+        )
+      ).resolves.toEqual(expect.any(Object));
+
+      expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            EndpointActions: expect.objectContaining({
+              data: expect.objectContaining({
+                parameters: expect.objectContaining({ timeout: 60000 }),
+              }),
+            }),
+          }),
+        }),
+        expect.anything()
+      );
+    });
   });
 
   describe('#getCustomScripts()', () => {
