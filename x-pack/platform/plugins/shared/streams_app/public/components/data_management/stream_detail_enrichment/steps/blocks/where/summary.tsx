@@ -16,6 +16,7 @@ import { CreateStepButton } from '../../../create_step_button';
 import type { StepConfigurationProps } from '../../steps_list';
 import { BlockDisableOverlay } from '../block_disable_overlay';
 import { StepContextMenu } from '../context_menu';
+import { DragHandle } from '../../draggable_step_wrapper';
 
 interface WhereBlockSummaryProps extends StepConfigurationProps {
   onClick?: () => void;
@@ -58,6 +59,16 @@ export const WhereBlockSummary = ({
       {stepUnderEdit &&
         rootLevelMap.get(stepUnderEdit.customIdentifier) ===
           rootLevelMap.get(step.customIdentifier) && <BlockDisableOverlay />}
+      {!readOnly && (
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            pointer-events: all;
+          `}
+        >
+          <DragHandle />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem
         css={css`
           // Facilitates text truncation
