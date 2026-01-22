@@ -81,6 +81,7 @@ import {
 import { registerSearchSessionsMgmt, openSearchSessionsFlyout } from './session/sessions_mgmt';
 import type { ISearchSetup, ISearchStart } from './types';
 import { BackgroundSearchNotifier } from './session/background_search_notifier';
+import { BACKGROUND_SESSION_POLLING_INTERVAL } from './session/constants';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
@@ -310,7 +311,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const config = this.initializerContext.config.get();
 
     this.backgroundSearchNotifier = new BackgroundSearchNotifier(this.sessionsClient, coreStart);
-    this.backgroundSearchNotifier.startPolling(5000);
+    this.backgroundSearchNotifier.startPolling(BACKGROUND_SESSION_POLLING_INTERVAL);
 
     return {
       aggs,

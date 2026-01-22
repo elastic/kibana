@@ -15,7 +15,7 @@ import type { ISessionsClient } from '../..';
 import { getInProgressSessionIds, setInProgressSessionIds } from './in_progress_session';
 
 export class BackgroundSearchNotifier {
-  stop$?: Subject<void>;
+  private stop$?: Subject<void>;
 
   constructor(private sessionsClient: ISessionsClient, private core: CoreStart) {}
 
@@ -23,8 +23,9 @@ export class BackgroundSearchNotifier {
     this.stop$ = new Subject();
 
     const serverInProgressSession = await this.loadInProgressSessions();
+    const localInProgressSessions = getInProgressSessionIds();
     this.updateSessions(
-      this.groupSessions(serverInProgressSession.statuses, getInProgressSessionIds())
+      this.initializeSessions(serverInProgressSession.statuses, localInProgressSessions)
     );
 
     timer(0, interval)
@@ -52,6 +53,16 @@ export class BackgroundSearchNotifier {
     return this.sessionsClient.find({
       filter: 'search-session.attributes.status: "in_progress"',
     });
+  }
+
+  private initializeSessions(
+    loadedSessions: Record<string, SearchSessionStatusResponse>,
+    localSessionIds: string[]
+  ) {
+    // Merge server in-progress sessions with local sessions (removing duplicates)
+    const serverSessionIds = Object.keys(loadedSessions);
+    const mergedSessionIds = Array.from(new Set([...localSessionIds, ...serverSessionIds]));
+    return { inProgressIds: mergedSessionIds, completedIds: [], failedIds: [] };
   }
 
   private groupSessions(
@@ -86,7 +97,7 @@ export class BackgroundSearchNotifier {
     for (const id of completedIds) {
       this.core.notifications.toasts.addSuccess({
         title: i18n.translate('data.search.sessions.backgroundSearch.completedToastTitle', {
-          defaultMessage: 'Background search session completed',
+          defaultMessage: 'Background search completed',
         }),
         text: i18n.translate('data.search.sessions.backgroundSearch.completedToastText', {
           defaultMessage: 'Search session {id} has completed successfully.',
@@ -98,7 +109,7 @@ export class BackgroundSearchNotifier {
     for (const id of failedIds) {
       this.core.notifications.toasts.addDanger({
         title: i18n.translate('data.search.sessions.backgroundSearch.failedToastTitle', {
-          defaultMessage: 'Background search session failed',
+          defaultMessage: 'Background search failed',
         }),
         text: i18n.translate('data.search.sessions.backgroundSearch.failedToastText', {
           defaultMessage: 'Search session {id} has failed.',

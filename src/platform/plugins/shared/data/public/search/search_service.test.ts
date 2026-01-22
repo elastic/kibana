@@ -19,6 +19,10 @@ import type { SearchServiceSetupDependencies } from './search_service';
 import { SearchService } from './search_service';
 import type { ISearchStart } from './types';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { BackgroundSearchNotifier } from './session/background_search_notifier';
+
+jest.mock('./session/background_search_notifier');
+const BackgroundSearchNotifierMock = jest.mocked(BackgroundSearchNotifier);
 
 describe('Search service', () => {
   let searchService: SearchService;
@@ -67,6 +71,10 @@ describe('Search service', () => {
         scriptedFieldsEnabled: true,
         share: {} as SharePluginStart,
       });
+    });
+
+    it('starts background search notifier polling', () => {
+      expect(BackgroundSearchNotifierMock.prototype.startPolling).toHaveBeenCalledTimes(1);
     });
 
     it('exposes proper contract', async () => {

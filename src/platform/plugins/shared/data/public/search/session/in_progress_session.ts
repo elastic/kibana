@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const IN_PROGRESS_SESSION_PREFIX = 'in-progress-background-search';
+export const IN_PROGRESS_SESSION_PREFIX = 'in-progress-background-search';
 
 export function getInProgressSessionIds(): string[] {
   const sessionIds: string[] = [];
