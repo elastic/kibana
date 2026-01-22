@@ -7,11 +7,12 @@
 
 import moment from 'moment';
 import { expect } from '@kbn/scout-oblt';
-import { EXTENDED_TIMEOUT, test } from '../../fixtures';
+import { test } from '../../fixtures';
 import {
   DATE_WITH_K8S_HOSTS_DATA_FROM,
   DATE_WITH_K8S_HOSTS_DATA_TO,
   K8S_HOST_NAME,
+  EXTENDED_TIMEOUT,
 } from '../../fixtures/constants';
 
 const START_K8S_HOST_DATE = moment.utc(DATE_WITH_K8S_HOSTS_DATA_FROM);
@@ -69,7 +70,7 @@ test.describe('Node Details: host with kubernetes section', { tag: ['@ess', '@sv
     });
 
     for (const { metric } of metricCharts) {
-      await nodeDetailsPage.expectChartsCount(`infraAssetDetailsHostChartsSection${metric}`, 1);
+      await nodeDetailsPage.expectChartsCount(`infraAssetDetailsHostChartsSection${metric}`, 2);
     }
   });
 
@@ -87,7 +88,7 @@ test.describe('Node Details: host with kubernetes section', { tag: ['@ess', '@sv
 
     await nodeDetailsPage.waitForChartsToLoad();
 
-    await nodeDetailsPage.expectChartsCount('infraAssetDetailsHostChartsSection', 9);
+    await nodeDetailsPage.expectChartsCount('infraAssetDetailsHostChartsSection', 18);
     await nodeDetailsPage.expectChartsCount('infraAssetDetailsHostChartsChart', 17);
   });
 

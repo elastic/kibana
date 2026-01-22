@@ -9,7 +9,7 @@ import type { Moment } from 'moment';
 import rison from '@kbn/rison';
 import type { AlertStatus } from '@kbn/rule-data-utils';
 import { type KibanaUrl, type Locator, type ScoutPage, expect } from '@kbn/scout-oblt';
-import { EXTENDED_TIMEOUT } from '../..';
+import { EXTENDED_TIMEOUT } from '../../constants';
 
 interface QueryParams {
   name?: string;

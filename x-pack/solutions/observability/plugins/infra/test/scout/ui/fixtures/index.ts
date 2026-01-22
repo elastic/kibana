@@ -28,6 +28,7 @@ export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
   pageObjects: ObltPageObjects & {
     inventoryPage: InventoryPage;
     assetDetailsPage: AssetDetailsPage;
+    nodeDetailsPage: NodeDetailsPage;
   };
 }
 
@@ -93,5 +94,3 @@ export const globalSetupHook = baseGlobalSetupHook.extend({
     await use({ index, clean });
   },
 });
-
-export const EXTENDED_TIMEOUT = 45000 as const;
