@@ -46,6 +46,7 @@ export const GapAutoFillSchedulerProvider = ({ children }: { children: React.Rea
 
   // Fetch error logs - only if scheduler is enabled
   // We only need to know if there are ANY errors, so perPage: 1 is sufficient
+  const STALE_TIME = 10 * 60 * 1000; // 10 minutes - data considered fresh, then refetch on next access
   const { data: errorLogsData } = useFindGapAutoFillSchedulerLogs({
     page: 1,
     perPage: 1,
@@ -53,7 +54,7 @@ export const GapAutoFillSchedulerProvider = ({ children }: { children: React.Rea
     sortField: '@timestamp',
     sortDirection: 'desc',
     enabled: canAccessGapAutoFill && scheduler?.enabled === true,
-    staleTime: 5 * 60 * 1000, // 5 minutes - data considered fresh, then refetch on next access
+    staleTime: STALE_TIME,
   });
 
   const value = useMemo(() => {
@@ -91,10 +92,6 @@ export const GapAutoFillSchedulerProvider = ({ children }: { children: React.Rea
   );
 };
 
-/**
- * Hook to access the gap auto fill scheduler context.
- * Must be used within a GapAutoFillSchedulerProvider.
- */
 export const useGapAutoFillSchedulerContext = (): GapAutoFillSchedulerContextValue => {
   const context = useContext(GapAutoFillSchedulerContext);
   invariant(
