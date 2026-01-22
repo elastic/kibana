@@ -20,13 +20,3 @@ export {
   type ListOptions,
   type VolumeGlobOptions,
 } from './types';
-export {
-  normalizePath,
-  dirname,
-  basename,
-  joinPath,
-  getPathSegments,
-  isRootPath,
-  getAncestorPaths,
-  getParentPath,
-} from './path_utils';

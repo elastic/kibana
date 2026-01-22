@@ -138,7 +138,11 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
     );
 
     resultsWithIds.forEach((result) => {
-      resultStore.add(result);
+      resultStore.add({
+        tool_id: tool.id,
+        tool_call_id: toolCallId,
+        result,
+      });
     });
 
     return {
