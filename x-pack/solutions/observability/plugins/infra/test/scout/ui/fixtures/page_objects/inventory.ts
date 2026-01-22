@@ -10,7 +10,9 @@ import {
   EXTENDED_TIMEOUT,
   KUBERNETES_TOUR_STORAGE_KEY,
   KUBERNETES_CARD_DISMISSED_STORAGE_KEY,
+  KUBERNETES_TOAST_STORAGE_KEY,
 } from '../constants';
+import type { SavedViews } from './saved_views';
 
 export class InventoryPage {
   public readonly feedbackLink: Locator;
@@ -22,6 +24,9 @@ export class InventoryPage {
   public readonly inventorySwitcherHostsButton: Locator;
   public readonly inventorySwitcherPodsButton: Locator;
   public readonly inventorySwitcherContainersButton: Locator;
+
+  public readonly metricSwitcherButton: Locator;
+  public readonly metricsContextMenu: Locator;
 
   public readonly k8sTourText: Locator;
   public readonly k8sTourDismissButton: Locator;
@@ -57,7 +62,11 @@ export class InventoryPage {
   public readonly alertsFlyoutRuleDefinitionSection: Locator;
   public readonly alertsFlyoutRuleTypeName: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl,
+    private readonly savedViews: SavedViews
+  ) {
     this.feedbackLink = this.page.getByTestId('infraInventoryFeedbackLink');
     this.k8sFeedbackLink = this.page.getByTestId('infra-kubernetes-feedback-link');
 
@@ -67,6 +76,9 @@ export class InventoryPage {
     this.inventorySwitcherHostsButton = this.page.getByTestId('goToHost');
     this.inventorySwitcherPodsButton = this.page.getByTestId('goToPods');
     this.inventorySwitcherContainersButton = this.page.getByTestId('goToContainer');
+
+    this.metricSwitcherButton = this.page.getByTestId('infraInventoryMetricDropdown');
+    this.metricsContextMenu = this.page.getByTestId('infraInventoryMetricsContextMenu');
 
     this.k8sTourText = this.page.getByTestId('infra-kubernetesTour-text');
     this.k8sTourDismissButton = this.page.getByTestId('infra-kubernetesTour-dismiss');
@@ -122,7 +134,7 @@ export class InventoryPage {
   private async waitForPageToLoad() {
     await this.page.getByTestId('infraMetricsPage').waitFor({ timeout: EXTENDED_TIMEOUT });
     await this.waitForNodesToLoad();
-    await this.page.getByTestId('savedViews-openPopover-loaded').waitFor();
+    await this.savedViews.waitForViewsToLoad();
   }
 
   public async goToPage(opts: { skipLoadWait?: boolean } = {}) {
@@ -210,6 +222,16 @@ export class InventoryPage {
     );
   }
 
+  public async addDismissK8sToastInitScript() {
+    // Dismiss k8s tour if it's present to avoid interference with other test assertions
+    await this.page.addInitScript(
+      ([k8sToastStorageKey]) => {
+        window.localStorage.setItem(k8sToastStorageKey, 'true');
+      },
+      [KUBERNETES_TOAST_STORAGE_KEY]
+    );
+  }
+
   public async goToTime(time: string) {
     await this.datePickerInput.fill(time);
     await this.datePickerInput.press('Escape');
@@ -271,5 +293,11 @@ export class InventoryPage {
       .getByRole('dialog')
       .filter({ hasText: 'Legend Options' })
       .waitFor({ state: 'hidden' });
+  }
+
+  public async selectMetric(metricName: string) {
+    await this.metricSwitcherButton.click();
+    await this.metricsContextMenu.getByRole('button', { name: metricName }).click();
+    await this.waitForNodesToLoad();
   }
 }
