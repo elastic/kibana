@@ -9,20 +9,20 @@ import type React from 'react';
 import { useCallback } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { useNodeExpandGraphPopover } from './use_node_expand_graph_popover';
-import type { NodeProps } from '../../..';
+import { useNodeExpandPopover } from './use_node_expand_popover';
+import type { NodeProps } from '../../types';
 import {
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID,
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
   GRAPH_LABEL_EXPAND_POPOVER_TEST_ID,
-} from '../test_ids';
+} from '../../test_ids';
 import type {
   ItemExpandPopoverListItemProps,
   SeparatorExpandPopoverListItemProps,
-} from './list_group_graph_popover';
-import { EVENT_ACTION } from '../../common/constants';
-import { addFilter, containsFilter, removeFilter } from './search_filters';
-import { getNodeDocumentMode } from '../utils';
+} from '../primitives/list_graph_popover';
+import { EVENT_ACTION } from '../../../common/constants';
+import { addFilter, containsFilter, removeFilter } from '../../graph_investigation/search_filters';
+import { getNodeDocumentMode } from '../../utils';
 
 type NodeToggleAction = 'show' | 'hide';
 
@@ -123,7 +123,7 @@ export const useLabelNodeExpandPopover = (
     },
     [onShowEventDetailsClick, onShowEventsWithThisActionClick, searchFilters]
   );
-  const labelNodeExpandPopover = useNodeExpandGraphPopover({
+  const labelNodeExpandPopover = useNodeExpandPopover({
     id: 'label-node-expand-popover',
     testSubject: GRAPH_LABEL_EXPAND_POPOVER_TEST_ID,
     itemsFn,
