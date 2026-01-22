@@ -118,13 +118,13 @@ describe('QueryService', () => {
     it('should convert ES|QL response to array of objects', () => {
       const mockResponse: ESQLSearchResponse = {
         columns: [
-          { name: 'rule_id', type: 'keyword' },
-          { name: 'alert_series_id', type: 'keyword' },
+          { name: 'rule.id', type: 'keyword' },
+          { name: 'group_hash', type: 'keyword' },
           { name: '@timestamp', type: 'date' },
         ],
         values: [
-          ['rule-1', 'series-1', '2026-01-02T10:29:31.019Z'],
-          ['rule-2', 'series-2', '2026-01-02T10:29:31.019Z'],
+          ['rule-1', 'hash-1', '2026-01-02T10:29:31.019Z'],
+          ['rule-2', 'hash-2', '2026-01-02T10:29:31.019Z'],
         ],
       };
 
@@ -134,13 +134,13 @@ describe('QueryService', () => {
       expect(result).toEqual([
         {
           '@timestamp': '2026-01-02T10:29:31.019Z',
-          rule_id: 'rule-1',
-          alert_series_id: 'series-1',
+          'rule.id': 'rule-1',
+          group_hash: 'hash-1',
         },
         {
           '@timestamp': '2026-01-02T10:29:31.019Z',
-          rule_id: 'rule-2',
-          alert_series_id: 'series-2',
+          'rule.id': 'rule-2',
+          group_hash: 'hash-2',
         },
       ]);
     });
@@ -148,12 +148,12 @@ describe('QueryService', () => {
     it('should handle missing column names in response', () => {
       const mockResponse: ESQLSearchResponse = {
         columns: [
-          { name: 'rule_id', type: 'keyword' },
-          { name: 'alert_series_id', type: 'keyword' },
+          { name: 'rule.id', type: 'keyword' },
+          { name: 'group_hash', type: 'keyword' },
         ],
         values: [
-          ['rule-1', 'series-1', '2026-01-02T10:29:31.019Z'],
-          ['rule-2', 'series-2', '2026-01-02T10:29:31.019Z'],
+          ['rule-1', 'hash-1', '2026-01-02T10:29:31.019Z'],
+          ['rule-2', 'hash-2', '2026-01-02T10:29:31.019Z'],
         ],
       };
 
@@ -162,12 +162,12 @@ describe('QueryService', () => {
       expect(result).toHaveLength(2);
       expect(result).toEqual([
         {
-          rule_id: 'rule-1',
-          alert_series_id: 'series-1',
+          'rule.id': 'rule-1',
+          group_hash: 'hash-1',
         },
         {
-          rule_id: 'rule-2',
-          alert_series_id: 'series-2',
+          'rule.id': 'rule-2',
+          group_hash: 'hash-2',
         },
       ]);
     });
