@@ -11,6 +11,7 @@ import React, { type MouseEvent } from 'react';
 import { EuiHeaderLink, EuiHideFor, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { upperFirst } from 'lodash';
 import { css } from '@emotion/react';
+import { getRouterLinkProps } from '@kbn/router-utils';
 import { getIsSelectedColor, getTooltip, isDisabled } from '../utils';
 import { AppMenuPopover } from './app_menu_popover';
 import type { AppMenuItemType } from '../types';
@@ -60,6 +61,9 @@ export const AppMenuItem = ({
     run?.({ triggerElement: event.currentTarget });
   };
 
+  const routerLinkProps =
+    href && run ? getRouterLinkProps({ href, onClick: handleClick }) : { onClick: handleClick };
+
   const buttonCss = css`
     background-color: ${isPopoverOpen
       ? getIsSelectedColor({
@@ -73,7 +77,6 @@ export const AppMenuItem = ({
   const buttonComponent = (
     <EuiHideFor sizes={hidden ?? 'none'}>
       <EuiHeaderLink
-        onClick={handleClick}
         id={htmlId}
         data-test-subj={testId || `app-menu-item-${id}`}
         iconType={iconType}
@@ -88,6 +91,7 @@ export const AppMenuItem = ({
         aria-haspopup={hasItems ? 'menu' : undefined}
         isSelected={hasItems ? isPopoverOpen : undefined}
         css={buttonCss}
+        {...routerLinkProps}
       >
         {itemText}
       </EuiHeaderLink>

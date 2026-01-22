@@ -13,6 +13,7 @@ import { upperFirst } from 'lodash';
 import type { EuiButtonColor, PopoverAnchorPosition } from '@elastic/eui';
 import { EuiButton, EuiHideFor, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { getRouterLinkProps } from '@kbn/router-utils';
 import {
   APP_MENU_NOTIFICATION_INDICATOR_LEFT,
   APP_MENU_NOTIFICATION_INDICATOR_TOP,
@@ -100,8 +101,11 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
     splitButtonRun?.({ triggerElement: event.currentTarget });
   };
 
+  const routerLinkProps =
+    href && run ? getRouterLinkProps({ href, onClick: handleClick }) : { onClick: handleClick };
+
   const commonProps = {
-    onClick: handleClick,
+    ...routerLinkProps,
     id: htmlId,
     'data-test-subj': testId || `app-menu-action-button-${id}`,
     iconType,

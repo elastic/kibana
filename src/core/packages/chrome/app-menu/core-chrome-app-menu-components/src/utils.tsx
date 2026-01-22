@@ -15,6 +15,7 @@ import {
   type EuiContextMenuPanelDescriptor,
   type EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
+import { getRouterLinkProps } from '@kbn/router-utils';
 import { AppMenuPopoverActionButtons } from './components/app_menu_popover_action_buttons';
 import type {
   AppMenuConfig,
@@ -132,11 +133,17 @@ export const mapAppMenuItemToPanelItem = (
     }
   };
 
+  const hasClickHandler = childPanelId === undefined;
+  const routerLinkProps =
+    item?.href && item?.run && hasClickHandler
+      ? getRouterLinkProps({ href: item.href, onClick: handleClick })
+      : { onClick: hasClickHandler ? handleClick : undefined };
+
   return {
     key: item.id,
     name: upperFirst(item.label),
     icon: item?.iconType,
-    onClick: childPanelId !== undefined ? undefined : handleClick,
+    ...routerLinkProps,
     href: item?.href,
     target: item?.href ? item?.target : undefined,
     disabled: isDisabled(item?.disableButton),
