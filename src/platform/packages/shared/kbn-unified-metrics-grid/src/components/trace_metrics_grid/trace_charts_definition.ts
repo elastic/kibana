@@ -14,12 +14,14 @@ import {
   PROCESSOR_EVENT,
   STATUS_CODE,
   TRANSACTION_DURATION,
+  TRANSACTION_ID,
+  SPAN_ID,
 } from '@kbn/apm-types';
 import { evaluate, from, keep, sort, stats, where } from '@kbn/esql-composer';
 import { i18n } from '@kbn/i18n';
 import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils';
 import type { MetricUnit } from '../../types';
-import { chartPalette, type DataSource } from '.';
+import { chartPalette } from '.';
 
 interface TraceChart {
   id: string;
@@ -32,7 +34,7 @@ interface TraceChart {
 
 const UNMAPPED_FIELDS_NULLIFY_SET_COMMAND = 'SET unmapped_fields="NULLIFY";';
 
-function getWhereClauses(dataSource: DataSource, filters: string[]) {
+function getWhereClauses(filters: string[]) {
   return [
     ...filters,
     ...[`TO_STRING(${PROCESSOR_EVENT}) == "transaction" OR ${PROCESSOR_EVENT} IS NULL`],
@@ -40,16 +42,14 @@ function getWhereClauses(dataSource: DataSource, filters: string[]) {
 }
 
 export function getErrorRateChart({
-  dataSource,
   indexes,
   filters,
 }: {
-  dataSource: DataSource;
   indexes: string;
   filters: string[];
 }): TraceChart | null {
   try {
-    const whereClauses = getWhereClauses(dataSource, filters);
+    const whereClauses = getWhereClauses(filters);
     const esqlQuery = from(indexes)
       .pipe(
         ...whereClauses,
@@ -78,16 +78,14 @@ export function getErrorRateChart({
 }
 
 export function getLatencyChart({
-  dataSource,
   indexes,
   filters,
 }: {
-  dataSource: DataSource;
   indexes: string;
   filters: string[];
 }): TraceChart | null {
   try {
-    const whereClauses = getWhereClauses(dataSource, filters);
+    const whereClauses = getWhereClauses(filters);
     const esqlQuery = from(indexes)
       .pipe(
         ...whereClauses,
@@ -116,20 +114,17 @@ export function getLatencyChart({
 export function getThroughputChart({
   indexes,
   filters,
-  dataSource,
-  fieldName,
 }: {
   indexes: string;
   filters: string[];
-  dataSource: DataSource;
-  fieldName: string;
 }): TraceChart | null {
   try {
-    const whereClauses = getWhereClauses(dataSource, filters);
+    const whereClauses = getWhereClauses(filters);
     const esqlQuery = from(indexes)
       .pipe(
         ...whereClauses,
-        stats(`COUNT(${fieldName}) BY BUCKET(${AT_TIMESTAMP}, 100, ?_tstart, ?_tend)`)
+        evaluate(`id = COALESCE(${TRANSACTION_ID}, ${SPAN_ID})`),
+        stats(`COUNT(id) BY BUCKET(${AT_TIMESTAMP}, 100, ?_tstart, ?_tend)`)
       )
       .toString();
 

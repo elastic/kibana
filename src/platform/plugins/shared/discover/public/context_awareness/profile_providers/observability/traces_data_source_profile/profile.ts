@@ -33,9 +33,11 @@ export const createTracesDataSourceProfileProvider = ({
     getDefaultAppState,
     getColumnsConfiguration,
     getCellRenderers,
-    getChartSectionConfiguration: getChartSectionConfiguration('apm'), // TODO remove dynamic datasource
+    getChartSectionConfiguration: getChartSectionConfiguration(),
   },
   resolve: (params) => {
+    // TODO why doesn't it work when coming from APM -> FROM remote_cluster:apm-*, remote_cluster:traces-apm*, remote_cluster:traces-*.otel-*, apm-*, traces-apm*, traces-*.otel-*
+
     if (
       params.rootContext.solutionType === SolutionType.Observability &&
       apmContextService.tracesService.isTracesIndexPattern(extractIndexPatternFrom(params))

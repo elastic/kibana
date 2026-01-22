@@ -19,21 +19,16 @@ import type { UnifiedMetricsGridProps } from '../../types';
 
 export const chartPalette = euiPaletteColorBlind({ rotations: 2 });
 
-export type DataSource = 'apm' | 'otel';
-
 function TraceMetricsGrid({
   fetchParams,
   fetch$: discoverFetch$,
   services,
   onBrushEnd,
   onFilter,
-  dataSource,
   renderToggleActions,
   chartToolbarCss,
   isComponentVisible,
-}: UnifiedMetricsGridProps & {
-  dataSource: DataSource;
-}) {
+}: UnifiedMetricsGridProps) {
   const { query, dataView } = fetchParams;
   const esqlQuery = useEsqlQueryInfo({
     query: query && 'esql' in query ? query.esql : '',
@@ -72,7 +67,6 @@ function TraceMetricsGrid({
     >
       <TraceMetricsProvider
         value={{
-          dataSource,
           indexes: indexPattern,
           filters,
           services,

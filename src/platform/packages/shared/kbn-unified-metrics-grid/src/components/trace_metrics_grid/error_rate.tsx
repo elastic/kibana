@@ -70,10 +70,9 @@ const ErrorRateChartContent = ({
 };
 
 export const ErrorRateChart = () => {
-  const { filters, dataSource, indexes } = useTraceMetricsContext();
+  const { filters, indexes } = useTraceMetricsContext();
 
   const errorRateChart = getErrorRateChart({
-    dataSource,
     indexes,
     filters,
   });
