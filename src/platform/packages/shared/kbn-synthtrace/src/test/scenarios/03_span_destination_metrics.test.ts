@@ -11,7 +11,10 @@ import type { ApmFields } from '@kbn/synthtrace-client';
 import { apm, timerange } from '@kbn/synthtrace-client';
 import { sortBy } from 'lodash';
 import { Readable } from 'stream';
-import { createSpanMetricsAggregator } from '../../lib/apm/aggregators/create_span_metrics_aggregator';
+import {
+  createSpanMetricsAggregator,
+  SPANS_PER_DESTINATION_METRIC,
+} from '../../lib/apm/aggregators/create_span_metrics_aggregator';
 import { awaitStream } from '../../lib/utils/wait_until_stream_finished';
 import type { ToolingLog } from '@kbn/tooling-log';
 
@@ -117,13 +120,21 @@ describe('span destination metrics', () => {
     expect(metricsSetsForSuccessfulExitSpans.length).toBe(15);
 
     metricsSetsForSuccessfulExitSpans.forEach((event) => {
-      expect(event['span.destination.service.response_time.count']).toEqual(25);
-      expect(event['span.destination.service.response_time.sum.us']).toEqual(25000000);
+      expect(event['span.destination.service.response_time.count']).toEqual(
+        25 * SPANS_PER_DESTINATION_METRIC
+      );
+      expect(event['span.destination.service.response_time.sum.us']).toEqual(
+        25000000 * SPANS_PER_DESTINATION_METRIC
+      );
     });
 
     metricsSetsForFailedExitSpans.forEach((event) => {
-      expect(event['span.destination.service.response_time.count']).toEqual(50);
-      expect(event['span.destination.service.response_time.sum.us']).toEqual(50000000);
+      expect(event['span.destination.service.response_time.count']).toEqual(
+        50 * SPANS_PER_DESTINATION_METRIC
+      );
+      expect(event['span.destination.service.response_time.sum.us']).toEqual(
+        50000000 * SPANS_PER_DESTINATION_METRIC
+      );
     });
   });
 });
