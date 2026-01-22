@@ -182,7 +182,11 @@ describe('test getDataStateContainer', () => {
     );
 
     await scopedProfilesManager$.getValue().resolveDataSourceProfile({});
-    stateContainer.actions.setDataView(dataViewMock);
+    stateContainer.internalState.dispatch(
+      stateContainer.injectCurrentTab(internalStateActions.assignNextDataView)({
+        dataView: dataViewMock,
+      })
+    );
     stateContainer.internalState.dispatch(
       stateContainer.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
         resetDefaultProfileState: {
@@ -226,7 +230,11 @@ describe('test getDataStateContainer', () => {
     );
 
     await scopedProfilesManager$.getValue().resolveDataSourceProfile({});
-    stateContainer.actions.setDataView(dataViewMock);
+    stateContainer.internalState.dispatch(
+      stateContainer.injectCurrentTab(internalStateActions.assignNextDataView)({
+        dataView: dataViewMock,
+      })
+    );
     stateContainer.internalState.dispatch(
       stateContainer.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
         resetDefaultProfileState: {
