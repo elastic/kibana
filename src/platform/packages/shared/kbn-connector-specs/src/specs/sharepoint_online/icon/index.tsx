@@ -14,4 +14,5 @@ import type { ConnectorIconProps } from '../../../types';
 import sharepointIcon from './sharepoint.svg';
 
 export default (props: ConnectorIconProps) => {
-  return <EuiIcon type={sharepointIcon} {...props} />;};
+  return <EuiIcon type={sharepointIcon} {...props} />;
+};

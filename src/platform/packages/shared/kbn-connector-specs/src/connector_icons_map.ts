@@ -50,7 +50,12 @@ export const ConnectorIconsMap: Map<
   ],
   [
     '.sharepoint-online',
-    lazy(() => import(/* webpackChunkName: "connectorIconsharepointonline" */ './specs/sharepoint_online/icon')),
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconsharepointonline" */ './specs/sharepoint_online/icon'
+        )
+    ),
   ],
   [
     '.abuseipdb',

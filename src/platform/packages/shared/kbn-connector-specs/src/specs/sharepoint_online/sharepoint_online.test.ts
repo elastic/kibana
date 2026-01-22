@@ -190,9 +190,9 @@ describe('SharepointOnline', () => {
     it('should propagate API errors', async () => {
       mockClient.get.mockRejectedValue(new Error('Access denied'));
 
-      await expect(
-        SharepointOnline.actions.getAllSites.handler(mockContext, {})
-      ).rejects.toThrow('Access denied');
+      await expect(SharepointOnline.actions.getAllSites.handler(mockContext, {})).rejects.toThrow(
+        'Access denied'
+      );
     });
   });
 
@@ -404,8 +404,7 @@ describe('SharepointOnline', () => {
         'https://graph.microsoft.com/v1.0/sites/site-123/lists/',
         {
           params: {
-            $select:
-              'id,displayName,name,webUrl,description,createdDateTime,lastModifiedDateTime',
+            $select: 'id,displayName,name,webUrl,description,createdDateTime,lastModifiedDateTime',
           },
         }
       );
@@ -446,8 +445,7 @@ describe('SharepointOnline', () => {
         'https://graph.microsoft.com/v1.0/sites/contoso.sharepoint.com,abc-123,def-456/lists/',
         {
           params: {
-            $select:
-              'id,displayName,name,webUrl,description,createdDateTime,lastModifiedDateTime',
+            $select: 'id,displayName,name,webUrl,description,createdDateTime,lastModifiedDateTime',
           },
         }
       );

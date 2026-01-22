@@ -125,8 +125,7 @@ export const SharepointOnline: ConnectorSpec = {
         ctx.log.debug(`SharePoint getting site info via ${url}`);
         const response = await ctx.client.get(url, {
           params: {
-            $select:
-              'id,displayName,webUrl,siteCollection,createdDateTime,lastModifiedDateTime',
+            $select: 'id,displayName,webUrl,siteCollection,createdDateTime,lastModifiedDateTime',
           },
         });
         return response.data;
@@ -198,13 +197,14 @@ export const SharepointOnline: ConnectorSpec = {
           listId: string;
         };
 
-        ctx.log.debug(`SharePoint getting all items of list ${typedInput.listId} of site ${typedInput.siteId}`);
+        ctx.log.debug(
+          `SharePoint getting all items of list ${typedInput.listId} of site ${typedInput.siteId}`
+        );
         const response = await ctx.client.get(
           `https://graph.microsoft.com/v1.0/sites/${typedInput.siteId}/lists/${typedInput.listId}/items/`,
           {
             params: {
-              $select:
-                'id,webUrl,createdDateTime,lastModifiedDateTime,createdBy,lastModifiedBy',
+              $select: 'id,webUrl,createdDateTime,lastModifiedDateTime,createdBy,lastModifiedBy',
             },
           }
         );
@@ -292,8 +292,7 @@ export const SharepointOnline: ConnectorSpec = {
 
     callGraphAPI: {
       isTool: true,
-      description:
-        'Call a Microsoft Graph v1.0 endpoint by path only (e.g., /v1.0/me).',
+      description: 'Call a Microsoft Graph v1.0 endpoint by path only (e.g., /v1.0/me).',
       input: z.object({
         method: z.enum(['GET', 'POST']).describe('HTTP method'),
         path: z
