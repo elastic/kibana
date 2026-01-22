@@ -8,7 +8,7 @@ import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types
 
 import { i18n } from '@kbn/i18n';
 import type { CspBenchmarkRulesStates } from '../schema/rules/latest';
-import { GENERIC_ENTITY_INDEX_ENRICH_POLICY } from '../constants';
+import { GENERIC_ENTITY_INDEX_ENRICH_POLICY, ENTITIES_LATEST_INDEX } from '../constants';
 
 interface BuildEntityAlertsQueryParams {
   field: string;
@@ -200,4 +200,11 @@ export const buildEntityAlertsQuery = ({
 // Get the enrich policy ID for a specific space
 export const getEnrichPolicyId = (space: string = 'default'): string => {
   return GENERIC_ENTITY_INDEX_ENRICH_POLICY.replace('<space>', space);
+};
+
+/**
+ * Gets the entities latest index name for a specific space
+ */
+export const getEntitiesLatestIndexName = (spaceId: string = 'default'): string => {
+  return ENTITIES_LATEST_INDEX.replace('<space>', spaceId);
 };
