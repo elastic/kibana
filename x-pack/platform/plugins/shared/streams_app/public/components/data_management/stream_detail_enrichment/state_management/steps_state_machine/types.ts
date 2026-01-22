@@ -16,6 +16,7 @@ import type {
 export type StepToParentEvent =
   | { type: 'step.cancel'; id: string }
   | { type: 'step.change'; id: string }
+  | { type: 'step.parentChanged'; id: string }
   | { type: 'step.delete'; id: string }
   | { type: 'step.edit' }
   | { type: 'step.save'; id: string };
@@ -61,6 +62,10 @@ export type StepEvent =
   | {
       type: 'step.changeDescription';
       description?: string;
+    }
+  | {
+      type: 'step.changeParent';
+      parentId: string | null;
     }
   | { type: 'step.delete' }
   | { type: 'step.edit' }
