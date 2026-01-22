@@ -15,8 +15,8 @@ import type { TimeRange } from '@kbn/es-query';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { AppMenuItemType, AppMenuPopoverItem } from '@kbn/core-chrome-app-menu-components';
 import type { ShowShareMenuOptions } from '@kbn/share-plugin/public';
-import type { IntlShape } from '@kbn/i18n-react';
 import type { ShareActionIntents } from '@kbn/share-plugin/public/types';
+import type { IntlShape } from '@kbn/i18n-react';
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import type { DataTotalHitsMsg } from '../../../state_management/discover_data_state_container';
 import { getSharingData, showPublicUrlSwitch } from '../../../../../utils/get_sharing_data';
@@ -163,70 +163,55 @@ const getExportItems = (
   const exportIntegrations = services.share.availableIntegrations('search', 'export');
   const exportDerivatives = services.share.availableIntegrations('search', 'exportDerivatives');
 
-  const mapIntegrationToMetaData = (integrationId: string) => {
-    switch (integrationId) {
-      case 'csvReports':
-        return {
-          label: i18n.translate('discover.localMenu.export.csvLabel', {
-            defaultMessage: 'CSV',
-          }),
-          testId: 'exportMenuItem-CSV',
-          iconType: 'tableDensityNormal' as const,
-          order: 1,
-        };
-      case 'scheduledReports':
-        return {
-          label: i18n.translate('discover.localMenu.export.scheduleExportLabel', {
-            defaultMessage: 'Schedule export',
-          }),
-          testId: 'exportMenuItem-scheduledReports',
-          iconType: 'calendar' as const,
-          order: 2,
-        };
-      default:
-        return {
-          label: integrationId,
-          testId: `exportMenuItem-${integrationId}`,
-          order: Number.MAX_SAFE_INTEGER,
-        };
-    }
-  };
+  const hasCsvReports = exportIntegrations.some(
+    (item: ShareActionIntents) =>
+      item.shareType === 'integration' && 'id' in item && item.id === 'csvReports'
+  );
+  const hasScheduledReports = exportDerivatives.some(
+    (item: ShareActionIntents) =>
+      item.shareType === 'integration' && 'id' in item && item.id === 'scheduledReports'
+  );
 
-  const exportItems: AppMenuPopoverItem[] = exportIntegrations
-    .filter(
-      (item: ShareActionIntents): item is typeof item & { shareType: 'integration'; id: string } =>
-        item.shareType === 'integration'
-    )
-    .map((item: ShareActionIntents & { shareType: 'integration'; id: string }) => ({
-      ...mapIntegrationToMetaData(item.id),
-      id: item.id,
+  const exportItems: AppMenuPopoverItem[] = [];
+
+  if (hasCsvReports) {
+    exportItems.push({
+      id: 'csvReports',
+      label: i18n.translate('discover.localMenu.export.csvLabel', {
+        defaultMessage: 'CSV',
+      }),
+      testId: 'exportMenuItem-CSV',
+      iconType: 'tableDensityNormal',
+      order: 1,
       run: async () => {
         const shareOptions = await buildShareOptions(buildShareOptionsParams);
-        const handler = await services.share?.getExportHandler(shareOptions, item.id, intl);
+        const handler = await services.share?.getExportHandler(shareOptions, 'csvReports', intl);
         await handler?.();
       },
-    }));
+    });
+  }
 
-  const derivativeItems: AppMenuPopoverItem[] = exportDerivatives
-    .filter(
-      (
-        item: ShareActionIntents
-      ): item is typeof item & { shareType: 'integration'; id: string; groupId: string } =>
-        item.shareType === 'integration' && item.groupId === 'exportDerivatives'
-    )
-    .map(
-      (item: ShareActionIntents & { shareType: 'integration'; id: string; groupId: string }) => ({
-        ...mapIntegrationToMetaData(item.id),
-        id: item.id,
-        run: async () => {
-          const shareOptions = await buildShareOptions(buildShareOptionsParams);
-          const handler = await services.share?.getExportDerivativeHandler(shareOptions, item.id);
-          await handler?.();
-        },
-      })
-    );
+  if (hasScheduledReports) {
+    exportItems.push({
+      id: 'scheduledReports',
+      label: i18n.translate('discover.localMenu.export.scheduleExportLabel', {
+        defaultMessage: 'Schedule export',
+      }),
+      testId: 'exportMenuItem-scheduledReports',
+      iconType: 'calendar',
+      order: 2,
+      run: async () => {
+        const shareOptions = await buildShareOptions(buildShareOptionsParams);
+        const handler = await services.share?.getExportDerivativeHandler(
+          shareOptions,
+          'scheduledReports'
+        );
+        await handler?.();
+      },
+    });
+  }
 
-  return [...exportItems, ...derivativeItems];
+  return exportItems;
 };
 
 export const getShareAppMenuItem = ({
