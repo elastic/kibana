@@ -283,6 +283,7 @@ function convertCustomFilter(
   const meta = filter.meta;
   return {
     ...baseProperties,
+    type: 'dsl',
     dsl: convertToRawDSL(filter),
     ...(meta?.field || meta?.key ? { field: meta.field || meta.key } : {}),
     // Only preserve params for non-combined filters (combined filters use params differently)
@@ -304,6 +305,7 @@ function convertPhraseFilter(
     const condition = convertToSimpleCondition(filter);
     return {
       ...baseProperties,
+      type: 'condition',
       condition,
     } as AsCodeConditionFilter;
   } catch (error) {
@@ -320,6 +322,7 @@ function convertPhrasesFilter(
     const condition = convertToSimpleCondition(filter);
     return {
       ...baseProperties,
+      type: 'condition',
       condition,
     } as AsCodeConditionFilter;
   } catch (error) {
@@ -342,6 +345,7 @@ function convertRangeFilter(
     const condition = convertToSimpleCondition(filter);
     return {
       ...baseProperties,
+      type: 'condition',
       condition,
     } as AsCodeConditionFilter;
   } catch (error) {
@@ -358,6 +362,7 @@ function convertExistsFilter(
     const condition = convertToSimpleCondition(filter);
     return {
       ...baseProperties,
+      type: 'condition',
       condition,
     } as AsCodeConditionFilter;
   } catch (error) {
@@ -374,6 +379,7 @@ function convertCombinedFilter(
     const group = convertToFilterGroup(filter);
     return {
       ...baseProperties,
+      type: 'group',
       group,
     };
   } catch (error) {
@@ -392,6 +398,7 @@ function convertToDSLFilter(
 ): AsCodeDSLFilter {
   return {
     ...baseProperties,
+    type: 'dsl',
     dsl: convertToRawDSL(filter),
     ...(filter.meta?.field ? { field: filter.meta.field } : {}),
     // Only preserve params for non-combined filters (combined filters use params differently)

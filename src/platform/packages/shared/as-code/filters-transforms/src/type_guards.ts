@@ -107,7 +107,7 @@ export function isCombinedFilter(storedFilter: StoredFilter): boolean {
  * Type guard to check if filter has a condition property
  */
 export function isConditionFilter(filter: AsCodeFilter): filter is AsCodeConditionFilter {
-  return 'condition' in filter && filter.condition !== undefined;
+  return filter.type === 'condition';
 }
 
 /**
@@ -126,14 +126,14 @@ export function isRangeConditionFilter(
  * Type guard to check if filter has a group property
  */
 export function isGroupFilter(filter: AsCodeFilter): filter is AsCodeGroupFilter {
-  return 'group' in filter && filter.group !== undefined;
+  return filter.type === 'group';
 }
 
 /**
  * Type guard to check if filter has a dsl property
  */
 export function isDSLFilter(filter: AsCodeFilter): filter is AsCodeDSLFilter {
-  return 'dsl' in filter && filter.dsl !== undefined;
+  return filter.type === 'dsl';
 }
 
 /**

@@ -14,11 +14,13 @@ import { fromStoredFilter } from './from_stored_filter';
 import { FilterStateStore } from '@kbn/es-query-constants';
 import { FILTERS } from '@kbn/es-query';
 import { spatialFilterFixture } from './__fixtures__/spatial_filter';
+import { isConditionFilter, isDSLFilter } from './type_guards';
 
 describe('toStoredFilter', () => {
   describe('main conversion function', () => {
     it('should convert condition filters to stored format', () => {
       const simplified: AsCodeFilter = {
+        type: 'condition',
         condition: {
           field: 'status',
           operator: 'is',
@@ -48,6 +50,7 @@ describe('toStoredFilter', () => {
 
     it('should convert group filters to bool queries', () => {
       const simplified: AsCodeFilter = {
+        type: 'group',
         group: {
           type: 'and',
           conditions: [
@@ -67,6 +70,7 @@ describe('toStoredFilter', () => {
 
     it('should convert DSL filters', () => {
       const simplified: AsCodeFilter = {
+        type: 'dsl',
         dsl: {
           query: { script: { source: 'doc.field.value > 0' } },
         },
@@ -93,6 +97,7 @@ describe('toStoredFilter', () => {
       // Test 1: top-level=false, condition=true
       // Top-level false should override condition true
       const filter1: AsCodeFilter = {
+        type: 'condition',
         negate: false, // Top-level negate (final say)
         condition: {
           field: 'status',
@@ -115,6 +120,7 @@ describe('toStoredFilter', () => {
       // Test 2: top-level=true, condition=false (explicit)
       // Top-level true should win
       const filter2: AsCodeFilter = {
+        type: 'condition',
         negate: true, // Top-level negate (final say)
         condition: {
           field: 'status',
@@ -148,8 +154,8 @@ describe('toStoredFilter', () => {
 
       // Convert to AsCode - should have condition.negate=true
       const asCodeFromNegated = fromStoredFilter(originalNegatedFilter) as AsCodeFilter;
-      expect('condition' in asCodeFromNegated).toBe(true);
-      if ('condition' in asCodeFromNegated) {
+      expect(isConditionFilter(asCodeFromNegated)).toBe(true);
+      if (isConditionFilter(asCodeFromNegated)) {
         expect(asCodeFromNegated.condition.negate).toBe(true);
       }
 
@@ -169,6 +175,7 @@ describe('toStoredFilter', () => {
     it('should handle group filter with nested negate condition and top-level negate', () => {
       // Test: group filter with top-level negate AND a nested condition with condition.negate
       const filterWithGroupDoubleNegate: AsCodeFilter = {
+        type: 'group',
         negate: true, // Top-level negate on the group
         group: {
           type: 'and',
@@ -303,8 +310,8 @@ describe('toStoredFilter', () => {
       const asCodeFilter = fromStoredFilter(scriptedPhraseFilter) as AsCodeFilter;
 
       // Should be converted to DSL format (scripted filters are complex)
-      expect('dsl' in asCodeFilter).toBe(true);
-      if ('dsl' in asCodeFilter) {
+      expect(isDSLFilter(asCodeFilter)).toBe(true);
+      if (isDSLFilter(asCodeFilter)) {
         expect(asCodeFilter.dsl.query).toEqual(scriptedPhraseFilter.query);
       }
       expect(asCodeFilter.label).toBe('Scripted calculation equals 100');
@@ -348,8 +355,8 @@ describe('toStoredFilter', () => {
       const asCodeFilter = fromStoredFilter(scriptedRangeFilter) as AsCodeFilter;
 
       // Should be converted to DSL format
-      expect('dsl' in asCodeFilter).toBe(true);
-      if ('dsl' in asCodeFilter) {
+      expect(isDSLFilter(asCodeFilter)).toBe(true);
+      if (isDSLFilter(asCodeFilter)) {
         expect(asCodeFilter.dsl.query).toEqual(scriptedRangeFilter.query);
       }
       expect(asCodeFilter.label).toBe('Scripted calculation between 0 and 100');
@@ -398,7 +405,7 @@ describe('toStoredFilter', () => {
       // Convert to AsCodeFilter
       const asCodeFilter = fromStoredFilter(scriptedFilter) as AsCodeFilter;
 
-      expect('dsl' in asCodeFilter).toBe(true);
+      expect(isDSLFilter(asCodeFilter)).toBe(true);
       expect(asCodeFilter.filter_type).toBe('phrase');
 
       const roundTrip = toStoredFilter(asCodeFilter) as StoredFilter;
@@ -440,8 +447,8 @@ describe('toStoredFilter', () => {
       const asCodeFilter = fromStoredFilter(dateRangeFilter) as AsCodeFilter;
 
       // Should detect as range condition
-      expect('condition' in asCodeFilter).toBe(true);
-      if ('condition' in asCodeFilter) {
+      expect(isConditionFilter(asCodeFilter)).toBe(true);
+      if (isConditionFilter(asCodeFilter)) {
         expect(asCodeFilter.condition.field).toBe('@timestamp');
         expect(asCodeFilter.condition.operator).toBe('range');
       }
@@ -485,8 +492,8 @@ describe('toStoredFilter', () => {
       // Convert to AsCodeFilter
       const asCodeFilter = fromStoredFilter(dateRangeFilter) as AsCodeFilter;
 
-      expect('condition' in asCodeFilter).toBe(true);
-      if ('condition' in asCodeFilter) {
+      expect(isConditionFilter(asCodeFilter)).toBe(true);
+      if (isConditionFilter(asCodeFilter)) {
         expect(asCodeFilter.condition.field).toBe('event.created');
       }
       expect(asCodeFilter.filter_type).toBe('range');
@@ -559,8 +566,8 @@ describe('toStoredFilter', () => {
       };
 
       const asCodeFilter = fromStoredFilter(timePickerFilter) as AsCodeFilter;
-      expect('condition' in asCodeFilter).toBe(true);
-      if ('condition' in asCodeFilter) {
+      expect(isConditionFilter(asCodeFilter)).toBe(true);
+      if (isConditionFilter(asCodeFilter)) {
         expect(asCodeFilter.condition.operator).toBe('range');
       }
 
@@ -573,6 +580,7 @@ describe('toStoredFilter', () => {
   describe('Negated phrases filter conversion', () => {
     it('should convert condition.negate with one_of to phrases filter with negate', () => {
       const asCodeFilter: AsCodeFilter = {
+        type: 'condition',
         condition: {
           field: 'Carrier',
           operator: 'is_one_of',
@@ -628,8 +636,8 @@ describe('toStoredFilter', () => {
       const asCodeFilter = fromStoredFilter(originalFilter) as AsCodeFilter;
 
       // Verify it converted to IS_NOT_ONE_OF
-      expect('condition' in asCodeFilter).toBe(true);
-      if ('condition' in asCodeFilter) {
+      expect(isConditionFilter(asCodeFilter)).toBe(true);
+      if (isConditionFilter(asCodeFilter)) {
         expect(asCodeFilter.condition.operator).toBe('is_one_of');
         expect(asCodeFilter.condition.negate).toBe(true);
         expect(asCodeFilter.condition.field).toBe('Carrier');
@@ -658,6 +666,7 @@ describe('toStoredFilter', () => {
     it('should convert OR group of negated phrase conditions to combined filter', () => {
       // Group filter like "Carrier is not A OR Carrier is not B OR Carrier is not C"
       const asCodeFilter: AsCodeFilter = {
+        type: 'group',
         group: {
           type: 'or',
           conditions: [
@@ -729,8 +738,8 @@ describe('toStoredFilter', () => {
       }
 
       // Verify it's a condition filter with range operator
-      expect('condition' in asCodeFilter!).toBe(true);
-      if ('condition' in asCodeFilter!) {
+      expect(isConditionFilter(asCodeFilter!)).toBe(true);
+      if (isConditionFilter(asCodeFilter!)) {
         expect(asCodeFilter!.condition.operator).toBe('range');
         expect(asCodeFilter!.condition.field).toBe('bytes');
         if ('value' in asCodeFilter!.condition) {
@@ -840,9 +849,9 @@ describe('toStoredFilter', () => {
       const asCodeFilter = fromStoredFilter(originalFilter) as AsCodeFilter;
 
       // Should be a DSL filter - bool queries without meta.type preserved as DSL
-      expect('dsl' in asCodeFilter).toBe(true);
+      expect(isDSLFilter(asCodeFilter)).toBe(true);
 
-      if ('dsl' in asCodeFilter) {
+      if (isDSLFilter(asCodeFilter)) {
         expect(asCodeFilter.dsl.query).toEqual({
           bool: {
             must: [
@@ -908,8 +917,8 @@ describe('toStoredFilter', () => {
       const asCodeFilter = fromStoredFilter(singleQueryFilter) as AsCodeFilter;
 
       // Should be preserved as DSL since there's no meta.type
-      expect('dsl' in asCodeFilter).toBe(true);
-      if ('dsl' in asCodeFilter) {
+      expect(isDSLFilter(asCodeFilter)).toBe(true);
+      if (isDSLFilter(asCodeFilter)) {
         expect(asCodeFilter.dsl.query).toEqual({
           match_phrase: {
             message: 'error occurred',
@@ -951,7 +960,7 @@ describe('toStoredFilter', () => {
       const asCodeFilter = fromStoredFilter(complexFilter) as AsCodeFilter;
 
       // Should NOT be a simple condition - should be group or DSL
-      expect('condition' in asCodeFilter).toBe(false);
+      expect(isConditionFilter(asCodeFilter)).toBe(false);
 
       // Should be either a group filter or DSL
       const isGroupOrDSL = 'group' in asCodeFilter || 'dsl' in asCodeFilter;
@@ -1002,9 +1011,9 @@ describe('toStoredFilter', () => {
       const asCodeFilter = fromStoredFilter(complexBoolFilter) as AsCodeFilter;
 
       // Should be a DSL filter - preserves complex bool structure
-      expect('dsl' in asCodeFilter).toBe(true);
+      expect(isDSLFilter(asCodeFilter)).toBe(true);
 
-      if ('dsl' in asCodeFilter) {
+      if (isDSLFilter(asCodeFilter)) {
         expect(asCodeFilter.dsl.query).toEqual({
           bool: {
             must: [
@@ -1072,9 +1081,9 @@ describe('toStoredFilter', () => {
       const asCodeFilter = fromStoredFilter(boolMustFilter) as AsCodeFilter;
 
       // Should be preserved as DSL
-      expect('dsl' in asCodeFilter).toBe(true);
+      expect(isDSLFilter(asCodeFilter)).toBe(true);
 
-      if ('dsl' in asCodeFilter && asCodeFilter.dsl) {
+      if (isDSLFilter(asCodeFilter)) {
         expect(asCodeFilter.dsl.query).toEqual({
           bool: {
             must: [

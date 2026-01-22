@@ -199,6 +199,7 @@ interface RecursiveType {
  */
 export const asCodeConditionFilterSchema = commonBasePropertiesSchema.extends(
   {
+    type: schema.literal('condition'),
     condition: conditionSchema,
   },
   { meta: { description: 'Condition filter' } }
@@ -211,6 +212,7 @@ export const asCodeConditionFilterSchema = commonBasePropertiesSchema.extends(
 const GROUP_FILTER_ID = '@kbn/as-code-filters-schema_groupFilter'; // package prefix for global uniqueness in OAS specs
 export const asCodeGroupFilterSchema = commonBasePropertiesSchema.extends(
   {
+    type: schema.literal('group'),
     group: schema.object(
       {
         type: schema.oneOf([
@@ -235,6 +237,7 @@ export const asCodeGroupFilterSchema = commonBasePropertiesSchema.extends(
  * Includes field and params properties specific to DSL filters for preserving metadata
  */
 export const asCodeDSLFilterSchema = commonBasePropertiesSchema.extends({
+  type: schema.literal('dsl'),
   dsl: schema.recordOf(schema.string(), schema.any(), {
     meta: { description: 'Elasticsearch Query DSL object' },
   }),
@@ -260,9 +263,10 @@ export const asCodeDSLFilterSchema = commonBasePropertiesSchema.extends({
 
 /**
  * Main discriminated union schema for Filter
- * Ensures exactly one of: condition, group, or dsl is present
+ * Uses 'type' as discriminator to validate condition, group, or dsl filters
  */
-export const asCodeFilterSchema = schema.oneOf(
+export const asCodeFilterSchema = schema.discriminatedUnion(
+  'type',
   [asCodeConditionFilterSchema, asCodeGroupFilterSchema, asCodeDSLFilterSchema],
   { meta: { description: 'A filter which can be a condition, group, or raw DSL' } }
 );
