@@ -35,7 +35,6 @@ import { apiHasEditorConfig } from '@kbn/control-group-renderer/src/types';
 import { CONTROL_MENU_TRIGGER } from '@kbn/controls-constants';
 import type { DataControlState } from '@kbn/controls-schemas';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { type SerializedTitles } from '@kbn/presentation-publishing';
 import {
   LazyDataViewPicker,
@@ -48,7 +47,6 @@ import {
   addControlMenuTrigger,
   type CreateControlTypeAction,
 } from '../../actions/control_panel_actions';
-import { confirmDeleteControl } from '../../common';
 import { coreServices, dataViewsService, uiActionsService } from '../../services/kibana_services';
 import { DataControlEditorStrings } from './data_control_constants';
 
@@ -416,65 +414,45 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup responsive={false} justifyContent="flexEnd" gutterSize="s">
-              {controlId && (
-                <EuiButton
-                  aria-label={`delete-${editorState.title ?? editorState.fieldName}`}
-                  iconType="trash"
-                  color="danger"
-                  onClick={() => {
-                    confirmDeleteControl().then((confirmed) => {
-                      if (confirmed) {
-                        onCancel(initialState); // don't want to show "lost changes" warning
-                        if (apiIsPresentationContainer(parentApi))
-                          parentApi.removePanel(controlId!);
-                      }
-                    });
-                  }}
-                >
-                  {DataControlEditorStrings.manageControl.getDeleteButtonTitle()}
-                </EuiButton>
-              )}
-              <EuiButton
-                aria-label={`save-${editorState.title ?? editorState.fieldName}`}
-                data-test-subj="control-editor-save"
-                fill
-                color="primary"
-                disabled={!(controlOptionsValid && Boolean(selectedControlType))}
-                onClick={() => {
-                  const transformedState: Partial<State> | undefined =
-                    selectedControlType && editorConfig && editorConfig.controlStateTransform
-                      ? (editorConfig.controlStateTransform(
-                          editorState,
-                          selectedControlType
-                        ) as Partial<State>)
-                      : undefined;
+            <EuiButton
+              aria-label={`save-${editorState.title ?? editorState.fieldName}`}
+              data-test-subj="control-editor-save"
+              fill
+              color="primary"
+              disabled={!(controlOptionsValid && Boolean(selectedControlType))}
+              onClick={() => {
+                const transformedState: Partial<State> | undefined =
+                  selectedControlType && editorConfig && editorConfig.controlStateTransform
+                    ? (editorConfig.controlStateTransform(
+                        editorState,
+                        selectedControlType
+                      ) as Partial<State>)
+                    : undefined;
 
-                  if (selectedControlType && (!controlId || controlType !== selectedControlType)) {
-                    // we need to create a new control from scratch
-                    try {
-                      controlActionRegistry[selectedControlType]?.execute({
-                        trigger: addControlMenuTrigger,
-                        embeddable: parentApi,
-                        state: transformedState ?? editorState,
-                        controlId,
-                        isPinned,
-                      });
-                    } catch (e) {
-                      coreServices.notifications.toasts.addError(e, {
-                        title: DataControlEditorStrings.manageControl.getOnSaveError(),
-                      });
-                    }
-                  } else {
-                    // the control already exists with the expected type, so just update it
-                    onUpdate(transformedState ?? editorState);
+                if (selectedControlType && (!controlId || controlType !== selectedControlType)) {
+                  // we need to create a new control from scratch
+                  try {
+                    controlActionRegistry[selectedControlType]?.execute({
+                      trigger: addControlMenuTrigger,
+                      embeddable: parentApi,
+                      state: transformedState ?? editorState,
+                      controlId,
+                      isPinned,
+                    });
+                  } catch (e) {
+                    coreServices.notifications.toasts.addError(e, {
+                      title: DataControlEditorStrings.manageControl.getOnSaveError(),
+                    });
                   }
-                  onSave(editorState.dataViewId);
-                }}
-              >
-                {DataControlEditorStrings.manageControl.getSaveChangesTitle()}
-              </EuiButton>
-            </EuiFlexGroup>
+                } else {
+                  // the control already exists with the expected type, so just update it
+                  onUpdate(transformedState ?? editorState);
+                }
+                onSave(editorState.dataViewId);
+              }}
+            >
+              {DataControlEditorStrings.manageControl.getSaveChangesTitle()}
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
