@@ -9,6 +9,7 @@
 
 import { Key } from 'selenium-webdriver';
 import { asyncForEach } from '@kbn/std';
+import { copyToClipboard } from '@elastic/eui';
 import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 
@@ -234,7 +235,7 @@ export class ConsolePageObject extends FtrService {
     // Get content via Monaco API and write to clipboard
     const content = await this.monacoEditor.getCodeEditorValueByTestSubj('consoleMonacoEditor');
     await this.browser.execute((text: string) => {
-      navigator.clipboard.writeText(text);
+      copyToClipboard(text);
     }, content);
   }
 
