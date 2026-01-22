@@ -15,12 +15,7 @@ import {
 } from '../../../profiles';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 import type { ProfileProviderServices } from '../../profile_provider_services';
-import {
-  getCellRenderers,
-  getColumnsConfiguration,
-  getDefaultAppState,
-  getChartSectionConfiguration,
-} from './accessors';
+import { getCellRenderers, getDefaultAppState, getChartSectionConfiguration } from './accessors';
 
 const OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID = 'observability-traces-data-source-profile';
 
@@ -31,7 +26,6 @@ export const createTracesDataSourceProfileProvider = ({
   restrictedToProductFeature: TRACES_PRODUCT_FEATURE_ID,
   profile: {
     getDefaultAppState,
-    getColumnsConfiguration,
     getCellRenderers,
     getChartSectionConfiguration: getChartSectionConfiguration(),
   },
