@@ -26,6 +26,45 @@ interface LogsOverviewHighlightsProps
   formattedDoc: LogDocumentOverview;
 }
 
+/**
+ * Helper to flatten nested objects into dot-notation keys
+ */
+function flattenObject(obj: Record<string, unknown>, prefix: string = ''): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    const fullKey = prefix ? `${prefix}.${key}` : key;
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      Object.assign(result, flattenObject(value as Record<string, unknown>, fullKey));
+    } else {
+      result[fullKey] = value;
+    }
+  }
+  return result;
+}
+
+/**
+ * Checks if a field exists either in flattened doc or in _source with attributes.* or resource.attributes.* prefix
+ */
+function hasFieldValue(
+  field: string,
+  flattenedDoc: Record<string, unknown>,
+  flattenedSource: Record<string, unknown>
+): boolean {
+  // Check mapped field first
+  const hasMapped = Boolean(flattenedDoc[field]);
+  
+  // Check _source for unmapped attributes.* or resource.attributes.* fields
+  const attributesField = `attributes.${field}`;
+  const resourceAttributesField = `resource.attributes.${field}`;
+  
+  const hasAttributes = Boolean(flattenedSource[attributesField]);
+  const hasResourceAttributes = Boolean(flattenedSource[resourceAttributesField]);
+  
+  console.log(`[hasFieldValue] "${field}": mapped=${hasMapped}, attributes=${hasAttributes}, resource.attributes=${hasResourceAttributes}`);
+  
+  return hasMapped || hasAttributes || hasResourceAttributes;
+}
+
 export function LogsOverviewHighlights({
   formattedDoc,
   hit,
@@ -35,11 +74,24 @@ export function LogsOverviewHighlights({
   onRemoveColumn,
 }: LogsOverviewHighlightsProps) {
   const flattenedDoc = hit.flattened;
+  const flattenedSource = hit.raw._source ? flattenObject(hit.raw._source) : {};
+  
+  console.log('[LogsOverviewHighlights] DEBUG - flattenedDoc:', flattenedDoc);
+  console.log('[LogsOverviewHighlights] DEBUG - flattenedSource:', flattenedSource);
+  console.log('[LogsOverviewHighlights] DEBUG - formattedDoc:', formattedDoc);
+  console.log('[LogsOverviewHighlights] DEBUG - fieldNames:', fieldNames);
+  
   const shouldRenderSection = (fields: Array<keyof LogDocumentOverview>) => {
-    return fields.some((field) => Boolean(formattedDoc[field] && flattenedDoc[field]));
+    return fields.some((field) => {
+      // Field is available if it has a value either in formattedDoc OR in _source
+      const hasValue = hasFieldValue(field, flattenedDoc, flattenedSource);
+      console.log(`[LogsOverviewHighlights] Field "${field}": hasValue=${hasValue}`);
+      return hasValue;
+    });
   };
 
   if (!shouldRenderSection(fieldNames)) {
+    console.log('[LogsOverviewHighlights] No fields to render, returning null');
     return null;
   }
 
@@ -69,6 +121,8 @@ const fieldNames: Array<keyof LogDocumentOverview> = [
   fieldConstants.TRACE_ID_FIELD,
   fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD,
   fieldConstants.ORCHESTRATOR_RESOURCE_ID_FIELD,
+  fieldConstants.KUBERNETES_NAMESPACE_FIELD,
+  fieldConstants.KUBERNETES_POD_NAME_FIELD,
   // Cloud
   fieldConstants.CLOUD_PROVIDER_FIELD,
   fieldConstants.CLOUD_REGION_FIELD,
@@ -109,6 +163,12 @@ const fieldConfigurations: Record<string, FieldConfiguration> = {
   },
   [fieldConstants.ORCHESTRATOR_RESOURCE_ID_FIELD]: {
     title: fieldLabels.ORCHESTRATOR_RESOURCE_ID_LABEL,
+  },
+  [fieldConstants.KUBERNETES_NAMESPACE_FIELD]: {
+    title: fieldLabels.KUBERNETES_NAMESPACE_LABEL,
+  },
+  [fieldConstants.KUBERNETES_POD_NAME_FIELD]: {
+    title: fieldLabels.KUBERNETES_POD_NAME_LABEL,
   },
   // Cloud
   [fieldConstants.CLOUD_PROVIDER_FIELD]: {

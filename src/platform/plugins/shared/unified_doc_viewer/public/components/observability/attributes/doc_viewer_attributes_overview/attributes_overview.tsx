@@ -76,8 +76,9 @@ export function AttributesOverview({
         shouldShowFieldHandler,
         isEsqlMode,
         areNullValuesHidden,
+        source: hit.raw._source,
       }),
-    [allFields, flattened, searchTerm, shouldShowFieldHandler, isEsqlMode, areNullValuesHidden]
+    [allFields, flattened, searchTerm, shouldShowFieldHandler, isEsqlMode, areNullValuesHidden, hit.raw._source]
   );
 
   const { attributesFields, resourceAttributesFields, scopeAttributesFields } = groupedFields;

@@ -28,6 +28,8 @@ import {
   TRANSACTION_NAME_FIELD,
   OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE,
   getAvailableResourceFields,
+  getAvailableResourceFieldsWithSourceFallback,
+  type ResourceFieldResult,
   RESOURCE_FIELDS,
 } from '@kbn/discover-utils';
 import type { TraceDocument } from '@kbn/discover-utils/src';
@@ -89,6 +91,8 @@ export interface ResourceFieldDescriptor {
   value: string;
   property?: DataViewField;
   rawValue: unknown;
+  /** POC: Whether this field comes from _source and is not filterable */
+  isFromSource?: boolean;
 }
 
 const getResourceBadgeComponent = (
@@ -210,6 +214,96 @@ export const createResourceFieldsWithOtelFallback = ({
       property,
       ResourceBadge: getResourceBadgeComponent(name, core, share),
       Icon: getResourceBadgeIcon(name, resourceDoc),
+    };
+  });
+};
+
+/**
+ * Flattens nested objects similar to how ES flattens _source
+ * Used to access values from _source when they're not in mapped fields
+ */
+function flattenObject(
+  obj: Record<string, unknown>,
+  prefix: string = ''
+): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(obj)) {
+    const fullKey = prefix ? `${prefix}.${key}` : key;
+
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      // Recursively flatten nested objects
+      Object.assign(result, flattenObject(value as Record<string, unknown>, fullKey));
+    } else {
+      result[fullKey] = value;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * POC: Enhanced version that checks _source as a fallback for unmapped resource fields.
+ * When mapped fields (ECS/OTel) are not available, it looks in _source for fields with
+ * 'attributes.*' or 'resource.attributes.*' prefixes. These source-based fields are marked
+ * as not filterable since they're not properly mapped.
+ */
+export const createResourceFieldsWithSourceFallback = ({
+  row,
+  dataView,
+  core,
+  share,
+  fieldFormats,
+}: Omit<ResourceFieldsProps, 'fields' | 'getAvailableFields'>): ResourceFieldDescriptor[] => {
+  const resourceDoc = getUnformattedFields(row, RESOURCE_FIELDS);
+  
+  // POC: Pass _source to check for unmapped fields as fallback
+  const availableFieldsWithMetadata: ResourceFieldResult[] = getAvailableResourceFieldsWithSourceFallback(
+    row.flattened,
+    row.raw._source as Record<string, unknown> | undefined
+  );
+
+  // POC: Flatten _source once for efficient access to source fields
+  const flattenedSource = row.raw._source ? flattenObject(row.raw._source as Record<string, unknown>) : {};
+
+  return availableFieldsWithMetadata.map(({ fieldName, isFromSource }: ResourceFieldResult) => {
+    const property = dataView.getFieldByName(fieldName);
+    
+    // POC: Get raw value from flattened source if it's a source field, otherwise from row.flattened
+    const rawValue = isFromSource ? flattenedSource[fieldName] : row.flattened[fieldName];
+    
+    // POC: For source fields, use 'text' format to avoid HTML in badge/popover
+    // For mapped fields, keep 'html' format for proper highlighting
+    const { formattedValue: value } = formatFieldValue(
+      rawValue,
+      row.raw,
+      fieldFormats,
+      dataView,
+      property,
+      isFromSource ? 'text' : 'html'
+    );
+    
+    // POC: If value is empty/null, provide a fallback display value
+    const displayValue = value || (rawValue === null || rawValue === undefined ? '(empty)' : String(rawValue || ''));
+
+    // For icon lookup, use the base field name without prefixes (e.g., 'service.name' from 'attributes.service.name')
+    const baseFieldName = isFromSource 
+      ? fieldName.replace(/^(attributes\.|resource\.attributes\.)/, '')
+      : fieldName;
+    
+    // Create a lookup object for icon determination using the base field name
+    const iconLookupDoc = isFromSource 
+      ? { ...resourceDoc, [baseFieldName]: rawValue }
+      : resourceDoc;
+
+    return {
+      name: fieldName,
+      rawValue,
+      value: displayValue, // Use displayValue instead of raw value for display
+      property,
+      ResourceBadge: getResourceBadgeComponent(baseFieldName, core, share),
+      Icon: getResourceBadgeIcon(baseFieldName, iconLookupDoc),
+      isFromSource, // POC: Mark whether this field is filterable
     };
   });
 };

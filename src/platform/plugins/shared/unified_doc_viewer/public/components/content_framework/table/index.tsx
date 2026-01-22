@@ -10,7 +10,8 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/src/services/types';
 import type { EuiDataGridCellPopoverElementProps } from '@elastic/eui';
-import { EuiSpacer, EuiText, useEuiTheme, useResizeObserver } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiText, EuiToolTip, useEuiTheme, useResizeObserver } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { getFormattedFields } from '@kbn/discover-utils/src/utils/get_formatted_fields';
 import { getFlattenedFields } from '@kbn/discover-utils/src/utils/get_flattened_fields';
 import { css } from '@emotion/react';
@@ -23,6 +24,50 @@ import { NamePopoverContent } from './components/name_popover_content';
 import { ValuePopoverContent } from './components/value_popover_content';
 
 const DEFAULT_INITIAL_PAGE_SIZE = 25;
+
+/**
+ * Helper to flatten nested objects into dot-notation keys
+ */
+function flattenObject(obj: Record<string, unknown>, prefix: string = ''): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    const fullKey = prefix ? `${prefix}.${key}` : key;
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      Object.assign(result, flattenObject(value as Record<string, unknown>, fullKey));
+    } else {
+      result[fullKey] = value;
+    }
+  }
+  return result;
+}
+
+/**
+ * Gets field value from either flattened hit or _source with attributes.* or resource.attributes.* prefix
+ */
+function getFieldValue(
+  fieldName: string,
+  flattenedHit: Record<string, unknown>,
+  flattenedSource: Record<string, unknown>
+): unknown {
+  // Check mapped field first
+  if (flattenedHit[fieldName] !== undefined) {
+    return flattenedHit[fieldName];
+  }
+  
+  // Check _source for unmapped attributes.* or resource.attributes.* fields
+  const attributesField = `attributes.${fieldName}`;
+  const resourceAttributesField = `resource.attributes.${fieldName}`;
+  
+  if (flattenedSource[attributesField] !== undefined) {
+    return flattenedSource[attributesField];
+  }
+  
+  if (flattenedSource[resourceAttributesField] !== undefined) {
+    return flattenedSource[resourceAttributesField];
+  }
+  
+  return undefined;
+}
 
 export type FieldConfigValue = string | number | undefined;
 
@@ -38,6 +83,7 @@ export interface TableFieldConfiguration {
   description?: string;
   type?: string;
   valueCellContent: (params?: { truncate?: boolean }) => React.ReactNode;
+  isFromSource?: boolean; // indicates field comes from unmapped _source data
 }
 
 export interface ContentFrameworkTableProps
@@ -81,10 +127,11 @@ export function ContentFrameworkTable({
     fieldNames,
   });
 
-  const { formattedHit, flattenedHit } = useMemo(
+  const { formattedHit, flattenedHit, flattenedSource } = useMemo(
     () => ({
       formattedHit: getFormattedFields(hit, fieldNames, { dataView, fieldFormats }),
       flattenedHit: getFlattenedFields(hit, fieldNames),
+      flattenedSource: hit.raw._source ? flattenObject(hit.raw._source) : {},
     }),
     [dataView, fieldFormats, hit, fieldNames]
   );
@@ -99,19 +146,23 @@ export function ContentFrameworkTable({
     () =>
       fieldNames.reduce(
         (acc, fieldName) => {
-          const value = flattenedHit[fieldName];
+          const value = getFieldValue(fieldName, flattenedHit, flattenedSource);
           const fieldConfiguration = fieldConfigurations?.[fieldName];
           const fieldDescription =
             fieldConfiguration?.description || fieldsMetadata[fieldName]?.short;
-          const formattedValue = formattedHit[fieldName];
+          const formattedValue = formattedHit[fieldName] || String(value || '');
 
-          if (!value) return acc;
+          if (value === undefined) return acc;
+
+          // Check if field comes from _source (unmapped)
+          const isFromSource = flattenedHit[fieldName] === undefined && value !== undefined;
 
           acc.fields[fieldName] = {
             name: fieldConfiguration?.title || fieldName,
             value,
             description: fieldDescription,
             type: fieldsMetadata[fieldName]?.type,
+            isFromSource,
             valueCellContent: ({ truncate }: { truncate?: boolean } = { truncate: true }) => {
               return fieldConfiguration?.formatter ? (
                 <>{fieldConfiguration.formatter(value, formattedValue)}</>
@@ -145,6 +196,7 @@ export function ContentFrameworkTable({
       fieldNames,
       fieldsMetadata,
       flattenedHit,
+      flattenedSource,
       formattedHit,
       hit,
     ]
@@ -164,13 +216,32 @@ export function ContentFrameworkTable({
         return (
           <>
             <EuiSpacer size="s" />
-            <EuiText
-              size="xs"
-              css={{ fontWeight: euiTheme.font.weight.bold }}
-              data-test-subj={rowDataTestSubj}
-            >
-              {fieldConfig.name}
-            </EuiText>
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiText
+                  size="xs"
+                  css={{ fontWeight: euiTheme.font.weight.bold }}
+                  data-test-subj={rowDataTestSubj}
+                >
+                  {fieldConfig.name}
+                </EuiText>
+              </EuiFlexItem>
+              {fieldConfig.isFromSource && (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    content={i18n.translate(
+                      'unifiedDocViewer.docView.table.unmappedFieldTooltip',
+                      {
+                        defaultMessage:
+                          'This field is not indexed and comes from the _source metadata',
+                      }
+                    )}
+                  >
+                    <EuiIcon type="indexEdit" size="m" />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           </>
         );
       }

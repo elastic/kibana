@@ -31,6 +31,55 @@ interface AttributesTableProps
   isEsqlMode: boolean;
 }
 
+/**
+ * Helper to flatten nested objects into dot-notation keys
+ */
+function flattenObject(obj: Record<string, unknown>, prefix: string = ''): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    const fullKey = prefix ? `${prefix}.${key}` : key;
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      Object.assign(result, flattenObject(value as Record<string, unknown>, fullKey));
+    } else {
+      result[fullKey] = value;
+    }
+  }
+  return result;
+}
+
+/**
+ * Gets field value from either flattened hit or _source with attributes.* or resource.attributes.* prefix
+ */
+function getFieldValue(
+  fieldName: string,
+  flattenedHit: Record<string, unknown>,
+  flattenedSource: Record<string, unknown>
+): unknown {
+  // Check mapped field first
+  if (flattenedHit[fieldName] !== undefined) {
+    return flattenedHit[fieldName];
+  }
+  
+  // Check _source for unmapped attributes.* or resource.attributes.* fields
+  const attributesField = `attributes.${fieldName}`;
+  const resourceAttributesField = `resource.attributes.${fieldName}`;
+  const scopeAttributesField = `scope.attributes.${fieldName}`;
+  
+  if (flattenedSource[attributesField] !== undefined) {
+    return flattenedSource[attributesField];
+  }
+  
+  if (flattenedSource[resourceAttributesField] !== undefined) {
+    return flattenedSource[resourceAttributesField];
+  }
+  
+  if (flattenedSource[scopeAttributesField] !== undefined) {
+    return flattenedSource[scopeAttributesField];
+  }
+  
+  return undefined;
+}
+
 export const AttributesTable = ({
   hit,
   dataView,
@@ -45,6 +94,7 @@ export const AttributesTable = ({
 }: AttributesTableProps) => {
   const flattened = hit.flattened;
   const { fieldFormats, toasts } = getUnifiedDocViewerServices();
+  const flattenedSource = hit.raw._source ? flattenObject(hit.raw._source) : {};
 
   const onToggleColumn = useMemo(() => {
     if (!onRemoveColumn || !onAddColumn || !columns) {
@@ -66,7 +116,7 @@ export const AttributesTable = ({
           new FieldRow({
             name: field.name,
             displayNameOverride: field.displayName,
-            flattenedValue: flattened[field.name],
+            flattenedValue: getFieldValue(field.name, flattened, flattenedSource),
             hit,
             dataView,
             fieldFormats,
@@ -74,7 +124,7 @@ export const AttributesTable = ({
             columnsMeta,
           })
       ),
-    [fields, flattened, hit, dataView, fieldFormats, columnsMeta]
+    [fields, flattened, flattenedSource, hit, dataView, fieldFormats, columnsMeta]
   );
 
   const fieldCellActions = useMemo(

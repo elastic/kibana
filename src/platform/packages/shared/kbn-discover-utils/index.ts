@@ -44,6 +44,7 @@ export {
   getIgnoredReason,
   getMessageFieldWithFallbacks,
   getAvailableResourceFields,
+  getAvailableResourceFieldsWithSourceFallback,
   getLogLevelFieldWithFallback,
   getLogEventTypeFieldWithFallback,
   getLogExceptionTypeFieldWithFallback,
@@ -74,6 +75,8 @@ export {
 } from './src';
 
 export type { LogsContextService, ApmContextService, SortOrder, SortInput, SortPair } from './src';
+
+export type { ResourceFieldResult } from './src/data_types/logs/utils';
 
 export * from './src/types';
 

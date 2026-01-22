@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getAvailableResourceFields } from './get_available_resource_fields';
+import {
+  getAvailableResourceFields,
+  getAvailableResourceFieldsWithSourceFallback,
+} from './get_available_resource_fields';
 
 describe('getAvailableResourceFields', () => {
   it('should return available fields', () => {
@@ -134,3 +137,132 @@ describe('getAvailableResourceFields', () => {
     expect(fields).toEqual(['service.name']);
   });
 });
+
+describe('getAvailableResourceFieldsWithSourceFallback - POC', () => {
+  it('should return mapped fields with isFromSource=false when available', () => {
+    const flattened = {
+      'service.name': 'my-service',
+      'host.name': 'my-host',
+    };
+
+    const results = getAvailableResourceFieldsWithSourceFallback(flattened);
+    
+    expect(results).toEqual([
+      { fieldName: 'service.name', isFromSource: false },
+      { fieldName: 'host.name', isFromSource: false },
+    ]);
+  });
+
+  it('should check _source for attributes.* fields when mapped fields not available', () => {
+    const flattened = {
+      'service.name': 'my-service',
+    };
+    
+    const source = {
+      'service.name': 'my-service',
+      attributes: {
+        'kubernetes.pod.name': 'pod-113',
+        'kubernetes.namespace': 'default',
+      },
+    };
+
+    const results = getAvailableResourceFieldsWithSourceFallback(flattened, source);
+    
+    expect(results).toHaveLength(3);
+    expect(results[0]).toEqual({ fieldName: 'service.name', isFromSource: false });
+    // The order of the next two depends on the AVAILABLE_RESOURCE_FIELDS order
+    expect(results.slice(1)).toEqual(
+      expect.arrayContaining([
+        { fieldName: 'attributes.kubernetes.pod.name', isFromSource: true },
+        { fieldName: 'attributes.kubernetes.namespace', isFromSource: true },
+      ])
+    );
+  });
+
+  it('should check _source for resource.attributes.* fields', () => {
+    const flattened = {};
+    
+    const source = {
+      resource: {
+        attributes: {
+          'host.name': 'host-0',
+        },
+      },
+    };
+
+    const results = getAvailableResourceFieldsWithSourceFallback(flattened, source);
+    
+    expect(results).toEqual([
+      { fieldName: 'resource.attributes.host.name', isFromSource: true },
+    ]);
+  });
+
+  it('should prefer mapped fields over _source fields', () => {
+    const flattened = {
+      'service.name': 'mapped-service',
+    };
+    
+    const source = {
+      attributes: {
+        'service.name': 'source-service',
+      },
+    };
+
+    const results = getAvailableResourceFieldsWithSourceFallback(flattened, source);
+    
+    // Should use the mapped field, not the source field
+    expect(results).toEqual([
+      { fieldName: 'service.name', isFromSource: false },
+    ]);
+  });
+
+  it('should handle mixed mapped and source fields', () => {
+    const flattened = {
+      'service.name': 'my-service',
+      'host.name': 'my-host',
+    };
+    
+    const source = {
+      'service.name': 'my-service',
+      attributes: {
+        'kubernetes.pod.name': 'pod-113',
+        'user.name': 'user396', // Not a resource field, should be ignored
+      },
+    };
+
+    const results = getAvailableResourceFieldsWithSourceFallback(flattened, source);
+    
+    expect(results).toEqual([
+      { fieldName: 'service.name', isFromSource: false },
+      { fieldName: 'host.name', isFromSource: false },
+      { fieldName: 'attributes.kubernetes.pod.name', isFromSource: true },
+    ]);
+  });
+
+  it('should return empty array when no fields available in either flattened or source', () => {
+    const flattened = {
+      message: 'log message',
+    };
+    
+    const source = {
+      message: 'log message',
+    };
+
+    const results = getAvailableResourceFieldsWithSourceFallback(flattened, source);
+    
+    expect(results).toEqual([]);
+  });
+
+  it('should handle missing _source gracefully', () => {
+    const flattened = {
+      'service.name': 'my-service',
+    };
+
+    const results = getAvailableResourceFieldsWithSourceFallback(flattened, undefined);
+    
+    expect(results).toEqual([
+      { fieldName: 'service.name', isFromSource: false },
+    ]);
+  });
+});
+

@@ -108,11 +108,18 @@ export function CellActionsPopover({
             `}
           >
             <strong>{name}</strong>{' '}
-            {typeof renderValue === 'function'
-              ? renderValue(value)
-              : rawValue != null && typeof rawValue !== 'object'
-              ? (rawValue as React.ReactNode)
-              : value}
+            {typeof renderValue === 'function' ? (
+              renderValue(value)
+            ) : rawValue != null && typeof rawValue !== 'object' ? (
+              (rawValue as React.ReactNode)
+            ) : (
+              // POC: For null/undefined values, display as plain text instead of showing HTML markup
+              <span
+                dangerouslySetInnerHTML={{
+                  __html: value,
+                }}
+              />
+            )}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -178,6 +185,7 @@ export interface FieldBadgeWithActionsProps
     'onFilter' | 'name' | 'property' | 'value' | 'rawValue' | 'renderValue'
   > {
   icon?: EuiBadgeProps['iconType'];
+  iconType?: EuiBadgeProps['iconType']; // POC: Alternative way to pass icon
   color?: string;
   truncateTitle?: boolean;
 }
@@ -192,6 +200,7 @@ export type FieldBadgeWithActionsPropsAndDependencies = FieldBadgeWithActionsPro
 
 export function FieldBadgeWithActions({
   icon,
+  iconType, // POC: Alternative way to pass icon
   onFilter,
   name,
   property,
@@ -206,6 +215,9 @@ export function FieldBadgeWithActions({
   const displayValue = truncateTitle ? truncateAndPreserveHighlightTags(value, MAX_LENGTH) : value;
   const titleText = extractTextAndMarkTags(value).cleanText;
 
+  // POC: Use iconType if provided, otherwise fall back to icon
+  const effectiveIcon = iconType ?? icon;
+
   return (
     <CellActionsPopover
       onFilter={onFilter}
@@ -218,7 +230,7 @@ export function FieldBadgeWithActions({
         <EuiBadge
           {...popoverTriggerProps}
           color={color}
-          iconType={icon}
+          iconType={effectiveIcon}
           iconSide="left"
           title={titleText}
         >

@@ -96,6 +96,16 @@ export const ORCHESTRATOR_RESOURCE_ID_LABEL = i18n.translate(
   { defaultMessage: 'Orchestrator resource ID' }
 );
 
+export const KUBERNETES_NAMESPACE_LABEL = i18n.translate(
+  'unifiedDocViewer.observability.kubernetesNamespace.label',
+  { defaultMessage: 'Kubernetes namespace' }
+);
+
+export const KUBERNETES_POD_NAME_LABEL = i18n.translate(
+  'unifiedDocViewer.observability.kubernetesPodName.label',
+  { defaultMessage: 'Kubernetes pod name' }
+);
+
 export const CLOUD_PROVIDER_LABEL = i18n.translate(
   'unifiedDocViewer.observability.cloudProvider.label',
   { defaultMessage: 'Cloud provider' }

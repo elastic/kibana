@@ -29,7 +29,7 @@ export const Resource = ({ fields, limited = false, onFilter, ...props }: Resour
 
   return (
     <EuiFlexGroup gutterSize="s" {...props}>
-      {displayedFields.map(({ name, rawValue, value, ResourceBadge, Icon, property }) => (
+      {displayedFields.map(({ name, rawValue, value, ResourceBadge, Icon, property, isFromSource }) => (
         <ResourceBadge
           key={name}
           name={name}
@@ -37,8 +37,9 @@ export const Resource = ({ fields, limited = false, onFilter, ...props }: Resour
           rawValue={rawValue}
           value={value}
           icon={Icon}
-          onFilter={onFilter}
+          onFilter={isFromSource ? undefined : onFilter} // POC: Disable filtering for source fields
           truncateTitle={true}
+          iconType={isFromSource ? 'eyeClosed' : undefined} // POC: Show visual indicator for non-filterable fields
         />
       ))}
       {extraFieldsCount > 0 && (

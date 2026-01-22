@@ -24,7 +24,7 @@ import { Resource } from './resource';
 import { Content } from './content';
 import {
   createResourceFields,
-  createResourceFieldsWithOtelFallback,
+  createResourceFieldsWithSourceFallback,
   formatJsonDocumentForContent,
   isTraceDocument,
 } from './utils';
@@ -78,6 +78,7 @@ const SummaryCell = ({
   const isSingleLine = rowHeight === SINGLE_ROW_COUNT;
 
   // For logs, also resolve otel field names directly, even if no alias exists
+  // POC: Using source fallback to check for unmapped attributes.* and resource.attributes.* fields
   const resourceFields =
     isTracesSummary && isTraceDocument(row)
       ? createResourceFields({
@@ -89,7 +90,7 @@ const SummaryCell = ({
           share,
           fieldFormats,
         })
-      : createResourceFieldsWithOtelFallback({
+      : createResourceFieldsWithSourceFallback({
           row,
           dataView,
           core,
@@ -142,6 +143,7 @@ export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
   const isTraceDoc = isTracesSummary && isTraceDocument(row);
 
   // For logs, also resolve otel field names directly, even if no alias exists
+  // POC: Using source fallback to check for unmapped attributes.* and resource.attributes.* fields
   const resourceFields = isTraceDoc
     ? createResourceFields({
         row,
@@ -152,7 +154,7 @@ export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
         share,
         fieldFormats,
       })
-    : createResourceFieldsWithOtelFallback({
+    : createResourceFieldsWithSourceFallback({
         row,
         dataView,
         core,
