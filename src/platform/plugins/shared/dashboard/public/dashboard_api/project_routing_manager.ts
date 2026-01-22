@@ -29,10 +29,10 @@ export function initializeProjectRoutingManager(
 
   const projectRouting$ = new BehaviorSubject<ProjectRouting>(initialState.project_routing);
 
-  // pass the initial state to CPS manager from dashboard state or just reset to default on dashboard init
-  cpsManager.setProjectRouting(
-    initialState.project_routing ?? cpsManager.getDefaultProjectRouting()
-  );
+  // pass the initial state to CPS manager from dashboard state if set
+  if (initialState.project_routing) {
+    cpsManager.setProjectRouting(initialState.project_routing);
+  }
 
   function setProjectRouting(projectRouting: ProjectRouting) {
     if (projectRouting !== projectRouting$.value) {
