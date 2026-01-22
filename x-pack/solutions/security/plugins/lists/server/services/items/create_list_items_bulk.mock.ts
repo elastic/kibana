@@ -23,12 +23,10 @@ import type { CreateListItemsBulkOptions } from '.';
 
 export const getCreateListItemBulkOptionsMock = (): CreateListItemsBulkOptions => ({
   dateNow: DATE_NOW,
-  deserializer: undefined,
   esClient: elasticsearchClientMock.createScopedClusterClient().asCurrentUser,
   listId: LIST_ID,
   listItemIndex: LIST_ITEM_INDEX,
   meta: META,
-  serializer: undefined,
   tieBreaker: TIE_BREAKERS,
   type: TYPE,
   user: USER,

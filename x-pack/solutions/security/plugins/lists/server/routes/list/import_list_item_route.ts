@@ -59,7 +59,7 @@ export const importListItemRoute = (router: ListsPluginRouter, config: ConfigTyp
       async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);
         try {
-          const { deserializer, list_id: listId, serializer, type, refresh } = request.query;
+          const { list_id: listId, type, refresh } = request.query;
           const lists = await getListClient(context);
 
           const filename = await lists.getImportFilename({
@@ -117,11 +117,9 @@ export const importListItemRoute = (router: ListsPluginRouter, config: ConfigTyp
               });
             }
             await lists.importListItemsToStream({
-              deserializer: list.deserializer,
               listId,
               meta: undefined,
               refresh,
-              serializer: list.serializer,
               stream,
               type: list.type,
               version: 1,
@@ -130,11 +128,9 @@ export const importListItemRoute = (router: ListsPluginRouter, config: ConfigTyp
             return response.ok({ body: ImportListItemsResponse.parse(list) });
           } else if (type != null) {
             const importedList = await lists.importListItemsToStream({
-              deserializer,
               listId: undefined,
               meta: undefined,
               refresh,
-              serializer,
               stream,
               type,
               version: 1,
