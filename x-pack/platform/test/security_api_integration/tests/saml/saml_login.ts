@@ -177,7 +177,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('finishing handshake', () => {
       let handshakeCookie: Cookie;
-      let samlRequestId: string;
+      let samlRequestId: string | undefined;
 
       beforeEach(async () => {
         const handshakeResponse = await supertest
