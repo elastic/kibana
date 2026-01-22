@@ -92,7 +92,6 @@ interface FileCache {
       };
     };
     outputFiles?: string[]; // Array of file names for mapping, no content needed
-    finalFiles?: Array<{ name: string; content: string }>; // After LLM rewriting and enrichment
   };
 }
 
@@ -661,32 +660,19 @@ yargs(process.argv.slice(2))
               // Check if file is cached and unchanged
               const cached = cache[cacheKey];
               if (cached && cached.hash === contentHash) {
-                // If finalFiles exist, we'll use them directly in the LLM phase, so skip extraction
-                if (cached.finalFiles && cached.finalFiles.length > 0) {
-                  log.info(
-                    `Skipping extraction for ${mdFile} (hash: ${contentHash.substring(
-                      0,
-                      8
-                    )}...) - will use cached final files`
-                  );
-                  // Populate mapping from finalFiles
-                  for (const finalFile of cached.finalFiles) {
-                    outputToSourceMap.set(finalFile.name, cacheKey);
-                  }
-                  continue;
-                } else if (cached.outputFiles) {
-                  // File is cached but no finalFiles yet - we'll need to extract and process
-                  // Just populate mapping, we'll extract below
-                  log.info(
-                    `File ${mdFile} cached (hash: ${contentHash.substring(
-                      0,
-                      8
-                    )}...), will re-extract for LLM processing`
-                  );
+                // File hash matches, populate mapping from cached outputFiles
+                if (cached.outputFiles) {
                   for (const outputFileName of cached.outputFiles) {
                     outputToSourceMap.set(outputFileName, cacheKey);
                   }
-                  // Continue to extraction below (don't skip)
+                  // Skip extraction - will check if final files exist on disk in LLM phase
+                  log.debug(
+                    `Skipping extraction for ${mdFile} (hash: ${contentHash.substring(
+                      0,
+                      8
+                    )}...) - will check disk for final files`
+                  );
+                  continue;
                 } else {
                   continue;
                 }
@@ -753,35 +739,17 @@ yargs(process.argv.slice(2))
                   // Check if file is cached and unchanged
                   const cached = cache[cacheKey];
                   if (cached && cached.hash === contentHash) {
-                    // If finalFiles exist, we'll use them directly in the LLM phase, so skip extraction
-                    if (cached.finalFiles && cached.finalFiles.length > 0) {
-                      log.info(
-                        `Skipping extraction for ${mdFile} (hash: ${contentHash.substring(
-                          0,
-                          8
-                        )}...) - will use cached final files`
-                      );
-                      // Populate mapping from finalFiles
-                      for (const finalFile of cached.finalFiles) {
-                        outputToSourceMap.set(finalFile.name, cacheKey);
-                      }
-                      continue;
-                    } else if (cached.outputFiles) {
-                      // File is cached but no finalFiles yet - we'll need to extract and process
-                      // Just populate mapping, we'll extract below
-                      log.info(
-                        `File ${mdFile} cached (hash: ${contentHash.substring(
-                          0,
-                          8
-                        )}...), will re-extract for LLM processing`
-                      );
+                    // Source file hasn't changed, skip processing
+                    log.debug(
+                      `Skipping ${mdFile} (hash: ${contentHash.substring(0, 8)}... unchanged)`
+                    );
+                    // Populate mapping from cached outputFiles if they exist
+                    if (cached.outputFiles) {
                       for (const outputFileName of cached.outputFiles) {
                         outputToSourceMap.set(outputFileName, cacheKey);
                       }
-                      // Continue to extraction below (don't skip)
-                    } else {
-                      continue;
                     }
+                    continue;
                   }
 
                   // Extract raw sections and check which ones have changed
@@ -824,17 +792,10 @@ yargs(process.argv.slice(2))
                           `Extracted function ${section.name} from ${mdFile} -> ${outputFileName} (changed)`
                         );
                       } else {
-                        // Section unchanged, skip processing but add to outputFileNames for tracking
+                        // Section unchanged, skip processing
                         log.debug(
                           `Skipping unchanged section ${section.name} from ${mdFile} -> ${outputFileName}`
                         );
-                        // Try to get from cache if available
-                        const cachedFinal = cache[cacheKey].finalFiles?.find(
-                          (f) => f.name === outputFileName
-                        );
-                        if (cachedFinal) {
-                          docFiles.push(cachedFinal);
-                        }
                       }
 
                       outputFileNames.push(outputFileName);
@@ -869,124 +830,56 @@ yargs(process.argv.slice(2))
             // Use LLM to rewrite documentation if connectorId is provided
             let finalDocFiles = docFiles;
             if (inferenceClient) {
-              // Check if all files have cached final versions
-              const allCached = docFiles.every((file) => {
+              // Process all files that made it through (unchanged files were already skipped)
+              const filesToProcess: Array<{
+                name: string;
+                content: string;
+                sourcePath?: string;
+              }> = docFiles.map((file) => {
                 const sourcePath = outputToSourceMap.get(file.name);
-                if (!sourcePath) return false;
-                const cached = cache[sourcePath];
-                return cached?.finalFiles?.some((f) => f.name === file.name);
+                return { ...file, sourcePath };
               });
 
-              if (allCached && docFiles.length > 0) {
-                log.info(`Using cached final files for all ${docFiles.length} documents`);
-                // Reconstruct finalDocFiles from cache
-                finalDocFiles = docFiles.map((file) => {
-                  const sourcePath = outputToSourceMap.get(file.name);
-                  if (sourcePath) {
-                    const cached = cache[sourcePath];
-                    const cachedFinal = cached?.finalFiles?.find((f) => f.name === file.name);
-                    if (cachedFinal) {
-                      return cachedFinal;
-                    }
-                  }
-                  return file;
+              if (filesToProcess.length > 0) {
+                log.info(`Rewriting ${filesToProcess.length} documents using LLM...`);
+                const rewrittenFiles = await generateDoc({
+                  docFiles: filesToProcess,
+                  inferenceClient,
+                  log,
                 });
-              } else {
-                // Process files that need rewriting/enrichment
-                const filesToProcess: Array<{
-                  name: string;
-                  content: string;
-                  sourcePath?: string;
-                }> = [];
-                const filesFromCache: Array<{ name: string; content: string }> = [];
+                log.info(`Successfully rewritten ${rewrittenFiles.length} documents`);
 
-                for (const file of docFiles) {
-                  const sourcePath = outputToSourceMap.get(file.name);
-                  if (sourcePath) {
-                    const cached = cache[sourcePath];
-                    const cachedFinal = cached?.finalFiles?.find((f) => f.name === file.name);
-                    if (cachedFinal) {
-                      filesFromCache.push(cachedFinal);
-                      continue;
-                    }
-                    filesToProcess.push({ ...file, sourcePath });
-                  } else {
-                    filesToProcess.push(file);
-                  }
-                }
-
-                if (filesToProcess.length > 0) {
-                  log.info(`Rewriting ${filesToProcess.length} documents using LLM...`);
-                  const rewrittenFiles = await generateDoc({
-                    docFiles: filesToProcess,
-                    inferenceClient,
-                    log,
-                  });
-                  log.info(`Successfully rewritten ${rewrittenFiles.length} documents`);
-
-                  // Enrich documentation with natural language descriptions for ES|QL queries
-                  log.info(
-                    `Enriching ${rewrittenFiles.length} documents with ES|QL query descriptions...`
-                  );
-                  const limiter = pLimit(10);
-                  const enrichedFiles = await Promise.all(
-                    rewrittenFiles.map(async (file) => {
-                      return limiter(async () => {
-                        try {
-                          const enrichedContent = await enrichDocumentation({
-                            content: file.content,
-                            inferenceClient,
-                          });
-                          log.info(`Enriched ${file.name} with ES|QL query descriptions`);
-                          return {
-                            name: file.name,
-                            content: enrichedContent,
-                          };
-                        } catch (error) {
-                          log.warning(
-                            `Failed to enrich ${file.name}: ${
-                              error instanceof Error ? error.message : String(error)
-                            }`
-                          );
-                          // Fall back to original content if enrichment fails
-                          return file;
-                        }
-                      });
-                    })
-                  );
-                  log.info(`Successfully enriched ${enrichedFiles.length} documents`);
-
-                  // Update cache with final files
-                  for (const file of enrichedFiles) {
-                    const sourcePath = outputToSourceMap.get(file.name);
-                    if (sourcePath) {
-                      const cached = cache[sourcePath];
-                      if (cached) {
-                        if (!cached.finalFiles) {
-                          cached.finalFiles = [];
-                        }
-                        const existingIndex = cached.finalFiles.findIndex(
-                          (f) => f.name === file.name
+                // Enrich documentation with natural language descriptions for ES|QL queries
+                log.info(
+                  `Enriching ${rewrittenFiles.length} documents with ES|QL query descriptions...`
+                );
+                const limiter = pLimit(10);
+                finalDocFiles = await Promise.all(
+                  rewrittenFiles.map(async (file) => {
+                    return limiter(async () => {
+                      try {
+                        const enrichedContent = await enrichDocumentation({
+                          content: file.content,
+                          inferenceClient,
+                        });
+                        log.info(`Enriched ${file.name} with ES|QL query descriptions`);
+                        return {
+                          name: file.name,
+                          content: enrichedContent,
+                        };
+                      } catch (error) {
+                        log.warning(
+                          `Failed to enrich ${file.name}: ${
+                            error instanceof Error ? error.message : String(error)
+                          }`
                         );
-                        if (existingIndex >= 0) {
-                          cached.finalFiles[existingIndex] = file;
-                        } else {
-                          cached.finalFiles.push(file);
-                        }
-                        // Once finalFiles exist, we don't need outputFiles anymore (they're redundant)
-                        // This saves cache space
-                        if (cached.finalFiles.length > 0) {
-                          delete cached.outputFiles;
-                        }
-                        cacheUpdated = true;
+                        // Fall back to original content if enrichment fails
+                        return file;
                       }
-                    }
-                  }
-
-                  finalDocFiles = [...filesFromCache, ...enrichedFiles];
-                } else {
-                  finalDocFiles = filesFromCache;
-                }
+                    });
+                  })
+                );
+                log.info(`Successfully enriched ${finalDocFiles.length} documents`);
               }
             }
 
