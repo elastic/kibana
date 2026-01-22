@@ -37,7 +37,7 @@ test.describe('Annotations List', { tag: ['@ess'] }, () => {
     ).toBeVisible();
   });
 
-  test('Go to slos and check that annotation is displayed', async ({ page, pageObjects }) => {
+  test('Go to SLOs and check that annotation is displayed', async ({ page, pageObjects }) => {
     await pageObjects.slo.openFromSideMenu();
     await page.click('text="Test Stack SLO"');
     await page.testSubj
