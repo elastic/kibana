@@ -57,7 +57,11 @@ export const getTopNavBadges = ({
     });
   }
 
-  if (hasUnsavedChanges && !defaultBadges?.unsavedChangesBadge?.disabled) {
+  if (
+    !services.embeddableEditor.isEmbeddedEditor() &&
+    hasUnsavedChanges &&
+    !defaultBadges?.unsavedChangesBadge?.disabled
+  ) {
     entries.push(
       getTopNavUnsavedChangesBadge({
         onRevert: async () => {
