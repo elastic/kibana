@@ -153,8 +153,8 @@ export function getConnectionStats({
         errorRate: {
           value:
             mergedStats.value.error_count + mergedStats.value.success_count > 0
-              ? (mergedStats.value.error_count ?? 0) / mergedStats.value.error_count +
-                mergedStats.value.success_count
+              ? (mergedStats.value.error_count ?? 0) /
+                (mergedStats.value.error_count + mergedStats.value.success_count)
               : null,
           timeseries: mergedStats.timeseries?.map((point) => ({
             x: point.x,
