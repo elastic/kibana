@@ -21,7 +21,7 @@ let capturedCallbacks: any = null;
 jest.mock('@kbn/embeddable-plugin/public', () => ({
   EmbeddableRenderer: ({ type, getParentApi, hidePanelChrome }: any) => {
     const api = getParentApi();
-    capturedCallbacks = api.getSerializedStateForChild().rawState;
+    capturedCallbacks = api.getSerializedStateForChild();
 
     return (
       <div
@@ -127,6 +127,21 @@ describe('FullScreenWaterfall', () => {
 
       expect(screen.getByTestId('logsFlyout')).toHaveAttribute('data-id', 'test-error-log-id');
       expect(screen.queryByTestId('spanFlyout')).not.toBeInTheDocument();
+    });
+
+    it('should not open any flyout when clicking a single error without errorDocId', () => {
+      render(<FullScreenWaterfall {...defaultProps} />);
+
+      act(() => {
+        capturedCallbacks.onErrorClick({
+          traceId: 'test-trace-id',
+          docId: 'test-doc-id',
+          errorCount: 1,
+        });
+      });
+
+      expect(screen.queryByTestId('spanFlyout')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('logsFlyout')).not.toBeInTheDocument();
     });
   });
 

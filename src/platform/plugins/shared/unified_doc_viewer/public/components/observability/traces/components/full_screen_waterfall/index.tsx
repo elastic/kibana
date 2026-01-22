@@ -74,8 +74,9 @@ export const FullScreenWaterfall = ({
    * - EUI components don't expose refs, requiring a wrapper div with closest()
    * - scrollElement must be available before the embeddable initializes (conditional render below)
    *
-   * TODO (Future improvement): If EUIFlyoutBody exposes refs or provides a scrollRef prop, this workaround
-   * can be replaced with a direct ref.
+   *
+   * TODO: Once the EUI team implements a scrollRef prop (or exposes refs on EUIFlyoutBody),
+   * we can replace this workaround with a direct ref usage.
    */
   const embeddableContainerRef = useCallback((node: HTMLDivElement | null) => {
     const scrollContainer = node?.closest(`.${EUI_FLYOUT_BODY_OVERFLOW_CLASS}`) ?? null;

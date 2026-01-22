@@ -108,4 +108,24 @@ describe('WaterfallFlyout', () => {
       expect(screen.queryByTestId('customChildren')).not.toBeInTheDocument();
     });
   });
+
+  describe('flyout header', () => {
+    it('should display the title in the header', () => {
+      render(<WaterfallFlyout {...defaultProps} title="Custom Title" />);
+
+      expect(screen.getByRole('heading', { name: 'Custom Title' })).toBeInTheDocument();
+    });
+  });
+
+  describe('close behavior', () => {
+    it('should call onCloseFlyout when close button is clicked', () => {
+      const onCloseFlyout = jest.fn();
+      render(<WaterfallFlyout {...defaultProps} onCloseFlyout={onCloseFlyout} />);
+
+      const closeButton = screen.getByRole('button', { name: /close/i });
+      fireEvent.click(closeButton);
+
+      expect(onCloseFlyout).toHaveBeenCalledTimes(1);
+    });
+  });
 });
