@@ -83,7 +83,7 @@ test.describe('Rule Details Page - Viewer', { tag: ['@ess', '@svlOblt'] }, () =>
     // Verify navigation to alerts tab
     const url = page.url();
     expect(url).toContain('tabId=alerts');
-    expect(url).toContain('selectedOptions:!()');
+    expect(url).toContain('selected_options:!()');
   });
 
   test('should not show actions button for viewer user', async ({ pageObjects }) => {
