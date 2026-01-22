@@ -47,13 +47,20 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                 runContext.taskInstance
                   .params as TaskParams<SignificantEventsQueriesGenerationTaskParams>;
 
-              const { taskClient, scopedClusterClient, streamsClient, inferenceClient, soClient } =
-                await taskContext.getScopedClients({
-                  request: runContext.fakeRequest,
-                });
+              const {
+                taskClient,
+                scopedClusterClient,
+                streamsClient,
+                inferenceClient,
+                soClient,
+                featureClient,
+              } = await taskContext.getScopedClients({
+                request: runContext.fakeRequest,
+              });
 
               try {
                 const stream = await streamsClient.getStream(streamName);
+                const { hits: features } = await featureClient.getFeatures(streamName);
 
                 const esClient = scopedClusterClient.asCurrentUser;
 
@@ -84,6 +91,7 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                           end,
                           system,
                           sampleDocsSize,
+                          features,
                           systemPrompt: significantEventsPromptOverride,
                         },
                         {
