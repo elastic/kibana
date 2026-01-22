@@ -49,8 +49,8 @@ export const createAttachmentReadTool = ({
     }
 
     const versionData = version
-      ? attachmentManager.getVersion(attachmentId, version)
-      : attachmentManager.getLatest(attachmentId);
+      ? attachmentManager.readVersion(attachmentId, version)
+      : attachmentManager.readLatest(attachmentId);
 
     if (!versionData) {
       return {

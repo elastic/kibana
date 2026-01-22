@@ -6,7 +6,11 @@
  */
 
 import { ConversationRoundStatus, type ConversationRound } from '@kbn/agent-builder-common';
-import { AttachmentType, type Attachment } from '@kbn/agent-builder-common/attachments';
+import {
+  ATTACHMENT_REF_OPERATION,
+  AttachmentType,
+  type Attachment,
+} from '@kbn/agent-builder-common/attachments';
 import { hashContent } from '@kbn/agent-builder-common/attachments';
 import {
   needsMigration,
@@ -255,7 +259,13 @@ describe('migrate_attachments', () => {
       const refs = createAttachmentRefs(rounds, versionedAttachments);
 
       expect(refs.size).toBe(1);
-      expect(refs.get(0)).toEqual([{ attachment_id: 'legacy-1', version: 1 }]);
+      expect(refs.get(0)).toEqual([
+        {
+          attachment_id: 'legacy-1',
+          version: 1,
+          operation: ATTACHMENT_REF_OPERATION.created,
+        },
+      ]);
     });
 
     it('handles attachments not found in versioned list', () => {

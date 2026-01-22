@@ -132,11 +132,14 @@ export const prepareConversation = async ({
   // Promote any legacy per-round attachments into conversation-level versioned attachments.
   // We merge both previous rounds and next input, then strip per-round attachments so the LLM
   // only sees the v2 conversation-level attachments (via attachment presentation/tools).
-  const legacyInputs: AttachmentInput[] = [
-    ...(previousRounds.flatMap((r) => r.input.attachments ?? []) as AttachmentInput[]),
-    ...((nextInput.attachments ?? []) as AttachmentInput[]),
-  ];
-  await mergeInputAttachmentsIntoAttachmentState(attachmentStateManager, legacyInputs);
+  const previousAttachments = previousRounds.flatMap(
+    (round) => round.input.attachments ?? []
+  ) as AttachmentInput[];
+  const nextInputAttachments = (nextInput.attachments ?? []) as AttachmentInput[];
+
+  await mergeInputAttachmentsIntoAttachmentState(attachmentStateManager, previousAttachments);
+  attachmentStateManager.clearAccessTracking();
+  await mergeInputAttachmentsIntoAttachmentState(attachmentStateManager, nextInputAttachments);
 
   const strippedNextInput: ConverseInput = { ...nextInput, attachments: [] };
   const processedNextInput = await prepareRoundInput({

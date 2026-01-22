@@ -51,6 +51,20 @@ export interface VersionedAttachment<
 }
 
 /**
+ * Operation performed on an attachment during a round.
+ */
+export const ATTACHMENT_REF_OPERATION = {
+  read: 'read',
+  created: 'created',
+  updated: 'updated',
+  deleted: 'deleted',
+  restored: 'restored',
+} as const;
+
+export type AttachmentRefOperation =
+  (typeof ATTACHMENT_REF_OPERATION)[keyof typeof ATTACHMENT_REF_OPERATION];
+
+/**
  * Reference to a specific version of an attachment.
  * Used in RoundInput to reference conversation-level attachments.
  */
@@ -59,6 +73,8 @@ export interface AttachmentVersionRef {
   attachment_id: string;
   /** Version number being referenced */
   version: number;
+  /** Operation performed on this attachment during the round */
+  operation?: AttachmentRefOperation;
 }
 
 /**
@@ -94,9 +110,18 @@ export interface VersionedAttachmentInput<
 
 // Zod schemas for validation
 
+export const attachmentRefOperationSchema = z.enum([
+  ATTACHMENT_REF_OPERATION.read,
+  ATTACHMENT_REF_OPERATION.created,
+  ATTACHMENT_REF_OPERATION.updated,
+  ATTACHMENT_REF_OPERATION.deleted,
+  ATTACHMENT_REF_OPERATION.restored,
+]);
+
 export const attachmentVersionRefSchema = z.object({
   attachment_id: z.string(),
   version: z.number().int().positive(),
+  operation: attachmentRefOperationSchema.optional(),
 });
 
 export const attachmentVersionSchema = z.object({

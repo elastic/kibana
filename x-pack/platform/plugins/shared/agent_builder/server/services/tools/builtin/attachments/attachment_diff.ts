@@ -66,8 +66,8 @@ export const createAttachmentDiffTool = ({
       };
     }
 
-    const fromVersionData = attachmentManager.getVersion(attachmentId, fromVersion);
-    const toVersionData = attachmentManager.getVersion(attachmentId, toVersion);
+    const fromVersionData = attachmentManager.readVersion(attachmentId, fromVersion);
+    const toVersionData = attachmentManager.readVersion(attachmentId, toVersion);
 
     return {
       results: [

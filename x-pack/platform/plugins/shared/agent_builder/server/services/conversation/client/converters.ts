@@ -14,6 +14,7 @@ import type {
   ToolResult,
   UserIdAndName,
 } from '@kbn/agent-builder-common';
+import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import { ConversationRoundStatus, ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type {
@@ -23,7 +24,11 @@ import type {
   PersistentConversationRoundStep,
 } from './types';
 import type { ConversationProperties } from './storage';
-import { migrateRoundAttachments, needsMigration } from './migrate_attachments';
+import {
+  createAttachmentRefs,
+  migrateRoundAttachments,
+  needsMigration,
+} from './migrate_attachments';
 
 export type Document = Pick<
   GetResponse<ConversationProperties>,
@@ -95,6 +100,50 @@ function deserializeStepResults(rounds: PersistentConversationRound[]): Conversa
   }));
 }
 
+const mergeAttachmentRefs = (
+  previous?: AttachmentVersionRef[],
+  next?: AttachmentVersionRef[]
+): AttachmentVersionRef[] | undefined => {
+  if (!previous?.length && !next?.length) {
+    return undefined;
+  }
+
+  const merged = new Map<string, AttachmentVersionRef>();
+  for (const ref of previous ?? []) {
+    merged.set(`${ref.attachment_id}:${ref.version}`, ref);
+  }
+  for (const ref of next ?? []) {
+    merged.set(`${ref.attachment_id}:${ref.version}`, ref);
+  }
+
+  return Array.from(merged.values());
+};
+
+const applyAttachmentRefsToRounds = (
+  rounds: ConversationRound[],
+  refsByRound: Map<number, AttachmentVersionRef[]>
+): ConversationRound[] => {
+  if (refsByRound.size === 0) {
+    return rounds;
+  }
+
+  return rounds.map((round, index) => {
+    const refs = refsByRound.get(index);
+    if (!refs?.length) {
+      return round;
+    }
+
+    const mergedRefs = mergeAttachmentRefs(round.input.attachment_refs, refs);
+    return {
+      ...round,
+      input: {
+        ...round.input,
+        ...(mergedRefs ? { attachment_refs: mergedRefs } : {}),
+      },
+    };
+  });
+};
+
 export const fromEs = (document: Document): Conversation => {
   const base = convertBaseFromEs(document);
 
@@ -103,26 +152,40 @@ export const fromEs = (document: Document): Conversation => {
   const deserializedRounds = deserializeStepResults(rawRounds);
 
   const existingAttachments = document._source!.attachments;
+  const hasLegacyRoundAttachments = needsMigration(false, deserializedRounds);
+  const attachmentsForRefs =
+    existingAttachments && existingAttachments.length > 0
+      ? existingAttachments
+      : hasLegacyRoundAttachments
+      ? migrateRoundAttachments(deserializedRounds)
+      : [];
+
+  const refsByRound =
+    attachmentsForRefs.length > 0
+      ? createAttachmentRefs(deserializedRounds, attachmentsForRefs)
+      : new Map<number, AttachmentVersionRef[]>();
+
+  const roundsWithRefs = applyAttachmentRefsToRounds(deserializedRounds, refsByRound);
+
   if (existingAttachments && existingAttachments.length > 0) {
     return {
       ...base,
-      rounds: deserializedRounds,
+      rounds: roundsWithRefs,
       attachments: existingAttachments,
     };
   }
 
-  if (needsMigration(false, deserializedRounds)) {
-    const migratedAttachments = migrateRoundAttachments(deserializedRounds);
+  if (hasLegacyRoundAttachments) {
     return {
       ...base,
-      rounds: deserializedRounds,
-      ...(migratedAttachments.length > 0 && { attachments: migratedAttachments }),
+      rounds: roundsWithRefs,
+      ...(attachmentsForRefs.length > 0 && { attachments: attachmentsForRefs }),
     };
   }
 
   return {
     ...base,
-    rounds: deserializedRounds,
+    rounds: roundsWithRefs,
     ...(document._source!.state && { state: document._source!.state }),
   };
 };

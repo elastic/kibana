@@ -27,13 +27,16 @@ export type {
   VersionedAttachment,
   AttachmentVersion,
   AttachmentVersionRef,
+  AttachmentRefOperation,
   AttachmentDiff,
   VersionedAttachmentInput,
 } from './versioned_attachment';
 export {
+  ATTACHMENT_REF_OPERATION,
   attachmentVersionSchema,
   versionedAttachmentSchema,
   attachmentVersionRefSchema,
+  attachmentRefOperationSchema,
   versionedAttachmentInputSchema,
   attachmentDiffSchema,
   getLatestVersion,
