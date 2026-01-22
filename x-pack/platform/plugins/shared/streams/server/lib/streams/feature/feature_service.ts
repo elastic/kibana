@@ -17,7 +17,7 @@ export class FeatureService {
   constructor(
     private readonly coreSetup: CoreSetup<StreamsPluginStartDependencies>,
     private readonly logger: Logger
-  ) { }
+  ) {}
 
   async getClientWithRequest({ request }: { request: KibanaRequest }): Promise<FeatureClient> {
     const [coreStart] = await this.coreSetup.getStartServices();
@@ -25,7 +25,7 @@ export class FeatureService {
     const adapter = new StorageIndexAdapter<FeatureStorageSettings, StoredFeature>(
       coreStart.elasticsearch.client.asInternalUser,
       this.logger.get('features'),
-      featureStorageSettings,
+      featureStorageSettings
     );
 
     return new FeatureClient({

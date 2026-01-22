@@ -45,7 +45,7 @@ export class FeatureClient {
     private readonly clients: {
       storageClient: IStorageClient<FeatureStorageSettings, StoredFeature>;
     }
-  ) { }
+  ) {}
 
   async clean() {
     await this.clients.storageClient.clean();
