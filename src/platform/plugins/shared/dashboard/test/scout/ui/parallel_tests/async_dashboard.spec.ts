@@ -8,7 +8,6 @@
  */
 
 import { spaceTest, expect, tags } from '@kbn/scout';
-import type { PageObjects, ScoutPage } from '@kbn/scout';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import {
   SAMPLE_DATA_SET_ID,
@@ -22,10 +21,7 @@ spaceTest.describe('Sample data dashboard', { tag: tags.ESS_ONLY }, () => {
   spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
 
-    // remove sample data if it exists
-    await apiServices.sampleData.remove(SAMPLE_DATA_SET_ID, scoutSpace.id);
-
-    // install sample data
+    // install sample flights data
     await apiServices.sampleData.install(SAMPLE_DATA_SET_ID, scoutSpace.id);
 
     await expect
@@ -47,104 +43,64 @@ spaceTest.describe('Sample data dashboard', { tag: tags.ESS_ONLY }, () => {
     });
   });
 
-  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsAdmin();
-    await pageObjects.discover.goto();
-    await pageObjects.discover.selectDataView(SAMPLE_DATA_VIEW);
-    await pageObjects.datePicker.setCommonlyUsedTime(SAMPLE_DATA_TIME_RANGE);
-    await pageObjects.discover.waitUntilSearchingHasFinished();
-    expect(await pageObjects.discover.getHitCountInt()).toBeGreaterThan(0);
-  });
-
   spaceTest.afterAll(async ({ apiServices, scoutSpace }) => {
+    // remove sample flights data
     await apiServices.sampleData.remove(SAMPLE_DATA_SET_ID, scoutSpace.id);
   });
 
-  const openFlightsDashboard = async (page: ScoutPage, pageObjects: PageObjects) => {
-    await page.gotoApp('dashboards', { hash: `/view/${SAMPLE_DATA_DASHBOARD_ID}` });
-    await pageObjects.datePicker.setCommonlyUsedTime(SAMPLE_DATA_TIME_RANGE);
-    await pageObjects.dashboard.waitForRenderComplete();
-    await expect.poll(async () => page.testSubj.locator('xyVisChart').count()).toBeGreaterThan(0);
-  };
+  spaceTest(
+    'should launch sample flights dataset dashboard',
+    async ({ browserAuth, page, pageObjects }) => {
+      await spaceTest.step('login and prepare Discover', async () => {
+        await browserAuth.loginAsAdmin();
+        await pageObjects.discover.goto();
+        await pageObjects.discover.selectDataView(SAMPLE_DATA_VIEW);
+        await pageObjects.datePicker.setCommonlyUsedTime(SAMPLE_DATA_TIME_RANGE);
+        await pageObjects.discover.waitUntilSearchingHasFinished();
+        expect(await pageObjects.discover.getHitCountInt()).toBeGreaterThan(0);
+      });
 
-  const openDiscoverAndExpectHits = async (pageObjects: PageObjects) => {
-    await pageObjects.discover.goto();
-    await pageObjects.discover.waitUntilSearchingHasFinished();
-    await expect.poll(async () => pageObjects.discover.getHitCountInt()).toBeGreaterThan(0);
-  };
+      await spaceTest.step('open flights dashboard and validate panels', async () => {
+        await pageObjects.dashboard.openDashboardWithId(SAMPLE_DATA_DASHBOARD_ID);
+        await pageObjects.datePicker.setCommonlyUsedTime(SAMPLE_DATA_TIME_RANGE);
+        expect(await pageObjects.dashboard.getPanelCount()).toBeGreaterThan(0);
+      });
 
-  const expectSavedSearchRowsRendered = async (page: ScoutPage) => {
-    await expect
-      .poll(() =>
-        page.evaluate(() => {
-          const docElement = document.querySelector('[data-document-number]');
-          const docCount = Number(docElement?.getAttribute('data-document-number') ?? '0');
-          const rowCount = document.querySelectorAll(
-            '[data-test-subj="docTableExpandToggleColumn"]'
-          ).length;
-          return docCount > 0 || rowCount > 0;
-        })
-      )
-      .toBe(true);
-  };
+      await spaceTest.step('open Discover and verify hits', async () => {
+        await pageObjects.discover.goto();
+        await pageObjects.discover.waitUntilSearchingHasFinished();
+        expect(await pageObjects.discover.getHitCountInt()).toBeGreaterThan(0);
+      });
 
-  const expectControlCount = async (page: ScoutPage, count: number) => {
-    const controls = page.testSubj.locator('control-frame');
-    await expect(controls).toHaveCount(count);
-  };
+      await spaceTest.step('return to dashboard and validate panels', async () => {
+        await pageObjects.dashboard.openDashboardWithId(SAMPLE_DATA_DASHBOARD_ID);
 
-  const expectTagCloudRendered = async (page: ScoutPage) => {
-    const tagClouds = page.testSubj.locator('tagCloudVisualization');
-    const textNodes = tagClouds.locator('text');
-    await expect
-      .poll(async () => {
-        const [cloudCount, textCount] = await Promise.all([tagClouds.count(), textNodes.count()]);
-        return cloudCount === 0 || textCount > 0;
-      })
-      .toBe(true);
-  };
+        await expect.poll(async () => pageObjects.dashboard.getControlCount()).toBe(3);
+        expect(await pageObjects.dashboard.getPanelCount()).toBeGreaterThan(0);
 
-  spaceTest('should launch sample flights dataset dashboard', async ({ page, pageObjects }) => {
-    await spaceTest.step('open flights dashboard and validate chart', async () => {
-      await openFlightsDashboard(page, pageObjects);
-    });
+        // Checking charts rendered
+        await expect
+          .poll(async () => pageObjects.dashboard.getVisualizationCount('xyVisChart'))
+          .toBeGreaterThan(0);
 
-    await spaceTest.step('open Discover and verify hits', async () => {
-      await openDiscoverAndExpectHits(pageObjects);
-    });
+        // Checking saved searches rendered
+        await expect
+          .poll(async () => pageObjects.dashboard.getSavedSearchRowCount())
+          .toBeGreaterThan(10);
 
-    await spaceTest.step('return to dashboard and validate chart', async () => {
-      await openFlightsDashboard(page, pageObjects);
-    });
+        // Checking input controls rendered
+        await expect.poll(async () => pageObjects.dashboard.getControlCount()).toBe(3);
 
-    await expect.poll(async () => page.testSubj.locator('xyVisChart').count()).toBeGreaterThan(0);
-  });
+        // Checking tag cloud rendered
+        const legendLabels = page.locator('[data-testid="echLegendItemLabel"]');
+        const legendTexts = await legendLabels.allInnerTexts();
+        ['Sunny', 'Rain', 'Clear', 'Cloudy', 'Hail'].forEach((value) => {
+          expect(legendTexts).toContain(value);
+        });
 
-  spaceTest('toggle from Discover to Dashboard attempt 1', async ({ page, pageObjects }) => {
-    await spaceTest.step('open Discover and verify hits', async () => {
-      await openDiscoverAndExpectHits(pageObjects);
-    });
-
-    await spaceTest.step('open flights dashboard and validate chart', async () => {
-      await openFlightsDashboard(page, pageObjects);
-    });
-
-    await expect.poll(async () => page.testSubj.locator('xyVisChart').count()).toBeGreaterThan(0);
-  });
-
-  spaceTest('toggle from Discover to Dashboard attempt 2', async ({ page, pageObjects }) => {
-    await spaceTest.step('open Discover and verify hits', async () => {
-      await openDiscoverAndExpectHits(pageObjects);
-    });
-
-    await spaceTest.step('open flights dashboard and validate panels', async () => {
-      await openFlightsDashboard(page, pageObjects);
-      await expectSavedSearchRowsRendered(page);
-      await expectControlCount(page, 3);
-      await expectTagCloudRendered(page);
-      await expect(page.locator('.vgaVis__view')).toBeVisible();
-    });
-
-    await expect.poll(async () => page.testSubj.locator('xyVisChart').count()).toBeGreaterThan(0);
-  });
+        // Checking vega chart rendered
+        await expect(page.locator('.vgaVis__view')).toBeVisible();
+      });
+    }
+  );
 });

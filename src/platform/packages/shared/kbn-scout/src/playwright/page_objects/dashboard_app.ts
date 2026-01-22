@@ -8,6 +8,7 @@
  */
 
 import type { ScoutPage } from '..';
+import { RenderablePage } from './renderable_page';
 import { Toasts } from './toasts';
 
 type CommonlyUsedTimeRange =
@@ -20,14 +21,21 @@ type CommonlyUsedTimeRange =
   | 'Last_1 year';
 
 export class DashboardApp {
+  private readonly renderable: RenderablePage;
   private readonly toasts: Toasts;
 
   constructor(private readonly page: ScoutPage) {
+    this.renderable = new RenderablePage(page);
     this.toasts = new Toasts(page);
   }
 
   async goto() {
     await this.page.gotoApp('dashboards');
+  }
+
+  async openDashboardWithId(id: string) {
+    await this.page.gotoApp('dashboards', { hash: `/view/${id}` });
+    await this.waitForRenderComplete();
   }
 
   async waitForListingTableToLoad() {
@@ -383,14 +391,66 @@ export class DashboardApp {
   }
 
   /**
+   * Gets the count of dashboard controls
+   */
+  async getControlCount(): Promise<number> {
+    return this.page.testSubj.locator('control-frame').count();
+  }
+
+  async getVisualizationCount(testSubj: string): Promise<number> {
+    return this.page.testSubj.locator(testSubj).count();
+  }
+
+  async getSavedSearchRowCount(): Promise<number> {
+    return this.page.evaluate(() => {
+      const docElement = document.querySelector('[data-document-number]');
+      const docCount = Number(docElement?.getAttribute('data-document-number') ?? '0');
+      const rowCount = document.querySelectorAll(
+        '[data-test-subj="docTableExpandToggleColumn"]'
+      ).length;
+      return Math.max(docCount, rowCount);
+    });
+  }
+
+  async getTagCloudTexts(): Promise<string[][]> {
+    const tagClouds = this.page.testSubj.locator('tagCloudVisualization');
+    const clouds = await tagClouds.all();
+    return Promise.all(
+      clouds.map(async (tagCloud) => tagCloud.locator('.echLegendItemLabel').allInnerTexts())
+    );
+  }
+
+  async getSharedItemsCount(): Promise<number> {
+    const attributeName = 'data-shared-items-count';
+    const elements = await this.page.locator(`[${attributeName}]`).all();
+    if (elements.length === 0) {
+      throw new Error(`no element`);
+    }
+    const attribute = await elements[0].getAttribute(attributeName);
+    if (!attribute) {
+      throw new Error(`no attribute found for [${attributeName}]`);
+    }
+    return Number(attribute);
+  }
+
+  /**
    * Waits for all dashboard panels to finish rendering.
    * Uses the data-render-complete attribute to determine completion.
    */
   async waitForRenderComplete() {
+    try {
+      const count = await this.getSharedItemsCount();
+      if (count > 0) {
+        await this.renderable.waitForRender(count);
+        return;
+      }
+    } catch {
+      // fall back to embeddable panel count
+    }
+
     const panels = this.page.testSubj.locator('embeddablePanel');
     const count = await panels.count();
     if (count > 0) {
-      // Wait for all panels to have data-render-complete="true"
       await this.waitForPanelsToLoad(count);
     }
   }
