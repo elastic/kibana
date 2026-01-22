@@ -18,7 +18,8 @@
       "management",
       "features",
       "encryptedSavedObjects",
-      "licensing"
+      "licensing",
+      "actions"
     ],
     "optionalPlugins": [
       "cloud"
