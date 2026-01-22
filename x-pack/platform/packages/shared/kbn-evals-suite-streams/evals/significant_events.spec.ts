@@ -195,6 +195,7 @@ evaluate.describe('Significant events query generation', { tag: '@svlOblt' }, ()
                     logger,
                     signal: new AbortController().signal,
                     systemPrompt: significantEventsPrompt,
+                    features: [],
                   });
 
                   // The task should return the array of generated queries
@@ -261,6 +262,7 @@ evaluate.describe('Significant events query generation', { tag: '@svlOblt' }, ()
               logger,
               signal: new AbortController().signal,
               systemPrompt: significantEventsPrompt,
+              features: [],
             });
 
             return queries;
