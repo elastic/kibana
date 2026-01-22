@@ -180,7 +180,6 @@ export const getDatatableRenderer = (dependencies: {
           {...config}
           formatFactory={dependencies.formatFactory}
           dispatchEvent={handlers.event}
-          renderMode={handlers.getRenderMode()}
           paletteService={dependencies.paletteService}
           getType={getType}
           rowHasRowClickTriggerActions={rowHasRowClickTriggerActions}

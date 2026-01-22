@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObjectsClient } from '@kbn/core/server';
+import { type SavedObjectsClientContract } from '@kbn/core/server';
 import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
@@ -26,6 +26,7 @@ import { getRetryParams } from './retry_helper';
 import { BulkActionTaskType } from './bulk_action_types';
 import { MigrateActionRunner } from './migrate_action_runner';
 import { ChangePrivilegeActionRunner } from './change_privilege_runner';
+import { RollbackActionRunner } from './rollback_action_runner';
 
 /**
  * Create and run retry tasks of agent bulk actions
@@ -39,7 +40,7 @@ export class BulkActionsResolver {
         const [coreStart] = await core.getStartServices();
         return {
           esClient: coreStart.elasticsearch.client.asInternalUser,
-          soClient: new SavedObjectsClient(coreStart.savedObjects.createInternalRepository()),
+          soClient: appContextService.getInternalUserSOClientWithoutSpaceExtension(),
         };
       };
 
@@ -51,6 +52,7 @@ export class BulkActionsResolver {
         [BulkActionTaskType.REQUEST_DIAGNOSTICS_RETRY]: RequestDiagnosticsActionRunner,
         [BulkActionTaskType.MIGRATE_RETRY]: MigrateActionRunner,
         [BulkActionTaskType.PRIVILEGE_LEVEL_CHANGE_RETRY]: ChangePrivilegeActionRunner,
+        [BulkActionTaskType.ROLLBACK_RETRY]: RollbackActionRunner,
       };
 
       return createRetryTask(
@@ -58,7 +60,7 @@ export class BulkActionsResolver {
         getDeps,
         async (
           esClient: ElasticsearchClient,
-          soClient: SavedObjectsClient,
+          soClient: SavedObjectsClientContract,
           actionParams: ActionParams,
           retryParams: RetryParams
         ) =>
@@ -127,10 +129,10 @@ export class BulkActionsResolver {
 
 export function createRetryTask(
   taskInstance: ConcreteTaskInstance,
-  getDeps: () => Promise<{ esClient: ElasticsearchClient; soClient: SavedObjectsClient }>,
+  getDeps: () => Promise<{ esClient: ElasticsearchClient; soClient: SavedObjectsClientContract }>,
   doRetry: (
     esClient: ElasticsearchClient,
-    soClient: SavedObjectsClient,
+    soClient: SavedObjectsClientContract,
     actionParams: ActionParams,
     retryParams: RetryParams
   ) => void

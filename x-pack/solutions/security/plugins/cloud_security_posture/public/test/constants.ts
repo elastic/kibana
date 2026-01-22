@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const SECURITY_FEATURE_ID = 'siemV4';
+export const SECURITY_FEATURE_ID = 'siemV5';

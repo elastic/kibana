@@ -1,0 +1,8 @@
+{
+  "name": "@kbn/otel-demo",
+  "version": "1.0.0",
+  "description": "OpenTelemetry Demo deployment tool for Kibana development - sends OTel data to local Elasticsearch",
+  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
+  "private": true
+}
+

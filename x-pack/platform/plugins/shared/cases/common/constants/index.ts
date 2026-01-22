@@ -167,7 +167,7 @@ export const MAX_CUSTOM_OBSERVABLE_TYPES_LABEL_LENGTH = 50 as const;
  */
 
 export const DEFAULT_FEATURES: CasesFeaturesAllRequired = Object.freeze({
-  alerts: { sync: true, enabled: true, isExperimental: false },
+  alerts: { sync: true, enabled: true, isExperimental: false, read: true, all: true },
   metrics: [],
   observables: { enabled: true, autoExtract: false },
   events: { enabled: false },
@@ -301,3 +301,9 @@ export const MAX_CUSTOM_OBSERVABLE_TYPES = 10;
 export const CASE_PAGE_VIEW_EVENT_TYPE = 'case_page_view' as const;
 
 export const CASE_ATTACH_EVENTS_EVENT_TYPE = 'case_attach_events' as const;
+
+export const CASE_VIEW_ATTACHMENTS_TAB_CLICKED_EVENT_TYPE =
+  'case_view_attachments_tab_clicked' as const;
+
+export const CASE_VIEW_ATTACHMENTS_SUB_TAB_CLICKED_EVENT_TYPE =
+  'case_view_attachments_sub_tab_clicked' as const;

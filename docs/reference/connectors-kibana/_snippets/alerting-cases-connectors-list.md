@@ -1,4 +1,3 @@
-* [Observability AI Assistant](/reference/connectors-kibana/obs-ai-assistant-action-type.md): Send alerts to the AI Assistant.
 * [{{xsoar}}](/reference/connectors-kibana/xsoar-action-type.md): Create an incident in Cortex {{xsoar}}.
 * [CrowdStrike](/reference/connectors-kibana/crowdstrike-action-type.md): Send a request to CrowdStrike.
 * [D3 Security](/reference/connectors-kibana/d3security-action-type.md): Send a request to D3 Security.

@@ -32,6 +32,7 @@ import { actionsAuthorizationMock } from '../authorization/actions_authorization
 import { connectorTokenClientMock } from '../lib/connector_token_client.mock';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import { ConnectorRateLimiter } from '../lib/connector_rate_limiter';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 
 jest.mock('uuid', () => ({
   v4: () => ConnectorSavedObject.id,
@@ -52,6 +53,9 @@ const getEventLogClient = jest.fn();
 const preSaveHook = jest.fn();
 const postSaveHook = jest.fn();
 const postDeleteHook = jest.fn();
+const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
+const getAxiosInstanceWithAuth = jest.fn();
+const isESOCanEncrypt = true;
 
 let actionsClient: ActionsClient;
 let mockedLicenseState: jest.Mocked<ILicenseState>;
@@ -146,6 +150,9 @@ beforeEach(() => {
     usageCounter: mockUsageCounter,
     connectorTokenClient,
     getEventLogClient,
+    encryptedSavedObjectsClient,
+    isESOCanEncrypt,
+    getAxiosInstanceWithAuth,
   });
 
   actionTypeRegistry.register({

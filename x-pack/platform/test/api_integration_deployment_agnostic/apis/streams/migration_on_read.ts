@@ -58,7 +58,7 @@ const migratedProcessing = {
         {
           set: {
             field: 'message',
-            if: "\n  try {\n  if (($('message', null) !== null && (($('message', null) instanceof Number && $('message', null).toString() == \"oldValue\") || $('message', null) == \"oldValue\"))) {\n    return true;\n  }\n  return false;\n} catch (Exception e) {\n  return false;\n}\n",
+            if: '\n  try {\n  \n  def val_message = $(\'message\', null); if (val_message instanceof List && val_message.size() == 1) { val_message = val_message[0]; }\n  \n  \n  if ((val_message !== null && ((val_message instanceof Number && val_message.toString() == "oldValue") || val_message == "oldValue"))) {\n    return true;\n  }\n  return false;\n} catch (Exception e) {\n  return false;\n}\n',
             value: 'newValue',
           },
         },
@@ -68,6 +68,7 @@ const migratedProcessing = {
       },
     },
   ],
+  updated_at: new Date(0).toISOString(),
 };
 
 // Do not update these if tests are failing - this is testing whether they get migrated correctly - you should
@@ -138,6 +139,7 @@ const wiredStreamDefinition = {
 const expectedStreamsResponse: Streams.ClassicStream.Definition = {
   name: TEST_STREAM_NAME,
   description: '',
+  updated_at: new Date(0).toISOString(),
   ingest: {
     lifecycle: {
       ilm: {
@@ -156,6 +158,7 @@ const expectedStreamsResponse: Streams.ClassicStream.Definition = {
 const expectedWiredStreamsResponse: Streams.WiredStream.Definition = {
   name: WIRED_STREAM_NAME,
   description: '',
+  updated_at: new Date(0).toISOString(),
   ingest: {
     lifecycle: {
       ilm: {
@@ -187,16 +190,14 @@ const expectedWiredStreamsResponse: Streams.WiredStream.Definition = {
   },
 };
 
-const expectedDashboardsResponse = {
-  dashboards: [
-    {
-      id: TEST_DASHBOARD_ID,
-      redirectId: TEST_DASHBOARD_ID,
-      title: 'dashboard-4-panels',
-      type: 'dashboard',
-      tags: [],
-    },
-  ],
+const expectedDashboard = {
+  id: TEST_DASHBOARD_ID,
+  redirectId: TEST_DASHBOARD_ID,
+  title: 'dashboard-4-panels',
+  type: 'dashboard',
+  tags: [],
+  description: '',
+  streamNames: [TEST_STREAM_NAME],
 };
 
 const expectedQueriesResponse = {
@@ -326,6 +327,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     after(async () => {
       await disableStreams(apiClient);
+      await esClient.indices.deleteDataStream({ name: TEST_STREAM_NAME });
       await kibanaServer.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
         [OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS]: false,
@@ -351,7 +353,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         {
           params: {
             path: { streamName: TEST_STREAM_NAME },
-            query: { attachmentType: 'dashboard' },
+            query: { attachmentTypes: ['dashboard'] },
           },
         }
       );
@@ -382,7 +384,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         {
           params: {
             path: { streamName: TEST_STREAM_NAME },
-            query: { attachmentType: 'dashboard' },
+            query: { attachmentTypes: ['dashboard'] },
           },
         }
       );
@@ -395,12 +397,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         {
           params: {
             path: { streamName: TEST_STREAM_NAME },
-            query: { attachmentType: 'dashboard' },
+            query: { attachmentTypes: ['dashboard'] },
           },
         }
       );
       expect(response.status).to.eql(200);
-      expect(response.body.attachments).to.eql(expectedDashboardsResponse.dashboards);
+      expect(response.body.attachments).to.have.length(1);
+      const { createdAt, updatedAt, ...rest } = response.body.attachments[0];
+      expect(rest).to.eql(expectedDashboard);
+      expect(createdAt).to.be.a('string');
+      expect(updatedAt).to.be.a('string');
     });
 
     it('should read expected queries for classic stream', async () => {

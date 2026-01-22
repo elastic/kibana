@@ -19,7 +19,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
-
+import { isMac } from '@kbn/shared-ux-utility';
 interface NavControlWithProviderDeps {
   coreStart: CoreStart;
   pluginsStart: AIAssistantPluginStartDependencies;
@@ -140,7 +140,6 @@ export function NavControl() {
   );
 }
 
-const isMac = navigator.userAgent.toLocaleLowerCase().includes('mac');
 const buttonLabel = i18n.translate(
   'xpack.searchAssistant.navControl.openTheAIAssistantPopoverLabel',
   {

@@ -14,9 +14,21 @@ export const sloDetailsHistoryLocatorID = 'SLO_DETAILS_HISTORY_LOCATOR';
 export const sloEditLocatorID = 'SLO_EDIT_LOCATOR';
 export const sloListLocatorID = 'SLO_LIST_LOCATOR';
 
+export const OVERVIEW_TAB_ID = 'overview';
+export const HISTORY_TAB_ID = 'history';
+export const DEFINITION_TAB_ID = 'definition';
+export const ALERTS_TAB_ID = 'alerts';
+
+export type SloTabId =
+  | typeof OVERVIEW_TAB_ID
+  | typeof ALERTS_TAB_ID
+  | typeof HISTORY_TAB_ID
+  | typeof DEFINITION_TAB_ID;
+
 export interface SloDetailsLocatorParams extends SerializableRecord {
-  sloId?: string;
+  sloId: string;
   instanceId?: string;
+  tabId?: SloTabId;
 }
 
 export interface SloDetailsHistoryLocatorParams extends SerializableRecord {

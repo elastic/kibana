@@ -100,6 +100,16 @@ it('matches snapshot', () => {
         "required": false,
         "type": "keyword",
       },
+      "kibana.alert.maintenance_window_names": Object {
+        "array": true,
+        "required": false,
+        "type": "keyword",
+      },
+      "kibana.alert.muted": Object {
+        "array": false,
+        "required": false,
+        "type": "boolean",
+      },
       "kibana.alert.pending_recovered_count": Object {
         "array": false,
         "required": false,

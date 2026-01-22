@@ -119,7 +119,7 @@ describe('schedule_type_guards', () => {
     it('should throw error for invalid objects', () => {
       const invalidSchedule = { invalid: true };
       expect(() => toAttackDiscoverySchedule(invalidSchedule)).toThrow(
-        'Response is not in internal AttackDiscoverySchedule format and needs transformation'
+        'Response is not in valid AttackDiscoveryApiSchedule format'
       );
     });
   });
@@ -140,7 +140,7 @@ describe('schedule_type_guards', () => {
     it('should throw error for invalid arrays', () => {
       const invalidArray = [{ invalid: true }];
       expect(() => toAttackDiscoveryScheduleArray(invalidArray)).toThrow(
-        'Response is not in internal AttackDiscoverySchedule[] format and needs transformation'
+        'Response is not in valid AttackDiscoveryApiSchedule[] format'
       );
     });
   });

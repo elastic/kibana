@@ -792,7 +792,7 @@ describe('buildStepExecutionsTree', () => {
       expect(result[1].stepId).toBe('step-1');
     });
 
-    it('should prepend both trigger and inputs pseudo-steps in correct order', () => {
+    it('should prepend only trigger pseudo-step when both event and inputs exist', () => {
       const stepExecutions: WorkflowStepExecutionDto[] = [
         createStepExecution({
           id: 'exec-1',
@@ -814,17 +814,13 @@ describe('buildStepExecutionsTree', () => {
 
       const result = buildStepExecutionsTree(stepExecutions, executionContext);
 
-      expect(result).toHaveLength(3);
+      expect(result).toHaveLength(2);
       expect(result[0].stepId).toBe('Event');
       expect(result[0].stepType).toBe('__trigger');
       expect(result[0].isTriggerPseudoStep).toBe(true);
 
-      expect(result[1].stepId).toBe('Inputs');
-      expect(result[1].stepType).toBe('__inputs');
-      expect(result[1].isTriggerPseudoStep).toBe(true);
-
-      expect(result[2].stepId).toBe('step-1');
-      expect(result[2].isTriggerPseudoStep).toBeUndefined();
+      expect(result[1].stepId).toBe('step-1');
+      expect(result[1].isTriggerPseudoStep).toBeUndefined();
     });
 
     it('should not add pseudo-steps when context is missing', () => {
@@ -927,9 +923,8 @@ describe('buildStepExecutionsTree', () => {
 
       const result = buildStepExecutionsTree([], executionContext);
 
-      expect(result).toHaveLength(2);
+      expect(result).toHaveLength(1);
       expect(result[0].stepId).toBe('Event');
-      expect(result[1].stepId).toBe('Inputs');
     });
   });
 
@@ -992,15 +987,13 @@ describe('buildStepExecutionsTree', () => {
         ExecutionStatus.RUNNING
       );
 
-      expect(result).toHaveLength(4);
+      expect(result).toHaveLength(3);
       expect(result[0].stepId).toBe('Overview');
       expect(result[0].stepType).toBe('__overview');
       expect(result[0].status).toBe(ExecutionStatus.RUNNING);
       expect(result[1].stepId).toBe('Event');
       expect(result[1].stepType).toBe('__trigger');
-      expect(result[2].stepId).toBe('Inputs');
-      expect(result[2].stepType).toBe('__inputs');
-      expect(result[3].stepId).toBe('step-1');
+      expect(result[2].stepId).toBe('step-1');
     });
 
     it.each([

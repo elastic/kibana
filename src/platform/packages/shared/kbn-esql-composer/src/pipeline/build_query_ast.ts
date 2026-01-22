@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Builder, mutate } from '@kbn/esql-ast';
+import { Builder, mutate } from '@kbn/esql-language';
 import type { Query } from '../types';
 
 export const buildQueryAst = (source: Query) => {

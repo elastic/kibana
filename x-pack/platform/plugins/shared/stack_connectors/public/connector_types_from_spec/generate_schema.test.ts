@@ -15,15 +15,17 @@ describe('generateSchema', () => {
       schema: z4.object({
         url: z4.string().min(1),
       }),
-      authTypes: [
-        'basic',
-        {
-          type: 'api_key_header',
-          defaults: {
-            headerField: 'custom-api-key-field',
+      auth: {
+        types: [
+          'basic',
+          {
+            type: 'api_key_header',
+            defaults: {
+              headerField: 'custom-api-key-field',
+            },
           },
-        },
-      ],
+        ],
+      },
     } as unknown as ConnectorSpec);
 
     expect(z4.toJSONSchema(schema)).toMatchSnapshot();

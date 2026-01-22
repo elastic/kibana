@@ -84,6 +84,7 @@
     "@kbn/core-http-server",
     "@kbn/setup-node-env",
     "@kbn/core-http-server",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/react-kibana-mount"
   ]
 }

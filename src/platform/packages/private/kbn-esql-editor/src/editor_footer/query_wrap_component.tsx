@@ -10,15 +10,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
-import { prettifyQuery } from '@kbn/esql-utils';
 
-export function QueryWrapComponent({
-  code,
-  updateQuery,
-}: {
-  code: string;
-  updateQuery: (qs: string) => void;
-}) {
+export function QueryWrapComponent({ onPrettifyQuery }: { onPrettifyQuery: () => void }) {
   return (
     <EuiFlexItem grow={false}>
       <EuiToolTip
@@ -36,12 +29,7 @@ export function QueryWrapComponent({
           aria-label={i18n.translate('esqlEditor.query.formatQueryLabel', {
             defaultMessage: 'Prettify query',
           })}
-          onClick={() => {
-            const updatedCode = prettifyQuery(code);
-            if (code !== updatedCode) {
-              updateQuery(updatedCode);
-            }
-          }}
+          onClick={onPrettifyQuery}
         />
       </EuiToolTip>
     </EuiFlexItem>

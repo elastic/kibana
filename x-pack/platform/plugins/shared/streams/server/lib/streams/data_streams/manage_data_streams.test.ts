@@ -13,9 +13,10 @@ import type { Streams } from '@kbn/streams-schema';
 const createMockWiredStream = (name: string): Streams.WiredStream.Definition => ({
   name,
   description: 'Test wired stream',
+  updated_at: new Date().toISOString(),
   ingest: {
     lifecycle: { inherit: {} },
-    processing: { steps: [] },
+    processing: { steps: [], updated_at: new Date().toISOString() },
     settings: {},
     wired: { fields: {}, routing: [] },
     failure_store: { inherit: {} },
@@ -25,9 +26,10 @@ const createMockWiredStream = (name: string): Streams.WiredStream.Definition => 
 const createMockClassicStream = (name: string): Streams.ClassicStream.Definition => ({
   name,
   description: 'Test classic stream',
+  updated_at: new Date().toISOString(),
   ingest: {
     lifecycle: { inherit: {} },
-    processing: { steps: [] },
+    processing: { steps: [], updated_at: new Date().toISOString() },
     settings: {},
     classic: {},
     failure_store: { inherit: {} },

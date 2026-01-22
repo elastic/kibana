@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
-import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
+import { SECURITY_FEATURE_ID_V5 } from '@kbn/security-solution-features/constants';
 import * as i18n from './translations';
 
 export {
@@ -28,7 +29,8 @@ export const CASES_FEATURE_ID = 'securitySolutionCasesV3' as const;
 export const TIMELINE_FEATURE_ID = 'securitySolutionTimeline' as const;
 export const NOTES_FEATURE_ID = 'securitySolutionNotes' as const;
 export const SERVER_APP_ID = 'siem' as const;
-export const SECURITY_FEATURE_ID = 'siemV4' as const;
+export const SECURITY_FEATURE_ID = SECURITY_FEATURE_ID_V5;
+export { RULES_FEATURE_ID } from '@kbn/security-solution-features/constants';
 export const APP_NAME = 'Security' as const;
 export const APP_ICON_SOLUTION = 'logoSecurity' as const;
 export const APP_PATH = `/app/security` as const;
@@ -147,6 +149,7 @@ export const ENTITY_ANALYTICS_LANDING_PATH = '/entity_analytics_landing' as cons
 export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH =
   '/entity_analytics_privileged_user_monitoring' as const;
 export const ENTITY_ANALYTICS_OVERVIEW_PATH = `/entity_analytics_overview` as const;
+export const ENTITY_ANALYTICS_THREAT_HUNTING_PATH = '/entity_analytics_threat_hunting' as const;
 export const APP_ALERTS_PATH = `${APP_PATH}${ALERTS_PATH}` as const;
 export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}` as const;
 export const APP_ENDPOINTS_PATH = `${APP_PATH}${ENDPOINTS_PATH}` as const;
@@ -259,13 +262,6 @@ export const ENABLE_CLOUD_CONNECTOR_SETTING = 'securitySolution:enableCloudConne
 /** This Kibana Advanced Setting allows users to enable/disable the SIEM Readiness Feature */
 export const ENABLE_SIEM_READINESS_SETTING = 'securitySolution:enableSiemReadiness' as const;
 
-/** This Kibana Advanced Setting allows users to enable/disable the privilged user monitoring feature */
-export const ENABLE_PRIVILEGED_USER_MONITORING_SETTING =
-  'securitySolution:enablePrivilegedUserMonitoring' as const;
-
-/** This Kibana Advanced Setting allows users to enable/disable ESQL-based risk scoring */
-export const ENABLE_ESQL_RISK_SCORING = 'securitySolution:enableEsqlRiskScoring' as const;
-
 /**
  * Id for the notifications alerting type
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -318,6 +314,12 @@ export const DETECTION_ENGINE_UNIFIED_ALERTS_URL =
   `${INTERNAL_DETECTION_ENGINE_URL}/unified_alerts` as const;
 export const DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL =
   `${DETECTION_ENGINE_UNIFIED_ALERTS_URL}/search` as const;
+export const DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL =
+  `${DETECTION_ENGINE_UNIFIED_ALERTS_URL}/workflow_status` as const;
+export const DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL =
+  `${DETECTION_ENGINE_UNIFIED_ALERTS_URL}/tags` as const;
+export const DETECTION_ENGINE_SET_UNIFIED_ALERTS_ASSIGNEES_URL =
+  `${DETECTION_ENGINE_UNIFIED_ALERTS_URL}/assignees` as const;
 
 /**
  * Telemetry detection endpoint for any previews requested of what data we are
@@ -473,9 +475,8 @@ export const RULES_TABLE_MAX_PAGE_SIZE = 100;
 export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v9.2',
   TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
-  SIEM_MAIN_LANDING_PAGE: 'securitySolution.siemMigrations.setupGuide.v8.18',
-  SIEM_RULE_TRANSLATION_PAGE: 'securitySolution.siemMigrations.ruleTranslationGuide.v8.18',
   DEFAULT_LLM: `elasticAssistant.elasticLLM.costAwarenessTour.assistantHeader.v8.19.default`,
+  AGENT_BUILDER_TOUR: 'elasticAssistant.agentBuilderTour.v9.3.default',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
@@ -487,32 +488,6 @@ export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_SOURCE_EVENT_TIME_RANGE_STORA
 export const MAX_NUMBER_OF_NEW_TERMS_FIELDS = 3;
 
 export const BULK_ADD_TO_TIMELINE_LIMIT = 2000;
-
-export const DEFAULT_DETECTION_PAGE_FILTERS: FilterControlConfig[] = [
-  {
-    title: 'Status',
-    fieldName: 'kibana.alert.workflow_status',
-    selectedOptions: ['open'],
-    hideActionBar: true,
-    persist: true,
-    hideExists: true,
-  },
-  {
-    title: 'Severity',
-    fieldName: 'kibana.alert.severity',
-    selectedOptions: [],
-    hideActionBar: true,
-    hideExists: true,
-  },
-  {
-    title: 'User',
-    fieldName: 'user.name',
-  },
-  {
-    title: 'Host',
-    fieldName: 'host.name',
-  },
-];
 
 /** This local storage key stores the `Grid / Event rendered view` selection */
 export const ALERTS_TABLE_VIEW_SELECTION_KEY = 'securitySolution.alerts.table.view-selection';
@@ -559,6 +534,13 @@ export const MAX_MANUAL_RULE_RUN_LOOKBACK_WINDOW_DAYS = 90;
 export const MAX_MANUAL_RULE_RUN_BULK_SIZE = 100;
 export const MAX_BULK_FILL_RULE_GAPS_LOOKBACK_WINDOW_DAYS = 90;
 export const MAX_BULK_FILL_RULE_GAPS_BULK_SIZE = 100;
+/**
+ * Max number of rule IDs to request when filtering rules by gap fill status.
+ * This protects from exceeding Elasticsearch's max clause count
+ */
+export const MAX_RULES_WITH_GAPS_TO_FETCH = 1000;
+export const MAX_RULES_WITH_GAPS_LIMIT_REACHED_WARNING_TYPE =
+  'max_rules_with_gaps_limit_reached' as const;
 
 /*
  * Whether it is a Jest environment
@@ -572,3 +554,154 @@ export const PROMOTION_RULE_TAGS = [
   'Promotion', // This is the legacy tag for promotion rules and can be safely removed once promotion rules go live
   'Promotion: External Alerts',
 ];
+
+/**
+ * Essential fields to return for security alerts to reduce context window usage.
+ * These fields contain the most relevant information for security analysis.
+ */
+export const ESSENTIAL_ALERT_FIELDS: string[] = [
+  '_id',
+  '_index',
+  '@timestamp',
+  'message',
+
+  /* Host */
+  'host.name',
+  'host.ip',
+  'host.os.name',
+  'host.os.version',
+  'host.asset.criticality',
+  'host.risk.calculated_level',
+  'host.risk.calculated_score_norm',
+
+  /* User */
+  'user.name',
+  'user.domain',
+  'user.asset.criticality',
+  'user.risk.calculated_level',
+  'user.risk.calculated_score_norm',
+  'user.target.name',
+
+  /* Service */
+  'service.name',
+  'service.id',
+
+  /* Entity */
+  'entity.id',
+  'entity.name',
+  'entity.type',
+  'entity.sub_type',
+
+  /* Agent */
+  'agent.id',
+
+  /* Process */
+  'process.name',
+  'process.pid',
+  'process.args',
+  'process.command_line',
+  'process.executable',
+  'process.exit_code',
+  'process.working_directory',
+  'process.pe.original_file_name',
+  'process.hash.md5',
+  'process.hash.sha1',
+  'process.hash.sha256',
+  'process.code_signature.exists',
+  'process.code_signature.signing_id',
+  'process.code_signature.status',
+  'process.code_signature.subject_name',
+  'process.code_signature.trusted',
+
+  /* Process parent */
+  'process.parent.name',
+  'process.parent.args',
+  'process.parent.args_count',
+  'process.parent.command_line',
+  'process.parent.executable',
+  'process.parent.code_signature.exists',
+  'process.parent.code_signature.status',
+  'process.parent.code_signature.subject_name',
+  'process.parent.code_signature.trusted',
+
+  /* File */
+  'file.name',
+  'file.path',
+  'file.Ext.original.path',
+  'file.hash.sha256',
+
+  /* Groups */
+  'group.id',
+  'group.name',
+
+  /* Cloud */
+  'cloud.provider',
+  'cloud.account.name',
+  'cloud.service.name',
+  'cloud.region',
+  'cloud.availability_zone',
+
+  /* Network / DNS */
+  'source.ip',
+  'destination.ip',
+  'network.protocol',
+  'dns.question.name',
+  'dns.question.type',
+
+  /* Event */
+  'event.category',
+  'event.action',
+  'event.type',
+  'event.code',
+  'event.dataset',
+  'event.module',
+  'event.outcome',
+
+  /* Rule (generic) */
+  'rule.name',
+  'rule.reference',
+
+  /* Kibana alert fields */
+  'kibana.alert.uuid',
+  'kibana.alert.original_time',
+  'kibana.alert.severity',
+  'kibana.alert.start',
+  'kibana.alert.workflow_status',
+  'kibana.alert.reason',
+  'kibana.alert.risk_score',
+  'kibana.alert.rule.name',
+  'kibana.alert.rule.rule_id',
+  'kibana.alert.rule.description',
+  'kibana.alert.rule.category',
+  'kibana.alert.rule.references',
+  'kibana.alert.rule.threat.framework',
+  'kibana.alert.rule.threat.tactic.id',
+  'kibana.alert.rule.threat.tactic.name',
+  'kibana.alert.rule.threat.tactic.reference',
+  'kibana.alert.rule.threat.technique.id',
+  'kibana.alert.rule.threat.technique.name',
+  'kibana.alert.rule.threat.technique.reference',
+  'kibana.alert.rule.threat.technique.subtechnique.id',
+  'kibana.alert.rule.threat.technique.subtechnique.name',
+  'kibana.alert.rule.threat.technique.subtechnique.reference',
+
+  /* Threat (top-level) */
+  'threat.framework',
+  'threat.tactic.id',
+  'threat.tactic.name',
+  'threat.tactic.reference',
+  'threat.technique.id',
+  'threat.technique.name',
+  'threat.technique.reference',
+  'threat.technique.subtechnique.id',
+  'threat.technique.subtechnique.name',
+  'threat.technique.subtechnique.reference',
+] as const;
+
+export enum SecurityAgentBuilderAttachments {
+  alert = 'security.alert',
+  entity = 'security.entity',
+  rule = 'security.rule',
+}
+
+export const THREAT_HUNTING_AGENT_ID = `${internalNamespaces.security}.agent`;

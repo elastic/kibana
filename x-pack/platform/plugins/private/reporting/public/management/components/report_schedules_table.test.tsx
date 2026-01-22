@@ -7,12 +7,11 @@
 
 import {
   applicationServiceMock,
-  coreMock,
   httpServiceMock,
   notificationServiceMock,
 } from '@kbn/core/public/mocks';
 import { render, screen, waitFor } from '@testing-library/react';
-import { ReportingAPIClient, useKibana } from '@kbn/reporting-public';
+import { useKibana } from '@kbn/reporting-public';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -56,18 +55,10 @@ const mockGetUserProfileQuery = jest.mocked(useGetUserProfileQuery);
 const mockEnableScheduledReports = jest.mocked(bulkEnableScheduledReports);
 
 const http = httpServiceMock.createSetupContract();
-const uiSettingsClient = coreMock.createSetup().uiSettings;
-const httpService = httpServiceMock.createSetupContract();
 const application = applicationServiceMock.createStartContract();
-const reportingAPIClient = new ReportingAPIClient(httpService, uiSettingsClient, 'x.x.x');
-const mockValidateEmailAddresses = jest.fn().mockResolvedValue([]);
 
 export const getMockTheme = (partialTheme: RecursivePartial<UseEuiTheme>): UseEuiTheme =>
   partialTheme as UseEuiTheme;
-
-const defaultProps = {
-  apiClient: reportingAPIClient,
-};
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -77,6 +68,7 @@ const queryClient = new QueryClient({
     },
   },
 });
+const mockValidateEmailAddresses = jest.fn().mockReturnValue([]);
 
 describe('ReportSchedulesTable', () => {
   // Disabling delay to avoid issues with fake timers
@@ -141,12 +133,14 @@ describe('ReportSchedulesTable', () => {
     render(
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
-          <ReportSchedulesTable {...defaultProps} />
+          <ReportSchedulesTable />
         </QueryClientProvider>
       </IntlProvider>
     );
 
     expect(await screen.findByTestId('reportSchedulesTable')).toBeInTheDocument();
+    expect(screen.getByTestId('scheduledReportsSearchField')).toBeInTheDocument();
+    expect(screen.getByTestId('refreshScheduledReportsButton')).toBeInTheDocument();
   });
 
   it('renders empty state correctly', async () => {
@@ -160,7 +154,7 @@ describe('ReportSchedulesTable', () => {
     render(
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
-          <ReportSchedulesTable {...defaultProps} />
+          <ReportSchedulesTable />
         </QueryClientProvider>
       </IntlProvider>
     );
@@ -172,7 +166,7 @@ describe('ReportSchedulesTable', () => {
     render(
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
-          <ReportSchedulesTable {...defaultProps} />
+          <ReportSchedulesTable />
         </QueryClientProvider>
       </IntlProvider>
     );
@@ -187,7 +181,7 @@ describe('ReportSchedulesTable', () => {
     render(
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
-          <ReportSchedulesTable {...defaultProps} />
+          <ReportSchedulesTable />
         </QueryClientProvider>
       </IntlProvider>
     );
@@ -206,7 +200,7 @@ describe('ReportSchedulesTable', () => {
     render(
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
-          <ReportSchedulesTable {...defaultProps} />
+          <ReportSchedulesTable />
         </QueryClientProvider>
       </IntlProvider>
     );
@@ -228,7 +222,7 @@ describe('ReportSchedulesTable', () => {
     render(
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
-          <ReportSchedulesTable {...defaultProps} />
+          <ReportSchedulesTable />
         </QueryClientProvider>
       </IntlProvider>
     );
@@ -244,7 +238,7 @@ describe('ReportSchedulesTable', () => {
     render(
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
-          <ReportSchedulesTable {...defaultProps} />
+          <ReportSchedulesTable />
         </QueryClientProvider>
       </IntlProvider>
     );
@@ -261,13 +255,78 @@ describe('ReportSchedulesTable', () => {
 
     await waitFor(() => {
       expect(window.open).toHaveBeenCalledWith(
-        '/app/reportingRedirect?page=1&perPage=50&scheduledReportId=scheduled-report-1',
+        '/app/reportingRedirect?page=1&perPage=50&scheduledReportId=scheduled-report-1&search=',
         '_blank'
       );
     });
   });
 
-  describe('The same user who created the report schedule is accessing the list', () => {
+  it('should search schedules with the provided search text on enter', async () => {
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={queryClient}>
+          <ReportSchedulesTable />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
+
+    expect(await screen.findAllByTestId('scheduledReportRow')).toHaveLength(3);
+
+    const searchField = screen.getByTestId(`scheduledReportsSearchField`);
+    await user.type(searchField, 'Report{enter}');
+
+    expect(mockGetScheduledReports).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        search: 'Report',
+      })
+    );
+  });
+
+  it('should reset the search param when clearing the search field', async () => {
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={queryClient}>
+          <ReportSchedulesTable />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
+
+    expect(await screen.findAllByTestId('scheduledReportRow')).toHaveLength(3);
+
+    const searchField = screen.getByTestId(`scheduledReportsSearchField`);
+    await user.type(searchField, 'Report{enter}');
+
+    await user.click(screen.getByTestId(`clearSearchButton`));
+
+    expect(mockGetScheduledReports).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        search: '',
+      })
+    );
+  });
+
+  it('should force refetch schedules when pressing refresh', async () => {
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={queryClient}>
+          <ReportSchedulesTable />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
+
+    expect(await screen.findAllByTestId('scheduledReportRow')).toHaveLength(3);
+    expect(mockGetScheduledReports).toHaveBeenCalledTimes(1);
+
+    const refreshButton = screen.getByTestId(`refreshScheduledReportsButton`);
+    await user.click(refreshButton);
+
+    expect(mockGetScheduledReports).toHaveBeenCalledTimes(2);
+    expect(mockGetScheduledReports).toHaveBeenLastCalledWith(
+      ...mockGetScheduledReports.mock.calls[0]
+    );
+  });
+
+  describe('when user is author of reports', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       window.open = jest.fn();
@@ -299,7 +358,7 @@ describe('ReportSchedulesTable', () => {
       render(
         <IntlProvider locale="en">
           <QueryClientProvider client={queryClient}>
-            <ReportSchedulesTable {...defaultProps} />
+            <ReportSchedulesTable />
           </QueryClientProvider>
         </IntlProvider>
       );
@@ -317,7 +376,7 @@ describe('ReportSchedulesTable', () => {
       render(
         <IntlProvider locale="en">
           <QueryClientProvider client={queryClient}>
-            <ReportSchedulesTable {...defaultProps} />
+            <ReportSchedulesTable />
           </QueryClientProvider>
         </IntlProvider>
       );
@@ -335,7 +394,7 @@ describe('ReportSchedulesTable', () => {
       render(
         <IntlProvider locale="en">
           <QueryClientProvider client={queryClient}>
-            <ReportSchedulesTable {...defaultProps} />
+            <ReportSchedulesTable />
           </QueryClientProvider>
         </IntlProvider>
       );
@@ -360,7 +419,7 @@ describe('ReportSchedulesTable', () => {
       render(
         <IntlProvider locale="en">
           <QueryClientProvider client={queryClient}>
-            <ReportSchedulesTable {...defaultProps} />
+            <ReportSchedulesTable />
           </QueryClientProvider>
         </IntlProvider>
       );
@@ -375,7 +434,7 @@ describe('ReportSchedulesTable', () => {
     });
   });
 
-  describe('manageReporting capability true actions', () => {
+  describe('when user is reporting manager', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       window.open = jest.fn();
@@ -407,7 +466,7 @@ describe('ReportSchedulesTable', () => {
       render(
         <IntlProvider locale="en">
           <QueryClientProvider client={queryClient}>
-            <ReportSchedulesTable {...defaultProps} />
+            <ReportSchedulesTable />
           </QueryClientProvider>
         </IntlProvider>
       );
@@ -431,7 +490,7 @@ describe('ReportSchedulesTable', () => {
       render(
         <IntlProvider locale="en">
           <QueryClientProvider client={queryClient}>
-            <ReportSchedulesTable {...defaultProps} />
+            <ReportSchedulesTable />
           </QueryClientProvider>
         </IntlProvider>
       );
@@ -461,7 +520,7 @@ describe('ReportSchedulesTable', () => {
       render(
         <IntlProvider locale="en">
           <QueryClientProvider client={queryClient}>
-            <ReportSchedulesTable {...defaultProps} />
+            <ReportSchedulesTable />
           </QueryClientProvider>
         </IntlProvider>
       );
@@ -479,7 +538,7 @@ describe('ReportSchedulesTable', () => {
       render(
         <IntlProvider locale="en">
           <QueryClientProvider client={queryClient}>
-            <ReportSchedulesTable {...defaultProps} />
+            <ReportSchedulesTable />
           </QueryClientProvider>
         </IntlProvider>
       );
@@ -519,7 +578,7 @@ describe('ReportSchedulesTable', () => {
       render(
         <IntlProvider locale="en">
           <QueryClientProvider client={queryClient}>
-            <ReportSchedulesTable {...defaultProps} />
+            <ReportSchedulesTable />
           </QueryClientProvider>
         </IntlProvider>
       );
@@ -549,7 +608,7 @@ describe('ReportSchedulesTable', () => {
       render(
         <IntlProvider locale="en">
           <QueryClientProvider client={queryClient}>
-            <ReportSchedulesTable {...defaultProps} />
+            <ReportSchedulesTable />
           </QueryClientProvider>
         </IntlProvider>
       );
@@ -587,7 +646,7 @@ describe('ReportSchedulesTable', () => {
       render(
         <IntlProvider locale="en">
           <QueryClientProvider client={queryClient}>
-            <ReportSchedulesTable {...defaultProps} />
+            <ReportSchedulesTable />
           </QueryClientProvider>
         </IntlProvider>
       );
@@ -612,7 +671,7 @@ describe('ReportSchedulesTable', () => {
       render(
         <IntlProvider locale="en">
           <QueryClientProvider client={queryClient}>
-            <ReportSchedulesTable {...defaultProps} />
+            <ReportSchedulesTable />
           </QueryClientProvider>
         </IntlProvider>
       );

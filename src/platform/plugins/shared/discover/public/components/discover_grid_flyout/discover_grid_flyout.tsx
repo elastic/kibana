@@ -26,7 +26,11 @@ import { useProfileAccessor } from '../../context_awareness';
 
 export const FLYOUT_WIDTH_KEY = 'discover:flyoutWidth';
 
-export interface DiscoverGridFlyoutProps {
+export interface DiscoverGridFlyoutProps
+  extends Pick<
+    DocViewerProps,
+    'initialDocViewerState' | 'onInitialDocViewerStateChange' | 'onUpdateSelectedTabId'
+  > {
   savedSearchId?: string;
   filters?: Filter[];
   query?: Query | AggregateQuery;
@@ -42,7 +46,11 @@ export interface DiscoverGridFlyoutProps {
   onClose: () => void;
   onFilter?: DocViewFilterFn;
   onRemoveColumn: (column: string) => void;
-  setExpandedDoc: (doc?: DataTableRecord, options?: { initialTabId?: string }) => void;
+  setExpandedDoc: (
+    doc?: DataTableRecord,
+    options?: { initialTabId?: string; initialTabState?: object }
+  ) => void;
+  hideFilteringOnComputedColumns?: boolean;
 }
 
 /**
@@ -65,6 +73,10 @@ export function DiscoverGridFlyout({
   onRemoveColumn,
   onAddColumn,
   setExpandedDoc,
+  initialDocViewerState,
+  onInitialDocViewerStateChange,
+  onUpdateSelectedTabId,
+  hideFilteringOnComputedColumns,
 }: DiscoverGridFlyoutProps) {
   const services = useDiscoverServices();
   const flyoutCustomization = useDiscoverCustomization('flyout');
@@ -127,6 +139,10 @@ export function DiscoverGridFlyout({
       setExpandedDoc={setExpandedDoc}
       initialTabId={initialTabId}
       docViewerRef={docViewerRef}
+      initialDocViewerState={initialDocViewerState}
+      onInitialDocViewerStateChange={onInitialDocViewerStateChange}
+      onUpdateSelectedTabId={onUpdateSelectedTabId}
+      hideFilteringOnComputedColumns={hideFilteringOnComputedColumns}
     />
   );
 }

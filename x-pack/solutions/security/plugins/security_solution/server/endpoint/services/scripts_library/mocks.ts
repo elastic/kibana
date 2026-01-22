@@ -12,8 +12,15 @@ import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-ob
 import type { ScriptsLibrarySavedObjectAttributes, ScriptsLibraryClientInterface } from './types';
 import { SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE } from '../../lib/scripts_library';
 import { createHapiReadableStreamMock } from '../actions/mocks';
-import type { CreateScriptRequestBody } from '../../../../common/api/endpoint/scripts_library';
-import { SCRIPTS_LIBRARY_ITEM_DOWNLOAD_ROUTE } from '../../../../common/endpoint/constants';
+import type {
+  CreateScriptRequestBody,
+  ListScriptsRequestQuery,
+  PatchUpdateRequestBody,
+} from '../../../../common/api/endpoint/scripts_library';
+import {
+  ENDPOINT_DEFAULT_PAGE_SIZE,
+  SCRIPTS_LIBRARY_ITEM_DOWNLOAD_ROUTE,
+} from '../../../../common/endpoint/constants';
 import type { EndpointScript } from '../../../../common/endpoint/types';
 
 const generateScriptEntryMock = (overrides: Partial<EndpointScript> = {}): EndpointScript => {
@@ -21,6 +28,11 @@ const generateScriptEntryMock = (overrides: Partial<EndpointScript> = {}): Endpo
     id: '1-2-3',
     name: 'script one',
     platform: ['linux', 'macos'],
+    tags: ['dataCollection'],
+    fileId: 'file-1-2-3',
+    fileName: 'my_script.sh',
+    fileSize: 12098,
+    fileHash: 'e5441eb2bb',
     requiresInput: false,
     downloadUri: SCRIPTS_LIBRARY_ITEM_DOWNLOAD_ROUTE.replace('{script_id}', '1-2-3'),
     description: 'does some stuff',
@@ -46,7 +58,18 @@ const generateCreateScriptBodyMock = (
     instructions: 'just execute it',
     example: 'bash -c script_one.sh',
     requiresInput: false,
+    tags: ['dataCollection'],
     file: createHapiReadableStreamMock(),
+    ...overrides,
+  };
+};
+
+const generateUpdateScriptBodyMock = (
+  overrides: Partial<PatchUpdateRequestBody> = {}
+): PatchUpdateRequestBody => {
+  return {
+    ...generateCreateScriptBodyMock(),
+    version: 'soVersionHere==',
     ...overrides,
   };
 };
@@ -60,16 +83,21 @@ const generateSavedObjectScriptEntryMock = (
     namespaces: ['default'],
     attributes: {
       id: '1-2-3',
-      hash: 'e5441eb2bb',
+      file_id: 'file-1-2-3',
+      file_size: 12098,
+      file_name: 'my_script.sh',
+      file_hash_sha256: 'e5441eb2bb',
       name: 'my script',
       platform: ['macos', 'linux'],
       requires_input: undefined,
       description: undefined,
       instructions: undefined,
       example: undefined,
-      pathToExecutable: undefined,
+      path_to_executable: undefined,
       created_by: 'elastic',
+      created_at: '2025-11-24T16:04:17.471Z',
       updated_by: 'elastic',
+      updated_at: '2025-11-24T16:04:17.471Z',
       ...scriptEntrySoAttributeOverrides,
     },
     references: [],
@@ -87,7 +115,23 @@ const getScriptsLibraryClientMock = (): jest.Mocked<ScriptsLibraryClientInterfac
     create: jest.fn().mockResolvedValue(generateScriptEntryMock()),
     update: jest.fn().mockResolvedValue(generateScriptEntryMock()),
     get: jest.fn().mockResolvedValue(generateScriptEntryMock()),
-    list: jest.fn().mockResolvedValue([generateScriptEntryMock()]),
+    list: jest.fn(
+      async ({
+        page = 1,
+        pageSize = ENDPOINT_DEFAULT_PAGE_SIZE,
+        sortField = 'name',
+        sortDirection = 'asc',
+      }: ListScriptsRequestQuery = {}) => {
+        return {
+          data: [generateScriptEntryMock()],
+          total: 1,
+          page,
+          pageSize,
+          sortField,
+          sortDirection,
+        };
+      }
+    ),
     delete: jest.fn().mockResolvedValue(null),
     download: jest.fn(async (_) => {
       return {
@@ -141,6 +185,8 @@ export const ScriptsLibraryMock = Object.freeze({
   getMockedClient: getScriptsLibraryClientMock,
   generateScriptEntry: generateScriptEntryMock,
   generateCreateScriptBody: generateCreateScriptBodyMock,
+  generateUpdateScriptBody: generateUpdateScriptBodyMock,
+  generateSavedObjectScriptEntry: generateSavedObjectScriptEntryMock,
   createFilesPluginClient: createFilesPluginClientMock,
   applyMocksToSoClient: applySoClientMocks,
 });

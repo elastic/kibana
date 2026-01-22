@@ -64,13 +64,14 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { DiscoverStartPlugins } from './types';
 import type { DiscoverContextAppLocator } from './application/context/services/locator';
 import type { DiscoverSingleDocLocator } from './application/doc/locator';
 import type { DiscoverAppLocator } from '../common';
 import type { ProfilesManager } from './context_awareness';
 import type { DiscoverEBTManager } from './ebt_manager';
-import { TABS_ENABLED_FEATURE_FLAG_KEY } from './constants';
+import { EmbeddableEditorService } from './plugin_imports/embeddable_editor_service';
 
 /**
  * Location state of internal Discover history instance
@@ -85,9 +86,7 @@ export interface UrlTracker {
   setTrackingEnabled: (value: boolean) => void;
 }
 
-export interface DiscoverFeatureFlags {
-  getTabsEnabled: () => boolean;
-}
+export type DiscoverFeatureFlags = Record<string, never>;
 
 export interface DiscoverServices {
   aiops?: AiopsPluginStart;
@@ -150,6 +149,8 @@ export interface DiscoverServices {
   fieldsMetadata?: FieldsMetadataPublicStart;
   logsDataAccess?: LogsDataAccessPluginStart;
   embeddableEnhanced?: EmbeddableEnhancedPluginStart;
+  cps?: CPSPluginStart;
+  embeddableEditor: EmbeddableEditorService;
 }
 
 export const buildServices = ({
@@ -194,9 +195,7 @@ export const buildServices = ({
     data: plugins.data,
     dataVisualizer: plugins.dataVisualizer,
     discoverShared: plugins.discoverShared,
-    discoverFeatureFlags: {
-      getTabsEnabled: () => core.featureFlags.getBooleanValue(TABS_ENABLED_FEATURE_FLAG_KEY, true),
-    },
+    discoverFeatureFlags: {},
     docLinks: core.docLinks,
     embeddable: plugins.embeddable,
     i18n: core.i18n,
@@ -247,5 +246,10 @@ export const buildServices = ({
     fieldsMetadata: plugins.fieldsMetadata,
     logsDataAccess: plugins.logsDataAccess,
     embeddableEnhanced: plugins.embeddableEnhanced,
+    cps: plugins.cps,
+    embeddableEditor: new EmbeddableEditorService(
+      core.application,
+      plugins.embeddable.getStateTransfer()
+    ),
   };
 };

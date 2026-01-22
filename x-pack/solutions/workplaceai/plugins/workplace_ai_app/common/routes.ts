@@ -9,3 +9,13 @@ export const AGENT_BUILDER_API_PATH = '/api/agent_builder';
 export const GET_AGENTS_ROUTE = `${AGENT_BUILDER_API_PATH}/agents`;
 export const AGENT_BUILDER_AGENTS = 'agents';
 export const MCP_SERVER_PATH = `${AGENT_BUILDER_API_PATH}/mcp`;
+export const AGENT_BUILDER_AGENT_NEW_PATH = '/agents/new';
+export const AGENT_BUILDER_CONVERSATIONS_NEW_PATH = '/conversations/new';
+
+// Stack Management deeplinks
+export const STACK_CONNECTORS_MANAGEMENT_ID = 'management:triggersActionsConnectors';
+
+// EARS OAuth routes
+export const EARS_API_PATH = '/internal/workplace_ai/ears';
+export const EARS_START_OAUTH_ROUTE = `${EARS_API_PATH}/oauth/start/{provider}`;
+export const EARS_FETCH_SECRETS_ROUTE = `${EARS_API_PATH}/oauth/fetch_secrets`;

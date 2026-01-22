@@ -32,7 +32,7 @@ import type { ScoutFileInfo } from '../../..';
 import {
   datasources,
   generateTestRunId,
-  getTestIDForTitle,
+  computeTestID,
   ScoutEventsReport,
   ScoutReportEventAction,
   type ScoutTestRunInfo,
@@ -85,16 +85,16 @@ export class ScoutJestReporter extends BaseReporter {
   private getOwnerAreas(owners: string[]): CodeOwnerArea[] {
     return owners
       .map((owner) => findAreaForCodeOwner(owner))
-      .filter((area) => area !== undefined) as CodeOwnerArea[];
+      .filter((area): area is CodeOwnerArea => area !== undefined);
   }
 
   private getScoutFileInfoForPath(filePath: string): ScoutFileInfo {
     const fileOwners = this.getFileOwners(filePath);
-
+    const areas = this.getOwnerAreas(fileOwners);
     return {
       path: filePath,
-      owner: fileOwners,
-      area: this.getOwnerAreas(fileOwners),
+      owner: fileOwners.length > 0 ? fileOwners : 'unknown',
+      area: areas.length > 0 ? areas : 'unknown',
     };
   }
 
@@ -157,7 +157,7 @@ export class ScoutJestReporter extends BaseReporter {
         type: test.result.ancestorTitles.length <= 1 ? 'root' : 'suite',
       },
       test: {
-        id: getTestIDForTitle(test.result.fullName),
+        id: computeTestID(path.relative(REPO_ROOT, test.filePath), test.result.fullName),
         title: test.result.title,
         tags: [],
         file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, test.filePath)),

@@ -7,7 +7,7 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import type { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/utility_types';
 import { getAgentName } from '@kbn/elastic-agent-utils';
 import type { SortOptions } from '@elastic/elasticsearch/lib/api/types';
@@ -28,6 +28,13 @@ import {
   TELEMETRY_SDK_NAME,
   AGENT_VERSION,
   TELEMETRY_SDK_VERSION,
+  SERVICE_RUNTIME_NAME,
+  SERVICE_RUNTIME_VERSION,
+  SERVICE_FRAMEWORK_NAME,
+  HOST_OS_PLATFORM,
+  HOST_ARCHITECTURE,
+  CLOUD_PROVIDER,
+  CLOUD_PROJECT_NAME,
 } from '../../../common/es_fields/apm';
 import type { ContainerType } from '../../../common/service_metadata';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
@@ -39,8 +46,8 @@ export interface ServiceMetadataDetails {
   service?: {
     versions?: string[];
     runtime?: {
-      name: string;
-      version: string;
+      name?: string;
+      version?: string;
     };
     framework?: string;
     agent: {
@@ -176,19 +183,9 @@ export async function getServiceMetadataDetails({
     };
   }
 
-  const response = structuredClone(data);
-  response.hits.hits[0].fields[AGENT_NAME] = getAgentName(
-    data.hits.hits[0]?.fields?.[AGENT_NAME] as unknown as string | null,
-    data.hits.hits[0]?.fields?.[TELEMETRY_SDK_LANGUAGE] as unknown as string | null,
-    data.hits.hits[0]?.fields?.[TELEMETRY_SDK_NAME] as unknown as string | null
-  ) as unknown as unknown[];
-  response.hits.hits[0].fields[AGENT_VERSION] =
-    response.hits.hits[0].fields[AGENT_VERSION] ??
-    data.hits.hits[0]?.fields?.[TELEMETRY_SDK_VERSION];
+  const hits = maybe(data.hits.hits[0])?.fields;
 
-  const event = unflattenKnownApmEventFields(
-    maybe(response.hits.hits[0])?.fields as undefined | FlattenedApmEvent
-  );
+  const event = hits && accessKnownApmEventFields(hits as Partial<FlattenedApmEvent>);
 
   if (!event) {
     return {
@@ -198,62 +195,79 @@ export async function getServiceMetadataDetails({
     };
   }
 
-  const { service, agent, host, kubernetes, container, cloud, labels } = event;
+  const aggregations = data.aggregations;
+  const agentName = getAgentName(
+    event[AGENT_NAME] ?? null,
+    event[TELEMETRY_SDK_LANGUAGE] ?? null,
+    event[TELEMETRY_SDK_NAME] ?? null
+  ) as string;
+  const agentVersion = (event[AGENT_VERSION] ?? event[TELEMETRY_SDK_VERSION]) as string;
+  const runtimeName = event[SERVICE_RUNTIME_NAME];
+  const runtimeVersion = event[SERVICE_RUNTIME_VERSION];
 
   const serviceMetadataDetails = {
-    versions: response.aggregations?.serviceVersions.buckets.map((bucket) => bucket.key as string),
-    runtime: service.runtime,
-    framework: service.framework?.name,
-    agent,
+    versions: aggregations?.serviceVersions.buckets.map((bucket) => bucket.key as string),
+    runtime:
+      runtimeName || runtimeVersion
+        ? {
+            name: runtimeName,
+            version: runtimeVersion,
+          }
+        : undefined,
+    framework: event[SERVICE_FRAMEWORK_NAME],
+    agent: { name: agentName, version: agentVersion },
   };
 
-  const otelDetails =
-    Boolean(agent?.name) && isOpenTelemetryAgentName(agent.name)
-      ? {
-          language: hasOpenTelemetryPrefix(agent.name) ? agent.name.split('/')[1] : undefined,
-          sdkVersion: agent?.version,
-          autoVersion: labels?.telemetry_auto_version as string,
-        }
-      : undefined;
+  const otelDetails = isOpenTelemetryAgentName(agentName)
+    ? {
+        language: hasOpenTelemetryPrefix(agentName) ? agentName.split('/')[1] : undefined,
+        sdkVersion: agentVersion,
+        autoVersion: event['labels.telemetry_auto_version'] as string,
+      }
+    : undefined;
 
-  const totalNumberInstances = response.aggregations?.totalNumberInstances.value;
+  const totalNumberInstances = aggregations?.totalNumberInstances.value;
+
+  const kubernetes = event.containsFields('kubernetes');
+  const container = event.containsFields('container');
+  const hostOsPlatform = event[HOST_OS_PLATFORM];
 
   const containerDetails =
-    host || container || totalNumberInstances || kubernetes
+    hostOsPlatform || kubernetes || totalNumberInstances || container
       ? {
-          type: (!!kubernetes ? 'Kubernetes' : 'Docker') as ContainerType,
-          os: host?.os?.platform,
+          type: (kubernetes ? 'Kubernetes' : 'Docker') as ContainerType,
+          os: hostOsPlatform,
           totalNumberInstances,
-          ids: response.aggregations?.containerIds.buckets.map((bucket) => bucket.key as string),
+          ids: aggregations?.containerIds.buckets.map((bucket) => bucket.key as string),
         }
       : undefined;
+
+  const cloudServiceName = event[CLOUD_SERVICE_NAME];
 
   const serverlessDetails =
-    !!response.aggregations?.faasTriggerTypes?.buckets.length && cloud
+    !!aggregations?.faasTriggerTypes?.buckets.length && cloudServiceName
       ? {
-          type: cloud.service?.name,
-          functionNames: response.aggregations?.faasFunctionNames.buckets
+          type: cloudServiceName,
+          functionNames: aggregations?.faasFunctionNames.buckets
             .map((bucket) => getLambdaFunctionNameFromARN(bucket.key as string))
             .filter((name) => name),
-          faasTriggerTypes: response.aggregations?.faasTriggerTypes.buckets.map(
+          faasTriggerTypes: aggregations?.faasTriggerTypes.buckets.map(
             (bucket) => bucket.key as string
           ),
-          hostArchitecture: host?.architecture,
+          hostArchitecture: event[HOST_ARCHITECTURE],
         }
       : undefined;
 
-  const cloudDetails = cloud
+  const cloudDetails = cloudServiceName
     ? {
-        provider: cloud.provider,
-        projectName: cloud.project?.name,
-        serviceName: cloud.service?.name,
-        availabilityZones: response.aggregations?.availabilityZones.buckets.map(
+        provider: event[CLOUD_PROVIDER],
+        projectName: event[CLOUD_PROJECT_NAME],
+        serviceName: cloudServiceName,
+        availabilityZones: aggregations?.availabilityZones.buckets.map(
           (bucket) => bucket.key as string
         ),
-        regions: response.aggregations?.regions.buckets.map((bucket) => bucket.key as string),
-        machineTypes: response.aggregations?.machineTypes.buckets.map(
-          (bucket) => bucket.key as string
-        ),
+        regions: aggregations?.regions.buckets.map((bucket) => bucket.key as string),
+        machineTypes: aggregations?.machineTypes.buckets.map((bucket) => bucket.key as string),
       }
     : undefined;
 

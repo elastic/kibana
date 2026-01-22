@@ -38,7 +38,7 @@ export const getMessageFromRawResponse = (
   }
 };
 
-const ELASTIC_LLM_CONNECTOR_ID = 'Elastic-Managed-LLM';
+const ELASTIC_LLM_CONNECTOR_IDS = ['Elastic-Managed-LLM', 'Anthropic-Claude-Sonnet-3-7'];
 
 /**
  * Returns a default connector if there is only one connector
@@ -67,7 +67,7 @@ export const getDefaultConnector = (
     // In case the default connector is not set or is invalid, return the prioritized connector
     const prioritizedConnectors = [...validConnectors].sort((a, b) => {
       const priority = (connector: (typeof validConnectors)[number]) => {
-        if (connector.id === ELASTIC_LLM_CONNECTOR_ID) return 0;
+        if (ELASTIC_LLM_CONNECTOR_IDS.includes(connector.id)) return 0;
         if (
           connector.apiProvider === OpenAiProviderType.OpenAi ||
           connector.apiProvider === OpenAiProviderType.AzureAi

@@ -10,6 +10,8 @@
         "label": "FileUploadManager",
         "description": [],
         "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+        "lineNumber": 97,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -33,6 +35,8 @@
               "[]>"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -56,6 +60,8 @@
               " | undefined)[]>"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -75,6 +81,8 @@
               ">>"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 123,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -94,6 +102,8 @@
               ">>"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -109,6 +119,8 @@
               "<string | null>"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 132,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -132,6 +144,8 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 165,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -146,6 +160,8 @@
               "any"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 169,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -160,6 +176,8 @@
                   "Dependencies"
                 ],
                 "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "lineNumber": 170,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -175,6 +193,8 @@
                   "string | null"
                 ],
                 "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "lineNumber": 171,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -190,6 +210,8 @@
                   "boolean"
                 ],
                 "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "lineNumber": 172,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -205,6 +227,8 @@
                   "boolean"
                 ],
                 "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "lineNumber": 173,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -220,6 +244,8 @@
                   "string | null"
                 ],
                 "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "lineNumber": 174,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -236,6 +262,8 @@
                   " | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "lineNumber": 175,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -251,6 +279,8 @@
                   "string | null"
                 ],
                 "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "lineNumber": 176,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -266,6 +296,8 @@
                   "((indexName: string) => void) | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "lineNumber": 177,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -281,6 +313,8 @@
                   "((indexName: string) => void) | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "lineNumber": 178,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -299,6 +333,8 @@
               "() => void"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 289,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -315,6 +351,8 @@
               "(fileList: FileList | File[]) => Promise<void>"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 310,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -329,6 +367,8 @@
                   "FileList | File[]"
                 ],
                 "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "lineNumber": 310,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -347,6 +387,8 @@
               "(file: File) => Promise<void>"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 319,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -361,6 +403,8 @@
                   "File"
                 ],
                 "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "lineNumber": 319,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -379,6 +423,8 @@
               "(index: number) => Promise<void>"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 333,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -393,6 +439,8 @@
                   "number"
                 ],
                 "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "lineNumber": 333,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -411,6 +459,8 @@
               "() => Promise<void>"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 348,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -427,6 +477,8 @@
               "() => Promise<void>"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 353,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -438,11 +490,15 @@
             "type": "Function",
             "tags": [],
             "label": "removeClashingFiles",
-            "description": [],
+            "description": [
+              "\nRemoves files that have clashing mappings and cannot be imported together.\nFiles marked with ERROR clash type will be removed from the file list."
+            ],
             "signature": [
               "() => Promise<void>"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 359,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -454,7 +510,9 @@
             "type": "Function",
             "tags": [],
             "label": "analyzeFileWithOverrides",
-            "description": [],
+            "description": [
+              "\nCreates a function to analyze a file at the specified index with custom overrides."
+            ],
             "signature": [
               "(index: number) => (overrides: ",
               {
@@ -467,6 +525,8 @@
               ") => Promise<void>"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 382,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -476,17 +536,23 @@
                 "type": "number",
                 "tags": [],
                 "label": "index",
-                "description": [],
+                "description": [
+                  "- The index of the file to analyze"
+                ],
                 "signature": [
                   "number"
                 ],
                 "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "lineNumber": 387,
+                "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
-            "returnComment": []
+            "returnComment": [
+              "A function that accepts overrides and performs the file analysis"
+            ]
           },
           {
             "parentPluginId": "@kbn/file-upload",
@@ -494,7 +560,9 @@
             "type": "Function",
             "tags": [],
             "label": "getUploadStatus",
-            "description": [],
+            "description": [
+              "\nGets the current upload status including file clashes, analysis status, and import progress."
+            ],
             "signature": [
               "() => ",
               {
@@ -506,10 +574,14 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 398,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
-            "returnComment": []
+            "returnComment": [
+              "The current upload status"
+            ]
           },
           {
             "parentPluginId": "@kbn/file-upload",
@@ -517,15 +589,21 @@
             "type": "Function",
             "tags": [],
             "label": "getInitializedWithExistingIndex",
-            "description": [],
+            "description": [
+              "\nChecks if the file upload manager was initialized with an existing index."
+            ],
             "signature": [
               "() => boolean"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 406,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
-            "returnComment": []
+            "returnComment": [
+              "True if initialized with an existing index, false otherwise"
+            ]
           },
           {
             "parentPluginId": "@kbn/file-upload",
@@ -533,15 +611,21 @@
             "type": "Function",
             "tags": [],
             "label": "getExistingIndexName",
-            "description": [],
+            "description": [
+              "\nGets the name of the existing index being used for import."
+            ],
             "signature": [
               "() => string | null"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 414,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
-            "returnComment": []
+            "returnComment": [
+              "The existing index name or null if none is set"
+            ]
           },
           {
             "parentPluginId": "@kbn/file-upload",
@@ -549,11 +633,15 @@
             "type": "Function",
             "tags": [],
             "label": "setExistingIndexName",
-            "description": [],
+            "description": [
+              "\nSets the existing index name and resets the analysis status."
+            ],
             "signature": [
               "(name: string | null) => void"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 422,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -563,11 +651,15 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "name",
-                "description": [],
+                "description": [
+                  "- The index name to set, or null to clear"
+                ],
                 "signature": [
                   "string | null"
                 ],
                 "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "lineNumber": 426,
+                "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -581,15 +673,21 @@
             "type": "Function",
             "tags": [],
             "label": "isExistingIndexUpload",
-            "description": [],
+            "description": [
+              "\nChecks if this upload is targeting an existing index."
+            ],
             "signature": [
               "() => boolean"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 440,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
-            "returnComment": []
+            "returnComment": [
+              "True if uploading to an existing index, false otherwise"
+            ]
           },
           {
             "parentPluginId": "@kbn/file-upload",
@@ -597,17 +695,23 @@
             "type": "Function",
             "tags": [],
             "label": "getFiles",
-            "description": [],
+            "description": [
+              "\nGets the current array of file wrappers being managed."
+            ],
             "signature": [
               "() => ",
               "FileWrapper",
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 448,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
-            "returnComment": []
+            "returnComment": [
+              "Array of FileWrapper instances"
+            ]
           },
           {
             "parentPluginId": "@kbn/file-upload",
@@ -620,6 +724,8 @@
               "(index: number) => (pipeline: string) => void"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 500,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -634,6 +740,8 @@
                   "number"
                 ],
                 "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "lineNumber": 500,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -647,7 +755,9 @@
             "type": "Function",
             "tags": [],
             "label": "updatePipelines",
-            "description": [],
+            "description": [
+              "\nUpdates the pipelines for all files with the provided array."
+            ],
             "signature": [
               "(pipelines: (",
               {
@@ -660,6 +770,8 @@
               " | undefined)[]) => void"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 507,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -669,7 +781,9 @@
                 "type": "Array",
                 "tags": [],
                 "label": "pipelines",
-                "description": [],
+                "description": [
+                  "- Array of pipelines corresponding to each file"
+                ],
                 "signature": [
                   "(",
                   {
@@ -682,6 +796,8 @@
                   " | undefined)[]"
                 ],
                 "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "lineNumber": 511,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -695,7 +811,9 @@
             "type": "Function",
             "tags": [],
             "label": "getMappings",
-            "description": [],
+            "description": [
+              "\nGets the current index mappings."
+            ],
             "signature": [
               "() => ",
               "Config",
@@ -704,10 +822,14 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 518,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
-            "returnComment": []
+            "returnComment": [
+              "The current mappings configuration"
+            ]
           },
           {
             "parentPluginId": "@kbn/file-upload",
@@ -715,13 +837,17 @@
             "type": "Function",
             "tags": [],
             "label": "updateMappings",
-            "description": [],
+            "description": [
+              "\nUpdates the index mappings configuration."
+            ],
             "signature": [
               "(mappings: string | ",
               "MappingTypeMapping",
               ") => void"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 526,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -731,12 +857,16 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "mappings",
-                "description": [],
+                "description": [
+                  "- New mappings as object or JSON string"
+                ],
                 "signature": [
                   "string | ",
                   "MappingTypeMapping"
                 ],
                 "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "lineNumber": 530,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -750,7 +880,9 @@
             "type": "Function",
             "tags": [],
             "label": "getSettings",
-            "description": [],
+            "description": [
+              "\nGets the current index settings."
+            ],
             "signature": [
               "() => ",
               "Config",
@@ -759,10 +891,14 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 534,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
-            "returnComment": []
+            "returnComment": [
+              "The current index settings configuration"
+            ]
           },
           {
             "parentPluginId": "@kbn/file-upload",
@@ -770,13 +906,17 @@
             "type": "Function",
             "tags": [],
             "label": "updateSettings",
-            "description": [],
+            "description": [
+              "\nUpdates the index settings configuration."
+            ],
             "signature": [
               "(settings: string | ",
               "IndicesIndexSettings",
               ") => void"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 542,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -786,12 +926,16 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "settings",
-                "description": [],
+                "description": [
+                  "- New settings as object or JSON string"
+                ],
                 "signature": [
                   "string | ",
                   "IndicesIndexSettings"
                 ],
                 "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "lineNumber": 546,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -805,15 +949,21 @@
             "type": "Function",
             "tags": [],
             "label": "getAutoCreateDataView",
-            "description": [],
+            "description": [
+              "\nGets whether a data view should be automatically created after import."
+            ],
             "signature": [
               "() => boolean"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 587,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
-            "returnComment": []
+            "returnComment": [
+              "True if auto-creating data view, false otherwise"
+            ]
           },
           {
             "parentPluginId": "@kbn/file-upload",
@@ -821,7 +971,9 @@
             "type": "Function",
             "tags": [],
             "label": "import",
-            "description": [],
+            "description": [
+              "\nImports all files into the specified index with optional data view creation."
+            ],
             "signature": [
               "(indexName: string, dataViewName?: string | null | undefined) => Promise<",
               {
@@ -834,6 +986,8 @@
               " | null>"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 595,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -843,11 +997,15 @@
                 "type": "string",
                 "tags": [],
                 "label": "indexName",
-                "description": [],
+                "description": [
+                  "- Name of the target index"
+                ],
                 "signature": [
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "lineNumber": 602,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -858,14 +1016,122 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "dataViewName",
-                "description": [],
+                "description": [
+                  "- Optional name for the data view to create"
+                ],
                 "signature": [
                   "string | null | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "lineNumber": 603,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              }
+            ],
+            "returnComment": [
+              "Promise resolving to import results or null if cancelled"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-public.FileUploadManager.renamePipelineTargetFields",
+            "type": "Function",
+            "tags": [],
+            "label": "renamePipelineTargetFields",
+            "description": [
+              "\nRenames target fields in CSV processors across all file pipelines."
+            ],
+            "signature": [
+              "(changes: { oldName: string; newName: string; }[]) => void"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 954,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload",
+                "id": "def-public.FileUploadManager.renamePipelineTargetFields.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "changes",
+                "description": [
+                  "- Array of field name changes to apply"
+                ],
+                "signature": [
+                  "{ oldName: string; newName: string; }[]"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "lineNumber": 959,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-public.FileUploadManager.removeConvertProcessors",
+            "type": "Function",
+            "tags": [],
+            "label": "removeConvertProcessors",
+            "description": [
+              "\nRemoves all convert processors from all file pipelines."
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 978,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-public.FileUploadManager.updateDateFields",
+            "type": "Function",
+            "tags": [],
+            "label": "updateDateFields",
+            "description": [
+              "\nUpdates date field processors in all file pipelines based on current mappings."
+            ],
+            "signature": [
+              "(mappings: ",
+              "MappingTypeMapping",
+              ") => void"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 988,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload",
+                "id": "def-public.FileUploadManager.updateDateFields.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "mappings",
+                "description": [
+                  "- Current index mappings to validate against"
+                ],
+                "signature": [
+                  "MappingTypeMapping"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+                "lineNumber": 992,
+                "columnNumber": 27,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -909,9 +1175,11 @@
             "section": "def-common.OpenFileUploadLiteContext",
             "text": "OpenFileUploadLiteContext"
           },
-          ">"
+          ", {}>"
         ],
         "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/new/file_upload_lite_action.tsx",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -926,6 +1194,8 @@
               "CoreStart"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/new/file_upload_lite_action.tsx",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -947,6 +1217,45 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/new/file_upload_lite_action.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload",
+        "id": "def-public.FileUploadLiteLookUpView",
+        "type": "Function",
+        "tags": [],
+        "label": "FileUploadLiteLookUpView",
+        "description": [],
+        "signature": [
+          "({ onClose, setDropzoneDisabled, setFileUploadActive, }: Props) => React.JSX.Element | null"
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/new/file_upload_lite_lookup_view.tsx",
+        "lineNumber": 37,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-public.FileUploadLiteLookUpView.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  onClose,\n  setDropzoneDisabled,\n  setFileUploadActive,\n}",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/new/file_upload_lite_lookup_view.tsx",
+            "lineNumber": 37,
+            "columnNumber": 53,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1001,7 +1310,7 @@
             "section": "def-common.FileUploadResults",
             "text": "FileUploadResults"
           },
-          " | null) => void) | undefined) => { fileUploadManager: ",
+          " | null) => void) | undefined, reset: ((existingIndex?: string | undefined) => void) | undefined) => { fileUploadManager: ",
           {
             "pluginId": "@kbn/file-upload",
             "scope": "public",
@@ -1097,9 +1406,11 @@
             "section": "def-common.FindFileStructureResponse",
             "text": "FindFileStructureResponse"
           },
-          " | null; }>) | undefined; }"
+          " | null; }>) | undefined; reset: ((existingIndex?: string | undefined) => void) | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/file-upload/src/use_file_upload.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1120,6 +1431,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/file-upload/src/use_file_upload.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1141,6 +1454,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/file-upload/src/use_file_upload.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1156,6 +1471,8 @@
               "ApplicationStart"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/src/use_file_upload.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1171,6 +1488,8 @@
               "HttpSetup"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/src/use_file_upload.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1186,6 +1505,8 @@
               "NotificationsStart"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/src/use_file_upload.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1209,6 +1530,8 @@
               " | null; }>) | undefined"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/src/use_file_upload.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1232,6 +1555,25 @@
               " | null) => void) | undefined"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/src/use_file_upload.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-public.useFileUpload.$8",
+            "type": "Function",
+            "tags": [],
+            "label": "reset",
+            "description": [],
+            "signature": [
+              "((existingIndex?: string | undefined) => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload/src/use_file_upload.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1344,9 +1686,11 @@
             "section": "def-common.FindFileStructureResponse",
             "text": "FindFileStructureResponse"
           },
-          " | null; }>) | undefined; }"
+          " | null; }>) | undefined; reset: ((existingIndex?: string | undefined) => void) | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/file-upload/src/use_file_upload.ts",
+        "lineNumber": 319,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -1363,6 +1707,8 @@
         "label": "FileUploadStartDependencies",
         "description": [],
         "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/kibana_context.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1383,6 +1729,8 @@
               ">; }"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/kibana_context.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1397,6 +1745,8 @@
               "FileUploadPluginStartApi"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/kibana_context.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1416,7 +1766,25 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ") => Promise<void>; } & { url: ",
+              ") => Promise<void>; getExportHandler: (options: Omit<",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.ShowShareMenuOptions",
+                "text": "ShowShareMenuOptions"
+              },
+              ", \"asExport\" | \"anchorElement\">, exportId: string, intl: ",
+              "IntlShape",
+              ") => Promise<(() => Promise<void>) | null>; getExportDerivativeHandler: (options: Omit<",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.ShowShareMenuOptions",
+                "text": "ShowShareMenuOptions"
+              },
+              ", \"asExport\" | \"anchorElement\">, derivativeId: string) => Promise<(() => Promise<void>) | null>; } & { url: ",
               {
                 "pluginId": "share",
                 "scope": "public",
@@ -1439,6 +1807,8 @@
               "[]; }"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/kibana_context.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1458,7 +1828,7 @@
                 "section": "def-common.FieldFormatsRegistry",
                 "text": "FieldFormatsRegistry"
               },
-              ", \"init\" | \"register\"> & { deserialize: ",
+              ", \"register\" | \"init\"> & { deserialize: ",
               {
                 "pluginId": "fieldFormats",
                 "scope": "common",
@@ -1469,6 +1839,8 @@
               "; }"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/kibana_context.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1489,6 +1861,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/kibana_context.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1518,7 +1892,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<Context>) => ",
+              "<Context, {}>) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -1526,7 +1900,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<Context>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
+              "<Context, object>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -1534,7 +1908,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<Context>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+              "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -1542,7 +1916,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<any>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+              "<any, {}>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -1550,7 +1924,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<any>>) => void; readonly getAction: (id: string) => Promise<",
+              "<any, {}>>) => void; readonly getAction: (id: string) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -1558,7 +1932,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
+              "<object, object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -1566,7 +1940,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
+              "<object, object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -1574,7 +1948,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
+              "<object, object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -1587,6 +1961,8 @@
               "; }"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/kibana_context.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1601,6 +1977,8 @@
               "IUiSettingsClient"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/kibana_context.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1615,6 +1993,8 @@
               "HttpSetup"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/kibana_context.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1629,6 +2009,8 @@
               "ApplicationStart"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/kibana_context.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1643,6 +2025,8 @@
               "NotificationsStart"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/kibana_context.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1657,6 +2041,8 @@
               "CoreStart"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/kibana_context.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1671,6 +2057,8 @@
         "label": "UploadStatus",
         "description": [],
         "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+        "lineNumber": 74,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1691,6 +2079,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1711,6 +2101,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1722,6 +2114,8 @@
             "label": "overallImportProgress",
             "description": [],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1742,6 +2136,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1762,6 +2158,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1782,6 +2180,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1802,6 +2202,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1822,6 +2224,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1842,6 +2246,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1863,6 +2269,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1878,6 +2286,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1889,6 +2299,8 @@
             "label": "formatMix",
             "description": [],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1900,6 +2312,8 @@
             "label": "mappingsJsonValid",
             "description": [],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1911,6 +2325,8 @@
             "label": "settingsJsonValid",
             "description": [],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1922,6 +2338,8 @@
             "label": "pipelinesJsonValid",
             "description": [],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1933,6 +2351,8 @@
             "label": "indexSearchable",
             "description": [],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1944,6 +2364,8 @@
             "label": "allDocsSearchable",
             "description": [],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1958,6 +2380,34 @@
               "{ title: string; error: any; }[]"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-public.UploadStatus.totalDocs",
+            "type": "number",
+            "tags": [],
+            "label": "totalDocs",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-public.UploadStatus.totalFailedDocs",
+            "type": "number",
+            "tags": [],
+            "label": "totalFailedDocs",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1974,6 +2424,8 @@
         "label": "CLASH_ERROR_TYPE",
         "description": [],
         "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/merge_tools.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1986,6 +2438,8 @@
         "label": "CLASH_TYPE",
         "description": [],
         "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/merge_tools.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1998,6 +2452,8 @@
         "label": "STATUS",
         "description": [],
         "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2010,6 +2466,8 @@
         "label": "UPLOAD_TYPE",
         "description": [],
         "path": "x-pack/platform/packages/shared/file-upload/src/use_file_upload.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2051,6 +2509,8 @@
           "[]; fileSizeInfo: FileSizeInfo; }"
         ],
         "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_wrapper.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2065,6 +2525,8 @@
         "label": "createOpenFileUploadLiteTrigger",
         "description": [],
         "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/new/file_upload_lite_action.tsx",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2076,6 +2538,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/new/file_upload_lite_action.tsx",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2087,6 +2551,8 @@
             "label": "title",
             "description": [],
             "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/new/file_upload_lite_action.tsx",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2098,6 +2564,8 @@
             "label": "description",
             "description": [],
             "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/new/file_upload_lite_action.tsx",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2208,9 +2676,11 @@
             "section": "def-common.FindFileStructureResponse",
             "text": "FindFileStructureResponse"
           },
-          " | null; }>) | undefined; } | undefined>"
+          " | null; }>) | undefined; reset: ((existingIndex?: string | undefined) => void) | undefined; } | undefined>"
         ],
         "path": "x-pack/platform/packages/shared/file-upload/src/use_file_upload.ts",
+        "lineNumber": 317,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

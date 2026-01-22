@@ -22,6 +22,9 @@ interface TopNavMenuItemsProps {
   gutterSize?: EuiHeaderLinksProps['gutterSize'];
 }
 
+/**
+ * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+ */
 export const TopNavMenuItems = ({
   config,
   className,

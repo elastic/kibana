@@ -9,18 +9,14 @@
 
 import React, { type PropsWithChildren, useEffect, useRef, useMemo, useCallback } from 'react';
 import { createHtmlPortalNode, type HtmlPortalNode, InPortal } from 'react-reverse-portal';
-import type {
-  ChartSectionConfiguration,
-  UnifiedHistogramPartialLayoutProps,
-} from '@kbn/unified-histogram';
+import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
 import { UnifiedHistogramChart, useUnifiedHistogram } from '@kbn/unified-histogram';
 import { useChartStyles } from '@kbn/unified-histogram/components/chart/hooks/use_chart_styles';
 import { useServicesBootstrap } from '@kbn/unified-histogram/hooks/use_services_bootstrap';
 import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-metrics-grid';
-import {
-  type ChartSectionConfigurationExtensionParams,
-  useProfileAccessor,
-} from '../../../../context_awareness';
+import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
+import { i18n } from '@kbn/i18n';
+import { type UpdateESQLQueryFn, useProfileAccessor } from '../../../../context_awareness';
 import { DiscoverCustomizationProvider } from '../../../../customizations';
 import {
   CurrentTabProvider,
@@ -40,6 +36,11 @@ import type { DiscoverStateContainer } from '../../state_management/discover_sta
 import { ScopedServicesProvider } from '../../../../components/scoped_services_provider';
 import { useUnifiedHistogramRuntimeState } from './use_unified_histogram_runtime_state';
 import { useUnifiedHistogramCommon } from './use_unified_histogram_common';
+import type {
+  ChartSectionConfigurationExtensionParams,
+  ChartSectionConfiguration,
+} from '../../../../context_awareness/types';
+import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
 export type ChartPortalNode = HtmlPortalNode;
 export type ChartPortalNodes = Record<string, ChartPortalNode>;
@@ -143,24 +144,37 @@ type UnifiedHistogramChartProps = Pick<UnifiedHistogramGuardProps, 'panelsToggle
 const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartProps) => {
   const dispatch = useInternalStateDispatch();
   const getChartConfigAccessor = useProfileAccessor('getChartSectionConfiguration');
+
+  const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
+  const onUpdateESQLQuery: UpdateESQLQueryFn = useCallback(
+    (queryOrUpdater) => {
+      dispatch(updateESQLQuery({ queryOrUpdater }));
+    },
+    [dispatch, updateESQLQuery]
+  );
   const chartSectionConfigurationExtParams: ChartSectionConfigurationExtensionParams =
     useMemo(() => {
       return {
         actions: {
           openInNewTab: (params) =>
             dispatch(internalStateActions.openInNewTabExtPointAction(params)),
-          updateESQLQuery: stateContainer.actions.updateESQLQuery,
+          updateESQLQuery: onUpdateESQLQuery,
         },
       };
-    }, [dispatch, stateContainer.actions.updateESQLQuery]);
+    }, [dispatch, onUpdateESQLQuery]);
 
-  const chartSectionConfig = useMemo(
-    () =>
-      getChartConfigAccessor(() => ({
+  const isEsqlMode = useIsEsqlMode();
+  const chartSectionConfig = useMemo<ChartSectionConfiguration>(() => {
+    if (!isEsqlMode) {
+      return {
         replaceDefaultChart: false,
-      }))(chartSectionConfigurationExtParams),
-    [getChartConfigAccessor, chartSectionConfigurationExtParams]
-  );
+      };
+    }
+
+    return getChartConfigAccessor(() => ({
+      replaceDefaultChart: false,
+    }))(chartSectionConfigurationExtParams);
+  }, [getChartConfigAccessor, chartSectionConfigurationExtParams, isEsqlMode]);
 
   useEffect(() => {
     const histogramConfig$ = selectTabRuntimeState(
@@ -242,10 +256,7 @@ const CustomChartSectionWrapper = ({
   const setMetricsGridState = useCurrentTabAction(internalStateActions.setMetricsGridState);
   const onInitialStateChange = useCallback(
     (newMetricsGridState: Partial<UnifiedMetricsGridRestorableState>) => {
-      // Defer dispatch to next tick - ensures React render cycle is complete
-      // setTimeout(() => {
       dispatch(setMetricsGridState({ metricsGridState: newMetricsGridState }));
-      // }, 0);
     },
     [setMetricsGridState, dispatch]
   );
@@ -286,20 +297,25 @@ const CustomChartSectionWrapper = ({
     return null;
   }
 
-  const isComponentVisible =
-    !!chartSectionConfig.Component && !!layoutProps.chart && !layoutProps.chart.hidden;
+  const isComponentVisible = !!layoutProps.chart && !layoutProps.chart.hidden;
 
   return (
-    <chartSectionConfig.Component
-      histogramCss={histogramCss}
-      chartToolbarCss={chartToolbarCss}
-      renderToggleActions={renderCustomChartToggleActions}
-      fetch$={fetch$}
-      fetchParams={fetchParams}
-      isComponentVisible={isComponentVisible}
-      {...unifiedHistogramProps}
-      initialState={metricsGridState}
-      onInitialStateChange={onInitialStateChange}
-    />
+    <KibanaSectionErrorBoundary
+      sectionName={i18n.translate('discover.chart.errorBoundarySectionName', {
+        defaultMessage: 'Discover chart section',
+      })}
+    >
+      {chartSectionConfig.renderChartSection({
+        histogramCss,
+        chartToolbarCss,
+        renderToggleActions: renderCustomChartToggleActions,
+        fetch$,
+        fetchParams,
+        isComponentVisible,
+        ...unifiedHistogramProps,
+        initialState: metricsGridState,
+        onInitialStateChange,
+      })}
+    </KibanaSectionErrorBoundary>
   );
 };

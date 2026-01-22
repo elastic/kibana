@@ -21,7 +21,7 @@ import {
   ERROR_ID,
   EXCEPTION_MESSAGE,
 } from '@kbn/apm-types';
-import type { GenerateDiscoverLink } from '../../hooks/use_get_generate_discover_link';
+import type { GenerateDiscoverLink } from '../../../../../hooks/use_generate_discover_link';
 import { NOT_AVAILABLE_LABEL } from '../../common/constants';
 
 const getErrorMessage = (error: ErrorData) => {

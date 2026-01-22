@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/observability-ai-assistant-app-plugin'
 type: unknown
 owners:
-  defaultOwner: '@elastic/obs-ai-assistant'
+  defaultOwner: '@elastic/obs-ai-team'
 toolchain:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   name: '@kbn/observability-ai-assistant-app-plugin'
   description: Moon project for @kbn/observability-ai-assistant-app-plugin
   channel: ''
-  owner: '@elastic/obs-ai-assistant'
+  owner: '@elastic/obs-ai-team'
   metadata:
     sourceRoot: x-pack/solutions/observability/plugins/observability_ai_assistant_app
 dependsOn:
@@ -61,8 +61,7 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/es-query'
   - '@kbn/rule-registry-plugin'
-  - '@kbn/esql-validation-autocomplete'
-  - '@kbn/esql-ast'
+  - '@kbn/esql-language'
   - '@kbn/field-types'
   - '@kbn/security-plugin'
   - '@kbn/observability-plugin'
@@ -93,6 +92,8 @@ dependsOn:
   - '@kbn/utility-types-jest'
   - '@kbn/zod'
   - '@kbn/connector-schemas'
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/object-utils'
 tags:
   - plugin
   - prod

@@ -53,4 +53,14 @@ export {
   QuerySource,
   TelemetryControlCancelledReason,
   type TelemetryQuerySubmittedProps,
+  type TelemetryLatencyProps,
 } from './src/esql_telemetry_types';
+
+export {
+  type ESQLCallbacks,
+  type PartialFieldsMetadataClient,
+  type ESQLFieldWithMetadata,
+  type EsqlFieldType,
+  esqlFieldTypes,
+  KQL_TYPE_TO_KIND_MAP,
+} from './src/editor_types';

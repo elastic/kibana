@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
 import {
   PERFORM_RULE_UPGRADE_URL,
   PerformRuleUpgradeRequestBody,
@@ -26,7 +27,7 @@ export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter, lo
       path: PERFORM_RULE_UPGRADE_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [RULES_API_ALL],
         },
       },
       options: {

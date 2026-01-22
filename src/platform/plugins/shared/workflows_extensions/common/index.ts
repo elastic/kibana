@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { CommonStepDefinition, InferStepInput, InferStepOutput } from './step_registry/types';
+export type { CommonStepDefinition } from './step_registry/types';
+export { DataMapStepTypeId } from './steps/data';

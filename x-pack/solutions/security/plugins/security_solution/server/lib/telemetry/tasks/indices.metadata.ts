@@ -14,6 +14,7 @@ import {
   createUsageCounterLabel,
   getPreviousDailyTaskTimestamp,
   newTelemetryLogger,
+  withErrorMessage,
 } from '../helpers';
 import {
   TELEMETRY_DATA_STREAM_EVENT,
@@ -182,7 +183,7 @@ export function createTelemetryIndicesMetadataTaskConfig() {
             return count;
           })
           .catch((error) => {
-            log.warn(`Error getting indices stats`, { error });
+            log.warn(`Error getting indices stats`, withErrorMessage(error));
             incrementCounter(TelemetryCounter.RUNTIME_ERROR, 'indices-stats', 1);
             return 0;
           });
@@ -194,7 +195,7 @@ export function createTelemetryIndicesMetadataTaskConfig() {
             return names;
           })
           .catch((error) => {
-            log.warn(`Error getting ILM stats`, { error });
+            log.warn(`Error getting ILM stats`, withErrorMessage(error));
             incrementCounter(TelemetryCounter.RUNTIME_ERROR, 'ilm-stats', 1);
             return new Set<string>();
           });
@@ -206,7 +207,7 @@ export function createTelemetryIndicesMetadataTaskConfig() {
             return count;
           })
           .catch((error) => {
-            log.warn(`Error getting ILM policies`, { error });
+            log.warn(`Error getting ILM policies`, withErrorMessage(error));
             incrementCounter(TelemetryCounter.RUNTIME_ERROR, 'ilm-policies', 1);
             return 0;
           });
@@ -220,7 +221,7 @@ export function createTelemetryIndicesMetadataTaskConfig() {
             return count;
           })
           .catch((error) => {
-            log.warn(`Error getting index templates`, { error });
+            log.warn(`Error getting index templates`, withErrorMessage(error));
             incrementCounter(TelemetryCounter.RUNTIME_ERROR, 'index-templates', 1);
             return 0;
           });
@@ -238,7 +239,7 @@ export function createTelemetryIndicesMetadataTaskConfig() {
 
         return indicesCount;
       } catch (error) {
-        log.warn(`Error running indices metadata task`, { error });
+        log.warn(`Error running indices metadata task`, withErrorMessage(error));
         await taskMetricsService.end(trace, error);
         return 0;
       }

@@ -10,7 +10,6 @@ import { BehaviorSubject } from 'rxjs';
 import { kibanaPackageJson } from '@kbn/repo-info';
 
 import type { HttpServiceSetup, KibanaRequest } from '@kbn/core-http-server';
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type {
   EncryptedSavedObjectsClient,
@@ -22,12 +21,14 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
-import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { Logger } from '@kbn/logging';
 import type { LockManagerService } from '@kbn/lock-manager';
+import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 
 import type { FleetConfigType } from '../../common/types';
 import {
@@ -54,8 +55,6 @@ import type { FleetUsage } from '../collectors/register';
 
 import type { BulkActionsResolver } from './agents/bulk_actions_resolver';
 import { type UninstallTokenServiceInterface } from './security/uninstall_token_service';
-import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
-import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 
 class AppContextService {
   private encryptedSavedObjects: EncryptedSavedObjectsClient | undefined;
@@ -87,6 +86,11 @@ class AppContextService {
   private fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
   private lockManagerService: LockManagerService | undefined;
   private alertingStart: AlertingServerStart | undefined;
+  private includedHiddenTypes: string[] = [
+    UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+    KibanaSavedObjectType.alertingRuleTemplate,
+    KibanaSavedObjectType.sloTemplate,
+  ];
 
   public start(appContext: FleetAppContext) {
     this.data = appContext.data;
@@ -195,68 +199,35 @@ class AppContextService {
     return this.savedObjectsTagging;
   }
   public getInternalUserSOClientForSpaceId(spaceId?: string) {
-    const request = kibanaRequestFactory({
-      headers: {},
-      path: '/',
-      route: { settings: {} },
-      url: { href: '', hash: '' } as URL,
-      raw: { req: { url: '/' } } as any,
-    });
-    if (this.httpSetup && spaceId && spaceId !== DEFAULT_SPACE_ID && spaceId !== ALL_SPACES_ID) {
-      this.httpSetup?.basePath.set(request, `/s/${spaceId}`);
-    }
-
     // soClient as kibana internal users, be careful on how you use it, security is not enabled
-    return appContextService.getSavedObjects().getScopedClient(request, {
-      includedHiddenTypes: [
-        UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-        KibanaSavedObjectType.alertingRuleTemplate,
-      ],
-      excludedExtensions: [SECURITY_EXTENSION_ID],
-    });
+    if (spaceId && spaceId !== DEFAULT_SPACE_ID && spaceId !== ALL_SPACES_ID) {
+      return appContextService
+        .getSavedObjects()
+        .getUnsafeInternalClient({
+          includedHiddenTypes: this.includedHiddenTypes,
+        })
+        .asScopedToNamespace(spaceId);
+    }
+    return this.getInternalUserSOClientWithoutSpaceExtension();
   }
 
   public getInternalUserSOClient(request?: KibanaRequest) {
-    if (!request) {
-      request = {
-        headers: {},
-        getBasePath: () => '',
-        path: '/',
-        route: { settings: {} },
-        url: { href: {} },
-        raw: { req: { url: '/' } },
-        isFakeRequest: true,
-      } as unknown as KibanaRequest;
+    if (request) {
+      return appContextService.getSavedObjects().getScopedClient(request, {
+        includedHiddenTypes: this.includedHiddenTypes,
+      });
     }
 
-    // soClient as kibana internal users, be careful on how you use it, security is not enabled
-    return appContextService.getSavedObjects().getScopedClient(request, {
-      includedHiddenTypes: [
-        UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-        KibanaSavedObjectType.alertingRuleTemplate,
-      ],
-      excludedExtensions: [SECURITY_EXTENSION_ID],
+    return appContextService.getSavedObjects().getUnsafeInternalClient({
+      includedHiddenTypes: this.includedHiddenTypes,
     });
   }
 
   public getInternalUserSOClientWithoutSpaceExtension() {
-    const fakeRequest = {
-      headers: {},
-      getBasePath: () => '',
-      path: '/',
-      route: { settings: {} },
-      url: { href: {} },
-      raw: { req: { url: '/' } },
-      isFakeRequest: true,
-    } as unknown as KibanaRequest;
-
     // soClient as kibana internal users, be careful on how you use it, security is not enabled
-    return appContextService.getSavedObjects().getScopedClient(fakeRequest, {
-      excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
-      includedHiddenTypes: [
-        UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-        KibanaSavedObjectType.alertingRuleTemplate,
-      ],
+    return appContextService.getSavedObjects().getUnsafeInternalClient({
+      excludedExtensions: [SPACES_EXTENSION_ID],
+      includedHiddenTypes: this.includedHiddenTypes,
     });
   }
 

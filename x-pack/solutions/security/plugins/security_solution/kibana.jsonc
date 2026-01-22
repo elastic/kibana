@@ -46,6 +46,7 @@
       "triggersActionsUi",
       "uiActions",
       "unifiedSearch",
+      "kql",
       "files",
       "controls",
       "dataViewEditor",
@@ -79,7 +80,9 @@
       "osquery",
       "savedObjectsTaggingOss",
       "automaticImport",
-      "serverless"
+      "serverless",
+      "agentBuilder",
+      "llmTasks"
     ],
     "requiredBundles": [
       "esUiShared",
@@ -90,7 +93,8 @@
       "lists",
       "ml",
       "unifiedSearch",
-      "esql"
+      "esql",
+      "agentBuilder"
     ],
     "extraPublicDirs": [
       "common"

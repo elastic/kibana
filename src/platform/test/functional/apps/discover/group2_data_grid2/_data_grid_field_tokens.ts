@@ -29,7 +29,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const defaultSettings = {
     defaultIndex: 'logstash-*',
-    hideAnnouncements: true,
   };
 
   async function findFirstColumnTokens() {
@@ -153,15 +152,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await findFirstDocViewerTokens()).to.eql([
         'Text',
+        'Keyword',
         'Text',
+        'Keyword',
         'Date',
         'Text',
+        'Keyword',
         'Number',
         'IP address',
         'Text',
-        'Geo point',
-        'Keyword',
-        'Keyword',
       ]);
     });
 

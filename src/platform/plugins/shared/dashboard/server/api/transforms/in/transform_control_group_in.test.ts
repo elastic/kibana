@@ -7,100 +7,75 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ControlsGroupState } from '@kbn/controls-schemas';
+import type { ControlsGroupState, PinnedControlState } from '@kbn/controls-schemas';
 import { transformControlGroupIn } from './transform_control_group_in';
 import { CONTROL_WIDTH_SMALL } from '@kbn/controls-constants';
 
 jest.mock('uuid', () => ({
   v4: jest.fn(() => 'mock-uuid'),
 }));
+jest.mock('../../../kibana_services', () => ({
+  ...jest.requireActual('../../../kibana_services'),
+  embeddableService: {
+    getTransforms: jest.fn(),
+  },
+}));
 
 describe('transformControlGroupIn', () => {
-  const mockControlsGroupState: ControlsGroupState = {
-    chainingSystem: 'NONE',
-    labelPosition: 'oneLine',
-    autoApplySelections: true,
-    ignoreParentSettings: {
-      ignoreFilters: true,
-      ignoreQuery: true,
-      ignoreTimerange: true,
-      ignoreValidations: true,
-    },
-    controls: [
-      {
-        id: 'control1',
-        type: 'type1',
-        width: CONTROL_WIDTH_SMALL,
-        controlConfig: { bizz: 'buzz' },
-        order: 0,
-        grow: false,
-      },
-      {
-        type: 'type2',
-        grow: true,
-        width: CONTROL_WIDTH_SMALL,
-        controlConfig: { boo: 'bear' },
-        order: 1,
-      },
-    ],
-  };
+  const mockControlsGroupState: ControlsGroupState = [
+    {
+      uid: 'control1',
+      type: 'type1',
+      width: CONTROL_WIDTH_SMALL,
+      config: { bizz: 'buzz' },
+      grow: false,
+    } as unknown as PinnedControlState,
+    {
+      type: 'type2',
+      grow: true,
+      width: CONTROL_WIDTH_SMALL,
+      config: { boo: 'bear' },
+    } as unknown as PinnedControlState,
+  ];
 
-  it('should return undefined if controlsGroupState is undefined', () => {
+  it('should return empty references if controlsGroupState is undefined', () => {
     const result = transformControlGroupIn(undefined);
-    expect(result).toBeUndefined();
+    expect(result.references).toEqual([]);
   });
 
   it('should transform controlsGroupState correctly', () => {
     const result = transformControlGroupIn(mockControlsGroupState);
 
-    expect(result).toEqual({
-      chainingSystem: 'NONE',
-      controlStyle: 'oneLine',
-      showApplySelections: false,
-      ignoreParentSettingsJSON: JSON.stringify({
-        ignoreFilters: true,
-        ignoreQuery: true,
-        ignoreTimerange: true,
-        ignoreValidations: true,
-      }),
-      panelsJSON: JSON.stringify({
+    expect(result.controlsJSON).toEqual(
+      JSON.stringify({
         control1: {
+          order: 0,
           type: 'type1',
           width: 'small',
-          order: 0,
           grow: false,
           explicitInput: { bizz: 'buzz' },
         },
         'mock-uuid': {
-          type: 'type2',
-          grow: true,
-          width: 'small',
           order: 1,
+          type: 'type2',
+          width: 'small',
+          grow: true,
           explicitInput: { boo: 'bear' },
         },
-      }),
-    });
+      })
+    );
   });
 
   it('should handle empty controls array', () => {
-    const controlsGroupState: ControlsGroupState = {
-      ...mockControlsGroupState,
-      controls: [],
-    };
+    const controlsGroupState: ControlsGroupState = [];
 
     const result = transformControlGroupIn(controlsGroupState);
 
-    expect(result).toEqual({
-      chainingSystem: 'NONE',
-      controlStyle: 'oneLine',
-      showApplySelections: false,
-      ignoreParentSettingsJSON: JSON.stringify({
-        ignoreFilters: true,
-        ignoreQuery: true,
-        ignoreTimerange: true,
-        ignoreValidations: true,
-      }),
-      panelsJSON: JSON.stringify({}),
-    });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "controlsJSON": "{}",
+        "references": Array [],
+      }
+    `);
   });
 });

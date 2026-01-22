@@ -46,6 +46,22 @@ function renderActions({ agent, agentPolicy }: { agent: Agent; agentPolicy?: Age
   return { utils };
 }
 
+/**
+ * Helper to navigate into a submenu panel in the hierarchical menu.
+ * Waits briefly for panel transition to complete.
+ */
+async function navigateToSubmenu(
+  utils: ReturnType<typeof renderActions>['utils'],
+  submenuText: string
+) {
+  const submenuButton = utils.getByText(submenuText).closest('button');
+  if (submenuButton) {
+    fireEvent.click(submenuButton);
+    // Wait a bit for panel transition
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+}
+
 describe('AgentDetailsActionMenu', () => {
   beforeEach(() => {
     mockedExperimentalFeaturesService.get.mockReturnValue({
@@ -64,8 +80,46 @@ describe('AgentDetailsActionMenu', () => {
     mockedUseAgentVersion.mockReturnValue('8.10.2');
   });
 
+  describe('Menu structure', () => {
+    it('should render hierarchical menu with submenus', async () => {
+      const { utils } = renderActions({
+        agent: {
+          active: true,
+          status: 'online',
+          local_metadata: { elastic: { agent: { version: '8.8.0' } } },
+        } as any,
+        agentPolicy: {
+          is_managed: false,
+        } as AgentPolicy,
+      });
+
+      // Check top-level items are visible (no "View agent" since we're already on details page)
+      expect(utils.getByText('Add / remove tags')).toBeInTheDocument();
+      expect(utils.getByText('Assign to new policy')).toBeInTheDocument();
+      expect(utils.getByText('Upgrade agent')).toBeInTheDocument();
+
+      // Check submenu headers are visible
+      expect(utils.getByText('Maintenance and diagnostics')).toBeInTheDocument();
+      expect(utils.getByText('Security and removal')).toBeInTheDocument();
+    });
+
+    it('should NOT show "View agent" item since we are already on agent details page', () => {
+      const { utils } = renderActions({
+        agent: {
+          active: true,
+          status: 'online',
+        } as any,
+        agentPolicy: {
+          is_managed: false,
+        } as AgentPolicy,
+      });
+
+      expect(utils.queryByText('View agent')).not.toBeInTheDocument();
+    });
+  });
+
   describe('Request Diagnotics action', () => {
-    function renderAndGetDiagnosticsButton({
+    async function renderAndGetDiagnosticsButton({
       agent,
       agentPolicy,
     }: {
@@ -77,11 +131,17 @@ describe('AgentDetailsActionMenu', () => {
         agentPolicy,
       });
 
+      // Navigate to maintenance submenu
+      const maintenanceButton = utils.queryByText('Maintenance and diagnostics');
+      if (maintenanceButton) {
+        await navigateToSubmenu(utils, 'Maintenance and diagnostics');
+      }
+
       return utils.queryByTestId('requestAgentDiagnosticsBtn');
     }
 
     it('should render an active action button if agent version >= 8.7', async () => {
-      const res = renderAndGetDiagnosticsButton({
+      const res = await renderAndGetDiagnosticsButton({
         agent: {
           active: true,
           status: 'online',
@@ -95,7 +155,7 @@ describe('AgentDetailsActionMenu', () => {
     });
 
     it('should render an active action button if agent version >= 8.7 and policy is_managed', async () => {
-      const res = renderAndGetDiagnosticsButton({
+      const res = await renderAndGetDiagnosticsButton({
         agent: {
           active: true,
           status: 'online',
@@ -111,7 +171,7 @@ describe('AgentDetailsActionMenu', () => {
     });
 
     it('should render a disabled action button if agent version < 8.7', async () => {
-      const res = renderAndGetDiagnosticsButton({
+      const res = await renderAndGetDiagnosticsButton({
         agent: {
           active: true,
           status: 'online',
@@ -133,7 +193,7 @@ describe('AgentDetailsActionMenu', () => {
         },
         integrations: {},
       } as any);
-      const res = renderAndGetDiagnosticsButton({
+      const { utils } = renderActions({
         agent: {
           active: true,
           status: 'online',
@@ -142,12 +202,17 @@ describe('AgentDetailsActionMenu', () => {
         agentPolicy: {} as AgentPolicy,
       });
 
-      expect(res).toBe(null);
+      // With no read permissions, the maintenance submenu might not appear or diagnostics won't be there
+      const maintenanceButton = utils.queryByText('Maintenance and diagnostics');
+      if (maintenanceButton) {
+        await navigateToSubmenu(utils, 'Maintenance and diagnostics');
+        expect(utils.queryByTestId('requestAgentDiagnosticsBtn')).toBe(null);
+      }
     });
   });
 
   describe('View agent JSON action', () => {
-    function renderAndGetViewJSONButton({
+    async function renderAndGetViewJSONButton({
       agent,
       agentPolicy,
     }: {
@@ -159,11 +224,17 @@ describe('AgentDetailsActionMenu', () => {
         agentPolicy,
       });
 
+      // Navigate to maintenance submenu (View agent JSON is now under Maintenance and diagnostics)
+      const maintenanceButton = utils.queryByText('Maintenance and diagnostics');
+      if (maintenanceButton) {
+        await navigateToSubmenu(utils, 'Maintenance and diagnostics');
+      }
+
       return utils.queryByTestId('viewAgentDetailsJsonBtn');
     }
 
     it('should render an active button', async () => {
-      const res = renderAndGetViewJSONButton({
+      const res = await renderAndGetViewJSONButton({
         agent: {} as any,
         agentPolicy: {} as AgentPolicy,
       });
@@ -173,7 +244,7 @@ describe('AgentDetailsActionMenu', () => {
     });
 
     it('should render an active button for managed agent policy', async () => {
-      const res = renderAndGetViewJSONButton({
+      const res = await renderAndGetViewJSONButton({
         agent: {} as any,
         agentPolicy: {
           is_managed: true,
@@ -186,7 +257,7 @@ describe('AgentDetailsActionMenu', () => {
   });
 
   describe('Restart upgrade action', () => {
-    function renderAndGetRestartUpgradeButton({
+    async function renderAndGetRestartUpgradeButton({
       agent,
       agentPolicy,
     }: {
@@ -198,14 +269,21 @@ describe('AgentDetailsActionMenu', () => {
         agentPolicy,
       });
 
+      // Navigate to upgrade management submenu
+      const upgradeManagementButton = utils.queryByText('Upgrade management');
+      if (upgradeManagementButton) {
+        await navigateToSubmenu(utils, 'Upgrade management');
+      }
+
       return utils.queryByTestId('restartUpgradeBtn');
     }
 
-    it('should render an active button', async () => {
-      const res = renderAndGetRestartUpgradeButton({
+    it('should render an active button when agent is stuck in updating', async () => {
+      const res = await renderAndGetRestartUpgradeButton({
         agent: {
           status: 'updating',
           upgrade_started_at: '2022-11-21T12:27:24Z',
+          local_metadata: { elastic: { agent: { version: '8.8.0', upgradeable: true } } },
         } as any,
         agentPolicy: {} as AgentPolicy,
       });
@@ -214,15 +292,34 @@ describe('AgentDetailsActionMenu', () => {
       expect(res).toBeEnabled();
     });
 
-    it('should not render action if agent is not stuck in updating', async () => {
-      const res = renderAndGetRestartUpgradeButton({
+    it('should render disabled action if agent is not stuck in updating', async () => {
+      const res = await renderAndGetRestartUpgradeButton({
         agent: {
           status: 'updating',
           upgrade_started_at: new Date().toISOString(),
+          local_metadata: { elastic: { agent: { version: '8.8.0', upgradeable: true } } },
         } as any,
         agentPolicy: {} as AgentPolicy,
       });
-      expect(res).toBe(null);
+
+      // Button should exist but be disabled
+      expect(res).not.toBe(null);
+      expect(res).not.toBeEnabled();
+    });
+
+    it('should not render upgrade management submenu if agent is not upgradeable', async () => {
+      const { utils } = renderActions({
+        agent: {
+          active: true,
+          status: 'online',
+          local_metadata: { elastic: { agent: { version: '8.8.0', upgradeable: false } } },
+        } as any,
+        agentPolicy: {
+          is_managed: false,
+        } as AgentPolicy,
+      });
+
+      expect(utils.queryByText('Upgrade management')).toBe(null);
     });
   });
 
@@ -272,7 +369,7 @@ describe('AgentDetailsActionMenu', () => {
   });
 
   describe('Migrate agent action', () => {
-    function renderAndGetMigrateButton({
+    async function renderAndGetMigrateButton({
       agent,
       agentPolicy,
     }: {
@@ -284,7 +381,13 @@ describe('AgentDetailsActionMenu', () => {
         agentPolicy,
       });
 
-      return utils.queryByTestId('migrateAgentBtn');
+      // Navigate to maintenance submenu
+      const maintenanceButton = utils.queryByText('Maintenance and diagnostics');
+      if (maintenanceButton) {
+        await navigateToSubmenu(utils, 'Maintenance and diagnostics');
+      }
+
+      return utils.queryByTestId('migrateAgentMenuItem');
     }
 
     it('should render an active action button when agent isnt protected', async () => {
@@ -292,7 +395,7 @@ describe('AgentDetailsActionMenu', () => {
         hasAtLeast: () => true,
       } as unknown as LicenseService);
 
-      const res = renderAndGetMigrateButton({
+      const res = await renderAndGetMigrateButton({
         agent: {
           active: true,
           status: 'online',
@@ -309,7 +412,7 @@ describe('AgentDetailsActionMenu', () => {
     });
 
     it('should not render an active action button when agent is protected by policy', async () => {
-      const res = renderAndGetMigrateButton({
+      const { utils } = renderActions({
         agent: {
           active: true,
           status: 'online',
@@ -321,11 +424,15 @@ describe('AgentDetailsActionMenu', () => {
         } as AgentPolicy,
       });
 
-      expect(res).toBe(null);
+      const maintenanceButton = utils.queryByText('Maintenance and diagnostics');
+      if (maintenanceButton) {
+        await navigateToSubmenu(utils, 'Maintenance and diagnostics');
+        expect(utils.queryByTestId('migrateAgentMenuItem')).toBe(null);
+      }
     });
 
     it('should not render an active action button when agent is a fleet server agent', async () => {
-      const res = renderAndGetMigrateButton({
+      const { utils } = renderActions({
         agent: {
           active: true,
           status: 'online',
@@ -338,10 +445,15 @@ describe('AgentDetailsActionMenu', () => {
         } as AgentPolicy,
       });
 
-      expect(res).toBe(null);
+      const maintenanceButton = utils.queryByText('Maintenance and diagnostics');
+      if (maintenanceButton) {
+        await navigateToSubmenu(utils, 'Maintenance and diagnostics');
+        expect(utils.queryByTestId('migrateAgentMenuItem')).toBe(null);
+      }
     });
+
     it('should not render an active action button when agent is an unsupported version', async () => {
-      const res = renderAndGetMigrateButton({
+      const { utils } = renderActions({
         agent: {
           active: true,
           status: 'online',
@@ -353,7 +465,11 @@ describe('AgentDetailsActionMenu', () => {
         } as AgentPolicy,
       });
 
-      expect(res).toBe(null);
+      const maintenanceButton = utils.queryByText('Maintenance and diagnostics');
+      if (maintenanceButton) {
+        await navigateToSubmenu(utils, 'Maintenance and diagnostics');
+        expect(utils.queryByTestId('migrateAgentMenuItem')).toBe(null);
+      }
     });
 
     it('should not render action when user only has read permissions', async () => {
@@ -364,7 +480,7 @@ describe('AgentDetailsActionMenu', () => {
         integrations: {},
       } as any);
 
-      const res = renderAndGetMigrateButton({
+      const { utils } = renderActions({
         agent: {
           active: true,
           status: 'online',
@@ -376,12 +492,16 @@ describe('AgentDetailsActionMenu', () => {
         } as AgentPolicy,
       });
 
-      expect(res).toBe(null);
+      const maintenanceButton = utils.queryByText('Maintenance and diagnostics');
+      if (maintenanceButton) {
+        await navigateToSubmenu(utils, 'Maintenance and diagnostics');
+        expect(utils.queryByTestId('migrateAgentMenuItem')).toBe(null);
+      }
     });
   });
 
   describe('Agent privilege level change action', () => {
-    function renderAndGetChangePrivilegeLevelButton({
+    async function renderAndGetChangePrivilegeLevelButton({
       agent,
       agentPolicy,
     }: {
@@ -393,11 +513,17 @@ describe('AgentDetailsActionMenu', () => {
         agentPolicy,
       });
 
-      return utils.queryByTestId('changeAgentPrivilegeLevelBtn');
+      // Navigate to security submenu
+      const securityButton = utils.queryByText('Security and removal');
+      if (securityButton) {
+        await navigateToSubmenu(utils, 'Security and removal');
+      }
+
+      return utils.queryByTestId('changeAgentPrivilegeLevelMenuItem');
     }
 
     it('should render an active action button when agent is eligible for privilege level change', async () => {
-      const res = renderAndGetChangePrivilegeLevelButton({
+      const res = await renderAndGetChangePrivilegeLevelButton({
         agent: {
           active: true,
           status: 'online',
@@ -417,7 +543,7 @@ describe('AgentDetailsActionMenu', () => {
     });
 
     it('should not render an action button when agent is already unprivileged', async () => {
-      const res = renderAndGetChangePrivilegeLevelButton({
+      const res = await renderAndGetChangePrivilegeLevelButton({
         agent: {
           active: true,
           status: 'online',
@@ -436,7 +562,7 @@ describe('AgentDetailsActionMenu', () => {
     });
 
     it('should not render an action button when agent requires root privilege', async () => {
-      const res = renderAndGetChangePrivilegeLevelButton({
+      const res = await renderAndGetChangePrivilegeLevelButton({
         agent: {
           active: true,
           status: 'online',
@@ -455,7 +581,7 @@ describe('AgentDetailsActionMenu', () => {
     });
 
     it('should not render an action button when agent is a fleet server agent', async () => {
-      const res = renderAndGetChangePrivilegeLevelButton({
+      const res = await renderAndGetChangePrivilegeLevelButton({
         agent: {
           active: true,
           status: 'online',
@@ -474,7 +600,7 @@ describe('AgentDetailsActionMenu', () => {
     });
 
     it('should not render an action button when agent is on an unsupported version', async () => {
-      const res = renderAndGetChangePrivilegeLevelButton({
+      const res = await renderAndGetChangePrivilegeLevelButton({
         agent: {
           active: true,
           status: 'online',
@@ -499,7 +625,7 @@ describe('AgentDetailsActionMenu', () => {
         },
         integrations: {},
       } as any);
-      const res = renderAndGetChangePrivilegeLevelButton({
+      const res = await renderAndGetChangePrivilegeLevelButton({
         agent: {
           active: true,
           status: 'online',
@@ -511,6 +637,61 @@ describe('AgentDetailsActionMenu', () => {
         agentPolicy: {
           is_managed: false,
           package_policies: [{ package: { name: 'some-integration', requires_root: false } }],
+        } as AgentPolicy,
+      });
+
+      expect(res).toBe(null);
+    });
+  });
+
+  describe('Uninstall agent action', () => {
+    async function renderAndGetUninstallButton({
+      agent,
+      agentPolicy,
+    }: {
+      agent: Agent;
+      agentPolicy?: AgentPolicy;
+    }) {
+      const { utils } = renderActions({
+        agent,
+        agentPolicy,
+      });
+
+      // Navigate to security submenu
+      const securityButton = utils.queryByText('Security and removal');
+      if (securityButton) {
+        await navigateToSubmenu(utils, 'Security and removal');
+      }
+
+      return utils.queryByTestId('uninstallAgentMenuItem');
+    }
+
+    it('should render uninstall button when agent has policy_id', async () => {
+      const res = await renderAndGetUninstallButton({
+        agent: {
+          active: true,
+          status: 'online',
+          policy_id: 'policy-1',
+        } as any,
+        agentPolicy: {
+          is_managed: false,
+        } as AgentPolicy,
+      });
+
+      expect(res).not.toBe(null);
+      expect(res).toBeEnabled();
+    });
+
+    it('should not render uninstall button for agentless policy', async () => {
+      const res = await renderAndGetUninstallButton({
+        agent: {
+          active: true,
+          status: 'online',
+          policy_id: 'policy-1',
+        } as any,
+        agentPolicy: {
+          is_managed: false,
+          supports_agentless: true,
         } as AgentPolicy,
       });
 

@@ -12,7 +12,6 @@ import type {
   PluginInitializerContext,
   LoggerFactory,
 } from '@kbn/core/server';
-import { registerWorkplaceAIApiKeysRoutes } from '@kbn/workplaceai-api-keys-server';
 import { registerRoutes } from './routes';
 import { registerFeatures } from './features';
 import type { InternalServices } from './services/types';
@@ -20,6 +19,7 @@ import { createServices } from './services/create_services';
 import type { WorkplaceAIAppConfig } from './config';
 import { AppLogger } from './utils';
 import { registerWorkplaceAIDataTypes } from './data_types';
+import { rerankStepDefinition } from './steps';
 import type {
   WorkplaceAIAppPluginSetup,
   WorkplaceAIAppPluginStart,
@@ -50,11 +50,14 @@ export class WorkplaceAIAppPlugin
     core: CoreSetup<WorkplaceAIAppPluginStartDependencies>,
     setupDeps: WorkplaceAIAppPluginSetupDependencies
   ): WorkplaceAIAppPluginSetup {
+    setupDeps.workflowsExtensions.registerStepDefinition(rerankStepDefinition);
+
     const router = core.http.createRouter();
     registerRoutes({
       core,
       router,
       logger: this.loggerFactory.get('routes'),
+      config: this.config,
       getServices: () => {
         if (!this.services) {
           throw new Error('getServices called before #start');
@@ -63,12 +66,10 @@ export class WorkplaceAIAppPlugin
       },
     });
 
-    registerWorkplaceAIApiKeysRoutes(router, this.loggerFactory.get('api-keys'));
-
     registerFeatures({ features: setupDeps.features });
 
     // Register custom data types with the data sources registry
-    registerWorkplaceAIDataTypes({ dataSourcesRegistry: setupDeps.dataSourcesRegistry });
+    registerWorkplaceAIDataTypes({ dataCatalog: setupDeps.dataCatalog });
 
     return {};
   }

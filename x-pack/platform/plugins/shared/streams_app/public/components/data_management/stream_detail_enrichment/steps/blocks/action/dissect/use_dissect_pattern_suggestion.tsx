@@ -13,7 +13,9 @@ import {
   groupMessagesByPattern,
 } from '@kbn/dissect-heuristics';
 import { lastValueFrom } from 'rxjs';
-import { showErrorToast } from '../../../../../../../hooks/use_streams_app_fetch';
+import type { useAbortController } from '@kbn/react-hooks';
+import { useFetchErrorToast } from '../../../../../../../hooks/use_fetch_error_toast';
+import { NoSuggestionsError, isNoSuggestionsError } from '../utils/no_suggestions_error';
 import {
   usePatternSuggestionDependencies,
   prepareSamplesForPatternExtraction,
@@ -28,16 +30,19 @@ export interface DissectPatternSuggestionParams {
   fieldName: string;
 }
 
-export function useDissectPatternSuggestion() {
+export function useDissectPatternSuggestion(
+  abortController: ReturnType<typeof useAbortController>
+) {
   const {
     notifications,
     telemetryClient,
     streamsRepositoryClient,
-    abortController,
     stepsWithoutCurrent,
     previewDocsFilter,
     originalSamples,
   } = usePatternSuggestionDependencies();
+
+  const showFetchErrorToast = useFetchErrorToast();
 
   return useAsyncFn(
     async (params: DissectPatternSuggestionParams | null) => {
@@ -90,6 +95,11 @@ export function useDissectPatternSuggestion() {
           )
         );
 
+        // Handle case where LLM couldn't generate suggestions
+        if (reviewResult.dissectProcessor === null) {
+          throw new NoSuggestionsError();
+        }
+
         const dissectProcessor = getDissectProcessorWithReview(
           dissectPattern,
           reviewResult.dissectProcessor,
@@ -131,7 +141,10 @@ export function useDissectPatternSuggestion() {
         };
       } catch (error) {
         finishTrackingAndReport(0, [0]);
-        showErrorToast(notifications, error);
+        // Don't show toast for NoSuggestionsError - let UI handle it inline
+        if (!isNoSuggestionsError(error)) {
+          showFetchErrorToast(error);
+        }
         throw error;
       }
     },

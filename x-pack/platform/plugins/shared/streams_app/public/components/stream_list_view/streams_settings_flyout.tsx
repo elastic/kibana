@@ -31,7 +31,6 @@ import {
   useGeneratedHtmlId,
   EuiText,
   EuiLink,
-  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
@@ -328,25 +327,23 @@ output.elasticsearch:
               title={
                 <h3>
                   <EuiFlexGroup gutterSize="s">
-                    <EuiFlexItem>
-                      {i18n.translate('xpack.streams.streamsListView.significantEventsTitle', {
-                        defaultMessage: 'Significant events',
+                    {i18n.translate('xpack.streams.streamsListView.significantEventsTitle', {
+                      defaultMessage: 'Significant events',
+                    })}
+                    <EuiBetaBadge
+                      label={i18n.translate('xpack.streams.streamsListView.betaBadgeLabel', {
+                        defaultMessage: 'Technical Preview',
                       })}
-                      <EuiBetaBadge
-                        label={i18n.translate('xpack.streams.streamsListView.betaBadgeLabel', {
-                          defaultMessage: 'Technical Preview',
-                        })}
-                        tooltipContent={i18n.translate(
-                          'xpack.streams.streamsListView.betaBadgeDescription',
-                          {
-                            defaultMessage:
-                              'This functionality is experimental and not supported. It may change or be removed at any time.',
-                          }
-                        )}
-                        alignment="middle"
-                        size="s"
-                      />
-                    </EuiFlexItem>
+                      tooltipContent={i18n.translate(
+                        'xpack.streams.streamsListView.betaBadgeDescription',
+                        {
+                          defaultMessage:
+                            'This functionality is experimental and not supported. It may change or be removed at any time.',
+                        }
+                      )}
+                      alignment="middle"
+                      size="s"
+                    />
                   </EuiFlexGroup>
                 </h3>
               }

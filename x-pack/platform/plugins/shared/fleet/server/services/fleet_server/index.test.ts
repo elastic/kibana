@@ -126,6 +126,44 @@ describe('checkFleetServerVersionsForSecretsStorage', () => {
       })
     );
   });
+
+  it('should return true if there are no fleet servers', async () => {
+    const version = '1.0.0';
+
+    jest
+      .spyOn(mockedPackagePolicyService, 'list')
+      .mockResolvedValueOnce({
+        items: [
+          {
+            id: '1',
+            policy_id: '1',
+            policy_ids: ['1'],
+            package: {
+              name: 'fleet_server',
+              version: '10.0.0',
+            },
+          },
+        ],
+      } as any)
+      .mockResolvedValueOnce({
+        items: [],
+      } as any);
+
+    mockedAgentPolicyService.getAllManagedAgentPolicies.mockResolvedValueOnce([]);
+
+    mockedGetAgentsByKuery.mockResolvedValueOnce({
+      agents: [],
+    } as any);
+
+    mockedGetAgentStatusById.mockResolvedValue('online');
+
+    const result = await checkFleetServerVersionsForSecretsStorage(
+      esClientMock,
+      soClientMock,
+      version
+    );
+    expect(result).toBe(true);
+  });
 });
 
 describe('getFleetServerPolicies', () => {

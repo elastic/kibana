@@ -19,7 +19,7 @@ import {
 import { DataSourceCategory, type DataSourceProfileProvider } from '../../../../profiles';
 import { extendProfileProvider } from '../../../extend_profile_provider';
 import { extractIndexPatternFrom } from '../../../extract_index_pattern_from';
-import { createChartSection } from '../accessors/chart_session';
+import { createChartSection } from '../accessors/chart_section';
 import { reContainsTracesApm, reContainsTracesOtel } from './reg_exps';
 
 export const createTracesAPMDataSourceProfileProvider = (

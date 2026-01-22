@@ -28,6 +28,7 @@ interface GapConstructorParams {
   inProgressIntervals?: StringInterval[];
   internalFields?: InternalFields;
   updatedAt?: string;
+  failedAutoFillAttempts?: number;
 }
 
 export class Gap {
@@ -37,6 +38,7 @@ export class Gap {
   private _internalFields?: InternalFields;
   private _timestamp?: string;
   private _updatedAt?: string;
+  private _failedAutoFillAttempts?: number;
   readonly _ruleId: string;
 
   constructor({
@@ -47,6 +49,7 @@ export class Gap {
     inProgressIntervals = [],
     internalFields,
     updatedAt,
+    failedAutoFillAttempts,
   }: GapConstructorParams) {
     this._range = normalizeInterval(range);
     this._filledIntervals = mergeIntervals(filledIntervals.map(normalizeInterval));
@@ -60,6 +63,7 @@ export class Gap {
 
     this._updatedAt = updatedAt ?? new Date().toISOString();
     this._ruleId = ruleId;
+    this._failedAutoFillAttempts = failedAutoFillAttempts ?? 0;
   }
 
   public fillGap(interval: Interval): void {
@@ -144,6 +148,14 @@ export class Gap {
     }
   }
 
+  public incrementFailedAutoFillAttempts(): void {
+    this._failedAutoFillAttempts = (this._failedAutoFillAttempts ?? 0) + 1;
+  }
+
+  public get failedAutoFillAttempts(): number {
+    return this._failedAutoFillAttempts ?? 0;
+  }
+
   public resetInProgressIntervals(): void {
     this._inProgressIntervals = [];
   }
@@ -185,6 +197,7 @@ export class Gap {
       unfilled_duration_ms: this.unfilledGapDurationMs,
       in_progress_duration_ms: this.inProgressGapDurationMs,
       updated_at: this._updatedAt,
+      failed_auto_fill_attempts: this._failedAutoFillAttempts,
     };
   }
 }

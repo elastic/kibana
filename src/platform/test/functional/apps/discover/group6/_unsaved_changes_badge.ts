@@ -32,7 +32,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const defaultSettings = {
     defaultIndex: 'logstash-*',
-    hideAnnouncements: true,
   };
 
   describe('discover unsaved changes badge', function describeIndexTests() {
@@ -92,6 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should not show a badge after loading a saved search, only after changes', async () => {
       await discover.loadSavedSearch(SAVED_SEARCH_NAME);
+      await discover.waitUntilTabIsLoaded();
 
       await testSubjects.missingOrFail('unsavedChangesBadge');
 
@@ -104,6 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should allow to revert changes', async () => {
       await discover.loadSavedSearch(SAVED_SEARCH_NAME);
+      await discover.waitUntilTabIsLoaded();
       await testSubjects.missingOrFail('unsavedChangesBadge');
 
       // test changes to columns

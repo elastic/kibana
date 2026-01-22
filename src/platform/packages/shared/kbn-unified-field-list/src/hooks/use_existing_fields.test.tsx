@@ -288,7 +288,7 @@ describe('UnifiedFieldList useExistingFields', () => {
     );
     expect(currentResult.getFieldsExistenceStatus('test-id')).toBe(ExistenceFetchStatus.unknown);
 
-    expect(dataViewWithRestrictions.getAggregationRestrictions).toHaveBeenCalledTimes(1);
+    expect(dataViewWithRestrictions.getAggregationRestrictions).toHaveBeenCalledTimes(4);
     expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledTimes(2);
   });
 
@@ -580,5 +580,135 @@ describe('UnifiedFieldList useExistingFields', () => {
 
     expect(hookReader.result.current.getNewFields(dataView.id!)).toBe(newFields);
     expect(hookReader.result.current.getNewFields('another-id')).toStrictEqual([]);
+  });
+
+  describe('initialExistingFieldsInfo', () => {
+    const fetchedExistingFieldsInfo = {
+      dataViewId: 'logstash-*',
+      dataViewHash: 'logstash-*:logstash-*:time:false:28',
+      info: {
+        fetchStatus: ExistenceFetchStatus.succeeded,
+        existingFieldsByFieldNameMap: { [dataView.fields[0].name]: true },
+        numberOfFetches: 1,
+        newFields: undefined,
+      },
+    };
+
+    it('should use initialExistingFieldsInfo instead of fetching', async () => {
+      const dataViewId = dataView.id!;
+      (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(async () => {
+        return {
+          existingFieldNames: [dataView.fields[0].name],
+        };
+      });
+
+      const onInitialExistingFieldsInfoChange = jest.fn();
+
+      renderHook(useExistingFieldsFetcher, {
+        initialProps: {
+          dataViews: [dataView],
+          services: mockedServices,
+          fromDate: '2019-01-01',
+          toDate: '2020-01-01',
+          query: { query: '', language: 'lucene' },
+          filters: [],
+          initialExistingFieldsInfo: fetchedExistingFieldsInfo,
+          onInitialExistingFieldsInfoChange,
+        },
+      });
+
+      const hookReader = renderHook(useExistingFieldsReader);
+
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+
+      expect(ExistingFieldsServiceApi.loadFieldExisting).not.toHaveBeenCalled(); // no fetching
+      expect(onInitialExistingFieldsInfoChange).not.toHaveBeenCalled(); // no need to update with the same initial info
+
+      // has existence info for the loaded data view => works more restrictive
+      expect(hookReader.result.current.isFieldsExistenceInfoUnavailable(dataViewId)).toBe(false);
+      expect(hookReader.result.current.hasFieldData(dataViewId, dataView.fields[0].name)).toBe(
+        true
+      );
+      expect(hookReader.result.current.hasFieldData(dataViewId, dataView.fields[1].name)).toBe(
+        false
+      );
+      expect(hookReader.result.current.getFieldsExistenceStatus(dataViewId)).toBe(
+        ExistenceFetchStatus.succeeded
+      );
+      expect(hookReader.result.current.getNewFields(dataViewId)).toStrictEqual([]);
+    });
+
+    it.each([
+      [
+        'hash is different',
+        {
+          ...fetchedExistingFieldsInfo,
+          dataViewHash: 'logstash-*:logstash-*:time:false:999',
+        },
+      ],
+      [
+        'no fields',
+        {
+          ...fetchedExistingFieldsInfo,
+          info: {
+            ...fetchedExistingFieldsInfo.info,
+            existingFieldsByFieldNameMap: {},
+          },
+        },
+      ],
+      [
+        'previous fetch failed',
+        {
+          ...fetchedExistingFieldsInfo,
+          info: {
+            ...fetchedExistingFieldsInfo.info,
+            fetchStatus: ExistenceFetchStatus.failed,
+          },
+        },
+      ],
+      ['esql', fetchedExistingFieldsInfo],
+    ])(
+      'should not use initialExistingFieldsInfo if "%s"',
+      async (type, initialExistingFieldsInfo) => {
+        (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(async () => {
+          return {
+            existingFieldNames: [dataView.fields[0].name],
+          };
+        });
+
+        const onInitialExistingFieldsInfoChange = jest.fn();
+
+        renderHook(useExistingFieldsFetcher, {
+          initialProps: {
+            dataViews: type === 'esql' ? [] : [dataView],
+            services: mockedServices,
+            fromDate: '2019-01-01',
+            toDate: '2020-01-01',
+            query: { query: '', language: 'lucene' },
+            filters: [],
+            initialExistingFieldsInfo,
+            onInitialExistingFieldsInfoChange,
+          },
+        });
+
+        await waitFor(() => new Promise((resolve) => resolve(null)));
+
+        if (type === 'esql') {
+          expect(ExistingFieldsServiceApi.loadFieldExisting).not.toHaveBeenCalled();
+          expect(onInitialExistingFieldsInfoChange).toHaveBeenCalledWith(undefined);
+        } else {
+          expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledWith(
+            expect.objectContaining({
+              fromDate: '2019-01-01',
+              toDate: '2020-01-01',
+              dslQuery,
+              dataView,
+              timeFieldName: dataView.timeFieldName,
+            })
+          );
+          expect(onInitialExistingFieldsInfoChange).toHaveBeenCalledWith(fetchedExistingFieldsInfo);
+        }
+      }
+    );
   });
 });

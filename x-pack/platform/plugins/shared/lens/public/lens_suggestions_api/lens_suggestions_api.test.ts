@@ -602,4 +602,43 @@ describe('suggestionsApi', () => {
     expect(datasourceMap.textBased.getDatasourceSuggestionsFromCurrentState).toHaveBeenCalled();
     expect(suggestions?.length).toEqual(1);
   });
+
+  test('calls isSubtypeSupported and passes chartType as subVisualizationId when supported', async () => {
+    const dataView = { id: 'index1' } as unknown as DataView;
+    const isSubtypeSupportedMock = jest.fn().mockReturnValue(true);
+
+    const visualizationMap = {
+      testVis: {
+        ...mockVis,
+        isSubtypeSupported: isSubtypeSupportedMock,
+      },
+    };
+
+    datasourceMap.textBased.getDatasourceSuggestionsForVisualizeField.mockReturnValue([
+      generateSuggestion(),
+    ]);
+
+    const context = {
+      dataViewSpec: {
+        id: 'index1',
+        title: 'index1',
+        name: 'DataView',
+      },
+      fieldName: '',
+      textBasedColumns: textBasedQueryColumns,
+      query: {
+        esql: 'FROM "index1" | keep field1, field2',
+      },
+    };
+
+    suggestionsApi({
+      context,
+      dataView,
+      datasourceMap,
+      visualizationMap,
+      preferredChartType: ChartType.Line,
+    });
+
+    expect(isSubtypeSupportedMock).toHaveBeenCalledWith('line');
+  });
 });

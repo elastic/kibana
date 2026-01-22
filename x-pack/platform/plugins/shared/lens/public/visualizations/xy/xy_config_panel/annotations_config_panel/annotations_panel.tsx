@@ -94,22 +94,24 @@ export const AnnotationsPanel = (
   }
 
   return currentDataView ? (
-    <AnnotationEditorControls
-      annotation={currentAnnotation}
-      onAnnotationChange={(newAnnotation) => setAnnotation(newAnnotation)}
-      dataView={currentDataView}
-      getDefaultRangeEnd={(rangeStart) =>
-        getEndTimestamp(
-          props.datatableUtilities,
-          rangeStart,
-          frame,
-          localState.layers.filter(isDataLayer)
-        )
-      }
-      queryInputServices={queryInputServices}
-      calendarClassName={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
-      appName={LENS_APP_NAME}
-    />
+    <div className="lnsIndexPatternDimensionEditor--padded">
+      <AnnotationEditorControls
+        annotation={currentAnnotation}
+        onAnnotationChange={(newAnnotation) => setAnnotation(newAnnotation)}
+        dataView={currentDataView}
+        getDefaultRangeEnd={(rangeStart) =>
+          getEndTimestamp(
+            props.datatableUtilities,
+            rangeStart,
+            frame,
+            localState.layers.filter(isDataLayer)
+          )
+        }
+        queryInputServices={queryInputServices}
+        calendarClassName={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
+        appName={LENS_APP_NAME}
+      />
+    </div>
   ) : null;
 };
 

@@ -11,13 +11,8 @@ import React, { useCallback, useMemo, useState, useRef } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
 import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type {
-  MetricField,
-  Dimension,
-  DimensionFilters,
-} from '@kbn/metrics-experience-plugin/common/types';
-import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { css } from '@emotion/react';
+import type { MetricField, Dimension } from '../types';
 import type { ChartSize } from './chart';
 import { Chart } from './chart';
 import { MetricInsightsFlyout } from './flyout/metrics_insights_flyout';
@@ -26,17 +21,18 @@ import { useGridNavigation } from '../hooks/use_grid_navigation';
 import { FieldsMetadataProvider } from '../context/fields_metadata';
 import { createESQLQuery } from '../common/utils';
 import { useChartLayers } from './chart/hooks/use_chart_layers';
+import type { UnifiedMetricsGridProps } from '../types';
 
 export type MetricsGridProps = Pick<
-  ChartSectionProps,
-  'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams'
+  UnifiedMetricsGridProps,
+  'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams' | 'actions'
 > & {
-  filters?: DimensionFilters;
   dimensions: Dimension[];
   searchTerm?: string;
   columns: NonNullable<EuiFlexGridProps['columns']>;
-  discoverFetch$: ChartSectionProps['fetch$'];
+  discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   fields: MetricField[];
+  whereStatements?: string[];
 };
 
 const getItemKey = (metric: MetricField, index: number) => {
@@ -46,13 +42,14 @@ export const MetricsGrid = ({
   fields,
   onBrushEnd,
   onFilter,
+  actions,
   dimensions,
+  whereStatements,
   services,
   columns,
   fetchParams,
   discoverFetch$,
   searchTerm,
-  filters = {},
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const chartRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -160,10 +157,10 @@ export const MetricsGrid = ({
                   metric={metric}
                   size="s"
                   dimensions={dimensions}
-                  filters={filters}
                   services={services}
                   onBrushEnd={onBrushEnd}
                   onFilter={onFilter}
+                  actions={actions}
                   fetchParams={fetchParams}
                   discoverFetch$={discoverFetch$}
                   rowIndex={rowIndex}
@@ -172,6 +169,7 @@ export const MetricsGrid = ({
                   onFocusCell={handleFocusCell}
                   onViewDetails={handleViewDetails}
                   searchTerm={searchTerm}
+                  whereStatements={whereStatements}
                 />
               </EuiFlexItem>
             );
@@ -191,20 +189,23 @@ export const MetricsGrid = ({
 };
 
 interface ChartItemProps
-  extends Pick<ChartSectionProps, 'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams'> {
+  extends Pick<
+    UnifiedMetricsGridProps,
+    'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams' | 'actions'
+  > {
   id: string;
   metric: MetricField;
   index: number;
   size: ChartSize;
   dimensions: Dimension[];
-  filters: DimensionFilters;
-  discoverFetch$: ChartSectionProps['fetch$'];
+  discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   rowIndex: number;
   colIndex: number;
   isFocused: boolean;
   searchTerm?: string;
   onFocusCell: (rowIndex: number, colIndex: number) => void;
   onViewDetails: (index: number, esqlQuery: string, metric: MetricField) => void;
+  whereStatements?: string[];
 }
 
 const ChartItem = React.memo(
@@ -216,16 +217,17 @@ const ChartItem = React.memo(
         index,
         size,
         dimensions,
-        filters,
         services,
         onBrushEnd,
         onFilter,
+        actions,
         fetchParams,
         discoverFetch$,
         rowIndex,
         colIndex,
         isFocused,
         searchTerm,
+        whereStatements,
         onFocusCell,
         onViewDetails,
       }: ChartItemProps,
@@ -243,10 +245,10 @@ const ChartItem = React.memo(
           ? createESQLQuery({
               metric,
               dimensions,
-              filters,
+              whereStatements,
             })
           : '';
-      }, [metric, dimensions, filters]);
+      }, [metric, dimensions, whereStatements]);
 
       const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
       const chartLayers = useChartLayers({ dimensions, metric, color });
@@ -273,10 +275,12 @@ const ChartItem = React.memo(
             services={services}
             onBrushEnd={onBrushEnd}
             onFilter={onFilter}
+            onExploreInDiscoverTab={actions.openInNewTab}
             onViewDetails={handleViewDetailsCallback}
             title={metric.name}
             chartLayers={chartLayers}
             titleHighlight={searchTerm}
+            extraDisabledActions={['ACTION_OPEN_IN_DISCOVER']}
           />
         </A11yGridCell>
       );

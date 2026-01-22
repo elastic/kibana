@@ -29,5 +29,5 @@ export async function listTypes(
     ? connectorTypes
     : connectorTypes.filter((type) => !type.isSystemActionType);
 
-  return filteredConnectorTypes;
+  return filteredConnectorTypes as ConnectorType[];
 }

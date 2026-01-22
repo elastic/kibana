@@ -10,6 +10,7 @@ import { getDateISORange } from '@kbn/timerange';
 import type { DoneInvokeEvent, InterpreterFrom } from 'xstate';
 import { assign, createMachine, raise } from 'xstate';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
+import { omit } from 'lodash';
 import type {
   Dashboard,
   DataStreamDetails,
@@ -1044,6 +1045,7 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
               body: {
                 ingest: {
                   ...context.streamDefinition.stream.ingest,
+                  processing: omit(context.streamDefinition.stream.ingest.processing, 'updated_at'),
                   failure_store: failureStoreStreamConfig,
                 },
               },

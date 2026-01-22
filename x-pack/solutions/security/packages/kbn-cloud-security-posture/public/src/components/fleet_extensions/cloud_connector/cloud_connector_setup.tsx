@@ -24,7 +24,7 @@ import { useCloudConnectorSetup } from './hooks/use_cloud_connector_setup';
 import { CloudConnectorTabs, type CloudConnectorTab } from './cloud_connector_tabs';
 import type { UpdatePolicy } from '../types';
 import { TABS, CLOUD_FORMATION_EXTERNAL_DOC_URL } from './constants';
-import { hasValidNewConnectionCredentials, isCloudConnectorReusableEnabled } from './utils';
+import { isCloudConnectorReusableEnabled } from './utils';
 export interface CloudConnectorSetupProps {
   input: NewPackagePolicyInput;
   newPolicy: NewPackagePolicy;
@@ -160,21 +160,15 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
     (tab: { id: 'new-connection' | 'existing-connection' }) => {
       setSelectedTabId(tab.id);
 
-      if (
-        tab.id === TABS.NEW_CONNECTION &&
-        hasValidNewConnectionCredentials(newConnectionCredentials, cloudProvider)
-      ) {
+      // Always update policy when switching tabs to ensure validation is correct
+      if (tab.id === TABS.NEW_CONNECTION) {
         updatePolicyWithNewCredentials(newConnectionCredentials);
-      } else if (
-        tab.id === TABS.EXISTING_CONNECTION &&
-        existingConnectionCredentials.cloudConnectorId
-      ) {
+      } else if (tab.id === TABS.EXISTING_CONNECTION) {
         updatePolicyWithExistingCredentials(existingConnectionCredentials);
       }
     },
     [
       newConnectionCredentials,
-      cloudProvider,
       existingConnectionCredentials,
       updatePolicyWithNewCredentials,
       updatePolicyWithExistingCredentials,

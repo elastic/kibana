@@ -1,0 +1,71 @@
+{
+  "id": "@kbn/shared-ux-label-formatter",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/shared-ux-label-formatter",
+        "id": "def-public.toSentenceCase",
+        "type": "Function",
+        "tags": [],
+        "label": "toSentenceCase",
+        "description": [
+          "\nConverts a string to sentence case.\nFor glossary terms, applies the exact formatting from the glossary.\nFor non-glossary terms, capitalizes only the first letter.\n"
+        ],
+        "signature": [
+          "(label: string) => string"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/label_formatter/src/to_sentence_case.ts",
+        "lineNumber": 54,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-label-formatter",
+            "id": "def-public.toSentenceCase.$1",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [
+              "- The label string to format"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/label_formatter/src/to_sentence_case.ts",
+            "lineNumber": 65,
+            "columnNumber": 32,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "formatted label string"
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -17,16 +17,22 @@ export const TestSingleFileConnector: ConnectorSpec = {
     supportedFeatureIds: ['workflows'],
   },
 
-  authTypes: [
-    'none',
-    'basic',
-    {
-      type: 'api_key_header',
-      defaults: {
-        headerField: 'Key',
+  auth: {
+    types: [
+      'none',
+      'basic',
+      {
+        type: 'api_key_header',
+        defaults: {
+          headerField: 'Key',
+        },
       },
+    ],
+    headers: {
+      'x-test-header': 'i-am-a-test-header-value',
+      'kbn-xsrf': 'foo',
     },
-  ],
+  },
 
   schema: z.object({
     apiUrl: z.string().describe('API URL'),

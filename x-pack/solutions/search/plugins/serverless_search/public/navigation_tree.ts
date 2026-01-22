@@ -7,18 +7,12 @@
 
 import { lazy } from 'react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { i18n } from '@kbn/i18n';
 
 const LazyIconAgents = lazy(() =>
   import('@kbn/search-shared-ui/src/v2_icons/robot').then((m) => ({ default: m.iconRobot }))
-);
-
-const LazyIconPlayground = lazy(() =>
-  import('@kbn/search-shared-ui/src/v2_icons/playground').then((m) => ({
-    default: m.iconPlayground,
-  }))
 );
 
 const NAV_TITLE = i18n.translate('xpack.serverlessSearch.nav.title', {
@@ -47,7 +41,10 @@ const AI_TITLE = i18n.translate('xpack.serverlessSearch.nav.adminAndSettings.ai.
   defaultMessage: 'AI',
 });
 
-export const navigationTree = ({ isAppRegistered }: ApplicationStart): NavigationTreeDefinition => {
+export function createNavigationTree({
+  isAppRegistered,
+  showAiAssistant = true,
+}: ApplicationStart & { showAiAssistant?: boolean }): NavigationTreeDefinition {
   return {
     body: [
       {
@@ -69,27 +66,24 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
       {
         icon: LazyIconAgents, // Temp svg until we have icon in EUI
         link: 'agent_builder',
-        badgeType: 'techPreview',
       },
       {
         link: 'workflows',
-        badgeType: 'techPreview' as const,
-      },
-      {
-        id: 'searchPlayground',
-        title: i18n.translate('xpack.serverlessSearch.nav.build.searchPlayground', {
-          defaultMessage: 'Playground',
-        }),
-        link: 'searchPlayground' as AppDeepLinkId,
-        breadcrumbStatus: 'hidden' as 'hidden',
-        icon: LazyIconPlayground, // Temp svg until we have icon in EUI
       },
       {
         children: [
           {
             id: 'ml_overview',
             title: '',
-            children: [{ link: 'ml:overview' }, { link: 'ml:dataVisualizer' }],
+            children: [
+              { link: 'ml:overview' },
+              { link: 'ml:dataVisualizer' },
+              { link: 'ml:dataDrift', sideNavStatus: 'hidden' },
+              { link: 'ml:dataDriftPage', sideNavStatus: 'hidden' },
+              { link: 'ml:fileUpload', sideNavStatus: 'hidden' },
+              { link: 'ml:indexDataVisualizer', sideNavStatus: 'hidden' },
+              { link: 'ml:indexDataVisualizerPage', sideNavStatus: 'hidden' },
+            ],
           },
           {
             id: 'category-anomaly_detection',
@@ -115,8 +109,11 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             breadcrumbStatus: 'hidden',
             children: [
               { link: 'ml:logRateAnalysis' },
+              { link: 'ml:logRateAnalysisPage', sideNavStatus: 'hidden' },
               { link: 'ml:logPatternAnalysis' },
+              { link: 'ml:logPatternAnalysisPage', sideNavStatus: 'hidden' },
               { link: 'ml:changePointDetections' },
+              { link: 'ml:changePointDetectionsPage', sideNavStatus: 'hidden' },
             ],
           },
         ],
@@ -124,24 +121,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
         id: 'machine_learning',
         renderAs: 'panelOpener',
         title: MACHINE_LEARNING_TITLE,
-      },
-    ],
-    footer: [
-      {
-        id: 'search_getting_started',
-        icon: 'launch',
-        link: 'searchGettingStarted',
-      },
-      {
-        id: 'dev_tools',
-        title: i18n.translate('xpack.serverlessSearch.nav.developerTools', {
-          defaultMessage: 'Developer Tools',
-        }),
-        icon: 'code',
-        link: 'dev_tools:console',
-        getIsActive: ({ pathNameSerialized, prepend }) => {
-          return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
-        },
       },
       {
         children: [
@@ -183,6 +162,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             children: [
               { link: 'searchSynonyms:synonyms', breadcrumbStatus: 'hidden' },
               { link: 'searchQueryRules' },
+              { link: 'searchPlayground' },
             ],
             id: 'search_relevance',
             breadcrumbStatus: 'hidden',
@@ -197,6 +177,24 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
         title: i18n.translate('xpack.serverlessSearch.nav.dataManagement', {
           defaultMessage: 'Data management',
         }),
+      },
+    ],
+    footer: [
+      {
+        id: 'search_getting_started',
+        icon: 'launch',
+        link: 'searchGettingStarted',
+      },
+      {
+        id: 'dev_tools',
+        title: i18n.translate('xpack.serverlessSearch.nav.developerTools', {
+          defaultMessage: 'Developer Tools',
+        }),
+        icon: 'code',
+        link: 'dev_tools:console',
+        getIsActive: ({ pathNameSerialized, prepend }) => {
+          return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
+        },
       },
       {
         id: 'admin_and_settings',
@@ -264,11 +262,14 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             title: AI_TITLE,
             children: [
               { link: 'management:genAiSettings', breadcrumbStatus: 'hidden' },
-              { link: 'management:agentBuilder', breadcrumbStatus: 'hidden' },
-              {
-                link: 'management:observabilityAiAssistantManagement',
-                breadcrumbStatus: 'hidden',
-              },
+              ...(showAiAssistant
+                ? [
+                    {
+                      link: 'management:observabilityAiAssistantManagement' as const,
+                      breadcrumbStatus: 'hidden' as const,
+                    },
+                  ]
+                : []),
             ],
           },
           {
@@ -301,4 +302,8 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
       },
     ],
   };
+}
+
+export const navigationTree = (application: ApplicationStart): NavigationTreeDefinition => {
+  return createNavigationTree(application);
 };

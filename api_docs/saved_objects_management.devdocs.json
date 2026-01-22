@@ -10,6 +10,8 @@
         "label": "SavedObjectsManagementAction",
         "description": [],
         "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/action.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -24,6 +26,8 @@
               "() => React.ReactNode"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/action.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -37,6 +41,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/action.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -83,6 +89,8 @@
               ") => any) | undefined; }"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/action.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -97,6 +105,8 @@
               "(() => { type: string; id: string; }[]) | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/action.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -111,6 +121,8 @@
               "ActionContext | null"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/action.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -132,6 +144,8 @@
               " | null"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/action.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -146,6 +160,8 @@
               "(actionContext: ActionContext) => void"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/action.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -160,6 +176,8 @@
                   "ActionContext"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/action.ts",
+                "lineNumber": 38,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -178,6 +196,8 @@
               "(callback: Function) => void"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/action.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -192,6 +212,8 @@
                   "Function"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/action.ts",
+                "lineNumber": 42,
+                "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -218,6 +240,8 @@
               ") => void"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/action.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -238,6 +262,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/action.ts",
+                "lineNumber": 46,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -256,6 +282,8 @@
               "() => void"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/action.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -272,6 +300,8 @@
         "label": "SavedObjectsManagementColumn",
         "description": [],
         "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/column.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -283,6 +313,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/column.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -294,11 +326,11 @@
             "label": "euiColumn",
             "description": [],
             "signature": [
-              "{ id?: string | undefined; prefix?: string | undefined; onError?: React.ReactEventHandler<HTMLTableCellElement> | undefined; scope?: string | undefined; name: React.ReactNode; security?: string | undefined; defaultValue?: string | number | readonly string[] | undefined; className?: string | undefined; 'aria-label'?: string | undefined; 'data-test-subj'?: string | undefined; css?: ",
+              "{ id?: string | undefined; prefix?: string | undefined; onError?: React.ReactEventHandler<HTMLTableCellElement> | undefined; scope?: string | undefined; name: React.ReactNode; security?: string | undefined; defaultValue?: string | number | readonly string[] | undefined; color?: string | undefined; suppressHydrationWarning?: boolean | undefined; className?: string | undefined; height?: string | number | undefined; lang?: string | undefined; style?: React.CSSProperties | undefined; width?: string | undefined; role?: React.AriaRole | undefined; tabIndex?: number | undefined; \"aria-activedescendant\"?: string | undefined; \"aria-atomic\"?: Booleanish | undefined; \"aria-autocomplete\"?: \"none\" | \"list\" | \"inline\" | \"both\" | undefined; \"aria-braillelabel\"?: string | undefined; \"aria-brailleroledescription\"?: string | undefined; \"aria-busy\"?: Booleanish | undefined; \"aria-checked\"?: boolean | \"true\" | \"false\" | \"mixed\" | undefined; \"aria-colcount\"?: number | undefined; \"aria-colindex\"?: number | undefined; \"aria-colindextext\"?: string | undefined; \"aria-colspan\"?: number | undefined; \"aria-controls\"?: string | undefined; \"aria-current\"?: boolean | \"page\" | \"date\" | \"true\" | \"false\" | \"step\" | \"location\" | \"time\" | undefined; \"aria-describedby\"?: string | undefined; \"aria-description\"?: string | undefined; \"aria-details\"?: string | undefined; \"aria-disabled\"?: Booleanish | undefined; \"aria-dropeffect\"?: \"execute\" | \"link\" | \"none\" | \"copy\" | \"move\" | \"popup\" | undefined; \"aria-errormessage\"?: string | undefined; \"aria-expanded\"?: Booleanish | undefined; \"aria-flowto\"?: string | undefined; \"aria-grabbed\"?: Booleanish | undefined; \"aria-haspopup\"?: boolean | \"dialog\" | \"grid\" | \"listbox\" | \"menu\" | \"tree\" | \"true\" | \"false\" | undefined; \"aria-hidden\"?: Booleanish | undefined; \"aria-invalid\"?: boolean | \"true\" | \"false\" | \"grammar\" | \"spelling\" | undefined; \"aria-keyshortcuts\"?: string | undefined; 'aria-label'?: string | undefined; \"aria-labelledby\"?: string | undefined; \"aria-level\"?: number | undefined; \"aria-live\"?: \"off\" | \"assertive\" | \"polite\" | undefined; \"aria-modal\"?: Booleanish | undefined; \"aria-multiline\"?: Booleanish | undefined; \"aria-multiselectable\"?: Booleanish | undefined; \"aria-orientation\"?: \"horizontal\" | \"vertical\" | undefined; \"aria-owns\"?: string | undefined; \"aria-placeholder\"?: string | undefined; \"aria-posinset\"?: number | undefined; \"aria-pressed\"?: boolean | \"true\" | \"false\" | \"mixed\" | undefined; \"aria-readonly\"?: Booleanish | undefined; \"aria-relevant\"?: \"text\" | \"additions\" | \"additions removals\" | \"additions text\" | \"all\" | \"removals\" | \"removals additions\" | \"removals text\" | \"text additions\" | \"text removals\" | undefined; \"aria-required\"?: Booleanish | undefined; \"aria-roledescription\"?: string | undefined; \"aria-rowcount\"?: number | undefined; \"aria-rowindex\"?: number | undefined; \"aria-rowindextext\"?: string | undefined; \"aria-rowspan\"?: number | undefined; \"aria-selected\"?: Booleanish | undefined; \"aria-setsize\"?: number | undefined; \"aria-sort\"?: \"none\" | \"ascending\" | \"descending\" | \"other\" | undefined; \"aria-valuemax\"?: number | undefined; \"aria-valuemin\"?: number | undefined; \"aria-valuenow\"?: number | undefined; \"aria-valuetext\"?: string | undefined; children?: React.ReactNode; dangerouslySetInnerHTML?: { __html: string | TrustedHTML; } | undefined; onCopy?: React.ClipboardEventHandler<HTMLTableCellElement> | undefined; onCopyCapture?: React.ClipboardEventHandler<HTMLTableCellElement> | undefined; onCut?: React.ClipboardEventHandler<HTMLTableCellElement> | undefined; onCutCapture?: React.ClipboardEventHandler<HTMLTableCellElement> | undefined; onPaste?: React.ClipboardEventHandler<HTMLTableCellElement> | undefined; onPasteCapture?: React.ClipboardEventHandler<HTMLTableCellElement> | undefined; onCompositionEnd?: React.CompositionEventHandler<HTMLTableCellElement> | undefined; onCompositionEndCapture?: React.CompositionEventHandler<HTMLTableCellElement> | undefined; onCompositionStart?: React.CompositionEventHandler<HTMLTableCellElement> | undefined; onCompositionStartCapture?: React.CompositionEventHandler<HTMLTableCellElement> | undefined; onCompositionUpdate?: React.CompositionEventHandler<HTMLTableCellElement> | undefined; onCompositionUpdateCapture?: React.CompositionEventHandler<HTMLTableCellElement> | undefined; onFocus?: React.FocusEventHandler<HTMLTableCellElement> | undefined; onFocusCapture?: React.FocusEventHandler<HTMLTableCellElement> | undefined; onBlur?: React.FocusEventHandler<HTMLTableCellElement> | undefined; onBlurCapture?: React.FocusEventHandler<HTMLTableCellElement> | undefined; onChange?: React.FormEventHandler<HTMLTableCellElement> | undefined; onChangeCapture?: React.FormEventHandler<HTMLTableCellElement> | undefined; onBeforeInput?: React.FormEventHandler<HTMLTableCellElement> | undefined; onBeforeInputCapture?: React.FormEventHandler<HTMLTableCellElement> | undefined; onInput?: React.FormEventHandler<HTMLTableCellElement> | undefined; onInputCapture?: React.FormEventHandler<HTMLTableCellElement> | undefined; onReset?: React.FormEventHandler<HTMLTableCellElement> | undefined; onResetCapture?: React.FormEventHandler<HTMLTableCellElement> | undefined; onSubmit?: React.FormEventHandler<HTMLTableCellElement> | undefined; onSubmitCapture?: React.FormEventHandler<HTMLTableCellElement> | undefined; onInvalid?: React.FormEventHandler<HTMLTableCellElement> | undefined; onInvalidCapture?: React.FormEventHandler<HTMLTableCellElement> | undefined; onLoad?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onLoadCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onErrorCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onKeyDown?: React.KeyboardEventHandler<HTMLTableCellElement> | undefined; onKeyDownCapture?: React.KeyboardEventHandler<HTMLTableCellElement> | undefined; onKeyPress?: React.KeyboardEventHandler<HTMLTableCellElement> | undefined; onKeyPressCapture?: React.KeyboardEventHandler<HTMLTableCellElement> | undefined; onKeyUp?: React.KeyboardEventHandler<HTMLTableCellElement> | undefined; onKeyUpCapture?: React.KeyboardEventHandler<HTMLTableCellElement> | undefined; onAbort?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onAbortCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onCanPlay?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onCanPlayCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onCanPlayThrough?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onCanPlayThroughCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onDurationChange?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onDurationChangeCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onEmptied?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onEmptiedCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onEncrypted?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onEncryptedCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onEnded?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onEndedCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onLoadedData?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onLoadedDataCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onLoadedMetadata?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onLoadedMetadataCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onLoadStart?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onLoadStartCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onPause?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onPauseCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onPlay?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onPlayCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onPlaying?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onPlayingCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onProgress?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onProgressCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onRateChange?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onRateChangeCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onResize?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onResizeCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onSeeked?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onSeekedCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onSeeking?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onSeekingCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onStalled?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onStalledCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onSuspend?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onSuspendCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onTimeUpdate?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onTimeUpdateCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onVolumeChange?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onVolumeChangeCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onWaiting?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onWaitingCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onAuxClick?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onAuxClickCapture?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onClick?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onClickCapture?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onContextMenu?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onContextMenuCapture?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onDoubleClick?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onDoubleClickCapture?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onDrag?: React.DragEventHandler<HTMLTableCellElement> | undefined; onDragCapture?: React.DragEventHandler<HTMLTableCellElement> | undefined; onDragEnd?: React.DragEventHandler<HTMLTableCellElement> | undefined; onDragEndCapture?: React.DragEventHandler<HTMLTableCellElement> | undefined; onDragEnter?: React.DragEventHandler<HTMLTableCellElement> | undefined; onDragEnterCapture?: React.DragEventHandler<HTMLTableCellElement> | undefined; onDragExit?: React.DragEventHandler<HTMLTableCellElement> | undefined; onDragExitCapture?: React.DragEventHandler<HTMLTableCellElement> | undefined; onDragLeave?: React.DragEventHandler<HTMLTableCellElement> | undefined; onDragLeaveCapture?: React.DragEventHandler<HTMLTableCellElement> | undefined; onDragOver?: React.DragEventHandler<HTMLTableCellElement> | undefined; onDragOverCapture?: React.DragEventHandler<HTMLTableCellElement> | undefined; onDragStart?: React.DragEventHandler<HTMLTableCellElement> | undefined; onDragStartCapture?: React.DragEventHandler<HTMLTableCellElement> | undefined; onDrop?: React.DragEventHandler<HTMLTableCellElement> | undefined; onDropCapture?: React.DragEventHandler<HTMLTableCellElement> | undefined; onMouseDown?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onMouseDownCapture?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onMouseEnter?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onMouseLeave?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onMouseMove?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onMouseMoveCapture?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onMouseOut?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onMouseOutCapture?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onMouseOver?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onMouseOverCapture?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onMouseUp?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onMouseUpCapture?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onSelect?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onSelectCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onTouchCancel?: React.TouchEventHandler<HTMLTableCellElement> | undefined; onTouchCancelCapture?: React.TouchEventHandler<HTMLTableCellElement> | undefined; onTouchEnd?: React.TouchEventHandler<HTMLTableCellElement> | undefined; onTouchEndCapture?: React.TouchEventHandler<HTMLTableCellElement> | undefined; onTouchMove?: React.TouchEventHandler<HTMLTableCellElement> | undefined; onTouchMoveCapture?: React.TouchEventHandler<HTMLTableCellElement> | undefined; onTouchStart?: React.TouchEventHandler<HTMLTableCellElement> | undefined; onTouchStartCapture?: React.TouchEventHandler<HTMLTableCellElement> | undefined; onPointerDown?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onPointerDownCapture?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onPointerMove?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onPointerMoveCapture?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onPointerUp?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onPointerUpCapture?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onPointerCancel?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onPointerCancelCapture?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onPointerEnter?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onPointerLeave?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onPointerOver?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onPointerOverCapture?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onPointerOut?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onPointerOutCapture?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onGotPointerCapture?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onGotPointerCaptureCapture?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onLostPointerCapture?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onLostPointerCaptureCapture?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onScroll?: React.UIEventHandler<HTMLTableCellElement> | undefined; onScrollCapture?: React.UIEventHandler<HTMLTableCellElement> | undefined; onWheel?: React.WheelEventHandler<HTMLTableCellElement> | undefined; onWheelCapture?: React.WheelEventHandler<HTMLTableCellElement> | undefined; onAnimationStart?: React.AnimationEventHandler<HTMLTableCellElement> | undefined; onAnimationStartCapture?: React.AnimationEventHandler<HTMLTableCellElement> | undefined; onAnimationEnd?: React.AnimationEventHandler<HTMLTableCellElement> | undefined; onAnimationEndCapture?: React.AnimationEventHandler<HTMLTableCellElement> | undefined; onAnimationIteration?: React.AnimationEventHandler<HTMLTableCellElement> | undefined; onAnimationIterationCapture?: React.AnimationEventHandler<HTMLTableCellElement> | undefined; onTransitionEnd?: React.TransitionEventHandler<HTMLTableCellElement> | undefined; onTransitionEndCapture?: React.TransitionEventHandler<HTMLTableCellElement> | undefined; 'data-test-subj'?: string | undefined; css?: ",
               "Interpolation",
               "<",
               "Theme",
-              ">; defaultChecked?: boolean | undefined; suppressContentEditableWarning?: boolean | undefined; suppressHydrationWarning?: boolean | undefined; accessKey?: string | undefined; autoFocus?: boolean | undefined; contentEditable?: Booleanish | \"inherit\" | \"plaintext-only\" | undefined; contextMenu?: string | undefined; dir?: string | undefined; draggable?: Booleanish | undefined; hidden?: boolean | undefined; lang?: string | undefined; nonce?: string | undefined; slot?: string | undefined; spellCheck?: Booleanish | undefined; style?: React.CSSProperties | undefined; tabIndex?: number | undefined; title?: string | undefined; translate?: \"yes\" | \"no\" | undefined; radioGroup?: string | undefined; role?: React.AriaRole | undefined; about?: string | undefined; content?: string | undefined; datatype?: string | undefined; inlist?: any; property?: string | undefined; rel?: string | undefined; resource?: string | undefined; rev?: string | undefined; typeof?: string | undefined; vocab?: string | undefined; autoCapitalize?: string | undefined; autoCorrect?: string | undefined; autoSave?: string | undefined; color?: string | undefined; itemProp?: string | undefined; itemScope?: boolean | undefined; itemType?: string | undefined; itemID?: string | undefined; itemRef?: string | undefined; results?: number | undefined; unselectable?: \"on\" | \"off\" | undefined; inputMode?: \"search\" | \"none\" | \"text\" | \"tel\" | \"url\" | \"email\" | \"numeric\" | \"decimal\" | undefined; is?: string | undefined; \"aria-activedescendant\"?: string | undefined; \"aria-atomic\"?: Booleanish | undefined; \"aria-autocomplete\"?: \"none\" | \"list\" | \"inline\" | \"both\" | undefined; \"aria-braillelabel\"?: string | undefined; \"aria-brailleroledescription\"?: string | undefined; \"aria-busy\"?: Booleanish | undefined; \"aria-checked\"?: boolean | \"false\" | \"true\" | \"mixed\" | undefined; \"aria-colcount\"?: number | undefined; \"aria-colindex\"?: number | undefined; \"aria-colindextext\"?: string | undefined; \"aria-colspan\"?: number | undefined; \"aria-controls\"?: string | undefined; \"aria-current\"?: boolean | \"page\" | \"date\" | \"location\" | \"false\" | \"true\" | \"time\" | \"step\" | undefined; \"aria-describedby\"?: string | undefined; \"aria-description\"?: string | undefined; \"aria-details\"?: string | undefined; \"aria-disabled\"?: Booleanish | undefined; \"aria-dropeffect\"?: \"execute\" | \"link\" | \"none\" | \"copy\" | \"move\" | \"popup\" | undefined; \"aria-errormessage\"?: string | undefined; \"aria-expanded\"?: Booleanish | undefined; \"aria-flowto\"?: string | undefined; \"aria-grabbed\"?: Booleanish | undefined; \"aria-haspopup\"?: boolean | \"grid\" | \"false\" | \"true\" | \"dialog\" | \"menu\" | \"listbox\" | \"tree\" | undefined; \"aria-hidden\"?: Booleanish | undefined; \"aria-invalid\"?: boolean | \"false\" | \"true\" | \"grammar\" | \"spelling\" | undefined; \"aria-keyshortcuts\"?: string | undefined; \"aria-labelledby\"?: string | undefined; \"aria-level\"?: number | undefined; \"aria-live\"?: \"off\" | \"assertive\" | \"polite\" | undefined; \"aria-modal\"?: Booleanish | undefined; \"aria-multiline\"?: Booleanish | undefined; \"aria-multiselectable\"?: Booleanish | undefined; \"aria-orientation\"?: \"horizontal\" | \"vertical\" | undefined; \"aria-owns\"?: string | undefined; \"aria-placeholder\"?: string | undefined; \"aria-posinset\"?: number | undefined; \"aria-pressed\"?: boolean | \"false\" | \"true\" | \"mixed\" | undefined; \"aria-readonly\"?: Booleanish | undefined; \"aria-relevant\"?: \"text\" | \"all\" | \"additions\" | \"additions removals\" | \"additions text\" | \"removals\" | \"removals additions\" | \"removals text\" | \"text additions\" | \"text removals\" | undefined; \"aria-required\"?: Booleanish | undefined; \"aria-roledescription\"?: string | undefined; \"aria-rowcount\"?: number | undefined; \"aria-rowindex\"?: number | undefined; \"aria-rowindextext\"?: string | undefined; \"aria-rowspan\"?: number | undefined; \"aria-selected\"?: Booleanish | undefined; \"aria-setsize\"?: number | undefined; \"aria-sort\"?: \"none\" | \"ascending\" | \"descending\" | \"other\" | undefined; \"aria-valuemax\"?: number | undefined; \"aria-valuemin\"?: number | undefined; \"aria-valuenow\"?: number | undefined; \"aria-valuetext\"?: string | undefined; children?: React.ReactNode; dangerouslySetInnerHTML?: { __html: string | TrustedHTML; } | undefined; onCopy?: React.ClipboardEventHandler<HTMLTableCellElement> | undefined; onCopyCapture?: React.ClipboardEventHandler<HTMLTableCellElement> | undefined; onCut?: React.ClipboardEventHandler<HTMLTableCellElement> | undefined; onCutCapture?: React.ClipboardEventHandler<HTMLTableCellElement> | undefined; onPaste?: React.ClipboardEventHandler<HTMLTableCellElement> | undefined; onPasteCapture?: React.ClipboardEventHandler<HTMLTableCellElement> | undefined; onCompositionEnd?: React.CompositionEventHandler<HTMLTableCellElement> | undefined; onCompositionEndCapture?: React.CompositionEventHandler<HTMLTableCellElement> | undefined; onCompositionStart?: React.CompositionEventHandler<HTMLTableCellElement> | undefined; onCompositionStartCapture?: React.CompositionEventHandler<HTMLTableCellElement> | undefined; onCompositionUpdate?: React.CompositionEventHandler<HTMLTableCellElement> | undefined; onCompositionUpdateCapture?: React.CompositionEventHandler<HTMLTableCellElement> | undefined; onFocus?: React.FocusEventHandler<HTMLTableCellElement> | undefined; onFocusCapture?: React.FocusEventHandler<HTMLTableCellElement> | undefined; onBlur?: React.FocusEventHandler<HTMLTableCellElement> | undefined; onBlurCapture?: React.FocusEventHandler<HTMLTableCellElement> | undefined; onChange?: React.FormEventHandler<HTMLTableCellElement> | undefined; onChangeCapture?: React.FormEventHandler<HTMLTableCellElement> | undefined; onBeforeInput?: React.FormEventHandler<HTMLTableCellElement> | undefined; onBeforeInputCapture?: React.FormEventHandler<HTMLTableCellElement> | undefined; onInput?: React.FormEventHandler<HTMLTableCellElement> | undefined; onInputCapture?: React.FormEventHandler<HTMLTableCellElement> | undefined; onReset?: React.FormEventHandler<HTMLTableCellElement> | undefined; onResetCapture?: React.FormEventHandler<HTMLTableCellElement> | undefined; onSubmit?: React.FormEventHandler<HTMLTableCellElement> | undefined; onSubmitCapture?: React.FormEventHandler<HTMLTableCellElement> | undefined; onInvalid?: React.FormEventHandler<HTMLTableCellElement> | undefined; onInvalidCapture?: React.FormEventHandler<HTMLTableCellElement> | undefined; onLoad?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onLoadCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onErrorCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onKeyDown?: React.KeyboardEventHandler<HTMLTableCellElement> | undefined; onKeyDownCapture?: React.KeyboardEventHandler<HTMLTableCellElement> | undefined; onKeyPress?: React.KeyboardEventHandler<HTMLTableCellElement> | undefined; onKeyPressCapture?: React.KeyboardEventHandler<HTMLTableCellElement> | undefined; onKeyUp?: React.KeyboardEventHandler<HTMLTableCellElement> | undefined; onKeyUpCapture?: React.KeyboardEventHandler<HTMLTableCellElement> | undefined; onAbort?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onAbortCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onCanPlay?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onCanPlayCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onCanPlayThrough?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onCanPlayThroughCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onDurationChange?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onDurationChangeCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onEmptied?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onEmptiedCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onEncrypted?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onEncryptedCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onEnded?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onEndedCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onLoadedData?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onLoadedDataCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onLoadedMetadata?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onLoadedMetadataCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onLoadStart?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onLoadStartCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onPause?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onPauseCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onPlay?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onPlayCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onPlaying?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onPlayingCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onProgress?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onProgressCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onRateChange?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onRateChangeCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onResize?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onResizeCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onSeeked?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onSeekedCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onSeeking?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onSeekingCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onStalled?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onStalledCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onSuspend?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onSuspendCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onTimeUpdate?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onTimeUpdateCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onVolumeChange?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onVolumeChangeCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onWaiting?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onWaitingCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onAuxClick?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onAuxClickCapture?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onClick?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onClickCapture?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onContextMenu?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onContextMenuCapture?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onDoubleClick?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onDoubleClickCapture?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onDrag?: React.DragEventHandler<HTMLTableCellElement> | undefined; onDragCapture?: React.DragEventHandler<HTMLTableCellElement> | undefined; onDragEnd?: React.DragEventHandler<HTMLTableCellElement> | undefined; onDragEndCapture?: React.DragEventHandler<HTMLTableCellElement> | undefined; onDragEnter?: React.DragEventHandler<HTMLTableCellElement> | undefined; onDragEnterCapture?: React.DragEventHandler<HTMLTableCellElement> | undefined; onDragExit?: React.DragEventHandler<HTMLTableCellElement> | undefined; onDragExitCapture?: React.DragEventHandler<HTMLTableCellElement> | undefined; onDragLeave?: React.DragEventHandler<HTMLTableCellElement> | undefined; onDragLeaveCapture?: React.DragEventHandler<HTMLTableCellElement> | undefined; onDragOver?: React.DragEventHandler<HTMLTableCellElement> | undefined; onDragOverCapture?: React.DragEventHandler<HTMLTableCellElement> | undefined; onDragStart?: React.DragEventHandler<HTMLTableCellElement> | undefined; onDragStartCapture?: React.DragEventHandler<HTMLTableCellElement> | undefined; onDrop?: React.DragEventHandler<HTMLTableCellElement> | undefined; onDropCapture?: React.DragEventHandler<HTMLTableCellElement> | undefined; onMouseDown?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onMouseDownCapture?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onMouseEnter?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onMouseLeave?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onMouseMove?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onMouseMoveCapture?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onMouseOut?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onMouseOutCapture?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onMouseOver?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onMouseOverCapture?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onMouseUp?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onMouseUpCapture?: React.MouseEventHandler<HTMLTableCellElement> | undefined; onSelect?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onSelectCapture?: React.ReactEventHandler<HTMLTableCellElement> | undefined; onTouchCancel?: React.TouchEventHandler<HTMLTableCellElement> | undefined; onTouchCancelCapture?: React.TouchEventHandler<HTMLTableCellElement> | undefined; onTouchEnd?: React.TouchEventHandler<HTMLTableCellElement> | undefined; onTouchEndCapture?: React.TouchEventHandler<HTMLTableCellElement> | undefined; onTouchMove?: React.TouchEventHandler<HTMLTableCellElement> | undefined; onTouchMoveCapture?: React.TouchEventHandler<HTMLTableCellElement> | undefined; onTouchStart?: React.TouchEventHandler<HTMLTableCellElement> | undefined; onTouchStartCapture?: React.TouchEventHandler<HTMLTableCellElement> | undefined; onPointerDown?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onPointerDownCapture?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onPointerMove?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onPointerMoveCapture?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onPointerUp?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onPointerUpCapture?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onPointerCancel?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onPointerCancelCapture?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onPointerEnter?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onPointerLeave?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onPointerOver?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onPointerOverCapture?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onPointerOut?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onPointerOutCapture?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onGotPointerCapture?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onGotPointerCaptureCapture?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onLostPointerCapture?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onLostPointerCaptureCapture?: React.PointerEventHandler<HTMLTableCellElement> | undefined; onScroll?: React.UIEventHandler<HTMLTableCellElement> | undefined; onScrollCapture?: React.UIEventHandler<HTMLTableCellElement> | undefined; onWheel?: React.WheelEventHandler<HTMLTableCellElement> | undefined; onWheelCapture?: React.WheelEventHandler<HTMLTableCellElement> | undefined; onAnimationStart?: React.AnimationEventHandler<HTMLTableCellElement> | undefined; onAnimationStartCapture?: React.AnimationEventHandler<HTMLTableCellElement> | undefined; onAnimationEnd?: React.AnimationEventHandler<HTMLTableCellElement> | undefined; onAnimationEndCapture?: React.AnimationEventHandler<HTMLTableCellElement> | undefined; onAnimationIteration?: React.AnimationEventHandler<HTMLTableCellElement> | undefined; onAnimationIterationCapture?: React.AnimationEventHandler<HTMLTableCellElement> | undefined; onTransitionEnd?: React.TransitionEventHandler<HTMLTableCellElement> | undefined; onTransitionEndCapture?: React.TransitionEventHandler<HTMLTableCellElement> | undefined; field: (string & {}) | keyof ",
+              ">; title?: string | undefined; description?: string | undefined; defaultChecked?: boolean | undefined; suppressContentEditableWarning?: boolean | undefined; accessKey?: string | undefined; autoFocus?: boolean | undefined; contentEditable?: \"inherit\" | Booleanish | \"plaintext-only\" | undefined; contextMenu?: string | undefined; dir?: string | undefined; draggable?: Booleanish | undefined; hidden?: boolean | undefined; nonce?: string | undefined; slot?: string | undefined; spellCheck?: Booleanish | undefined; translate?: \"no\" | \"yes\" | undefined; radioGroup?: string | undefined; about?: string | undefined; content?: string | undefined; datatype?: string | undefined; inlist?: any; property?: string | undefined; rel?: string | undefined; resource?: string | undefined; rev?: string | undefined; typeof?: string | undefined; vocab?: string | undefined; autoCapitalize?: string | undefined; autoCorrect?: string | undefined; autoSave?: string | undefined; itemProp?: string | undefined; itemScope?: boolean | undefined; itemType?: string | undefined; itemID?: string | undefined; itemRef?: string | undefined; results?: number | undefined; unselectable?: \"off\" | \"on\" | undefined; inputMode?: \"search\" | \"none\" | \"text\" | \"tel\" | \"url\" | \"email\" | \"numeric\" | \"decimal\" | undefined; is?: string | undefined; field: (string & {}) | keyof ",
               {
                 "pluginId": "savedObjectsManagement",
                 "scope": "public",
@@ -306,7 +338,7 @@
                 "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
-              "; description?: string | undefined; abbr?: string | undefined; footer?: string | React.ReactElement<any, string | React.JSXElementConstructor<any>> | ((props: ",
+              "; abbr?: string | undefined; footer?: string | React.ReactElement<any, string | React.JSXElementConstructor<any>> | ((props: ",
               "EuiTableFooterProps",
               "<",
               {
@@ -316,9 +348,11 @@
                 "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
-              ">) => React.ReactNode) | undefined; width?: string | undefined; readOnly?: boolean | undefined; headers?: string | undefined; dataType?: ",
+              ">) => React.ReactNode) | undefined; readOnly?: boolean | undefined; headers?: string | undefined; dataType?: ",
               "EuiTableDataType",
-              " | undefined; render?: ((value: any, item: ",
+              " | undefined; align?: ",
+              "HorizontalAlignment",
+              " | undefined; colSpan?: number | undefined; rowSpan?: number | undefined; valign?: \"baseline\" | \"middle\" | \"top\" | \"bottom\" | undefined; render?: ((value: any, item: ",
               {
                 "pluginId": "savedObjectsManagement",
                 "scope": "public",
@@ -326,9 +360,7 @@
                 "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
-              ") => React.ReactNode) | undefined; align?: ",
-              "HorizontalAlignment",
-              " | undefined; height?: string | number | undefined; colSpan?: number | undefined; rowSpan?: number | undefined; valign?: \"top\" | \"bottom\" | \"baseline\" | \"middle\" | undefined; nameTooltip?: ",
+              ") => React.ReactNode) | undefined; nameTooltip?: ",
               "EuiTableColumnNameTooltipProps",
               " | undefined; textOnly?: boolean | undefined; truncateText?: boolean | { lines: number; } | undefined; mobileOptions?: (Omit<",
               "EuiTableRowCellMobileOptionsShape",
@@ -343,6 +375,8 @@
               ") => React.ReactNode) | undefined; }) | undefined; isExpander?: boolean | undefined; }"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/column.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -357,6 +391,8 @@
               "(() => { type: string; id: string; }[]) | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/column.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -371,6 +407,8 @@
               "ColumnContext | null"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/column.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -385,6 +423,8 @@
               "(columnContext: ColumnContext) => void"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/column.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -399,6 +439,8 @@
                   "ColumnContext"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/column.ts",
+                "lineNumber": 30,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -417,6 +459,8 @@
               "(callback: Function) => void"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/column.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -431,6 +475,8 @@
                   "Function"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/column.ts",
+                "lineNumber": 34,
+                "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -449,6 +495,8 @@
               "() => void"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/column.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -480,6 +528,8 @@
           "[] | undefined"
         ],
         "path": "src/platform/plugins/shared/saved_objects_management/public/lib/get_tag_references.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -491,6 +541,8 @@
             "label": "{\n  selectedTags,\n  taggingApi,\n}",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/public/lib/get_tag_references.ts",
+            "lineNumber": 16,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -505,6 +557,8 @@
                   "string[] | undefined"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_management/public/lib/get_tag_references.ts",
+                "lineNumber": 17,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -526,6 +580,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_management/public/lib/get_tag_references.ts",
+                "lineNumber": 18,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -556,6 +612,8 @@
           "[]) => ParsedQuery"
         ],
         "path": "src/platform/plugins/shared/saved_objects_management/public/lib/parse_query.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -570,6 +628,8 @@
               "Query"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/lib/parse_query.ts",
+            "lineNumber": 19,
+            "columnNumber": 28,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -592,6 +652,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/lib/parse_query.ts",
+            "lineNumber": 19,
+            "columnNumber": 42,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -620,6 +682,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/saved_objects_management/public/lib/process_import_response.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -634,6 +698,8 @@
               "SavedObjectsImportResponse"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/lib/process_import_response.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -652,6 +718,8 @@
         "label": "FailedImport",
         "description": [],
         "path": "src/platform/plugins/shared/saved_objects_management/public/lib/process_import_response.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -666,6 +734,8 @@
               "{ id: string; meta: { title?: string | undefined; icon?: string | undefined; }; type: string; managed?: boolean | undefined; overwrite?: boolean | undefined; }"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/lib/process_import_response.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -685,9 +755,13 @@
               " | ",
               "SavedObjectsImportMissingReferencesError",
               " | ",
-              "SavedObjectsImportUnknownError"
+              "SavedObjectsImportUnknownError",
+              " | ",
+              "SavedObjectsImportUnexpectedAccessControlMetadataError"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/lib/process_import_response.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -702,6 +776,8 @@
         "label": "ProcessedImportResponse",
         "description": [],
         "path": "src/platform/plugins/shared/saved_objects_management/public/lib/process_import_response.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -723,6 +799,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/lib/process_import_response.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -738,6 +816,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/lib/process_import_response.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -752,6 +832,8 @@
               "UnmatchedReference[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/lib/process_import_response.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -766,6 +848,8 @@
               "\"success\" | \"idle\""
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/lib/process_import_response.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -777,6 +861,8 @@
             "label": "importCount",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/public/lib/process_import_response.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -792,6 +878,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/lib/process_import_response.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -806,6 +894,8 @@
         "label": "SavedObjectManagementTypeInfo",
         "description": [],
         "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+        "lineNumber": 80,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -817,6 +907,8 @@
             "label": "name",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -831,6 +923,8 @@
               "\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -842,6 +936,8 @@
             "label": "hidden",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -853,6 +949,8 @@
             "label": "displayName",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -869,6 +967,8 @@
           "Domain interfaces\n\nSaved Object Management metadata associated with a saved object. See\n{@link SavedObjectWithMetadata}."
         ],
         "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -883,6 +983,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -897,6 +999,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -911,6 +1015,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -925,6 +1031,8 @@
               "{ path: string; uiCapabilitiesPath: string; } | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -940,6 +1048,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -954,6 +1064,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -970,6 +1082,8 @@
           "\nRepresents a relation between two {@link SavedObjectWithMetadata | saved objects}."
         ],
         "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+        "lineNumber": 58,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -981,6 +1095,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -992,6 +1108,8 @@
             "label": "type",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1006,6 +1124,8 @@
               "\"child\" | \"parent\""
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1026,6 +1146,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1037,6 +1159,8 @@
             "label": "managed",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1052,6 +1176,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1066,6 +1192,8 @@
         "label": "SavedObjectsManagementRecord",
         "description": [],
         "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/record.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1077,6 +1205,8 @@
             "label": "type",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/record.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1088,6 +1218,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/record.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1104,6 +1236,8 @@
               "; hiddenType: boolean; }"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/record.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1119,6 +1253,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/record.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1133,6 +1269,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/record.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1161,6 +1299,8 @@
           "<T>"
         ],
         "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1172,6 +1312,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1183,6 +1325,8 @@
             "label": "type",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1203,6 +1347,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1218,6 +1364,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1232,6 +1380,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1246,6 +1396,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1260,6 +1412,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1274,6 +1428,8 @@
               "T"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1288,6 +1444,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1303,6 +1461,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1321,6 +1481,8 @@
       "label": "SavedObjectsManagementPluginSetup",
       "description": [],
       "path": "src/platform/plugins/shared/saved_objects_management/public/plugin.ts",
+      "lineNumber": 41,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -1335,6 +1497,8 @@
       "label": "SavedObjectsManagementPluginStart",
       "description": [],
       "path": "src/platform/plugins/shared/saved_objects_management/public/plugin.ts",
+      "lineNumber": 43,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1357,6 +1521,8 @@
             "[]>"
           ],
           "path": "src/platform/plugins/shared/saved_objects_management/public/plugin.ts",
+          "lineNumber": 44,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -1375,6 +1541,8 @@
             ">"
           ],
           "path": "src/platform/plugins/shared/saved_objects_management/public/plugin.ts",
+          "lineNumber": 45,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1389,6 +1557,8 @@
                 "string"
               ],
               "path": "src/platform/plugins/shared/saved_objects_management/public/plugin.ts",
+              "lineNumber": 46,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1404,6 +1574,8 @@
                 "string"
               ],
               "path": "src/platform/plugins/shared/saved_objects_management/public/plugin.ts",
+              "lineNumber": 47,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1419,6 +1591,8 @@
                 "string[]"
               ],
               "path": "src/platform/plugins/shared/saved_objects_management/public/plugin.ts",
+              "lineNumber": 48,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1434,6 +1608,8 @@
                 "number | undefined"
               ],
               "path": "src/platform/plugins/shared/saved_objects_management/public/plugin.ts",
+              "lineNumber": 49,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -1460,6 +1636,8 @@
             "[]) => string"
           ],
           "path": "src/platform/plugins/shared/saved_objects_management/public/plugin.ts",
+          "lineNumber": 51,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -1472,6 +1650,8 @@
               "label": "type",
               "description": [],
               "path": "src/platform/plugins/shared/saved_objects_management/public/lib/get_saved_object_label.ts",
+              "lineNumber": 15,
+              "columnNumber": 37,
               "deprecated": false,
               "trackAdoption": false
             },
@@ -1493,6 +1673,8 @@
                 "[]"
               ],
               "path": "src/platform/plugins/shared/saved_objects_management/public/lib/get_saved_object_label.ts",
+              "lineNumber": 15,
+              "columnNumber": 51,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -1509,6 +1691,8 @@
             "(object: { id: string; type: string; }) => string"
           ],
           "path": "src/platform/plugins/shared/saved_objects_management/public/plugin.ts",
+          "lineNumber": 52,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -1524,6 +1708,8 @@
                 "{ id: string; type: string; }"
               ],
               "path": "src/platform/plugins/shared/saved_objects_management/public/lib/get_default_title.ts",
+              "lineNumber": 10,
+              "columnNumber": 33,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -1550,6 +1736,8 @@
             "[]) => ParsedQuery"
           ],
           "path": "src/platform/plugins/shared/saved_objects_management/public/plugin.ts",
+          "lineNumber": 53,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -1565,6 +1753,8 @@
                 "Query"
               ],
               "path": "src/platform/plugins/shared/saved_objects_management/public/lib/parse_query.ts",
+              "lineNumber": 19,
+              "columnNumber": 28,
               "deprecated": false,
               "trackAdoption": false
             },
@@ -1586,6 +1776,8 @@
                 "[]"
               ],
               "path": "src/platform/plugins/shared/saved_objects_management/public/lib/parse_query.ts",
+              "lineNumber": 19,
+              "columnNumber": 42,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -1612,6 +1804,8 @@
             "[] | undefined"
           ],
           "path": "src/platform/plugins/shared/saved_objects_management/public/plugin.ts",
+          "lineNumber": 54,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -1635,6 +1829,8 @@
                 " | undefined; }"
               ],
               "path": "src/platform/plugins/shared/saved_objects_management/public/lib/get_tag_references.ts",
+              "lineNumber": 13,
+              "columnNumber": 38,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -1659,6 +1855,8 @@
           "Domain interfaces\n\nSaved Object Management metadata associated with a saved object. See\n{@link SavedObjectWithMetadata}."
         ],
         "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1673,6 +1871,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1687,6 +1887,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1701,6 +1903,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1715,6 +1919,8 @@
               "{ path: string; uiCapabilitiesPath: string; } | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1730,6 +1936,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1744,6 +1952,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1772,6 +1982,8 @@
           "<T>"
         ],
         "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1783,6 +1995,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1794,6 +2008,8 @@
             "label": "type",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1814,6 +2030,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1829,6 +2047,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1843,6 +2063,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1857,6 +2079,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1871,6 +2095,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1885,6 +2111,8 @@
               "T"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1899,6 +2127,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1914,6 +2144,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1932,6 +2164,8 @@
       "label": "SavedObjectsManagementPluginSetup",
       "description": [],
       "path": "src/platform/plugins/shared/saved_objects_management/server/types.ts",
+      "lineNumber": 11,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -1946,6 +2180,8 @@
       "label": "SavedObjectsManagementPluginStart",
       "description": [],
       "path": "src/platform/plugins/shared/saved_objects_management/server/types.ts",
+      "lineNumber": 14,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -1967,6 +2203,8 @@
           "\nRepresents a relation between two {@link SavedObjectWithMetadata | saved objects}."
         ],
         "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+        "lineNumber": 70,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1978,6 +2216,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1989,6 +2229,8 @@
             "label": "type",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2003,6 +2245,8 @@
               "\"child\" | \"parent\""
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2014,6 +2258,8 @@
             "label": "error",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2028,6 +2274,8 @@
         "label": "SavedObjectManagementTypeInfo",
         "description": [],
         "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+        "lineNumber": 80,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2039,6 +2287,8 @@
             "label": "name",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2053,6 +2303,8 @@
               "\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2064,6 +2316,8 @@
             "label": "hidden",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2075,6 +2329,8 @@
             "label": "displayName",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2091,6 +2347,8 @@
           "Domain interfaces\n\nSaved Object Management metadata associated with a saved object. See\n{@link SavedObjectWithMetadata}."
         ],
         "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2105,6 +2363,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2119,6 +2379,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2133,6 +2395,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2147,6 +2411,8 @@
               "{ path: string; uiCapabilitiesPath: string; } | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2162,6 +2428,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2176,6 +2444,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2192,6 +2462,8 @@
           "\nRepresents a relation between two {@link SavedObjectWithMetadata | saved objects}."
         ],
         "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+        "lineNumber": 58,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2203,6 +2475,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2214,6 +2488,8 @@
             "label": "type",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2228,6 +2504,8 @@
               "\"child\" | \"parent\""
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2248,6 +2526,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2259,6 +2539,8 @@
             "label": "managed",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2274,6 +2556,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2302,6 +2586,8 @@
           "<T>"
         ],
         "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2313,6 +2599,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2324,6 +2612,8 @@
             "label": "type",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2344,6 +2634,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2359,6 +2651,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2373,6 +2667,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2387,6 +2683,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2401,6 +2699,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2415,6 +2715,8 @@
               "T"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2429,6 +2731,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2444,6 +2748,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2464,6 +2770,8 @@
           "\"child\" | \"parent\""
         ],
         "path": "src/platform/plugins/shared/saved_objects_management/common/types/v1.ts",
+        "lineNumber": 56,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -20,13 +20,6 @@ jest.mock('./use_get_schedule');
 jest.mock('../api');
 jest.mock('../../../../../common/hooks/use_app_toasts');
 
-const mockUseKibanaFeatureFlags = jest
-  .fn()
-  .mockReturnValue({ attackDiscoveryPublicApiEnabled: false });
-jest.mock('../../../use_kibana_feature_flags', () => ({
-  useKibanaFeatureFlags: () => mockUseKibanaFeatureFlags(),
-}));
-
 const deleteAttackDiscoveryScheduleMock = deleteAttackDiscoverySchedule as jest.MockedFunction<
   typeof deleteAttackDiscoverySchedule
 >;
@@ -74,7 +67,6 @@ describe('useDeleteAttackDiscoverySchedule', () => {
     await act(async () => {
       await result.mutateAsync({ id: 'test-0' });
       expect(deleteAttackDiscoveryScheduleMock).toHaveBeenCalledWith({
-        attackDiscoveryPublicApiEnabled: false,
         id: 'test-0',
       });
     });

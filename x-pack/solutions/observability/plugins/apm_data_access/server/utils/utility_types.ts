@@ -10,7 +10,7 @@ import type { DedotObject } from '@kbn/utility-types';
 import type { ValuesType } from 'utility-types';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { EventOutcome, StatusCode } from '@kbn/apm-types/src/es_schemas/raw/fields';
-import type { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type { ProcessorEvent } from '@kbn/apm-types-shared';
 
 const {
   CLOUD,

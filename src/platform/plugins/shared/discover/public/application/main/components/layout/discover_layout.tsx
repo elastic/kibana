@@ -56,7 +56,6 @@ import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
 import type { PanelsToggleProps } from '../../../../components/panels_toggle';
 import { PanelsToggle } from '../../../../components/panels_toggle';
-import { sendErrorMsg } from '../../hooks/use_saved_search_messages';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import {
   internalStateActions,
@@ -97,7 +96,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     observabilityAIAssistant,
     dataVisualizer: dataVisualizerService,
     fieldsMetadata,
-    discoverFeatureFlags,
   } = useDiscoverServices();
   const { scopedEBTManager } = useScopedServices();
   const dispatch = useInternalStateDispatch();
@@ -113,7 +111,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     state.grid,
   ]);
   const isEsqlMode = useIsEsqlMode();
-  const tabsEnabled = discoverFeatureFlags.getTabsEnabled();
   const viewMode: VIEW_MODE = useAppStateSelector((state) => {
     const fieldStatsNotAvailable =
       !uiSettings.get(SHOW_FIELD_STATISTICS) && !!dataVisualizerService;
@@ -278,6 +275,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     [dispatch, updateAppState]
   );
 
+  const updateAdHocDataViewId = useCurrentTabAction(internalStateActions.updateAdHocDataViewId);
   const onFieldEdited: (options: {
     editedDataView: DataView;
     removedFieldName?: string;
@@ -290,11 +288,25 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         onRemoveColumn(removedFieldName);
       }
       if (!editedDataView.isPersisted()) {
-        await stateContainer.actions.updateAdHocDataViewId(editedDataView);
+        await dispatch(
+          updateAdHocDataViewId({
+            editedDataView,
+          })
+        );
+      }
+      if (editedDataView?.id) {
+        // `tab.uiState.fieldListExistingFieldsInfo` needs to be reset when user edits fields,
+        // otherwise the edited field would be shown under "Empty" section in the sidebar
+        // when switching to a tab with the same data view id.
+        dispatch(
+          internalStateActions.resetAffectedFieldListExistingFieldsInfoUiState({
+            dataViewId: editedDataView.id,
+          })
+        );
       }
       stateContainer.dataState.refetch$.next('reset');
     },
-    [dataView, stateContainer, currentColumns, onRemoveColumn]
+    [dataView, stateContainer, currentColumns, onRemoveColumn, dispatch, updateAdHocDataViewId]
   );
 
   const onDisableFilters = useCallback(() => {
@@ -384,8 +396,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   const onCancelClick = useCallback(() => {
     stateContainer.dataState.cancel();
-    sendErrorMsg(stateContainer.dataState.data$.documents$);
-    sendErrorMsg(stateContainer.dataState.data$.main$);
   }, [stateContainer.dataState]);
 
   const layoutUiState = useCurrentTabSelector((state) => state.uiState.layout);
@@ -401,6 +411,22 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     [dispatch, setLayoutUiState]
   );
 
+  const changeDataView = useCurrentTabAction(internalStateActions.changeDataView);
+  const onChangeDataView = useCallback(
+    (dataViewOrDataViewId: string | DataView) => {
+      dispatch(changeDataView({ dataViewOrDataViewId }));
+    },
+    [dispatch, changeDataView]
+  );
+
+  const onDataViewCreatedAction = useCurrentTabAction(internalStateActions.onDataViewCreated);
+  const onDataViewCreated = useCallback(
+    (nextDataView: DataView) => {
+      dispatch(onDataViewCreatedAction({ nextDataView }));
+    },
+    [dispatch, onDataViewCreatedAction]
+  );
+
   return (
     <EuiPage
       className="dscPage" // class is used in tests and other styles
@@ -410,7 +436,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         styles.dscPage,
         css`
           ${useEuiBreakpoint(['m', 'l', 'xl'])} {
-            ${kbnFullBodyHeightCss(tabsEnabled ? '40px' : undefined)}
+            ${kbnFullBodyHeightCss('40px')}
           }
         `,
       ]}
@@ -445,8 +471,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
                 onAddBreakdownField={canSetBreakdownField ? onAddBreakdownField : undefined}
                 onAddField={onAddColumnWithTracking}
                 onAddFilter={onFilter}
-                onChangeDataView={stateContainer.actions.onChangeDataView}
-                onDataViewCreated={stateContainer.actions.onDataViewCreated}
+                onChangeDataView={onChangeDataView}
+                onDataViewCreated={onDataViewCreated}
                 onFieldEdited={onFieldEdited}
                 onRemoveField={onRemoveColumnWithTracking}
                 selectedDataView={dataView}

@@ -45,6 +45,7 @@ export const registerInternalListRoute = ({
       },
       validate: {
         query: schema.object({
+          search: schema.maybe(schema.string({ maxLength: 1000 })),
           page: schema.string({ defaultValue: '1' }),
           size: schema.string({
             defaultValue: `${DEFAULT_SCHEDULED_REPORT_LIST_SIZE}`,
@@ -74,8 +75,11 @@ export const registerInternalListRoute = ({
 
         await validateReportingLicense({ reporting, responseFactory: res });
 
-        const { page: queryPage = '1', size: querySize = `${DEFAULT_SCHEDULED_REPORT_LIST_SIZE}` } =
-          req.query;
+        const {
+          page: queryPage = '1',
+          size: querySize = `${DEFAULT_SCHEDULED_REPORT_LIST_SIZE}`,
+          search,
+        } = req.query;
         const page = parseInt(queryPage, 10) || 1;
         const size = Math.min(
           MAX_SCHEDULED_REPORT_LIST_SIZE,
@@ -89,7 +93,7 @@ export const registerInternalListRoute = ({
           responseFactory: res,
         });
 
-        const results = await scheduledReportsService.list({ user, page, size });
+        const results = await scheduledReportsService.list({ user, page, size, search });
 
         counters.usageCounter();
 

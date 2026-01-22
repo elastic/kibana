@@ -53,7 +53,7 @@ export default function QualityIssueFlyout() {
     degradedFieldAnalysisFormattedResult,
     isDegradedFieldsValueLoading,
   } = useQualityIssues();
-  const { dataStreamSettings, datasetDetails, timeRange } = useDatasetQualityDetailsState();
+  const { dataStreamSettings, datasetDetails, timeRange, view } = useDatasetQualityDetailsState();
   const pushedFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'pushedFlyoutTitle',
   });
@@ -135,7 +135,8 @@ export default function QualityIssueFlyout() {
           !isAnalysisInProgress &&
           degradedFieldAnalysisFormattedResult &&
           !degradedFieldAnalysisFormattedResult.identifiedUsingHeuristics &&
-          !isDegradedFieldsValueLoading && (
+          !isDegradedFieldsValueLoading &&
+          view !== 'wired' && (
             <>
               <EuiSpacer size="s" />
               <EuiTextColor

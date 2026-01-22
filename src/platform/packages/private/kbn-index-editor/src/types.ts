@@ -17,7 +17,8 @@ import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import type { FileUploadManager } from '@kbn/file-upload';
 import type { FileUploadPluginStart, MessageImporter } from '@kbn/file-upload-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { IndexUpdateService } from './index_update_service';
+import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
+import type { IndexUpdateService } from './services/index_update_service';
 import type { IndexEditorTelemetryService } from './telemetry/telemetry_service';
 
 export interface EditLookupIndexContentContext {
@@ -48,7 +49,7 @@ export type FlyoutDeps = EditLookupIndexFlyoutDeps & {
   storage: Storage;
   indexUpdateService: IndexUpdateService;
   indexEditorTelemetryService: IndexEditorTelemetryService;
-  fileManager: FileUploadManager;
+  existingIndexName: string | undefined | null;
 };
 
 /** Extended kibana context */
@@ -86,4 +87,31 @@ export enum IndexEditorErrors {
   FILE_TOO_BIG_ERROR = 'fileTooBigError',
   FILE_UPLOAD_ERROR = 'fileUploadError',
   FILE_ANALYSIS_ERROR = 'fileAnalysisError',
+}
+
+export interface DocUpdate {
+  id: string;
+  value: Record<string, any>;
+  atIndex?: number;
+}
+
+export interface ColumnAddition {
+  name: string;
+  fieldType?: DatatableColumnMeta['esType'];
+}
+
+export interface ColumnUpdate {
+  name: string;
+  previousName?: string;
+  fieldType?: DatatableColumnMeta['esType'];
+}
+
+export interface DeleteDocAction {
+  type: 'delete-doc';
+  payload: { ids: string[] };
+}
+
+export interface AddDocAction {
+  type: 'add-doc';
+  payload: DocUpdate;
 }

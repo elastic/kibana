@@ -27,18 +27,18 @@ import { flattenObjectNestedLast, calculateObjectDiff } from '@kbn/object-utils'
 import type {
   FlattenRecord,
   NamedFieldDefinitionConfig,
-  FieldDefinitionConfig,
-  InheritedFieldDefinitionConfig,
   FieldDefinition,
+  SimulationError,
+  DocSimulationStatus,
+  SimulationDocReport,
+  ProcessorMetrics,
+  DetectedField,
+  ProcessingSimulationResponse,
 } from '@kbn/streams-schema';
-import {
-  getInheritedFieldsFromAncestors,
-  isNamespacedEcsField,
-  Streams,
-} from '@kbn/streams-schema';
+import { getInheritedFieldsFromAncestors, isOtelStream, Streams } from '@kbn/streams-schema';
 import { mapValues, uniq, omit, isEmpty, uniqBy } from 'lodash';
 import type { StreamlangDSL } from '@kbn/streamlang';
-import { transpileIngestPipeline } from '@kbn/streamlang';
+import { transpileIngestPipeline, validateStreamlang } from '@kbn/streamlang';
 import { getRoot } from '@kbn/streams-schema/src/shared/hierarchy';
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import { FIELD_DEFINITION_TYPES } from '@kbn/streams-schema/src/fields';
@@ -65,55 +65,6 @@ export interface SimulateProcessingDeps {
   scopedClusterClient: IScopedClusterClient;
   streamsClient: StreamsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
-}
-
-export interface BaseSimulationError {
-  message: string;
-}
-
-export type SimulationError = BaseSimulationError &
-  (
-    | {
-        type: 'field_mapping_failure';
-      }
-    | {
-        type: 'generic_processor_failure';
-        processor_id: string;
-      }
-    | {
-        type: 'generic_simulation_failure';
-        processor_id?: string;
-      }
-    | {
-        type: 'ignored_fields_failure';
-        ignored_fields: Array<Record<string, string>>;
-      }
-    | {
-        type: 'non_namespaced_fields_failure';
-        processor_id: string;
-      }
-    | {
-        type: 'reserved_field_failure';
-        processor_id: string;
-      }
-  );
-
-export type DocSimulationStatus = 'parsed' | 'partially_parsed' | 'skipped' | 'failed' | 'dropped';
-
-export interface SimulationDocReport {
-  detected_fields: Array<{ processor_id: string; name: string }>;
-  errors: SimulationError[];
-  status: DocSimulationStatus;
-  value: FlattenRecord;
-}
-
-export interface ProcessorMetrics {
-  detected_fields: string[];
-  errors: SimulationError[];
-  failed_rate: number;
-  skipped_rate: number;
-  parsed_rate: number;
-  dropped_rate: number;
 }
 
 // Narrow down the type to only successful processor results
@@ -146,15 +97,6 @@ export type IngestSimulationResult =
       error: SimulationError;
     };
 
-export type DetectedField =
-  | WithNameAndEsType
-  | WithNameAndEsType<FieldDefinitionConfig | InheritedFieldDefinitionConfig>;
-
-export type WithNameAndEsType<TObj = {}> = TObj & {
-  name: string;
-  esType?: string;
-  suggestedType?: string;
-};
 export type WithRequired<TObj, TKey extends keyof TObj> = TObj & { [TProp in TKey]-?: TObj[TProp] };
 
 export const simulateProcessing = async ({
@@ -162,7 +104,7 @@ export const simulateProcessing = async ({
   scopedClusterClient,
   streamsClient,
   fieldsMetadataClient,
-}: SimulateProcessingDeps) => {
+}: SimulateProcessingDeps): Promise<ProcessingSimulationResponse> => {
   /* 0. Retrieve required data to prepare the simulation */
   const [stream, { indexState: streamIndexState, fieldCaps: streamIndexFieldCaps }] =
     await Promise.all([
@@ -171,6 +113,36 @@ export const simulateProcessing = async ({
     ]);
 
   const streamFields = await getStreamFields(streamsClient, stream);
+
+  // Get reserved fields for validation
+  const reservedFields = Object.entries(streamFields)
+    .filter(([, { type }]) => type === 'system')
+    .map(([name]) => name);
+
+  // Validate the Streamlang DSL before attempting simulation
+  const validationResult = validateStreamlang(params.body.processing, {
+    reservedFields,
+    streamType: Streams.WiredStream.Definition.is(stream) ? 'wired' : 'classic',
+  });
+
+  if (!validationResult.isValid) {
+    return {
+      documents: [],
+      processors_metrics: {},
+      documents_metrics: {
+        failed_rate: 1,
+        partially_parsed_rate: 0,
+        skipped_rate: 0,
+        parsed_rate: 0,
+        dropped_rate: 0,
+      },
+      detected_fields: [],
+      definition_error: {
+        type: 'validation_error',
+        message: validationResult.errors.map((e) => e.message).join(', '),
+      },
+    };
+  }
 
   /* 1. Prepare data for either simulation types (ingest, pipeline), prepare simulation body for the mandatory pipeline simulation */
   const simulationData = prepareSimulationData(params, stream, streamFields);
@@ -198,6 +170,8 @@ export const simulateProcessing = async ({
     return prepareSimulationFailureResponse(ingestSimulationResult.error);
   }
 
+  const otelStream = isOtelStream(stream);
+
   /* 4. Extract all the documents reports and processor metrics from the simulations */
   const { docReports, processorsMetrics } = computePipelineSimulationResult(
     pipelineSimulationResult.simulation,
@@ -205,6 +179,7 @@ export const simulateProcessing = async ({
     simulationData.docs,
     params.body.processing,
     Streams.WiredStream.Definition.is(stream),
+    otelStream,
     streamFields
   );
 
@@ -309,7 +284,6 @@ const preparePipelineSimulationBody = (
 
   return {
     docs,
-    // @ts-expect-error field_access_pattern not supported by typing yet
     pipeline: { processors, field_access_pattern: 'flexible' },
     verbose: true,
   };
@@ -333,7 +307,6 @@ const prepareIngestSimulationBody = (
   if (defaultPipelineName) {
     pipelineSubstitutions[defaultPipelineName] = {
       processors,
-      // @ts-expect-error field_access_pattern not supported by typing yet
       field_access_pattern: 'flexible',
     };
   }
@@ -372,7 +345,7 @@ const prepareIngestSimulationBody = (
  * If the simulation fails, we won't be able to extract the documents reports and the processor metrics.
  * In case any other error occurs, we delegate the error handling to currently in draft processor.
  */
-const executePipelineSimulation = async (
+export const executePipelineSimulation = async (
   scopedClusterClient: IScopedClusterClient,
   simulationBody: IngestSimulateRequest
 ): Promise<PipelineSimulationResult> => {
@@ -387,12 +360,12 @@ const executePipelineSimulation = async (
     };
   } catch (error) {
     if (error instanceof esErrors.ResponseError) {
-      const { processor_tag, reason } = error.body?.error;
+      const { processor_tag } = error.body?.error;
 
       return {
         status: 'failure',
         error: {
-          message: reason,
+          message: error.message,
           processor_id: processor_tag,
           type: 'generic_simulation_failure',
         },
@@ -534,6 +507,7 @@ const computePipelineSimulationResult = (
   sampleDocs: Array<{ _source: FlattenRecord }>,
   processing: StreamlangDSL,
   isWiredStream: boolean,
+  otelStream: boolean,
   streamFields: FieldDefinition
 ): {
   docReports: SimulationDocReport[];
@@ -552,7 +526,8 @@ const computePipelineSimulationResult = (
 
   const docReports = pipelineSimulationResult.docs.map((pipelineDocResult, id) => {
     const ingestDocResult = ingestSimulationResult.docs[id];
-    const ingestDocErrors = collectIngestDocumentErrors(ingestDocResult);
+    const ingestDocErrors = collectIngestDocumentErrors(ingestDocResult, otelStream);
+    const processedBy = collectProcessedByProcessorIds(pipelineDocResult.processor_results);
 
     const { errors, status, value } = getLastDoc(
       pipelineDocResult,
@@ -597,6 +572,7 @@ const computePipelineSimulationResult = (
     return {
       detected_fields: diff.detected_fields,
       errors,
+      processed_by: processedBy,
       status,
       value,
     };
@@ -773,16 +749,6 @@ const computeSimulationDocDiff = (
 
     diffResult.detected_fields.push(...processorDetectedFields);
 
-    if (isWiredStream) {
-      const nonNamespacedFields = addedFields.filter((field) => !isNamespacedEcsField(field));
-      if (!isEmpty(nonNamespacedFields)) {
-        diffResult.errors.push({
-          processor_id: nextDoc.processor_id,
-          type: 'non_namespaced_fields_failure',
-          message: `The fields generated by the processor do not match the streams recommended schema - put custom fields into attributes, body.structured or resource.attributes: [${nonNamespacedFields.join()}]`,
-        });
-      }
-    }
     if (forbiddenFields.some((field) => updatedFields.includes(field))) {
       diffResult.errors.push({
         processor_id: nextDoc.processor_id,
@@ -795,7 +761,26 @@ const computeSimulationDocDiff = (
   return diffResult;
 };
 
-const collectIngestDocumentErrors = (docResult: SimulateIngestSimulateIngestDocumentResult) => {
+const collectProcessedByProcessorIds = (
+  processorResults: SuccessfulPipelineSimulateDocumentResult['processor_results']
+) => {
+  const processedBy = new Set<string>();
+
+  processorResults.forEach((processor) => {
+    if (!processor.tag || isSkippedProcessor(processor)) {
+      return;
+    }
+
+    processedBy.add(processor.tag);
+  });
+
+  return Array.from(processedBy);
+};
+
+const collectIngestDocumentErrors = (
+  docResult: SimulateIngestSimulateIngestDocumentResult,
+  otelStream: boolean
+) => {
   const errors: SimulationError[] = [];
 
   if (isMappingFailure(docResult)) {
@@ -806,10 +791,17 @@ const collectIngestDocumentErrors = (docResult: SimulateIngestSimulateIngestDocu
   }
 
   if (docResult.doc?.ignored_fields) {
+    // Drop ignored field errors for OTEL streams if they end in geo.location - This is a temporary workaround for https://github.com/elastic/elasticsearch/issues/140506
+    const fieldsWithoutLocation = docResult.doc.ignored_fields.filter(({ field }) => {
+      return !field.endsWith('geo.location');
+    });
+    if (otelStream && fieldsWithoutLocation.length === 0) {
+      return errors;
+    }
     errors.push({
       type: 'ignored_fields_failure',
       message: 'Some fields were ignored while simulating this document ingestion.',
-      ignored_fields: docResult.doc.ignored_fields,
+      ignored_fields: fieldsWithoutLocation,
     });
   }
 

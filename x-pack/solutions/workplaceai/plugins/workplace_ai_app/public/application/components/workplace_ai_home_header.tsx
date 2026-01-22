@@ -14,23 +14,15 @@ import {
   EuiText,
   EuiButton,
   EuiImage,
-  EuiCopy,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
-import { ApiKeyForm } from '@kbn/workplaceai-api-keys-components';
 import { useCurrentUser } from '../hooks/use_current_user';
-import { useElasticsearchUrl } from '../hooks/use_elasticsearch_url';
-import { useMcpServerUrl } from '../hooks/use_mcp_server_url';
-import { ElasticsearchUrlField } from './elasticsearch_url_field';
 import headerHeroSvg from '../../assets/header_hero.svg';
-import mcpEndpointSVG from '../../assets/mcp_endpoint.svg';
 
 export const WorkplaceAIHomeHeader: React.FC = () => {
   const user = useCurrentUser();
-  const elasticsearchUrl = useElasticsearchUrl();
-  const { mcpServerUrl } = useMcpServerUrl();
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="xl">
@@ -56,49 +48,6 @@ export const WorkplaceAIHomeHeader: React.FC = () => {
         <EuiSpacer size="xxl" />
 
         <EuiFlexGroup gutterSize="s" wrap>
-          <EuiFlexItem grow={false}>
-            <ElasticsearchUrlField
-              value={elasticsearchUrl}
-              dataTestSubj="elasticsearchUrlField"
-              copyValueDataTestSubj="copyElasticsearchUrlButton"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <ApiKeyForm hasTitle={false} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiCopy
-              textToCopy={mcpServerUrl}
-              afterMessage={i18n.translate(
-                'xpack.workplaceai.gettingStarted.homeHeader.mcpEndpointCopiedMessage',
-                {
-                  defaultMessage: 'MCP Server URL copied',
-                }
-              )}
-            >
-              {(copy) => (
-                <EuiButton
-                  fill={false}
-                  color="text"
-                  size="s"
-                  iconType={mcpEndpointSVG}
-                  iconSide="left"
-                  onClick={copy}
-                  aria-label={i18n.translate(
-                    'xpack.workplaceai.gettingStarted.homeHeader.mcpEndpointAriaLabel',
-                    {
-                      defaultMessage: 'Copy MCP Server URL to clipboard',
-                    }
-                  )}
-                >
-                  <FormattedMessage
-                    id="xpack.workplaceai.gettingStarted.homeHeader.mcpEndpointButtonLabel"
-                    defaultMessage="MCP Endpoint"
-                  />
-                </EuiButton>
-              )}
-            </EuiCopy>
-          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
               fill={false}

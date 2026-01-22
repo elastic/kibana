@@ -18,7 +18,7 @@ export {
   fleetErrorToResponseOptions,
 } from './handlers';
 
-export { isESClientError } from './utils';
+export { isESClientError, rethrowIfInstanceOrWrap } from './utils';
 export {
   FleetError as FleetError,
   FleetVersionConflictError,
@@ -153,6 +153,11 @@ export class CloudConnectorUpdateError extends FleetError {
 
 export class AgentPolicyNameExistsError extends AgentPolicyError {}
 export class AgentReassignmentError extends FleetError {}
+export class AgentRollbackError extends FleetError {
+  constructor(message: string) {
+    super(`Error rolling back agent in Fleet: ${message}`);
+  }
+}
 export class PackagePolicyIneligibleForUpgradeError extends FleetError {}
 export class PackagePolicyValidationError extends FleetError {}
 export class PackagePolicyNameExistsError extends FleetError {}

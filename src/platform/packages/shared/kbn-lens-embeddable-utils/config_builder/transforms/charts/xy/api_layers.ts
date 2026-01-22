@@ -180,10 +180,10 @@ export function buildAPIDataLayer(
   if (isTextBasedLayer(layer)) {
     const dataset = buildDatasetState(
       layer,
+      visualization.layerId,
       adHocDataViews,
       references,
-      adhocReferences,
-      visualization.layerId
+      adhocReferences
     );
     const baseLayer = convertDataLayerToAPI(visualization, layer);
     if (isEsqlTableTypeDataset(dataset)) {
@@ -198,10 +198,10 @@ export function buildAPIDataLayer(
   }
   const dataset = buildDatasetState(
     layer,
+    visualization.layerId,
     adHocDataViews,
     references,
-    adhocReferences,
-    visualization.layerId
+    adhocReferences
   );
 
   if (isEsqlTableTypeDataset(dataset)) {
@@ -312,10 +312,10 @@ export function buildAPIReferenceLinesLayer(
 ): ReferenceLineLayerType {
   const dataset = buildDatasetState(
     layer,
+    visualization.layerId,
     adHocDataViews,
     references,
-    adhocReferences,
-    visualization.layerId
+    adhocReferences
   );
   if (isTextBasedLayer(layer)) {
     if (isEsqlTableTypeDataset(dataset)) {

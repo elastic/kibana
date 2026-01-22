@@ -73,6 +73,9 @@ dependsOn:
   - '@kbn/failure-store-modal'
   - '@kbn/react-query'
   - '@kbn/scout'
+  - '@kbn/deeplinks-management'
+  - '@kbn/test-eui-helpers'
+  - '@kbn/core-elasticsearch-server'
 tags:
   - plugin
   - prod
@@ -82,6 +85,7 @@ tags:
 fileGroups:
   src:
     - __jest__/**/*
+    - __mocks__/**/*
     - common/**/*
     - public/**/*
     - server/**/*

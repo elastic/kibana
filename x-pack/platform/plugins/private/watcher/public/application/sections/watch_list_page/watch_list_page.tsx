@@ -534,7 +534,7 @@ export const WatchListPage = () => {
               </>
             )
           }
-          message={
+          noItemsMessage={
             <FormattedMessage
               id="xpack.watcher.sections.watchList.watchTable.noWatchesMessage"
               defaultMessage="No watches to show"

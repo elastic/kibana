@@ -9,6 +9,7 @@ import { htmlIdGenerator } from '@elastic/eui';
 import { isAlwaysCondition, type Condition } from '@kbn/streamlang';
 import type { RoutingDefinition, Streams } from '@kbn/streams-schema';
 import { omit } from 'lodash';
+import type { IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
 import { emptyEqualsToAlways } from '../../../util/condition';
 import type { RoutingDefinitionWithUIAttributes } from './types';
 
@@ -52,10 +53,11 @@ export const toDataTableRecordWithIndex = <T>(documents: T[]) =>
 export const buildRoutingSaveRequestPayload = (
   definition: Streams.WiredStream.GetResponse,
   routing: RoutingDefinition[]
-): { ingest: Streams.WiredStream.GetResponse['stream']['ingest'] } => {
+): { ingest: IngestUpsertRequest } => {
   return {
     ingest: {
       ...definition.stream.ingest,
+      processing: omit(definition.stream.ingest.processing, 'updated_at'),
       wired: {
         ...definition.stream.ingest.wired,
         routing,

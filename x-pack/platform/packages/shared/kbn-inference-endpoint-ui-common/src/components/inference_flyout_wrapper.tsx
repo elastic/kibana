@@ -102,6 +102,7 @@ interface InferenceFlyoutWrapperProps {
   enforceAdaptiveAllocations?: boolean;
   onSubmitSuccess?: (inferenceId: string) => void;
   inferenceEndpoint?: InferenceEndpoint;
+  enableEisPromoTour?: boolean;
 }
 
 export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
@@ -112,6 +113,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
   enforceAdaptiveAllocations = false,
   onSubmitSuccess,
   inferenceEndpoint,
+  enableEisPromoTour,
 }) => {
   const inferenceCreationFlyoutId = useGeneratedHtmlId({
     prefix: 'InferenceFlyoutId',
@@ -176,6 +178,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
               enforceAdaptiveAllocations,
               isPreconfigured,
               reenterSecretsOnEdit: false,
+              enableEisPromoTour,
             }}
           />
           <EuiSpacer size="m" />

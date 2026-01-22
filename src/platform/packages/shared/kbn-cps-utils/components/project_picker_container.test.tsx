@@ -14,7 +14,7 @@ import { EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { BehaviorSubject } from 'rxjs';
 import type { ProjectRouting } from '@kbn/es-query';
-import type { CPSProject, ICPSManager, ProjectPickerAccessInfo } from '../types';
+import type { CPSProject, ICPSManager } from '../types';
 import { ProjectRoutingAccess } from '../types';
 import { ProjectPickerContainer } from './project_picker_container';
 
@@ -36,7 +36,7 @@ describe('ProjectPickerContainer', () => {
   ];
 
   let mockProjectRouting$: BehaviorSubject<ProjectRouting | undefined>;
-  let mockProjectPickerAccess$: BehaviorSubject<ProjectPickerAccessInfo>;
+  let mockProjectPickerAccess$: BehaviorSubject<ProjectRoutingAccess>;
   let mockCPSManager: ICPSManager;
 
   const mockFetchProjects = jest.fn().mockResolvedValue({
@@ -66,10 +66,9 @@ describe('ProjectPickerContainer', () => {
 
     mockProjectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(undefined);
     // Default to EDITABLE access (dashboards app on individual page)
-    mockProjectPickerAccess$ = new BehaviorSubject<ProjectPickerAccessInfo>({
-      access: ProjectRoutingAccess.EDITABLE,
-      readonlyMessage: undefined,
-    });
+    mockProjectPickerAccess$ = new BehaviorSubject<ProjectRoutingAccess>(
+      ProjectRoutingAccess.EDITABLE
+    );
 
     mockCPSManager = {
       fetchProjects: mockFetchProjects,
@@ -114,10 +113,7 @@ describe('ProjectPickerContainer', () => {
 
   describe('project routing access control', () => {
     it('should have EDITABLE access when on dashboard individual page', async () => {
-      mockProjectPickerAccess$.next({
-        access: ProjectRoutingAccess.EDITABLE,
-        readonlyMessage: undefined,
-      });
+      mockProjectPickerAccess$.next(ProjectRoutingAccess.EDITABLE);
 
       await renderProjectPicker();
       const button = screen.getByTestId('project-picker-button');
@@ -125,10 +121,7 @@ describe('ProjectPickerContainer', () => {
     });
 
     it('should have DISABLED access when on dashboard listing page', async () => {
-      mockProjectPickerAccess$.next({
-        access: ProjectRoutingAccess.DISABLED,
-        readonlyMessage: undefined,
-      });
+      mockProjectPickerAccess$.next(ProjectRoutingAccess.DISABLED);
 
       await renderProjectPicker();
       const button = screen.getByTestId('project-picker-button');
@@ -136,10 +129,7 @@ describe('ProjectPickerContainer', () => {
     });
 
     it('should have EDITABLE access when on dashboard create page', async () => {
-      mockProjectPickerAccess$.next({
-        access: ProjectRoutingAccess.EDITABLE,
-        readonlyMessage: undefined,
-      });
+      mockProjectPickerAccess$.next(ProjectRoutingAccess.EDITABLE);
 
       await renderProjectPicker();
       const button = screen.getByTestId('project-picker-button');
@@ -147,10 +137,7 @@ describe('ProjectPickerContainer', () => {
     });
 
     it('should have DISABLED access when on a different app', async () => {
-      mockProjectPickerAccess$.next({
-        access: ProjectRoutingAccess.DISABLED,
-        readonlyMessage: undefined,
-      });
+      mockProjectPickerAccess$.next(ProjectRoutingAccess.DISABLED);
 
       await renderProjectPicker();
       const button = screen.getByTestId('project-picker-button');
@@ -158,10 +145,7 @@ describe('ProjectPickerContainer', () => {
     });
 
     it('should default to DISABLED access when no app state is provided', async () => {
-      mockProjectPickerAccess$.next({
-        access: ProjectRoutingAccess.DISABLED,
-        readonlyMessage: undefined,
-      });
+      mockProjectPickerAccess$.next(ProjectRoutingAccess.DISABLED);
 
       await renderProjectPicker();
       const button = screen.getByTestId('project-picker-button');
@@ -169,25 +153,11 @@ describe('ProjectPickerContainer', () => {
     });
 
     it('should have READONLY access when on Lens editor page', async () => {
-      mockProjectPickerAccess$.next({
-        access: ProjectRoutingAccess.READONLY,
-        readonlyMessage: 'Please adjust project scope for each layer in the Lens editor.',
-      });
+      mockProjectPickerAccess$.next(ProjectRoutingAccess.READONLY);
 
       await renderProjectPicker();
       const button = screen.getByTestId('project-picker-button');
       // Button should not be disabled but should be in readonly mode
-      expect(button).not.toHaveAttribute('disabled');
-    });
-
-    it('should have READONLY access when on Lens listing page', async () => {
-      mockProjectPickerAccess$.next({
-        access: ProjectRoutingAccess.READONLY,
-        readonlyMessage: 'Please adjust project scope for each layer in the Lens editor.',
-      });
-
-      await renderProjectPicker();
-      const button = screen.getByTestId('project-picker-button');
       expect(button).not.toHaveAttribute('disabled');
     });
   });

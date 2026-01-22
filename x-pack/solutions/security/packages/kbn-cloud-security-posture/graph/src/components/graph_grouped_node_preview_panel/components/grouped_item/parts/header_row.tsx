@@ -6,17 +6,37 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiText,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import {
   DOCUMENT_TYPE_ENTITY,
   DOCUMENT_TYPE_EVENT,
   DOCUMENT_TYPE_ALERT,
 } from '@kbn/cloud-security-posture-common/schema/graph/v1';
-import { GROUPED_ITEM_TITLE_TEST_ID } from '../../../test_ids';
+import {
+  GROUPED_ITEM_TITLE_TEST_ID_LINK,
+  GROUPED_ITEM_TITLE_TEST_ID_TEXT,
+  GROUPED_ITEM_TITLE_TOOLTIP_TEST_ID,
+} from '../../../test_ids';
 import type { EntityOrEventItem } from '../types';
 import { emitGroupedItemClick } from '../../../events';
 import { displayEntityName, displayEventName } from '../utils';
+
+const entityUnavailableTooltip = i18n.translate(
+  'securitySolutionPackages.csp.graph.groupedItem.entityUnavailable.tooltip',
+  {
+    defaultMessage: 'Entity unavailable in entity store',
+  }
+);
 
 export interface HeaderRowProps {
   item: EntityOrEventItem;
@@ -24,7 +44,6 @@ export interface HeaderRowProps {
 
 export const HeaderRow = ({ item }: HeaderRowProps) => {
   const { euiTheme } = useEuiTheme();
-
   const title = useMemo(() => {
     switch (item.itemType) {
       case DOCUMENT_TYPE_EVENT:
@@ -34,6 +53,11 @@ export const HeaderRow = ({ item }: HeaderRowProps) => {
         return displayEntityName(item);
     }
   }, [item]);
+
+  const isClickable =
+    item.itemType === DOCUMENT_TYPE_EVENT ||
+    item.itemType === DOCUMENT_TYPE_ALERT ||
+    (item.itemType === DOCUMENT_TYPE_ENTITY && item.availableInEntityStore);
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -61,24 +85,44 @@ export const HeaderRow = ({ item }: HeaderRowProps) => {
           min-width: 0;
         `}
       >
-        <EuiLink
-          onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
-            e.preventDefault();
-            emitGroupedItemClick(item);
-          }}
-          color="primary"
-          css={css`
-            display: block;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            font-weight: ${euiTheme.font.weight.semiBold};
-            width: 100%;
-          `}
-          data-test-subj={GROUPED_ITEM_TITLE_TEST_ID}
-        >
-          {title}
-        </EuiLink>
+        {isClickable ? (
+          <EuiLink
+            onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+              e.preventDefault();
+              emitGroupedItemClick(item);
+            }}
+            color="primary"
+            css={css`
+              display: block;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              font-weight: ${euiTheme.font.weight.semiBold};
+              width: 100%;
+            `}
+            data-test-subj={GROUPED_ITEM_TITLE_TEST_ID_LINK}
+          >
+            {title}
+          </EuiLink>
+        ) : (
+          <EuiToolTip
+            content={entityUnavailableTooltip}
+            position="left"
+            data-test-subj={GROUPED_ITEM_TITLE_TOOLTIP_TEST_ID}
+          >
+            <EuiText
+              size="s"
+              color="text"
+              tabIndex={0}
+              data-test-subj={GROUPED_ITEM_TITLE_TEST_ID_TEXT}
+              css={css`
+                font-weight: ${euiTheme.font.weight.medium};
+              `}
+            >
+              {title}
+            </EuiText>
+          </EuiToolTip>
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

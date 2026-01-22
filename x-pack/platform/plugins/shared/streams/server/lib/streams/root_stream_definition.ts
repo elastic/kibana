@@ -11,23 +11,28 @@ import { baseFields } from './component_templates/logs_layer';
 
 export const LOGS_ROOT_STREAM_NAME = 'logs';
 
-export const rootStreamDefinition: Streams.WiredStream.Definition = {
-  name: LOGS_ROOT_STREAM_NAME,
-  description: 'Root stream',
-  ingest: {
-    lifecycle: { dsl: {} },
-    failure_store: {
-      lifecycle: { enabled: { data_retention: '30d' } }, // default 30d retention for failure store
-    },
-    settings: {},
-    processing: { steps: [] },
-    wired: {
-      routing: [],
-      fields: {
-        ...baseFields,
+export const createRootStreamDefinition = (): Streams.WiredStream.Definition => {
+  const now = new Date().toISOString();
+
+  return {
+    name: LOGS_ROOT_STREAM_NAME,
+    description: 'Root stream',
+    updated_at: now,
+    ingest: {
+      lifecycle: { dsl: {} },
+      failure_store: {
+        lifecycle: { enabled: { data_retention: '30d' } }, // default 30d retention for failure store
+      },
+      settings: {},
+      processing: { steps: [], updated_at: now },
+      wired: {
+        routing: [],
+        fields: {
+          ...baseFields,
+        },
       },
     },
-  },
+  };
 };
 
 export function hasSupportedStreamsRoot(streamName: string) {
