@@ -11,6 +11,7 @@ import { BulkDeleteConfirmationModal } from '../components/slo/bulk_delete_confi
 import { SloDeleteConfirmationModal } from '../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { SloDisableConfirmationModal } from '../components/slo/disable_confirmation_modal/slo_disable_confirmation_modal';
 import { SloEnableConfirmationModal } from '../components/slo/enable_confirmation_modal/slo_enable_confirmation_modal';
+import { HealthScanFlyout } from '../components/slo/health_scan_flyout';
 import { PurgeInstancesConfirmationModal } from '../components/slo/purge_instances_confirmation_modal/purge_instances_confirmation_modal';
 import { BulkPurgeRollupConfirmationModal } from '../components/slo/purge_rollup_confirmation_modal/bulk_purge_rollup_confirmation_modal';
 import { SloPurgeRollupConfirmationModal } from '../components/slo/purge_rollup_confirmation_modal/slo_purge_rollup_confirmation_modal';
@@ -109,6 +110,8 @@ export function ActionModalProvider({ children }: { children: ReactNode }) {
             onConfirm={handleOnConfirm}
           />
         );
+      case 'health_scan':
+        return <HealthScanFlyout onClose={handleOnCancel} />;
       default:
         return null;
     }
