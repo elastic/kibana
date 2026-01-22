@@ -7,16 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useContext, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { EuiResizeObserverProps } from '@elastic/eui';
 import type { UnifiedTabsProps, TabMenuItem } from '@kbn/unified-tabs';
-import useObservable from 'react-use/lib/useObservable';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { discoverTopNavMenuContext } from '../top_nav/discover_topnav_menu';
 import {
   internalStateActions,
   useInternalStateDispatch,
@@ -26,6 +24,7 @@ import {
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
+import { useTopNavMenuItems } from '../top_nav/use_top_nav_menu_items';
 
 const APP_MENU_COLLAPSE_THRESHOLD = 800;
 
@@ -99,8 +98,7 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
     currentDataView,
   ]);
 
-  const { topNavMenu$ } = useContext(discoverTopNavMenuContext);
-  const topNavMenuItems = useObservable(topNavMenu$, topNavMenu$.getValue());
+  const topNavMenuItems = useTopNavMenuItems();
 
   return {
     shouldCollapseAppMenu,
