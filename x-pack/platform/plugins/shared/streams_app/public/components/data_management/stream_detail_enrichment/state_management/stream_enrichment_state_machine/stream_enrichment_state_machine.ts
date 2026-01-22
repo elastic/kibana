@@ -442,7 +442,10 @@ export const streamEnrichmentMachine = setup({
             },
             'dataSources.select': {
               actions: [
-                ({ context, event }) => selectDataSource(context.dataSourcesRefs, event.id),
+                ({ context, event }) => {
+                  console.log('dataSources.select event received', event.id);
+                  return selectDataSource(context.dataSourcesRefs, event.id);
+                },
                 { type: 'notifyActiveDataSourceChange' },
               ],
             },

@@ -59,8 +59,9 @@ export interface FailureStoreSamplesResponse {
  * Fetches documents from the failure store and applies all configured processors
  * from parent streams to transform them.
  *
- * Only documents that failed after the most recent processing update are returned,
- * as older failures may have been caused by processing configurations that have since been fixed.
+ * All failure store documents are returned regardless of when they failed, since
+ * the simulation uses the current processing configuration. If processing has been
+ * fixed since the failure, the simulation will succeed anyway.
  *
  * Optimizations:
  * - Direct children of root streams (e.g., logs.child) have no ancestor processing,
@@ -77,80 +78,51 @@ export const getFailureStoreSamples = async ({
   const { name } = params.path;
   const size = params.query?.size ?? DEFAULT_SAMPLE_SIZE;
 
-  // 1. Get the current stream definition
-  const stream = await streamsClient.getStream(name);
-
-  // 2. Check if this is a direct child of a root stream (e.g., logs.child).
+  // 1. Check if this is a direct child of a root stream (e.g., logs.child).
   // Direct children have no ancestor processing to apply, so we can optimize by
   // skipping ancestor retrieval entirely.
   if (isDirectChildOfRoot(name)) {
-    const afterTimestamp = getStreamProcessingUpdatedAt(stream);
     const failureStoreDocs = await fetchFailureStoreDocuments({
       scopedClusterClient,
       streamName: name,
       size,
-      afterTimestamp,
     });
     return { documents: failureStoreDocs };
   }
 
-  // 3. For deeper nested streams, first fetch failure store documents.
-  // We use the current stream's processing updated_at as a preliminary filter.
+  // 2. For deeper nested streams, first fetch failure store documents.
   // If no documents exist, we can return early without fetching ancestors.
-  const preliminaryAfterTimestamp = getStreamProcessingUpdatedAt(stream);
   const failureStoreDocs = await fetchFailureStoreDocuments({
     scopedClusterClient,
     streamName: name,
     size,
-    afterTimestamp: preliminaryAfterTimestamp,
   });
 
   if (failureStoreDocs.length === 0) {
     return { documents: [] };
   }
 
-  // 4. Only fetch ancestors when we have documents that need processing
-  const ancestors = await streamsClient.getAncestors(name);
+  // 3. Only fetch ancestors and stream definition when we have documents that need processing
+  const [ancestors, stream] = await Promise.all([
+    streamsClient.getAncestors(name),
+    streamsClient.getStream(name),
+  ]);
 
-  // 5. Find the most recent processing update timestamp across all streams in the hierarchy.
-  // If an ancestor was updated more recently, we may need to re-filter documents.
-  const mostRecentProcessingUpdate = getMostRecentProcessingUpdate(ancestors, stream);
-
-  // If an ancestor was updated more recently than the current stream, we need to re-fetch
-  // documents with the stricter timestamp filter
-  let finalDocs = failureStoreDocs;
-  if (
-    mostRecentProcessingUpdate &&
-    preliminaryAfterTimestamp &&
-    mostRecentProcessingUpdate > preliminaryAfterTimestamp
-  ) {
-    finalDocs = await fetchFailureStoreDocuments({
-      scopedClusterClient,
-      streamName: name,
-      size,
-      afterTimestamp: mostRecentProcessingUpdate,
-    });
-
-    if (finalDocs.length === 0) {
-      return { documents: [] };
-    }
-  }
-
-  // 6. Collect and combine processing steps from all ancestors (root to current stream)
+  // 4. Collect and combine processing steps from all ancestors (root to current stream)
   const combinedProcessing = collectAncestorProcessing(ancestors, stream);
 
   // If no processing steps are configured, return the raw documents
   if (combinedProcessing.steps.length === 0) {
-    return { documents: finalDocs };
+    return { documents: failureStoreDocs };
   }
 
-  // 7. Run simulation with combined processing using the existing simulateProcessing function
+  // 5. Run simulation with combined processing using the existing simulateProcessing function
   const simulationResult = await simulateProcessing({
     params: {
       path: { name },
       body: {
         processing: combinedProcessing,
-        documents: finalDocs,
+        documents: failureStoreDocs,
       },
     },
     scopedClusterClient,
@@ -158,7 +130,7 @@ export const getFailureStoreSamples = async ({
     fieldsMetadataClient,
   });
 
-  // 8. Extract the processed document sources from the simulation result
+  // 6. Extract the processed document sources from the simulation result
   const processedDocs = simulationResult.documents.map((docReport) => docReport.value);
 
   return { documents: processedDocs };
@@ -176,59 +148,7 @@ function isDirectChildOfRoot(streamName: string): boolean {
 }
 
 /**
- * Extracts the processing updated_at timestamp from a stream definition.
- */
-function getStreamProcessingUpdatedAt(stream: Streams.all.Definition): string | undefined {
-  if (Streams.WiredStream.Definition.is(stream)) {
-    return stream.ingest.processing.updated_at;
-  }
-  if (Streams.ClassicStream.Definition.is(stream)) {
-    return stream.ingest.processing.updated_at;
-  }
-  return undefined;
-}
-
-/**
- * Finds the most recent processing update timestamp across all streams in the hierarchy.
- * This is used to filter failure store documents - we only want documents that failed
- * after the last processing change, as older failures may have been caused by
- * configurations that have since been fixed.
- */
-function getMostRecentProcessingUpdate(
-  ancestors: Streams.WiredStream.Definition[],
-  currentStream: Streams.all.Definition
-): string | undefined {
-  const allUpdatedAtTimestamps: string[] = [];
-
-  // Collect updated_at from ancestors
-  for (const ancestor of ancestors) {
-    if (ancestor.ingest.processing.updated_at) {
-      allUpdatedAtTimestamps.push(ancestor.ingest.processing.updated_at);
-    }
-  }
-
-  // Collect updated_at from current stream
-  if (Streams.WiredStream.Definition.is(currentStream)) {
-    if (currentStream.ingest.processing.updated_at) {
-      allUpdatedAtTimestamps.push(currentStream.ingest.processing.updated_at);
-    }
-  } else if (Streams.ClassicStream.Definition.is(currentStream)) {
-    if (currentStream.ingest.processing.updated_at) {
-      allUpdatedAtTimestamps.push(currentStream.ingest.processing.updated_at);
-    }
-  }
-
-  if (allUpdatedAtTimestamps.length === 0) {
-    return undefined;
-  }
-
-  // Return the most recent timestamp
-  return allUpdatedAtTimestamps.sort().reverse()[0];
-}
-
-/**
  * Fetches documents from the failure store for the given stream.
- * If afterTimestamp is provided, only documents with @timestamp greater than that value are returned.
  *
  * Documents in the failure store are wrapped with error metadata. This function
  * unwraps them and returns only the original document sources that can be used
@@ -238,35 +158,16 @@ async function fetchFailureStoreDocuments({
   scopedClusterClient,
   streamName,
   size,
-  afterTimestamp,
 }: {
   scopedClusterClient: IScopedClusterClient;
   streamName: string;
   size: number;
-  afterTimestamp?: string;
 }): Promise<FlattenRecord[]> {
-  const timeRangeFilter = afterTimestamp
-    ? {
-        range: {
-          '@timestamp': {
-            gt: afterTimestamp,
-          },
-        },
-      }
-    : undefined;
-
   try {
     const response = await scopedClusterClient.asCurrentUser.search({
       index: `${streamName}${FAILURE_STORE_SELECTOR}`,
       size,
       sort: [{ '@timestamp': { order: 'desc' } }],
-      ...(timeRangeFilter && {
-        query: {
-          bool: {
-            filter: [timeRangeFilter],
-          },
-        },
-      }),
     });
 
     // Unwrap the original documents from the failure store wrapper.

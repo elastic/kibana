@@ -66,7 +66,7 @@ export const createDefaultCustomSamplesDataSource = (
 export const createFailureStoreDataSource = (streamName: string): FailureStoreDataSource => ({
   type: 'failure-store',
   name: DATA_SOURCES_I18N.failureStore.defaultName,
-  enabled: false, // Start disabled - only one data source should be enabled at a time
+  enabled: true,
 });
 
 export const defaultEnrichmentUrlState: EnrichmentUrlState = {
