@@ -73,7 +73,12 @@ export function getSupportedOperators(): SupportedOperators[] {
  * Escapes a string value for use in ES|QL queries by escaping backslashes and quotes
  */
 export function escapeStringValue(val: string): string {
-  return `"${val.replace(/\\/g, '\\\\').replace(/\"/g, '\\"')}"`;
+  return `"${val
+    .replace(/\\/g, '\\\\')
+    .replace(/\"/g, '\\"')
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r')
+    .replace(/\t/g, '\\t')}"`;
 }
 
 /**
