@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiSelectableOption, UseEuiTheme } from '@elastic/eui';
+import type { EuiSelectableOption, EuiThemeComputed } from '@elastic/eui';
 
 import {
   EuiPopover,
@@ -29,7 +29,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 export const BROWSER_POPOVER_WIDTH = 400;
 export const BROWSER_POPOVER_HEIGHT = 500;
 
-const filterPopoverStyle = ({ euiTheme }: UseEuiTheme) => css`
+const filterPopoverStyle = (euiTheme: EuiThemeComputed) => css`
   .euiFilterButton__wrapper {
     ${logicalCSS('left', `-${euiTheme.size.s}`)}
     ${logicalCSS('min-width', '0')}
@@ -41,7 +41,7 @@ const filterPopoverStyle = ({ euiTheme }: UseEuiTheme) => css`
   }
 `;
 
-const filterButtonStyle = ({ euiTheme }: UseEuiTheme) => css`
+const filterButtonStyle = css`
   padding: 0;
 
   &,
@@ -186,7 +186,7 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
               id="esqlResourceBrowserFilterPopover"
               panelPaddingSize="none"
               display="block"
-              css={filterPopoverStyle}
+              css={filterPopoverStyle(euiTheme)}
               button={filterButton}
               isOpen={isFilterPopoverOpen}
               closePopover={() => setIsFilterPopoverOpen(false)}
