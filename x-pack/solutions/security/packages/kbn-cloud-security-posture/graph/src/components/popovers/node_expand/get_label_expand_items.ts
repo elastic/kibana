@@ -10,8 +10,6 @@ import type {
   ItemExpandPopoverListItemProps,
   SeparatorExpandPopoverListItemProps,
 } from '../primitives/list_graph_popover';
-import { emitFilterAction } from '../../filters/filter_pub_sub';
-import { isFilterActive } from '../../filters/filter_state';
 import {
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID,
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
@@ -39,6 +37,17 @@ export interface GetLabelExpandItemsOptions {
   onShowEventDetails?: () => void;
   /** Callback to close the popover */
   onClose?: () => void;
+  /**
+   * Callback to check if a filter is currently active.
+   * Returns true if the filter for the given field and value is active.
+   * If undefined, filter items will not show active state.
+   */
+  isFilterActive?: (field: string, value: string) => boolean;
+  /**
+   * Callback to toggle a filter on/off.
+   * If undefined, filter items will not toggle when clicked.
+   */
+  toggleFilter?: (field: string, value: string, action: 'show' | 'hide') => void;
   /** Opt-in configuration for which items to render. All default to false. */
   shouldRender: LabelExpandShouldRender;
   /** Whether this is a single alert node. Changes label to "Show alert details". Defaults to false. */
@@ -54,13 +63,21 @@ export interface GetLabelExpandItemsOptions {
 export const getLabelExpandItems = (
   options: GetLabelExpandItemsOptions
 ): Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps> => {
-  const { nodeLabel, onShowEventDetails, onClose, shouldRender, isSingleAlert = false } = options;
+  const {
+    nodeLabel,
+    onShowEventDetails,
+    onClose,
+    isFilterActive,
+    toggleFilter,
+    shouldRender,
+    isSingleAlert = false,
+  } = options;
 
   const items: Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps> = [];
 
   // Filter action item
   if (shouldRender.showEventsWithAction) {
-    const eventsWithActionActive = isFilterActive(EVENT_ACTION, nodeLabel);
+    const eventsWithActionActive = isFilterActive?.(EVENT_ACTION, nodeLabel) ?? false;
     items.push({
       type: 'item',
       iconType: 'analyzeEvent',
@@ -75,12 +92,7 @@ export const getLabelExpandItems = (
             { defaultMessage: 'Show related events' }
           ),
       onClick: () => {
-        emitFilterAction({
-          type: 'TOGGLE_EVENTS_WITH_ACTION',
-          field: EVENT_ACTION,
-          value: nodeLabel,
-          action: eventsWithActionActive ? 'hide' : 'show',
-        });
+        toggleFilter?.(EVENT_ACTION, nodeLabel, eventsWithActionActive ? 'hide' : 'show');
         onClose?.();
       },
     });

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import type { Meta, StoryFn } from '@storybook/react';
 import {
   DOCUMENT_TYPE_ENTITY,
@@ -18,6 +18,9 @@ import type {
   EventItem as EventItemType,
   AlertItem as AlertItemType,
 } from './types';
+import { createFilterStore, destroyFilterStore } from '../../../filters/filter_state';
+
+const STORYBOOK_SCOPE_ID = 'storybook-grouped-item';
 
 // Base interface for common props across all stories
 interface BaseStoryProps {
@@ -53,12 +56,17 @@ export const EntityItem: StoryFn<EntityStoryProps> = ({
   isLoading,
   ...itemArgs
 }: EntityStoryProps) => {
+  useEffect(() => {
+    createFilterStore(STORYBOOK_SCOPE_ID, 'storybook-data-view');
+    return () => destroyFilterStore(STORYBOOK_SCOPE_ID);
+  }, []);
+
   const item: EntityItemType = {
     itemType: DOCUMENT_TYPE_ENTITY,
     ...itemArgs,
   };
 
-  return <GroupedItemComp isLoading={isLoading} item={item} />;
+  return <GroupedItemComp isLoading={isLoading} item={item} scopeId={STORYBOOK_SCOPE_ID} />;
 };
 
 EntityItem.args = {
@@ -81,12 +89,17 @@ export const EventItem: StoryFn<EventAlertStoryProps> = ({
   isLoading,
   ...itemArgs
 }: EventAlertStoryProps) => {
+  useEffect(() => {
+    createFilterStore(STORYBOOK_SCOPE_ID, 'storybook-data-view');
+    return () => destroyFilterStore(STORYBOOK_SCOPE_ID);
+  }, []);
+
   const item: EventItemType = {
     itemType: DOCUMENT_TYPE_EVENT,
     ...itemArgs,
   };
 
-  return <GroupedItemComp isLoading={isLoading} item={item} />;
+  return <GroupedItemComp isLoading={isLoading} item={item} scopeId={STORYBOOK_SCOPE_ID} />;
 };
 
 EventItem.args = {
@@ -106,12 +119,17 @@ export const AlertItem: StoryFn<EventAlertStoryProps> = ({
   isLoading,
   ...itemArgs
 }: EventAlertStoryProps) => {
+  useEffect(() => {
+    createFilterStore(STORYBOOK_SCOPE_ID, 'storybook-data-view');
+    return () => destroyFilterStore(STORYBOOK_SCOPE_ID);
+  }, []);
+
   const item: AlertItemType = {
     itemType: DOCUMENT_TYPE_ALERT,
     ...itemArgs,
   };
 
-  return <GroupedItemComp isLoading={isLoading} item={item} />;
+  return <GroupedItemComp isLoading={isLoading} item={item} scopeId={STORYBOOK_SCOPE_ID} />;
 };
 
 AlertItem.args = {

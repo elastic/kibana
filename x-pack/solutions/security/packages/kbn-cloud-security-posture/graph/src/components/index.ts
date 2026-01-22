@@ -23,14 +23,6 @@ export {
   /** @deprecated Use useGraphPopoverState instead */
   useGraphPopoverState as useGraphPopover,
 } from './popovers/primitives/use_graph_popover_state';
-export {
-  previewAction$,
-  emitPreviewAction,
-  /** @deprecated Use previewAction$ instead */
-  previewAction$ as groupedItemClick$,
-  /** @deprecated Use emitPreviewAction instead */
-  emitPreviewAction as emitGroupedItemClick,
-} from './preview_pub_sub';
 export type { GraphProps } from './graph/graph';
 export type {
   NodeViewModel,

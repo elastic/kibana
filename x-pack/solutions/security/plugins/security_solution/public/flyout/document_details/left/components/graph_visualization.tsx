@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect } from 'react';
+import React, { memo, useCallback } from 'react';
 import { css } from '@emotion/react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
@@ -13,20 +13,15 @@ import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import {
-  type EntityOrEventItem,
   getNodeDocumentMode,
   getSingleDocumentData,
   GraphGroupedNodePreviewPanelKey,
   GROUP_PREVIEW_BANNER,
   NETWORK_PREVIEW_BANNER,
   type NodeViewModel,
-  previewAction$,
 } from '@kbn/cloud-security-posture-graph';
 import { type NodeDocumentDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
-import {
-  DOCUMENT_TYPE_ALERT,
-  DOCUMENT_TYPE_ENTITY,
-} from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import { DOCUMENT_TYPE_ENTITY } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { isEntityNodeEnriched } from '@kbn/cloud-security-posture-graph/src/components/utils';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
@@ -200,38 +195,6 @@ export const GraphVisualization: React.FC = memo(() => {
     [toasts, openPreviewPanel, scopeId, dataViewIndexPattern]
   );
 
-  // Subscribe to preview actions emitted by graph package
-  useEffect(() => {
-    const sub = previewAction$.subscribe((item: EntityOrEventItem) => {
-      if (item.itemType === DOCUMENT_TYPE_ENTITY) {
-        openPreviewPanel({
-          id: GenericEntityPanelKey,
-          params: {
-            entityId: item.id,
-            scopeId,
-            isPreviewMode: true,
-            banner: GENERIC_ENTITY_PREVIEW_BANNER,
-            isEngineMetadataExist: !!item.availableInEntityStore,
-          },
-        });
-      } else {
-        // event or alert
-        openPreviewPanel({
-          id: DocumentDetailsPreviewPanelKey,
-          params: {
-            id: item.docId,
-            indexName: item.index,
-            scopeId,
-            banner:
-              item.itemType === DOCUMENT_TYPE_ALERT ? ALERT_PREVIEW_BANNER : EVENT_PREVIEW_BANNER,
-            isPreviewMode: true,
-          },
-        });
-      }
-    });
-    return () => sub.unsubscribe();
-  }, [openPreviewPanel, scopeId]);
-
   const originEventIds = eventIds.map((id) => ({ id, isAlert }));
   const { investigateInTimeline } = useInvestigateInTimeline();
   const openTimelineCallback = useCallback(
@@ -289,6 +252,7 @@ export const GraphVisualization: React.FC = memo(() => {
       {dataView && (
         <React.Suspense fallback={<EuiLoadingSpinner />}>
           <GraphInvestigationLazy
+            scopeId={scopeId}
             initialState={{
               dataView,
               originEventIds,

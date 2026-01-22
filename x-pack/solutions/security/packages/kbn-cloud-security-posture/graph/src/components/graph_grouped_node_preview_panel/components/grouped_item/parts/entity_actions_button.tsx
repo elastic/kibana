@@ -8,14 +8,16 @@
 import React, { useCallback, useState } from 'react';
 import { EuiButtonIcon, EuiPopover, EuiListGroup, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { PopoverListItem } from '../../../../popovers/primitives/popover_list_item';
 import {
   GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID,
   GROUPED_ITEM_ACTIONS_POPOVER_TEST_ID,
 } from '../../../test_ids';
 import type { EntityItem } from '../types';
-import { emitPreviewAction } from '../../../../preview_pub_sub';
 import { getEntityExpandItems } from '../../../../popovers/node_expand/get_entity_expand_items';
+import { getFilterStore } from '../../../../filters/filter_state';
+import { GenericEntityPanelKey, GENERIC_ENTITY_PREVIEW_BANNER } from '../../../constants';
 
 const actionsButtonAriaLabel = i18n.translate(
   'securitySolutionPackages.csp.graph.groupedItem.actionsButton.ariaLabel',
@@ -26,26 +28,49 @@ const actionsButtonAriaLabel = i18n.translate(
 
 export interface EntityActionsButtonProps {
   item: EntityItem;
+  /**
+   * Unique identifier for the graph instance, used to scope filter state.
+   */
+  scopeId: string;
 }
 
 /**
  * Actions button for entity items in the grouped node preview panel.
  * Shows a popover with filter toggle actions and entity details option.
- * Emits filter actions via pub-sub for GraphInvestigation to handle.
- * Emits grouped item click via pub-sub for entity details.
+ * Uses FilterStore (scoped by scopeId) for filter state management.
+ * Uses useExpandableFlyoutApi to open entity details preview panel.
  */
-export const EntityActionsButton = ({ item }: EntityActionsButtonProps) => {
+export const EntityActionsButton = ({ item, scopeId }: EntityActionsButtonProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const { openPreviewPanel } = useExpandableFlyoutApi();
 
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const togglePopover = useCallback(() => setIsPopoverOpen((prev) => !prev), []);
+
+  // Get the FilterStore for this scope to check current filter state
+  const filterStore = getFilterStore(scopeId);
+
+  const handleShowEntityDetails = useCallback(() => {
+    openPreviewPanel({
+      id: GenericEntityPanelKey,
+      params: {
+        entityId: item.id,
+        scopeId,
+        isPreviewMode: true,
+        banner: GENERIC_ENTITY_PREVIEW_BANNER,
+        isEngineMetadataExist: !!item.availableInEntityStore,
+      },
+    });
+  }, [item.id, item.availableInEntityStore, openPreviewPanel, scopeId]);
 
   // Generate items fresh on each render to reflect current filter state
   const items = getEntityExpandItems({
     nodeId: item.id,
     sourceNamespace: item.ecsParentField,
-    onShowEntityDetails: item.availableInEntityStore ? () => emitPreviewAction(item) : undefined,
+    onShowEntityDetails: item.availableInEntityStore ? handleShowEntityDetails : undefined,
     onClose: closePopover,
+    isFilterActive: (field, value) => filterStore?.isFilterActive(field, value) ?? false,
+    toggleFilter: (field, value, action) => filterStore?.toggleFilter(field, value, action),
     shouldRender: {
       showActionsByEntity: true,
       showActionsOnEntity: true,

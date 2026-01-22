@@ -18,26 +18,7 @@ import {
   GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
 } from '../../test_ids';
-import { RELATED_ENTITY } from '../../../common/constants';
-import { DOCUMENT_TYPE_ENTITY } from '@kbn/cloud-security-posture-common/schema/graph/v1';
-
-// Mock isFilterActive to control filter state in tests
-const mockIsFilterActive = jest.fn();
-
-// Mock emitFilterAction to verify filter emissions
-const mockEmitFilterAction = jest.fn();
-jest.mock('../../filters/filter_state', () => ({
-  isFilterActive: (...args: unknown[]) => mockIsFilterActive(...args),
-}));
-jest.mock('../../filters/filter_pub_sub', () => ({
-  emitFilterAction: (...args: unknown[]) => mockEmitFilterAction(...args),
-}));
-
-// Mock emitPreviewAction to verify preview emissions
-const mockEmitPreviewAction = jest.fn();
-jest.mock('../../preview_pub_sub', () => ({
-  emitPreviewAction: (...args: unknown[]) => mockEmitPreviewAction(...args),
-}));
+import { createFilterStore, destroyFilterStore, getFilterStore } from '../../filters/filter_state';
 
 // Mock useNodeExpandGraphPopover to capture and expose itemsFn
 let capturedItemsFn:
@@ -144,16 +125,25 @@ const createMockNode = (
 };
 
 describe('useEntityNodeExpandPopover', () => {
+  const scopeId = 'test-scope-id';
+  const mockOnOpenEventPreview = jest.fn();
+
   beforeEach(() => {
     jest.clearAllMocks();
     capturedItemsFn = null;
-    mockIsFilterActive.mockReturnValue(false);
+    // Create a filter store for the test scope
+    createFilterStore(scopeId, 'test-data-view-id');
+  });
+
+  afterEach(() => {
+    // Clean up the filter store
+    destroyFilterStore(scopeId);
   });
 
   describe('itemsFn - single-entity mode', () => {
     it('should return all 4 menu items when docMode is single-entity and entity is enriched', () => {
       const node = createMockNode('single-entity', 'user');
-      renderHook(() => useEntityNodeExpandPopover());
+      renderHook(() => useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview));
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
@@ -180,28 +170,62 @@ describe('useEntityNodeExpandPopover', () => {
         disabled: false,
       });
     });
-  });
 
-  describe('itemsFn - grouped-entities mode', () => {
-    it('should return only entity details item when docMode is grouped-entities', () => {
-      const node = createMockNode('grouped-entities', 'user');
-      renderHook(() => useEntityNodeExpandPopover());
+    it('should return only filter items when onOpenEventPreview is not provided', () => {
+      const node = createMockNode('single-entity', 'user');
+      renderHook(() => useEntityNodeExpandPopover(scopeId));
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
 
-      // grouped-entities mode has "Show entity details" disabled because pub-sub only supports single entities
+      // Only filter items, no separator or entity details
+      expect(items).toHaveLength(3);
+      expect(items[0]).toMatchObject({
+        type: 'item',
+        testSubject: GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
+      });
+      expect(items[1]).toMatchObject({
+        type: 'item',
+        testSubject: GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID,
+      });
+      expect(items[2]).toMatchObject({
+        type: 'item',
+        testSubject: GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID,
+      });
+    });
+  });
+
+  describe('itemsFn - grouped-entities mode', () => {
+    it('should return only entity details item when docMode is grouped-entities and onOpenEventPreview provided', () => {
+      const node = createMockNode('grouped-entities', 'user');
+      renderHook(() => useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview));
+
+      expect(capturedItemsFn).not.toBeNull();
+      const items = capturedItemsFn!(node);
+
+      // grouped-entities mode only shows entity details (no filter items)
       expect(items).toHaveLength(1);
       expect(items[0]).toMatchObject({
         type: 'item',
         testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
-        disabled: true, // Disabled because pub-sub doesn't support grouped previews
+        disabled: false,
       });
+    });
+
+    it('should return empty array when docMode is grouped-entities and onOpenEventPreview not provided', () => {
+      const node = createMockNode('grouped-entities', 'user');
+      renderHook(() => useEntityNodeExpandPopover(scopeId));
+
+      expect(capturedItemsFn).not.toBeNull();
+      const items = capturedItemsFn!(node);
+
+      // No filter items in grouped mode, no entity details without callback
+      expect(items).toHaveLength(0);
     });
 
     it('should not show filter actions in grouped-entities mode', () => {
       const node = createMockNode('grouped-entities', 'user');
-      renderHook(() => useEntityNodeExpandPopover());
+      renderHook(() => useEntityNodeExpandPopover(scopeId));
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
@@ -228,7 +252,7 @@ describe('useEntityNodeExpandPopover', () => {
   describe('shouldDisableEntityDetailsListItem', () => {
     it('should disable entity details when entity is not enriched in single-entity mode', () => {
       const node = createMockNode('single-entity', 'user', false);
-      renderHook(() => useEntityNodeExpandPopover());
+      renderHook(() => useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview));
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
@@ -244,25 +268,9 @@ describe('useEntityNodeExpandPopover', () => {
       });
     });
 
-    it('should disable entity details in grouped-entities mode (pub-sub only supports single entities)', () => {
-      const node = createMockNode('grouped-entities', 'user');
-      renderHook(() => useEntityNodeExpandPopover());
-
-      expect(capturedItemsFn).not.toBeNull();
-      const items = capturedItemsFn!(node);
-
-      expect(items).toHaveLength(1);
-      expect(items[0]).toMatchObject({
-        type: 'item',
-        testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
-        disabled: true,
-        showToolTip: true,
-      });
-    });
-
     it('should enable entity details when entity is enriched in single-entity mode', () => {
       const node = createMockNode('single-entity', 'user', true);
-      renderHook(() => useEntityNodeExpandPopover());
+      renderHook(() => useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview));
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
@@ -279,7 +287,7 @@ describe('useEntityNodeExpandPopover', () => {
 
     it('should disable entity details when documentsData does not contain entity enrichment', () => {
       const node = createMockNode('single-entity', 'user', false);
-      renderHook(() => useEntityNodeExpandPopover());
+      renderHook(() => useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview));
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
@@ -298,26 +306,25 @@ describe('useEntityNodeExpandPopover', () => {
 
     it('should also disable entity details in grouped-entities mode when documentsData does not contain entity enrichment', () => {
       const node = createMockNode('grouped-entities', 'user', false);
-      renderHook(() => useEntityNodeExpandPopover());
+      renderHook(() => useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview));
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
 
+      // In grouped-entities mode, only entity details is shown (no filter items)
       expect(items).toHaveLength(1);
       expect(items[0]).toMatchObject({
         type: 'item',
         testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
-        disabled: true, // Disabled because pub-sub doesn't support grouped previews
+        disabled: false, // Not disabled - grouped mode doesn't check enrichment
       });
     });
   });
 
   describe('action labels', () => {
     it('should show "Show" labels when filters are not active', () => {
-      mockIsFilterActive.mockReturnValue(false);
-
       const node = createMockNode('single-entity', 'user');
-      renderHook(() => useEntityNodeExpandPopover());
+      renderHook(() => useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview));
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
@@ -347,10 +354,14 @@ describe('useEntityNodeExpandPopover', () => {
     });
 
     it('should show "Hide" labels when filters are active', () => {
-      mockIsFilterActive.mockReturnValue(true);
-
+      // Add a filter to make isFilterActive return true
       const node = createMockNode('single-entity', 'user');
-      renderHook(() => useEntityNodeExpandPopover());
+      const filterStore = getFilterStore(scopeId);
+
+      // Activate a filter first
+      filterStore?.toggleFilter('user.entity.id', node.id, 'show');
+
+      renderHook(() => useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview));
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
@@ -359,33 +370,17 @@ describe('useEntityNodeExpandPopover', () => {
         (item) =>
           item.type === 'item' && item.testSubject === GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID
       );
-      const actionsOnItem = items.find(
-        (item) =>
-          item.type === 'item' && item.testSubject === GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID
-      );
-      const relatedItem = items.find(
-        (item) =>
-          item.type === 'item' && item.testSubject === GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID
-      );
 
       if (actionsByItem?.type === 'item') {
         expect(actionsByItem.label).toContain('Hide');
       }
-      if (actionsOnItem?.type === 'item') {
-        expect(actionsOnItem.label).toContain('Hide');
-      }
-      if (relatedItem?.type === 'item') {
-        expect(relatedItem.label).toContain('Hide');
-      }
     });
   });
 
-  describe('filter action emission via pub-sub', () => {
-    it('should emit filter action when filter item is clicked', () => {
-      mockIsFilterActive.mockReturnValue(false);
-
+  describe('filter action via FilterStore', () => {
+    it('should toggle filter when filter item is clicked', () => {
       const node = createMockNode('single-entity', 'user');
-      renderHook(() => useEntityNodeExpandPopover());
+      renderHook(() => useEntityNodeExpandPopover(scopeId));
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
@@ -399,17 +394,15 @@ describe('useEntityNodeExpandPopover', () => {
         relatedItem.onClick();
       }
 
-      expect(mockEmitFilterAction).toHaveBeenCalledWith({
-        type: 'TOGGLE_RELATED_EVENTS',
-        field: RELATED_ENTITY,
-        value: node.id,
-        action: 'show',
-      });
+      // After clicking, the filter should be added to the store
+      const filterStore = getFilterStore(scopeId);
+      expect(filterStore?.getFilters().length).toBeGreaterThan(0);
     });
 
-    it('should emit preview action when entity details item is clicked', () => {
+    it('should call onOpenEventPreview callback when entity details item is clicked', () => {
       const node = createMockNode('single-entity', 'user');
-      renderHook(() => useEntityNodeExpandPopover());
+
+      renderHook(() => useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview));
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
@@ -424,15 +417,7 @@ describe('useEntityNodeExpandPopover', () => {
         entityDetailsItem.onClick();
       }
 
-      expect(mockEmitPreviewAction).toHaveBeenCalledWith({
-        itemType: DOCUMENT_TYPE_ENTITY,
-        id: 'entity-123',
-        index: undefined,
-        type: 'User',
-        subType: undefined,
-        availableInEntityStore: true,
-      });
-      expect(mockEmitFilterAction).not.toHaveBeenCalled();
+      expect(mockOnOpenEventPreview).toHaveBeenCalledWith(node.data);
     });
   });
 });

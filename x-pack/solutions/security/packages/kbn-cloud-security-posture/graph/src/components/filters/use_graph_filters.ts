@@ -7,62 +7,50 @@
 
 import { useCallback, useEffect, useReducer, useRef } from 'react';
 import type { Filter } from '@kbn/es-query';
-import { filterAction$ } from './filter_pub_sub';
-import {
-  getFilters,
-  addFilterToStore,
-  removeFilterFromStore,
-  setFiltersInStore,
-  resetFiltersStore,
-} from './filter_state';
+import { createFilterStore, destroyFilterStore } from './filter_state';
 
 /**
- * Hook that manages graph filter state and subscribes to filter actions.
+ * Hook that manages graph filter state for a specific scope.
  *
  * This hook:
- * 1. Subscribes to filterAction$ to receive filter mutations from action buttons/popovers
- * 2. Mutates the module-level filter store (source of truth)
- * 3. Triggers re-render so GraphInvestigation gets updated searchFilters
+ * 1. Creates or retrieves a FilterStore for the given scopeId
+ * 2. Subscribes to filter changes from the store
+ * 3. Triggers re-render when filters change (from action buttons or SearchBar)
  * 4. Provides setSearchFilters for SearchBar's onFiltersUpdated callback
- * 5. Cleans up and resets store on unmount
+ * 5. Cleans up and destroys the store on unmount
  *
+ * @param scopeId - Unique identifier for the graph instance
  * @param dataViewId - The data view ID used when constructing new filters
  * @returns Object containing searchFilters and setSearchFilters
  */
 export const useGraphFilters = (
+  scopeId: string,
   dataViewId: string
 ): { searchFilters: Filter[]; setSearchFilters: (filters: Filter[]) => void } => {
   // Force update mechanism - we don't need the state value, just the re-render trigger
   const [, forceUpdate] = useReducer((x: number) => x + 1, 0);
 
-  // Use ref to access latest dataViewId in subscription without re-subscribing
-  const dataViewIdRef = useRef(dataViewId);
-  dataViewIdRef.current = dataViewId;
+  // Create or get the FilterStore for this scopeId
+  const storeRef = useRef(createFilterStore(scopeId, dataViewId));
 
   useEffect(() => {
-    const subscription = filterAction$.subscribe(({ field, value, action }) => {
-      // Mutate the store (source of truth)
-      if (action === 'show') {
-        addFilterToStore(dataViewIdRef.current, field, value);
-      } else {
-        removeFilterFromStore(field, value);
-      }
+    // Subscribe to filter changes from the store
+    const subscription = storeRef.current.subscribe(() => {
       // Trigger re-render so GraphInvestigation gets updated filters
       forceUpdate();
     });
 
     return () => {
       subscription.unsubscribe();
-      resetFiltersStore();
+      destroyFilterStore(scopeId);
     };
-  }, []);
+  }, [scopeId]);
 
   // Callback for SearchBar's onFiltersUpdated - sets filters directly in store
   const setSearchFilters = useCallback((filters: Filter[]) => {
-    setFiltersInStore(filters);
-    forceUpdate();
+    storeRef.current.setFilters(filters);
   }, []);
 
   // Read from store on every render
-  return { searchFilters: getFilters(), setSearchFilters };
+  return { searchFilters: storeRef.current.getFilters(), setSearchFilters };
 };

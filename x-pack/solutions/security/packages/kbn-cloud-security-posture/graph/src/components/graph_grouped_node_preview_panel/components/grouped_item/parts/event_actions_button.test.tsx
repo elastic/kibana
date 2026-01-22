@@ -10,55 +10,15 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { EventActionsButton } from './event_actions_button';
 import type { EventItem, AlertItem } from '../types';
 import { GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID } from '../../../test_ids';
-import { useGraphPopoverState } from '../../../../popovers/primitives/use_graph_popover_state';
+import { createFilterStore, destroyFilterStore } from '../../../../filters/filter_state';
 
-// Mock useGraphPopoverState
-jest.mock('../../../../popovers/primitives/use_graph_popover_state', () => ({
-  useGraphPopoverState: jest.fn(() => ({
-    state: { isOpen: false, anchorElement: null },
-    actions: {
-      openPopover: jest.fn(),
-      closePopover: jest.fn(),
-    },
+// Mock useExpandableFlyoutApi
+const mockOpenPreviewPanel = jest.fn();
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: jest.fn(() => ({
+    openPreviewPanel: mockOpenPreviewPanel,
   })),
 }));
-
-// Mock filter and preview modules
-const mockEmitPreviewAction = jest.fn();
-const mockEmitFilterAction = jest.fn();
-jest.mock('../../../../preview_pub_sub', () => ({
-  emitPreviewAction: (...args: unknown[]) => mockEmitPreviewAction(...args),
-}));
-jest.mock('../../../../filters/filter_pub_sub', () => ({
-  emitFilterAction: (...args: unknown[]) => mockEmitFilterAction(...args),
-}));
-jest.mock('../../../../filters/filter_state', () => ({
-  isFilterActive: () => false,
-}));
-
-// Mock ListGraphPopover
-jest.mock('../../../../popovers/primitives/list_graph_popover', () => ({
-  ListGraphPopover: jest.fn(({ items, isOpen }) =>
-    isOpen ? (
-      <div data-test-subj="mock-popover">
-        {items
-          .filter((item: { type: string }) => item.type === 'item')
-          .map((item: { testSubject: string; label: string; onClick: () => void }) => (
-            <button
-              type="button"
-              key={item.testSubject}
-              data-test-subj={item.testSubject}
-              onClick={item.onClick}
-            >
-              {item.label}
-            </button>
-          ))}
-      </div>
-    ) : null
-  ),
-}));
-
-const mockUseGraphPopoverState = useGraphPopoverState as jest.Mock;
 
 describe('EventActionsButton', () => {
   const mockEventItem: EventItem = {
@@ -77,96 +37,96 @@ describe('EventActionsButton', () => {
     timestamp: '2025-01-19T00:00:00.000Z',
   };
 
+  const scopeId = 'test-scope-id';
+
   beforeEach(() => {
     jest.clearAllMocks();
+    // Create a filter store for the test scope
+    createFilterStore(scopeId, 'test-data-view-id');
+  });
+
+  afterEach(() => {
+    // Clean up the filter store
+    destroyFilterStore(scopeId);
   });
 
   it('should render the actions button', () => {
-    render(<EventActionsButton item={mockEventItem} />);
+    render(<EventActionsButton item={mockEventItem} scopeId={scopeId} />);
 
     expect(screen.getByTestId(GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID)).toBeInTheDocument();
   });
 
   it('should have correct aria-label', () => {
-    render(<EventActionsButton item={mockEventItem} />);
+    render(<EventActionsButton item={mockEventItem} scopeId={scopeId} />);
 
     const button = screen.getByTestId(GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID);
     expect(button).toHaveAttribute('aria-label', 'Actions');
   });
 
   describe('when popover is open with event item', () => {
-    beforeEach(() => {
-      // Mock popover as open
-      mockUseGraphPopoverState.mockReturnValue({
-        state: { isOpen: true, anchorElement: document.createElement('button') },
-        actions: {
-          openPopover: jest.fn(),
-          closePopover: jest.fn(),
-        },
-      });
-    });
-
     it('should render event details item with correct label for events', () => {
-      render(<EventActionsButton item={mockEventItem} />);
+      render(<EventActionsButton item={mockEventItem} scopeId={scopeId} />);
+
+      // Click the button to open the popover
+      fireEvent.click(screen.getByTestId(GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID));
 
       expect(screen.getByText('Show event details')).toBeInTheDocument();
     });
 
     it('should render show related events item', () => {
-      render(<EventActionsButton item={mockEventItem} />);
+      render(<EventActionsButton item={mockEventItem} scopeId={scopeId} />);
+
+      // Click the button to open the popover
+      fireEvent.click(screen.getByTestId(GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID));
 
       expect(screen.getByText('Show related events')).toBeInTheDocument();
     });
 
-    it('should emit emitPreviewAction when event details is clicked', () => {
-      render(<EventActionsButton item={mockEventItem} />);
+    it('should open preview panel when event details is clicked', () => {
+      render(<EventActionsButton item={mockEventItem} scopeId={scopeId} />);
+
+      // Click the button to open the popover
+      fireEvent.click(screen.getByTestId(GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID));
 
       const eventDetailsButton = screen.getByText('Show event details');
       fireEvent.click(eventDetailsButton);
 
-      expect(mockEmitPreviewAction).toHaveBeenCalledWith(mockEventItem);
-    });
-
-    it('should emit filter action when show related events is clicked', () => {
-      render(<EventActionsButton item={mockEventItem} />);
-
-      const relatedEventsButton = screen.getByText('Show related events');
-      fireEvent.click(relatedEventsButton);
-
-      expect(mockEmitFilterAction).toHaveBeenCalledWith({
-        type: 'TOGGLE_EVENTS_WITH_ACTION',
-        field: 'event.action',
-        value: 'file_created',
-        action: 'show',
-      });
+      expect(mockOpenPreviewPanel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            id: mockEventItem.docId,
+          }),
+        })
+      );
     });
   });
 
   describe('when popover is open with alert item', () => {
-    beforeEach(() => {
-      // Mock popover as open
-      mockUseGraphPopoverState.mockReturnValue({
-        state: { isOpen: true, anchorElement: document.createElement('button') },
-        actions: {
-          openPopover: jest.fn(),
-          closePopover: jest.fn(),
-        },
-      });
-    });
-
     it('should render alert details item with correct label for alerts', () => {
-      render(<EventActionsButton item={mockAlertItem} />);
+      render(<EventActionsButton item={mockAlertItem} scopeId={scopeId} />);
+
+      // Click the button to open the popover
+      fireEvent.click(screen.getByTestId(GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID));
 
       expect(screen.getByText('Show alert details')).toBeInTheDocument();
     });
 
-    it('should emit emitPreviewAction when alert details is clicked', () => {
-      render(<EventActionsButton item={mockAlertItem} />);
+    it('should open preview panel when alert details is clicked', () => {
+      render(<EventActionsButton item={mockAlertItem} scopeId={scopeId} />);
+
+      // Click the button to open the popover
+      fireEvent.click(screen.getByTestId(GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID));
 
       const alertDetailsButton = screen.getByText('Show alert details');
       fireEvent.click(alertDetailsButton);
 
-      expect(mockEmitPreviewAction).toHaveBeenCalledWith(mockAlertItem);
+      expect(mockOpenPreviewPanel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            id: mockAlertItem.docId,
+          }),
+        })
+      );
     });
   });
 });

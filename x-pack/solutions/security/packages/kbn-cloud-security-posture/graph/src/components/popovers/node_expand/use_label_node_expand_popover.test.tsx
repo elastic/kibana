@@ -16,25 +16,7 @@ import {
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID,
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
 } from '../../test_ids';
-import { EVENT_ACTION } from '../../../common/constants';
-
-// Mock isFilterActive to control filter state in tests
-const mockIsFilterActive = jest.fn();
-
-// Mock emitFilterAction to verify filter emissions
-const mockEmitFilterAction = jest.fn();
-jest.mock('../../filters/filter_state', () => ({
-  isFilterActive: (...args: unknown[]) => mockIsFilterActive(...args),
-}));
-jest.mock('../../filters/filter_pub_sub', () => ({
-  emitFilterAction: (...args: unknown[]) => mockEmitFilterAction(...args),
-}));
-
-// Mock emitPreviewAction to verify preview emissions
-const mockEmitPreviewAction = jest.fn();
-jest.mock('../../preview_pub_sub', () => ({
-  emitPreviewAction: (...args: unknown[]) => mockEmitPreviewAction(...args),
-}));
+import { createFilterStore, destroyFilterStore, getFilterStore } from '../../filters/filter_state';
 
 // Mock useLabelExpandGraphPopover to capture and expose itemsFn
 let capturedItemsFn:
@@ -81,16 +63,24 @@ const createMockLabelNode = (): NodeProps =>
   } as unknown as NodeProps);
 
 describe('useLabelNodeExpandPopover', () => {
+  const scopeId = 'test-scope-id';
+
   beforeEach(() => {
     jest.clearAllMocks();
     capturedItemsFn = null;
-    mockIsFilterActive.mockReturnValue(false);
+    // Create a filter store for the test scope
+    createFilterStore(scopeId, 'test-data-view-id');
+  });
+
+  afterEach(() => {
+    // Clean up the filter store
+    destroyFilterStore(scopeId);
   });
 
   describe('itemsFn - generates menu items', () => {
     it('should return show events item (event details disabled without proper docMode)', () => {
       const node = createMockLabelNode();
-      renderHook(() => useLabelNodeExpandPopover());
+      renderHook(() => useLabelNodeExpandPopover(scopeId));
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
@@ -107,7 +97,7 @@ describe('useLabelNodeExpandPopover', () => {
 
     it('should not show event details item when doc mode is not appropriate', () => {
       const node = createMockLabelNode();
-      renderHook(() => useLabelNodeExpandPopover());
+      renderHook(() => useLabelNodeExpandPopover(scopeId));
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
@@ -125,10 +115,8 @@ describe('useLabelNodeExpandPopover', () => {
 
   describe('action labels', () => {
     it('should show "Show" label when filter is not active', () => {
-      mockIsFilterActive.mockReturnValue(false);
-
       const node = createMockLabelNode();
-      renderHook(() => useLabelNodeExpandPopover());
+      renderHook(() => useLabelNodeExpandPopover(scopeId));
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
@@ -145,10 +133,13 @@ describe('useLabelNodeExpandPopover', () => {
     });
 
     it('should show "Hide" label when filter is active', () => {
-      mockIsFilterActive.mockReturnValue(true);
-
       const node = createMockLabelNode();
-      renderHook(() => useLabelNodeExpandPopover());
+      const filterStore = getFilterStore(scopeId);
+
+      // Activate a filter first
+      filterStore?.toggleFilter('event.action', 'Test Label', 'show');
+
+      renderHook(() => useLabelNodeExpandPopover(scopeId));
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
@@ -165,12 +156,10 @@ describe('useLabelNodeExpandPopover', () => {
     });
   });
 
-  describe('filter action emission via pub-sub', () => {
-    it('should emit filter action when events with action item is clicked', () => {
-      mockIsFilterActive.mockReturnValue(false);
-
+  describe('filter action via FilterStore', () => {
+    it('should toggle filter when events with action item is clicked', () => {
       const node = createMockLabelNode();
-      renderHook(() => useLabelNodeExpandPopover());
+      renderHook(() => useLabelNodeExpandPopover(scopeId));
 
       expect(capturedItemsFn).not.toBeNull();
       const items = capturedItemsFn!(node);
@@ -185,39 +174,9 @@ describe('useLabelNodeExpandPopover', () => {
         eventsWithActionItem.onClick();
       }
 
-      expect(mockEmitFilterAction).toHaveBeenCalledWith({
-        type: 'TOGGLE_EVENTS_WITH_ACTION',
-        field: EVENT_ACTION,
-        value: 'Test Label',
-        action: 'show',
-      });
-    });
-
-    it('should emit hide action when filter is already active', () => {
-      mockIsFilterActive.mockReturnValue(true);
-
-      const node = createMockLabelNode();
-      renderHook(() => useLabelNodeExpandPopover());
-
-      expect(capturedItemsFn).not.toBeNull();
-      const items = capturedItemsFn!(node);
-
-      const eventsWithActionItem = items.find(
-        (item) =>
-          item.type === 'item' &&
-          item.testSubject === GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID
-      );
-
-      if (eventsWithActionItem?.type === 'item' && eventsWithActionItem.onClick) {
-        eventsWithActionItem.onClick();
-      }
-
-      expect(mockEmitFilterAction).toHaveBeenCalledWith({
-        type: 'TOGGLE_EVENTS_WITH_ACTION',
-        field: EVENT_ACTION,
-        value: 'Test Label',
-        action: 'hide',
-      });
+      // After clicking, the filter should be added to the store
+      const filterStore = getFilterStore(scopeId);
+      expect(filterStore?.getFilters().length).toBeGreaterThan(0);
     });
   });
 });

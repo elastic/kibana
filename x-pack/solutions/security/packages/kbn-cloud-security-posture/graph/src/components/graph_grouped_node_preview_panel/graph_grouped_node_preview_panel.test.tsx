@@ -24,14 +24,21 @@ import {
 } from './test_ids';
 import { DOCUMENT_TYPE_EVENT } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { GROUPED_PREVIEW_PAGINATION_SETTINGS_KEY } from './use_pagination';
+import { createFilterStore, destroyFilterStore } from '../filters/filter_state';
 
 // Mock the hook
 jest.mock('./use_fetch_document_details');
 
+// Mock expandable flyout API
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: () => ({
+    openPreviewPanel: jest.fn(),
+  }),
+}));
+
 const mockUseFetchDocumentDetails = useFetchDocumentDetails as jest.MockedFunction<
   typeof useFetchDocumentDetails
 >;
-
 const createMockHookResult = (
   overrides?: Partial<ReturnType<typeof useFetchDocumentDetails>>
 ): ReturnType<typeof useFetchDocumentDetails> => ({
@@ -44,8 +51,11 @@ const createMockHookResult = (
   ...overrides,
 });
 
+const TEST_SCOPE_ID = 'test-scope-id';
+
 describe('GraphGroupedNodePreviewPanel', () => {
   const defaultProps = {
+    scopeId: TEST_SCOPE_ID,
     docMode: 'grouped-entities' as const,
     dataViewId: 'test-data-view-id',
     documentIds: ['doc-1', 'doc-2', 'doc-3'],
@@ -66,6 +76,7 @@ describe('GraphGroupedNodePreviewPanel', () => {
   };
 
   beforeEach(() => {
+    createFilterStore(TEST_SCOPE_ID, 'test-data-view-id');
     jest.clearAllMocks();
     localStorage.clear();
     entityIdCounter = 0;
@@ -74,6 +85,10 @@ describe('GraphGroupedNodePreviewPanel', () => {
         data: undefined as unknown as { page: (EventItem | AlertItem)[]; total: number },
       })
     );
+  });
+
+  afterEach(() => {
+    destroyFilterStore(TEST_SCOPE_ID);
   });
 
   describe('Rendering States', () => {

@@ -10,8 +10,7 @@ import type {
   ItemExpandPopoverListItemProps,
   SeparatorExpandPopoverListItemProps,
 } from '../primitives/list_graph_popover';
-import { emitFilterAction } from '../../filters/filter_pub_sub';
-import { isFilterActive } from '../../filters/filter_state';
+import type { NodeViewModel } from '../../types';
 import {
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID,
@@ -90,6 +89,17 @@ export interface GetEntityExpandItemsOptions {
   onShowEntityDetails?: () => void;
   /** Callback to close the popover */
   onClose?: () => void;
+  /**
+   * Callback to check if a filter is currently active.
+   * Returns true if the filter for the given field and value is active.
+   * If undefined, filter items will not show active state.
+   */
+  isFilterActive?: (field: string, value: string) => boolean;
+  /**
+   * Callback to toggle a filter on/off.
+   * If undefined, filter items will not toggle when clicked.
+   */
+  toggleFilter?: (field: string, value: string, action: 'show' | 'hide') => void;
   /** Opt-in configuration for which items to render. All default to false. */
   shouldRender: EntityExpandShouldRender;
   /** Whether entity details should be disabled (shown but not clickable). Defaults to false. */
@@ -115,6 +125,8 @@ export const getEntityExpandItems = (
     sourceNamespace,
     onShowEntityDetails,
     onClose,
+    isFilterActive,
+    toggleFilter,
     shouldRender,
     showEntityDetailsDisabled = false,
   } = options;
@@ -127,7 +139,7 @@ export const getEntityExpandItems = (
 
   // Filter action items
   if (shouldRender.showActionsByEntity) {
-    const actionsByEntityActive = isFilterActive(actorField, nodeId);
+    const actionsByEntityActive = isFilterActive?.(actorField, nodeId) ?? false;
     items.push({
       type: 'item',
       iconType: 'sortRight',
@@ -142,19 +154,14 @@ export const getEntityExpandItems = (
             { defaultMessage: "Show this entity's actions" }
           ),
       onClick: () => {
-        emitFilterAction({
-          type: 'TOGGLE_ACTIONS_BY_ENTITY',
-          field: actorField,
-          value: nodeId,
-          action: actionsByEntityActive ? 'hide' : 'show',
-        });
+        toggleFilter?.(actorField, nodeId, actionsByEntityActive ? 'hide' : 'show');
         onClose?.();
       },
     });
   }
 
   if (shouldRender.showActionsOnEntity) {
-    const actionsOnEntityActive = isFilterActive(targetField, nodeId);
+    const actionsOnEntityActive = isFilterActive?.(targetField, nodeId) ?? false;
     items.push({
       type: 'item',
       iconType: 'sortLeft',
@@ -169,19 +176,14 @@ export const getEntityExpandItems = (
             { defaultMessage: 'Show actions done to this entity' }
           ),
       onClick: () => {
-        emitFilterAction({
-          type: 'TOGGLE_ACTIONS_ON_ENTITY',
-          field: targetField,
-          value: nodeId,
-          action: actionsOnEntityActive ? 'hide' : 'show',
-        });
+        toggleFilter?.(targetField, nodeId, actionsOnEntityActive ? 'hide' : 'show');
         onClose?.();
       },
     });
   }
 
   if (shouldRender.showRelatedEvents) {
-    const relatedEventsActive = isFilterActive(RELATED_ENTITY, nodeId);
+    const relatedEventsActive = isFilterActive?.(RELATED_ENTITY, nodeId) ?? false;
     items.push({
       type: 'item',
       iconType: 'analyzeEvent',
@@ -196,12 +198,7 @@ export const getEntityExpandItems = (
             { defaultMessage: 'Show related events' }
           ),
       onClick: () => {
-        emitFilterAction({
-          type: 'TOGGLE_RELATED_EVENTS',
-          field: RELATED_ENTITY,
-          value: nodeId,
-          action: relatedEventsActive ? 'hide' : 'show',
-        });
+        toggleFilter?.(RELATED_ENTITY, nodeId, relatedEventsActive ? 'hide' : 'show');
         onClose?.();
       },
     });

@@ -11,20 +11,24 @@ import type { NodeProps, NodeViewModel } from '../../types';
 import { GRAPH_NODE_EXPAND_POPOVER_TEST_ID } from '../../test_ids';
 import { getEntityExpandItems, getSourceNamespaceFromNode } from './get_entity_expand_items';
 import { getNodeDocumentMode, isEntityNodeEnriched } from '../../utils';
+import { getFilterStore } from '../../filters/filter_state';
 
 /**
  * Hook to handle the entity node expand popover.
  * This hook is used to show the popover when the user clicks on the expand button of an entity node.
  * The popover contains the actions to show/hide the actions by entity, actions on entity, and related entities.
  *
- * Uses pub-sub pattern for filter state management - reads from filterState$ and emits to filterAction$.
+ * Uses FilterStore for filter state management - accessed via getFilterStore(scopeId).
  *
+ * @param scopeId - The unique identifier for the graph instance (used to scope filter state)
  * @param onOpenEventPreview - Optional callback to open event preview with full node data.
  *                             If provided, clicking "Show entity details" calls this callback.
- *                             If not provided, it emits via previewAction$ pub-sub.
  * @returns The entity node expand popover.
  */
-export const useEntityNodeExpandPopover = (onOpenEventPreview?: (node: NodeViewModel) => void) => {
+export const useEntityNodeExpandPopover = (
+  scopeId: string,
+  onOpenEventPreview?: (node: NodeViewModel) => void
+) => {
   const itemsFn = useCallback(
     (node: NodeProps) => {
       const docMode = getNodeDocumentMode(node.data);
@@ -32,10 +36,15 @@ export const useEntityNodeExpandPopover = (onOpenEventPreview?: (node: NodeViewM
       const isGroupedEntities = docMode === 'grouped-entities';
       const isEnriched = isEntityNodeEnriched(node.data);
 
+      // Get the FilterStore for this scope
+      const filterStore = getFilterStore(scopeId);
+
       return getEntityExpandItems({
         nodeId: node.id,
         sourceNamespace: getSourceNamespaceFromNode(node.data),
         onShowEntityDetails: onOpenEventPreview ? () => onOpenEventPreview(node.data) : undefined,
+        isFilterActive: (field, value) => filterStore?.isFilterActive(field, value) ?? false,
+        toggleFilter: (field, value, action) => filterStore?.toggleFilter(field, value, action),
         shouldRender: {
           // Filter actions only for single-entity mode
           showActionsByEntity: isSingleEntity,
@@ -49,7 +58,7 @@ export const useEntityNodeExpandPopover = (onOpenEventPreview?: (node: NodeViewM
         showEntityDetailsDisabled: isSingleEntity && !isEnriched,
       });
     },
-    [onOpenEventPreview]
+    [scopeId, onOpenEventPreview]
   );
 
   const entityNodeExpandPopover = useNodeExpandPopover({

@@ -11,20 +11,24 @@ import type { NodeProps, NodeViewModel } from '../../types';
 import { GRAPH_LABEL_EXPAND_POPOVER_TEST_ID } from '../../test_ids';
 import { getLabelExpandItems } from './get_label_expand_items';
 import { getNodeDocumentMode } from '../../utils';
+import { getFilterStore } from '../../filters/filter_state';
 
 /**
  * Hook to handle the label node expand popover.
  * This hook is used to show the popover when the user clicks on the expand button of a label node.
  * The popover contains the actions to show/hide the events with this action.
  *
- * Uses pub-sub pattern for filter state management - reads from filterState$ and emits to filterAction$.
+ * Uses FilterStore for filter state management - accessed via getFilterStore(scopeId).
  *
+ * @param scopeId - The unique identifier for the graph instance (used to scope filter state)
  * @param onOpenEventPreview - Optional callback to open event preview with full node data.
  *                             If provided, clicking "Show event details" calls this callback.
- *                             If not provided, it emits via previewAction$ pub-sub.
  * @returns The label node expand popover.
  */
-export const useLabelNodeExpandPopover = (onOpenEventPreview?: (node: NodeViewModel) => void) => {
+export const useLabelNodeExpandPopover = (
+  scopeId: string,
+  onOpenEventPreview?: (node: NodeViewModel) => void
+) => {
   const itemsFn = useCallback(
     (node: NodeProps) => {
       // Extract the label from node data
@@ -36,9 +40,14 @@ export const useLabelNodeExpandPopover = (onOpenEventPreview?: (node: NodeViewMo
       const isSingleEvent = docMode === 'single-event';
       const isGroupedEvents = docMode === 'grouped-events';
 
+      // Get the FilterStore for this scope
+      const filterStore = getFilterStore(scopeId);
+
       return getLabelExpandItems({
         nodeLabel,
         onShowEventDetails: onOpenEventPreview ? () => onOpenEventPreview(node.data) : undefined,
+        isFilterActive: (field, value) => filterStore?.isFilterActive(field, value) ?? false,
+        toggleFilter: (field, value, action) => filterStore?.toggleFilter(field, value, action),
         shouldRender: {
           // Always show filter action for label nodes
           showEventsWithAction: true,
@@ -49,7 +58,7 @@ export const useLabelNodeExpandPopover = (onOpenEventPreview?: (node: NodeViewMo
         isSingleAlert,
       });
     },
-    [onOpenEventPreview]
+    [scopeId, onOpenEventPreview]
   );
 
   const labelNodeExpandPopover = useNodeExpandPopover({

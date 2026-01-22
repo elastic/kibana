@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import {
   DOCUMENT_TYPE_ENTITY,
   DOCUMENT_TYPE_EVENT,
@@ -27,11 +28,17 @@ import {
   GROUPED_ITEM_TITLE_TEST_ID_TEXT,
   GROUPED_ITEM_TITLE_TOOLTIP_TEST_ID,
 } from '../../../test_ids';
-import { emitPreviewAction } from '../../../../preview_pub_sub';
 import type { EntityOrEventItem, EntityItem, EventItem, AlertItem } from '../types';
 import { displayEntityName, displayEventName } from '../utils';
 import { EntityActionsButton } from './entity_actions_button';
 import { EventActionsButton } from './event_actions_button';
+import {
+  GENERIC_ENTITY_PREVIEW_BANNER,
+  DocumentDetailsPreviewPanelKey,
+  GenericEntityPanelKey,
+  ALERT_PREVIEW_BANNER,
+  EVENT_PREVIEW_BANNER,
+} from '../../../constants';
 
 const entityUnavailableTooltip = i18n.translate(
   'securitySolutionPackages.csp.graph.groupedItem.entityUnavailable.tooltip',
@@ -42,10 +49,16 @@ const entityUnavailableTooltip = i18n.translate(
 
 export interface HeaderRowProps {
   item: EntityOrEventItem;
+  /**
+   * Unique identifier for the graph instance, used to scope filter state.
+   */
+  scopeId: string;
 }
 
-export const HeaderRow = ({ item }: HeaderRowProps) => {
+export const HeaderRow = ({ item, scopeId }: HeaderRowProps) => {
   const { euiTheme } = useEuiTheme();
+  const { openPreviewPanel } = useExpandableFlyoutApi();
+
   const title = useMemo(() => {
     switch (item.itemType) {
       case DOCUMENT_TYPE_EVENT:
@@ -55,6 +68,39 @@ export const HeaderRow = ({ item }: HeaderRowProps) => {
         return displayEntityName(item);
     }
   }, [item]);
+
+  const handlePreviewClick = useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>) => {
+      e.preventDefault();
+
+      if (item.itemType === DOCUMENT_TYPE_ENTITY) {
+        openPreviewPanel({
+          id: GenericEntityPanelKey,
+          params: {
+            entityId: item.id,
+            scopeId,
+            isPreviewMode: true,
+            banner: GENERIC_ENTITY_PREVIEW_BANNER,
+            isEngineMetadataExist: !!item.availableInEntityStore,
+          },
+        });
+      } else {
+        // event or alert
+        openPreviewPanel({
+          id: DocumentDetailsPreviewPanelKey,
+          params: {
+            id: item.docId,
+            indexName: item.index,
+            scopeId,
+            banner:
+              item.itemType === DOCUMENT_TYPE_ALERT ? ALERT_PREVIEW_BANNER : EVENT_PREVIEW_BANNER,
+            isPreviewMode: true,
+          },
+        });
+      }
+    },
+    [item, openPreviewPanel, scopeId]
+  );
 
   const isClickable =
     item.itemType === DOCUMENT_TYPE_EVENT ||
@@ -89,10 +135,7 @@ export const HeaderRow = ({ item }: HeaderRowProps) => {
       >
         {isClickable ? (
           <EuiLink
-            onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
-              e.preventDefault();
-              emitPreviewAction(item);
-            }}
+            onClick={handlePreviewClick}
             color="primary"
             css={css`
               display: block;
@@ -128,9 +171,9 @@ export const HeaderRow = ({ item }: HeaderRowProps) => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {item.itemType === DOCUMENT_TYPE_ENTITY ? (
-          <EntityActionsButton item={item as EntityItem} />
+          <EntityActionsButton item={item as EntityItem} scopeId={scopeId} />
         ) : (
-          <EventActionsButton item={item as EventItem | AlertItem} />
+          <EventActionsButton item={item as EventItem | AlertItem} scopeId={scopeId} />
         )}
       </EuiFlexItem>
     </EuiFlexGroup>
