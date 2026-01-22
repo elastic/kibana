@@ -271,6 +271,11 @@ export function createDiscoverServicesMock(): DiscoverServices {
     discoverFeatureFlags: {
       getCascadeLayoutEnabled: jest.fn(() => false),
     },
+    embeddableEditor: {
+      isByValueEditor: jest.fn(() => false),
+      isEmbeddedEditor: jest.fn(() => false),
+      transferBackToEditor: jest.fn(),
+    },
   } as unknown as DiscoverServices;
 }
 

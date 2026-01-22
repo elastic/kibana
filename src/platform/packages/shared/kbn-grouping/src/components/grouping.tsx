@@ -7,10 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor,
-} from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -61,13 +57,7 @@ export interface GroupingProps<T> {
   renderChildComponent: GroupChildComponentRenderer<T>;
   onGroupClose: () => void;
   selectedGroup: string;
-  takeActionItems?: (
-    groupFilters: Filter[],
-    groupNumber: number
-  ) => {
-    items: EuiContextMenuPanelItemDescriptor[];
-    panels: EuiContextMenuPanelDescriptor[];
-  };
+  takeActionItems?: (groupFilters: Filter[], groupNumber: number) => JSX.Element | undefined;
   tracker?: (
     type: UiCounterMetricType,
     event: string | string[],
