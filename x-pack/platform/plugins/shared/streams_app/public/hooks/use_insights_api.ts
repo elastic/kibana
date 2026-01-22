@@ -20,7 +20,7 @@ export function useInsightsApi() {
   const { signal } = useAbortController();
 
   return {
-    scheduleInsightsIdentificationTask: async (connectorId: string) => {
+    scheduleInsightsDiscoveryTask: async (connectorId: string) => {
       await streamsRepositoryClient.fetch('POST /internal/streams/_insights/_task', {
         signal,
         params: {
@@ -31,12 +31,12 @@ export function useInsightsApi() {
         },
       });
     },
-    getInsightsIdentificationTaskStatus: async () => {
+    getInsightsDiscoveryTaskStatus: async () => {
       return streamsRepositoryClient.fetch('POST /internal/streams/_insights/_status', {
         signal,
       });
     },
-    cancelInsightsIdentificationTask: async () => {
+    cancelInsightsDiscoveryTask: async () => {
       return streamsRepositoryClient.fetch('POST /internal/streams/_insights/_task', {
         signal,
         params: {
@@ -46,7 +46,7 @@ export function useInsightsApi() {
         },
       });
     },
-    acknowledgeInsightsIdentificationTask: async () => {
+    acknowledgeInsightsDiscoveryTask: async () => {
       return streamsRepositoryClient.fetch('POST /internal/streams/_insights/_task', {
         signal,
         params: {

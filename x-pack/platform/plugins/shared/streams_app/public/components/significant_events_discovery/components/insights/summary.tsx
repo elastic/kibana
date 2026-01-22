@@ -34,19 +34,19 @@ export function Summary({ count }: { count: number }) {
   } = useKibana();
 
   const {
-    scheduleInsightsIdentificationTask,
-    getInsightsIdentificationTaskStatus,
-    acknowledgeInsightsIdentificationTask,
-    cancelInsightsIdentificationTask,
+    scheduleInsightsDiscoveryTask,
+    getInsightsDiscoveryTaskStatus,
+    acknowledgeInsightsDiscoveryTask,
+    cancelInsightsDiscoveryTask,
   } = useInsightsApi();
 
-  const [{ value: task }, getTaskStatus] = useAsyncFn(getInsightsIdentificationTaskStatus);
+  const [{ value: task }, getTaskStatus] = useAsyncFn(getInsightsDiscoveryTaskStatus);
   const [{ loading: isSchedulingTask }, scheduleTask] = useAsyncFn(async (connectorId: string) => {
     /**
      * Combining scheduling and immediate status update to prevent
      * React updating the UI in between states causing flickering
      */
-    await scheduleInsightsIdentificationTask(connectorId);
+    await scheduleInsightsDiscoveryTask(connectorId);
     await getTaskStatus();
   });
 
@@ -69,7 +69,7 @@ export function Summary({ count }: { count: number }) {
     }
   }, [task, notifications.toasts]);
 
-  useTaskPolling(task, getInsightsIdentificationTaskStatus, getTaskStatus);
+  useTaskPolling(task, getInsightsDiscoveryTaskStatus, getTaskStatus);
 
   const [summary, setSummary] = useState<string | null>(null);
 
@@ -86,14 +86,14 @@ export function Summary({ count }: { count: number }) {
       return;
     }
 
-    await acknowledgeInsightsIdentificationTask();
+    await acknowledgeInsightsDiscoveryTask();
     await scheduleTask(aiFeatures?.genAiConnectors.selectedConnector);
 
     setSummary(null);
   };
 
   const onCancelClick = async () => {
-    await cancelInsightsIdentificationTask();
+    await cancelInsightsDiscoveryTask();
     getTaskStatus();
   };
 
