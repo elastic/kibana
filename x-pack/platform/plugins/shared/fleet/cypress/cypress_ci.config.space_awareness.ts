@@ -9,6 +9,10 @@ import { defineCypressConfig } from '@kbn/cypress-config';
 
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
+  reporter: '../../../../../node_modules/cypress-multi-reporters',
+  reporterOptions: {
+    configFile: './cypress/reporter_config.json',
+  },
   defaultCommandTimeout: 60000,
   requestTimeout: 60000,
   responseTimeout: 60000,
@@ -42,7 +46,7 @@ export default defineCypressConfig({
     supportFile: './cypress/support/e2e.ts',
 
     setupNodeEvents(on, config) {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires, @kbn/imports/no_boundary_crossing
+      // eslint-disable-next-line @typescript-eslint/no-var-requires, @kbn/imports/uniform_imports
       return require('@kbn/fleet-plugin-cypress/plugins')(on, config);
     },
   },
