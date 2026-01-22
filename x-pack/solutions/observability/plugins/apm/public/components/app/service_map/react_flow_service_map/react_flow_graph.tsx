@@ -22,7 +22,15 @@ import {
   type NodeTypes,
   type NodeMouseHandler,
 } from '@xyflow/react';
-import { EuiLoadingSpinner, EuiButtonGroup, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import {
+  EuiLoadingSpinner,
+  EuiButtonGroup,
+  EuiToolTip,
+  useEuiTheme,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type cytoscape from 'cytoscape';
 import '@xyflow/react/dist/style.css';
@@ -33,13 +41,19 @@ import type { Environment } from '../../../../../common/environment_rt';
 import type { ServiceMapNodeData } from './service_node';
 import { ServiceNode } from './service_node';
 import { DependencyNode } from './dependency_node';
+import { GroupNode } from './group_node';
 import { transformElements, type ServiceMapEdgeData } from './transform_data';
 import { applyLayout, type LayoutDirection } from './apply_layout';
 import { ReactFlowPopover } from './react_flow_popover';
+import { useExpandCollapse, type GroupNodeData } from './use_expand_collapse';
+import { createGroupsFromServiceGroups } from './grouping_utils';
+import { useServiceGroups } from './use_service_groups';
+import { ServiceGroupSelector } from './service_group_selector';
 
 const nodeTypes: NodeTypes = {
   service: ServiceNode,
   dependency: DependencyNode,
+  group: GroupNode,
 };
 
 // Default edge colors
@@ -88,6 +102,8 @@ interface ReactFlowGraphProps {
   kuery: string;
   start: string;
   end: string;
+  /** Enable expand/collapse grouping of connected services */
+  enableGrouping?: boolean;
 }
 
 const layoutDirectionOptions = [
@@ -117,95 +133,210 @@ function ReactFlowGraphInner({
   start,
   end,
   serviceName,
+  enableGrouping = true,
 }: ReactFlowGraphProps) {
   const { euiTheme } = useEuiTheme();
   const reactFlowInstance = useReactFlow();
   const { fitView } = reactFlowInstance;
-  const [nodes, setNodes, onNodesChange] = useNodesState<Node<ServiceMapNodeData>>([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node<ServiceMapNodeData | GroupNodeData>>(
+    []
+  );
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge<ServiceMapEdgeData>>([]);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [layoutDirection, setLayoutDirection] = useState<LayoutDirection>('LR');
-  const [selectedNodeForPopover, setSelectedNodeForPopover] =
-    useState<Node<ServiceMapNodeData> | null>(null);
+  const [selectedNodeForPopover, setSelectedNodeForPopover] = useState<Node<
+    ServiceMapNodeData | GroupNodeData
+  > | null>(null);
+
+  // State for selected service groups (dynamic grouping)
+  const [selectedServiceGroupIds, setSelectedServiceGroupIds] = useState<string[]>([]);
+
+  // Fetch available service groups
+  const { serviceGroups: savedServiceGroups, loading: loadingServiceGroups } = useServiceGroups();
 
   const primaryColor = euiTheme.colors.primary;
+
+  // Transform elements once (these are the "all" nodes/edges for grouping)
+  const { allNodes, allEdges } = useMemo(() => {
+    if (elements.length === 0) {
+      return { allNodes: [], allEdges: [] };
+    }
+    const { nodes: transformedNodes, edges: transformedEdges } = transformElements(
+      elements,
+      EDGE_COLOR_DEFAULT
+    );
+    return { allNodes: transformedNodes, allEdges: transformedEdges };
+  }, [elements]);
+
+  // Create groups only when service groups are explicitly selected from the dropdown
+  const serviceGroups = useMemo(() => {
+    if (!enableGrouping || allNodes.length === 0 || selectedServiceGroupIds.length === 0) {
+      return [];
+    }
+
+    return createGroupsFromServiceGroups(allNodes, savedServiceGroups, selectedServiceGroupIds);
+  }, [enableGrouping, allNodes, selectedServiceGroupIds, savedServiceGroups]);
+
+  // Use expand/collapse hook for managing visibility
+  const {
+    visibleNodes,
+    visibleEdges,
+    toggleGroup,
+    expandAll,
+    collapseAll,
+    collapseGroup,
+    expandedGroups,
+  } = useExpandCollapse({
+    allNodes,
+    allEdges,
+    groups: serviceGroups,
+  });
+
+  const hasGroups = serviceGroups.length > 0;
+  const allExpanded = serviceGroups.every((g) => expandedGroups.has(g.id));
 
   // Track the current selected node for use in layout effect without triggering re-layout
   const selectedNodeIdRef = React.useRef<string | null>(null);
   selectedNodeIdRef.current = selectedNodeId;
+
+  // Pre-computed marker objects to avoid recreating them on every edge update
+  const markers = useMemo(
+    () => ({
+      defaultEnd: {
+        type: MarkerType.ArrowClosed,
+        width: 12,
+        height: 12,
+        color: EDGE_COLOR_DEFAULT,
+      } as EdgeMarker,
+      highlightedEnd: {
+        type: MarkerType.ArrowClosed,
+        width: 14,
+        height: 14,
+        color: primaryColor,
+      } as EdgeMarker,
+      defaultStart: {
+        type: MarkerType.ArrowClosed,
+        width: 12,
+        height: 12,
+        color: EDGE_COLOR_DEFAULT,
+      } as EdgeMarker,
+      highlightedStart: {
+        type: MarkerType.ArrowClosed,
+        width: 14,
+        height: 14,
+        color: primaryColor,
+      } as EdgeMarker,
+    }),
+    [primaryColor]
+  );
 
   // Helper to apply edge highlighting based on selected node
   const applyEdgeHighlighting = useCallback(
     (edgesToHighlight: Edge<ServiceMapEdgeData>[], nodeId: string | null) => {
       return edgesToHighlight.map((edge) => {
         const isConnected = nodeId !== null && (edge.source === nodeId || edge.target === nodeId);
-        const color = isConnected ? primaryColor : EDGE_COLOR_DEFAULT;
-        const strokeWidth = isConnected ? 2 : 1;
-        const markerSize = isConnected ? 14 : 12;
 
-        // Always create complete marker objects to ensure arrows render in all layouts
-        const markerEnd: EdgeMarker = {
-          type: MarkerType.ArrowClosed,
-          width: markerSize,
-          height: markerSize,
-          color,
-        };
-
-        const markerStart: EdgeMarker | undefined = edge.data?.isBidirectional
-          ? { type: MarkerType.ArrowClosed, width: markerSize, height: markerSize, color }
+        // Use pre-computed marker objects
+        const markerEnd = isConnected ? markers.highlightedEnd : markers.defaultEnd;
+        const markerStart = edge.data?.isBidirectional
+          ? isConnected
+            ? markers.highlightedStart
+            : markers.defaultStart
           : undefined;
 
         return {
           ...edge,
-          style: { stroke: color, strokeWidth },
+          style: {
+            stroke: isConnected ? primaryColor : EDGE_COLOR_DEFAULT,
+            strokeWidth: isConnected ? 2 : 1,
+          },
           markerEnd,
           markerStart,
           zIndex: isConnected ? 1000 : 0,
         };
       });
     },
-    [primaryColor]
+    [primaryColor, markers]
   );
 
-  // Transform and layout elements when they change or layout direction changes
+  // Stable reference to collapseGroup to avoid recreating node objects on every render
+  const collapseGroupRef = React.useRef(collapseGroup);
+  collapseGroupRef.current = collapseGroup;
+
+  // Stable callback that uses the ref
+  const stableCollapseGroup = useCallback((groupId: string) => {
+    collapseGroupRef.current(groupId);
+  }, []);
+
+  // Apply layout when visible nodes/edges change or layout direction changes
   useEffect(() => {
-    if (elements.length === 0) {
+    if (visibleNodes.length === 0) {
       setNodes([]);
       setEdges([]);
       return;
     }
 
-    const { nodes: transformedNodes, edges: transformedEdges } = transformElements(
-      elements,
-      EDGE_COLOR_DEFAULT
-    );
     const { nodes: layoutedNodes, edges: layoutedEdges } = applyLayout(
-      transformedNodes,
-      transformedEdges,
+      visibleNodes as Node<ServiceMapNodeData>[],
+      visibleEdges,
       { rankdir: layoutDirection }
     );
 
-    setNodes(layoutedNodes);
+    // Add collapseGroup callback to nodes that belong to groups
+    // Using stable callback reference to avoid unnecessary re-renders
+    const nodesWithCallbacks = layoutedNodes.map((node) => {
+      if (node.data.groupId) {
+        return {
+          ...node,
+          data: {
+            ...node.data,
+            onCollapseGroup: stableCollapseGroup,
+          },
+        };
+      }
+      return node;
+    });
+
+    setNodes(nodesWithCallbacks);
     // Preserve highlighting if a node is selected (using ref to avoid triggering re-layout)
     setEdges(applyEdgeHighlighting(layoutedEdges, selectedNodeIdRef.current));
     // Fit view after layout change with a small delay to ensure nodes are rendered
     setTimeout(() => fitView({ padding: 0.2, duration: 200 }), 50);
-  }, [elements, layoutDirection, applyEdgeHighlighting, setNodes, setEdges, fitView]);
+  }, [
+    visibleNodes,
+    visibleEdges,
+    layoutDirection,
+    applyEdgeHighlighting,
+    setNodes,
+    setEdges,
+    fitView,
+    stableCollapseGroup,
+  ]);
 
   const handleLayoutDirectionChange = useCallback((optionId: string) => {
     setLayoutDirection(optionId as LayoutDirection);
   }, []);
 
   // Handle node click - update node selection and edge highlighting
-  const handleNodeClick: NodeMouseHandler<Node<ServiceMapNodeData>> = useCallback(
+  const handleNodeClick: NodeMouseHandler<Node<ServiceMapNodeData | GroupNodeData>> = useCallback(
     (_, node) => {
+      // Check if this is a group node - if so, toggle expand/collapse
+      const nodeData = node.data as ServiceMapNodeData | GroupNodeData;
+      if ('isGroup' in nodeData && nodeData.isGroup) {
+        // Extract the group ID from the node ID (format: "group-{groupId}")
+        const groupId = node.id.replace('group-', '');
+        toggleGroup(groupId);
+        return;
+      }
+
+      // Regular node click behavior
       const newSelectedId = selectedNodeId === node.id ? null : node.id;
       setSelectedNodeId(newSelectedId);
 
       setEdges((currentEdges) => applyEdgeHighlighting(currentEdges, newSelectedId));
       setSelectedNodeForPopover(newSelectedId ? node : null);
     },
-    [selectedNodeId, setEdges, applyEdgeHighlighting]
+    [selectedNodeId, setEdges, applyEdgeHighlighting, toggleGroup]
   );
 
   // Handle pane click to deselect
@@ -379,30 +510,83 @@ function ReactFlowGraphInner({
         })}
       >
         <Background gap={24} size={1} color={euiTheme.colors.lightShade} />
-        <Panel position="top-right">
-          <EuiToolTip
-            content={i18n.translate('xpack.apm.serviceMap.layoutDirection.tooltip', {
-              defaultMessage: 'Change layout orientation',
-            })}
-          >
-            <EuiButtonGroup
-              legend={i18n.translate('xpack.apm.serviceMap.layoutDirection.legend', {
-                defaultMessage: 'Layout direction',
-              })}
-              options={layoutDirectionOptions}
-              idSelected={layoutDirection}
-              onChange={handleLayoutDirectionChange}
-              buttonSize="compressed"
-              isIconOnly
-              data-test-subj="serviceMapLayoutToggle"
-              css={css`
-                background-color: ${euiTheme.colors.backgroundBasePlain};
-                border-radius: ${euiTheme.border.radius.medium};
-                border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
-                padding: ${euiTheme.size.xs};
-              `}
+
+        {/* Service Group Selector - Top Left */}
+        {enableGrouping && savedServiceGroups.length > 0 && (
+          <Panel position="top-left">
+            <ServiceGroupSelector
+              serviceGroups={savedServiceGroups}
+              selectedGroupIds={selectedServiceGroupIds}
+              onSelectionChange={setSelectedServiceGroupIds}
+              loading={loadingServiceGroups}
             />
-          </EuiToolTip>
+          </Panel>
+        )}
+
+        <Panel position="top-right">
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            {/* Expand/Collapse controls - only show when grouping is enabled and groups exist */}
+            {enableGrouping && hasGroups && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={
+                    allExpanded
+                      ? i18n.translate('xpack.apm.serviceMap.collapseAll.tooltip', {
+                          defaultMessage: 'Collapse all service groups',
+                        })
+                      : i18n.translate('xpack.apm.serviceMap.expandAll.tooltip', {
+                          defaultMessage: 'Expand all service groups',
+                        })
+                  }
+                >
+                  <EuiButtonEmpty
+                    size="xs"
+                    iconType={allExpanded ? 'minimize' : 'expand'}
+                    onClick={allExpanded ? collapseAll : expandAll}
+                    data-test-subj="serviceMapExpandCollapseToggle"
+                    css={css`
+                      background-color: ${euiTheme.colors.backgroundBasePlain};
+                      border-radius: ${euiTheme.border.radius.medium};
+                      border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
+                    `}
+                  >
+                    {allExpanded
+                      ? i18n.translate('xpack.apm.serviceMap.collapseAll', {
+                          defaultMessage: 'Collapse',
+                        })
+                      : i18n.translate('xpack.apm.serviceMap.expandAll', {
+                          defaultMessage: 'Expand',
+                        })}
+                  </EuiButtonEmpty>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={i18n.translate('xpack.apm.serviceMap.layoutDirection.tooltip', {
+                  defaultMessage: 'Change layout orientation',
+                })}
+              >
+                <EuiButtonGroup
+                  legend={i18n.translate('xpack.apm.serviceMap.layoutDirection.legend', {
+                    defaultMessage: 'Layout direction',
+                  })}
+                  options={layoutDirectionOptions}
+                  idSelected={layoutDirection}
+                  onChange={handleLayoutDirectionChange}
+                  buttonSize="compressed"
+                  isIconOnly
+                  data-test-subj="serviceMapLayoutToggle"
+                  css={css`
+                    background-color: ${euiTheme.colors.backgroundBasePlain};
+                    border-radius: ${euiTheme.border.radius.medium};
+                    border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
+                    padding: ${euiTheme.size.xs};
+                  `}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </Panel>
         <Controls
           showInteractive={false}
