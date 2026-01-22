@@ -24,7 +24,13 @@ interface UseServiceActionsParams {
 }
 
 export const useServiceActions = ({ onServiceUpdate, services }: UseServiceActionsParams) => {
-  const { notifications, telemetryService, apiService } = useCloudConnectedAppContext();
+  const {
+    notifications,
+    telemetryService,
+    apiService,
+    hasActionsSavePrivilege,
+    setHasAnyDefaultLLMConnectors,
+  } = useCloudConnectedAppContext();
 
   // Tracks which service is currently being updated (for loading spinner)
   const [loadingService, setLoadingService] = useState<string | null>(null);
@@ -97,6 +103,16 @@ export const useServiceActions = ({ onServiceUpdate, services }: UseServiceActio
     setLoadingService(null);
     // Optimistically update the UI
     onServiceUpdate(serviceKey, enabled);
+
+    // When EIS is enabled and user has actions.save privilege, we know default LLM connectors were created
+    if (
+      serviceKey === 'eis' &&
+      enabled &&
+      hasActionsSavePrivilege &&
+      setHasAnyDefaultLLMConnectors
+    ) {
+      setHasAnyDefaultLLMConnectors(true);
+    }
   };
 
   // Enables a service directly without confirmation

@@ -30,6 +30,7 @@ interface Props {
   definition: Streams.all.Definition;
   query: StreamQueryKql;
   isSubmitting: boolean;
+  isEditMode: boolean;
   setQuery: (query: StreamQueryKql) => void;
   setCanSave: (canSave: boolean) => void;
   features: Feature[];
@@ -45,6 +46,7 @@ export function ManualFlowForm({
   setQuery,
   setCanSave,
   isSubmitting,
+  isEditMode,
   features,
   dataViews,
 }: Props) {
@@ -165,7 +167,7 @@ export function ManualFlowForm({
                 'xpack.streams.addSignificantEventFlyout.manualFlow.featurePlaceholder',
                 { defaultMessage: 'Select feature' }
               )}
-              disabled={isSubmitting || features.length === 0}
+              disabled={isSubmitting || features.length === 0 || isEditMode}
               onBlur={() => {
                 setTouched((prev) => ({ ...prev, feature: true }));
               }}
