@@ -127,13 +127,12 @@ export const updateTabs: InternalStateThunkActionCreator<
     void
   ],
   Promise<void>
-> =
-  ({ items, selectedItem, updatedDiscoverSession }) =>
-  async (
+> = ({ items, selectedItem, updatedDiscoverSession }) =>
+  async function updateTabsThunkFn(
     dispatch,
     getState,
     { services, runtimeStateManager, tabsStorageManager, urlStateStorage, searchSessionManager }
-  ) => {
+  ) {
     const currentState = getState();
     const currentTab = selectTab(currentState, currentState.tabs.unsafeCurrentId);
     const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTab.id);
