@@ -56,6 +56,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid';
 import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { QuerySource } from '@kbn/esql-types';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { useCanCreateLookupIndex, useLookupIndexCommand } from './lookup_join';
@@ -101,6 +102,8 @@ import {
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
 const DATEPICKER_WIDTH = 373;
+
+const VISOR_AUTO_OPEN_DISMISSED_KEY = 'esql:visorAutoOpenDismissed';
 
 // React.memo is applied inside the withRestorableState HOC (called below)
 const ESQLEditorInternal = function ESQLEditor({
@@ -201,6 +204,10 @@ const ESQLEditorInternal = function ESQLEditor({
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
   const [isVisorOpen, setIsVisorOpen] = useState(false);
+  const [hasUserDismissedVisorAutoOpen, setHasUserDismissedVisorAutoOpen] = useLocalStorage(
+    VISOR_AUTO_OPEN_DISMISSED_KEY,
+    !openVisorOnSourceCommands
+  );
 
   // Refs for dynamic dependencies that commands need to access
   const esqlVariablesRef = useRef(esqlVariables);
@@ -220,15 +227,23 @@ const ESQLEditorInternal = function ESQLEditor({
   // Open visor on initial render if query has only source commands
   useEffect(() => {
     if (
-      openVisorOnSourceCommands &&
       !hasOpenedVisorOnMount.current &&
+      !hasUserDismissedVisorAutoOpen &&
       code &&
       hasOnlySourceCommand(code)
     ) {
       setIsVisorOpen(true);
       hasOpenedVisorOnMount.current = true;
     }
-  }, [code, openVisorOnSourceCommands]);
+  }, [code, hasUserDismissedVisorAutoOpen]);
+
+  const onToggleVisor = useCallback(() => {
+    if (hasOpenedVisorOnMount.current) {
+      // User manually closed the visor after it was auto-opened
+      setHasUserDismissedVisorAutoOpen(true);
+    }
+    setIsVisorOpen((prevIsOpen) => !prevIsOpen);
+  }, [setHasUserDismissedVisorAutoOpen]);
 
   const onQueryUpdate = useCallback(
     (value: string) => {
@@ -1321,7 +1336,7 @@ const ESQLEditorInternal = function ESQLEditor({
         resizableContainerHeight={resizableContainerHeight}
         displayDocumentationAsFlyout={displayDocumentationAsFlyout}
         dataErrorsControl={dataErrorsControl}
-        toggleVisor={() => setIsVisorOpen(!isVisorOpen)}
+        toggleVisor={onToggleVisor}
         hideQuickSearch={hideQuickSearch}
       />
       {createPortal(
