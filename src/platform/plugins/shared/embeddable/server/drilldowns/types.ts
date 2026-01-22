@@ -30,6 +30,8 @@ export type DrilldownSetup<
   };
 };
 
+export type DrilldownsState = TypeOf<ReturnType<typeof getDrilldownsSchema>>;
+
 export type DrilldownState = TypeOf<ReturnType<typeof getDrilldownSchema>>;
 
 export type GetDrilldownsSchemaFnType = (

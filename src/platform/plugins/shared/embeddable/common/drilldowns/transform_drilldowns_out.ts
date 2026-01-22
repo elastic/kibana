@@ -8,28 +8,20 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { DrilldownState } from '../../server';
-import type { DynamicActionsState } from '../bwc/enhancements/dynamic_actions/types';
-import { convertToDrilldowns } from '../bwc/enhancements/convert_to_drilldowns';
+import type { DrilldownsState } from '../../server';
+import { transformEnhancementsOut } from '../bwc/enhancements/transform_enhancements_out';
 
 export function getTransformDrilldownsOut(
   getTranformOut: (
     type: string
   ) => ((state: { type: string }, references?: Reference[]) => { type: string }) | undefined
 ) {
-  function transformDrilldownsOut(
-    state: {
-      drilldowns?: DrilldownState[];
-      enhancements?: { dynamicActions?: DynamicActionsState };
-    },
-    references?: Reference[]
-  ) {
-    return state.enhancements || state.drilldowns
+  function transformDrilldownsOut(state: DrilldownsState, references?: Reference[]) {
+    const { drilldowns, ...restOfState } = transformEnhancementsOut(state);
+    return drilldowns?.length
       ? {
-          drilldowns: [
-            ...convertToDrilldowns(state.enhancements ?? {}),
-            ...(state.drilldowns ?? []),
-          ].map((drilldownState) => {
+          ...restOfState,
+          drilldowns: drilldowns.map((drilldownState) => {
             const transformOut = getTranformOut(drilldownState.config.type);
             return transformOut
               ? {
@@ -39,7 +31,7 @@ export function getTransformDrilldownsOut(
               : drilldownState;
           }),
         }
-      : {};
+      : restOfState;
   }
   return transformDrilldownsOut;
 }

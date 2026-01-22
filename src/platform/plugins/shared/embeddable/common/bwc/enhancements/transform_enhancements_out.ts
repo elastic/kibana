@@ -7,13 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DrilldownsState } from '../../../server';
 import { generateRefName } from './dynamic_actions/dashboard_drilldown_persistable_state';
 import type { DynamicActionsState, SerializedEvent } from './dynamic_actions/types';
 
-export function convertToDrilldowns(enhancementsState: { dynamicActions?: DynamicActionsState }) {
-  if (!enhancementsState?.dynamicActions?.events) return [];
+export function transformEnhancementsOut(
+  state: DrilldownsState & { enhancements?: { dynamicActions?: DynamicActionsState } }
+): DrilldownsState {
+  const { enhancements, ...restOfState } = state;
 
-  return enhancementsState.dynamicActions.events
+  if (
+    !enhancements?.dynamicActions?.events ||
+    !Array(enhancements.dynamicActions.events) ||
+    !enhancements.dynamicActions.events.length
+  ) {
+    return restOfState;
+  }
+
+  const drilldownsFromEnhancements = enhancements.dynamicActions.events
     .map((event) => {
       if (event.action.factoryId === 'DASHBOARD_TO_DASHBOARD_DRILLDOWN') {
         return convertToDashboardDrilldown(event);
@@ -28,6 +39,13 @@ export function convertToDrilldowns(enhancementsState: { dynamicActions?: Dynami
       }
     })
     .filter((drilldown) => drilldown !== undefined);
+
+  return drilldownsFromEnhancements.length
+    ? {
+        ...restOfState,
+        drilldowns: [...drilldownsFromEnhancements, ...(restOfState.drilldowns ?? [])],
+      }
+    : restOfState;
 }
 
 function convertToDashboardDrilldown(event: SerializedEvent) {

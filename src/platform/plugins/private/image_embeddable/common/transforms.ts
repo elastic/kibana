@@ -14,21 +14,10 @@ import type { ImageEmbeddableState } from '../server';
 export function getTransforms(drilldownTransforms: DrilldownTransforms) {
   return {
     transformIn: (state: ImageEmbeddableState) => {
-      const drilldowns = drilldownTransforms.transformIn(state);
-
-      return {
-        state: {
-          ...state,
-          ...drilldowns.state,
-        },
-        references: drilldowns.references,
-      };
+      return drilldownTransforms.transformIn(state);
     },
     transformOut: (state: ImageEmbeddableState, references?: Reference[]) => {
-      return {
-        ...state,
-        ...drilldownTransforms.transformOut(state, references),
-      };
+      return drilldownTransforms.transformOut(state, references);
     },
   };
 }

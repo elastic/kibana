@@ -8,7 +8,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { DrilldownState } from '../../server';
+import type { DrilldownsState } from '../../server';
 
 export function getTransformDrilldownsIn(
   getTranformIn: (type: string) =>
@@ -18,18 +18,20 @@ export function getTransformDrilldownsIn(
       })
     | undefined
 ) {
-  function transformDrilldownsIn(state: { drilldowns?: DrilldownState[] }) {
-    if (!state.drilldowns) {
+  function transformDrilldownsIn(state: DrilldownsState) {
+    const { drilldowns, ...restOfState } = state;
+    if (!drilldowns) {
       return {
-        state: {},
-        references: [],
-      };
+        state: restOfState,
+        references: []
+      }
     }
 
     const references: Reference[] = [];
     return {
       state: {
-        drilldowns: state.drilldowns.map((drilldownState) => {
+        ...restOfState,
+        drilldowns: drilldowns.map((drilldownState) => {
           const transformIn = getTranformIn(drilldownState.config.type);
           if (!transformIn) {
             return drilldownState;

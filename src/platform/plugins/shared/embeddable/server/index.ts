@@ -13,7 +13,11 @@ export type { EmbeddableSetup, EmbeddableStart };
 
 export type { EmbeddableRegistryDefinition } from './types';
 
-export type { DrilldownState, GetDrilldownsSchemaFnType } from './drilldowns/types';
+export type {
+  DrilldownState,
+  DrilldownsState,
+  GetDrilldownsSchemaFnType,
+} from './drilldowns/types';
 
 export type {
   EmbeddableStateWithType,
