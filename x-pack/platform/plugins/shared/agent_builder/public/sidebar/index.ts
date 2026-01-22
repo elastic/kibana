@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// Context and services (loaded eagerly)
 export {
   sidebarServices$,
   sidebarRuntimeContext$,
@@ -13,11 +12,5 @@ export {
   setSidebarRuntimeContext,
   clearSidebarRuntimeContext,
 } from './sidebar_context';
-export type { SidebarRuntimeContext, SidebarServices } from './sidebar_context';
 
-// Params schema (loaded eagerly for registration)
-export { getParamsSchema } from './sidebar_params';
-export type { SidebarParams } from './sidebar_params';
-
-// Component is NOT exported here - it should be lazy-loaded via:
-// loadComponent: () => import('./sidebar/sidebar_conversation').then(m => m.SidebarConversation)
+export type { SidebarRuntimeContext } from './sidebar_context';

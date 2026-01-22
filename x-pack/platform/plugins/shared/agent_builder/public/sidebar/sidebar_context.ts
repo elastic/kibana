@@ -7,40 +7,19 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
-import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { AgentBuilderInternalService } from '../services';
+import type { OpenConversationFlyoutOptions } from '../flyout/types';
+import type { EmbeddableConversationProps } from '../embeddable/types';
 
 /**
- * Runtime context for sidebar - contains non-serializable data that cannot
- * be persisted to localStorage (functions, class instances, etc.)
+ * Services set once at plugin start
  */
-export interface SidebarRuntimeContext {
-  browserApiTools?: Array<BrowserApiToolDefinition<any>>;
-  attachments?: AttachmentInput[];
-}
-
-/**
- * Global services needed by the sidebar component.
- * Set during plugin start, accessed by sidebar component.
- */
-export interface SidebarServices {
+interface SidebarServices {
   coreStart: CoreStart;
   services: AgentBuilderInternalService;
 }
 
-/**
- * Observable for global services needed by the sidebar component.
- * Set once during plugin start via setSidebarServices().
- */
 export const sidebarServices$ = new BehaviorSubject<SidebarServices | null>(null);
-
-/**
- * Observable for runtime context (non-serializable data like browserApiTools, attachments).
- * Updated when opening/closing the sidebar or when active config changes.
- */
-export const sidebarRuntimeContext$ = new BehaviorSubject<SidebarRuntimeContext>({});
-
 /**
  * Set global services during plugin start.
  * These are needed by the sidebar component to render the conversation.
@@ -50,8 +29,19 @@ export const setSidebarServices = (coreStart: CoreStart, services: AgentBuilderI
 };
 
 /**
- * Set the runtime context. Call before opening the sidebar or when config changes.
+ * Runtime context set before each sidebar open
  */
+export interface SidebarRuntimeContext {
+  options: OpenConversationFlyoutOptions;
+  onClose?: () => void;
+  onRegisterCallbacks?: (callbacks: {
+    updateProps: (props: EmbeddableConversationProps) => void;
+    resetBrowserApiTools: () => void;
+  }) => void;
+}
+
+export const sidebarRuntimeContext$ = new BehaviorSubject<SidebarRuntimeContext | null>(null);
+
 export const setSidebarRuntimeContext = (ctx: SidebarRuntimeContext) => {
   sidebarRuntimeContext$.next(ctx);
 };
@@ -60,5 +50,5 @@ export const setSidebarRuntimeContext = (ctx: SidebarRuntimeContext) => {
  * Clear the runtime context. Call when closing the sidebar.
  */
 export const clearSidebarRuntimeContext = () => {
-  sidebarRuntimeContext$.next({});
+  sidebarRuntimeContext$.next(null);
 };

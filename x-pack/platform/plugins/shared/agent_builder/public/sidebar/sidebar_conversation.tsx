@@ -5,37 +5,23 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { useObservable } from '@kbn/use-observable';
 import type { SidebarComponentProps } from '@kbn/core-chrome-sidebar';
 import { SidebarBody } from '@kbn/core-chrome-sidebar-components';
-import { EmbeddableConversationInternal } from '../embeddable/embeddable_conversation';
-import {
-  sidebarServices$,
-  sidebarRuntimeContext$,
-  clearSidebarRuntimeContext,
-} from './sidebar_context';
-import type { SidebarParams } from './sidebar_params';
+import { createEmbeddableConversation } from '../embeddable/create_embeddable_conversation';
+import { sidebarServices$, sidebarRuntimeContext$ } from './sidebar_context';
 
 /**
- * Main sidebar conversation component.
- * Receives serializable params from sidebar API and retrieves non-serializable
- * runtime context (browserApiTools, attachments) via observables.
- *
- * This component is lazy-loaded via loadComponent in the sidebar registration.
+ * Sidebar conversation component.
+ * Uses createEmbeddableConversation (same as flyout) and passes onRegisterCallbacks
+ * to enable prop updates and browser API tool resets.
  */
 export function SidebarConversation({
-  params,
   onClose,
-}: SidebarComponentProps<SidebarParams>): React.ReactElement {
+}: SidebarComponentProps<{}>): React.ReactElement | null {
   const services = useObservable(sidebarServices$);
-  const runtimeContext = useObservable(sidebarRuntimeContext$, {});
-
-  // Handle sidebar close - clear runtime context and invoke onClose callback
-  const handleClose = useCallback(() => {
-    clearSidebarRuntimeContext();
-    onClose();
-  }, [onClose]);
+  const runtimeContext = useObservable(sidebarRuntimeContext$);
 
   if (!services) {
     throw new Error(
@@ -43,20 +29,32 @@ export function SidebarConversation({
     );
   }
 
+  if (!runtimeContext) {
+    return null;
+  }
+
+  const { coreStart, services: internalServices } = services;
+  const { options, onRegisterCallbacks, onClose: contextOnClose } = runtimeContext;
+  const { onClose: externalOnClose, ...restOptions } = options;
+
+  const ConversationComponent = createEmbeddableConversation({
+    services: internalServices,
+    coreStart,
+  });
+
+  const handleOnClose = () => {
+    onClose(); // closes the sidebar panel
+    externalOnClose?.(); // calls the consumer's optionally defined onClose callback
+    contextOnClose?.(); // clears up internal implementation in plugin and context
+  };
+
   return (
     <SidebarBody>
-      <EmbeddableConversationInternal
-        coreStart={services.coreStart}
-        services={services.services}
-        onClose={handleClose}
+      <ConversationComponent
+        onClose={handleOnClose}
         ariaLabelledBy="agent-builder-sidebar"
-        sessionTag={params.sessionTag}
-        agentId={params.agentId}
-        initialMessage={params.initialMessage}
-        autoSendInitialMessage={params.autoSendInitialMessage}
-        newConversation={params.newConversation}
-        browserApiTools={runtimeContext.browserApiTools}
-        attachments={runtimeContext.attachments}
+        onRegisterCallbacks={onRegisterCallbacks}
+        {...restOptions}
       />
     </SidebarBody>
   );
