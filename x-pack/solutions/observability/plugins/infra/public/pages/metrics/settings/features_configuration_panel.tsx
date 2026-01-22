@@ -16,7 +16,6 @@ import { withSuspense } from '@kbn/shared-ux-utility';
 import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import type { ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { usePluginConfig } from '../../../containers/plugin_config_context';
 
 const LazyFieldRow = React.lazy(async () => ({
   default: (await import('@kbn/management-settings-components-field-row')).FieldRow,
@@ -40,7 +39,6 @@ export function FeaturesConfigurationPanel({
   const {
     services: { docLinks, notifications },
   } = useKibanaContextForPlugin();
-  const { featureFlags } = usePluginConfig();
 
   // We don't validate the user input on these settings
   const settingsValidationResponse: ValueValidation = {
