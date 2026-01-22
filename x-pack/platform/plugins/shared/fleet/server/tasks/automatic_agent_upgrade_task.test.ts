@@ -204,7 +204,7 @@ describe('AutomaticAgentUpgradeTask', () => {
       await runTask();
 
       expect(mockedSendAutomaticUpgradeAgentsActions).toHaveBeenCalledWith(
-        expect.anything(),
+        undefined,
         expect.anything(),
         {
           agents: agents.slice(0, 3),
@@ -228,7 +228,7 @@ describe('AutomaticAgentUpgradeTask', () => {
       await runTask();
 
       expect(mockedSendAutomaticUpgradeAgentsActions).toHaveBeenCalledWith(
-        expect.anything(),
+        undefined,
         expect.anything(),
         {
           agents: agents.slice(0, 2), // As theres already one upgrading, and 30% of 11 is 3, we only want two items to be sent for upgrade
@@ -252,7 +252,7 @@ describe('AutomaticAgentUpgradeTask', () => {
       await runTask();
 
       expect(mockedSendAutomaticUpgradeAgentsActions).toHaveBeenCalledWith(
-        expect.anything(),
+        undefined,
         expect.anything(),
         {
           agents: agents.slice(0, 2),
@@ -289,7 +289,7 @@ describe('AutomaticAgentUpgradeTask', () => {
       await runTask();
 
       expect(mockedSendAutomaticUpgradeAgentsActions).toHaveBeenCalledWith(
-        expect.anything(),
+        undefined,
         expect.anything(),
         {
           agents: activeAgents.slice(0, 3),
@@ -297,7 +297,7 @@ describe('AutomaticAgentUpgradeTask', () => {
         }
       );
       expect(mockedSendAutomaticUpgradeAgentsActions).not.toHaveBeenCalledWith(
-        expect.anything(),
+        undefined,
         expect.anything(),
         { agents: uninstalledAgents, version: '8.18.0' }
       );
@@ -370,7 +370,7 @@ describe('AutomaticAgentUpgradeTask', () => {
       await runTask();
 
       expect(mockedSendAutomaticUpgradeAgentsActions).toHaveBeenCalledWith(
-        expect.anything(),
+        undefined,
         expect.anything(),
         {
           agents: agents.slice(0, 30),
@@ -411,7 +411,7 @@ describe('AutomaticAgentUpgradeTask', () => {
       await runTask();
 
       expect(mockedSendAutomaticUpgradeAgentsActions).toHaveBeenCalledWith(
-        expect.anything(),
+        undefined,
         expect.anything(),
         {
           agents: agents.slice(0, 3),
@@ -447,7 +447,7 @@ describe('AutomaticAgentUpgradeTask', () => {
       await runTask();
 
       expect(mockedSendAutomaticUpgradeAgentsActions).toHaveBeenCalledWith(
-        expect.anything(),
+        undefined,
         expect.anything(),
         {
           agents: firstAgentsBatch,
@@ -456,7 +456,7 @@ describe('AutomaticAgentUpgradeTask', () => {
         }
       );
       expect(mockedSendAutomaticUpgradeAgentsActions).toHaveBeenCalledWith(
-        expect.anything(),
+        undefined,
         expect.anything(),
         {
           agents: secondAgentsBatch.slice(0, 4),
@@ -525,7 +525,7 @@ describe('AutomaticAgentUpgradeTask', () => {
       await runTask();
 
       expect(mockedSendAutomaticUpgradeAgentsActions).toHaveBeenCalledWith(
-        expect.anything(),
+        undefined,
         expect.anything(),
         {
           agents: agents.slice(0, 1),
