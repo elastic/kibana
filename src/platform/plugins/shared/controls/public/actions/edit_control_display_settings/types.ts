@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { apiHasPrependWrapperRef, type HasPrependWrapperRef } from '@kbn/controls-renderer';
-import { PinnedControlLayoutState } from '@kbn/controls-schemas';
+import type { PinnedControlLayoutState } from '@kbn/controls-schemas';
 import {
   type IsPinnable,
   type PresentationContainer,
