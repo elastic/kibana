@@ -27,3 +27,4 @@ vscode-languageserver-textdocument
 yaml-language-server
 @atlaskit/pragmatic-drag-and-drop
 @atlaskit/pragmatic-drag-and-drop-hitbox
+@opentelemetry/exporter-metrics-otlp-proto
