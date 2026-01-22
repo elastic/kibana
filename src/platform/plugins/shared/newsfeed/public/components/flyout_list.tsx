@@ -45,6 +45,7 @@ export const NewsfeedFlyout = (
         aria-labelledby="flyoutSmallTitle"
         className="kbnNews__flyout"
         data-test-subj="NewsfeedFlyout"
+        session="start"
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">

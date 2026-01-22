@@ -46,10 +46,11 @@ export async function generateSignificantEventsSummary({
       if (summary.tokenUsage) {
         acc.prompt += summary.tokenUsage.prompt;
         acc.completion += summary.tokenUsage.completion;
+        acc.cached += summary.tokenUsage.cached ?? 0;
       }
       return acc;
     },
-    { prompt: 0, completion: 0 }
+    { prompt: 0, completion: 0, cached: 0 }
   );
 
   try {
@@ -66,6 +67,7 @@ export async function generateSignificantEventsSummary({
       tokenUsage: {
         prompt: tokenUsage.prompt + (response.tokens?.prompt ?? 0),
         completion: tokenUsage.completion + (response.tokens?.completion ?? 0),
+        cached: tokenUsage.cached + (response.tokens?.cached ?? 0),
       },
     };
   } catch (error) {
@@ -124,10 +126,11 @@ async function generateStreamSummary({
       if (summary.tokenUsage) {
         acc.prompt += summary.tokenUsage.prompt;
         acc.completion += summary.tokenUsage.completion;
+        acc.cached += summary.tokenUsage.cached ?? 0;
       }
       return acc;
     },
-    { prompt: 0, completion: 0 }
+    { prompt: 0, completion: 0, cached: 0 }
   );
 
   try {
@@ -145,6 +148,7 @@ async function generateStreamSummary({
       tokenUsage: {
         prompt: tokenUsage.prompt + (response.tokens?.prompt ?? 0),
         completion: tokenUsage.completion + (response.tokens?.completion ?? 0),
+        cached: tokenUsage.cached + (response.tokens?.cached ?? 0),
       },
     };
   } catch (error) {
