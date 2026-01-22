@@ -6,14 +6,14 @@
  */
 
 import { useState, useEffect } from 'react';
-import type { SearchDashboardsResponse } from '@kbn/dashboard-plugin/public';
+import type { DashboardSearchResponseBody } from '@kbn/dashboard-plugin/server';
 import { i18n } from '@kbn/i18n';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useTabSwitcherContext } from './use_tab_switcher';
 
 export interface SearchDashboardsResult {
-  data: SearchDashboardsResponse['hits'];
+  data: DashboardSearchResponseBody['dashboards'];
   status: FETCH_STATUS;
 }
 

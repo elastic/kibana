@@ -21,7 +21,7 @@ import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plug
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import type { ViewMode } from '@kbn/presentation-publishing';
 
-//import type { DashboardSearchOut } from '@kbn/dashboard-plugin/server/content_management';
+import type { DashboardSearchResponseBody } from '@kbn/dashboard-plugin/server';
 import type { SerializableRecord } from '@kbn/utility-types';
 import {
   ASSET_DETAILS_FLYOUT_LOCATOR_ID,
@@ -90,7 +90,10 @@ export function Dashboards() {
   }, [entity.type, currentDashboard, telemetry, trackingEventProperties]);
 
   useEffect(() => {
-    const allAvailableDashboardsMap = new Map<string, any>();
+    const allAvailableDashboardsMap = new Map<
+      string,
+      DashboardSearchResponseBody['dashboards'][number]
+    >();
     allAvailableDashboards.forEach((availableDashboard) => {
       allAvailableDashboardsMap.set(availableDashboard.id, availableDashboard);
     });
