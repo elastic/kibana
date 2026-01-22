@@ -115,27 +115,34 @@ test.describe('Node Details: host', { tag: ['@ess', '@svlOblt'] }, () => {
   });
 
   test('Overview Tab - renders metric charts', async ({
-    pageObjects: { nodeDetailsPage },
+    pageObjects: { assetDetailsPage },
     page,
   }) => {
     await expect(page.getByTestId('superDatePickerToggleQuickMenuButton')).toBeVisible();
-    const metricCharts = [
-      { metric: 'CPU Usage', chartsCount: 1 },
-      { metric: 'Normalized Load-1', chartsCount: 1 },
-      { metric: 'Memory Usage', chartsCount: 1 },
-      { metric: 'Network', chartsCount: 1 },
-      { metric: 'Disk Usage by Mount Point', chartsCount: 1 },
-      { metric: 'Disk IOPS', chartsCount: 1 },
-    ];
 
-    for (const { metric, chartsCount } of metricCharts) {
-      await test.step(`wait for charts to load and verify ${metric} charts count`, async () => {
-        await nodeDetailsPage.expectChartsCount(
-          `infraAssetDetailsHostChartsChart${metric}`,
-          chartsCount
-        );
-      });
-    }
+    await test.step('wait for charts to load and verify CPU Usage chart', async () => {
+      await expect(assetDetailsPage.hostOverviewTab.metricsCpuUsageChart).toBeVisible();
+    });
+
+    await test.step('wait for charts to load and verify Normalized Load chart', async () => {
+      await expect(assetDetailsPage.hostOverviewTab.metricsCpuNormalizedLoadChart).toBeVisible();
+    });
+
+    await test.step('wait for charts to load and verify Memory Usage chart', async () => {
+      await expect(assetDetailsPage.hostOverviewTab.metricsMemoryUsageChart).toBeVisible();
+    });
+
+    await test.step('wait for charts to load and verify Network chart', async () => {
+      await expect(assetDetailsPage.hostOverviewTab.metricsNetworkChart).toBeVisible();
+    });
+
+    await test.step('wait for charts to load and verify Disk Usage chart', async () => {
+      await expect(assetDetailsPage.hostOverviewTab.metricsDiskUsageChart).toBeVisible();
+    });
+
+    await test.step('wait for charts to load and verify Disk IO chart', async () => {
+      await expect(assetDetailsPage.hostOverviewTab.metricsDiskIOChart).toBeVisible();
+    });
   });
 
   test('Overview Tab - shows all sections as collapsible', async ({
@@ -241,10 +248,6 @@ test.describe('Node Details: host', { tag: ['@ess', '@svlOblt'] }, () => {
 
   test('Metrics Tab - renders quick access items', async ({ pageObjects: { nodeDetailsPage } }) => {
     await nodeDetailsPage.clickMetricsTab();
-    await nodeDetailsPage.setAbsoluteRange({
-      from: START_HOST_DATE.format(DATE_PICKER_FORMAT),
-      to: END_HOST_DATE.format(DATE_PICKER_FORMAT),
-    });
 
     const metrics = ['cpu', 'memory', 'disk', 'network', 'log'];
     for (const metric of metrics) {

@@ -101,7 +101,7 @@ export const HostCharts = React.forwardRef<HTMLDivElement, Props>(
         }
       >
         <ChartsGrid columns={2}>
-          {charts.map((chart, index) => (
+          {charts.map((chart) => (
             <Chart
               id={chart.id}
               key={chart.id}
@@ -111,7 +111,6 @@ export const HostCharts = React.forwardRef<HTMLDivElement, Props>(
               lensAttributes={chart}
               queryField={findInventoryFields('host').id}
               overrides={{ settings: { legendAction: 'ignore' } }}
-              dataTestSubj={`infraAssetDetailsHostChartsChart${chart.title}-${index}`}
             />
           ))}
         </ChartsGrid>

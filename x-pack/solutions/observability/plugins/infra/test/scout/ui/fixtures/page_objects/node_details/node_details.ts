@@ -235,7 +235,7 @@ export class NodeDetailsPage {
   }
 
   public async waitForChartsToLoad(timeout: number = EXTENDED_TIMEOUT) {
-    const chartLocator = this.page.locator(`[data-test-subj^="infraAssetDetailsHostChartsChart"]`);
+    const chartLocator = this.page.testSubj.locator('^infraAssetDetailsHostCharts');
 
     await expect
       .poll(
@@ -321,10 +321,8 @@ export class NodeDetailsPage {
   }
 
   public async expectChartsCount(dataTestSubj: string, expectedCount: number) {
-    const charts = await this.page.locator(`[data-test-subj^="${dataTestSubj}"]`).count();
-
-    // eslint-disable-next-line playwright/prefer-to-have-count
-    expect(charts).toBe(expectedCount);
+    const charts = this.page.testSubj.locator(`^${dataTestSubj}`);
+    await expect(charts).toHaveCount(expectedCount);
   }
 
   public async clickQuickAccessItem(metric: string) {
@@ -374,72 +372,6 @@ export class NodeDetailsPage {
   public async legacyMetricAlertCalloutExists(): Promise<boolean> {
     return await this.page.testSubj
       .locator('infraAssetDetailsLegacyMetricAlertCallout')
-      .isVisible()
-      .catch(() => false);
-  }
-
-  // Date picker methods
-  // This method mirrors the implementation from DatePicker.showStartEndTimes()
-  // in @kbn/scout/src/playwright/page_objects/date_picker.ts
-  private async showStartEndTimes() {
-    // This first await makes sure the superDatePicker has loaded before we check for the ShowDatesButton
-    await this.page.testSubj.waitForSelector('superDatePickerToggleQuickMenuButton', {
-      timeout: 10000,
-    });
-    const isShowDateBtnVisible = await this.page.testSubj.isVisible(
-      'superDatePickerShowDatesButton',
-      {
-        timeout: 5000,
-      }
-    );
-
-    if (isShowDateBtnVisible) {
-      await this.page.testSubj.click('superDatePickerShowDatesButton');
-    }
-
-    const isStartDatePopoverBtnVisible = await this.page.testSubj.isVisible(
-      'superDatePickerstartDatePopoverButton',
-      {
-        timeout: 5000,
-      }
-    );
-
-    if (isStartDatePopoverBtnVisible) {
-      await this.page.testSubj.click('superDatePickerstartDatePopoverButton');
-    }
-  }
-
-  public async setAbsoluteRange({ from, to }: { from: string; to: string }) {
-    await this.showStartEndTimes();
-    // we start with end date
-    // Note: Playwright fails to click 'superDatePickerendDatePopoverButton' because <span class="...">Now</span>
-    // element inside <div data-euiportal="true"> subtree repeatedly intercepts pointer events, preventing
-    // the click despite the target element is visible, enabled, and stable. Using { force: true } to bypass these checks.
-    // eslint-disable-next-line playwright/no-force-option
-    await this.page.testSubj.locator('superDatePickerendDatePopoverButton').click({ force: true });
-    await this.page.testSubj.click('superDatePickerAbsoluteTab');
-    const inputFrom = this.page.testSubj.locator('superDatePickerAbsoluteDateInput');
-    await inputFrom.clear();
-    await inputFrom.fill(to);
-    await this.page.testSubj.click('parseAbsoluteDateFormat');
-    await this.page.keyboard.press('Escape');
-    // and later change start date
-    await this.page.testSubj.click('superDatePickerstartDatePopoverButton');
-    await this.page.testSubj.click('superDatePickerAbsoluteTab');
-    const inputTo = this.page.testSubj.locator('superDatePickerAbsoluteDateInput');
-    await inputTo.clear();
-    await inputTo.fill(from);
-    await this.page.testSubj.click('parseAbsoluteDateFormat');
-    await this.page.keyboard.press('Escape');
-
-    await expect(
-      this.page.testSubj.locator('superDatePickerstartDatePopoverButton'),
-      `Date picker 'start date' should be set correctly`
-    ).toHaveText(from);
-    await expect(
-      this.page.testSubj.locator('superDatePickerendDatePopoverButton'),
-      `Date picker 'end date' should be set correctly`
-    ).toHaveText(to);
-    await this.page.testSubj.click('superDatePickerApplyTimeButton');
+      .isVisible();
   }
 }

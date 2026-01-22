@@ -80,7 +80,10 @@ test.describe('Node Details: host with kubernetes section', { tag: ['@ess', '@sv
     await expect(charts).toHaveCount(4);
   });
 
-  test('Metrics Tab - renders host charts', async ({ pageObjects: { nodeDetailsPage }, page }) => {
+  test('Metrics Tab - renders host charts', async ({
+    pageObjects: { nodeDetailsPage, assetDetailsPage },
+    page,
+  }) => {
     await nodeDetailsPage.clickMetricsTab();
     await expect(page.getByTestId('infraMetricsQuickAccessItemcpu')).toBeVisible({
       timeout: EXTENDED_TIMEOUT,
@@ -89,7 +92,32 @@ test.describe('Node Details: host with kubernetes section', { tag: ['@ess', '@sv
     await nodeDetailsPage.waitForChartsToLoad();
 
     await nodeDetailsPage.expectChartsCount('infraAssetDetailsHostChartsSection', 18);
-    await nodeDetailsPage.expectChartsCount('infraAssetDetailsHostChartsChart', 17);
+
+    await test.step('verify CPU charts', async () => {
+      await expect(assetDetailsPage.hostMetricsTab.cpuUsageChart).toBeVisible();
+      await expect(assetDetailsPage.hostMetricsTab.cpuUsageBreakdownChart).toBeVisible();
+      await expect(assetDetailsPage.hostMetricsTab.cpuNormalizedLoadChart).toBeVisible();
+      await expect(assetDetailsPage.hostMetricsTab.cpuLoadBreakdownChart).toBeVisible();
+    });
+
+    await test.step('verify Memory charts', async () => {
+      await expect(assetDetailsPage.hostMetricsTab.memoryUsageChart).toBeVisible();
+      await expect(assetDetailsPage.hostMetricsTab.memoryUsageBreakdownChart).toBeVisible();
+    });
+
+    await test.step('verify Network chart', async () => {
+      await expect(assetDetailsPage.hostMetricsTab.networkChart).toBeVisible();
+    });
+
+    await test.step('verify Disk charts', async () => {
+      await expect(assetDetailsPage.hostMetricsTab.diskUsageChart).toBeVisible();
+      await expect(assetDetailsPage.hostMetricsTab.diskIOChart).toBeVisible();
+      await expect(assetDetailsPage.hostMetricsTab.diskThroughputChart).toBeVisible();
+    });
+
+    await test.step('verify Log chart', async () => {
+      await expect(assetDetailsPage.hostMetricsTab.logRateChart).toBeVisible();
+    });
   });
 
   test('Metrics Tab - renders quick access items', async ({ pageObjects: { nodeDetailsPage } }) => {
