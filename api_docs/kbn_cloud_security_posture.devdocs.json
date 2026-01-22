@@ -1010,7 +1010,7 @@
           "<T>) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/grouping/group_wrapper.tsx",
-        "lineNumber": 47,
+        "lineNumber": 46,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1027,7 +1027,7 @@
               "<T>"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/grouping/group_wrapper.tsx",
-            "lineNumber": 47,
+            "lineNumber": 46,
             "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
