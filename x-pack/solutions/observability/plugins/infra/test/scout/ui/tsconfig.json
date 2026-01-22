@@ -7,6 +7,8 @@
   "kbn_references": [
     "@kbn/scout-oblt",
     "@kbn/synthtrace-client",
+    "@kbn/rison",
+    "@kbn/rule-data-utils",
   ],
   "exclude": ["target/**/*"]
 }
