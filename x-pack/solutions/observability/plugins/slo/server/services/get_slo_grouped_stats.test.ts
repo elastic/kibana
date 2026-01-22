@@ -9,6 +9,7 @@ import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { GetSLOGroupedStats } from './get_slo_grouped_stats';
 import { DEFAULT_SETTINGS } from './slo_settings_repository';
+import { SLOError } from '../errors/errors';
 
 describe('GetSLOGroupedStats', () => {
   let scopedClusterClient: IScopedClusterClient;
@@ -155,6 +156,26 @@ describe('GetSLOGroupedStats', () => {
         expect(filters).toContainEqual({ term: { 'service.environment': 'production' } });
       });
 
+      it('should work when size parameter is not provided', async () => {
+        esClientMock.search.mockResolvedValue({
+          took: 0,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: { total: { value: 0, relation: 'eq' }, hits: [] },
+          aggregations: { groups: { buckets: [] } },
+        });
+
+        await service.execute({
+          type: 'apm',
+        });
+
+        expect(esClientMock.search).toHaveBeenCalledTimes(1);
+        const searchCall = esClientMock.search.mock.calls[0][0] as any;
+
+        // When size is not provided, it should be undefined, letting ES use its default (10)
+        expect(searchCall.aggs.groups.terms.size).toBeUndefined();
+      });
+
       it('handles missing status counts gracefully', async () => {
         esClientMock.search.mockResolvedValue({
           took: 0,
@@ -187,23 +208,14 @@ describe('GetSLOGroupedStats', () => {
           ],
         });
       });
+    });
 
-      it('uses default size of 100', async () => {
-        esClientMock.search.mockResolvedValue({
-          took: 0,
-          timed_out: false,
-          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-          hits: { total: { value: 0, relation: 'eq' }, hits: [] },
-          aggregations: { groups: { buckets: [] } },
-        });
-
-        await service.execute({
-          type: 'apm',
-        });
-
-        const searchCall = esClientMock.search.mock.calls[0][0] as any;
-        expect(searchCall.aggs.groups.terms.size).toBe(100);
-      });
+    it('throws SLOError for unsupported SLO type', async () => {
+      await expect(
+        service.execute({
+          type: 'unsupported-type' as any,
+        })
+      ).rejects.toThrow(SLOError);
     });
   });
 });

@@ -228,5 +228,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.body.results[0].entity).to.eql('service-a');
       expect(response.body.results[0].summary.healthy).to.eql(2);
     });
+
+    it('returns 400 for unsupported SLO type', async () => {
+      const response = await supertestWithoutAuth
+        .post(`/internal/slos/_grouped_stats`)
+        .set(adminRoleAuthc.apiKeyHeader)
+        .set(internalHeaders)
+        .send({ type: 'unsupported-type' })
+        .expect(400);
+
+      expect(response.body.message).to.contain('unsupported-type" does not match expected type');
+    });
   });
 }

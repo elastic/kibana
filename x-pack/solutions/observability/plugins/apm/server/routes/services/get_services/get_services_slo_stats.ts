@@ -10,7 +10,6 @@ import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import type { SloStatus } from '../../../../common/service_inventory';
 
 const STATUS_PRIORITY: SloStatus[] = ['violated', 'degrading', 'noData', 'healthy'];
-
 export type SloSummary = Record<SloStatus, number>;
 
 export type ServiceSloStatsResponse = Array<{

@@ -20,6 +20,7 @@ import type { SLOSettings } from '../domain/models';
 import { typedSearch } from '../utils/queries';
 import { getSummaryIndices } from './utils/get_summary_indices';
 import { excludeStaleSummaryFilter } from './utils/summary_stale_filter';
+import { SLOError } from '../errors/errors';
 
 interface SloTypeConfig {
   groupByField: string;
@@ -49,14 +50,16 @@ export class GetSLOGroupedStats {
   ) {}
 
   public async execute(params: GetSLOGroupedStatsParams): Promise<GetSLOGroupedStatsResponse> {
+    const config = this.getConfig(params.type);
+
+    if (!config) {
+      throw new SLOError(`Unsupported SLO type: ${params.type}`);
+    }
+
     const { indices } = await getSummaryIndices(
       this.scopedClusterClient.asInternalUser,
       this.settings
     );
-
-    const { size = 100 } = params;
-    const config = this.getConfig(params.type);
-
     const response = await typedSearch(this.scopedClusterClient.asCurrentUser, {
       index: indices,
       size: 0,
@@ -73,8 +76,8 @@ export class GetSLOGroupedStats {
       aggs: {
         groups: {
           terms: {
-            size,
-            field: config?.groupByField ?? '',
+            size: params.size,
+            field: config.groupByField,
           },
           aggs: {
             violated: {
@@ -83,11 +86,11 @@ export class GetSLOGroupedStats {
             degrading: {
               filter: { term: { status: SLO_STATUS.DEGRADING } },
             },
-            healthy: {
-              filter: { term: { status: SLO_STATUS.HEALTHY } },
-            },
             noData: {
               filter: { term: { status: SLO_STATUS.NO_DATA } },
+            },
+            healthy: {
+              filter: { term: { status: SLO_STATUS.HEALTHY } },
             },
           },
         },
@@ -101,8 +104,8 @@ export class GetSLOGroupedStats {
       summary: {
         violated: bucket.violated?.doc_count ?? 0,
         degrading: bucket.degrading?.doc_count ?? 0,
-        healthy: bucket.healthy?.doc_count ?? 0,
         noData: bucket.noData?.doc_count ?? 0,
+        healthy: bucket.healthy?.doc_count ?? 0,
       },
     }));
 

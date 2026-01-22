@@ -7,15 +7,28 @@
 import * as t from 'io-ts';
 
 const sloBaseParamsSchema = t.partial({
+  /**
+   * Number of buckets to return.
+   * If not provided, the query will use elasticsearch default value of 10.
+   */
   size: t.number,
 });
 
 const apmSloParamsSchema = t.intersection([
   t.type({
+    /**
+     * SLO type.
+     */
     type: t.literal('apm'),
   }),
   t.partial({
+    /**
+     * List of service names to filter by.
+     */
     serviceNames: t.array(t.string),
+    /**
+     * Environment to filter by.
+     */
     environment: t.string,
   }),
 ]);
