@@ -10,6 +10,7 @@ import { render, screen } from '@testing-library/react';
 import type { Streams } from '@kbn/streams-schema';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ClassicAdvancedView } from './classic_advanced_view';
+import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 
 jest.mock('@kbn/ebt-tools', () => ({
   usePerformanceContext: () => ({ onPageReady: jest.fn() }),
@@ -21,30 +22,35 @@ jest.mock('../../../../hooks/use_ai_features', () => ({
 
 // Mock the useStreamsPrivileges hook
 jest.mock('../../../../hooks/use_streams_privileges');
-import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 
 // Mock hooks used by StreamDescription
-jest.mock('../../../stream_detail_features/stream_description/use_stream_description_api', () => ({
+jest.mock('../../../stream_detail_systems/stream_description/use_stream_description_api', () => ({
   useStreamDescriptionApi: () => ({
-    isGenerating: false,
     description: '',
+    setDescription: jest.fn(),
     isUpdating: false,
     isEditing: false,
-    setDescription: jest.fn(),
     onCancelEdit: jest.fn(),
-    onGenerateDescription: jest.fn(),
-    onSaveDescription: jest.fn(),
     onStartEditing: jest.fn(),
+    onSaveDescription: jest.fn(),
+    isTaskLoading: false,
+    task: undefined,
+    taskError: null,
+    refreshTask: jest.fn(),
+    getDescriptionGenerationStatus: jest.fn().mockResolvedValue({ status: 'not_started' }),
+    scheduleDescriptionGenerationTask: jest.fn(),
+    cancelDescriptionGenerationTask: jest.fn(),
+    acknowledgeDescriptionGenerationTask: jest.fn(),
     areButtonsDisabled: false,
   }),
 }));
 
-// Mock hooks used by StreamFeatureConfiguration
-jest.mock('../../../stream_detail_features/stream_features/hooks/use_stream_features', () => ({
-  useStreamFeatures: () => ({
-    features: [],
-    refreshFeatures: jest.fn(),
-    featuresLoading: false,
+// Mock hooks used by StreamSystemConfiguration
+jest.mock('../../../stream_detail_systems/stream_systems/hooks/use_stream_systems', () => ({
+  useStreamSystems: () => ({
+    systems: [],
+    refreshSystems: jest.fn(),
+    systemsLoading: false,
   }),
 }));
 
@@ -54,9 +60,16 @@ jest.mock('../../../../hooks/use_ai_features', () => ({
   }),
 }));
 
-jest.mock('../../../../hooks/use_stream_features_api', () => ({
-  useStreamFeaturesApi: () => ({
-    identifyFeatures: jest.fn(),
+jest.mock('../../../../hooks/use_stream_systems_api', () => ({
+  useStreamSystemsApi: () => ({
+    identifySystems: jest.fn(),
+    getSystemIdentificationStatus: jest.fn().mockResolvedValue({ status: 'not_started' }),
+    scheduleSystemIdentificationTask: jest.fn(),
+    cancelSystemIdentificationTask: jest.fn(),
+    acknowledgeSystemIdentificationTask: jest.fn(),
+    addSystemsToStream: jest.fn(),
+    removeSystemsFromStream: jest.fn(),
+    upsertSystem: jest.fn(),
     abort: jest.fn(),
   }),
 }));
@@ -93,11 +106,13 @@ jest.mock('../../../../hooks/use_kibana', () => ({
     appParams: { history: {} },
     core: {
       notifications: { toasts: { addSuccess: jest.fn(), addError: jest.fn() } },
-      application: { navigateToApp: jest.fn() },
+      application: { navigateToApp: jest.fn(), navigateToUrl: jest.fn() },
       pricing: { isFeatureAvailable: jest.fn(() => false) },
       uiSettings: {
         get: jest.fn((_key: string, defaultValue?: unknown) => defaultValue),
       },
+      overlays: { openConfirm: jest.fn() },
+      http: {},
     },
     dependencies: {
       start: {
@@ -211,10 +226,8 @@ describe('ClassicAdvancedView', () => {
         />
       );
 
-      // Check the Feature identification panel title is rendered
-      expect(screen.getByText('Feature identification')).toBeInTheDocument();
-      // Check the Identify features button is rendered
-      expect(screen.getByRole('button', { name: /identify features/i })).toBeInTheDocument();
+      // Check the System identification panel title is rendered
+      expect(screen.getByText('System identification')).toBeInTheDocument();
     });
 
     it('should NOT render Stream description or Feature identification when significantEvents is disabled', () => {
@@ -232,7 +245,7 @@ describe('ClassicAdvancedView', () => {
       );
 
       expect(screen.queryByText('Stream description')).not.toBeInTheDocument();
-      expect(screen.queryByText('Feature identification')).not.toBeInTheDocument();
+      expect(screen.queryByText('System identification')).not.toBeInTheDocument();
     });
 
     it('should NOT render Stream description or Feature identification when significantEvents is undefined', () => {
@@ -250,7 +263,7 @@ describe('ClassicAdvancedView', () => {
       );
 
       expect(screen.queryByText('Stream description')).not.toBeInTheDocument();
-      expect(screen.queryByText('Feature identification')).not.toBeInTheDocument();
+      expect(screen.queryByText('System identification')).not.toBeInTheDocument();
     });
   });
 
@@ -411,8 +424,8 @@ describe('ClassicAdvancedView', () => {
 
       // Stream description
       expect(screen.getByText('Stream description')).toBeInTheDocument();
-      // Feature identification
-      expect(screen.getByText('Feature identification')).toBeInTheDocument();
+      // System identification
+      expect(screen.getByText('System identification')).toBeInTheDocument();
       // Index Configuration
       expect(screen.getByText('Index Configuration')).toBeInTheDocument();
       // Elasticsearch assets

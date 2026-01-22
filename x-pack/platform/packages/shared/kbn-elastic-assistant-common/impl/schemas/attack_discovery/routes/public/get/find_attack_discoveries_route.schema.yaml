@@ -16,9 +16,8 @@ paths:
              --header "Content-Type: application/json"
       x-labels: [ess, serverless]
       operationId: AttackDiscoveryFind
-      x-state: Technical Preview; added in 9.2.0
       summary: Find Attack discoveries that match the search criteria
-      description: Find Attack discoveries that match the search criteria. Supports free text search, filtering, pagination, and sorting. `Technical preview`
+      description: Find Attack discoveries that match the search criteria. Supports free text search, filtering, pagination, and sorting.
       parameters:
         - name: 'alert_ids'
           description: Filter results to Attack discoveries that include any of the provided alert IDs
@@ -93,6 +92,12 @@ paths:
           example: ""
         - name: 'shared'
           description: Whether to filter by shared visibility. If omitted, both shared and privately visible Attack discoveries are returned. Use `true` to return only shared discoveries, `false` to return only those visible to the current user.
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: 'scheduled'
+          description: Whether to filter by scheduled or ad-hoc attack discoveries. If omitted, both types of attack discoveries are returned. Use `true` to return only scheduled discoveries or `false` to return only ad-hoc discoveries.
           in: query
           required: false
           schema:

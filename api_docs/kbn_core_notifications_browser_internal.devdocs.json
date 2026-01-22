@@ -10,6 +10,8 @@
         "label": "NotificationsService",
         "description": [],
         "path": "src/core/packages/notifications/browser-internal/src/notifications_service.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -24,6 +26,8 @@
               "any"
             ],
             "path": "src/core/packages/notifications/browser-internal/src/notifications_service.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -43,6 +47,8 @@
               "NotificationsSetup"
             ],
             "path": "src/core/packages/notifications/browser-internal/src/notifications_service.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -57,6 +63,8 @@
                   "SetupDeps"
                 ],
                 "path": "src/core/packages/notifications/browser-internal/src/notifications_service.ts",
+                "lineNumber": 45,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -78,6 +86,8 @@
               "NotificationsStart"
             ],
             "path": "src/core/packages/notifications/browser-internal/src/notifications_service.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -92,6 +102,8 @@
                   "StartDeps"
                 ],
                 "path": "src/core/packages/notifications/browser-internal/src/notifications_service.ts",
+                "lineNumber": 63,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -110,6 +122,8 @@
               "() => void"
             ],
             "path": "src/core/packages/notifications/browser-internal/src/notifications_service.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -133,6 +147,8 @@
           "IToasts"
         ],
         "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+        "lineNumber": 84,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -147,6 +163,8 @@
               "any"
             ],
             "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+            "lineNumber": 95,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -158,6 +176,8 @@
                 "label": "deps",
                 "description": [],
                 "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+                "lineNumber": 95,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -172,6 +192,8 @@
                       "IUiSettingsClient"
                     ],
                     "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+                    "lineNumber": 95,
+                    "columnNumber": 23,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -197,6 +219,8 @@
               "[]>"
             ],
             "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -218,6 +242,8 @@
               "Toast"
             ],
             "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -234,6 +260,8 @@
                   "ToastInput"
                 ],
                 "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+                "lineNumber": 115,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -258,6 +286,8 @@
               ") => void"
             ],
             "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+            "lineNumber": 127,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -275,6 +305,8 @@
                   "Toast"
                 ],
                 "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+                "lineNumber": 131,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -300,6 +332,8 @@
               "Toast"
             ],
             "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+            "lineNumber": 140,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -316,6 +350,8 @@
                   "ToastInput"
                 ],
                 "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+                "lineNumber": 147,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -334,6 +370,8 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+                "lineNumber": 147,
+                "columnNumber": 44,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -361,6 +399,8 @@
               "Toast"
             ],
             "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+            "lineNumber": 156,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -377,6 +417,8 @@
                   "ToastInput"
                 ],
                 "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+                "lineNumber": 163,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -395,6 +437,8 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+                "lineNumber": 163,
+                "columnNumber": 47,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -422,6 +466,8 @@
               "Toast"
             ],
             "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+            "lineNumber": 172,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -438,6 +484,8 @@
                   "ToastInput"
                 ],
                 "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+                "lineNumber": 179,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -456,6 +504,8 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+                "lineNumber": 179,
+                "columnNumber": 47,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -483,6 +533,8 @@
               "Toast"
             ],
             "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+            "lineNumber": 189,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -499,6 +551,8 @@
                   "ToastInput"
                 ],
                 "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+                "lineNumber": 196,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -517,6 +571,8 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+                "lineNumber": 196,
+                "columnNumber": 46,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -542,6 +598,8 @@
               "Toast"
             ],
             "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+            "lineNumber": 210,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -558,6 +616,8 @@
                   "Error"
                 ],
                 "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+                "lineNumber": 217,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -575,6 +635,8 @@
                   "ErrorToastOptions"
                 ],
                 "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx",
+                "lineNumber": 217,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -611,6 +673,8 @@
           "; stop: () => void; }"
         ],
         "path": "src/core/packages/notifications/browser-internal/src/notifications_service.ts",
+        "lineNumber": 98,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

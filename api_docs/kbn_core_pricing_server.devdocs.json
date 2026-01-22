@@ -22,6 +22,8 @@
           "\nAPIs to manage pricing product features during the setup phase.\n\nPlugins that want to register features that are available in specific pricing tiers\nshould use the `registerProductFeatures` method during the setup phase.\n"
         ],
         "path": "src/core/packages/pricing/server/src/contracts.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -38,6 +40,8 @@
               "(featureId: string) => Promise<boolean>"
             ],
             "path": "src/core/packages/pricing/server/src/contracts.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -52,6 +56,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/pricing/server/src/contracts.ts",
+                "lineNumber": 33,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -74,6 +80,8 @@
               "[]) => void"
             ],
             "path": "src/core/packages/pricing/server/src/contracts.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -89,6 +97,8 @@
                   "[]"
                 ],
                 "path": "src/core/packages/pricing/server/src/contracts.ts",
+                "lineNumber": 51,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -109,6 +119,8 @@
           "\nAPIs to access pricing tier information during the start phase.\n"
         ],
         "path": "src/core/packages/pricing/common/src/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -125,6 +137,8 @@
               "<TFeatureId extends string>(featureId: TFeatureId) => boolean"
             ],
             "path": "src/core/packages/pricing/common/src/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [
@@ -144,6 +158,8 @@
                   "TFeatureId"
                 ],
                 "path": "src/core/packages/pricing/common/src/types.ts",
+                "lineNumber": 67,
+                "columnNumber": 49,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -164,6 +180,8 @@
               " | undefined"
             ],
             "path": "src/core/packages/pricing/common/src/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
             "references": [

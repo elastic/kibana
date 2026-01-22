@@ -7,6 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  AvgIndexPatternColumn,
+  CountIndexPatternColumn,
+  FormulaIndexPatternColumn,
+  MathIndexPatternColumn,
+  MedianIndexPatternColumn,
+  TermsIndexPatternColumn,
+} from '@kbn/lens-common';
 import type { LensAttributes } from '../../types';
 
 /**
@@ -161,3 +169,159 @@ export const breakdownMetricAttributes: LensAttributes = {
     },
   ],
 } satisfies LensAttributes;
+
+/**
+ * Metric with formula reference columns and rank_by in the terms bucket operation
+ */
+export const breakdownMetricWithFormulaRefColumnsAttributes: LensAttributes = {
+  references: [
+    {
+      type: 'index-pattern',
+      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      name: 'indexpattern-datasource-layer-fe6cb443-ec2b-4f72-ad1e-87f3f84ad30f',
+    },
+  ],
+  title: 'metric formula',
+  visualizationType: 'lnsMetric',
+  version: 1,
+  state: {
+    visualization: {
+      layerId: 'fe6cb443-ec2b-4f72-ad1e-87f3f84ad30f',
+      layerType: 'data',
+      metricAccessor: '0a9cac71-9abb-426a-b779-069aa1c1a2d2',
+      breakdownByAccessor: 'a1282bcf-f6ca-4170-b9ff-b547b6e4e728',
+      secondaryMetricAccessor: 'ff842a36-152d-45e4-a23d-67cc333829e5',
+      secondaryTrend: {
+        type: 'none',
+      },
+      secondaryLabelPosition: 'before',
+    },
+    query: {
+      query: '',
+      language: 'kuery',
+    },
+    filters: [],
+    datasourceStates: {
+      formBased: {
+        layers: {
+          'fe6cb443-ec2b-4f72-ad1e-87f3f84ad30f': {
+            columns: {
+              '0a9cac71-9abb-426a-b779-069aa1c1a2d2X0': {
+                label: 'Part of median(bytes)/average(bytes)',
+                dataType: 'number',
+                operationType: 'median',
+                sourceField: 'bytes',
+                isBucketed: false,
+                params: {
+                  emptyAsNull: false,
+                },
+                customLabel: true,
+              } as MedianIndexPatternColumn,
+              '0a9cac71-9abb-426a-b779-069aa1c1a2d2X1': {
+                label: 'Part of median(bytes)/average(bytes)',
+                dataType: 'number',
+                operationType: 'average',
+                sourceField: 'bytes',
+                isBucketed: false,
+                params: {
+                  emptyAsNull: false,
+                },
+                customLabel: true,
+              } as AvgIndexPatternColumn,
+              // @ts-expect-error
+              '0a9cac71-9abb-426a-b779-069aa1c1a2d2X2': {
+                label: 'Part of median(bytes)/average(bytes)',
+                dataType: 'number',
+                operationType: 'math',
+                isBucketed: false,
+                params: {
+                  tinymathAst: {
+                    type: 'function',
+                    name: 'divide',
+                    args: [
+                      '0a9cac71-9abb-426a-b779-069aa1c1a2d2X0',
+                      '0a9cac71-9abb-426a-b779-069aa1c1a2d2X1',
+                    ],
+                    location: {
+                      min: 0,
+                      max: 28,
+                    },
+                    text: 'median(bytes)/average(bytes)',
+                  },
+                },
+                references: [
+                  '0a9cac71-9abb-426a-b779-069aa1c1a2d2X0',
+                  '0a9cac71-9abb-426a-b779-069aa1c1a2d2X1',
+                ],
+                customLabel: true,
+              } as MathIndexPatternColumn,
+              '0a9cac71-9abb-426a-b779-069aa1c1a2d2': {
+                label: 'median(bytes)/average(bytes)',
+                dataType: 'number',
+                operationType: 'formula',
+                isBucketed: false,
+                params: {
+                  formula: 'median(bytes)/average(bytes)',
+                  isFormulaBroken: false,
+                },
+                references: ['0a9cac71-9abb-426a-b779-069aa1c1a2d2X2'],
+              } as FormulaIndexPatternColumn,
+              'a1282bcf-f6ca-4170-b9ff-b547b6e4e728': {
+                label: 'Top 5 values of geo.dest',
+                dataType: 'string',
+                operationType: 'terms',
+                sourceField: 'geo.dest',
+                isBucketed: true,
+                params: {
+                  size: 5,
+                  orderBy: {
+                    type: 'column',
+                    columnId: 'ff842a36-152d-45e4-a23d-67cc333829e5',
+                  },
+                  orderDirection: 'desc',
+                  otherBucket: true,
+                  missingBucket: false,
+                  parentFormat: {
+                    id: 'terms',
+                  },
+                  include: [],
+                  exclude: [],
+                  includeIsRegex: false,
+                  excludeIsRegex: false,
+                },
+              } as TermsIndexPatternColumn,
+              'ff842a36-152d-45e4-a23d-67cc333829e5': {
+                label: 'Count of records',
+                dataType: 'number',
+                operationType: 'count',
+                isBucketed: false,
+                sourceField: '___records___',
+                params: {
+                  emptyAsNull: true,
+                },
+              } as CountIndexPatternColumn,
+            },
+            columnOrder: [
+              'a1282bcf-f6ca-4170-b9ff-b547b6e4e728',
+              '0a9cac71-9abb-426a-b779-069aa1c1a2d2',
+              '0a9cac71-9abb-426a-b779-069aa1c1a2d2X0',
+              '0a9cac71-9abb-426a-b779-069aa1c1a2d2X1',
+              '0a9cac71-9abb-426a-b779-069aa1c1a2d2X2',
+              'ff842a36-152d-45e4-a23d-67cc333829e5',
+            ],
+            incompleteColumns: {},
+          },
+        },
+      },
+      // @ts-expect-error
+      indexpattern: {
+        layers: {},
+      },
+      textBased: {
+        layers: {},
+      },
+    },
+    internalReferences: [],
+    adHocDataViews: {},
+  },
+};

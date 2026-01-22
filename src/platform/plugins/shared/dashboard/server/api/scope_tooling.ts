@@ -13,12 +13,9 @@ import type { DashboardPanel, DashboardState } from './types';
 
 export function stripUnmappedKeys(dashboardState: DashboardState) {
   const warnings: string[] = [];
-  const { controlGroupInput, references, panels, ...rest } = dashboardState;
-  if (controlGroupInput) {
-    warnings.push(`Dropped unmapped key 'controlGroupInput' from dashboard`);
-  }
-  if (references) {
-    warnings.push(`Dropped unmapped key 'references' from dashboard`);
+  const { pinned_panels, panels, ...rest } = dashboardState;
+  if (pinned_panels) {
+    warnings.push(`Dropped unmapped key 'pinned_panels' from dashboard`);
   }
 
   function isMappedPanelType(panel: DashboardPanel) {
@@ -34,17 +31,25 @@ export function stripUnmappedKeys(dashboardState: DashboardState) {
       }
     }
 
-    if (!transforms?.schema) {
+    const panelSchema = transforms?.getSchema?.();
+
+    if (!panelSchema) {
       warnings.push(
         `Dropped panel ${panel.uid}, panel schema not available for panel type: ${panel.type}. Panels without schemas are not supported by dashboard REST endpoints`
       );
     }
-    return Boolean(transforms?.schema);
+    return Boolean(panelSchema);
   }
 
   function removeEnhancements(panel: DashboardPanel) {
-    const { enhancements, ...restOfConfig } = panel.config as { enhancements?: unknown };
-    if (enhancements) {
+    const { enhancements, ...restOfConfig } = panel.config as {
+      enhancements?: { dynamicActions: { events: [] } };
+    };
+    if (
+      typeof enhancements?.dynamicActions === 'object' &&
+      Array.isArray(enhancements?.dynamicActions?.events) &&
+      enhancements.dynamicActions.events.length
+    ) {
       warnings.push(`Dropped unmapped panel config key 'enhancements' from panel ${panel.uid}`);
     }
     return {
@@ -74,17 +79,15 @@ export function stripUnmappedKeys(dashboardState: DashboardState) {
 }
 
 export function throwOnUnmappedKeys(dashboardState: DashboardState) {
-  if (dashboardState.controlGroupInput) {
-    throw new Error('controlGroupInput key is not supported by dashboard REST endpoints.');
-  }
-
-  if (dashboardState.references) {
-    throw new Error('references key is not supported by dashboard REST endpoints.');
+  if (dashboardState.pinned_panels) {
+    throw new Error('pinned_panels key is not supported by dashboard REST endpoints.');
   }
 
   function throwOnUnmappedPanelKeys(panel: DashboardPanel) {
     const transforms = embeddableService?.getTransforms(panel.type);
-    if (!transforms?.schema) {
+    const panelSchema = transforms?.getSchema?.();
+
+    if (!panelSchema) {
       throw new Error(
         `Panel schema not available for panel type: ${panel.type}. Panels without schemas are not supported by dashboard REST endpoints`
       );

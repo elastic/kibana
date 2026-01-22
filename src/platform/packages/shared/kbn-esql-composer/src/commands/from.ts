@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parse } from '@kbn/esql-ast';
+import { parse } from '@kbn/esql-language';
 import { createPipeline } from '../pipeline/create_pipeline';
 import type { QueryPipeline } from '../types';
 
@@ -32,9 +32,17 @@ function buildPipeline(
     params: [],
   });
 }
+
+/**
+ * @deprecated Migrate to `@kbn/esql-language` composer.
+ */
 export function timeseries(...patterns: Array<string | string[]>): QueryPipeline {
   return buildPipeline('TS', ...patterns);
 }
+
+/**
+ * @deprecated Migrate to `@kbn/esql-language` composer.
+ */
 export function from(...patterns: Array<string | string[]>): QueryPipeline {
   return buildPipeline('FROM', ...patterns);
 }

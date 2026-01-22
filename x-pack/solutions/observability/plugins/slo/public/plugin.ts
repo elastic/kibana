@@ -14,14 +14,13 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
-import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import type { DefaultClientOptions } from '@kbn/server-route-repository-client';
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
+import { SLOS_BASE_PATH } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { lazy } from 'react';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { PLUGIN_NAME, sloAppId } from '../common';
 import type { ExperimentalFeatures, SLOConfig } from '../common/config';
-import { SLOS_BASE_PATH } from '../common/locators/paths';
 import type { SLORouteRepository } from '../server/routes/get_slo_server_route_repository';
 import { SLO_ALERTS_EMBEDDABLE_ID } from './embeddable/slo/alerts/constants';
 import { SLO_BURN_RATE_EMBEDDABLE_ID } from './embeddable/slo/burn_rate/constants';
@@ -135,11 +134,8 @@ export class SLOPlugin
 
         pluginsStart.presentationUtil.registerPanelPlacementSettings(
           SLO_OVERVIEW_EMBEDDABLE_ID,
-          (serializedState?: SerializedPanelState<SloOverviewEmbeddableState>) => {
-            if (
-              serializedState?.rawState?.showAllGroupByInstances ||
-              serializedState?.rawState?.groupFilters
-            ) {
+          (serializedState?: SloOverviewEmbeddableState) => {
+            if (serializedState?.showAllGroupByInstances || serializedState?.groupFilters) {
               return { placementSettings: { width: 24, height: 8 } };
             }
             return { placementSettings: { width: 12, height: 8 } };

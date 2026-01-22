@@ -100,17 +100,9 @@ export const streamEnrichmentMachine = setup({
 
       const isWiredStream = Streams.WiredStream.Definition.is(context.definition.stream);
 
-      // Only run full validation for wired streams
-      if (!isWiredStream) {
-        return {
-          schemaErrors: [],
-          validationErrors: new Map(),
-          fieldTypesByProcessor: new Map(),
-        };
-      }
-
       const validationResult = validateStreamlang(context.nextStreamlangDSL, {
         reservedFields: [],
+        streamType: isWiredStream ? 'wired' : 'classic',
       });
 
       const errorsByStep = new Map<string, typeof validationResult.errors>();
@@ -401,6 +393,8 @@ export const streamEnrichmentMachine = setup({
                   definition: context.definition,
                   streamlangDSL: context.nextStreamlangDSL,
                   fields: getUpsertFields(context),
+                  configurationMode:
+                    context.interactiveModeRef !== undefined ? 'interactive' : 'yaml',
                 }),
                 onDone: {
                   target: 'idle',
