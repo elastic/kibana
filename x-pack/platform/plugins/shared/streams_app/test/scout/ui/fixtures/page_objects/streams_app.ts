@@ -148,6 +148,38 @@ export class StreamsApp {
     ).toHaveText(expectedRange.to);
   }
 
+  /**
+   * Set absolute time range using the Streams app search bar date picker.
+   * Uses .first() to target the correct date picker when multiple are present
+   * (e.g., Retention tab has two IngestionRatePanel components each with their own date picker)
+   */
+  async setAbsoluteTimeRange(range: { from: string; to: string }) {
+    // Click the date picker button to open it (use .first() for the Streams app search bar)
+    const showDatesBtn = this.page.testSubj.locator('superDatePickerShowDatesButton').first();
+    await showDatesBtn.click();
+
+    // Set the start date
+    const startBtn = this.page.testSubj.locator('superDatePickerstartDatePopoverButton').first();
+    await startBtn.click();
+    await this.page.testSubj.locator('superDatePickerAbsoluteTab').click();
+    const startInput = this.page.testSubj.locator('superDatePickerAbsoluteDateInput');
+    await startInput.clear();
+    await startInput.fill(range.from);
+    await startInput.press('Enter');
+
+    // Set the end date
+    const endBtn = this.page.testSubj.locator('superDatePickerendDatePopoverButton').first();
+    await endBtn.click();
+    await this.page.testSubj.locator('superDatePickerAbsoluteTab').click();
+    const endInput = this.page.testSubj.locator('superDatePickerAbsoluteDateInput');
+    await endInput.clear();
+    await endInput.fill(range.to);
+    await endInput.press('Enter');
+
+    // Apply the time range
+    await this.page.testSubj.locator('querySubmitButton').click();
+  }
+
   async verifyDocCount(streamName: string, expectedCount: number) {
     await expect(this.page.locator(`[data-test-subj="streamsDocCount-${streamName}"]`)).toHaveText(
       expectedCount.toString()
