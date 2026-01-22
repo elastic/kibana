@@ -14,23 +14,17 @@ import {
   DATE_WITH_POD_DATA,
   DATE_WITHOUT_DATA,
   HOSTS,
+  POD_COUNT,
   POD_NAMES,
 } from '../../fixtures/constants';
 
-const KUBERNETES_TOUR_STORAGE_KEY = 'isKubernetesTourSeen';
-
-test.use({
-  timezoneId: 'GMT',
-});
+const POD_NAME = POD_NAMES[POD_COUNT - 1];
 
 test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects: { inventoryPage } }) => {
     await browserAuth.loginAsViewer();
+    await inventoryPage.addDismissK8sTourInitScript();
     await inventoryPage.goToPage();
-    // Dismiss k8s tour if it's present to avoid interference with other test assertions
-    // The k8s tour specific test will take care of adding it back during its own execution
-    await inventoryPage.dismissK8sTour();
-    await inventoryPage.goToTime(DATE_WITH_HOSTS_DATA);
   });
 
   test('Render expected content', async ({ page, pageObjects: { inventoryPage } }) => {
@@ -44,6 +38,7 @@ test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
     });
 
     await test.step('display waffle map', async () => {
+      await inventoryPage.goToTime(DATE_WITH_HOSTS_DATA);
       await expect(inventoryPage.mapViewButton).toHaveAttribute('aria-pressed', 'true');
       await expect(inventoryPage.waffleMap).toBeVisible();
     });
@@ -59,33 +54,6 @@ test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
       await inventoryPage.switchToTableView();
       await expect(inventoryPage.tableViewButton).toHaveAttribute('aria-pressed', 'true');
       await expect(inventoryPage.nodesOverviewTable).toBeVisible();
-    });
-  });
-
-  test('Render and dismiss k8s tour', async ({ page, pageObjects: { inventoryPage } }) => {
-    await test.step('reset k8s tour seen state', async () => {
-      await page.evaluate(
-        ([k8sTourStorageKey]) => localStorage.setItem(k8sTourStorageKey, 'false'),
-        [KUBERNETES_TOUR_STORAGE_KEY]
-      );
-      await inventoryPage.reload();
-    });
-
-    await test.step('display k8s tour with proper message', async () => {
-      await expect(inventoryPage.k8sTourText).toBeVisible();
-      await expect(inventoryPage.k8sTourText).toHaveText(
-        'Click here to see your infrastructure in different ways, including Kubernetes pods.'
-      );
-    });
-
-    await test.step('dismiss k8s tour', async () => {
-      await inventoryPage.dismissK8sTour();
-      await expect(inventoryPage.k8sTourText).toBeHidden();
-    });
-
-    await test.step('reload page and verify tour remains dismissed', async () => {
-      await inventoryPage.reload();
-      await expect(inventoryPage.k8sTourText).toBeHidden();
     });
   });
 
@@ -111,6 +79,7 @@ test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
 
   test('Inventory switcher changes node types', async ({ pageObjects: { inventoryPage } }) => {
     await test.step('show hosts by default', async () => {
+      await inventoryPage.goToTime(DATE_WITH_HOSTS_DATA);
       await expect(inventoryPage.inventorySwitcherButton).toContainText('Hosts');
 
       const hostName = HOSTS[Math.floor(Math.random() * HOSTS.length)].hostName;
@@ -124,10 +93,9 @@ test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
       await inventoryPage.showPods();
       await expect(inventoryPage.inventorySwitcherButton).toContainText('Kubernetes Pods');
 
-      const podName = POD_NAMES[Math.floor(Math.random() * POD_NAMES.length)];
-      const waffleNode = await inventoryPage.getWaffleNode(podName);
+      const waffleNode = await inventoryPage.getWaffleNode(POD_NAME);
       await expect(waffleNode.container).toBeVisible();
-      await expect(waffleNode.name).toHaveText(podName);
+      await expect(waffleNode.name).toHaveText(POD_NAME);
 
       await expect(inventoryPage.k8sFeedbackLink).toBeVisible();
     });
@@ -144,7 +112,44 @@ test.describe('Infrastructure Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
     });
   });
 
-  test('Has no detectable a11y violations on load', async ({ page }) => {
+  test('K8s pods waffle map node redirects to pod details page', async ({
+    page,
+    pageObjects: { inventoryPage },
+  }) => {
+    await test.step('switch to k8s pods', async () => {
+      await inventoryPage.goToTime(DATE_WITH_POD_DATA);
+      await inventoryPage.showPods();
+      await expect(inventoryPage.inventorySwitcherButton).toContainText('Kubernetes Pods');
+    });
+
+    await test.step('open pod waffle context menu', async () => {
+      const waffleNode = await inventoryPage.getWaffleNode(POD_NAME);
+      await waffleNode.container.click();
+
+      await expect(inventoryPage.k8sPodWaffleContextMenu).toBeVisible();
+      await expect(inventoryPage.k8sPodWaffleContextMenu).toContainText(
+        `View details for kubernetes.pod.uid ${POD_NAME}`
+      );
+    });
+
+    await test.step('click pod details link and verify redirection', async () => {
+      await inventoryPage.k8sPodWaffleContextMenu
+        .getByRole('link', {
+          name: 'Kubernetes Pod metrics',
+        })
+        .click();
+
+      const url = new URL(page.url());
+
+      expect(url.pathname).toBe(`/app/metrics/detail/pod/${encodeURIComponent(POD_NAME)}`);
+    });
+  });
+
+  test('Has no detectable a11y violations on load', async ({
+    page,
+    pageObjects: { inventoryPage },
+  }) => {
+    await inventoryPage.goToTime(DATE_WITH_HOSTS_DATA);
     const { violations } = await page.checkA11y({ include: ['main'] });
     expect(violations).toHaveLength(0);
   });

@@ -162,6 +162,18 @@ describe('esql query helpers', () => {
         )
       ).toBe('date_nanos');
     });
+
+    it('should return @timestamp for PromQL if there is at least one time param', () => {
+      expect(
+        getTimeFieldFromESQLQuery(
+          'PROMQL index = index1 step="5m" start=?_tstart end=?_tend avg(bytes) '
+        )
+      ).toBe('@timestamp');
+    });
+
+    it('should return undefined for PromQL if there is no time param', () => {
+      expect(getTimeFieldFromESQLQuery('PROMQL index = index1 step="5m" ')).toBeUndefined();
+    });
   });
 
   describe('getKqlSearchQueries', () => {
@@ -1207,6 +1219,14 @@ describe('esql query helpers', () => {
 
     it('should return false for empty query', () => {
       expect(hasOnlySourceCommand('')).toBe(false);
+    });
+
+    it('should return false for queries with only PROMQL command', () => {
+      expect(
+        hasOnlySourceCommand(
+          'PROMQL index = index1 step="5m" start=?_tstart end=?_tend avg(bytes) '
+        )
+      ).toBe(false);
     });
   });
 });
