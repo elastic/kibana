@@ -104,6 +104,29 @@ export const getSchemaType = (schema: JsonSchema): SchemaPropertyInfo['type'] =>
 };
 
 /**
+ * Format type for display (e.g., "string", "number", "array<string>", etc.)
+ */
+const formatTypeForDisplay = (schema: JsonSchema): string => {
+  const resolved = resolveSchema(schema);
+  const baseType = Array.isArray(resolved.type) ? resolved.type[0] : resolved.type;
+
+  if (resolved.enum) {
+    const enumValues = resolved.enum as Array<string | number | boolean>;
+    if (enumValues.length <= 3) {
+      return enumValues.map((v) => (typeof v === 'string' ? `"${v}"` : String(v))).join(' | ');
+    }
+    return `enum (${enumValues.length} values)`;
+  }
+
+  if (baseType === 'array' && resolved.items) {
+    const itemType = formatTypeForDisplay(resolved.items);
+    return `${itemType}[]`;
+  }
+
+  return baseType ?? 'unknown';
+};
+
+/**
  * Get properties from JSON schema at a given path
  */
 export const getSchemaProperties = (path: string[]): SchemaPropertyInfo[] => {
@@ -115,7 +138,7 @@ export const getSchemaProperties = (path: string[]): SchemaPropertyInfo[] => {
 
   return Object.entries(resolved.properties).map(([key, propSchema]) => {
     const resolvedProp = resolveSchema(propSchema);
-    const type = getSchemaType(propSchema);
+    const type = formatTypeForDisplay(propSchema);
     const isEnum = Boolean(resolvedProp.enum);
     const enumValues = isEnum ? (resolvedProp.enum as string[]) : undefined;
 
@@ -137,6 +160,23 @@ export const getSchemaDescription = (path: string[]): string | undefined => {
   if (!node) return undefined;
   const resolved = resolveSchema(node);
   return node.description ?? resolved.description;
+};
+
+/**
+ * Get full property info at a given path (for hover)
+ */
+export const getSchemaPropertyInfo = (
+  path: string[]
+): { type: string; description?: string; enumValues?: string[] } | undefined => {
+  const node = getSchemaNode(path);
+  if (!node) return undefined;
+
+  const resolved = resolveSchema(node);
+  const type = formatTypeForDisplay(node);
+  const description = node.description ?? resolved.description;
+  const enumValues = resolved.enum ? (resolved.enum as string[]) : undefined;
+
+  return { type, description, enumValues };
 };
 
 /**

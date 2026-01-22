@@ -11,7 +11,7 @@ import { ESQL_AUTOCOMPLETE_TRIGGER_CHARS, monaco, YAML_LANG_ID } from '@kbn/mona
 import { suggest } from '@kbn/esql-language';
 import type { YamlRuleEditorProps } from './types';
 import { DEFAULT_ESQL_PROPERTY_NAMES } from './types';
-import { getSchemaDescription, getSchemaProperties, getSchemaTypeInfo } from './schema_utils';
+import { getSchemaProperties, getSchemaPropertyInfo, getSchemaTypeInfo } from './schema_utils';
 import {
   buildYamlValidationMarkers,
   getCompletionContext,
@@ -157,10 +157,11 @@ export const YamlRuleEditor: React.FC<YamlRuleEditorProps> = ({
         return {
           suggestions: properties
             .filter(({ key }) => !existingKeys.has(key))
-            .map(({ key, description }) => ({
+            .map(({ key, description, type }) => ({
               label: key,
               insertText: `${key}: `,
               kind: monaco.languages.CompletionItemKind.Property,
+              detail: type,
               documentation: description ? { value: description } : undefined,
               range,
             })),
@@ -177,13 +178,30 @@ export const YamlRuleEditor: React.FC<YamlRuleEditorProps> = ({
         if (!path) {
           return null;
         }
-        const description = getSchemaDescription(path);
-        if (!description) {
+        const propertyInfo = getSchemaPropertyInfo(path);
+        if (!propertyInfo) {
           return null;
         }
-        return {
-          contents: [{ value: description }],
-        };
+
+        const contents: monaco.IMarkdownString[] = [];
+
+        // Show type as code block
+        contents.push({
+          value: `\`\`\`yaml\n${path[path.length - 1]}: ${propertyInfo.type}\n\`\`\``,
+        });
+
+        // Show description if available
+        if (propertyInfo.description) {
+          contents.push({ value: propertyInfo.description });
+        }
+
+        // Show enum values if applicable
+        if (propertyInfo.enumValues && propertyInfo.enumValues.length > 3) {
+          const enumList = propertyInfo.enumValues.map((v) => `- \`${v}\``).join('\n');
+          contents.push({ value: `**Allowed values:**\n${enumList}` });
+        }
+
+        return { contents };
       },
     }),
     [esqlPropertyNames]

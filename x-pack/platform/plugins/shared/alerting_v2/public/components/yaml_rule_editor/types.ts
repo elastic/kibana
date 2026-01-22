@@ -25,7 +25,8 @@ export interface QueryContext {
 export interface SchemaPropertyInfo {
   key: string;
   description?: string;
-  type: 'string' | 'number' | 'boolean' | 'array' | 'object' | 'unknown';
+  /** Formatted type string for display (e.g., "string", "number", "string[]", '"a" | "b"') */
+  type: string;
   isEnum?: boolean;
   enumValues?: string[];
 }
