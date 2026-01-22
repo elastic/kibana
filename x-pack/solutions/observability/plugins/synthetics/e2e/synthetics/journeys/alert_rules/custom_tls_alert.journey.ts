@@ -113,9 +113,7 @@ journey(`CustomTLSAlert`, async ({ page, params }) => {
   });
 
   step('Verify alert creation', async () => {
-    await page.goto(`${params.kibanaUrl}/app/observability/alerts`, {
-      waitUntil: 'networkidle',
-    });
+    await page.getByTestId('observability-nav-observability-overview-alerts').click();
 
     await retry.tryForTime(5 * 1000, async () => {
       await page.getByTestId('querySubmitButton').click();

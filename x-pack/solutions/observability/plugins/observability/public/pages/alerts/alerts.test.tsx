@@ -74,7 +74,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../hooks/create_use_rules_link', () => ({
   createUseRulesLink: jest.fn((unifiedRulesPage: boolean) => () => ({
-    href: unifiedRulesPage ? '/app/rules' : '/app/observability/rules',
+    href: unifiedRulesPage ? '/app/rules' : '/app/observability/alerts/rules',
     onClick: jest.fn(),
   })),
 }));
