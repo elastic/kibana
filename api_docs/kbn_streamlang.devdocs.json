@@ -920,7 +920,7 @@
             "section": "def-common.ShorthandBinaryFilterCondition",
             "text": "ShorthandBinaryFilterCondition"
           },
-          ") => \"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"range\" | \"gt\" | \"lt\" | \"contains\" | \"eq\" | \"neq\" | undefined"
+          ") => \"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"range\" | \"gt\" | \"lt\" | \"eq\" | \"contains\" | \"neq\" | undefined"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/src/conditions/helpers.ts",
         "lineNumber": 28,
@@ -1521,10 +1521,10 @@
           "\nGet the processor type (action) from a processor definition"
         ],
         "signature": [
-          "(processor: TProcessorDefinition) => \"replace\" | \"trim\" | \"date\" | \"math\" | \"append\" | \"set\" | \"lowercase\" | \"remove\" | \"rename\" | \"uppercase\" | \"grok\" | \"dissect\" | \"drop_document\" | \"convert\" | \"remove_by_prefix\" | \"manual_ingest_pipeline\""
+          "(processor: TProcessorDefinition) => \"concat\" | \"replace\" | \"trim\" | \"date\" | \"join\" | \"math\" | \"append\" | \"set\" | \"lowercase\" | \"remove\" | \"rename\" | \"uppercase\" | \"grok\" | \"dissect\" | \"drop_document\" | \"convert\" | \"remove_by_prefix\" | \"manual_ingest_pipeline\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 548,
+        "lineNumber": 613,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1540,7 +1540,7 @@
               "TProcessorDefinition"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-            "lineNumber": 552,
+            "lineNumber": 617,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1862,7 +1862,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          ">(value: TValue) => value is Extract<TValue, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>"
+          ">(value: TValue) => value is Extract<TValue, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
         "lineNumber": 205,
@@ -2043,7 +2043,7 @@
           "<TValue extends any>(value: TValue) => value is Extract<TValue, any>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 518,
+        "lineNumber": 583,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2079,7 +2079,7 @@
           "<TValue extends any>(value: TValue) => value is Extract<TValue, any>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 513,
+        "lineNumber": 578,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2120,7 +2120,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          ">(value: TValue) => value is Extract<TValue, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; } | { field: string; exists?: boolean | undefined; }>"
+          ">(value: TValue) => value is Extract<TValue, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; } | { field: string; exists?: boolean | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
         "lineNumber": 213,
@@ -2210,7 +2210,7 @@
           "<TValue extends any>(value: TValue) => value is Extract<TValue, any>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 508,
+        "lineNumber": 573,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2394,7 +2394,7 @@
           "<TValue extends any>(value: TValue) => value is Extract<TValue, any>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 496,
+        "lineNumber": 561,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2430,7 +2430,7 @@
           "<TValue extends any>(value: TValue) => value is Extract<TValue, any>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 491,
+        "lineNumber": 556,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2783,7 +2783,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/validate_streamlang.ts",
-        "lineNumber": 791,
+        "lineNumber": 829,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2807,7 +2807,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/validate_streamlang.ts",
-            "lineNumber": 810,
+            "lineNumber": 848,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2832,7 +2832,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/validate_streamlang.ts",
-            "lineNumber": 811,
+            "lineNumber": 849,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3311,6 +3311,100 @@
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
             "lineNumber": 279,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.ConcatProcessor",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConcatProcessor",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.ConcatProcessor",
+            "text": "ConcatProcessor"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.ProcessorBaseWithWhere",
+            "text": "ProcessorBaseWithWhere"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+        "lineNumber": 501,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.ConcatProcessor.action",
+            "type": "string",
+            "tags": [],
+            "label": "action",
+            "description": [],
+            "signature": [
+              "\"concat\""
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "lineNumber": 502,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.ConcatProcessor.from",
+            "type": "Array",
+            "tags": [],
+            "label": "from",
+            "description": [],
+            "signature": [
+              "ConcatFrom[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "lineNumber": 503,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.ConcatProcessor.to",
+            "type": "string",
+            "tags": [],
+            "label": "to",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "lineNumber": 504,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.ConcatProcessor.ignore_missing",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignore_missing",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "lineNumber": 505,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3799,6 +3893,113 @@
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
             "lineNumber": 109,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.JoinProcessor",
+        "type": "Interface",
+        "tags": [],
+        "label": "JoinProcessor",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.JoinProcessor",
+            "text": "JoinProcessor"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.ProcessorBaseWithWhere",
+            "text": "ProcessorBaseWithWhere"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+        "lineNumber": 454,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.JoinProcessor.action",
+            "type": "string",
+            "tags": [],
+            "label": "action",
+            "description": [],
+            "signature": [
+              "\"join\""
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "lineNumber": 455,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.JoinProcessor.from",
+            "type": "Array",
+            "tags": [],
+            "label": "from",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "lineNumber": 456,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.JoinProcessor.delimiter",
+            "type": "string",
+            "tags": [],
+            "label": "delimiter",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "lineNumber": 457,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.JoinProcessor.to",
+            "type": "string",
+            "tags": [],
+            "label": "to",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "lineNumber": 458,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.JoinProcessor.ignore_missing",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignore_missing",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "lineNumber": 459,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6071,7 +6272,7 @@
         "label": "BINARY_OPERATORS",
         "description": [],
         "signature": [
-          "(\"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"range\" | \"gt\" | \"lt\" | \"contains\" | \"eq\" | \"neq\")[]"
+          "(\"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"range\" | \"gt\" | \"lt\" | \"eq\" | \"contains\" | \"neq\")[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
         "lineNumber": 23,
@@ -6088,11 +6289,28 @@
         "label": "BinaryOperatorKeys",
         "description": [],
         "signature": [
-          "\"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"range\" | \"gt\" | \"lt\" | \"contains\" | \"eq\" | \"neq\""
+          "\"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"range\" | \"gt\" | \"lt\" | \"eq\" | \"contains\" | \"neq\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
         "lineNumber": 19,
         "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.concatProcessorSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "concatProcessorSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+        "lineNumber": 508,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6341,6 +6559,23 @@
       },
       {
         "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.joinProcessorSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "joinProcessorSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+        "lineNumber": 462,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
         "id": "def-common.lowercaseProcessorSchema",
         "type": "Any",
         "tags": [],
@@ -6398,7 +6633,7 @@
         "label": "OperatorKeys",
         "description": [],
         "signature": [
-          "\"exists\" | \"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"range\" | \"gt\" | \"lt\" | \"contains\" | \"eq\" | \"neq\""
+          "\"exists\" | \"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"range\" | \"gt\" | \"lt\" | \"eq\" | \"contains\" | \"neq\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
         "lineNumber": 21,
@@ -6434,10 +6669,10 @@
           "\nProcessorType is the union of all possible 'action' values"
         ],
         "signature": [
-          "\"replace\" | \"trim\" | \"date\" | \"math\" | \"append\" | \"set\" | \"lowercase\" | \"remove\" | \"rename\" | \"uppercase\" | \"grok\" | \"dissect\" | \"drop_document\" | \"convert\" | \"remove_by_prefix\" | \"manual_ingest_pipeline\""
+          "\"concat\" | \"replace\" | \"trim\" | \"date\" | \"join\" | \"math\" | \"append\" | \"set\" | \"lowercase\" | \"remove\" | \"rename\" | \"uppercase\" | \"grok\" | \"dissect\" | \"drop_document\" | \"convert\" | \"remove_by_prefix\" | \"manual_ingest_pipeline\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 523,
+        "lineNumber": 588,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6453,10 +6688,10 @@
           "\nGet all processor types as a string array (derived from the Zod schema)"
         ],
         "signature": [
-          "(\"replace\" | \"trim\" | \"date\" | \"math\" | \"append\" | \"set\" | \"lowercase\" | \"remove\" | \"rename\" | \"uppercase\" | \"grok\" | \"dissect\" | \"drop_document\" | \"convert\" | \"remove_by_prefix\" | \"manual_ingest_pipeline\")[]"
+          "(\"concat\" | \"replace\" | \"trim\" | \"date\" | \"join\" | \"math\" | \"append\" | \"set\" | \"lowercase\" | \"remove\" | \"rename\" | \"uppercase\" | \"grok\" | \"dissect\" | \"drop_document\" | \"convert\" | \"remove_by_prefix\" | \"manual_ingest_pipeline\")[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 531,
+        "lineNumber": 596,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6753,12 +6988,28 @@
             "pluginId": "@kbn/streamlang",
             "scope": "common",
             "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.JoinProcessor",
+            "text": "JoinProcessor"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.ConcatProcessor",
+            "text": "ConcatProcessor"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
             "section": "def-common.ManualIngestPipelineProcessor",
             "text": "ManualIngestPipelineProcessor"
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 454,
+        "lineNumber": 515,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6806,7 +7057,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
-        "lineNumber": 472,
+        "lineNumber": 535,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8209,10 +8460,10 @@
           },
           {
             "parentPluginId": "@kbn/streamlang",
-            "id": "def-common.ACTION_METADATA_MAP.manual_ingest_pipeline",
+            "id": "def-common.ACTION_METADATA_MAP.join",
             "type": "Object",
             "tags": [],
-            "label": "manual_ingest_pipeline",
+            "label": "join",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
             "lineNumber": 579,
@@ -8222,7 +8473,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/streamlang",
-                "id": "def-common.ACTION_METADATA_MAP.manual_ingest_pipeline.name",
+                "id": "def-common.ACTION_METADATA_MAP.join.name",
                 "type": "string",
                 "tags": [],
                 "label": "name",
@@ -8235,7 +8486,7 @@
               },
               {
                 "parentPluginId": "@kbn/streamlang",
-                "id": "def-common.ACTION_METADATA_MAP.manual_ingest_pipeline.description",
+                "id": "def-common.ACTION_METADATA_MAP.join.description",
                 "type": "string",
                 "tags": [],
                 "label": "description",
@@ -8248,13 +8499,169 @@
               },
               {
                 "parentPluginId": "@kbn/streamlang",
+                "id": "def-common.ACTION_METADATA_MAP.join.usage",
+                "type": "string",
+                "tags": [],
+                "label": "usage",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
+                "lineNumber": 586,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/streamlang",
+                "id": "def-common.ACTION_METADATA_MAP.join.examples",
+                "type": "Array",
+                "tags": [],
+                "label": "examples",
+                "description": [],
+                "signature": [
+                  "{ description: string; yaml: string; }[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
+                "lineNumber": 590,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/streamlang",
+                "id": "def-common.ACTION_METADATA_MAP.join.tips",
+                "type": "Array",
+                "tags": [],
+                "label": "tips",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
+                "lineNumber": 601,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.ACTION_METADATA_MAP.concat",
+            "type": "Object",
+            "tags": [],
+            "label": "concat",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
+            "lineNumber": 609,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/streamlang",
+                "id": "def-common.ACTION_METADATA_MAP.concat.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
+                "lineNumber": 610,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/streamlang",
+                "id": "def-common.ACTION_METADATA_MAP.concat.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
+                "lineNumber": 613,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/streamlang",
+                "id": "def-common.ACTION_METADATA_MAP.concat.usage",
+                "type": "string",
+                "tags": [],
+                "label": "usage",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
+                "lineNumber": 616,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/streamlang",
+                "id": "def-common.ACTION_METADATA_MAP.concat.examples",
+                "type": "Array",
+                "tags": [],
+                "label": "examples",
+                "description": [],
+                "signature": [
+                  "{ description: string; yaml: string; }[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
+                "lineNumber": 620,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.ACTION_METADATA_MAP.manual_ingest_pipeline",
+            "type": "Object",
+            "tags": [],
+            "label": "manual_ingest_pipeline",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
+            "lineNumber": 638,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/streamlang",
+                "id": "def-common.ACTION_METADATA_MAP.manual_ingest_pipeline.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
+                "lineNumber": 639,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/streamlang",
+                "id": "def-common.ACTION_METADATA_MAP.manual_ingest_pipeline.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
+                "lineNumber": 642,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/streamlang",
                 "id": "def-common.ACTION_METADATA_MAP.manual_ingest_pipeline.usage",
                 "type": "string",
                 "tags": [],
                 "label": "usage",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 589,
+                "lineNumber": 648,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -8270,7 +8677,7 @@
                   "{ description: string; yaml: string; }[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 593,
+                "lineNumber": 652,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -8286,7 +8693,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streamlang/src/actions/action_metadata.ts",
-                "lineNumber": 620,
+                "lineNumber": 679,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -8611,7 +9018,7 @@
           "ZodTypeAny",
           ", { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }, { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }>>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>, ",
+          ", { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>, ",
           "ZodObject",
           "<{ field: ",
           "ZodEffects",
@@ -9225,7 +9632,7 @@
           "ZodTypeAny",
           ", { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }, { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }>>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>"
+          ", { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
         "lineNumber": 85,
