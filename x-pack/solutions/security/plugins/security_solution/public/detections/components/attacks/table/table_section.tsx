@@ -17,7 +17,6 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { AttackDetailsRightPanelKey } from '../../../../flyout/attack_details/constants/panel_keys';
 import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
 import { PageScope } from '../../../../data_view_manager/constants';
-import { useGroupTakeActionsItems } from '../../../hooks/alerts_table/use_group_take_action_items';
 import {
   defaultGroupStatsAggregations,
   defaultGroupStatsRenderer,
@@ -46,6 +45,8 @@ import { EmptyResultsPrompt } from './empty_results_prompt';
 import { groupingOptions, groupingSettings } from './grouping_configs';
 import * as i18n from './translations';
 import { buildConnectorIdFilter } from './filtering_configs';
+import type { GroupTakeActionItems } from '../../alerts_table/types';
+import { AttacksGroupTakeActionItems } from './attacks_group_take_action_items';
 
 export const TABLE_SECTION_TEST_ID = 'attacks-page-table-section';
 export const EXPAND_ATTACK_BUTTON_TEST_ID = 'expand-attack-button';
@@ -105,7 +106,7 @@ export const TableSection = React.memo(
 
     const { to, from } = useGlobalTime();
 
-    const [{ loading: userInfoLoading, hasIndexWrite, hasIndexMaintenance }] = useUserData();
+    const [{ loading: userInfoLoading }] = useUserData();
 
     const { loading: listsConfigLoading } = useListsConfig();
 
@@ -210,10 +211,14 @@ export const TableSection = React.memo(
       [defaultFilters, getAttack, isLoading, showAnonymized]
     );
 
-    const groupTakeActionItems = useGroupTakeActionsItems({
-      currentStatus: statusFilter,
-      showAlertStatusActions: Boolean(hasIndexWrite) && Boolean(hasIndexMaintenance),
-    });
+    const groupTakeActionItems: GroupTakeActionItems = useCallback(
+      ({ selectedGroup, groupBucket }) => {
+        const attack = getAttack(selectedGroup, groupBucket);
+        if (!attack) return;
+        return <AttacksGroupTakeActionItems attack={attack} />;
+      },
+      [getAttack]
+    );
 
     const accordionExtraActionGroupStats = useMemo(
       () => ({
