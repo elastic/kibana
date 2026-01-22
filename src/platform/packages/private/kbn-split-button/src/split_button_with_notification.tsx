@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MouseEventHandler } from 'react';
 import React from 'react';
 import {
-  EuiIconTip,
+  EuiIcon,
+  EuiToolTip,
   euiButtonSizeMap,
   useEuiTheme,
   type IconColor,
@@ -76,14 +78,23 @@ export const SplitButtonWithNotification = ({
             }),
           }}
         >
-          <span css={{ pointerEvents: 'auto' }}>
-            <EuiIconTip
-              type="dot"
-              size={notificationIndicatorSize}
-              color={notificationIndicatorColor}
-              content={notifcationIndicatorTooltipContent}
-            />
-          </span>
+          <EuiToolTip content={notifcationIndicatorTooltipContent}>
+            <button
+              css={{
+                pointerEvents: 'auto',
+              }}
+              onClick={
+                splitButtonProps?.onClick as MouseEventHandler<HTMLButtonElement> | undefined
+              }
+              aria-label={splitButtonProps?.['aria-label']}
+            >
+              <EuiIcon
+                type="dot"
+                size={notificationIndicatorSize}
+                color={notificationIndicatorColor}
+              />
+            </button>
+          </EuiToolTip>
         </div>
       )}
     </div>
