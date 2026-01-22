@@ -7,7 +7,7 @@
 
 import { monaco } from '@kbn/monaco';
 import YAML, { LineCounter } from 'yaml';
-import { createRuleDataSchema } from '../../../common/schemas/create_rule_data_schema';
+import { createRuleDataSchema } from '@kbn/alerting-v2-schemas';
 import type { CompletionContext } from './types';
 import { findYamlQueryContext } from './query_context';
 

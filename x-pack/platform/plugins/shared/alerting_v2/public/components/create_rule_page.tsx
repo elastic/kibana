@@ -25,8 +25,7 @@ import { getESQLSources, getEsqlColumns } from '@kbn/esql-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { dump, load } from 'js-yaml';
 import { useHistory, useParams } from 'react-router-dom';
-import { createRuleDataSchema } from '../../common/schemas/create_rule_data_schema';
-import type { CreateRuleData } from '../../common/types';
+import { createRuleDataSchema, type CreateRuleData } from '@kbn/alerting-v2-schemas';
 import { RulesApi } from '../services/rules_api';
 import { YamlRuleEditor } from './yaml_rule_editor';
 

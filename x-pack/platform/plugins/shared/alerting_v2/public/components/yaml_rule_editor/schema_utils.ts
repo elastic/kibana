@@ -6,7 +6,7 @@
  */
 
 import { zodToJsonSchema } from 'zod-to-json-schema';
-import { createRuleDataSchema } from '../../../common/schemas/create_rule_data_schema';
+import { createRuleDataSchema } from '@kbn/alerting-v2-schemas';
 import type { JsonSchema, SchemaPropertyInfo } from './types';
 
 /**

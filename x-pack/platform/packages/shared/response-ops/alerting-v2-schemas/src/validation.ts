@@ -9,15 +9,23 @@ import { Parser } from '@kbn/esql-language';
 
 const DURATION_RE = /^(\d+)(ms|s|m|h|d|w)$/;
 
+/**
+ * Validate a duration string format (e.g., "5m", "1h", "30s", "250ms")
+ * @returns Error message if invalid, undefined if valid
+ */
 export function validateDuration(value: string): string | void {
   if (!DURATION_RE.test(value)) {
     return `Invalid duration "${value}". Expected format like "5m", "1h", "30s", "250ms"`;
   }
 }
 
-export const validateEsqlQuery = (query: string): string | void => {
+/**
+ * Validate an ES|QL query string
+ * @returns Error message if invalid, undefined if valid
+ */
+export function validateEsqlQuery(query: string): string | void {
   const errors = Parser.parseErrors(query);
   if (errors.length > 0) {
     return `Invalid ES|QL query: ${errors[0].message}`;
   }
-};
+}

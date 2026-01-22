@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { validateDuration } from '../../common/validation';
+import { validateDuration } from '@kbn/alerting-v2-schemas';
 
 const DURATION_RE = /^(\d+)(ms|s|m|h|d|w)$/;
 
