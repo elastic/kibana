@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiSelectableOption } from '@elastic/eui';
+import type { EuiSelectableOption, UseEuiTheme } from '@elastic/eui';
+
 import {
   EuiPopover,
   EuiPopoverTitle,
@@ -17,14 +18,41 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   useEuiTheme,
+  EuiFilterButton,
+  EuiLink,
   EuiIcon,
+  logicalCSS,
+  mathWithUnits,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 
 export const BROWSER_POPOVER_WIDTH = 400;
 export const BROWSER_POPOVER_HEIGHT = 500;
+
+const filterPopoverStyle = ({ euiTheme }: UseEuiTheme) => css`
+  .euiFilterButton__wrapper {
+    ${logicalCSS('left', `-${euiTheme.size.s}`)}
+    ${logicalCSS('min-width', '0')}
+    ${logicalCSS('width', `calc(100% + ${mathWithUnits(euiTheme.size.s, (x) => x * 2)})`)}
+
+    &::before {
+      display: none;
+    }
+  }
+`;
+
+const filterButtonStyle = ({ euiTheme }: UseEuiTheme) => css`
+  padding: 0;
+
+  &,
+  & .euiFilterButton__text {
+    min-width: 0;
+    line-height: 1;
+  }
+`;
 
 export interface BrowserPopoverWrapperProps<TItem> {
   isOpen: boolean;
@@ -228,7 +256,7 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
         // Check if option has typeKey in data (set by createOptions)
         const typeKey = option.data?.typeKey as string | undefined;
 
-        if (typeKey === 'integration') {
+        if (typeKey === 'integration' && availableIntegrations.length > 0) {
           const integrationName = option.data?.integrationName as string | undefined;
           return integrationName && selectedIntegrations.includes(integrationName);
         }
@@ -242,7 +270,7 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
     }
 
     return filtered;
-  }, [options, searchValue, selectedTypes, selectedIntegrations]);
+  }, [options, searchValue, selectedTypes, selectedIntegrations, availableIntegrations.length]);
 
   const handleSelectionChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {
@@ -280,13 +308,21 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
   }, []);
 
   const filterButton = (
-    <EuiButtonIcon
-      iconType="filter"
+    <EuiFilterButton
+      aria-label={i18n.translate('unifiedFieldList.fieldTypeFilter.filterByTypeAriaLabel', {
+        defaultMessage: 'Filter by type',
+      })}
+      color="text"
+      isSelected={isFilterPopoverOpen}
+      numFilters={availableTypes.length + availableIntegrations.length}
+      hasActiveFilters={selectedTypes.length > 0 || selectedIntegrations.length > 0}
+      numActiveFilters={selectedTypes.length + selectedIntegrations.length}
+      css={filterButtonStyle}
       onClick={() => setIsFilterPopoverOpen(!isFilterPopoverOpen)}
-      aria-label={i18nKeys.filterTitle}
       buttonRef={setFilterButtonRef}
-      size="s"
-    />
+    >
+      <EuiIcon type="filter" />
+    </EuiFilterButton>
   );
 
   // Overwriting the border style as setting listProps.bordered to false doesn't work
@@ -314,7 +350,18 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
         append: (
           <>
             {isIntegration && hasIntegrations ? (
-              <EuiIcon type="arrowRight" />
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                {selectedIntegrations.length > 0 && (
+                  <EuiFlexItem grow={false}>
+                    <EuiNotificationBadge color="accent" size="s">
+                      {selectedIntegrations.length}
+                    </EuiNotificationBadge>
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="arrowRight" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             ) : (
               <EuiNotificationBadge color="subdued" size="m">
                 {typeCounts.get(typeKey) ?? 0}
@@ -331,49 +378,8 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
     getTypeIcon,
     typeCounts,
     availableIntegrations.length,
+    selectedIntegrations,
   ]);
-
-  const renderTypeOption = useCallback(
-    (option: EuiSelectableOption) => {
-      const isIntegration = option.key === 'integration';
-      const hasIntegrations = availableIntegrations.length > 0;
-      return isIntegration && hasIntegrations ? (
-        <EuiPopover
-          button={option.label}
-          isOpen={isIntegrationPopoverOpen}
-          closePopover={() => {
-            setIsIntegrationPopoverOpen(false);
-          }}
-          panelPaddingSize="none"
-          offset={-35} // Move popover up to align with the filter button
-          panelStyle={{ transform: `translateX(215px)` }}
-        >
-          <EuiSelectable
-            options={integrationFilterOptions}
-            onChange={handleIntegrationFilterChange}
-            listProps={{
-              bordered: false,
-            }}
-          >
-            {(integrationList) => (
-              <div css={filterListStyles} style={{ width: 250, maxHeight: 250, overflowY: 'auto' }}>
-                {integrationList}
-              </div>
-            )}
-          </EuiSelectable>
-        </EuiPopover>
-      ) : (
-        option.label
-      );
-    },
-    [
-      isIntegrationPopoverOpen,
-      availableIntegrations,
-      integrationFilterOptions,
-      handleIntegrationFilterChange,
-      filterListStyles,
-    ]
-  );
 
   return (
     <EuiPopover
@@ -402,33 +408,65 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
           inputRef: setSearchInputRef,
           append: (
             <EuiPopover
+              id="esqlResourceBrowserFilterPopover"
+              panelPaddingSize="none"
+              display="block"
+              css={filterPopoverStyle}
               button={filterButton}
               isOpen={isFilterPopoverOpen}
               closePopover={() => setIsFilterPopoverOpen(false)}
-              panelPaddingSize="none"
-              panelStyle={{ transform: `translateX(45px)` }}
+              panelStyle={{ transform: `translateX(60px)` }}
               offset={-35} // Move popover up to align with the filter button
             >
-              <EuiPopoverTitle paddingSize="s">{i18nKeys.filterTitle}</EuiPopoverTitle>
-              <EuiSelectable
-                options={typeFilterOptions}
-                onChange={(newOptions, event, changedOption) =>
-                  handleTypeFilterChange(newOptions, changedOption)
-                }
-                renderOption={renderTypeOption}
-                listProps={{
-                  bordered: false, // Doesn't work so we overwrite the border style with filterListStyles
-                }}
-              >
-                {(list) => (
-                  <div
-                    css={filterListStyles}
-                    style={{ width: 250, maxHeight: 250, overflowY: 'auto' }}
+              {isIntegrationPopoverOpen ? (
+                <>
+                  <EuiPopoverTitle
+                    paddingSize="s"
+                    onClick={() => setIsIntegrationPopoverOpen(false)}
                   >
-                    {list}
-                  </div>
-                )}
-              </EuiSelectable>
+                    <EuiIcon type="arrowLeft" />
+                      &emsp;
+                    <EuiLink color="text">
+                      Integrations
+                    </EuiLink>
+                  </EuiPopoverTitle>
+                  <EuiSelectable
+                    options={integrationFilterOptions}
+                    onChange={handleIntegrationFilterChange}
+                    listProps={{
+                      bordered: false,
+                    }}
+                  >
+                    {(integrationList) => (
+                      <div css={filterListStyles} style={{ width: '250px', maxHeight: 250, overflowY: 'auto' }}>
+                        {integrationList}
+                      </div>
+                    )}
+                  </EuiSelectable>
+                </>
+              ) : (
+                <>
+                  <EuiPopoverTitle paddingSize="s">{i18nKeys.filterTitle}</EuiPopoverTitle>
+                  <EuiSelectable
+                    options={typeFilterOptions}
+                    onChange={(newOptions, event, changedOption) =>
+                      handleTypeFilterChange(newOptions, changedOption)
+                    }
+                    listProps={{
+                      bordered: false, // Doesn't work so we overwrite the border style with filterListStyles
+                    }}
+                  >
+                    {(list) => (
+                      <div
+                        css={filterListStyles}
+                        style={{ width: '250px', maxHeight: 250, overflowY: 'auto' }}
+                      >
+                        {list}
+                      </div>
+                    )}
+                  </EuiSelectable>
+                </>
+              )}
             </EuiPopover>
           ),
         }}
@@ -440,8 +478,8 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
         noMatchesMessage={i18nKeys.noMatches}
         listProps={{
           truncationProps: {
-            truncation: 'middle'
-          }
+            truncation: 'middle',
+          },
         }}
       >
         {(list, search) => (
