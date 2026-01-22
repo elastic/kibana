@@ -36,7 +36,9 @@ export function buildHelmCommand({
 
   const wiredStreamsConfig = useWiredStreams
     ? `
-    --set 'outputs.default._write_to_logs_streams=true'
+    --set 'outputs.default._write_to_logs_streams=true' \
+    --set 'kubernetes.containers.logs.vars.processors[0].add_fields.target=@metadata' \
+    --set 'kubernetes.containers.logs.vars.processors[0].add_fields.fields.raw_index=logs'
   `
     : '';
 

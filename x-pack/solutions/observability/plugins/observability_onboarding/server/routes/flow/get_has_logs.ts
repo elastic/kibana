@@ -29,6 +29,17 @@ export async function getHasLogs(esClient: ElasticsearchClient, agentId: string)
     if (error.statusCode === 404) {
       return false;
     }
+
+    const errorType = error?.meta?.body?.error?.type;
+    const rootCauseType = error?.meta?.body?.error?.root_cause?.[0]?.type;
+
+    if (
+      errorType === 'search_phase_execution_exception' &&
+      rootCauseType === 'no_shard_available_action_exception'
+    ) {
+      return false;
+    }
+
     throw error;
   }
 }

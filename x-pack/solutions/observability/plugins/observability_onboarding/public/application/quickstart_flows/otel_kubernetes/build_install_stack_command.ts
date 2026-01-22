@@ -39,7 +39,7 @@ export function buildInstallStackCommand({
 
   const wiredStreamsConfig = useWiredStreams
     ? ` \\
-  --set 'exporters.elasticsearch.logs_index=logs'`
+  --set 'collectors.gateway.config.exporters.elasticsearch\\/otel.logs_index=logs'`
     : '';
 
   return `kubectl create namespace ${OTEL_STACK_NAMESPACE}

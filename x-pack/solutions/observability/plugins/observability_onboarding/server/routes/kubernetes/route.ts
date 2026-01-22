@@ -142,6 +142,18 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
         hasData: value > 0,
       };
     } catch (error) {
+      const errorType = error?.meta?.body?.error?.type;
+      const rootCauseType = error?.meta?.body?.error?.root_cause?.[0]?.type;
+
+      if (
+        errorType === 'search_phase_execution_exception' &&
+        rootCauseType === 'no_shard_available_action_exception'
+      ) {
+        return {
+          hasData: false,
+        };
+      }
+
       throw Boom.internal(`Elasticsearch responses with an error. ${error.message}`);
     }
   },

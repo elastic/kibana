@@ -101,7 +101,9 @@ helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kub
         useWiredStreams: true,
       });
 
-      expect(command).toContain("--set 'exporters.elasticsearch.logs_index=logs'");
+      expect(command).toContain(
+        "--set 'collectors.gateway.config.exporters.elasticsearch\\/otel.logs_index=logs'"
+      );
     });
 
     it('appends wired streams config at the end of the helm command', () => {
@@ -118,7 +120,7 @@ helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kub
       // Wired streams config should come after the version
       expect(command).toContain(
         `--version '${OTEL_KUBE_STACK_VERSION}' \\
-  --set 'exporters.elasticsearch.logs_index=logs'`
+  --set 'collectors.gateway.config.exporters.elasticsearch\\/otel.logs_index=logs'`
       );
     });
   });
