@@ -33,6 +33,7 @@ export interface InterceptServiceStartDeps {
     UserInterceptRunPersistenceService['start']
   >['updateUserTriggerData'];
   staticAssetsHelper: HttpStart['staticAssets'];
+  resetInterceptTimingRecord: (interceptId: Intercept['id']) => void;
 }
 
 export class InterceptDialogService {
@@ -55,6 +56,7 @@ export class InterceptDialogService {
     analytics,
     staticAssetsHelper,
     persistInterceptRunId: persistInterceptRunInteraction,
+    resetInterceptTimingRecord,
   }: InterceptServiceStartDeps) {
     const { ack, add, get$ } = this.api.start({ analytics });
     this.targetDomElement = targetDomElement;
@@ -111,6 +113,10 @@ export class InterceptDialogService {
 
       ack(ackArgs);
 
+      // Reset the timer start record, so the next interval starts fresh
+      resetInterceptTimingRecord(ackArgs.interceptId);
+
+      // persist the intercept interaction to the user trigger data
       persistInterceptRunInteraction(ackArgs.interceptId, runId);
 
       // Release acquired lock after user acknowledges the intercept

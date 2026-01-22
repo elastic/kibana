@@ -90,6 +90,7 @@ describe('InterceptDialogService', () => {
         targetDomElement: document.createElement('div'),
         persistInterceptRunId: jest.fn(),
         staticAssetsHelper: staticAssetsHelperMock,
+        resetInterceptTimingRecord: jest.fn(),
       };
 
       // append the target dom element to the body
@@ -256,6 +257,8 @@ describe('InterceptDialogService', () => {
 
       // dismiss the security intercept
       await user.click(screen.getByTestId('productInterceptDismissButton'));
+
+      expect(startDeps.resetInterceptTimingRecord).toHaveBeenCalled();
     });
 
     it('eventually displays a queued intercept when said intercept gets queued while the notifications coordination lock is held by another coordinator', async () => {

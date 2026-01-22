@@ -249,6 +249,43 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
       expect(result.state.lastStartedAt).toBe(startedAt.toISOString());
     });
+
+    it('should sync only for provided privateLocationId and clear it from state', async () => {
+      const taskInstance = getMockTaskInstance({ privateLocationId: 'pl-1' });
+      // Ensure the server's savedObjects.createInternalRepository returns an object for the call
+      (mockServerSetup.coreStart.savedObjects as any).createInternalRepository = jest
+        .fn()
+        .mockReturnValue(mockSoClient as any);
+
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+        {
+          id: 'pl-1',
+          label: 'Private Location 1',
+          isServiceManaged: false,
+          agentPolicyId: 'policy-1',
+        },
+      ]);
+
+      const syncSpy = jest
+        .spyOn(task.deployPackagePolicies, 'syncAllPackagePolicies')
+        .mockResolvedValue(undefined);
+
+      const result = await task.runTask({ taskInstance });
+
+      expect(syncSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          allPrivateLocations: expect.any(Array),
+          encryptedSavedObjects: mockEncryptedSoClient,
+          privateLocationId: 'pl-1',
+          soClient: expect.any(Object),
+        })
+      );
+
+      expect(result.state).toEqual({
+        ...taskInstance.state,
+        privateLocationId: undefined,
+      });
+    });
   });
 
   describe('hasAnyDataChanged', () => {
@@ -439,6 +476,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
                 attributes: {
                   origin: 'ui',
                   locations: [{ id: 'loc1', isServiceManaged: false }],
+                  id: 'monitor1',
                 },
                 namespaces: ['space1'],
               },
