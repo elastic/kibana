@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { WARNING_AND_ABOVE_VALUES } from '../../utils/ecs_otel_fields';
+import { WARNING_AND_ABOVE_VALUES } from '../../utils/warning_and_above_log_filter';
 
 /**
  * These functions analyze individual log entry objects to determine if they are:

@@ -7,7 +7,7 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
-const WARNING_AND_ABOVE_VALUES = [
+export const WARNING_AND_ABOVE_VALUES = [
   'ALERT',
   'CRIT',
   'CRITICAL',
