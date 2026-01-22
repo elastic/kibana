@@ -76,8 +76,12 @@ export function openSearchSessionsFlyout({
         coreStart
       ),
       {
-        hideCloseButton: true,
         size: FLYOUT_WIDTH,
+        type: 'overlay',
+        ownFocus: true,
+        outsideClickCloses: true,
+        'aria-labelledby': 'backgroundSearchesFlyoutTitle',
+        onClose: () => flyout.close(),
       }
     );
 
