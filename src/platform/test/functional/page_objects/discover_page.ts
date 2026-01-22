@@ -48,6 +48,7 @@ export class DiscoverPageObject extends FtrService {
     saveAsNew?: boolean,
     { tags = [], storeTimeRange }: { tags?: string[]; storeTimeRange?: boolean } = {}
   ) {
+    const mode = await this.globalNav.getFirstBreadcrumb();
     await this.clickSaveSearchButton();
     // preventing an occasional flakiness when the saved object wasn't set and the form can't be submitted
     await this.retry.waitFor(
@@ -93,9 +94,14 @@ export class DiscoverPageObject extends FtrService {
     // that the next action wouldn't have to retry.  But it doesn't really solve
     // that issue.  But it does typically take about 3 retries to
     // complete with the expected searchName.
-    await this.retry.waitFor(`saved search was persisted with name ${searchName}`, async () => {
-      return (await this.getCurrentQueryName()) === searchName;
-    });
+
+    if (mode === 'Discover') {
+      await this.retry.waitFor(`saved search was persisted with name ${searchName}`, async () => {
+        const last = await this.getCurrentQueryName();
+
+        return last === searchName;
+      });
+    }
   }
 
   public async inputSavedSearchTitle(searchName: string) {

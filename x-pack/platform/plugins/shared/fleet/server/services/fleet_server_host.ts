@@ -12,7 +12,6 @@ import type {
   ElasticsearchClient,
   SavedObjectsClientContract,
   SavedObject,
-  KibanaRequest,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
@@ -63,24 +62,9 @@ function savedObjectToFleetServerHost(
   };
 }
 
-const fakeRequest = {
-  headers: {},
-  getBasePath: () => '',
-  path: '/',
-  route: { settings: {} },
-  url: {
-    href: '/',
-  },
-  raw: {
-    req: {
-      url: '/',
-    },
-  },
-} as unknown as KibanaRequest;
-
 class FleetServerHostService {
   private get soClient() {
-    return appContextService.getInternalUserSOClient(fakeRequest);
+    return appContextService.getInternalUserSOClient();
   }
 
   private get encryptedSoClient() {

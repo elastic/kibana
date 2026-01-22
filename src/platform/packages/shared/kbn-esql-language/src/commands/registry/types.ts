@@ -260,6 +260,11 @@ export enum Location {
    * In the COMPLETION command
    */
   COMPLETION = 'completion',
+
+  /**
+   * In the PROMQL command (PromQL query expression)
+   */
+  PROMQL = 'promql',
 }
 
 export enum UnmappedFieldsStrategy {
