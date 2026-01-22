@@ -12,7 +12,7 @@ import { euiShadow } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
-import type { MapCache } from 'lodash';
+import { uniqBy, type MapCache } from 'lodash';
 import { useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
@@ -359,6 +359,36 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
 
 export const filterDataErrors = (errors: (MonacoMessage & { code: string })[]): MonacoMessage[] => {
   return errors.filter((error) => {
-    return !['unknownIndex', 'unknownColumn'].includes(error.code);
+    return !['unknownIndex', 'unknownColumn', 'unmappedColumnWarning'].includes(error.code);
+  });
+};
+
+/**
+ * Filters warning messages that overlap with error messages ranges.
+ */
+export const filterOutWarningsOverlappingWithErrors = (
+  errors: MonacoMessage[],
+  warnings: MonacoMessage[]
+): MonacoMessage[] => {
+  const hasOverlap = (warning: MonacoMessage) => {
+    return errors.some((error) => {
+      const isOverlappingLine =
+        warning.startLineNumber <= error.endLineNumber &&
+        warning.endLineNumber >= error.startLineNumber;
+      const isOverlappingColumn =
+        warning.startColumn <= error.endColumn && warning.endColumn >= error.startColumn;
+
+      return isOverlappingLine && isOverlappingColumn;
+    });
+  };
+
+  return warnings.filter((warning) => !hasOverlap(warning));
+};
+
+export const filterDuplicatedWarnings = (
+  warnings: (MonacoMessage & { code: string })[]
+): MonacoMessage[] => {
+  return uniqBy(warnings, (warning) => {
+    return warning.message;
   });
 };
