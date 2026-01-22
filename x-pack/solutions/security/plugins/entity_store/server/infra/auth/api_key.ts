@@ -52,13 +52,13 @@ const generateEntityStoreAPIKey = async ({
   logger: Logger;
   security: SecurityPluginStart;
   request: KibanaRequest;
-  type?: EntityType;
+  type: EntityType;
   namespace: string;
 }): Promise<EntityStoreAPIKey | undefined> => {
   logger.info('Generating Entity Store API key');
 
   const apiKey = await security.authc.apiKeys.grantAsInternalUser(request, {
-    name: `Entity Store API key ${type ? `${type}-` : ''}${namespace}`,
+    name: `Entity Store API key ${type}-${namespace}`,
     role_descriptors: {},
     metadata: {
       description: 'API key used to manage the resources in the entity store framework',

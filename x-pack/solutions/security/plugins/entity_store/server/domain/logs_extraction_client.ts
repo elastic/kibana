@@ -49,12 +49,13 @@ export class LogsExtractionClient {
     try {
       const entityDefinition = getEntityDefinition({ type });
 
-      const maxPageSearchSize = 10000; // get from config in the saved object
+      const maxPageSearchSize = 10000; // TODO: get from config in the saved object
       const indexPatterns = await this.getIndexPatterns(type);
       const latestIndex = getLatestEntitiesIndexName(type, this.namespace);
 
-      // Needs to be fetched from the saved object
-      // 5min lookback just to make sure we are getting data in this testing stage
+      // TODO: Fetch the default lookback window from the entity store saved object configuration
+      // instead of using a hard-coded 5-minute lookback. This temporary default ensures that, when
+      // no explicit from/to dates are provided, we still retrieve recent data for entity extraction.
       const fromDateISO = opts?.fromDateISO || moment().utc().subtract(5, 'minute').toISOString();
       const toDateISO = opts?.toDateISO || moment().utc().toISOString();
 
@@ -102,8 +103,10 @@ export class LogsExtractionClient {
       );
       secSolIndices.push(...secSolDataView.getIndexPattern().split(','));
     } catch (error) {
-      this.logger.error('Problems find security solution data view indices, defaulting to logs-*');
-      this.logger.error(error);
+      this.logger.warn(
+        'Problems finding security solution data view indices, defaulting to logs-*'
+      );
+      this.logger.warn(error);
       secSolIndices.push('logs-*');
     }
 

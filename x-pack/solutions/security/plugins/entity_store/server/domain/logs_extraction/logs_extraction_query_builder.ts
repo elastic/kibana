@@ -52,15 +52,15 @@ export const buildLogsExtractionEsqlQuery = ({
   const idFieldName = idField.field;
 
   const cleanFields = fields.filter(
-    // boolean and date still not working, maybe the code is not in the snapshot I'm running locally
-    // I need to further test
+    // TODO: Investigate support for boolean and date fields in logs extraction.
+    // These types are currently excluded from cleanFields until their ES|QL handling is verified.
     ({ mapping }) =>
       mapping?.type !== 'boolean' && mapping?.type !== 'date' && mapping?.type !== 'ip'
   );
 
   return `FROM ${indexPatterns.join(', ')}
     METADATA ${METADATA_FIELDS.join(', ')}
-  | WHERE ${entityIdFiler(idFieldName)}
+  | WHERE ${entityIdFilter(idFieldName)}
       AND @timestamp > TO_DATETIME("${fromDateISO}")
       AND @timestamp <= TO_DATETIME("${toDateISO}")
   | SORT @timestamp ASC
@@ -84,7 +84,7 @@ export const buildLogsExtractionEsqlQuery = ({
   | SORT @timestamp ASC`;
 };
 
-function entityIdFiler(idFieldName: string) {
+function entityIdFilter(idFieldName: string) {
   return `${idFieldName} IS NOT NULL
   AND ${idFieldName} != ""`;
 }

@@ -44,22 +44,22 @@ export async function installElasticsearchAssets({
   const { type } = definition;
   try {
     await putComponentTemplate(esClient, getEntityDefinitionComponentTemplate(definition));
-    logger.debug(`installed component template for: ${type}`);
+    logger.debug(`installed latest component template for: ${type}`);
 
     await putComponentTemplate(esClient, getResetEntityDefinitionComponentTemplate(definition));
-    logger.debug(`installed component template for: ${type} reset`);
+    logger.debug(`installed reset component template for: ${type}`);
 
     await putIndexTemplate(esClient, getLatestEntityIndexTemplateConfig(definition));
-    logger.debug(`installed index template for: ${type}`);
+    logger.debug(`installed latest index template for: ${type}`);
 
     await putIndexTemplate(esClient, getResetEntityIndexTemplateConfig(definition));
-    logger.debug(`installed index template for: ${type} reset`);
+    logger.debug(`installed reset index template for: ${type}`);
 
     await createIndex(esClient, getLatestEntitiesIndexName(definition.type, namespace));
     logger.debug(`created latest entity index for: ${type}`);
 
     await createIndex(esClient, getResetEntitiesIndexName(definition.type, namespace));
-    logger.debug(`created latest entity index for: ${type} reset`);
+    logger.debug(`created reset entity index for: ${type}`);
   } catch (error) {
     logger.error(`error installing assets for ${type}: ${error}`);
 
