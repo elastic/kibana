@@ -739,7 +739,7 @@ describe('EndpointActionsClient', () => {
       await expect(
         endpointActionsClient.runscript(
           endpointActionClientMock.createRunScriptOptions({
-            parameters: { scriptId: 'script-with-args' },
+            parameters: { scriptId: 'script-with-args', timeout: 0 },
           })
         )
       ).resolves.toEqual(expect.any(Object));
@@ -749,7 +749,7 @@ describe('EndpointActionsClient', () => {
           document: expect.objectContaining({
             EndpointActions: expect.objectContaining({
               data: expect.objectContaining({
-                parameters: expect.objectContaining({ timeout: 60000 }),
+                parameters: expect.objectContaining({ timeout: DEFAULT_EXECUTE_ACTION_TIMEOUT }),
               }),
             }),
           }),
