@@ -35,7 +35,7 @@ export async function createRequestHandlerContext({
   const [coreStart, startPlugins] = await coreSetup.getStartServices();
   const taskManagerStart = startPlugins.taskManager;
 
-  const namespace = startPlugins.spaces?.spacesService?.getSpaceId(request);
+  const namespace = startPlugins.spaces.spacesService.getSpaceId(request);
 
   const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
     core.savedObjects.client,

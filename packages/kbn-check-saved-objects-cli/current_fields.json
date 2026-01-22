@@ -395,6 +395,10 @@
     "type"
   ],
   "entity-store-api-key": [
+    "id",
+    "name",
+    "type",
+    "namespace",
     "apiKey"
   ],
   "epm-packages": [

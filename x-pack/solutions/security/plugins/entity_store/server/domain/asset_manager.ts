@@ -20,7 +20,7 @@ export class AssetManager {
     private esClient: ElasticsearchClient,
     private taskManager: TaskManagerStartContract,
     private namespace: string,
-    private apiKeyManager?: ApiKeyManager
+    private apiKeyManager: ApiKeyManager
   ) {}
 
   public async init(type: EntityType, logExtractionFrequency?: string) {
@@ -83,21 +83,12 @@ export class AssetManager {
     this.logger.get(type).debug(`Uninstalled definition: ${type}`);
   }
 
-  /**
-   * Generates an API key for the entity store if API key manager is available.
-   * This should be called during installation to ensure the API key exists for tasks.
-   */
-  public async generateApiKey(type: EntityType): Promise<void> {
-    if (!this.apiKeyManager) {
-      this.logger.debug('API key manager not available, skipping API key generation');
-      return;
-    }
-
+  private async generateApiKey(type: EntityType): Promise<void> {
     try {
       // Check if API key already exists
       const existingApiKey = await this.apiKeyManager.getApiKey();
       if (existingApiKey) {
-        this.logger.debug('API key already exists, skipping generation');
+        this.logger.get(type).debug('API key already exists, skipping generation');
         return;
       }
 

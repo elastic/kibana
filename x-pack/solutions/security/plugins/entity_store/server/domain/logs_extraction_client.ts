@@ -18,7 +18,10 @@ import {
 import { getLatestEntitiesIndexName, getResetEntitiesIndexName } from './assets/latest_index';
 import { executeEsqlQuery } from '../infra/elasticsearch/esql';
 import { ingestEntities } from '../infra/elasticsearch/ingest';
-import { alertsIndexName, securitySolutionDataViewName } from './assets/external_indices_contants';
+import {
+  getAlertsIndexName,
+  getSecuritySolutionDataViewName,
+} from './assets/external_indices_contants';
 
 interface LogsExtractionOptions {
   fromDateISO?: string;
@@ -95,12 +98,12 @@ export class LogsExtractionClient {
   // TODO: We need to include index patterns provided manually by the customer
   private async getIndexPatterns(type: EntityType) {
     const resetIndex = getResetEntitiesIndexName(type, this.namespace);
-    const alertsIndex = alertsIndexName(this.namespace);
+    const alertsIndex = getAlertsIndexName(this.namespace);
     const secSolIndices = [];
 
     try {
       const secSolDataView = await this.dataViewsService.get(
-        securitySolutionDataViewName(this.namespace)
+        getSecuritySolutionDataViewName(this.namespace)
       );
       secSolIndices.push(...secSolDataView.getIndexPattern().split(','));
     } catch (error) {

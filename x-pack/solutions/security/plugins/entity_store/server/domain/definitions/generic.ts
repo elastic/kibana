@@ -35,7 +35,7 @@ export const genericEntityDefinition: EntityDefinitionWithoutId = {
     newestValue({ source: 'host.boot.id' }),
     newestValue({
       source: 'host.cpu.usage',
-      mapping: { type: 'scaled_float', scaling_factor: 100 },
+      mapping: { type: 'scaled_float', scaling_factor: 1000 },
     }),
     newestValue({ source: 'host.disk.read.bytes', mapping: { type: 'long' } }),
     newestValue({ source: 'host.disk.write.bytes', mapping: { type: 'long' } }),

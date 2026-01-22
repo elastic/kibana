@@ -9,7 +9,6 @@ export const ENTITY_LATEST = 'latest' as const;
 export const ENTITY_RESET = 'reset' as const;
 
 export const ENTITY_BASE_PREFIX = 'entities';
-export const ENTITY_INTERNAL_INDICES_PATTERN = `.${ENTITY_BASE_PREFIX}*`;
 
 export const ENTITY_SCHEMA_VERSION_V2 = 'v2';
 

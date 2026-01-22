@@ -7,5 +7,6 @@
 
 const ALERTS_INDEX_SUFFIX = '.alerts-security.alerts';
 export const ALERTS_INDICES_PATTERN = `${ALERTS_INDEX_SUFFIX}*`;
-export const alertsIndexName = (namespace: string) => `${ALERTS_INDEX_SUFFIX}-${namespace}`;
-export const securitySolutionDataViewName = (namespace: string) => `security-solution-${namespace}`;
+export const getAlertsIndexName = (namespace: string) => `${ALERTS_INDEX_SUFFIX}-${namespace}`;
+export const getSecuritySolutionDataViewName = (namespace: string) =>
+  `security-solution-${namespace}`;
