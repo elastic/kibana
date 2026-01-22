@@ -2,26 +2,10 @@
   "id": "@kbn/securitysolution-exception-list-components",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
-        "id": "def-common.EmptyViewerState",
+        "id": "def-public.EmptyViewerState",
         "type": "Function",
         "tags": [],
         "label": "EmptyViewerState",
@@ -38,7 +22,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.EmptyViewerState.$1",
+            "id": "def-public.EmptyViewerState.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -57,7 +41,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
-        "id": "def-common.ExceptionItemCard",
+        "id": "def-public.ExceptionItemCard",
         "type": "Function",
         "tags": [],
         "label": "ExceptionItemCard",
@@ -66,9 +50,9 @@
           "React.NamedExoticComponent<",
           {
             "pluginId": "@kbn/securitysolution-exception-list-components",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSecuritysolutionExceptionListComponentsPluginApi",
-            "section": "def-common.ExceptionItemProps",
+            "section": "def-public.ExceptionItemProps",
             "text": "ExceptionItemProps"
           },
           ">"
@@ -82,7 +66,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionItemCard.$1",
+            "id": "def-public.ExceptionItemCard.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -101,7 +85,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
-        "id": "def-common.ExceptionItemCardComments",
+        "id": "def-public.ExceptionItemCardComments",
         "type": "Function",
         "tags": [],
         "label": "ExceptionItemCardComments",
@@ -110,9 +94,9 @@
           "React.NamedExoticComponent<",
           {
             "pluginId": "@kbn/securitysolution-exception-list-components",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSecuritysolutionExceptionListComponentsPluginApi",
-            "section": "def-common.ExceptionItemCardCommentsProps",
+            "section": "def-public.ExceptionItemCardCommentsProps",
             "text": "ExceptionItemCardCommentsProps"
           },
           ">"
@@ -126,7 +110,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionItemCardComments.$1",
+            "id": "def-public.ExceptionItemCardComments.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -145,7 +129,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
-        "id": "def-common.ExceptionItemCardConditions",
+        "id": "def-public.ExceptionItemCardConditions",
         "type": "Function",
         "tags": [],
         "label": "ExceptionItemCardConditions",
@@ -164,7 +148,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionItemCardConditions.$1",
+            "id": "def-public.ExceptionItemCardConditions.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -183,7 +167,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
-        "id": "def-common.ExceptionItemCardHeader",
+        "id": "def-public.ExceptionItemCardHeader",
         "type": "Function",
         "tags": [],
         "label": "ExceptionItemCardHeader",
@@ -192,9 +176,9 @@
           "React.NamedExoticComponent<",
           {
             "pluginId": "@kbn/securitysolution-exception-list-components",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSecuritysolutionExceptionListComponentsPluginApi",
-            "section": "def-common.ExceptionItemCardHeaderProps",
+            "section": "def-public.ExceptionItemCardHeaderProps",
             "text": "ExceptionItemCardHeaderProps"
           },
           ">"
@@ -208,7 +192,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionItemCardHeader.$1",
+            "id": "def-public.ExceptionItemCardHeader.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -227,7 +211,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
-        "id": "def-common.ExceptionItemCardMetaInfo",
+        "id": "def-public.ExceptionItemCardMetaInfo",
         "type": "Function",
         "tags": [],
         "label": "ExceptionItemCardMetaInfo",
@@ -236,9 +220,9 @@
           "React.NamedExoticComponent<",
           {
             "pluginId": "@kbn/securitysolution-exception-list-components",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSecuritysolutionExceptionListComponentsPluginApi",
-            "section": "def-common.ExceptionItemCardMetaInfoProps",
+            "section": "def-public.ExceptionItemCardMetaInfoProps",
             "text": "ExceptionItemCardMetaInfoProps"
           },
           ">"
@@ -252,7 +236,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionItemCardMetaInfo.$1",
+            "id": "def-public.ExceptionItemCardMetaInfo.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -271,7 +255,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
-        "id": "def-common.ExceptionItems",
+        "id": "def-public.ExceptionItems",
         "type": "Function",
         "tags": [],
         "label": "ExceptionItems",
@@ -288,7 +272,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionItems.$1",
+            "id": "def-public.ExceptionItems.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -307,7 +291,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
-        "id": "def-common.ExceptionListHeader",
+        "id": "def-public.ExceptionListHeader",
         "type": "Function",
         "tags": [],
         "label": "ExceptionListHeader",
@@ -324,7 +308,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionListHeader.$1",
+            "id": "def-public.ExceptionListHeader.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -343,7 +327,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
-        "id": "def-common.generateLinkedRulesMenuItems",
+        "id": "def-public.generateLinkedRulesMenuItems",
         "type": "Function",
         "tags": [],
         "label": "generateLinkedRulesMenuItems",
@@ -359,7 +343,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.generateLinkedRulesMenuItems.$1",
+            "id": "def-public.generateLinkedRulesMenuItems.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  dataTestSubj,\n  linkedRules,\n  securityLinkAnchorComponent,\n  leftIcon = '',\n}",
@@ -380,7 +364,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
-        "id": "def-common.HeaderMenu",
+        "id": "def-public.HeaderMenu",
         "type": "Function",
         "tags": [],
         "label": "HeaderMenu",
@@ -397,7 +381,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.HeaderMenu.$1",
+            "id": "def-public.HeaderMenu.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -416,7 +400,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
-        "id": "def-common.Pagination",
+        "id": "def-public.Pagination",
         "type": "Function",
         "tags": [],
         "label": "Pagination",
@@ -425,9 +409,9 @@
           "React.NamedExoticComponent<",
           {
             "pluginId": "@kbn/securitysolution-exception-list-components",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSecuritysolutionExceptionListComponentsPluginApi",
-            "section": "def-common.PaginationProps",
+            "section": "def-public.PaginationProps",
             "text": "PaginationProps"
           },
           ">"
@@ -441,7 +425,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.Pagination.$1",
+            "id": "def-public.Pagination.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -460,7 +444,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
-        "id": "def-common.PartialCodeSignatureCallout",
+        "id": "def-public.PartialCodeSignatureCallout",
         "type": "Function",
         "tags": [],
         "label": "PartialCodeSignatureCallout",
@@ -479,7 +463,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
-        "id": "def-common.SearchBar",
+        "id": "def-public.SearchBar",
         "type": "Function",
         "tags": [],
         "label": "SearchBar",
@@ -496,7 +480,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.SearchBar.$1",
+            "id": "def-public.SearchBar.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -515,7 +499,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
-        "id": "def-common.ValueWithSpaceWarning",
+        "id": "def-public.ValueWithSpaceWarning",
         "type": "Function",
         "tags": [],
         "label": "ValueWithSpaceWarning",
@@ -531,7 +515,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ValueWithSpaceWarning.$1",
+            "id": "def-public.ValueWithSpaceWarning.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  value,\n  tooltipIconType = 'info',\n  tooltipIconText,\n}",
@@ -552,7 +536,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
-        "id": "def-common.WildCardWithWrongOperatorCallout",
+        "id": "def-public.WildCardWithWrongOperatorCallout",
         "type": "Function",
         "tags": [],
         "label": "WildCardWithWrongOperatorCallout",
@@ -573,7 +557,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
-        "id": "def-common.Action",
+        "id": "def-public.Action",
         "type": "Interface",
         "tags": [],
         "label": "Action",
@@ -586,7 +570,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.Action.key",
+            "id": "def-public.Action.key",
             "type": "string",
             "tags": [],
             "label": "key",
@@ -599,7 +583,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.Action.icon",
+            "id": "def-public.Action.icon",
             "type": "string",
             "tags": [],
             "label": "icon",
@@ -612,7 +596,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.Action.label",
+            "id": "def-public.Action.label",
             "type": "CompoundType",
             "tags": [],
             "label": "label",
@@ -628,7 +612,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.Action.disabled",
+            "id": "def-public.Action.disabled",
             "type": "CompoundType",
             "tags": [],
             "label": "disabled",
@@ -644,7 +628,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.Action.onClick",
+            "id": "def-public.Action.onClick",
             "type": "Function",
             "tags": [],
             "label": "onClick",
@@ -660,7 +644,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/securitysolution-exception-list-components",
-                "id": "def-common.Action.onClick.$1",
+                "id": "def-public.Action.onClick.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "e",
@@ -683,7 +667,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
-        "id": "def-common.BackOptions",
+        "id": "def-public.BackOptions",
         "type": "Interface",
         "tags": [],
         "label": "BackOptions",
@@ -696,7 +680,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.BackOptions.pageId",
+            "id": "def-public.BackOptions.pageId",
             "type": "string",
             "tags": [],
             "label": "pageId",
@@ -709,7 +693,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.BackOptions.path",
+            "id": "def-public.BackOptions.path",
             "type": "string",
             "tags": [],
             "label": "path",
@@ -722,7 +706,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.BackOptions.dataTestSubj",
+            "id": "def-public.BackOptions.dataTestSubj",
             "type": "string",
             "tags": [],
             "label": "dataTestSubj",
@@ -738,7 +722,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.BackOptions.onNavigate",
+            "id": "def-public.BackOptions.onNavigate",
             "type": "Function",
             "tags": [],
             "label": "onNavigate",
@@ -754,7 +738,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/securitysolution-exception-list-components",
-                "id": "def-common.BackOptions.onNavigate.$1",
+                "id": "def-public.BackOptions.onNavigate.$1",
                 "type": "string",
                 "tags": [],
                 "label": "path",
@@ -777,7 +761,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
-        "id": "def-common.ExceptionItemCardCommentsProps",
+        "id": "def-public.ExceptionItemCardCommentsProps",
         "type": "Interface",
         "tags": [],
         "label": "ExceptionItemCardCommentsProps",
@@ -790,7 +774,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionItemCardCommentsProps.comments",
+            "id": "def-public.ExceptionItemCardCommentsProps.comments",
             "type": "Array",
             "tags": [],
             "label": "comments",
@@ -807,7 +791,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionItemCardCommentsProps.dataTestSubj",
+            "id": "def-public.ExceptionItemCardCommentsProps.dataTestSubj",
             "type": "string",
             "tags": [],
             "label": "dataTestSubj",
@@ -826,7 +810,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
-        "id": "def-common.ExceptionItemCardHeaderProps",
+        "id": "def-public.ExceptionItemCardHeaderProps",
         "type": "Interface",
         "tags": [],
         "label": "ExceptionItemCardHeaderProps",
@@ -839,7 +823,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionItemCardHeaderProps.item",
+            "id": "def-public.ExceptionItemCardHeaderProps.item",
             "type": "Object",
             "tags": [],
             "label": "item",
@@ -855,7 +839,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionItemCardHeaderProps.actions",
+            "id": "def-public.ExceptionItemCardHeaderProps.actions",
             "type": "Array",
             "tags": [],
             "label": "actions",
@@ -871,7 +855,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionItemCardHeaderProps.disableActions",
+            "id": "def-public.ExceptionItemCardHeaderProps.disableActions",
             "type": "CompoundType",
             "tags": [],
             "label": "disableActions",
@@ -887,7 +871,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionItemCardHeaderProps.dataTestSubj",
+            "id": "def-public.ExceptionItemCardHeaderProps.dataTestSubj",
             "type": "string",
             "tags": [],
             "label": "dataTestSubj",
@@ -903,7 +887,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
-        "id": "def-common.ExceptionItemCardMetaInfoProps",
+        "id": "def-public.ExceptionItemCardMetaInfoProps",
         "type": "Interface",
         "tags": [],
         "label": "ExceptionItemCardMetaInfoProps",
@@ -916,7 +900,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionItemCardMetaInfoProps.item",
+            "id": "def-public.ExceptionItemCardMetaInfoProps.item",
             "type": "Object",
             "tags": [],
             "label": "item",
@@ -932,7 +916,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionItemCardMetaInfoProps.rules",
+            "id": "def-public.ExceptionItemCardMetaInfoProps.rules",
             "type": "Array",
             "tags": [],
             "label": "rules",
@@ -940,9 +924,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/securitysolution-exception-list-components",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSecuritysolutionExceptionListComponentsPluginApi",
-                "section": "def-common.Rule",
+                "section": "def-public.Rule",
                 "text": "Rule"
               },
               "[]"
@@ -955,7 +939,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionItemCardMetaInfoProps.dataTestSubj",
+            "id": "def-public.ExceptionItemCardMetaInfoProps.dataTestSubj",
             "type": "string",
             "tags": [],
             "label": "dataTestSubj",
@@ -968,7 +952,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionItemCardMetaInfoProps.formattedDateComponent",
+            "id": "def-public.ExceptionItemCardMetaInfoProps.formattedDateComponent",
             "type": "CompoundType",
             "tags": [],
             "label": "formattedDateComponent",
@@ -984,7 +968,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionItemCardMetaInfoProps.securityLinkAnchorComponent",
+            "id": "def-public.ExceptionItemCardMetaInfoProps.securityLinkAnchorComponent",
             "type": "CompoundType",
             "tags": [],
             "label": "securityLinkAnchorComponent",
@@ -1003,7 +987,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
-        "id": "def-common.ExceptionItemProps",
+        "id": "def-public.ExceptionItemProps",
         "type": "Interface",
         "tags": [],
         "label": "ExceptionItemProps",
@@ -1016,7 +1000,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionItemProps.dataTestSubj",
+            "id": "def-public.ExceptionItemProps.dataTestSubj",
             "type": "string",
             "tags": [],
             "label": "dataTestSubj",
@@ -1032,7 +1016,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionItemProps.disableActions",
+            "id": "def-public.ExceptionItemProps.disableActions",
             "type": "CompoundType",
             "tags": [],
             "label": "disableActions",
@@ -1048,7 +1032,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionItemProps.exceptionItem",
+            "id": "def-public.ExceptionItemProps.exceptionItem",
             "type": "Object",
             "tags": [],
             "label": "exceptionItem",
@@ -1064,7 +1048,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionItemProps.listType",
+            "id": "def-public.ExceptionItemProps.listType",
             "type": "Enum",
             "tags": [],
             "label": "listType",
@@ -1086,7 +1070,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionItemProps.ruleReferences",
+            "id": "def-public.ExceptionItemProps.ruleReferences",
             "type": "Array",
             "tags": [],
             "label": "ruleReferences",
@@ -1094,9 +1078,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/securitysolution-exception-list-components",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSecuritysolutionExceptionListComponentsPluginApi",
-                "section": "def-common.Rule",
+                "section": "def-public.Rule",
                 "text": "Rule"
               },
               "[]"
@@ -1109,7 +1093,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionItemProps.editActionLabel",
+            "id": "def-public.ExceptionItemProps.editActionLabel",
             "type": "string",
             "tags": [],
             "label": "editActionLabel",
@@ -1125,7 +1109,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionItemProps.deleteActionLabel",
+            "id": "def-public.ExceptionItemProps.deleteActionLabel",
             "type": "string",
             "tags": [],
             "label": "deleteActionLabel",
@@ -1141,7 +1125,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionItemProps.securityLinkAnchorComponent",
+            "id": "def-public.ExceptionItemProps.securityLinkAnchorComponent",
             "type": "CompoundType",
             "tags": [],
             "label": "securityLinkAnchorComponent",
@@ -1157,7 +1141,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionItemProps.formattedDateComponent",
+            "id": "def-public.ExceptionItemProps.formattedDateComponent",
             "type": "CompoundType",
             "tags": [],
             "label": "formattedDateComponent",
@@ -1173,7 +1157,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionItemProps.getFormattedComments",
+            "id": "def-public.ExceptionItemProps.getFormattedComments",
             "type": "Function",
             "tags": [],
             "label": "getFormattedComments",
@@ -1191,7 +1175,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/securitysolution-exception-list-components",
-                "id": "def-common.ExceptionItemProps.getFormattedComments.$1",
+                "id": "def-public.ExceptionItemProps.getFormattedComments.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "comments",
@@ -1211,7 +1195,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionItemProps.onDeleteException",
+            "id": "def-public.ExceptionItemProps.onDeleteException",
             "type": "Function",
             "tags": [],
             "label": "onDeleteException",
@@ -1220,9 +1204,9 @@
               "(arg: ",
               {
                 "pluginId": "@kbn/securitysolution-exception-list-components",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSecuritysolutionExceptionListComponentsPluginApi",
-                "section": "def-common.ExceptionListItemIdentifiers",
+                "section": "def-public.ExceptionListItemIdentifiers",
                 "text": "ExceptionListItemIdentifiers"
               },
               ") => void"
@@ -1235,7 +1219,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/securitysolution-exception-list-components",
-                "id": "def-common.ExceptionItemProps.onDeleteException.$1",
+                "id": "def-public.ExceptionItemProps.onDeleteException.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "arg",
@@ -1243,9 +1227,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/securitysolution-exception-list-components",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnSecuritysolutionExceptionListComponentsPluginApi",
-                    "section": "def-common.ExceptionListItemIdentifiers",
+                    "section": "def-public.ExceptionListItemIdentifiers",
                     "text": "ExceptionListItemIdentifiers"
                   }
                 ],
@@ -1261,7 +1245,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionItemProps.onEditException",
+            "id": "def-public.ExceptionItemProps.onEditException",
             "type": "Function",
             "tags": [],
             "label": "onEditException",
@@ -1277,7 +1261,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/securitysolution-exception-list-components",
-                "id": "def-common.ExceptionItemProps.onEditException.$1",
+                "id": "def-public.ExceptionItemProps.onEditException.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "item",
@@ -1297,7 +1281,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionItemProps.showValueListModal",
+            "id": "def-public.ExceptionItemProps.showValueListModal",
             "type": "CompoundType",
             "tags": [],
             "label": "showValueListModal",
@@ -1316,7 +1300,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
-        "id": "def-common.ExceptionListItemIdentifiers",
+        "id": "def-public.ExceptionListItemIdentifiers",
         "type": "Interface",
         "tags": [],
         "label": "ExceptionListItemIdentifiers",
@@ -1329,7 +1313,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionListItemIdentifiers.id",
+            "id": "def-public.ExceptionListItemIdentifiers.id",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -1342,7 +1326,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionListItemIdentifiers.name",
+            "id": "def-public.ExceptionListItemIdentifiers.name",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -1355,7 +1339,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionListItemIdentifiers.namespaceType",
+            "id": "def-public.ExceptionListItemIdentifiers.namespaceType",
             "type": "CompoundType",
             "tags": [],
             "label": "namespaceType",
@@ -1374,7 +1358,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
-        "id": "def-common.ExceptionListSummaryProps",
+        "id": "def-public.ExceptionListSummaryProps",
         "type": "Interface",
         "tags": [],
         "label": "ExceptionListSummaryProps",
@@ -1387,7 +1371,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionListSummaryProps.pagination",
+            "id": "def-public.ExceptionListSummaryProps.pagination",
             "type": "Object",
             "tags": [],
             "label": "pagination",
@@ -1403,7 +1387,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ExceptionListSummaryProps.lastUpdated",
+            "id": "def-public.ExceptionListSummaryProps.lastUpdated",
             "type": "CompoundType",
             "tags": [],
             "label": "lastUpdated",
@@ -1422,7 +1406,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
-        "id": "def-common.GetExceptionItemProps",
+        "id": "def-public.GetExceptionItemProps",
         "type": "Interface",
         "tags": [],
         "label": "GetExceptionItemProps",
@@ -1435,7 +1419,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.GetExceptionItemProps.pagination",
+            "id": "def-public.GetExceptionItemProps.pagination",
             "type": "CompoundType",
             "tags": [],
             "label": "pagination",
@@ -1453,7 +1437,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.GetExceptionItemProps.search",
+            "id": "def-public.GetExceptionItemProps.search",
             "type": "string",
             "tags": [],
             "label": "search",
@@ -1469,7 +1453,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.GetExceptionItemProps.filters",
+            "id": "def-public.GetExceptionItemProps.filters",
             "type": "string",
             "tags": [],
             "label": "filters",
@@ -1488,7 +1472,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
-        "id": "def-common.ListDetails",
+        "id": "def-public.ListDetails",
         "type": "Interface",
         "tags": [],
         "label": "ListDetails",
@@ -1501,7 +1485,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ListDetails.name",
+            "id": "def-public.ListDetails.name",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -1514,7 +1498,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.ListDetails.description",
+            "id": "def-public.ListDetails.description",
             "type": "string",
             "tags": [],
             "label": "description",
@@ -1533,7 +1517,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
-        "id": "def-common.PaginationProps",
+        "id": "def-public.PaginationProps",
         "type": "Interface",
         "tags": [],
         "label": "PaginationProps",
@@ -1546,7 +1530,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.PaginationProps.dataTestSubj",
+            "id": "def-public.PaginationProps.dataTestSubj",
             "type": "string",
             "tags": [],
             "label": "dataTestSubj",
@@ -1562,7 +1546,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.PaginationProps.ariaLabel",
+            "id": "def-public.PaginationProps.ariaLabel",
             "type": "string",
             "tags": [],
             "label": "ariaLabel",
@@ -1578,7 +1562,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.PaginationProps.pagination",
+            "id": "def-public.PaginationProps.pagination",
             "type": "CompoundType",
             "tags": [],
             "label": "pagination",
@@ -1595,7 +1579,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.PaginationProps.onPaginationChange",
+            "id": "def-public.PaginationProps.onPaginationChange",
             "type": "Function",
             "tags": [],
             "label": "onPaginationChange",
@@ -1604,9 +1588,9 @@
               "(arg: ",
               {
                 "pluginId": "@kbn/securitysolution-exception-list-components",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSecuritysolutionExceptionListComponentsPluginApi",
-                "section": "def-common.GetExceptionItemProps",
+                "section": "def-public.GetExceptionItemProps",
                 "text": "GetExceptionItemProps"
               },
               ") => void"
@@ -1619,7 +1603,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/securitysolution-exception-list-components",
-                "id": "def-common.PaginationProps.onPaginationChange.$1",
+                "id": "def-public.PaginationProps.onPaginationChange.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "arg",
@@ -1627,9 +1611,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/securitysolution-exception-list-components",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnSecuritysolutionExceptionListComponentsPluginApi",
-                    "section": "def-common.GetExceptionItemProps",
+                    "section": "def-public.GetExceptionItemProps",
                     "text": "GetExceptionItemProps"
                   }
                 ],
@@ -1648,7 +1632,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
-        "id": "def-common.Rule",
+        "id": "def-public.Rule",
         "type": "Interface",
         "tags": [],
         "label": "Rule",
@@ -1661,7 +1645,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.Rule.name",
+            "id": "def-public.Rule.name",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -1674,7 +1658,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.Rule.id",
+            "id": "def-public.Rule.id",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -1687,7 +1671,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.Rule.rule_id",
+            "id": "def-public.Rule.rule_id",
             "type": "string",
             "tags": [],
             "label": "rule_id",
@@ -1700,7 +1684,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.Rule.exceptions_list",
+            "id": "def-public.Rule.exceptions_list",
             "type": "Array",
             "tags": [],
             "label": "exceptions_list",
@@ -1719,7 +1703,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
-        "id": "def-common.RuleReference",
+        "id": "def-public.RuleReference",
         "type": "Interface",
         "tags": [],
         "label": "RuleReference",
@@ -1732,7 +1716,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.RuleReference.name",
+            "id": "def-public.RuleReference.name",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -1745,7 +1729,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.RuleReference.id",
+            "id": "def-public.RuleReference.id",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -1758,7 +1742,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.RuleReference.referenced_rules",
+            "id": "def-public.RuleReference.referenced_rules",
             "type": "Array",
             "tags": [],
             "label": "referenced_rules",
@@ -1766,9 +1750,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/securitysolution-exception-list-components",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSecuritysolutionExceptionListComponentsPluginApi",
-                "section": "def-common.Rule",
+                "section": "def-public.Rule",
                 "text": "Rule"
               },
               "[]"
@@ -1781,7 +1765,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.RuleReference.listId",
+            "id": "def-public.RuleReference.listId",
             "type": "string",
             "tags": [],
             "label": "listId",
@@ -1800,7 +1784,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
-        "id": "def-common.RuleReferences",
+        "id": "def-public.RuleReferences",
         "type": "Interface",
         "tags": [],
         "label": "RuleReferences",
@@ -1813,7 +1797,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
-            "id": "def-common.RuleReferences.Unnamed",
+            "id": "def-public.RuleReferences.Unnamed",
             "type": "IndexSignature",
             "tags": [],
             "label": "[key: string]: RuleReference",
@@ -1822,9 +1806,9 @@
               "[key: string]:  ",
               {
                 "pluginId": "@kbn/securitysolution-exception-list-components",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSecuritysolutionExceptionListComponentsPluginApi",
-                "section": "def-common.RuleReference",
+                "section": "def-public.RuleReference",
                 "text": "RuleReference"
               }
             ],
@@ -1841,7 +1825,7 @@
     "enums": [
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
-        "id": "def-common.ListTypeText",
+        "id": "def-public.ListTypeText",
         "type": "Enum",
         "tags": [],
         "label": "ListTypeText",
@@ -1855,7 +1839,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
-        "id": "def-common.ViewerStatus",
+        "id": "def-public.ViewerStatus",
         "type": "Enum",
         "tags": [],
         "label": "ViewerStatus",
@@ -1871,7 +1855,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/securitysolution-exception-list-components",
-        "id": "def-common.ViewerFlyoutName",
+        "id": "def-public.ViewerFlyoutName",
         "type": "Type",
         "tags": [],
         "label": "ViewerFlyoutName",
@@ -1887,6 +1871,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }
