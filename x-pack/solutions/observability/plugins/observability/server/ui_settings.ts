@@ -165,15 +165,12 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     description: i18n.translate(
       'xpack.observability.enableInfrastructureAssetCustomDashboardsDescription',
       {
-        defaultMessage:
-          '{technicalPreviewLabel} Enable option to link custom dashboards in the asset details view.',
-        values: {
-          technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-        },
+        defaultMessage: 'Enable option to link custom dashboards in the asset details view.',
       }
     ),
     schema: schema.boolean(),
-    solution: 'oblt',
+    solutionViews: ['classic', 'oblt'],
+    technicalPreview: true,
   },
   [apmEnableTableSearchBar]: {
     category: [observabilityFeatureId],
