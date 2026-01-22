@@ -43,10 +43,10 @@ export function buildInstallCommand({
     : `.\\otel_samples\\${sampleFileSubfolder.replace('/', '\\')}platformlogs.yml`;
 
   const wiredStreamsSedLinux = useWiredStreams
-    ? ` && sed -i '/^[[:space:]]*elasticsearch:/a\\    logs_index: logs' ./otel.yml`
+    ? ` && sed -i '/^[[:space:]]*elasticsearch\\/otel:/a\\    logs_index: logs' ./otel.yml`
     : '';
   const wiredStreamsSedMac = useWiredStreams
-    ? ` && sed -i '' '/^[[:space:]]*elasticsearch:/a\\
+    ? ` && sed -i '' '/^[[:space:]]*elasticsearch\\/otel:/a\\
     logs_index: logs' ./otel.yml`
     : '';
 
@@ -70,7 +70,7 @@ rm ./otel.yml && cp ${sampleConfigurationPath} ./otel.yml && mkdir -p ./data/ote
         ? `
 (Get-Content .\\otel.yml) | ForEach-Object {
     $_
-    if ($_ -match '^\\s*elasticsearch:') {
+    if ($_ -match '^\\s*elasticsearch/otel:') {
         '    logs_index: logs'
     }
 } | Set-Content .\\otel.yml`

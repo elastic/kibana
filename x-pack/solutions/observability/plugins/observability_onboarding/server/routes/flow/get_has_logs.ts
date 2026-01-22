@@ -13,7 +13,7 @@ import { AGENT_ID } from '../../../common/es_fields';
 export async function getHasLogs(esClient: ElasticsearchClient, agentId: string) {
   try {
     const result = await esClient.search({
-      index: ['logs-*', 'metrics-*'],
+      index: ['logs-*', 'metrics-*', 'logs', 'logs.*'],
       ignore_unavailable: true,
       size: 0,
       terminate_after: 1,

@@ -262,7 +262,7 @@ rm ./otel.yml && cp ./otel_samples/managed_otlp/platformlogs.yml ./otel.yml && m
         });
 
         expect(command).toContain('logs_index: logs');
-        expect(command).toContain("sed -i '/^[[:space:]]*elasticsearch:/a");
+        expect(command).toContain("sed -i '/^[[:space:]]*elasticsearch\\/otel:/a");
       });
     });
 
@@ -285,7 +285,7 @@ rm ./otel.yml && cp ./otel_samples/managed_otlp/platformlogs.yml ./otel.yml && m
         });
 
         expect(command).toContain('logs_index: logs');
-        expect(command).toContain("sed -i '' '/^[[:space:]]*elasticsearch:/a");
+        expect(command).toContain("sed -i '' '/^[[:space:]]*elasticsearch\\/otel:/a");
       });
     });
 
@@ -308,7 +308,7 @@ rm ./otel.yml && cp ./otel_samples/managed_otlp/platformlogs.yml ./otel.yml && m
         });
 
         expect(command).toContain('logs_index: logs');
-        expect(command).toContain('elasticsearch:');
+        expect(command).toContain('elasticsearch/otel:');
       });
     });
 

@@ -114,7 +114,14 @@ export function useWiredStreamsStatus(): UseWiredStreamsStatusResult {
 
         return true;
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const httpError = error as { body?: { message?: string }; message?: string };
+        const errorMessage =
+          httpError?.body?.message ||
+          httpError?.message ||
+          i18n.translate('xpack.observability_onboarding.wiredStreams.enableError.fallback', {
+            defaultMessage:
+              'An unexpected error occurred.',
+          });
 
         analytics?.reportEvent('observability_onboarding_wired_streams_auto_enabled', {
           flow_type: flowType,
@@ -126,13 +133,7 @@ export function useWiredStreamsStatus(): UseWiredStreamsStatusResult {
           title: i18n.translate('xpack.observability_onboarding.wiredStreams.enableError.title', {
             defaultMessage: 'Failed to enable Wired Streams',
           }),
-          toastMessage: i18n.translate(
-            'xpack.observability_onboarding.wiredStreams.enableError.message',
-            {
-              defaultMessage:
-                'Could not enable Wired Streams. Please try again or contact your administrator.',
-            }
-          ),
+          toastMessage: errorMessage,
         });
 
         return false;
