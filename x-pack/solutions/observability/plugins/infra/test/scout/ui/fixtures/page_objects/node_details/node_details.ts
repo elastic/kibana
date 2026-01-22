@@ -234,10 +234,19 @@ export class NodeDetailsPage {
     );
   }
 
-  public async waitForChartsToLoad() {
-    await this.overviewTabContent
-      .locator('[data-test-subj="infraAssetDetailsHostChartsChartCPU Usage-0"]')
-      .waitFor({ timeout: EXTENDED_TIMEOUT });
+  public async waitForChartsToLoad(timeout: number = EXTENDED_TIMEOUT) {
+    const chartLocator = this.page.locator(`[data-test-subj^="infraAssetDetailsHostChartsChart"]`);
+
+    await expect
+      .poll(
+        async () => {
+          return await chartLocator.count();
+        },
+        {
+          timeout,
+        }
+      )
+      .toBeGreaterThanOrEqual(1);
   }
 
   public async clickAlertsSectionCollapsible() {
