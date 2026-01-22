@@ -367,6 +367,34 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
         });
       });
 
+      describe('/internal/apm/service-map/dependency with sourceServiceName and array of dependencies', () => {
+        let response: DependencyResponse;
+        before(async () => {
+          response = await apmApiClient.readUser({
+            endpoint: `GET /internal/apm/service-map/dependency`,
+            params: {
+              query: {
+                dependencies: ['postgresql', 'redis'],
+                sourceServiceName: 'opbeans-java',
+                start: metadata.start,
+                end: metadata.end,
+                environment: 'ENVIRONMENT_ALL',
+              },
+            },
+          });
+        });
+
+        it('returns status code 200', () => {
+          expect(response.status).to.be(200);
+        });
+
+        it('returns edge data with source service filter applied', () => {
+          expect(response.body.currentPeriod?.failedTransactionsRate).to.not.be(undefined);
+          expect(response.body.currentPeriod?.transactionStats?.latency).to.not.be(undefined);
+          expect(response.body.currentPeriod?.transactionStats?.throughput).to.not.be(undefined);
+        });
+      });
+
       describe('/internal/apm/service-map/service/{serviceName} with comparison', () => {
         let response: ServiceNodeResponse;
         before(async () => {

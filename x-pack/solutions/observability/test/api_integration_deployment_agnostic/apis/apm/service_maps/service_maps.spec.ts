@@ -112,6 +112,32 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(response.body.currentPeriod).toEqual({ transactionStats: {} });
         });
       });
+
+      describe('/internal/apm/service-map/dependency with sourceServiceName and array of dependencies', () => {
+        let response: DependencyResponse;
+        before(async () => {
+          response = await apmApiClient.readUser({
+            endpoint: `GET /internal/apm/service-map/dependency`,
+            params: {
+              query: {
+                dependencies: ['postgres', 'redis'],
+                sourceServiceName: 'test-service',
+                start: new Date(start).toISOString(),
+                end: new Date(end).toISOString(),
+                environment: 'ENVIRONMENT_ALL',
+              },
+            },
+          });
+        });
+
+        it('returns status code 200', () => {
+          expect(response.status).toBe(200);
+        });
+
+        it('handles edge query with sourceServiceName', () => {
+          expect(response.body.currentPeriod).toBeDefined();
+        });
+      });
     });
 
     describe('with synthtrace data', () => {

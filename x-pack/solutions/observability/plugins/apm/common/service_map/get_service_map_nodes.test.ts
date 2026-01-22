@@ -13,6 +13,7 @@ import type {
   ServiceMapConnections,
   GroupResourceNodesResponse,
   ServiceConnectionNode,
+  ConnectionEdge,
 } from './types';
 import { getServiceMapNodes } from './get_service_map_nodes';
 import { getExternalConnectionNode, getServiceConnectionNode } from './utils';
@@ -160,6 +161,9 @@ describe('getServiceMapNodes', () => {
     expect(getNodeAnomalyStats(elements, 'opbeans-java')).toEqual(
       multiServiceAnomalies.serviceAnomalies[1]
     );
+
+    // Verify resources are attached to each edge
+    expect((edges[0].data as ConnectionEdge).resources).toEqual(['opbeans-node']);
   });
 
   it('adds connections for messaging systems', () => {
