@@ -70,7 +70,7 @@ export function getSupportedOperators(): SupportedOperators[] {
 }
 
 /**
- * Escapes a string value for use in ES|QL queries by escaping backslashes and quotes
+ * Escapes a string value for use in ES|QL queries by escaping special characters
  */
 export function escapeStringValue(val: string): string {
   return `"${val
