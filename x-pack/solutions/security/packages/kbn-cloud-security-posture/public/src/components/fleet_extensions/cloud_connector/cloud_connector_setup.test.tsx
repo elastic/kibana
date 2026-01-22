@@ -141,6 +141,7 @@ describe('CloudConnectorSetup', () => {
       setExistingConnectionCredentials: mockSetExistingConnectionCredentials,
       updatePolicyWithNewCredentials: mockUpdatePolicyWithNewCredentials,
       updatePolicyWithExistingCredentials: mockUpdatePolicyWithExistingCredentials,
+      accountTypeFromInputs: undefined,
     });
   };
 
@@ -350,16 +351,20 @@ describe('CloudConnectorSetup', () => {
       expect(mockUseCloudConnectorSetup).toHaveBeenCalledWith(
         defaultProps.input,
         defaultProps.newPolicy,
-        defaultProps.updatePolicy
+        defaultProps.updatePolicy,
+        defaultProps.cloudProvider
       );
     });
 
-    it('should call useGetCloudConnectors hook', () => {
+    it('should call useGetCloudConnectors hook with correct filter options', () => {
       setupMocks([]);
 
       renderComponent();
 
-      expect(mockUseGetCloudConnectors).toHaveBeenCalled();
+      expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
+        cloudProvider: AWS_PROVIDER,
+        accountType: undefined,
+      });
     });
 
     it('should pass cloud connectors count to CloudConnectorTabs', () => {

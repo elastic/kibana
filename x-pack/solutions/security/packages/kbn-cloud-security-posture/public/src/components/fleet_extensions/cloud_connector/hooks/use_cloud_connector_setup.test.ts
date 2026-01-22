@@ -1366,4 +1366,151 @@ describe('Azure credentials with mixed secret and text vars', () => {
       azure_credentials_cloud_connector_id: undefined,
     });
   });
+
+  describe('getAccountTypeFromInputs', () => {
+    it('should extract account type from AWS policy inputs', () => {
+      const { result } = renderHook(() =>
+        useCloudConnectorSetup(
+          {
+            ...mockInput,
+            streams: [
+              {
+                ...mockInput.streams[0],
+                vars: {
+                  ...mockInput.streams[0].vars,
+                  'aws.account_type': { value: 'single-account' },
+                },
+              },
+            ],
+          },
+          {
+            ...mockPolicy,
+            inputs: [
+              {
+                ...mockPolicy.inputs[0],
+                streams: [
+                  {
+                    ...mockPolicy.inputs[0].streams[0],
+                    vars: {
+                      ...mockPolicy.inputs[0].streams[0].vars,
+                      'aws.account_type': { value: 'single-account' },
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+          mockUpdatePolicy,
+          'aws'
+        )
+      );
+
+      expect(result.current.accountTypeFromInputs).toBe('single-account');
+    });
+
+    it('should extract organization account type from AWS policy inputs', () => {
+      const { result } = renderHook(() =>
+        useCloudConnectorSetup(
+          {
+            ...mockInput,
+            streams: [
+              {
+                ...mockInput.streams[0],
+                vars: {
+                  ...mockInput.streams[0].vars,
+                  'aws.account_type': { value: 'organization-account' },
+                },
+              },
+            ],
+          },
+          {
+            ...mockPolicy,
+            inputs: [
+              {
+                ...mockPolicy.inputs[0],
+                streams: [
+                  {
+                    ...mockPolicy.inputs[0].streams[0],
+                    vars: {
+                      ...mockPolicy.inputs[0].streams[0].vars,
+                      'aws.account_type': { value: 'organization-account' },
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+          mockUpdatePolicy,
+          'aws'
+        )
+      );
+
+      expect(result.current.accountTypeFromInputs).toBe('organization-account');
+    });
+
+    it('should extract account type from Azure policy inputs', () => {
+      const { result } = renderHook(() =>
+        useCloudConnectorSetup(
+          {
+            ...mockInput,
+            type: 'cloudbeat/cis_azure',
+            streams: [
+              {
+                ...mockInput.streams[0],
+                vars: {
+                  'azure.account_type': { value: 'single-account' },
+                },
+              },
+            ],
+          },
+          {
+            ...mockPolicy,
+            inputs: [
+              {
+                ...mockPolicy.inputs[0],
+                type: 'cloudbeat/cis_azure',
+                enabled: true,
+                streams: [
+                  {
+                    ...mockPolicy.inputs[0].streams[0],
+                    vars: {
+                      'azure.account_type': { value: 'single-account' },
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+          mockUpdatePolicy,
+          'azure'
+        )
+      );
+
+      expect(result.current.accountTypeFromInputs).toBe('single-account');
+    });
+
+    it('should return undefined when no account type is present', () => {
+      const { result } = renderHook(() =>
+        useCloudConnectorSetup(mockInput, mockPolicy, mockUpdatePolicy, 'aws')
+      );
+
+      expect(result.current.accountTypeFromInputs).toBeUndefined();
+    });
+
+    it('should return undefined when cloudProvider is not provided', () => {
+      const { result } = renderHook(() =>
+        useCloudConnectorSetup(mockInput, mockPolicy, mockUpdatePolicy, undefined)
+      );
+
+      expect(result.current.accountTypeFromInputs).toBeUndefined();
+    });
+
+    it('should return undefined for unsupported cloud provider', () => {
+      const { result } = renderHook(() =>
+        useCloudConnectorSetup(mockInput, mockPolicy, mockUpdatePolicy, 'gcp' as any)
+      );
+
+      expect(result.current.accountTypeFromInputs).toBeUndefined();
+    });
+  });
 });
