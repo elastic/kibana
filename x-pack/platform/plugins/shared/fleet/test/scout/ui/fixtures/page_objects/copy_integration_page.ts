@@ -30,6 +30,10 @@ export class CopyIntegrationPage {
     return this.page.testSubj.locator('agentPolicyMultiSelect');
   }
 
+  getAgentPolicySelectIsLoading() {
+    return this.getAgentPolicySelect().getByRole('progressbar');
+  }
+
   async fillPackagePolicyName(name: string) {
     const input = this.getPackagePolicyNameInput();
     await input.clear();
