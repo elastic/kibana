@@ -84,6 +84,7 @@ export const ExpressionChart = ({
     region,
     timerange,
     schema,
+    includeTimeseries: true,
   });
 
   const metric = {
