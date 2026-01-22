@@ -32,11 +32,17 @@ export const AiPromptStepDefinition: PublicStepDefinition<
   editorHandlers: {
     dynamicSchema: {
       getOutputSchema: ({ input }) => {
-        if (input.schema) {
-          return getStructuredOutputSchema(fromJSONSchema(input.schema));
+        if (!input.schema) {
+          return AiPromptOutputSchema;
         }
 
-        return AiPromptOutputSchema;
+        const zodSchema = fromJSONSchema(input.schema);
+
+        if (!zodSchema) {
+          return AiPromptOutputSchema;
+        }
+
+        return getStructuredOutputSchema(zodSchema);
       },
     },
   },
