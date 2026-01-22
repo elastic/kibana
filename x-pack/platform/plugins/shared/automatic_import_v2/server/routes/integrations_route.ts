@@ -148,39 +148,45 @@ const createIntegrationRoute = (
         },
       },
       async (context, request, response) => {
+        const { automaticImportService, getCurrentUser, esClient } =
+          await context.automaticImportv2;
+        const { integrationId, title, logo, description, connectorId, dataStreams } = request.body;
         try {
-          const automaticImportv2 = await context.automaticImportv2;
-          const automaticImportService = automaticImportv2.automaticImportService;
-          const integrationRequestBody = request.body;
-          const authenticatedUser = await automaticImportv2.getCurrentUser();
-          const integrationId = integrationRequestBody.integrationId;
+          const authenticatedUser = await getCurrentUser();
 
           const integrationParams: IntegrationParams = {
             integrationId,
-            title: integrationRequestBody.title,
-            logo: integrationRequestBody.logo,
-            description: integrationRequestBody.description,
+            title,
+            logo,
+            description,
           };
 
-          await automaticImportService.createIntegration({ authenticatedUser, integrationParams });
+          await automaticImportService.createUpdateIntegration({
+            authenticatedUser,
+            integrationParams,
+          });
 
-          if (integrationRequestBody.dataStreams) {
-            const dataStreamsParams: DataStreamParams[] = integrationRequestBody.dataStreams.map(
-              (dataStream) => ({
-                ...dataStream,
-                integrationId,
-                metadata: { createdAt: new Date().toISOString() },
-              })
-            );
+          if (dataStreams) {
+            const dataStreamsParams: DataStreamParams[] = dataStreams.map((dataStream) => ({
+              ...dataStream,
+              integrationId,
+              metadata: { createdAt: new Date().toISOString() },
+            }));
             await Promise.all(
               dataStreamsParams.map((dataStreamParams) =>
-                automaticImportService.createDataStream({
-                  authenticatedUser,
-                  dataStreamParams,
-                })
+                automaticImportService.createDataStream(
+                  {
+                    authenticatedUser,
+                    dataStreamParams,
+                    esClient,
+                    connectorId,
+                  },
+                  request
+                )
               )
             );
           }
+
           const body: CreateAutoImportIntegrationResponse = {
             integration_id: integrationId,
           };
