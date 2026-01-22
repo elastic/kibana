@@ -97,8 +97,6 @@
     "@kbn/lazy-object",
     "@kbn/scout",
     "@kbn/mock-idp-utils",
-    "@kbn/actions-plugin",
-    "@kbn/synthtrace"
   ],
   "exclude": ["target/**/*"]
 }
