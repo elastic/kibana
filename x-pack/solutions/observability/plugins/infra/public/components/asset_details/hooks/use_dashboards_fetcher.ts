@@ -8,7 +8,6 @@
 import { useState, useEffect } from 'react';
 import type { SearchDashboardsResponse } from '@kbn/dashboard-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useTabSwitcherContext } from './use_tab_switcher';
@@ -20,9 +19,8 @@ export interface SearchDashboardsResult {
 
 export function useDashboardFetcher(query = ''): SearchDashboardsResult {
   const {
-    services: { dashboard },
+    services: { dashboard, notifications },
   } = useKibanaContextForPlugin();
-  const { notifications } = useKibana();
   const [result, setResult] = useState<SearchDashboardsResult>({
     data: [],
     status: FETCH_STATUS.NOT_INITIATED,
@@ -39,11 +37,11 @@ export function useDashboardFetcher(query = ''): SearchDashboardsResult {
         const findDashboardsService = await dashboard?.findDashboardsService();
         const data = await findDashboardsService.search({
           search: query,
-          size: 1000,
+          per_page: 1000,
         });
 
         setResult({
-          data: data.hits,
+          data: data.dashboards,
           status: FETCH_STATUS.SUCCESS,
         });
       } catch (error) {
@@ -51,11 +49,11 @@ export function useDashboardFetcher(query = ''): SearchDashboardsResult {
           data: [],
           status: FETCH_STATUS.FAILURE,
         });
-        notifications.toasts.danger({
+        notifications.toasts.addDanger({
           title: i18n.translate('xpack.infra.fetchingDashboards.addFailure.toast.title', {
             defaultMessage: 'Error while fetching dashboards',
           }),
-          body: error.message,
+          text: error.message,
         });
       }
     };

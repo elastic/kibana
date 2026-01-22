@@ -21,7 +21,7 @@ import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plug
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import type { ViewMode } from '@kbn/presentation-publishing';
 
-import type { DashboardSearchOut } from '@kbn/dashboard-plugin/server/content_management';
+//import type { DashboardSearchOut } from '@kbn/dashboard-plugin/server/content_management';
 import type { SerializableRecord } from '@kbn/utility-types';
 import {
   ASSET_DETAILS_FLYOUT_LOCATOR_ID,
@@ -53,7 +53,7 @@ import { FilterExplanationCallout } from './filter_explanation_callout';
 
 export function Dashboards() {
   const { dateRange } = useDatePickerContext();
-  const { asset, renderMode } = useAssetDetailsRenderPropsContext();
+  const { entity, renderMode } = useAssetDetailsRenderPropsContext();
   const location = useLocation();
   const {
     services: { share, telemetry },
@@ -67,13 +67,13 @@ export function Dashboards() {
   const [urlState, setUrlState] = useAssetDetailsUrlState();
   const trackOnlyOnceTheSameDashboardFilters = React.useRef(false);
 
-  const { dashboards, loading, reload } = useFetchCustomDashboards({ assetType: asset.type });
+  const { dashboards, loading, reload } = useFetchCustomDashboards({ assetType: entity.type });
 
   useEffect(() => {
     trackOnlyOnceTheSameDashboardFilters.current = false;
     if (currentDashboard) {
       const currentEventTrackingProperties: AssetDashboardLoadedParams = {
-        assetType: asset.type,
+        assetType: entity.type,
         state: currentDashboard.dashboardFilterAssetIdEnabled,
         filtered_by: currentDashboard.dashboardFilterAssetIdEnabled ? ['assetId'] : [],
       };
@@ -87,10 +87,10 @@ export function Dashboards() {
         telemetry.reportAssetDashboardLoaded(currentEventTrackingProperties);
       }
     }
-  }, [asset.type, currentDashboard, telemetry, trackingEventProperties]);
+  }, [entity.type, currentDashboard, telemetry, trackingEventProperties]);
 
   useEffect(() => {
-    const allAvailableDashboardsMap = new Map<string, DashboardSearchOut['hits'][number]>();
+    const allAvailableDashboardsMap = new Map<string, any>();
     allAvailableDashboards.forEach((availableDashboard) => {
       allAvailableDashboardsMap.set(availableDashboard.id, availableDashboard);
     });
@@ -102,7 +102,7 @@ export function Dashboards() {
           );
           if (matchedDashboard) {
             result.push({
-              title: matchedDashboard.attributes.title,
+              title: matchedDashboard.data.title,
               ...customDashboard,
             });
           }
@@ -141,19 +141,19 @@ export function Dashboards() {
     if (!dashboard) return;
     dashboard.setFilters(
       metrics.dataView && currentDashboard?.dashboardFilterAssetIdEnabled
-        ? buildAssetIdFilter(asset.name, asset.type, metrics.dataView)
+        ? buildAssetIdFilter(entity.name, entity.type, metrics.dataView)
         : []
     );
     dashboard.setTimeRange({ from: dateRange.from, to: dateRange.to });
     dashboard.forceRefresh();
   }, [
     metrics.dataView,
-    asset.name,
+    entity.name,
     dashboard,
     dateRange.from,
     dateRange.to,
     currentDashboard,
-    asset.type,
+    entity.type,
   ]);
 
   const getLocatorParams = useCallback(
@@ -165,12 +165,12 @@ export function Dashboards() {
 
       return {
         assetDetails: { ...urlState, dashboardId: params.dashboardId },
-        assetType: asset.type,
-        assetId: asset.id,
+        assetType: entity.type,
+        assetId: entity.id,
         ...flyoutParams,
       };
     },
-    [asset.id, asset.type, location.search, urlState]
+    [entity.id, entity.type, location.search, urlState]
   );
 
   const locator = useMemo(() => {
@@ -236,18 +236,18 @@ export function Dashboards() {
                       newDashboardButton
                       onRefresh={reload}
                       customDashboards={customDashboards}
-                      assetType={asset.type}
+                      assetType={entity.type}
                     />,
                     <GotoDashboardLink currentDashboard={currentDashboard} />,
                     <EditDashboard
                       currentDashboard={currentDashboard}
                       onRefresh={reload}
-                      assetType={asset.type}
+                      assetType={entity.type}
                     />,
                     <UnlinkDashboard
                       currentDashboard={currentDashboard}
                       onRefresh={reload}
-                      assetType={asset.type}
+                      assetType={entity.type}
                     />,
                   ]}
                 />
@@ -280,7 +280,7 @@ export function Dashboards() {
             <LinkDashboard
               onRefresh={reload}
               customDashboards={customDashboards}
-              assetType={asset.type}
+              assetType={entity.type}
             />
           }
         />
