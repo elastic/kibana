@@ -227,9 +227,7 @@ export const asCodeDSLFilterSchema = commonBasePropertiesSchema.extends({
   field: schema.maybe(
     schema.string({
       meta: {
-        description:
-          'Field name metadata. Critical for backwards compatibility in legacy scripted filters where field cannot be extracted from query.',
-        deprecated: true,
+        description: 'Field name for scripted filters where field cannot be extracted from query.',
       },
     })
   ),
@@ -237,8 +235,7 @@ export const asCodeDSLFilterSchema = commonBasePropertiesSchema.extends({
     schema.any({
       meta: {
         description:
-          'Filter parameters metadata. Preserves display values, formats, and script parameters in legacy filters for backwards compatibility.',
-        deprecated: true,
+          'Filter parameters metadata. May contain display values, formats, and parameters for scripted filters.',
       },
     })
   ),
