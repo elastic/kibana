@@ -154,25 +154,20 @@ export async function loadIndices(onIndicesLoaded: (indices: Index[]) => void) {
 
   // iterate over all the requests for additional info
   enrichedPromises.forEach((enrichedPromise) => {
-    enrichedPromise
-      .then((enriched) => {
-        // iterate over the array of additional data and merge it into the original index data
-        if (enriched.indices) {
-          enriched.indices.forEach((enrichedIndex) => {
-            if (indices[enrichedIndex.name]) {
-              Object.assign(indices[enrichedIndex.name], enrichedIndex);
-            }
-          });
-          onIndicesLoaded(Object.values(indices));
-        } else {
-          // todo need to add these to state
-          // console.error(enriched.error);
-        }
-      })
-      .catch((error) => {
-        // todo errors should be collected and displayed to the user
-        // console.error(error);
-      });
+    enrichedPromise.then((enriched) => {
+      // iterate over the array of additional data and merge it into the original index data
+      if (enriched.indices) {
+        enriched.indices.forEach((enrichedIndex) => {
+          if (indices[enrichedIndex.name]) {
+            Object.assign(indices[enrichedIndex.name], enrichedIndex);
+          }
+        });
+        onIndicesLoaded(Object.values(indices));
+      } else {
+        // todo need to add these to state
+        // console.error(enriched.error);
+      }
+    });
   });
 }
 
