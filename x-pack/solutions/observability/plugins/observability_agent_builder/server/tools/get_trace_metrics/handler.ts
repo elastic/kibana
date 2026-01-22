@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import { orderBy } from 'lodash';
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
-import {
-  calculateFailedTransactionRate,
-  getOutcomeAggregation,
-  calculateThroughputWithRange,
-} from '@kbn/apm-data-access-plugin/server/utils';
+import { ApmDocumentType } from '@kbn/apm-data-access-plugin/common';
+import { getOutcomeAggregation } from '@kbn/apm-data-access-plugin/server/utils';
 import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
   ObservabilityAgentBuilderPluginStart,
@@ -36,6 +32,69 @@ export interface TraceMetricsItem {
 }
 
 const MAX_NUMBER_OF_GROUPS = 100;
+
+function getTermsOrderAggregationPath(
+  sortBy: 'latency' | 'throughput' | 'failureRate',
+  latencyType: LatencyAggregationType
+): string {
+  switch (sortBy) {
+    case 'latency':
+      return latencyType === 'avg' ? 'latency' : `latency.${latencyType === 'p95' ? '95' : '99'}`;
+    case 'throughput':
+      return 'throughput';
+    case 'failureRate':
+      return 'failure_rate';
+  }
+}
+function getFailureRateAggregation(documentType: DocumentType) {
+  const calculateFailedTransactionRate =
+    'params.successful_or_failed != null && params.successful_or_failed > 0 ? (params.successful_or_failed - params.success) / params.successful_or_failed : 0';
+  return {
+    ...getOutcomeAggregation(documentType),
+    failure_rate:
+      documentType === ApmDocumentType.ServiceTransactionMetric
+        ? {
+            bucket_script: {
+              buckets_path: {
+                successful_or_failed: 'successful_or_failed',
+                success: 'successful',
+              },
+              script: {
+                source: calculateFailedTransactionRate,
+              },
+            },
+          }
+        : {
+            bucket_script: {
+              buckets_path: {
+                successful_or_failed: 'successful_or_failed>_count',
+                success: 'successful>_count',
+              },
+              script: {
+                source: calculateFailedTransactionRate,
+              },
+            },
+          },
+  };
+}
+
+function getThroughputAggregation(durationAsMinutes: number) {
+  return {
+    throughput: {
+      bucket_script: {
+        buckets_path: {
+          count: '_count',
+        },
+        script: {
+          source: 'params.count != null ? params.count / params.durationAsMinutes : 0',
+          params: {
+            durationAsMinutes,
+          },
+        },
+      },
+    },
+  };
+}
 
 export async function getToolHandler({
   core,
@@ -105,14 +164,16 @@ export async function getToolHandler({
         terms: {
           field: groupBy,
           size: MAX_NUMBER_OF_GROUPS,
+          order: { [getTermsOrderAggregationPath(sortBy, latencyType)]: 'desc' },
         },
         aggs: {
-          ...getOutcomeAggregation(documentType),
           ...getLatencyAggregation({
             latencyAggregationType: latencyType,
             hasDurationSummaryField,
             documentType,
           }),
+          ...getFailureRateAggregation(documentType),
+          ...getThroughputAggregation((endMs - startMs) / 1000 / 60),
         },
       },
     },
@@ -121,7 +182,6 @@ export async function getToolHandler({
   const buckets = response.aggregations?.groups?.buckets ?? [];
 
   const items: TraceMetricsItem[] = buckets.map((bucket) => {
-    const docCount = bucket.doc_count;
     const latencyValue = getLatencyValue({
       latencyAggregationType: latencyType,
       aggregation: bucket.latency,
@@ -130,24 +190,16 @@ export async function getToolHandler({
     const latencyMs =
       latencyValue !== null && latencyValue !== undefined ? latencyValue / 1000 : -1;
 
-    const failureRate = calculateFailedTransactionRate(bucket);
-
-    const throughput = calculateThroughputWithRange({
-      start: startMs,
-      end: endMs,
-      value: docCount,
-    });
-
     return {
       group: bucket.key as string,
       latency: latencyMs,
-      throughput,
-      failureRate,
+      throughput: bucket.throughput.value as number,
+      failureRate: bucket.failure_rate.value as number,
     };
   });
 
   return {
-    items: orderBy(items, [sortBy], ['desc']),
+    items,
     latencyType,
   };
 }
