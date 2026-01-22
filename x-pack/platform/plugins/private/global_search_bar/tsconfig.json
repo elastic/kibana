@@ -15,6 +15,7 @@
     "@kbn/saved-objects-tagging-oss-plugin",
     "@kbn/core-chrome-browser",
     "@kbn/config-schema",
+    "@kbn/shared-ux-utility"
   ],
   "exclude": [
     "target/**/*",

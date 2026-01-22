@@ -22,6 +22,7 @@ import type { Action } from '@elastic/eui/src/components/basic_table/action_type
 import { TableIcon } from '../../../../../../../components/package_icon';
 import type { PackageListItem } from '../../../../../../../../common';
 import { type UrlPagination, useLink, useAuthz, useLicense } from '../../../../../../../hooks';
+
 import type { InstalledPackageUIPackageListItem } from '../types';
 import { useViewPolicies } from '../hooks/use_url_filters';
 import { useInstalledIntegrationsActions } from '../hooks/use_installed_integrations_actions';
@@ -69,6 +70,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
       bulkUpgradeIntegrationsWithConfirmModal,
       bulkRollbackIntegrationsWithConfirmModal,
     },
+    rollingbackIntegrations,
   } = useInstalledIntegrationsActions();
   const { enablePackageRollback } = ExperimentalFeaturesService.get();
   const licenseService = useLicense();
@@ -110,6 +112,9 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
         items={installedPackages}
         itemId="name"
         rowProps={{ 'data-test-subj': 'installedIntegrationsTableRow' }}
+        tableCaption={i18n.translate('xpack.fleet.epmInstalledIntegrations.tableCaption', {
+          defaultMessage: 'Installed integrations',
+        })}
         pagination={{
           pageIndex: pagination.pagination.currentPage - 1,
           totalItemCount: total,
@@ -335,9 +340,15 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                         ),
                         icon: 'returnKey',
                         type: 'icon',
-
+                        'data-test-subj': 'rollbackButton',
                         onClick: (item) => bulkRollbackIntegrationsWithConfirmModal([item]),
-                        enabled: (item) => isRollbackAvailablePackages[item.name] ?? false,
+                        enabled: (item) => {
+                          const isAvailable = isRollbackAvailablePackages[item.name] ?? false;
+                          const isRollingBack =
+                            rollingbackIntegrations?.some((u) => u.name === item.name) ?? false;
+
+                          return isAvailable && !isRollingBack;
+                        },
                         description: (item) =>
                           !hasPreviousVersion(item)
                             ? i18n.translate(

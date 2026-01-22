@@ -443,10 +443,10 @@ paths:
                   endpoint_ids:
                     - ed518850-681a-4d60-bb98-e22640cae2a8
                   parameters:
-                    inputParams: >-
+                    scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
+                    scriptInput: >-
                       --delete --paths-to-delete
                       /tmp/temp_file.txt,/tmp/random_file.txt
-                    script: 1111-2222-3333-4444-5555-6666-7777-8888
             schema:
               $ref: '#/components/schemas/RunScriptRouteRequestBody'
         required: true
@@ -1338,7 +1338,11 @@ components:
                 command:
                   $ref: '#/components/schemas/Command'
                 timeout:
-                  $ref: '#/components/schemas/Timeout'
+                  description: >-
+                    The maximum timeout value in seconds before the command is
+                    terminated.
+                  minimum: 1
+                  type: integer
               required:
                 - command
           required:
@@ -2493,21 +2497,21 @@ components:
         endpoint_ids:
           - endpoint-id-1
         parameters:
-          inputParams: '--delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt'
-          script: 1111-2222-3333-4444-5555-6666-7777-8888
+          scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
+          scriptInput: '--delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt'
       properties:
-        inputParams:
-          description: The input parameter arguments for the script that was selected.
-          minLength: 1
-          type: string
-        script:
+        scriptId:
           description: >-
             The script ID from SentinelOne scripts library that will be
             executed.
           minLength: 1
           type: string
+        scriptInput:
+          description: The input parameter arguments for the script that was selected.
+          minLength: 1
+          type: string
       required:
-        - script
+        - scriptId
       title: SentinelOne Run Script Parameters
       type: object
     SortDirection:
@@ -2668,10 +2672,6 @@ components:
           wasSuccessful: true
       type: object
       properties: {}
-    Timeout:
-      description: The maximum timeout value in milliseconds (optional)
-      minimum: 1
-      type: integer
     Type:
       description: Type of response action
       enum:
