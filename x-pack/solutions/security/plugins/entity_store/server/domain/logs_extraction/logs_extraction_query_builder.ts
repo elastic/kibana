@@ -15,7 +15,7 @@ export const HASHED_ID = 'entity.hashedId';
 const HASH_ALG = 'SHA256';
 
 const MAIN_ENTITY_ID = 'entity.id';
-const DEFAULT_FIELDS = ['@timestamp', MAIN_ENTITY_ID];
+const DEFAULT_FIELDS_TO_KEEP = ['@timestamp', MAIN_ENTITY_ID, HASHED_ID];
 const METADATA_FIELDS = ['_index'];
 
 const RECENT_DATA_PREFIX = 'recent';
@@ -69,10 +69,9 @@ export const buildLogsExtractionEsqlQuery = ({
     ${recentData(idFieldName)} AS ${idFieldName}
   | EVAL
     ${mergedFieldStats(idField, fields)},
-    ${customFieldEvalLogic()}
+    ${customFieldEvalLogic()},
+    ${HASHED_ID} = HASH("${HASH_ALG}", ${MAIN_ENTITY_ID})
   | KEEP ${fieldsToKeep(idField, fields)}
-  | LIMIT ${maxPageSearchSize}
-  | EVAL ${HASHED_ID} = HASH("${HASH_ALG}", ${MAIN_ENTITY_ID})
   | SORT @timestamp ASC`;
 };
 
@@ -124,7 +123,7 @@ function mergedFieldStats({ field: idField }: EntityIdentityField, fields: Entit
 function fieldsToKeep({ field: idField }: EntityIdentityField, fields: EntityField[]) {
   return fields
     .map(({ destination, source }) => destination || source)
-    .concat([...DEFAULT_FIELDS, idField])
+    .concat([...DEFAULT_FIELDS_TO_KEEP, idField])
     .join(',\n ');
 }
 

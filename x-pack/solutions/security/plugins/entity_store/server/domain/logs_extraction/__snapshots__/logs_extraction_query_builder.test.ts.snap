@@ -183,7 +183,8 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
  entity.risk.calculated_score_norm = COALESCE(recent.entity.risk.calculated_score_norm, entity.risk.calculated_score_norm),
  entity.id = entity.id,
     @timestamp = recent.timestamp,
- entity.name = COALESCE(entity.name, entity.id)
+ entity.name = COALESCE(entity.name, entity.id),
+    entity.hashedId = HASH(\\"SHA256\\", entity.id)
   | KEEP entity.name,
  entity.source,
  entity.type,
@@ -267,9 +268,8 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
  entity.risk.calculated_score_norm,
  @timestamp,
  entity.id,
+ entity.hashedId,
  entity.id
-  | LIMIT 10000
-  | EVAL entity.hashedId = HASH(\\"SHA256\\", entity.id)
   | SORT @timestamp ASC"
 `;
 
@@ -382,7 +382,8 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
  entity.relationships.Accessed_frequently_by = MV_DEDUPE(COALESCE(MV_APPEND(recent.entity.relationships.Accessed_frequently_by, entity.relationships.Accessed_frequently_by), recent.entity.relationships.Accessed_frequently_by)),
  entity.id = host.name,
     @timestamp = recent.timestamp,
- entity.name = COALESCE(entity.name, entity.id)
+ entity.name = COALESCE(entity.name, entity.id),
+    entity.hashedId = HASH(\\"SHA256\\", entity.id)
   | KEEP host.domain,
  host.hostname,
  host.id,
@@ -429,9 +430,8 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
  entity.relationships.Accessed_frequently_by,
  @timestamp,
  entity.id,
+ entity.hashedId,
  host.name
-  | LIMIT 10000
-  | EVAL entity.hashedId = HASH(\\"SHA256\\", entity.id)
   | SORT @timestamp ASC"
 `;
 
@@ -542,7 +542,8 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
  entity.relationships.Dependent_of = MV_DEDUPE(COALESCE(MV_APPEND(recent.entity.relationships.Dependent_of, entity.relationships.Dependent_of), recent.entity.relationships.Dependent_of)),
  entity.id = service.name,
     @timestamp = recent.timestamp,
- entity.name = COALESCE(entity.name, entity.id)
+ entity.name = COALESCE(entity.name, entity.id),
+    entity.hashedId = HASH(\\"SHA256\\", entity.id)
   | KEEP service.address,
  service.environment,
  service.ephemeral_id,
@@ -588,9 +589,8 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
  entity.relationships.Dependent_of,
  @timestamp,
  entity.id,
+ entity.hashedId,
  service.name
-  | LIMIT 10000
-  | EVAL entity.hashedId = HASH(\\"SHA256\\", entity.id)
   | SORT @timestamp ASC"
 `;
 
@@ -695,7 +695,8 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
  entity.relationships.Supervised_by = MV_DEDUPE(COALESCE(MV_APPEND(recent.entity.relationships.Supervised_by, entity.relationships.Supervised_by), recent.entity.relationships.Supervised_by)),
  entity.id = user.name,
     @timestamp = recent.timestamp,
- entity.name = COALESCE(entity.name, entity.id)
+ entity.name = COALESCE(entity.name, entity.id),
+    entity.hashedId = HASH(\\"SHA256\\", entity.id)
   | KEEP user.domain,
  user.email,
  user.full_name,
@@ -738,8 +739,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
  entity.relationships.Supervised_by,
  @timestamp,
  entity.id,
+ entity.hashedId,
  user.name
-  | LIMIT 10000
-  | EVAL entity.hashedId = HASH(\\"SHA256\\", entity.id)
   | SORT @timestamp ASC"
 `;
