@@ -2861,7 +2861,7 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/solutions/security/plugins/security_solution/public/exceptions @elastic/security-detection-engine
 
 /x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/migrations @elastic/security-detection-engine
-x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/ai_assisted_rule_creation @elastic/security-detection-engine
+/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/ai_assisted_rule_creation @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_exceptions @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_preview @elastic/security-detection-engine
