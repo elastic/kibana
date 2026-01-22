@@ -7,14 +7,8 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
-import type {
-  KibanaRequest,
-  SavedObjectsClientContract,
-  ElasticsearchClient,
-} from '@kbn/core/server';
+import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
 import {
   type TestElasticsearchUtils,
@@ -30,21 +24,6 @@ import { agentPolicyService } from '../services';
 import { getAgentPolicySavedObjectType } from '../services/agent_policy';
 
 import { useDockerRegistry, waitForFleetSetup } from './helpers';
-
-const fakeRequest = {
-  headers: {},
-  getBasePath: () => '',
-  path: '/',
-  route: { settings: {} },
-  url: {
-    href: '/',
-  },
-  raw: {
-    req: {
-      url: '/',
-    },
-  },
-} as unknown as KibanaRequest;
 
 describe('upgrade agent policy schema version', () => {
   let esServer: TestElasticsearchUtils;
@@ -130,9 +109,7 @@ describe('upgrade agent policy schema version', () => {
     let esClient: ElasticsearchClient;
 
     beforeAll(async () => {
-      soClient = kbnServer.coreStart.savedObjects.getScopedClient(fakeRequest, {
-        excludedExtensions: [SECURITY_EXTENSION_ID],
-      });
+      soClient = kbnServer.coreStart.savedObjects.getUnsafeInternalClient();
       esClient = kbnServer.coreStart.elasticsearch.client.asInternalUser;
     });
 

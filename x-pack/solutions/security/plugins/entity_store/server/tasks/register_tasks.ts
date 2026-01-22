@@ -8,9 +8,9 @@
 import type { Logger } from '@kbn/logging';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 
-import { ALL_ENTITY_TYPES } from '../domain/definitions/entity_type';
 import { registerExtractEntityTasks } from './extract_entity_task';
 import type { EntityStoreCoreSetup } from '../types';
+import { ALL_ENTITY_TYPES } from '../domain/definitions/entity_schema';
 
 export function registerTasks(
   taskManager: TaskManagerSetupContract,
