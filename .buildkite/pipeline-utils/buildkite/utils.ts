@@ -11,6 +11,7 @@ import fs from 'fs';
 
 export function emitPipeline(pipelineSteps: string[]) {
   const pipelineStr = [...new Set(pipelineSteps)].join('\n');
+  console.warn('debug:', pipelineSteps);
   console.log(pipelineStr);
 }
 

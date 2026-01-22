@@ -51,6 +51,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     pipeline.push(getAgentImageConfig({ returnYaml: true }));
 
+    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/only_test.yml', false));
+    emitPipeline(pipeline);
+    return;
+
     const onlyRunQuickChecks = await areChangesSkippable([/^renovate\.json$/], REQUIRED_PATHS);
     if (onlyRunQuickChecks) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/renovate.yml', false));
