@@ -34,7 +34,7 @@ import {
 import { fromMetricAPItoLensState } from '../../columns/metric';
 import { fromBucketLensApiToLensState } from '../../columns/buckets';
 import { fromColorMappingAPIToLensState } from '../../coloring';
-import type { AnyMetricLensStateColumn } from '../../columns/types';
+import { processMetricColumnsWithReferences } from '../utils';
 
 const X_ACCESSOR = 'x';
 const BREAKDOWN_ACCESSOR = 'breakdown';
@@ -221,23 +221,11 @@ export function buildFormBasedXYLayer(layer: unknown, i: number) {
   if (isAPIDataLayer(layer)) {
     // convert metrics in buckets, do not flat yet
     const yColumnsConverted = layer.y.map(fromMetricAPItoLensState);
-    const yColumnsWithIds: Array<{ column: AnyMetricLensStateColumn; id: string }> = [];
-    // now fix the ids of referenced columns
-    for (const [index, convertedColumns] of Object.entries(yColumnsConverted)) {
-      const [mainMetric, refMetric] = convertedColumns;
-      const id = getAccessorNameForXY(layer, METRIC_ACCESSOR_PREFIX, Number(index));
-      yColumnsWithIds.push({ column: mainMetric, id });
-      if (refMetric) {
-        // Use a different format for reference column ids
-        // as visualization doesn't know about them, so wrong id could be generated on that side
-        const refId = getAccessorNameForXY(layer, `${METRIC_ACCESSOR_PREFIX}_ref`, Number(index));
-        // rewrite the mainMetric reference id to match the newly generated one
-        if ('references' in mainMetric && Array.isArray(mainMetric.references)) {
-          mainMetric.references = [refId];
-        }
-        yColumnsWithIds.push({ column: refMetric, id: refId });
-      }
-    }
+    const yColumnsWithIds = processMetricColumnsWithReferences(
+      yColumnsConverted,
+      (index) => getAccessorNameForXY(layer, METRIC_ACCESSOR_PREFIX, index),
+      (index) => getAccessorNameForXY(layer, `${METRIC_ACCESSOR_PREFIX}_ref`, index)
+    );
     const xColumns = layer.x ? fromBucketLensApiToLensState(layer.x, yColumnsWithIds) : undefined;
     const breakdownColumns = layer.breakdown_by
       ? fromBucketLensApiToLensState(layer.breakdown_by, yColumnsWithIds)
