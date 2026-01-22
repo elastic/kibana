@@ -21,7 +21,7 @@
 module.exports = {
   test(val) {
     // After enzyme-to-json, match plain objects that represent Emotion's ForwardRef wrappers
-    
+
     // Skip if not an object
     if (!val || typeof val !== 'object') {
       return false;

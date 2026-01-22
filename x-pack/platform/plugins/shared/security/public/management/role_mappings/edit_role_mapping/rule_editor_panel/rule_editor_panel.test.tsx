@@ -128,7 +128,7 @@ describe('RuleEditorPanel', () => {
     // Error boundary should have caught the error
     expect(wrapper.find(VisualRuleEditor)).toHaveLength(0);
     expect(wrapper.find(EuiErrorBoundary)).toHaveLength(1);
-    
+
     consoleError.mockRestore();
     jest.restoreAllMocks();
   });
