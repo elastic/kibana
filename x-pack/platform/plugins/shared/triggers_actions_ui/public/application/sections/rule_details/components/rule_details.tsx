@@ -250,10 +250,12 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   const onEditRuleClick = () => {
     if (isInRulesApp) {
       // Navigate within the rules app using history
+      const { pathname, search, hash } = history.location;
+      const returnPath = `${pathname}${search}${hash}` || `/${rule.id}`;
       history.push({
         pathname: getEditRuleRoute(rule.id),
         state: {
-          returnPath: history.location.pathname + history.location.search + history.location.hash,
+          returnPath,
         },
       });
     } else {

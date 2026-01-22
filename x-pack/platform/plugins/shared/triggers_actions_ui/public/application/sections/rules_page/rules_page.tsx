@@ -89,7 +89,7 @@ const RulesPage = () => {
   const navigateToEditRuleForm = useCallback(
     (ruleId: string) => {
       const { pathname, search, hash } = locationRef.current;
-      const returnPath = `${pathname}${search}${hash}`;
+      const returnPath = `${pathname}${search}${hash}` || '/';
 
       history.push({
         pathname: getEditRuleRoute(ruleId),
