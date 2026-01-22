@@ -5,6 +5,7 @@
  * 2.0.
  */
 import pLimit from 'p-limit';
+import { Agent, fetch as undiciFetch } from 'undici';
 import type { PhoenixClient } from '@arizeai/phoenix-client';
 import { createClient } from '@arizeai/phoenix-client';
 import type { RanExperiment, TaskOutput } from '@arizeai/phoenix-client/dist/esm/types/experiments';
@@ -15,6 +16,51 @@ import { withInferenceContext } from '@kbn/inference-tracing';
 import type { Evaluator, EvaluationDataset, ExperimentTask } from '../types';
 import { upsertDataset } from './upsert_dataset';
 import type { PhoenixConfig } from '../utils/get_phoenix_config';
+
+const PHOENIX_CONNECT_TIMEOUT_MS = 60_000;
+const PHOENIX_HEADERS_TIMEOUT_MS = 60_000;
+const PHOENIX_BODY_TIMEOUT_MS = 5 * 60_000;
+
+const phoenixAgent = new Agent({
+  connectTimeout: PHOENIX_CONNECT_TIMEOUT_MS,
+  headersTimeout: PHOENIX_HEADERS_TIMEOUT_MS,
+  bodyTimeout: PHOENIX_BODY_TIMEOUT_MS,
+});
+
+export async function phoenixFetch(
+  input: RequestInfo | URL,
+  init?: RequestInit
+): Promise<Response> {
+  // openapi-fetch passes a Request object, but undici.fetch doesn't handle
+  // the global Request type the same way. Extract URL and init from Request.
+  if (input instanceof Request) {
+    const request = input;
+    const url = request.url;
+    const body = request.body;
+    const mergedInit = {
+      method: request.method,
+      headers: Object.fromEntries(request.headers.entries()),
+      body,
+      duplex: body ? 'half' : undefined,
+      ...init,
+    };
+    return undiciFetch(url, {
+      ...mergedInit,
+      dispatcher: phoenixAgent,
+    } as Parameters<typeof undiciFetch>[1]) as unknown as Promise<Response>;
+  }
+
+  const fetchInit = {
+    ...init,
+    duplex: init?.body ? 'half' : undefined,
+    dispatcher: phoenixAgent,
+  };
+
+  return undiciFetch(
+    input as Parameters<typeof undiciFetch>[0],
+    fetchInit as Parameters<typeof undiciFetch>[1]
+  ) as unknown as Promise<Response>;
+}
 
 export class KibanaPhoenixClient {
   private readonly phoenixClient: PhoenixClient;
@@ -31,7 +77,10 @@ export class KibanaPhoenixClient {
     }
   ) {
     this.phoenixClient = createClient({
-      options: this.options.config,
+      options: {
+        ...this.options.config,
+        fetch: phoenixFetch,
+      },
     });
   }
 
