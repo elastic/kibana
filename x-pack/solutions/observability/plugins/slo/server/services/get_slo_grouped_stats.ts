@@ -59,10 +59,10 @@ export class GetSLOGroupedStats {
     if (!config) {
       throw new IllegalArgumentError(`Unsupported SLO type: ${params.type}`);
     }
-    if (size < MIN_SIZE) {
+    if (size != null && size < MIN_SIZE) {
       throw new IllegalArgumentError(`size must be equal to or greater than ${MIN_SIZE}`);
     }
-    if (size > MAX_SIZE) {
+    if (size != null && size > MAX_SIZE) {
       throw new IllegalArgumentError(`size cannot be greater than ${MAX_SIZE}`);
     }
 
