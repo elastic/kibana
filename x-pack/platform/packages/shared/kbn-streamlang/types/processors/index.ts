@@ -451,6 +451,67 @@ export const trimProcessorSchema = processorBaseWithWhereSchema.extend({
   ignore_missing: z.optional(z.boolean()),
 }) satisfies z.Schema<TrimProcessor>;
 
+export interface JoinProcessor extends ProcessorBaseWithWhere {
+  action: 'join';
+  from: string[];
+  delimiter: string;
+  to: string;
+  ignore_missing?: boolean;
+}
+
+export const joinProcessorSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('join'),
+  from: z.array(StreamlangSourceField),
+  delimiter: z.string(),
+  to: StreamlangTargetField,
+  ignore_missing: z.optional(z.boolean()),
+}) satisfies z.Schema<JoinProcessor>;
+
+/**
+ * Concat processor
+ */
+
+interface ConcatFromField {
+  type: 'field';
+  value: string;
+}
+
+const concatFromFieldSchema = z.object({
+  type: z.literal('field'),
+  value: StreamlangSourceField,
+}) satisfies z.Schema<ConcatFromField>;
+
+interface ConcatFromLiteral {
+  type: 'literal';
+  value: string;
+}
+
+const concatFromLiteralSchema = z.object({
+  type: z.literal('literal'),
+  value: z.string(),
+}) satisfies z.Schema<ConcatFromLiteral>;
+
+type ConcatFrom = ConcatFromField | ConcatFromLiteral;
+
+const concatFromSchema = z.union([
+  concatFromFieldSchema,
+  concatFromLiteralSchema,
+]) satisfies z.Schema<ConcatFrom>;
+
+export interface ConcatProcessor extends ProcessorBaseWithWhere {
+  action: 'concat';
+  from: ConcatFrom[];
+  to: string;
+  ignore_missing?: boolean;
+}
+
+export const concatProcessorSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('concat'),
+  from: z.array(concatFromSchema).nonempty(),
+  to: StreamlangTargetField,
+  ignore_missing: z.optional(z.boolean()),
+}) satisfies z.Schema<ConcatProcessor>;
+
 export type StreamlangProcessorDefinition =
   | DateProcessor
   | DissectProcessor
@@ -467,6 +528,8 @@ export type StreamlangProcessorDefinition =
   | UppercaseProcessor
   | LowercaseProcessor
   | TrimProcessor
+  | JoinProcessor
+  | ConcatProcessor
   | ManualIngestPipelineProcessor;
 
 export const streamlangProcessorSchema = z.union([
@@ -484,7 +547,9 @@ export const streamlangProcessorSchema = z.union([
   uppercaseProcessorSchema,
   lowercaseProcessorSchema,
   trimProcessorSchema,
+  joinProcessorSchema,
   convertProcessorSchema,
+  concatProcessorSchema,
   manualIngestPipelineProcessorSchema,
 ]);
 
