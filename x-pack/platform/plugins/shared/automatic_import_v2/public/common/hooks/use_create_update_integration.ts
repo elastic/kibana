@@ -13,20 +13,20 @@ import { useKibana } from './use_kibana';
 import * as i18n from './translations';
 import { useUIState } from '../../components/integration_management/contexts';
 
-export interface UseCreateIntegrationResult {
-  createIntegrationMutation: ReturnType<
+export interface UseCreateUpdateIntegrationResult {
+  createUpdateIntegrationMutation: ReturnType<
     typeof useMutation<CreateAutoImportIntegrationResponse, Error, CreateIntegrationRequest>
   >;
-  isCreating: boolean;
+  isLoading: boolean;
   error: Error | null;
 }
 
 /**
- * Hook to create an integration with data streams.
+ * Hook to create or update an integration with data streams.
  * Uses React Query for mutation management with automatic cache invalidation.
- * Navigates to the edit page after successful creation.
+ * Navigates to the edit page after successful creation/update.
  */
-export function useCreateIntegration(): UseCreateIntegrationResult {
+export function useCreateUpdateIntegration(): UseCreateUpdateIntegrationResult {
   const { http, notifications, application } = useKibana().services;
   const { closeCreateDataStreamFlyout } = useUIState();
   const queryClient = useQueryClient();
@@ -41,7 +41,6 @@ export function useCreateIntegration(): UseCreateIntegrationResult {
     },
     onSuccess: (data) => {
       // Invalidate the specific integration cache to include new data streams
-      // we dont need this  if it is a "pure" create endpoint in the future
       if (data.integration_id) {
         queryClient.invalidateQueries({ queryKey: ['integration', data.integration_id] });
       }
@@ -49,8 +48,8 @@ export function useCreateIntegration(): UseCreateIntegrationResult {
       closeCreateDataStreamFlyout();
 
       notifications.toasts.addSuccess({
-        title: i18n.CREATE_INTEGRATION_SUCCESS,
-        text: i18n.CREATE_INTEGRATION_SUCCESS_DESCRIPTION(data.integration_id ?? ''),
+        title: i18n.SAVE_INTEGRATION_SUCCESS,
+        text: i18n.SAVE_INTEGRATION_SUCCESS_DESCRIPTION(data.integration_id ?? ''),
       });
 
       // Navigate to the edit page for the newly created integration
@@ -62,14 +61,14 @@ export function useCreateIntegration(): UseCreateIntegrationResult {
     },
     onError: (error) => {
       notifications.toasts.addError(error, {
-        title: i18n.CREATE_INTEGRATION_ERROR,
+        title: i18n.SAVE_INTEGRATION_ERROR,
       });
     },
   });
 
   return {
-    createIntegrationMutation: mutation,
-    isCreating: mutation.isLoading,
+    createUpdateIntegrationMutation: mutation,
+    isLoading: mutation.isLoading,
     error: mutation.error,
   };
 }

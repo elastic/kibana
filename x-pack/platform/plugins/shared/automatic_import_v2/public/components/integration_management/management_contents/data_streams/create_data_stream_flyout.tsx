@@ -37,7 +37,7 @@ import * as i18n from './translations';
 import { FormStyledLabel } from '../../../../common/components/form_styled_label';
 import { useFetchIndices } from '../../../../common/hooks/use_fetch_indices';
 import { useValidateIndex } from '../../../../common/hooks/use_validate_index';
-import { useCreateIntegration } from '../../../../common/hooks/use_create_integration';
+import { useCreateUpdateIntegration } from '../../../../common/hooks/use_create_update_integration';
 import { useGetIntegrationById } from '../../../../common/hooks/use_get_integration_by_id';
 import { generateId } from '../../../../common/lib/helper_functions';
 
@@ -134,7 +134,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
     validateIndex,
     clearValidationError: clearIndexValidationError,
   } = useValidateIndex();
-  const { createIntegrationMutation, isCreating } = useCreateIntegration();
+  const { createUpdateIntegrationMutation, isLoading } = useCreateUpdateIntegration();
 
   const [isParsing, setIsParsing] = useState(false);
   const [fileError, setFileError] = useState<string | undefined>(undefined);
@@ -227,7 +227,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
     !isLogSourceValid ||
     isParsing ||
     isValidatingIndex ||
-    isCreating;
+    isLoading;
 
   const handleAnalyzeLogs = useCallback(async () => {
     if (!formData) return;
@@ -238,25 +238,22 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
       name: method as InputType['name'],
     }));
 
-    const formDataStream: DataStream = {
+    const newDataStream: DataStream = {
       dataStreamId,
       title: formData.dataStreamTitle,
       description: formData.dataStreamDescription ?? formData.dataStreamTitle,
       inputTypes,
     };
 
-    const finalDataStreams = [...(integration?.dataStreams ?? []), formDataStream];
-
-    // TODO: Later have conditional mutation for create or update
-    await createIntegrationMutation.mutateAsync({
+    await createUpdateIntegrationMutation.mutateAsync({
       connectorId: formData.connectorId,
       integrationId,
       title: formData.title,
       description: formData.description,
       ...(formData.logo ? { logo: formData.logo } : {}),
-      dataStreams: finalDataStreams,
+      dataStreams: [newDataStream],
     });
-  }, [formData, createIntegrationMutation, currentIntegrationId, integration]);
+  }, [formData, createUpdateIntegrationMutation, currentIntegrationId]);
 
   return (
     <EuiFlyout
@@ -267,7 +264,6 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          {/* replace number with variable later */}
           <h2 id="createDataStreamFlyoutTitle">
             {i18n.CREATE_DATA_STREAM_TITLE} {(integration?.dataStreams?.length ?? 0) + 1}
           </h2>
@@ -448,7 +444,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
               fill
               onClick={handleAnalyzeLogs}
               disabled={isAnalyzeDisabled}
-              isLoading={isParsing || isCreating}
+              isLoading={isParsing || isLoading}
               data-test-subj="analyzeLogsButton"
             >
               {i18n.ANALYZE_LOGS_BUTTON}

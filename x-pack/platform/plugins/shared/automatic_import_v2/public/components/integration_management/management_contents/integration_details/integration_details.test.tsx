@@ -16,7 +16,7 @@ import { MAX_NAME_LENGTH, MAX_DESCRIPTION_LENGTH } from '../../forms/constants';
 
 const mockExistingPackageNames = ['existing_integration', 'my_custom_package', 'test_package'];
 
-jest.mock('../../../../../common/lib/api', () => ({
+jest.mock('../../../../common/lib/api', () => ({
   getInstalledPackages: jest.fn(() =>
     Promise.resolve({
       items: mockExistingPackageNames.map((id) => ({ id })),

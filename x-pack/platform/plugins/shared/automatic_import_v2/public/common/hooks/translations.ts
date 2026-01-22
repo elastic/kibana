@@ -22,22 +22,22 @@ export const INDEX_VALIDATION_FAILED = i18n.translate(
   }
 );
 
-export const CREATE_INTEGRATION_SUCCESS = i18n.translate(
-  'xpack.automaticImportV2.createIntegration.success',
+export const SAVE_INTEGRATION_SUCCESS = i18n.translate(
+  'xpack.automaticImportV2.saveIntegration.success',
   {
-    defaultMessage: 'Integration created successfully',
+    defaultMessage: 'Integration saved successfully',
   }
 );
 
-export const CREATE_INTEGRATION_SUCCESS_DESCRIPTION = (integrationId: string) =>
-  i18n.translate('xpack.automaticImportV2.createIntegration.successDescription', {
+export const SAVE_INTEGRATION_SUCCESS_DESCRIPTION = (integrationId: string) =>
+  i18n.translate('xpack.automaticImportV2.saveIntegration.successDescription', {
     defaultMessage: 'Integration {integrationId} is now being processed.',
     values: { integrationId },
   });
 
-export const CREATE_INTEGRATION_ERROR = i18n.translate(
-  'xpack.automaticImportV2.createIntegration.error',
+export const SAVE_INTEGRATION_ERROR = i18n.translate(
+  'xpack.automaticImportV2.saveIntegration.error',
   {
-    defaultMessage: 'Failed to create integration',
+    defaultMessage: 'Failed to save integration',
   }
 );

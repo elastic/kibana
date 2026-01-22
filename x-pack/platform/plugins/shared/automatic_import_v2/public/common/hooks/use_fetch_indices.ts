@@ -28,7 +28,6 @@ export function useFetchIndices(search: string = '*'): UseFetchIndicesResult {
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['fetchIndices', search],
     queryFn: async () => {
-      // TODO: need to find the correct pattern to search for indices. This is always jsut adding a wildcard
       const searchPattern = search.endsWith('*') ? search : `${search}*`;
       const response = await http.get<ResolveIndexResponse>(
         `/internal/index-pattern-management/resolve_index/${encodeURIComponent(searchPattern)}`
