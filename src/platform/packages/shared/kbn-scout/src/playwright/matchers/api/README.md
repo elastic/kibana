@@ -2,7 +2,7 @@
 
 ## Summary
 
-Create a Scout API custom `expect` with dynamic matchers for API testing and restricted exposure to Playwright's default matchers. This is to assist developers with API-specific assertions and enforce best practices
+Scout exposes a custom API `expect` object with dynamic matchers for API testing. To enforce best practices, Playwright's default matchers are restricted.
 
 **Key Features:**
 
