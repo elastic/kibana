@@ -220,7 +220,6 @@ export class UserProfileService {
     session: PublicMethodsOf<Session>,
     request: UserProfileGetCurrentParams['request']
   ): Promise<{ profileId?: string; sessionId?: string }> {
-    // ToDo: what is the execution flow with anonymous access?
     let userSession;
     try {
       userSession = await session.get(request);
@@ -230,7 +229,6 @@ export class UserProfileService {
     }
 
     if (userSession.error) {
-      // ToDo: should we log this as an error or info level?
       this.logger.debug(`Retrieved user session has error: ${userSession.error.message}`);
       return {
         profileId: undefined,
@@ -267,14 +265,14 @@ export class UserProfileService {
     const [username, password] = Buffer.from(base64Credentials, 'base64').toString().split(':');
     if (!username || !password) {
       this.logger.debug(`Basic credentials are malformed, cannot extract username and password.`);
-      return undefined; // ToDo: or throw? This should never happen as the request should be authenticated already.
+      return undefined;
     }
 
     const activatedProfile = await this.activate(clusterClient, {
       type: 'password',
       username,
       password,
-    }); // ToDo: should we instead catch and wrap the error, or return gracefully with null?ß
+    });
 
     return activatedProfile;
   }
@@ -318,7 +316,6 @@ export class UserProfileService {
   ) {
     if (request.auth.isAuthenticated === false) {
       this.logger.debug(`Request to get current user profile is not authenticated.`);
-      // ToDo: should this throw instead so we can return 401 to the client?
       return null;
     }
 
