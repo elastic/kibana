@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CreateRuleData, UpdateRuleData } from '@kbn/alerting-rule-schemas';
+import type { CreateRuleData, UpdateRuleData } from '@kbn/alerting-v2-schemas';
 
 export interface CreateRuleParams {
   data: CreateRuleData;

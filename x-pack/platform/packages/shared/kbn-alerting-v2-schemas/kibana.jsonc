@@ -1,6 +1,6 @@
 {
   "type": "shared-common",
-  "id": "@kbn/alerting-rule-schemas",
+  "id": "@kbn/alerting-v2-schemas",
   "owner": "@elastic/response-ops",
   "group": "platform",
   "visibility": "shared"

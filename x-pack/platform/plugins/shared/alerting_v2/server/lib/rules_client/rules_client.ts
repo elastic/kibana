@@ -16,7 +16,7 @@ import { inject, injectable } from 'inversify';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import { stringifyZodError } from '@kbn/zod-helpers';
-import { createRuleDataSchema, updateRuleDataSchema } from '@kbn/alerting-rule-schemas';
+import { createRuleDataSchema, updateRuleDataSchema } from '@kbn/alerting-v2-schemas';
 
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
