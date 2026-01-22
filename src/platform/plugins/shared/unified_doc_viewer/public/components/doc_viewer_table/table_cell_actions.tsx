@@ -70,6 +70,14 @@ const esqlMultivalueFilteringDisabled = i18n.translate(
   }
 );
 
+function shouldShowFilterActions(
+  onFilter: DocViewFilterFn | undefined,
+  hideFilteringOnComputedColumns: boolean | undefined,
+  dataViewField: FieldRow['dataViewField']
+): boolean {
+  return Boolean(onFilter && (!hideFilteringOnComputedColumns || !dataViewField?.isComputedColumn));
+}
+
 const Copy: React.FC<Omit<TableActionsProps, 'isEsqlMode'> & { toasts: IToasts }> = ({
   Component,
   row,
@@ -150,10 +158,7 @@ const FilterIn: React.FC<TableActionsProps & { onFilter: DocViewFilterFn | undef
     }
   );
 
-  const shouldShowFilters =
-    onFilter && (!hideFilteringOnComputedColumns || !dataViewField?.isComputedColumn);
-
-  if (!shouldShowFilters) {
+  if (!shouldShowFilterActions(onFilter, hideFilteringOnComputedColumns, dataViewField)) {
     return null;
   }
 
@@ -166,7 +171,7 @@ const FilterIn: React.FC<TableActionsProps & { onFilter: DocViewFilterFn | undef
       disabled={filteringDisabled || isFilterInOutPairDisabled(row, onFilter)}
       title={filteringDisabled ? esqlMultivalueFilteringDisabled : filterAddLabel}
       flush="left"
-      onClick={() => onFilter(dataViewField, flattenedValue, '+')}
+      onClick={() => onFilter!(dataViewField, flattenedValue, '+')}
     >
       {filterAddLabel}
     </Component>
@@ -194,10 +199,7 @@ const FilterOut: React.FC<TableActionsProps & { onFilter: DocViewFilterFn | unde
     }
   );
 
-  const shouldShowFilters =
-    onFilter && (!hideFilteringOnComputedColumns || !dataViewField?.isComputedColumn);
-
-  if (!shouldShowFilters) {
+  if (!shouldShowFilterActions(onFilter, hideFilteringOnComputedColumns, dataViewField)) {
     return null;
   }
 
@@ -210,7 +212,7 @@ const FilterOut: React.FC<TableActionsProps & { onFilter: DocViewFilterFn | unde
       disabled={filteringDisabled || isFilterInOutPairDisabled(row, onFilter)}
       title={filteringDisabled ? esqlMultivalueFilteringDisabled : filterOutLabel}
       flush="left"
-      onClick={() => onFilter(dataViewField, flattenedValue, '-')}
+      onClick={() => onFilter!(dataViewField, flattenedValue, '-')}
     >
       {filterOutLabel}
     </Component>
@@ -268,10 +270,7 @@ const FilterExist: React.FC<TableActionsProps & { onFilter: DocViewFilterFn | un
     { defaultMessage: 'Filter for field present' }
   );
 
-  const shouldShowFilters =
-    onFilter && (!hideFilteringOnComputedColumns || !dataViewField?.isComputedColumn);
-
-  if (!shouldShowFilters) {
+  if (!shouldShowFilterActions(onFilter, hideFilteringOnComputedColumns, dataViewField)) {
     return null;
   }
 
@@ -282,7 +281,7 @@ const FilterExist: React.FC<TableActionsProps & { onFilter: DocViewFilterFn | un
       disabled={isFilterExistsDisabled(row, onFilter)}
       title={filterExistsLabel}
       flush="left"
-      onClick={() => onFilter('_exists_', name, '+')}
+      onClick={() => onFilter!('_exists_', name, '+')}
     >
       {filterExistsLabel}
     </Component>
