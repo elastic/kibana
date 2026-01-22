@@ -3,7 +3,7 @@
 ## ADDED Requirements
 
 ### Requirement: Remote target configuration (SSH)
-The system MUST support configuring a remote vLLM target using SSH access via environment variables. Configuration includes host, user, and authentication material (password or key path). The system MUST support both SSH key-based and password-based authentication. Secrets MUST NOT be committed to the repository.
+The system MUST support configuring a remote vLLM target using SSH access via environment variables. Configuration includes host, user, and authentication material (password or key path). The system MUST support both SSH key-based and password-based authentication. The SSH user is a non-root user; the agent MUST switch to root (via `sudo`) after connecting for privileged operations. Secrets MUST NOT be committed to the repository.
 
 #### Scenario: SSH target configured via environment variables
 - **GIVEN** a user provides SSH connection parameters via environment variables (VLLM_SSH_HOST, VLLM_SSH_USER, VLLM_SSH_PASSWORD or VLLM_SSH_KEY_PATH)
@@ -23,6 +23,12 @@ The system MUST support configuring a remote vLLM target using SSH access via en
 - **WHEN** the agent connects to the remote VM
 - **THEN** the connection succeeds using key-based authentication
 - **AND** the private key content is never stored in plain text or committed to the repository
+
+#### Scenario: Switch to root for privileged operations
+- **GIVEN** an established SSH connection as a non-root user
+- **WHEN** the agent needs to perform privileged operations (Docker commands, system configuration, etc.)
+- **THEN** the agent uses `sudo` to execute the commands as root
+- **AND** the agent assumes the SSH user has passwordless sudo access configured
 
 ### Requirement: vLLM Docker container lifecycle management
 The system MUST provide allow-listed operations over SSH to manage the vLLM Docker container lifecycle:
