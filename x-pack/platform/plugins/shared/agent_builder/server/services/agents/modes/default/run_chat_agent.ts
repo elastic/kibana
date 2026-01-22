@@ -109,6 +109,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     agentConfiguration,
     attachmentsService: attachments,
     request,
+    spaceId: context.spaceId,
     runner: context.runner,
   });
 
