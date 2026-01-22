@@ -35,6 +35,7 @@ import {
   fixESQLQueryWithVariables,
   prettifyQuery,
   hasOnlySourceCommand,
+  getESQLAdHocDataview,
 } from '@kbn/esql-utils';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
@@ -46,6 +47,7 @@ import type {
   ESQLCallbacks,
   TelemetryQuerySubmittedProps,
 } from '@kbn/esql-types';
+import { KQL_TYPE_TO_KIND_MAP } from '@kbn/esql-types';
 import { FavoritesClient } from '@kbn/content-management-favorites-public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ILicense } from '@kbn/licensing-types';
@@ -72,6 +74,7 @@ import { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
 import {
   clearCacheWhenOld,
   filterDataErrors,
+  filterDuplicatedWarnings,
   filterOutWarningsOverlappingWithErrors,
   getEditorOverwrites,
   onKeyDownResizeHandler,
@@ -149,7 +152,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const isFirstFocusRef = useRef<boolean>(true);
   const theme = useEuiTheme();
   const kibana = useKibana<ESQLEditorDeps>();
-  const { application, core, fieldsMetadata, uiSettings, uiActions, data, usageCollection } =
+  const { application, core, fieldsMetadata, uiSettings, uiActions, data, usageCollection, kql } =
     kibana.services;
 
   const favoritesClient = useMemo(
@@ -700,19 +703,49 @@ const ESQLEditorInternal = function ESQLEditor({
       },
       canCreateLookupIndex,
       isServerless: Boolean(kibana.services?.esql?.isServerless),
+      getKqlSuggestions: async (kqlQuery: string, cursorPositionInKql: number) => {
+        const hasQuerySuggestions = kql?.autocomplete?.hasQuerySuggestions('kuery');
+        if (!hasQuerySuggestions) {
+          return undefined;
+        }
+        const dataView = await getESQLAdHocDataview({
+          dataViewsService: data.dataViews,
+          query: minimalQueryRef.current,
+        });
+        const suggestions = await kql?.autocomplete.getQuerySuggestions({
+          language: 'kuery',
+          query: kqlQuery,
+          selectionStart: cursorPositionInKql,
+          selectionEnd: cursorPositionInKql,
+          indexPatterns: [dataView],
+        });
+        return (
+          suggestions?.map((suggestion) => {
+            return {
+              text: suggestion.text,
+              label: suggestion.text,
+              detail:
+                typeof suggestion.description === 'string' ? suggestion.description : undefined,
+              kind: KQL_TYPE_TO_KIND_MAP[suggestion.type] ?? 'Value',
+            };
+          }) ?? []
+        );
+      },
     };
     return callbacks;
   }, [
     fieldsMetadata,
     getJoinIndicesCallback,
-    kibana.services?.esql,
     canCreateLookupIndex,
+    kibana.services?.esql,
+    kql?.autocomplete,
     dataSourcesCache,
     memoizedSources,
     core,
     esqlFieldsCache,
     data.query.timefilter.timefilter,
     data.search.search,
+    data.dataViews,
     memoizedFieldsFromESQL,
     abortController.signal,
     variablesService?.esqlVariables,
@@ -838,7 +871,8 @@ const ESQLEditorInternal = function ESQLEditor({
       trackValidationLatencyEnd(active);
 
       if (active) {
-        setEditorMessages({ errors: allErrors, warnings: allWarnings });
+        const uniqueWarnings = filterDuplicatedWarnings(allWarnings);
+        setEditorMessages({ errors: allErrors, warnings: uniqueWarnings });
         monaco.editor.setModelMarkers(
           editorModel.current,
           'Unified search',

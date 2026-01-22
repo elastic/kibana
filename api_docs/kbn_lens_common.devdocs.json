@@ -6783,7 +6783,7 @@
             "label": "layerType",
             "description": [],
             "signature": [
-              "\"data\" | \"annotations\" | \"metricTrendline\" | \"referenceLine\""
+              "\"data\" | \"annotations\" | \"referenceLine\" | \"metricTrendline\""
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/datatable/types.ts",
             "lineNumber": 134,
@@ -11347,7 +11347,51 @@
               "CustomXDomain",
               " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType<{}> | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
               "LegendStrategy",
-              " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
+              " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
+              {
+                "pluginId": "@kbn/chart-expressions-common",
+                "scope": "common",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
+                "section": "def-common.MakeOverridesSerializable",
+                "text": "MakeOverridesSerializable"
+              },
+              "<",
+              "RecursivePartial",
+              "<Omit<",
+              "AxisStyle",
+              ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
+              "Position",
+              " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
+              {
+                "pluginId": "@kbn/chart-expressions-common",
+                "scope": "common",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
+                "section": "def-common.MakeOverridesSerializable",
+                "text": "MakeOverridesSerializable"
+              },
+              "<",
+              "YDomainRange",
+              " | undefined>; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; ticks?: number | undefined; gridLine?: ",
+              {
+                "pluginId": "@kbn/chart-expressions-common",
+                "scope": "common",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
+                "section": "def-common.MakeOverridesSerializable",
+                "text": "MakeOverridesSerializable"
+              },
+              "<Partial<",
+              "GridLineStyle",
+              "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
+              {
+                "pluginId": "@kbn/chart-expressions-common",
+                "scope": "common",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
+                "section": "def-common.MakeOverridesSerializable",
+                "text": "MakeOverridesSerializable"
+              },
+              "<{ duration: number; } | undefined>; valueGetter?: ",
+              "ValueGetter",
+              " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
               "GoalSubtype",
               "; domain: ",
               {
@@ -11359,7 +11403,7 @@
               },
               "<",
               "GoalDomainRange",
-              ">; bands?: number | number[] | undefined; ticks?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
+              ">; ticks?: number | number[] | undefined; bands?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
               "GoalLabelAccessor",
               " | undefined; labelMinor?: string | ",
               "GoalLabelAccessor",
@@ -11375,51 +11419,7 @@
                 "section": "def-common.MakeOverridesSerializable",
                 "text": "MakeOverridesSerializable"
               },
-              "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
-              {
-                "pluginId": "@kbn/chart-expressions-common",
-                "scope": "common",
-                "docId": "kibKbnChartExpressionsCommonPluginApi",
-                "section": "def-common.MakeOverridesSerializable",
-                "text": "MakeOverridesSerializable"
-              },
-              "<{ duration: number; } | undefined>; valueGetter?: ",
-              "ValueGetter",
-              " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
-              {
-                "pluginId": "@kbn/chart-expressions-common",
-                "scope": "common",
-                "docId": "kibKbnChartExpressionsCommonPluginApi",
-                "section": "def-common.MakeOverridesSerializable",
-                "text": "MakeOverridesSerializable"
-              },
-              "<",
-              "RecursivePartial",
-              "<Omit<",
-              "AxisStyle",
-              ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
-              "Position",
-              " | undefined; domain?: ",
-              {
-                "pluginId": "@kbn/chart-expressions-common",
-                "scope": "common",
-                "docId": "kibKbnChartExpressionsCommonPluginApi",
-                "section": "def-common.MakeOverridesSerializable",
-                "text": "MakeOverridesSerializable"
-              },
-              "<",
-              "YDomainRange",
-              " | undefined>; ticks?: number | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; gridLine?: ",
-              {
-                "pluginId": "@kbn/chart-expressions-common",
-                "scope": "common",
-                "docId": "kibKbnChartExpressionsCommonPluginApi",
-                "section": "def-common.MakeOverridesSerializable",
-                "text": "MakeOverridesSerializable"
-              },
-              "<Partial<",
-              "GridLineStyle",
-              "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | undefined) => void"
+              "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | undefined) => void"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
             "lineNumber": 171,
@@ -11473,7 +11473,51 @@
                   "CustomXDomain",
                   " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType<{}> | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
                   "LegendStrategy",
-                  " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
+                  " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
+                  {
+                    "pluginId": "@kbn/chart-expressions-common",
+                    "scope": "common",
+                    "docId": "kibKbnChartExpressionsCommonPluginApi",
+                    "section": "def-common.MakeOverridesSerializable",
+                    "text": "MakeOverridesSerializable"
+                  },
+                  "<",
+                  "RecursivePartial",
+                  "<Omit<",
+                  "AxisStyle",
+                  ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
+                  "Position",
+                  " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
+                  {
+                    "pluginId": "@kbn/chart-expressions-common",
+                    "scope": "common",
+                    "docId": "kibKbnChartExpressionsCommonPluginApi",
+                    "section": "def-common.MakeOverridesSerializable",
+                    "text": "MakeOverridesSerializable"
+                  },
+                  "<",
+                  "YDomainRange",
+                  " | undefined>; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; ticks?: number | undefined; gridLine?: ",
+                  {
+                    "pluginId": "@kbn/chart-expressions-common",
+                    "scope": "common",
+                    "docId": "kibKbnChartExpressionsCommonPluginApi",
+                    "section": "def-common.MakeOverridesSerializable",
+                    "text": "MakeOverridesSerializable"
+                  },
+                  "<Partial<",
+                  "GridLineStyle",
+                  "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
+                  {
+                    "pluginId": "@kbn/chart-expressions-common",
+                    "scope": "common",
+                    "docId": "kibKbnChartExpressionsCommonPluginApi",
+                    "section": "def-common.MakeOverridesSerializable",
+                    "text": "MakeOverridesSerializable"
+                  },
+                  "<{ duration: number; } | undefined>; valueGetter?: ",
+                  "ValueGetter",
+                  " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
                   "GoalSubtype",
                   "; domain: ",
                   {
@@ -11485,7 +11529,7 @@
                   },
                   "<",
                   "GoalDomainRange",
-                  ">; bands?: number | number[] | undefined; ticks?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
+                  ">; ticks?: number | number[] | undefined; bands?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
                   "GoalLabelAccessor",
                   " | undefined; labelMinor?: string | ",
                   "GoalLabelAccessor",
@@ -11501,51 +11545,7 @@
                     "section": "def-common.MakeOverridesSerializable",
                     "text": "MakeOverridesSerializable"
                   },
-                  "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
-                  {
-                    "pluginId": "@kbn/chart-expressions-common",
-                    "scope": "common",
-                    "docId": "kibKbnChartExpressionsCommonPluginApi",
-                    "section": "def-common.MakeOverridesSerializable",
-                    "text": "MakeOverridesSerializable"
-                  },
-                  "<{ duration: number; } | undefined>; valueGetter?: ",
-                  "ValueGetter",
-                  " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
-                  {
-                    "pluginId": "@kbn/chart-expressions-common",
-                    "scope": "common",
-                    "docId": "kibKbnChartExpressionsCommonPluginApi",
-                    "section": "def-common.MakeOverridesSerializable",
-                    "text": "MakeOverridesSerializable"
-                  },
-                  "<",
-                  "RecursivePartial",
-                  "<Omit<",
-                  "AxisStyle",
-                  ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
-                  "Position",
-                  " | undefined; domain?: ",
-                  {
-                    "pluginId": "@kbn/chart-expressions-common",
-                    "scope": "common",
-                    "docId": "kibKbnChartExpressionsCommonPluginApi",
-                    "section": "def-common.MakeOverridesSerializable",
-                    "text": "MakeOverridesSerializable"
-                  },
-                  "<",
-                  "YDomainRange",
-                  " | undefined>; ticks?: number | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; gridLine?: ",
-                  {
-                    "pluginId": "@kbn/chart-expressions-common",
-                    "scope": "common",
-                    "docId": "kibKbnChartExpressionsCommonPluginApi",
-                    "section": "def-common.MakeOverridesSerializable",
-                    "text": "MakeOverridesSerializable"
-                  },
-                  "<Partial<",
-                  "GridLineStyle",
-                  "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | undefined"
+                  "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
                 "lineNumber": 171,
@@ -15192,7 +15192,51 @@
               "CustomXDomain",
               " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType<{}> | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
               "LegendStrategy",
-              " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
+              " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
+              {
+                "pluginId": "@kbn/chart-expressions-common",
+                "scope": "common",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
+                "section": "def-common.MakeOverridesSerializable",
+                "text": "MakeOverridesSerializable"
+              },
+              "<",
+              "RecursivePartial",
+              "<Omit<",
+              "AxisStyle",
+              ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
+              "Position",
+              " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
+              {
+                "pluginId": "@kbn/chart-expressions-common",
+                "scope": "common",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
+                "section": "def-common.MakeOverridesSerializable",
+                "text": "MakeOverridesSerializable"
+              },
+              "<",
+              "YDomainRange",
+              " | undefined>; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; ticks?: number | undefined; gridLine?: ",
+              {
+                "pluginId": "@kbn/chart-expressions-common",
+                "scope": "common",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
+                "section": "def-common.MakeOverridesSerializable",
+                "text": "MakeOverridesSerializable"
+              },
+              "<Partial<",
+              "GridLineStyle",
+              "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
+              {
+                "pluginId": "@kbn/chart-expressions-common",
+                "scope": "common",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
+                "section": "def-common.MakeOverridesSerializable",
+                "text": "MakeOverridesSerializable"
+              },
+              "<{ duration: number; } | undefined>; valueGetter?: ",
+              "ValueGetter",
+              " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
               "GoalSubtype",
               "; domain: ",
               {
@@ -15204,7 +15248,7 @@
               },
               "<",
               "GoalDomainRange",
-              ">; bands?: number | number[] | undefined; ticks?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
+              ">; ticks?: number | number[] | undefined; bands?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
               "GoalLabelAccessor",
               " | undefined; labelMinor?: string | ",
               "GoalLabelAccessor",
@@ -15220,51 +15264,7 @@
                 "section": "def-common.MakeOverridesSerializable",
                 "text": "MakeOverridesSerializable"
               },
-              "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
-              {
-                "pluginId": "@kbn/chart-expressions-common",
-                "scope": "common",
-                "docId": "kibKbnChartExpressionsCommonPluginApi",
-                "section": "def-common.MakeOverridesSerializable",
-                "text": "MakeOverridesSerializable"
-              },
-              "<{ duration: number; } | undefined>; valueGetter?: ",
-              "ValueGetter",
-              " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
-              {
-                "pluginId": "@kbn/chart-expressions-common",
-                "scope": "common",
-                "docId": "kibKbnChartExpressionsCommonPluginApi",
-                "section": "def-common.MakeOverridesSerializable",
-                "text": "MakeOverridesSerializable"
-              },
-              "<",
-              "RecursivePartial",
-              "<Omit<",
-              "AxisStyle",
-              ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
-              "Position",
-              " | undefined; domain?: ",
-              {
-                "pluginId": "@kbn/chart-expressions-common",
-                "scope": "common",
-                "docId": "kibKbnChartExpressionsCommonPluginApi",
-                "section": "def-common.MakeOverridesSerializable",
-                "text": "MakeOverridesSerializable"
-              },
-              "<",
-              "YDomainRange",
-              " | undefined>; ticks?: number | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; gridLine?: ",
-              {
-                "pluginId": "@kbn/chart-expressions-common",
-                "scope": "common",
-                "docId": "kibKbnChartExpressionsCommonPluginApi",
-                "section": "def-common.MakeOverridesSerializable",
-                "text": "MakeOverridesSerializable"
-              },
-              "<Partial<",
-              "GridLineStyle",
-              "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | undefined"
+              "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
             "lineNumber": 123,
@@ -16736,7 +16736,7 @@
                 "section": "def-common.LensShareableState",
                 "text": "LensShareableState"
               },
-              ", \"references\" | \"visualization\" | \"datasourceStates\" | \"activeDatasourceId\"> | undefined"
+              ", \"references\" | \"datasourceStates\" | \"visualization\" | \"activeDatasourceId\"> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
             "lineNumber": 1409,
@@ -16993,7 +16993,7 @@
             "label": "orientation",
             "description": [],
             "signature": [
-              "\"multiple\" | \"single\" | \"right angled\""
+              "\"single\" | \"right angled\" | \"multiple\""
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/tagcloud/types.ts",
             "lineNumber": 20,
@@ -17284,7 +17284,7 @@
                 "section": "def-common.LensShareableState",
                 "text": "LensShareableState"
               },
-              ", \"references\" | \"visualization\" | \"datasourceStates\" | \"activeDatasourceId\">"
+              ", \"references\" | \"datasourceStates\" | \"visualization\" | \"activeDatasourceId\">"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/locator_types.ts",
             "lineNumber": 141,
@@ -17404,7 +17404,7 @@
             "label": "layerType",
             "description": [],
             "signature": [
-              "\"data\" | \"annotations\" | \"metricTrendline\" | \"referenceLine\""
+              "\"data\" | \"annotations\" | \"referenceLine\" | \"metricTrendline\""
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/metric/types.ts",
             "lineNumber": 35,
@@ -26153,7 +26153,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"data\" | \"annotations\" | \"metricTrendline\" | \"referenceLine\""
+              "\"data\" | \"annotations\" | \"referenceLine\" | \"metricTrendline\""
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/types.ts",
             "lineNumber": 124,
@@ -28286,7 +28286,7 @@
             "label": "layerType",
             "description": [],
             "signature": [
-              "\"data\" | \"annotations\" | \"metricTrendline\" | \"referenceLine\""
+              "\"data\" | \"annotations\" | \"referenceLine\" | \"metricTrendline\""
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/types.ts",
             "lineNumber": 117,
@@ -28685,7 +28685,7 @@
         "label": "DataGridDensity",
         "description": [],
         "signature": [
-          "\"normal\" | \"compact\" | \"expanded\""
+          "\"compact\" | \"normal\" | \"expanded\""
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/visualizations/datatable/types.ts",
         "lineNumber": 28,
@@ -29410,16 +29410,16 @@
             "pluginId": "@kbn/lens-common",
             "scope": "common",
             "docId": "kibKbnLensCommonPluginApi",
-            "section": "def-common.FieldBasedIndexPatternColumn",
-            "text": "FieldBasedIndexPatternColumn"
+            "section": "def-common.BaseIndexPatternColumn",
+            "text": "BaseIndexPatternColumn"
           },
           " | ",
           {
             "pluginId": "@kbn/lens-common",
             "scope": "common",
             "docId": "kibKbnLensCommonPluginApi",
-            "section": "def-common.BaseIndexPatternColumn",
-            "text": "BaseIndexPatternColumn"
+            "section": "def-common.FieldBasedIndexPatternColumn",
+            "text": "FieldBasedIndexPatternColumn"
           },
           " | ",
           {
@@ -29583,7 +29583,51 @@
           "CustomXDomain",
           " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType<{}> | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
           "LegendStrategy",
-          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
+          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "RecursivePartial",
+          "<Omit<",
+          "AxisStyle",
+          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
+          "Position",
+          " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "YDomainRange",
+          " | undefined>; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; ticks?: number | undefined; gridLine?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<Partial<",
+          "GridLineStyle",
+          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<{ duration: number; } | undefined>; valueGetter?: ",
+          "ValueGetter",
+          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
           "GoalSubtype",
           "; domain: ",
           {
@@ -29595,7 +29639,7 @@
           },
           "<",
           "GoalDomainRange",
-          ">; bands?: number | number[] | undefined; ticks?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
+          ">; ticks?: number | number[] | undefined; bands?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
           "GoalLabelAccessor",
           " | undefined; labelMinor?: string | ",
           "GoalLabelAccessor",
@@ -29611,51 +29655,7 @@
             "section": "def-common.MakeOverridesSerializable",
             "text": "MakeOverridesSerializable"
           },
-          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<{ duration: number; } | undefined>; valueGetter?: ",
-          "ValueGetter",
-          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "RecursivePartial",
-          "<Omit<",
-          "AxisStyle",
-          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
-          "Position",
-          " | undefined; domain?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "YDomainRange",
-          " | undefined>; ticks?: number | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; gridLine?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<Partial<",
-          "GridLineStyle",
-          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | undefined; executionContext?: ",
+          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | undefined; executionContext?: ",
           "KibanaExecutionContext",
           " | undefined; palette?: ",
           {
@@ -29665,15 +29665,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<Record<string, unknown>> | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; enhancements?: { dynamicActions: ",
-          {
-            "pluginId": "uiActionsEnhanced",
-            "scope": "common",
-            "docId": "kibUiActionsEnhancedPluginApi",
-            "section": "def-common.DynamicActionsState",
-            "text": "DynamicActionsState"
-          },
-          "; } | undefined; esqlVariables?: ",
+          "<Record<string, unknown>> | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; esqlVariables?: ",
           {
             "pluginId": "@kbn/esql-types",
             "scope": "common",
@@ -29681,7 +29673,15 @@
             "section": "def-common.ESQLControlVariable",
             "text": "ESQLControlVariable"
           },
-          "[] | undefined; renderMode?: ",
+          "[] | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.DynamicActionsState",
+            "text": "DynamicActionsState"
+          },
+          "; } | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -29689,7 +29689,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          " | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; disableTriggers?: boolean | undefined; isNewPanel?: boolean | undefined; savedObjectId?: string | undefined; attributes: ",
+          " | undefined; disableTriggers?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; isNewPanel?: boolean | undefined; savedObjectId?: string | undefined; attributes: ",
           {
             "pluginId": "@kbn/lens-common",
             "scope": "common",
@@ -30530,7 +30530,51 @@
           "CustomXDomain",
           " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType<{}> | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
           "LegendStrategy",
-          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
+          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "RecursivePartial",
+          "<Omit<",
+          "AxisStyle",
+          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
+          "Position",
+          " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "YDomainRange",
+          " | undefined>; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; ticks?: number | undefined; gridLine?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<Partial<",
+          "GridLineStyle",
+          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<{ duration: number; } | undefined>; valueGetter?: ",
+          "ValueGetter",
+          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
           "GoalSubtype",
           "; domain: ",
           {
@@ -30542,7 +30586,7 @@
           },
           "<",
           "GoalDomainRange",
-          ">; bands?: number | number[] | undefined; ticks?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
+          ">; ticks?: number | number[] | undefined; bands?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
           "GoalLabelAccessor",
           " | undefined; labelMinor?: string | ",
           "GoalLabelAccessor",
@@ -30558,51 +30602,7 @@
             "section": "def-common.MakeOverridesSerializable",
             "text": "MakeOverridesSerializable"
           },
-          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<{ duration: number; } | undefined>; valueGetter?: ",
-          "ValueGetter",
-          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "RecursivePartial",
-          "<Omit<",
-          "AxisStyle",
-          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
-          "Position",
-          " | undefined; domain?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "YDomainRange",
-          " | undefined>; ticks?: number | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; gridLine?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<Partial<",
-          "GridLineStyle",
-          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | undefined) => void; getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
+          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | undefined) => void; getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
           {
             "pluginId": "uiActions",
             "scope": "public",
@@ -30753,7 +30753,51 @@
           "CustomXDomain",
           " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType<{}> | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
           "LegendStrategy",
-          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
+          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "RecursivePartial",
+          "<Omit<",
+          "AxisStyle",
+          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
+          "Position",
+          " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "YDomainRange",
+          " | undefined>; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; ticks?: number | undefined; gridLine?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<Partial<",
+          "GridLineStyle",
+          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<{ duration: number; } | undefined>; valueGetter?: ",
+          "ValueGetter",
+          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
           "GoalSubtype",
           "; domain: ",
           {
@@ -30765,7 +30809,7 @@
           },
           "<",
           "GoalDomainRange",
-          ">; bands?: number | number[] | undefined; ticks?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
+          ">; ticks?: number | number[] | undefined; bands?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
           "GoalLabelAccessor",
           " | undefined; labelMinor?: string | ",
           "GoalLabelAccessor",
@@ -30781,51 +30825,7 @@
             "section": "def-common.MakeOverridesSerializable",
             "text": "MakeOverridesSerializable"
           },
-          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<{ duration: number; } | undefined>; valueGetter?: ",
-          "ValueGetter",
-          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "RecursivePartial",
-          "<Omit<",
-          "AxisStyle",
-          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
-          "Position",
-          " | undefined; domain?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "YDomainRange",
-          " | undefined>; ticks?: number | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; gridLine?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<Partial<",
-          "GridLineStyle",
-          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | undefined; references?: ",
+          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | undefined; references?: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -30851,7 +30851,39 @@
             "section": "def-common.Datatable",
             "text": "Datatable"
           },
-          "; column: number; range: number[]; timeFieldName?: string | undefined; preventDefault: () => void; }) => void) | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; onFilter?: ((data: { data: { table: Pick<",
+          "; column: number; range: number[]; timeFieldName?: string | undefined; preventDefault: () => void; }) => void) | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; esqlVariables?: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLControlVariable",
+            "text": "ESQLControlVariable"
+          },
+          "[] | undefined; noPadding?: boolean | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.DynamicActionsState",
+            "text": "DynamicActionsState"
+          },
+          "; } | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.ViewMode",
+            "text": "ViewMode"
+          },
+          " | undefined; disableTriggers?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; isNewPanel?: boolean | undefined; savedObjectId?: string | undefined; abortController?: AbortController | undefined; withDefaultActions?: boolean | undefined; extraActions?: ",
+          {
+            "pluginId": "uiActions",
+            "scope": "public",
+            "docId": "kibUiActionsPluginApi",
+            "section": "def-public.Action",
+            "text": "Action"
+          },
+          "<object, object>[] | undefined; disabledActions?: string[] | undefined; showInspector?: boolean | undefined; canEditInline?: boolean | undefined; onFilter?: ((data: { data: { table: Pick<",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -30875,39 +30907,7 @@
             "section": "def-common.BooleanRelation",
             "text": "BooleanRelation"
           },
-          " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; preventDefault: () => void; }) => void) | undefined; withDefaultActions?: boolean | undefined; disabledActions?: string[] | undefined; enhancements?: { dynamicActions: ",
-          {
-            "pluginId": "uiActionsEnhanced",
-            "scope": "common",
-            "docId": "kibUiActionsEnhancedPluginApi",
-            "section": "def-common.DynamicActionsState",
-            "text": "DynamicActionsState"
-          },
-          "; } | undefined; esqlVariables?: ",
-          {
-            "pluginId": "@kbn/esql-types",
-            "scope": "common",
-            "docId": "kibKbnEsqlTypesPluginApi",
-            "section": "def-common.ESQLControlVariable",
-            "text": "ESQLControlVariable"
-          },
-          "[] | undefined; abortController?: AbortController | undefined; renderMode?: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.ViewMode",
-            "text": "ViewMode"
-          },
-          " | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; noPadding?: boolean | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; disableTriggers?: boolean | undefined; isNewPanel?: boolean | undefined; savedObjectId?: string | undefined; extraActions?: ",
-          {
-            "pluginId": "uiActions",
-            "scope": "public",
-            "docId": "kibUiActionsPluginApi",
-            "section": "def-public.Action",
-            "text": "Action"
-          },
-          "<object, object>[] | undefined; showInspector?: boolean | undefined; canEditInline?: boolean | undefined; onTableRowClick?: ((data: { rowIndex: number; table: ",
+          " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; preventDefault: () => void; }) => void) | undefined; onTableRowClick?: ((data: { rowIndex: number; table: ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -30986,7 +30986,51 @@
           "CustomXDomain",
           " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType<{}> | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
           "LegendStrategy",
-          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
+          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "RecursivePartial",
+          "<Omit<",
+          "AxisStyle",
+          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
+          "Position",
+          " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "YDomainRange",
+          " | undefined>; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; ticks?: number | undefined; gridLine?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<Partial<",
+          "GridLineStyle",
+          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<{ duration: number; } | undefined>; valueGetter?: ",
+          "ValueGetter",
+          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
           "GoalSubtype",
           "; domain: ",
           {
@@ -30998,7 +31042,7 @@
           },
           "<",
           "GoalDomainRange",
-          ">; bands?: number | number[] | undefined; ticks?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
+          ">; ticks?: number | number[] | undefined; bands?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
           "GoalLabelAccessor",
           " | undefined; labelMinor?: string | ",
           "GoalLabelAccessor",
@@ -31014,51 +31058,7 @@
             "section": "def-common.MakeOverridesSerializable",
             "text": "MakeOverridesSerializable"
           },
-          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<{ duration: number; } | undefined>; valueGetter?: ",
-          "ValueGetter",
-          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "RecursivePartial",
-          "<Omit<",
-          "AxisStyle",
-          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
-          "Position",
-          " | undefined; domain?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "YDomainRange",
-          " | undefined>; ticks?: number | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; gridLine?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<Partial<",
-          "GridLineStyle",
-          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | undefined; references?: ",
+          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | undefined; references?: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -31253,7 +31253,51 @@
           "CustomXDomain",
           " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType<{}> | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
           "LegendStrategy",
-          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
+          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "RecursivePartial",
+          "<Omit<",
+          "AxisStyle",
+          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
+          "Position",
+          " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "YDomainRange",
+          " | undefined>; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; ticks?: number | undefined; gridLine?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<Partial<",
+          "GridLineStyle",
+          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<{ duration: number; } | undefined>; valueGetter?: ",
+          "ValueGetter",
+          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
           "GoalSubtype",
           "; domain: ",
           {
@@ -31265,7 +31309,7 @@
           },
           "<",
           "GoalDomainRange",
-          ">; bands?: number | number[] | undefined; ticks?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
+          ">; ticks?: number | number[] | undefined; bands?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
           "GoalLabelAccessor",
           " | undefined; labelMinor?: string | ",
           "GoalLabelAccessor",
@@ -31281,51 +31325,7 @@
             "section": "def-common.MakeOverridesSerializable",
             "text": "MakeOverridesSerializable"
           },
-          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<{ duration: number; } | undefined>; valueGetter?: ",
-          "ValueGetter",
-          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "RecursivePartial",
-          "<Omit<",
-          "AxisStyle",
-          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
-          "Position",
-          " | undefined; domain?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "YDomainRange",
-          " | undefined>; ticks?: number | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; gridLine?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<Partial<",
-          "GridLineStyle",
-          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | undefined; attributes: { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | undefined; attributes: { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -32105,7 +32105,39 @@
             "section": "def-common.Datatable",
             "text": "Datatable"
           },
-          "; column: number; range: number[]; timeFieldName?: string | undefined; preventDefault: () => void; }) => void) | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; onFilter?: ((data: { data: { table: Pick<",
+          "; column: number; range: number[]; timeFieldName?: string | undefined; preventDefault: () => void; }) => void) | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; esqlVariables?: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLControlVariable",
+            "text": "ESQLControlVariable"
+          },
+          "[] | undefined; noPadding?: boolean | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.DynamicActionsState",
+            "text": "DynamicActionsState"
+          },
+          "; } | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.ViewMode",
+            "text": "ViewMode"
+          },
+          " | undefined; disableTriggers?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; isNewPanel?: boolean | undefined; abortController?: AbortController | undefined; withDefaultActions?: boolean | undefined; extraActions?: ",
+          {
+            "pluginId": "uiActions",
+            "scope": "public",
+            "docId": "kibUiActionsPluginApi",
+            "section": "def-public.Action",
+            "text": "Action"
+          },
+          "<object, object>[] | undefined; disabledActions?: string[] | undefined; showInspector?: boolean | undefined; canEditInline?: boolean | undefined; onFilter?: ((data: { data: { table: Pick<",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -32129,39 +32161,7 @@
             "section": "def-common.BooleanRelation",
             "text": "BooleanRelation"
           },
-          " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; preventDefault: () => void; }) => void) | undefined; withDefaultActions?: boolean | undefined; disabledActions?: string[] | undefined; enhancements?: { dynamicActions: ",
-          {
-            "pluginId": "uiActionsEnhanced",
-            "scope": "common",
-            "docId": "kibUiActionsEnhancedPluginApi",
-            "section": "def-common.DynamicActionsState",
-            "text": "DynamicActionsState"
-          },
-          "; } | undefined; esqlVariables?: ",
-          {
-            "pluginId": "@kbn/esql-types",
-            "scope": "common",
-            "docId": "kibKbnEsqlTypesPluginApi",
-            "section": "def-common.ESQLControlVariable",
-            "text": "ESQLControlVariable"
-          },
-          "[] | undefined; abortController?: AbortController | undefined; renderMode?: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.ViewMode",
-            "text": "ViewMode"
-          },
-          " | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; noPadding?: boolean | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; disableTriggers?: boolean | undefined; isNewPanel?: boolean | undefined; extraActions?: ",
-          {
-            "pluginId": "uiActions",
-            "scope": "public",
-            "docId": "kibUiActionsPluginApi",
-            "section": "def-public.Action",
-            "text": "Action"
-          },
-          "<object, object>[] | undefined; showInspector?: boolean | undefined; canEditInline?: boolean | undefined; onTableRowClick?: ((data: { rowIndex: number; table: ",
+          " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; preventDefault: () => void; }) => void) | undefined; onTableRowClick?: ((data: { rowIndex: number; table: ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -32240,7 +32240,51 @@
           "CustomXDomain",
           " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType<{}> | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
           "LegendStrategy",
-          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
+          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "RecursivePartial",
+          "<Omit<",
+          "AxisStyle",
+          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
+          "Position",
+          " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "YDomainRange",
+          " | undefined>; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; ticks?: number | undefined; gridLine?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<Partial<",
+          "GridLineStyle",
+          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<{ duration: number; } | undefined>; valueGetter?: ",
+          "ValueGetter",
+          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
           "GoalSubtype",
           "; domain: ",
           {
@@ -32252,7 +32296,7 @@
           },
           "<",
           "GoalDomainRange",
-          ">; bands?: number | number[] | undefined; ticks?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
+          ">; ticks?: number | number[] | undefined; bands?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
           "GoalLabelAccessor",
           " | undefined; labelMinor?: string | ",
           "GoalLabelAccessor",
@@ -32268,51 +32312,7 @@
             "section": "def-common.MakeOverridesSerializable",
             "text": "MakeOverridesSerializable"
           },
-          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<{ duration: number; } | undefined>; valueGetter?: ",
-          "ValueGetter",
-          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "RecursivePartial",
-          "<Omit<",
-          "AxisStyle",
-          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
-          "Position",
-          " | undefined; domain?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "YDomainRange",
-          " | undefined>; ticks?: number | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; gridLine?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<Partial<",
-          "GridLineStyle",
-          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | undefined; references?: ",
+          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | undefined; references?: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -32431,7 +32431,7 @@
           },
           " | undefined; executionContext?: ",
           "KibanaExecutionContext",
-          " | undefined; abortController?: AbortController | undefined; noPadding?: boolean | undefined; forceDSL?: boolean | undefined; }"
+          " | undefined; noPadding?: boolean | undefined; forceDSL?: boolean | undefined; abortController?: AbortController | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
         "lineNumber": 304,
@@ -32612,7 +32612,51 @@
           "CustomXDomain",
           " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType<{}> | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
           "LegendStrategy",
-          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
+          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "RecursivePartial",
+          "<Omit<",
+          "AxisStyle",
+          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
+          "Position",
+          " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "YDomainRange",
+          " | undefined>; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; ticks?: number | undefined; gridLine?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<Partial<",
+          "GridLineStyle",
+          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<{ duration: number; } | undefined>; valueGetter?: ",
+          "ValueGetter",
+          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
           "GoalSubtype",
           "; domain: ",
           {
@@ -32624,7 +32668,7 @@
           },
           "<",
           "GoalDomainRange",
-          ">; bands?: number | number[] | undefined; ticks?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
+          ">; ticks?: number | number[] | undefined; bands?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
           "GoalLabelAccessor",
           " | undefined; labelMinor?: string | ",
           "GoalLabelAccessor",
@@ -32640,51 +32684,7 @@
             "section": "def-common.MakeOverridesSerializable",
             "text": "MakeOverridesSerializable"
           },
-          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<{ duration: number; } | undefined>; valueGetter?: ",
-          "ValueGetter",
-          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "RecursivePartial",
-          "<Omit<",
-          "AxisStyle",
-          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
-          "Position",
-          " | undefined; domain?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "YDomainRange",
-          " | undefined>; ticks?: number | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; gridLine?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<Partial<",
-          "GridLineStyle",
-          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | undefined) => void; dataViews$: ",
+          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | undefined) => void; dataViews$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -32794,7 +32794,51 @@
           "CustomXDomain",
           " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType<{}> | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
           "LegendStrategy",
-          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
+          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "RecursivePartial",
+          "<Omit<",
+          "AxisStyle",
+          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
+          "Position",
+          " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "YDomainRange",
+          " | undefined>; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; ticks?: number | undefined; gridLine?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<Partial<",
+          "GridLineStyle",
+          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<{ duration: number; } | undefined>; valueGetter?: ",
+          "ValueGetter",
+          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
           "GoalSubtype",
           "; domain: ",
           {
@@ -32806,7 +32850,7 @@
           },
           "<",
           "GoalDomainRange",
-          ">; bands?: number | number[] | undefined; ticks?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
+          ">; ticks?: number | number[] | undefined; bands?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
           "GoalLabelAccessor",
           " | undefined; labelMinor?: string | ",
           "GoalLabelAccessor",
@@ -32822,51 +32866,7 @@
             "section": "def-common.MakeOverridesSerializable",
             "text": "MakeOverridesSerializable"
           },
-          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<{ duration: number; } | undefined>; valueGetter?: ",
-          "ValueGetter",
-          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "RecursivePartial",
-          "<Omit<",
-          "AxisStyle",
-          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
-          "Position",
-          " | undefined; domain?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "YDomainRange",
-          " | undefined>; ticks?: number | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; gridLine?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<Partial<",
-          "GridLineStyle",
-          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | undefined>; disableTriggers$: ",
+          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | undefined>; disableTriggers$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -33027,7 +33027,7 @@
         "label": "LensLayerType",
         "description": [],
         "signature": [
-          "\"data\" | \"annotations\" | \"metricTrendline\" | \"referenceLine\""
+          "\"data\" | \"annotations\" | \"referenceLine\" | \"metricTrendline\""
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/visualizations/types.ts",
         "lineNumber": 88,
@@ -33178,7 +33178,51 @@
           "CustomXDomain",
           " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType<{}> | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
           "LegendStrategy",
-          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
+          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "RecursivePartial",
+          "<Omit<",
+          "AxisStyle",
+          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
+          "Position",
+          " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "YDomainRange",
+          " | undefined>; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; ticks?: number | undefined; gridLine?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<Partial<",
+          "GridLineStyle",
+          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<{ duration: number; } | undefined>; valueGetter?: ",
+          "ValueGetter",
+          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
           "GoalSubtype",
           "; domain: ",
           {
@@ -33190,7 +33234,7 @@
           },
           "<",
           "GoalDomainRange",
-          ">; bands?: number | number[] | undefined; ticks?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
+          ">; ticks?: number | number[] | undefined; bands?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
           "GoalLabelAccessor",
           " | undefined; labelMinor?: string | ",
           "GoalLabelAccessor",
@@ -33206,51 +33250,7 @@
             "section": "def-common.MakeOverridesSerializable",
             "text": "MakeOverridesSerializable"
           },
-          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<{ duration: number; } | undefined>; valueGetter?: ",
-          "ValueGetter",
-          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "RecursivePartial",
-          "<Omit<",
-          "AxisStyle",
-          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
-          "Position",
-          " | undefined; domain?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "YDomainRange",
-          " | undefined>; ticks?: number | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; gridLine?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<Partial<",
-          "GridLineStyle",
-          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | undefined; references?: ",
+          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | undefined; references?: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -33268,15 +33268,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<Record<string, unknown>> | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; enhancements?: { dynamicActions: ",
-          {
-            "pluginId": "uiActionsEnhanced",
-            "scope": "common",
-            "docId": "kibUiActionsEnhancedPluginApi",
-            "section": "def-common.DynamicActionsState",
-            "text": "DynamicActionsState"
-          },
-          "; } | undefined; esqlVariables?: ",
+          "<Record<string, unknown>> | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; esqlVariables?: ",
           {
             "pluginId": "@kbn/esql-types",
             "scope": "common",
@@ -33284,7 +33276,15 @@
             "section": "def-common.ESQLControlVariable",
             "text": "ESQLControlVariable"
           },
-          "[] | undefined; renderMode?: ",
+          "[] | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.DynamicActionsState",
+            "text": "DynamicActionsState"
+          },
+          "; } | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -33292,7 +33292,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          " | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; disableTriggers?: boolean | undefined; isNewPanel?: boolean | undefined; savedObjectId?: string | undefined; attributes: { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+          " | undefined; disableTriggers?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; isNewPanel?: boolean | undefined; savedObjectId?: string | undefined; attributes: { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -34200,7 +34200,51 @@
           "CustomXDomain",
           " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType<{}> | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
           "LegendStrategy",
-          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
+          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "RecursivePartial",
+          "<Omit<",
+          "AxisStyle",
+          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
+          "Position",
+          " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "YDomainRange",
+          " | undefined>; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; ticks?: number | undefined; gridLine?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<Partial<",
+          "GridLineStyle",
+          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<{ duration: number; } | undefined>; valueGetter?: ",
+          "ValueGetter",
+          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
           "GoalSubtype",
           "; domain: ",
           {
@@ -34212,7 +34256,7 @@
           },
           "<",
           "GoalDomainRange",
-          ">; bands?: number | number[] | undefined; ticks?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
+          ">; ticks?: number | number[] | undefined; bands?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
           "GoalLabelAccessor",
           " | undefined; labelMinor?: string | ",
           "GoalLabelAccessor",
@@ -34228,51 +34272,7 @@
             "section": "def-common.MakeOverridesSerializable",
             "text": "MakeOverridesSerializable"
           },
-          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<{ duration: number; } | undefined>; valueGetter?: ",
-          "ValueGetter",
-          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "RecursivePartial",
-          "<Omit<",
-          "AxisStyle",
-          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
-          "Position",
-          " | undefined; domain?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "YDomainRange",
-          " | undefined>; ticks?: number | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; gridLine?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<Partial<",
-          "GridLineStyle",
-          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | undefined; executionContext?: ",
+          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | undefined; executionContext?: ",
           "KibanaExecutionContext",
           " | undefined; palette?: ",
           {
@@ -34282,15 +34282,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<Record<string, unknown>> | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; enhancements?: { dynamicActions: ",
-          {
-            "pluginId": "uiActionsEnhanced",
-            "scope": "common",
-            "docId": "kibUiActionsEnhancedPluginApi",
-            "section": "def-common.DynamicActionsState",
-            "text": "DynamicActionsState"
-          },
-          "; } | undefined; esqlVariables?: ",
+          "<Record<string, unknown>> | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; esqlVariables?: ",
           {
             "pluginId": "@kbn/esql-types",
             "scope": "common",
@@ -34298,7 +34290,15 @@
             "section": "def-common.ESQLControlVariable",
             "text": "ESQLControlVariable"
           },
-          "[] | undefined; renderMode?: ",
+          "[] | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.DynamicActionsState",
+            "text": "DynamicActionsState"
+          },
+          "; } | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -34306,7 +34306,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          " | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; disableTriggers?: boolean | undefined; isNewPanel?: boolean | undefined; savedObjectId?: string | undefined; attributes: ",
+          " | undefined; disableTriggers?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; isNewPanel?: boolean | undefined; savedObjectId?: string | undefined; attributes: ",
           {
             "pluginId": "@kbn/lens-common",
             "scope": "common",
@@ -34444,7 +34444,51 @@
           "CustomXDomain",
           " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType<{}> | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
           "LegendStrategy",
-          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
+          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "RecursivePartial",
+          "<Omit<",
+          "AxisStyle",
+          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
+          "Position",
+          " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "YDomainRange",
+          " | undefined>; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; ticks?: number | undefined; gridLine?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<Partial<",
+          "GridLineStyle",
+          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<{ duration: number; } | undefined>; valueGetter?: ",
+          "ValueGetter",
+          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
           "GoalSubtype",
           "; domain: ",
           {
@@ -34456,7 +34500,7 @@
           },
           "<",
           "GoalDomainRange",
-          ">; bands?: number | number[] | undefined; ticks?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
+          ">; ticks?: number | number[] | undefined; bands?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
           "GoalLabelAccessor",
           " | undefined; labelMinor?: string | ",
           "GoalLabelAccessor",
@@ -34472,51 +34516,7 @@
             "section": "def-common.MakeOverridesSerializable",
             "text": "MakeOverridesSerializable"
           },
-          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<{ duration: number; } | undefined>; valueGetter?: ",
-          "ValueGetter",
-          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "RecursivePartial",
-          "<Omit<",
-          "AxisStyle",
-          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
-          "Position",
-          " | undefined; domain?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "YDomainRange",
-          " | undefined>; ticks?: number | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; gridLine?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<Partial<",
-          "GridLineStyle",
-          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | undefined; references?: ",
+          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | undefined; references?: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -34655,7 +34655,51 @@
           "CustomXDomain",
           " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType<{}> | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
           "LegendStrategy",
-          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
+          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "RecursivePartial",
+          "<Omit<",
+          "AxisStyle",
+          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
+          "Position",
+          " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "YDomainRange",
+          " | undefined>; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; ticks?: number | undefined; gridLine?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<Partial<",
+          "GridLineStyle",
+          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<{ duration: number; } | undefined>; valueGetter?: ",
+          "ValueGetter",
+          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
           "GoalSubtype",
           "; domain: ",
           {
@@ -34667,7 +34711,7 @@
           },
           "<",
           "GoalDomainRange",
-          ">; bands?: number | number[] | undefined; ticks?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
+          ">; ticks?: number | number[] | undefined; bands?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
           "GoalLabelAccessor",
           " | undefined; labelMinor?: string | ",
           "GoalLabelAccessor",
@@ -34683,51 +34727,7 @@
             "section": "def-common.MakeOverridesSerializable",
             "text": "MakeOverridesSerializable"
           },
-          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<{ duration: number; } | undefined>; valueGetter?: ",
-          "ValueGetter",
-          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "RecursivePartial",
-          "<Omit<",
-          "AxisStyle",
-          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
-          "Position",
-          " | undefined; domain?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "YDomainRange",
-          " | undefined>; ticks?: number | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; gridLine?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<Partial<",
-          "GridLineStyle",
-          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | undefined; references?: ",
+          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | undefined; references?: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -34847,7 +34847,51 @@
           "CustomXDomain",
           " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType<{}> | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
           "LegendStrategy",
-          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
+          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "RecursivePartial",
+          "<Omit<",
+          "AxisStyle",
+          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
+          "Position",
+          " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "YDomainRange",
+          " | undefined>; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; ticks?: number | undefined; gridLine?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<Partial<",
+          "GridLineStyle",
+          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<{ duration: number; } | undefined>; valueGetter?: ",
+          "ValueGetter",
+          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
           "GoalSubtype",
           "; domain: ",
           {
@@ -34859,7 +34903,7 @@
           },
           "<",
           "GoalDomainRange",
-          ">; bands?: number | number[] | undefined; ticks?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
+          ">; ticks?: number | number[] | undefined; bands?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
           "GoalLabelAccessor",
           " | undefined; labelMinor?: string | ",
           "GoalLabelAccessor",
@@ -34875,51 +34919,7 @@
             "section": "def-common.MakeOverridesSerializable",
             "text": "MakeOverridesSerializable"
           },
-          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<{ duration: number; } | undefined>; valueGetter?: ",
-          "ValueGetter",
-          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "RecursivePartial",
-          "<Omit<",
-          "AxisStyle",
-          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
-          "Position",
-          " | undefined; domain?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "YDomainRange",
-          " | undefined>; ticks?: number | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; gridLine?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<Partial<",
-          "GridLineStyle",
-          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | undefined; references?: ",
+          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | undefined; references?: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -35349,9 +35349,7 @@
             "section": "def-common.CustomPaletteParams",
             "text": "CustomPaletteParams"
           },
-          "> | undefined; titlesTextAlign?: \"right\" | \"center\" | \"left\" | undefined; iconAlign?: \"right\" | \"left\" | undefined; titleWeight?: ",
-          "MetricFontWeight",
-          " | undefined; subtitle?: string | undefined; collapseFn?: \"min\" | \"max\" | \"sum\" | \"avg\" | undefined; metricAccessor?: string | undefined; secondaryMetricAccessor?: string | undefined; maxAccessor?: string | undefined; breakdownByAccessor?: string | undefined; secondaryPrefix?: string | undefined; secondaryLabel?: string | undefined; secondaryTrend?: ",
+          "> | undefined; metricAccessor?: string | undefined; maxAccessor?: string | undefined; secondaryMetricAccessor?: string | undefined; breakdownByAccessor?: string | undefined; collapseFn?: \"min\" | \"max\" | \"sum\" | \"avg\" | undefined; subtitle?: string | undefined; secondaryPrefix?: string | undefined; secondaryLabel?: string | undefined; secondaryTrend?: ",
           {
             "pluginId": "@kbn/lens-common",
             "scope": "common",
@@ -35361,7 +35359,7 @@
           },
           " | undefined; progressDirection?: ",
           "LayoutDirection",
-          " | undefined; showBar?: boolean | undefined; valuesTextAlign?: \"right\" | \"center\" | \"left\" | undefined; secondaryAlign?: \"right\" | \"center\" | \"left\" | undefined; primaryAlign?: \"right\" | \"center\" | \"left\" | undefined; valueFontMode?: ",
+          " | undefined; showBar?: boolean | undefined; titlesTextAlign?: \"right\" | \"center\" | \"left\" | undefined; valuesTextAlign?: \"right\" | \"center\" | \"left\" | undefined; secondaryAlign?: \"right\" | \"center\" | \"left\" | undefined; primaryAlign?: \"right\" | \"center\" | \"left\" | undefined; iconAlign?: \"right\" | \"left\" | undefined; valueFontMode?: ",
           {
             "pluginId": "@kbn/lens-common",
             "scope": "common",
@@ -35369,6 +35367,8 @@
             "section": "def-common.ValueFontMode",
             "text": "ValueFontMode"
           },
+          " | undefined; titleWeight?: ",
+          "MetricFontWeight",
           " | undefined; primaryPosition?: \"top\" | \"bottom\" | undefined; secondaryLabelPosition?: \"after\" | \"before\" | undefined; maxCols?: number | undefined; trendlineLayerId?: string | undefined; trendlineLayerType?: ",
           {
             "pluginId": "@kbn/lens-common",
@@ -36317,7 +36317,51 @@
           "CustomXDomain",
           " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType<{}> | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
           "LegendStrategy",
-          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
+          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "RecursivePartial",
+          "<Omit<",
+          "AxisStyle",
+          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
+          "Position",
+          " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "YDomainRange",
+          " | undefined>; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; ticks?: number | undefined; gridLine?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<Partial<",
+          "GridLineStyle",
+          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<{ duration: number; } | undefined>; valueGetter?: ",
+          "ValueGetter",
+          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
           "GoalSubtype",
           "; domain: ",
           {
@@ -36329,7 +36373,7 @@
           },
           "<",
           "GoalDomainRange",
-          ">; bands?: number | number[] | undefined; ticks?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
+          ">; ticks?: number | number[] | undefined; bands?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
           "GoalLabelAccessor",
           " | undefined; labelMinor?: string | ",
           "GoalLabelAccessor",
@@ -36345,51 +36389,7 @@
             "section": "def-common.MakeOverridesSerializable",
             "text": "MakeOverridesSerializable"
           },
-          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<{ duration: number; } | undefined>; valueGetter?: ",
-          "ValueGetter",
-          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "RecursivePartial",
-          "<Omit<",
-          "AxisStyle",
-          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
-          "Position",
-          " | undefined; domain?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "YDomainRange",
-          " | undefined>; ticks?: number | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; gridLine?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<Partial<",
-          "GridLineStyle",
-          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | undefined; attributes: { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | undefined; attributes: { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -37169,7 +37169,39 @@
             "section": "def-common.Datatable",
             "text": "Datatable"
           },
-          "; column: number; range: number[]; timeFieldName?: string | undefined; preventDefault: () => void; }) => void) | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; onFilter?: ((data: { data: { table: Pick<",
+          "; column: number; range: number[]; timeFieldName?: string | undefined; preventDefault: () => void; }) => void) | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; esqlVariables?: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLControlVariable",
+            "text": "ESQLControlVariable"
+          },
+          "[] | undefined; noPadding?: boolean | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.DynamicActionsState",
+            "text": "DynamicActionsState"
+          },
+          "; } | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.ViewMode",
+            "text": "ViewMode"
+          },
+          " | undefined; disableTriggers?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; isNewPanel?: boolean | undefined; abortController?: AbortController | undefined; withDefaultActions?: boolean | undefined; extraActions?: ",
+          {
+            "pluginId": "uiActions",
+            "scope": "public",
+            "docId": "kibUiActionsPluginApi",
+            "section": "def-public.Action",
+            "text": "Action"
+          },
+          "<object, object>[] | undefined; disabledActions?: string[] | undefined; showInspector?: boolean | undefined; canEditInline?: boolean | undefined; onFilter?: ((data: { data: { table: Pick<",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -37193,39 +37225,7 @@
             "section": "def-common.BooleanRelation",
             "text": "BooleanRelation"
           },
-          " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; preventDefault: () => void; }) => void) | undefined; withDefaultActions?: boolean | undefined; disabledActions?: string[] | undefined; enhancements?: { dynamicActions: ",
-          {
-            "pluginId": "uiActionsEnhanced",
-            "scope": "common",
-            "docId": "kibUiActionsEnhancedPluginApi",
-            "section": "def-common.DynamicActionsState",
-            "text": "DynamicActionsState"
-          },
-          "; } | undefined; esqlVariables?: ",
-          {
-            "pluginId": "@kbn/esql-types",
-            "scope": "common",
-            "docId": "kibKbnEsqlTypesPluginApi",
-            "section": "def-common.ESQLControlVariable",
-            "text": "ESQLControlVariable"
-          },
-          "[] | undefined; abortController?: AbortController | undefined; renderMode?: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.ViewMode",
-            "text": "ViewMode"
-          },
-          " | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; noPadding?: boolean | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; disableTriggers?: boolean | undefined; isNewPanel?: boolean | undefined; extraActions?: ",
-          {
-            "pluginId": "uiActions",
-            "scope": "public",
-            "docId": "kibUiActionsPluginApi",
-            "section": "def-public.Action",
-            "text": "Action"
-          },
-          "<object, object>[] | undefined; showInspector?: boolean | undefined; canEditInline?: boolean | undefined; onTableRowClick?: ((data: { rowIndex: number; table: ",
+          " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; preventDefault: () => void; }) => void) | undefined; onTableRowClick?: ((data: { rowIndex: number; table: ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -37346,7 +37346,51 @@
           "CustomXDomain",
           " | undefined>; onAnnotationClick?: \"ignore\" | undefined; resizeDebounce?: number | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; renderingSort?: \"ignore\" | undefined; noResults?: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | React.ComponentType<{}> | undefined; ariaLabel?: string | undefined; ariaLabelledBy?: string | undefined; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaTableCaption?: string | undefined; legendStrategy?: ",
           "LegendStrategy",
-          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
+          " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "RecursivePartial",
+          "<Omit<",
+          "AxisStyle",
+          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
+          "Position",
+          " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<",
+          "YDomainRange",
+          " | undefined>; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; ticks?: number | undefined; gridLine?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<Partial<",
+          "GridLineStyle",
+          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<{ duration: number; } | undefined>; valueGetter?: ",
+          "ValueGetter",
+          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"gauge\", { id: string; target?: number | undefined; subtype: ",
           "GoalSubtype",
           "; domain: ",
           {
@@ -37358,7 +37402,7 @@
           },
           "<",
           "GoalDomainRange",
-          ">; bands?: number | number[] | undefined; ticks?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
+          ">; ticks?: number | number[] | undefined; bands?: number | number[] | undefined; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
           "GoalLabelAccessor",
           " | undefined; labelMinor?: string | ",
           "GoalLabelAccessor",
@@ -37374,51 +37418,7 @@
             "section": "def-common.MakeOverridesSerializable",
             "text": "MakeOverridesSerializable"
           },
-          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | Partial<Record<\"partition\", { animation?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<{ duration: number; } | undefined>; valueGetter?: ",
-          "ValueGetter",
-          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "RecursivePartial",
-          "<Omit<",
-          "AxisStyle",
-          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
-          "Position",
-          " | undefined; domain?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<",
-          "YDomainRange",
-          " | undefined>; ticks?: number | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; gridLine?: ",
-          {
-            "pluginId": "@kbn/chart-expressions-common",
-            "scope": "common",
-            "docId": "kibKbnChartExpressionsCommonPluginApi",
-            "section": "def-common.MakeOverridesSerializable",
-            "text": "MakeOverridesSerializable"
-          },
-          "<Partial<",
-          "GridLineStyle",
-          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> | undefined; references?: ",
+          "<string[] | undefined>; tooltipValueFormatter?: \"ignore\" | undefined; }>> | undefined; references?: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -37436,15 +37436,7 @@
             "section": "def-common.PaletteOutput",
             "text": "PaletteOutput"
           },
-          "<Record<string, unknown>> | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; enhancements?: { dynamicActions: ",
-          {
-            "pluginId": "uiActionsEnhanced",
-            "scope": "common",
-            "docId": "kibUiActionsEnhancedPluginApi",
-            "section": "def-common.DynamicActionsState",
-            "text": "DynamicActionsState"
-          },
-          "; } | undefined; esqlVariables?: ",
+          "<Record<string, unknown>> | undefined; hidePanelTitles?: boolean | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; esqlVariables?: ",
           {
             "pluginId": "@kbn/esql-types",
             "scope": "common",
@@ -37452,7 +37444,15 @@
             "section": "def-common.ESQLControlVariable",
             "text": "ESQLControlVariable"
           },
-          "[] | undefined; renderMode?: ",
+          "[] | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.DynamicActionsState",
+            "text": "DynamicActionsState"
+          },
+          "; } | undefined; timeslice?: [number, number] | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -37460,7 +37460,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          " | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; forceDSL?: boolean | undefined; timeslice?: [number, number] | undefined; disableTriggers?: boolean | undefined; isNewPanel?: boolean | undefined; savedObjectId?: string | undefined; attributes: { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+          " | undefined; disableTriggers?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; isNewPanel?: boolean | undefined; savedObjectId?: string | undefined; attributes: { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -39636,7 +39636,7 @@
             "label": "orientation",
             "description": [],
             "signature": [
-              "\"multiple\" | \"single\" | \"right angled\""
+              "\"single\" | \"right angled\" | \"multiple\""
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/tagcloud/constants.ts",
             "lineNumber": 26,

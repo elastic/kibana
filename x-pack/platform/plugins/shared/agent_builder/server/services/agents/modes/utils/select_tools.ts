@@ -12,6 +12,9 @@ import type { ToolProvider, ExecutableTool, ScopedRunner } from '@kbn/agent-buil
 import type { AgentConfiguration } from '@kbn/agent-builder-common';
 import type { AttachmentsService } from '@kbn/agent-builder-server/runner';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentFormatContext } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentTools } from '../../../tools/builtin/attachments';
 import type { ProcessedConversation } from './prepare_conversation';
 
@@ -21,6 +24,7 @@ export const selectTools = async ({
   toolProvider,
   agentConfiguration,
   attachmentsService,
+  spaceId,
   runner,
 }: {
   conversation: ProcessedConversation;
@@ -28,8 +32,11 @@ export const selectTools = async ({
   toolProvider: ToolProvider;
   attachmentsService: AttachmentsService;
   agentConfiguration: AgentConfiguration;
+  spaceId: string;
   runner: ScopedRunner;
 }) => {
+  const formatContext: AttachmentFormatContext = { request, spaceId };
+
   // create tool selection for attachments types
   const attachmentTypes = conversation.attachmentTypes.map((type) => type.type);
   const attachmentToolIds = getToolsForAttachmentTypes(attachmentTypes, attachmentsService);
@@ -37,10 +44,11 @@ export const selectTools = async ({
     tool_ids: attachmentToolIds,
   };
 
-  // convert attachment-bound tools
-  const attachmentBoundTools = conversation.attachments
-    .flatMap((attachment) => attachment.tools)
-    .map((tool) => attachmentsService.convertAttachmentTool(tool));
+  const versionedAttachmentBoundTools = await getVersionedAttachmentBoundTools({
+    attachmentStateManager: conversation.attachmentStateManager,
+    attachmentsService,
+    formatContext,
+  });
 
   const versionedAttachmentTools = createVersionedAttachmentTools({
     attachmentStateManager: conversation.attachmentStateManager,
@@ -54,7 +62,18 @@ export const selectTools = async ({
     request,
   });
 
-  return [...attachmentBoundTools, ...versionedAttachmentTools, ...registryTools];
+  const allTools = [
+    ...versionedAttachmentBoundTools,
+    ...versionedAttachmentTools,
+    ...registryTools,
+  ];
+
+  const deduped = new Map<string, ExecutableTool>();
+  for (const tool of allTools) {
+    deduped.set(tool.id, tool);
+  }
+
+  return [...deduped.values()];
 };
 
 /**
@@ -97,6 +116,49 @@ const createVersionedAttachmentTools = ({
       });
     },
   }));
+};
+
+const getVersionedAttachmentBoundTools = async ({
+  attachmentStateManager,
+  attachmentsService,
+  formatContext,
+}: {
+  attachmentStateManager: AttachmentStateManager;
+  attachmentsService: AttachmentsService;
+  formatContext: AttachmentFormatContext;
+}): Promise<ExecutableTool[]> => {
+  const tools: ExecutableTool[] = [];
+
+  for (const attachment of attachmentStateManager.getActive()) {
+    const latest = getLatestVersion(attachment);
+    if (!latest) {
+      continue;
+    }
+
+    const definition = attachmentsService.getTypeDefinition(attachment.type);
+    if (!definition) {
+      continue;
+    }
+
+    const input: Attachment = {
+      id: attachment.id,
+      type: attachment.type,
+      data: latest.data as Attachment['data'],
+      ...(attachment.hidden !== undefined ? { hidden: attachment.hidden } : {}),
+    };
+
+    try {
+      const formatted = await definition.format(input, formatContext);
+      const boundedTools = formatted.getBoundedTools ? await formatted.getBoundedTools() : [];
+      for (const tool of boundedTools) {
+        tools.push(attachmentsService.convertAttachmentTool(tool));
+      }
+    } catch {
+      // Ignore formatting errors; bounded tools are optional.
+    }
+  }
+
+  return tools;
 };
 
 const getToolsForAttachmentTypes = (

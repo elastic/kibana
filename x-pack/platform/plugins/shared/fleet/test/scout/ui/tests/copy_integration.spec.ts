@@ -141,6 +141,10 @@ test.describe('Copy integration', { tag: ['@ess'] }, () => {
     const nameInput = copyIntegration.getPackagePolicyNameInput();
     await expect(nameInput).toBeVisible();
 
+    // Ensure agent policy select is loaded
+    await expect(copyIntegration.getAgentPolicySelect()).toBeVisible();
+    await expect(copyIntegration.getAgentPolicySelectIsLoading()).toBeHidden();
+
     await expect(nameInput).toHaveValue(`copy-${packagePolicyName}`);
 
     const pathsInput = copyIntegration.getMultiTextInputRow('nginx.access', 'paths');

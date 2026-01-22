@@ -2694,6 +2694,25 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture-common",
+        "id": "def-common.ENTITIES_LATEST_INDEX",
+        "type": "string",
+        "tags": [],
+        "label": "ENTITIES_LATEST_INDEX",
+        "description": [
+          "\nEntity store latest index pattern for LOOKUP JOIN queries.\nThe <space> placeholder should be replaced with the actual space ID."
+        ],
+        "signature": [
+          "\".entities.v2.latest.security_generic_<space>\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
+        "lineNumber": 118,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-common",
         "id": "def-common.FINDINGS_INDEX_PATTERN",
         "type": "string",
         "tags": [],
@@ -3637,7 +3656,7 @@
           "readonly [\"user.entity.id\", \"host.entity.id\", \"service.entity.id\", \"entity.id\"]"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 118,
+        "lineNumber": 124,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3656,7 +3675,7 @@
           "readonly [\"user.target.entity.id\", \"host.target.entity.id\", \"service.target.entity.id\", \"entity.target.id\"]"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/constants.ts",
-        "lineNumber": 129,
+        "lineNumber": 135,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

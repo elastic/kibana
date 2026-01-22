@@ -13,6 +13,7 @@ import type { ProjectRouting } from '@kbn/es-query';
 import type { ICPSManager } from '../types';
 import { ProjectRoutingAccess } from '../types';
 import { DisabledProjectPicker, ProjectPicker } from './project_picker';
+import { ProjectPickerSettings } from './project_picker_settings';
 
 interface ProjectPickerContainerProps {
   cpsManager: ICPSManager;
@@ -31,6 +32,10 @@ export const ProjectPickerContainer: React.FC<ProjectPickerContainerProps> = ({ 
     return cpsManager.fetchProjects();
   }, [cpsManager]);
 
+  const resetProjectPicker = useCallback(() => {
+    updateProjectRouting(cpsManager.getDefaultProjectRouting());
+  }, [cpsManager, updateProjectRouting]);
+
   if (access === ProjectRoutingAccess.DISABLED) {
     return <DisabledProjectPicker />;
   }
@@ -41,6 +46,7 @@ export const ProjectPickerContainer: React.FC<ProjectPickerContainerProps> = ({ 
       onProjectRoutingChange={updateProjectRouting}
       fetchProjects={fetchProjects}
       isReadonly={access === ProjectRoutingAccess.READONLY}
+      settingsComponent={<ProjectPickerSettings onResetToDefaults={resetProjectPicker} />}
     />
   );
 };

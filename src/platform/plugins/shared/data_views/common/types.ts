@@ -428,6 +428,11 @@ export type FieldSpec = DataViewFieldBase & {
    * True if field is empty
    */
   isNull?: boolean;
+
+  /**
+   * True if field is a computed column, used in ES|QL to distinguish from index fields
+   */
+  isComputedColumn?: boolean;
   /**
    * True if can be read from doc values
    */

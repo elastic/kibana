@@ -37,7 +37,8 @@ export async function getCorrelatedLogsForAnchor({
   );
 
   const res = await search({
-    _source: logSourceFields,
+    _source: false,
+    fields: logSourceFields,
     track_total_hits: maxLogsPerSequence + 1, // +1 to check if sequence is truncated
     size: maxLogsPerSequence,
     index: logsIndices,
@@ -55,7 +56,14 @@ export async function getCorrelatedLogsForAnchor({
   const totalHits = getTotalHits(res);
 
   return {
-    logs: res.hits.hits.map((hit) => hit._source as Record<string, unknown>),
+    logs: res.hits.hits.map((hit) => {
+      return Object.fromEntries(
+        Object.entries(hit.fields ?? {}).map(([key, value]) => [
+          key,
+          Array.isArray(value) && value.length === 1 ? value[0] : value,
+        ])
+      );
+    }),
     isTruncated: totalHits > maxLogsPerSequence,
   };
 }

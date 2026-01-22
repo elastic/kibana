@@ -73,6 +73,7 @@ export interface TableGridProps {
   customRenderCellValue?: RenderCellValue;
   customRenderCellPopover?: React.JSXElementConstructor<EuiDataGridCellPopoverElementProps>;
   gridStyle?: EuiDataGridStyle;
+  hideFilteringOnComputedColumns?: boolean;
 }
 
 const MIN_NAME_COLUMN_WIDTH = 150;
@@ -100,6 +101,7 @@ export function TableGrid({
   customRenderCellValue,
   customRenderCellPopover,
   gridStyle,
+  hideFilteringOnComputedColumns,
 }: TableGridProps) {
   const styles = useMemoCss(componentStyles);
   const { toasts } = getUnifiedDocViewerServices();
@@ -118,12 +120,27 @@ export function TableGrid({
   }, [onRemoveColumn, onAddColumn, columns]);
 
   const fieldCellActions = useMemo(
-    () => getFieldCellActions({ rows, isEsqlMode, onFilter: filter, onToggleColumn, columns }),
-    [rows, isEsqlMode, filter, onToggleColumn, columns]
+    () =>
+      getFieldCellActions({
+        rows,
+        isEsqlMode,
+        onFilter: filter,
+        onToggleColumn,
+        columns,
+        hideFilteringOnComputedColumns,
+      }),
+    [rows, isEsqlMode, filter, onToggleColumn, columns, hideFilteringOnComputedColumns]
   );
   const fieldValueCellActions = useMemo(
-    () => getFieldValueCellActions({ rows, isEsqlMode, toasts, onFilter: filter }),
-    [rows, isEsqlMode, toasts, filter]
+    () =>
+      getFieldValueCellActions({
+        rows,
+        isEsqlMode,
+        toasts,
+        onFilter: filter,
+        hideFilteringOnComputedColumns,
+      }),
+    [rows, isEsqlMode, toasts, filter, hideFilteringOnComputedColumns]
   );
 
   const { curPageIndex, pageSize, totalPages, changePageIndex, changePageSize } = usePager({

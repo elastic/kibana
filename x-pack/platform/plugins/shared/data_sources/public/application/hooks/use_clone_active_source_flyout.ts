@@ -11,6 +11,7 @@ import type { ActiveSource } from '../../types/connector';
 import { useCloneActiveSource } from './use_clone_active_source';
 import { useAddConnectorFlyout } from './use_add_connector_flyout';
 import { useStackConnector } from './use_stack_connector';
+import { getConnectorIconType } from '../../utils/get_connector_icon';
 
 export interface UseCloneActiveSourceFlyoutOptions {
   sourceToClone: ActiveSource | null;
@@ -43,7 +44,7 @@ export const useCloneActiveSourceFlyout = ({
   // Generate suggested clone name
   const clonedName = sourceToClone ? getCloneName(sourceToClone) : undefined;
 
-  // Use the add connector flyout with the data source type and suggested name
+  // Use the add connector flyout with the data source type, suggested name, and icon
   const {
     openFlyout: openAddFlyout,
     flyout,
@@ -51,6 +52,7 @@ export const useCloneActiveSourceFlyout = ({
   } = useAddConnectorFlyout({
     dataSourceType: sourceToClone?.type,
     suggestedName: clonedName,
+    icon: sourceToClone ? getConnectorIconType(sourceToClone.iconType) : undefined,
     onConnectorCreated,
   });
 

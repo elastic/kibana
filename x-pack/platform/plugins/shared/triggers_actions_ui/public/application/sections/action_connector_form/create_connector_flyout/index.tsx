@@ -7,6 +7,7 @@
 
 import type { ReactNode } from 'react';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import type { IconType } from '@elastic/eui';
 import { EuiButtonGroup, EuiCallOut, EuiFlyout, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 
@@ -39,6 +40,7 @@ export interface CreateConnectorFlyoutProps {
   onTestConnector?: (connector: ActionConnector) => void;
   isServerless?: boolean;
   initialConnector?: Partial<Omit<ActionConnector, 'secrets'>> & { actionTypeId: string };
+  icon?: IconType;
 }
 
 const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
@@ -48,6 +50,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   onConnectorCreated,
   onTestConnector,
   initialConnector,
+  icon,
 }) => {
   const {
     application: { capabilities },
@@ -244,7 +247,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
       })}
     >
       <FlyoutHeader
-        icon={actionTypeModel?.iconClass}
+        icon={icon ?? actionTypeModel?.iconClass}
         actionTypeName={actionType?.name}
         actionTypeMessage={actionTypeModel?.selectMessage}
         compatibility={getConnectorCompatibility(actionType?.supportedFeatureIds)}

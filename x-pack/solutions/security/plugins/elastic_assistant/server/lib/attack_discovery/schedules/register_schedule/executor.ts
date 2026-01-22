@@ -8,7 +8,10 @@
 import moment from 'moment';
 import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
-import { getAttackDiscoveryMarkdownFields } from '@kbn/elastic-assistant-common';
+import {
+  getAttackDiscoveryMarkdownFields,
+  resolveConnectorId,
+} from '@kbn/elastic-assistant-common';
 import { ALERT_URL } from '@kbn/rule-data-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
@@ -55,6 +58,13 @@ export const attackDiscoveryScheduleExecutor = async ({
   }
   if (!actionsClient) {
     throw new Error('Expected actionsClient not to be null!');
+  }
+
+  if (params.apiConfig?.connectorId) {
+    // Resolve potentially outdated Elastic managed connector ID to the new one.
+    // This provides backward compatibility for existing schedules that reference
+    // "Elastic-Managed-LLM" or "General-Purpose-LLM-v1".
+    params.apiConfig.connectorId = resolveConnectorId(params.apiConfig.connectorId);
   }
 
   const esClient = scopedClusterClient.asCurrentUser;

@@ -137,8 +137,14 @@ export const RuleFormRoute = () => {
         }}
         onSubmit={(ruleId) => {
           if (isInRulesApp) {
-            // Navigate to rule details page in the rules app using history.push
-            history.push(getRulesAppDetailsRoute(ruleId));
+            // After editing, navigate back to where we came from (returnPath)
+            // For new rules, returnPath won't be set, so go to details
+            if (id && returnPath) {
+              history.push(returnPath);
+            } else {
+              // For new rules, navigate to rule details page
+              history.push(getRulesAppDetailsRoute(ruleId));
+            }
           } else if (returnApp && returnPath) {
             // Navigate back to the original app/path for other apps
             navigateToApp(returnApp, { path: returnPath });

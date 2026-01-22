@@ -96,6 +96,7 @@ export const DocViewerTable = ({
   decreaseAvailableHeightBy,
   onAddColumn,
   onRemoveColumn,
+  hideFilteringOnComputedColumns,
 }: DocViewRenderProps) => {
   const styles = useMemoCss(componentStyles);
 
@@ -383,6 +384,7 @@ export const DocViewerTable = ({
             onChangePageSize={onChangePageSize}
             pinnedFields={pinnedFields}
             onTogglePinned={onTogglePinned}
+            hideFilteringOnComputedColumns={hideFilteringOnComputedColumns}
           />
         </EuiFlexItem>
       )}

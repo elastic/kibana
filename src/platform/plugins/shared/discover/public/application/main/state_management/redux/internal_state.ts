@@ -494,20 +494,6 @@ const createMiddleware = (options: InternalStateDependencies) => {
     },
   });
 
-  startListening({
-    actionCreator: initializeTabs.fulfilled,
-    effect: (action, listenerApi) => {
-      const { services } = listenerApi.extra;
-
-      // Initialize CPS manager with session-level projectRouting after state is updated
-      if (services.cps?.cpsManager) {
-        services.cps.cpsManager.setProjectRouting(
-          services.cps.cpsManager.getDefaultProjectRouting()
-        );
-      }
-    },
-  });
-
   return listenerMiddleware.middleware;
 };
 

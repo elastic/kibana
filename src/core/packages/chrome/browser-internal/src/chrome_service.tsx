@@ -14,6 +14,7 @@ import {
   BehaviorSubject,
   combineLatest,
   filter,
+  from,
   map,
   merge,
   mergeMap,
@@ -436,6 +437,10 @@ export class ChromeService {
     const activeDataTestSubj$ = projectNavigation.getActiveDataTestSubj$();
     const feedbackUrlParams$ = projectNavigation.getFeedbackUrlParams$();
 
+    const isFeedbackEnabled = from(
+      getNotifications().then((notifications) => notifications.feedback.isEnabled())
+    );
+
     const navProps: NavigationProps = {
       basePath: http.basePath,
       application,
@@ -451,6 +456,7 @@ export class ChromeService {
       isFeedbackBtnVisible$: this.isFeedbackBtnVisible$,
       feedbackUrlParams$,
       onToggleCollapsed: setIsSideNavCollapsed,
+      isFeedbackEnabled$: isFeedbackEnabled,
     };
 
     const getProjectHeader = ({

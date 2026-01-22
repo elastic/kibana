@@ -21,10 +21,8 @@ const logRateAnalysisSchema = z.object({
   index: z.string().describe(indexDescription),
   timeFieldName: z
     .string()
-    .describe(
-      'Timestamp field used to build the baseline/deviation windows. Defaults to `@timestamp`.'
-    )
-    .optional(),
+    .default('@timestamp')
+    .describe('Timestamp field used to build the baseline/deviation windows.'),
   baseline: z
     .object(timeRangeSchemaRequired)
     .describe(
@@ -75,7 +73,7 @@ Do NOT use for:
       },
     },
     handler: async (toolParams, context) => {
-      const { index, timeFieldName = '@timestamp', baseline, deviation, searchQuery } = toolParams;
+      const { index, timeFieldName, baseline, deviation, searchQuery } = toolParams;
 
       try {
         const esClient = context.esClient.asCurrentUser;

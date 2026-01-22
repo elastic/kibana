@@ -32,7 +32,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
-    hideAnnouncements: true,
   };
 
   describe('discover URL state', () => {

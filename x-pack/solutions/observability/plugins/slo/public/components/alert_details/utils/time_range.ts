@@ -29,3 +29,10 @@ export function getChartTimeRange(alert: BurnRateAlert): TimeRange {
     to: timeRange.to ? new Date(timeRange.to) : new Date(),
   };
 }
+
+export function getAlertTimeRange(alert: BurnRateAlert): TimeRange {
+  return {
+    from: new Date(alert.fields[ALERT_START]!),
+    to: alert.fields[ALERT_END] ? new Date(alert.fields[ALERT_END]) : new Date(),
+  };
+}

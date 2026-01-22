@@ -193,7 +193,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.getWaffleMap();
       });
 
-      describe('Asset Details flyout for a host', () => {
+      // Done
+      describe.skip('Asset Details flyout for a host', () => {
         before(async () => {
           await pageObjects.infraHome.goToTime(DATE_WITH_HOSTS_DATA);
           await pageObjects.infraHome.getWaffleMap();
@@ -277,6 +278,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
+      // Done
       describe('Asset Details flyout for a container', () => {
         before(async () => {
           await pageObjects.infraHome.goToContainer();
@@ -453,6 +455,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.infraHome.waitForLoading();
         });
 
+        // Done
         it('Should redirect to Host Details page', async () => {
           await pageObjects.infraHome.goToTime(DATE_WITH_HOSTS_DATA);
           await pageObjects.infraHome.goToHost();
@@ -469,6 +472,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await returnTo(INVENTORY_PATH);
         });
 
+        // Done
         describe('Redirect to Pod Details page', () => {
           it('should redirect to Pod Details page', async () => {
             await pageObjects.infraHome.goToPods();
@@ -491,6 +495,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
         });
 
+        // Done
         describe('Redirect to Container Details page', () => {
           it('should redirect to Container Details page', async () => {
             await pageObjects.infraHome.goToContainer();

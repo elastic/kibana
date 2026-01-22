@@ -1230,7 +1230,7 @@
           "\nVisualization types available in Kibana"
         ],
         "signature": [
-          "\"table\" | \"metric\" | \"line\" | \"area\" | \"lens\" | \"goal\" | \"gauge\" | \"bar\" | \"tagcloud\" | \"pie\" | \"tsvb\" | \"markdown\" | \"vega\" | \"timelion\""
+          "\"table\" | \"metric\" | \"line\" | \"area\" | \"lens\" | \"goal\" | \"gauge\" | \"bar\" | \"pie\" | \"tagcloud\" | \"tsvb\" | \"markdown\" | \"vega\" | \"timelion\""
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
         "lineNumber": 10,

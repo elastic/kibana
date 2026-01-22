@@ -939,13 +939,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(items).to.have.length(0);
       });
 
-      it('defaults to service.name grouping when groupBy is an empty string', async () => {
+      it('defaults to service.name grouping when groupBy is not provided', async () => {
         const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
           id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
           params: {
             start: START,
             end: END,
-            groupBy: '',
           },
         });
 

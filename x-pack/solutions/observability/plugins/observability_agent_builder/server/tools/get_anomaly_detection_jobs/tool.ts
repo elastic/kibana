@@ -42,17 +42,15 @@ const getAnomalyDetectionJobsSchema = z.object({
     .array(z.string().min(1))
     .min(1)
     .max(20)
-    .describe(
-      'Optional list of ML job IDs to query. Leave empty to include all anomaly detection jobs in this space.'
-    )
-    .optional(),
+    .optional()
+    .describe('Specific ML job IDs to query. Omit to include all jobs in this space.'),
   limit: z
     .number()
     .int()
     .min(1)
     .max(25)
-    .describe(`Maximum number of jobs to return. Defaults to ${DEFAULT_JOBS_LIMIT}.`)
-    .optional(),
+    .default(DEFAULT_JOBS_LIMIT)
+    .describe('Maximum number of jobs to return.'),
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
 });
 
@@ -88,12 +86,7 @@ When to use:
     ): Promise<{
       results: (GetAnomalyDetectionJobsToolResult | Omit<ErrorResult, 'tool_result_id'>)[];
     }> => {
-      const {
-        jobIds,
-        limit: jobsLimit = DEFAULT_JOBS_LIMIT,
-        start: rangeStart,
-        end: rangeEnd,
-      } = toolParams;
+      const { jobIds, limit: jobsLimit, start: rangeStart, end: rangeEnd } = toolParams;
       const scopedEsClient = esClient.asCurrentUser;
       const mlClient = scopedEsClient.ml;
 

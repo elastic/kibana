@@ -134,7 +134,7 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
               disabled: !canUserEditList,
             },
           ]}
-          disableActions={isReadonly}
+          disableActions={false}
           anchorPosition="downCenter"
           ariaLabel={i18n.EXCEPTION_LIST_ACTIONS_ARIA_LABEL}
         />

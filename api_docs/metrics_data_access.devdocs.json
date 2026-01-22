@@ -565,7 +565,7 @@
         "label": "LogQueryFields",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/metrics/types.ts",
-        "lineNumber": 119,
+        "lineNumber": 125,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -578,7 +578,7 @@
             "label": "indexPattern",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/metrics/types.ts",
-            "lineNumber": 120,
+            "lineNumber": 126,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

@@ -126,7 +126,9 @@ export const onSaveDiscoverSession = async ({
       isTimeBased={isTimeBased}
       services={services}
       title={persistedDiscoverSession?.title ?? ''}
-      showCopyOnSave={!!persistedDiscoverSession?.id}
+      showCopyOnSave={
+        !services.embeddableEditor.isEmbeddedEditor() && !!persistedDiscoverSession?.id
+      }
       initialCopyOnSave={initialCopyOnSave}
       description={persistedDiscoverSession?.description}
       timeRestore={timeRestore}

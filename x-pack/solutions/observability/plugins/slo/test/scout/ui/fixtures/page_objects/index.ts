@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ScoutPage, ObltPageObjects } from '@kbn/scout-oblt';
+import type { ScoutPage, ObltPageObjects, ScoutTestConfig } from '@kbn/scout-oblt';
 import { createLazyPageObject } from '@kbn/scout-oblt';
 import { AnnotationsApp } from './annotations_app';
 import { SLOApp } from './slo_app';
@@ -15,10 +15,14 @@ export interface SLOPageObjects extends ObltPageObjects {
   annotations: AnnotationsApp;
 }
 
-export function extendPageObjects(pageObjects: ObltPageObjects, page: ScoutPage): SLOPageObjects {
+export function extendPageObjects(
+  pageObjects: ObltPageObjects,
+  page: ScoutPage,
+  config: ScoutTestConfig
+): SLOPageObjects {
   return {
     ...pageObjects,
-    slo: createLazyPageObject(SLOApp, page),
+    slo: createLazyPageObject(SLOApp, page, config),
     annotations: createLazyPageObject(AnnotationsApp, page),
   };
 }

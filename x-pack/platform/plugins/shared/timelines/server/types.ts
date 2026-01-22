@@ -7,7 +7,6 @@
 
 import type { PluginSetup, PluginStart } from '@kbn/data-plugin/server';
 import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface TimelinesPluginUI {}
@@ -16,7 +15,6 @@ export interface TimelinesPluginStart {}
 
 export interface SetupPlugins {
   data: PluginSetup;
-  security?: SecurityPluginSetup;
 }
 
 export interface StartPlugins {

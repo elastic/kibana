@@ -10,6 +10,7 @@ import { isInheritLifecycle } from '@kbn/streams-schema';
 import { isEqual, noop } from 'lodash';
 import type {
   AppendProcessor,
+  ConcatProcessor,
   Condition,
   ConvertProcessor,
   DateProcessor,
@@ -185,6 +186,14 @@ const actionStepValidators: {
     for (const field of step.from) {
       checkFieldName(field);
     }
+  },
+  concat: (step: ConcatProcessor) => {
+    checkFieldName(step.to);
+    step.from.forEach((from) => {
+      if (from.type === 'field') {
+        checkFieldName(from.value);
+      }
+    });
   },
   // fields referenced in manual ingest pipelines are not validated here because
   // the interface is Elasticsearch directly here, which has its own validation

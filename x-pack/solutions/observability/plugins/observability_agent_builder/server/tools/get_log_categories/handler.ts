@@ -13,7 +13,7 @@ import { getTypedSearch } from '../../utils/get_typed_search';
 import { getTotalHits } from '../../utils/get_total_hits';
 import { timeRangeFilter, kqlFilter } from '../../utils/dsl_filters';
 import { parseDatemath } from '../../utils/time';
-import { warningAndAboveLogFilter } from '../../utils/ecs_otel_fields';
+import { warningAndAboveLogFilter } from '../../utils/warning_and_above_log_filter';
 
 export async function getToolHandler({
   core,
@@ -52,7 +52,6 @@ export async function getToolHandler({
       logger,
       categoryCount: 20,
       fields,
-      field: 'message',
     }),
     getLogCategories({
       esClient,
@@ -61,7 +60,6 @@ export async function getToolHandler({
       logger,
       categoryCount: 10,
       fields,
-      field: 'message',
     }),
   ]);
 
@@ -75,7 +73,6 @@ export async function getLogCategories({
   logger,
   categoryCount,
   fields,
-  field = 'message',
 }: {
   esClient: IScopedClusterClient;
   logsIndices: string[];
@@ -83,7 +80,6 @@ export async function getLogCategories({
   logger: Logger;
   categoryCount: number;
   fields: string[];
-  field?: string;
 }) {
   const search = getTypedSearch(esClient.asCurrentUser);
 
@@ -97,9 +93,7 @@ export async function getLogCategories({
 
   const totalHits = getTotalHits(countResponse);
   if (totalHits === 0) {
-    logger.debug(
-      `No log documents found for field "${field}", filter: ${JSON.stringify(boolQuery)}`
-    );
+    logger.debug(`No log documents found, filter: ${JSON.stringify(boolQuery)}`);
     return undefined;
   }
 
@@ -111,7 +105,7 @@ export async function getLogCategories({
   logger.debug(
     `Total log documents: ${totalHits}, using sampling probability: ${samplingProbability.toFixed(
       4
-    )} for field "${field}", filter: ${JSON.stringify(boolQuery)}`
+    )}, filter: ${JSON.stringify(boolQuery)}`
   );
 
   const response = await search({
@@ -125,7 +119,7 @@ export async function getLogCategories({
         aggs: {
           categories: {
             categorize_text: {
-              field,
+              field: 'message',
               size: categoryCount,
               min_doc_count: 1,
             },
@@ -134,7 +128,7 @@ export async function getLogCategories({
                 top_hits: {
                   size: 1,
                   _source: false,
-                  fields: [field, '@timestamp', ...fields],
+                  fields: ['message', '@timestamp', ...fields],
                   sort: {
                     '@timestamp': { order: 'desc' },
                   },

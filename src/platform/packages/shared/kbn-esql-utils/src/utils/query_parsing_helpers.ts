@@ -211,6 +211,12 @@ export const getTimeFieldFromESQLQuery = (esql: string) => {
   const timeNamedParam = params.find(
     (param) => param.value === '_tstart' || param.value === '_tend'
   );
+  // PromQL queries always use @timestamp as timefield
+  const isPromQLQuery = root.commands.some(({ name }) => name === 'promql');
+  if (isPromQLQuery && timeNamedParam) {
+    return '@timestamp';
+  }
+
   if (!timeNamedParam || !functions.length) {
     return undefined;
   }
@@ -646,6 +652,7 @@ export function hasDateBreakdown(esql: string, columns: DatatableColumn[] = []):
 
 /**
  * Checks if the ESQL query contains only source commands (e.g., FROM, TS).
+ * If the query contains PROMQL command, we will exclude it from this check.
  * @param esql: string - The ESQL query string
  * @returns true if the query contains only source commands, false otherwise
  */
@@ -654,6 +661,7 @@ export const hasOnlySourceCommand = (query: string): boolean => {
   const sourceCommands = esqlCommandRegistry.getSourceCommandNames();
   return (
     root.commands.length > 0 &&
+    root.commands.every(({ name }) => name !== 'promql') &&
     root.commands.every((command) => sourceCommands.includes(command.name))
   );
 };

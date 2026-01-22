@@ -24,6 +24,8 @@ export const githubDataSource: DataSource = {
     defaultMessage: 'Connect to Github to pull data from your repository.',
   }),
 
+  iconType: '.github',
+
   oauthConfiguration: {
     provider: EARSSupportedOAuthProvider.GITHUB,
     initiatePath: '/oauth/start/github',
