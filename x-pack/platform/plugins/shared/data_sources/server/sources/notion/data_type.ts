@@ -22,6 +22,8 @@ export const notionDataSource: DataSource = {
     defaultMessage: 'Connect to Notion to pull data from your workspace.',
   }),
 
+  iconType: '.notion',
+
   oauthConfiguration: {
     provider: EARSSupportedOAuthProvider.NOTION,
     initiatePath: '/oauth/start/notion',
