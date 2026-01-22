@@ -14,13 +14,13 @@ import type { TaskParams } from '../types';
 import { generateSignificantEventsSummary } from '../../significant_events/insights/generate_significant_events_summary';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 
-export interface InsightsIdentificationTaskParams {
+export interface InsightsDiscoveryTaskParams {
   connectorId: string;
 }
 
 export const STREAMS_INSIGHTS_DISCOVERY_TASK_TYPE = 'streams_insights_discovery';
 
-export function createStreamsInsightsIdentificationTask(taskContext: TaskContext) {
+export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
   return {
     [STREAMS_INSIGHTS_DISCOVERY_TASK_TYPE]: {
       createTaskRunner: (runContext) => {
@@ -32,7 +32,7 @@ export function createStreamsInsightsIdentificationTask(taskContext: TaskContext
               }
 
               const { connectorId, _task } = runContext.taskInstance
-                .params as TaskParams<InsightsIdentificationTaskParams>;
+                .params as TaskParams<InsightsDiscoveryTaskParams>;
 
               const {
                 taskClient,
@@ -53,7 +53,7 @@ export function createStreamsInsightsIdentificationTask(taskContext: TaskContext
                   esClient: scopedClusterClient.asCurrentUser,
                   inferenceClient: boundInferenceClient,
                   signal: runContext.abortController.signal,
-                  logger: taskContext.logger.get('insights_identification'),
+                  logger: taskContext.logger.get('insights_discovery'),
                 });
 
                 taskContext.telemetry.trackInsightsGenerated({
@@ -62,7 +62,7 @@ export function createStreamsInsightsIdentificationTask(taskContext: TaskContext
                   cached_tokens_used: result.tokenUsage?.cached ?? 0,
                 });
 
-                await taskClient.complete<InsightsIdentificationTaskParams, InsightsResult>(
+                await taskClient.complete<InsightsDiscoveryTaskParams, InsightsResult>(
                   _task,
                   { connectorId },
                   result
@@ -86,7 +86,7 @@ export function createStreamsInsightsIdentificationTask(taskContext: TaskContext
                   `Task ${runContext.taskInstance.id} failed: ${errorMessage}`
                 );
 
-                await taskClient.fail<InsightsIdentificationTaskParams>(
+                await taskClient.fail<InsightsDiscoveryTaskParams>(
                   _task,
                   { connectorId },
                   errorMessage

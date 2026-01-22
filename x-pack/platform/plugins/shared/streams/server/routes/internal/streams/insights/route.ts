@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import type { InsightsResult } from '@kbn/streams-schema';
-import type { InsightsIdentificationTaskParams } from '../../../../lib/tasks/task_definitions/insights_discovery';
+import type { InsightsDiscoveryTaskParams } from '../../../../lib/tasks/task_definitions/insights_discovery';
 import { STREAMS_INSIGHTS_DISCOVERY_TASK_TYPE } from '../../../../lib/tasks/task_definitions/insights_discovery';
 import type { TaskResult } from '../../../../lib/tasks/types';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
@@ -71,7 +71,7 @@ const insightsTaskRoute = createServerRoute({
             scheduleConfig: {
               taskType: STREAMS_INSIGHTS_DISCOVERY_TASK_TYPE,
               taskId: STREAMS_INSIGHTS_DISCOVERY_TASK_TYPE,
-              params: await (async (): Promise<InsightsIdentificationTaskParams> => {
+              params: await (async (): Promise<InsightsDiscoveryTaskParams> => {
                 const connectorId = await resolveConnectorId({
                   connectorId: body.connectorId,
                   uiSettingsClient,
@@ -87,7 +87,7 @@ const insightsTaskRoute = createServerRoute({
           } as const)
         : ({ action: body.action } as const);
 
-    return handleTaskAction<InsightsIdentificationTaskParams, InsightsResult>({
+    return handleTaskAction<InsightsDiscoveryTaskParams, InsightsResult>({
       taskClient,
       taskId: STREAMS_INSIGHTS_DISCOVERY_TASK_TYPE,
       ...actionParams,
@@ -113,7 +113,7 @@ const insightsStatusRoute = createServerRoute({
     });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    return taskClient.getStatus<InsightsIdentificationTaskParams, InsightsResult>(
+    return taskClient.getStatus<InsightsDiscoveryTaskParams, InsightsResult>(
       STREAMS_INSIGHTS_DISCOVERY_TASK_TYPE
     );
   },
