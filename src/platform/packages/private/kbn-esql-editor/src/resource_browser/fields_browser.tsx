@@ -15,11 +15,12 @@ import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import type { ESQLFieldWithMetadata, RecommendedField } from '@kbn/esql-types';
 import type { GetColumnMapFn } from '@kbn/esql-language/src/language/shared/columns_retrieval_helpers';
 import type { ESQLColumnData } from '@kbn/esql-language/src/commands/registry/types';
-import type { HttpStart } from '@kbn/core/public';
 import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups';
 import { FieldIcon } from '@kbn/react-field';
 import { getEditorExtensions } from '@kbn/esql-utils';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { BrowserPopoverWrapper } from './browser_popover_wrapper';
+import type { ESQLEditorDeps } from '../types';
 
 // Map ESQL field types to FieldIcon types (matching typeToEuiIconMap keys)
 const getFieldIconType = (type: string): string => {
@@ -147,24 +148,25 @@ const getFieldTypeIconType = (typeLabel: string): string => {
 interface FieldsBrowserProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectField: (fieldName: string, oldLength: number) => void;
+  onSelect: (fieldName: string, oldLength: number) => void;
   getColumnMap?: GetColumnMapFn;
   position?: { top?: number; left?: number };
   queryString?: string;
   activeSolutionId?: SolutionId | null;
-  http?: HttpStart;
 }
 
 export const FieldsBrowser: React.FC<FieldsBrowserProps> = ({
   isOpen,
   onClose,
-  onSelectField,
+  onSelect,
   getColumnMap,
   position,
   queryString = '',
   activeSolutionId,
-  http,
 }) => {
+  const kibana = useKibana<ESQLEditorDeps>();
+  const { http } = kibana.services;
+
   const [items, setItems] = useState<ESQLFieldWithMetadata[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchValue, setSearchValue] = useState('');
@@ -418,9 +420,9 @@ export const FieldsBrowser: React.FC<FieldsBrowserProps> = ({
 
       const oldLength = selectedItems.join(',').length;
       setSelectedItems(newlySelected);
-      onSelectField(newlySelected.join(','), oldLength);
+      onSelect(newlySelected.join(','), oldLength);
     },
-    [onSelectField, selectedItems]
+    [onSelect, selectedItems]
   );
 
   const handleTypeFilterChange = useCallback(

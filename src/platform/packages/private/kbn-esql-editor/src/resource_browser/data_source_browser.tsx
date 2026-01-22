@@ -23,8 +23,8 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import type { ESQLSourceResult } from '@kbn/esql-types';
 import { getESQLSources } from '@kbn/esql-utils';
-import type { CoreStart } from '@kbn/core/public';
-import type { ILicense } from '@kbn/licensing-types';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { ESQLEditorDeps } from '../types';
 import { BrowserPopoverWrapper } from './browser_popover_wrapper';
 
 const getSourceTypeLabel = (type?: string): string => {
@@ -54,20 +54,19 @@ const getSourceTypeKey = (type?: string): string => {
 interface DataSourceBrowserProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectIndex: (indexName: string, oldLength: number) => void;
-  core: CoreStart;
-  getLicense?: () => Promise<ILicense | undefined>;
+  onSelect: (dataSourceName: string, oldLength: number) => void;
   position?: { top?: number; left?: number };
 }
 
 export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
   isOpen,
   onClose,
-  onSelectIndex,
-  core,
-  getLicense,
+  onSelect,
   position,
 }) => {
+  const kibana = useKibana<ESQLEditorDeps>();
+  const { core, esql } = kibana.services;
+
   const [items, setItems] = useState<ESQLSourceResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchValue, setSearchValue] = useState('');
@@ -89,8 +88,8 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
   }, [isOpen]);
 
   const fetchData = useCallback(async () => {
-    return getESQLSources(core, getLicense);
-  }, [core, getLicense]);
+    return getESQLSources(core, esql?.getLicense);
+  }, [core, esql?.getLicense]);
 
   const getTypeKey = useCallback((source: ESQLSourceResult) => {
     return getSourceTypeKey(source.type);
@@ -270,9 +269,9 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
 
       const oldLength = selectedItems.join(',').length;
       setSelectedItems(newlySelected);
-      onSelectIndex(newlySelected.join(','), oldLength);
+      onSelect(newlySelected.join(','), oldLength);
     },
-    [onSelectIndex, selectedItems]
+    [onSelect, selectedItems]
   );
 
   const handleTypeFilterChange = useCallback(

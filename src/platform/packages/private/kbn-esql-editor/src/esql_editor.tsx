@@ -211,7 +211,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
   const [isVisorOpen, setIsVisorOpen] = useState(false);
-  const [isIndicesBrowserOpen, setIsIndicesBrowserOpen] = useState(false);
+  const [isDataSourceBrowserOpen, setIsDataSourceBrowserOpen] = useState(false);
   const [isFieldsBrowserOpen, setIsFieldsBrowserOpen] = useState(false);
   const fieldsBrowserGetColumnMapRef = useRef<(() => Promise<Map<string, any>>) | undefined>(
     undefined
@@ -1025,7 +1025,7 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const openIndicesBrowser = useCallback(() => {
     updateResourceBrowserPosition();
-    setIsIndicesBrowserOpen(true);
+    setIsDataSourceBrowserOpen(true);
   }, [updateResourceBrowserPosition]);
 
   const fieldsBrowserQueryStringRef = useRef<string>('');
@@ -1567,22 +1567,19 @@ const ESQLEditorInternal = function ESQLEditor({
       {enableIndicesBrowser && (
         <>
           <DataSourceBrowser
-            isOpen={isIndicesBrowserOpen}
-            onClose={() => setIsIndicesBrowserOpen(false)}
-            onSelectIndex={handleResourceBrowserSelect}
-            core={core}
-            getLicense={kibana.services?.esql?.getLicense}
+            isOpen={isDataSourceBrowserOpen}
+            onClose={() => setIsDataSourceBrowserOpen(false)}
+            onSelect={handleResourceBrowserSelect}
             position={browserPopoverPosition}
           />
           <FieldsBrowser
             isOpen={isFieldsBrowserOpen}
             onClose={() => setIsFieldsBrowserOpen(false)}
-            onSelectField={handleResourceBrowserSelect}
+            onSelect={handleResourceBrowserSelect}
             getColumnMap={fieldsBrowserGetColumnMapRef.current}
             position={browserPopoverPosition}
             queryString={fieldsBrowserQueryStringRef.current}
             activeSolutionId={activeSolutionId ?? undefined}
-            http={core.http}
           />
         </>
       )}
