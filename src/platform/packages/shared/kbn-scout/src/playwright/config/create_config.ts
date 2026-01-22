@@ -54,13 +54,13 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
    */
   scoutProjects = options.runGlobalSetup
     ? scoutDefaultProjects.flatMap((project) => [
-      {
-        name: `setup-${project?.name}`,
-        use: project?.use ? { ...project.use } : {},
-        testMatch: /global.setup\.ts/,
-      },
-      { ...project, dependencies: [`setup-${project?.name}`] },
-    ])
+        {
+          name: `setup-${project?.name}`,
+          use: project?.use ? { ...project.use } : {},
+          testMatch: /global.setup\.ts/,
+        },
+        { ...project, dependencies: [`setup-${project?.name}`] },
+      ])
     : scoutDefaultProjects;
 
   return defineConfig<ScoutTestOptions>({
