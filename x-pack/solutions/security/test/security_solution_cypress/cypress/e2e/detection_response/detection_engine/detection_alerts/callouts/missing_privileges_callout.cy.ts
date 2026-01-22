@@ -44,7 +44,6 @@ const waitForPageTitleToBeShown = () => {
   cy.get(PAGE_TITLE).should('be.visible');
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/198628
 describe('Detections > Callouts', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   before(() => {
     // First, we have to open the app on behalf of a privileged user in order to initialize it.
