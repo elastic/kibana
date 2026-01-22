@@ -91,49 +91,36 @@ export const getApiKeyManager = ({
 }: {
   core: CoreStart;
   logger: Logger;
-  security?: SecurityPluginStart;
-  encryptedSavedObjects?: EncryptedSavedObjectsPluginStart;
+  security: SecurityPluginStart;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   request?: KibanaRequest;
   namespace: string;
 }): ApiKeyManager => ({
   generate: async (type: EntityType) => {
-    if (!encryptedSavedObjects) {
-      throw new Error(
-        'Unable to create API key. Ensure encrypted Saved Object client is enabled in this environment.'
-      );
-    } else if (!request) {
+    if (!request) {
       throw new Error('Unable to create API key due to invalid request');
-    } else if (!security) {
-      throw new Error('Unable to create API key. Security plugin is not available.');
-    } else {
-      const apiKey = await generateEntityStoreAPIKey({
-        logger,
-        security,
-        request,
-        type,
-        namespace,
-      });
-
-      const soClient = core.savedObjects.getScopedClient(request, {
-        excludedExtensions: [SECURITY_EXTENSION_ID],
-        includedHiddenTypes: [SO_ENTITY_STORE_API_KEY_TYPE],
-      });
-
-      const savedObjectId = getSpaceAwareEntityStoreSavedObjectId(namespace);
-
-      await soClient.create(SO_ENTITY_STORE_API_KEY_TYPE, apiKey, {
-        id: savedObjectId,
-        overwrite: true,
-        managed: true,
-      });
     }
+
+    const apiKey = await generateEntityStoreAPIKey({
+      logger,
+      security,
+      request,
+      type,
+      namespace,
+    });
+
+    const soClient = core.savedObjects.getScopedClient(request, {
+      excludedExtensions: [SECURITY_EXTENSION_ID],
+      includedHiddenTypes: [SO_ENTITY_STORE_API_KEY_TYPE],
+    });
+
+    await soClient.create(SO_ENTITY_STORE_API_KEY_TYPE, apiKey, {
+      id: getSpaceAwareEntityStoreSavedObjectId(namespace),
+      overwrite: true,
+      managed: true,
+    });
   },
   getApiKey: async () => {
-    if (!encryptedSavedObjects) {
-      throw Error(
-        'Unable to retrieve API key. Ensure encrypted Saved Object client is enabled in this environment.'
-      );
-    }
     try {
       const encryptedSavedObjectsClient = encryptedSavedObjects.getClient({
         includedHiddenTypes: [SO_ENTITY_STORE_API_KEY_TYPE],

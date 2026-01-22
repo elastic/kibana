@@ -39,11 +39,11 @@ export async function createLogsExtractionClient({
   logger: Logger;
   namespace: string;
 }): Promise<LogsExtractionClientFactoryResult | null> {
-  // Get API key manager (security plugin not needed here - we only read/use keys, not generate them)
+  // Get API key manager
   const apiKeyManager = getApiKeyManager({
     core,
     logger,
-    security: undefined, // Not needed for reading/using API keys, only for generating them
+    security: plugins.security,
     encryptedSavedObjects: plugins.encryptedSavedObjects,
     namespace,
   });

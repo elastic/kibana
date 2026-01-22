@@ -37,7 +37,7 @@ export interface EntityStoreStartPlugins {
   taskManager: TaskManagerStartContract;
   spaces: SpacesPluginStart;
   dataViews: DataViewsPluginStart;
-  security?: SecurityPluginStart;
+  security: SecurityPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
 }
 
