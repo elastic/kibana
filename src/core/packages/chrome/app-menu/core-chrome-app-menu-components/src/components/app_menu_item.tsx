@@ -73,7 +73,7 @@ export const AppMenuItem = ({
   const buttonComponent = (
     <EuiHideFor sizes={hidden ?? 'none'}>
       <EuiHeaderLink
-        onClick={href ? undefined : handleClick}
+        onClick={handleClick}
         id={htmlId}
         data-test-subj={testId || `app-menu-item-${id}`}
         iconType={iconType}

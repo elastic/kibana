@@ -136,7 +136,7 @@ export const mapAppMenuItemToPanelItem = (
     key: item.id,
     name: upperFirst(item.label),
     icon: item?.iconType,
-    onClick: item?.href || childPanelId !== undefined ? undefined : handleClick,
+    onClick: childPanelId !== undefined ? undefined : handleClick,
     href: item?.href,
     target: item?.href ? item?.target : undefined,
     disabled: isDisabled(item?.disableButton),

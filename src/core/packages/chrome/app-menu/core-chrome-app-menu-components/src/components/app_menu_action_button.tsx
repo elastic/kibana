@@ -101,7 +101,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
   };
 
   const commonProps = {
-    onClick: href ? undefined : handleClick,
+    onClick: handleClick,
     id: htmlId,
     'data-test-subj': testId || `app-menu-action-button-${id}`,
     iconType,
