@@ -8,3 +8,5 @@
  */
 
 export * from './ai_prompt_step';
+export * from './ai_summarize_step/step';
+export * from './ai_classify_step/step';
