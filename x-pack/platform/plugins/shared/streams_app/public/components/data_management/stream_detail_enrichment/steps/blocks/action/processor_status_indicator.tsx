@@ -37,36 +37,53 @@ export const ProcessorStatusIndicator = ({
       }
     );
     variant = {
-      type: 'dot',
-      color: 'subdued',
+      type: 'minusInCircle',
+      color: euiTheme.colors.textDisabled,
       content: name,
-      size: 'l',
+      size: 'm',
     };
   } else if (
     stepStatus === 'skipped.followsProcessorBeingEdited' ||
-    stepStatus === 'skipped.createdInPreviousSimulation'
+    stepStatus === 'skipped.createdInPreviousSimulation' ||
+    stepStatus === 'skipped.excludedByFilteringCondition'
   ) {
-    const name =
-      stepStatus === 'skipped.followsProcessorBeingEdited'
-        ? i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.enrichment.skippedNewProcessorTooltip',
-            {
-              defaultMessage: 'Processor skipped because it follows a processor being edited.',
-            }
-          )
-        : i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.enrichment.skippedConfiguredProcessorTooltip',
-            {
-              defaultMessage:
-                'Processor skipped because it was created in a previous simulation session.',
-            }
-          );
+    let name: string;
+
+    switch (stepStatus) {
+      case 'skipped.excludedByFilteringCondition':
+        name = i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.skippedProcessorFilteringConditionTooltip',
+          {
+            defaultMessage:
+              'Processor skipped because it is excluded by the currently selected condition.',
+          }
+        );
+        break;
+      case 'skipped.followsProcessorBeingEdited':
+        name = i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.skippedNewProcessorTooltip',
+          {
+            defaultMessage: 'Processor skipped because it follows a processor being edited.',
+          }
+        );
+        break;
+      case 'skipped.createdInPreviousSimulation':
+      default:
+        name = i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.skippedConfiguredProcessorTooltip',
+          {
+            defaultMessage:
+              'Processor skipped because it was created in a previous simulation session.',
+          }
+        );
+        break;
+    }
 
     variant = {
-      type: 'dot',
-      color: 'warning',
+      type: 'dashedCircle',
+      color: euiTheme.colors.textParagraph,
       content: name,
-      size: 'l',
+      size: 'm',
     };
   } else {
     if (stepStatus === 'running') {

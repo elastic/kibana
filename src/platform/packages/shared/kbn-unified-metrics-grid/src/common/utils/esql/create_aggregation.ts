@@ -13,9 +13,9 @@ import {
   isCommand,
   isFunctionExpression,
   type ESQLAstQueryExpression,
-} from '@kbn/esql-ast';
+} from '@kbn/esql-language';
 import { replaceParameters } from '@kbn/esql-composer';
-import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import type { MetricField } from '../../../types';
 
 type Params = Record<string, string | number | boolean | null>;
 

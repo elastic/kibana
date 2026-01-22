@@ -27,7 +27,7 @@ import { Shortcuts } from 'react-shortcuts';
 import type {
   ExpressionInputEditorRef,
   OnExpressionInputEditorDidMount,
-} from '@kbn/presentation-util-plugin/public';
+} from '../expression_input/types';
 import { ExpressionInput } from '../expression_input';
 import { ToolTipShortcut } from '../tool_tip_shortcut';
 import type { ExpressionFunction } from '../../../types';

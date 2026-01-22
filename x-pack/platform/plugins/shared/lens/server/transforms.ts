@@ -28,29 +28,39 @@ export const getLensServerTransforms = (
   };
 };
 
-export const legacyPanelSchema = lensItemDataSchema.extends({
+const legacyPanelAttributesSchema = lensItemDataSchema.extends({
   type: schema.maybe(schema.literal('lens')), // why is this added to the panel state?
 });
 
-const lensPanelSchema = schema.object(
+const lensByValuePanelSchema = schema.object(
   {
     // TODO: add missing config properties
-    attributes: schema.oneOf([lensApiStateSchema, legacyPanelSchema]),
+    attributes: schema.oneOf([lensApiStateSchema, legacyPanelAttributesSchema]),
   },
   { unknowns: 'allow' }
 );
 
+const lensByRefPanelSchema = schema.object(
+  {
+    // TODO: add missing config properties
+    savedObjectId: schema.string(),
+  },
+  { unknowns: 'allow' }
+);
+
+const lensPanelSchema = schema.oneOf([lensByValuePanelSchema, lensByRefPanelSchema]);
+
 function getExtraServerTransformProps(
   builder: LensConfigBuilder
-): Pick<LensTransforms, 'schema' | 'throwOnUnmappedPanel'> {
-  if (!builder.isEnabled) return {};
-
+): Pick<LensTransforms, 'getSchema' | 'throwOnUnmappedPanel'> {
   return {
-    schema: lensPanelSchema,
+    getSchema: () => {
+      return builder.isEnabled ? lensPanelSchema : undefined;
+    },
     throwOnUnmappedPanel: (state: LensSerializedAPIConfig) => {
       const chartType = builder.getType(state.attributes);
 
-      if (!builder.isSupported(chartType)) {
+      if (builder.isEnabled && !builder.isSupported(chartType)) {
         throw new Error(`Lens "${chartType}" chart type is not supported`);
       }
     },

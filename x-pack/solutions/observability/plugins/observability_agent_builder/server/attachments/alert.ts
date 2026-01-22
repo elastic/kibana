@@ -6,19 +6,17 @@
  */
 
 import { z } from '@kbn/zod';
-import type { CoreSetup, Logger } from '@kbn/core/server';
-import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
-import { ToolType } from '@kbn/onechat-common';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import type { Logger } from '@kbn/core/server';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import { ToolType } from '@kbn/agent-builder-common';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import dedent from 'dedent';
 import { OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID } from '../../common/constants';
-import type {
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
-} from '../types';
+import type { ObservabilityAgentBuilderCoreSetup } from '../types';
 
 const alertDataSchema = z.object({
   alertId: z.string(),
+  attachmentLabel: z.string().optional(),
 });
 
 export type AlertAttachmentData = z.infer<typeof alertDataSchema>;
@@ -27,10 +25,7 @@ export function createAlertAttachmentType({
   core,
   logger,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   logger: Logger;
 }): AttachmentTypeDefinition<typeof OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID, AlertAttachmentData> {
   return {

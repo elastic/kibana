@@ -7,7 +7,10 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { ConversationResponse, Replacements } from '@kbn/elastic-assistant-common';
-import { replaceOriginalValuesWithUuidValues } from '@kbn/elastic-assistant-common';
+import {
+  replaceOriginalValuesWithUuidValues,
+  resolveConnectorId,
+} from '@kbn/elastic-assistant-common';
 import _ from 'lodash';
 import type { EsConversationSchema } from './types';
 
@@ -32,8 +35,11 @@ export const transformESToConversation = (
     ...(conversationSchema.api_config
       ? {
           apiConfig: {
+            // Resolve potentially outdated Elastic managed connector ID to the new one.
+            // This provides backward compatibility for existing conversations that reference
+            // "Elastic-Managed-LLM" or "General-Purpose-LLM-v1".
+            connectorId: resolveConnectorId(conversationSchema.api_config.connector_id),
             actionTypeId: conversationSchema.api_config.action_type_id,
-            connectorId: conversationSchema.api_config.connector_id,
             defaultSystemPromptId: conversationSchema.api_config.default_system_prompt_id,
             model: conversationSchema.api_config.model,
             provider: conversationSchema.api_config.provider,
@@ -51,6 +57,7 @@ export const transformESToConversation = (
           messageContent: message.content,
           replacements,
         }),
+        ...(message.refusal ? { refusal: message.refusal } : {}),
         ...(message.is_error ? { isError: message.is_error } : {}),
         ...(message.reader ? { reader: message.reader } : {}),
         ...(message.user ? { user: message.user } : {}),

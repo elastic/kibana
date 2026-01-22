@@ -4,29 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate5';
-import { assign, setup } from 'xstate5';
-import { getPlaceholderFor } from '@kbn/xstate-utils';
-import type { FlattenRecord } from '@kbn/streams-schema';
-import { isEmpty } from 'lodash';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
+import type { FlattenRecord } from '@kbn/streams-schema';
+import { getPlaceholderFor } from '@kbn/xstate-utils';
+import { isEmpty } from 'lodash';
+import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate5';
+import { assign, setup } from 'xstate5';
+import type { MappedSchemaField } from '../../../schema_editor/types';
 import { getValidSteps } from '../../utils';
-import type {
-  SimulationInput,
-  SimulationContext,
-  SimulationEvent,
-  Simulation,
-  SimulationMachineDeps,
-  SampleDocumentWithUIAttributes,
-} from './types';
+import { selectSamplesForSimulation } from './selectors';
 import type { PreviewDocsFilterOption } from './simulation_documents_search';
 import {
-  createSimulationRunnerActor,
   createSimulationRunFailureNotifier,
+  createSimulationRunnerActor,
 } from './simulation_runner_actor';
+import type {
+  SampleDocumentWithUIAttributes,
+  Simulation,
+  SimulationContext,
+  SimulationEvent,
+  SimulationInput,
+  SimulationMachineDeps,
+} from './types';
 import { getSchemaFieldsFromSimulation, mapField, unmapField } from './utils';
-import type { MappedSchemaField } from '../../../schema_editor/types';
 
 export type SimulationActorRef = ActorRefFrom<typeof simulationMachine>;
 export type SimulationActorSnapshot = SnapshotFrom<typeof simulationMachine>;
@@ -61,8 +62,9 @@ export const simulationMachine = setup({
     storeSamples: assign((_, params: { samples: SampleDocumentWithUIAttributes[] }) => ({
       samples: params.samples,
     })),
-    storeSimulation: assign((_, params: { simulation: Simulation | undefined }) => ({
+    storeSimulation: assign(({ context }, params: { simulation: Simulation | undefined }) => ({
       simulation: params.simulation,
+      baseSimulation: context.selectedConditionId ? context.baseSimulation : params.simulation,
     })),
     storeExplicitlyEnabledPreviewColumns: assign(({ context }, params: { columns: string[] }) => ({
       explicitlyEnabledPreviewColumns: params.columns,
@@ -111,10 +113,24 @@ export const simulationMachine = setup({
       explicitlyDisabledPreviewColumns: [],
       previewColumnsOrder: [],
       simulation: undefined,
+      baseSimulation: undefined,
       previewDocsFilter: 'outcome_filter_all',
     }),
     resetSteps: assign({ steps: [] }),
-    resetSamples: assign({ samples: [] }),
+    resetSamples: assign({
+      samples: [],
+      selectedConditionId: undefined,
+    }),
+    applyConditionFilter: assign((_, params: { conditionId: string }) => {
+      return {
+        selectedConditionId: params.conditionId,
+      };
+    }),
+    clearConditionFilter: assign(() => {
+      return {
+        selectedConditionId: undefined,
+      };
+    }),
   },
   delays: {
     processorChangeDebounceTime: 300,
@@ -138,8 +154,10 @@ export const simulationMachine = setup({
     previewColumnsSorting: { fieldName: undefined, direction: 'asc' },
     steps: input.steps,
     samples: [],
+    selectedConditionId: undefined,
     streamName: input.streamName,
     streamType: input.streamType,
+    baseSimulation: undefined,
   }),
   initial: 'idle',
   on: {
@@ -187,6 +205,16 @@ export const simulationMachine = setup({
         actions: [{ type: 'resetSimulationOutcome' }, { type: 'resetSteps' }],
       },
     ],
+    'simulation.filterByCondition': [
+      {
+        target: '.assertingRequirements',
+        actions: [{ type: 'applyConditionFilter', params: ({ event }) => event }],
+      },
+    ],
+    'simulation.clearConditionFilter': {
+      target: '.assertingRequirements',
+      actions: [{ type: 'clearConditionFilter' }],
+    },
   },
   states: {
     idle: {
@@ -253,7 +281,7 @@ export const simulationMachine = setup({
         src: 'runSimulation',
         input: ({ context }) => ({
           streamName: context.streamName,
-          documents: context.samples
+          documents: selectSamplesForSimulation(context)
             .map((doc) => doc.document)
             .map(flattenObjectNestedLast) as FlattenRecord[],
           steps: getValidSteps(context.steps),

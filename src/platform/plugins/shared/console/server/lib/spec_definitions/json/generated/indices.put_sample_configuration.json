@@ -1,14 +1,30 @@
 {
   "indices.put_sample_configuration": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
+    },
     "methods": [
       "PUT"
     ],
     "patterns": [
       "{index}/_sample/config"
     ],
-    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-sample-configuration",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch#TODO",
     "availability": {
-      "stack": true,
+      "stack": false,
       "serverless": false
     }
   }

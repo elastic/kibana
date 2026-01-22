@@ -109,6 +109,8 @@ function getDefaultLensApiMock() {
     setDisabledActionIds: jest.fn(),
     rendered$: new BehaviorSubject<boolean>(false),
     searchSessionId$: new BehaviorSubject<string | undefined>(undefined),
+    hasUnsavedChanges$: new BehaviorSubject<boolean>(false),
+    resetUnsavedChanges: jest.fn(),
     projectRoutingOverrides$: new BehaviorSubject<ProjectRoutingOverrides | undefined>(undefined),
   };
   return LensApiMock;

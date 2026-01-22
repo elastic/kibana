@@ -16,6 +16,8 @@ import { ScriptsLibraryMock } from './mocks';
 import { Readable, Transform } from 'stream';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE } from '../../lib/scripts_library';
+import { createHapiReadableStreamMock } from '../actions/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
 jest.mock('@kbn/files-plugin/server', () => {
   const actual = jest.requireActual('@kbn/files-plugin/server');
@@ -29,12 +31,16 @@ const createEsFileClientMock = _createEsFileClient as jest.Mock;
 
 describe('scripts library client', () => {
   let endpointAppServicesMock: EndpointAppContextService;
+  let soClientMock: jest.Mocked<SavedObjectsClientContract>;
   let scriptsClient: ScriptsLibraryClientInterface;
   let filesPluginClient: ReturnType<typeof createFileClientMock>;
   let fileMock: ReturnType<typeof createFileMock>;
 
   beforeEach(async () => {
     endpointAppServicesMock = createMockEndpointAppContextService();
+
+    soClientMock =
+      endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient() as jest.Mocked<SavedObjectsClientContract>;
 
     const filesPluginMocks = ScriptsLibraryMock.createFilesPluginClient({
       hash: { sha256: 'e5441eb2bb' },
@@ -45,9 +51,7 @@ describe('scripts library client', () => {
 
     fileMock = filesPluginMocks.file;
 
-    ScriptsLibraryMock.applyMocksToSoClient(
-      endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient() as jest.Mocked<SavedObjectsClientContract>
-    );
+    ScriptsLibraryMock.applyMocksToSoClient(soClientMock);
 
     scriptsClient = new ScriptsLibraryClient({
       spaceId: 'spaceA',
@@ -61,6 +65,12 @@ describe('scripts library client', () => {
 
     beforeEach(() => {
       createBodyMock = ScriptsLibraryMock.generateCreateScriptBody();
+      soClientMock.find.mockResolvedValue({
+        page: 0,
+        per_page: 0,
+        total: 0,
+        saved_objects: [],
+      });
     });
 
     it('should create a file record and upload file content to it', async () => {
@@ -84,8 +94,7 @@ describe('scripts library client', () => {
 
     it('should create a script entry (SO) with expected content', async () => {
       await scriptsClient.create(createBodyMock);
-      const soClientMock = endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient();
-      const scriptSoId = (soClientMock.create as jest.Mock).mock.calls[0][2].id;
+      const scriptSoId = soClientMock.create.mock.calls?.[0]?.[2]?.id;
 
       expect(
         endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().create
@@ -103,6 +112,7 @@ describe('scripts library client', () => {
           instructions: 'just execute it',
           name: 'script one',
           platform: ['linux', 'macos'],
+          tags: ['dataCollection'],
           requires_input: false,
           created_by: 'elastic',
           created_at: expect.any(String),
@@ -121,14 +131,25 @@ describe('scripts library client', () => {
     });
 
     it('should delete the file record if creating the script entry fails', async () => {
-      (
-        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient() as jest.Mocked<SavedObjectsClientContract>
-      ).create.mockRejectedValue(new Error('Failed to create so record'));
+      soClientMock.create.mockRejectedValue(new Error('Failed to create so record'));
 
       await expect(scriptsClient.create(createBodyMock)).rejects.toThrow(
         'Failed to create so record'
       );
       expect(fileMock.delete).toHaveBeenCalled();
+    });
+
+    it('should validate that file hash does not already exist', async () => {
+      soClientMock.find.mockResolvedValue({
+        page: 1,
+        per_page: 1,
+        total: 1,
+        saved_objects: [{ ...ScriptsLibraryMock.generateSavedObjectScriptEntry(), score: 1 }],
+      });
+
+      await expect(scriptsClient.create(createBodyMock)).rejects.toThrow(
+        'The file you are attempting to upload (hash: [e5441eb2bb]) already exists and is associated with a script entry named [my script] (script ID: [1-2-3])'
+      );
     });
 
     it('should return the new Script record', async () => {
@@ -139,10 +160,12 @@ describe('scripts library client', () => {
         id: '1-2-3',
         name: 'my script',
         fileHash: 'e5441eb2bb',
+        fileId: 'file-1-2-3',
         fileName: 'my_script.sh',
         fileSize: 12098,
         platform: ['macos', 'linux'],
         requiresInput: false,
+        tags: [],
         updatedAt: '2025-11-24T16:04:17.471Z',
         updatedBy: 'elastic',
         version: 'WzgsMV0=',
@@ -154,9 +177,7 @@ describe('scripts library client', () => {
     it('should use defaults when called with no options', async () => {
       await scriptsClient.list();
 
-      expect(
-        endpointAppServicesMock.savedObjects.createInternalScopedSoClient().find
-      ).toHaveBeenCalledWith({
+      expect(soClientMock.find).toHaveBeenCalledWith({
         filter: undefined,
         page: 1,
         perPage: 10,
@@ -174,9 +195,7 @@ describe('scripts library client', () => {
         sortDirection: 'desc',
       });
 
-      expect(
-        endpointAppServicesMock.savedObjects.createInternalScopedSoClient().find
-      ).toHaveBeenCalledWith({
+      expect(soClientMock.find).toHaveBeenCalledWith({
         filter: undefined,
         page: 101,
         perPage: 500,
@@ -191,9 +210,7 @@ describe('scripts library client', () => {
         kuery: 'name:script_one AND platform: (linux OR macos)',
       });
 
-      expect(
-        endpointAppServicesMock.savedObjects.createInternalScopedSoClient().find
-      ).toHaveBeenCalledWith(
+      expect(soClientMock.find).toHaveBeenCalledWith(
         expect.objectContaining({
           // The `kuery` passed to soClient.find() is converted to `KueryNode` (AST) and field names
           // prepended with the SO type
@@ -262,10 +279,12 @@ describe('scripts library client', () => {
             instructions: undefined,
             name: 'my script',
             fileHash: 'e5441eb2bb',
+            fileId: 'file-1-2-3',
             fileName: 'my_script.sh',
             fileSize: 12098,
             pathToExecutable: undefined,
             platform: ['macos', 'linux'],
+            tags: [],
             requiresInput: false,
             updatedAt: '2025-11-24T16:04:17.471Z',
             updatedBy: 'elastic',
@@ -278,6 +297,273 @@ describe('scripts library client', () => {
         sortField: 'name',
         total: 0,
       });
+    });
+  });
+
+  describe('#update()', () => {
+    beforeEach(() => {
+      ScriptsLibraryMock.applyMocksToSoClient(soClientMock);
+    });
+
+    it('should update script entry only when no file content is provided', async () => {
+      await scriptsClient.update({
+        id: '1-2-3',
+        name: 'updated name',
+        description: 'updated description',
+      });
+
+      expect(
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().update
+      ).toHaveBeenCalledWith(
+        SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE,
+        '1-2-3',
+        {
+          name: 'updated name',
+          description: 'updated description',
+          updated_by: 'elastic',
+          updated_at: expect.any(String),
+        },
+        { version: undefined }
+      );
+
+      expect(fileMock.uploadContent).not.toHaveBeenCalled();
+    });
+
+    it('should upload file content, update script with new file info and delete old file', async () => {
+      soClientMock.find.mockResolvedValue({
+        page: 0,
+        per_page: 0,
+        total: 0,
+        saved_objects: [],
+      });
+      const fileContent = createHapiReadableStreamMock();
+      await scriptsClient.update({
+        id: '1-2-3',
+        file: fileContent,
+      });
+
+      expect(fileMock.uploadContent).toHaveBeenCalledWith(fileContent, undefined, {
+        transforms: [expect.any(Transform)],
+      });
+
+      expect(
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().update
+      ).toHaveBeenCalledWith(
+        SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE,
+        '1-2-3',
+        {
+          file_hash_sha256: 'e5441eb2bb',
+          file_id: '123',
+          file_name: 'test.txt',
+          file_size: 1234,
+          updated_by: 'elastic',
+          updated_at: expect.any(String),
+        },
+        { version: undefined }
+      );
+
+      expect(filesPluginClient.delete).toHaveBeenCalledWith({ id: 'file-1-2-3' });
+    });
+
+    it('should throw error when script does not exist', async () => {
+      soClientMock.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+
+      await expect(
+        scriptsClient.update({
+          id: 'non-existent',
+          name: 'test',
+        })
+      ).rejects.toThrow('Script with id non-existent not found');
+    });
+
+    it('should throw error when uploading new file with `version` that is no longer valid', async () => {
+      await expect(
+        scriptsClient.update({
+          id: '1-2-3',
+          file: createHapiReadableStreamMock(),
+          version: 'foo',
+        })
+      ).rejects.toThrow(
+        'Script with id 1-2-3 has a different version than the one provided in the request. Current version: WzgsMV0=, provided version: foo'
+      );
+      expect(
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().update
+      ).not.toHaveBeenCalled();
+      expect(fileMock.uploadContent).not.toHaveBeenCalled();
+    });
+
+    it('should not update script entry if file upload fails', async () => {
+      fileMock.uploadContent.mockRejectedValue(new Error('upload failed'));
+
+      await expect(
+        scriptsClient.update({
+          id: '1-2-3',
+          name: 'new name',
+          file: createHapiReadableStreamMock(),
+        })
+      ).rejects.toThrow('upload failed');
+
+      expect(
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().update
+      ).not.toHaveBeenCalled();
+    });
+
+    it('should delete new uploaded file when update to script data fails', async () => {
+      soClientMock.update.mockRejectedValue(new Error('Failed to update script record'));
+      soClientMock.find.mockResolvedValue({
+        page: 0,
+        per_page: 0,
+        total: 0,
+        saved_objects: [],
+      });
+
+      await expect(
+        scriptsClient.update({
+          id: '1-2-3',
+          file: createHapiReadableStreamMock(),
+        })
+      ).rejects.toThrow('Failed to update script record');
+
+      expect(fileMock.delete).toHaveBeenCalled();
+    });
+
+    it('should validate that file hash does not already exist for another script', async () => {
+      soClientMock.find.mockResolvedValue({
+        page: 1,
+        per_page: 1,
+        total: 1,
+        saved_objects: [{ ...ScriptsLibraryMock.generateSavedObjectScriptEntry(), score: 1 }],
+      });
+
+      await expect(
+        scriptsClient.update({ id: '1-2-3', file: createHapiReadableStreamMock() })
+      ).rejects.toThrow(
+        'The file you are attempting to upload (hash: [e5441eb2bb]) already exists and is associated with a script entry named [my script] (script ID: [1-2-3])'
+      );
+    });
+
+    it('should return script record on successful update', async () => {
+      await expect(
+        scriptsClient.update({
+          id: '1-2-3',
+          name: 'updated script',
+        })
+      ).resolves.toEqual({
+        createdAt: '2025-11-24T16:04:17.471Z',
+        createdBy: 'elastic',
+        downloadUri: '/api/endpoint/scripts_library/1-2-3/download',
+        id: '1-2-3',
+        name: 'my script',
+        fileHash: 'e5441eb2bb',
+        fileId: 'file-1-2-3',
+        fileName: 'my_script.sh',
+        fileSize: 12098,
+        platform: ['macos', 'linux'],
+        tags: [],
+        requiresInput: false,
+        updatedAt: '2025-11-24T16:04:17.471Z',
+        updatedBy: 'elastic',
+        version: 'WzgsMV0=',
+      });
+    });
+  });
+
+  describe('#get()', () => {
+    it('should retrieve script entry using ID provided', async () => {
+      await scriptsClient.get('1-2-3');
+
+      expect(
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().get
+      ).toHaveBeenCalledWith(SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE, '1-2-3');
+    });
+
+    it('should respond with script', async () => {
+      await expect(scriptsClient.get('1-2-3')).resolves.toEqual({
+        createdAt: '2025-11-24T16:04:17.471Z',
+        createdBy: 'elastic',
+        downloadUri: '/api/endpoint/scripts_library/1-2-3/download',
+        fileHash: 'e5441eb2bb',
+        fileId: 'file-1-2-3',
+        fileName: 'my_script.sh',
+        fileSize: 12098,
+        id: '1-2-3',
+        name: 'my script',
+        platform: ['macos', 'linux'],
+        tags: [],
+        requiresInput: false,
+        updatedAt: '2025-11-24T16:04:17.471Z',
+        updatedBy: 'elastic',
+        version: 'WzgsMV0=',
+      });
+    });
+  });
+
+  describe('#download()', () => {
+    it('should retrieve script metadata using ID provided', async () => {
+      await scriptsClient.download('1-2-3');
+
+      expect(
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().get
+      ).toHaveBeenCalledWith(SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE, '1-2-3');
+    });
+
+    it('should retrieve file content using file ID from script metadata', async () => {
+      await scriptsClient.download('1-2-3');
+
+      expect(filesPluginClient.get).toHaveBeenCalledWith({ id: 'file-1-2-3' });
+      expect(fileMock.downloadContent).toHaveBeenCalled();
+    });
+
+    it('should return script metadata and file stream', async () => {
+      const result = await scriptsClient.download('1-2-3');
+
+      expect(result).toEqual({
+        stream: expect.any(Readable),
+        fileName: 'my_script.sh',
+        mimeType: 'text/plain',
+      });
+    });
+
+    it('should throw error when script does not exist', async () => {
+      soClientMock.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+
+      await expect(scriptsClient.download('non-existent')).rejects.toThrow(
+        'Script with id non-existent not found'
+      );
+    });
+  });
+
+  describe('#delete()', () => {
+    it('should delete both script entry and associated file', async () => {
+      await scriptsClient.delete('1-2-3');
+
+      expect(
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().delete
+      ).toHaveBeenCalledWith(SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE, '1-2-3');
+
+      expect(filesPluginClient.delete).toHaveBeenCalledWith({ id: 'file-1-2-3' });
+    });
+
+    it('should return void on successful deletion', async () => {
+      await expect(scriptsClient.delete('1-2-3')).resolves.toBeUndefined();
+    });
+
+    it('should throw error when script does not exist', async () => {
+      soClientMock.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+
+      await expect(scriptsClient.delete('non-existent')).rejects.toThrow(
+        'Script with id non-existent not found'
+      );
+    });
+
+    it('should complete successfully even if file deletion fails', async () => {
+      filesPluginClient.delete.mockRejectedValue(new Error('file deletion failed'));
+
+      await expect(scriptsClient.delete('1-2-3')).resolves.toBeUndefined();
+
+      expect(
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().delete
+      ).toHaveBeenCalledWith(SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE, '1-2-3');
     });
   });
 });

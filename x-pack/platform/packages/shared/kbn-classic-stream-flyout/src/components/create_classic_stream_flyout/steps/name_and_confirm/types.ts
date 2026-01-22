@@ -4,9 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TemplateDeserialized } from '@kbn/index-management-plugin/common/types';
+import type { TemplateListItem as IndexTemplate } from '@kbn/index-management-shared-types';
 
-import type { IlmPolicyFetcher, ValidationErrorType } from '../../../../utils';
+import type {
+  IlmPolicyFetcher,
+  SimulatedTemplateFetcher,
+  ValidationErrorType,
+} from '../../../../utils';
 
 export interface NameAndConfirmBaseProps {
   selectedIndexPattern: string;
@@ -18,8 +22,9 @@ export interface NameAndConfirmBaseProps {
 }
 
 export interface NameAndConfirmStepProps extends NameAndConfirmBaseProps {
-  template: TemplateDeserialized;
+  template: IndexTemplate;
   getIlmPolicy?: IlmPolicyFetcher;
+  getSimulatedTemplate?: SimulatedTemplateFetcher;
 }
 
 export interface NameStreamSectionProps extends NameAndConfirmBaseProps {

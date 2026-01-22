@@ -72,7 +72,7 @@ export const StreamNameInput = ({
     [validationError, parts]
   );
 
-  const getConnectedInputStyles = (isFirst: boolean, isLast: boolean) => {
+  const getConnectedInputStyles = (isFirst: boolean, isLast: boolean, isInvalid: boolean) => {
     return css`
       flex: 1 1 0%;
 
@@ -89,9 +89,9 @@ export const StreamNameInput = ({
       }
 
       /* Remove border on connected sides to prevent double borders */
-      /* We use margin-right: -1px to overlap borders instead of removing them, */
-      /* which keeps the focus ring intact and correct */
-      ${!isLast ? 'margin-right: -1px;' : ''}
+      /* We use margin-right: -1px to overlap borders, but not when invalid */
+      /* because the outline needs to be fully visible on all sides */
+      ${!isLast && !isInvalid ? 'margin-right: -1px;' : ''}
 
       /* Ensure the focused element is on top */
       &:focus-within {
@@ -158,11 +158,12 @@ export const StreamNameInput = ({
       {inputGroups.map((group, index) => {
         const isFirst = index === 0;
         const isLast = index === inputGroups.length - 1;
+        const isInvalid = isInputInvalid(group.wildcardIndex);
 
         return (
           <EuiFlexItem
             key={`wildcard-${group.wildcardIndex}`}
-            css={getConnectedInputStyles(isFirst, isLast)}
+            css={getConnectedInputStyles(isFirst, isLast, isInvalid)}
           >
             <EuiFieldText
               autoFocus={isFirst}
@@ -170,7 +171,7 @@ export const StreamNameInput = ({
               onChange={(e) => handleWildcardChange(group.wildcardIndex, e.target.value)}
               placeholder="*"
               fullWidth
-              isInvalid={isInputInvalid(group.wildcardIndex)}
+              isInvalid={isInvalid}
               prepend={group.prepend}
               append={group.append}
               aria-label={i18n.translate(

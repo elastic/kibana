@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { createFlyout } from '../components/create_flyout';
-import { IndexUpdateService } from '../index_update_service';
+import { IndexUpdateService } from '../services/index_update_service';
 import type { EditLookupIndexContentContext, EditLookupIndexFlyoutDeps } from '../types';
 import { EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID } from './constants';
 import { IndexEditorTelemetryService } from '../telemetry/telemetry_service';

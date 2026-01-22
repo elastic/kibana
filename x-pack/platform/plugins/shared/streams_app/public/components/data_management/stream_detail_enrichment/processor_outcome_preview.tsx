@@ -5,27 +5,40 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { EuiDataGridRowHeightsOptions } from '@elastic/eui';
 import {
+  EuiBadge,
+  EuiButton,
   EuiFilterButton,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
   EuiLoadingSpinner,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { Sample } from '@kbn/grok-ui';
-import type { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
 import type { GrokProcessor } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
+import type { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
+import { isEmpty } from 'lodash';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useDocViewerSetup } from '../../../hooks/use_doc_viewer_setup';
 import { useDocumentExpansion } from '../../../hooks/use_document_expansion';
 import { useStreamDataViewFieldTypes } from '../../../hooks/use_stream_data_view_field_types';
 import { getPercentageFormatter } from '../../../util/formatters';
+import { MemoPreviewTable, PreviewFlyout, type PreviewTableMode } from '../shared';
+import { RowSelectionContext } from '../shared/preview_table';
+import { toDataTableRecordWithIndex } from '../stream_detail_routing/utils';
+import { DOC_VIEW_DIFF_ID, DocViewerContext } from './doc_viewer_diff';
+import {
+  NoPreviewDocumentsEmptyPrompt,
+  NoProcessingDataAvailableEmptyPrompt,
+} from './empty_prompts';
+import { useDataSourceSelector } from './state_management/data_source_state_machine';
+import { selectDraftProcessor } from './state_management/interactive_mode_machine/selectors';
 import type { PreviewDocsFilterOption } from './state_management/simulation_state_machine';
 import {
   getAllFieldsInOrder,
@@ -37,25 +50,16 @@ import {
   selectHasSimulatedRecords,
   selectOriginalPreviewRecords,
   selectPreviewRecords,
+  selectSamplesForSimulation,
 } from './state_management/simulation_state_machine/selectors';
+import { isStepUnderEdit } from './state_management/steps_state_machine';
 import {
   useSimulatorSelector,
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
-import { isStepUnderEdit } from './state_management/steps_state_machine';
 import { selectIsInteractiveMode } from './state_management/stream_enrichment_state_machine/selectors';
-import { DOC_VIEW_DIFF_ID, DocViewerContext } from './doc_viewer_diff';
-import {
-  NoPreviewDocumentsEmptyPrompt,
-  NoProcessingDataAvailableEmptyPrompt,
-} from './empty_prompts';
-import { PreviewFlyout, MemoPreviewTable, type PreviewTableMode } from '../shared';
-import { toDataTableRecordWithIndex } from '../stream_detail_routing/utils';
-import { RowSelectionContext } from '../shared/preview_table';
 import { getActiveDataSourceRef } from './state_management/stream_enrichment_state_machine/utils';
-import { useDataSourceSelector } from './state_management/data_source_state_machine';
-import { selectDraftProcessor } from './state_management/interactive_mode_machine/selectors';
 
 export const ProcessorOutcomePreview = () => {
   const samples = useSimulatorSelector((snapshot) => snapshot.context.samples);
@@ -105,7 +109,8 @@ const formatter = getPercentageFormatter();
 const formatRateToPercentage = (rate?: number) => (rate ? formatter.format(rate) : undefined);
 
 const PreviewDocumentsGroupBy = () => {
-  const { changePreviewDocsFilter } = useStreamEnrichmentEvents();
+  const { changePreviewDocsFilter, clearSimulationConditionFilter: clearConditionFilter } =
+    useStreamEnrichmentEvents();
 
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
   const hasMetrics = useSimulatorSelector((state) => !!state.context.simulation?.documents_metrics);
@@ -124,6 +129,13 @@ const PreviewDocumentsGroupBy = () => {
   const simulationDroppedRate = useSimulatorSelector((state) =>
     formatRateToPercentage(state.context.simulation?.documents_metrics.dropped_rate)
   );
+  const selectedConditionId = useSimulatorSelector((state) => state.context.selectedConditionId);
+  const totalSamples = useSimulatorSelector((state) => state.context.samples.length);
+  const activeSamples = useSimulatorSelector(
+    (state) => selectSamplesForSimulation(state.context).length
+  );
+  const conditionPercentage =
+    totalSamples > 0 ? Math.round((activeSamples / totalSamples) * 100) : 0;
 
   const getFilterButtonPropsFor = (filter: PreviewDocsFilterOption) => ({
     isToggle: previewDocsFilter === filter,
@@ -134,55 +146,78 @@ const PreviewDocumentsGroupBy = () => {
   });
 
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
-      <EuiFilterGroup
-        compressed={true}
-        aria-label={i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControlsAriaLabel',
-          { defaultMessage: 'Filter for all, matching or unmatching previewed documents.' }
-        )}
-      >
-        <EuiFilterButton
-          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_all.id)}
+    <EuiFlexGroup alignItems="center" justifyContent="flexStart" wrap gutterSize="m">
+      {selectedConditionId && (
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            onClick={clearConditionFilter}
+            iconType="cross"
+            iconSide="right"
+            size="s"
+            color="text"
+            data-test-subj="streamsAppConditionFilterButton"
+          >
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiText size="s">{selectedButtonLabel}</EuiText>
+              <EuiBadge data-test-subj="streamsAppConditionFilterSelectedBadge">
+                {`${conditionPercentage}%`}
+              </EuiBadge>
+            </EuiFlexGroup>
+          </EuiButton>
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem grow={false}>
+        <EuiFilterGroup
+          compressed={true}
+          aria-label={i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControlsAriaLabel',
+            { defaultMessage: 'Filter for all, matching or unmatching previewed documents.' }
+          )}
         >
-          {previewDocsFilterOptions.outcome_filter_all.label}
-        </EuiFilterButton>
-        <EuiFilterButton
-          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_parsed.id)}
-          badgeColor="success"
-          numActiveFilters={simulationParsedRate}
-        >
-          {previewDocsFilterOptions.outcome_filter_parsed.label}
-        </EuiFilterButton>
-        <EuiFilterButton
-          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_partially_parsed.id)}
-          badgeColor="accent"
-          numActiveFilters={simulationPartiallyParsedRate}
-        >
-          {previewDocsFilterOptions.outcome_filter_partially_parsed.label}
-        </EuiFilterButton>
-        <EuiFilterButton
-          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_skipped.id)}
-          badgeColor="accent"
-          numActiveFilters={simulationSkippedRate}
-        >
-          {previewDocsFilterOptions.outcome_filter_skipped.label}
-        </EuiFilterButton>
-        <EuiFilterButton
-          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_failed.id)}
-          badgeColor="accent"
-          numActiveFilters={simulationFailedRate}
-        >
-          {previewDocsFilterOptions.outcome_filter_failed.label}
-        </EuiFilterButton>
-        <EuiFilterButton
-          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_dropped.id)}
-          badgeColor="accent"
-          numActiveFilters={simulationDroppedRate}
-        >
-          {previewDocsFilterOptions.outcome_filter_dropped.label}
-        </EuiFilterButton>
-      </EuiFilterGroup>
+          <EuiFilterButton
+            {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_all.id)}
+          >
+            {previewDocsFilterOptions.outcome_filter_all.label}
+          </EuiFilterButton>
+          <EuiFilterButton
+            {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_parsed.id)}
+            badgeColor="success"
+            numActiveFilters={simulationParsedRate}
+          >
+            {previewDocsFilterOptions.outcome_filter_parsed.label}
+          </EuiFilterButton>
+          <EuiFilterButton
+            {...getFilterButtonPropsFor(
+              previewDocsFilterOptions.outcome_filter_partially_parsed.id
+            )}
+            badgeColor="accent"
+            numActiveFilters={simulationPartiallyParsedRate}
+          >
+            {previewDocsFilterOptions.outcome_filter_partially_parsed.label}
+          </EuiFilterButton>
+          <EuiFilterButton
+            {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_skipped.id)}
+            badgeColor="accent"
+            numActiveFilters={simulationSkippedRate}
+          >
+            {previewDocsFilterOptions.outcome_filter_skipped.label}
+          </EuiFilterButton>
+          <EuiFilterButton
+            {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_failed.id)}
+            badgeColor="accent"
+            numActiveFilters={simulationFailedRate}
+          >
+            {previewDocsFilterOptions.outcome_filter_failed.label}
+          </EuiFilterButton>
+          <EuiFilterButton
+            {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_dropped.id)}
+            badgeColor="accent"
+            numActiveFilters={simulationDroppedRate}
+          >
+            {previewDocsFilterOptions.outcome_filter_dropped.label}
+          </EuiFilterButton>
+        </EuiFilterGroup>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
@@ -220,19 +255,18 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     const isInteractiveMode = selectIsInteractiveMode(state);
     if (!isInteractiveMode || !state.context.interactiveModeRef) return undefined;
 
-    const currentProcessorRef = state.context.interactiveModeRef
-      .getSnapshot()
-      .context.stepRefs.find(
-        (stepRef) =>
-          isActionBlock(stepRef.getSnapshot().context.step) &&
-          isStepUnderEdit(stepRef.getSnapshot())
-      );
+    const stepRefs = state.context.interactiveModeRef.getSnapshot().context.stepRefs;
 
-    if (!currentProcessorRef) return undefined;
+    for (const stepRef of stepRefs) {
+      const snapshot = stepRef.getSnapshot();
+      const step = snapshot.context.step;
 
-    const step = currentProcessorRef.getSnapshot().context.step;
+      if (isActionBlock(step) && isStepUnderEdit(snapshot)) {
+        return getSourceField(step);
+      }
+    }
 
-    if (isActionBlock(step)) return getSourceField(step);
+    return undefined;
   });
 
   const docViewsRegistry = useDocViewerSetup(true);
@@ -492,3 +526,10 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
 };
 
 const staticRowHeightsOptions: EuiDataGridRowHeightsOptions = { defaultHeight: 'auto' };
+
+const selectedButtonLabel = i18n.translate(
+  'xpack.streams.streamDetailView.managementTab.enrichment.processor.conditionFilterSelectedBadge',
+  {
+    defaultMessage: 'Selected',
+  }
+);

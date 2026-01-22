@@ -40,4 +40,5 @@ export const groupingSettings: GroupSettings = {
   hideCustomFieldOption: true,
   hideOptionsTitle: true,
   popoverButtonLabel: GROUP_BY_ATTACK_LABEL,
+  enforcedGroups: [ALERT_ATTACK_IDS],
 };

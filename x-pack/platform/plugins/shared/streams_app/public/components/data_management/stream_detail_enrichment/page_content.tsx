@@ -10,7 +10,9 @@ import { css } from '@emotion/react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { Streams } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { usePerformanceContext } from '@kbn/ebt-tools';
+import { useKibana } from '../../../hooks/use_kibana';
 import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
 import { useKbnUrlStateStorageFromRouterContext } from '../../../util/kbn_url_state_context';
 import { StreamsAppContextProvider } from '../../streams_app_context_provider';
@@ -40,7 +42,6 @@ import { StepsEditor } from './steps/steps_editor';
 import { RunSimulationButton } from './yaml_mode/run_simulation_button';
 import { YamlEditorWrapper } from './yaml_mode/yaml_editor_wrapper';
 import { useRequestPreviewFlyoutState } from '../request_preview_flyout/use_request_preview_flyout_state';
-import { useKibana } from '../../../hooks/use_kibana';
 import { buildUpsertStreamRequestPayload } from './utils';
 import { getUpsertFields } from './state_management/stream_enrichment_state_machine/utils';
 import { RequestPreviewFlyout } from '../request_preview_flyout';
@@ -89,6 +90,7 @@ export function StreamDetailEnrichmentContentImpl() {
     false
   );
   const { appParams, core } = context;
+  const { onPageReady } = usePerformanceContext();
 
   const getStreamEnrichmentState = useGetStreamEnrichmentState();
   const { resetChanges, saveChanges } = useStreamEnrichmentEvents();
@@ -153,6 +155,22 @@ export function StreamDetailEnrichmentContentImpl() {
 
     return result;
   }, [detectedFields, fieldsInSamples, definitionFields]);
+
+  // Telemetry for TTFMP (time to first meaningful paint)
+  useEffect(() => {
+    if (isReady && definition) {
+      const streamType = getStreamTypeFromDefinition(definition.stream);
+      onPageReady({
+        meta: {
+          description: `[ttfmp_streams_detail_processing] streamType: ${streamType}`,
+        },
+        customMetrics: {
+          key1: 'schemaEditorFields',
+          value1: schemaEditorFields.length,
+        },
+      });
+    }
+  }, [isReady, definition, onPageReady, schemaEditorFields.length]);
 
   const hasDefinitionError = useSimulatorSelector((snapshot) =>
     Boolean(snapshot.context.simulation?.definition_error)

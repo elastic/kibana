@@ -119,7 +119,7 @@ export const constructSearchQuery = ({
             nested: {
               path,
               query: {
-                term: { [field]: search },
+                term: { [field]: { value: search, case_insensitive: true } },
               },
             },
           });

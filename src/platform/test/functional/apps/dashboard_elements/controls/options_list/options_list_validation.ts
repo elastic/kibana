@@ -92,7 +92,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Options List dashboard no validation', () => {
       before(async () => {
-        await dashboardControls.updateValidationSetting(false);
+        await dashboardControls.updateValidationSetting(controlId, false);
       });
 
       after(async () => {

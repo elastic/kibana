@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EditorError } from '@kbn/esql-ast';
+import type { EditorError } from '@kbn/esql-language';
 import type { ValidateEsqlResult } from '../validate_esql_in_last_message_node/utils';
 import { lastMessageWithErrorReport } from './utils';
 

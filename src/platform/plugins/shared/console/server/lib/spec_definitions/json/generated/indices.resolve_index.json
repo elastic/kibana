@@ -22,7 +22,8 @@
       ]
     },
     "methods": [
-      "GET"
+      "GET",
+      "POST"
     ],
     "patterns": [
       "_resolve/index/{name}"

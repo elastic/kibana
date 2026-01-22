@@ -14,6 +14,7 @@ import type { AlertStatus } from '@kbn/rule-data-utils';
 import moment from 'moment';
 import React from 'react';
 import { Tooltip as CaseTooltip } from '@kbn/cases-components';
+import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { LEGACY_COMPARATORS } from '../../../common/utils/convert_legacy_outside_comparator';
 import type { NavigateToCaseView } from '../../hooks/use_case_view_navigation';
@@ -101,6 +102,7 @@ export const ColumnIDs = {
   RULE_NAME: 'rule_name',
   RULE_TYPE: 'rule_type',
   CASES: 'cases',
+  WORKFLOW_TAGS: 'workflow_tags',
 } as const;
 
 export const overviewColumns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
@@ -214,6 +216,10 @@ export const overviewColumns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
               </CaseTooltip>,
             ];
           });
+        case ColumnIDs.WORKFLOW_TAGS:
+          const workflowTags = value as string[];
+          if (!workflowTags || !workflowTags.length) return <>{'-'}</>;
+          return <TagsList tags={workflowTags} ignoreEmpty color="default" />;
         default:
           return <>{'-'}</>;
       }

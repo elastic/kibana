@@ -14,6 +14,9 @@ import React, { Fragment } from 'react';
 import type { EuiBadgeProps, EuiToolTipProps } from '@elastic/eui';
 import { EuiBadge, EuiBadgeGroup, EuiToolTip, useEuiTheme } from '@elastic/eui';
 
+/**
+ * @deprecated Use coreStart.chrome.setBreadcrumbsBadges API instead
+ */
 export type TopNavMenuBadgeProps = EuiBadgeProps & {
   badgeText: string;
   toolTipProps?: Partial<EuiToolTipProps>;
@@ -21,7 +24,7 @@ export type TopNavMenuBadgeProps = EuiBadgeProps & {
 };
 
 /**
- * @deprecated Badges will be moved to use BreadcrumbsWithExtension API.
+ * @deprecated Use coreStart.chrome.setBreadcrumbsBadges API instead
  */
 export const TopNavMenuBadges = ({ badges }: { badges: TopNavMenuBadgeProps[] | undefined }) => {
   const { euiTheme } = useEuiTheme();

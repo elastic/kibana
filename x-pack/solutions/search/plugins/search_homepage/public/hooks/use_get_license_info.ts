@@ -7,7 +7,6 @@
 
 import useObservable from 'react-use/lib/useObservable';
 import { useMemo } from 'react';
-import moment from 'moment';
 import { useKibana } from './use_kibana';
 
 export const useGetLicenseInfo = () => {
@@ -17,21 +16,16 @@ export const useGetLicenseInfo = () => {
 
   const license = useObservable(licensing.license$, null);
 
-  const { isTrial, daysLeft } = useMemo(() => {
-    return {
+  const { isTrial, licenseType } = useMemo(
+    () => ({
       isTrial: license && license.isAvailable && license.isActive && license.type === 'trial',
-      daysLeft:
-        (license &&
-          license.isAvailable &&
-          license.isActive &&
-          license.expiryDateInMillis &&
-          moment(license.expiryDateInMillis).days()) ||
-        0,
-    };
-  }, [license]);
+      licenseType: license?.type,
+    }),
+    [license]
+  );
 
   return {
     isTrial,
-    daysLeft,
+    licenseType,
   };
 };

@@ -38,11 +38,14 @@ interface ServiceSummary {
   deployments: Array<{ '@timestamp': string }>;
 }
 
-interface APMDownstreamDependency {
-  'service.name'?: string | undefined;
+export interface APMDownstreamDependency {
+  'service.name'?: string;
   'span.destination.service.resource': string;
-  'span.type'?: string | undefined;
-  'span.subtype'?: string | undefined;
+  'span.type'?: string;
+  'span.subtype'?: string;
+  errorRate?: number;
+  latencyMs?: number;
+  throughputPerMin?: number;
 }
 
 interface APMError {
@@ -86,7 +89,7 @@ interface APMTransaction {
   };
 }
 
-interface ServicesItemsItem {
+export interface ServicesItemsItem {
   serviceName: string;
   transactionType?: string;
   environments?: string[];
@@ -102,6 +105,43 @@ interface ServicesItemsResponse {
   items: ServicesItemsItem[];
   maxCountExceeded: boolean;
   serviceOverflowCount: number;
+}
+
+// Infra host types
+type InfraEntityMetricType =
+  | 'cpu'
+  | 'cpuV2'
+  | 'normalizedLoad1m'
+  | 'diskSpaceUsage'
+  | 'memory'
+  | 'memoryFree'
+  | 'rx'
+  | 'tx'
+  | 'rxV2'
+  | 'txV2';
+
+type InfraEntityMetadataType = 'cloud.provider' | 'host.ip' | 'host.os.name';
+
+interface InfraEntityMetrics {
+  name: InfraEntityMetricType;
+  value: number | null;
+}
+
+interface InfraEntityMetadata {
+  name: InfraEntityMetadataType;
+  value: string | number | null;
+}
+
+export interface InfraEntityMetricsItem {
+  name: string;
+  metrics: InfraEntityMetrics[];
+  metadata: InfraEntityMetadata[];
+  hasSystemMetrics: boolean;
+  alertsCount?: number;
+}
+
+interface InfraHostsResponse {
+  nodes: InfraEntityMetricsItem[];
 }
 
 export interface ObservabilityAgentBuilderDataRegistryTypes {
@@ -166,4 +206,13 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     end: string;
     searchQuery?: string;
   }) => Promise<ServicesItemsResponse>;
+
+  infraHosts: (params: {
+    request: KibanaRequest;
+    from: string;
+    to: string;
+    limit: number;
+    query: Record<string, unknown> | undefined;
+    hostNames?: string[];
+  }) => Promise<InfraHostsResponse>;
 }

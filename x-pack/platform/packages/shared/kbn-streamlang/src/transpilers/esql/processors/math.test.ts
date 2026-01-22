@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BasicPrettyPrinter, Builder, type ESQLAstCommand } from '@kbn/esql-ast';
+import { BasicPrettyPrinter, Builder, type ESQLAstCommand } from '@kbn/esql-language';
 import { convertMathProcessorToESQL } from './math';
 import { type MathProcessor } from '../../../../types/processors';
 

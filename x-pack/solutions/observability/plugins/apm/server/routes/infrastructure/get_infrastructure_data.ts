@@ -11,8 +11,8 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import {
   SERVICE_NAME,
   CONTAINER_ID,
-  HOST_HOSTNAME,
   KUBERNETES_POD_NAME,
+  HOST_NAME,
 } from '../../../common/es_fields/apm';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
@@ -56,7 +56,7 @@ export const getInfrastructureData = async ({
       },
       hostNames: {
         terms: {
-          field: HOST_HOSTNAME,
+          field: HOST_NAME,
           size: 500,
         },
       },

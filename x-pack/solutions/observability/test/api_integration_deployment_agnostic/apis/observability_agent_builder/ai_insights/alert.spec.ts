@@ -7,17 +7,17 @@
 
 import expect from '@kbn/expect';
 import type { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-functional-services';
-import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
-import type { LlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
-import { createLlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
+import { generateApmErrorData, indexAll, type ApmSynthtraceEsClient } from '@kbn/synthtrace';
+import type { LlmProxy } from '@kbn/test-suites-xpack-platform/agent_builder_api_integration/utils/llm_proxy';
+import { createLlmProxy } from '@kbn/test-suites-xpack-platform/agent_builder_api_integration/utils/llm_proxy';
 import { ApmRuleType } from '@kbn/rule-data-utils';
+import { timerange } from '@kbn/synthtrace-client';
 import { APM_ALERTS_INDEX } from '../../apm/alerts/helpers/alerting_helper';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
   createLlmProxyActionConnector,
   deleteActionConnector,
 } from '../utils/llm_proxy/action_connectors';
-import { createSyntheticApmData } from '../utils/synthtrace_scenarios';
 import { createRule, deleteRules } from '../utils/alerts/alerting_rules';
 
 const MOCKED_AI_SUMMARY = 'This is a mocked AI insight summary for the alert.';
@@ -39,6 +39,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const alertingApi = getService('alertingApi');
   const kibanaServer = getService('kibanaServer');
   const observabilityAgentBuilderApi = getService('observabilityAgentBuilderApi');
+  const synthtrace = getService('synthtrace');
 
   describe('AI Insights: Alert', function () {
     // LLM Proxy is not yet supported in cloud environments
@@ -58,8 +59,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await kibanaServer.savedObjects.cleanStandardList();
         internalReqHeader = samlAuth.getInternalRequestHeader();
         roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
 
-        ({ apmSynthtraceEsClient } = await createSyntheticApmData({ getService }));
+        await indexAll(
+          generateApmErrorData({
+            range: timerange('now-15m', 'now'),
+            apmEsClient: apmSynthtraceEsClient,
+            serviceName: 'test-service',
+            environment: 'production',
+            language: 'go',
+          })
+        );
 
         // Create a rule and wait for an alert to be generated
         createdRuleId = await createRule({

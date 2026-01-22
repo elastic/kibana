@@ -16,6 +16,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 
 const COPIED_ICON_DISPLAY_DURATION_MS = 1000;
 
@@ -68,10 +69,10 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
       gutterSize="s"
       alignItems="center"
       wrap
-      style={{
+      css={css({
         maxWidth: maxWidth ? `${maxWidth}px` : undefined,
         minWidth: minWidth ? `${minWidth}px` : undefined,
-      }}
+      })}
     >
       {label && (
         <EuiFlexItem grow={false}>
@@ -80,13 +81,12 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
           </EuiTitle>
         </EuiFlexItem>
       )}
-      <EuiFlexItem grow={false} style={{ flexBasis: 'content', maxWidth: '100%' }}>
+      <EuiFlexItem grow={false} css={css({ flexBasis: 'content', maxWidth: '100%' })}>
         <EuiFlexGroup
-          style={{
+          css={css({
             color: euiTheme.colors.textParagraph,
-            backgroundColor: euiTheme.colors.backgroundBaseSubdued,
             borderRadius: euiTheme.border.radius.small,
-          }}
+          })}
           alignItems="center"
           gutterSize="xs"
           responsive={false}

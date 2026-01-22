@@ -55,6 +55,32 @@ export class WorkflowGraph {
     return this.graph.node(nodeId);
   }
 
+  /**
+   * Retrieves a step node by its step ID, accounting for control flow node prefixes.
+   * This method tries to find the node with the given step ID, checking for common
+   * control flow node prefixes (enterForeach_, enterCondition_, enterIf_, etc.)
+   *
+   * @param stepId - The step ID to search for
+   * @returns The graph node if found, undefined otherwise
+   */
+  public getStepNode(stepId: string): GraphNodeUnion | undefined {
+    const nodePrefixes = [
+      '', // Try the exact step ID first
+      'enterForeach_',
+      'enterCondition_',
+    ];
+
+    for (const prefix of nodePrefixes) {
+      const nodeId = `${prefix}${stepId}`;
+      const node = this.graph.node(nodeId);
+      if (node) {
+        return node;
+      }
+    }
+
+    return undefined;
+  }
+
   public getNodeStack(nodeId: string): string[] {
     const predecessors = this.getAllPredecessors(nodeId).toReversed();
 

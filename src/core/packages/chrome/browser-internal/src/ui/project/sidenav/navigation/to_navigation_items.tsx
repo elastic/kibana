@@ -20,6 +20,7 @@ import type {
   SideNavLogo,
 } from '@kbn/core-chrome-navigation/types';
 import type { SolutionId } from '@kbn/core-chrome-browser';
+import { toSentenceCase } from '@kbn/shared-ux-label-formatter';
 
 import { AppDeepLinkIdToIcon } from './known_icons_mappings';
 import type { PanelStateManager } from './panel_state_manager';
@@ -161,7 +162,7 @@ export const toNavigationItems = (
       maybeMarkActive(child, 2, navNode);
       return {
         id: child.id,
-        label: warnIfMissing(child, 'title', 'Missing Title 😭'),
+        label: toSentenceCase(warnIfMissing(child, 'title', 'Missing Title 😭')),
         href: warnIfMissing(child, 'href', 'Missing Href 😭'),
         isExternal: child.isExternalLink,
         'data-test-subj': getTestSubj(child),
@@ -212,7 +213,7 @@ export const toNavigationItems = (
 
             return {
               id: child.id,
-              label: child.title,
+              label: child.title && toSentenceCase(child.title),
               items: secondaryItems,
             };
           })
@@ -236,7 +237,7 @@ export const toNavigationItems = (
 
     return {
       id: navNode.id,
-      label: warnIfMissing(navNode, 'title', 'Missing Title 😭'),
+      label: toSentenceCase(warnIfMissing(navNode, 'title', 'Missing Title 😭')),
       iconType: getIcon(navNode),
       href: itemHref,
       sections: secondarySections,

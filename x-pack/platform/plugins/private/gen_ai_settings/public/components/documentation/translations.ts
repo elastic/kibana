@@ -16,8 +16,24 @@ export const DOCUMENTATION_DESCRIPTION = i18n.translate('genAiSettings.documenta
     'Help improve Agent Builder responses to your prompts by installing product documentation. All entries are global to the cluster.',
 });
 
+export const DOCUMENTATION_TABLE_CAPTION = i18n.translate(
+  'genAiSettings.documentation.tableCaption',
+  {
+    defaultMessage: 'Documentation status and installation management actions',
+  }
+);
+
+export const LEARN_MORE = i18n.translate('genAiSettings.documentation.learnMore', {
+  defaultMessage: 'Learn more',
+});
+
+export const AIR_GAPPED_HINT = i18n.translate('genAiSettings.documentation.airGappedHint', {
+  defaultMessage:
+    'If your environment has no internet access, you can host these artifacts yourself.',
+});
+
 export const ELASTIC_DOCS_NAME = i18n.translate('genAiSettings.documentation.elasticDocs.name', {
-  defaultMessage: 'Elastic documents',
+  defaultMessage: 'Elastic documentation',
 });
 
 export const SECURITY_LABS_NAME = i18n.translate('genAiSettings.documentation.securityLabs.name', {
@@ -73,6 +89,10 @@ export const ACTION_INSTALL = i18n.translate('genAiSettings.documentation.action
   defaultMessage: 'Install',
 });
 
+export const ACTION_UPDATE = i18n.translate('genAiSettings.documentation.action.update', {
+  defaultMessage: 'Update',
+});
+
 export const ACTION_UNINSTALL = i18n.translate('genAiSettings.documentation.action.uninstall', {
   defaultMessage: 'Uninstall',
 });
@@ -81,24 +101,36 @@ export const ACTION_RETRY = i18n.translate('genAiSettings.documentation.action.r
   defaultMessage: 'Retry',
 });
 
-export const INSTALL_SUCCESS = i18n.translate('genAiSettings.documentation.install.success', {
-  defaultMessage: 'Documentation installed successfully',
-});
+export const getInstallSuccessTitle = (name: string) =>
+  i18n.translate('genAiSettings.documentation.install.successWithName', {
+    defaultMessage: '{name} installed successfully',
+    values: { name },
+  });
 
-export const INSTALL_ERROR = i18n.translate('genAiSettings.documentation.install.error', {
-  defaultMessage: 'Failed to install documentation',
-});
+export const getInstallErrorTitle = (name: string) =>
+  i18n.translate('genAiSettings.documentation.install.errorWithName', {
+    defaultMessage: 'Failed to install {name}',
+    values: { name },
+  });
 
-export const UNINSTALL_SUCCESS = i18n.translate('genAiSettings.documentation.uninstall.success', {
-  defaultMessage: 'Documentation uninstalled successfully',
-});
+export const getUninstallSuccessTitle = (name: string) =>
+  i18n.translate('genAiSettings.documentation.uninstall.successWithName', {
+    defaultMessage: '{name} uninstalled successfully',
+    values: { name },
+  });
 
-export const UNINSTALL_ERROR = i18n.translate('genAiSettings.documentation.uninstall.error', {
-  defaultMessage: 'Failed to uninstall documentation',
-});
+export const getUninstallErrorTitle = (name: string) =>
+  i18n.translate('genAiSettings.documentation.uninstall.errorWithName', {
+    defaultMessage: 'Failed to uninstall {name}',
+    values: { name },
+  });
 
 export const TECH_PREVIEW = i18n.translate('genAiSettings.documentation.techPreview', {
   defaultMessage: 'TECH PREVIEW',
+});
+
+export const UPDATE_AVAILABLE = i18n.translate('genAiSettings.documentation.updateAvailable', {
+  defaultMessage: 'Update available',
 });
 
 export const SHOWING = i18n.translate('genAiSettings.documentation.showing', {

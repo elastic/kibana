@@ -15,6 +15,7 @@ import {
   EuiIcon,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiSkeletonText,
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
@@ -60,7 +61,11 @@ const ActionsTableComponent = () => {
 
   const { data: packsData } = usePacks({});
 
-  const { data: actionsData } = useAllLiveQueries({
+  const {
+    data: actionsData,
+    isLoading,
+    isFetching,
+  } = useAllLiveQueries({
     activePage: pageIndex,
     limit: pageSize,
     kuery: 'user_id: *',
@@ -272,9 +277,14 @@ const ActionsTableComponent = () => {
     []
   );
 
+  if (isLoading) {
+    return <EuiSkeletonText lines={10} />;
+  }
+
   return (
     <EuiBasicTable
       items={actionsData?.data?.items ?? EMPTY_ARRAY}
+      loading={isFetching && !isLoading}
       // @ts-expect-error update types
       columns={columns}
       pagination={pagination}
@@ -286,3 +296,4 @@ const ActionsTableComponent = () => {
 };
 
 export const ActionsTable = React.memo(ActionsTableComponent);
+ActionsTable.displayName = 'ActionsTable';

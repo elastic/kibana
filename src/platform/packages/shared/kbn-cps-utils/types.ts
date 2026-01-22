@@ -50,4 +50,5 @@ export interface ICPSManager {
   getProjectRouting(): ProjectRouting | undefined;
   getDefaultProjectRouting(): ProjectRouting;
   getProjectPickerAccess$(): Observable<ProjectRoutingAccess>;
+  getProjectPickerAccess(): ProjectRoutingAccess;
 }

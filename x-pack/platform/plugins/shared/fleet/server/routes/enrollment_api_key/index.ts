@@ -132,7 +132,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
               description: 'OK: A successful request.',
               body: () =>
                 ListResponseSchema(EnrollmentAPIKeySchema).extends({
-                  list: schema.arrayOf(EnrollmentAPIKeySchema, { meta: { deprecated: true } }),
+                  list: schema.arrayOf(EnrollmentAPIKeySchema, {
+                    meta: { deprecated: true },
+                    maxSize: 10000,
+                  }),
                 }),
             },
             400: {

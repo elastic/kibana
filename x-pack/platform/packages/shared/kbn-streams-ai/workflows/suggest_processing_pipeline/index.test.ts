@@ -36,12 +36,14 @@ describe('getUniqueDocumentErrors', () => {
           errors: [],
           detected_fields: [],
           status: 'parsed',
+          processed_by: [],
         },
         {
           value: { field: 'value2' },
           errors: [],
           detected_fields: [],
           status: 'parsed',
+          processed_by: [],
         },
       ],
       detected_fields: [],
@@ -74,6 +76,7 @@ describe('getUniqueDocumentErrors', () => {
           ],
           detected_fields: [],
           status: 'failed',
+          processed_by: [],
         },
         {
           value: { field: 'value2' },
@@ -86,12 +89,14 @@ describe('getUniqueDocumentErrors', () => {
           ],
           detected_fields: [],
           status: 'failed',
+          processed_by: [],
         },
         {
           value: { field: 'value3' },
           errors: [{ type: 'field_mapping_failure', message: 'Invalid format' }],
           detected_fields: [],
           status: 'failed',
+          processed_by: [],
         },
       ],
       detected_fields: [],
@@ -123,6 +128,7 @@ describe('getUniqueDocumentErrors', () => {
           ],
           detected_fields: [],
           status: 'failed',
+          processed_by: [],
         },
         {
           value: {},
@@ -131,6 +137,7 @@ describe('getUniqueDocumentErrors', () => {
           ],
           detected_fields: [],
           status: 'failed',
+          processed_by: [],
         },
         {
           value: {},
@@ -139,6 +146,7 @@ describe('getUniqueDocumentErrors', () => {
           ],
           detected_fields: [],
           status: 'failed',
+          processed_by: [],
         },
         {
           value: {},
@@ -147,6 +155,7 @@ describe('getUniqueDocumentErrors', () => {
           ],
           detected_fields: [],
           status: 'failed',
+          processed_by: [],
         },
         {
           value: {},
@@ -155,6 +164,7 @@ describe('getUniqueDocumentErrors', () => {
           ],
           detected_fields: [],
           status: 'failed',
+          processed_by: [],
         },
         {
           value: {},
@@ -163,6 +173,7 @@ describe('getUniqueDocumentErrors', () => {
           ],
           detected_fields: [],
           status: 'failed',
+          processed_by: [],
         },
         {
           value: {},
@@ -171,6 +182,7 @@ describe('getUniqueDocumentErrors', () => {
           ],
           detected_fields: [],
           status: 'failed',
+          processed_by: [],
         },
       ],
       detected_fields: [],
@@ -206,6 +218,7 @@ describe('getUniqueDocumentErrors', () => {
           ],
           detected_fields: [],
           status: 'failed',
+          processed_by: [],
         },
       ],
       detected_fields: [],
@@ -238,6 +251,7 @@ describe('getUniqueDocumentErrors', () => {
           ],
           detected_fields: [],
           status: 'failed',
+          processed_by: [],
         },
         {
           value: {},
@@ -246,6 +260,7 @@ describe('getUniqueDocumentErrors', () => {
           ],
           detected_fields: [],
           status: 'failed',
+          processed_by: [],
         },
       ],
       detected_fields: [],
@@ -279,6 +294,7 @@ describe('getUniqueDocumentErrors', () => {
           ],
           detected_fields: [],
           status: 'failed',
+          processed_by: [],
         },
         {
           value: {},
@@ -288,6 +304,7 @@ describe('getUniqueDocumentErrors', () => {
           ],
           detected_fields: [],
           status: 'failed',
+          processed_by: [],
         },
       ],
       detected_fields: [],
@@ -319,6 +336,7 @@ describe('getUniqueDocumentErrors', () => {
           ],
           detected_fields: [],
           status: 'failed',
+          processed_by: [],
         },
         {
           value: {},
@@ -327,6 +345,7 @@ describe('getUniqueDocumentErrors', () => {
           ],
           detected_fields: [],
           status: 'failed',
+          processed_by: [],
         },
         {
           value: {},
@@ -335,6 +354,7 @@ describe('getUniqueDocumentErrors', () => {
           ],
           detected_fields: [],
           status: 'failed',
+          processed_by: [],
         },
         {
           value: {},
@@ -343,6 +363,7 @@ describe('getUniqueDocumentErrors', () => {
           ],
           detected_fields: [],
           status: 'failed',
+          processed_by: [],
         },
         {
           value: {},
@@ -351,6 +372,7 @@ describe('getUniqueDocumentErrors', () => {
           ],
           detected_fields: [],
           status: 'failed',
+          processed_by: [],
         },
       ],
       detected_fields: [],

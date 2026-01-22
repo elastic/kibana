@@ -35,8 +35,8 @@ export function makeFtrConfigProvider(
       ? 'x-pack/platform/test/serverless/shared/config.base.ts'
       : config.getFtrConfigPath();
     const defaultConfigPath = config.isXpack()
-      ? 'x-pack/platform/test/functional/config.base.ts'
-      : 'src/platform/test/functional/config.base.js';
+      ? 'x-pack/performance/configs/http2_config.ts'
+      : 'src/platform/test/functional/config.base.http2.ts';
     const ftrConfigPath = configPath ?? defaultConfigPath;
     const baseConfig = (await readConfigFile(Path.resolve(REPO_ROOT, ftrConfigPath))).getAll();
 

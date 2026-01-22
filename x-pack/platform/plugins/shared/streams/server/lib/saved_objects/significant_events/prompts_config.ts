@@ -14,7 +14,15 @@ export const streamsPromptsSOAttributesV1 = schema.object({
   significantEventsPromptOverride: schema.maybe(schema.string()),
 });
 
-export type PromptsConfigAttributes = TypeOf<typeof streamsPromptsSOAttributesV1>;
+export const streamsPromptsSOAttributesV2 = streamsPromptsSOAttributesV1.extends({
+  descriptionPromptOverride: schema.maybe(schema.string()),
+});
+
+export const streamsPromptsSOAttributesV3 = streamsPromptsSOAttributesV2.extends({
+  systemsPromptOverride: schema.maybe(schema.string()),
+});
+
+export type PromptsConfigAttributes = TypeOf<typeof streamsPromptsSOAttributesV3>;
 
 export const getStreamsPromptsSavedObject = (): SavedObjectsType => {
   return {
@@ -34,6 +42,20 @@ export const getStreamsPromptsSavedObject = (): SavedObjectsType => {
         schemas: {
           forwardCompatibility: streamsPromptsSOAttributesV1.extends({}, { unknowns: 'ignore' }),
           create: streamsPromptsSOAttributesV1,
+        },
+      },
+      '2': {
+        changes: [],
+        schemas: {
+          forwardCompatibility: streamsPromptsSOAttributesV2.extends({}, { unknowns: 'ignore' }),
+          create: streamsPromptsSOAttributesV2,
+        },
+      },
+      '3': {
+        changes: [],
+        schemas: {
+          forwardCompatibility: streamsPromptsSOAttributesV3.extends({}, { unknowns: 'ignore' }),
+          create: streamsPromptsSOAttributesV3,
         },
       },
     },

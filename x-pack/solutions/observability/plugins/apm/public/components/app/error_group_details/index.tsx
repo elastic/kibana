@@ -11,7 +11,10 @@ import React, { useEffect } from 'react';
 import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/common';
+import {
+  OBSERVABILITY_AGENT_ID,
+  OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
+} from '@kbn/observability-agent-builder-plugin/public';
 import { isOpenTelemetryAgentName, isRumAgentName } from '../../../../common/agent_name';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -85,7 +88,7 @@ export function ErrorGroupDetails() {
   const apmRouter = useApmRouter();
   const history = useHistory();
   const { onPageReady } = usePerformanceContext();
-  const { observabilityAIAssistant, onechat } = useApmPluginContext();
+  const { observabilityAIAssistant, agentBuilder } = useApmPluginContext();
 
   const {
     path: { groupId },
@@ -201,12 +204,13 @@ export function ErrorGroupDetails() {
 
   // Configure agent builder global flyout with the error attachment
   useEffect(() => {
-    if (!onechat || !errorId) {
+    if (!agentBuilder || !errorId) {
       return;
     }
 
-    onechat.setConversationFlyoutActiveConfig({
+    agentBuilder.setConversationFlyoutActiveConfig({
       newConversation: true,
+      agentId: OBSERVABILITY_AGENT_ID,
       attachments: [
         {
           type: OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
@@ -222,9 +226,9 @@ export function ErrorGroupDetails() {
     });
 
     return () => {
-      onechat.clearConversationFlyoutActiveConfig();
+      agentBuilder.clearConversationFlyoutActiveConfig();
     };
-  }, [onechat, errorId, serviceName, environment, start, end]);
+  }, [agentBuilder, errorId, serviceName, environment, start, end]);
 
   return (
     <>

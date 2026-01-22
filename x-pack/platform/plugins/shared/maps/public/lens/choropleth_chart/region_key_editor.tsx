@@ -101,14 +101,15 @@ export function RegionKeyEditor(props: Props) {
   return isLoading ? (
     <EuiSelect isLoading />
   ) : (
-    <>
+    <div className="lnsIndexPatternDimensionEditor--padded">
       <EMSFileSelect
         isColumnCompressed
         value={props.state.emsLayerId ? props.state.emsLayerId : null}
         onChange={onEmsLayerSelect}
+        fullWidth
       />
       {emsFieldSelect}
-    </>
+    </div>
   );
 }
 

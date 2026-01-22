@@ -12,6 +12,7 @@ import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '@kbn/deeplinks-analytics/constants';
 import type { DashboardReadResponseBody } from '../../server';
 import { getAccessControlClient } from '../services/access_control_service';
+import { dashboardClient } from '../dashboard_client';
 
 export function initializeAccessControlManager(
   savedObjectResult?: DashboardReadResponseBody,
@@ -41,6 +42,7 @@ export function initializeAccessControlManager(
         ...currentAccessControl,
         accessMode,
       });
+      dashboardClient.invalidateCache(dashboardId);
     } catch (error) {
       throw error;
     }
