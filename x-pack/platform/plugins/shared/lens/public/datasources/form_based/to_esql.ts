@@ -161,7 +161,7 @@ export function getESQLForLayer(
       allParamObjects.push(rawResult.params);
     }
 
-    let metricESQL = `${esAggsId} = ` + rawResult.template;
+    let metricESQL = `${esAggsId} = ${rawResult.template}`;
 
     if (wrapInFilter) {
       if (col.filter?.language === 'kuery') {
@@ -288,7 +288,7 @@ export function getESQLForLayer(
       allParamObjects.push(rawResult.params);
     }
 
-    return `${esAggsId} = ` + rawResult.template;
+    return `${esAggsId} = ${rawResult.template}`;
   });
 
   if (buckets.some((m) => !m)) return;
