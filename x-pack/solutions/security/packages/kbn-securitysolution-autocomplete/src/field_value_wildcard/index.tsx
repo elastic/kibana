@@ -132,9 +132,9 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
 
     const handleValuesChange = useCallback(
       (newOptions: EuiComboBoxOptionOption[]): void => {
-        const searchQueryIsCustom =
+        const isCustomSearchQuery =
           newOptions.length > 0 && searchQuery && searchQuery !== newOptions[0].label;
-        if (searchQueryIsCustom) {
+        if (isCustomSearchQuery) {
           handleError(undefined);
           handleSpacesWarning(searchQuery);
           setShowSpacesWarning(false);
