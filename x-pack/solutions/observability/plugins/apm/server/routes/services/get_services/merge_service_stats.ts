@@ -32,12 +32,12 @@ export function mergeServiceStats({
   serviceStats,
   healthStatuses,
   alertCounts,
-  sloStats = [],
+  sloStats,
 }: {
   serviceStats: ServiceTransactionStatsResponse['serviceStats'];
   healthStatuses: ServiceHealthStatusesResponse;
   alertCounts: ServiceAlertsResponse;
-  sloStats?: ServiceSloStatsResponse;
+  sloStats: ServiceSloStatsResponse;
 }): MergedServiceStat[] {
   const allServiceNames = serviceStats.map(({ serviceName }) => serviceName);
 
