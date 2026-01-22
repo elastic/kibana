@@ -119,6 +119,16 @@ const columns = [
   },
   {
     displayAsText: i18n.translate(
+      'xpack.triggersActionsUI.alertsTable.workflowTagsColumnDescription',
+      {
+        defaultMessage: 'Workflow tags',
+      }
+    ),
+    id: ALERT_WORKFLOW_TAGS,
+    initialWidth: 150,
+  },
+  {
+    displayAsText: i18n.translate(
       'xpack.triggersActionsUI.alertsTable.maintenanceWindowsColumnDescription',
       {
         defaultMessage: 'Maintenance windows',

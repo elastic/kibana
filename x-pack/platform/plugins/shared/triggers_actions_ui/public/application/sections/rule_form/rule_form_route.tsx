@@ -36,7 +36,7 @@ export const RuleFormRoute = () => {
     setBreadcrumbs,
     ...startServices
   } = useKibana().services;
-  const { currentAppId$, navigateToApp, getUrlForApp, isAppRegistered } = application;
+  const { currentAppId$, navigateToApp, getUrlForApp } = application;
   const currentAppId = useObservable(currentAppId$, undefined);
   const isInRulesApp = currentAppId === 'rules';
 
@@ -70,7 +70,7 @@ export const RuleFormRoute = () => {
   // Set breadcrumb and page title
   useEffect(() => {
     const rulesBreadcrumb = getAlertingSectionBreadcrumb('rules', true);
-    const breadcrumbHref = isAppRegistered('rules')
+    const breadcrumbHref = isInRulesApp
       ? getUrlForApp('rules', { path: '/' })
       : getUrlForApp('management', { path: 'insightsAndAlerting/triggersActions/rules' });
 
@@ -88,7 +88,7 @@ export const RuleFormRoute = () => {
       chrome.docTitle.change(getCurrentDocTitle('createRule'));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ruleTypeId, templateId, id, getUrlForApp, isAppRegistered]);
+  }, [ruleTypeId, templateId, id, getUrlForApp, isInRulesApp]);
 
   if (isLoadingRuleTemplate) {
     return <CenterJustifiedSpinner />;

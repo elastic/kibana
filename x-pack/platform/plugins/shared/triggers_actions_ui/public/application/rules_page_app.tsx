@@ -14,6 +14,7 @@ import {
   rulesAppDetailsRoute,
   createRuleRoute,
   createRuleFromTemplateRoute,
+  ruleLogsRoute,
 } from '@kbn/rule-data-utils';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import { setDataViewsService } from '../common/lib/data_apis';
@@ -72,7 +73,11 @@ const AppWithoutRouter = () => {
             path={createRuleRoute}
             component={suspendedComponentWithProps(RuleFormRoute, 'xl')}
           />
-          <Route exact path="/logs" component={suspendedComponentWithProps(RulesPage, 'xl')} />
+          <Route
+            exact
+            path={ruleLogsRoute}
+            component={suspendedComponentWithProps(RulesPage, 'xl')}
+          />
           <Route
             path={rulesAppDetailsRoute}
             component={suspendedComponentWithProps(RuleDetailsRouteWrapper, 'xl')}
