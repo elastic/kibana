@@ -62,4 +62,5 @@ export {
   type ESQLFieldWithMetadata,
   type EsqlFieldType,
   esqlFieldTypes,
+  KQL_TYPE_TO_KIND_MAP,
 } from './src/editor_types';
