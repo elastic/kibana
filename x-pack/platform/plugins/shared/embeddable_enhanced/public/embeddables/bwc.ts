@@ -88,3 +88,61 @@ export function extractEnhancements(state: DynamicActionsSerializedState) {
     },
   };
 }
+
+export function serializeEnhancements(enhancements: DynamicActionsSerializedState['enhancements']) {
+  if (!enhancements?.dynamicActions?.events.length) {
+    return {};
+  }
+
+  const drilldowns = enhancements.dynamicActions.events
+    .map((event) => {
+      if (event.action.factoryId === 'DASHBOARD_TO_DASHBOARD_DRILLDOWN') {
+        const { dashboardId, openInNewTab, useCurrentDateRange, useCurrentFilters } =
+          event.action.config;
+        return {
+          label: event.action.name,
+          triggers: event.triggers,
+          config: {
+            type: 'dashboard_drilldown',
+            dashboard_id: dashboardId,
+            open_in_new_tab: openInNewTab ?? false,
+            use_time_range: useCurrentDateRange ?? true,
+            use_filters: useCurrentFilters ?? true,
+          },
+        };
+      }
+
+      if (event.action.factoryId === 'OPEN_IN_DISCOVER_DRILLDOWN') {
+        const { openInNewTab } = event.action.config;
+        return {
+          label: event.action.name,
+          triggers: event.triggers,
+          config: {
+            type: 'discover_drilldown',
+            open_in_new_tab: openInNewTab ?? false,
+          },
+        };
+      }
+
+      if (event.action.factoryId === 'URL_DRILLDOWN') {
+        const { encodeUrl, openInNewTab, url } = event.action.config as {
+          encodeUrl?: boolean;
+          openInNewTab?: boolean;
+          url?: { template?: string };
+        };
+        return {
+          label: event.action.name,
+          triggers: event.triggers,
+          config: {
+            type: 'url_drilldown',
+            encode_url: encodeUrl ?? true,
+            open_in_new_tab: openInNewTab ?? true,
+            url: url?.template ?? '',
+          },
+        };
+      }
+    })
+    .filter((drilldown) => drilldown !== undefined);
+
+  return drilldowns.length ? { drilldowns } : {};
+}

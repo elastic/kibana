@@ -14,7 +14,7 @@ import { DynamicActionStorage, type DynamicActionStorageApi } from './dynamic_ac
 import { getDynamicActionsState } from './get_dynamic_actions_state';
 import type { DynamicActionsSerializedState, EmbeddableDynamicActionsManager } from './types';
 import type { StartDependencies } from '../plugin';
-import { extractEnhancements } from './bwc';
+import { extractEnhancements, serializeEnhancements } from './bwc';
 
 export function initializeDynamicActionsManager(
   uuid: string,
@@ -42,7 +42,7 @@ export function initializeDynamicActionsManager(
   });
 
   function getLatestState() {
-    return { enhancements: dynamicActionsState$.getValue() };
+    return serializeEnhancements(dynamicActionsState$.getValue());
   }
 
   return {
