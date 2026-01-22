@@ -31,12 +31,12 @@ export function cancellableTask(
         taskContext.logger.debug('Starting cancellable task check loop');
         intervalId = setInterval(async () => {
           const task = await taskClient.get(runContext.taskInstance.id);
+
           taskContext.logger.trace(
             `Cancellable task check loop for task ${runContext.taskInstance.id}: status is ${task.status}`
           );
+
           if (task.status === TaskStatus.BeingCanceled) {
-            runContext.abortController.abort();
-            await taskClient.markCanceled(task);
             resolve('canceled' as const);
           }
         }, 5000);
@@ -45,8 +45,15 @@ export function cancellableTask(
       taskContext.logger.debug(
         `Running task ${runContext.taskInstance.id} with cancellation support (race)`
       );
-      const result = await Promise.race([run(), cancellationPromise]).finally(() => {
+      const result = await Promise.race([run(), cancellationPromise]).finally(async () => {
         clearInterval(intervalId);
+
+        const task = await taskClient.get(runContext.taskInstance.id);
+
+        if (task.status === TaskStatus.BeingCanceled) {
+          runContext.abortController.abort();
+          await taskClient.markCanceled(task);
+        }
       });
 
       if (result === 'canceled') {

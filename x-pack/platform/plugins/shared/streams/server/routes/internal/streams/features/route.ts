@@ -7,18 +7,18 @@
 
 import { z } from '@kbn/zod';
 import { baseFeatureSchema, type Feature } from '@kbn/streams-schema';
+import type { TaskResult } from '@kbn/streams-schema/src/tasks/types';
+import type { IdentifyFeaturesResult } from '@kbn/streams-schema/src/api/features';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
 import { getFeatureId } from '../../../../lib/streams/feature/feature_client';
 import {
-  type IdentifyFeaturesResult,
   type FeaturesIdentificationTaskParams,
   getFeaturesIdentificationTaskId,
   FEATURES_IDENTIFICATION_TASK_TYPE,
 } from '../../../../lib/tasks/task_definitions/features_identification';
-import type { TaskResult } from '../../../../lib/tasks/types';
 import { handleTaskAction } from '../../../utils/task_helpers';
 
 const dateFromString = z.string().transform((input) => new Date(input));

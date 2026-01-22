@@ -6,9 +6,11 @@
  */
 
 import { useAbortController } from '@kbn/react-hooks';
+import { useMemo } from 'react';
 import { useKibana } from './use_kibana';
+import { getLast24HoursTimeRange } from '../util/time_range';
 
-export function useInsightsApi() {
+export function useInsightsApi(connectorId?: string) {
   const {
     dependencies: {
       start: {
@@ -19,42 +21,94 @@ export function useInsightsApi() {
 
   const { signal } = useAbortController();
 
-  return {
-    scheduleInsightsDiscoveryTask: async (connectorId: string) => {
-      await streamsRepositoryClient.fetch('POST /internal/streams/_insights/_task', {
-        signal,
-        params: {
-          body: {
-            action: 'schedule',
-            connectorId,
+  return useMemo(
+    () => ({
+      /* Insights Onboarding */
+
+      scheduleInsightsOnboardingTask: async (streamName: string) => {
+        const { from, to } = getLast24HoursTimeRange();
+
+        await streamsRepositoryClient.fetch(
+          'POST /internal/streams/{streamName}/insights_onboarding/_task',
+          {
+            signal,
+            params: {
+              path: { streamName },
+              body: {
+                action: 'schedule',
+                from,
+                to,
+                connectorId,
+              },
+            },
+          }
+        );
+      },
+      getInsightsOnboardingTaskStatus: async (streamName: string) => {
+        return streamsRepositoryClient.fetch(
+          'GET /internal/streams/{streamName}/insights_onboarding/_status',
+          {
+            signal,
+            params: {
+              path: { streamName },
+            },
+          }
+        );
+      },
+      cancelInsightsOnboardingTask: async (streamName: string) => {
+        await streamsRepositoryClient.fetch(
+          'POST /internal/streams/{streamName}/insights_onboarding/_task',
+          {
+            signal,
+            params: {
+              path: { streamName },
+              body: {
+                action: 'cancel',
+              },
+            },
+          }
+        );
+      },
+
+      /* Insights Discovery */
+
+      scheduleInsightsDiscoveryTask: async () => {
+        await streamsRepositoryClient.fetch('POST /internal/streams/_insights/_task', {
+          signal,
+          params: {
+            body: {
+              action: 'schedule',
+              connectorId,
+            },
           },
-        },
-      });
-    },
-    getInsightsDiscoveryTaskStatus: async () => {
-      return streamsRepositoryClient.fetch('POST /internal/streams/_insights/_status', {
-        signal,
-      });
-    },
-    cancelInsightsDiscoveryTask: async () => {
-      return streamsRepositoryClient.fetch('POST /internal/streams/_insights/_task', {
-        signal,
-        params: {
-          body: {
-            action: 'cancel' as const,
+        });
+      },
+      getInsightsDiscoveryTaskStatus: async () => {
+        return streamsRepositoryClient.fetch('POST /internal/streams/_insights/_status', {
+          signal,
+        });
+      },
+      cancelInsightsDiscoveryTask: async () => {
+        return streamsRepositoryClient.fetch('POST /internal/streams/_insights/_task', {
+          signal,
+          params: {
+            body: {
+              action: 'cancel' as const,
+            },
           },
-        },
-      });
-    },
-    acknowledgeInsightsDiscoveryTask: async () => {
-      return streamsRepositoryClient.fetch('POST /internal/streams/_insights/_task', {
-        signal,
-        params: {
-          body: {
-            action: 'acknowledge' as const,
+        });
+      },
+      acknowledgeInsightsDiscoveryTask: async () => {
+        return streamsRepositoryClient.fetch('POST /internal/streams/_insights/_task', {
+          signal,
+          params: {
+            body: {
+              action: 'acknowledge' as const,
+            },
           },
-        },
-      });
-    },
-  };
+        });
+      },
+    }),
+    [connectorId, signal, streamsRepositoryClient]
+  );
 }

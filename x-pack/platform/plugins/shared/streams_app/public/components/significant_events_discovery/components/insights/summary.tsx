@@ -39,15 +39,15 @@ export function Summary({ count }: { count: number }) {
     getInsightsDiscoveryTaskStatus,
     acknowledgeInsightsDiscoveryTask,
     cancelInsightsDiscoveryTask,
-  } = useInsightsApi();
+  } = useInsightsApi(aiFeatures?.genAiConnectors.selectedConnector);
 
   const [{ value: task }, getTaskStatus] = useAsyncFn(getInsightsDiscoveryTaskStatus);
-  const [{ loading: isSchedulingTask }, scheduleTask] = useAsyncFn(async (connectorId: string) => {
+  const [{ loading: isSchedulingTask }, scheduleTask] = useAsyncFn(async () => {
     /**
      * Combining scheduling and immediate status update to prevent
      * React updating the UI in between states causing flickering
      */
-    await scheduleInsightsDiscoveryTask(connectorId);
+    await scheduleInsightsDiscoveryTask();
     await getTaskStatus();
   });
 
@@ -90,21 +90,13 @@ export function Summary({ count }: { count: number }) {
 
   const [insights, setInsights] = useState<Insight[] | null>(null);
 
-  const onGenerateInsightsClick = async () => {
-    if (!aiFeatures?.genAiConnectors.selectedConnector) {
-      return;
-    }
-
-    await scheduleTask(aiFeatures?.genAiConnectors.selectedConnector);
+  const onGenerateSummaryClick = async () => {
+    await scheduleTask();
   };
 
-  const onRegenerateInsightsClick = async () => {
-    if (!aiFeatures?.genAiConnectors.selectedConnector) {
-      return;
-    }
-
+  const onRegenerateSummaryClick = async () => {
     await acknowledgeInsightsDiscoveryTask();
-    await scheduleTask(aiFeatures?.genAiConnectors.selectedConnector);
+    await scheduleTask();
 
     setInsights(null);
   };

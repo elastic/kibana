@@ -6,6 +6,10 @@
  */
 
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
+import type { GenerateDescriptionResult } from '../api/description_generation';
+import type { IdentifyFeaturesResult } from '../api/features';
+import type { SignificantEventsQueriesGenerationResult } from '../api/significant_events';
+import type { TaskResult } from '../tasks/types';
 
 export type InsightImpactLevel = 'critical' | 'high' | 'medium' | 'low';
 
@@ -27,4 +31,10 @@ export interface Insight {
 export interface InsightsResult {
   insights: Insight[];
   tokensUsed: ChatCompletionTokenCount;
+}
+
+export interface InsightsOnboardingResult {
+  descriptionTaskResult: TaskResult<GenerateDescriptionResult>;
+  featuresTaskResult?: TaskResult<IdentifyFeaturesResult>;
+  queriesTaskResult?: TaskResult<SignificantEventsQueriesGenerationResult>;
 }

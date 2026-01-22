@@ -5,16 +5,153 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
 import type { InsightsResult } from '@kbn/streams-schema';
+import { z } from '@kbn/zod';
+import type { TaskResult } from '@kbn/streams-schema/src/tasks/types';
+import type { InsightsOnboardingResult } from '@kbn/streams-schema/src/insights';
+import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import type { InsightsDiscoveryTaskParams } from '../../../../lib/tasks/task_definitions/insights_discovery';
 import { STREAMS_INSIGHTS_DISCOVERY_TASK_TYPE } from '../../../../lib/tasks/task_definitions/insights_discovery';
-import type { TaskResult } from '../../../../lib/tasks/types';
-import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
+import type { InsightsOnboardingTaskParams } from '../../../../lib/tasks/task_definitions/insights_onboarding';
+import {
+  getInsightsOnboardingTaskId,
+  STREAMS_INSIGHTS_ONBOARDING_TASK_TYPE,
+} from '../../../../lib/tasks/task_definitions/insights_onboarding';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import { handleTaskAction } from '../../../utils/task_helpers';
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
+import { handleTaskAction } from '../../../utils/task_helpers';
+
+const timestampFromString = z.string().transform((input) => new Date(input).getTime());
+
+/* Insights Onboarding Task */
+
+export type InsightsOnboardingTaskResult = TaskResult<InsightsOnboardingResult>;
+
+const insightsOnboardingTaskRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{streamName}/insights_onboarding/_task',
+  options: {
+    access: 'internal',
+    summary: 'Onboard stream for insights discovery',
+    description:
+      'Generate description, features and queries for a stream, the data that is necessary for insights discovery.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    path: z.object({ streamName: z.string() }),
+    body: z.discriminatedUnion('action', [
+      z.object({
+        action: z.literal('schedule').describe('Schedule a new generation task'),
+        from: timestampFromString,
+        to: timestampFromString,
+        connectorId: z
+          .string()
+          .optional()
+          .describe(
+            'Optional connector ID. If not provided, the default AI connector from settings will be used.'
+          ),
+      }),
+      z.object({
+        action: z.literal('cancel').describe('Cancel an in-progress generation task'),
+      }),
+      z.object({
+        action: z.literal('acknowledge').describe('Acknowledge a completed generation task'),
+      }),
+    ]),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    logger,
+  }): Promise<InsightsOnboardingTaskResult> => {
+    const { licensing, uiSettingsClient, taskClient } = await getScopedClients({
+      request,
+    });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const {
+      path: { streamName },
+      body,
+    } = params;
+    const insightsOnboardingTaskId = getInsightsOnboardingTaskId(streamName);
+
+    const actionParams =
+      body.action === 'schedule'
+        ? ({
+            action: body.action,
+            scheduleConfig: {
+              taskType: STREAMS_INSIGHTS_ONBOARDING_TASK_TYPE,
+              taskId: insightsOnboardingTaskId,
+              params: await (async (): Promise<InsightsOnboardingTaskParams> => {
+                const connectorId = await resolveConnectorId({
+                  connectorId: body.connectorId,
+                  uiSettingsClient,
+                  logger,
+                });
+
+                return {
+                  connectorId,
+                  streamName,
+                  from: body.from,
+                  to: body.to,
+                };
+              })(),
+              request,
+            },
+          } as const)
+        : ({ action: body.action } as const);
+
+    return handleTaskAction<InsightsOnboardingTaskParams, InsightsOnboardingResult>({
+      taskClient,
+      taskId: insightsOnboardingTaskId,
+      ...actionParams,
+    });
+  },
+});
+
+const insightsOnboardingStatusRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/{streamName}/insights_onboarding/_status',
+  options: {
+    access: 'internal',
+    summary: 'Check the status of insights onboarding',
+    description: 'Check the status of insights onboarding progress for a stream',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    path: z.object({ streamName: z.string() }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<InsightsOnboardingTaskResult> => {
+    const { licensing, uiSettingsClient, taskClient } = await getScopedClients({
+      request,
+    });
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const {
+      path: { streamName },
+    } = params;
+    const taskId = getInsightsOnboardingTaskId(streamName);
+
+    return taskClient.getStatus<InsightsOnboardingTaskParams, InsightsOnboardingResult>(taskId);
+  },
+});
+
+/* Insights Discovery Task */
 
 export type InsightsTaskResult = TaskResult<InsightsResult>;
 
@@ -22,8 +159,8 @@ const insightsTaskRoute = createServerRoute({
   endpoint: 'POST /internal/streams/_insights/_task',
   options: {
     access: 'internal',
-    summary: 'Identify insights in streams',
-    description: 'Identify insights in streams based on significant events',
+    summary: 'Management of the insights discovery task',
+    description: 'schedules/cancels/acknowledges the insights discovery task',
   },
   security: {
     authz: {
@@ -99,8 +236,8 @@ const insightsStatusRoute = createServerRoute({
   endpoint: 'POST /internal/streams/_insights/_status',
   options: {
     access: 'internal',
-    summary: 'Check the status of insights identification',
-    description: 'Check the status of insights identification',
+    summary: 'Check the status of insights discovery',
+    description: 'Check the status of insights discovery',
   },
   security: {
     authz: {
@@ -120,6 +257,8 @@ const insightsStatusRoute = createServerRoute({
 });
 
 export const internalInsightsRoutes = {
+  ...insightsOnboardingTaskRoute,
+  ...insightsOnboardingStatusRoute,
   ...insightsTaskRoute,
   ...insightsStatusRoute,
 };

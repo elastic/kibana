@@ -32,6 +32,13 @@ export const SYSTEMS_COLUMN_HEADER = i18n.translate(
   }
 );
 
+export const ONBOARDING_STATUS_COLUMN_HEADER = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsTree.onboardingStatusColumnName',
+  {
+    defaultMessage: 'Status',
+  }
+);
+
 export const ACTIONS_COLUMN_HEADER = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsTree.actionsColumnName',
   {
@@ -58,10 +65,24 @@ export const STREAMS_TABLE_CAPTION_ARIA_LABEL = i18n.translate(
   }
 );
 
-export const RUN_STREAM_DISCOVERY_BUTTON_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsTree.runStreamDiscoveryButtonEmptyLabel',
+export const RUN_BULK_STREAM_ONBOARDING_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsTree.runBulkStreamInsightsOnboardingButtonEmptyLabel',
   {
-    defaultMessage: 'Run Stream Discovery',
+    defaultMessage: 'Onboard Streams',
+  }
+);
+
+export const RUN_STREAM_ONBOARDING_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsTree.runStreamInsightsOnboardingButtonEmptyLabel',
+  {
+    defaultMessage: 'Onboard stream',
+  }
+);
+
+export const STOP_STREAM_ONBOARDING_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsTree.stopStreamInsightsOnboardingButtonEmptyLabel',
+  {
+    defaultMessage: 'Stop stream onboarding',
   }
 );
 

@@ -13,6 +13,7 @@ import {
 import { z } from '@kbn/zod';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import {
+  getSignificantEventsQueriesGenerationTaskId,
   SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE,
   type SignificantEventsQueriesGenerationTaskParams,
 } from '../../../../lib/tasks/task_definitions/significant_events_queries_generation';
@@ -25,10 +26,6 @@ import { resolveConnectorId } from '../../../utils/resolve_connector_id';
 // Make sure strings are expected for input, but still converted to a
 // Date, without breaking the OpenAPI generator
 const dateFromString = z.string().transform((input) => new Date(input));
-
-function getSignificantEventsQueriesGenerationTaskId(streamName: string) {
-  return `${SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE}_${streamName}`;
-}
 
 const significantEventsQueriesGenerationStatusRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{name}/significant_events/_status',

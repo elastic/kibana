@@ -6,12 +6,12 @@
  */
 
 import { z } from '@kbn/zod';
-import type { TaskResult } from '../../../../lib/tasks/types';
+import type { TaskResult } from '@kbn/streams-schema/src/tasks/types';
+import type { GenerateDescriptionResult } from '@kbn/streams-schema/src/api/description_generation';
 import {
   DESCRIPTION_GENERATION_TASK_TYPE,
   getDescriptionGenerationTaskId,
   type DescriptionGenerationTaskParams,
-  type GenerateDescriptionResult,
 } from '../../../../lib/tasks/task_definitions/description_generation';
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';

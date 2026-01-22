@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { niceTimeFormatter } from '@elastic/charts';
 import type { EuiSearchBarProps, Query } from '@elastic/eui';
 import {
   EuiButtonEmpty,
@@ -15,24 +16,30 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
-import React, { useMemo, useState } from 'react';
+import { TaskStatus } from '@kbn/streams-schema';
+import type { InsightsOnboardingResult } from '@kbn/streams-schema/src/insights';
+import type { TaskResult } from '@kbn/streams-schema/src/tasks/types';
 import { compact } from 'lodash';
-import { niceTimeFormatter } from '@elastic/charts';
-import { css } from '@emotion/react';
-import { useTimefilter } from '../../../../hooks/use_timefilter';
+import pMap from 'p-map';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useAIFeatures } from '../../../../hooks/use_ai_features';
 import { useFetchSignificantEvents } from '../../../../hooks/use_fetch_significant_events';
+import { useInsightsApi } from '../../../../hooks/use_insights_api';
+import { useTimefilter } from '../../../../hooks/use_timefilter';
+import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
+import { formatChangePoint } from '../../utils/change_point';
+import { SignificantEventsHistogramChart } from '../significant_events_histogram_chart/significant_events_histogram_chart';
 import {
   OCCURRENCES_CHART_TITLE,
-  RUN_STREAM_DISCOVERY_BUTTON_LABEL,
+  RUN_BULK_STREAM_ONBOARDING_BUTTON_LABEL,
   STREAMS_TABLE_SEARCH_ARIA_LABEL,
 } from './translations';
 import { StreamsTreeTable } from './tree_table';
 import { useDiscoveryStreams } from './use_discovery_streams_fetch';
-import { SignificantEventsHistogramChart } from '../significant_events_histogram_chart/significant_events_histogram_chart';
-import { formatChangePoint } from '../../utils/change_point';
-import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
+import { useOnboardingStatusUpdateQueue } from './use_onboarding_status_update_queue';
 
 const datePickerStyle = css`
   .euiFormControlLayout,
@@ -48,6 +55,24 @@ export function StreamsView() {
   const streamsListFetch = useDiscoveryStreams();
   const [selectedStreams, setSelectedStreams] = useState<ListStreamDetail[]>([]);
   const significantEventsFetchState = useFetchSignificantEvents();
+  const [streamOnboardingResultMap, setStreamOnboardingResultMap] = useState<
+    Record<string, TaskResult<InsightsOnboardingResult>>
+  >({});
+  const aiFeatures = useAIFeatures();
+  const { scheduleInsightsOnboardingTask, cancelInsightsOnboardingTask } = useInsightsApi(
+    aiFeatures?.genAiConnectors.selectedConnector
+  );
+  const onStreamStatusUpdate = useCallback(
+    (streamName: string, taskResult: TaskResult<InsightsOnboardingResult>) => {
+      setStreamOnboardingResultMap((currentMap) => ({
+        ...currentMap,
+        [streamName]: taskResult,
+      }));
+    },
+    []
+  );
+  const { onboardingStatusUpdateQueue, processStatusUpdateQueue } =
+    useOnboardingStatusUpdateQueue(onStreamStatusUpdate);
 
   const xFormatter = useMemo(() => {
     return niceTimeFormatter([timeState.start, timeState.end]);
@@ -55,6 +80,54 @@ export function StreamsView() {
 
   const handleQueryChange: EuiSearchBarProps['onChange'] = ({ query }) => {
     if (query) setSearchQuery(query);
+  };
+
+  useEffect(() => {
+    if (streamsListFetch.value === undefined) {
+      return;
+    }
+
+    streamsListFetch.value.streams.forEach((item) => {
+      onboardingStatusUpdateQueue.add(item.stream.name);
+    });
+    processStatusUpdateQueue();
+  }, [onboardingStatusUpdateQueue, processStatusUpdateQueue, streamsListFetch.value]);
+
+  const bulkScheduleInsightsOnboardingTask = async (streamList: string[]) => {
+    await pMap(
+      streamList,
+      async (streamName) => {
+        await scheduleInsightsOnboardingTask(streamName);
+      },
+      { concurrency: 10 }
+    );
+  };
+
+  const onBulkOnboardStreamsClick = async () => {
+    const streamList = selectedStreams
+      .filter((item) => {
+        const onboardingResult = streamOnboardingResultMap[item.stream.name];
+
+        return ![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(onboardingResult.status);
+      })
+      .map((item) => item.stream.name);
+
+    await bulkScheduleInsightsOnboardingTask(streamList);
+    streamList.forEach((streamName) => {
+      onboardingStatusUpdateQueue.add(streamName);
+    });
+    processStatusUpdateQueue();
+  };
+
+  const onOnboardStreamActionClick = async (streamName: string) => {
+    await bulkScheduleInsightsOnboardingTask([streamName]);
+
+    onboardingStatusUpdateQueue.add(streamName);
+    processStatusUpdateQueue();
+  };
+
+  const onStopOnboardingActionClick = (streamName: string) => {
+    cancelInsightsOnboardingTask(streamName);
   };
 
   return (
@@ -116,8 +189,12 @@ export function StreamsView() {
             )}
           </EuiText>
 
-          <EuiButtonEmpty iconType="securitySignalDetected" disabled={selectedStreams.length === 0}>
-            {RUN_STREAM_DISCOVERY_BUTTON_LABEL}
+          <EuiButtonEmpty
+            onClick={onBulkOnboardStreamsClick}
+            iconType="securitySignal"
+            disabled={selectedStreams.length === 0}
+          >
+            {RUN_BULK_STREAM_ONBOARDING_BUTTON_LABEL}
           </EuiButtonEmpty>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -125,9 +202,12 @@ export function StreamsView() {
       <EuiFlexItem>
         <StreamsTreeTable
           streams={streamsListFetch.value?.streams}
+          streamOnboardingResultMap={streamOnboardingResultMap}
           loading={streamsListFetch.loading}
           searchQuery={searchQuery}
           onSelectionChange={setSelectedStreams}
+          onOnboardStreamActionClick={onOnboardStreamActionClick}
+          onStopOnboardingActionClick={onStopOnboardingActionClick}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

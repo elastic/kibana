@@ -7,8 +7,8 @@
 
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
-import type { BaseFeature } from '@kbn/streams-schema';
 import { identifyFeatures } from '@kbn/streams-ai';
+import type { IdentifyFeaturesResult } from '@kbn/streams-schema/src/api/features';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
@@ -21,10 +21,6 @@ export interface FeaturesIdentificationTaskParams {
   start: number;
   end: number;
   streamName: string;
-}
-
-export interface IdentifyFeaturesResult {
-  features: BaseFeature[];
 }
 
 export const FEATURES_IDENTIFICATION_TASK_TYPE = 'streams_features_identification';
