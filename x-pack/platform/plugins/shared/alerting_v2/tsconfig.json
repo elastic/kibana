@@ -43,6 +43,7 @@
     "@kbn/logging-mocks",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/es-errors",
+    "@kbn/alerting-v2-schemas",
     "@kbn/zod",
     "@kbn/core-di-internal",
     "@kbn/i18n",

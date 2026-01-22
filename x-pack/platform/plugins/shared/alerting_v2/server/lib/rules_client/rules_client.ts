@@ -15,12 +15,13 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { inject, injectable } from 'inversify';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
+import { stringifyZodError } from '@kbn/zod-helpers';
+import { createRuleDataSchema, updateRuleDataSchema } from '@kbn/alerting-v2-schemas';
 
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
 import { RulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service';
-import { createRuleDataSchema, updateRuleDataSchema } from './schemas';
 import type {
   CreateRuleParams,
   FindRulesParams,
@@ -56,7 +57,9 @@ export class RulesClient {
 
     const parsed = createRuleDataSchema.safeParse(params.data);
     if (!parsed.success) {
-      throw Boom.badRequest(`Error validating create rule data - ${parsed.error.message}`);
+      throw Boom.badRequest(
+        `Error validating create rule data - ${stringifyZodError(parsed.error)}`
+      );
     }
 
     const username = await this.getUserName();
@@ -123,7 +126,9 @@ export class RulesClient {
 
     const parsed = updateRuleDataSchema.safeParse(data);
     if (!parsed.success) {
-      throw Boom.badRequest(`Error validating update rule data - ${parsed.error.message}`);
+      throw Boom.badRequest(
+        `Error validating update rule data - ${stringifyZodError(parsed.error)}`
+      );
     }
 
     const username = await this.getUserName();

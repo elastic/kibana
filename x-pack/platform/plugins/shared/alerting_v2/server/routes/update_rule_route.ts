@@ -12,12 +12,12 @@ import { inject, injectable } from 'inversify';
 import { Request, Response } from '@kbn/core-di-server';
 import type { TypeOf } from '@kbn/config-schema';
 import type { RouteSecurity } from '@kbn/core-http-server';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
 import { updateRuleDataSchema, type UpdateRuleData } from '../lib/rules_client';
 import { RulesClient } from '../lib/rules_client/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_RULE_API_PATH } from './constants';
-import { buildRouteValidationWithZod } from './route_validation';
 
 const updateRuleParamsSchema = schema.object({
   id: schema.string(),

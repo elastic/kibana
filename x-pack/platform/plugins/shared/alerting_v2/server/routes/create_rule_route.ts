@@ -15,11 +15,11 @@ import type { RouteHandler } from '@kbn/core-di-server';
 import { Request, Response } from '@kbn/core-di-server';
 import type { TypeOf } from '@kbn/config-schema';
 import type { RouteSecurity } from '@kbn/core-http-server';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { createRuleDataSchema, type CreateRuleData } from '../lib/rules_client';
 import { RulesClient } from '../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_RULE_API_PATH } from './constants';
-import { buildRouteValidationWithZod } from './route_validation';
 
 const createRuleParamsSchema = schema.object({
   id: schema.maybe(schema.string()),

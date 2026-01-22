@@ -11,8 +11,14 @@ import type { EuiButtonProps, EuiBetaBadgeProps, IconType } from '@elastic/eui';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import type { SplitButtonProps } from '@kbn/split-button';
 
+/**
+ * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+ */
 export type TopNavMenuAction = (anchorElement: HTMLElement) => void;
 
+/**
+ * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+ */
 export interface TopNavMenuData {
   id?: string;
   htmlId?: string;
@@ -40,6 +46,9 @@ export interface TopNavMenuData {
   };
 }
 
+/**
+ * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+ */
 export interface RegisteredTopNavMenuData extends TopNavMenuData {
   appName?: string;
 }

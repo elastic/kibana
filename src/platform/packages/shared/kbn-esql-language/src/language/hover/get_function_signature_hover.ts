@@ -13,11 +13,9 @@ import {
   getFormattedFunctionSignature,
 } from '../../commands/definitions/utils';
 import { fromCache, setToCache } from './hover_cache';
-import type { GetColumnMapFn } from '../shared/columns_retrieval_helpers';
 
 export async function getFunctionSignatureHover(
-  fnNode: ESQLFunction,
-  getColumnMap: GetColumnMapFn
+  fnNode: ESQLFunction
 ): Promise<Array<{ value: string }>> {
   // Use function name and argument types as cache key, fnName:argType1,argType2
   const cacheKey = fnNode.name;
