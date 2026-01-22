@@ -11,6 +11,7 @@ import type { MapCenterAndZoom, MapExtent, MapSettings } from '../descriptor_typ
 import type { MapAttributes } from '../../server';
 
 export type MapEmbeddableBaseState = SerializedTimeRange &
+  SerializedTitles &
   Partial<DynamicActionsSerializedState> & {
     isLayerTOCOpen?: boolean;
     openTOCDetails?: string[];
@@ -30,4 +31,4 @@ export type MapByValueState = MapEmbeddableBaseState & {
   attributes: MapAttributes;
 };
 
-export type MapEmbeddableState = SerializedTitles & (MapByReferenceState | MapByValueState);
+export type MapEmbeddableState = MapByReferenceState | MapByValueState;

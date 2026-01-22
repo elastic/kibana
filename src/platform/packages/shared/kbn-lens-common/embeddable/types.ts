@@ -254,6 +254,7 @@ export type LensSerializedSharedState = Simplify<
     LensWithReferences &
     LensUnifiedSearchContext &
     LensPanelProps &
+    SerializedTitles &
     Omit<LensSharedProps, 'noPadding'> &
     Partial<DynamicActionsSerializedState> & { isNewPanel?: boolean }
 >;

@@ -8,14 +8,14 @@
 import type { Reference } from '@kbn/content-management-utils/src/types';
 import { transformTitlesOut } from '@kbn/presentation-publishing';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import type { OverviewStatsStoredState } from './types';
+import type { OverviewStatsEmbeddableState } from './types';
 
 export function getTransformOut(
   transformEnhancementsOut: EmbeddableSetup['transformEnhancementsOut']
 ) {
-  function transformOut(state: OverviewStatsStoredState, references?: Reference[]) {
-    const stateWithApiTitles = transformTitlesOut(state);
-    const { enhancements, ...rest } = stateWithApiTitles;
+  function transformOut(state: OverviewStatsEmbeddableState, references?: Reference[]) {
+    transformTitlesOut(state);
+    const { enhancements, ...rest } = state;
     const enhancementsState = enhancements
       ? transformEnhancementsOut(enhancements, references ?? [])
       : undefined;

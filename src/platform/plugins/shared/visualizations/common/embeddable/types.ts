@@ -12,18 +12,17 @@ import type { SerializedTimeRange, SerializedTitles } from '@kbn/presentation-pu
 import type { VisParams } from '@kbn/visualizations-common';
 import type { SerializedVis } from '../types';
 
-export type VisualizeEmbeddableBaseState = SerializedTimeRange &
+export type VisualizeEmbeddableBaseState = SerializedTitles &
+  SerializedTimeRange &
   Partial<DynamicActionsSerializedState>;
 
-export type VisualizeByReferenceState = VisualizeEmbeddableBaseState &
-  SerializedTitles & {
-    savedObjectId?: string;
-    uiState?: any;
-  };
+export type VisualizeByReferenceState = VisualizeEmbeddableBaseState & {
+  savedObjectId?: string;
+  uiState?: any;
+};
 
-export type VisualizeByValueState = VisualizeEmbeddableBaseState &
-  SerializedTitles & {
-    savedVis: SerializedVis<VisParams>;
-  };
+export type VisualizeByValueState = VisualizeEmbeddableBaseState & {
+  savedVis: SerializedVis<VisParams>;
+};
 
 export type VisualizeEmbeddableState = VisualizeByReferenceState | VisualizeByValueState;

@@ -37,16 +37,16 @@ export function getTransformOut(
       ? transformEnhancementsOut(state.enhancements, references ?? [])
       : undefined;
 
-    const stateWithApiTitles = transformTitlesOut(state);
+    transformTitlesOut(state);
     const enhancements = enhancementsState ? { enhancements: enhancementsState } : {};
-    if (isByValue(stateWithApiTitles)) {
+    if (isByValue(state)) {
       const tabsState = {
-        ...stateWithApiTitles,
-        attributes: extractTabs(stateWithApiTitles.attributes),
+        ...state,
+        attributes: extractTabs(state.attributes),
       };
       const { attributes } = inject({ type: SavedSearchType, ...tabsState }, references ?? []);
       return {
-        ...stateWithApiTitles,
+        ...state,
         attributes,
         ...enhancements,
       } as SearchEmbeddableByValueState;
@@ -56,7 +56,7 @@ export function getTransformOut(
       (ref) => SavedSearchType === ref.type && ref.name === SAVED_SEARCH_SAVED_OBJECT_REF_NAME
     );
     return {
-      ...stateWithApiTitles,
+      ...state,
       ...enhancements,
       ...(savedObjectRef?.id ? { savedObjectId: savedObjectRef.id } : {}),
     } as SearchEmbeddableByReferenceState;

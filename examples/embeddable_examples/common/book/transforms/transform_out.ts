@@ -17,12 +17,12 @@ export function transformOut(
   storedState: BookEmbeddableState | BookEmbeddableState910,
   references?: Reference[]
 ): BookEmbeddableState {
-  const stateWithApiTitles = transformTitlesOut(storedState);
   // storedState may contain legacy state stored from dashboards or URL
+  transformTitlesOut(storedState);
 
   // 9.1.0 by-value state stored book state under attributes
-  if ('attributes' in stateWithApiTitles) {
-    const { attributes, ...rest } = stateWithApiTitles as { attributes: BookState };
+  if ('attributes' in storedState) {
+    const { attributes, ...rest } = storedState as { attributes: BookState };
     return {
       ...attributes,
       ...rest,
@@ -30,8 +30,8 @@ export function transformOut(
   }
 
   // 9.1.0 by-reference state stored by-reference id as savedBookId
-  if ('savedBookId' in stateWithApiTitles) {
-    const { savedBookId, ...rest } = stateWithApiTitles as { savedBookId: string };
+  if ('savedBookId' in storedState) {
+    const { savedBookId, ...rest } = storedState as { savedBookId: string };
     return {
       ...rest,
       savedObjectId: savedBookId,
@@ -44,11 +44,11 @@ export function transformOut(
   );
   if (savedObjectRef) {
     return {
-      ...(stateWithApiTitles as BookEmbeddableState),
+      ...(storedState as BookEmbeddableState),
       savedObjectId: savedObjectRef.id,
     };
   }
 
   // stateWithApiTitles is current by-value state
-  return stateWithApiTitles as BookEmbeddableState;
+  return storedState as BookEmbeddableState;
 }

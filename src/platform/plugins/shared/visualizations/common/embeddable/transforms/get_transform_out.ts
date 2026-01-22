@@ -19,9 +19,9 @@ export function getTransformOut(
   transformEnhancementsOut: EmbeddableSetup['transformEnhancementsOut']
 ) {
   function transformOut(state: StoredVisualizeEmbeddableState, references?: Reference[]) {
-    const stateWithApiTitles = transformTitlesOut(state);
-    const enhancementsState = stateWithApiTitles.enhancements
-      ? transformEnhancementsOut(stateWithApiTitles.enhancements, references ?? [])
+    transformTitlesOut(state);
+    const enhancementsState = state.enhancements
+      ? transformEnhancementsOut(state.enhancements, references ?? [])
       : undefined;
 
     // by ref
@@ -30,28 +30,28 @@ export function getTransformOut(
     );
     if (savedObjectRef) {
       return {
-        ...stateWithApiTitles,
+        ...state,
         ...(enhancementsState ? { enhancements: enhancementsState } : {}),
         savedObjectId: savedObjectRef.id,
       };
     }
 
     // by value
-    if ((stateWithApiTitles as StoredVisualizeByValueState).savedVis) {
+    if ((state as StoredVisualizeByValueState).savedVis) {
       const savedVis = injectVisReferences(
-        (stateWithApiTitles as StoredVisualizeByValueState).savedVis,
+        (state as StoredVisualizeByValueState).savedVis,
         references ?? []
       );
 
       return {
-        ...stateWithApiTitles,
+        ...state,
         ...(enhancementsState ? { enhancements: enhancementsState } : {}),
         savedVis,
       };
     }
 
     return {
-      ...stateWithApiTitles,
+      ...state,
       ...(enhancementsState ? { enhancements: enhancementsState } : {}),
     };
   }

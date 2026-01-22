@@ -26,9 +26,9 @@ export const getTransformOut = ({
   transformEnhancementsOut,
 }: LensTransformDependencies): LensTransformOut => {
   return function transformOut(state, panelReferences) {
-    const stateWithApiTitles = transformTitlesOut(state);
-    const enhancements = stateWithApiTitles.enhancements
-      ? transformEnhancementsOut?.(stateWithApiTitles.enhancements, panelReferences ?? [])
+    transformTitlesOut(state);
+    const enhancements = state.enhancements
+      ? transformEnhancementsOut?.(state.enhancements, panelReferences ?? [])
       : undefined;
     const enhancementsState = (
       enhancements ? { enhancements } : {}
@@ -36,18 +36,18 @@ export const getTransformOut = ({
 
     const savedObjectRef = findLensReference(panelReferences);
 
-    if (savedObjectRef && isByRefLensState(stateWithApiTitles)) {
+    if (savedObjectRef && isByRefLensState(state)) {
       return {
-        ...stateWithApiTitles,
+        ...state,
         ...enhancementsState,
         savedObjectId: savedObjectRef.id,
       } satisfies LensByRefTransformOutResult;
     }
 
-    const migratedAttributes = migrateAttributes(stateWithApiTitles.attributes);
+    const migratedAttributes = migrateAttributes(state.attributes);
     const injectedState = injectLensReferences(
       {
-        ...stateWithApiTitles,
+        ...state,
         ...enhancementsState,
         attributes: migratedAttributes,
       },
@@ -67,7 +67,7 @@ export const getTransformOut = ({
     });
 
     return {
-      ...stateWithApiTitles,
+      ...state,
       attributes: apiConfig,
     } satisfies LensByValueTransformOutResult;
   };

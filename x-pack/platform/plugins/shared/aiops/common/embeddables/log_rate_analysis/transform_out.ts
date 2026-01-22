@@ -14,12 +14,12 @@ export function transformOut(
   state: StoredLogRateAnalysisEmbeddableState,
   references?: Reference[]
 ): LogRateAnalysisEmbeddableState {
-  const stateWithApiTitles = transformTitlesOut(state);
+  transformTitlesOut(state);
   const dataViewIdRef = references?.find(
     (ref) => ref.name === LOG_RATE_ANALYSIS_DATA_VIEW_REF_NAME
   );
   return {
-    ...stateWithApiTitles,
+    ...state,
     ...(dataViewIdRef && { dataViewId: dataViewIdRef.id }),
   };
 }

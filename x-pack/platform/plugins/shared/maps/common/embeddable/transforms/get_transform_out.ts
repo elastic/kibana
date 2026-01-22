@@ -22,9 +22,9 @@ export function getTransformOut(
     panelReferences?: Reference[],
     containerReferences?: Reference[]
   ) {
-    const stateWithApiTitles = transformTitlesOut(state);
-    const enhancementsState = stateWithApiTitles.enhancements
-      ? transformEnhancementsOut(stateWithApiTitles.enhancements, panelReferences ?? [])
+    transformTitlesOut(state);
+    const enhancementsState = state.enhancements
+      ? transformEnhancementsOut(state.enhancements, panelReferences ?? [])
       : undefined;
 
     // by ref
@@ -33,19 +33,19 @@ export function getTransformOut(
     );
     if (savedObjectRef) {
       return {
-        ...stateWithApiTitles,
+        ...state,
         ...(enhancementsState ? { enhancements: enhancementsState } : {}),
         savedObjectId: savedObjectRef.id,
       };
     }
 
     // by value
-    if ((stateWithApiTitles as MapByValueState).attributes) {
+    if ((state as MapByValueState).attributes) {
       return {
-        ...stateWithApiTitles,
+        ...state,
         ...(enhancementsState ? { enhancements: enhancementsState } : {}),
         attributes: transformMapAttributesOut(
-          (stateWithApiTitles as MapByValueState).attributes,
+          (state as MapByValueState).attributes,
           (targetName: string) => {
             const panelRef = (panelReferences ?? []).find(({ name }) => name === targetName);
             if (panelRef) return panelRef;
@@ -57,7 +57,7 @@ export function getTransformOut(
     }
 
     return {
-      ...stateWithApiTitles,
+      ...state,
       ...(enhancementsState ? { enhancements: enhancementsState } : {}),
     };
   }

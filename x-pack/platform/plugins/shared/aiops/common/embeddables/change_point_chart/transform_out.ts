@@ -14,12 +14,12 @@ export function transformOut(
   state: StoredChangePointEmbeddableState,
   references?: Reference[]
 ): ChangePointEmbeddableState {
-  const stateWithApiTitles = transformTitlesOut(state);
+  transformTitlesOut(state);
   const dataViewIdRef = references?.find(
     (ref) => ref.name === CHANGE_POINT_CHART_DATA_VIEW_REF_NAME
   );
   return {
-    ...stateWithApiTitles,
+    ...state,
     dataViewId: dataViewIdRef?.id ?? '',
   };
 }

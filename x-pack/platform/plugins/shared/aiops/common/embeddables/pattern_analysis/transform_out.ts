@@ -14,10 +14,10 @@ export function transformOut(
   state: StoredPatternAnalysisEmbeddableState,
   references?: Reference[]
 ): PatternAnalysisEmbeddableState {
-  const stateWithApiTitles = transformTitlesOut(state);
+  transformTitlesOut(state);
   const dataViewIdRef = references?.find((ref) => ref.name === PATTERN_ANALYSIS_DATA_VIEW_REF_NAME);
   return {
-    ...stateWithApiTitles,
+    ...state,
     ...(dataViewIdRef && { dataViewId: dataViewIdRef.id }),
   };
 }
