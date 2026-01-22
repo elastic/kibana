@@ -18,7 +18,7 @@ describe.skip('grokdebugger_request', () => {
     const downstreamRequestWithCustomPatterns = {
       rawEvent: '55.3.244.1 GET /index.html',
       pattern: '%{IP:client} %{WORD:method} %{URIPATHPARAM:request}',
-      customPatterns: '%{FOO:bar}',
+      customPatterns: { FOO: 'bar' },
     };
 
     describe('fromDownstreamJSON factory method', () => {
@@ -35,7 +35,7 @@ describe.skip('grokdebugger_request', () => {
         );
         expect(grokdebuggerRequest.rawEvent).toEqual(downstreamRequest.rawEvent);
         expect(grokdebuggerRequest.pattern).toEqual(downstreamRequest.pattern);
-        expect(grokdebuggerRequest.customPatterns).toEqual('%{FOO:bar}');
+        expect(grokdebuggerRequest.customPatterns).toEqual({ FOO: 'bar' });
       });
     });
 
@@ -79,7 +79,7 @@ describe.skip('grokdebugger_request', () => {
                 grok: {
                   field: 'rawEvent',
                   patterns: ['%{IP:client} %{WORD:method} %{URIPATHPARAM:request}'],
-                  pattern_definitions: '%{FOO:bar}',
+                  pattern_definitions: { FOO: 'bar' },
                 },
               },
             ],

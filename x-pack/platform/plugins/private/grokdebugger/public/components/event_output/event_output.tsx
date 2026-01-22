@@ -9,7 +9,11 @@ import React from 'react';
 import { EuiFormRow, EuiCodeBlock } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export function EventOutput({ value }) {
+interface EventOutputProps {
+  value: Record<string, unknown>;
+}
+
+export function EventOutput({ value }: EventOutputProps) {
   return (
     <EuiFormRow
       label={

@@ -12,7 +12,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CodeEditor, GROK_LANG_ID } from '@kbn/code-editor';
 
-export function PatternInput({ value, onChange }) {
+interface PatternInputProps {
+  value: string;
+  onChange: (value: string) => void;
+}
+
+export function PatternInput({ value, onChange }: PatternInputProps) {
   return (
     <EuiFormRow
       label={

@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
+import type { GrokdebuggerResponseParams } from '../types';
 
 export class GrokdebuggerResponse {
-  constructor(props) {
-    this.structuredEvent = get(props, 'structuredEvent', {});
-    this.error = get(props, 'error', {});
+  structuredEvent: Record<string, unknown>;
+  error: string | Record<string, never>;
+
+  constructor(props: GrokdebuggerResponseParams) {
+    this.structuredEvent = props.structuredEvent ?? {};
+    this.error = props.error ?? {};
   }
 
-  static fromUpstreamJSON(grokdebuggerResponse) {
+  static fromUpstreamJSON(grokdebuggerResponse: GrokdebuggerResponseParams) {
     return new GrokdebuggerResponse(grokdebuggerResponse);
   }
 }

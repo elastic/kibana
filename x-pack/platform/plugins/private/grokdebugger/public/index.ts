@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { PluginInitializerContext } from '@kbn/core/public';
+
 import { GrokDebuggerUIPlugin } from './plugin';
 
-export function plugin(initializerContext) {
-  return new GrokDebuggerUIPlugin(initializerContext);
+export function plugin(_initializerContext: PluginInitializerContext) {
+  return new GrokDebuggerUIPlugin();
 }

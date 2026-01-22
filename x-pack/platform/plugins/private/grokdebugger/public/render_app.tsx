@@ -8,12 +8,15 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
+import type { CoreStart } from '@kbn/core/public';
+import type { ILicense } from '@kbn/licensing-types';
+
 import { KibanaContextProvider, KibanaRenderContextProvider } from './shared_imports';
 import { GrokDebugger } from './components/grok_debugger';
 import { GrokdebuggerService } from './services/grokdebugger/grokdebugger_service';
 import { InactiveLicenseSlate } from './components/inactive_license';
 
-export function renderApp(license, element, coreStart, theme$) {
+export function renderApp(license: ILicense, element: HTMLElement, coreStart: CoreStart) {
   const content = license.isActive ? (
     <KibanaRenderContextProvider {...coreStart}>
       <KibanaContextProvider services={{ ...coreStart }}>
@@ -21,8 +24,8 @@ export function renderApp(license, element, coreStart, theme$) {
       </KibanaContextProvider>
     </KibanaRenderContextProvider>
   ) : (
-    <KibanaRenderContextProvider theme$={theme$}>
-      <InactiveLicenseSlate license={license} />
+    <KibanaRenderContextProvider {...coreStart}>
+      <InactiveLicenseSlate />
     </KibanaRenderContextProvider>
   );
 

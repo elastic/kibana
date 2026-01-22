@@ -5,22 +5,34 @@
  * 2.0.
  */
 
-import { get, isEmpty, omit } from 'lodash';
+import { isEmpty, omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import type { IngestSimulateResponse } from '@elastic/elasticsearch/lib/api/types';
 
 /**
  * This model captures the grok debugger response from upstream to be passed to
  * the view
  */
+interface GrokdebuggerResponseProps {
+  structuredEvent?: Record<string, unknown>;
+  /**
+   * `error` is either a translated error message string, or an empty object (no error).
+   */
+  error?: string | Record<string, never>;
+}
+
 export class GrokdebuggerResponse {
-  constructor(props) {
-    this.structuredEvent = get(props, 'structuredEvent', {});
-    this.error = get(props, 'error', {});
+  structuredEvent: Record<string, unknown>;
+  error: string | Record<string, never>;
+
+  constructor(props: GrokdebuggerResponseProps) {
+    this.structuredEvent = props.structuredEvent ?? {};
+    this.error = props.error ?? {};
   }
 
   // generate GrokdebuggerResponse object from elasticsearch response
-  static fromUpstreamJSON(upstreamGrokdebuggerResponse) {
-    const docs = get(upstreamGrokdebuggerResponse, 'docs');
+  static fromUpstreamJSON(upstreamGrokdebuggerResponse: IngestSimulateResponse) {
+    const { docs } = upstreamGrokdebuggerResponse;
     const error = docs[0].error;
     if (!isEmpty(error)) {
       const opts = {
@@ -33,7 +45,10 @@ export class GrokdebuggerResponse {
       };
       return new GrokdebuggerResponse(opts);
     }
-    const structuredEvent = omit(get(docs, '0.doc._source'), 'rawEvent');
+    // `IngestDocumentSimulation._source` is typed as `Record<string, any>` upstream.
+    // Normalize to `Record<string, unknown>` to avoid leaking `any` into this plugin.
+    const source: Record<string, unknown> = docs[0].doc?._source ?? {};
+    const structuredEvent = omit(source, 'rawEvent');
     const opts = { structuredEvent };
     return new GrokdebuggerResponse(opts);
   }

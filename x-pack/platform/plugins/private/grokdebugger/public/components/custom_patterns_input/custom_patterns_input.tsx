@@ -12,7 +12,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CodeEditor } from '@kbn/code-editor';
 
-export function CustomPatternsInput({ value, onChange }) {
+interface CustomPatternsInputProps {
+  value: string;
+  onChange: (value: string) => void;
+}
+
+export function CustomPatternsInput({ value, onChange }: CustomPatternsInputProps) {
   const sampleCustomPatterns = `POSTFIX_QUEUEID [0-9A-F]{10,11}
 MSG message-id=<%{GREEDYDATA}>`;
 

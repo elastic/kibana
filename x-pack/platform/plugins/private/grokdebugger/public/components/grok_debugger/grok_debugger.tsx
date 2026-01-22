@@ -9,14 +9,18 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 
+import type { KibanaReactContextValue, KibanaServices } from '@kbn/kibana-react-plugin/public';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiForm, EuiButton, EuiPage, EuiPageBody, EuiPageSection, EuiSpacer } from '@elastic/eui';
+
 import { EventInput } from '../event_input';
 import { PatternInput } from '../pattern_input';
 import { CustomPatternsInput } from '../custom_patterns_input';
 import { EventOutput } from '../event_output';
 import { GrokdebuggerRequest } from '../../models/grokdebugger_request';
-import { withKibana } from '@kbn/kibana-react-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
+import type { GrokdebuggerService } from '../../services/grokdebugger/grokdebugger_service';
+import type { CustomPatterns } from '../../models/types';
 
 const i18nTexts = {
   simulate: {
@@ -29,8 +33,25 @@ const i18nTexts = {
   },
 };
 
-export class GrokDebuggerComponent extends React.Component {
-  constructor(props) {
+interface GrokDebuggerComponentProps {
+  grokdebuggerService: GrokdebuggerService;
+  kibana: KibanaReactContextValue<KibanaServices>;
+}
+
+interface GrokDebuggerComponentState {
+  rawEvent: string;
+  pattern: string;
+  customPatterns: string;
+  structuredEvent: Record<string, unknown>;
+}
+
+export class GrokDebuggerComponent extends React.Component<
+  GrokDebuggerComponentProps,
+  GrokDebuggerComponentState
+> {
+  private grokdebuggerRequest: GrokdebuggerRequest;
+
+  constructor(props: GrokDebuggerComponentProps) {
     super(props);
     this.state = {
       rawEvent: '',
@@ -41,28 +62,28 @@ export class GrokDebuggerComponent extends React.Component {
     this.grokdebuggerRequest = new GrokdebuggerRequest();
   }
 
-  onRawEventChange = (rawEvent) => {
+  onRawEventChange = (rawEvent: string) => {
     this.setState({ rawEvent });
     this.grokdebuggerRequest.rawEvent = rawEvent.trimEnd();
   };
 
-  onPatternChange = (pattern) => {
+  onPatternChange = (pattern: string) => {
     this.setState({ pattern });
     this.grokdebuggerRequest.pattern = pattern.trimEnd();
   };
 
-  onCustomPatternsChange = (customPatterns) => {
+  onCustomPatternsChange = (customPatterns: string) => {
     this.setState({ customPatterns });
 
-    customPatterns = customPatterns.trim();
-    const customPatternsObj = {};
+    const trimmedPatterns = customPatterns.trim();
+    const customPatternsObj: CustomPatterns = {};
 
-    if (!customPatterns) {
+    if (!trimmedPatterns) {
       this.grokdebuggerRequest.customPatterns = customPatternsObj;
       return;
     }
 
-    customPatterns.split('\n').forEach((customPattern) => {
+    trimmedPatterns.split('\n').forEach((customPattern: string) => {
       // Patterns are defined like so:
       // patternName patternDefinition
       // For example:
@@ -78,6 +99,9 @@ export class GrokDebuggerComponent extends React.Component {
 
   simulateGrok = async () => {
     const notifications = this.props.kibana.services.notifications;
+    if (!notifications) {
+      throw new Error('Expected notifications service to be available');
+    }
     try {
       const simulateResponse = await this.props.grokdebuggerService.simulate(
         this.grokdebuggerRequest
@@ -89,11 +113,11 @@ export class GrokDebuggerComponent extends React.Component {
       if (!isEmpty(simulateResponse.error)) {
         notifications.toasts.addDanger({
           title: i18nTexts.simulate.errorTitle,
-          text: simulateResponse.error,
+          text: String(simulateResponse.error),
         });
       }
-    } catch (e) {
-      notifications.toasts.addError(e, {
+    } catch (e: unknown) {
+      notifications.toasts.addError(e instanceof Error ? e : new Error(String(e)), {
         title: i18nTexts.simulate.unknownErrorTitle,
       });
     }
@@ -147,4 +171,4 @@ export class GrokDebuggerComponent extends React.Component {
   }
 }
 
-export const GrokDebugger = withKibana(GrokDebuggerComponent);
+export const GrokDebugger = withKibana<GrokDebuggerComponentProps>(GrokDebuggerComponent);

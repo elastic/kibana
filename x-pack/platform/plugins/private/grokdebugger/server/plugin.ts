@@ -6,6 +6,9 @@
  */
 
 import { offeringBasedSchema, schema } from '@kbn/config-schema';
+import type { CoreSetup, Plugin as KibanaPlugin } from '@kbn/core/server';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { ILicense } from '@kbn/licensing-types';
 import { KibanaFramework } from './lib/kibana_framework';
 import { registerGrokdebuggerRoutes } from './routes/api/grokdebugger';
 
@@ -17,11 +20,15 @@ export const config = {
   }),
 };
 
-export class Plugin {
-  setup(coreSetup, plugins) {
+interface GrokdebuggerServerPluginDependencies {
+  licensing: LicensingPluginSetup;
+}
+
+export class Plugin implements KibanaPlugin<void, void, GrokdebuggerServerPluginDependencies> {
+  setup(coreSetup: CoreSetup, plugins: GrokdebuggerServerPluginDependencies) {
     const framework = new KibanaFramework(coreSetup);
 
-    plugins.licensing.license$.subscribe((license) => {
+    plugins.licensing.license$.subscribe((license: ILicense) => {
       framework.setLicense(license);
     });
 

@@ -11,7 +11,12 @@ import { EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor } from '@kbn/code-editor';
 
-export function EventInput({ value, onChange }) {
+interface EventInputProps {
+  value: string;
+  onChange: (value: string) => void;
+}
+
+export function EventInput({ value, onChange }: EventInputProps) {
   return (
     <EuiFormRow
       label={

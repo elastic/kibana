@@ -5,16 +5,30 @@
  * 2.0.
  */
 
-import { get, pick } from 'lodash';
+import type { CustomPatterns } from '../types';
+
+export interface GrokdebuggerRequestParams {
+  rawEvent?: string;
+  pattern?: string;
+  customPatterns?: CustomPatterns;
+}
 
 export class GrokdebuggerRequest {
-  constructor(props = {}) {
-    this.rawEvent = get(props, 'rawEvent', '');
-    this.pattern = get(props, 'pattern', '');
-    this.customPatterns = get(props, 'customPatterns', {});
+  rawEvent: string;
+  pattern: string;
+  customPatterns: CustomPatterns;
+
+  constructor(props: GrokdebuggerRequestParams = {}) {
+    this.rawEvent = props.rawEvent ?? '';
+    this.pattern = props.pattern ?? '';
+    this.customPatterns = props.customPatterns ?? {};
   }
 
-  get upstreamJSON() {
-    return pick(this, ['rawEvent', 'pattern', 'customPatterns']);
+  public get upstreamJSON() {
+    return {
+      rawEvent: this.rawEvent,
+      pattern: this.pattern,
+      customPatterns: this.customPatterns,
+    };
   }
 }

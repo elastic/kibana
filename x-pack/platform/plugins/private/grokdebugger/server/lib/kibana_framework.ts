@@ -42,7 +42,12 @@ export class KibanaFramework {
     return this.license.isActive;
   }
 
-  public registerRoute<Params = any, Query = any, Body = any, Method extends RouteMethod = any>(
+  public registerRoute<
+    Params = unknown,
+    Query = unknown,
+    Body = unknown,
+    Method extends RouteMethod = RouteMethod
+  >(
     config: GrokDebuggerRouteConfig<Params, Query, Body, Method>,
     handler: RequestHandler<Params, Query, Body>
   ) {

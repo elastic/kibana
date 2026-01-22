@@ -7,12 +7,23 @@
 
 import { i18n } from '@kbn/i18n';
 import { firstValueFrom } from 'rxjs';
+import type { Plugin, CoreSetup } from '@kbn/core/public';
+import type { ILicense } from '@kbn/licensing-types';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { DevToolsSetup } from '@kbn/dev-tools-plugin/public';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 
 import { PLUGIN } from '../common/constants';
 import { registerFeature } from './register_feature';
 
-export class GrokDebuggerUIPlugin {
-  setup(coreSetup, plugins) {
+export interface AppPublicPluginDependencies {
+  licensing: LicensingPluginSetup;
+  home: HomePublicPluginSetup;
+  devTools: DevToolsSetup;
+}
+
+export class GrokDebuggerUIPlugin implements Plugin<void, void, AppPublicPluginDependencies> {
+  setup(coreSetup: CoreSetup, plugins: AppPublicPluginDependencies) {
     registerFeature(plugins.home);
 
     const devTool = plugins.devTools.register({
@@ -22,11 +33,11 @@ export class GrokDebuggerUIPlugin {
       }),
       id: PLUGIN.ID,
       enableRouting: false,
-      async mount({ element, theme$ }) {
+      mount: async ({ element }) => {
         const [coreStart] = await coreSetup.getStartServices();
-        const license = await firstValueFrom(plugins.licensing.license$);
+        const license: ILicense = await firstValueFrom(plugins.licensing.license$);
         const { renderApp } = await import('./render_app');
-        return renderApp(license, element, coreStart, theme$);
+        return renderApp(license, element, coreStart);
       },
     });
 
