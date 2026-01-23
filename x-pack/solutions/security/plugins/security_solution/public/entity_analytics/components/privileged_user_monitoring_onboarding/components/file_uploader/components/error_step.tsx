@@ -76,7 +76,7 @@ export const PrivilegedUserMonitoringErrorStep: React.FC<{
           <FormattedMessage
             defaultMessage="{assignedCount, plural, one {# privileged user assignment succeeded.} other {# privileged user assignments succeeded.}}"
             id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.fileUploader.errorStep.assignedEntities"
-            values={{ assignedCount: result.stats.successful }}
+            values={{ assignedCount: result.stats.upserted }}
           />
         </EuiText>
         <EuiText size="s" color={euiTheme.colors.danger}>

@@ -140,7 +140,7 @@ export default ({ getService }: FtrProviderContext) => {
           log.error(JSON.stringify(res.body));
         }
         expect(res.status).eql(200);
-        expect(res.body.stats.successful).to.be(3);
+        expect(res.body.stats.upserted).to.be(3);
         expect(res.body.stats.total).to.be(3);
       });
 
@@ -154,7 +154,7 @@ export default ({ getService }: FtrProviderContext) => {
           log.error(JSON.stringify(res.body));
         }
         expect(res.status).eql(200);
-        expect(res.body.stats.successful).to.be(999);
+        expect(res.body.stats.upserted).to.be(999);
         expect(res.body.stats.total).to.be(999);
       });
 
@@ -168,7 +168,7 @@ export default ({ getService }: FtrProviderContext) => {
         }
 
         expect(res.status).eql(200);
-        expect(res.body.stats.successful).to.be(3);
+        expect(res.body.stats.upserted).to.be(3);
         expect(res.body.stats.total).to.be(3);
 
         log.info('Verifying uploaded users');
@@ -356,7 +356,7 @@ export default ({ getService }: FtrProviderContext) => {
         }
 
         expect(res.status).eql(200);
-        expect(res.body.stats.successful).to.be(1);
+        expect(res.body.stats.upserted).to.be(1);
         expect(res.body.stats.total).to.be(1);
 
         const {
@@ -373,7 +373,7 @@ export default ({ getService }: FtrProviderContext) => {
         }
 
         expect(res2.status).eql(200);
-        expect(res2.body.stats.successful).to.be(1);
+        expect(res2.body.stats.upserted).to.be(1);
         expect(res2.body.stats.total).to.be(1);
 
         const {
