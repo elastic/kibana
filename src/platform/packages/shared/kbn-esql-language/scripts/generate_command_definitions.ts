@@ -9,7 +9,6 @@
 
 /* eslint-disable no-console */
 
-import { snakeCase } from 'lodash';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import type { ElasticsearchCommandDefinition } from '../src/commands/definitions/types';
@@ -45,7 +44,7 @@ async function generateElasticsearchCommandDefinitions(): Promise<void> {
 
   const commandEnum = `export enum EsqlCommandNames {
 ${esCommandDefinitions
-  .map((command) => `  ${snakeCase(command.name).toUpperCase()} = '${command.name}',`)
+  .map((command) => `  ${command.name.toUpperCase()} = '${command.name}',`)
   .join('\n')}
 }`;
 
