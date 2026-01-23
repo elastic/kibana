@@ -8,8 +8,8 @@
 import type { LensSerializedState } from '@kbn/lens-common';
 import { LENS_UNKNOWN_VIS, type LensByValueSerializedState } from '@kbn/lens-common';
 import { LENS_ITEM_VERSION_V2 } from '@kbn/lens-common/content_management/constants';
-import type { LensAttributes } from '@kbn/lens-embeddable-utils';
-import type { LensTransformDependencies } from '.';
+import type { LensAttributes, LensConfigBuilder } from '@kbn/lens-embeddable-utils';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { transformToV1LensItemAttributes } from '../content_management/v1';
 import { transformToV2LensItemAttributes } from '../content_management/v2';
 import { injectLensReferences } from '../references';
@@ -24,15 +24,12 @@ import { isLensAttributesV0, isLensAttributesV1 } from '../content_management/ut
 /**
  * Transform from Lens Serialized State to Lens API format
  */
-export const getTransformOut = ({
-  builder,
-  drilldownTransforms,
-}: LensTransformDependencies): LensTransformOut => {
+export const getTransformOut = (
+  builder: LensConfigBuilder,
+  transformDrilldownsOut: DrilldownTransforms['transformOut']
+): LensTransformOut => {
   return function transformOut(storedState, panelReferences) {
-    const state = drilldownTransforms.transformOut(
-      storedState,
-      panelReferences
-    ) as LensSerializedState;
+    const state = transformDrilldownsOut(storedState, panelReferences) as LensSerializedState;
 
     const savedObjectRef = findLensReference(panelReferences);
 

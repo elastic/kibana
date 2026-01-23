@@ -410,21 +410,11 @@ export class LensPlugin {
           embeddable.registerLegacyURLTransform(
             LENS_EMBEDDABLE_TYPE,
             async (transformDrilldownsOut: DrilldownTransforms['transformOut']) => {
-              const { getLensTransforms } = await import('./async_services');
+              const { getTransformOut } = await import('./async_services');
               const { LensConfigBuilder } = await import('@kbn/lens-embeddable-utils');
               const builder = new LensConfigBuilder(undefined, flags.apiFormat);
 
-              return getLensTransforms({
-                builder,
-                drilldownTransforms: {
-                  // transformIn not provided in client. Not needed since only transformOut is used
-                  transformIn: (state) => ({
-                    state,
-                    references: [],
-                  }),
-                  transformOut: transformDrilldownsOut,
-                },
-              }).transformOut;
+              return getTransformOut(builder, transformDrilldownsOut);
             }
           );
         })

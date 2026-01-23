@@ -6,7 +6,8 @@
  */
 
 import { isLensAPIFormat } from '@kbn/lens-embeddable-utils/config_builder/utils';
-import type { LensTransformDependencies } from '.';
+import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { DOC_TYPE } from '../constants';
 import { extractLensReferences } from '../references';
 import type {
@@ -20,13 +21,12 @@ import type { LensSerializedState } from '../../public';
 /**
  * Transform from Lens API format to Lens Serialized State
  */
-export const getTransformIn = ({
-  builder,
-  drilldownTransforms,
-}: LensTransformDependencies): LensTransformIn => {
+export const getTransformIn = (
+  builder: LensConfigBuilder,
+  transformDrilldownsIn: DrilldownTransforms['transformIn']
+): LensTransformIn => {
   return function transformIn(config) {
-    const { state: storedConfig, references: drilldownReferences } =
-      drilldownTransforms.transformIn(config);
+    const { state: storedConfig, references: drilldownReferences } = transformDrilldownsIn(config);
 
     if (isByRefLensConfig(storedConfig)) {
       const { savedObjectId: id, ...rest } = storedConfig;

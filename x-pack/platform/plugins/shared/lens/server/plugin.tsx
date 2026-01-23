@@ -34,17 +34,15 @@ import {
   LENS_CONTENT_TYPE,
   LENS_ITEM_LATEST_VERSION,
 } from '@kbn/lens-common/content_management/constants';
-import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { setupSavedObjects } from './saved_objects';
 import { setupExpressions } from './expressions';
 import { makeLensEmbeddableFactory } from './embeddable/make_lens_embeddable_factory';
 import type { CustomVisualizationMigrations } from './migrations/types';
 import { LensAppLocatorDefinition } from '../common/locator/locator';
-import { LENS_EMBEDDABLE_TYPE } from '../common/constants';
 import { LensStorage } from './content_management';
 import { registerLensAPIRoutes } from './api/routes';
 import { fetchLensFeatureFlags } from '../common';
-import { getLensServerTransforms } from './transforms';
+import { registerLensEmbeddableTransforms } from './transforms';
 
 export interface PluginSetupContract {
   taskManager?: TaskManagerSetupContract;
@@ -133,10 +131,7 @@ export class LensServerPlugin
         builder.setEnabled(flags.apiFormat);
 
         // Need to wait for feature flags to be set before registering transforms
-        plugins.embeddable.registerTransforms(LENS_EMBEDDABLE_TYPE, {
-          getTransforms: (drilldownTransforms: DrilldownTransforms) =>
-            getLensServerTransforms(builder, drilldownTransforms),
-        });
+        registerLensEmbeddableTransforms(plugins.embeddable, builder);
 
         flags.apiFormat$.subscribe((value) => {
           builder.setEnabled(value);
