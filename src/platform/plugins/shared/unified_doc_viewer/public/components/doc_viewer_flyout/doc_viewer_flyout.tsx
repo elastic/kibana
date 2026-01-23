@@ -27,6 +27,8 @@ import {
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
+import useObservable from 'react-use/lib/useObservable';
+import type { ChromeStart } from '@kbn/core/public';
 import type { DocViewFilterFn, DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import type { DocViewerProps } from '@kbn/unified-doc-viewer';
 import { UnifiedDocViewer } from '../lazy_doc_viewer';
@@ -51,6 +53,7 @@ export interface UnifiedDocViewerFlyoutProps
   }>;
   services: {
     toastNotifications?: ToastsStart;
+    chrome: ChromeStart;
   };
   docViewsRegistry?: DocViewRenderProps['docViewsRegistry'];
   isEsqlQuery: boolean;
@@ -109,6 +112,7 @@ export function UnifiedDocViewerFlyout({
 }: UnifiedDocViewerFlyoutProps) {
   const { euiTheme } = useEuiTheme();
   const isXlScreen = useIsWithinMinBreakpoint('xl');
+  const chromeStyle = useObservable(services.chrome?.getChromeStyle$());
   const DEFAULT_WIDTH = euiTheme.base * 34;
   const defaultWidth = flyoutDefaultWidth ?? DEFAULT_WIDTH; // Give enough room to search bar to not wrap
   const [flyoutWidth, setFlyoutWidth] = useLocalStorage(
@@ -218,7 +222,7 @@ export function UnifiedDocViewerFlyout({
         onRemoveColumn={removeColumn}
         textBasedHits={isEsqlQuery ? hits : undefined}
         docViewsRegistry={docViewsRegistry}
-        decreaseAvailableHeightBy={euiTheme.base}
+        decreaseAvailableHeightBy={chromeStyle === 'project' ? euiTheme.base + 8 : euiTheme.base}
         initialTabId={initialTabId}
         initialDocViewerState={initialDocViewerState}
         onInitialDocViewerStateChange={onInitialDocViewerStateChange}
@@ -244,6 +248,7 @@ export function UnifiedDocViewerFlyout({
       hideFilteringOnComputedColumns,
       onInitialDocViewerStateChange,
       onUpdateSelectedTabId,
+      chromeStyle,
     ]
   );
 
