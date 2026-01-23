@@ -25,6 +25,7 @@ function TraceMetricsGrid({
   services,
   onBrushEnd,
   onFilter,
+  actions,
   renderToggleActions,
   chartToolbarCss,
   isComponentVisible,
@@ -74,6 +75,7 @@ function TraceMetricsGrid({
           onFilter,
           fetchParams,
           discoverFetch$,
+          actions,
         }}
       >
         <EuiPanel

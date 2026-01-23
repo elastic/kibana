@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { useTraceMetricsContext } from '../../context/trace_metrics_context';
+import { ACTION_OPEN_IN_DISCOVER } from '../../common/constants';
 import { Chart } from '../chart';
 import { useChartLayers } from '../chart/hooks/use_chart_layers';
 import { getThroughputChart } from './trace_charts_definition';
@@ -22,7 +23,7 @@ const ThroughputChartContent = ({
   color,
   title,
 }: ThroughputChartContentProps) => {
-  const { services, fetchParams, discoverFetch$, indexes, onBrushEnd, onFilter } =
+  const { services, fetchParams, discoverFetch$, indexes, onBrushEnd, onFilter, actions } =
     useTraceMetricsContext();
 
   const chartLayers = useChartLayers({
@@ -48,10 +49,12 @@ const ThroughputChartContent = ({
       services={services}
       onBrushEnd={onBrushEnd}
       onFilter={onFilter}
+      onExploreInDiscoverTab={actions.openInNewTab}
       title={title}
       chartLayers={chartLayers}
       syncTooltips
       syncCursor
+      extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
     />
   );
 };
