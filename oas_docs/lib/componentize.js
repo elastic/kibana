@@ -247,6 +247,7 @@ const componentizeObjectSchemas = async (relativeFilePath, { log = console } = {
 
       // Process this component to extract any nested inline schemas
       // Use a generic context since these components aren't tied to specific operations
+      // Include parentComponentName so nested schemas get meaningful names
       processSchema(componentSchema, {
         method: null,
         path: null,
@@ -254,6 +255,7 @@ const componentizeObjectSchemas = async (relativeFilePath, { log = console } = {
         isRequest: undefined,
         responseCode: null,
         propertyPath: [],
+        parentComponentName: componentName,
       });
     }
 

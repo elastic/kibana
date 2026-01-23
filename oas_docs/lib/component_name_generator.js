@@ -71,6 +71,10 @@ function fromPropertyPaths(propertyPath) {
  * // Complex paths with parameters and underscores
  * nameGen({ method: 'get', path: '/api/alerting/rule/{rule_id}/alert/{alert_id}/_unmute', isRequest: false, responseCode: '200' })
  * // => 'ApiAlertingRuleAlertUnmute_Get_Response_200'
+ *
+ * // Existing components with nested schemas (from overlays)
+ * nameGen({ parentComponentName: 'BedRockConfig', propertyPath: ['apiKey'], isRequest: undefined }, 'property')
+ * // => 'BedRockConfig_ApiKey'
  */
 const createComponentNameGenerator = () => {
   const nameMap = new Map();
@@ -83,12 +87,20 @@ const createComponentNameGenerator = () => {
    * @param {boolean|undefined} context.isRequest - true for request, false for response, undefined for components
    * @param {string|null} context.responseCode - HTTP response code (200, 404, etc.) or null
    * @param {Array<string>} [context.propertyPath=[]] - Path of nested properties
+   * @param {string|null} [context.parentComponentName=null] - Parent component name for existing components
    * @param {string} [compositionType] - Type: 'oneOf', 'anyOf', 'allOf', 'property', 'arrayItem', 'additionalProperty'
    * @param {number} [index] - Index for composition types (0-based, converted to 1-based in name)
    * @returns {string} Generated unique component name
    */
   return function generateName(context, compositionType, index) {
-    const { method, path, isRequest, responseCode, propertyPath = [] } = context;
+    const {
+      method,
+      path,
+      isRequest,
+      responseCode,
+      propertyPath = [],
+      parentComponentName = null,
+    } = context;
 
     // Convert path to PascalCase API name
     const buildApiName = (pathStr) => {
@@ -99,7 +111,12 @@ const createComponentNameGenerator = () => {
     };
 
     const parts = [];
-    parts.push(buildApiName(path));
+    // Use parent component name as prefix for nested schemas in existing components
+    if (parentComponentName) {
+      parts.push(parentComponentName);
+    } else {
+      parts.push(buildApiName(path));
+    }
     if (method) {
       parts.push(toPascalCase(method));
     }

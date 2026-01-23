@@ -738,4 +738,307 @@ describe('componentizeObjectSchemas', () => {
       expect(result.components.schemas.ExistingSchema).toBeDefined();
     });
   });
+
+  describe('existing components with predefined names (Phase 3)', () => {
+    it('should process existing component with nested object properties', async () => {
+      const testDoc = {
+        openapi: '3.0.3',
+        info: { title: 'Test', version: '1.0.0' },
+        paths: {
+          '/api/test': {
+            get: {
+              responses: {
+                200: {
+                  content: {
+                    'application/json': {
+                      schema: {
+                        $ref: '#/components/schemas/PredefinedSchema',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            PredefinedSchema: {
+              type: 'object',
+              properties: {
+                id: { type: 'string' },
+                config: {
+                  type: 'object',
+                  properties: {
+                    url: { type: 'string' },
+                    apiKey: { type: 'string' },
+                  },
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const testFile = path.join(tempDir, 'test.yaml');
+      fs.writeFileSync(testFile, yaml.dump(testDoc));
+
+      await componentizeObjectSchemas(testFile, { log: mockLog });
+
+      const result = yaml.load(fs.readFileSync(testFile, 'utf8'));
+
+      // PredefinedSchema should still exist with same name
+      expect(result.components.schemas.PredefinedSchema).toBeDefined();
+
+      // config property should now be a reference
+      expect(result.components.schemas.PredefinedSchema.properties.config).toEqual({
+        $ref: '#/components/schemas/PredefinedSchema_Config',
+      });
+
+      // Extracted config component should exist with parent name as prefix
+      expect(result.components.schemas.PredefinedSchema_Config).toEqual({
+        type: 'object',
+        properties: {
+          url: { type: 'string' },
+          apiKey: { type: 'string' },
+        },
+      });
+
+      // Simple property should remain inline
+      expect(result.components.schemas.PredefinedSchema.properties.id).toEqual({ type: 'string' });
+    });
+
+    it('should process existing component with composition types', async () => {
+      const testDoc = {
+        openapi: '3.0.3',
+        info: { title: 'Test', version: '1.0.0' },
+        paths: {
+          '/api/test': {
+            get: {
+              responses: {
+                200: {
+                  content: {
+                    'application/json': {
+                      schema: {
+                        $ref: '#/components/schemas/PredefinedUnion',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            PredefinedUnion: {
+              oneOf: [
+                { type: 'object', properties: { a: { type: 'string' } } },
+                { type: 'object', properties: { b: { type: 'number' } } },
+              ],
+            },
+          },
+        },
+      };
+
+      const testFile = path.join(tempDir, 'test.yaml');
+      fs.writeFileSync(testFile, yaml.dump(testDoc));
+
+      await componentizeObjectSchemas(testFile, { log: mockLog });
+
+      const result = yaml.load(fs.readFileSync(testFile, 'utf8'));
+
+      // PredefinedUnion should still exist with same name
+      expect(result.components.schemas.PredefinedUnion).toBeDefined();
+
+      // oneOf items should be extracted with parent name as prefix
+      expect(result.components.schemas.PredefinedUnion.oneOf).toEqual([
+        { $ref: '#/components/schemas/PredefinedUnion_1' },
+        { $ref: '#/components/schemas/PredefinedUnion_2' },
+      ]);
+
+      // Extracted oneOf items should exist
+      expect(result.components.schemas.PredefinedUnion_1).toEqual({
+        type: 'object',
+        properties: { a: { type: 'string' } },
+      });
+      expect(result.components.schemas.PredefinedUnion_2).toEqual({
+        type: 'object',
+        properties: { b: { type: 'number' } },
+      });
+    });
+
+    it('should handle multiple existing components without name collisions', async () => {
+      const testDoc = {
+        openapi: '3.0.3',
+        info: { title: 'Test', version: '1.0.0' },
+        paths: {
+          '/api/test': {
+            get: {
+              responses: {
+                200: {
+                  content: {
+                    'application/json': {
+                      schema: {
+                        $ref: '#/components/schemas/SchemaA',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            SchemaA: {
+              type: 'object',
+              properties: {
+                config: {
+                  type: 'object',
+                  properties: {
+                    urlA: { type: 'string' },
+                  },
+                },
+              },
+            },
+            SchemaB: {
+              type: 'object',
+              properties: {
+                config: {
+                  type: 'object',
+                  properties: {
+                    urlB: { type: 'string' },
+                  },
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const testFile = path.join(tempDir, 'test.yaml');
+      fs.writeFileSync(testFile, yaml.dump(testDoc));
+
+      await componentizeObjectSchemas(testFile, { log: mockLog });
+
+      const result = yaml.load(fs.readFileSync(testFile, 'utf8'));
+
+      // Both schemas should exist with original names
+      expect(result.components.schemas.SchemaA).toBeDefined();
+      expect(result.components.schemas.SchemaB).toBeDefined();
+
+      // Each should have extracted config with unique names (parent name prefix prevents collision)
+      expect(result.components.schemas.SchemaA.properties.config).toEqual({
+        $ref: '#/components/schemas/SchemaA_Config',
+      });
+      expect(result.components.schemas.SchemaB.properties.config).toEqual({
+        $ref: '#/components/schemas/SchemaB_Config',
+      });
+
+      // Both config components should exist with different content
+      expect(result.components.schemas.SchemaA_Config).toEqual({
+        type: 'object',
+        properties: {
+          urlA: { type: 'string' },
+        },
+      });
+      expect(result.components.schemas.SchemaB_Config).toEqual({
+        type: 'object',
+        properties: {
+          urlB: { type: 'string' },
+        },
+      });
+
+      // Verify no collision - should have 4 components total
+      expect(Object.keys(result.components.schemas).length).toBe(4);
+    });
+
+    it('should handle existing component referencing another existing component', async () => {
+      const testDoc = {
+        openapi: '3.0.3',
+        info: { title: 'Test', version: '1.0.0' },
+        paths: {
+          '/api/test': {
+            get: {
+              responses: {
+                200: {
+                  content: {
+                    'application/json': {
+                      schema: {
+                        $ref: '#/components/schemas/ExtendedSchema',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            BaseSchema: {
+              type: 'object',
+              properties: {
+                id: { type: 'string' },
+              },
+            },
+            ExtendedSchema: {
+              allOf: [
+                { $ref: '#/components/schemas/BaseSchema' },
+                {
+                  type: 'object',
+                  properties: {
+                    name: { type: 'string' },
+                    metadata: {
+                      type: 'object',
+                      properties: {
+                        created: { type: 'string' },
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      };
+
+      const testFile = path.join(tempDir, 'test.yaml');
+      fs.writeFileSync(testFile, yaml.dump(testDoc));
+
+      await componentizeObjectSchemas(testFile, { log: mockLog });
+
+      const result = yaml.load(fs.readFileSync(testFile, 'utf8'));
+
+      // Both original components should exist
+      expect(result.components.schemas.BaseSchema).toBeDefined();
+      expect(result.components.schemas.ExtendedSchema).toBeDefined();
+
+      // Reference to BaseSchema should be preserved
+      expect(result.components.schemas.ExtendedSchema.allOf[0]).toEqual({
+        $ref: '#/components/schemas/BaseSchema',
+      });
+
+      // The second allOf item (inline object) should be extracted
+      expect(result.components.schemas.ExtendedSchema.allOf[1]).toEqual({
+        $ref: '#/components/schemas/ExtendedSchema_2',
+      });
+
+      // Extracted allOf item should have metadata extracted
+      const extractedAllOf = result.components.schemas.ExtendedSchema_2;
+      expect(extractedAllOf.properties.name).toEqual({ type: 'string' });
+      expect(extractedAllOf.properties.metadata).toEqual({
+        $ref: '#/components/schemas/ExtendedSchema_Metadata',
+      });
+
+      // Nested metadata component should exist
+      expect(result.components.schemas.ExtendedSchema_Metadata).toEqual({
+        type: 'object',
+        properties: {
+          created: { type: 'string' },
+        },
+      });
+    });
+  });
 });
