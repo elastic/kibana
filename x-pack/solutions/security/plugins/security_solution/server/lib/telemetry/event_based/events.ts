@@ -30,6 +30,7 @@ import type {
   RuleBulkUpgradeTelemetry,
   RuleUpgradeTelemetry,
 } from '../../detection_engine/prebuilt_rules/api/perform_rule_upgrade/update_rule_telemetry';
+import { TRIAL_COMPANION_EVENTS } from '../../trial_companion/telemetry/trial_companion_ebt_events';
 
 // Telemetry event that is sent for each rule that is upgraded during a prebuilt rule upgrade
 export const DETECTION_RULE_UPGRADE_EVENT: EventTypeOpts<RuleUpgradeTelemetry> = {
@@ -1728,4 +1729,5 @@ export const events = [
   TELEMETRY_NODE_INGEST_PIPELINES_STATS_EVENT,
   ...SIEM_MIGRATIONS_EVENTS,
   GAP_DETECTED_EVENT,
+  ...TRIAL_COMPANION_EVENTS,
 ];
