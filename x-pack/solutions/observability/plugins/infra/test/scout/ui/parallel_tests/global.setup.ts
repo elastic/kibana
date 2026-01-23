@@ -8,6 +8,7 @@
 import { generateHostData } from '../fixtures/synthtrace/host_data';
 import {
   CONTAINER_COUNT,
+  CONTAINER_IDS,
   DATE_WITH_DOCKER_DATA_FROM,
   DATE_WITH_DOCKER_DATA_TO,
   DATE_WITH_HOSTS_DATA_FROM,
@@ -26,7 +27,7 @@ import {
 } from '../fixtures/constants';
 import { generateHostsWithK8sNodeData } from '../fixtures/synthtrace/hosts_with_k8s_node_data';
 import { generatePodsData } from '../fixtures/synthtrace/pods_data';
-import { generateLogsDataForHosts } from '../fixtures/synthtrace/logs_data_for_hosts';
+import { generateLogsDataForHostsOrContainers } from '../fixtures/synthtrace/logs_data_for_hosts_or_containers';
 import { generateAddServicesToExistingHost } from '../fixtures/synthtrace/add_services_to_existing_hosts';
 import { generateDockerContainersData } from '../fixtures/synthtrace/docker_containers_data';
 import { globalSetupHook } from '../fixtures';
@@ -45,10 +46,10 @@ globalSetupHook(
     log.info('Host data indexed');
 
     await logsSynthtraceEsClient.index(
-      generateLogsDataForHosts({
+      generateLogsDataForHostsOrContainers({
         from: DATE_WITH_HOSTS_DATA_FROM,
         to: DATE_WITH_HOSTS_DATA_TO,
-        hosts: HOSTS,
+        hostNames: HOSTS.map((host) => host.hostName),
       })
     );
     log.info('Logs data for hosts indexed');
@@ -97,5 +98,14 @@ globalSetupHook(
       })
     );
     log.info('Docker containers data indexed');
+
+    await logsSynthtraceEsClient.index(
+      generateLogsDataForHostsOrContainers({
+        from: DATE_WITH_DOCKER_DATA_FROM,
+        to: DATE_WITH_DOCKER_DATA_TO,
+        containerIds: CONTAINER_IDS,
+      })
+    );
+    log.info('Logs data for containers indexed');
   }
 );

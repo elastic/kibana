@@ -304,6 +304,12 @@ export const AgentBasedPackagePoliciesTable = ({
         ]}
         loading={isLoading}
         data-test-subj="integrationPolicyTable"
+        tableCaption={i18n.translate(
+          'xpack.fleet.epm.packageDetails.integrationList.tableCaption',
+          {
+            defaultMessage: 'Integration policies',
+          }
+        )}
         pagination={{
           pageIndex: pagination.pagination.currentPage - 1,
           pageSize: pagination.pagination.pageSize,
