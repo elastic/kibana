@@ -50,16 +50,33 @@ export function EditPolicyModal({
   onSaveAsNew,
 }: EditPolicyModalProps) {
   const modalTitleId = useGeneratedHtmlId();
-  const streamsCount = affectedResources.filter((resource) => resource.type === 'stream').length;
-  const indicesCount = affectedResources.filter((resource) => resource.type === 'index').length;
   const isInUse = affectedResources.length > 0;
+  const streamsCount = isInUse
+    ? affectedResources.filter((resource) => resource.type === 'stream').length
+    : 0;
+  const indicesCount = isInUse
+    ? affectedResources.filter((resource) => resource.type === 'index').length
+    : 0;
+  const streamsLabel =
+    streamsCount > 0
+      ? i18n.translate('xpack.streams.editPolicyModal.streamsLabel', {
+          defaultMessage: '{streamsCount, plural, one {# stream} other {# streams}}',
+          values: { streamsCount },
+        })
+      : null;
+  const indicesLabel =
+    indicesCount > 0
+      ? i18n.translate('xpack.streams.editPolicyModal.indicesLabel', {
+          defaultMessage: '{indicesCount, plural, one {# index} other {# indices}}',
+          values: { indicesCount },
+        })
+      : null;
+  const affectedResourcesLabel = [streamsLabel, indicesLabel].filter(Boolean).join(' and ');
   const modalTitle = isInUse
     ? i18n.translate('xpack.streams.editPolicyModal.title', {
-        defaultMessage:
-          '{streamsCount, plural, one {# stream} other {# streams}} and {indicesCount, plural, one {# index} other {# indices}} will be affected',
+        defaultMessage: '{affectedResourcesLabel} will be affected',
         values: {
-          streamsCount,
-          indicesCount,
+          affectedResourcesLabel,
         },
       })
     : isManaged
@@ -105,10 +122,9 @@ export function EditPolicyModal({
             <EuiText size="s">
               {i18n.translate('xpack.streams.editPolicyModal.description', {
                 defaultMessage:
-                  'The ILM policy you are updating is currently used in {streamsCount} streams and {indicesCount} indices. If you would like your updates to only affect this stream, you may save as a new ILM policy.',
+                  'The ILM policy you are updating is currently used in {affectedResourcesLabel}. If you would like your updates to only affect this stream, you may save as a new ILM policy.',
                 values: {
-                  streamsCount,
-                  indicesCount,
+                  affectedResourcesLabel,
                 },
               })}
             </EuiText>

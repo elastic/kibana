@@ -46,6 +46,42 @@ describe('EditPolicyModal', () => {
     ).toBeInTheDocument();
   });
 
+  it('renders title with only streams when there are no indices', () => {
+    renderWithI18n(
+      <EditPolicyModal
+        affectedResources={[
+          { name: 'stream-1', type: 'stream' },
+          { name: 'stream-2', type: 'stream' },
+        ]}
+        onCancel={() => {}}
+        onOverwrite={() => {}}
+        onSaveAsNew={() => {}}
+      />
+    );
+
+    expect(screen.getByTestId('editPolicyModalTitle')).toHaveTextContent(
+      '2 streams will be affected'
+    );
+  });
+
+  it('renders title with only indices when there are no streams', () => {
+    renderWithI18n(
+      <EditPolicyModal
+        affectedResources={[
+          { name: 'index-1', type: 'index' },
+          { name: 'index-2', type: 'index' },
+        ]}
+        onCancel={() => {}}
+        onOverwrite={() => {}}
+        onSaveAsNew={() => {}}
+      />
+    );
+
+    expect(screen.getByTestId('editPolicyModalTitle')).toHaveTextContent(
+      '2 indices will be affected'
+    );
+  });
+
   it('does not render indices and streams if the policy is not in use for others', () => {
     renderWithI18n(
       <EditPolicyModal
