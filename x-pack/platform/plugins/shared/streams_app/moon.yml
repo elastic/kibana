@@ -98,7 +98,6 @@ dependsOn:
   - '@kbn/traced-es-client'
   - '@kbn/streamlang-yaml-editor'
   - '@kbn/tooling-log'
-  - '@kbn/inference-common'
   - '@kbn/core-chrome-navigation'
   - '@kbn/classic-stream-flyout'
   - '@kbn/ebt-tools'
@@ -107,6 +106,7 @@ dependsOn:
   - '@kbn/test-jest-helpers'
   - '@kbn/react-query'
   - '@kbn/timerange'
+  - '@kbn/inference-common'
 tags:
   - plugin
   - prod
