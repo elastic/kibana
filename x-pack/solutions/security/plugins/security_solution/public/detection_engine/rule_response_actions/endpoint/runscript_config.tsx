@@ -294,7 +294,12 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
               scriptSelected?.requiresInput ? SCRIPT_ARGUMENTS_REQUIRED_HELP_TEXT : undefined
             }
           >
-            <EuiFieldText name="scriptParms" fullWidth onChange={scriptParamsOnChangeHandler} />
+            <EuiFieldText
+              name="scriptParms"
+              disabled={!scriptSelected}
+              fullWidth
+              onChange={scriptParamsOnChangeHandler}
+            />
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -322,7 +327,12 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
               ) : undefined
             }
           >
-            <EuiFieldText name="timeout" fullWidth onChange={scriptTimeoutOnChangeHandler} />
+            <EuiFieldText
+              name="timeout"
+              disabled={!scriptSelected}
+              fullWidth
+              onChange={scriptTimeoutOnChangeHandler}
+            />
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
