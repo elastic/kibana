@@ -22,7 +22,6 @@ import type {
   PublishesViewMode,
   PublishesWritableDescription,
   PublishesWritableTitle,
-  SerializedTitles,
   PublishesUnsavedChanges,
 } from '@kbn/presentation-publishing';
 import type { LensApiSchemaType } from '@kbn/lens-embeddable-utils';
@@ -58,8 +57,7 @@ export type LensByRefSerializedAPIConfig = LensByRefSerializedState;
  * - Panel settings
  * - other props from the embeddable
  */
-export type LensSerializedAPIConfig = SerializedTitles &
-  (LensByRefSerializedAPIConfig | LensByValueSerializedAPIConfig);
+export type LensSerializedAPIConfig = LensByRefSerializedAPIConfig | LensByValueSerializedAPIConfig;
 
 export interface LegacyLensStateApi {
   /**
