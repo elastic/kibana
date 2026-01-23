@@ -12,9 +12,10 @@ This package is built on top of `@kbn/scout` and the `@kbn/inference-*` packages
 2. `evaluate` – a [`@playwright/test`](https://playwright.dev/docs/test-intro) extension that boots:
 
    - an Inference Client that is pre-bound to a Kibana connector
-   - an executor client to run experiments (defaults to **in-Kibana**, with optional Phoenix fallback)
+   - an executor client to run experiments (defaults to **in-Kibana**; can be switched to the Phoenix-backed executor)
 
-3. `scripts/generate_schema` – (deprecated) previously used to (re)generate typed GraphQL artifacts for the Phoenix schema. This is not required for running evals, and the Phoenix-backed executor is optional during migration.
+3. `scripts/generate_schema` – optional utility to (re)generate typed GraphQL artifacts for the Phoenix schema using `@graphql/codegen`.
+   This is not required to run evals and the generated artifacts are currently not used (we only have a single query), but it is useful if we add more queries.
 
 ## Writing an evaluation test
 
@@ -466,7 +467,7 @@ Then you can run the evaluations as normal. The Playwright tests will use the pr
 
 By default, evals run using the **in-Kibana executor** (no Phoenix dataset/experiment API required).
 
-If you want to run using the **Phoenix-backed executor** (for parity during migration), set:
+If you want to run using the **Phoenix-backed executor**, set:
 
 ```bash
 KBN_EVALS_EXECUTOR=phoenix
