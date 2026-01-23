@@ -468,7 +468,10 @@ export const promqlFunctionDefinitions: PromQLFunctionDefinition[] = [
   const functionsEnum = `export enum EsqlFunctionNames {
   ${allFunctionDefinitions
     .map(
-      (f) => `  ${f.name.toUpperCase()} = '${f.operator?.toLowerCase() ?? f.name.toLowerCase()}',`
+      (func) =>
+        `  ${func.name.toUpperCase()} = '${
+          func.operator?.toLowerCase() ?? func.name.toLowerCase()
+        }',`
     )
     .join('\n')}
   }`;
