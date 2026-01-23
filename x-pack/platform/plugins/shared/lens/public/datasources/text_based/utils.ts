@@ -24,7 +24,7 @@ import { generateId } from '../../id_generator';
 import { fetchDataFromAggregateQuery } from './fetch_data_from_aggregate_query';
 import { addColumnsToCache } from './fieldlist_cache';
 
-export const MAX_NUM_OF_COLUMNS = 5;
+export const MAX_NUM_OF_COLUMNS = 10;
 
 export async function loadIndexPatternRefs(
   indexPatternsService: DataViewsPublicPluginStart

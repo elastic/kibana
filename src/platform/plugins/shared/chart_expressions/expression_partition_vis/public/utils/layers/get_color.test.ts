@@ -26,7 +26,7 @@ describe('get color', () => {
     let palette: PaletteOutput;
     let colorIndexMap: Map<string, number>;
     const visData = createMockVisData();
-    const categories = getColorCategories(visData.rows, visData.columns[1]?.id);
+    const categories = getColorCategories(visData.rows, [visData.columns[1]?.id]);
 
     beforeEach(() => {
       paletteDefinition = chartPluginMock.createPaletteRegistry().get('default');
@@ -102,8 +102,8 @@ describe('get color', () => {
     const colors = ['color1', 'color2', 'color3', 'color4'];
     const getCategories = (chartType?: ChartTypes) =>
       chartType === ChartTypes.MOSAIC && visData.columns.length === 2
-        ? getColorCategories(visData.rows, visData.columns[1]?.id)
-        : getColorCategories(visData.rows, visData.columns[0]?.id);
+        ? getColorCategories(visData.rows, [visData.columns[1]?.id])
+        : getColorCategories(visData.rows, [visData.columns[0]?.id]);
     const getColorIndexMap = (chartType?: ChartTypes) =>
       new Map(getCategories(chartType).map((d, i) => [d, i]));
     const dataMock = dataPluginMock.createStartContract();
