@@ -10,11 +10,6 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
-import type {
-  AiPromptStepConfigSchema,
-  AiPromptStepInputSchema,
-  AiPromptStepOutputSchema,
-} from '../../../common/steps/ai';
 import {
   AiPromptOutputSchema,
   AiPromptStepCommonDefinition,
@@ -23,11 +18,7 @@ import {
 } from '../../../common/steps/ai';
 import { ActionsMenuGroup, type PublicStepDefinition } from '../../step_registry/types';
 
-export const AiPromptStepDefinition: PublicStepDefinition<
-  AiPromptStepInputSchema,
-  AiPromptStepOutputSchema,
-  AiPromptStepConfigSchema
-> = {
+export const AiPromptStepDefinition: PublicStepDefinition = {
   ...AiPromptStepCommonDefinition,
   editorHandlers: {
     dynamicSchema: {
