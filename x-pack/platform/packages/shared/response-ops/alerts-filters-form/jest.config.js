@@ -10,8 +10,8 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/response-ops/alerts-filters-form'],
+  roots: ['<rootDir>/x-pack/platform/packages/shared/response-ops/alerts-filters-form'],
   setupFilesAfterEnv: [
-    '<rootDir>/src/platform/packages/shared/response-ops/alerts-filters-form/setup_tests.ts',
+    '<rootDir>/x-pack/platform/packages/shared/response-ops/alerts-filters-form/setup_tests.ts',
   ],
 };

@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/response-ops'
   metadata:
-    sourceRoot: src/platform/packages/shared/response-ops/alerts-filters-form
+    sourceRoot: x-pack/platform/packages/shared/response-ops/alerts-filters-form
 dependsOn:
   - '@kbn/response-ops-rules-apis'
   - '@kbn/i18n'
