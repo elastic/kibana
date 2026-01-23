@@ -13,7 +13,7 @@ import typeDetect from 'type-detect';
 import { internals } from '../internals';
 import {
   META_FIELD_X_OAS_DISCRIMINATOR,
-  META_FIELD_X_OAS_DISCRIMINATOR_CATCH_ALL,
+  META_FIELD_X_OAS_DISCRIMINATOR_DEFAULT_CASE,
 } from '../oas_meta_fields';
 import type { ExtendsDeepOptions } from './type';
 import { Type } from './type';
@@ -53,7 +53,7 @@ export class DiscriminatedUnionType<
           throw new Error(`Only one fallback schema is allowed`);
         }
 
-        otherwise = type.getSchema().meta({ [META_FIELD_X_OAS_DISCRIMINATOR_CATCH_ALL]: true });
+        otherwise = type.getSchema().meta({ [META_FIELD_X_OAS_DISCRIMINATOR_DEFAULT_CASE]: true });
         return acc;
       } else {
         if (typeof discriminatorValue !== 'string') {

@@ -13,99 +13,105 @@ import { processDiscriminator } from './discriminator';
 import { createCtx } from '../context';
 import { cloneDeep } from 'lodash';
 
-test.each([
-  [
-    schema.discriminatedUnion('type', [
-      schema.object(
-        { type: schema.literal('str'), value: schema.string() },
-        { meta: { id: 'my-str-my-team' } }
-      ),
-      schema.object(
-        { type: schema.literal('num'), value: schema.number() },
-        { meta: { id: 'my-num-team' } }
-      ),
-    ]),
-    'test-simple',
-    {
-      oneOf: [
-        {
-          $ref: '#/components/schemas/my-str-my-team',
-        },
-        {
-          $ref: '#/components/schemas/my-num-team',
-        },
-      ],
-      discriminator: {
-        propertyName: 'type',
-      },
-    },
-    {
-      'my-str-my-team': {
-        type: 'object',
-        properties: {
-          type: { type: 'string', enum: ['str'] },
-        },
-      },
-      'my-num-team': {
-        type: 'object',
-        properties: {
-          type: { type: 'string', enum: ['num'] },
-        },
-      },
-    },
-  ],
-  [
-    schema.discriminatedUnion('type', [
-      schema.object(
-        { type: schema.literal('str'), value: schema.string() },
-        { meta: { id: 'my-str-my-team' } }
-      ),
-      schema.object(
-        { type: schema.literal('num'), value: schema.number() },
-        { meta: { id: 'my-num-team' } }
-      ),
-      schema.object(
-        { type: schema.string(), value: schema.number() },
-        { meta: { id: 'my-catch-all-my-team' } }
-      ),
-    ]),
-    'test-catch-all',
-    {
-      oneOf: [
-        {
-          $ref: '#/components/schemas/my-str-my-team',
-        },
-        {
-          $ref: '#/components/schemas/my-num-team',
-        },
-      ],
-      discriminator: {
-        propertyName: 'type',
-      },
-      description: 'The catch all schema for this discriminator is my-catch-all-my-team',
-    },
-    {
-      'my-str-my-team': {
-        type: 'object',
-        properties: {
-          type: { type: 'string', enum: ['str'] },
-        },
-      },
-      'my-num-team': {
-        type: 'object',
-        properties: {
-          type: { type: 'string', enum: ['num'] },
-        },
-      },
-    },
-  ],
-])('processDiscriminator %#', (input, namespace, resultSchema, resultSharedSchemas) => {
-  const parsed = joi2JsonInternal(input.getSchema());
-  const ctx = createCtx({ sharedSchemas: new Map(Object.entries(parsed.schemas)) });
-  delete parsed.schemas;
+test('base case', () => {
+  const testSchema = schema.discriminatedUnion('type', [
+    schema.object(
+      { type: schema.literal('str'), value: schema.string() },
+      { meta: { id: 'my-str-my-team' } }
+    ),
+    schema.object(
+      { type: schema.literal('num'), value: schema.number() },
+      { meta: { id: 'my-num-team' } }
+    ),
+  ]);
+  const { schemas, ...parsed } = joi2JsonInternal(testSchema.getSchema());
+  const ctx = createCtx({ sharedSchemas: new Map(Object.entries(schemas)) });
   processDiscriminator(ctx, parsed);
-  expect(parsed).toEqual(resultSchema);
-  expect(ctx.getSharedSchemas()).toMatchObject(resultSharedSchemas);
+  expect(parsed).toEqual({
+    oneOf: [
+      {
+        $ref: '#/components/schemas/my-str-my-team',
+      },
+      {
+        $ref: '#/components/schemas/my-num-team',
+      },
+    ],
+    discriminator: {
+      propertyName: 'type',
+    },
+  });
+
+  expect(ctx.getSharedSchemas()).toMatchObject({
+    'my-str-my-team': {
+      type: 'object',
+      properties: {
+        type: { type: 'string', enum: ['str'] },
+      },
+    },
+    'my-num-team': {
+      type: 'object',
+      properties: {
+        type: { type: 'string', enum: ['num'] },
+      },
+    },
+  });
+});
+
+test('with default case', () => {
+  const testSchema = schema.discriminatedUnion('type', [
+    schema.object(
+      { type: schema.literal('str'), value: schema.string() },
+      { meta: { id: 'my-str-my-team' } }
+    ),
+    schema.object(
+      { type: schema.literal('num'), value: schema.number() },
+      { meta: { id: 'my-num-team' } }
+    ),
+    schema.object(
+      { type: schema.string(), value: schema.number() },
+      { meta: { id: 'my-catch-all-my-team' } }
+    ),
+  ]);
+
+  const { schemas, ...parsed } = joi2JsonInternal(testSchema.getSchema());
+  const ctx = createCtx({ sharedSchemas: new Map(Object.entries(schemas)) });
+  processDiscriminator(ctx, parsed);
+  expect(parsed).toEqual({
+    oneOf: [
+      {
+        $ref: '#/components/schemas/my-str-my-team',
+      },
+      {
+        $ref: '#/components/schemas/my-num-team',
+      },
+    ],
+    discriminator: {
+      propertyName: 'type',
+    },
+    description: 'The catch all schema for this discriminator is my-catch-all-my-team',
+  });
+
+  expect(ctx.getSharedSchemas()).toMatchObject({
+    'my-str-my-team': {
+      type: 'object',
+      properties: {
+        type: { type: 'string', enum: ['str'] },
+      },
+    },
+    'my-num-team': {
+      type: 'object',
+      properties: {
+        type: { type: 'string', enum: ['num'] },
+      },
+    },
+    'my-catch-all-my-team': {
+      type: 'object',
+      properties: {
+        type: { type: 'string' },
+        value: { type: 'number' },
+      },
+    },
+  });
 });
 
 describe('throws if any schema has no ID', () => {

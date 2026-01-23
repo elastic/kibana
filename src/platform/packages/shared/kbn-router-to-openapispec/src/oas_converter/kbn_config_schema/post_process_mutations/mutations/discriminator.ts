@@ -14,7 +14,7 @@ import { deleteField, getIdFromRefString } from './utils';
 import type { IContext } from '../context';
 import { isReferenceObject } from '../../../common';
 
-const { META_FIELD_X_OAS_DISCRIMINATOR, META_FIELD_X_OAS_DISCRIMINATOR_CATCH_ALL } = metaFields;
+const { META_FIELD_X_OAS_DISCRIMINATOR, META_FIELD_X_OAS_DISCRIMINATOR_DEFAULT_CASE } = metaFields;
 
 export const processDiscriminator = (ctx: IContext, schema: OpenAPIV3.SchemaObject): void => {
   const firstSchema = isReferenceObject(schema.anyOf?.[0])
@@ -66,7 +66,7 @@ export const processDiscriminator = (ctx: IContext, schema: OpenAPIV3.SchemaObje
       throw new Error(
         `Shared schema ${entry.$ref} not found. This is likely a bug in the OAS generator.`
       );
-    if (META_FIELD_X_OAS_DISCRIMINATOR_CATCH_ALL in sharedSchema) {
+    if (META_FIELD_X_OAS_DISCRIMINATOR_DEFAULT_CASE in sharedSchema) {
       catchAllIdx = idx;
       return;
     }
