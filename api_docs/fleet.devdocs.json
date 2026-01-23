@@ -13753,7 +13753,7 @@
         "label": "MessageSigningServiceInterface",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/server/services/security/message_signing_service.ts",
-        "lineNumber": 34,
+        "lineNumber": 32,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -13766,7 +13766,7 @@
             "label": "isEncryptionAvailable",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/server/services/security/message_signing_service.ts",
-            "lineNumber": 35,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -13782,7 +13782,7 @@
               "(providedPassphrase?: string | undefined) => Promise<{ privateKey: string; publicKey: string; passphrase: string; }>"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/server/services/security/message_signing_service.ts",
-            "lineNumber": 36,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -13798,7 +13798,7 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/security/message_signing_service.ts",
-                "lineNumber": 37,
+                "lineNumber": 35,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -13818,7 +13818,7 @@
               "() => Promise<void>"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/server/services/security/message_signing_service.ts",
-            "lineNumber": 39,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -13836,7 +13836,7 @@
               "(message: Record<string, unknown> | Buffer) => Promise<{ data: Buffer; signature: string; }>"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/server/services/security/message_signing_service.ts",
-            "lineNumber": 40,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -13852,7 +13852,7 @@
                   "Record<string, unknown> | Buffer"
                 ],
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/security/message_signing_service.ts",
-                "lineNumber": 40,
+                "lineNumber": 38,
                 "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -13872,7 +13872,7 @@
               "() => Promise<string>"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/server/services/security/message_signing_service.ts",
-            "lineNumber": 41,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

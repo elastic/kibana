@@ -258,9 +258,19 @@ export class DiscoverPageObject extends FtrService {
       await this.testSubjects.existOrFail('unifiedHistogramBreakdownSelectorSelectable');
     });
 
-    await (
-      await this.testSubjects.find('unifiedHistogramBreakdownSelectorSelectorSearch')
-    ).type(field, { charByChar: true });
+    const searchInput = await this.testSubjects.find(
+      'unifiedHistogramBreakdownSelectorSelectorSearch'
+    );
+
+    await searchInput.type(field, { charByChar: true });
+
+    await this.retry.waitFor('options to be filtered', async () => {
+      const isSearching = await this.testSubjects.getAttribute(
+        'unifiedHistogramBreakdownSelectorSelectable',
+        'data-is-searching'
+      );
+      return isSearching === 'false';
+    });
 
     const optionValue = value ?? field;
 
@@ -268,9 +278,7 @@ export class DiscoverPageObject extends FtrService {
       `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${optionValue}"]`
     );
 
-    await this.retry.waitFor('the dropdown to close', async () => {
-      return !(await this.testSubjects.exists('unifiedHistogramBreakdownSelectorSelectable'));
-    });
+    await this.testSubjects.missingOrFail('unifiedHistogramBreakdownSelectorSelectable');
 
     await this.retry.waitFor('the value to be selected', async () => {
       const breakdownButton = await this.testSubjects.find(
