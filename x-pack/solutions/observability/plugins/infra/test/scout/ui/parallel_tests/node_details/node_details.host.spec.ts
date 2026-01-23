@@ -206,7 +206,7 @@ test.describe('Node Details: host', { tag: ['@ess', '@svlOblt'] }, () => {
     });
 
     await test.step('refresh page and verify pin persists', async () => {
-      await page.reload();
+      await nodeDetailsPage.refreshPage();
       await nodeDetailsPage.clickMetadataTab();
       await expect(nodeDetailsPage.metadataRemovePin).toBeVisible();
     });

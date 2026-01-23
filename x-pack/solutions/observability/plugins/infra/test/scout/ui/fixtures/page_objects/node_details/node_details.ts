@@ -7,7 +7,6 @@
 
 import type { Moment } from 'moment';
 import rison from '@kbn/rison';
-import type { AlertStatus } from '@kbn/rule-data-utils';
 import { type KibanaUrl, type Locator, type ScoutPage, expect } from '@kbn/scout-oblt';
 import { EXTENDED_TIMEOUT } from '../../constants';
 
@@ -353,19 +352,6 @@ export class NodeDetailsPage {
 
   public async clearLogsSearch() {
     await this.logsSearchInput.clear();
-  }
-
-  // Alerts methods
-  public async setAlertStatusFilter(alertStatus?: AlertStatus) {
-    const buttons: Record<AlertStatus | 'all', string> = {
-      active: 'hostsView-alert-status-filter-active-button',
-      recovered: 'hostsView-alert-status-filter-recovered-button',
-      untracked: 'hostsView-alert-status-filter-untracked-button',
-      all: 'hostsView-alert-status-filter-show-all-button',
-    };
-
-    const buttonSubject = alertStatus ? buttons[alertStatus] : buttons.all;
-    await this.page.testSubj.locator(buttonSubject).click();
   }
 
   // Callouts
