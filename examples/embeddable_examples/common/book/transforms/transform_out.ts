@@ -49,6 +49,6 @@ export function transformOut(
     };
   }
 
-  // stateWithApiTitles is current by-value state
+  // state is current by-value state
   return state as BookEmbeddableState;
 }
