@@ -217,7 +217,11 @@ export const streamEnrichmentMachine = setup({
       const hasFailureStoreDataSource = dataSources.some((ds) => ds.type === 'failure-store');
 
       if (isFailureStoreAvailable && !hasFailureStoreDataSource) {
-        dataSources.push(createFailureStoreDataSource(definition.stream.name));
+        // Add with enabled: false since there's already an active data source
+        dataSources.push({
+          ...createFailureStoreDataSource(definition.stream.name),
+          enabled: false,
+        });
       }
 
       return {

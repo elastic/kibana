@@ -84,6 +84,7 @@ export const FailureStoreDataSourceCard = ({ dataSourceRef }: FailureStoreDataSo
       title={DATA_SOURCES_I18N.failureStore.defaultName}
       subtitle={DATA_SOURCES_I18N.failureStore.subtitle}
       isForCompleteSimulation
+      data-test-subj="streamsAppFailureStoreDataSourceCard"
     >
       <EuiSpacer size="s" />
 

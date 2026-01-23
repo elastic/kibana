@@ -41,30 +41,32 @@ test.describe(
     test('should allow adding a new kql data source', async ({ page, pageObjects }) => {
       await pageObjects.streams.clickManageDataSourcesButton();
       await pageObjects.streams.addDataSource('kql');
-      // Scope interactions to the KQL search bar to avoid conflicts with other data sources (e.g., failure store)
-      const kqlSearchBar = page.getByTestId('streamsAppKqlSamplesSearchBar');
-      await page.getByTestId('streamsAppKqlSamplesDataSourceNameField').fill('Kql Samples');
-      // Set date range within the KQL search bar
-      await kqlSearchBar.getByTestId('superDatePickerShowDatesButton').click();
-      await kqlSearchBar.getByTestId('superDatePickerendDatePopoverButton').click();
-      await page.getByTestId('superDatePickerAbsoluteTab').click();
+      // Scope interactions to the KQL data source card to avoid conflicts with other data sources (e.g., failure store)
+      const kqlDataSourceCard = page.getByTestId('streamsAppKqlSamplesDataSourceCard');
+      await kqlDataSourceCard
+        .getByTestId('streamsAppKqlSamplesDataSourceNameField')
+        .fill('Kql Samples');
+      // Set date range within the KQL data source card
+      await kqlDataSourceCard.getByTestId('superDatePickerShowDatesButton').click();
+      await kqlDataSourceCard.getByTestId('superDatePickerendDatePopoverButton').click();
+      await page.getByRole('tab', { name: 'End date: Absolute' }).click();
       const endDateInput = page.getByTestId('superDatePickerAbsoluteDateInput');
       await endDateInput.clear();
       await endDateInput.fill(DATE_RANGE.to);
       await page.getByTestId('parseAbsoluteDateFormat').click();
       await page.keyboard.press('Escape');
-      await kqlSearchBar.getByTestId('superDatePickerstartDatePopoverButton').click();
-      await page.getByTestId('superDatePickerAbsoluteTab').click();
+      await kqlDataSourceCard.getByTestId('superDatePickerstartDatePopoverButton').click();
+      await page.getByRole('tab', { name: 'Start date: Absolute' }).click();
       const startDateInput = page.getByTestId('superDatePickerAbsoluteDateInput');
       await startDateInput.clear();
       await startDateInput.fill(DATE_RANGE.from);
       await page.getByTestId('parseAbsoluteDateFormat').click();
       await page.keyboard.press('Escape');
-      await kqlSearchBar
+      await kqlDataSourceCard
         .getByTestId('unifiedQueryInput')
         .getByRole('textbox')
         .fill('log.level: warn');
-      await kqlSearchBar.getByTestId('querySubmitButton').click();
+      await kqlDataSourceCard.getByTestId('querySubmitButton').click();
 
       // Assert that the custom samples are correctly displayed in the preview
       await pageObjects.streams.closeFlyout();
