@@ -169,39 +169,11 @@ export class DiscoverApp {
     await this.waitUntilSearchingHasFinished();
   }
 
-  async revertUnsavedChanges() {
-    await this.page.testSubj.hover('unsavedChangesBadge');
-    await this.page.testSubj.click('unsavedChangesBadge');
-    await this.page.testSubj.waitForSelector('unsavedChangesBadgeMenuPanel', { state: 'visible' });
-    await this.page.testSubj.click('revertUnsavedChangesButton');
-    await this.waitUntilSearchingHasFinished();
-  }
-
-  async clickFieldSort(field: string, sortOption: string) {
-    const header = this.page.testSubj.locator(`dataGridHeaderCell-${field}`);
-    await header.click();
-    await this.page.testSubj.waitForSelector(`dataGridHeaderCellActionGroup-${field}`, {
-      state: 'visible',
-    });
-    await this.page.locator(`button:has-text("${sortOption}")`).click();
-  }
-
   async getDocHeader(): Promise<string> {
     const headers = await this.page
       .locator('[data-test-subj^="dataGridHeaderCell-"]')
       .allInnerTexts();
     return headers.join(',');
-  }
-
-  async getSharedItemTitleAndDescription(): Promise<{ title: string; description: string }> {
-    const cssSelector = '[data-shared-item][data-title][data-description]';
-    const element = this.page.locator(cssSelector);
-    await element.waitFor({ state: 'visible' });
-
-    const title = (await element.getAttribute('data-title')) || '';
-    const description = (await element.getAttribute('data-description')) || '';
-
-    return { title, description };
   }
 
   async showChart() {

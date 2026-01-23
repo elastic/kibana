@@ -38,10 +38,6 @@ export class DashboardApp {
     await this.waitForRenderComplete();
   }
 
-  async waitForListingTableToLoad() {
-    return this.page.testSubj.waitForSelector('table-is-ready', { state: 'visible' });
-  }
-
   async openNewDashboard() {
     await this.page.testSubj.click('newItemButton');
     await this.waitForRenderComplete();
@@ -126,22 +122,11 @@ export class DashboardApp {
     await this.page.testSubj.waitForSelector('dashboardPanelSelectionList', { state: 'visible' });
   }
 
-  async clickCreateNewVisualization() {
-    await this.page.testSubj.click('dashboardAddTopNavButton');
-    await this.page.testSubj.click('dashboardCreateNewVisButton');
-    await this.page.testSubj.waitForSelector('dashboardCreateNewVisButton', { state: 'hidden' });
-    await this.page.testSubj.waitForSelector('lnsApp', { state: 'visible' });
-  }
-
   async saveDashboard(name: string) {
     await this.page.testSubj.click('dashboardInteractiveSaveMenuItem');
     await this.page.testSubj.fill('savedObjectTitle', name);
     await this.page.testSubj.click('confirmSaveSavedObjectButton');
     await this.page.testSubj.waitForSelector('confirmSaveSavedObjectButton', { state: 'hidden' });
-  }
-
-  async openSaveSplitMenu() {
-    await this.page.testSubj.click('dashboardQuickSaveMenuItem-secondary-button');
   }
 
   async clickQuickSave() {
@@ -270,16 +255,6 @@ export class DashboardApp {
   }
 
   /**
-   * Adds a visualization to the dashboard.
-   * Wrapper around addEmbeddable() with type='Visualization'.
-   *
-   * @param vizName - Name with dashes
-   */
-  async addVisualization(vizName: string) {
-    return this.addEmbeddable(vizName, 'Visualization');
-  }
-
-  /**
    * Adds a Lens visualization to the dashboard from the library.
    * Wrapper around addEmbeddable() with type='lens'.
    *
@@ -345,10 +320,6 @@ export class DashboardApp {
     await this.page.testSubj.waitForSelector(panelHeaderTestSubj, {
       state: 'hidden',
     });
-  }
-
-  async editPanel(name?: string) {
-    await this.clickPanelAction('embeddablePanelAction-editPanel', name);
   }
 
   async waitForPanelsToLoad(
