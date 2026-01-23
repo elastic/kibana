@@ -60,7 +60,6 @@
     "@kbn/shared-ux-utility",
     "@kbn/stack-alerts-plugin",
     "@kbn/std",
-    "@kbn/task-manager-plugin",
     "@kbn/timerange",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/ui-actions-plugin",
