@@ -6,32 +6,29 @@
  */
 
 import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useAssetBasePath } from '../../../hooks/use_asset_base_path';
-import { ErrorPrompt } from '../../common/prompt/error';
+import { ErrorPrompt } from '../../common/prompt/error_prompt';
 
 export const NoPrivilegePrompt: React.FC = () => {
   const { colorMode } = useEuiTheme();
   const assetBasePath = useAssetBasePath();
   const { docLinksService } = useAgentBuilderServices();
 
-  const learnMoreButton = useMemo(
-    () => (
-      <EuiButtonEmpty
-        href={docLinksService.agentBuilder}
-        target="_blank"
-        iconType="popout"
-        iconSide="right"
-      >
-        <FormattedMessage
-          id="xpack.agentBuilder.access.prompt.noPrivilege.actions.docsLink"
-          defaultMessage="Learn more"
-        />
-      </EuiButtonEmpty>
-    ),
-    [docLinksService.agentBuilder]
+  const learnMoreButton = (
+    <EuiButtonEmpty
+      href={docLinksService.agentBuilder}
+      target="_blank"
+      iconType="popout"
+      iconSide="right"
+    >
+      <FormattedMessage
+        id="xpack.agentBuilder.access.prompt.noPrivilege.actions.docsLink"
+        defaultMessage="Learn more"
+      />
+    </EuiButtonEmpty>
   );
 
   return (

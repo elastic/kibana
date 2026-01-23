@@ -35,7 +35,7 @@ export type PromptLayoutProps = {
   subtitle: React.ReactNode;
   primaryButton: React.ReactNode;
   secondaryButton?: React.ReactNode;
-  variant?: PromptLayoutVariant;
+  variant: PromptLayoutVariant;
 } & IconProps;
 
 export const PromptLayout: React.FC<PromptLayoutProps> = ({
@@ -45,7 +45,7 @@ export const PromptLayout: React.FC<PromptLayoutProps> = ({
   subtitle,
   primaryButton,
   secondaryButton,
-  variant = PROMPT_LAYOUT_VARIANTS.DEFAULT,
+  variant,
 }) => {
   const actions = [primaryButton, ...(secondaryButton ? [secondaryButton] : [])];
 

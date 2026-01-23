@@ -118,20 +118,6 @@ const StartNewConversationAction: React.FC = () => {
   );
 };
 
-const getErrorDetails = (errorType: AppErrorType): ErrorDetails => {
-  return ERROR_DETAILS_MAPPINGS[errorType];
-};
-
-const getVariant = (
-  providedVariant: PromptLayoutVariant | undefined,
-  isEmbeddedContext: boolean
-): PromptLayoutVariant => {
-  return (
-    providedVariant ??
-    (isEmbeddedContext ? PROMPT_LAYOUT_VARIANTS.EMBEDDABLE : PROMPT_LAYOUT_VARIANTS.DEFAULT)
-  );
-};
-
 export const ErrorPrompt: React.FC<ErrorPromptProps> = ({
   errorType,
   imageSrc,
@@ -140,8 +126,10 @@ export const ErrorPrompt: React.FC<ErrorPromptProps> = ({
   variant,
 }) => {
   const { isEmbeddedContext } = useConversationContext();
-  const errorDetails = getErrorDetails(errorType);
-  const layoutVariant = getVariant(variant, isEmbeddedContext);
+  const errorDetails = ERROR_DETAILS_MAPPINGS[errorType];
+  const layoutVariant =
+    variant ??
+    (isEmbeddedContext ? PROMPT_LAYOUT_VARIANTS.EMBEDDABLE : PROMPT_LAYOUT_VARIANTS.DEFAULT);
 
   return (
     <PromptLayout

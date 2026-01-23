@@ -32,7 +32,7 @@ import {
 import { ScrollButton } from './scroll_button';
 import { useAppLeave } from '../../context/app_leave_context';
 import { useNavigationAbort } from '../../hooks/use_navigation_abort';
-import { ErrorPrompt } from '../common/prompt/error';
+import { ErrorPrompt } from '../common/prompt/error_prompt';
 import { PROMPT_LAYOUT_VARIANTS } from '../common/prompt/layout';
 
 export const Conversation: React.FC<{}> = () => {
