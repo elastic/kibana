@@ -27,7 +27,7 @@ import {
 import { getAllMigrations } from './persistable_state/get_all_migrations';
 import type { EmbeddableTransforms, EmbeddableTransformsSetup } from '../common';
 import type { DrilldownSetup } from './drilldowns/types';
-import { DrilldownRegistry } from './drilldowns/registry';
+import { getDrilldownRegistry } from './drilldowns/registry';
 import { getTransformDrilldownsIn } from '../common/drilldowns/transform_drilldowns_in';
 import { getTransformDrilldownsOut } from '../common/drilldowns/transform_drilldowns_out';
 import { getDrilldownsSchema } from './drilldowns/schemas';
@@ -73,7 +73,7 @@ export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> &
 export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
   private migrateFn: PersistableStateMigrateFn | undefined;
-  private drilldownRegistry = new DrilldownRegistry();
+  private drilldownRegistry = getDrilldownRegistry();
   private transformsRegistry: { [key: string]: EmbeddableTransformsSetup<any, any> } = {};
 
   public setup(core: CoreSetup) {

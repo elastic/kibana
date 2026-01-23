@@ -9,28 +9,28 @@
 
 import type { DrilldownSetup } from './types';
 
-export class DrilldownRegistry {
-  private registry: { [key: string]: DrilldownSetup } = {};
+export function getDrilldownRegistry() {
+  const registry: { [key: string]: DrilldownSetup } = {};
 
-  registerDrilldown(type: string, drilldown: DrilldownSetup) {
-    if (this.registry[type]) {
-      throw new Error(`Drilldown for type "${type}" are already registered.`);
+  return {
+    registerDrilldown: (type: string, drilldown: DrilldownSetup) => {
+      if (registry[type]) {
+        throw new Error(`Drilldown for type "${type}" are already registered.`);
+      }
+
+      registry[type] = drilldown;
+    },
+    getDrilldown: (type: string) => {
+      return registry[type];
+    },
+    getSchemas: (embeddableSupportedTriggers: string[]) => {
+      return Object.values(registry)
+        .filter(({ supportedTriggers: drilldownSupportedTriggers }) => {
+          return embeddableSupportedTriggers.some((trigger) =>
+            drilldownSupportedTriggers.includes(trigger)
+          );
+        })
+        .map(({ schema }) => schema);
     }
-
-    this.registry[type] = drilldown;
-  }
-
-  getDrilldown(type: string) {
-    return this.registry[type];
-  }
-
-  getSchemas(embeddableSupportedTriggers: string[]) {
-    return Object.values(this.registry)
-      .filter(({ supportedTriggers: drilldownSupportedTriggers }) => {
-        return embeddableSupportedTriggers.some((trigger) =>
-          drilldownSupportedTriggers.includes(trigger)
-        );
-      })
-      .map(({ schema }) => schema);
-  }
+  };
 }
