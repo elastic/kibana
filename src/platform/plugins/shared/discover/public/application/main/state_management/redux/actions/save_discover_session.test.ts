@@ -14,14 +14,14 @@ import { fromTabStateToSavedObjectTab } from '../tab_mapping_utils';
 import { getTabStateMock } from '../__mocks__/internal_state.mocks';
 import { dataViewMock, dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import type { DiscoverServices } from '../../../../../build_services';
-import type { SaveDiscoverSessionParams } from '@kbn/saved-search-plugin/public';
+import type { SaveDiscoverSessionParams, SavedSearch } from '@kbn/saved-search-plugin/public';
 import { internalStateActions } from '..';
 import { savedSearchMock } from '../../../../../__mocks__/saved_search';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { internalStateSlice } from '../internal_state';
 import type { SaveDiscoverSessionThunkParams } from './save_discover_session';
-import * as dataViewsActions from './data_views';
+import * as tabStateDataViewActions from './tab_state_data_view';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 
 jest.mock('uuid', () => ({ v4: jest.fn(() => 'test-uuid') }));
@@ -56,8 +56,14 @@ const setup = ({
     );
   const dataViewCreateSpy = jest.spyOn(services.dataViews, 'create');
   const dataViewsClearCacheSpy = jest.spyOn(services.dataViews, 'clearInstanceCache');
+  const savedSearch: SavedSearch = {
+    ...savedSearchMock,
+    chartInterval: 'auto',
+    timeRestore: false,
+  };
+  savedSearch.searchSource.setField('filter', []);
   const state = getDiscoverStateMock({
-    savedSearch: { ...savedSearchMock, timeRestore: false },
+    savedSearch,
     additionalPersistedTabs: additionalPersistedTabs?.(services),
     services,
   });
@@ -132,7 +138,7 @@ describe('saveDiscoverSession', () => {
       internalStateSlice.actions,
       'resetOnSavedSearchChange'
     );
-    const setDataViewSpy = jest.spyOn(dataViewsActions, 'setDataView');
+    const setDataViewSpy = jest.spyOn(tabStateDataViewActions, 'setDataView');
     const setSavedSearchSpy = jest.spyOn(state.savedSearchState, 'set');
     const currentTabId = state.getCurrentTab().id;
 

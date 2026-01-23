@@ -14,13 +14,11 @@ import {
 } from '@kbn/cloud-security-posture-common';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_VERSION } from '../constants';
 import type { FtrProviderContext } from '../ftr_provider_context';
-import { setupMockServer } from './mock_agentless_api';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const agentCreationTimeout = 1000 * 60 * 1; // 1 minute
   const retry = getService('retry');
-  const mockAgentlessApiService = setupMockServer();
   const pageObjects = getPageObjects([
     'common',
     'cspSecurity',
@@ -36,9 +34,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let mockApiServer: http.Server;
 
     before(async () => {
+      const { setupMockServer } = await import('./mock_agentless_api');
+      const mockAgentlessApiService = setupMockServer();
+      mockApiServer = mockAgentlessApiService.listen(8089);
+
       cisIntegration = pageObjects.cisAddIntegration;
       cisIntegrationAws = pageObjects.cisAddIntegration.cisAws;
-      mockApiServer = await mockAgentlessApiService.listen(8089); // Start the usage api mock server on port 8081
     });
 
     after(async () => {

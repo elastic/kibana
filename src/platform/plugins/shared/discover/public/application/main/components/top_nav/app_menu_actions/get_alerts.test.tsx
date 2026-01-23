@@ -19,6 +19,7 @@ import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_wi
 import { dataViewWithNoTimefieldMock } from '../../../../../__mocks__/data_view_no_timefield';
 import { getDiscoverStateMock } from '../../../../../__mocks__/discover_state.mock';
 import type { AppMenuExtensionParams } from '../../../../../context_awareness';
+import { internalStateActions } from '../../../state_management/redux';
 
 const mount = (
   dataView = dataViewMock,
@@ -26,7 +27,11 @@ const mount = (
   authorizedRuleTypeIds = [ES_QUERY_ID]
 ) => {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-  stateContainer.actions.setDataView(dataView);
+  stateContainer.internalState.dispatch(
+    stateContainer.injectCurrentTab(internalStateActions.assignNextDataView)({
+      dataView,
+    })
+  );
 
   const discoverParamsMock: AppMenuExtensionParams = {
     dataView,

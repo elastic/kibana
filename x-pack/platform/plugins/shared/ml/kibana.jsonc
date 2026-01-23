@@ -29,6 +29,7 @@
       "triggersActionsUi",
       "uiActions",
       "unifiedSearch",
+      "kql",
       "savedObjectsManagement",
       "savedSearch",
       "contentManagement",

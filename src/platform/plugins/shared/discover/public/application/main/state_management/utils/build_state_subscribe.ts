@@ -8,13 +8,17 @@
  */
 
 import { isEqual } from 'lodash';
-import type { InternalStateStore, RuntimeStateManager, TabState } from '../redux';
+import {
+  internalStateActions,
+  type InternalStateStore,
+  type RuntimeStateManager,
+  type TabState,
+} from '../redux';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverSavedSearchContainer } from '../discover_saved_search_container';
 import type { DiscoverDataStateContainer } from '../discover_data_state_container';
-import type { DiscoverStateContainer } from '../discover_state';
-import type { DiscoverAppState, DiscoverAppStateContainer } from '../discover_app_state_container';
-import { isEqualState } from '../discover_app_state_container';
+import type { DiscoverAppState } from '../redux';
+import { isEqualState } from './state_comparators';
 import { addLog } from '../../../../utils/add_log';
 import { FetchStatus } from '../../../types';
 import { loadAndResolveDataView } from './resolve_data_view';
@@ -26,37 +30,31 @@ import {
 import { sendLoadingMsg } from '../../hooks/use_saved_search_messages';
 
 /**
- * Builds a subscribe function for the AppStateContainer, that is executed when the AppState changes in URL
+ * Builds a subscribe function for the app state, that is executed when the app state changes in URL
  * or programmatically. It's main purpose is to detect which changes should trigger a refetch of the data.
  * @param stateContainer
  */
 export const buildStateSubscribe =
   ({
-    appState,
     dataState,
     internalState,
     runtimeStateManager,
     savedSearchState,
     services,
-    setDataView,
     getCurrentTab,
   }: {
-    appState: DiscoverAppStateContainer;
     dataState: DiscoverDataStateContainer;
     internalState: InternalStateStore;
     runtimeStateManager: RuntimeStateManager;
     savedSearchState: DiscoverSavedSearchContainer;
     services: DiscoverServices;
-    setDataView: DiscoverStateContainer['actions']['setDataView'];
     getCurrentTab: () => TabState;
   }) =>
   async (nextState: DiscoverAppState) => {
     const prevState = getCurrentTab().previousAppState;
-    const nextQuery = nextState.query;
     const savedSearch = savedSearchState.getState();
-    const prevQuery = savedSearch.searchSource.getField('query');
     const isEsqlMode = isDataSourceType(nextState.dataSource, DataSourceType.Esql);
-    const queryChanged = !isEqual(nextQuery, prevQuery) || !isEqual(nextQuery, prevState.query);
+    const queryChanged = !isEqual(nextState.query, prevState.query);
 
     if (isEsqlMode && prevState.viewMode !== nextState.viewMode && !queryChanged) {
       savedSearchState.update({ nextState });
@@ -86,11 +84,9 @@ export const buildStateSubscribe =
       }
     }
 
-    const { interval, breakdownField, sampleSize, sort, dataSource } = prevState;
+    const { sampleSize, sort, dataSource } = prevState;
     // Cast to boolean to avoid false positives when comparing
     // undefined and false, which would trigger a refetch
-    const chartIntervalChanged = nextState.interval !== interval && !isEsqlMode;
-    const breakdownFieldChanged = nextState.breakdownField !== breakdownField;
     const sampleSizeChanged = nextState.sampleSize !== sampleSize;
     const docTableSortChanged = !isEqual(nextState.sort, sort) && !isEsqlMode;
     const dataSourceChanged = !isEqual(nextState.dataSource, dataSource) && !isEsqlMode;
@@ -115,13 +111,15 @@ export const buildStateSubscribe =
       // If the requested data view is not found, don't try to load it,
       // and instead reset the app state to the fallback data view
       if (fallback) {
-        appState.update(
-          {
-            dataSource: nextDataView.id
-              ? createDataViewDataSource({ dataViewId: nextDataView.id })
-              : undefined,
-          },
-          true
+        await internalState.dispatch(
+          internalStateActions.updateAppStateAndReplaceUrl({
+            tabId: getCurrentTab().id,
+            appState: {
+              dataSource: nextDataView.id
+                ? createDataViewDataSource({ dataViewId: nextDataView.id })
+                : undefined,
+            },
+          })
         );
 
         return;
@@ -129,7 +127,12 @@ export const buildStateSubscribe =
 
       savedSearch.searchSource.setField('index', nextDataView);
       dataState.reset();
-      setDataView(nextDataView);
+      internalState.dispatch(
+        internalStateActions.assignNextDataView({
+          tabId: getCurrentTab().id,
+          dataView: nextDataView,
+        })
+      );
       savedSearchDataView = nextDataView;
     }
 
@@ -140,24 +143,11 @@ export const buildStateSubscribe =
       return;
     }
 
-    if (
-      chartIntervalChanged ||
-      breakdownFieldChanged ||
-      sampleSizeChanged ||
-      docTableSortChanged ||
-      dataSourceChanged ||
-      queryChanged
-    ) {
+    if (sampleSizeChanged || docTableSortChanged || dataSourceChanged || queryChanged) {
       const logData = {
-        chartIntervalChanged: logEntry(chartIntervalChanged, interval, nextState.interval),
-        breakdownFieldChanged: logEntry(
-          breakdownFieldChanged,
-          breakdownField,
-          nextState.breakdownField
-        ),
         docTableSortChanged: logEntry(docTableSortChanged, sort, nextState.sort),
         dataSourceChanged: logEntry(dataSourceChanged, dataSource, nextState.dataSource),
-        queryChanged: logEntry(queryChanged, prevQuery, nextQuery),
+        queryChanged: logEntry(queryChanged, prevState.query, nextState.query),
       };
 
       if (dataState.disableNextFetchOnStateChange$.getValue()) {

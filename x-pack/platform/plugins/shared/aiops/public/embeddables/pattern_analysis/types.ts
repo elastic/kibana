@@ -11,14 +11,8 @@ import type {
   PublishesDataViews,
   PublishesTimeRange,
   PublishingSubject,
-  SerializedTimeRange,
-  SerializedTitles,
 } from '@kbn/presentation-publishing';
-import type { MinimumTimeRangeOption } from '../../components/log_categorization/log_categorization_for_embeddable/minimum_time_range';
-import type {
-  RandomSamplerOption,
-  RandomSamplerProbability,
-} from '../../components/log_categorization/sampling_menu/random_sampler';
+import type { PatternAnalysisEmbeddableState } from '../../../common/embeddables/pattern_analysis/types';
 
 export interface PatternAnalysisComponentApi {
   dataViewId: PublishingSubject<PatternAnalysisEmbeddableState['dataViewId']>;
@@ -38,19 +32,3 @@ export type PatternAnalysisEmbeddableApi = DefaultEmbeddableApi<PatternAnalysisE
   PublishesDataViews &
   PublishesTimeRange &
   PatternAnalysisComponentApi;
-
-export interface PatternAnalysisEmbeddableState extends SerializedTitles, SerializedTimeRange {
-  dataViewId: string;
-  fieldName: string | undefined;
-  minimumTimeRangeOption: MinimumTimeRangeOption;
-  randomSamplerMode: RandomSamplerOption;
-  randomSamplerProbability: RandomSamplerProbability;
-}
-
-export interface PatternAnalysisEmbeddableInitialState
-  extends SerializedTitles,
-    SerializedTimeRange {
-  dataViewId?: string;
-}
-
-export type PatternAnalysisEmbeddableRuntimeState = PatternAnalysisEmbeddableState;

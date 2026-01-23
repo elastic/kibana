@@ -48,10 +48,27 @@ if [[ -z "$configs" && "${BUILDKITE_RETRY_COUNT:-0}" == "1" ]]; then
   fi
 fi
 
-if [ -z "$configs" ] && [ "$SCOUT_CONFIG_GROUP_KEY" != "" ]; then
+
+module_data=""
+# Download module_data if SCOUT_CONFIG_GROUP_KEY is set (needed for serverRunFlags)
+# This is required even when retrying, as we need module_data to get serverRunFlags for each config
+if [ "$SCOUT_CONFIG_GROUP_KEY" != "" ]; then
   echo "--- Downloading Scout Test Configuration"
   download_artifact scout_playwright_configs.json .
-  configs=$(jq -r '.[env.SCOUT_CONFIG_GROUP_KEY].configs[]' scout_playwright_configs.json)
+
+  # Extract module and its configs
+  module_data=$(jq -c ".[] | select(.name == env.SCOUT_CONFIG_GROUP_KEY)" scout_playwright_configs.json)
+
+  if [[ -z "$module_data" ]]; then
+    echo "Module '${SCOUT_CONFIG_GROUP_KEY}' not found in scout_playwright_configs.json"
+    exit 1
+  fi
+
+  # Extract config paths only if configs is not already set (e.g., from retry logic)
+  if [ -z "$configs" ]; then
+    # Extract config paths: process configs with their serverRunFlags directly
+    configs=$(echo "$module_data" | jq -r '.configs[].path')
+  fi
 fi
 
 if [ -z "$configs" ]; then
@@ -59,31 +76,12 @@ if [ -z "$configs" ]; then
   exit 1
 fi
 
-# Define run modes based on group
-declare -A RUN_MODES
-RUN_MODES["platform"]="--stateful --serverless=es --serverless=oblt --serverless=security"
-RUN_MODES["observability"]="--stateful --serverless=oblt --serverless=oblt-logs-essentials"
-RUN_MODES["search"]="--stateful --serverless=es"
-RUN_MODES["security"]="--stateful --serverless=security"
-
-# Define serverless-only run modes based on group
-declare -A RUN_MODES_SERVERLESS_ONLY
-RUN_MODES_SERVERLESS_ONLY["platform"]="--serverless=es --serverless=oblt --serverless=security"
-RUN_MODES_SERVERLESS_ONLY["observability"]="--serverless=oblt --serverless=oblt-logs-essentials"
-RUN_MODES_SERVERLESS_ONLY["search"]="--serverless=es"
-RUN_MODES_SERVERLESS_ONLY["security"]="--serverless=security"
-
-# Determine valid run modes for the group
-if [[ -n "${SERVERLESS_TESTS_ONLY:-}" ]]; then
-  echo "--- Using serverless-only test modes (SERVERLESS_TESTS_ONLY is set)"
-  RUN_MODE_LIST=${RUN_MODES_SERVERLESS_ONLY[$group]}
-else
-  RUN_MODE_LIST=${RUN_MODES[$group]}
-fi
-
-if [[ -z "$RUN_MODE_LIST" ]]; then
-  echo "Unknown group: $group"
-  exit 1
+# If we have module_data, we can process configs with their serverRunFlags directly
+# Otherwise, we need to handle the case where SCOUT_CONFIG is set directly
+if [[ -z "${module_data:-}" && -n "$SCOUT_CONFIG" ]]; then
+  echo "⚠️ Warning: SCOUT_CONFIG is set but module_data is not available. Server run flags cannot be determined from tags."
+  echo "   As a result, tests may not run in the expected modes or with the correct configuration, which could lead to unexpected failures or incomplete test coverage."
+  echo "   Execution will proceed, but it is strongly recommended to use SCOUT_CONFIG_GROUP_KEY instead to ensure serverRunFlags are set from the JSON file."
 fi
 
 results=()
@@ -137,8 +135,53 @@ while read -r config_path; do
     continue
   fi
 
+  # Get server run flags for this config
+  config_run_modes=""
+
+  if [[ -n "${module_data:-}" ]]; then
+    # Extract serverRunFlags array for this config from module data
+    config_run_modes=$(echo "$module_data" | jq -r ".configs[] | select(.path == \"$config_path\") | .serverRunFlags[]?")
+  elif [[ -n "${SCOUT_SERVER_RUN_FLAGS:-}" ]]; then
+    # Use serverRunFlags from environment variable (Flaky-test-runner pipeline when JSON is not available)
+    config_run_modes="$SCOUT_SERVER_RUN_FLAGS"
+  fi
+
+  if [[ -z "$config_run_modes" ]]; then
+    if [[ -z "${module_data:-}" && -z "${SCOUT_SERVER_RUN_FLAGS:-}" ]]; then
+      echo "⚠️ Warning: No module_data or SCOUT_SERVER_RUN_FLAGS available for config: $config_path"
+      echo "   Skipping config (serverRunFlags cannot be determined)"
+      continue
+    fi
+  fi
+
+  if [[ -z "$config_run_modes" ]]; then
+    echo "⚠️ No serverRunFlags found for config: $config_path"
+    continue
+  fi
+
+  # If SERVERLESS_TESTS_ONLY is set, filter out --stateful and keep only serverless modes
+  if [[ -n "${SERVERLESS_TESTS_ONLY:-}" ]]; then
+    echo "--- Using serverless-only test modes (SERVERLESS_TESTS_ONLY is set)"
+    # Filter out --stateful and keep only serverless modes
+    config_run_modes=$(echo "$config_run_modes" | grep -E "^--serverless=" || true)
+  fi
+
+  if [[ -z "$config_run_modes" ]]; then
+    echo "⚠️ No run modes available for config: $config_path (after SERVERLESS_TESTS_ONLY filtering)"
+    continue
+  fi
+
+  echo "--- Config: $config_path"
+  if [[ -n "${module_data:-}" ]]; then
+    echo "   Tags: $(echo "$module_data" | jq -r ".configs[] | select(.path == \"$config_path\") | .tags | join(\", \")")"
+  fi
+  echo "   Modes: $(echo "$config_run_modes" | tr '\n' ' ')"
+
   # Run config for each mode
-  for mode in $RUN_MODE_LIST; do
+  while read -r mode; do
+    if [[ -z "$mode" ]]; then
+      continue
+    fi
     # If we're retrying specific failed pairs, check if this config+mode pair should be retried
     if [[ -n "$RETRY_FAILED_PAIRS" ]]; then
       config_mode_pair="$config_path ($mode)"
@@ -194,7 +237,7 @@ while read -r config_path; do
       buildkite-agent meta-data set "$CONFIG_MODE_EXECUTION_KEY" "true"
       results+=("$config_path ($mode) ✅ (${duration})")
     fi
-  done
+  done <<< "$config_run_modes"
 done <<< "$configs"
 
 echo "--- Scout Test Run Complete: Summary"

@@ -15,9 +15,9 @@ import type {
   WorkflowContext,
   WorkflowExecutionContext,
 } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, TerminalExecutionStatuses } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
-import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
+import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import { buildWorkflowContext } from '../build_workflow_context';
 import type { ContextDependencies } from '../types';
 import { WorkflowExecutionRuntimeManager } from '../workflow_execution_runtime_manager';
@@ -277,12 +277,6 @@ describe('WorkflowExecutionRuntimeManager', () => {
       ]);
     });
 
-    it('should save the current workflow execution state', async () => {
-      await underTest.saveState();
-
-      expect(workflowExecutionState.flush).toHaveBeenCalled();
-    });
-
     it('should complete workflow execution if no nodes to process', async () => {
       // Mock the WorkflowExecutionRuntimeManager to have no current node
       (underTest as any).nextNodeId = undefined;
@@ -327,7 +321,10 @@ describe('WorkflowExecutionRuntimeManager', () => {
     it('should fail workflow execution if workflow error is set', async () => {
       (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
         startedAt: '2025-08-05T00:00:00.000Z',
-        error: 'Second step failed',
+        error: {
+          message: 'Second step failed',
+          type: 'Error',
+        },
       } as Partial<EsWorkflowStepExecution>);
       await underTest.saveState();
 
@@ -353,7 +350,10 @@ describe('WorkflowExecutionRuntimeManager', () => {
     it('should log workflow failure', async () => {
       (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
         startedAt: '2025-08-05T00:00:00.000Z',
-        error: 'Second step failed',
+        error: {
+          message: 'Second step failed',
+          type: 'Error',
+        },
       } as Partial<EsWorkflowStepExecution>);
       await underTest.saveState();
 
@@ -367,13 +367,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
       });
     });
 
-    describe.each([
-      ExecutionStatus.COMPLETED,
-      ExecutionStatus.FAILED,
-      ExecutionStatus.CANCELLED,
-      ExecutionStatus.SKIPPED,
-      ExecutionStatus.TIMED_OUT,
-    ])('for status %s', (status) => {
+    describe.each(TerminalExecutionStatuses)('for status %s', (status) => {
       beforeEach(() => {
         (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
           startedAt: '2025-08-05T00:00:00.000Z',

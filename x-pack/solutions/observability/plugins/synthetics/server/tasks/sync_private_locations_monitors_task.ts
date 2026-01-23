@@ -6,11 +6,7 @@
  */
 
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server/plugin';
-import type {
-  SavedObjectsClientContract,
-  SavedObjectsFindResult,
-} from '@kbn/core-saved-objects-api-server';
-import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type {
   ConcreteTaskInstance,
@@ -18,56 +14,55 @@ import type {
   RruleSchedule,
 } from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
-import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/common';
+import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-plugin/common';
 import pRetry from 'p-retry';
-import { getFilterForTestNowRun } from '../synthetics_service/private_location/clean_up_task';
-import { syntheticsMonitorSOTypes, syntheticsParamType } from '../../common/types/saved_objects';
-import { normalizeSecrets } from '../synthetics_service/utils';
-import type { PrivateLocationAttributes } from '../runtime_types/private_locations';
-import type {
-  EncryptedSyntheticsMonitorAttributes,
-  HeartbeatConfig,
-  MonitorFields,
-  SyntheticsMonitorWithSecretsAttributes,
-} from '../../common/runtime_types';
-import { MonitorConfigRepository } from '../services/monitor_config_repository';
+import {
+  legacyMonitorAttributes,
+  syntheticsMonitorAttributes,
+  syntheticsMonitorSOTypes,
+} from '../../common/types/saved_objects';
+import { DeployPrivateLocationMonitors } from './deploy_private_location_monitors';
+import { cleanUpDuplicatedPackagePolicies } from './clean_up_duplicate_policies';
+import type { HeartbeatConfig } from '../../common/runtime_types';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { getPrivateLocations } from '../synthetics_service/get_private_locations';
 import type { SyntheticsServerSetup } from '../types';
-import {
-  formatHeartbeatRequest,
-  mixParamsWithGlobalParams,
-} from '../synthetics_service/formatters/public_formatters/format_configs';
-import { SyntheticsPrivateLocation } from '../synthetics_service/private_location/synthetics_private_location';
 
 const TASK_TYPE = 'Synthetics:Sync-Private-Location-Monitors';
 export const PRIVATE_LOCATIONS_SYNC_TASK_ID = `${TASK_TYPE}-single-instance`;
 const TASK_SCHEDULE = '60m';
 
-interface TaskState extends Record<string, unknown> {
+export interface SyncTaskState extends Record<string, unknown> {
   lastStartedAt: string;
-  lastTotalParams: number;
-  lastTotalMWs: number;
   hasAlreadyDoneCleanup: boolean;
   maxCleanUpRetries: number;
+  disableAutoSync?: boolean;
+  privateLocationId?: string;
 }
 
 export type CustomTaskInstance = Omit<ConcreteTaskInstance, 'state'> & {
-  state: Partial<TaskState>;
+  state: Partial<SyncTaskState>;
 };
 
 export class SyncPrivateLocationMonitorsTask {
+  public deployPackagePolicies: DeployPrivateLocationMonitors;
   constructor(
     public serverSetup: SyntheticsServerSetup,
-    public taskManager: TaskManagerSetupContract,
     public syntheticsMonitorClient: SyntheticsMonitorClient
   ) {
+    this.deployPackagePolicies = new DeployPrivateLocationMonitors(
+      serverSetup,
+      syntheticsMonitorClient
+    );
+  }
+
+  registerTaskDefinition(taskManager: TaskManagerSetupContract) {
     taskManager.registerTaskDefinitions({
       [TASK_TYPE]: {
         title: 'Synthetics Sync Global Params Task',
         description:
           'This task is executed so that we can sync private location monitors for example when global params are updated',
-        timeout: '5m',
+        timeout: '10m',
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance }) => {
           return {
@@ -80,11 +75,11 @@ export class SyncPrivateLocationMonitorsTask {
     });
   }
 
-  public async runTask({
-    taskInstance,
-  }: {
-    taskInstance: CustomTaskInstance;
-  }): Promise<{ state: TaskState; error?: Error; schedule?: IntervalSchedule | RruleSchedule }> {
+  public async runTask({ taskInstance }: { taskInstance: CustomTaskInstance }): Promise<{
+    state: SyncTaskState;
+    error?: Error;
+    schedule?: IntervalSchedule | RruleSchedule;
+  }> {
     this.debugLog(
       `Syncing private location monitors, current task state is ${JSON.stringify(
         taskInstance.state
@@ -93,56 +88,125 @@ export class SyncPrivateLocationMonitorsTask {
 
     const {
       coreStart: { savedObjects },
-      encryptedSavedObjects,
       logger,
+      encryptedSavedObjects,
     } = this.serverSetup;
-    const lastStartedAt =
-      taskInstance.state.lastStartedAt || moment().subtract(10, 'minute').toISOString();
-    const startedAt = taskInstance.startedAt || new Date();
 
-    const taskState = {
-      lastStartedAt: startedAt.toISOString(),
-      lastTotalParams: taskInstance.state.lastTotalParams || 0,
-      lastTotalMWs: taskInstance.state.lastTotalMWs || 0,
-      hasAlreadyDoneCleanup: taskInstance.state.hasAlreadyDoneCleanup || false,
-      maxCleanUpRetries: taskInstance.state.maxCleanUpRetries || 3,
-    };
+    let lastStartedAt = taskInstance.state.lastStartedAt;
+    // if it's too old, set it to 10 minutes ago to avoid syncing everything the first time
+    if (!lastStartedAt || moment(lastStartedAt).isBefore(moment().subtract(6, 'hour'))) {
+      lastStartedAt = moment().subtract(10, 'minute').toISOString();
+    }
+    const taskState = this.getNewTaskState({ taskInstance });
 
     try {
       const soClient = savedObjects.createInternalRepository([
         MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       ]);
-
-      const { performSync } = await this.cleanUpDuplicatedPackagePolicies(soClient, taskState);
-
       const allPrivateLocations = await getPrivateLocations(soClient, ALL_SPACES_ID);
-      const { hasDataChanged } = await this.hasAnyDataChanged({
+
+      if (taskInstance.state.privateLocationId) {
+        // if privateLocationId exists on state, we just perform sync and exit
+        await this.deployPackagePolicies.syncAllPackagePolicies({
+          allPrivateLocations,
+          encryptedSavedObjects,
+          privateLocationId: taskInstance.state.privateLocationId,
+          soClient: savedObjects.createInternalRepository(),
+        });
+
+        return {
+          state: {
+            ...taskInstance.state,
+            privateLocationId: undefined,
+          } as SyncTaskState,
+        };
+      }
+
+      const defaultState = {
+        state: taskState,
+        schedule: {
+          interval: TASK_SCHEDULE,
+        },
+      };
+
+      const { performCleanupSync } = await this.cleanUpDuplicatedPackagePolicies(
         soClient,
-        taskState,
-        lastStartedAt,
-      });
+        taskState
+      );
 
-      if (hasDataChanged || performSync) {
-        if (hasDataChanged) {
-          this.debugLog(`Syncing private location monitors because data has changed`);
+      if (allPrivateLocations.length === 0) {
+        this.debugLog(`No private locations found, skipping sync of private location monitors`);
+        return {
+          state: taskState,
+          schedule: {
+            interval: TASK_SCHEDULE,
+          },
+        };
+      }
+      if (performCleanupSync) {
+        this.debugLog(`Syncing private location monitors because cleanup performed a change`);
+
+        if (allPrivateLocations.length > 1) {
+          // if there are multiple locations, we run a task per location to optimize it
+          for (const location of allPrivateLocations) {
+            await runTaskPerPrivateLocation({
+              server: this.serverSetup,
+              privateLocationId: location.id,
+            });
+          }
         } else {
-          this.debugLog(`Syncing private location monitors because cleanup performed a change`);
-        }
-
-        if (allPrivateLocations.length > 0) {
-          await this.syncGlobalParams({
+          await this.deployPackagePolicies.syncAllPackagePolicies({
             allPrivateLocations,
             soClient,
             encryptedSavedObjects,
           });
-        } else {
-          this.debugLog(`No private locations found, skipping sync`);
         }
+        return defaultState;
+      }
+
+      if (taskState.disableAutoSync) {
+        this.debugLog(`Auto sync is disabled, skipping sync of private location monitors`);
+        return defaultState;
+      }
+
+      const monitorMwsIds = await this.fetchMonitorMwsIds(soClient);
+      if (monitorMwsIds.length === 0) {
+        this.debugLog(
+          `No monitors with maintenance windows found, skipping sync of private location monitors`
+        );
+        return defaultState;
+      }
+
+      const { hasMWsChanged, updatedMWs, missingMWIds, maintenanceWindows } =
+        await this.hasMWsChanged({
+          soClient,
+          taskState,
+          lastStartedAt,
+          monitorMwsIds,
+        });
+
+      const dataChangeSync = hasMWsChanged && !taskState.disableAutoSync;
+      if (dataChangeSync) {
+        this.debugLog(`Syncing private location monitors because data has changed`);
+
+        await this.deployPackagePolicies.syncPackagePoliciesForMws({
+          allPrivateLocations,
+          soClient,
+          updatedMWs,
+          missingMWIds,
+          // this is passed so we don't have to fetch them again in the method
+          maintenanceWindows,
+        });
+
         this.debugLog(`Sync of private location monitors succeeded`);
       } else {
-        this.debugLog(
-          `No data has changed since last run ${lastStartedAt}, skipping sync of private location monitors`
-        );
+        if (taskState.disableAutoSync) {
+          this.debugLog(`Auto sync is disabled, skipping sync of private location monitors`);
+        } else {
+          this.debugLog(
+            `No data has changed since last run ${lastStartedAt}, skipping sync of private location monitors`
+          );
+        }
       }
     } catch (error) {
       logger.error(`Sync of private location monitors failed: ${error.message}`);
@@ -154,11 +218,23 @@ export class SyncPrivateLocationMonitorsTask {
         },
       };
     }
+
     return {
       state: taskState,
       schedule: {
         interval: TASK_SCHEDULE,
       },
+    };
+  }
+
+  getNewTaskState({ taskInstance }: { taskInstance: CustomTaskInstance }): SyncTaskState {
+    const startedAt = taskInstance.startedAt || new Date();
+
+    return {
+      lastStartedAt: startedAt.toISOString(),
+      hasAlreadyDoneCleanup: taskInstance.state.hasAlreadyDoneCleanup || false,
+      maxCleanUpRetries: taskInstance.state.maxCleanUpRetries || 3,
+      disableAutoSync: taskInstance.state.disableAutoSync ?? false,
     };
   }
 
@@ -179,119 +255,6 @@ export class SyncPrivateLocationMonitorsTask {
     this.debugLog(`Sync private location monitors task scheduled successfully`);
   };
 
-  hasAnyDataChanged = async ({
-    taskState,
-    soClient,
-    lastStartedAt,
-  }: {
-    taskState: TaskState;
-    soClient: SavedObjectsClientContract;
-    lastStartedAt: string;
-  }) => {
-    const { lastTotalParams, lastTotalMWs } = taskState;
-
-    const { totalParams, hasParamsChanges } = await this.hasAnyParamChanged({
-      soClient,
-      lastStartedAt,
-      lastTotalParams,
-    });
-    const { totalMWs, hasMWsChanged } = await this.hasMWsChanged({
-      soClient,
-      lastStartedAt,
-      lastTotalMWs,
-    });
-    taskState.lastTotalParams = totalParams;
-    taskState.lastTotalMWs = totalMWs;
-
-    const hasDataChanged = hasMWsChanged || hasParamsChanges;
-    return { hasDataChanged };
-  };
-
-  async syncGlobalParams({
-    allPrivateLocations,
-    encryptedSavedObjects,
-    soClient,
-  }: {
-    soClient: SavedObjectsClientContract;
-    allPrivateLocations: PrivateLocationAttributes[];
-    encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
-  }) {
-    const { privateLocationAPI } = this.syntheticsMonitorClient;
-
-    const { configsBySpaces, paramsBySpace, spaceIds, maintenanceWindows } =
-      await this.getAllMonitorConfigs({
-        encryptedSavedObjects,
-        soClient,
-      });
-
-    return this.serverSetup.fleet.runWithCache(async () => {
-      for (const spaceId of spaceIds) {
-        const privateConfigs: Array<{
-          config: HeartbeatConfig;
-          globalParams: Record<string, string>;
-        }> = [];
-        const monitors = configsBySpaces[spaceId];
-        this.debugLog(`Processing spaceId: ${spaceId}, monitors count: ${monitors?.length ?? 0}`);
-        if (!monitors) {
-          continue;
-        }
-        for (const monitor of monitors) {
-          const { privateLocations } = this.parseLocations(monitor);
-
-          if (privateLocations.length > 0) {
-            privateConfigs.push({ config: monitor, globalParams: paramsBySpace[spaceId] });
-          }
-        }
-        if (privateConfigs.length > 0) {
-          this.debugLog(
-            `Syncing private configs for spaceId: ${spaceId}, privateConfigs count: ${privateConfigs.length}`
-          );
-
-          await privateLocationAPI.editMonitors(
-            privateConfigs,
-            allPrivateLocations,
-            spaceId,
-            maintenanceWindows
-          );
-        } else {
-          this.debugLog(`No privateConfigs to sync for spaceId: ${spaceId}`);
-        }
-      }
-    });
-  }
-
-  async getAllMonitorConfigs({
-    soClient,
-    encryptedSavedObjects,
-  }: {
-    soClient: SavedObjectsClientContract;
-    encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
-  }) {
-    const { syntheticsService } = this.syntheticsMonitorClient;
-    const paramsBySpacePromise = syntheticsService.getSyntheticsParams({ spaceId: ALL_SPACES_ID });
-    const maintenanceWindowsPromise = syntheticsService.getMaintenanceWindows();
-    const monitorConfigRepository = new MonitorConfigRepository(
-      soClient,
-      encryptedSavedObjects.getClient()
-    );
-
-    const monitorsPromise = monitorConfigRepository.findDecryptedMonitors({
-      spaceId: ALL_SPACES_ID,
-    });
-
-    const [paramsBySpace, monitors, maintenanceWindows] = await Promise.all([
-      paramsBySpacePromise,
-      monitorsPromise,
-      maintenanceWindowsPromise,
-    ]);
-
-    return {
-      ...this.mixParamsWithMonitors(monitors, paramsBySpace),
-      paramsBySpace,
-      maintenanceWindows,
-    };
-  }
-
   parseLocations(config: HeartbeatConfig) {
     const { locations } = config;
 
@@ -301,237 +264,86 @@ export class SyncPrivateLocationMonitorsTask {
     return { privateLocations, publicLocations };
   }
 
-  mixParamsWithMonitors(
-    monitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>>,
-    paramsBySpace: Record<string, Record<string, string>>
-  ) {
-    const configsBySpaces: Record<string, HeartbeatConfig[]> = {};
-    const spaceIds = new Set<string>();
-
-    for (const monitor of monitors) {
-      const spaceId = monitor.namespaces?.[0];
-      if (!spaceId) {
-        continue;
+  async fetchMonitorMwsIds(soClient: SavedObjectsClientContract) {
+    const monitorsWithMws = await soClient.find<
+      unknown,
+      {
+        monitorMws: {
+          buckets: Array<{ key: string; doc_count: number }>;
+        };
+        legacyMonitorsMws: {
+          buckets: Array<{ key: string; doc_count: number }>;
+        };
       }
-      spaceIds.add(spaceId);
-      const normalizedMonitor = normalizeSecrets(monitor).attributes as MonitorFields;
-      const { str: paramsString } = mixParamsWithGlobalParams(
-        paramsBySpace[spaceId],
-        normalizedMonitor
-      );
+    >({
+      type: syntheticsMonitorSOTypes,
+      perPage: 0,
+      namespaces: [ALL_SPACES_ID],
+      fields: [],
+      aggs: {
+        monitorMws: {
+          terms: { field: `${syntheticsMonitorAttributes}.maintenance_windows`, size: 1000 },
+        },
+        legacyMonitorsMws: {
+          terms: { field: `${legacyMonitorAttributes}.maintenance_windows`, size: 1000 },
+        },
+      },
+    });
+    const { monitorMws, legacyMonitorsMws } = monitorsWithMws.aggregations || {};
+    const monitorMwsIds = monitorMws?.buckets.map((b) => b.key) || [];
+    const legacyMonitorMwsIds = legacyMonitorsMws?.buckets.map((b) => b.key) || [];
 
-      if (!configsBySpaces[spaceId]) {
-        configsBySpaces[spaceId] = [];
-      }
+    this.debugLog(`Fetched monitor MWs IDs: ${JSON.stringify(monitorMwsIds)}`);
+    this.debugLog(`Fetched legacy monitor MWs IDs: ${JSON.stringify(legacyMonitorMwsIds)}`);
 
-      configsBySpaces[spaceId].push(
-        formatHeartbeatRequest(
-          {
-            spaceId,
-            monitor: normalizedMonitor,
-            configId: monitor.id,
-          },
-          paramsString
-        )
-      );
-    }
-
-    return { configsBySpaces, spaceIds };
-  }
-
-  async hasAnyParamChanged({
-    soClient,
-    lastStartedAt,
-    lastTotalParams,
-  }: {
-    soClient: SavedObjectsClientContract;
-    lastStartedAt: string;
-    lastTotalParams: number;
-  }) {
-    const { logger } = this.serverSetup;
-    const [editedParams, totalParams] = await Promise.all([
-      soClient.find({
-        type: syntheticsParamType,
-        perPage: 0,
-        namespaces: [ALL_SPACES_ID],
-        filter: `synthetics-param.updated_at > "${lastStartedAt}"`,
-        fields: [],
-      }),
-      soClient.find({
-        type: syntheticsParamType,
-        perPage: 0,
-        namespaces: [ALL_SPACES_ID],
-        fields: [],
-      }),
-    ]);
-    logger.debug(
-      `Found ${editedParams.total} params updated and ${totalParams.total} total params`
-    );
-    const updatedParams = editedParams.total;
-    const noOfParams = totalParams.total;
-
-    const hasParamsChanges = updatedParams > 0 || noOfParams !== lastTotalParams;
-
-    return {
-      hasParamsChanges,
-      updatedParams: editedParams.total,
-      totalParams: noOfParams,
-    };
+    return Array.from(new Set([...monitorMwsIds, ...legacyMonitorMwsIds]));
   }
 
   async hasMWsChanged({
-    soClient,
     lastStartedAt,
-    lastTotalMWs,
+    monitorMwsIds,
   }: {
     soClient: SavedObjectsClientContract;
     lastStartedAt: string;
-    lastTotalMWs: number;
+    taskState: SyncTaskState;
+    monitorMwsIds: string[];
   }) {
-    const { logger } = this.serverSetup;
+    const { syntheticsService } = this.syntheticsMonitorClient;
 
-    const [editedMWs, totalMWs] = await Promise.all([
-      soClient.find({
-        type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-        perPage: 0,
-        namespaces: [ALL_SPACES_ID],
-        filter: `${MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE}.updated_at > "${lastStartedAt}"`,
-        fields: [],
-      }),
-      soClient.find({
-        type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-        perPage: 0,
-        namespaces: [ALL_SPACES_ID],
-        fields: [],
-      }),
-    ]);
-    logger.debug(
-      `Found ${editedMWs.total} maintenance windows updated and ${totalMWs.total} total maintenance windows`
-    );
-    const updatedMWs = editedMWs.total;
-    const noOfMWs = totalMWs.total;
+    const maintenanceWindows = (await syntheticsService.getMaintenanceWindows(ALL_SPACES_ID)) ?? [];
+    // check if any of the MWs were updated since the last run
+    const updatedMWs = maintenanceWindows.filter((mw) => {
+      const updatedAt = mw.updatedAt;
+      return moment(updatedAt).isAfter(moment(lastStartedAt));
+    });
 
-    const hasMWsChanged = updatedMWs > 0 || noOfMWs !== lastTotalMWs;
+    this.debugLog(`Updated MWs: ${updatedMWs.map((mw) => mw.id).join(', ')}`);
+
+    // check if any MWs are missing
+    const missingMWIds = monitorMwsIds.filter((mwId) => {
+      return !maintenanceWindows.find((mw) => mw.id === mwId);
+    });
+
+    this.debugLog('Missing MW IDs: ' + JSON.stringify(missingMWIds));
 
     return {
-      hasMWsChanged,
+      hasMWsChanged: updatedMWs.length > 0 || missingMWIds.length > 0,
       updatedMWs,
-      totalMWs: noOfMWs,
+      missingMWIds,
+      maintenanceWindows: maintenanceWindows.filter((mw) => monitorMwsIds.includes(mw.id)),
     };
+  }
+
+  async cleanUpDuplicatedPackagePolicies(
+    soClient: SavedObjectsClientContract,
+    taskState: SyncTaskState
+  ) {
+    return await cleanUpDuplicatedPackagePolicies(this.serverSetup, soClient, taskState);
   }
 
   debugLog = (message: string) => {
     this.serverSetup.logger.debug(`[SyncPrivateLocationMonitorsTask] ${message}`);
   };
-
-  async cleanUpDuplicatedPackagePolicies(
-    soClient: SavedObjectsClientContract,
-    taskState: TaskState
-  ) {
-    let performSync = false;
-
-    if (taskState.hasAlreadyDoneCleanup) {
-      this.debugLog(
-        'Skipping cleanup of duplicated package policies as it has already been done once'
-      );
-      return { performSync };
-    } else if (taskState.maxCleanUpRetries <= 0) {
-      this.debugLog(
-        'Skipping cleanup of duplicated package policies as max retries have been reached'
-      );
-      taskState.hasAlreadyDoneCleanup = true;
-      taskState.maxCleanUpRetries = 3;
-      return { performSync };
-    }
-    this.debugLog('Starting cleanup of duplicated package policies');
-    const { fleet } = this.serverSetup.pluginsStart;
-    const { logger } = this.serverSetup;
-
-    try {
-      const esClient = this.serverSetup.coreStart?.elasticsearch?.client.asInternalUser;
-
-      const finder = soClient.createPointInTimeFinder<EncryptedSyntheticsMonitorAttributes>({
-        type: syntheticsMonitorSOTypes,
-        fields: ['id', 'name', 'locations', 'origin'],
-        namespaces: ['*'],
-      });
-
-      const privateLocationAPI = new SyntheticsPrivateLocation(this.serverSetup);
-
-      const expectedPackagePolicies = new Set<string>();
-      for await (const result of finder.find()) {
-        result.saved_objects.forEach((monitor) => {
-          monitor.attributes.locations?.forEach((location) => {
-            const spaceId = monitor.namespaces?.[0];
-            if (!location.isServiceManaged && spaceId) {
-              const policyId = privateLocationAPI.getPolicyId(
-                {
-                  origin: monitor.attributes.origin,
-                  id: monitor.id,
-                },
-                location.id,
-                spaceId
-              );
-              expectedPackagePolicies.add(policyId);
-            }
-          });
-        });
-      }
-
-      finder.close().catch(() => {});
-
-      const packagePoliciesKuery = getFilterForTestNowRun(true);
-
-      const policiesIterator = await fleet.packagePolicyService.fetchAllItemIds(soClient, {
-        kuery: packagePoliciesKuery,
-        spaceIds: ['*'],
-        perPage: 100,
-      });
-      const packagePoliciesToDelete: string[] = [];
-
-      for await (const packagePoliciesIds of policiesIterator) {
-        for (const packagePolicyId of packagePoliciesIds) {
-          if (!expectedPackagePolicies.has(packagePolicyId)) {
-            packagePoliciesToDelete.push(packagePolicyId);
-          }
-          // remove it from the set to mark it as found
-          expectedPackagePolicies.delete(packagePolicyId);
-        }
-      }
-
-      // if we have any to delete or any expected that were not found we need to perform a sync
-      performSync = packagePoliciesToDelete.length > 0 || expectedPackagePolicies.size > 0;
-
-      if (packagePoliciesToDelete.length > 0) {
-        logger.info(
-          ` [PrivateLocationCleanUpTask] Found ${
-            packagePoliciesToDelete.length
-          } duplicate package policies to delete: ${packagePoliciesToDelete.join(', ')}`
-        );
-        await fleet.packagePolicyService.delete(soClient, esClient, packagePoliciesToDelete, {
-          force: true,
-          spaceIds: ['*'],
-        });
-      }
-      taskState.hasAlreadyDoneCleanup = true;
-      taskState.maxCleanUpRetries = 3;
-      return { performSync };
-    } catch (e) {
-      taskState.maxCleanUpRetries -= 1;
-      if (taskState.maxCleanUpRetries <= 0) {
-        this.debugLog(
-          'Skipping cleanup of duplicated package policies as max retries have been reached'
-        );
-        taskState.hasAlreadyDoneCleanup = true;
-        taskState.maxCleanUpRetries = 3;
-      }
-      logger.error(
-        '[SyncPrivateLocationMonitorsTask] Error cleaning up duplicated package policies',
-        { error: e }
-      );
-      return { performSync };
-    }
-  }
 }
 
 export const runSynPrivateLocationMonitorsTaskSoon = async ({
@@ -566,8 +378,10 @@ export const runSynPrivateLocationMonitorsTaskSoon = async ({
 
 export const resetSyncPrivateCleanUpState = async ({
   server,
+  hasAlreadyDoneCleanup = false,
 }: {
   server: SyntheticsServerSetup;
+  hasAlreadyDoneCleanup: boolean;
 }) => {
   const {
     logger,
@@ -576,8 +390,49 @@ export const resetSyncPrivateCleanUpState = async ({
   logger.debug(`Resetting Synthetics sync private location monitors cleanup state`);
   await taskManager.bulkUpdateState([PRIVATE_LOCATIONS_SYNC_TASK_ID], (state) => ({
     ...state,
-    hasAlreadyDoneCleanup: false,
+    hasAlreadyDoneCleanup,
   }));
   await runSynPrivateLocationMonitorsTaskSoon({ server });
   logger.debug(`Synthetics sync private location monitors cleanup state reset successfully`);
+};
+
+export const disableSyncPrivateLocationTask = async ({
+  server,
+  disableAutoSync,
+}: {
+  server: SyntheticsServerSetup;
+  disableAutoSync: boolean;
+}) => {
+  const {
+    logger,
+    pluginsStart: { taskManager },
+  } = server;
+  logger.debug(
+    `Setting Synthetics sync private location monitors disableAutoSync to ${disableAutoSync}`
+  );
+  await taskManager.bulkUpdateState([PRIVATE_LOCATIONS_SYNC_TASK_ID], (state) => ({
+    ...state,
+    disableAutoSync,
+  }));
+  logger.debug(`Synthetics sync private location monitors disableAutoSync set successfully`);
+};
+
+export const runTaskPerPrivateLocation = async ({
+  server,
+  privateLocationId,
+}: {
+  server: SyntheticsServerSetup;
+  privateLocationId: string;
+}) => {
+  const {
+    pluginsStart: { taskManager },
+  } = server;
+
+  await taskManager.ensureScheduled({
+    id: `${TASK_TYPE}:${privateLocationId}`,
+    params: {},
+    taskType: TASK_TYPE,
+    runAt: new Date(Date.now() + 3 * 1000),
+    state: { privateLocationId },
+  });
 };

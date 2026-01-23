@@ -64,7 +64,7 @@ exports[`View policy flyout shows all phases 1`] = `
                         data-test-subj="ilmTimelinePhase-hot"
                       >
                         <div
-                          class="css-1rh47ut-hotColorBar"
+                          class="css-1hc49ay-hotColorBar"
                         />
                         <div
                           class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-center-row"
@@ -116,7 +116,7 @@ exports[`View policy flyout shows all phases 1`] = `
                         data-test-subj="ilmTimelinePhase-cold"
                       >
                         <div
-                          class="css-50s7pf-coldColorBar"
+                          class="css-x5c4vq-coldColorBar"
                         />
                         <div
                           class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-center-row"
@@ -142,7 +142,7 @@ exports[`View policy flyout shows all phases 1`] = `
                         data-test-subj="ilmTimelinePhase-frozen"
                       >
                         <div
-                          class="css-5087wh-frozenColorBar"
+                          class="css-1dyeo8h-frozenColorBar"
                         />
                         <div
                           class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-center-row"
@@ -169,11 +169,12 @@ exports[`View policy flyout shows all phases 1`] = `
                     class="euiFlexItem emotion-euiFlexItem-growZero"
                   >
                     <div
-                      class="css-o7z0yz-deleteIconContainer"
+                      class="css-1qg2ux8-deleteIconContainer"
                       data-test-subj="ilmTimelinePhase-delete"
                     >
                       <span
                         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                        id="generated-id-wrapper"
                       >
                         <span
                           data-euiicon-type="trash"
@@ -198,7 +199,7 @@ exports[`View policy flyout shows all phases 1`] = `
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class="css-ntslzu-PhaseIndicator"
+                class="css-2elhuf-PhaseIndicator"
               />
             </div>
             <div
@@ -627,7 +628,7 @@ exports[`View policy flyout shows all phases 1`] = `
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class="css-ywp2b5-PhaseIndicator"
+                class="css-b5qt8d-PhaseIndicator"
               />
             </div>
             <div
@@ -802,7 +803,7 @@ exports[`View policy flyout shows all phases 1`] = `
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class="css-58wjyp-PhaseIndicator"
+                class="css-13gh28o-PhaseIndicator"
               />
             </div>
             <div
@@ -876,7 +877,7 @@ exports[`View policy flyout shows all phases 1`] = `
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class="css-va4xia-PhaseIndicator"
+                class="css-1qm42o4-PhaseIndicator"
               />
             </div>
             <div
@@ -969,7 +970,7 @@ exports[`View policy flyout shows all phases 1`] = `
       class="euiFlyoutFooter emotion-euiFlyoutFooter"
     >
       <div
-        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-stretch-row"
       >
         <div
           class="euiFlexItem emotion-euiFlexItem-growZero"

@@ -7,42 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../common/constants';
+import type { PinnedControlState } from '@kbn/controls-schemas';
 import type { DashboardState } from '../../types';
 import { transformDashboardIn } from './transform_dashboard_in';
+
+jest.mock('../../../kibana_services', () => ({
+  ...jest.requireActual('../../../kibana_services'),
+  embeddableService: {
+    getTransforms: jest.fn(),
+  },
+}));
 
 describe('transformDashboardIn', () => {
   test('should transform dashboard state to saved object', () => {
     const dashboardState: DashboardState = {
-      controlGroupInput: {
-        chainingSystem: 'NONE',
-        labelPosition: 'twoLine',
-        controls: [
-          {
-            controlConfig: { anyKey: 'some value' },
-            grow: false,
-            id: 'foo',
-            order: 0,
-            type: 'type1',
-            width: 'small',
-          },
-        ],
-        ignoreParentSettings: {
-          ignoreFilters: true,
-          ignoreQuery: true,
-          ignoreTimerange: true,
-          ignoreValidations: true,
-        },
-        autoApplySelections: false,
-      },
+      pinned_panels: [
+        {
+          config: { anyKey: 'some value' },
+          grow: false,
+          uid: 'foo',
+          order: 0,
+          type: 'type1',
+          width: 'small',
+        } as unknown as PinnedControlState,
+      ],
       description: 'description',
       query: { query: 'test', language: 'KQL' },
       options: {
-        hidePanelTitles: true,
-        useMargins: false,
-        syncColors: false,
-        syncTooltips: false,
-        syncCursor: false,
+        hide_panel_titles: true,
+        use_margins: false,
+        sync_colors: false,
+        sync_tooltips: false,
+        sync_cursor: false,
+        auto_apply_filters: true,
       },
       panels: [
         {
@@ -59,8 +56,8 @@ describe('transformDashboardIn', () => {
       ],
       tags: [],
       title: 'title',
-      refreshInterval: { pause: true, value: 1000 },
-      timeRange: {
+      refresh_interval: { pause: true, value: 1000 },
+      time_range: {
         from: 'now-15m',
         to: 'now',
       },
@@ -71,17 +68,13 @@ describe('transformDashboardIn', () => {
       Object {
         "attributes": Object {
           "controlGroupInput": Object {
-            "chainingSystem": "NONE",
-            "controlStyle": "twoLine",
-            "ignoreParentSettingsJSON": "{\\"ignoreFilters\\":true,\\"ignoreQuery\\":true,\\"ignoreTimerange\\":true,\\"ignoreValidations\\":true}",
-            "panelsJSON": "{\\"foo\\":{\\"grow\\":false,\\"order\\":0,\\"type\\":\\"type1\\",\\"width\\":\\"small\\",\\"explicitInput\\":{\\"anyKey\\":\\"some value\\"}}}",
-            "showApplySelections": true,
+            "panelsJSON": "{\\"foo\\":{\\"order\\":0,\\"type\\":\\"type1\\",\\"width\\":\\"small\\",\\"grow\\":false,\\"explicitInput\\":{\\"anyKey\\":\\"some value\\"}}}",
           },
           "description": "description",
           "kibanaSavedObjectMeta": Object {
             "searchSourceJSON": "{\\"query\\":{\\"query\\":\\"test\\",\\"language\\":\\"KQL\\"}}",
           },
-          "optionsJSON": "{\\"hidePanelTitles\\":true,\\"useMargins\\":false,\\"syncColors\\":false,\\"syncTooltips\\":false,\\"syncCursor\\":false}",
+          "optionsJSON": "{\\"hidePanelTitles\\":true,\\"useMargins\\":false,\\"syncColors\\":false,\\"syncTooltips\\":false,\\"syncCursor\\":false,\\"autoApplyFilters\\":true}",
           "panelsJSON": "[{\\"title\\":\\"title1\\",\\"type\\":\\"type1\\",\\"version\\":\\"2\\",\\"embeddableConfig\\":{\\"enhancements\\":{},\\"savedObjectId\\":\\"1\\"},\\"panelIndex\\":\\"1\\",\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":10,\\"h\\":10,\\"i\\":\\"1\\"}}]",
           "refreshInterval": Object {
             "pause": true,
@@ -98,24 +91,21 @@ describe('transformDashboardIn', () => {
     `);
   });
 
-  it('should handle missing optional state keys', () => {
+  it('should not provide default values for optional properties', () => {
     const dashboardState: DashboardState = {
       title: 'title',
-      description: 'my description',
-      panels: [],
-      options: DEFAULT_DASHBOARD_OPTIONS,
     };
 
     const output = transformDashboardIn(dashboardState);
     expect(output).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
-          "description": "my description",
+          "description": "",
           "kibanaSavedObjectMeta": Object {
             "searchSourceJSON": "{}",
           },
-          "optionsJSON": "{\\"hidePanelTitles\\":false,\\"useMargins\\":true,\\"syncColors\\":false,\\"syncCursor\\":true,\\"syncTooltips\\":false}",
-          "panelsJSON": "[]",
+          "optionsJSON": "{}",
+          "panelsJSON": "",
           "timeRestore": false,
           "title": "title",
         },
@@ -125,26 +115,24 @@ describe('transformDashboardIn', () => {
     `);
   });
 
-  it('should return error when passed tag references', () => {
+  it('should transform project_routing to attributes', () => {
     const dashboardState: DashboardState = {
       title: 'title',
-      panels: [],
-      references: [
-        {
-          name: 'someTagRef',
-          type: 'tag',
-          id: '1',
-        },
-      ],
+      project_routing: '_alias:_origin',
     };
 
     const output = transformDashboardIn(dashboardState);
-    expect(output).toMatchInlineSnapshot(`
-      Object {
-        "attributes": null,
-        "error": [Error: Tag references are not supported. Pass tags in with 'data.tags'],
-        "references": null,
-      }
-    `);
+    expect(output.error).toBeNull();
+    expect(output.attributes?.projectRouting).toBe('_alias:_origin');
+  });
+
+  it('should not include projectRouting in attributes when it is undefined', () => {
+    const dashboardState: DashboardState = {
+      title: 'title',
+    };
+
+    const output = transformDashboardIn(dashboardState);
+    expect(output.error).toBeNull();
+    expect(output.attributes).not.toHaveProperty('projectRouting');
   });
 });

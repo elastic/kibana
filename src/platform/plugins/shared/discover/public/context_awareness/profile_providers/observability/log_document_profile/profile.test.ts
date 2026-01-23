@@ -171,6 +171,7 @@ describe('logDocumentProfileProvider', () => {
         { context: RESOLUTION_MATCH.context }
       );
       const docViewer = getDocViewer({
+        actions: {},
         record: buildDataTableRecord({}),
       });
       const registry = new DocViewsRegistry();
@@ -184,7 +185,7 @@ describe('logDocumentProfileProvider', () => {
           id: 'doc_view_logs_overview',
           title: 'Log overview',
           order: 0,
-          component: expect.any(Function),
+          render: expect.any(Function),
         })
       );
     });

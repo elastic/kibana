@@ -51,7 +51,7 @@ describe('StepExecutionRepository', () => {
       await underTest.bulkUpsert(stepExecutions as any);
 
       expect(esClient.bulk).toHaveBeenCalledWith({
-        refresh: true,
+        refresh: false,
         index: expect.any(String),
         body: [
           { update: { _id: 'step-1' } },
@@ -216,7 +216,7 @@ describe('StepExecutionRepository', () => {
       await underTest.bulkUpsert(stepExecutions as any);
 
       expect(esClient.bulk).toHaveBeenCalledWith({
-        refresh: true,
+        refresh: false,
         index: expect.any(String),
         body: [{ update: { _id: 'step-1' } }, { doc: stepExecutions[0], doc_as_upsert: true }],
       });
@@ -228,7 +228,7 @@ describe('StepExecutionRepository', () => {
           id: 'step-1',
           stepId: 'test-step-1',
           status: 'completed',
-          completedAt: '2025-10-28T10:00:00Z',
+          finishedAt: '2025-10-28T10:00:00Z',
           executionTimeMs: 5000,
           output: { result: 'success' },
         },
@@ -256,7 +256,7 @@ describe('StepExecutionRepository', () => {
       );
     });
 
-    it('should use refresh: true for immediate visibility', async () => {
+    it('should use refresh: false to avoid blocking on index refresh', async () => {
       const stepExecutions = [{ id: 'step-1', stepId: 'test-step-1' }];
 
       esClient.bulk.mockResolvedValue({
@@ -268,7 +268,7 @@ describe('StepExecutionRepository', () => {
 
       expect(esClient.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
-          refresh: true,
+          refresh: false,
         })
       );
     });

@@ -9,7 +9,7 @@ import React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { load } from 'js-yaml';
-import { isEqual, omit } from 'lodash';
+import { isEqual, omit, pick } from 'lodash';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
@@ -27,6 +27,7 @@ import {
   AgentlessAgentCreateOverProvisionedError,
 } from '../../../../../../../../common/errors';
 import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_settings_context';
+import type { CloudProvider } from '../../../../../types';
 import {
   type AgentPolicy,
   type NewPackagePolicy,
@@ -45,11 +46,7 @@ import {
   useFleetStatus,
   sendCreatePackagePolicyForRq,
 } from '../../../../../hooks';
-import {
-  ExperimentalFeaturesService,
-  isVerificationError,
-  packageToPackagePolicy,
-} from '../../../../../services';
+import { isVerificationError, packageToPackagePolicy } from '../../../../../services';
 import type {
   CreatePackagePolicyResponse,
   NewPackagePolicyInput,
@@ -136,10 +133,7 @@ export const createAgentPolicyIfNeeded = async ({
     }
 
     // Skip policy creation for agentless as it's done through agentless_policies API
-    if (
-      ExperimentalFeaturesService.get().useAgentlessAPIInUI &&
-      newAgentPolicy.supports_agentless
-    ) {
+    if (newAgentPolicy.supports_agentless) {
       return;
     }
 
@@ -154,40 +148,49 @@ export const createAgentPolicyIfNeeded = async ({
 async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) {
   const { policy, forceCreateNeeded } = await prepareInputPackagePolicyDataset(pkgPolicy);
 
-  // If agentless and feature enabled use new API
-  if (ExperimentalFeaturesService.get().useAgentlessAPIInUI && policy.supports_agentless) {
+  // If agentless use agentless policies API
+  if (policy.supports_agentless) {
     function formatPackage(pkg: NewPackagePolicy['package']) {
       return omit(pkg, 'title');
     }
 
-    if (policy.supports_cloud_connector) {
-      throw new Error(
-        'Cloud connectors are not supported with agentless API yet disable useAgentlessAPIInUI'
-      );
-    }
+    const agentlessRequestBody = {
+      package: formatPackage(pkgPolicy.package),
+      ...omit(
+        pkgPolicy,
+        'policy_ids',
+        'package',
+        'enabled',
+        'inputs',
+        'vars',
+        'id',
+        'supports_agentless',
+        'supports_cloud_connector',
+        'cloud_connector_id',
+        'cloud_connector_name'
+      ),
+      id: pkgPolicy.id ? String(pkgPolicy.id) : undefined,
+      inputs: formatInputs(pkgPolicy.inputs),
+      vars: formatVars(pkgPolicy.vars),
+      // Build cloud_connector object if cloud connectors are supported
+      ...(pkgPolicy.supports_cloud_connector && {
+        cloud_connector: {
+          enabled: true,
+          ...(pkgPolicy.cloud_connector_id && {
+            cloud_connector_id: pkgPolicy.cloud_connector_id,
+          }),
+          // Only pass the name if creating a new connector (no cloud_connector_id)
+          ...(!pkgPolicy.cloud_connector_id &&
+            pkgPolicy.cloud_connector_name && {
+              name: pkgPolicy.cloud_connector_name,
+            }),
+        },
+      }),
+    };
 
-    const result = await sendCreateAgentlessPolicy(
-      {
-        package: formatPackage(pkgPolicy.package),
-        ...omit(
-          pkgPolicy,
-          'policy_ids',
-          'package',
-          'enabled',
-          'inputs',
-          'vars',
-          'id',
-          'supports_agentless',
-          'supports_cloud_connector'
-        ),
-        id: pkgPolicy.id ? String(pkgPolicy.id) : undefined,
-        inputs: formatInputs(pkgPolicy.inputs),
-        vars: formatVars(pkgPolicy.vars),
-      },
-      {
-        format: inputsFormat.Legacy,
-      }
-    );
+    const result = await sendCreateAgentlessPolicy(agentlessRequestBody, {
+      format: inputsFormat.Legacy,
+    });
 
     return result as CreatePackagePolicyResponse;
   }
@@ -247,7 +250,7 @@ export const updateAgentlessCloudConnectorConfig = (
         ...newAgentPolicy.agentless,
         cloud_connectors: {
           enabled: cloudConnectorPolicyEnabled,
-          target_csp: targetCsp,
+          target_csp: targetCsp as CloudProvider,
         },
       },
     });
@@ -281,6 +284,7 @@ export function useOnSubmit({
   setNewAgentPolicy,
   setSelectedPolicyTab,
   isAddIntegrationFlyout,
+  defaultPolicyData,
 }: {
   packageInfo?: PackageInfo;
   newAgentPolicy: NewAgentPolicy;
@@ -293,6 +297,7 @@ export function useOnSubmit({
   setNewAgentPolicy: (policy: NewAgentPolicy) => void;
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
   isAddIntegrationFlyout?: boolean;
+  defaultPolicyData?: Partial<PackagePolicy>;
 }) {
   const { notifications, docLinks } = useStartServices();
   const { spaceId } = useFleetStatus();
@@ -416,6 +421,29 @@ export function useOnSubmit({
           integrationToEnable
         );
 
+        if (defaultPolicyData) {
+          Object.assign(
+            basePackagePolicy,
+            pick(
+              defaultPolicyData,
+              'name',
+              'description',
+              'namespace',
+              'policy_ids',
+              'output_id',
+              'cloud_connector_id',
+              'cloud_connector_name',
+              'inputs',
+              'vars',
+              'elasticsearch',
+              'overrides',
+              'supports_agentless',
+              'supports_cloud_connector',
+              'additional_datastreams_permissions'
+            )
+          );
+        }
+
         // Set the package policy with the fetched package
         updatePackagePolicy(basePackagePolicy);
         setIsInitialized(true);
@@ -437,6 +465,8 @@ export function useOnSubmit({
     integration,
     setIntegration,
     isAddIntegrationFlyout,
+    defaultPolicyData,
+    setSelectedPolicyTab,
   ]);
 
   useEffect(() => {
@@ -673,7 +703,9 @@ export function useOnSubmit({
           : false;
 
         // Check if agentless is configured in ESS and Serverless until Agentless API migrates to Serverless
-        const isAgentlessConfigured = isAgentlessAgentPolicy(createdPolicy);
+        const isAgentlessConfigured = createdPolicy
+          ? isAgentlessAgentPolicy(createdPolicy)
+          : data?.item?.supports_agentless;
 
         // Removing this code will disabled the Save and Continue button. We need code below update form state and trigger correct modal depending on agent count
         if (hasFleetAddAgentsPrivileges && !isAgentlessConfigured && !skipConfirmModal) {

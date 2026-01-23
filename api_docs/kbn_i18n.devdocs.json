@@ -28,6 +28,8 @@
         "label": "TranslateArguments",
         "description": [],
         "path": "src/platform/packages/shared/kbn-i18n/src/core/i18n.ts",
+        "lineNumber": 109,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,6 +48,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/src/core/i18n.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -62,6 +66,8 @@
               "string | object | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/src/core/i18n.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -82,6 +88,8 @@
               "<string, string>> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/src/core/i18n.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -98,6 +106,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/src/core/i18n.ts",
+            "lineNumber": 122,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -114,6 +124,8 @@
               "MessageFormatters | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/src/core/i18n.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -145,6 +157,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-i18n/src/translation.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -158,6 +172,8 @@
               "\nDefault locale to fall back to when the translation is not found for the message id.\nHardcoded to `en` for Kibana."
             ],
             "path": "src/platform/packages/shared/kbn-i18n/src/translation.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -174,6 +190,8 @@
               "CustomFormats"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/src/translation.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -188,6 +206,8 @@
         "label": "TranslationInput",
         "description": [],
         "path": "src/platform/packages/shared/kbn-i18n/src/translation.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -206,6 +226,8 @@
               "[]>"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/src/translation.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -219,6 +241,8 @@
               "\nLocale of the translated messages."
             ],
             "path": "src/platform/packages/shared/kbn-i18n/src/translation.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -236,6 +260,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/src/translation.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -256,6 +282,8 @@
           "CustomFormats"
         ],
         "path": "src/platform/packages/shared/kbn-i18n/src/core/formats.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -270,6 +298,8 @@
         "label": "i18n",
         "description": [],
         "path": "src/platform/packages/shared/kbn-i18n/index.ts",
+        "lineNumber": 30,
+        "columnNumber": 7,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -291,6 +321,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-i18n/index.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -307,6 +339,8 @@
               "() => string"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/index.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -331,6 +365,8 @@
               ") => string"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/index.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -343,6 +379,8 @@
                 "label": "id",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-i18n/src/core/i18n.ts",
+                "lineNumber": 146,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -363,6 +401,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-i18n/src/core/i18n.ts",
+                "lineNumber": 147,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -379,6 +419,8 @@
               "(type: \"unit\" | \"conjunction\" | \"disjunction\", value: string[]) => string"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/index.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -394,6 +436,8 @@
                   "\"unit\" | \"conjunction\" | \"disjunction\""
                 ],
                 "path": "src/platform/packages/shared/kbn-i18n/src/core/i18n.ts",
+                "lineNumber": 179,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -408,6 +452,8 @@
                   "string[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-i18n/src/core/i18n.ts",
+                "lineNumber": 179,
+                "columnNumber": 74,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -432,6 +478,8 @@
               " | undefined) => void"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/index.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -454,6 +502,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-i18n/src/core/i18n.ts",
+                "lineNumber": 191,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -470,6 +520,8 @@
               "(translationsUrl: string) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/index.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -482,6 +534,8 @@
                 "label": "translationsUrl",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-i18n/src/core/i18n.ts",
+                "lineNumber": 204,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -510,6 +564,8 @@
               ") => void"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/index.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -535,6 +591,8 @@
                   "FormatError"
                 ],
                 "path": "node_modules/@formatjs/intl/src/types.d.ts",
+                "lineNumber": 25,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -551,6 +609,8 @@
               "() => boolean"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/index.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -567,6 +627,8 @@
         "label": "i18nLoader",
         "description": [],
         "path": "src/platform/packages/shared/kbn-i18n/index.ts",
+        "lineNumber": 41,
+        "columnNumber": 7,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -581,6 +643,8 @@
               "(translationFilePath: string) => void"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/index.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -593,6 +657,8 @@
                 "label": "translationFilePath",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-i18n/src/loader.ts",
+                "lineNumber": 77,
+                "columnNumber": 41,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -609,6 +675,8 @@
               "(arrayOfPaths?: string[]) => void"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/index.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -624,6 +692,8 @@
                   "string[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-i18n/src/loader.ts",
+                "lineNumber": 96,
+                "columnNumber": 42,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -648,6 +718,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/index.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -660,6 +732,8 @@
                 "label": "locale",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-i18n/src/loader.ts",
+                "lineNumber": 113,
+                "columnNumber": 47,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -684,6 +758,8 @@
               "; }>"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/index.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -708,6 +784,8 @@
               "; }>"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/index.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -723,6 +801,8 @@
                   "string[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-i18n/src/loader.ts",
+                "lineNumber": 161,
+                "columnNumber": 51,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -739,6 +819,8 @@
               "() => string[]"
             ],
             "path": "src/platform/packages/shared/kbn-i18n/index.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

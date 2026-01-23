@@ -169,7 +169,7 @@ exports[`Users Table Component Rendering it renders the default Users table 1`] 
     data-test-subj="paginated-basic-table"
   >
     <table
-      class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
+      class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
       id="__table_generated-id"
       tabindex="-1"
     >
@@ -187,6 +187,7 @@ exports[`Users Table Component Rendering it renders the default Users table 1`] 
           >
             <span
               class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+              id="generated-id-wrapper"
             >
               <button
                 class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
@@ -270,6 +271,7 @@ exports[`Users Table Component Rendering it renders the default Users table 1`] 
           >
             <span
               class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+              id="generated-id-wrapper"
             >
               <button
                 class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
@@ -506,7 +508,7 @@ exports[`Users Table Component Rendering it renders the default Users table 1`] 
     </table>
   </div>
   <div
-    class="euiFlexGroup c4 emotion-euiFlexGroup-l-spaceBetween-center-row"
+    class="euiFlexGroup c4 emotion-euiFlexGroup-m-spaceBetween-center-row"
   >
     <div
       class="euiFlexItem emotion-euiFlexItem-growZero"

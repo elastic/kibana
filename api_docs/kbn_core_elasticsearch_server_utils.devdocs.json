@@ -34,6 +34,8 @@
           ", customRetryStatusCodes?: number[] | undefined) => boolean"
         ],
         "path": "src/core/packages/elasticsearch/server-utils/src/is_retryable_es_client_error.ts",
+        "lineNumber": 39,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -50,6 +52,8 @@
               "ElasticsearchClientError"
             ],
             "path": "src/core/packages/elasticsearch/server-utils/src/is_retryable_es_client_error.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -67,6 +71,8 @@
               "number[] | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server-utils/src/is_retryable_es_client_error.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false

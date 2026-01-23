@@ -10,12 +10,14 @@
 import type { EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import { ExecutionError } from '@kbn/workflows/server';
 import type { WorkflowContextManager } from './workflow_context_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { RunStepResult } from '../step/node_implementation';
 import { parseDuration } from '../utils';
-import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
+
+import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 interface StepExecutionRuntimeInit {
   contextManager: WorkflowContextManager;
@@ -98,7 +100,7 @@ export class StepExecutionRuntime {
     return {
       input: stepExecution.input || {},
       output: stepExecution.output || {},
-      error: stepExecution.error,
+      error: stepExecution.error ? new ExecutionError(stepExecution.error) : undefined,
     };
   }
 
@@ -108,7 +110,7 @@ export class StepExecutionRuntime {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async setCurrentStepState(state: Record<string, any> | undefined): Promise<void> {
+  public setCurrentStepState(state: Record<string, any> | undefined): void {
     const stepId = this.node.stepId;
     this.workflowExecutionState.upsertStep({
       id: this.stepExecutionId,
@@ -117,7 +119,7 @@ export class StepExecutionRuntime {
     });
   }
 
-  public async startStep(): Promise<void> {
+  public startStep(): void {
     const stepId = this.node.stepId;
     const stepStartedAt = new Date();
 
@@ -134,11 +136,10 @@ export class StepExecutionRuntime {
     this.workflowExecutionState.upsertStep(stepExecution);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.logStepStart(stepId, stepExecution.id!);
-    await this.workflowExecutionState.flushStepChanges();
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async setInput(input: Record<string, any>): Promise<void> {
+  public setInput(input: Record<string, any>): void {
     this.workflowExecutionState.upsertStep({
       id: this.stepExecutionId,
       input,
@@ -146,18 +147,18 @@ export class StepExecutionRuntime {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async finishStep(stepOutput?: Record<string, any>): Promise<void> {
+  public finishStep(stepOutput?: Record<string, any>): void {
     const startedStepExecution = this.workflowExecutionState.getStepExecution(this.stepExecutionId);
     const stepExecutionUpdate = {
       id: this.stepExecutionId,
       status: ExecutionStatus.COMPLETED,
-      completedAt: new Date().toISOString(),
+      finishedAt: new Date().toISOString(),
       output: stepOutput,
     } as Partial<EsWorkflowStepExecution>;
 
     if (startedStepExecution?.startedAt) {
       stepExecutionUpdate.executionTimeMs =
-        new Date(stepExecutionUpdate.completedAt as string).getTime() -
+        new Date(stepExecutionUpdate.finishedAt as string).getTime() -
         new Date(startedStepExecution.startedAt).getTime();
     }
 
@@ -165,30 +166,35 @@ export class StepExecutionRuntime {
     this.logStepComplete(stepExecutionUpdate);
   }
 
-  public async failStep(error: Error | string): Promise<void> {
+  public failStep(error: Error): void {
     // if there is a last step execution, fail it
     // if not, create a new step execution with fail
+    const executionError = ExecutionError.fromError(error);
+    const serializedError = executionError.toSerializableObject();
     const startedStepExecution = this.workflowExecutionState.getStepExecution(this.stepExecutionId);
     const stepExecutionUpdate = {
       id: this.stepExecutionId,
       status: ExecutionStatus.FAILED,
       scopeStack: this.stackFrames,
-      completedAt: new Date().toISOString(),
+      finishedAt: new Date().toISOString(),
       output: null,
-      error: String(error),
+      error: serializedError,
     } as Partial<EsWorkflowStepExecution>;
 
     if (startedStepExecution && startedStepExecution.startedAt) {
       stepExecutionUpdate.executionTimeMs =
-        new Date(stepExecutionUpdate.completedAt as string).getTime() -
+        new Date(stepExecutionUpdate.finishedAt as string).getTime() -
         new Date(startedStepExecution.startedAt).getTime();
     }
     this.workflowExecutionState.updateWorkflowExecution({
-      error: String(error),
+      error: serializedError,
     });
     this.workflowExecutionState.upsertStep(stepExecutionUpdate);
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    this.logStepFail(stepExecutionUpdate.id!, error);
+    this.logStepFail(executionError);
+  }
+
+  public async flushEventLogs(): Promise<void> {
+    await this.stepLogger?.flushEvents();
   }
 
   /**
@@ -276,32 +282,19 @@ export class StepExecutionRuntime {
         execution_time_ms: step.executionTimeMs,
       },
       ...(step.error && {
-        error: {
-          message:
-            typeof step.error === 'string'
-              ? step.error
-              : (step.error as Error)?.message || 'Unknown error',
-          type:
-            typeof step.error === 'string'
-              ? 'WorkflowStepError'
-              : (step.error as Error)?.name || 'Error',
-          stack_trace: typeof step.error === 'string' ? undefined : (step.error as Error)?.stack,
-        },
+        error: step.error,
       }),
     });
   }
 
-  private logStepFail(stepExecutionId: string, error: Error | string): void {
+  private logStepFail(executionError: ExecutionError): void {
     const stepName = this.node.stepId;
     const stepType = this.node.stepType || 'unknown';
-    const _error = typeof error === 'string' ? Error(error) : error;
 
-    // Include error message in the log message
-    const errorMsg = typeof error === 'string' ? error : error?.message || 'Unknown error';
-    const message = `Step '${stepName}' failed: ${errorMsg}`;
+    const message = `Step '${stepName}' failed: ${executionError.message}`;
 
-    this.stepLogger?.logError(message, _error, {
-      workflow: { step_id: this.node.stepId, step_execution_id: stepExecutionId },
+    this.stepLogger?.logError(message, executionError, {
+      workflow: { step_id: this.node.stepId, step_execution_id: this.stepExecutionId },
       event: { action: 'step-fail', category: ['workflow', 'step'] },
       tags: ['workflow', 'step', 'fail'],
       labels: {

@@ -16,32 +16,34 @@ import { getErrorRateChart } from './trace_charts_definition';
 
 const ERROR_RATE_Y_BOUNDS: LensYBoundsConfig = { mode: 'custom', lowerBound: 0, upperBound: 1 };
 
-export const ErrorRateChart = () => {
+type UseChartLayersFromEsqlArgs = Parameters<typeof useChartLayersFromEsql>[0];
+
+type ErrorRateChartContentProps = Pick<
+  UseChartLayersFromEsqlArgs,
+  'query' | 'seriesType' | 'unit' | 'color'
+> & {
+  title: string;
+};
+
+const ErrorRateChartContent = ({
+  query,
+  seriesType,
+  unit,
+  color,
+  title,
+}: ErrorRateChartContentProps) => {
+  const { services, fetchParams, discoverFetch$, onBrushEnd, onFilter } = useTraceMetricsContext();
+  const { abortController, timeRange } = fetchParams;
+
   const {
-    filters,
-    requestParams,
-    services,
-    abortController,
-    discoverFetch$,
-    searchSessionId,
-    dataSource,
-    indexes,
-    onBrushEnd,
-    onFilter,
-  } = useTraceMetricsContext();
-  const { getTimeRange } = requestParams;
-
-  const { esqlQuery, seriesType, unit, color, title } = getErrorRateChart({
-    dataSource,
-    indexes,
-    filters,
-  });
-
-  const chartLayers = useChartLayersFromEsql({
-    query: esqlQuery,
+    layers: chartLayers,
+    loading: isLoadingColumns,
+    error: columnsError,
+  } = useChartLayersFromEsql({
+    query,
     seriesType,
     services,
-    getTimeRange,
+    timeRange,
     unit,
     color,
     abortController,
@@ -49,13 +51,11 @@ export const ErrorRateChart = () => {
 
   return (
     <Chart
-      esqlQuery={esqlQuery}
+      esqlQuery={query}
       size="s"
       discoverFetch$={discoverFetch$}
-      requestParams={requestParams}
+      fetchParams={fetchParams}
       services={services}
-      abortController={abortController}
-      searchSessionId={searchSessionId}
       onBrushEnd={onBrushEnd}
       onFilter={onFilter}
       title={title}
@@ -63,6 +63,34 @@ export const ErrorRateChart = () => {
       syncCursor
       syncTooltips
       yBounds={ERROR_RATE_Y_BOUNDS}
+      isLoading={isLoadingColumns}
+      error={columnsError}
+    />
+  );
+};
+
+export const ErrorRateChart = () => {
+  const { filters, dataSource, indexes } = useTraceMetricsContext();
+
+  const errorRateChart = getErrorRateChart({
+    dataSource,
+    indexes,
+    filters,
+  });
+
+  if (!errorRateChart) {
+    return null;
+  }
+
+  const { esqlQuery, seriesType, unit, color, title } = errorRateChart;
+
+  return (
+    <ErrorRateChartContent
+      query={esqlQuery}
+      seriesType={seriesType}
+      unit={unit}
+      color={color}
+      title={title}
     />
   );
 };

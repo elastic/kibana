@@ -10,7 +10,7 @@
 import { isScalar } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import { DynamicStepContextSchema } from '@kbn/workflows';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import type { AutocompleteContext } from './autocomplete.types';
 import { getFocusedYamlPair } from './get_focused_yaml_pair';
 import { isInsideLiquidBlock } from './liquid_utils';
@@ -43,6 +43,7 @@ export function buildAutocompleteContext({
   const workflowGraph = editorState?.computed?.workflowGraph;
   const yamlDocument = editorState?.computed?.yamlDocument;
   const workflowLookup = editorState?.computed?.workflowLookup;
+  const yamlLineCounter = editorState?.computed?.yamlLineCounter;
   const focusedStepId = editorState?.focusedStepId;
   const workflowDefinition = editorState?.computed?.workflowDefinition;
   // monaco-related
@@ -91,7 +92,7 @@ export function buildAutocompleteContext({
   const parseResult = parseLineForCompletion(lineUpToCursor);
 
   if (workflowDefinition && workflowGraph) {
-    contextSchema = getContextSchemaForPath(workflowDefinition, workflowGraph, path);
+    contextSchema = getContextSchemaForPath(workflowDefinition, workflowGraph, path, yamlDocument);
   }
 
   if (parseResult?.fullKey) {
@@ -129,12 +130,12 @@ export function buildAutocompleteContext({
     absoluteOffset,
     focusedStepInfo,
     focusedYamlPair,
-    // TODO: add currentTriggerInfo
 
     // context
     contextSchema,
     contextScopedToPath,
     yamlDocument,
+    yamlLineCounter: yamlLineCounter ?? null,
     scalarType,
 
     // kind of ast info
@@ -145,5 +146,8 @@ export function buildAutocompleteContext({
 
     // dynamic connector types
     dynamicConnectorTypes: currentDynamicConnectorTypes ?? null,
+
+    // workflow definition (for JSON Schema autocompletion)
+    workflowDefinition: workflowDefinition ?? null,
   };
 }

@@ -12,6 +12,7 @@ import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
 import { handleRouteError } from './route_error_handlers';
 import { WORKFLOW_EXECUTION_READ_SECURITY } from './route_security';
 import type { RouteDependencies } from './types';
+import { withLicenseCheck } from '../lib/with_license_check';
 
 export function registerGetWorkflowExecutionLogsRoute({
   router,
@@ -30,30 +31,28 @@ export function registerGetWorkflowExecutionLogsRoute({
         }),
         query: schema.object({
           stepExecutionId: schema.maybe(schema.string()),
-          size: schema.maybe(schema.number({ min: 1, max: 1000 })),
-          page: schema.maybe(schema.number({ min: 1 })),
+          size: schema.number({ min: 1, max: 1000, defaultValue: 100 }),
+          page: schema.number({ min: 1, defaultValue: 1 }),
           sortField: schema.maybe(schema.string()),
           sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
         }),
       },
     },
-    async (context, request, response) => {
+    withLicenseCheck(async (context, request, response) => {
       try {
         const { workflowExecutionId } = request.params;
         const { size, page, sortField, sortOrder, stepExecutionId } = request.query;
         const spaceId = spaces.getSpaceId(request);
 
-        const logs = await api.getWorkflowExecutionLogs(
-          {
-            executionId: workflowExecutionId,
-            size,
-            page,
-            sortField,
-            sortOrder,
-            stepExecutionId,
-          },
-          spaceId
-        );
+        const logs = await api.getWorkflowExecutionLogs({
+          executionId: workflowExecutionId,
+          size,
+          page,
+          sortField,
+          sortOrder,
+          stepExecutionId,
+          spaceId,
+        });
 
         return response.ok({
           body: logs,
@@ -61,6 +60,6 @@ export function registerGetWorkflowExecutionLogsRoute({
       } catch (error) {
         return handleRouteError(response, error);
       }
-    }
+    })
   );
 }

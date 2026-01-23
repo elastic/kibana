@@ -408,7 +408,7 @@ describe('Agent policy', () => {
         updated_by: 'system',
         schema_version: '1.1.1',
         is_protected: false,
-        fleet_server_host_id: 'default-fleet-server',
+        fleet_server_host_id: 'default-fleet-server-internal',
       });
     });
 
@@ -484,7 +484,7 @@ describe('Agent policy', () => {
         updated_by: 'system',
         schema_version: '1.1.1',
         is_protected: false,
-        fleet_server_host_id: 'default-fleet-server',
+        fleet_server_host_id: 'default-fleet-server-internal',
       });
     });
 
@@ -1208,6 +1208,59 @@ describe('Agent policy', () => {
         })
       ).rejects.toThrowError(
         new HostedAgentPolicyRestrictionRelatedError('Cannot update is_protected')
+      );
+    });
+
+    it('should throw a HostedAgentPolicyRestrictionRelatedError if user tries to update namespace for a managed policy', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            attributes: { is_managed: true },
+            id: 'mocked',
+            type: 'mocked',
+            references: [],
+          },
+        ],
+      });
+
+      await expect(
+        agentPolicyService.update(soClient, esClient, 'test-id', {
+          namespace: 'test-namespace',
+        })
+      ).rejects.toThrowError(
+        new HostedAgentPolicyRestrictionRelatedError('Cannot update namespace')
+      );
+    });
+    it('should not throw if user tries to update namespace for a managed policy with option force', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            attributes: { is_managed: true },
+            id: 'mocked',
+            type: 'mocked',
+            references: [],
+          },
+        ],
+      });
+
+      await expect(
+        agentPolicyService.update(
+          soClient,
+          esClient,
+          'test-id',
+          {
+            namespace: 'test-namespace',
+          },
+          { force: true }
+        )
+      ).resolves.not.toThrowError(
+        new HostedAgentPolicyRestrictionRelatedError('Cannot update namespace')
       );
     });
 

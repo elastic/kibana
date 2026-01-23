@@ -75,6 +75,16 @@ exports[`FieldIcon renders known field types conflict is rendered 1`] = `
 />
 `;
 
+exports[`FieldIcon renders known field types constant_keyword is rendered 1`] = `
+<EuiToken
+  aria-label="constant_keyword"
+  className="kbnFieldIcon"
+  iconType="tokenConstant"
+  size="s"
+  title="constant_keyword"
+/>
+`;
+
 exports[`FieldIcon renders known field types counter is rendered 1`] = `
 <EuiToken
   aria-label="counter"
@@ -285,6 +295,16 @@ exports[`FieldIcon renders known field types nested is rendered 1`] = `
 />
 `;
 
+exports[`FieldIcon renders known field types null is rendered 1`] = `
+<EuiToken
+  aria-label="null"
+  className="kbnFieldIcon"
+  iconType="tokenNull"
+  size="s"
+  title="null"
+/>
+`;
+
 exports[`FieldIcon renders known field types number is rendered 1`] = `
 <EuiToken
   aria-label="number"
@@ -302,6 +322,16 @@ exports[`FieldIcon renders known field types number_range is rendered 1`] = `
   iconType="tokenNumber"
   size="s"
   title="number_range"
+/>
+`;
+
+exports[`FieldIcon renders known field types percolator is rendered 1`] = `
+<EuiToken
+  aria-label="percolator"
+  className="kbnFieldIcon"
+  iconType="tokenPercolator"
+  size="s"
+  title="percolator"
 />
 `;
 
@@ -342,6 +372,16 @@ exports[`FieldIcon renders known field types scaled_float is rendered 1`] = `
   iconType="tokenNumber"
   size="s"
   title="scaled_float"
+/>
+`;
+
+exports[`FieldIcon renders known field types search_as_you_type is rendered 1`] = `
+<EuiToken
+  aria-label="search_as_you_type"
+  className="kbnFieldIcon"
+  iconType="tokenSearchType"
+  size="s"
+  title="search_as_you_type"
 />
 `;
 
@@ -432,6 +472,16 @@ exports[`FieldIcon renders known field types version is rendered 1`] = `
   iconType="tokenTag"
   size="s"
   title="version"
+/>
+`;
+
+exports[`FieldIcon renders known field types wildcard is rendered 1`] = `
+<EuiToken
+  aria-label="wildcard"
+  className="kbnFieldIcon"
+  iconType="tokenString"
+  size="s"
+  title="wildcard"
 />
 `;
 

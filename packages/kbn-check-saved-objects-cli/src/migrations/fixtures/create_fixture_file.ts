@@ -9,7 +9,7 @@
 
 import type { ModelVersionIdentifier, SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { createFixtureTemplate } from './create_fixture_template';
-import { jsonToFile } from '../../util/json';
+import { jsonToFile } from '../../util';
 
 export async function createFixtureFile({
   type,
@@ -31,10 +31,13 @@ export async function createFixtureFile({
   await jsonToFile(path, {
     [previous]: [
       {
-        TODO: `Please create one or more test objects with properties that reflect real '${type}' objects`,
+        TODO: `Please create one or more sample objects with properties that reflect real '${type}' objects`,
         NOTE: `That each modelVersion has a corresponding fixture file, which defines the previous and current versions.`,
+        NOTE2: `These fixtures define the before and after state, and are used for both upgrade and rollback testing.`,
         HINT: `You can use the template below and create sample objects for ${previous} and ${current} versions.`,
         HINT2: `Alternatively, you can copy the contents from older fixture files (if they exist) and adapt them accordingly.`,
+        IMPORTANT: `The current version fixtures (below) are defining how objects from the previous version fixtures (this array) would look like AFTER upgrading.`,
+        IMPORTANT2: `They are NOT defining random sample objects with properties that are valid for the current model version.`,
       },
     ],
     [current]: [typeTemplate],

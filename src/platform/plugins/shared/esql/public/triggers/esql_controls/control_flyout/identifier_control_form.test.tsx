@@ -77,18 +77,6 @@ describe('IdentifierControlForm', () => {
 
       // variable label input should be rendered and with the default value (empty)
       expect(await findByTestId('esqlControlLabel')).toHaveValue('');
-
-      // control width dropdown should be rendered and default to 'MEDIUM'
-      expect(await findByTestId('esqlControlMinimumWidth')).toBeInTheDocument();
-      const pressedWidth = within(await findByTestId('esqlControlMinimumWidth')).getByTitle(
-        'Medium'
-      );
-      expect(pressedWidth).toHaveAttribute('aria-pressed', 'true');
-
-      // control grow switch should be rendered and default to 'false'
-      expect(await findByTestId('esqlControlGrow')).toBeInTheDocument();
-      const growSwitch = await findByTestId('esqlControlGrow');
-      expect(growSwitch).not.toBeChecked();
     });
 
     it('should be able to change in value type', async () => {
@@ -185,18 +173,6 @@ describe('IdentifierControlForm', () => {
 
       // variable label input should be rendered and with the default value (my control)
       expect(await findByTestId('esqlControlLabel')).toHaveValue('my control');
-
-      // control width dropdown should be rendered and default to 'MEDIUM'
-      expect(await findByTestId('esqlControlMinimumWidth')).toBeInTheDocument();
-      const pressedWidth = within(await findByTestId('esqlControlMinimumWidth')).getByTitle(
-        'Small'
-      );
-      expect(pressedWidth).toHaveAttribute('aria-pressed', 'true');
-
-      // control grow switch should be rendered and default to 'false'
-      expect(await findByTestId('esqlControlGrow')).toBeInTheDocument();
-      const growSwitch = await findByTestId('esqlControlGrow');
-      expect(growSwitch).toBeChecked();
     });
 
     it('should call the onEditControl callback, if initialState is given', async () => {
@@ -265,7 +241,7 @@ describe('IdentifierControlForm', () => {
       const fieldsOptionsDropdownSearchInput = within(fieldsOptionsDropdown).getByRole('combobox');
       fireEvent.click(fieldsOptionsDropdownSearchInput);
       expect(await findByTitle('avg')).toBeDefined();
-      expect(await findByTitle('median')).toBeDefined();
+      expect(await findByTitle('last')).toBeDefined();
     });
   });
 });

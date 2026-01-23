@@ -38,7 +38,6 @@
     "@kbn/css-utils",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/alerting-plugin",
-    "@kbn/core-ui-settings-server",
     "@kbn/logging-mocks",
     "@kbn/discover-utils",
     "@kbn/storybook",
@@ -66,12 +65,19 @@
     "@kbn/connector-schemas",
     "@kbn/react-query",
     "@kbn/core-http-server",
-    "@kbn/zod-helpers",
     "@kbn/test-jest-helpers",
     "@kbn/es-errors",
     "@kbn/core-http-server-mocks",
-    "@kbn/core-elasticsearch-server",
-    "@kbn/safer-lodash-set"
+    "@kbn/connector-specs",
+    "@kbn/workflows-extensions",
+    "@kbn/alerts-ui-shared",
+    "@kbn/ai-assistant-icon",
+    "@kbn/licensing-plugin",
+    "@kbn/securitysolution-rules",
+    "@kbn/alerts-as-data-utils",
+    "@kbn/shared-ux-utility",
+    "@kbn/licensing-types",
+    "@kbn/core-lifecycle-server-mocks"
   ],
   "exclude": ["target/**/*"]
 }

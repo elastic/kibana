@@ -6,9 +6,10 @@
  */
 import React, { useState } from 'react';
 import type { Streams } from '@kbn/streams-schema';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiIconTip, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { withSuspense } from '@kbn/shared-ux-utility';
+import type { FailureStoreFormData } from '@kbn/failure-store-modal';
 import { NoFailureStorePanel } from './no_failure_store_panel';
 import { FailureStoreInfo } from './failure_store_info';
 import { useUpdateFailureStore } from '../../../../hooks/use_update_failure_store';
@@ -60,24 +61,18 @@ export const StreamDetailFailureStore = ({
     defaultRetentionPeriod,
     customRetentionPeriod,
     inheritOptions,
-    refreshDefaultRetention,
+    retentionDisabled,
   } = failureStoreConfig;
 
   const closeModal = () => {
     setIsFailureStoreModalOpen(false);
   };
 
-  const handleSaveModal = async (update: {
-    failureStoreEnabled?: boolean;
-    customRetentionPeriod?: string;
-    inherit?: boolean;
-    retentionDisabled?: boolean;
-  }) => {
+  const handleSaveModal = async (update: FailureStoreFormData) => {
     try {
       await updateFailureStore(definition.stream.name, transformFailureStoreConfig(update));
 
       refreshDefinition();
-      refreshDefaultRetention();
 
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.streams.streamDetailFailureStore.updateFailureStoreSuccess', {
@@ -99,6 +94,34 @@ export const StreamDetailFailureStore = ({
 
   return (
     <EuiFlexItem grow={false}>
+      <EuiTitle size="xs">
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="errorFilled" color="danger" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <h4>
+              {i18n.translate('xpack.streams.streamDetailLifecycle.failedIngestData', {
+                defaultMessage: 'Failed ingest data ',
+              })}
+            </h4>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIconTip
+              content={i18n.translate(
+                'xpack.streams.streamDetailView.failureStoreEnabled.tooltip',
+                {
+                  defaultMessage:
+                    'Failed ingest data is stored in a failure store. A failure store is a secondary set of indices inside a data stream, dedicated to storing failed documents.',
+                }
+              )}
+              size="s"
+              position="right"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiTitle>
+      <EuiSpacer size="m" />
       <EuiFlexGroup direction="column" gutterSize="m">
         {readFailureStorePrivilege ? (
           <>
@@ -110,9 +133,17 @@ export const StreamDetailFailureStore = ({
                   failureStoreEnabled,
                   defaultRetentionPeriod,
                   customRetentionPeriod,
+                  retentionDisabled,
                 }}
                 inheritOptions={inheritOptions}
-                showIlmDescription={isServerless}
+                showIlmDescription={!isServerless}
+                canShowDisableLifecycle={!isServerless}
+                disableButtonLabel={i18n.translate(
+                  'xpack.streams.dataManagement.streamDetailLifecycle.indefinite',
+                  {
+                    defaultMessage: 'Indefinite',
+                  }
+                )}
               />
             )}
             {data.isLoading || failureStoreEnabled ? (

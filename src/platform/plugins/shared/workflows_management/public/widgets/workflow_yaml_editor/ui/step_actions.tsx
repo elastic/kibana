@@ -20,7 +20,11 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { RunStepButton } from './run_step_button';
-import { CopyElasticSearchDevToolsOption, CopyWorkflowStepOption } from './step_action_options';
+import {
+  CopyDevToolsOption,
+  CopyWorkflowStepJsonOption,
+  CopyWorkflowStepOption,
+} from './step_action_options';
 import {
   selectEditorFocusedStepInfo,
   selectIsExecutionsTab,
@@ -62,13 +66,16 @@ export const StepActions = React.memo<StepActionsProps>(({ onStepActionClicked }
       return [];
     }
 
+    const showDevToolsOption =
+      focusedStepInfo.stepType.startsWith('elasticsearch.') ||
+      focusedStepInfo.stepType.startsWith('kibana.');
+
     return [
-      ...[
-        ...(focusedStepInfo.stepType.startsWith('elasticsearch.')
-          ? [<CopyElasticSearchDevToolsOption key="copy-as-console" onClick={closePopover} />]
-          : []),
-        <CopyWorkflowStepOption key="copy-workflow-step" onClick={closePopover} />,
-      ],
+      ...(showDevToolsOption
+        ? [<CopyDevToolsOption key="copy-as-console" onClick={closePopover} />]
+        : []),
+      <CopyWorkflowStepOption key="copy-workflow-step" onClick={closePopover} />,
+      <CopyWorkflowStepJsonOption key="copy-step-as-json" onClick={closePopover} />,
     ];
   }, [focusedStepInfo, closePopover]);
 

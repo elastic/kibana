@@ -38,8 +38,6 @@ export async function handleExecutionDelay(
   params.workflowExecutionState.updateWorkflowExecution({
     status: ExecutionStatus.WAITING,
   });
-  await params.workflowExecutionState.flush();
-
   if (diff < SHORT_DURATION_THRESHOLD) {
     const timeout = diff > 0 ? diff : 0;
 

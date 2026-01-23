@@ -37,6 +37,7 @@ export interface TabPreviewProps {
   previewData: TabPreviewData;
   stopPreviewOnHover?: boolean;
   previewDelay?: number;
+  position?: 'bottom' | 'left';
 }
 
 const getQueryLanguage = (tabPreviewData: TabPreviewData) => {
@@ -62,6 +63,7 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
   tabItem,
   previewData,
   stopPreviewOnHover,
+  position = 'bottom',
   previewDelay = 1250, // as "long" EuiToolTip delay
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -73,27 +75,42 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
   useEffect(() => {
     if (showPreview && tabRef.current) {
       const rect = tabRef.current.getBoundingClientRect();
-      const windowWidth = window.innerWidth;
-
-      // Check if preview would extend beyond right edge
-      const wouldExtendBeyondRight = rect.left + PREVIEW_WIDTH > windowWidth;
-
-      // Calculate left position based on screen edge constraints
-      let leftPosition = rect.left + window.scrollX;
-
-      if (wouldExtendBeyondRight) {
-        // Align right edge of preview with right edge of window
-        leftPosition = windowWidth - PREVIEW_WIDTH + window.scrollX;
-      }
 
       setTabPreviewData(previewData);
 
-      setTabPosition({
-        top: rect.bottom + window.scrollY,
-        left: leftPosition,
-      });
+      if (position === 'left') {
+        // Position to the left of the element
+        let leftPosition = rect.left + window.scrollX - PREVIEW_WIDTH - euiTheme.base - 30; // extra 30 to push it off the EUI selectable menu
+        const topPosition = rect.top + window.scrollY - euiTheme.base / 2;
+
+        // Ensure preview doesn't go off left edge
+        if (leftPosition < window.scrollX) {
+          leftPosition = window.scrollX + euiTheme.base;
+        }
+
+        setTabPosition({
+          top: topPosition,
+          left: leftPosition,
+        });
+      } else {
+        // Position below the element (default)
+        let leftPosition = rect.left + window.scrollX;
+
+        // Check if preview would extend beyond right edge
+        const wouldExtendBeyondRight = rect.left + PREVIEW_WIDTH > window.innerWidth;
+
+        if (wouldExtendBeyondRight) {
+          // Align right edge of preview with right edge of window
+          leftPosition = window.innerWidth - PREVIEW_WIDTH + window.scrollX;
+        }
+
+        setTabPosition({
+          top: rect.bottom + window.scrollY + euiTheme.base / 2,
+          left: leftPosition,
+        });
+      }
     }
-  }, [showPreview, previewData, tabItem]);
+  }, [showPreview, previewData, tabItem, euiTheme.base, position]);
 
   const onKeyDown = useCallback(
     (event: KeyboardEvent) => {

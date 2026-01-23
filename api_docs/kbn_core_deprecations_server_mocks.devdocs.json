@@ -23,6 +23,8 @@
         "label": "deprecationsServiceMock",
         "description": [],
         "path": "src/core/packages/deprecations/server-mocks/src/deprecations_service.mock.ts",
+        "lineNumber": 66,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -37,6 +39,8 @@
               "() => jest.Mocked<DeprecationsServiceContract>"
             ],
             "path": "src/core/packages/deprecations/server-mocks/src/deprecations_service.mock.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -55,6 +59,8 @@
               ">"
             ],
             "path": "src/core/packages/deprecations/server-mocks/src/deprecations_service.mock.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -73,6 +79,8 @@
               ">"
             ],
             "path": "src/core/packages/deprecations/server-mocks/src/deprecations_service.mock.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -91,6 +99,8 @@
               ">"
             ],
             "path": "src/core/packages/deprecations/server-mocks/src/deprecations_service.mock.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -109,6 +119,8 @@
               ">"
             ],
             "path": "src/core/packages/deprecations/server-mocks/src/deprecations_service.mock.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

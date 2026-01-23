@@ -9,38 +9,13 @@
 
 import { merge } from 'lodash';
 import type { Logger } from '@kbn/core/server';
+import { ExecutionError } from '@kbn/workflows/server';
+import type {
+  IWorkflowEventLogger,
+  WorkflowEventLoggerContext,
+  WorkflowEventLoggerOptions,
+} from './types';
 import type { LogsRepository, WorkflowLogEvent } from '../repositories/logs_repository';
-
-export interface WorkflowEventLoggerContext {
-  workflowId?: string;
-  workflowName?: string;
-  executionId?: string;
-  stepExecutionId?: string;
-  stepId?: string;
-  stepName?: string;
-  stepType?: string;
-  spaceId?: string;
-}
-
-export interface WorkflowEventLoggerOptions {
-  enableConsoleLogging?: boolean;
-}
-
-export interface IWorkflowEventLogger {
-  logEvent(event: WorkflowLogEvent): void;
-  logInfo(message: string, additionalData?: Partial<WorkflowLogEvent>): void;
-  logError(message: string, error?: Error, additionalData?: Partial<WorkflowLogEvent>): void;
-  logWarn(message: string, additionalData?: Partial<WorkflowLogEvent>): void;
-  logDebug(message: string, additionalData?: Partial<WorkflowLogEvent>): void;
-  startTiming(event: WorkflowLogEvent): void;
-  stopTiming(event: WorkflowLogEvent): void;
-  createStepLogger(
-    stepExecutionId: string,
-    stepId: string,
-    stepName?: string,
-    stepType?: string
-  ): IWorkflowEventLogger;
-}
 
 export class WorkflowEventLogger implements IWorkflowEventLogger {
   private eventQueue: WorkflowLogEvent[] = [];
@@ -53,7 +28,7 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
     private options: WorkflowEventLoggerOptions = {}
   ) {}
 
-  public logEvent(eventProperties: WorkflowLogEvent): void {
+  public logEvent(eventProperties: Partial<WorkflowLogEvent>): void {
     const event: WorkflowLogEvent = this.createBaseEvent();
 
     // Merge context, default properties, and provided properties
@@ -90,11 +65,7 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
     const errorData: Partial<WorkflowLogEvent> = {};
 
     if (error) {
-      errorData.error = {
-        message: error.message,
-        type: error.name,
-        stack_trace: error.stack,
-      };
+      errorData.error = ExecutionError.fromError(error).toSerializableObject();
     }
 
     this.logEvent({
@@ -205,6 +176,7 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
   private createBaseEvent(): WorkflowLogEvent {
     return {
       '@timestamp': new Date().toISOString(),
+      message: '',
       spaceId: this.context.spaceId,
       workflow: {
         id: this.context.workflowId,
@@ -281,7 +253,7 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
     try {
       await this.logsRepository.createLogs(events);
 
-      this.logger.info(`Successfully indexed ${events.length} workflow events`);
+      this.logger.debug(`Successfully indexed ${events.length} workflow events`);
     } catch (error) {
       this.logger.error(`Failed to index workflow events: ${error.message}`, {
         eventsCount: events.length,

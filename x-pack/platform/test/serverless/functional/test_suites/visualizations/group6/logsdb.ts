@@ -17,11 +17,12 @@ import {
 } from '../tsdb_logsdb_helpers';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, lens, discover, header, svlCommonPage } = getPageObjects([
+  const { common, lens, discover, header, timePicker, svlCommonPage } = getPageObjects([
     'common',
     'lens',
     'discover',
     'header',
+    'timePicker',
     'svlCommonPage',
   ]);
   const testSubjects = getService('testSubjects');
@@ -70,6 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.uiSettings.replace({});
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await es.indices.delete({ index: [logsdbIndex] });
     });
 
@@ -119,22 +121,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           keepOpen: true,
         });
 
-        // now check that operations won't show the incompatibility tooltip
         for (const operation of allOperations) {
+          // now check that operations won't show the incompatibility tooltip
           expect(
             testSubjects.exists(`lns-indexPatternDimension-${operation} incompatible`, {
               timeout: 500,
             })
           ).to.eql(false);
-        }
-
-        for (const operation of allOperations) {
           // try to change to the provided function and check all is ok
           await lens.selectOperation(operation);
 
           expect(
             await find.existsByCssSelector(
-              '[data-test-subj="indexPattern-field-selection-row"] .euiFormErrorText'
+              '[data-test-subj="indexPattern-field-selection-row"] .euiFormErrorText',
+              500
             )
           ).to.be(false);
         }

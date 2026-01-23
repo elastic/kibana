@@ -60,7 +60,7 @@ export const listStreamsRoute = createServerRoute({
     });
 
     const enrichedStreams = streams.reduce<ListStreamDetail[]>((acc, { stream }) => {
-      if (Streams.GroupStream.Definition.is(stream) || Streams.QueryStream.Definition.is(stream)) {
+      if (Streams.QueryStream.Definition.is(stream)) {
         acc.push({ stream });
         return acc;
       }
@@ -104,14 +104,6 @@ export const streamDetailRoute = createServerRoute({
   handler: async ({ params, request, getScopedClients }): Promise<StreamDetailsResponse> => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
     const streamEntity = await streamsClient.getStream(params.path.name);
-
-    if (Streams.GroupStream.Definition.is(streamEntity)) {
-      return {
-        details: {
-          count: 0,
-        },
-      };
-    }
 
     // check doc count
     const docCountResponse = await scopedClusterClient.asCurrentUser.search({

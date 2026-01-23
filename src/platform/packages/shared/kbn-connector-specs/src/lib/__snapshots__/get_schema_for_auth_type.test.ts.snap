@@ -1,16 +1,44 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`getSchemaForAuthType() correctly returns schema for auth type definition when defaults are provided 1`] = `
+exports[`getSchemaForAuthType() correctly returns schema for auth type definition when defaults and meta overrides are provided 1`] = `
 Object {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
+  "label": "API key header authentication",
   "properties": Object {
     "authType": Object {
       "const": "api_key_header",
       "type": "string",
     },
     "custom-api-key-field": Object {
-      "description": "API Key",
+      "label": "Custom API Key Label",
+      "minLength": 1,
+      "placeholder": "enter a key!",
+      "sensitive": true,
+      "type": "string",
+    },
+  },
+  "required": Array [
+    "custom-api-key-field",
+    "authType",
+  ],
+  "type": "object",
+}
+`;
+
+exports[`getSchemaForAuthType() correctly returns schema for auth type definition when defaults are provided 1`] = `
+Object {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "label": "API key header authentication",
+  "properties": Object {
+    "authType": Object {
+      "const": "api_key_header",
+      "type": "string",
+    },
+    "custom-api-key-field": Object {
+      "label": "API key",
+      "minLength": 1,
       "sensitive": true,
       "type": "string",
     },
@@ -27,19 +55,21 @@ exports[`getSchemaForAuthType() correctly returns schema for auth type definitio
 Object {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
+  "label": "Basic authentication",
   "properties": Object {
     "authType": Object {
       "const": "basic",
       "type": "string",
     },
     "password": Object {
-      "description": "Password",
+      "label": "Password",
+      "minLength": 1,
       "sensitive": true,
       "type": "string",
     },
     "username": Object {
-      "description": "Username",
-      "sensitive": true,
+      "label": "Username",
+      "minLength": 1,
       "type": "string",
     },
   },
@@ -56,9 +86,11 @@ exports[`getSchemaForAuthType() ignores defaults for key that is not in auth typ
 Object {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
+  "label": "API key header authentication",
   "properties": Object {
     "Api-Key": Object {
-      "description": "API Key",
+      "label": "API key",
+      "minLength": 1,
       "sensitive": true,
       "type": "string",
     },

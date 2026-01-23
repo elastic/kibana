@@ -55,11 +55,16 @@ export const typeToEuiIconMap = {
   semantic_text: { iconType: 'tokenSemanticText' },
   string: { iconType: 'tokenString' },
   text: { iconType: 'tokenString' },
+  wildcard: { iconType: 'tokenString' },
+  search_as_you_type: { iconType: 'tokenSearchType' },
   keyword: { iconType: 'tokenKeyword' },
+  constant_keyword: { iconType: 'tokenConstant' },
   gauge: { iconType: 'tokenMetricGauge' },
   counter: { iconType: 'tokenMetricCounter' },
   nested: { iconType: 'tokenNested' },
   version: { iconType: 'tokenTag' },
+  percolator: { iconType: 'tokenPercolator' },
+  null: { iconType: 'tokenNull' },
 } as const;
 
 type AllowedIconType = keyof typeof typeToEuiIconMap;

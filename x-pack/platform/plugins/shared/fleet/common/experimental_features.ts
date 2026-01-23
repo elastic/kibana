@@ -10,18 +10,21 @@ const _allowedExperimentalValues = {
   useSpaceAwareness: true,
   enableAutomaticAgentUpgrades: true,
   enableSyncIntegrationsOnRemote: true,
-  enableSSLSecrets: false,
+  enableSSLSecrets: true,
   installedIntegrationsTabularUI: true,
   enabledUpgradeAgentlessDeploymentsTask: true,
   enablePackageRollback: true,
   enableAutoInstallContentPackages: true,
   enableOtelIntegrations: true,
   enableAgentStatusAlerting: true,
-  enableAgentPrivilegeLevelChange: false,
-  installIntegrationsKnowledge: false,
-  agentlessPoliciesAPI: true,
-  useAgentlessAPIInUI: false,
-  disabledAgentlessLegacyAPI: false,
+  enableAgentPrivilegeLevelChange: true,
+  installIntegrationsKnowledge: true,
+  enableFleetPolicyRevisionsCleanupTask: true,
+  enableAgentRollback: true, // When enabled, agent upgrade rollback will be available in the API and UI.
+  disableAgentlessLegacyAPI: false, // When enabled, it will disable creating agentless policies via agent or package policies API.
+  enableEsqlViewInstall: false,
+  enableSloTemplates: false,
+  newBrowseIntegrationUx: false, // When enabled integrations, browse integrations page will use the new UX.
 };
 
 /**

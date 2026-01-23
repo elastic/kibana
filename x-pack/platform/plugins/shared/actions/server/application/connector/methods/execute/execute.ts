@@ -60,5 +60,6 @@ export async function execute(
     request: context.request,
     relatedSavedObjects,
     actionExecutionId: uuidv4(),
+    connectorTokenClient: context.connectorTokenClient,
   });
 }

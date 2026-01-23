@@ -123,6 +123,8 @@ export const streamRoutingMachine = setup({
       editingSuggestionIndex: null,
       editedSuggestion: null,
     })),
+    setRefreshing: assign(() => ({ isRefreshing: true })),
+    clearRefreshing: assign(() => ({ isRefreshing: false })),
   },
   guards: {
     canForkStream: and(['hasManagePrivileges', 'isValidRouting', 'isValidChild']),
@@ -162,6 +164,7 @@ export const streamRoutingMachine = setup({
     suggestedRuleId: null,
     editingSuggestionIndex: null,
     editedSuggestion: null,
+    isRefreshing: false,
   }),
   initial: 'initializing',
   states: {
@@ -177,8 +180,53 @@ export const streamRoutingMachine = setup({
       on: {
         'stream.received': {
           target: '#ready',
-          actions: [{ type: 'storeDefinition', params: ({ event }) => event }],
+          actions: [
+            { type: 'storeDefinition', params: ({ event }) => event },
+            { type: 'clearRefreshing' },
+          ],
           reenter: true,
+        },
+        'routingSamples.setDocumentMatchFilter': {
+          actions: sendTo('routingSamplesMachine', ({ event }) => ({
+            type: 'routingSamples.setDocumentMatchFilter',
+            filter: event.filter,
+          })),
+        },
+        'suggestion.preview': {
+          actions: [
+            sendTo('routingSamplesMachine', ({ event, context }) => ({
+              type: 'routingSamples.setSelectedPreview',
+              preview: event.toggle
+                ? { type: 'suggestion', name: event.name, index: event.index }
+                : undefined,
+              condition: event.toggle
+                ? event.condition
+                : context.currentRuleId
+                ? selectCurrentRule(context)?.where
+                : undefined,
+            })),
+            sendTo('routingSamplesMachine', {
+              type: 'routingSamples.setDocumentMatchFilter',
+              filter: 'matched',
+            }),
+          ],
+        },
+        'routingRule.reviewSuggested': {
+          target: '#ready.reviewSuggestedRule',
+          actions: [{ type: 'storeSuggestedRuleId', params: ({ event }) => event }],
+        },
+        'suggestion.edit': {
+          target: '#ready.editingSuggestedRule',
+          actions: enqueueActions(({ enqueue, event }) => {
+            enqueue({ type: 'storeEditingSuggestion', params: event });
+
+            // Set the preview for the suggestion being edited
+            enqueue.sendTo('routingSamplesMachine', {
+              type: 'routingSamples.setSelectedPreview',
+              preview: { type: 'suggestion', name: event.suggestion.name, index: event.index },
+              condition: event.suggestion.condition,
+            });
+          }),
         },
       },
       invoke: {
@@ -245,19 +293,199 @@ export const streamRoutingMachine = setup({
               }),
             },
           },
+        },
+        creatingNewRule: {
+          id: 'creatingNewRule',
+          entry: [
+            { type: 'addNewRoutingRule' },
+            sendTo('routingSamplesMachine', {
+              type: 'routingSamples.setSelectedPreview',
+              preview: { type: 'createStream' },
+              condition: { always: {} },
+            }),
+          ],
+          exit: [
+            { type: 'resetRoutingChanges' },
+            sendTo('routingSamplesMachine', {
+              type: 'routingSamples.setSelectedPreview',
+              preview: undefined,
+            }),
+            sendTo('routingSamplesMachine', {
+              type: 'routingSamples.setDocumentMatchFilter',
+              filter: 'matched',
+            }),
+          ],
+          initial: 'changing',
           states: {
-            idle: {
-              id: 'idle',
+            changing: {
+              on: {
+                'routingRule.cancel': {
+                  target: '#idle',
+                  actions: [
+                    { type: 'resetRoutingChanges' },
+                    sendTo('routingSamplesMachine', {
+                      type: 'routingSamples.setDocumentMatchFilter',
+                      filter: 'matched',
+                    }),
+                  ],
+                },
+                'routingRule.change': {
+                  actions: enqueueActions(({ enqueue, event }) => {
+                    enqueue({ type: 'patchRule', params: { routingRule: event.routingRule } });
+
+                    // Trigger samples collection only on condition change
+                    if (event.routingRule.where) {
+                      enqueue.sendTo('routingSamplesMachine', {
+                        type: 'routingSamples.updateCondition',
+                        condition: event.routingRule.where,
+                      });
+                    }
+                  }),
+                },
+                'routingRule.edit': {
+                  guard: 'hasManagePrivileges',
+                  target: '#editingRule',
+                  actions: [{ type: 'storeCurrentRuleId', params: ({ event }) => event }],
+                },
+                'routingRule.fork': {
+                  guard: 'canForkStream',
+                  target: 'forking',
+                },
+              },
+            },
+            forking: {
+              invoke: {
+                id: 'forkStreamActor',
+                src: 'forkStream',
+                input: ({ context }) => {
+                  const currentRoutingRule = selectCurrentRule(context);
+
+                  return {
+                    definition: context.definition,
+                    where: currentRoutingRule.where,
+                    destination: currentRoutingRule.destination,
+                    status: currentRoutingRule.status,
+                  };
+                },
+                onDone: {
+                  target: '#idle',
+                  actions: [{ type: 'setRefreshing' }, { type: 'refreshDefinition' }],
+                },
+                onError: {
+                  target: 'changing',
+                  actions: [{ type: 'notifyStreamFailure' }],
+                },
+              },
+            },
+          },
+        },
+        editingRule: {
+          id: 'editingRule',
+          initial: 'changing',
+          entry: [
+            sendTo('routingSamplesMachine', {
+              type: 'routingSamples.setSelectedPreview',
+              preview: { type: 'updateStream' },
+            }),
+          ],
+          exit: [{ type: 'resetRoutingChanges' }],
+          states: {
+            changing: {
               on: {
                 'routingRule.create': {
                   guard: 'hasSimulatePrivileges',
                   target: 'creatingNewRule',
                 },
-                'routingRule.edit': {
+                'routingRule.cancel': {
+                  target: '#idle',
+                  actions: [
+                    { type: 'resetRoutingChanges' },
+                    sendTo('routingSamplesMachine', {
+                      type: 'routingSamples.setDocumentMatchFilter',
+                      filter: 'matched',
+                    }),
+                    sendTo('routingSamplesMachine', {
+                      type: 'routingSamples.updateCondition',
+                      condition: undefined,
+                    }),
+                  ],
+                },
+                'routingRule.change': {
+                  actions: [{ type: 'patchRule', params: ({ event }) => event }],
+                },
+                'routingRule.edit': [
+                  {
+                    guard: { type: 'isAlreadyEditing', params: ({ event }) => event },
+                    target: '#idle',
+                    actions: [{ type: 'storeCurrentRuleId', params: { id: null } }],
+                  },
+                  {
+                    actions: [{ type: 'storeCurrentRuleId', params: ({ event }) => event }],
+                  },
+                ],
+                'routingRule.remove': {
                   guard: 'hasManagePrivileges',
                   target: 'editingRule',
                   actions: [{ type: 'storeCurrentRuleId', params: ({ event }) => event }],
                 },
+                'routingRule.save': {
+                  guard: 'canUpdateStream',
+                  target: 'updatingRule',
+                },
+              },
+            },
+            removingRule: {
+              invoke: {
+                id: 'deleteStreamActor',
+                src: 'deleteStream',
+                input: ({ context }) => ({
+                  name: selectCurrentRule(context).destination,
+                }),
+                onDone: {
+                  target: '#idle',
+                  actions: [{ type: 'setRefreshing' }, { type: 'refreshDefinition' }],
+                },
+                onError: {
+                  target: 'changing',
+                },
+              },
+            },
+            updatingRule: {
+              invoke: {
+                id: 'upsertStreamActor',
+                src: 'upsertStream',
+                input: ({ context }) => ({
+                  definition: context.definition,
+                  routing: context.routing.map(routingConverter.toAPIDefinition),
+                }),
+                onDone: {
+                  target: '#idle',
+                  actions: [
+                    { type: 'notifyStreamSuccess' },
+                    { type: 'setRefreshing' },
+                    { type: 'refreshDefinition' },
+                  ],
+                },
+                onError: {
+                  target: 'changing',
+                  actions: [{ type: 'notifyStreamFailure' }],
+                },
+              },
+            },
+          },
+        },
+        reorderingRules: {
+          id: 'reorderingRules',
+          initial: 'reordering',
+          entry: [
+            sendTo('routingSamplesMachine', {
+              type: 'routingSamples.setSelectedPreview',
+              preview: { type: 'updateStream' },
+            }),
+          ],
+          states: {
+            reordering: {
+              on: {
                 'routingRule.reorder': {
                   guard: 'canReorderRules',
                   target: 'reorderingRules',
@@ -273,63 +501,13 @@ export const streamRoutingMachine = setup({
                   type: 'routingSamples.setSelectedPreview',
                   preview: { type: 'createStream' },
                 }),
-                sendTo('routingSamplesMachine', {
-                  type: 'routingSamples.updateCondition',
-                  condition: { always: {} },
-                }),
-              ],
-              exit: [
-                { type: 'resetRoutingChanges' },
-                sendTo('routingSamplesMachine', {
-                  type: 'routingSamples.setSelectedPreview',
-                  preview: undefined,
-                }),
-                sendTo('routingSamplesMachine', {
-                  type: 'routingSamples.updateCondition',
-                  condition: undefined,
-                }),
-                sendTo('routingSamplesMachine', {
-                  type: 'routingSamples.setDocumentMatchFilter',
-                  filter: 'matched',
-                }),
-              ],
-              initial: 'changing',
-              states: {
-                changing: {
-                  on: {
-                    'routingRule.cancel': {
-                      target: '#ingestMode.idle',
-                      actions: [
-                        { type: 'resetRoutingChanges' },
-                        sendTo('routingSamplesMachine', {
-                          type: 'routingSamples.setDocumentMatchFilter',
-                          filter: 'matched',
-                        }),
-                      ],
-                    },
-                    'routingRule.change': {
-                      actions: enqueueActions(({ enqueue, event }) => {
-                        enqueue({ type: 'patchRule', params: { routingRule: event.routingRule } });
-
-                        // Trigger samples collection only on condition change
-                        if (event.routingRule.where) {
-                          enqueue.sendTo('routingSamplesMachine', {
-                            type: 'routingSamples.updateCondition',
-                            condition: event.routingRule.where,
-                          });
-                        }
-                      }),
-                    },
-                    'routingRule.edit': {
-                      guard: 'hasManagePrivileges',
-                      target: '#editingRule',
-                      actions: [{ type: 'storeCurrentRuleId', params: ({ event }) => event }],
-                    },
-                    'routingRule.fork': {
-                      guard: 'canForkStream',
-                      target: 'forking',
-                    },
-                  },
+                onDone: {
+                  target: '#idle',
+                  actions: [
+                    { type: 'notifyStreamSuccess' },
+                    { type: 'setRefreshing' },
+                    { type: 'refreshDefinition' },
+                  ],
                 },
                 forking: {
                   invoke: {
@@ -620,11 +798,129 @@ export const streamRoutingMachine = setup({
             },
           },
         },
-        queryMode: {
-          id: 'queryMode',
-          on: {
-            'childStreams.mode.changeToIngestMode': {
-              target: '#ingestMode',
+        reviewSuggestedRule: {
+          id: 'reviewSuggestedRule',
+          initial: 'reviewing',
+          states: {
+            reviewing: {
+              on: {
+                'routingRule.fork': {
+                  guard: 'canForkStream',
+                  target: 'forking',
+                },
+                'routingRule.cancel': {
+                  target: '#idle',
+                  actions: [{ type: 'resetSuggestedRuleId' }],
+                },
+              },
+            },
+            forking: {
+              invoke: {
+                id: 'forkStreamActor',
+                src: 'forkStream',
+                input: ({ context, event }) => {
+                  assertEvent(event, 'routingRule.fork');
+
+                  const { routingRule } = event;
+                  if (!routingRule) {
+                    throw new Error('No routing rule to fork');
+                  }
+
+                  return {
+                    definition: context.definition,
+                    destination: routingRule.destination,
+                    where: routingRule.where,
+                    status: 'enabled',
+                  };
+                },
+                onDone: {
+                  target: '#idle',
+                  actions: [
+                    { type: 'resetSuggestedRuleId' },
+                    { type: 'setRefreshing' },
+                    { type: 'refreshDefinition' },
+                  ],
+                },
+                onError: {
+                  target: 'reviewing',
+                  actions: [{ type: 'notifyStreamFailure' }],
+                },
+              },
+            },
+          },
+        },
+        editingSuggestedRule: {
+          id: 'editingSuggestedRule',
+          initial: 'editing',
+          exit: [{ type: 'clearEditingSuggestion' }],
+          states: {
+            editing: {
+              on: {
+                'suggestion.changeName': {
+                  actions: enqueueActions(({ context, enqueue, event }) => {
+                    enqueue({
+                      type: 'updateEditedSuggestion',
+                      params: { updates: { name: event.name } },
+                    });
+
+                    // Update the preview name (without triggering refetch)
+                    enqueue.sendTo('routingSamplesMachine', {
+                      type: 'routingSamples.updatePreviewName',
+                      name: event.name,
+                    });
+                  }),
+                },
+                'suggestion.changeCondition': {
+                  actions: enqueueActions(({ enqueue, event }) => {
+                    enqueue({
+                      type: 'updateEditedSuggestion',
+                      params: { updates: { condition: event.condition } },
+                    });
+
+                    // Update the condition for preview (triggers refetch)
+                    enqueue.sendTo('routingSamplesMachine', {
+                      type: 'routingSamples.updateCondition',
+                      condition: event.condition,
+                    });
+                  }),
+                },
+                'routingRule.change': {
+                  actions: enqueueActions(({ enqueue, event }) => {
+                    if (event.routingRule.where) {
+                      enqueue({
+                        type: 'updateEditedSuggestion',
+                        params: { updates: { condition: event.routingRule.where } },
+                      });
+
+                      enqueue.sendTo('routingSamplesMachine', {
+                        type: 'routingSamples.updateCondition',
+                        condition: event.routingRule.where,
+                      });
+                    }
+                  }),
+                },
+                'routingRule.cancel': {
+                  target: '#ready.idle',
+                  actions: [
+                    { type: 'clearEditingSuggestion' },
+                    sendTo('routingSamplesMachine', {
+                      type: 'routingSamples.setSelectedPreview',
+                      preview: undefined,
+                    }),
+                  ],
+                },
+                'suggestion.saveSuggestion': {
+                  guard: 'canSaveSuggestion',
+                  target: '#ready.idle',
+                  actions: [
+                    { type: 'clearEditingSuggestion' },
+                    sendTo('routingSamplesMachine', {
+                      type: 'routingSamples.setSelectedPreview',
+                      preview: undefined,
+                    }),
+                  ],
+                },
+              },
             },
           },
         },
@@ -654,6 +950,7 @@ export const createStreamRoutingMachineImplementations = ({
       createRoutingSamplesMachineImplementations({
         data,
         timeState$,
+        telemetryClient,
       })
     ),
   },

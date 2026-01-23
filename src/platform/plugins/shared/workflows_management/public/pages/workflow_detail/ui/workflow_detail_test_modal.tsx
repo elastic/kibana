@@ -11,12 +11,12 @@ import React, { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import {
+  selectEditorYaml,
   selectIsTestModalOpen,
   selectWorkflowDefinition,
   selectWorkflowId,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { setIsTestModalOpen } from '../../../entities/workflows/store/workflow_detail/slice';
-import { runWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/run_workflow_thunk';
 import { testWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/test_workflow_thunk';
 import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
 import { useAsyncThunk } from '../../../hooks/use_async_thunk';
@@ -34,23 +34,19 @@ export const WorkflowDetailTestModal = () => {
   const isTestModalOpen = useSelector(selectIsTestModalOpen);
   const definition = useSelector(selectWorkflowDefinition);
   const workflowId = useSelector(selectWorkflowId);
+  const yamlString = useSelector(selectEditorYaml);
 
   const testWorkflow = useAsyncThunk(testWorkflowThunk);
-  const runWorkflow = useAsyncThunk(runWorkflowThunk);
-
-  const isTestRun = !workflowId;
 
   const handleRunWorkflow = useCallback(
     async (inputs: Record<string, unknown>) => {
-      const executionId = isTestRun
-        ? await testWorkflow({ inputs })
-        : await runWorkflow({ inputs });
+      const executionId = await testWorkflow({ inputs });
 
       if (executionId) {
         setSelectedExecution(executionId.workflowExecutionId);
       }
     },
-    [isTestRun, runWorkflow, testWorkflow, setSelectedExecution]
+    [testWorkflow, setSelectedExecution]
   );
 
   const closeModal = useCallback(() => {
@@ -85,9 +81,10 @@ export const WorkflowDetailTestModal = () => {
 
   return (
     <WorkflowExecuteModal
-      isTestRun={isTestRun}
+      isTestRun={true}
       definition={definition}
       workflowId={workflowId}
+      yamlString={yamlString}
       onClose={closeModal}
       onSubmit={handleRunWorkflow}
     />
