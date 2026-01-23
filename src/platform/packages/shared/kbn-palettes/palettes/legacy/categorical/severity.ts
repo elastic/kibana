@@ -17,5 +17,5 @@ export const severityPalette = new KbnCategoricalPalette({
     defaultMessage: 'Severity',
   }),
   colorCount: 6,
-  colors: ['#EE4C48', '#FF995E', '#FCD883', '#24C292', '#B5E5F2', '#E3E8F2'],
+  colors: ['#24C292', '#B5E5F2', '#FCD883', '#FF995E', '#EE4C48', '#E3E8F2'],
 });

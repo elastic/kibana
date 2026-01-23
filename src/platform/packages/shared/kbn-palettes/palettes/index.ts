@@ -52,6 +52,7 @@ const darkKbnPalettes = new KbnPalettes(
 const lightKbnPalettes = new KbnPalettes(
   [
     elasticPalette,
+    severityPalette,
     kibana7Palette,
     kibana4Palette,
     getNeutralPalette(false),
@@ -65,7 +66,6 @@ const lightKbnPalettes = new KbnPalettes(
     warmPalette,
     elasticClassicPalette,
     compareToPalette,
-    severityPalette,
   ],
   elasticPalette
 );
