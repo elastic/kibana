@@ -5,131 +5,86 @@
  * 2.0.
  */
 
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
 import { inject, injectable } from 'inversify';
 
-import { ALERT_EVENTS_DATA_STREAM } from '../../resources/alert_events';
-import { buildAlertEventsFromEsqlResponse } from './build_alert_events';
-import { getQueryPayload } from './get_query_payload';
-import type { ResourceManagerContract } from '../services/resource_service/resource_manager';
-import { ResourceManager } from '../services/resource_service/resource_manager';
-import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
-import { RulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service';
-import type { QueryServiceContract } from '../services/query_service/query_service';
-import { QueryService } from '../services/query_service/query_service';
-import { StorageServiceInternalToken } from '../services/storage_service/tokens';
-import type { StorageServiceContract } from '../services/storage_service/storage_service';
-import type { RuleExecutorTaskParams } from './types';
-import type { LoggerServiceContract } from '../services/logger_service/logger_service';
-import { LoggerServiceToken } from '../services/logger_service/logger_service';
+import type { RuleExecutionInput, HaltReason, RuleExecutorTaskParams } from './types';
+import { RuleExecutionPipeline, type PipelineResult } from './execution_pipeline';
 
 type TaskRunParams = Pick<RunContext, 'taskInstance' | 'abortController'>;
 
 @injectable()
 export class RuleExecutorTaskRunner {
-  constructor(
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
-    @inject(ResourceManager) private readonly resourcesService: ResourceManagerContract,
-    @inject(RulesSavedObjectService)
-    private readonly rulesSavedObjectService: RulesSavedObjectServiceContract,
-    @inject(QueryService) private readonly queryService: QueryServiceContract,
-    @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract
-  ) {}
+  constructor(@inject(RuleExecutionPipeline) private readonly pipeline: RuleExecutionPipeline) {}
 
   public async run({ taskInstance, abortController }: TaskRunParams): Promise<RunResult> {
-    // Wait for the plugin-wide resource initialization started during plugin setup.
-    await this.resourcesService.waitUntilReady();
+    const input = this.createRuleExecutionInput(taskInstance, abortController);
 
+    const result = await this.pipeline.execute(input);
+
+    return this.buildRunResult(result, taskInstance);
+  }
+
+  /**
+   * Creates execution input for the pipeline.
+   */
+  private createRuleExecutionInput(
+    taskInstance: TaskRunParams['taskInstance'],
+    abortController: AbortController
+  ): RuleExecutionInput {
     const params = taskInstance.params as RuleExecutorTaskParams;
-
-    const ruleDoc = await this.rulesSavedObjectService
-      .get(params.ruleId, params.spaceId)
-      .catch((error) => {
-        if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-          return null;
-        }
-        throw error;
-      });
-
-    if (!ruleDoc) {
-      // Rule was deleted.
-      return { state: taskInstance.state };
-    }
-
-    this.logger.debug({
-      message: () => `Rule saved object attributes: ${JSON.stringify(ruleDoc.attributes, null, 2)}`,
-    });
-
-    if (!ruleDoc.attributes.enabled) {
-      return { state: taskInstance.state };
-    }
-
-    const { filter, params: queryParams } = getQueryPayload({
-      query: ruleDoc.attributes.query,
-      timeField: ruleDoc.attributes.timeField,
-      lookbackWindow: ruleDoc.attributes.lookbackWindow,
-    });
-
-    this.logger.debug({
-      message: () =>
-        `executing ES|QL query for rule ${params.ruleId} in space ${
-          params.spaceId
-        } - ${JSON.stringify({
-          query: ruleDoc.attributes.query,
-          filter,
-          params: queryParams,
-        })}`,
-    });
-
-    let esqlResponse: Awaited<ReturnType<QueryService['executeQuery']>>;
-    try {
-      esqlResponse = await this.queryService.executeQuery({
-        query: ruleDoc.attributes.query,
-        filter,
-        params: queryParams,
-        abortSignal: abortController.signal,
-      });
-    } catch (error) {
-      if (abortController.signal.aborted) {
-        throw new Error('Search has been aborted due to cancelled execution');
-      }
-      throw error;
-    }
-
-    this.logger.debug({
-      message: () => `ES|QL response values: ${JSON.stringify(esqlResponse.values, null, 2)}`,
-    });
-
-    const targetDataStream = ALERT_EVENTS_DATA_STREAM;
-
     const scheduledAt = taskInstance.scheduledAt;
-    const scheduledTimestamp =
-      (typeof scheduledAt === 'string' ? scheduledAt : undefined) ??
-      (taskInstance.startedAt instanceof Date ? taskInstance.startedAt.toISOString() : undefined) ??
-      new Date().toISOString();
 
-    const alertDocs = buildAlertEventsFromEsqlResponse({
+    return {
       ruleId: params.ruleId,
       // TODO: Implement rule versioning. For now, use 1 as a placeholder.
       // The version should increment when the rule definition changes.
       ruleVersion: 1,
       spaceId: params.spaceId,
-      ruleAttributes: ruleDoc.attributes,
-      esqlResponse,
-      scheduledTimestamp,
-    });
+      scheduledAt: this.getScheduledAtISOString(scheduledAt, taskInstance.startedAt),
+      abortSignal: abortController.signal,
+    };
+  }
 
-    await this.storageService.bulkIndexDocs({
-      index: targetDataStream,
-      docs: alertDocs.map(({ doc }) => doc),
-      getId: (_doc, i) => alertDocs[i].id,
-    });
+  private getScheduledAtISOString(scheduledAt?: Date | string, startedAt?: Date | null): string {
+    if (typeof scheduledAt === 'string') {
+      return scheduledAt;
+    }
 
-    this.logger.debug({
-      message: `alerting_v2:esql run: ruleId=${params.ruleId} spaceId=${params.spaceId} alertsDataStream=${targetDataStream}`,
-    });
+    if (startedAt instanceof Date) {
+      return startedAt.toISOString();
+    }
 
-    return { state: {} };
+    return new Date().toISOString();
+  }
+
+  /**
+   * Translate pipeline result to task manager state.
+   */
+  private buildRunResult(
+    result: PipelineResult,
+    taskInstance: TaskRunParams['taskInstance']
+  ): RunResult {
+    if (result.completed) {
+      return { state: {} };
+    }
+
+    return { state: this.getStateForHaltReason(taskInstance, result.haltReason) };
+  }
+
+  /**
+   * Map domain halt reasons to task manager state.
+   */
+  private getStateForHaltReason(
+    taskInstance: TaskRunParams['taskInstance'],
+    reason?: HaltReason
+  ): Record<string, unknown> {
+    switch (reason) {
+      case 'rule_deleted':
+      case 'rule_disabled':
+        return taskInstance.state ?? {};
+      default:
+        return {};
+    }
   }
 }

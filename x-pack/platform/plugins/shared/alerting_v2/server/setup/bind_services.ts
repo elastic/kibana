@@ -26,6 +26,17 @@ import {
 import type { AlertingServerStartDependencies } from '../types';
 import { RetryServiceToken } from '../lib/services/retry_service/tokens';
 import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
+import { RuleExecutionPipeline } from '../lib/rule_executor/execution_pipeline';
+import { RuleExecutionStepsToken } from '../lib/rule_executor/tokens';
+import {
+  WaitForResourcesStep,
+  FetchRuleStep,
+  ValidateRuleStep,
+  BuildQueryStep,
+  ExecuteQueryStep,
+  BuildAlertsStep,
+  StoreAlertsStep,
+} from '../lib/rule_executor/steps';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(RulesClient).toSelf().inRequestScope();
@@ -82,4 +93,30 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       return new StorageService(esClient, loggerService);
     })
     .inSingletonScope();
+
+  bindRuleExecutionServices(bind);
 }
+
+const bindRuleExecutionServices = (bind: ContainerModuleLoadOptions['bind']) => {
+  bind(WaitForResourcesStep).toSelf().inSingletonScope();
+  bind(FetchRuleStep).toSelf().inRequestScope();
+  bind(ValidateRuleStep).toSelf().inSingletonScope();
+  bind(BuildQueryStep).toSelf().inSingletonScope();
+  bind(ExecuteQueryStep).toSelf().inRequestScope();
+  bind(BuildAlertsStep).toSelf().inSingletonScope();
+  bind(StoreAlertsStep).toSelf().inSingletonScope();
+
+  bind(RuleExecutionStepsToken)
+    .toDynamicValue(({ get }) => [
+      get(WaitForResourcesStep),
+      get(FetchRuleStep),
+      get(ValidateRuleStep),
+      get(BuildQueryStep),
+      get(ExecuteQueryStep),
+      get(BuildAlertsStep),
+      get(StoreAlertsStep),
+    ])
+    .inRequestScope();
+
+  bind(RuleExecutionPipeline).toSelf().inRequestScope();
+};
