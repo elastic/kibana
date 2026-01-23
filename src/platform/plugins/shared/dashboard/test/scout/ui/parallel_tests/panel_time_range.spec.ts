@@ -29,19 +29,28 @@ const addByValueLensPanel = async (pageObjects: PageObjects, page: ScoutPage) =>
   await page.testSubj.waitForSelector('lnsApp', { state: 'visible' });
 
   await page.testSubj.click('lnsXY_yDimensionPanel > lns-empty-dimension');
-  await page.testSubj.click('lns-indexPatternDimension-count');
+  await page.testSubj.click('lns-indexPatternDimension-average');
+  await page.testSubj.click('indexPattern-dimension-field');
+  await page.testSubj.typeWithDelay('indexPattern-dimension-field > comboBoxSearchInput', 'bytes');
+  await page.testSubj.click('lns-fieldOption-bytes');
+  await page.testSubj.click('lns-indexPattern-dimensionContainerClose');
+
+  await page.testSubj.click('lnsXY_xDimensionPanel > lns-empty-dimension');
+  await page.testSubj.click('lns-indexPatternDimension-date_histogram');
+  await page.testSubj.click('indexPattern-dimension-field');
+  await page.testSubj.typeWithDelay(
+    'indexPattern-dimension-field > comboBoxSearchInput',
+    '@timestamp'
+  );
+  await page.testSubj.click('lns-fieldOption-@timestamp');
   await page.testSubj.click('lns-indexPattern-dimensionContainerClose');
 
   await page.testSubj.click('lnsXY_splitDimensionPanel > lns-empty-dimension');
   await page.testSubj.click('lns-indexPatternDimension-terms');
   await page.testSubj.click('indexPattern-dimension-field');
-  await page.testSubj.typeWithDelay(
-    'indexPattern-dimension-field > comboBoxSearchInput',
-    'geo.src'
-  );
-  await page.testSubj.click('lns-fieldOption-geo.src');
+  await page.testSubj.typeWithDelay('indexPattern-dimension-field > comboBoxSearchInput', 'ip');
+  await page.testSubj.click('lns-fieldOption-ip');
   await page.testSubj.click('lns-indexPattern-dimensionContainerClose');
-
   await pageObjects.lens.saveAndReturn();
   await pageObjects.dashboard.waitForRenderComplete();
 };
@@ -122,7 +131,7 @@ spaceTest.describe('Panel time range (dashboard)', { tag: tags.ESS_ONLY }, () =>
     async ({ pageObjects, page }, testInfo) => {
       const libraryTitle = `My by reference visualization - ${testInfo.title.replace(/\s+/g, '-')}`;
 
-      await spaceTest.step('create dashboard and save panel to library', async () => {
+      await spaceTest.step('create dashboard and save Lens to library', async () => {
         await createDashboard(pageObjects, `${DASHBOARD_NAME_PREFIX} - ${testInfo.title}`);
         await addByValueLensPanel(pageObjects, page);
         await pageObjects.dashboard.saveToLibrary(libraryTitle);
@@ -142,7 +151,7 @@ spaceTest.describe('Panel time range (dashboard)', { tag: tags.ESS_ONLY }, () =>
     async ({ pageObjects, page }, testInfo) => {
       const libraryTitle = `My by reference visualization - ${testInfo.title.replace(/\s+/g, '-')}`;
 
-      await spaceTest.step('create dashboard and save panel to library', async () => {
+      await spaceTest.step('create dashboard and save Lens to library', async () => {
         await createDashboard(pageObjects, `${DASHBOARD_NAME_PREFIX} - ${testInfo.title}`);
         await addByValueLensPanel(pageObjects, page);
         await pageObjects.dashboard.saveToLibrary(libraryTitle);
