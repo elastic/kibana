@@ -556,9 +556,12 @@ function getObjectPropertiesDescription(
   fieldSchema: z.ZodObject,
   maxProperties: number = 5
 ): string {
-  return `an object with properties: ${Object.keys(fieldSchema.def.shape)
-    .slice(0, maxProperties)
-    .join(', ')}${Object.keys(fieldSchema.def.shape).length > maxProperties ? '...' : ''}`;
+  const requiredProperties = Object.keys(fieldSchema.def.shape).filter(
+    (key) => !isOptionalSchema(fieldSchema.def.shape[key])
+  );
+  return `an object with properties: ${requiredProperties.slice(0, maxProperties).join(', ')}${
+    requiredProperties.length > maxProperties ? '...' : ''
+  }`;
 }
 
 /**
