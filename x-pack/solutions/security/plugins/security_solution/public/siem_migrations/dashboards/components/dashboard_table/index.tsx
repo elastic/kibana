@@ -320,6 +320,7 @@ export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> =
                 </EuiFlexGroup>
                 <EuiSpacer size="m" />
                 <EuiBasicTable<DashboardMigrationDashboard>
+                  tableCaption={i18n.DASHBOARDS_MIGRATION_TABLE_CAPTION}
                   loading={false}
                   items={migrationDashboards}
                   pagination={pagination}
