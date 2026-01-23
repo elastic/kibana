@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiTabbedContent, useEuiTheme } from '@elastic/eui';
 import type { AlertStatusValues } from '@kbn/alerting-plugin/common';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
-import { defaultAlertsTableColumns } from '@kbn/response-ops-alerts-table/configuration';
+import { defaultAlertsTableColumns } from 'x-pack/platform/packages/shared/response-ops/alerts-table/configuration';
 import type { AlertsTable as AlertsTableType } from '@kbn/response-ops-alerts-table';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { Rule, RuleSummary, AlertStatus, RuleType } from '../../../../types';

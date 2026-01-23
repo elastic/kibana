@@ -20,7 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { isDefined } from '@kbn/ml-is-defined';
-import type { GetAlertsTableProp } from '@kbn/response-ops-alerts-table/types';
+import type { GetAlertsTableProp } from 'x-pack/platform/packages/shared/response-ops/alerts-table/types';
 import { useAlertsTableContext } from '@kbn/response-ops-alerts-table/contexts/alerts_table_context';
 import type { Alert } from '@kbn/alerting-types';
 import { ALERT_RULE_CATEGORY, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
@@ -28,7 +28,7 @@ import {
   ALERT_FLYOUT_DEFAULT_TITLE,
   ALERT_FLYOUT_PAGINATION_ARIA_LABEL,
   getAlertFlyoutAriaLabel,
-} from '@kbn/response-ops-alerts-table/translations';
+} from 'x-pack/platform/packages/shared/response-ops/alerts-table/translations';
 import { getAlertFormatters } from './render_cell_value';
 
 export const AlertsTableFlyout: GetAlertsTableProp<'renderExpandedAlertView'> = ({

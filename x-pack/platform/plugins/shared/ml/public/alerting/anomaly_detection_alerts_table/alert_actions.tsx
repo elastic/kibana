@@ -17,10 +17,10 @@ import { i18n } from '@kbn/i18n';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { AttachmentType, APP_ID as CASE_APP_ID } from '@kbn/cases-plugin/common';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
-import type { GetAlertsTableProp } from '@kbn/response-ops-alerts-table/types';
+import type { GetAlertsTableProp } from 'x-pack/platform/packages/shared/response-ops/alerts-table/types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
-import { STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX } from '@kbn/response-ops-alerts-table/constants';
+import { STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX } from 'x-pack/platform/packages/shared/response-ops/alerts-table/constants';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { useMlKibana } from '../../application/contexts/kibana';
 

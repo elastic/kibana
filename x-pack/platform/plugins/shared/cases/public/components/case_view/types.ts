@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { ComponentType, MutableRefObject } from 'react';
-import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
+import type { AlertsTableProps } from 'x-pack/platform/packages/shared/response-ops/alerts-table/types';
 import type { CasesTimelineIntegration } from '../timeline_context';
 import type { CasesNavigation } from '../links';
 import type { CaseViewRefreshPropInterface, CaseUI } from '../../../common';
