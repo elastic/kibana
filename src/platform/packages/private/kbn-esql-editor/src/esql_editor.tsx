@@ -1091,7 +1091,13 @@ const ESQLEditorInternal = function ESQLEditor({
         onOpenIndicesBrowser: enableEsqlResourceBrowser ? openIndicesBrowser : undefined,
         onOpenFieldsBrowser: enableEsqlResourceBrowser ? openFieldsBrowser : undefined,
       }),
-    [esqlCallbacks, telemetryCallbacks, enableEsqlResourceBrowser, openIndicesBrowser, openFieldsBrowser]
+    [
+      esqlCallbacks,
+      telemetryCallbacks,
+      enableEsqlResourceBrowser,
+      openIndicesBrowser,
+      openFieldsBrowser,
+    ]
   );
 
   const hoverProvider = useMemo(
@@ -1352,7 +1358,9 @@ const ESQLEditorInternal = function ESQLEditor({
                       esqlVariables: esqlVariablesRef,
                       controlsContext: controlsContextRef,
                       openTimePickerPopover,
-                      openIndicesBrowser: enableEsqlResourceBrowser ? openIndicesBrowser : undefined,
+                      openIndicesBrowser: enableEsqlResourceBrowser
+                        ? openIndicesBrowser
+                        : undefined,
                       openFieldsBrowser: enableEsqlResourceBrowser ? openFieldsBrowser : undefined,
                     });
 
