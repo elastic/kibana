@@ -705,3 +705,5 @@ export enum SecurityAgentBuilderAttachments {
 }
 
 export const THREAT_HUNTING_AGENT_ID = `${internalNamespaces.security}.agent`;
+export const automaticTroubleshootingNamespace = `${internalNamespaces.security}.automatic_troubleshooting`;
+export const AUTOMATIC_TROUBLESHOOTING_AGENT_ID = `${automaticTroubleshootingNamespace}.agent`;
