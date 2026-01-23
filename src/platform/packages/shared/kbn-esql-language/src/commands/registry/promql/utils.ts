@@ -27,8 +27,6 @@ interface PromqlPosition {
 export const IDENTIFIER_PATTERN = '[A-Za-z_][A-Za-z0-9_]*';
 
 const TRAILING_PARAM_NAME_REGEX = new RegExp(`(${IDENTIFIER_PATTERN})\\s*$`);
-const IDENTIFIER_CHAR_REGEX = /[a-z0-9_]/;
-const WHITESPACE_CHAR_REGEX = /[ \t\n\r]/;
 
 export function getPosition(innerText: string, command: ESQLAstAllCommands): PromqlPosition {
   const promqlCommand = command as ESQLAstPromqlCommand;
@@ -202,6 +200,12 @@ const PROMQL_PARAMS: PromqlParamDefinition[] = [
 
 export const PROMQL_PARAM_NAMES: string[] = PROMQL_PARAMS.map((param) => param.name);
 
+/* Matches "param=" or "param =" but not "endpoint=" for param "end". */
+const PARAM_ASSIGNMENT_PATTERNS = PROMQL_PARAM_NAMES.map((param) => ({
+  param,
+  pattern: new RegExp(`\\b${param}\\s*=`, 'i'),
+}));
+
 export function getPromqlParamDefinitions(): PromqlParamDefinition[] {
   return PROMQL_PARAMS;
 }
@@ -244,26 +248,10 @@ export function looksLikePromqlParamAssignment(text: string): boolean {
  */
 export function getUsedPromqlParamNames(commandText: string): Set<string> {
   const used = new Set<string>();
-  const text = commandText.toLowerCase();
 
-  for (const param of PROMQL_PARAM_NAMES) {
-    let index = text.indexOf(param);
-
-    while (index !== -1) {
-      if (index === 0 || !IDENTIFIER_CHAR_REGEX.test(text[index - 1])) {
-        let cursor = index + param.length;
-
-        while (cursor < text.length && WHITESPACE_CHAR_REGEX.test(text[cursor])) {
-          cursor += 1;
-        }
-
-        if (cursor < text.length && text[cursor] === '=') {
-          used.add(param);
-          break;
-        }
-      }
-
-      index = text.indexOf(param, index + param.length);
+  for (const { param, pattern } of PARAM_ASSIGNMENT_PATTERNS) {
+    if (pattern.test(commandText)) {
+      used.add(param);
     }
   }
 
@@ -272,7 +260,7 @@ export function getUsedPromqlParamNames(commandText: string): Set<string> {
 
 /*
  * Prevents value suggestions when a concrete value already follows the cursor.
- * This keepsus from suggesting values inthe middleof existing assignments.
+ * This keeps us from suggesting values in the middle of existing assignments.
  */
 export function isParamValueComplete(
   fullQuery: string,
@@ -291,7 +279,7 @@ export function isParamValueComplete(
     return false;
   }
 
-  // Cache the type guard result to avoid narrowing firstToken to never. */
+  // Cache the type guard result to avoid narrowing firstToken to never.
   const isParamToken = isPromqlParamName(firstToken);
   if (isParamToken) {
     return false;
