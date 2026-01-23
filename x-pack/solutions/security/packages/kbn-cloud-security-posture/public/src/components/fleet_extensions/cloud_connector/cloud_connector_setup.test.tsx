@@ -350,7 +350,8 @@ describe('CloudConnectorSetup', () => {
       expect(mockUseCloudConnectorSetup).toHaveBeenCalledWith(
         defaultProps.input,
         defaultProps.newPolicy,
-        defaultProps.updatePolicy
+        defaultProps.updatePolicy,
+        defaultProps.packageInfo
       );
     });
 
@@ -458,7 +459,8 @@ describe('CloudConnectorSetup', () => {
       expect(mockUseCloudConnectorSetup).toHaveBeenCalledWith(
         defaultProps.input,
         defaultProps.newPolicy,
-        defaultProps.updatePolicy
+        defaultProps.updatePolicy,
+        defaultProps.packageInfo
       );
 
       expect(mockCloudConnectorTabs).toHaveBeenCalledWith(
