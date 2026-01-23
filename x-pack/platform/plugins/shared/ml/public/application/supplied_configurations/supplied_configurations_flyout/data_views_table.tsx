@@ -123,7 +123,7 @@ export const DataViewsTable: FC<Props> = ({ matchingDataViews, moduleId, jobsLen
       tableCaption={i18n.translate(
         'xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.matchedDataViewsTableCaption',
         {
-          defaultMessage: 'Data views that match the supplied module',
+          defaultMessage: 'Data views that match the supplied configuration',
         }
       )}
     />
