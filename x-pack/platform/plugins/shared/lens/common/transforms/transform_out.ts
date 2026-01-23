@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
+import type { LensSerializedState } from '@kbn/lens-common';
 import { LENS_UNKNOWN_VIS, type LensByValueSerializedState } from '@kbn/lens-common';
 import type { LensTransformDependencies } from '.';
 import { LENS_ITEM_VERSION_V1, transformToV1LensItemAttributes } from '../content_management/v1';
@@ -22,22 +22,19 @@ import { findLensReference, isByRefLensState } from './utils';
  */
 export const getTransformOut = ({
   builder,
-  transformEnhancementsOut,
+  drilldownTransforms,
 }: LensTransformDependencies): LensTransformOut => {
-  return function transformOut(state, panelReferences) {
-    const enhancements = state.enhancements
-      ? transformEnhancementsOut?.(state.enhancements, panelReferences ?? [])
-      : undefined;
-    const enhancementsState = (
-      enhancements ? { enhancements } : {}
-    ) as DynamicActionsSerializedState;
+  return function transformOut(storedState, panelReferences) {
+    const state = drilldownTransforms.transformOut(
+      storedState,
+      panelReferences
+    ) as LensSerializedState;
 
     const savedObjectRef = findLensReference(panelReferences);
 
     if (savedObjectRef && isByRefLensState(state)) {
       return {
         ...state,
-        ...enhancementsState,
         savedObjectId: savedObjectRef.id,
       } satisfies LensByRefTransformOutResult;
     }
@@ -46,7 +43,6 @@ export const getTransformOut = ({
     const injectedState = injectLensReferences(
       {
         ...state,
-        ...enhancementsState,
         attributes: migratedAttributes,
       },
       panelReferences

@@ -22,26 +22,23 @@ import type { LensSerializedState } from '../../public';
  */
 export const getTransformIn = ({
   builder,
-  transformEnhancementsIn,
+  drilldownTransforms,
 }: LensTransformDependencies): LensTransformIn => {
   return function transformIn(config) {
-    const enhancementsResult =
-      transformEnhancementsIn && config.enhancements
-        ? transformEnhancementsIn(config.enhancements)
-        : { state: undefined, references: [] };
+    const { state: storedConfig, references: drilldownReferences } =
+      drilldownTransforms.transformIn(config);
 
-    if (isByRefLensConfig(config)) {
-      const { savedObjectId: id, ...rest } = config;
+    if (isByRefLensConfig(storedConfig)) {
+      const { savedObjectId: id, ...rest } = storedConfig;
       return {
         state: rest,
-        ...(enhancementsResult.state ? { enhancements: enhancementsResult.state } : {}),
         references: [
           {
             name: LENS_SAVED_OBJECT_REF_NAME,
             type: DOC_TYPE,
             id: id!,
           },
-          ...enhancementsResult.references,
+          ...drilldownReferences,
         ],
       } satisfies LensByRefTransformInResult;
     }
@@ -49,13 +46,12 @@ export const getTransformIn = ({
     const chartType = builder.getType(config.attributes);
 
     if (!builder.isSupported(chartType)) {
-      const { state, references } = extractLensReferences(config as LensSerializedState);
+      const { state, references } = extractLensReferences(storedConfig as LensSerializedState);
       // TODO: remove this once all formats are supported
       // when not supported, no transform is needed
       return {
         state,
-        ...(enhancementsResult.state ? { enhancements: enhancementsResult.state } : {}),
-        references: [...references, ...enhancementsResult.references],
+        references: [...references, ...drilldownReferences],
       } satisfies LensByValueTransformInResult;
     }
 
@@ -68,14 +64,13 @@ export const getTransformIn = ({
       ? builder.fromAPIFormat(config.attributes)
       : config.attributes;
     const { state, references } = extractLensReferences({
-      ...config,
+      ...storedConfig,
       attributes,
     });
 
     return {
       state,
-      ...(enhancementsResult.state ? { enhancements: enhancementsResult.state } : {}),
-      references: [...references, ...enhancementsResult.references],
+      references: [...references, ...drilldownReferences],
     } satisfies LensByValueTransformInResult;
   };
 };

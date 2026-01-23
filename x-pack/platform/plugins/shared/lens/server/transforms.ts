@@ -6,7 +6,7 @@
  */
 
 import { lensApiStateSchema, type LensConfigBuilder } from '@kbn/lens-embeddable-utils';
-import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type { DrilldownTransforms, EmbeddableTransformsSetup } from '@kbn/embeddable-plugin/common';
 import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 
 import { schema } from '@kbn/config-schema';
@@ -16,13 +16,12 @@ import { lensItemDataSchema } from './content_management';
 
 export const getLensServerTransforms = (
   builder: LensConfigBuilder,
-  { transformEnhancementsIn, transformEnhancementsOut }: EmbeddableSetup
+  drilldownTransforms: DrilldownTransforms
 ): LensTransforms => {
   return {
     ...getLensTransforms({
       builder,
-      transformEnhancementsIn,
-      transformEnhancementsOut,
+      drilldownTransforms,
     }),
     ...getExtraServerTransformProps(builder),
   };
@@ -52,7 +51,7 @@ const lensPanelSchema = schema.oneOf([lensByValuePanelSchema, lensByRefPanelSche
 
 function getExtraServerTransformProps(
   builder: LensConfigBuilder
-): Pick<LensTransforms, 'getSchema' | 'throwOnUnmappedPanel'> {
+): Pick<EmbeddableTransformsSetup, 'getSchema' | 'throwOnUnmappedPanel'> {
   return {
     getSchema: () => {
       return builder.isEnabled ? lensPanelSchema : undefined;

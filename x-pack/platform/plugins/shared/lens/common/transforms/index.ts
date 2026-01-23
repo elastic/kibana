@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 
 import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import type { LensTransforms } from './types';
@@ -14,8 +14,7 @@ import { getTransformOut } from './transform_out';
 
 export interface LensTransformDependencies {
   builder: LensConfigBuilder;
-  transformEnhancementsIn?: EmbeddableSetup['transformEnhancementsIn'];
-  transformEnhancementsOut?: EmbeddableSetup['transformEnhancementsOut'];
+  drilldownTransforms: DrilldownTransforms;
 }
 
 export function getLensTransforms(deps: LensTransformDependencies): LensTransforms {

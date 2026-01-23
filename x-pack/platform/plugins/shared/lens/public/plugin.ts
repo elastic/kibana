@@ -80,6 +80,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
@@ -402,17 +403,24 @@ export class LensPlugin {
           // This loads the builder async to allow synchronous access to builder via getLensBuilder
           await setLensBuilder(flags.apiFormat);
 
-          embeddable.registerLegacyURLTransform(LENS_EMBEDDABLE_TYPE, async () => {
-            const { getLensTransforms } = await import('./async_services');
-            const { LensConfigBuilder } = await import('@kbn/lens-embeddable-utils');
-            const builder = new LensConfigBuilder(undefined, flags.apiFormat);
+          embeddable.registerLegacyURLTransform(
+            LENS_EMBEDDABLE_TYPE,
+            async (transformDrilldownsOut: DrilldownTransforms['transformOut']) => {
+              const { getLensTransforms } = await import('./async_services');
+              const { LensConfigBuilder } = await import('@kbn/lens-embeddable-utils');
+              const builder = new LensConfigBuilder(undefined, flags.apiFormat);
 
-            return getLensTransforms({
-              builder,
-              transformEnhancementsIn: embeddable.transformEnhancementsIn,
-              transformEnhancementsOut: embeddable.transformEnhancementsOut,
-            }).transformOut;
-          });
+              return getLensTransforms({
+                builder,
+                drilldownTransforms: {
+                  transformIn: () => {
+                    throw new Error('transformDrilldownIn not provided in client');
+                  },
+                  transformOut: transformDrilldownsOut,
+                },
+              }).transformOut;
+            }
+          );
         })
       );
 

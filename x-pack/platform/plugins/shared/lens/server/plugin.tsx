@@ -30,6 +30,7 @@ import type { EmbeddableRegistryDefinition, EmbeddableSetup } from '@kbn/embedda
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { setupSavedObjects } from './saved_objects';
 import { setupExpressions } from './expressions';
 import { makeLensEmbeddableFactory } from './embeddable/make_lens_embeddable_factory';
@@ -133,10 +134,10 @@ export class LensServerPlugin
         builder.setEnabled(flags.apiFormat);
 
         // Need to wait for feature flags to be set before registering transforms
-        plugins.embeddable.registerTransforms(
-          LENS_EMBEDDABLE_TYPE,
-          getLensServerTransforms(builder, plugins.embeddable)
-        );
+        plugins.embeddable.registerTransforms(LENS_EMBEDDABLE_TYPE, {
+          getTransforms: (drilldownTransforms: DrilldownTransforms) =>
+            getLensServerTransforms(builder, drilldownTransforms),
+        });
 
         flags.apiFormat$.subscribe((value) => {
           builder.setEnabled(value);

@@ -52,7 +52,7 @@ export function initializeDynamicActionsManager(
         return deepEqual(getDynamicActionsState(a), getDynamicActionsState(b));
       },
       drilldowns: 'skip',
-    } as StateComparators<DynamicActionsSerializedState & { drilldowns: unknown }>,
+    } as StateComparators<DynamicActionsSerializedState>,
     anyStateChange$: dynamicActionsState$.pipe(map(() => undefined)),
     getLatestState,
     serializeState: () => getLatestState(),
