@@ -33,6 +33,7 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import { SavedObjectsService } from '@kbn/core-saved-objects-server-internal';
 import { I18nService } from '@kbn/core-i18n-server-internal';
 import { DeprecationsService } from '@kbn/core-deprecations-server-internal';
+import { UserActivityService } from '@kbn/core-user-activity-server-internal';
 import { CoreUsageDataService } from '@kbn/core-usage-data-server-internal';
 import { StatusService } from '@kbn/core-status-server-internal';
 import { UiSettingsService } from '@kbn/core-ui-settings-server-internal';
@@ -95,6 +96,7 @@ export class Server {
   private readonly coreUsageData: CoreUsageDataService;
   private readonly i18n: I18nService;
   private readonly deprecations: DeprecationsService;
+  private readonly userActivity: UserActivityService;
   private readonly executionContext: ExecutionContextService;
   private readonly prebootService: PrebootService;
   private readonly pricing: PricingService;
@@ -151,6 +153,7 @@ export class Server {
     this.coreUsageData = new CoreUsageDataService(core);
     this.i18n = new I18nService(core);
     this.deprecations = new DeprecationsService(core);
+    this.userActivity = new UserActivityService(core);
     this.executionContext = new ExecutionContextService(core);
     this.prebootService = new PrebootService(core);
     this.pricing = new PricingService(core);
@@ -338,6 +341,8 @@ export class Server {
       docLinks: docLinksSetup,
     });
 
+    const userActivitySetup = this.userActivity.setup({ logging: loggingSetup });
+
     const savedObjectsSetup = await this.savedObjects.setup({
       http: httpSetup,
       elasticsearch: elasticsearchServiceSetup,
@@ -405,6 +410,7 @@ export class Server {
       logging: loggingSetup,
       metrics: metricsSetup,
       deprecations: deprecationsSetup,
+      userActivity: userActivitySetup,
       coreUsageData: coreUsageDataSetup,
       pricing: pricingSetup,
       userSettings: userSettingsServiceSetup,
@@ -455,6 +461,7 @@ export class Server {
     });
 
     const deprecationsStart = this.deprecations.start();
+    const userActivityStart = this.userActivity.start();
     const soStartSpan = startTransaction.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await this.savedObjects.start({
       elasticsearch: elasticsearchStart,
@@ -514,6 +521,7 @@ export class Server {
       savedObjects: savedObjectsStart,
       uiSettings: uiSettingsStart,
       coreUsageData: coreUsageDataStart,
+      userActivity: userActivityStart,
       deprecations: deprecationsStart,
       security: securityStart,
       userProfile: userProfileStart,
