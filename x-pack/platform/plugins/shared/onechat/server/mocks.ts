@@ -7,6 +7,7 @@
 
 import type { OnechatPluginSetup, OnechatPluginStart } from './types';
 import { createMockedExecutableTool, createToolRegistryMock } from './test_utils/tools';
+import { createFormatContextMock } from './test_utils/attachments';
 
 const createSetupContractMock = (): jest.Mocked<OnechatPluginSetup> => {
   return {
@@ -24,6 +25,9 @@ const createSetupContractMock = (): jest.Mocked<OnechatPluginSetup> => {
 
 const createStartContractMock = (): jest.Mocked<OnechatPluginStart> => {
   return {
+    agents: {
+      runAgent: jest.fn(),
+    },
     tools: {
       execute: jest.fn(),
       getRegistry: jest.fn().mockImplementation(() => createToolRegistryMock()),
@@ -35,4 +39,7 @@ export const onechatMocks = {
   createSetup: createSetupContractMock,
   createStart: createStartContractMock,
   createTool: createMockedExecutableTool,
+  attachments: {
+    createFormatContextMock,
+  },
 };

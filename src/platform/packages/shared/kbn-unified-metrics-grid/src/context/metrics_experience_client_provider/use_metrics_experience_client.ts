@@ -15,7 +15,7 @@ export function useMetricsExperienceClient() {
 
   if (!services) {
     throw new Error(
-      'MetricsExperienceContext not set. Did you wrap your component in `<MetricsExperienceProvider/>`?'
+      'MetricsExperienceClientContext not set. Did you wrap your component in `<MetricsExperienceClientProvider/>`?'
     );
   }
 

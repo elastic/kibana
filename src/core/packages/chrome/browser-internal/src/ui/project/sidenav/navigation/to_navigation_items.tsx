@@ -10,8 +10,6 @@
 import type {
   ChromeProjectNavigationNode,
   NavigationTreeDefinitionUI,
-  RecentlyAccessedDefinition,
-  RootNavigationItemDefinition,
 } from '@kbn/core-chrome-browser';
 import classnames from 'classnames';
 import type {
@@ -105,35 +103,17 @@ export const toNavigationItems = (
     );
   };
 
-  if (navigationTree.body.length === 1) {
-    const firstNode = navigationTree.body[0];
-    if (!isRecentlyAccessedDefinition(firstNode)) {
-      primaryNodes = firstNode.children ?? [];
-      const homeNodeIndex = primaryNodes.findIndex((node) => node.renderAs === 'home');
-      if (homeNodeIndex !== -1) {
-        logoNode = primaryNodes[homeNodeIndex];
-        primaryNodes = primaryNodes.filter((_, index) => index !== homeNodeIndex); // Remove the logo node from primary items
-        maybeMarkActive(logoNode, 0);
-      } else {
-        warnOnce(
-          `No "home" node found in primary nodes. There should be a logo node with solution logo, name and home page href. renderAs: "home" is expected.`
-        );
-      }
-    }
-  } else {
-    warnOnce(
-      `Navigation tree body has multiple root nodes. First level should have a single node. It is not used and shall be removed later after we fully migrate to the new nav.`
-    );
-  }
+  primaryNodes = navigationTree.body;
+  footerNodes = navigationTree.footer ?? [];
 
-  if (navigationTree.footer?.length === 1) {
-    const firstNode = navigationTree.footer[0];
-    if (!isRecentlyAccessedDefinition(firstNode)) {
-      footerNodes = firstNode.children ?? [];
-    }
+  const homeNodeIndex = primaryNodes.findIndex((node) => node.renderAs === 'home');
+  if (homeNodeIndex !== -1) {
+    logoNode = primaryNodes[homeNodeIndex];
+    primaryNodes = primaryNodes.filter((_, index) => index !== homeNodeIndex); // Remove the logo node from primary items
+    maybeMarkActive(logoNode, 0);
   } else {
     warnOnce(
-      `Navigation tree footer has multiple root nodes. Footer should have a single node for the footer links.`
+      `No "home" node found in primary nodes. There should be a logo node with solution logo, name and home page href. renderAs: "home" is expected.`
     );
   }
 
@@ -148,34 +128,8 @@ export const toNavigationItems = (
   const toMenuItem = (navNode: ChromeProjectNavigationNode): MenuItem[] | MenuItem | null => {
     if (!navNode) return null;
 
-    if (isRecentlyAccessedDefinition(navNode)) {
-      warnOnce(
-        `Recently accessed node "${navNode.id}" is not supported in the new navigation. Ignoring it.`
-      );
+    if (navNode.sideNavStatus === 'hidden') {
       return null;
-    }
-
-    if (navNode.sideNavStatus === 'hidden' || navNode.sideNavVersion === 'v1') {
-      return null;
-    }
-
-    // Flatten accordion items into a single level with links.
-    // This is because the new navigation does not support accordion items.
-    if (navNode.renderAs === 'accordion') {
-      if (!navNode.children?.length) {
-        warnOnce(`Accordion node "${navNode.id}" has no children. Ignoring it.`);
-        return null;
-      }
-
-      const items = filterEmpty(navNode.children.flatMap(toMenuItem));
-
-      warnOnce(
-        `Accordion items are not supported in the new navigation. Flattening them "${items
-          .map((i) => i.id)
-          .join(', ')}" and dropping accordion node "${navNode.id}".`
-      );
-
-      return items;
     }
 
     // This was like a sub-section title without a link in the old navigation.
@@ -199,22 +153,11 @@ export const toNavigationItems = (
     const filterValidSecondaryChildren = (
       children: ChromeProjectNavigationNode[]
     ): ChromeProjectNavigationNode[] => {
-      return children
-        .filter((child) => child.sideNavStatus !== 'hidden' && child.sideNavVersion !== 'v1')
-        .filter((child) => {
-          const isCustomRender = typeof child.renderItem === 'function';
-          if (isCustomRender) {
-            warnOnce(
-              `Custom renderItem is not supported in the new navigation. Ignoring it for node "${child.id}".`
-            );
-          }
-          return !isCustomRender;
-        });
+      return children.filter((child) => child.sideNavStatus !== 'hidden');
     };
 
     // Helper function to convert a node to a secondary menu item
     const createSecondaryMenuItem = (child: ChromeProjectNavigationNode): SecondaryMenuItem => {
-      warnUnsupportedNavNodeOptions(child);
       maybeMarkActive(child, 2, navNode);
       return {
         id: child.id,
@@ -222,7 +165,7 @@ export const toNavigationItems = (
         href: warnIfMissing(child, 'href', 'Missing Href 😭'),
         isExternal: child.isExternalLink,
         'data-test-subj': getTestSubj(child),
-        badgeType: child.badgeTypeV2,
+        badgeType: child.badgeType,
       };
     };
 
@@ -255,10 +198,8 @@ export const toNavigationItems = (
         // Otherwise, we need to create sections for each child
         secondarySections = filterEmpty(
           navNode.children.map((child) => {
-            if (child.sideNavStatus === 'hidden' || child.sideNavVersion === 'v1') return null;
+            if (child.sideNavStatus === 'hidden') return null;
             if (!child.children?.length) return null;
-
-            warnUnsupportedNavNodeOptions(child);
 
             const validChildren = filterValidSecondaryChildren(child.children);
             const secondaryItems = validChildren.map(createSecondaryMenuItem);
@@ -284,8 +225,6 @@ export const toNavigationItems = (
       }
     }
 
-    warnUnsupportedNavNodeOptions(navNode);
-
     // for primary menu items there should always be a href
     // if it's a panel opener, we use the last opened panel or the first link inside the section as the href
     // if there are no sections, we use the href directly
@@ -302,7 +241,7 @@ export const toNavigationItems = (
       href: itemHref,
       sections: secondarySections,
       'data-test-subj': getTestSubj(navNode),
-      badgeType: navNode.badgeTypeV2,
+      badgeType: navNode.badgeType,
     } as MenuItem;
   };
 
@@ -394,38 +333,6 @@ function warnOnce(message: string) {
     }
   }, 0);
 }
-
-function warnUnsupportedNavNodeOptions(navNode: ChromeProjectNavigationNode) {
-  if (navNode.spaceBefore) {
-    warnOnce(
-      `Space before is not supported in the new navigation. Ignoring it for node "${navNode.id}".`
-    );
-  }
-
-  if (navNode.badgeOptions || navNode.withBadge) {
-    warnOnce(
-      `Badge options are not supported in the new navigation. Ignoring them for node "${navNode.id}".`
-    );
-  }
-
-  if (navNode.openInNewTab) {
-    warnOnce(
-      `Open in new tab is not supported in the new navigation. Ignoring it for node "${navNode.id}".`
-    );
-  }
-
-  if (navNode.renderItem) {
-    warnOnce(
-      `Custom renderItem is not supported in the new navigation. Ignoring it for node "${navNode.id}".`
-    );
-  }
-}
-
-const isRecentlyAccessedDefinition = (
-  item: ChromeProjectNavigationNode | RecentlyAccessedDefinition
-): item is RecentlyAccessedDefinition => {
-  return (item as RootNavigationItemDefinition).type === 'recentlyAccessed';
-};
 
 const filterEmpty = <T,>(arr: Array<T | null | undefined>): T[] =>
   arr.filter((item) => item !== null && item !== undefined) as T[];
@@ -582,10 +489,6 @@ const getPanelOpenerHref = (
 };
 
 const getIcon = (node: ChromeProjectNavigationNode | null): string => {
-  if (node?.iconV2) {
-    return node.iconV2 as string;
-  }
-
   if (node?.icon) {
     return node.icon as string;
   }

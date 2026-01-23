@@ -72,7 +72,9 @@ const findProtectedRanges = memoize((text: string): ProtectedRange[] => {
   }
 
   // Find markdown links ([text](url))
-  const linkRegex = /\[([^\]]*)\]\([^)]*\)/g;
+  // Use a limited length match to prevent ReDoS - links shouldn't be extremely long
+  // This matches up to 500 chars in brackets and parentheses (should be enough for any link)
+  const linkRegex = /\[(?:[^\]]){0,500}?\]\((?:[^)]){0,500}?\)/g;
   while ((match = linkRegex.exec(text)) !== null) {
     ranges.push({ start: match.index, end: match.index + match[0].length });
   }

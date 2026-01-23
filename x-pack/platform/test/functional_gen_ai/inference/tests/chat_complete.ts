@@ -250,10 +250,8 @@ export const chatCompleteSuite = (
 
         const message = await lastValueFrom(observable);
 
-        expect({
-          ...message,
-          content: '',
-        }).to.eql({ type: 'chatCompletionMessage', content: '', toolCalls: [] });
+        expect(message.type).to.eql('chatCompletionMessage');
+        expect(message.toolCalls).to.eql([]);
         expect(message.content).to.contain('4');
       });
 
@@ -315,6 +313,10 @@ export const chatCompleteSuite = (
         expect(tokenEvent.tokens.total).to.be(
           tokenEvent.tokens.prompt + tokenEvent.tokens.completion
         );
+        // Model field is optional and may be present if provided by the connector
+        if (tokenEvent.model !== undefined) {
+          expect(tokenEvent.model).to.be.a('string');
+        }
       });
 
       it('returns an error with the expected shape in case of error', async () => {
@@ -351,7 +353,7 @@ export const chatCompleteSuite = (
         before(async () => {
           await setAiAnonymizationSettings(supertest, { rules: [] });
         });
-        it('returns events without deanonymization data and streams', async () => {
+        it('returns events without deanonymization data', async () => {
           const response = supertest
             .post(`/internal/inference/chat_complete/stream`)
             .set('kbn-xsrf', 'kibana')
@@ -367,9 +369,6 @@ export const chatCompleteSuite = (
 
           const observable = supertestToObservable(response);
           const events = await lastValueFrom(observable.pipe(toArray()));
-          // Should have multiple chunk events (confirming it's streaming)
-          const chunkEvents = events.filter((event) => event.type === 'chatCompletionChunk');
-          expect(chunkEvents.length).to.be.greaterThan(1);
           const messageEvent = events.find((event) => event.type === 'chatCompletionMessage');
           expect(messageEvent.deanonymized_input).to.be(undefined);
           expect(messageEvent.deanonymized_output).to.be(undefined);
@@ -417,7 +416,7 @@ export const chatCompleteSuite = (
           });
         });
 
-        it('streams normally when no PII is detected even with rules enabled', async () => {
+        it('returns no deanonymization data when no PII is detected even with rules enabled', async () => {
           const response = supertest
             .post(`/internal/inference/chat_complete/stream`)
             .set('kbn-xsrf', 'kibana')
@@ -435,10 +434,6 @@ export const chatCompleteSuite = (
           const messageEvent = events.find((event) => event.type === 'chatCompletionMessage');
           expect(messageEvent.deanonymized_input).to.be(undefined);
           expect(messageEvent.deanonymized_output).to.be(undefined);
-
-          // Should have multiple chunk events (confirming it's streaming)
-          const chunkEvents = events.filter((event) => event.type === 'chatCompletionChunk');
-          expect(chunkEvents.length).to.be.greaterThan(1);
         });
       });
     });

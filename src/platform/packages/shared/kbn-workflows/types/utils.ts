@@ -10,10 +10,11 @@
 import type {
   ConnectorContractUnion,
   DynamicConnectorContract,
-  EnhancedInternalConnectorContract,
   EsWorkflowCreate,
+  HttpMethod,
+  InternalConnectorContract,
 } from './v1';
-import { ExecutionStatus } from './v1';
+import { ExecutionStatus, KNOWN_HTTP_METHODS } from './v1';
 import type {
   BuiltInStepType,
   ElasticsearchStep,
@@ -94,10 +95,13 @@ export const isBuiltInStepType = (type: string): type is BuiltInStepType =>
 export const isTriggerType = (type: string): type is TriggerType =>
   TriggerTypes.includes(type as TriggerType);
 
+export const isInternalConnector = (
+  connector: ConnectorContractUnion
+): connector is InternalConnectorContract => 'methods' in connector;
+
 export const isDynamicConnector = (
   connector: ConnectorContractUnion
 ): connector is DynamicConnectorContract => 'actionTypeId' in connector;
 
-export const isEnhancedInternalConnector = (
-  connector: ConnectorContractUnion
-): connector is EnhancedInternalConnectorContract => 'examples' in connector;
+export const isHttpMethod = (method: string): method is HttpMethod =>
+  KNOWN_HTTP_METHODS.includes(method as HttpMethod);

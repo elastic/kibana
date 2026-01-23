@@ -5,9 +5,15 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiMarkdownEditor, EuiTitle, EuiSpacer, EuiFlexGroup, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiMarkdownEditor,
+  EuiTitle,
+  EuiFlexGroup,
+  EuiButtonIcon,
+  EuiHorizontalRule,
+} from '@elastic/eui';
 import type { Condition } from '@kbn/streamlang';
-import type { Feature } from '@kbn/streams-schema';
+import { isFeatureWithFilter, type Feature } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
 import { EditableConditionPanel } from '../../data_management/shared';
@@ -34,8 +40,8 @@ export const FeatureDetailExpanded = ({
   };
 
   return (
-    <EuiFlexGroup direction="column">
-      <EuiTitle size="xs">
+    <EuiFlexGroup direction="column" gutterSize="xs" css={{ padding: '24px 24px 0 0' }}>
+      <EuiTitle size="xxs">
         <h3>
           {i18n.translate('xpack.streams.streamDetailView.featureDetailExpanded.description', {
             defaultMessage: 'Description',
@@ -51,37 +57,46 @@ export const FeatureDetailExpanded = ({
         )}
         value={feature.description}
         onChange={handleDescriptionChange}
-        height={400}
         readOnly={false}
         initialViewMode="viewing"
+        height={320}
+        autoExpandPreview={false}
       />
-      <EuiSpacer size="m" />
-      <EuiFlexGroup direction="column" gutterSize="none">
-        <EuiFlexGroup justifyContent="flexStart" gutterSize="xs" alignItems="center">
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate('xpack.streams.streamDetailView.featureDetailExpanded.filter', {
-                defaultMessage: 'Filter',
-              })}
-            </h3>
-          </EuiTitle>
-          <EuiButtonIcon
-            iconType="pencil"
-            onClick={toggleIsEditingCondition}
-            aria-label={i18n.translate(
-              'xpack.streams.streamDetailView.featureDetailExpanded.filter.edit',
-              {
-                defaultMessage: 'Edit filter',
+      <EuiHorizontalRule />
+      {isFeatureWithFilter(feature) && (
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexGroup justifyContent="flexStart" gutterSize="xs" alignItems="center">
+            <EuiTitle size="xxs">
+              <h3>
+                {i18n.translate('xpack.streams.streamDetailView.featureDetailExpanded.filter', {
+                  defaultMessage: 'Filter',
+                })}
+              </h3>
+            </EuiTitle>
+            <EuiButtonIcon
+              iconType="pencil"
+              onClick={toggleIsEditingCondition}
+              aria-label={i18n.translate(
+                'xpack.streams.streamDetailView.featureDetailExpanded.filter.edit',
+                {
+                  defaultMessage: 'Edit filter',
+                }
+              )}
+              data-test-subj={
+                isEditingCondition
+                  ? 'feature_identification_edit_filter_button'
+                  : 'feature_identification_save_filter_button'
               }
-            )}
+            />
+          </EuiFlexGroup>
+          <EditableConditionPanel
+            condition={feature.filter}
+            isEditingCondition={isEditingCondition}
+            setCondition={handleConditionChange}
           />
+          <EuiHorizontalRule />
         </EuiFlexGroup>
-        <EditableConditionPanel
-          condition={feature.filter}
-          isEditingCondition={isEditingCondition}
-          setCondition={handleConditionChange}
-        />
-      </EuiFlexGroup>
+      )}
     </EuiFlexGroup>
   );
 };

@@ -18,17 +18,26 @@ import type {
 } from '@kbn/onechat-common';
 import { isToolCallStep } from '@kbn/onechat-common';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
+import type { AttachmentInput, Attachment } from '@kbn/onechat-common/attachments';
 import type { ConversationsService } from '../../../services/conversations';
 import { queryKeys } from '../../query_keys';
 import { storageKeys } from '../../storage_keys';
-import { createNewConversation, newConversationId } from '../../utils/new_conversation';
-
-const pendingRoundId = '__pending__';
+import {
+  createNewConversation,
+  createNewRound,
+  newConversationId,
+} from '../../utils/new_conversation';
 
 export interface ConversationActions {
   removeNewConversationQuery: () => void;
   invalidateConversation: () => void;
-  addOptimisticRound: ({ userMessage }: { userMessage: string }) => void;
+  addOptimisticRound: ({
+    userMessage,
+    attachments,
+  }: {
+    userMessage: string;
+    attachments?: AttachmentInput[];
+  }) => void;
   removeOptimisticRound: () => void;
   setAgentId: (agentId: string) => void;
   addReasoningStep: ({ step }: { step: ReasoningStep }) => void;
@@ -104,18 +113,22 @@ const createConversationActions = ({
       queryClient.invalidateQueries({ queryKey });
     },
 
-    addOptimisticRound: ({ userMessage }: { userMessage: string }) => {
+    addOptimisticRound: ({
+      userMessage,
+      attachments,
+    }: {
+      userMessage: string;
+      attachments?: AttachmentInput[];
+    }) => {
       setConversation(
         produce((draft) => {
-          const nextRound: ConversationRound = {
-            id: pendingRoundId,
-            input: { message: userMessage },
-            response: { message: '' },
-            steps: [],
-            started_at: new Date().toISOString(),
-            time_to_first_token: 0,
-            time_to_last_token: 0,
-          };
+          const optimisticAttachments: Attachment[] =
+            attachments?.map((attachment, idx) => ({
+              id: `pending-attachment-${idx}`,
+              ...attachment,
+            })) ?? [];
+
+          const nextRound = createNewRound({ userMessage, attachments: optimisticAttachments });
 
           if (!draft) {
             const newConversation = createNewConversation();

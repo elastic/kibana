@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import type { Either } from 'fp-ts/Either';
+import * as t from 'io-ts';
 import { allOrAnyStringOrArray, dateType } from './common';
 import { durationType } from './duration';
 import { indicatorSchema } from './indicators';
 import { timeWindowSchema } from './time_window';
-import { healthStatusSchema, stateSchema, transformHealthSchema } from './health';
 
 const occurrencesBudgetingMethodSchema = t.literal('occurrences');
 const timeslicesBudgetingMethodSchema = t.literal('timeslices');
@@ -110,33 +109,31 @@ const artifactsWithIdSchema = t.partial({ artifacts: dashboardsWithIdSchema });
 const artifactsWithRefIdSchema = t.partial({ artifacts: dashboardsWithRefIdSchema });
 
 const sloDefinitionSchema = t.intersection([baseSloSchema, artifactsWithIdSchema]);
-
-const sloDefinitionAndHealthSchema = t.intersection([
-  baseSloSchema,
-  artifactsWithIdSchema,
-  t.partial({
-    state: stateSchema,
-    health: t.type({
-      overall: transformHealthSchema,
-      rollup: healthStatusSchema,
-      summary: healthStatusSchema,
-    }),
-  }),
-]);
-
 const storedSloDefinitionSchema = t.intersection([baseSloSchema, artifactsWithRefIdSchema]);
+
+const storedSloDefinitionTemplateSchema = t.partial({
+  name: t.string,
+  description: t.string,
+  indicator: indicatorSchema,
+  timeWindow: timeWindowSchema,
+  budgetingMethod: budgetingMethodSchema,
+  objective: objectiveSchema,
+  settings: settingsSchema,
+  tags: tagsSchema,
+  groupBy: groupBySchema,
+});
 
 export {
   budgetingMethodSchema,
-  objectiveSchema,
   groupBySchema,
+  objectiveSchema,
   occurrencesBudgetingMethodSchema,
   optionalSettingsSchema,
   settingsSchema,
   sloDefinitionSchema,
-  sloDefinitionAndHealthSchema,
-  storedSloDefinitionSchema,
   sloIdSchema,
+  storedSloDefinitionSchema,
+  storedSloDefinitionTemplateSchema,
   tagsSchema,
   targetSchema,
   timeslicesBudgetingMethodSchema,

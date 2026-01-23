@@ -19,12 +19,12 @@ import {
   PERFORM_RULE_INSTALLATION_URL,
   REVIEW_RULE_INSTALLATION_URL,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { deleteAllRules, waitFor } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteEndpointFleetPackage,
   deletePrebuiltRulesFleetPackage,
 } from '../../../../utils/rules/prebuilt_rules/delete_fleet_packages';
-import { deleteAllRules, waitFor } from '../../../../../../config/services/detections_response';
 
 const KIBANA_STATUS_URL = '/api/status';
 
@@ -107,7 +107,10 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send()
+        .send({
+          page: 1,
+          per_page: 10_000,
+        })
         .expect(200);
 
       expect(reviewPrebuiltRulesForInstallationResponse.rules.length).toBeGreaterThan(0);

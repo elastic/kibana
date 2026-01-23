@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { SynthtraceFixture } from '@kbn/scout-oblt';
-import { apm, log, timerange } from '@kbn/apm-synthtrace-client';
+import { apm, log, timerange } from '@kbn/synthtrace-client';
 
 const TEST_START_TIME = '2024-01-01T00:00:00.000Z';
 const TEST_END_TIME = '2024-01-01T01:00:00.000Z';
@@ -14,7 +14,8 @@ const TEST_END_TIME = '2024-01-01T01:00:00.000Z';
  * Generate synthetic logs data for testing
  */
 export async function generateLogsData(
-  logsSynthtraceEsClient: SynthtraceFixture['logsSynthtraceEsClient']
+  logsSynthtraceEsClient: SynthtraceFixture['logsSynthtraceEsClient'],
+  opts?: { dataset?: string }
 ) {
   const logsData = timerange(TEST_START_TIME, TEST_END_TIME)
     .interval('1m')
@@ -24,7 +25,7 @@ export async function generateLogsData(
         .create()
         .message('Test log message')
         .timestamp(timestamp)
-        .dataset('synth.test')
+        .dataset(opts?.dataset ?? 'synth.test')
         .namespace('default')
         .logLevel(Math.random() > 0.5 ? 'info' : 'warn')
         .defaults({

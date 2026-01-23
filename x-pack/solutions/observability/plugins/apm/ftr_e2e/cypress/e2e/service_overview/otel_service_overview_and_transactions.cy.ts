@@ -6,7 +6,7 @@
  */
 
 import url from 'url';
-import { ApmSynthtracePipelineSchema } from '@kbn/apm-synthtrace-client';
+import { ApmSynthtracePipelineSchema } from '@kbn/synthtrace-client';
 import { synthtrace } from '../../../synthtrace';
 import { sendotlp } from '../../fixtures/synthtrace/sendotlp';
 import { checkA11y } from '../../support/commands';

@@ -39,7 +39,7 @@ export class OneChatPageObject extends FtrService {
    * Type a message in the conversation input
    */
   async typeMessage(message: string) {
-    const inputElement = await this.testSubjects.find('onechatAppConversationInputFormTextArea');
+    const inputElement = await this.testSubjects.find('agentBuilderConversationInputEditor');
     await inputElement.click();
     await inputElement.type(message);
   }
@@ -48,7 +48,7 @@ export class OneChatPageObject extends FtrService {
    * Send the current message
    */
   async sendMessage() {
-    const sendButton = await this.testSubjects.find('onechatAppConversationInputFormSubmitButton');
+    const sendButton = await this.testSubjects.find('agentBuilderConversationInputSubmitButton');
     await sendButton.click();
   }
 
@@ -112,10 +112,46 @@ export class OneChatPageObject extends FtrService {
     return await this.getCurrentConversationIdFromUrl();
   }
 
+  async openConversationsHistory() {
+    // Only open if not already open
+    if (await this.isConversationsHistoryOpen()) {
+      return;
+    }
+
+    const conversationsHistoryToggleBtn = await this.testSubjects.find(
+      'onechatConversationsHistoryToggleBtn'
+    );
+    await conversationsHistoryToggleBtn.click();
+
+    // Wait for the conversations history popover to be visible and populated
+    await this.retry.try(async () => {
+      const conversationList = await this.testSubjects.find('agentBuilderConversationList');
+      // Verify the list is actually visible and has content
+      const isDisplayed = await conversationList.isDisplayed();
+      if (!isDisplayed) {
+        throw new Error('Conversation list is not displayed');
+      }
+    });
+  }
+
+  /**
+   * Check if the conversations history popover is currently open
+   */
+  async isConversationsHistoryOpen(): Promise<boolean> {
+    try {
+      const conversationList = await this.testSubjects.find('agentBuilderConversationList');
+      return await conversationList.isDisplayed();
+    } catch {
+      return false;
+    }
+  }
+
   /**
    * Navigate to an existing conversation by clicking on it in the history sidebar
    */
   async navigateToConversationViaHistory(conversationId: string) {
+    await this.openConversationsHistory();
+
     const conversationItem = await this.testSubjects.find(`conversationItem-${conversationId}`);
     await conversationItem.click();
   }
@@ -151,16 +187,21 @@ export class OneChatPageObject extends FtrService {
   }
 
   /**
-   * Delete a conversation by hovering and clicking the delete button
+   * Delete a conversation by clicking the more actions button and then the delete button
    */
   async deleteConversation(conversationId: string) {
+    await this.openConversationsHistory();
+
+    // Click on conversation to open it
     const conversationItem = await this.testSubjects.find(`conversationItem-${conversationId}`);
+    await conversationItem.click();
 
-    await conversationItem.moveMouseTo();
+    // Click on the more actions button
+    const moreActionsButton = await this.testSubjects.find('agentBuilderMoreActionsButton');
+    await moreActionsButton.click();
 
-    const deleteButton = await this.testSubjects.find(
-      `delete-conversation-button-${conversationId}`
-    );
+    // Click on the delete button from the popover
+    const deleteButton = await this.testSubjects.find('agentBuilderConversationDeleteButton');
     await deleteButton.click();
 
     const confirmButton = await this.testSubjects.find('confirmModalConfirmButton');
@@ -176,6 +217,8 @@ export class OneChatPageObject extends FtrService {
    * Check if a conversation exists in the history by conversation ID
    */
   async isConversationInHistory(conversationId: string): Promise<boolean> {
+    await this.openConversationsHistory();
+
     try {
       await this.testSubjects.find(`conversationItem-${conversationId}`);
       return true;
@@ -201,10 +244,51 @@ export class OneChatPageObject extends FtrService {
   }
 
   /**
+   * Get the current conversation title text
+   */
+  async getConversationTitle(): Promise<string> {
+    const titleElement = await this.testSubjects.find('agentBuilderConversationTitle');
+    return await titleElement.getVisibleText();
+  }
+
+  /**
+   * Rename a conversation by hovering over the title, clicking the pencil icon,
+   * entering the new name, and submitting
+   */
+  async renameConversation(newTitle: string): Promise<string> {
+    // Hover over the conversation title to reveal the pencil icon
+    const titleElement = await this.testSubjects.find('agentBuilderConversationTitle');
+    await titleElement.moveMouseTo();
+
+    // Click the pencil icon to enter edit mode
+    const renameButton = await this.testSubjects.find('agentBuilderConversationRenameButton');
+    await renameButton.click();
+
+    // Wait for the inline edit input to appear and clear + type new name
+    const inputElement = await this.testSubjects.find('renameConversationInputField');
+    await inputElement.clearValueWithKeyboard();
+    await inputElement.type(newTitle);
+
+    // Click the save button (checkmark icon)
+    const saveButton = await this.testSubjects.find('renameConversationSaveButton');
+    await saveButton.click();
+
+    // Wait for the title to update
+    await this.retry.try(async () => {
+      const updatedTitle = await this.getConversationTitle();
+      if (updatedTitle !== newTitle) {
+        throw new Error(`Title not yet updated: expected "${newTitle}", got "${updatedTitle}"`);
+      }
+    });
+
+    return newTitle;
+  }
+
+  /**
    * Get the thinking details text
    */
   async getThinkingDetails() {
-    const responseElement = await this.testSubjects.find('agentBuilderRoundResponse');
+    const responseElement = await this.testSubjects.find('agentBuilderThinkingPanel');
     return await responseElement.getVisibleText();
   }
 
@@ -254,7 +338,9 @@ export class OneChatPageObject extends FtrService {
   }
 
   async selectToolType(type: Exclude<ToolType, ToolType.builtin>) {
-    await this.testSubjects.selectValue('agentBuilderToolTypeSelect', type);
+    // EuiSuperSelect requires clicking the button to open the dropdown, then clicking the option
+    await this.testSubjects.click('agentBuilderToolTypeSelect');
+    await this.testSubjects.click(`agentBuilderToolTypeOption-${type}`);
   }
 
   async setToolDescription(description: string) {
@@ -357,6 +443,14 @@ export class OneChatPageObject extends FtrService {
     await this.clickToolsBulkDelete();
     await this.confirmModalConfirm();
     await this.testSubjects.click('toastCloseButton');
+  }
+
+  toolsSearch() {
+    return {
+      type: async (term: string) => {
+        await this.testSubjects.setValue('agentBuilderToolsSearchInput', term);
+      },
+    };
   }
 
   /*

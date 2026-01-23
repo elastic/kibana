@@ -13,4 +13,4 @@ export type {
   MetricFieldType,
   MetricUnit,
 } from './fields/types';
-export type { Dimension } from './dimensions/types';
+export type { Dimension, DimensionFilters } from './dimensions/types';

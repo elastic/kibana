@@ -55,7 +55,8 @@
     "@kbn/css-utils",
     "@kbn/storybook",
     "@kbn/esql-composer",
-    "@kbn/deeplinks-analytics"
+    "@kbn/deeplinks-analytics",
+    "@kbn/lens-embeddable-utils"
   ],
   "exclude": ["target/**/*"]
 }

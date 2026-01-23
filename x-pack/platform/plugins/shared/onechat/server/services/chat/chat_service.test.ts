@@ -37,7 +37,9 @@ import { isConversationIdSetEvent } from '@kbn/onechat-common/chat';
 
 const createChatModel = (): InferenceChatModel => {
   // we don't really need it
-  return {} as any;
+  return {
+    getConnector: jest.fn().mockReturnValue({ actionTypeId: '.bedrock' }),
+  } as any;
 };
 
 describe('ChatService', () => {

@@ -16,6 +16,8 @@ import {
   ALERT_FLAPPING_HISTORY,
   ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MAINTENANCE_WINDOW_NAMES,
+  ALERT_MUTED,
   ALERT_START,
   ALERT_STATUS,
   ALERT_UUID,
@@ -79,6 +81,9 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
+        // @ts-ignore
+        [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'open',
@@ -96,6 +101,7 @@ for (const flattened of [true, false]) {
               [EVENT_KIND]: 'signal',
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -122,6 +128,7 @@ for (const flattened of [true, false]) {
         duration: '36000000',
       });
       legacyAlert.setMaintenanceWindowIds(['maint-1', 'maint-321']);
+      legacyAlert.setMaintenanceWindowNames(['Maintenance Window 1', 'Maintenance Window 321']);
 
       const updatedRule = {
         ...alertRule,
@@ -152,6 +159,9 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
+        [ALERT_MAINTENANCE_WINDOW_NAMES]: ['Maintenance Window 1', 'Maintenance Window 321'],
+        // @ts-ignore
+        [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'open',
@@ -169,6 +179,7 @@ for (const flattened of [true, false]) {
               [EVENT_KIND]: 'signal',
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -219,6 +230,9 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
+        // @ts-ignore
+        [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'open',
@@ -236,6 +250,7 @@ for (const flattened of [true, false]) {
               [EVENT_KIND]: 'signal',
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
               [SPACE_IDS]: ['*'],
             }
           : {
@@ -263,6 +278,7 @@ for (const flattened of [true, false]) {
         duration: '36000000',
       });
       legacyAlert.setMaintenanceWindowIds(['maint-1', 'maint-321']);
+      legacyAlert.setMaintenanceWindowNames(['Maintenance Window 1', 'Maintenance Window 321']);
 
       const alert = flattened
         ? {
@@ -323,6 +339,9 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
+        [ALERT_MAINTENANCE_WINDOW_NAMES]: ['Maintenance Window 1', 'Maintenance Window 321'],
+        // @ts-ignore
+        [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'open',
@@ -340,6 +359,7 @@ for (const flattened of [true, false]) {
               [EVENT_KIND]: 'signal',
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -390,6 +410,9 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
+        // @ts-ignore
+        [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'open',
@@ -407,6 +430,7 @@ for (const flattened of [true, false]) {
               [EVENT_KIND]: 'signal',
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -433,6 +457,7 @@ for (const flattened of [true, false]) {
         duration: '36000000',
       });
       legacyAlert.setMaintenanceWindowIds(['maint-1', 'maint-321']);
+      legacyAlert.setMaintenanceWindowNames(['Maintenance Window 1', 'Maintenance Window 321']);
 
       const alert = flattened
         ? {
@@ -501,6 +526,9 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
+        [ALERT_MAINTENANCE_WINDOW_NAMES]: ['Maintenance Window 1', 'Maintenance Window 321'],
+        // @ts-ignore
+        [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'open',
@@ -518,6 +546,7 @@ for (const flattened of [true, false]) {
               [EVENT_KIND]: 'signal',
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -544,6 +573,7 @@ for (const flattened of [true, false]) {
         duration: '36000000',
       });
       legacyAlert.setMaintenanceWindowIds(['maint-1', 'maint-321']);
+      legacyAlert.setMaintenanceWindowNames(['Maintenance Window 1', 'Maintenance Window 321']);
 
       const alert = flattened
         ? {
@@ -610,6 +640,9 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
+        [ALERT_MAINTENANCE_WINDOW_NAMES]: ['Maintenance Window 1', 'Maintenance Window 321'],
+        // @ts-ignore
+        [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'open',
@@ -627,6 +660,7 @@ for (const flattened of [true, false]) {
               [EVENT_KIND]: 'signal',
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -718,6 +752,9 @@ for (const flattened of [true, false]) {
         [ALERT_SEVERITY_IMPROVING]: true,
         [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
         [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+        [ALERT_MAINTENANCE_WINDOW_NAMES]: [],
+        // @ts-ignore
+        [ALERT_MUTED]: false,
         [ALERT_PENDING_RECOVERED_COUNT]: 0,
         [ALERT_STATUS]: 'recovered',
         [ALERT_WORKFLOW_STATUS]: 'custom_status',
@@ -735,6 +772,7 @@ for (const flattened of [true, false]) {
               [EVENT_KIND]: 'signal',
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_UUID]: 'abcdefg',
+              [ALERT_MUTED]: false,
             }
           : {
               event: {
@@ -748,6 +786,24 @@ for (const flattened of [true, false]) {
                 },
               },
             }),
+      });
+    });
+
+    describe('ALERT_MUTED field', () => {
+      test('should preserve ALERT_MUTED from the existing alert', () => {
+        const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
+        legacyAlert.scheduleActions('default');
+
+        const result = buildRecoveredAlert<{}, {}, {}, 'default', 'recovered'>({
+          alert: existingFlattenedActiveAlert,
+          legacyAlert,
+          rule: alertRule,
+          recoveryActionGroup: 'recovered',
+          timestamp: '2023-03-28T12:27:28.159Z',
+          kibanaVersion: '8.9.0',
+        });
+
+        expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(false);
       });
     });
   });

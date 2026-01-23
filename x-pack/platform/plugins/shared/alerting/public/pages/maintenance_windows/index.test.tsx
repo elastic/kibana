@@ -11,7 +11,7 @@ import type { AppMockRenderer } from '../../lib/test_utils';
 import { createAppMockRenderer } from '../../lib/test_utils';
 import { useFindMaintenanceWindows } from '../../hooks/use_find_maintenance_windows';
 import { MaintenanceWindowsPage } from '.';
-import { MAINTENANCE_WINDOW_FEATURE_ID } from '../../../common';
+import { MAINTENANCE_WINDOW_FEATURE_ID } from '@kbn/maintenance-windows-plugin/common';
 
 jest.mock('../../hooks/use_find_maintenance_windows', () => ({
   useFindMaintenanceWindows: jest.fn(),

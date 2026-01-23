@@ -48,11 +48,11 @@ export type {
   ConnectorSubAction,
   ConnectorInstance,
   ConnectorTypeInfo,
-  ConnectorTypeInfoMinimal,
   ConnectorContractUnion,
-  EnhancedInternalConnectorContract,
   InternalConnectorContract,
   DynamicConnectorContract,
+  BaseConnectorContract,
+  HttpMethod,
 } from './v1';
 
 // exported full to use enum as values
@@ -63,6 +63,8 @@ export {
   ExecutionType,
   ExecutionStatusValues,
   ExecutionTypeValues,
+  TerminalExecutionStatuses,
+  NonTerminalExecutionStatuses,
   SearchWorkflowCommandSchema,
   UpdateWorkflowCommandSchema,
 } from './v1';

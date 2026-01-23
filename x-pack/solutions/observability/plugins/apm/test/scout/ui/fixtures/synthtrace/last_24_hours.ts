@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ApmFields, SynthtraceGenerator } from '@kbn/apm-synthtrace-client';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
+import { apm, timerange } from '@kbn/synthtrace-client';
 
 export function servicesDataFromTheLast24Hours(): SynthtraceGenerator<ApmFields> {
   const start = Date.now() - 1000 * 60 * 15;

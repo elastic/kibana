@@ -11,5 +11,6 @@
     "@kbn/onechat-common",
     "@kbn/tooling-log",
     "@kbn/core",
+    "@kbn/scout",
   ]
 }

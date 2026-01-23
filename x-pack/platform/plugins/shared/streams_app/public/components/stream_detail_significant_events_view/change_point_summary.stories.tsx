@@ -25,14 +25,23 @@ const xFormatter = niceTimeFormatter([start, end]);
 export const Spike: StoryFn<{}> = () => {
   return (
     <ChangePointSummary
-      change={{
-        time: new Date(`2025-03-24T13:48:00.000Z`).getTime(),
-        label: 'Spike',
-        type: 'spike',
-        color: 'danger',
-        impact: 'high',
-        p_value: 0.01,
-      }}
+      changes={[
+        {
+          query: {
+            id: 'some_event',
+            title: 'Some event',
+            kql: {
+              query: '*',
+            },
+          },
+          time: new Date(`2025-03-24T13:48:00.000Z`).getTime(),
+          label: 'Spike',
+          type: 'spike',
+          color: 'danger',
+          impact: 'high',
+          p_value: 0.01,
+        },
+      ]}
       xFormatter={xFormatter}
     />
   );

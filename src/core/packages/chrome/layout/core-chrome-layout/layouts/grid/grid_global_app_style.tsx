@@ -38,9 +38,11 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
     --kbnProjectHeaderAppActionMenuHeight: ${layoutVar('application.topBar.height', '0px')};
   }
 
-  :root {
-    // disable document-level scroll, since the application area handles it
-    overflow: hidden;
+  // disable document-level scroll, since the application area handles it, but only when not printing
+  @media screen {
+    :root {
+      overflow: hidden;
+    }
   }
 
   #kibana-body {
@@ -77,13 +79,6 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
     height: calc(100vh - var(--kbnHeaderBannerHeight));
     top: var(--kbnHeaderBannerHeight);
   }
-
-  // make sure fixed bottom bars are positioned relative to the application area
-  .euiBottomBar.euiBottomBar--fixed {
-    left: ${layoutVar('application.left', '0px')} !important; /* override EUI inline style */
-    right: ${layoutVar('application.right', '0px')} !important; /* override EUI inline style */
-    bottom: ${layoutVar('application.bottom', '0px')} !important; /* override EUI inline style */
-  }
 `;
 
 // temporary hacks that need to be removed after better flyout and global sidenav customization support in EUI
@@ -97,31 +92,54 @@ const globalTempHackStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
   }
 
   .kbnBody {
-    // adjust position of all the right flyouts relative to the application area, except the ones that are "above the header"
-    .euiFlyout[class*='right']:not(.euiOverlayMask[class*='aboveHeader'] .euiFlyout) {
-      ${logicalCSS('top', layoutVar('application.top', '0px'))};
-      ${logicalCSS('bottom', layoutVar('application.bottom', '0px'))};
-      ${logicalCSS('right', layoutVar('application.right', '0px'))};
-    }
-
     // overlay mask "belowHeader" should only cover the application area
-    .euiOverlayMask[class*='belowHeader'] {
+    .euiOverlayMask[data-relative-to-header='below'] {
       ${logicalCSS('top', layoutVar('application.top', '0px'))};
       ${logicalCSS('left', layoutVar('application.left', '0px'))};
       ${logicalCSS('right', layoutVar('application.right', '0px'))};
       ${logicalCSS('bottom', layoutVar('application.bottom', '0px'))};
     }
+
+    // adjust position of all the right flyouts relative to the application area
+    .euiFlyout[class*='right'] {
+      ${logicalCSS('top', layoutVar('application.top', '0px'))};
+      ${logicalCSS('right', layoutVar('application.right', '0px'))};
+      ${logicalCSS('bottom', layoutVar('application.bottom', '0px'))};
+    }
+
+    // if the overlay mask exists that is above the header, set the top, right and bottom of the right flyouts to 0
+    .euiOverlayMask[data-relative-to-header='above']
+      + [data-euiportal='true']
+      .euiFlyout[class*='right'] {
+      ${logicalCSS('top', 0)};
+      ${logicalCSS('right', 0)};
+      ${logicalCSS('bottom', 0)};
+    }
   }
 
-  // push flyout should be pushing the application area, instead of body
   #${APP_MAIN_SCROLL_CONTAINER_ID} {
+    // push flyout should be pushing the application area, instead of body
     ${logicalCSS('padding-right', `var(--euiPushFlyoutOffsetInlineEnd, 0px)`)};
     ${logicalCSS('padding-left', `var(--euiPushFlyoutOffsetInlineStart, 0px)`)};
+
+    // application area should have bottom padding when bottom bar is present
+    ${logicalCSS('padding-bottom', `var(--euiBottomBarOffset, 0px)`)};
   }
-  // this is a temporary hack to override EUI's body padding with push flyout
   .kbnBody {
+    // this is a temporary hack to override EUI's body padding with push flyout
     ${logicalCSS('padding-right', `0px !important`)};
     ${logicalCSS('padding-left', `0px !important`)};
+    // this is a temporary hack to override EUI's body padding with euibottom bar
+    ${logicalCSS('padding-bottom', `0px !important`)};
+    // just for consistency with other sides
+    ${logicalCSS('padding-top', `0px !important`)};
+  }
+
+  // make sure fixed bottom bars are positioned relative to the application area
+  .euiBottomBar.euiBottomBar--fixed {
+    left: ${layoutVar('application.left', '0px')} !important; /* override EUI inline style */
+    right: ${layoutVar('application.right', '0px')} !important; /* override EUI inline style */
+    bottom: ${layoutVar('application.bottom', '0px')} !important; /* override EUI inline style */
   }
 `;
 

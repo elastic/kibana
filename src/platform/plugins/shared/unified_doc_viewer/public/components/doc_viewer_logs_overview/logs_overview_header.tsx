@@ -53,6 +53,7 @@ export function LogsOverviewHeader({
       hasPadding={false}
     >
       <ContentBreakdown
+        dataView={dataView}
         formattedDoc={formattedDoc}
         hit={hit}
         renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}

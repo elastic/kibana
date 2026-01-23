@@ -11,6 +11,7 @@ import React, { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/public';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { ValuesSelector } from './values_selector';
 import { MetricsExperienceClientProvider } from '../../context/metrics_experience_client_provider';
 import { FIELD_VALUE_SEPARATOR } from '../../common/constants';
@@ -48,10 +49,11 @@ const mockClient: MetricsExperienceClient = {
     ],
   }),
   getFields: async () => ({ fields: [], total: 0, page: 1 }),
-} as MetricsExperienceClient;
+  searchFields: async () => ({ fields: [], total: 0, page: 1 }),
+};
 
 // Wrapper component with all required providers
-const StoryWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+const StoryWrapper = ({ children }: React.PropsWithChildren<{}>) => (
   <IntlProvider locale="en">
     <QueryClientProvider client={queryClient}>
       <MetricsExperienceClientProvider value={{ client: mockClient }}>
@@ -67,7 +69,10 @@ export const Default = () => {
   return (
     <StoryWrapper>
       <ValuesSelector
-        selectedDimensions={['host.name', 'service.name']}
+        selectedDimensions={[
+          { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
+          { name: 'service.name', type: ES_FIELD_TYPES.KEYWORD },
+        ]}
         selectedValues={selectedValues}
         indices={['metrics-*']}
         timeRange={defaultTimeRange}
@@ -87,7 +92,10 @@ export const WithSelectedValues = () => {
   return (
     <StoryWrapper>
       <ValuesSelector
-        selectedDimensions={['host.name', 'service.name']}
+        selectedDimensions={[
+          { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
+          { name: 'service.name', type: ES_FIELD_TYPES.KEYWORD },
+        ]}
         selectedValues={selectedValues}
         indices={['metrics-*']}
         timeRange={defaultTimeRange}
@@ -104,7 +112,7 @@ export const Disabled = () => {
   return (
     <StoryWrapper>
       <ValuesSelector
-        selectedDimensions={['host.name']}
+        selectedDimensions={[{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }]}
         selectedValues={selectedValues}
         indices={['metrics-*']}
         disabled={true}

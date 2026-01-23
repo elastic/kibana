@@ -73,5 +73,6 @@ export const updateSearchSource = (
       : fetchContext.filters;
     parentSearchSource.setField('filter', filters);
     parentSearchSource.setField('query', fetchContext.query);
+    parentSearchSource.setField('projectRouting', fetchContext.projectRouting);
   }
 };

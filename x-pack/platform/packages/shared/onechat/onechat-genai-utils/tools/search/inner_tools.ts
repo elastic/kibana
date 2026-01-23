@@ -73,17 +73,12 @@ export const createRelevanceSearchTool = ({
       name: relevanceSearchToolName,
       responseFormat: 'content_and_artifact',
       schema: z.object({
-        term: z.string().describe('Term to search for'),
-        index: z.string().describe('Name of the index, alias or datastream to search against'),
-        size: z
-          .number()
-          .optional()
-          .default(10)
-          .describe('Number of documents to return. Defaults to 10.'),
+        term: z.string().describe('The search term or phrase to match against document content'),
+        index: z.string().describe('The index, alias, or datastream to search'),
+        size: z.number().optional().default(10).describe('Max documents to return (default: 10)'),
       }),
-      description: `Find relevant documents in an index, alias or datastream, based on a simple fulltext search.
-
-      Will search for documents performing a match query against the provided term(s).`,
+      description:
+        'Find documents using full-text search. Returns results ranked by relevance score.',
     }
   );
 };
@@ -95,11 +90,15 @@ export const createNaturalLanguageSearchTool = ({
   esClient,
   events,
   logger,
+  rowLimit,
+  customInstructions,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
   events: ToolEventEmitter;
   logger: Logger;
+  rowLimit?: number;
+  customInstructions?: string;
 }) => {
   return toTool(
     async ({ query, index }) => {
@@ -115,6 +114,8 @@ export const createNaturalLanguageSearchTool = ({
             esClient,
             events,
             logger,
+            rowLimit,
+            customInstructions,
           });
 
           const results: ToolResult[] = response.esqlData

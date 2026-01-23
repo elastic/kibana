@@ -20,6 +20,7 @@ const features: Feature[] = [];
 
 for (let i = 0; i < 5; i++) {
   features.push({
+    type: 'system',
     name: faker.company.name(),
     description: faker.lorem.sentence(),
     filter: {
@@ -44,6 +45,7 @@ The editor also ships with some built in plugins. For example it can handle chec
 It can also handle emojis! :smile:
 And it can render !{tooltip[tooltips like this](Look! I'm a very helpful tooltip content!)}
 `;
+
   return (
     <StreamExistingFeaturesTable
       features={features}
@@ -52,13 +54,16 @@ And it can render !{tooltip[tooltips like this](Look! I'm a very helpful tooltip
       definition={{
         name: 'synthetics-http-default',
         description: '',
+        updated_at: new Date().toISOString(),
         ingest: {
           settings: {},
           lifecycle: { inherit: {} },
-          processing: { steps: [] },
+          processing: { steps: [], updated_at: new Date().toISOString() },
           classic: {},
+          failure_store: { inherit: {} },
         },
       }}
+      aiFeatures={null}
     />
   );
 };

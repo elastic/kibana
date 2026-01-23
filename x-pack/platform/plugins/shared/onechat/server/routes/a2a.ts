@@ -82,8 +82,8 @@ export function registerA2ARoutes({
       },
       access: 'public',
       summary: 'Send A2A task',
-      description:
-        'WARNING: This endpoint is designed for A2A protocol clients and should not be used directly via REST APIs. Use an A2A SDK or A2A Inspector instead.',
+      description: `> warn
+> This endpoint is designed for A2A protocol clients and should not be used directly via REST APIs. Use an A2A SDK or A2A Inspector instead.`,
       options: {
         tags: ['a2a', 'oas-tag:agent builder'],
         xsrfRequired: false,

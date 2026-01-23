@@ -33,6 +33,8 @@ export const naturalLanguageSearch = async ({
   esClient,
   logger,
   events,
+  rowLimit,
+  customInstructions,
 }: {
   nlQuery: string;
   target: string;
@@ -40,6 +42,8 @@ export const naturalLanguageSearch = async ({
   esClient: ElasticsearchClient;
   logger: Logger;
   events: ToolEventEmitter;
+  rowLimit?: number;
+  customInstructions?: string;
 }): Promise<NaturalLanguageSearchResponse> => {
   const queryGenResponse = await generateEsql({
     nlQuery,
@@ -49,6 +53,8 @@ export const naturalLanguageSearch = async ({
     esClient,
     logger,
     events,
+    rowLimit,
+    additionalInstructions: customInstructions,
   });
 
   return {

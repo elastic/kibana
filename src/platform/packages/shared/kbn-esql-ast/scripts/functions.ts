@@ -6,8 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { FunctionDefinition } from '../src/definitions/types';
-import { FunctionDefinitionTypes } from '../src/definitions/types';
+import type { FunctionDefinition } from '../src/commands/definitions/types';
+import { FunctionDefinitionTypes } from '../src/commands/definitions/types';
 import {
   defaultScalarFunctionLocations,
   dateDiffSuggestions,
@@ -31,6 +31,7 @@ export const extraFunctions: FunctionDefinition[] = [
         ],
         minParams: 2,
         returnType: 'unknown',
+        isSignatureRepeating: true,
       },
     ],
     examples: [

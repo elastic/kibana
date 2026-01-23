@@ -29,5 +29,9 @@
     "@kbn/datemath",
     "@kbn/es-query",
     "@kbn/monaco",
+    "@kbn/core",
+    "@kbn/projects-solutions-groups",
+    "@kbn/index-management-shared-types",
+    "@kbn/licensing-types",
   ]
 }

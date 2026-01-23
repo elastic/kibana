@@ -919,7 +919,7 @@
         "label": "validateHasWildcardWithWrongOperator",
         "description": [],
         "signature": [
-          "({ operator, value, }: { operator: \"wildcard\" | \"match\" | \"nested\" | \"exists\" | \"match_any\"; value: string | string[]; }) => boolean"
+          "({ operator, value, }: { operator: \"exists\" | \"wildcard\" | \"match\" | \"nested\" | \"match_any\"; value: string | string[]; }) => boolean"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,
@@ -944,7 +944,7 @@
                 "label": "operator",
                 "description": [],
                 "signature": [
-                  "\"wildcard\" | \"match\" | \"nested\" | \"exists\" | \"match_any\""
+                  "\"exists\" | \"wildcard\" | \"match\" | \"nested\" | \"match_any\""
                 ],
                 "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/path_validations/index.ts",
                 "deprecated": false,
@@ -1269,7 +1269,7 @@
         "label": "EventFiltersTypes",
         "description": [],
         "signature": [
-          "\"nested\" | \"exists\" | ",
+          "\"exists\" | \"nested\" | ",
           {
             "pluginId": "@kbn/securitysolution-utils",
             "scope": "common",

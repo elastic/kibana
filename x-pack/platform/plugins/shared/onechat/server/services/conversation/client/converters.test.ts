@@ -48,6 +48,12 @@ describe('conversation model converters', () => {
               started_at: roundCreationDate,
               time_to_first_token: 42,
               time_to_last_token: 100,
+              model_usage: {
+                connector_id: 'unknown',
+                llm_calls: 1,
+                input_tokens: 12,
+                output_tokens: 42,
+              },
             },
           ],
           created_at: creationDate,
@@ -84,6 +90,12 @@ describe('conversation model converters', () => {
             started_at: roundCreationDate,
             time_to_first_token: 42,
             time_to_last_token: 100,
+            model_usage: {
+              connector_id: 'unknown',
+              llm_calls: 1,
+              input_tokens: 12,
+              output_tokens: 42,
+            },
           },
         ],
       });
@@ -106,6 +118,12 @@ describe('conversation model converters', () => {
           started_at: roundCreationDate,
           time_to_first_token: 0,
           time_to_last_token: 0,
+          model_usage: {
+            connector_id: 'unknown',
+            llm_calls: 1,
+            input_tokens: 12,
+            output_tokens: 42,
+          },
         },
       ];
 
@@ -134,6 +152,12 @@ describe('conversation model converters', () => {
             started_at: roundCreationDate,
             time_to_first_token: 0,
             time_to_last_token: 0,
+            model_usage: {
+              connector_id: 'unknown',
+              llm_calls: 1,
+              input_tokens: 12,
+              output_tokens: 42,
+            },
           },
         ],
       });
@@ -210,6 +234,54 @@ describe('conversation model converters', () => {
 
       expect(results.map((result) => result.tool_result_id)).toEqual(['foo', 'some-result-id']);
     });
+
+    it('deserializes conversation with attachments', () => {
+      const serialized = documentBase();
+      serialized._source!.attachments = [
+        {
+          id: 'att-1',
+          type: 'text',
+          versions: [
+            {
+              version: 1,
+              data: { content: 'Hello' },
+              created_at: creationDate,
+              content_hash: 'abc123',
+              estimated_tokens: 5,
+            },
+          ],
+          current_version: 1,
+        },
+      ];
+
+      const deserialized = fromEs(serialized);
+
+      expect(deserialized.attachments).toEqual([
+        {
+          id: 'att-1',
+          type: 'text',
+          versions: [
+            {
+              version: 1,
+              data: { content: 'Hello' },
+              created_at: creationDate,
+              content_hash: 'abc123',
+              estimated_tokens: 5,
+            },
+          ],
+          current_version: 1,
+        },
+      ]);
+    });
+
+    it('deserializes conversation without attachments (old format)', () => {
+      const serialized = documentBase();
+      // No attachments field - old format
+
+      const deserialized = fromEs(serialized);
+
+      expect(deserialized.attachments).toBeUndefined();
+    });
   });
 
   describe('toEs', () => {
@@ -234,6 +306,12 @@ describe('conversation model converters', () => {
             started_at: roundCreationDate,
             time_to_first_token: 42,
             time_to_last_token: 100,
+            model_usage: {
+              connector_id: 'unknown',
+              llm_calls: 1,
+              input_tokens: 12,
+              output_tokens: 42,
+            },
           },
         ],
       };
@@ -262,13 +340,61 @@ describe('conversation model converters', () => {
             started_at: roundCreationDate,
             time_to_first_token: 42,
             time_to_last_token: 100,
+            model_usage: {
+              connector_id: 'unknown',
+              llm_calls: 1,
+              input_tokens: 12,
+              output_tokens: 42,
+            },
           },
         ],
         created_at: creationDate,
         updated_at: updateDate,
+        // NEW: attachments defaults to empty array
+        attachments: [],
+        // Legacy field explicitly set to undefined
+        rounds: undefined,
       });
       // Verify rounds is not present
       expect(serialized.rounds).toBeUndefined();
+    });
+
+    it('serializes conversation with attachments', () => {
+      const conversation = conversationBase();
+      conversation.attachments = [
+        {
+          id: 'att-1',
+          type: 'text',
+          versions: [
+            {
+              version: 1,
+              data: { content: 'Hello' },
+              created_at: creationDate,
+              content_hash: 'abc123',
+              estimated_tokens: 5,
+            },
+          ],
+          current_version: 1,
+        },
+      ];
+      const serialized = toEs(conversation, 'space');
+
+      expect(serialized.attachments).toEqual([
+        {
+          id: 'att-1',
+          type: 'text',
+          versions: [
+            {
+              version: 1,
+              data: { content: 'Hello' },
+              created_at: creationDate,
+              content_hash: 'abc123',
+              estimated_tokens: 5,
+            },
+          ],
+          current_version: 1,
+        },
+      ]);
     });
 
     it('serializes the steps', () => {

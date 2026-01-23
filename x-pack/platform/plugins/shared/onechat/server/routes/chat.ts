@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
 import type { Observable } from 'rxjs';
@@ -35,6 +36,7 @@ export function registerChatRoutes({
   getInternalServices,
   coreSetup,
   logger,
+  analyticsService,
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
@@ -82,7 +84,12 @@ export function registerChatRoutes({
             })
           ),
         }),
-        { meta: { description: 'Optional attachments to send with the message.' } }
+        {
+          meta: {
+            description:
+              '**Technical Preview; added in 9.3.0.** Optional attachments to send with the message.',
+          },
+        }
       )
     ),
     capabilities: schema.maybe(
@@ -200,7 +207,6 @@ export function registerChatRoutes({
         },
         tags: ['oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
@@ -252,9 +258,7 @@ export function registerChatRoutes({
         return response.ok<ChatResponse>({
           body: {
             conversation_id: convId,
-            trace_id: round.trace_id,
-            steps: round.steps,
-            response: round.response,
+            ...omit(round, ['id', 'input']),
           },
         });
       })
@@ -400,7 +404,6 @@ export function registerChatRoutes({
         },
         tags: ['oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },

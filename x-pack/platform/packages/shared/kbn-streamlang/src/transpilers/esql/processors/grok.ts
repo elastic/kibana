@@ -57,7 +57,6 @@ import { unwrapPatternDefinitions } from '../../../../types/utils/grok_pattern_d
 export function convertGrokProcessorToESQL(processor: GrokProcessor): ESQLAstCommand[] {
   const {
     from,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     ignore_missing = false, // default mirrors ingest grok behavior
     where,
   } = processor;

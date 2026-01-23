@@ -14,7 +14,8 @@ import { useLocation } from 'react-router-dom';
 import type { EuiPortalProps } from '@elastic/eui/src/components/portal/portal';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
-import { layoutVar } from '@kbn/core-chrome-layout-constants';
+import { euiIncludeSelectorInFocusTrap, layoutVar } from '@kbn/core-chrome-layout-constants';
+
 import { useHasFullScreenContent } from '../../../common/containers/use_full_screen';
 import { FULL_SCREEN_CONTENT_OVERRIDES_CSS_STYLESHEET } from '../../../common/components/page';
 
@@ -32,9 +33,7 @@ const OverlayRootContainer = styled.div`
 
   border-left: 1px solid ${({ theme: { eui } }) => eui.euiColorLightestShade};
 
-  z-index: ${({ theme: { eui } }) =>
-    eui.euiZFlyout +
-    3}; // we need to have this response div rendered above the timeline flyout (with z-index at 1002)
+  z-index: ${({ theme: { eui } }) => eui.euiZFlyout};
 
   background-color: ${({ theme: { eui } }) => eui.euiColorEmptyShade};
 
@@ -302,6 +301,19 @@ export const PageOverlay = memo<PageOverlayProps>(
       };
     }, [isHidden, isMounted, lockDocumentBody, showInFullScreen]);
 
+    const focusTrapShards = useMemo(() => {
+      return new Proxy([], {
+        get(_, prop) {
+          const elements = Array.from(
+            document.querySelectorAll(euiIncludeSelectorInFocusTrap.selector)
+          );
+          const value = Reflect.get(elements, prop);
+
+          return typeof value === 'function' ? value.bind(elements) : value;
+        },
+      });
+    }, []);
+
     return (
       <EuiPortal portalRef={setPortalEleRef}>
         <OverlayRootContainer
@@ -309,7 +321,7 @@ export const PageOverlay = memo<PageOverlayProps>(
           className={containerClassName}
           style={containerCssOverrides}
         >
-          <EuiFocusTrap data-test-subj="trap-focus" className="fullHeight">
+          <EuiFocusTrap data-test-subj="trap-focus" className="fullHeight" shards={focusTrapShards}>
             {children}
           </EuiFocusTrap>
         </OverlayRootContainer>

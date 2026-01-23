@@ -35,6 +35,7 @@ describe('BarDetails', () => {
     name: 'Test Span',
     duration: 1234,
     errors: [],
+    spanLinksCount: { incoming: 0, outgoing: 0 },
   } as unknown as TraceWaterfallItem;
 
   it('renders the span name and formatted duration', () => {
@@ -65,8 +66,7 @@ describe('BarDetails', () => {
   describe('in case of errors', () => {
     it('renders errors icon in case of errors', () => {
       const mockItemWithError = {
-        name: 'Test Span',
-        duration: 1234,
+        ...mockItem,
         errors: [{ errorDocId: 'error-doc-id-1' }],
       } as unknown as TraceWaterfallItem;
       const { getByTestId } = render(<BarDetails item={mockItemWithError} left={10} />);
@@ -81,8 +81,7 @@ describe('BarDetails', () => {
       });
       it('renders errors button icont', () => {
         const mockItemWithError = {
-          name: 'Test Span',
-          duration: 1234,
+          ...mockItem,
           errors: [{ errorDocId: 'error-doc-id-1' }],
         } as unknown as TraceWaterfallItem;
         const { getByTestId } = render(<BarDetails item={mockItemWithError} left={10} />);
@@ -99,8 +98,7 @@ describe('BarDetails', () => {
 
       describe('and only has 1 error', () => {
         const mockItemWithError = {
-          name: 'Test Span',
-          duration: 1234,
+          ...mockItem,
           errors: [{ errorDocId: 'error-doc-id-1' }],
         } as unknown as TraceWaterfallItem;
 
@@ -116,8 +114,7 @@ describe('BarDetails', () => {
       describe('and has more than 1 error', () => {
         const errorCount = 2;
         const mockItemWithError = {
-          name: 'Test Span',
-          duration: 1234,
+          ...mockItem,
           errors: [{ errorDocId: 'error-doc-id-1' }, { errorDocId: 'error-doc-id-2' }],
         } as unknown as TraceWaterfallItem;
 
@@ -134,13 +131,11 @@ describe('BarDetails', () => {
 
   describe('in case of failure or error', () => {
     const mockItemWithFailure = {
-      name: 'Test Span',
-      duration: 1234,
+      ...mockItem,
       status: {
         fieldName: 'fieldName',
         value: 'Error',
       },
-      errors: [],
     } as unknown as TraceWaterfallItem;
 
     it('renders failure badge', () => {
@@ -168,10 +163,8 @@ describe('BarDetails', () => {
 
   describe('in case of orphan spans', () => {
     const mockOrphanItem = {
-      name: 'Test Span',
-      duration: 1234,
+      ...mockItem,
       isOrphan: true,
-      errors: [],
     } as unknown as TraceWaterfallItem;
 
     it('renders an orphan span icon', () => {
@@ -196,6 +189,71 @@ describe('BarDetails', () => {
           'This span is orphaned due to missing trace context and has been reparented to the root to restore the execution flow'
         );
         expect(tooltipContent).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('in case of span links', () => {
+    it('does not render SpanLinksBadge when both incoming and outgoing counts are zero', () => {
+      const mockItemWithNoSpanLinks = {
+        ...mockItem,
+        id: 'test-span-id',
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+      } as unknown as TraceWaterfallItem;
+
+      const { queryByTestId } = render(<BarDetails item={mockItemWithNoSpanLinks} left={10} />);
+      expect(queryByTestId('spanLinksBadge_test-span-id')).not.toBeInTheDocument();
+    });
+
+    it('renders SpanLinksBadge with correct count for single span link', () => {
+      const mockItemWithSpanLinks = {
+        ...mockItem,
+        id: 'test-span-id',
+        spanLinksCount: { incoming: 1, outgoing: 0 },
+      } as unknown as TraceWaterfallItem;
+
+      const { getByTestId, getByText } = render(
+        <BarDetails item={mockItemWithSpanLinks} left={10} />
+      );
+      const badge = getByTestId('spanLinksBadge_test-span-id');
+      expect(badge).toBeInTheDocument();
+      expect(getByText('1 Span link')).toBeInTheDocument();
+    });
+
+    it('renders SpanLinksBadge with correct count for multiple span links', () => {
+      const mockItemWithSpanLinks = {
+        ...mockItem,
+        id: 'test-span-id',
+        spanLinksCount: { incoming: 2, outgoing: 3 },
+      } as unknown as TraceWaterfallItem;
+
+      const { getByTestId, getByText } = render(
+        <BarDetails item={mockItemWithSpanLinks} left={10} />
+      );
+      const badge = getByTestId('spanLinksBadge_test-span-id');
+      expect(badge).toBeInTheDocument();
+      expect(getByText('5 Span links')).toBeInTheDocument();
+    });
+
+    it('shows tooltip with correct counts on hover', async () => {
+      const user = userEvent.setup();
+      const mockItemWithSpanLinks = {
+        ...mockItem,
+        id: 'test-span-id',
+        spanLinksCount: { incoming: 3, outgoing: 5 },
+      } as unknown as TraceWaterfallItem;
+
+      const { getByTestId, getByText } = render(
+        <BarDetails item={mockItemWithSpanLinks} left={10} />
+      );
+      const badge = getByTestId('spanLinksBadge_test-span-id');
+
+      await user.hover(badge);
+
+      await waitFor(() => {
+        expect(getByText('8 Span links found')).toBeInTheDocument();
+        expect(getByText('3 incoming')).toBeInTheDocument();
+        expect(getByText('5 outgoing')).toBeInTheDocument();
       });
     });
   });

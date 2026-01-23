@@ -330,6 +330,12 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     );
   };
 
+  private onDraftChange = (draft: UnifiedSearchDraft | undefined) => {
+    if (this.props.onDraftChange && !isEqual(this.props.draft, draft)) {
+      this.props.onDraftChange(draft);
+    }
+  };
+
   componentWillUnmount() {
     this.renderSavedQueryManagement.clear();
   }
@@ -576,28 +582,36 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     dateRange: TimeRange;
     query?: QT | Query | undefined;
   }) => {
-    if (!this.isDirty()) {
-      const searchSession = await this.services.data.search.session.save({
-        entryPoint: 'main button',
-      });
-      this.showBackgroundSearchCreatedToast(searchSession.attributes.name);
-      return;
-    }
-
-    const currentSessionId = this.services.data.search.session.getSessionId();
-
-    const subscription = this.services.data.search.session
-      .getSession$()
-      .subscribe(async (newSessionId) => {
-        if (currentSessionId === newSessionId) return;
-        subscription.unsubscribe();
+    try {
+      if (!this.isDirty()) {
         const searchSession = await this.services.data.search.session.save({
           entryPoint: 'main button',
         });
         this.showBackgroundSearchCreatedToast(searchSession.attributes.name);
-      });
+        return;
+      }
 
-    this.onQueryBarSubmit(payload);
+      const currentSessionId = this.services.data.search.session.getSessionId();
+
+      const subscription = this.services.data.search.session
+        .getSession$()
+        .subscribe(async (newSessionId) => {
+          if (currentSessionId === newSessionId) return;
+          subscription.unsubscribe();
+          const searchSession = await this.services.data.search.session.save({
+            entryPoint: 'main button',
+          });
+          this.showBackgroundSearchCreatedToast(searchSession.attributes.name);
+        });
+
+      this.onQueryBarSubmit(payload);
+    } catch (e) {
+      this.services.notifications.toasts.addError(e as Error, {
+        title: i18n.translate('unifiedSearch.search.searchBar.backgroundSearch.errorToast.title', {
+          defaultMessage: 'There was a problem sending your search to background',
+        }),
+      });
+    }
   };
 
   private shouldShowDatePickerAsBadge() {
@@ -752,7 +766,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           onRefreshChange={this.props.onRefreshChange}
           onCancel={this.props.onCancel}
           onChange={this.onQueryBarChange}
-          onDraftChange={this.props.onDraftChange}
+          onDraftChange={this.onDraftChange}
           onSendToBackground={this.onBackgroundSearch}
           isDirty={this.isDirty()}
           customSubmitButton={

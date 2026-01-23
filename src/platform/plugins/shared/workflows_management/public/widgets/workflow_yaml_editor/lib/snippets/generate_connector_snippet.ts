@@ -9,7 +9,7 @@
 
 import { stringify, type ToStringOptions } from 'yaml';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { getZodTypeName } from '../../../../../common/lib/zod';
 import { isMac } from '../../../../shared/utils/is_mac';
 import { getConnectorInstancesForType } from '../autocomplete/suggestions/connector_id/get_connector_id_suggestions_items';
@@ -37,7 +37,7 @@ export function generateConnectorSnippet(
   const stringifyOptions: ToStringOptions = { indent: 2 };
   let parameters: Record<string, unknown>;
 
-  const isConnectorIdRequired = getCachedAllConnectors().find(
+  const isConnectorIdRequired = getCachedAllConnectors(dynamicConnectorTypes).find(
     (c) => c.type === connectorType
   )?.connectorIdRequired;
 
@@ -48,10 +48,10 @@ export function generateConnectorSnippet(
     if (instances.length > 0) {
       // Use the first non-deprecated instance as default, or first instance if all are deprecated
       const defaultInstance = instances.find((i) => !i.isDeprecated) || instances[0];
-      connectorIdValue = defaultInstance.name;
+      connectorIdValue = defaultInstance.id; // Use UUID
     } else {
       // No instances configured, add placeholder comment
-      connectorIdValue = '# Enter connector ID here';
+      connectorIdValue = '# Enter connector UUID here';
     }
   }
 
@@ -163,7 +163,7 @@ export function getEnhancedTypeInfo(schema: z.ZodType): {
   // Unwrap ZodOptional
   if (currentSchema instanceof z.ZodOptional) {
     isOptional = true;
-    currentSchema = currentSchema._def.innerType;
+    currentSchema = currentSchema.unwrap() as z.ZodType;
   }
 
   const baseType = getZodTypeName(currentSchema);
@@ -182,17 +182,17 @@ export function getEnhancedTypeInfo(schema: z.ZodType): {
   // Enhanced type information based on schema type
   let enhancedType = baseType;
   if (currentSchema instanceof z.ZodArray) {
-    const elementType = getZodTypeName(currentSchema._def.type);
+    const elementType = getZodTypeName(currentSchema.unwrap() as z.ZodType);
     enhancedType = `${elementType}[]`;
   } else if (currentSchema instanceof z.ZodUnion) {
     const options = currentSchema._def.options;
-    const unionTypes = options.map((opt: z.ZodType) => getZodTypeName(opt)).join(' | ');
+    const unionTypes = options.map((opt) => getZodTypeName(opt as z.ZodType)).join(' | ');
     enhancedType = unionTypes;
   } else if (currentSchema instanceof z.ZodEnum) {
-    const values = currentSchema._def.values;
+    const values = currentSchema.options;
     enhancedType = `enum: ${values.slice(0, 3).join(' | ')}${values.length > 3 ? '...' : ''}`;
   } else if (currentSchema instanceof z.ZodLiteral) {
-    enhancedType = `"${currentSchema._def.value}"`;
+    enhancedType = `"${currentSchema.value}"`;
   }
 
   return {

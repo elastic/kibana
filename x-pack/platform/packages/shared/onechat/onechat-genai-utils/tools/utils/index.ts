@@ -15,3 +15,4 @@ export {
 } from './mappings';
 export { processFieldCapsResponse, type FieldListFromFieldCapsResponse } from './field_caps';
 export { generateXmlTree, type XmlNode } from './formatting';
+export { errorResult, otherResult } from './results';

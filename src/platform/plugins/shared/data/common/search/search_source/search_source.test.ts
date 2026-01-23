@@ -854,6 +854,55 @@ describe('SearchSource', () => {
           { field: '@timestamp', format: 'strict_date_optional_time_nanos' },
         ]);
       });
+
+      test('adds date with override timezone', async () => {
+        searchSource.setField('index', {
+          ...indexPattern,
+          fields: [
+            {
+              count: 0,
+              name: 'event.start',
+              type: 'date',
+              esTypes: ['date'],
+              scripted: false,
+              searchable: true,
+              aggregatable: true,
+              readFromDocValues: true,
+            },
+          ],
+        } as unknown as DataView);
+        searchSource.setField('query', {
+          language: 'kuery',
+          query: 'event.start < "2025-12-16T10:50:00.000"',
+        });
+        searchSource.setField('timezone', 'America/Los_Angeles');
+
+        const request = searchSource.getSearchRequestBody();
+        expect(request.query).toEqual({
+          bool: {
+            filter: [
+              {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [
+                    {
+                      range: {
+                        'event.start': {
+                          lt: '2025-12-16T10:50:00.000',
+                          time_zone: 'America/Los_Angeles',
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+            must: [],
+            must_not: [],
+            should: [],
+          },
+        });
+      });
     });
 
     describe(`#setField('index')`, () => {
@@ -1099,6 +1148,53 @@ describe('SearchSource', () => {
       searchSource.setField('index', indexPattern123);
       searchSource.getSerializedFields(true);
       expect(indexPattern123.toMinimalSpec).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('projectRouting field', () => {
+    test('should accept projectRouting as a field', () => {
+      searchSource.setField('projectRouting', '_alias:_origin');
+      expect(searchSource.getField('projectRouting')).toBe('_alias:_origin');
+    });
+
+    test('should serialize projectRouting in getSerializedFields', () => {
+      searchSource.setField('projectRouting', '_alias:_origin');
+      const serialized = searchSource.getSerializedFields();
+      expect(serialized.projectRouting).toBe('_alias:_origin');
+    });
+
+    test('should serialize undefined projectRouting', () => {
+      searchSource.setField('projectRouting', undefined);
+      const serialized = searchSource.getSerializedFields();
+      expect(serialized.projectRouting).toBeUndefined();
+    });
+
+    test('should include projectRouting in serialize()', () => {
+      searchSource.setField('projectRouting', '_alias:_origin');
+      const { searchSourceJSON } = searchSource.serialize();
+      expect(JSON.parse(searchSourceJSON).projectRouting).toBe('_alias:_origin');
+    });
+
+    test('should include project_routing in ES request body when projectRouting is set to _alias:_origin', () => {
+      searchSource.setField('index', indexPattern);
+      searchSource.setField('projectRouting', '_alias:_origin');
+      const request = searchSource.getSearchRequestBody();
+      expect(request.project_routing).toBe('_alias:_origin');
+    });
+
+    test('should not include project_routing in ES request body when projectRouting is set to ALL (sanitized)', () => {
+      searchSource.setField('index', indexPattern);
+      searchSource.setField('projectRouting', 'ALL');
+      const request = searchSource.getSearchRequestBody();
+      // 'ALL' gets sanitized to undefined since it means "search all projects" which is the default
+      expect(request.project_routing).toBeUndefined();
+    });
+
+    test('should not include project_routing in ES request body when projectRouting is undefined', () => {
+      searchSource.setField('index', indexPattern);
+      searchSource.setField('projectRouting', undefined);
+      const request = searchSource.getSearchRequestBody();
+      expect(request.project_routing).toBeUndefined();
     });
   });
 

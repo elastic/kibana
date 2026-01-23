@@ -25,6 +25,11 @@ export interface FleetApiService {
     install: (name: string) => Promise<any>;
     delete: (name: string) => Promise<any>;
   };
+  package_policies: {
+    get: (queryParams?: Record<string, any>) => Promise<any>;
+    delete: (id: string) => Promise<any>;
+    bulkDelete: (ids: [string]) => Promise<any>;
+  };
   agent_policies: {
     get: (queryParams?: Record<string, any>) => Promise<any>;
     create: (
@@ -121,6 +126,46 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
               ignoreErrors: [400],
             });
             return { status: response.status };
+          }
+        );
+      },
+    },
+    package_policies: {
+      get: async () => {
+        return await measurePerformanceAsync(log, `fleetApi.package_policies.get`, async () => {
+          return await kbnClient.request({
+            method: 'GET',
+            path: '/api/fleet/package_policies',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+        });
+      },
+      delete: async (id: string) => {
+        return await measurePerformanceAsync(
+          log,
+          `fleetApi.package_policies.delete [${id}]`,
+          async () => {
+            const response = await kbnClient.request({
+              method: 'DELETE',
+              path: `/api/fleet/package_policies/${id}`,
+              ignoreErrors: [400],
+            });
+            return { status: response.status };
+          }
+        );
+      },
+      bulkDelete: async (ids: [string]) => {
+        return await measurePerformanceAsync(
+          log,
+          `fleetApi.package_policies.delete ${ids}`,
+          async () => {
+            return await kbnClient.request({
+              method: 'DELETE',
+              path: `/api/fleet/package_policies`,
+              body: { ids },
+            });
           }
         );
       },

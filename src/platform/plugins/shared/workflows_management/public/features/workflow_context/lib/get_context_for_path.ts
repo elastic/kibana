@@ -11,7 +11,7 @@ import _ from 'lodash';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { DynamicStepContextSchema } from '@kbn/workflows';
 import { isEnterForeach, type WorkflowGraph } from '@kbn/workflows/graph';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import { getForeachStateSchema } from './get_foreach_state_schema';
 import { getNearestStepPath } from './get_nearest_step_path';
 import { getStepsCollectionSchema } from './get_steps_collection_schema';

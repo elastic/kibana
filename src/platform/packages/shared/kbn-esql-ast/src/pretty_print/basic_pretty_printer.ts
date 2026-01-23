@@ -22,9 +22,9 @@ import {
   binaryExpressionGroup,
   unaryExpressionGroup,
 } from '../ast/grouping';
-import type { ESQLAstExpressionNode } from '../visitor';
-import { Visitor } from '../visitor';
-import { resolveItem } from '../visitor/utils';
+import type { ESQLAstExpressionNode } from '../ast/visitor';
+import { Visitor } from '../ast/visitor';
+import { resolveItem } from '../ast/visitor/utils';
 import {
   commandOptionsWithEqualsSeparator,
   commandsWithNoCommaArgSeparator,
@@ -501,11 +501,15 @@ export class BasicPrettyPrinter {
       if (cmd === 'FORK') {
         const branches = node.args
           .map((branch) => {
-            if (Array.isArray(branch) || branch.type !== 'query') {
+            if (Array.isArray(branch)) {
               return undefined;
             }
 
-            return ctx.visitSubQuery(branch);
+            if (branch.type === 'parens' && branch.child.type === 'query') {
+              return ctx.visitSubQuery(branch.child);
+            }
+
+            return undefined;
           })
           .filter(Boolean) as string[];
 

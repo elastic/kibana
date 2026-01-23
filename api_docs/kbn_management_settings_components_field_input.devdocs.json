@@ -383,7 +383,7 @@
             "label": "field",
             "description": [],
             "signature": [
-              "{ id: string; type: T; defaultValue?: ",
+              "{ id: string; type: T; name: string; defaultValue?: ",
               {
                 "pluginId": "@kbn/management-settings-types",
                 "scope": "public",
@@ -391,7 +391,7 @@
                 "section": "def-public.KnownTypeToValue",
                 "text": "KnownTypeToValue"
               },
-              "<T> | null | undefined; name: string; isOverridden: boolean; ariaAttributes: { ariaLabel: string; ariaDescribedBy?: string | undefined; }; savedValue?: ",
+              "<T> | null | undefined; isOverridden: boolean; ariaAttributes: { ariaLabel: string; ariaDescribedBy?: string | undefined; }; savedValue?: ",
               {
                 "pluginId": "@kbn/management-settings-types",
                 "scope": "public",

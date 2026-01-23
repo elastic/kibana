@@ -90,8 +90,8 @@ describe('ContextMenu', () => {
     jest.clearAllMocks();
   });
 
-  describe('Copy as menu item visibility', () => {
-    it('should show "Copy as" menu item when not in isPackagedEnvironment', async () => {
+  describe('Copy to language menu item visibility', () => {
+    it('should show "Copy to language" menu item when not in isPackagedEnvironment', async () => {
       const contextValue = createMockContextValue(undefined);
 
       render(
@@ -108,9 +108,12 @@ describe('ContextMenu', () => {
       await waitFor(() => {
         expect(screen.getByTestId('consoleMenuCopyAsButton')).toBeInTheDocument();
       });
+
+      // Also verify "Select language" menu item is present
+      expect(screen.getByTestId('consoleMenuSelectLanguage')).toBeInTheDocument();
     });
 
-    it('should hide "Copy as" menu item when isPackagedEnvironment is true', async () => {
+    it('should hide "Copy to language" menu item when isPackagedEnvironment is true', async () => {
       const contextValue = createMockContextValue(true);
 
       render(
@@ -130,8 +133,11 @@ describe('ContextMenu', () => {
         expect(screen.getByTestId('consoleMenu')).toBeInTheDocument();
       });
 
-      // Verify "Copy as" button is NOT in the document
+      // Verify "Copy to language" button is NOT in the document
       expect(screen.queryByTestId('consoleMenuCopyAsButton')).not.toBeInTheDocument();
+
+      // Also verify "Select language" menu item is NOT in the document
+      expect(screen.queryByTestId('consoleMenuSelectLanguage')).not.toBeInTheDocument();
     });
   });
 });

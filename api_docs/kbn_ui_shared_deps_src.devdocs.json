@@ -905,6 +905,17 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbnreactkibanacontextenv",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/react-kibana-context-env'",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
             "id": "def-common.externals.kbnshareduxrouter",
             "type": "string",
             "tags": [],

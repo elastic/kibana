@@ -21,13 +21,16 @@ import type {
 /**
  * Tool result as returned by the tool handler.
  */
-export type ToolHandlerResult = Omit<ToolResult, 'tool_result_id'> & { tool_result_id?: string };
+export type ToolHandlerResult<TResult extends ToolResult = ToolResult> = Omit<
+  TResult,
+  'tool_result_id'
+> & { tool_result_id?: string };
 
 /**
  * Return value for {@link ToolHandlerFn} / {@link BuiltinToolDefinition}
  */
-export interface ToolHandlerReturn {
-  results: ToolHandlerResult[];
+export interface ToolHandlerReturn<TResult extends ToolResult = ToolResult> {
+  results: Array<ToolHandlerResult<TResult>>;
 }
 
 /**
@@ -48,6 +51,10 @@ export interface ToolHandlerContext {
    * Can be used to create scoped services not directly exposed by this context.
    */
   request: KibanaRequest;
+  /**
+   * Id of the space associated with the request
+   */
+  spaceId: string;
   /**
    * A cluster client scoped to the current user.
    * Can be used to access ES on behalf of either the current user or the system user.

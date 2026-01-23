@@ -7,14 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import type { CoreStart, ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
+import apm from 'elastic-apm-node';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
-import type { LogsRepository } from '../repositories/logs_repository';
-import type { StepExecutionRepository } from '../repositories/step_execution_repository';
-import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
-import type { WorkflowsExecutionEnginePluginStartDeps } from '../types';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
 
@@ -22,13 +18,6 @@ export async function runWorkflow({
   workflowRunId,
   spaceId,
   taskAbortController,
-  workflowExecutionRepository,
-  stepExecutionRepository,
-  logsRepository,
-  coreStart,
-  esClient,
-  actions,
-  taskManager,
   logger,
   config,
   fakeRequest,
@@ -37,18 +26,13 @@ export async function runWorkflow({
   workflowRunId: string;
   spaceId: string;
   taskAbortController: AbortController;
-  coreStart: CoreStart;
-  esClient: ElasticsearchClient;
-  workflowExecutionRepository: WorkflowExecutionRepository;
-  stepExecutionRepository: StepExecutionRepository;
-  logsRepository: LogsRepository;
-  actions: ActionsPluginStartContract;
-  taskManager: WorkflowsExecutionEnginePluginStartDeps['taskManager'];
   logger: Logger;
   config: WorkflowsExecutionEngineConfig;
   fakeRequest: KibanaRequest;
   dependencies: ContextDependencies;
 }): Promise<void> {
+  // Span for setup/initialization phase
+  const setupSpan = apm.startSpan('workflow setup', 'workflow', 'setup');
   const {
     workflowRuntime,
     stepExecutionRuntimeFactory,
@@ -56,37 +40,39 @@ export async function runWorkflow({
     workflowLogger,
     nodesFactory,
     workflowExecutionGraph,
-    clientToUse,
-    fakeRequest: fakeRequestFromContainer,
-    coreStart: coreStartFromContainer,
-  } = await setupDependencies(
-    workflowRunId,
-    spaceId,
-    actions,
-    taskManager,
+    workflowTaskManager,
+    workflowExecutionRepository,
     esClient,
-    logger,
-    config,
-    workflowExecutionRepository,
-    stepExecutionRepository,
-    logsRepository,
-    coreStart,
-    dependencies,
-    fakeRequest // Provided by Task Manager's first-class API key support
-  );
-  await workflowRuntime.start();
+  } = await setupDependencies(workflowRunId, spaceId, logger, config, dependencies, fakeRequest);
+  setupSpan?.end();
 
-  await workflowExecutionLoop({
-    workflowRuntime,
-    stepExecutionRuntimeFactory,
-    workflowExecutionState,
-    workflowExecutionRepository,
-    workflowLogger,
-    nodesFactory,
-    workflowExecutionGraph,
-    esClient: clientToUse,
-    fakeRequest: fakeRequestFromContainer,
-    coreStart: coreStartFromContainer,
-    taskAbortController,
-  });
+  // Span for runtime initialization
+  const startSpan = apm.startSpan('workflow runtime start', 'workflow', 'initialization');
+  await workflowRuntime.start();
+  startSpan?.end();
+
+  // Span for the main execution loop
+  const loopSpan = apm.startSpan('workflow execution loop', 'workflow', 'execution');
+  try {
+    await workflowExecutionLoop({
+      workflowRuntime,
+      stepExecutionRuntimeFactory,
+      workflowExecutionState,
+      workflowExecutionRepository,
+      workflowLogger,
+      nodesFactory,
+      workflowExecutionGraph,
+      esClient,
+      fakeRequest,
+      coreStart: dependencies.coreStart,
+      taskAbortController,
+      workflowTaskManager,
+    });
+    loopSpan?.setOutcome('success');
+  } catch (error) {
+    loopSpan?.setOutcome('failure');
+    throw error;
+  } finally {
+    loopSpan?.end();
+  }
 }

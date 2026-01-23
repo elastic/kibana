@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ComponentProps, FC, ReactNode } from 'react';
 import React, { useCallback } from 'react';
-import { css } from '@emotion/react';
+import type { ComponentProps, FC, ReactNode } from 'react';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { useNestedMenu } from './use_nested_menu';
 import { SecondaryMenu } from '../secondary_menu';
@@ -19,17 +19,17 @@ export interface PrimaryMenuItemProps
   extends Omit<ComponentProps<typeof SecondaryMenu.Item>, 'children' | 'isHighlighted'> {
   children: ReactNode;
   hasSubmenu?: boolean;
-  isHighlighted?: boolean;
   isCurrent?: boolean;
+  isHighlighted?: boolean;
   onClick?: () => void;
 }
 
 export const PrimaryMenuItem: FC<PrimaryMenuItemProps> = ({
-  id,
   children,
   hasSubmenu = false,
-  isHighlighted = false,
+  id,
   isCurrent,
+  isHighlighted = false,
   onClick,
   ...props
 }) => {

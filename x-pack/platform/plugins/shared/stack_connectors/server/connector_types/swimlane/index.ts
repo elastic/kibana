@@ -14,6 +14,7 @@ import {
   AlertingConnectorFeatureId,
   CasesConnectorFeatureId,
   SecurityConnectorFeatureId,
+  WorkflowsConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import {
   CONNECTOR_ID,
@@ -50,6 +51,7 @@ export function getConnectorType(): ConnectorType<
       AlertingConnectorFeatureId,
       CasesConnectorFeatureId,
       SecurityConnectorFeatureId,
+      WorkflowsConnectorFeatureId,
     ],
     validate: {
       config: {

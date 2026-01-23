@@ -35,14 +35,16 @@ const xFormatter = niceTimeFormatter([start, end]);
 const logsStreamDefinition: Streams.WiredStream.Definition = {
   name: 'logs',
   description: '',
+  updated_at: new Date().toISOString(),
   ingest: {
     wired: {
       fields: {},
       routing: [],
     },
     lifecycle: { inherit: {} },
-    processing: { steps: [] },
+    processing: { steps: [], updated_at: new Date().toISOString() },
     settings: {},
+    failure_store: { inherit: {} },
   },
 };
 
@@ -65,7 +67,6 @@ export const SomeThings: StoryFn<{}> = () => {
       }}
       items={[
         {
-          title: 'High error rate',
           query: {
             id: 'match_everything',
             title: 'Match everything',
@@ -74,6 +75,7 @@ export const SomeThings: StoryFn<{}> = () => {
             },
             feature: {
               name: 'Feature',
+              type: 'system',
               filter: {
                 always: {},
               },

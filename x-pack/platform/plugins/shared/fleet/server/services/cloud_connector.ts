@@ -15,13 +15,12 @@ import type {
   AwsCloudConnectorVars,
   AzureCloudConnectorVars,
 } from '../../common/types/models/cloud_connector';
-import { isAwsCloudConnectorVars, isAzureCloudConnectorVars } from '../../common/services';
 import type { CloudConnectorSOAttributes } from '../types/so_attributes';
 import type {
   CreateCloudConnectorRequest,
   UpdateCloudConnectorRequest,
 } from '../../common/types/rest_spec/cloud_connector';
-import { CLOUD_CONNECTOR_SAVED_OBJECT_TYPE } from '../../common/constants';
+import { CLOUD_CONNECTOR_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../common/constants';
 import {
   TENANT_ID_VAR_NAME,
   CLIENT_ID_VAR_NAME,
@@ -33,6 +32,7 @@ import {
   CloudConnectorGetListError,
   CloudConnectorInvalidVarsError,
   CloudConnectorDeleteError,
+  rethrowIfInstanceOrWrap,
 } from '../errors';
 
 import { appContextService } from './app_context';
@@ -66,6 +66,51 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
     return appContextService.getLogger().get('CloudConnectorService', ...childContextPaths);
   }
 
+  /**
+   * Normalizes a cloud connector name by trimming and collapsing consecutive spaces
+   * @param name - The name to normalize
+   * @returns The normalized name
+   */
+  private static normalizeName(name: string): string {
+    return name.trim().replace(/\s+/g, ' ');
+  }
+
+  /**
+   * Validates and normalizes a cloud connector name, checking for duplicates
+   * @param soClient - Saved objects client
+   * @param name - The name to validate
+   * @param excludeId - Optional cloud connector ID to exclude from duplicate check (for updates)
+   * @returns The normalized name
+   * @throws CloudConnectorCreateError if a duplicate name is found
+   */
+  private async validateAndNormalizeName(
+    soClient: SavedObjectsClientContract,
+    name: string,
+    excludeId?: string
+  ): Promise<string> {
+    const normalizedName = CloudConnectorService.normalizeName(name);
+
+    // Check for existing connector with same name (case-insensitive, normalized)
+    const existingConnectors = await this.getList(soClient, {
+      perPage: SO_SEARCH_LIMIT,
+      fields: ['name'],
+    });
+    const normalizedNameLower = normalizedName.toLowerCase();
+    const duplicateConnectorName = existingConnectors.find((c) => {
+      // Skip the current connector when updating
+      if (excludeId && c.id === excludeId) {
+        return false;
+      }
+      return CloudConnectorService.normalizeName(c.name).toLowerCase() === normalizedNameLower;
+    });
+
+    if (duplicateConnectorName) {
+      throw new CloudConnectorCreateError('A cloud connector with this name already exists');
+    }
+
+    return normalizedName;
+  }
+
   async create(
     soClient: SavedObjectsClientContract,
     cloudConnector: CreateCloudConnectorRequest
@@ -85,12 +130,8 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         );
       }
 
-      let name = cloudConnector.name;
-      if (cloudConnector.cloudProvider === 'aws' && isAwsCloudConnectorVars(vars)) {
-        name = vars.role_arn.value;
-      } else if (cloudConnector.cloudProvider === 'azure' && isAzureCloudConnectorVars(vars)) {
-        name = vars.azure_credentials_cloud_connector_id.value;
-      }
+      // Validate and normalize the name, checking for duplicates
+      const name = await this.validateAndNormalizeName(soClient, cloudConnector.name);
 
       // Check if space awareness is enabled for namespace handling
       const { isSpaceAwarenessEnabled } = await import('./spaces/helpers');
@@ -101,6 +142,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         name,
         namespace,
         cloudProvider,
+        accountType: cloudConnector.accountType,
         vars,
         packagePolicyCount: 1,
         created_at: new Date().toISOString(),
@@ -119,9 +161,15 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         ...savedObject.attributes,
       };
     } catch (error) {
-      logger.error('Failed to create cloud connector', error.message);
-      throw new CloudConnectorCreateError(
-        `CloudConnectorService Failed to create cloud connector: ${error.message}\n${error.stack}`
+      logger.error(
+        `Failed to create cloud connector: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      rethrowIfInstanceOrWrap(
+        error,
+        CloudConnectorCreateError,
+        'CloudConnectorService Failed to create cloud connector'
       );
     }
   }
@@ -145,6 +193,11 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       // Add KQL filter if specified
       if (options?.kuery) {
         findOptions.filter = options.kuery;
+      }
+
+      // Add fields filter if specified
+      if (options?.fields) {
+        findOptions.fields = options.fields;
       }
 
       const cloudConnectors = await soClient.find<CloudConnectorSOAttributes>(findOptions);
@@ -222,8 +275,17 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         updated_at: new Date().toISOString(),
       };
 
+      // Validate and normalize name if provided, checking for duplicates (excluding current connector)
       if (cloudConnectorUpdate.name) {
-        updateAttributes.name = cloudConnectorUpdate.name;
+        updateAttributes.name = await this.validateAndNormalizeName(
+          soClient,
+          cloudConnectorUpdate.name,
+          cloudConnectorId
+        );
+      }
+
+      if (cloudConnectorUpdate.accountType !== undefined) {
+        updateAttributes.accountType = cloudConnectorUpdate.accountType;
       }
 
       if (cloudConnectorUpdate.vars) {
@@ -250,10 +312,12 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         ...mergedAttributes,
       };
     } catch (error) {
-      logger.error('Failed to update cloud connector', error.message);
-      throw new CloudConnectorCreateError(
-        `Failed to update cloud connector: ${error.message}\n${error.stack}`
+      logger.error(
+        `Failed to update cloud connector: ${
+          error instanceof Error ? error.message : String(error)
+        }`
       );
+      rethrowIfInstanceOrWrap(error, CloudConnectorCreateError, 'Failed to update cloud connector');
     }
   }
 

@@ -19,7 +19,7 @@ interface RelatedDashboardsProps {
   linkedDashboards?: LinkedDashboard[];
   isLoadingRelatedDashboards: boolean;
   onSuccessAddSuggestedDashboard: () => Promise<void>;
-  timeRange: NonNullable<DashboardLocatorParams['timeRange']>;
+  timeRange: NonNullable<DashboardLocatorParams['time_range']>;
 }
 
 export function RelatedDashboards({

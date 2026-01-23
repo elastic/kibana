@@ -37,7 +37,7 @@ export function buildInstallCommand({
 
   switch (platform) {
     case 'linux':
-      return `arch=$(if ([[ $(arch) == "arm" || $(arch) == "aarch64" ]]); then echo "arm64"; else echo $(arch); fi)
+      return `arch=$(if [[ $(uname -m) == "arm" || $(uname -m) == "aarch64" ]]; then echo "arm64"; else echo $(uname -m); fi)
 
 curl --output elastic-distro-${agentVersion}-linux-$arch.tar.gz --url https://${AGENT_CDN_BASE_URL}/elastic-agent-${agentVersion}-linux-$arch.tar.gz --proto '=https' --tlsv1.2 -fL && mkdir -p elastic-distro-${agentVersion}-linux-$arch && tar -xvf elastic-distro-${agentVersion}-linux-$arch.tar.gz -C "elastic-distro-${agentVersion}-linux-$arch" --strip-components=1 && cd elastic-distro-${agentVersion}-linux-$arch
 

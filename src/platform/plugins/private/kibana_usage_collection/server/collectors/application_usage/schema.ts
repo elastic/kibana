@@ -135,6 +135,7 @@ export const applicationUsageSchema = {
   agent_builder: commonSchema,
   apm: commonSchema,
   canvas: commonSchema,
+  cloud_connect: commonSchema,
   enterpriseSearch: commonSchema,
   enterpriseSearchContent: commonSchema,
   searchInferenceEndpoints: commonSchema,

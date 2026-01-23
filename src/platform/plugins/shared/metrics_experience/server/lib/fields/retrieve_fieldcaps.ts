@@ -47,10 +47,13 @@ export async function retrieveFieldCaps({
       fields,
       include_unmapped: false,
       index_filter: dateRangeQuery(from, to)[0],
+      include_empty_fields: false,
       types: [...uniqueFieldTypes],
     });
 
-    indexFieldCapsMap.set(index.name, fieldCaps.fields);
+    if (Object.keys(fieldCaps.fields).length > 0) {
+      indexFieldCapsMap.set(index.name, fieldCaps.fields);
+    }
   });
 
   // Wait for all field caps requests to complete

@@ -9,7 +9,7 @@
 
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
-import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import type { History } from 'history';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -19,7 +19,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { DashboardState } from '../../common/types';
 import type { DashboardApi, DashboardCreationOptions } from '..';
-import { DASHBOARD_APP_ID } from '../../common/constants';
+import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import { DashboardRenderer } from '../dashboard_renderer/dashboard_renderer';
 import { DashboardTopNav } from '../dashboard_top_nav';
 import {
@@ -117,7 +117,6 @@ export function DashboardApp({
       createKbnUrlStateStorage({
         history,
         useHash: coreServices.uiSettings.get('state:storeInSessionStorage'),
-        ...withNotifyOnErrors(coreServices.notifications.toasts),
       }),
     [history]
   );

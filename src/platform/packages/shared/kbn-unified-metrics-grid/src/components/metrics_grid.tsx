@@ -11,9 +11,11 @@ import React, { useCallback, useMemo, useState, useRef } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
 import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
-import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
-import type { Observable } from 'rxjs';
+import type {
+  MetricField,
+  Dimension,
+  DimensionFilters,
+} from '@kbn/metrics-experience-plugin/common/types';
 import { css } from '@emotion/react';
 import type { ChartSize } from './chart';
 import { Chart } from './chart';
@@ -23,16 +25,17 @@ import { useGridNavigation } from '../hooks/use_grid_navigation';
 import { FieldsMetadataProvider } from '../context/fields_metadata';
 import { createESQLQuery } from '../common/utils';
 import { useChartLayers } from './chart/hooks/use_chart_layers';
+import type { UnifiedMetricsGridProps } from '../types';
 
 export type MetricsGridProps = Pick<
-  ChartSectionProps,
-  'searchSessionId' | 'services' | 'onBrushEnd' | 'onFilter' | 'abortController' | 'requestParams'
+  UnifiedMetricsGridProps,
+  'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams' | 'actions'
 > & {
-  filters?: Array<{ field: string; value: string }>;
-  dimensions: string[];
+  filters?: DimensionFilters;
+  dimensions: Dimension[];
   searchTerm?: string;
   columns: NonNullable<EuiFlexGridProps['columns']>;
-  discoverFetch$: Observable<UnifiedHistogramInputMessage>;
+  discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   fields: MetricField[];
 };
 
@@ -41,17 +44,16 @@ const getItemKey = (metric: MetricField, index: number) => {
 };
 export const MetricsGrid = ({
   fields,
-  searchSessionId,
   onBrushEnd,
   onFilter,
+  actions,
   dimensions,
   services,
   columns,
-  abortController,
-  requestParams,
+  fetchParams,
   discoverFetch$,
   searchTerm,
-  filters = [],
+  filters = {},
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const chartRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -160,12 +162,11 @@ export const MetricsGrid = ({
                   size="s"
                   dimensions={dimensions}
                   filters={filters}
-                  searchSessionId={searchSessionId}
                   services={services}
                   onBrushEnd={onBrushEnd}
                   onFilter={onFilter}
-                  abortController={abortController}
-                  requestParams={requestParams}
+                  actions={actions}
+                  fetchParams={fetchParams}
                   discoverFetch$={discoverFetch$}
                   rowIndex={rowIndex}
                   colIndex={colIndex}
@@ -193,16 +194,16 @@ export const MetricsGrid = ({
 
 interface ChartItemProps
   extends Pick<
-    ChartSectionProps,
-    'searchSessionId' | 'services' | 'onBrushEnd' | 'onFilter' | 'abortController' | 'requestParams'
+    UnifiedMetricsGridProps,
+    'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams' | 'actions'
   > {
   id: string;
   metric: MetricField;
   index: number;
   size: ChartSize;
-  dimensions: string[];
-  filters: Array<{ field: string; value: string }>;
-  discoverFetch$: Observable<UnifiedHistogramInputMessage>;
+  dimensions: Dimension[];
+  filters: DimensionFilters;
+  discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   rowIndex: number;
   colIndex: number;
   isFocused: boolean;
@@ -221,12 +222,11 @@ const ChartItem = React.memo(
         size,
         dimensions,
         filters,
-        searchSessionId,
         services,
         onBrushEnd,
         onFilter,
-        abortController,
-        requestParams,
+        actions,
+        fetchParams,
         discoverFetch$,
         rowIndex,
         colIndex,
@@ -275,16 +275,16 @@ const ChartItem = React.memo(
             esqlQuery={esqlQuery}
             size={size}
             discoverFetch$={discoverFetch$}
-            requestParams={requestParams}
+            fetchParams={fetchParams}
             services={services}
-            abortController={abortController}
-            searchSessionId={searchSessionId}
             onBrushEnd={onBrushEnd}
             onFilter={onFilter}
+            onExploreInDiscoverTab={actions.openInNewTab}
             onViewDetails={handleViewDetailsCallback}
             title={metric.name}
             chartLayers={chartLayers}
             titleHighlight={searchTerm}
+            extraDisabledActions={['ACTION_OPEN_IN_DISCOVER']}
           />
         </A11yGridCell>
       );

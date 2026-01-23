@@ -15,13 +15,14 @@ import type {
   StringOrNumberOrBoolean,
 } from '../../types/conditions';
 import { BINARY_OPERATORS } from '../../types/conditions';
+import { painlessFieldAccessor } from '../../types/utils';
 
 // Utility: get the field name from a filter condition
 function safePainlessField(conditionOrField: FilterCondition | string) {
   if (typeof conditionOrField === 'string') {
-    return `$('${conditionOrField}', null)`;
+    return painlessFieldAccessor(conditionOrField);
   }
-  return `$('${conditionOrField.field}', null)`;
+  return painlessFieldAccessor(conditionOrField.field);
 }
 
 function encodeValue(value: StringOrNumberOrBoolean | null | undefined) {

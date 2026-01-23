@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EsqlQuery } from '../../query';
+import { EsqlQuery } from '../../composer/query';
 import type { ESQLAstRerankCommand, ESQLCommandOption } from '../../types';
 
 describe('RERANK', () => {
@@ -130,15 +130,13 @@ describe('RERANK', () => {
             type: 'function',
             subtype: 'binary-expression',
             name: '=',
-            args: expect.arrayContaining([
-              expect.objectContaining({ type: 'column', name: 'overview' }),
-              expect.arrayContaining([
-                expect.objectContaining({
-                  type: 'function',
-                  name: 'substring',
-                }),
-              ]),
-            ]),
+            args: [
+              {},
+              {
+                type: 'function',
+                name: 'substring',
+              },
+            ],
           },
         ],
       });

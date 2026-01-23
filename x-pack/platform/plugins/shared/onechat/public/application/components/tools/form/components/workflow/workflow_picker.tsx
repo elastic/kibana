@@ -57,6 +57,7 @@ export const WorkflowPicker: React.FC = () => {
         defaultMessage: 'Select a workflow',
       })}
       options={options}
+      fullWidth={true}
       selectedOptions={selectedOptions}
       onChange={handleSelectionChange}
       onBlur={onBlur}

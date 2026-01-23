@@ -65,10 +65,10 @@ export const ChartSectionTemplate = ({
                 flex-basis: 100%;
                 order: 3;
 
-                > .euiFlexGroup {
+                .unifiedHistogram__leftSideToolbar {
                   flex-wrap: wrap;
 
-                  > .euiFlexItem {
+                  .unifiedHistogram__leftSideToolbarItem {
                     flex-grow: 1;
                     flex-basis: 100%;
                   }
@@ -110,9 +110,18 @@ export const ChartSectionTemplate = ({
 
           {leftSide && (
             <EuiFlexItem grow data-toolbar-section="left">
-              <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+              <EuiFlexGroup
+                direction="row"
+                gutterSize="s"
+                responsive={false}
+                className="unifiedHistogram__leftSideToolbar"
+              >
                 {React.Children.toArray(leftSide).map((child, i) => (
-                  <EuiFlexItem grow={false} key={i}>
+                  <EuiFlexItem
+                    grow={false}
+                    key={i}
+                    className="unifiedHistogram__leftSideToolbarItem"
+                  >
                     {child}
                   </EuiFlexItem>
                 ))}

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EsqlQuery } from '../../query';
-import { Walker } from '../../walker';
+import { EsqlQuery } from '../../composer/query';
+import { Walker } from '../../ast/walker';
 
 describe('<TYPE> JOIN command', () => {
   describe('correctly formatted', () => {
@@ -51,6 +51,27 @@ describe('<TYPE> JOIN command', () => {
           {
             type: 'source',
             name: 'languages_lookup',
+          },
+          {},
+        ],
+      });
+    });
+
+    it('can parse target with AS alias', () => {
+      const text = `FROM employees | LOOKUP JOIN languages_lookup AS ll ON language_code`;
+      const query = EsqlQuery.fromSrc(text);
+
+      expect(query.ast.commands[1]).toMatchObject({
+        commandType: 'lookup',
+        args: [
+          {
+            type: 'function',
+            subtype: 'binary-expression',
+            name: 'as',
+            args: [
+              { type: 'source', name: 'languages_lookup' },
+              { type: 'identifier', name: 'll' },
+            ],
           },
           {},
         ],

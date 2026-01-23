@@ -19,6 +19,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { Datatable } from '@kbn/expressions-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { ExpressionsContext } from './expressions_context';
 
 const expression = `getEvents
@@ -57,6 +58,9 @@ export function App() {
           <EuiSpacer size={'m'} />
           {datatable ? (
             <EuiBasicTable
+              tableCaption={i18n.translate('partialResultsDemo.tableCaption', {
+                defaultMessage: 'Partial expression results',
+              })}
               data-test-subj={'example-table'}
               columns={datatable.columns?.map(({ id: field, name }) => ({
                 field,

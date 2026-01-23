@@ -46,11 +46,11 @@ Depending on the command you are adding, it may be required or not to do an adju
 
 ## Create the command definition
 
-We need to register the new command in the `kbn-esql-ast` [package](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-esql-validation-autocomplete/README.md) in order to activate the autocomplete and validation features.
+We need to register the new command in the `kbn-esql-ast` [package](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-esql-ast/README.md) in order to activate the autocomplete and validation features.
 
-All commands are registered in our commands registry. Read [the doc](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-esql-ast/src/commands_registry/README.md) for context.
+All commands are registered in our commands registry. Read [the doc](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-esql-ast/src/commands/registry/README.md) for context.
 
-- [ ] First, create a new folder with the same name as the command under `kbn-esql-ast/src/commands_registry/commands`. This will house all command logic that gets sent to the registry.
+- [ ] First, create a new folder with the same name as the command under `kbn-esql-ast/src/commands/registry/commands`. This will house all command logic that gets sent to the registry.
 - [ ] Create an `index.ts` file within the folder. This is where you create your command definition (`ICommand`).
 
   If the command is not ready to be advertised, use `hidden: true`.
@@ -59,9 +59,9 @@ All commands are registered in our commands registry. Read [the doc](https://git
 
   If the command is ready for GA, don’t use either of the above properties.
 
-- [ ] Import your new command definition in `commands_registry/index.ts`.
+- [ ] Import your new command definition in `commands/registry/index.ts`.
 
-If you get stuck, check the many examples in `commands_registry/commands`.
+If you get stuck, check the many examples in `commands/registry/commands`.
 
 ### Example ⭐
 
@@ -165,7 +165,7 @@ export const validate = (
 
 Define what are the keywords you want to be suggested when the cursor is positioned at the new command.
 
-You can read how suggestions work [here](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-esql-validation-autocomplete/README.md#autocomplete-1).
+You can read how suggestions work [here](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-esql-ast/README.md#autocomplete-1).
 
 - [ ] Add the suggestions to be shown when **positioned at** the new command.
 
@@ -221,7 +221,7 @@ You can read how suggestions work [here](https://github.com/elastic/kibana/blob/
   1. resume typing where you left off to generate suggestions again
   1. then accept a suggestion
 
-  If the editor is inserting the text incorrectly, you need to calculate and attach a custom [`rangeToReplace`](https://github.com/elastic/kibana/blob/f09bce1108cdd55ba69e11e8b14c947bf052dd91/src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/types.ts#L64-L75) that covers the entire prefix. Once you have verified the behavior manually, you can add an automated test to check the computed range ([example](https://github.com/elastic/kibana/blob/3962e0fb2a7b833a21b33012b2425fa847e48bcb/src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/__tests__/autocomplete.command.sort.test.ts#L240)). (We may be able to find [a more automatic way](https://github.com/elastic/kibana/issues/209905) to ensure correct behavior in the future, but for now, it's manual.)
+  If the editor is inserting the text incorrectly, you need to calculate and attach a custom [`rangeToReplace`](https://github.com/elastic/kibana/blob/f09bce1108cdd55ba69e11e8b14c947bf052dd91/src/platform/packages/shared/kbn-esql-ast/src/autocomplete/types.ts#L64-L75) that covers the entire prefix. Once you have verified the behavior manually, you can add an automated test to check the computed range ([example](https://github.com/elastic/kibana/blob/3962e0fb2a7b833a21b33012b2425fa847e48bcb/src/platform/packages/shared/kbn-esql-ast/src/autocomplete/__tests__/autocomplete.command.sort.test.ts#L240)). (We may be able to find [a more automatic way](https://github.com/elastic/kibana/issues/209905) to ensure correct behavior in the future, but for now, it's manual.)
 
 ### A note on regular expressions (regex) in autocomplete
 

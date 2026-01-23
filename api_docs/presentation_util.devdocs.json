@@ -760,7 +760,7 @@
             "label": "setProjectStatus",
             "description": [],
             "signature": [
-              "(id: \"labs:dashboard:deferBelowFold\" | \"labs:canvas:byValueEmbeddable\", env: \"kibana\" | \"browser\" | \"session\", status: boolean) => void"
+              "(id: \"labs:dashboard:deferBelowFold\" | \"labs:canvas:byValueEmbeddable\", env: \"kibana\" | \"session\" | \"browser\", status: boolean) => void"
             ],
             "path": "src/platform/plugins/shared/presentation_util/public/services/presentation_labs_service.ts",
             "deprecated": false,
@@ -789,7 +789,7 @@
                 "label": "env",
                 "description": [],
                 "signature": [
-                  "\"kibana\" | \"browser\" | \"session\""
+                  "\"kibana\" | \"session\" | \"browser\""
                 ],
                 "path": "src/platform/plugins/shared/presentation_util/public/services/presentation_labs_service.ts",
                 "deprecated": false,
@@ -1393,7 +1393,7 @@
             "label": "environments",
             "description": [],
             "signature": [
-              "(\"kibana\" | \"browser\" | \"session\")[]"
+              "(\"kibana\" | \"session\" | \"browser\")[]"
             ],
             "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
             "deprecated": false,
@@ -1438,7 +1438,7 @@
         "label": "EnvironmentName",
         "description": [],
         "signature": [
-          "\"kibana\" | \"browser\" | \"session\""
+          "\"kibana\" | \"session\" | \"browser\""
         ],
         "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
         "deprecated": false,
@@ -1453,7 +1453,7 @@
         "label": "EnvironmentStatus",
         "description": [],
         "signature": [
-          "{ kibana?: boolean | undefined; browser?: boolean | undefined; session?: boolean | undefined; }"
+          "{ kibana?: boolean | undefined; session?: boolean | undefined; browser?: boolean | undefined; }"
         ],
         "path": "src/platform/plugins/shared/presentation_util/common/labs.ts",
         "deprecated": false,

@@ -14,6 +14,7 @@ import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
 import { useUnifiedHistogram } from './use_unified_histogram';
 import { renderHook, waitFor } from '@testing-library/react';
+import type { UnifiedHistogramFetchParamsExternal } from '../types';
 
 describe('useUnifiedHistogram', () => {
   it('should initialize', async () => {
@@ -31,69 +32,84 @@ describe('useUnifiedHistogram', () => {
         title: 'field',
       },
     };
+    const fetchParamsExternal: UnifiedHistogramFetchParamsExternal = {
+      dataView: dataViewWithTimefieldMock,
+      filters: [],
+      query: { language: 'kuery', query: '' },
+      requestAdapter: new RequestAdapter(),
+      searchSessionId: '123',
+      relativeTimeRange: { from: 'now-15m', to: 'now' },
+      esqlVariables: [
+        {
+          key: 'agent_keyword',
+          value: 'Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1',
+          type: 'values',
+        },
+      ] as ESQLControlVariable[],
+      controlsState: esqlControlState,
+      timeInterval: '42s',
+    };
     const hook = renderHook(() =>
       useUnifiedHistogram({
         services: unifiedHistogramServicesMock,
-        initialState: { timeInterval: '42s' },
-        dataView: dataViewWithTimefieldMock,
-        filters: [],
-        query: { language: 'kuery', query: '' },
-        requestAdapter: new RequestAdapter(),
-        searchSessionId: '123',
-        timeRange: { from: 'now-15m', to: 'now' },
-        esqlVariables: [
-          {
-            key: 'agent_keyword',
-            value: 'Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1',
-            type: 'values',
-          },
-        ] as ESQLControlVariable[],
-        controlsState: esqlControlState,
+        initialState: {},
       })
     );
     expect(hook.result.current.isInitialized).toBe(false);
-    expect(hook.result.current.api).toBeUndefined();
+    expect(hook.result.current.api).toBeDefined();
     expect(hook.result.current.chartProps).toBeUndefined();
     expect(hook.result.current.layoutProps).toBeUndefined();
+
+    act(() => {
+      hook.result.current.api.fetch(fetchParamsExternal);
+    });
+
     await waitFor(() => {
       expect(hook.result.current.isInitialized).toBe(true);
     });
     expect(hook.result.current.api).toBeDefined();
     expect(hook.result.current.chartProps?.chart?.timeInterval).toBe('42s');
-    expect(hook.result.current.chartProps?.requestParams.esqlVariables).toEqual([
+    expect(hook.result.current.chartProps?.fetchParams.esqlVariables).toEqual([
       {
         key: 'agent_keyword',
         value: 'Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1',
         type: 'values',
       },
     ]);
-    expect(hook.result.current.chartProps?.controlsState).toBe(esqlControlState);
+    expect(hook.result.current.chartProps?.fetchParams.controlsState).toBe(esqlControlState);
     expect(hook.result.current.layoutProps).toBeDefined();
   });
 
-  it('should trigger input$ when fetch is called', async () => {
+  it('should trigger fetch$ when fetch is called', async () => {
+    const fetchParamsExternal: UnifiedHistogramFetchParamsExternal = {
+      dataView: dataViewWithTimefieldMock,
+      filters: [],
+      query: { language: 'kuery', query: '' },
+      requestAdapter: new RequestAdapter(),
+      searchSessionId: '123',
+      relativeTimeRange: { from: 'now-15m', to: 'now' },
+      timeInterval: '42s',
+    };
     const { result } = renderHook(() =>
       useUnifiedHistogram({
         services: unifiedHistogramServicesMock,
-        initialState: { timeInterval: '42s' },
-        dataView: dataViewWithTimefieldMock,
-        filters: [],
-        query: { language: 'kuery', query: '' },
-        requestAdapter: new RequestAdapter(),
-        searchSessionId: '123',
-        timeRange: { from: 'now-15m', to: 'now' },
+        initialState: {},
       })
     );
+    expect(result.current.isInitialized).toBe(false);
+    act(() => {
+      result.current.api.fetch(fetchParamsExternal);
+    });
     await waitFor(() => {
       expect(result.current.isInitialized).toBe(true);
     });
-    const input$ = result.current.chartProps?.input$;
-    const inputSpy = jest.fn();
-    input$?.subscribe(inputSpy);
-    act(() => {
-      result.current.api?.fetch();
+    const fetch$ = result.current.chartProps?.fetch$;
+    const fetchSpy = jest.fn();
+    fetch$?.subscribe(fetchSpy);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(fetchSpy).toHaveBeenCalledWith({
+      fetchParams: result.current.chartProps?.fetchParams,
+      lensVisServiceState: result.current.chartProps?.lensVisServiceState,
     });
-    expect(inputSpy).toHaveBeenCalledTimes(1);
-    expect(inputSpy).toHaveBeenCalledWith({ type: 'fetch' });
   });
 });

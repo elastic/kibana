@@ -51,6 +51,8 @@ startMock.uiSettings.get.mockImplementation((key: string) => {
       ];
     case 'dateFormat':
       return 'MMM D, YYYY @ HH:mm:ss.SSS';
+    case 'dateFormat:tz':
+      return 'UTC';
     case UI_SETTINGS.HISTORY_LIMIT:
       return 10;
     case UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS:
@@ -710,6 +712,26 @@ describe('QueryBarTopRowTopRow', () => {
         expect(getByText(kqlQuery.query)).toBeInTheDocument();
         expect(onDraftChange).toHaveBeenCalledWith(undefined);
       });
+    });
+
+    it('should call onDraftChange only once even if unmounted', async () => {
+      const onDraftChange = jest.fn();
+      const state = {
+        query: kqlQuery,
+        dateRangeFrom: 'now-7d',
+        dateRangeTo: 'now',
+      };
+      const { unmount } = render(
+        wrapQueryBarTopRowInContext({
+          isDirty: false,
+          onDraftChange,
+          ...state,
+        })
+      );
+
+      unmount();
+
+      expect(onDraftChange).toHaveBeenCalledTimes(1);
     });
   });
 });

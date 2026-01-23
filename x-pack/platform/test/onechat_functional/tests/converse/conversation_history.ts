@@ -135,12 +135,34 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const conversationIdToDelete = conversationIds[0];
       await onechat.deleteConversation(conversationIdToDelete);
 
-      // Assert the deleted conversation is no longer in history
-      expect(await onechat.isConversationInHistory(conversationIdToDelete)).to.be(false);
+      // Wait for the deleted conversation to disappear from history (wait for refetch to complete)
+      await retry.try(async () => {
+        const isInHistory = await onechat.isConversationInHistory(conversationIdToDelete);
+        expect(isInHistory).to.be(false);
+      });
 
       // Assert the remaining conversations are still in history
       expect(await onechat.isConversationInHistory(conversationIds[1])).to.be(true);
       expect(await onechat.isConversationInHistory(conversationIds[2])).to.be(true);
+    });
+
+    it('can rename a conversation and the title updates correctly', async () => {
+      const conversationIdToRename = conversationIds[1];
+      const newTitle = 'Renamed Conversation Title';
+
+      // Navigate to the conversation
+      await onechat.navigateToConversationViaHistory(conversationIdToRename);
+
+      // Wait for conversation content to load
+      await retry.try(async () => {
+        await testSubjects.find('agentBuilderRoundResponse');
+      });
+
+      // Rename the conversation
+      const updatedTitle = await onechat.renameConversation(newTitle);
+
+      // Assert the title was updated correctly
+      expect(updatedTitle).to.be(newTitle);
     });
 
     it.skip('does not allow continuing to chat if the agent cannot be found', async () => {

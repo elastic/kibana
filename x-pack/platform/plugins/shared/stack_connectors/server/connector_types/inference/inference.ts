@@ -23,12 +23,13 @@ import { filter, from, identity, map, mergeMap, tap } from 'rxjs';
 import type OpenAI from 'openai';
 import type { ChatCompletionChunk } from 'openai/resources';
 import {
+  SUB_ACTION,
   ChatCompleteParamsSchema,
   RerankParamsSchema,
   SparseEmbeddingParamsSchema,
   TextEmbeddingParamsSchema,
   UnifiedChatCompleteParamsSchema,
-} from '../../../common/inference/schema';
+} from '@kbn/connector-schemas/inference';
 import type {
   Config,
   Secrets,
@@ -44,8 +45,7 @@ import type {
   DashboardActionResponse,
   ChatCompleteParams,
   ChatCompleteResponse,
-} from '../../../common/inference/types';
-import { SUB_ACTION } from '../../../common/inference/constants';
+} from '@kbn/connector-schemas/inference';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import { chunksIntoMessage, eventSourceStreamIntoObservable } from './helpers';
 

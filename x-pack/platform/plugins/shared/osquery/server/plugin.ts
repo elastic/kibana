@@ -68,6 +68,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   public setup(core: CoreSetup<StartPlugins, OsqueryPluginStart>, plugins: SetupPlugins) {
     this.logger.debug('osquery: Setup');
     const config = createConfig(this.initializerContext);
+    const experimentalFeatures = config.experimentalFeatures;
 
     registerFeatures(plugins.features);
 
@@ -78,6 +79,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       getStartServices: core.getStartServices,
       service: this.osqueryAppContextService,
       config: (): ConfigType => config,
+      experimentalFeatures,
       security: plugins.security,
       telemetryEventsSender: this.telemetryEventsSender,
       licensing: plugins.licensing,

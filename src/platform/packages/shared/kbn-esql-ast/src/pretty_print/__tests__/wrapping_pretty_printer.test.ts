@@ -9,7 +9,7 @@
 
 import { parse } from '../../parser';
 import type { ESQLMap } from '../../types';
-import { Walker } from '../../walker';
+import { Walker } from '../../ast/walker';
 import type { WrappingPrettyPrinterOptions } from '../wrapping_pretty_printer';
 import { WrappingPrettyPrinter } from '../wrapping_pretty_printer';
 

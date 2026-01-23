@@ -8,8 +8,9 @@
 import type { ZodObject } from '@kbn/zod';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { StaticToolRegistration } from '@kbn/onechat-server/tools';
-import type { ToolTypeInfo } from '../../../common/tools';
+import type { AnyToolTypeDefinition } from './tool_types';
 import type { ToolRegistry } from './tool_registry';
+import type { ToolHealthClient } from './health';
 
 export interface ToolsServiceSetup {
   register<RunInput extends ZodObject<any>>(tool: StaticToolRegistration<RunInput>): void;
@@ -20,9 +21,13 @@ export interface ToolsServiceStart {
    * Create a registry scoped to the current user and context.
    */
   getRegistry(opts: { request: KibanaRequest }): Promise<ToolRegistry>;
-
   /**
-   * Return the list of available tool types with corresponding metadata.
+   * Returns the list of available tool definitions.
    */
-  getToolTypeInfo(): ToolTypeInfo[];
+  getToolDefinitions(): AnyToolTypeDefinition[];
+  /**
+   * Create a health client scoped to the current space.
+   * Used to track and query tool health state.
+   */
+  getHealthClient(opts: { request: KibanaRequest }): ToolHealthClient;
 }

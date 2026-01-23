@@ -8,6 +8,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import { useAIFeatures } from '../../../hooks/use_ai_features';
 import { StreamDescription } from '../../stream_detail_features/stream_description';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
@@ -61,6 +62,7 @@ export function ClassicStreamDetailManagement({
   const {
     features: { attachments },
   } = useStreamsPrivileges();
+  const aiFeatures = useAIFeatures();
 
   const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
     definition,
@@ -141,7 +143,9 @@ export function ClassicStreamDetailManagement({
   };
 
   tabs.dataQuality = {
-    content: <StreamDetailDataQuality definition={definition} />,
+    content: (
+      <StreamDetailDataQuality definition={definition} refreshDefinition={refreshDefinition} />
+    ),
     label: (
       <EuiToolTip
         content={i18n.translate('xpack.streams.managementTab.dataQuality.tooltip', {
@@ -176,10 +180,15 @@ export function ClassicStreamDetailManagement({
         <>
           {otherTabs.significantEvents ? (
             <>
-              <StreamDescription definition={definition} refreshDefinition={refreshDefinition} />
+              <StreamDescription
+                definition={definition}
+                refreshDefinition={refreshDefinition}
+                aiFeatures={aiFeatures}
+              />
               <EuiSpacer />
             </>
           ) : null}
+
           <UnmanagedElasticsearchAssets
             definition={definition}
             refreshDefinition={refreshDefinition}

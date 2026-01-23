@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiPanel,
   EuiText,
   EuiToolTip,
@@ -20,10 +21,12 @@ import {
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ExecutionStatus } from '@kbn/workflows';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations';
+import { FormattedRelativeEnhanced } from '../../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced';
 import { getExecutionStatusColors, getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
 
@@ -38,13 +41,14 @@ export const getExecutionTitleColor = (
 
 interface WorkflowExecutionListItemProps {
   status: ExecutionStatus;
+  isTestRun: boolean;
   startedAt: Date | null;
   duration: number | null;
   selected?: boolean;
   onClick?: () => void;
 }
 export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemProps>(
-  ({ status, startedAt, duration, selected, onClick }) => {
+  ({ status, isTestRun, startedAt, duration, selected, onClick }) => {
     const { euiTheme } = useEuiTheme();
     const styles = useMemoCss(componentStyles);
     const getFormattedDate = useGetFormattedDateTime();
@@ -88,7 +92,7 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
                 {startedAt ? (
                   <EuiToolTip position="left" content={formattedDate}>
                     <EuiText size="xs" tabIndex={0} color="subdued">
-                      <FormattedRelative value={startedAt} />
+                      <FormattedRelativeEnhanced value={startedAt} />
                     </EuiText>
                   </EuiToolTip>
                 ) : (
@@ -105,6 +109,20 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
           {formattedDuration && (
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs" wrap>
+                {isTestRun && (
+                  <EuiFlexItem>
+                    <EuiIconTip
+                      type="flask"
+                      color={euiTheme.colors.backgroundFilledText}
+                      title={i18n.translate(
+                        'workflows.workflowExecutionListItem.testRunIconTitle',
+                        {
+                          defaultMessage: 'Test Run',
+                        }
+                      )}
+                    />
+                  </EuiFlexItem>
+                )}
                 <EuiFlexItem grow={false}>
                   <EuiIcon type="clock" color="subdued" />
                 </EuiFlexItem>

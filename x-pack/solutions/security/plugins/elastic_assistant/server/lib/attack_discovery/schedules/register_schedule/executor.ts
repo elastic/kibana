@@ -8,7 +8,10 @@
 import moment from 'moment';
 import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
-import { getAttackDiscoveryMarkdownFields } from '@kbn/elastic-assistant-common';
+import {
+  getAttackDiscoveryMarkdownFields,
+  resolveConnectorId,
+} from '@kbn/elastic-assistant-common';
 import { ALERT_URL } from '@kbn/rule-data-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
@@ -30,6 +33,7 @@ import {
 } from '../../persistence/transforms/transform_to_alert_documents';
 import { deduplicateAttackDiscoveries } from '../../persistence/deduplication';
 import { getScheduledIndexPattern } from '../../persistence/get_scheduled_index_pattern';
+import { updateAlertsWithAttackIds } from './updateAlertsWithAttackIds';
 
 export interface AttackDiscoveryScheduleExecutorParams {
   options: AttackDiscoveryExecutorOptions;
@@ -51,6 +55,13 @@ export const attackDiscoveryScheduleExecutor = async ({
   }
   if (!actionsClient) {
     throw new Error('Expected actionsClient not to be null!');
+  }
+
+  if (params.apiConfig?.connectorId) {
+    // Resolve potentially outdated Elastic managed connector ID to the new one.
+    // This provides backward compatibility for existing schedules that reference
+    // "Elastic-Managed-LLM" or "General-Purpose-LLM-v1".
+    params.apiConfig.connectorId = resolveConnectorId(params.apiConfig.connectorId);
   }
 
   const esClient = scopedClusterClient.asCurrentUser;
@@ -137,6 +148,13 @@ export const attackDiscoveryScheduleExecutor = async ({
       spaceId,
     });
 
+    /**
+     * Map that uses alert id as key and an array
+     * of attack ids as value.
+     * Used to update alerts in one query
+     */
+    const alertIdToAttackIds: Record<string, string[]> = {};
+
     await Promise.all(
       dedupedDiscoveries.map(async (attackDiscovery) => {
         const alertInstanceId = generateAttackDiscoveryAlertHash({
@@ -150,6 +168,11 @@ export const attackDiscoveryScheduleExecutor = async ({
           id: alertInstanceId,
           actionGroup: 'default',
         });
+
+        for (const alertId of attackDiscovery.alertIds) {
+          alertIdToAttackIds[alertId] = alertIdToAttackIds[alertId] ?? [];
+          alertIdToAttackIds[alertId].push(alertDocId);
+        }
 
         const baseAlertDocument = transformToBaseAlertDocument({
           alertDocId,
@@ -186,6 +209,12 @@ export const attackDiscoveryScheduleExecutor = async ({
         });
       })
     );
+
+    await updateAlertsWithAttackIds({
+      alertIdToAttackIdsMap: alertIdToAttackIds,
+      esClient,
+      spaceId,
+    });
   } catch (error) {
     logger.error(error);
     const transformedError = transformError(error);

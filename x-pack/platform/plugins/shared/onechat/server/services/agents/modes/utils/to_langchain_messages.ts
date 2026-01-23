@@ -99,7 +99,7 @@ const formatAttachment = ({
       },
       children: [attachment.representation.value],
     },
-    { initialIndentLevel: indent }
+    { initialIndentLevel: indent, escapeContent: false }
   );
 };
 

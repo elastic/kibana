@@ -5,64 +5,139 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import type { TestBed } from '@kbn/test-jest-helpers';
+import {
+  screen,
+  fireEvent,
+  within,
+  waitFor,
+  waitForElementToBeRemoved,
+} from '@testing-library/react';
+import { EuiSelectTestHarness } from '@kbn/test-eui-helpers';
 
 import type { DataTierAllocationType } from '../../../public/application/sections/edit_policy/types';
 import type { Phase } from '../../../common/types';
-import { createFormSetValueAction } from './form_set_value_action';
 
-export const createNodeAllocationActions = (testBed: TestBed, phase: Phase) => {
-  const { component, find, exists } = testBed;
-
+export const createNodeAllocationActions = (phase: Phase) => {
   const controlsSelector = `${phase}-dataTierAllocationControls`;
-  const dataTierSelector = `${controlsSelector}.dataTierSelect`;
   const nodeAttrsSelector = `${phase}-selectedNodeAttrs`;
 
   const openNodeAttributesSection = async () => {
-    await act(async () => {
-      find(dataTierSelector).simulate('click');
+    // Find the controls container and query within it
+    const container = screen.getByTestId(controlsSelector);
+    const select = within(container).getByTestId('dataTierSelect');
+    fireEvent.click(select);
+
+    // Wait for dropdown portal options to appear (always wait for custom/none which are always available)
+    await waitFor(() => {
+      const customOption = screen.queryByTestId('customDataAllocationOption');
+      const noneOption = screen.queryByTestId('noneDataAllocationOption');
+      if (!customOption && !noneOption) {
+        throw new Error('Dropdown options (custom/none) did not appear');
+      }
     });
-    component.update();
   };
 
-  const isAllocationLoading = () => find(`${phase}-phase.allocationLoadingSpinner`).exists();
-  const hasDefaultToDataNodesNotice = () => exists(`${phase}-phase.defaultToDataNodesNotice`);
-  const hasDefaultToDataTiersNotice = () => exists(`${phase}-phase.defaultToDataTiersNotice`);
+  const getPhaseContainer = () => {
+    return screen.queryByTestId(`${phase}-phase`);
+  };
+
+  const isAllocationLoading = () => {
+    // The spinner is within the phase container
+    const container = getPhaseContainer();
+    if (!container) return false;
+    return Boolean(within(container).queryByTestId('allocationLoadingSpinner'));
+  };
+
+  const hasDefaultToDataNodesNotice = () => {
+    const container = getPhaseContainer();
+    return container ? Boolean(within(container).queryByTestId('defaultToDataNodesNotice')) : false;
+  };
+  const hasDefaultToDataTiersNotice = () => {
+    const container = getPhaseContainer();
+    return container ? Boolean(within(container).queryByTestId('defaultToDataTiersNotice')) : false;
+  };
   const hasDefaultAllocationBehaviorNotice = () =>
     hasDefaultToDataNodesNotice() && hasDefaultToDataTiersNotice();
-  const hasNoTiersAvailableNotice = () => exists(`${phase}-phase.noTiersAvailableNotice`);
-  const hasNoTiersAvailableUsingNodeAttributesNotice = () =>
-    exists(`${phase}-phase.noTiersAvailableUsingNodeAttributesNotice`);
-  const hasWillUseFallbackTierNotice = () => exists(`${phase}-phase.willUseFallbackTierNotice`);
-  const hasWillUseFallbackTierUsingNodeAttributesNotice = () =>
-    exists(`${phase}-phase.willUseFallbackTierUsingNodeAttributesNotice`);
-  const getWillUseFallbackTierNoticeText = () =>
-    find(`${phase}-phase.willUseFallbackTierNotice`).text();
+  const hasNoTiersAvailableNotice = () => {
+    const container = getPhaseContainer();
+    return container ? Boolean(within(container).queryByTestId('noTiersAvailableNotice')) : false;
+  };
+  const hasNoTiersAvailableUsingNodeAttributesNotice = () => {
+    const container = getPhaseContainer();
+    return container
+      ? Boolean(within(container).queryByTestId('noTiersAvailableUsingNodeAttributesNotice'))
+      : false;
+  };
+  const hasWillUseFallbackTierNotice = () => {
+    const container = getPhaseContainer();
+    return container
+      ? Boolean(within(container).queryByTestId('willUseFallbackTierNotice'))
+      : false;
+  };
+  const hasWillUseFallbackTierUsingNodeAttributesNotice = () => {
+    const container = getPhaseContainer();
+    return container
+      ? Boolean(within(container).queryByTestId('willUseFallbackTierUsingNodeAttributesNotice'))
+      : false;
+  };
+  const getWillUseFallbackTierNoticeText = () => {
+    const container = getPhaseContainer();
+    if (!container) return '';
+    const element = within(container).queryByTestId('willUseFallbackTierNotice');
+    return element?.textContent || '';
+  };
 
   return {
-    hasDataTierAllocationControls: () => exists(controlsSelector),
+    hasDataTierAllocationControls: () => Boolean(screen.queryByTestId(controlsSelector)),
     openNodeAttributesSection,
-    hasNodeAttributesSelect: (): boolean => exists(nodeAttrsSelector),
-    getNodeAttributesSelectOptions: () => find(nodeAttrsSelector).find('option'),
+    hasNodeAttributesSelect: (): boolean =>
+      Boolean(new EuiSelectTestHarness(nodeAttrsSelector).self),
+    getNodeAttributesSelectOptions: () => new EuiSelectTestHarness(nodeAttrsSelector).options,
     setDataAllocation: async (value: DataTierAllocationType) => {
       await openNodeAttributesSection();
 
-      await act(async () => {
-        switch (value) {
-          case 'node_roles':
-            find(`${controlsSelector}.defaultDataAllocationOption`).simulate('click');
-            break;
-          case 'node_attrs':
-            find(`${controlsSelector}.customDataAllocationOption`).simulate('click');
-            break;
-          default:
-            find(`${controlsSelector}.noneDataAllocationOption`).simulate('click');
+      switch (value) {
+        case 'node_roles': {
+          const option = screen.getByTestId('defaultDataAllocationOption');
+          fireEvent.click(option);
+          await waitForElementToBeRemoved(option);
+          break;
+        }
+        case 'node_attrs': {
+          const customOption = screen.getByTestId('customDataAllocationOption');
+          fireEvent.click(customOption);
+          await waitForElementToBeRemoved(customOption);
+          break;
+        }
+        default:
+          const option = screen.getByTestId('noneDataAllocationOption');
+          fireEvent.click(option);
+          await waitForElementToBeRemoved(option);
+      }
+    },
+    setSelectedNodeAttribute: async (value: string) => {
+      // Wait for the node attribute select field to appear AND be populated with options
+      // The field only renders when dataTierAllocationType === 'node_attrs'
+      await waitFor(() => {
+        const selectHarness = new EuiSelectTestHarness(nodeAttrsSelector);
+        expect(selectHarness.self).toBeInTheDocument();
+
+        // Check if options are loaded (more than just the empty default option)
+        const options = selectHarness.options.map((o) => o.value).filter((v) => v !== '');
+        if (options.length === 0) {
+          throw new Error('Options not yet loaded');
+        }
+        if (!options.includes(value)) {
+          throw new Error(
+            `Option '${value}' not found. Available options: ${JSON.stringify(options)}`
+          );
         }
       });
-      component.update();
+
+      // Field found and options loaded, set the value
+      const selectHarness = new EuiSelectTestHarness(nodeAttrsSelector);
+      selectHarness.select(value);
     },
-    setSelectedNodeAttribute: createFormSetValueAction(testBed, nodeAttrsSelector),
     isAllocationLoading,
     hasDefaultToDataNodesNotice,
     hasDefaultToDataTiersNotice,
@@ -72,12 +147,15 @@ export const createNodeAllocationActions = (testBed: TestBed, phase: Phase) => {
     hasWillUseFallbackTierNotice,
     hasWillUseFallbackTierUsingNodeAttributesNotice,
     getWillUseFallbackTierNoticeText,
-    hasNodeDetailsFlyout: () => exists(`${phase}-viewNodeDetailsFlyoutButton`),
+    hasNodeDetailsFlyout: () => Boolean(screen.queryByRole('dialog')),
     openNodeDetailsFlyout: async () => {
-      await act(async () => {
-        find(`${phase}-viewNodeDetailsFlyoutButton`).simulate('click');
+      const button = screen.getByTestId(`${phase}-viewNodeDetailsFlyoutButton`);
+      fireEvent.click(button);
+
+      // Wait for flyout portal to mount
+      await waitFor(() => {
+        expect(screen.getByRole('dialog')).toBeInTheDocument();
       });
-      component.update();
     },
   };
 };

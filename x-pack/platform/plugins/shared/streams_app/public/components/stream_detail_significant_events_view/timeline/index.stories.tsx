@@ -63,14 +63,23 @@ export const WithEvents: StoryFn<{}> = () => {
       header: `Another event`,
       label: (
         <ChangePointSummary
-          change={{
-            time: new Date(`2025-03-24T13:48:00.000Z`).getTime(),
-            label: 'Spike',
-            type: 'spike',
-            color: 'danger',
-            impact: 'high',
-            p_value: 0.01,
-          }}
+          changes={[
+            {
+              query: {
+                id: 'some_event',
+                title: 'Some event',
+                kql: {
+                  query: '*',
+                },
+              },
+              time: new Date(`2025-03-24T13:48:00.000Z`).getTime(),
+              label: 'Spike',
+              type: 'spike',
+              color: 'danger',
+              impact: 'high',
+              p_value: 0.01,
+            },
+          ]}
           xFormatter={xFormatter}
         />
       ),
@@ -100,14 +109,23 @@ export const WithChangePointsSummary: StoryFn<{}> = () => {
       header: 'Some event',
       label: (
         <ChangePointSummary
-          change={{
-            time: new Date(`2025-03-24T13:48:00.000Z`).getTime(),
-            label: 'Change',
-            type: 'distribution_change',
-            color: 'danger',
-            impact: 'medium',
-            p_value: 0.01,
-          }}
+          changes={[
+            {
+              query: {
+                id: 'some_event',
+                title: 'Some event',
+                kql: {
+                  query: '*',
+                },
+              },
+              time: new Date(`2025-03-24T13:48:00.000Z`).getTime(),
+              label: 'Change',
+              type: 'distribution_change' as const,
+              color: 'danger' as const,
+              impact: 'medium' as const,
+              p_value: 0.01,
+            },
+          ]}
           xFormatter={xFormatter}
         />
       ),
@@ -119,14 +137,23 @@ export const WithChangePointsSummary: StoryFn<{}> = () => {
       header: 'Some other event',
       label: (
         <ChangePointSummary
-          change={{
-            time: new Date(`2025-03-24T13:48:00.000Z`).getTime(),
-            label: 'Dip',
-            type: 'dip',
-            color: 'danger',
-            impact: 'low',
-            p_value: 0.01,
-          }}
+          changes={[
+            {
+              query: {
+                id: 'some_event',
+                title: 'Some event',
+                kql: {
+                  query: '*',
+                },
+              },
+              time: new Date(`2025-03-24T13:48:00.000Z`).getTime(),
+              label: 'Dip',
+              type: 'dip',
+              color: 'danger',
+              impact: 'low',
+              p_value: 0.01,
+            },
+          ]}
           xFormatter={xFormatter}
         />
       ),
@@ -138,14 +165,23 @@ export const WithChangePointsSummary: StoryFn<{}> = () => {
       header: `Another event`,
       label: (
         <ChangePointSummary
-          change={{
-            time: new Date(`2025-03-24T13:48:00.000Z`).getTime(),
-            label: 'Spike',
-            type: 'spike',
-            color: 'danger',
-            impact: 'high',
-            p_value: 0.01,
-          }}
+          changes={[
+            {
+              query: {
+                id: 'some_event',
+                title: 'Some event',
+                kql: {
+                  query: '*',
+                },
+              },
+              time: new Date(`2025-03-24T13:48:00.000Z`).getTime(),
+              label: 'Spike',
+              type: 'spike',
+              color: 'danger',
+              impact: 'high',
+              p_value: 0.01,
+            },
+          ]}
           xFormatter={xFormatter}
         />
       ),
