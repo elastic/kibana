@@ -28,7 +28,7 @@ export const useAlertAssigneesActions = ({
   ecsRowData,
   refetch,
 }: UseAlertAssigneesActionsProps) => {
-  const { hasIndexWrite } = useAlertsPrivileges();
+  const { hasAlertsAll } = useAlertsPrivileges();
 
   const alertId = ecsRowData._id;
   const alertAssignments = useMemo(
@@ -95,7 +95,7 @@ export const useAlertAssigneesActions = ({
   );
 
   return {
-    alertAssigneesItems: hasIndexWrite ? itemsToReturn : [],
+    alertAssigneesItems: hasAlertsAll ? itemsToReturn : [],
     alertAssigneesPanels: panelsToReturn,
   };
 };

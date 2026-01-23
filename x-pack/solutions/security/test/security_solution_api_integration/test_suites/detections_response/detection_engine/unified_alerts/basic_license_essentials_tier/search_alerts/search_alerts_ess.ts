@@ -19,10 +19,10 @@ import type { FtrProviderContext } from '../../../../../../ftr_provider_context'
 import { getSimpleQuery } from '../../utils/queries';
 import {
   noKibanaPrivileges,
-  rulesReadUser,
-  rulesReadNoAttackIndicesUser,
-  rulesReadNoDetectionIndicesUser,
-  rulesReadNoIndicesUser,
+  alertsReadUser,
+  alertsReadNoAttackIndicesUser,
+  alertsReadNoDetectionIndicesUser,
+  alertsReadNoIndicesUser,
 } from '../../utils/auth/users';
 import {
   getMissingReadIndexPrivilegesError,
@@ -36,10 +36,10 @@ export default ({ getService }: FtrProviderContext) => {
   describe('@ess Search Alerts - ESS', () => {
     describe('RBAC', () => {
       describe('Kibana privileges', () => {
-        it('should return all alerts with rules read privileges', async () => {
+        it('should return all alerts with alerts read privileges', async () => {
           const { body } = await supertestWithoutAuth
             .post(DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL)
-            .auth(rulesReadUser.username, rulesReadUser.password)
+            .auth(alertsReadUser.username, alertsReadUser.password)
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
             .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -49,7 +49,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body.hits.hits).toEqual([...expectedDetectionAlerts, ...expectedAttackAlerts]);
         });
 
-        it('should not return alerts without rules read privileges', async () => {
+        it('should not return alerts without alerts read privileges', async () => {
           const { body } = await supertestWithoutAuth
             .post(DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL)
             .auth(noKibanaPrivileges.username, noKibanaPrivileges.password)
@@ -71,7 +71,7 @@ export default ({ getService }: FtrProviderContext) => {
         it('should not return alerts without index privileges', async () => {
           const { body } = await supertestWithoutAuth
             .post(DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL)
-            .auth(rulesReadNoIndicesUser.username, rulesReadNoIndicesUser.password)
+            .auth(alertsReadNoIndicesUser.username, alertsReadNoIndicesUser.password)
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
             .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -80,8 +80,8 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(body).toEqual(
             getMissingReadIndexPrivilegesError({
-              username: rulesReadNoIndicesUser.username,
-              roles: rulesReadNoIndicesUser.roles,
+              username: alertsReadNoIndicesUser.username,
+              roles: alertsReadNoIndicesUser.roles,
             })
           );
         });
@@ -90,8 +90,8 @@ export default ({ getService }: FtrProviderContext) => {
           const { body } = await supertestWithoutAuth
             .post(DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL)
             .auth(
-              rulesReadNoDetectionIndicesUser.username,
-              rulesReadNoDetectionIndicesUser.password
+              alertsReadNoDetectionIndicesUser.username,
+              alertsReadNoDetectionIndicesUser.password
             )
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
@@ -106,7 +106,7 @@ export default ({ getService }: FtrProviderContext) => {
         it('should return only detection alerts without attack alerts index privileges', async () => {
           const { body } = await supertestWithoutAuth
             .post(DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL)
-            .auth(rulesReadNoAttackIndicesUser.username, rulesReadNoAttackIndicesUser.password)
+            .auth(alertsReadNoAttackIndicesUser.username, alertsReadNoAttackIndicesUser.password)
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
             .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
