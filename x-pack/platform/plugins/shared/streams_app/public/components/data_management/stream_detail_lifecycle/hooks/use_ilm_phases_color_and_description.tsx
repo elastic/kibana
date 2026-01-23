@@ -12,19 +12,9 @@ import { useMemo } from 'react';
 export const useIlmPhasesColorAndDescription = () => {
   const { euiTheme } = useEuiTheme();
 
-  const hotPalette = colorPalette(
-    [euiTheme.colors.severity.risk, euiTheme.colors.backgroundFilledRisk],
-    3
-  );
-
   const coldPalette = colorPalette(
     [euiTheme.colors.severity.neutral, euiTheme.colors.backgroundFilledNeutral],
     6
-  );
-
-  const frozenPalette = colorPalette(
-    [euiTheme.colors.vis.euiColorVis3, euiTheme.colors.vis.euiColorVis2],
-    4
   );
 
   return useMemo(
@@ -32,7 +22,7 @@ export const useIlmPhasesColorAndDescription = () => {
       ilmPhases: {
         hot: {
           color: euiTheme.colors.severity.risk,
-          hoverColor: hotPalette[1],
+          hoverColor: euiTheme.colors.vis.euiColorVisRisk0,
           description: i18n.translate('xpack.streams.streamDetailLifecycle.hotPhaseDescription', {
             defaultMessage:
               'Use for data that is searched frequently and actively updated, optimized for indexing and search performance.',
@@ -56,7 +46,7 @@ export const useIlmPhasesColorAndDescription = () => {
         },
         frozen: {
           color: euiTheme.colors.vis.euiColorVis3,
-          hoverColor: frozenPalette[1],
+          hoverColor: euiTheme.colors.vis.euiColorVisCool1,
           description: i18n.translate(
             'xpack.streams.streamDetailLifecycle.frozenPhaseDescription',
             {
@@ -77,6 +67,6 @@ export const useIlmPhasesColorAndDescription = () => {
         },
       },
     }),
-    [euiTheme, coldPalette, frozenPalette, hotPalette]
+    [euiTheme, coldPalette]
   );
 };

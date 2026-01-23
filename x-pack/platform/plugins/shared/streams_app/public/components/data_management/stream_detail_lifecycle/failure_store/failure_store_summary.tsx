@@ -38,7 +38,7 @@ export const FailureStoreSummary = ({ stats, failureStoreConfig }: FailureStoreS
       defaultMessage: 'Failed ingest',
     }),
     color: euiTheme.colors.severity.danger,
-    colorHover: euiTheme.colors.backgroundFilledDanger,
+    colorHover: euiTheme.colors.vis.euiColorVisText7,
     size: storageSize,
     retentionPeriod,
     sizeInBytes: stats?.size,
