@@ -9,6 +9,7 @@
 
 import { useCallback, useState } from 'react';
 import type YAML from 'yaml';
+import { parseDocument } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import type { z } from '@kbn/zod/v4';
 import { filterMonacoYamlMarkers } from './filter_monaco_yaml_markers';
@@ -51,11 +52,14 @@ export function useMonacoMarkersChangedInterceptor({
       return filterMonacoYamlMarkers(markers, editorModel, yamlDocumentRef.current).map(
         (marker) => {
           if (owner === 'yaml') {
+            // we absolutely need to have up to date yaml document to format the error message, not the one from the ref object (which is debounced)
+            // the monaco-yaml validation is already debounced, so this won't be run every key stroke
+            const freshYamlDocument = parseDocument(editorModel.getValue());
             return formatMonacoYamlMarker(
               marker,
               editorModel,
               workflowYamlSchema,
-              yamlDocumentRef.current
+              freshYamlDocument
             );
           }
           return marker;
