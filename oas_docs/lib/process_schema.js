@@ -10,6 +10,53 @@
 const MAX_RECURSION_DEPTH = 100;
 
 /**
+ * Check if a schema has structural fields worth extracting as a component.
+ * Structural fields define the shape/structure of data, as opposed to metadata fields.
+ *
+ * @param {Object} schema - The schema to check
+ * @returns {boolean} - True if schema has structural fields (properties, additionalProperties, patternProperties, composition types)
+ *
+ * @example
+ * hasStructuralFields({ type: 'object', properties: { id: { type: 'string' } } }) // true
+ * hasStructuralFields({ type: 'object', additionalProperties: { type: 'string' } }) // true
+ * hasStructuralFields({ type: 'object', description: 'metadata only' }) // false
+ * hasStructuralFields({ type: 'object' }) // false (empty object)
+ */
+function hasStructuralFields(schema) {
+  if (!schema || typeof schema !== 'object') return false;
+
+  // Has properties
+  if (
+    schema.properties &&
+    typeof schema.properties === 'object' &&
+    Object.keys(schema.properties).length > 0
+  ) {
+    return true;
+  }
+
+  // Has additionalProperties (schema, not boolean)
+  if (schema.additionalProperties && typeof schema.additionalProperties === 'object') {
+    return true;
+  }
+
+  // Has patternProperties
+  if (
+    schema.patternProperties &&
+    typeof schema.patternProperties === 'object' &&
+    Object.keys(schema.patternProperties).length > 0
+  ) {
+    return true;
+  }
+
+  // Has composition types
+  if (schema.oneOf || schema.anyOf || schema.allOf) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
  * Creates a schema processing function that recursively extracts inline schemas into components.
  *
  * The processor extracts:
@@ -115,15 +162,13 @@ const createProcessSchema = (components, nameGenerator, stats, log) => {
           ...context,
           propertyPath: [...(context.propertyPath || []), propName],
         };
-        // Extract nested objects as components
-        // Skip empty objects
-        // Properties are already nested by definition, so always extract them
+        // Extract nested objects as components if they have structural fields
+        // Properties are already nested by definition, so extract them if they have content
         if (
           propSchema &&
           typeof propSchema === 'object' &&
           propSchema.type === 'object' &&
-          propSchema.properties &&
-          Object.keys(propSchema.properties).length > 0
+          hasStructuralFields(propSchema)
         ) {
           const name = nameGenerator(propContext, 'property');
           // Check if name exists
@@ -151,15 +196,13 @@ const createProcessSchema = (components, nameGenerator, stats, log) => {
         ...context,
         inArray: true,
       };
-      // Extract nested objects as components
-      // Skip empty objects (objects without properties)
-      // Array items are already nested by definition, so always extract them
+      // Extract nested objects as components if they have structural fields
+      // Array items are already nested by definition, so extract them if they have content
       if (
         schema.items &&
         typeof schema.items === 'object' &&
         schema.items.type === 'object' &&
-        schema.items.properties &&
-        Object.keys(schema.items.properties).length > 0
+        hasStructuralFields(schema.items)
       ) {
         const name = nameGenerator(itemContext, 'arrayItem');
         // Check if name exists
@@ -186,13 +229,11 @@ const createProcessSchema = (components, nameGenerator, stats, log) => {
         ...context,
         inAdditionalProperties: true,
       };
-      // Extract nested objects as components
-      // Skip empty objects (objects without properties)
-      // AdditionalProperties are already nested by definition, so always extract them
+      // Extract nested objects as components if they have structural fields
+      // AdditionalProperties are already nested by definition, so extract them if they have content
       if (
         schema.additionalProperties.type === 'object' &&
-        schema.additionalProperties.properties &&
-        Object.keys(schema.additionalProperties.properties).length > 0
+        hasStructuralFields(schema.additionalProperties)
       ) {
         const name = nameGenerator(addlPropContext, 'additionalProperty');
         // Check if name exists

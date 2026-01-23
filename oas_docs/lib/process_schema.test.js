@@ -47,7 +47,10 @@ describe('createProcessSchema', () => {
   beforeEach(() => {
     mockComponents = {};
     mockNameGenerator = jest.fn((context, compType, idx) => {
-      return `Mock${compType}${idx}`;
+      if (idx !== undefined) {
+        return `Mock${compType}${idx}`;
+      }
+      return `Mock${compType}`;
     });
     mockStats = {
       schemasExtracted: 0,
@@ -422,5 +425,164 @@ describe('createProcessSchema', () => {
     // Root object itself should NOT be extracted
     expect(schema.type).toBe('object'); // Root stays as inline object
     expect(schema.properties.data).toHaveProperty('$ref'); // Nested object extracted
+  });
+
+  describe('Phase 2: Extract objects with structural fields', () => {
+    beforeEach(() => {
+      processSchema = createProcessSchema(mockComponents, mockNameGenerator, mockStats, mockLog);
+    });
+
+    it('should extract property object with only additionalProperties (no properties)', () => {
+      const schema = {
+        type: 'object',
+        properties: {
+          metadata: {
+            type: 'object',
+            additionalProperties: {
+              type: 'string',
+            },
+          },
+        },
+      };
+      const context = { operationId: 'test', responseCode: '200' };
+      processSchema(schema, context);
+
+      expect(mockStats.schemasExtracted).toBe(1);
+      expect(schema.properties.metadata).toEqual({ $ref: '#/components/schemas/Mockproperty' });
+      expect(mockComponents.Mockproperty).toEqual({
+        type: 'object',
+        additionalProperties: {
+          type: 'string',
+        },
+      });
+    });
+
+    it('should extract array item object with only additionalProperties', () => {
+      const schema = {
+        type: 'array',
+        items: {
+          type: 'object',
+          additionalProperties: {
+            type: 'number',
+          },
+        },
+      };
+      const context = { operationId: 'test', responseCode: '200' };
+      processSchema(schema, context);
+
+      expect(mockStats.schemasExtracted).toBe(1);
+      expect(schema.items).toEqual({ $ref: '#/components/schemas/MockarrayItem' });
+      expect(mockComponents.MockarrayItem).toEqual({
+        type: 'object',
+        additionalProperties: {
+          type: 'number',
+        },
+      });
+    });
+
+    it('should extract object with only composition types (no properties)', () => {
+      const schema = {
+        type: 'object',
+        properties: {
+          variant: {
+            type: 'object',
+            oneOf: [{ type: 'string' }, { type: 'number' }],
+          },
+        },
+      };
+      const context = { operationId: 'test', responseCode: '200' };
+      processSchema(schema, context);
+
+      // variant object extracted (1) + oneOf items (2) = 3
+      expect(mockStats.schemasExtracted).toBe(3);
+      expect(schema.properties.variant).toEqual({ $ref: '#/components/schemas/Mockproperty' });
+    });
+
+    it('should NOT extract object with only metadata fields', () => {
+      const schema = {
+        type: 'object',
+        properties: {
+          metadataOnly: {
+            type: 'object',
+            description: 'This is just metadata',
+            title: 'Metadata Object',
+          },
+        },
+      };
+      const context = { operationId: 'test', responseCode: '200' };
+      processSchema(schema, context);
+
+      expect(mockStats.schemasExtracted).toBe(0);
+      expect(schema.properties.metadataOnly).not.toHaveProperty('$ref');
+      expect(schema.properties.metadataOnly).toEqual({
+        type: 'object',
+        description: 'This is just metadata',
+        title: 'Metadata Object',
+      });
+    });
+
+    it('should NOT extract empty objects', () => {
+      const schema = {
+        type: 'object',
+        properties: {
+          emptyObj: {
+            type: 'object',
+          },
+        },
+      };
+      const context = { operationId: 'test', responseCode: '200' };
+      processSchema(schema, context);
+
+      expect(mockStats.schemasExtracted).toBe(0);
+      expect(schema.properties.emptyObj).not.toHaveProperty('$ref');
+      expect(schema.properties.emptyObj).toEqual({ type: 'object' });
+    });
+
+    it('should extract additionalProperties object with structural fields', () => {
+      const schema = {
+        type: 'object',
+        additionalProperties: {
+          type: 'object',
+          oneOf: [{ type: 'string' }, { type: 'boolean' }],
+        },
+      };
+      const context = { operationId: 'test', responseCode: '200' };
+      processSchema(schema, context);
+
+      // additionalProperties object (1) + oneOf items (2) = 3
+      expect(mockStats.schemasExtracted).toBe(3);
+      expect(schema.additionalProperties).toEqual({
+        $ref: '#/components/schemas/MockadditionalProperty',
+      });
+    });
+
+    it('should extract object with patternProperties', () => {
+      const schema = {
+        type: 'object',
+        properties: {
+          config: {
+            type: 'object',
+            patternProperties: {
+              '^[a-z]+$': {
+                type: 'string',
+              },
+            },
+          },
+        },
+      };
+      const context = { operationId: 'test', responseCode: '200' };
+      processSchema(schema, context);
+
+      expect(mockStats.schemasExtracted).toBe(1);
+      expect(schema.properties.config).toEqual({ $ref: '#/components/schemas/Mockproperty' });
+      expect(mockComponents.Mockproperty).toEqual({
+        type: 'object',
+        patternProperties: {
+          '^[a-z]+$': {
+            type: 'string',
+          },
+        },
+      });
+    });
   });
 });
