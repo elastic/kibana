@@ -34,11 +34,14 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   // Dashboards
   'platform.dashboard.create_dashboard',
   'platform.dashboard.update_dashboard',
+
   // Security Solution
   `${internalNamespaces.security}.entity_risk_score`,
   `${internalNamespaces.security}.attack_discovery_search`,
   `${internalNamespaces.security}.security_labs_search`,
   `${internalNamespaces.security}.alerts`,
+  `${internalNamespaces.security}.automatic_troubleshooting.get_package_configurations`,
+  `${internalNamespaces.security}.automatic_troubleshooting.generate_insight`,
 ];
 
 /**
@@ -49,6 +52,7 @@ export const AGENT_BUILDER_BUILTIN_AGENTS: string[] = [
   `${internalNamespaces.observability}.agent`,
   'platform.dashboard.dashboard_agent',
   `${internalNamespaces.security}.agent`,
+  `${internalNamespaces.security}.automatic_troubleshooting.agent`,
 ];
 
 export const isAllowedBuiltinTool = (toolName: string) => {

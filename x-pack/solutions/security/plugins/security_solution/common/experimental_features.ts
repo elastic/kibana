@@ -210,6 +210,10 @@ export const allowedExperimentalValues = Object.freeze({
    * When disabled, DNS field is not added to Linux policies and not shown in UI.
    */
   linuxDnsEvents: false,
+  /**
+   * Enables the Automatic Troubleshooting Agent Builder agent and tools
+   */
+  automaticTroubleshootingAgent: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
