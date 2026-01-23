@@ -69,6 +69,15 @@ If you want to allow anonymous authentication in Kibana, these settings are supp
 `vis_type_vega.enableExternalUrls`
 :   Set this value to `true` to allow Vega to use any URL to access external data sources and images. When `false`, Vega can only get data from {{es}}. **Default: `false`**
 
+### UI Settings [ec_ui_settings]
+
+#### Version 9.4+ [ec_ui_version_9_4]
+
+`uiSettings.globalOverrides.hideAnnouncements`
+:   Set to `true` to stop showing messages and tours that highlight new features. **Default: `false`**
+
+`uiSettings.globalOverrides.hideFeedback`
+:   Set to `true` to stop showing elements requesting user feedback. **Default: `false`**
 
 ## X-Pack configuration settings [ec-xpack-config]
 
