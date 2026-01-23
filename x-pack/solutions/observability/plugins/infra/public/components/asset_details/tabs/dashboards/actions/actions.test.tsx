@@ -39,7 +39,7 @@ describe('Custom Dashboards Actions', () => {
   beforeAll(() => {
     mockUseSearchSession();
 
-    useKibanaContextForPlugin.mockReturnValue({
+    (useKibanaContextForPlugin as jest.Mock).mockReturnValue({
       services: {
         notifications: {
           toasts: {
