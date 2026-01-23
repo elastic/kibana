@@ -43,7 +43,7 @@ export const useBulkAlertAssigneesItems = ({
 }: UseBulkAlertAssigneesItemsProps) => {
   const isPlatinumPlus = useLicense().isPlatinumPlus();
 
-  const { hasAlertsAll } = useAlertsPrivileges();
+  const { hasAlertsUpdate } = useAlertsPrivileges();
   const setAlertAssignees = useSetAlertAssignees();
 
   const handleOnAlertAssigneesSubmit = useCallback<
@@ -86,7 +86,7 @@ export const useBulkAlertAssigneesItems = ({
 
   const alertAssigneesItems = useMemo(
     () =>
-      hasAlertsAll && isPlatinumPlus
+      hasAlertsUpdate && isPlatinumPlus
         ? [
             {
               key: 'manage-alert-assignees',
@@ -108,7 +108,7 @@ export const useBulkAlertAssigneesItems = ({
             },
           ]
         : [],
-    [alertAssignments, hasAlertsAll, isPlatinumPlus, onRemoveAllAssignees]
+    [alertAssignments, hasAlertsUpdate, isPlatinumPlus, onRemoveAllAssignees]
   );
 
   const TitleContent = useMemo(
@@ -145,7 +145,7 @@ export const useBulkAlertAssigneesItems = ({
 
   const alertAssigneesPanels: UseBulkAlertAssigneesPanel[] = useMemo(
     () =>
-      hasAlertsAll && isPlatinumPlus
+      hasAlertsUpdate && isPlatinumPlus
         ? [
             {
               id: 2,
@@ -156,7 +156,7 @@ export const useBulkAlertAssigneesItems = ({
             },
           ]
         : [],
-    [TitleContent, hasAlertsAll, isPlatinumPlus, renderContent]
+    [TitleContent, hasAlertsUpdate, isPlatinumPlus, renderContent]
   );
 
   return useMemo(() => {

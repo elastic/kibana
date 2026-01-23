@@ -55,7 +55,7 @@ const renderContextMenu = (
 describe('useAlertTagsActions', () => {
   beforeEach(() => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({
-      hasAlertsAll: true,
+      hasAlertsUpdate: true,
     });
   });
 
@@ -103,7 +103,7 @@ describe('useAlertTagsActions', () => {
 
   it("should not render alert tagging actions if user doesn't have write permissions", () => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({
-      hasAlertsAll: false,
+      hasAlertsUpdate: false,
     });
     const { result } = renderHook(() => useAlertTagsActions(defaultProps), {
       wrapper: TestProviders,

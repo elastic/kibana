@@ -32,6 +32,8 @@ import {
   SERVER_APP_ID,
   USERS_API_READ,
   ALERTS_FEATURE_ID,
+  ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
+  ALERTS_UI_UPDATE_DEPRECATED_PRIVILEGE,
 } from '../../constants';
 import { type BaseKibanaFeatureConfig } from '../../types';
 import type { SecurityFeatureParams } from '../../security/types';

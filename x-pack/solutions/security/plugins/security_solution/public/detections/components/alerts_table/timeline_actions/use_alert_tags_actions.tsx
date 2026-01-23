@@ -25,7 +25,7 @@ export const useAlertTagsActions = ({
   ecsRowData,
   refetch,
 }: UseAlertTagsActionsProps) => {
-  const { hasAlertsAll } = useAlertsPrivileges();
+  const { hasAlertsUpdate } = useAlertsPrivileges();
   const alertId = ecsRowData._id;
   const alertTagData = useMemo(() => {
     return [
@@ -72,7 +72,7 @@ export const useAlertTagsActions = ({
   );
 
   return {
-    alertTagsItems: hasAlertsAll ? itemsToReturn : [],
+    alertTagsItems: hasAlertsUpdate ? itemsToReturn : [],
     alertTagsPanels: panelsToReturn,
   };
 };

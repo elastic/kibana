@@ -44,7 +44,7 @@ export const useBulkAlertActionItems = ({
   to,
   refetch: refetchProp,
 }: UseBulkAlertActionItemsArgs) => {
-  const { hasAlertsAll } = useAlertsPrivileges();
+  const { hasAlertsUpdate } = useAlertsPrivileges();
   const { startTransaction } = useStartTransaction();
 
   const { addSuccess, addError, addWarning } = useAppToasts();
@@ -215,7 +215,7 @@ export const useBulkAlertActionItems = ({
   );
 
   const items = useMemo(() => {
-    return hasAlertsAll
+    return hasAlertsUpdate
       ? ([FILTER_OPEN, FILTER_CLOSED, FILTER_ACKNOWLEDGED]
           .map((status) => {
             return getUpdateAlertStatusAction(status as AlertWorkflowStatus);
@@ -223,7 +223,7 @@ export const useBulkAlertActionItems = ({
           //  Filter out undefined items
           .filter((item) => !!item) as BulkActionsConfig[])
       : [];
-  }, [getUpdateAlertStatusAction, hasAlertsAll]);
+  }, [getUpdateAlertStatusAction, hasAlertsUpdate]);
 
   const panels = useMemo(
     () => [...alertClosingReasonPanels] as BulkActionsPanelConfig[],

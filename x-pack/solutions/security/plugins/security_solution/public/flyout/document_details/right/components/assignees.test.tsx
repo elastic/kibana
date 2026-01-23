@@ -77,7 +77,7 @@ describe('<Assignees />', () => {
       isLoading: false,
       data: mockUserProfiles,
     });
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsAll: true });
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsUpdate: true });
     (useLicense as jest.Mock).mockReturnValue({ isPlatinumPlus: () => true });
     (useUpsellingMessage as jest.Mock).mockReturnValue('Go for Platinum!');
 
@@ -146,7 +146,7 @@ describe('<Assignees />', () => {
   });
 
   it('should render add assignees button as disabled if user does not have alerts edit privileges', () => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsAll: false });
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsUpdate: false });
 
     const assignees = ['user-id-1', 'user-id-2'];
     const { getByTestId } = renderAssignees('test-event', assignees);

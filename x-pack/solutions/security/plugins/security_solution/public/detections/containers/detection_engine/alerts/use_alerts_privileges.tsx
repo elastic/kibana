@@ -32,7 +32,7 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
   const {
     detectionEnginePrivileges: { error, result, loading },
     alertsPrivileges: {
-      alerts: { edit: hasAlertsAll, read: hasAlertsRead },
+      alerts: { edit: hasAlertsAll, read: hasAlertsRead, legacyUpdate: hasLegacyAlertsUpdate },
     },
   } = useUserPrivileges();
 
@@ -79,6 +79,7 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
         // We do this to avoid doing this double wherever this hook is used.
         hasAlertsRead: hasAlertsRead && hasIndexRead,
         hasAlertsAll: hasAlertsAll && hasIndexWrite,
+        hasAlertsUpdate: hasAlertsUpdate && hasIndexWrite,
       };
     }
 

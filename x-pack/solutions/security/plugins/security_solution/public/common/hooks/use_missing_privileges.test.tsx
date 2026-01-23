@@ -117,7 +117,7 @@ describe('useMissingPrivileges', () => {
           rules: { edit: false, read: true },
           exceptions: { edit: false, read: true },
         },
-        alertsPrivileges: { alerts: { edit: true, read: true } },
+        alertsPrivileges: { alerts: { edit: true, read: true, legacyUpdate: false } },
       })
     );
 
@@ -137,7 +137,7 @@ describe('useMissingPrivileges', () => {
           rules: { edit: true, read: true },
           exceptions: { edit: true, read: true },
         },
-        alertsPrivileges: { alerts: { edit: false, read: true } },
+        alertsPrivileges: { alerts: { edit: false, read: true, legacyUpdate: false } },
       })
     );
 
@@ -174,7 +174,7 @@ describe('useMissingPrivileges', () => {
           rules: { edit: false, read: true },
           exceptions: { edit: false, read: true },
         },
-        alertsPrivileges: { alerts: { edit: false, read: true } },
+        alertsPrivileges: { alerts: { edit: false, read: true, legacyUpdate: false } },
       })
     );
 
@@ -195,7 +195,7 @@ describe('useMissingPrivileges', () => {
           rules: { edit: true, read: true },
           exceptions: { edit: true, read: true },
         },
-        alertsPrivileges: { alerts: { edit: true, read: true } },
+        alertsPrivileges: { alerts: { edit: true, read: true, legacyUpdate: true } },
       })
     );
 
@@ -211,7 +211,7 @@ describe('useMissingPrivileges', () => {
           rules: { edit: false, read: true },
           exceptions: { edit: false, read: true },
         },
-        alertsPrivileges: { alerts: { edit: false, read: true } },
+        alertsPrivileges: { alerts: { edit: false, read: true, legacyUpdate: false } },
       })
     );
 

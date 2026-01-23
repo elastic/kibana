@@ -33,6 +33,8 @@ import {
   CLOUD_DEFEND_APP_ID,
   EXCEPTIONS_SUBFEATURE_ALL,
   ALERTS_FEATURE_ID,
+  ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
+  ALERTS_UI_UPDATE_DEPRECATED_PRIVILEGE,
 } from '../../constants';
 import type { SecurityFeatureParams } from '../types';
 import type { BaseKibanaFeatureConfig } from '../../types';

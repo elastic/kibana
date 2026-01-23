@@ -79,7 +79,7 @@ const userPrivilegesInitial: ReturnType<typeof useUserPrivileges> = {
   timelinePrivileges: { crud: true, read: true },
   notesPrivileges: { crud: true, read: true },
   rulesPrivileges: { rules: { edit: true, read: true }, exceptions: { read: true, edit: false } },
-  alertsPrivileges: { alerts: { edit: true, read: true } },
+  alertsPrivileges: { alerts: { edit: true, read: true, legacyUpdate: true } },
 };
 
 describe('useAlertsPrivileges', () => {
@@ -188,7 +188,7 @@ describe('useAlertsPrivileges', () => {
   test('returns "hasAlertsAll" as false if user does not have alerts "edit" privileges', async () => {
     const userPrivileges = produce(userPrivilegesInitial, (draft) => {
       draft.detectionEnginePrivileges.result = privilege;
-      draft.alertsPrivileges = { alerts: { edit: false, read: true } };
+      draft.alertsPrivileges = { alerts: { edit: false, read: true, legacyUpdate: false } };
     });
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
 
@@ -213,7 +213,7 @@ describe('useAlertsPrivileges', () => {
   test('returns "hasAlertsRead" as false if user does not have alerts "read" privileges', async () => {
     const userPrivileges = produce(userPrivilegesInitial, (draft) => {
       draft.detectionEnginePrivileges.result = privilege;
-      draft.alertsPrivileges = { alerts: { edit: false, read: false } };
+      draft.alertsPrivileges = { alerts: { edit: false, read: false, legacyUpdate: false } };
     });
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
 
