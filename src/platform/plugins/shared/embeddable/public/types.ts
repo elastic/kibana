@@ -73,7 +73,9 @@ export interface EmbeddableSetup {
    */
   registerLegacyURLTransform: (
     type: string,
-    getTransformOut: (transformDrilldownsOut: DrilldownTransforms['transformOut']) => Promise<EmbeddableTransforms['transformOut']>
+    getTransformOut: (
+      transformDrilldownsOut: DrilldownTransforms['transformOut']
+    ) => Promise<EmbeddableTransforms['transformOut']>
   ) => void;
 }
 

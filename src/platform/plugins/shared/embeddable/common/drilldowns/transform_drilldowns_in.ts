@@ -23,8 +23,8 @@ export function getTransformDrilldownsIn(
     if (!drilldowns) {
       return {
         state: restOfState,
-        references: []
-      }
+        references: [],
+      };
     }
 
     const references: Reference[] = [];

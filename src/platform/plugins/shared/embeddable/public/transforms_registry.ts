@@ -18,7 +18,9 @@ const registry: {
 
 export function registerLegacyURLTransform(
   type: string,
-  getTransformOut: (transformDrilldownsOut: DrilldownTransforms['transformOut']) => Promise<EmbeddableTransforms['transformOut']>
+  getTransformOut: (
+    transformDrilldownsOut: DrilldownTransforms['transformOut']
+  ) => Promise<EmbeddableTransforms['transformOut']>
 ) {
   if (registry[type]) {
     throw new Error(`Embeddable legacy URL transform for type "${type}" is already registered.`);

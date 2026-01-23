@@ -15,7 +15,7 @@ import type {
   MigrateFunctionsObject,
   PersistableState,
 } from '@kbn/kibana-utils-plugin/common';
-import type { ObjectType } from '@kbn/config-schema';
+import type { ObjectType, Type } from '@kbn/config-schema';
 import type { EmbeddableFactoryRegistry, EmbeddableRegistryDefinition } from './types';
 import type { EmbeddableStateWithType } from './persistable_state/types';
 import {
@@ -62,7 +62,12 @@ export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> &
    */
   getEmbeddableSchemas: () => ObjectType[];
 
-  getTransforms: (type: string) => EmbeddableTransforms | undefined;
+  getTransforms: (type: string) =>
+    | (EmbeddableTransforms & {
+        schema?: Type<object>;
+        throwOnUnmappedPanel?: EmbeddableTransformsSetup['throwOnUnmappedPanel'];
+      })
+    | undefined;
 };
 
 export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
@@ -96,11 +101,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
     return {
       getEmbeddableSchemas: () =>
         Object.values(this.transformsRegistry)
-          .map((transforms) =>
-            transforms?.getSchema?.((embeddableSupportedTriggers: string[]) =>
-              getDrilldownsSchema(this.drilldownRegistry, embeddableSupportedTriggers)
-            )
-          )
+          .map((transformSetup) => transformSetup?.getSchema?.(this.getDrilldownsSchema))
           .filter((schema) => Boolean(schema)) as ObjectType[],
       getTransforms: (embeddableType: string) => {
         const drilldownTransforms = {
@@ -113,7 +114,22 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
               this.drilldownRegistry.getDrilldown(drilldownType)?.transformOut
           ),
         };
-        return this.transformsRegistry[embeddableType]?.getTransforms?.(drilldownTransforms);
+        const transformsSetup = this.transformsRegistry[embeddableType];
+        if (!transformsSetup) {
+          return;
+        }
+
+        return {
+          ...(transformsSetup.getTransforms
+            ? transformsSetup.getTransforms(drilldownTransforms)
+            : {}),
+          ...(transformsSetup.getSchema
+            ? { schema: transformsSetup.getSchema(this.getDrilldownsSchema) }
+            : {}),
+          ...(typeof transformsSetup.throwOnUnmappedPanel === 'boolean'
+            ? { throwOnUnmappedPanel: transformsSetup.throwOnUnmappedPanel }
+            : {}),
+        };
       },
       telemetry: getTelemetryFunction(this.getEmbeddableFactory),
       extract: getExtractFunction(this.getEmbeddableFactory),
@@ -157,4 +173,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
       }
     );
   };
+
+  private getDrilldownsSchema = (embeddableSupportedTriggers: string[]) =>
+    getDrilldownsSchema(this.drilldownRegistry, embeddableSupportedTriggers);
 }
