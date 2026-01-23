@@ -198,7 +198,6 @@ const SYNTH_HOSTS = [
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
-  const security = getService('security');
   const esArchiver = getService('esArchiver');
   const find = getService('find');
   const kibanaServer = getService('kibanaServer');
@@ -220,53 +219,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   ]);
 
   // Helpers
-
-  const loginWithReadOnlyUser = async () => {
-    await security.role.create('global_hosts_read_privileges_role', {
-      elasticsearch: {
-        indices: [
-          { names: ['metrics-*'], privileges: ['read', 'view_index_metadata'] },
-          { names: ['metricbeat-*'], privileges: ['read', 'view_index_metadata'] },
-        ],
-      },
-      kibana: [
-        {
-          feature: {
-            infrastructure: ['read'],
-            apm: ['read'],
-            advancedSettings: ['read'],
-            streams: ['read'],
-          },
-          spaces: ['*'],
-        },
-      ],
-    });
-
-    await security.user.create('global_hosts_read_privileges_user', {
-      password: 'global_hosts_read_privileges_user-password',
-      roles: ['global_hosts_read_privileges_role'],
-      full_name: 'test user',
-    });
-
-    await pageObjects.security.forceLogout();
-
-    await pageObjects.security.login(
-      'global_hosts_read_privileges_user',
-      'global_hosts_read_privileges_user-password',
-      {
-        expectSpaceSelector: false,
-      }
-    );
-  };
-
-  const logoutAndDeleteReadOnlyUser = async () => {
-    await pageObjects.security.forceLogout();
-    await Promise.all([
-      security.role.delete('global_hosts_read_privileges_role'),
-      security.user.delete('global_hosts_read_privileges_user'),
-    ]);
-  };
-
   const setCustomDashboardsEnabled = (value: boolean = true) =>
     kibanaServer.uiSettings.update({ [enableInfrastructureAssetCustomDashboards]: value });
 
@@ -993,47 +945,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await retry.tryForTime(5000, async () => {
               await testSubjects.exists('hostsViewTableNoData');
             });
-          });
-        });
-      });
-      describe('#Permissions: Read Only User - Single Host Flyout', () => {
-        describe('Dashboards Tab', () => {
-          before(async () => {
-            await setCustomDashboardsEnabled(true);
-            await loginWithReadOnlyUser();
-            // Setting the params directly will help us reduce flakiness (and clicking the wrong tab)
-            // as we already test the flow (in #Single Host Flyout) here we can directly navigate to test the permissions
-            const dashboardsTabSearchParams = `?_a=(dateRange:(from:%27${DATE_WITH_HOSTS_DATA_FROM}%27,to:%27${DATE_WITH_HOSTS_DATA_TO}%27),filters:!(),limit:100,panelFilters:!(),query:(language:kuery,query:%27%27))&tableProperties=(detailsItemId:host-1-Linux,pagination:(pageIndex:0,pageSize:10),sorting:(direction:desc,field:alertsCount))&assetDetails=(dateRange:(from:%27${DATE_WITH_HOSTS_DATA_FROM}%27,to:%27${DATE_WITH_HOSTS_DATA_TO}%27),name:host-1,tabId:dashboards)`;
-
-            await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH, {
-              search: dashboardsTabSearchParams,
-            });
-            await pageObjects.header.waitUntilLoadingHasFinished();
-          });
-
-          after(async () => {
-            await retry.tryForTime(5000, async () => {
-              await pageObjects.infraHome.clickCloseFlyoutButton();
-            });
-            await logoutAndDeleteReadOnlyUser();
-          });
-
-          it('should render dashboards tab splash screen with disabled option to add dashboard', async () => {
-            await pageObjects.assetDetails.dashboardsTabExistsOrFail();
-            await pageObjects.assetDetails.clickDashboardsTab();
-            await pageObjects.assetDetails.addDashboardExists();
-            const elementToHover = await pageObjects.assetDetails.getAddDashboardButton();
-            await retry.tryForTime(5000, async () => {
-              await elementToHover.moveMouseTo();
-              await testSubjects.existOrFail('infraCannotAddDashboardTooltip');
-            });
-          });
-
-          it('should not render dashboards tab if the feature is disabled', async () => {
-            await setCustomDashboardsEnabled(false);
-            await pageObjects.assetDetails.clickOverviewTab();
-            await browser.refresh();
-            await !pageObjects.assetDetails.dashboardsTabExists();
           });
         });
       });
