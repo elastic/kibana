@@ -7,11 +7,11 @@
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
-import { useGetRuleTagsQuery } from 'x-pack/platform/packages/shared/response-ops/rules-apis/hooks/use_get_rule_tags_query';
 import React, { useCallback, useMemo } from 'react';
 import type { EuiComboBoxProps } from '@elastic/eui/src/components/combo_box/combo_box';
 import { nodeBuilder, toKqlExpression } from '@kbn/es-query';
 import { ALERT_RULE_TAGS } from '@kbn/rule-data-utils';
+import { useGetRuleTagsQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query';
 import { RULE_TAGS_FILTER_SUBJ } from '../constants';
 import {
   RULE_TAGS_FILTER_LABEL,

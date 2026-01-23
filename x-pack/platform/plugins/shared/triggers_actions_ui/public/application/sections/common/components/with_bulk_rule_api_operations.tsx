@@ -17,7 +17,7 @@ import { fetchAlertingFrameworkHealth as alertingFrameworkHealth } from '@kbn/al
 import { resolveRule } from '@kbn/response-ops-rule-form';
 import { muteAlertInstance } from '@kbn/response-ops-alerts-apis/apis/mute_alert_instance';
 import { unmuteAlertInstance } from '@kbn/response-ops-alerts-apis/apis/unmute_alert_instance';
-import { getRuleTypes } from 'x-pack/platform/packages/shared/response-ops/rules-apis/apis/get_rule_types';
+import { getRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_rule_types';
 import type {
   Rule,
   RuleType,

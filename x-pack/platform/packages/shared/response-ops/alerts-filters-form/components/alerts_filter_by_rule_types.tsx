@@ -8,7 +8,7 @@
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { useGetInternalRuleTypesQuery } from 'x-pack/platform/packages/shared/response-ops/rules-apis/hooks/use_get_internal_rule_types_query';
+import { useGetInternalRuleTypesQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query';
 import type { EuiComboBoxProps } from '@elastic/eui/src/components/combo_box/combo_box';
 import type { SetRequired } from 'type-fest';
 import { nodeBuilder, toKqlExpression } from '@kbn/es-query';

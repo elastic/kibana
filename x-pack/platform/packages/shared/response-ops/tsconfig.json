@@ -5,10 +5,5 @@
   },
   "include": [".storybook/**/*.ts", ".storybook/**/*.tsx"],
   "exclude": ["target/**/*"],
-  "kbn_references": [
-    "@kbn/storybook",
-    "@kbn/react-query",
-    "@kbn/core",
-    "@kbn/kibana-react-plugin",
-  ]
+  "kbn_references": ["@kbn/storybook", "@kbn/react-query", "@kbn/core", "@kbn/kibana-react-plugin"]
 }
