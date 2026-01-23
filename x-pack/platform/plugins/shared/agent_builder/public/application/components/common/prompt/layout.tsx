@@ -60,12 +60,12 @@ export const PromptLayout: React.FC<PromptLayoutProps> = ({
 
   return (
     <EuiEmptyPrompt
-      data-test-subj="ErrorPrompt"
+      data-test-subj="errorPrompt"
       css={isEmbeddable ? undefined : defaultPromptStyles}
       hasShadow={!isEmbeddable}
       color={isEmbeddable ? 'transparent' : 'plain'}
       icon={iconContent}
-      title={<h2 data-test-subj="ErrorPromptTitle">{title}</h2>}
+      title={<h2 data-test-subj="errorPromptTitle">{title}</h2>}
       body={
         <EuiText color="subdued" textAlign="center">
           {subtitle}
