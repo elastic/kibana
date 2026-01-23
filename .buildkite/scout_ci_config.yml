@@ -8,6 +8,7 @@ plugins:
     - maps
     - observability_onboarding
     - painless_lab
+    - profiling
     - security_solution
     - spaces
     - streams_app
