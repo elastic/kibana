@@ -74,7 +74,6 @@ import {
   FLEET_ELASTIC_AGENT_PACKAGE,
   UUID_V5_NAMESPACE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
-  AGENT_POLICY_VERSION_SEPARATOR,
 } from '../../common/constants';
 import type {
   DeleteAgentPolicyResponse,
@@ -105,6 +104,11 @@ import {
   MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
   MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
 } from '../constants';
+
+import {
+  hasVersionSuffix,
+  removeVersionSuffixFromPolicyId,
+} from '../../common/services/version_specific_policies_utils';
 
 import { appContextService } from '.';
 
@@ -755,7 +759,7 @@ class AgentPolicyService {
       if (typeof id === 'string') {
         return {
           ...options,
-          id: id.split(AGENT_POLICY_VERSION_SEPARATOR)[0], // ID without version
+          id: removeVersionSuffixFromPolicyId(id),
           type: savedObjectType,
           namespaces: isSpacesEnabled && options.spaceId ? [options.spaceId] : undefined,
         };
@@ -765,7 +769,7 @@ class AgentPolicyService {
 
       return {
         ...options,
-        id: id.id.split(AGENT_POLICY_VERSION_SEPARATOR)[0], // ID without version
+        id: removeVersionSuffixFromPolicyId(id.id),
         namespaces:
           isSpacesEnabled && spaceForThisAgentPolicy ? [spaceForThisAgentPolicy] : undefined,
         type: savedObjectType,
@@ -1841,7 +1845,7 @@ class AgentPolicyService {
 
     const versionSpecificAgentPolicyIds = fleetServerPolicies
       .map((fsp) => fsp.policy_id)
-      .filter((id) => id.includes(AGENT_POLICY_VERSION_SEPARATOR));
+      .filter((id) => hasVersionSuffix(id));
     await scheduleReassignAgentsToVersionSpecificPoliciesTask(
       appContextService.getTaskManagerStart()!,
       versionSpecificAgentPolicyIds

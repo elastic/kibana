@@ -18,7 +18,7 @@ import { appContextService } from '..';
 import * as AgentService from '../agents';
 import { MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS } from '../../constants';
 import { throwIfAborted } from '../../tasks/utils';
-import { AGENT_POLICY_VERSION_SEPARATOR } from '../../../common/constants';
+import { splitVersionSuffixFromPolicyId } from '../../../common/services/version_specific_policies_utils';
 
 const TASK_TYPE = 'fleet:reassign_agents_to_version_specific_policies';
 
@@ -89,7 +89,7 @@ export async function reassignAgentsToVersionSpecificPolicies(versionedAgentPoli
   const esClient = appContextService.getInternalUserESClient();
   const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
 
-  const [agentPolicyId, version] = versionedAgentPolicyId.split(AGENT_POLICY_VERSION_SEPARATOR);
+  const { baseId: agentPolicyId, version } = splitVersionSuffixFromPolicyId(versionedAgentPolicyId);
   // agents enrolled to parent policy or agents using child policy but upgraded to new version
   const kueryToReassignAgents = `(policy_id:"${agentPolicyId}" AND agent.version:${version}.*) OR (policy_id:${agentPolicyId}* AND agent.version:${version}.* AND upgraded_at:*)`;
 

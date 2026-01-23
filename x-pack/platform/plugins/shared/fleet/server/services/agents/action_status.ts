@@ -24,7 +24,7 @@ import {
 } from '../../../common';
 import { appContextService } from '..';
 import { addNamespaceFilteringToQuery } from '../spaces/query_namespaces_filtering';
-import { AGENT_POLICY_VERSION_SEPARATOR } from '../../../common/constants';
+import { hasVersionSuffix } from '../../../common/services/version_specific_policies_utils';
 
 /**
  * Return current bulk actions.
@@ -253,7 +253,7 @@ async function getActions(
 
       const newPolicyId = source.data?.policy_id as string;
 
-      if (newPolicyId?.includes(AGENT_POLICY_VERSION_SEPARATOR)) {
+      if (hasVersionSuffix(newPolicyId)) {
         // skip version specific policy actions
         return acc;
       }
@@ -421,7 +421,7 @@ async function getPolicyChangeActions(
   const agentPolicies: { [key: string]: AgentPolicyRevision } = agentPoliciesRes.hits.hits.reduce(
     (acc, curr) => {
       const hit = curr._source! as any;
-      if (hit.policy_id?.includes(AGENT_POLICY_VERSION_SEPARATOR)) {
+      if (hasVersionSuffix(hit.policy_id)) {
         // skip version specific policy actions
         return acc;
       }
