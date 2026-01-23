@@ -100,7 +100,7 @@ function getKqlInstructions() {
 }
 
 /**
- * Entity Linking instructions for Observability Agent Builder.
+ * Entity Linking instructions for the Observability Agent
  * Instructs the LLM to format entities as clickable links using Kibana's relative URL paths.
  *
  * Supported entity types:
