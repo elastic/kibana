@@ -10,6 +10,7 @@ import { useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { agentBuilderDefaultAgentId, ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { AppErrorType } from '../components/common/error_prompt';
 import { queryKeys } from '../query_keys';
 import { newConversationId, createNewRound } from '../utils/new_conversation';
 import { useConversationId } from '../context/conversation/use_conversation_id';
@@ -57,8 +58,30 @@ export const useConversation = () => {
 };
 
 export const useConversationStatus = () => {
-  const { isLoading, isFetching, isFetched, isError, error } = useConversation();
-  return { isLoading, isFetching, isFetched, isError, error };
+  const { isLoading, isFetching, isFetched } = useConversation();
+  return { isLoading, isFetching, isFetched };
+};
+
+const getErrorTypeFromStatus = (status?: number): AppErrorType => {
+  if (status === 404) {
+    return 'CONVERSATION_NOT_FOUND';
+  }
+  return 'GENERIC_ERROR';
+};
+
+export const useConversationError = () => {
+  const { isError, error } = useConversation();
+
+  const httpError = error as IHttpFetchError | undefined;
+  const errorStatus = httpError?.response?.status;
+  const errorType = isError && errorStatus ? getErrorTypeFromStatus(errorStatus) : undefined;
+
+  return {
+    isError,
+    error: httpError,
+    errorStatus,
+    errorType,
+  };
 };
 
 const useGetNewConversationAgentId = () => {

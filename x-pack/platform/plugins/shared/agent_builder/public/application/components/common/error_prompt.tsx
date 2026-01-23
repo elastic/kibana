@@ -106,17 +106,15 @@ const StartNewConversationAction: React.FC = () => {
   }, [isEmbeddedContext, setConversationId, navigateToAgentBuilderUrl]);
 
   return (
-    <EuiButton color="primary" fill onClick={handleClick}>
+    <EuiButton
+      color="primary"
+      fill
+      onClick={handleClick}
+      data-test-subj="startNewConversationButton"
+    >
       {NEW_CONVERSATION_BUTTON_LABEL}
     </EuiButton>
   );
-};
-
-export const getErrorTypeFromStatus = (status?: number): AppErrorType => {
-  if (status === 404) {
-    return 'CONVERSATION_NOT_FOUND';
-  }
-  return 'GENERIC_ERROR';
 };
 
 export const AppErrorPrompt: React.FC<AppErrorPromptProps> = ({

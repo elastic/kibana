@@ -14,8 +14,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useRef } from 'react';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { useHasActiveConversation } from '../../hooks/use_conversation';
+import { useConversationError, useHasActiveConversation } from '../../hooks/use_conversation';
 import { ConversationInput } from './conversation_input/conversation_input';
 import { ConversationRounds } from './conversation_rounds/conversation_rounds';
 import { NewConversationPrompt } from './new_conversation_prompt';
@@ -33,14 +32,15 @@ import {
 import { ScrollButton } from './scroll_button';
 import { useAppLeave } from '../../context/app_leave_context';
 import { useNavigationAbort } from '../../hooks/use_navigation_abort';
-import { AppErrorPrompt, getErrorTypeFromStatus } from '../common/error_prompt';
+import { AppErrorPrompt } from '../common/error_prompt';
 
 export const Conversation: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
   const conversationId = useConversationId();
   const hasActiveConversation = useHasActiveConversation();
   const { isResponseLoading } = useSendMessage();
-  const { isFetched, isError, error } = useConversationStatus();
+  const { isFetched } = useConversationStatus();
+  const { errorType } = useConversationError();
   const shouldStickToBottom = useShouldStickToBottom();
   const onAppLeave = useAppLeave();
 
@@ -104,14 +104,12 @@ export const Conversation: React.FC<{}> = () => {
     padding-bottom: ${euiTheme.size.base};
   `;
 
-  if (isError && error) {
-    const httpError = error as IHttpFetchError;
-    const errorType = getErrorTypeFromStatus(httpError?.response?.status);
-    return <AppErrorPrompt errorType={errorType} />;
-  }
-
   if (!hasActiveConversation) {
     return <NewConversationPrompt />;
+  }
+
+  if (errorType) {
+    return <AppErrorPrompt errorType={errorType} />;
   }
 
   return (
