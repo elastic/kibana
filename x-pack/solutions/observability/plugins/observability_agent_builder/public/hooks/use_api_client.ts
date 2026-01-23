@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import {
   createRepositoryClient,
   type DefaultClientOptions,
@@ -21,8 +22,11 @@ export function useApiClient(): RouteRepositoryClient<
     services: { http },
   } = useKibana();
 
-  return createRepositoryClient<
-    ObservabilityAgentBuilderServerRouteRepository,
-    DefaultClientOptions
-  >({ http });
+  return useMemo(
+    () =>
+      createRepositoryClient<ObservabilityAgentBuilderServerRouteRepository, DefaultClientOptions>({
+        http,
+      }),
+    [http]
+  );
 }
