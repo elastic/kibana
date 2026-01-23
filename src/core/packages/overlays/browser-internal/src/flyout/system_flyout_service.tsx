@@ -86,7 +86,7 @@ export class SystemFlyoutService {
           >
             <EuiFlyout
               {...options}
-              flyoutMenuProps={{ title }}
+              flyoutMenuProps={{ ...options.flyoutMenuProps, title }}
               session={session}
               onClose={onCloseFlyout}
               aria-label={options['aria-label']}
