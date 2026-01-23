@@ -44,7 +44,8 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
   onESQLQuerySubmit,
 }) => {
   const kibana = useKibana<IUnifiedSearchPluginServices>();
-  const { docLinks, http, chrome, analytics } = kibana.services;
+  const { docLinks, http, chrome, analytics, notifications } = kibana.services;
+  const isFeedbackEnabled = notifications.feedback.isEnabled();
 
   const { euiTheme } = useEuiTheme();
 
@@ -217,26 +218,30 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
                 },
               ]
             : []),
-          {
-            name: i18n.translate('unifiedSearch.query.queryBar.esqlMenu.feedback', {
-              defaultMessage: 'Submit feedback',
-            }),
-            icon: 'editorComment',
-            renderItem: () => (
-              <EuiContextMenuItem
-                key="feedback"
-                icon="editorComment"
-                data-test-subj="esql-feedback"
-                target="_blank"
-                href={FEEDBACK_LINK}
-                onClick={() => setIsESQLMenuPopoverOpen(false)}
-              >
-                {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.feedback', {
-                  defaultMessage: 'Submit feedback',
-                })}
-              </EuiContextMenuItem>
-            ),
-          },
+          ...(isFeedbackEnabled
+            ? [
+                {
+                  name: i18n.translate('unifiedSearch.query.queryBar.esqlMenu.feedback', {
+                    defaultMessage: 'Submit feedback',
+                  }),
+                  icon: 'editorComment',
+                  renderItem: () => (
+                    <EuiContextMenuItem
+                      key="feedback"
+                      icon="editorComment"
+                      data-test-subj="esql-feedback"
+                      target="_blank"
+                      href={FEEDBACK_LINK}
+                      onClick={() => setIsESQLMenuPopoverOpen(false)}
+                    >
+                      {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.feedback', {
+                        defaultMessage: 'Submit feedback',
+                      })}
+                    </EuiContextMenuItem>
+                  ),
+                },
+              ]
+            : []),
         ],
       },
       {
@@ -273,6 +278,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
     toggleLanguageComponent,
     solutionsRecommendedQueries, // This dependency is fine here, as it *uses* the state
     categorizationField,
+    isFeedbackEnabled,
   ]);
 
   const esqlMenuPopoverStyles = css`
