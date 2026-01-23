@@ -3460,7 +3460,7 @@ components:
       type: string
     ExceptionListItemOsTypeArray:
       items:
-        $ref: '#/components/schemas/ExceptionListOsType'
+        $ref: '#/components/schemas/ExceptionListItemOsType'
       type: array
     ExceptionListItemTags:
       items:

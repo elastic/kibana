@@ -514,7 +514,7 @@ components:
     ExceptionListItemOsTypeArray:
       type: array
       items:
-        $ref: '#/components/schemas/ExceptionListOsType'
+        $ref: '#/components/schemas/ExceptionListItemOsType'
 
     ExceptionListItemComment:
       type: object
