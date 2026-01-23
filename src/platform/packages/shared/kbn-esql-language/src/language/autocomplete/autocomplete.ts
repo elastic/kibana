@@ -241,6 +241,8 @@ export async function suggest(
     // Indices are suggested in FROM/TS commands, fields are suggested in other commands
     const commandName = astContext.command.name.toLowerCase();
     const isSourceCommand = commandName === 'from' || commandName === 'ts';
+    // STATS and inline stats don't primarily suggest field names, they suggest aggregation functions
+    const isStatsCommand = commandName === 'stats' || commandName === 'inline stats';
 
     // Check if we have field suggestions (kind 'Variable' indicates fields)
     const hasFieldSuggestions = commandsSpecificSuggestions.some((s) => s.kind === 'Variable');
@@ -260,8 +262,8 @@ export async function suggest(
       return [indicesBrowserSuggestion, ...commandsSpecificSuggestions];
     }
 
-    // Show fields browser when we have field suggestions and we're not in a source command
-    if (!isSourceCommand && hasFieldSuggestions && resourceRetriever?.onOpenFieldsBrowser) {
+    // Show fields browser when we have field suggestions and we're not in a source command or stats command
+    if (!isSourceCommand && !isStatsCommand && hasFieldSuggestions && resourceRetriever?.onOpenFieldsBrowser) {
       const fieldsBrowserSuggestion = createResourceBrowserSuggestion(
         i18n.translate('esqlEditor.fieldsBrowser.suggestionLabel', {
           defaultMessage: 'Browse fields',
