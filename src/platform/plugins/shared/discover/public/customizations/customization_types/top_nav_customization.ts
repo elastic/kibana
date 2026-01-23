@@ -20,12 +20,7 @@ export interface TopNavDefaultMenu {
   saveItem?: TopNavDefaultItem;
 }
 
-export interface TopNavDefaultBadges {
-  unsavedChangesBadge?: TopNavDefaultItem;
-}
-
 export interface TopNavCustomization {
   id: 'top_nav';
   defaultMenu?: TopNavDefaultMenu;
-  defaultBadges?: TopNavDefaultBadges;
 }
