@@ -91,6 +91,8 @@ export function registerRoutes(dependencies: RouteDependencies) {
       const query = request.query;
 
       try {
+        const [, { dataCatalog }] = await getStartServices();
+        const catalog = dataCatalog.getCatalog();
         const savedObjectsClient = coreContext.savedObjects.client;
         const findResult: SavedObjectsFindResponse<DataSourceAttributes> =
           await savedObjectsClient.find({
@@ -100,7 +102,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
           });
 
         const dataSources = findResult.saved_objects.map((savedObject) => {
-          return convertSOtoAPIResponse(savedObject);
+          return convertSOtoAPIResponse(savedObject, catalog);
         });
 
         return response.ok({
@@ -132,6 +134,8 @@ export function registerRoutes(dependencies: RouteDependencies) {
       const coreContext = await context.core;
 
       try {
+        const [, { dataCatalog }] = await getStartServices();
+        const catalog = dataCatalog.getCatalog();
         const savedObjectsClient = coreContext.savedObjects.client;
         const savedObject: SavedObject<DataSourceAttributes> = await savedObjectsClient.get(
           DATA_SOURCE_SAVED_OBJECT_TYPE,
@@ -139,7 +143,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
         );
 
         return response.ok({
-          body: convertSOtoAPIResponse(savedObject),
+          body: convertSOtoAPIResponse(savedObject, catalog),
         });
       } catch (error) {
         logger.error(`Error fetching data source: ${(error as Error).message}`);
@@ -240,6 +244,8 @@ export function registerRoutes(dependencies: RouteDependencies) {
 
       try {
         const { name } = request.body;
+        const [, { dataCatalog }] = await getStartServices();
+        const catalog = dataCatalog.getCatalog();
         const savedObjectsClient = coreContext.savedObjects.client;
 
         // Get existing data connector
@@ -266,13 +272,13 @@ export function registerRoutes(dependencies: RouteDependencies) {
 
           logger.info(`Successfully updated data connector ${request.params.id}`);
           return response.ok({
-            body: convertSOtoAPIResponse(updatedSavedObject),
+            body: convertSOtoAPIResponse(updatedSavedObject, catalog),
           });
         }
 
         // If no updates provided, return current state
         return response.ok({
-          body: convertSOtoAPIResponse(savedObject),
+          body: convertSOtoAPIResponse(savedObject, catalog),
         });
       } catch (error) {
         logger.error(`Failed to update data connector: ${(error as Error).message}`);

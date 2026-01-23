@@ -27,6 +27,7 @@ import { useLicense } from '../../hooks/use_license';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { StartConversationButton } from './start_conversation_button';
 import { AiInsightErrorBanner } from './ai_insight_error_banner';
+import { OBSERVABILITY_AGENT_ID } from '../../../common/constants';
 
 export interface AiInsightResponse {
   summary: string;
@@ -87,6 +88,7 @@ export function AiInsight({ title, fetchInsight, buildAttachments }: AiInsightPr
 
     agentBuilder.openConversationFlyout({
       newConversation: true,
+      agentId: OBSERVABILITY_AGENT_ID,
       attachments: buildAttachments(summary, context),
     });
   }, [agentBuilder, buildAttachments, summary, context]);
@@ -129,7 +131,7 @@ export function AiInsight({ title, fetchInsight, buildAttachments }: AiInsightPr
               <EuiText size="s" css={{ color: euiTheme.colors.textSubdued }}>
                 <span>
                   {i18n.translate('xpack.observabilityAgentBuilder.aiInsight.description', {
-                    defaultMessage: 'Get helpful insights from our Elastic AI Agent',
+                    defaultMessage: 'Get helpful insights from our Observability Agent',
                   })}
                 </span>
               </EuiText>

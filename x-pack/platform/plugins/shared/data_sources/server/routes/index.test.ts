@@ -144,6 +144,11 @@ describe('registerRoutes', () => {
         page: 1,
       });
 
+      // Mock catalog to return iconType
+      mockDataCatalog.getCatalog.mockReturnValue({
+        get: jest.fn().mockReturnValue({ iconType: '.notion' }),
+      });
+
       registerRoutes(dependencies);
 
       const routeHandler = mockRouter.get.mock.calls[0][1];
@@ -464,6 +469,11 @@ describe('registerRoutes', () => {
       };
 
       mockSavedObjectsClient.get.mockResolvedValue(mockDataSource);
+
+      // Mock catalog to return iconType
+      mockDataCatalog.getCatalog.mockReturnValue({
+        get: jest.fn().mockReturnValue({ iconType: '.notion' }),
+      });
 
       registerRoutes(dependencies);
 
