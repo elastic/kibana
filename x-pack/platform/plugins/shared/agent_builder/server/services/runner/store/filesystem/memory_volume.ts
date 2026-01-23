@@ -6,7 +6,7 @@
  */
 
 import minimatch from 'minimatch';
-import type { FileEntry, StoreEntry, DirEntry, Volume, VolumeGlobOptions } from './types';
+import type { FileEntry, FsEntry, DirEntry, Volume, VolumeGlobOptions } from './types';
 import { normalizePath, getPathSegments } from './path_utils';
 
 /**
@@ -97,7 +97,7 @@ export class MemoryVolume implements Volume {
     return this.fileIndex.get(normalizePath(path));
   }
 
-  async list(dirPath: string): Promise<StoreEntry[]> {
+  async list(dirPath: string): Promise<FsEntry[]> {
     const normalizedPath = normalizePath(dirPath);
     const node = this.getNode(normalizedPath);
 
@@ -105,7 +105,7 @@ export class MemoryVolume implements Volume {
       return [];
     }
 
-    const entries: StoreEntry[] = [];
+    const entries: FsEntry[] = [];
 
     // Add subdirectories
     for (const [childName] of node.children) {
@@ -121,11 +121,11 @@ export class MemoryVolume implements Volume {
     return entries;
   }
 
-  async glob(patterns: string | string[], options: VolumeGlobOptions = {}): Promise<StoreEntry[]> {
+  async glob(patterns: string | string[], options: VolumeGlobOptions = {}): Promise<FsEntry[]> {
     const patternArray = Array.isArray(patterns) ? patterns : [patterns];
     const { onlyFiles = false, onlyDirectories = false } = options;
 
-    const entries: StoreEntry[] = [];
+    const entries: FsEntry[] = [];
     const seenPaths = new Set<string>();
 
     // Helper to check if a path matches any of the patterns

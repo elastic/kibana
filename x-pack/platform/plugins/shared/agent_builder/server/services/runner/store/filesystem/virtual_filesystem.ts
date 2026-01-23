@@ -7,7 +7,7 @@
 
 import type {
   Volume,
-  StoreEntry,
+  FsEntry,
   DirEntry,
   MountOptions,
   GlobOptions,
@@ -69,7 +69,7 @@ export class VirtualFileSystem implements IVirtualFileSystem {
    * Queries volumes in priority order, returns first match (first-wins for files).
    * For directories, returns a DirEntry if any volume has that directory.
    */
-  async get(path: string): Promise<StoreEntry | undefined> {
+  async get(path: string): Promise<FsEntry | undefined> {
     const normalizedPath = normalizePath(path);
 
     // First, try to find a file at this path
@@ -95,7 +95,7 @@ export class VirtualFileSystem implements IVirtualFileSystem {
    * List contents of a directory.
    * Aggregates results from all volumes, merging directories and using first-wins for files.
    */
-  async list(dirPath: string, options: ListOptions = {}): Promise<StoreEntry[]> {
+  async list(dirPath: string, options: ListOptions = {}): Promise<FsEntry[]> {
     const { recursive = false, maxDepth } = options;
     const normalizedPath = normalizePath(dirPath);
 
@@ -110,7 +110,7 @@ export class VirtualFileSystem implements IVirtualFileSystem {
    * Find entries matching glob pattern(s).
    * Aggregates results from all volumes.
    */
-  async glob(patterns: string | string[], options: GlobOptions = {}): Promise<StoreEntry[]> {
+  async glob(patterns: string | string[], options: GlobOptions = {}): Promise<FsEntry[]> {
     const { cwd = '/', onlyFiles = false, onlyDirectories = false } = options;
 
     // Normalize patterns with cwd if they're relative
@@ -123,7 +123,7 @@ export class VirtualFileSystem implements IVirtualFileSystem {
     });
 
     // Collect results from all volumes
-    const seenPaths = new Map<string, StoreEntry>();
+    const seenPaths = new Map<string, FsEntry>();
 
     for (const { volume } of this.mountedVolumes) {
       const entries = await volume.glob(normalizedPatterns, { onlyFiles, onlyDirectories });
@@ -204,8 +204,8 @@ export class VirtualFileSystem implements IVirtualFileSystem {
   /**
    * List a single directory level, aggregating from all volumes.
    */
-  private async listSingleLevel(dirPath: string): Promise<StoreEntry[]> {
-    const seenPaths = new Map<string, StoreEntry>();
+  private async listSingleLevel(dirPath: string): Promise<FsEntry[]> {
+    const seenPaths = new Map<string, FsEntry>();
 
     for (const { volume } of this.mountedVolumes) {
       const entries = await volume.list(dirPath);
@@ -234,9 +234,9 @@ export class VirtualFileSystem implements IVirtualFileSystem {
     dirPath: string,
     currentDepth: number,
     maxDepth?: number
-  ): Promise<StoreEntry[]> {
+  ): Promise<FsEntry[]> {
     const entries = await this.listSingleLevel(dirPath);
-    const result: StoreEntry[] = [];
+    const result: FsEntry[] = [];
 
     for (const entry of entries) {
       result.push(entry);

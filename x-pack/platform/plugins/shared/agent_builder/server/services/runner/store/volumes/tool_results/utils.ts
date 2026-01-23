@@ -32,7 +32,10 @@ export const createToolCallEntry = (result: ToolResultWithMeta): ToolCallFileEnt
       toolCallId: result.tool_call_id,
       toolResultId: result.result.tool_result_id,
     }),
-    content: result.result.data,
+    content: {
+      raw: result.result.data,
+      plain_text: JSON.stringify(result.result.data, undefined, 2),
+    },
     metadata: {
       type: StoreEntryType.toolResult,
       id: result.result.tool_result_id,

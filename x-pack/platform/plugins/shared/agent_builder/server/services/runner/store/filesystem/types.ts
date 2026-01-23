@@ -13,7 +13,7 @@ export enum StoreEntryType {
   attachment = 'attachment',
 }
 
-export interface StoreEntryMetadata<TExtraMeta extends object = {}> {
+export interface FileEntryMetadata<TExtraMeta extends object = {}> {
   /**
    * Type of the entry (tool_result, attachment...)
    */
@@ -36,14 +36,25 @@ export interface StoreEntryMetadata<TExtraMeta extends object = {}> {
   extra?: TExtraMeta;
 }
 
+export interface FileEntryContent<TData extends object = object> {
+  /**
+   * Raw content of the file.
+   */
+  raw: TData;
+  /**
+   * Plain text representation of the file content, which can be used for grep.
+   */
+  plain_text?: string;
+}
+
 /**
  * A file entry in the virtual filesystem.
  */
 export interface FileEntry<TContent extends object = object, TMeta extends object = object> {
   path: string;
   type: 'file';
-  metadata: StoreEntryMetadata<TMeta>;
-  content: TContent;
+  metadata: FileEntryMetadata<TMeta>;
+  content: FileEntryContent<TContent>;
 }
 
 /**
@@ -57,7 +68,7 @@ export interface DirEntry {
 /**
  * Either a file or directory entry.
  */
-export type StoreEntry = FileEntry | DirEntry;
+export type FsEntry = FileEntry | DirEntry;
 
 // ============================================================================
 // Volume types
@@ -94,13 +105,13 @@ export interface Volume {
    * Returns empty array if directory doesn't exist.
    * Volumes are responsible for computing implicit directories from their files.
    */
-  list(dirPath: string): Promise<StoreEntry[]>;
+  list(dirPath: string): Promise<FsEntry[]>;
 
   /**
    * Find all entries matching the glob pattern(s).
    * Returns both files and directories that match.
    */
-  glob(patterns: string | string[], options?: VolumeGlobOptions): Promise<StoreEntry[]>;
+  glob(patterns: string | string[], options?: VolumeGlobOptions): Promise<FsEntry[]>;
 
   /**
    * Check if a path exists (file or directory).
@@ -162,17 +173,17 @@ export interface IVirtualFileSystem {
    * Get entry by exact path.
    * Returns FileEntry for files, DirEntry for directories.
    */
-  get(path: string): Promise<StoreEntry | undefined>;
+  get(path: string): Promise<FsEntry | undefined>;
 
   /**
    * List contents of a directory.
    */
-  list(dirPath: string, options?: ListOptions): Promise<StoreEntry[]>;
+  list(dirPath: string, options?: ListOptions): Promise<FsEntry[]>;
 
   /**
    * Find entries matching glob pattern(s).
    */
-  glob(patterns: string | string[], options?: GlobOptions): Promise<StoreEntry[]>;
+  glob(patterns: string | string[], options?: GlobOptions): Promise<FsEntry[]>;
 
   /**
    * Check if path exists (file or directory).
