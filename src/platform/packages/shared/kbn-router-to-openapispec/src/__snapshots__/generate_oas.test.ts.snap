@@ -102,7 +102,37 @@ Object {
 exports[`generateOpenApiDocument @kbn/config-schema generates the expected OpenAPI document 1`] = `
 Object {
   "components": Object {
-    "schemas": Object {},
+    "schemas": Object {
+      "myArray": Object {
+        "items": Object {
+          "additionalProperties": false,
+          "properties": Object {
+            "foo": Object {
+              "type": "string",
+            },
+          },
+          "required": Array [
+            "foo",
+          ],
+          "type": "object",
+        },
+        "type": "array",
+      },
+      "myUnion": Object {
+        "anyOf": Array [
+          Object {
+            "description": "Union string",
+            "maxLength": 1,
+            "type": "string",
+          },
+          Object {
+            "description": "Union number",
+            "minimum": 0,
+            "type": "number",
+          },
+        ],
+      },
+    },
     "securitySchemes": Object {
       "apiKeyAuth": Object {
         "in": "header",
@@ -253,6 +283,24 @@ Object {
                 "additionalProperties": false,
                 "properties": Object {
                   "any": Object {},
+                  "array": Object {
+                    "items": Object {
+                      "additionalProperties": false,
+                      "properties": Object {
+                        "foo": Object {
+                          "type": "string",
+                        },
+                      },
+                      "required": Array [
+                        "foo",
+                      ],
+                      "type": "object",
+                    },
+                    "type": "array",
+                  },
+                  "arrayWithId": Object {
+                    "$ref": "#/components/schemas/myArray",
+                  },
                   "booleanDefault": Object {
                     "default": true,
                     "description": "defaults to to true",
@@ -304,6 +352,9 @@ Object {
                       },
                     ],
                   },
+                  "unionWithId": Object {
+                    "$ref": "#/components/schemas/myUnion",
+                  },
                   "uri": Object {
                     "default": "prototest://something",
                     "format": "uri",
@@ -317,6 +368,9 @@ Object {
                   "map",
                   "record",
                   "union",
+                  "unionWithId",
+                  "array",
+                  "arrayWithId",
                   "any",
                 ],
                 "type": "object",
@@ -397,6 +451,24 @@ Object {
                 "additionalProperties": false,
                 "properties": Object {
                   "any": Object {},
+                  "array": Object {
+                    "items": Object {
+                      "additionalProperties": false,
+                      "properties": Object {
+                        "foo": Object {
+                          "type": "string",
+                        },
+                      },
+                      "required": Array [
+                        "foo",
+                      ],
+                      "type": "object",
+                    },
+                    "type": "array",
+                  },
+                  "arrayWithId": Object {
+                    "$ref": "#/components/schemas/myArray",
+                  },
                   "booleanDefault": Object {
                     "default": true,
                     "description": "defaults to to true",
@@ -448,6 +520,9 @@ Object {
                       },
                     ],
                   },
+                  "unionWithId": Object {
+                    "$ref": "#/components/schemas/myUnion",
+                  },
                   "uri": Object {
                     "default": "prototest://something",
                     "format": "uri",
@@ -461,6 +536,9 @@ Object {
                   "map",
                   "record",
                   "union",
+                  "unionWithId",
+                  "array",
+                  "arrayWithId",
                   "any",
                 ],
                 "type": "object",

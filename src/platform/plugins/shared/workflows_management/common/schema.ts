@@ -102,8 +102,8 @@ function getRegisteredStepDefinitions(): BaseConnectorContract[] {
         // Only public step definitions have documentation and examples
         return {
           ...definition,
-          summary: stepDefinition.label,
-          description: stepDefinition.description ?? null,
+          description: stepDefinition.label, // Short title-like text
+          summary: stepDefinition.description ?? null, // Explanation of the step behavior
           documentation: stepDefinition.documentation?.url,
           examples: stepDefinition.documentation?.examples
             ? { snippet: stepDefinition.documentation?.examples.join('\n') }
