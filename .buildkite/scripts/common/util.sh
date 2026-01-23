@@ -172,3 +172,10 @@ docker_with_retry () {
     fi
   done
 }
+
+force_clean_ports() {
+  for port in "$@"; do
+    echo "Force cleaning port: $port"
+    lsof -ti:"$port" | xargs -r kill -9
+  done
+}
