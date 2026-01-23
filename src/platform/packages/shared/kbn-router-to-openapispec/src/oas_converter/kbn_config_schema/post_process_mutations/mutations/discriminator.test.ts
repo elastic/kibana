@@ -88,7 +88,6 @@ test('with default case', () => {
     discriminator: {
       propertyName: 'type',
     },
-    description: 'The catch all schema for this discriminator is my-catch-all-my-team',
   });
 
   expect(ctx.getSharedSchemas()).toMatchObject({

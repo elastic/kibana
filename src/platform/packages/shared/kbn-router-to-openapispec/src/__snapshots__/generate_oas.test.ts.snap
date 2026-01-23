@@ -701,7 +701,7 @@ Object {
           "value",
         ],
         "type": "object",
-        "x-oas-discriminator-catch-all": true,
+        "x-oas-discriminator-default-case": true,
       },
     },
     "securitySchemes": Object {
@@ -732,7 +732,6 @@ Object {
           "content": Object {
             "application/json": Object {
               "schema": Object {
-                "description": "The catch all schema for this discriminator is my-catch-all-my-team",
                 "discriminator": Object {
                   "propertyName": "type",
                 },

@@ -10,7 +10,7 @@
 import { metaFields } from '@kbn/config-schema';
 import dedent from 'dedent';
 import type { OpenAPIV3 } from 'openapi-types';
-import { deleteField, getIdFromRefString } from './utils';
+import { deleteField } from './utils';
 import type { IContext } from '../context';
 import { isReferenceObject } from '../../../common';
 
@@ -73,11 +73,6 @@ export const processDiscriminator = (ctx: IContext, schema: OpenAPIV3.SchemaObje
   });
 
   if (catchAllIdx > -1) {
-    const [catchAll] = schema.oneOf?.splice(catchAllIdx, 1);
-    schema.description =
-      (schema.description ?? '') +
-      `The catch all schema for this discriminator is ${getIdFromRefString(
-        (catchAll as OpenAPIV3.ReferenceObject).$ref
-      )}`;
+    schema.oneOf?.splice(catchAllIdx, 1);
   }
 };
