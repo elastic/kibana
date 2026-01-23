@@ -38,6 +38,8 @@ export const EndpointRunscriptScriptSelector = memo<EndpointRunscriptScriptSelec
     );
 
     const selectedScript: EndpointScript | undefined = useMemo(() => {
+      // FIXME:PT handle case where script is not found on a update flow
+
       if (selectedScriptId && data) {
         return data.find((script) => script.id === selectedScriptId)?.meta ?? undefined;
       }

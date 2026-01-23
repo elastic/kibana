@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { type ComponentProps, memo, useCallback, useMemo } from 'react';
-import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import React, { memo, useCallback, useMemo, useState } from 'react';
+import type { FieldConfig, FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { EuiFieldTextProps } from '@elastic/eui';
 import {
   EuiIconTip,
@@ -15,7 +15,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiHorizontalRule,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -23,31 +22,46 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { useTestIdGenerator } from '../../../management/hooks/use_test_id_generator';
 import type { EndpointRunScriptActionRequestParams } from '../../../../common/api/endpoint';
-import type { AutomatedRunScriptConfig } from '../../../../common/endpoint/types';
+import type { AutomatedRunScriptConfig, EndpointScript } from '../../../../common/endpoint/types';
 import type { EndpointRunscriptScriptSelectorProps } from '../../../management/components/endpoint_runscript_script_selector';
 import { EndpointRunscriptScriptSelector } from '../../../management/components/endpoint_runscript_script_selector';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { CONSOLE_COMMANDS, OS_TITLES } from '../../../management/common/translations';
+import { OS_TITLES } from '../../../management/common/translations';
 import { PlatformIcon } from '../../../management/components/endpoint_responder/components/header_info/platforms';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { SupportedHostOsType } from '../../../../common/endpoint/constants';
 
+const RUNSCRIPT_CONFIG_LABEL = i18n.translate(
+  'xpack.securitySolution.endpoint.runscriptConfig.runscriptConfigurationLabel',
+  { defaultMessage: 'OS configuration' }
+);
+const RUNSCRIPT_CONFIG_REQUIRES_ONE_OS = i18n.translate(
+  'xpack.securitySolution.endpoint.runscriptConfig.runscriptConfigurationHelp',
+  { defaultMessage: 'At least one OS script must be configured' }
+);
 const SCRIPT_SELECTION_LABEL = i18n.translate(
-  'xpack.securitySolution.runscriptConfig.scriptSeletionLabel',
+  'xpack.securitySolution.runscriptConfig.scriptSelectionLabel',
   { defaultMessage: 'Script' }
 );
 const SCRIPT_ARGUMENTS_LABEL = i18n.translate(
   'xpack.securitySolution.runscriptConfig.scriptArgumentsLabel',
-  { defaultMessage: 'Script arguments (optional)' }
+  { defaultMessage: 'Arguments' }
 );
 const SCRIPT_TIMEOUT_LABEL = i18n.translate(
   'xpack.securitySolution.runscriptConfig.scriptTimeoutLabel',
   { defaultMessage: 'Timeout' }
 );
-
+const OPTIONAL_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.runscriptConfig.optionalFieldLabel',
+  { defaultMessage: 'optional' }
+);
 const TIMEOUT_TOOLTIP_CONTENT = i18n.translate(
   'xpack.securitySolution.runscriptConfig.timeoutTooltipContent',
-  { defaultMessage: 'Script execution timeout in seconds' }
+  { defaultMessage: 'Script execution timeout in seconds. Defaults to 4 hours if not specified.' }
+);
+const SCRIPT_ARGUMENTS_REQUIRED_HELP_TEXT = i18n.translate(
+  'xpack.securitySolution.runscriptConfig.scriptArgumentsRequiredHelpText',
+  { defaultMessage: 'Selected script requires arguments to be provided' }
 );
 
 export interface RunscriptConfigProps {
@@ -62,17 +76,33 @@ export const RunscriptConfig = memo<RunscriptConfigProps>(
       'responseActionsEndpointAutomatedRunScript'
     );
 
-    const fieldConfig: ComponentProps<typeof UseField<AutomatedRunScriptConfig>>['config'] =
-      useMemo(() => {
-        return {
-          defaultValue: {
-            linux: { scriptId: '', scriptInput: '', timeout: undefined },
-            macos: { scriptId: '', scriptInput: '', timeout: undefined },
-            windows: { scriptId: '', scriptInput: '', timeout: undefined },
+    const fieldConfig: FieldConfig<AutomatedRunScriptConfig> = useMemo(() => {
+      const config: FieldConfig<AutomatedRunScriptConfig> = {
+        defaultValue: {
+          linux: { scriptId: '', scriptInput: '', timeout: undefined },
+          macos: { scriptId: '', scriptInput: '', timeout: undefined },
+          windows: { scriptId: '', scriptInput: '', timeout: undefined },
+        },
+        validations: [
+          {
+            validator: ({ value }) => {
+              const isInvalid =
+                !value.linux.scriptId && !value.macos.scriptId && !value.windows.scriptId;
+
+              if (isInvalid) {
+                return {
+                  code: 'invalid_script_id',
+                  isInvalid: true,
+                  message: RUNSCRIPT_CONFIG_REQUIRES_ONE_OS,
+                };
+              }
+            },
           },
-          label: CONSOLE_COMMANDS.runscript.title,
-        };
-      }, []);
+        ],
+      };
+
+      return config;
+    }, []);
 
     if (!isAutomatedRunsScriptEnabled) {
       return null;
@@ -103,9 +133,8 @@ export interface AutomatedRunScriptConfigurationProps {
 export const AutomatedRunScriptConfiguration = memo<AutomatedRunScriptConfigurationProps>(
   (props) => {
     const { field, 'data-test-subj': dataTestSubj } = props;
-    const { onChange, value } = field;
+    const { onChange: fieldOnChange, value } = field;
     const getTestId = useTestIdGenerator(dataTestSubj);
-    const [data] = useFormData();
     const userHasRunScriptAuthz = useUserPrivileges().endpointPrivileges.canWriteExecuteOperations;
 
     const emitChange = useCallback(
@@ -116,15 +145,12 @@ export const AutomatedRunScriptConfiguration = memo<AutomatedRunScriptConfigurat
 
         Object.defineProperty(event, 'target', {
           writable: false,
-          value: {
-            value: newValue,
-            name: field.path,
-          },
+          value: { value: newValue, name: field.path },
         });
 
-        onChange(event);
+        fieldOnChange(event);
       },
-      [field.path, onChange]
+      [field.path, fieldOnChange]
     );
 
     if (!userHasRunScriptAuthz) {
@@ -132,47 +158,36 @@ export const AutomatedRunScriptConfiguration = memo<AutomatedRunScriptConfigurat
     }
 
     return (
-      <EuiText size="s" data-test-subj={dataTestSubj}>
-        <EuiSpacer />
-
-        {(['linux', 'macos', 'windows'] as Array<keyof AutomatedRunScriptConfig>).map(
-          (osType, index) => {
-            return (
-              <RunScriptOsTypeConfig
-                key={osType}
-                platform={osType}
-                showFieldLabels={index === 0}
-                config={value[osType]}
-                data-test-subj={getTestId(osType)}
-                onChange={(updatedConfig) => {
-                  emitChange({
-                    ...value,
-                    [osType]: updatedConfig,
-                  });
-                }}
-              />
-            );
-          }
-        )}
-
-        <EuiSpacer size="xxl" />
-        <EuiHorizontalRule />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <div>
-          <pre>
-            {'`field`:'}
-            {JSON.stringify(props.field, null, 2)}
-          </pre>
-        </div>
-        <EuiSpacer size="xxl" />
-        <div>
-          <pre>
-            {'`data`:'}
-            {JSON.stringify(data, null, 2)}
-          </pre>
-        </div>
-      </EuiText>
+      <EuiFormRow
+        fullWidth
+        label={RUNSCRIPT_CONFIG_LABEL}
+        helpText={RUNSCRIPT_CONFIG_REQUIRES_ONE_OS}
+        data-test-subj={dataTestSubj}
+      >
+        <EuiText size="s">
+          {(['linux', 'macos', 'windows'] as Array<keyof AutomatedRunScriptConfig>).map(
+            (osType, index) => {
+              return (
+                <div key={osType}>
+                  <EuiSpacer size="s" />
+                  <RunScriptOsTypeConfig
+                    platform={osType}
+                    showFieldLabels={index === 0}
+                    config={value[osType]}
+                    data-test-subj={getTestId(osType)}
+                    onChange={(updatedConfig) => {
+                      emitChange({
+                        ...value,
+                        [osType]: updatedConfig,
+                      });
+                    }}
+                  />
+                </div>
+              );
+            }
+          )}
+        </EuiText>
+      </EuiFormRow>
     );
   }
 );
@@ -190,6 +205,8 @@ export interface RunScriptOsTypeConfigProps {
 /** @private */
 const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
   ({ config, onChange, 'data-test-subj': dataTestSubj, platform, showFieldLabels = true }) => {
+    const [scriptSelected, setSelectedScript] = useState<EndpointScript | undefined>(undefined);
+
     const scriptSelectionOnChangeHandler: EndpointRunscriptScriptSelectorProps['onChange'] =
       useCallback(
         (selectedScript) => {
@@ -197,6 +214,7 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
             ...config,
             scriptId: selectedScript?.id ?? '',
           });
+          setSelectedScript(selectedScript);
         },
         [config, onChange]
       );
@@ -222,61 +240,92 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
     );
 
     return (
-      <EuiFormRow fullWidth data-test-subj={dataTestSubj}>
-        <EuiFlexGroup
-          key={platform}
-          gutterSize="s"
-          alignItems="center"
-          justifyContent="spaceBetween"
-        >
-          <EuiFlexItem grow={false}>
-            <EuiFormRow hasEmptyLabelSpace={showFieldLabels}>
-              <EuiFlexGroup
-                responsive={false}
-                wrap={false}
-                gutterSize="s"
-                alignItems="center"
-                css={css`
-                  width: 10ch;
-                `}
-              >
-                <EuiFlexItem grow={false}>
-                  <PlatformIcon platform={platform} size="m" />
-                </EuiFlexItem>
-                <EuiFlexItem className="eui-textTruncate" grow={false}>
-                  {OS_TITLES[platform] ?? platform}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFormRow label={showFieldLabels ? SCRIPT_SELECTION_LABEL : undefined}>
-              <EndpointRunscriptScriptSelector
-                selectedScriptId={config.scriptId}
-                osType={platform}
-                onChange={scriptSelectionOnChangeHandler}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFormRow label={showFieldLabels ? SCRIPT_ARGUMENTS_LABEL : undefined}>
-              <EuiFieldText name="scriptParms" fullWidth onChange={scriptParamsOnChangeHandler} />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFormRow
-              label={showFieldLabels ? SCRIPT_TIMEOUT_LABEL : undefined}
-              labelAppend={
-                showFieldLabels ? (
-                  <EuiIconTip content={<EuiText size="xs">{TIMEOUT_TOOLTIP_CONTENT}</EuiText>} />
-                ) : undefined
-              }
+      <EuiFlexGroup
+        key={platform}
+        gutterSize="s"
+        alignItems="flexStart"
+        justifyContent="spaceBetween"
+        data-test-subj={dataTestSubj}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiFormRow hasEmptyLabelSpace={showFieldLabels}>
+            <EuiFlexGroup
+              responsive={false}
+              wrap={false}
+              gutterSize="s"
+              alignItems="center"
+              css={css`
+                width: 10ch;
+              `}
             >
-              <EuiFieldText name="timeout" fullWidth onChange={scriptTimeoutOnChangeHandler} />
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFormRow>
+              <EuiFlexItem grow={false}>
+                <PlatformIcon platform={platform} size="m" />
+              </EuiFlexItem>
+              <EuiFlexItem className="eui-textTruncate" grow={false}>
+                {OS_TITLES[platform] ?? platform}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            label={showFieldLabels ? SCRIPT_SELECTION_LABEL : undefined}
+            helpText={
+              // FIXME:PT implement way to view script definition details - use component from Ash's PR
+              scriptSelected ? 'TBD: Click here to view script definition details' : undefined
+            }
+          >
+            <EndpointRunscriptScriptSelector
+              selectedScriptId={config.scriptId}
+              osType={platform}
+              onChange={scriptSelectionOnChangeHandler}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            label={showFieldLabels ? SCRIPT_ARGUMENTS_LABEL : undefined}
+            labelAppend={
+              showFieldLabels && !scriptSelected?.requiresInput ? (
+                <EuiText size="xs">{OPTIONAL_FIELD_LABEL}</EuiText>
+              ) : undefined
+            }
+            helpText={
+              scriptSelected?.requiresInput ? SCRIPT_ARGUMENTS_REQUIRED_HELP_TEXT : undefined
+            }
+          >
+            <EuiFieldText name="scriptParms" fullWidth onChange={scriptParamsOnChangeHandler} />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
+            label={showFieldLabels ? SCRIPT_TIMEOUT_LABEL : undefined}
+            labelAppend={
+              showFieldLabels ? (
+                <EuiFlexGroup
+                  responsive={false}
+                  wrap={false}
+                  alignItems="center"
+                  justifyContent="flexEnd"
+                  gutterSize="xs"
+                  css={css`
+                    line-height: 1rem;
+                  `}
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs">{OPTIONAL_FIELD_LABEL}</EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiIconTip content={<EuiText size="xs">{TIMEOUT_TOOLTIP_CONTENT}</EuiText>} />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ) : undefined
+            }
+          >
+            <EuiFieldText name="timeout" fullWidth onChange={scriptTimeoutOnChangeHandler} />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 );

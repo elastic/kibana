@@ -288,7 +288,7 @@ export const CONSOLE_COMMANDS = {
       defaultMessage: 'Run a script on the host',
     }),
     title: i18n.translate('xpack.securitySolution.endpointConsoleCommands.runscript.title', {
-      defaultMessage: 'Run a script on the host',
+      defaultMessage: 'Run script',
     }),
     privileges: i18n.translate(
       'xpack.securitySolution.endpointConsoleCommands.runscript.privileges',
