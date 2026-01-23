@@ -100,7 +100,9 @@ Object {
             "layerId": "unifiedHistogram",
             "layerType": "data",
             "seriesType": "bar_stacked",
-            "splitAccessor": "breakdown_column",
+            "splitAccessors": Array [
+              "breakdown_column",
+            ],
             "xAccessor": "date_column",
           },
         ],
@@ -122,7 +124,7 @@ Object {
       },
     },
     "title": "Edit visualization",
-    "version": 1,
+    "version": 2,
     "visualizationType": "lnsXY",
   },
   "esqlVariables": Array [],
@@ -279,7 +281,7 @@ Object {
       },
     },
     "title": "Heat map",
-    "version": 1,
+    "version": 2,
     "visualizationType": "lnsHeatmap",
   },
   "esqlVariables": Array [
