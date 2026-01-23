@@ -9,7 +9,7 @@ import type { ConversationRound, ToolCallWithResult } from '@kbn/agent-builder-c
 import { isToolCallStep } from '@kbn/agent-builder-common';
 import type { ToolResultWithMeta } from '@kbn/agent-builder-server/runner';
 import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
-import { StoreEntryType } from '../../filesystem';
+import { FileEntryType } from '../../filesystem';
 import type { ToolCallFileEntry } from './types';
 
 export const getToolCallEntryPath = ({
@@ -37,7 +37,7 @@ export const createToolCallEntry = (result: ToolResultWithMeta): ToolCallFileEnt
       plain_text: JSON.stringify(result.result.data, undefined, 2),
     },
     metadata: {
-      type: StoreEntryType.toolResult,
+      type: FileEntryType.toolResult,
       id: result.result.tool_result_id,
       content_length: 0, // TODO
       readonly: true,

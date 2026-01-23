@@ -9,7 +9,7 @@ import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/agent-builder-common';
 import { createOtherResult } from '@kbn/agent-builder-server';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
-import type { IFileSystemStore, LsEntry } from '../store';
+import type { IFileSystemStore, LsEntry } from '@kbn/agent-builder-server/runner/filesystem';
 import type { FileEntryMetadata } from '../filesystem';
 import { fsToolsNamespace } from '../constants';
 

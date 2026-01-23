@@ -5,5 +5,12 @@
  * 2.0.
  */
 
-export { createStore } from './create_store';
-export { getStoreTools } from './tools';
+export {
+  FileEntryType,
+  type FileEntry,
+  type FsEntry,
+  type FileEntryContent,
+  type FileEntryMetadata,
+  type DirEntry,
+} from './fs';
+export type { IFileSystemStore, LsEntry, DirEntryWithChildren, GrepMatch } from './store';

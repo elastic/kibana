@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import type {
-  Volume,
-  FsEntry,
-  DirEntry,
-  MountOptions,
-  GlobOptions,
-  ListOptions,
-  IVirtualFileSystem,
-} from './types';
+import type { FsEntry, DirEntry } from '@kbn/agent-builder-server/runner/filesystem';
+import type { Volume, MountOptions, GlobOptions, ListOptions, IVirtualFileSystem } from './types';
 import { normalizePath, joinPath } from './path_utils';
 
 interface MountedVolume {

@@ -8,6 +8,7 @@
 import type { Conversation } from '@kbn/agent-builder-common';
 import { VirtualFileSystem } from './filesystem';
 import { createResultStore } from './volumes/tool_results';
+import { FileSystemStore } from './store';
 
 export const createStore = ({ conversation }: { conversation?: Conversation }) => {
   const filesystem = new VirtualFileSystem();
@@ -15,5 +16,7 @@ export const createStore = ({ conversation }: { conversation?: Conversation }) =
   const resultStore = createResultStore({ conversation });
   filesystem.mount(resultStore.getVolume());
 
-  return { filesystem, resultStore };
+  const fsStore = new FileSystemStore({ filesystem });
+
+  return { filesystem, fsStore, resultStore };
 };

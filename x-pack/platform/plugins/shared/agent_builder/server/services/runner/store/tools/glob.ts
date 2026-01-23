@@ -8,9 +8,9 @@
 import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/agent-builder-common';
 import { createOtherResult } from '@kbn/agent-builder-server';
+import type { IFileSystemStore } from '@kbn/agent-builder-server/runner/filesystem';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import type { FileEntry } from '../filesystem';
-import type { IFileSystemStore } from '../store';
 import { fsToolsNamespace } from '../constants';
 
 const schema = z.object({

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { FileEntryType, type FileEntry } from '@kbn/agent-builder-server/runner/filesystem';
 import { FileSystemStore } from './store';
-import { VirtualFileSystem, MemoryVolume, StoreEntryType } from './filesystem';
-import type { FileEntry } from './filesystem';
+import { VirtualFileSystem, MemoryVolume } from './filesystem';
 
 const createFileEntry = (
   path: string,
@@ -17,7 +17,7 @@ const createFileEntry = (
   path,
   type: 'file',
   metadata: {
-    type: StoreEntryType.toolResult,
+    type: FileEntryType.toolResult,
     id: path,
     content_length: 100,
     readonly: true,

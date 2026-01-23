@@ -6,7 +6,8 @@
  */
 
 import minimatch from 'minimatch';
-import type { FileEntry, FsEntry, DirEntry, Volume, VolumeGlobOptions } from './types';
+import type { FileEntry, FsEntry, DirEntry } from '@kbn/agent-builder-server/runner/filesystem';
+import type { Volume, VolumeGlobOptions } from './types';
 import { normalizePath, getPathSegments } from './path_utils';
 
 /**

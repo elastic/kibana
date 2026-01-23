@@ -6,7 +6,7 @@
  */
 
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
-import type { IFileSystemStore } from '../store';
+import type { IFileSystemStore } from '@kbn/agent-builder-server/runner/filesystem';
 import { readTool } from './read';
 import { lsTool } from './ls';
 import { globTool } from './glob';

@@ -8,13 +8,8 @@
 export { VirtualFileSystem } from './virtual_filesystem';
 export { MemoryVolume } from './memory_volume';
 export {
-  StoreEntryType,
   type IVirtualFileSystem,
   type Volume,
-  type FileEntry,
-  type DirEntry,
-  type FsEntry,
-  type FileEntryMetadata,
   type MountOptions,
   type GlobOptions,
   type ListOptions,

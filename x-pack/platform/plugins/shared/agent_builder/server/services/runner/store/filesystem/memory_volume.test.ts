@@ -5,20 +5,21 @@
  * 2.0.
  */
 
+import { FileEntryType, type FileEntry } from '@kbn/agent-builder-server/runner/filesystem';
 import { MemoryVolume } from './memory_volume';
-import type { FileEntry } from './types';
-import { StoreEntryType } from './types';
 
 const createFileEntry = (path: string, overrides: Partial<FileEntry> = {}): FileEntry => ({
   path,
   type: 'file',
   metadata: {
-    type: StoreEntryType.toolResult,
+    type: FileEntryType.toolResult,
     id: path,
-    contentLength: 100,
+    content_length: 100,
     readonly: true,
   },
-  content: { name: `content for ${path}` },
+  content: {
+    raw: { name: `content for ${path}` },
+  },
   ...overrides,
 });
 
@@ -56,14 +57,14 @@ describe('MemoryVolume', () => {
 
     it('overwrites existing entry at the same path', async () => {
       const volume = new MemoryVolume('test');
-      const entry1 = createFileEntry('/agents/agent1.json', { content: { version: 1 } });
-      const entry2 = createFileEntry('/agents/agent1.json', { content: { version: 2 } });
+      const entry1 = createFileEntry('/agents/agent1.json', { content: { raw: { version: 1 } } });
+      const entry2 = createFileEntry('/agents/agent1.json', { content: { raw: { version: 2 } } });
 
       volume.add(entry1);
       volume.add(entry2);
 
       const result = (await volume.get('/agents/agent1.json')) as FileEntry;
-      expect(result.content).toEqual({ version: 2 });
+      expect(result.content.raw).toEqual({ version: 2 });
     });
   });
 

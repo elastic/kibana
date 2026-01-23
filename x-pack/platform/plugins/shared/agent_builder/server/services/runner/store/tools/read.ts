@@ -9,11 +9,11 @@ import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/agent-builder-common';
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
+import type { IFileSystemStore } from '@kbn/agent-builder-server/runner/filesystem';
 import {
   estimateTokens,
   truncateTokens,
 } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
-import type { IFileSystemStore } from '../store';
 import { fsToolsNamespace } from '../constants';
 
 const schema = z.object({

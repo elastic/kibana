@@ -6,7 +6,7 @@
  */
 
 import type { ToolResultType } from '@kbn/agent-builder-common';
-import type { FileEntry } from '../../filesystem';
+import type { FileEntry } from '@kbn/agent-builder-server/runner/filesystem';
 
 export interface ToolCallEntryMeta {
   tool_result_type: ToolResultType;

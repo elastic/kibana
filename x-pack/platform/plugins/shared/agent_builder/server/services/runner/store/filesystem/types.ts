@@ -5,70 +5,7 @@
  * 2.0.
  */
 
-/**
- * Possible types of entries stored in the store.
- */
-export enum StoreEntryType {
-  toolResult = 'tool_result',
-  attachment = 'attachment',
-}
-
-export interface FileEntryMetadata<TExtraMeta extends object = {}> {
-  /**
-   * Type of the entry (tool_result, attachment...)
-   */
-  type: StoreEntryType;
-  /**
-   * Unique identifier of the entry, (unique for its type)
-   */
-  id: string;
-  /**
-   * Estimated length of the content of the entry.
-   */
-  content_length: number;
-  /**
-   * Defines if the entry can be modified or not.
-   */
-  readonly: boolean;
-  /**
-   * Extra per type metadata.
-   */
-  extra?: TExtraMeta;
-}
-
-export interface FileEntryContent<TData extends object = object> {
-  /**
-   * Raw content of the file.
-   */
-  raw: TData;
-  /**
-   * Plain text representation of the file content, which can be used for grep.
-   */
-  plain_text?: string;
-}
-
-/**
- * A file entry in the virtual filesystem.
- */
-export interface FileEntry<TContent extends object = object, TMeta extends object = object> {
-  path: string;
-  type: 'file';
-  metadata: FileEntryMetadata<TMeta>;
-  content: FileEntryContent<TContent>;
-}
-
-/**
- * A directory entry in the virtual filesystem.
- */
-export interface DirEntry {
-  path: string;
-  type: 'dir';
-}
-
-/**
- * Either a file or directory entry.
- */
-export type FsEntry = FileEntry | DirEntry;
+import type { FsEntry, FileEntry } from '@kbn/agent-builder-server/runner/filesystem';
 
 // ============================================================================
 // Volume types
