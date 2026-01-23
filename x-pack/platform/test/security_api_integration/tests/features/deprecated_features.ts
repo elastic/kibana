@@ -190,6 +190,7 @@ export default function ({ getService }: FtrProviderContext) {
           "securitySolutionCases",
           "securitySolutionCasesV2",
           "securitySolutionRulesV1",
+          "securitySolutionRulesV2",
           "siem",
           "siemV2",
           "siemV3",
@@ -224,6 +225,8 @@ export default function ({ getService }: FtrProviderContext) {
         'siemV2',
         'siemV3',
         'siemV4',
+        'securitySolutionRulesV1',
+        'securitySolutionRulesV2',
       ]);
       for (const feature of features) {
         if (

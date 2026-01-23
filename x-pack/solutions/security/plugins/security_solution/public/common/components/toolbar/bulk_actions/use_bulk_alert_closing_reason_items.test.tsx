@@ -18,7 +18,7 @@ jest.mock('../../../lib/kibana');
 jest.mock(
   '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',
   () => ({
-    useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true }),
+    useAlertsPrivileges: jest.fn().mockReturnValue({ hasAlertsAll: true }),
   })
 );
 jest.mock('../../../hooks/use_experimental_features', () => ({

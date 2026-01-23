@@ -30,7 +30,7 @@ export const useAlertsActions = ({
   refetch,
 }: Props) => {
   const dispatch = useDispatch();
-  const { hasIndexWrite } = useAlertsPrivileges();
+  const { hasAlertsAll } = useAlertsPrivileges();
 
   const onStatusUpdate = useCallback(() => {
     closePopover();
@@ -74,6 +74,6 @@ export const useAlertsActions = ({
   const { items: actionItems, panels } = useBulkActionItems(actionItemArgs);
 
   return useMemo(() => {
-    return hasIndexWrite ? { actionItems, panels } : { actionItems: [], panels: [] };
-  }, [actionItems, hasIndexWrite, panels]);
+    return hasAlertsAll ? { actionItems, panels } : { actionItems: [], panels: [] };
+  }, [actionItems, hasAlertsAll, panels]);
 };

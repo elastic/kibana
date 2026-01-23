@@ -52,10 +52,9 @@ const props = {
 
 type AlertsPriveleges = Partial<ReturnType<typeof useAlertsPrivileges>>;
 
-const writePriveleges: AlertsPriveleges = { hasIndexWrite: true };
+const writePriveleges: AlertsPriveleges = { hasAlertsAll: true };
 const readPriveleges: AlertsPriveleges = {
-  hasIndexWrite: false,
-  hasIndexRead: true,
+  hasAlertsRead: true,
 };
 
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
