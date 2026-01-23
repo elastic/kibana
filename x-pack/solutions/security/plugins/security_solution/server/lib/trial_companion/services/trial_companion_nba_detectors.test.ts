@@ -124,14 +124,18 @@ describe('Trial companion NBA detectors', () => {
           createPackageListItem('fleet_server', 'installed'),
         ],
         undefined,
-      ],
+      ], // TODO: test esClient
     ])('returns milestone based on packages in %s', async (_tcName, packageList, expected) => {
       packageClient.getPackages.mockResolvedValueOnce(packageList);
-      await expect(installedPackagesM1(deps.logger, packageService)()).resolves.toEqual(expected);
+      await expect(installedPackagesM1(deps.logger, packageService, esClient)()).resolves.toEqual(
+        expected
+      );
     });
     it('propagates error from package service', async () => {
       packageClient.getPackages.mockRejectedValueOnce(new Error('test error'));
-      await expect(installedPackagesM1(deps.logger, packageService)()).rejects.toThrowError();
+      await expect(
+        installedPackagesM1(deps.logger, packageService, esClient)()
+      ).rejects.toThrowError();
     });
   });
 
@@ -203,7 +207,7 @@ describe('Trial companion NBA detectors', () => {
         async (_tcName, alerts, assistant, expected) => {
           (esClient.count as jest.Mock).mockResolvedValueOnce(buildCountResponse(alerts));
           (esClient.count as jest.Mock).mockResolvedValueOnce(buildCountResponse(assistant));
-          await expect(aiFeaturesM5(esClient)()).resolves.toEqual(expected);
+          await expect(aiFeaturesM5(esClient, detectorsLogger)()).resolves.toEqual(expected);
         }
       );
     });

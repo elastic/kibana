@@ -19,7 +19,11 @@ export interface UsageCollectorDeps {
   usageCollection: ICollectorSet;
 }
 
-export const installedPackagesM1 = (logger: Logger, packageService: PackageService): DetectorF => {
+export const installedPackagesM1 = (
+  logger: Logger,
+  packageService: PackageService,
+  esClient: ElasticsearchClient
+): DetectorF => {
   return async (): Promise<Milestone | undefined> => {
     try {
       logger.debug('verifyNonDefaultPackagesInstalled: Fetching Fleet packages');
@@ -47,7 +51,12 @@ export const installedPackagesM1 = (logger: Logger, packageService: PackageServi
         }, installed package names: ${nonDefaultPackages.join(', ')}`
       );
 
-      if (nonDefaultPackages.length === 0) {
+      const agentLogs = await esClient.count({
+        index: 'logs-elastic_agent*',
+      });
+      logger.debug(`agentLogs: ${JSON.stringify(agentLogs)}`);
+
+      if (nonDefaultPackages.length === 0 || agentLogs.count === 0) {
         return Milestone.M1;
       }
       return undefined;
@@ -146,6 +155,19 @@ export const aiFeaturesM5 = (esClient: ElasticsearchClient): DetectorF => {
       },
     });
     if (aiAssistantResponse.count > 0) {
+      return undefined;
+    }
+    const aiChatsResponse = await esClient.count({
+      index: '.chat-conversations*',
+      query: {
+        range: {
+          updated_at: {
+            gte: 'now-14d',
+          },
+        },
+      },
+    });
+    if (aiChatsResponse.count > 0) {
       return undefined;
     }
     return Milestone.M5;
