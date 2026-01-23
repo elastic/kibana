@@ -174,11 +174,14 @@ docker_with_retry () {
 }
 
 force_clean_ports() {
+  set +e
+  echo "LSOF: $(which lsof)"
   for port in "$@"; do
     echo "Force cleaning port: $port"
-    LSOF_ENTRY=$(lsof -i :"$port")
+    LSOF_ENTRY=$(lsof -i ":$port")
     echo "Found: $LSOF_ENTRY"
-    PID=$(lsof -i :"$port" -t | head -n 1)
+    PID=$(lsof -i ":$port" -t | head -n 1)
     kill -9 "$PID" || true
   done
+  set -e
 }
