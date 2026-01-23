@@ -106,9 +106,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await agentBuilder.navigateToApp(`conversations/${INVALID_ID}`);
 
-      await testSubjects.existOrFail('appErrorPrompt');
+      await testSubjects.existOrFail('errorPrompt');
 
-      const errorTitle = await testSubjects.getVisibleText('appErrorPromptTitle');
+      const errorTitle = await testSubjects.getVisibleText('errorPromptTitle');
       expect(errorTitle).to.be('Conversation not found');
 
       await testSubjects.existOrFail('startNewConversationButton');

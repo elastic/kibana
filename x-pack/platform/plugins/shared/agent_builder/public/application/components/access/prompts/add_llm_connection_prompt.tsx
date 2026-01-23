@@ -8,7 +8,7 @@
 import { EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AppErrorPrompt } from '../../common/error_prompt';
+import { ErrorPrompt } from '../../common/prompt/error';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useAssetBasePath } from '../../../hooks/use_asset_base_path';
 
@@ -45,7 +45,7 @@ export const AddLlmConnectionPrompt = () => {
     colorMode === 'LIGHT' ? `${assetBasePath}/brain_light.svg` : `${assetBasePath}/brain_dark.svg`;
 
   return (
-    <AppErrorPrompt
+    <ErrorPrompt
       errorType="ADD_LLM_CONNECTION"
       imageSrc={brainImage}
       primaryButton={primaryButton}

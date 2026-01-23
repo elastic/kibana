@@ -32,7 +32,7 @@ import {
 import { ScrollButton } from './scroll_button';
 import { useAppLeave } from '../../context/app_leave_context';
 import { useNavigationAbort } from '../../hooks/use_navigation_abort';
-import { AppErrorPrompt } from '../common/error_prompt';
+import { ErrorPrompt } from '../common/prompt/error';
 
 export const Conversation: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
@@ -109,7 +109,7 @@ export const Conversation: React.FC<{}> = () => {
   }
 
   if (errorType) {
-    return <AppErrorPrompt errorType={errorType} />;
+    return <ErrorPrompt errorType={errorType} />;
   }
 
   return (

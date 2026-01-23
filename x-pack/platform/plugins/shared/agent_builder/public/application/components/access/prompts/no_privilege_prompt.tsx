@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useAssetBasePath } from '../../../hooks/use_asset_base_path';
-import { AppErrorPrompt } from '../../common/error_prompt';
+import { ErrorPrompt } from '../../common/prompt/error';
 
 export const NoPrivilegePrompt: React.FC = () => {
   const { colorMode } = useEuiTheme();
@@ -35,7 +35,7 @@ export const NoPrivilegePrompt: React.FC = () => {
   );
 
   return (
-    <AppErrorPrompt
+    <ErrorPrompt
       errorType="MISSING_PRIVILEGES"
       imageSrc={
         colorMode === 'LIGHT' ? `${assetBasePath}/lock_light.svg` : `${assetBasePath}/lock_dark.svg`

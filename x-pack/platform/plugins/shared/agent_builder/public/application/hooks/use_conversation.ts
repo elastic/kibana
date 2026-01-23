@@ -10,7 +10,7 @@ import { useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { agentBuilderDefaultAgentId, ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { AppErrorType } from '../components/common/error_prompt';
+import type { AppErrorType } from '../components/common/prompt/error';
 import { queryKeys } from '../query_keys';
 import { newConversationId, createNewRound } from '../utils/new_conversation';
 import { useConversationId } from '../context/conversation/use_conversation_id';

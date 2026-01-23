@@ -9,10 +9,10 @@ import React, { useCallback } from 'react';
 import { EuiButton } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useConversationContext } from '../../context/conversation/conversation_context';
-import { PromptLayout } from './prompt_layout';
-import { useNavigation } from '../../hooks/use_navigation';
-import { appPaths } from '../../utils/app_paths';
+import { useConversationContext } from '../../../context/conversation/conversation_context';
+import { PromptLayout } from './layout';
+import { useNavigation } from '../../../hooks/use_navigation';
+import { appPaths } from '../../../utils/app_paths';
 
 export type AppErrorType =
   | 'GENERIC_ERROR'
@@ -86,7 +86,7 @@ const NEW_CONVERSATION_BUTTON_LABEL = i18n.translate(
   }
 );
 
-interface AppErrorPromptProps {
+interface ErrorPromptProps {
   errorType: AppErrorType;
   imageSrc?: string;
   primaryButton?: React.ReactNode;
@@ -117,7 +117,7 @@ const StartNewConversationAction: React.FC = () => {
   );
 };
 
-export const AppErrorPrompt: React.FC<AppErrorPromptProps> = ({
+export const ErrorPrompt: React.FC<ErrorPromptProps> = ({
   errorType,
   imageSrc,
   primaryButton,

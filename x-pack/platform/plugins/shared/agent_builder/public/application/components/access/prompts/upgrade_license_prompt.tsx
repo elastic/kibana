@@ -8,7 +8,7 @@
 import { EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AppErrorPrompt } from '../../common/error_prompt';
+import { ErrorPrompt } from '../../common/prompt/error';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useAssetBasePath } from '../../../hooks/use_asset_base_path';
 
@@ -42,7 +42,7 @@ export const UpgradeLicensePrompt: React.FC = () => {
   ) : undefined;
 
   return (
-    <AppErrorPrompt
+    <ErrorPrompt
       errorType="UPGRADE_LICENSE"
       imageSrc={
         colorMode === 'LIGHT' ? `${assetBasePath}/lock_light.svg` : `${assetBasePath}/lock_dark.svg`
