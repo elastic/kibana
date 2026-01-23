@@ -568,7 +568,10 @@ describe('Agent policy', () => {
         enabled: true,
       };
 
-      mockedCreateAgentPolicyWithPackages.mockResolvedValue(mockAgentPolicy as any);
+      mockedCreateAgentPolicyWithPackages.mockResolvedValue({
+        ...mockAgentPolicy,
+        id: 'test-agent-policy',
+      } as any);
       mockedPackagePolicyService.create.mockResolvedValue(mockPackagePolicy as any);
       soClient.bulkGet.mockResolvedValueOnce({
         saved_objects: [

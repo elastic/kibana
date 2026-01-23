@@ -74,6 +74,7 @@ import {
   FLEET_ELASTIC_AGENT_PACKAGE,
   UUID_V5_NAMESPACE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
+  AGENT_POLICY_VERSION_SEPARATOR,
 } from '../../common/constants';
 import type {
   DeleteAgentPolicyResponse,
@@ -137,6 +138,7 @@ import { agentlessAgentService } from './agents/agentless_agent';
 import { scheduleDeployAgentPoliciesTask } from './agent_policies/deploy_agent_policies_task';
 import { getSpaceForAgentPolicy, getSpaceForAgentPolicySO } from './spaces/helpers';
 import { getVersionSpecificPolicies } from './utils/version_specific_policies';
+import { scheduleReassignAgentsToVersionSpecificPoliciesTask } from './agent_policies/reassign_agents_to_version_specific_policies_task';
 
 function normalizeKuery(savedObjectType: string, kuery: string) {
   if (savedObjectType === LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE) {
@@ -753,7 +755,7 @@ class AgentPolicyService {
       if (typeof id === 'string') {
         return {
           ...options,
-          id,
+          id: id.split(AGENT_POLICY_VERSION_SEPARATOR)[0], // ID without version
           type: savedObjectType,
           namespaces: isSpacesEnabled && options.spaceId ? [options.spaceId] : undefined,
         };
@@ -763,7 +765,7 @@ class AgentPolicyService {
 
       return {
         ...options,
-        id: id.id,
+        id: id.id.split(AGENT_POLICY_VERSION_SEPARATOR)[0], // ID without version
         namespaces:
           isSpacesEnabled && spaceForThisAgentPolicy ? [spaceForThisAgentPolicy] : undefined,
         type: savedObjectType,
@@ -1836,6 +1838,14 @@ class AgentPolicyService {
       }
     );
     t.end();
+
+    const versionSpecificAgentPolicyIds = fleetServerPolicies
+      .map((fsp) => fsp.policy_id)
+      .filter((id) => id.includes(AGENT_POLICY_VERSION_SEPARATOR));
+    await scheduleReassignAgentsToVersionSpecificPoliciesTask(
+      appContextService.getTaskManagerStart()!,
+      versionSpecificAgentPolicyIds
+    );
   }
 
   public async deleteFleetServerPoliciesForPolicyId(
