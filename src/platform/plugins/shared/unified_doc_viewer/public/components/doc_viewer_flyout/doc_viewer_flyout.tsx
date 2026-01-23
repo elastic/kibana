@@ -134,6 +134,8 @@ export function UnifiedDocViewerFlyout({
     return getIndexByDocId(hits, id);
   }, [hits, hit, pageCount]);
 
+  const renderSubheader = pageCount > 1 || flyoutActions;
+
   const setPage = useCallback(
     (index: number) => {
       if (hits && hits[index]) {
@@ -311,33 +313,35 @@ export function UnifiedDocViewerFlyout({
         {...a11yProps}
       >
         {screenReaderDescription}
-        <EuiFlyoutHeader hasBorder>
-          <EuiFlexGroup
-            direction="row"
-            alignItems="center"
-            justifyContent="spaceBetween"
-            responsive={false}
-            wrap={true}
-          >
-            {activePage !== -1 && (
-              <EuiFlexItem data-test-subj={`docViewerFlyoutNavigationPage-${activePage}`}>
-                <EuiPagination
-                  aria-label={i18n.translate('unifiedDocViewer.flyout.documentNavigation', {
-                    defaultMessage: 'Document pagination',
-                  })}
-                  pageCount={pageCount}
-                  activePage={activePage}
-                  onPageClick={setPage}
-                  compressed
-                  data-test-subj="docViewerFlyoutNavigation"
-                />
+        {renderSubheader && (
+          <EuiFlyoutHeader hasBorder>
+            <EuiFlexGroup
+              direction="row"
+              alignItems="center"
+              justifyContent="spaceBetween"
+              responsive={false}
+              wrap={true}
+            >
+              {activePage !== -1 && (
+                <EuiFlexItem data-test-subj={`docViewerFlyoutNavigationPage-${activePage}`}>
+                  <EuiPagination
+                    aria-label={i18n.translate('unifiedDocViewer.flyout.documentNavigation', {
+                      defaultMessage: 'Document pagination',
+                    })}
+                    pageCount={pageCount}
+                    activePage={activePage}
+                    onPageClick={setPage}
+                    compressed
+                    data-test-subj="docViewerFlyoutNavigation"
+                  />
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={false} css={{ marginLeft: 'auto' }}>
+                {isEsqlQuery || !flyoutActions ? null : <>{flyoutActions}</>}
               </EuiFlexItem>
-            )}
-            <EuiFlexItem grow={false}>
-              {isEsqlQuery || !flyoutActions ? null : <>{flyoutActions}</>}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutHeader>
+            </EuiFlexGroup>
+          </EuiFlyoutHeader>
+        )}
         <EuiFlyoutBody>{bodyContent}</EuiFlyoutBody>
       </EuiFlyout>
     </EuiPortal>
