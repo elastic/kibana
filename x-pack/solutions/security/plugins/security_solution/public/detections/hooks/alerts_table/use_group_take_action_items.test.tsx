@@ -196,7 +196,7 @@ describe('useGroupTakeActionsItems', () => {
           wrapper: wrapperContainer,
         }
       );
-      await waitFor(() => expect(result.current(getActionItemsParams).items.length).toEqual(0));
+      await waitFor(() => expect(result.current(getActionItemsParams)).toBeUndefined());
     });
   });
 });

@@ -105,15 +105,7 @@ jest.mock('../../../../common/lib/kibana', () => {
 });
 
 jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges', () => ({
-  useAlertsPrivileges: jest.fn().mockReturnValue({ hasAlertsUpdate: true }),
-}));
-
-const mockUseRunAlertWorkflowPanel = jest.fn().mockReturnValue({
-  runWorkflowMenuItem: [],
-  runAlertWorkflowPanel: [],
-});
-jest.mock('./use_run_alert_workflow_panel', () => ({
-  useRunAlertWorkflowPanel: (...args: unknown[]) => mockUseRunAlertWorkflowPanel(...args),
+  useAlertsPrivileges: jest.fn().mockReturnValue({ hasAlertsAll: true }),
 }));
 
 const actionMenuButton = 'timeline-context-menu-button';

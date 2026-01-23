@@ -107,7 +107,7 @@ export const getRulesV3BaseKibanaFeature = (
       catalogue: [APP_ID],
       savedObject: {
         all: [],
-        read: params.savedObjects.filter((so) => so !== EXCEPTION_LIST_NAMESPACE),
+        read: params.savedObjects,
       },
       alerting: {
         rule: { read: alertingFeatures },

@@ -7,8 +7,6 @@
 
 import {
   alertsRead,
-  alertsAll,
-  alertsUpdateLegacy,
   alertsReadNoIndices,
   alertsReadNoDetectionIndices,
   alertsReadNoAttackIndices,
@@ -34,18 +32,6 @@ export const alertsReadUser: User = {
   username: 'alerts_read_all_spaces',
   password: 'alerts_read_all_spaces',
   roles: [alertsRead.name],
-};
-
-export const alertsAllUser: User = {
-  username: 'alerts_all_all_spaces',
-  password: 'alerts_all_all_spaces',
-  roles: [alertsAll.name],
-};
-
-export const alertsUpdateLegacyUser: User = {
-  username: 'alerts_update_legacy_all_spaces',
-  password: 'alerts_update_legacy_all_spaces',
-  roles: [alertsUpdateLegacy.name],
 };
 
 export const alertsReadNoIndicesUser: User = {
@@ -82,8 +68,6 @@ export const allUsers = [
   superUser,
   noKibanaPrivileges,
   alertsReadUser,
-  alertsAllUser,
-  alertsUpdateLegacyUser,
   alertsReadNoIndicesUser,
   alertsReadNoDetectionIndicesUser,
   alertsReadNoAttackIndicesUser,
