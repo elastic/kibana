@@ -2073,7 +2073,7 @@ describe('XYChart component', () => {
         })
       ).toEqual('#FEECDF');
     });
-    test('color is not applied to chart when splitAccessor is defined or when decorations is not configured', () => {
+    test('color is not applied to chart when splitAccessors is defined or when decorations is not configured', () => {
       const newArgs: XYProps = {
         ...args,
         layers: [

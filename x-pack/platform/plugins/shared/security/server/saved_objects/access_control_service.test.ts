@@ -253,13 +253,16 @@ describe('AccessControlService', () => {
     });
 
     describe(`non-owner scenarios`, () => {
+      // Non-owner objects have requiresManageAccessControl: true
       it('throws if authorizationResult.status is "unauthorized"', () => {
         const authorizationResult = makeAuthResult('unauthorized');
         expect(() =>
           service.enforceAccessControl({
             authorizationResult,
-            typesRequiringAccessControl: new Set(['dashboard']),
-            typesRequiringRbac: new Set(),
+            // Non-owner object: requiresManageAccessControl = true
+            objectsRequiringPrivilegeCheck: [
+              { type: 'dashboard', id: '1', requiresManageAccessControl: true },
+            ],
             currentSpace: 'default',
           })
         ).toThrow(/Access denied/);
@@ -277,8 +280,9 @@ describe('AccessControlService', () => {
         expect(() =>
           service.enforceAccessControl({
             authorizationResult,
-            typesRequiringAccessControl: new Set(['dashboard']),
-            typesRequiringRbac: new Set(),
+            objectsRequiringPrivilegeCheck: [
+              { type: 'dashboard', id: '1', requiresManageAccessControl: true },
+            ],
             currentSpace: 'default',
           })
         ).toThrow(/Access denied/);
@@ -296,8 +300,9 @@ describe('AccessControlService', () => {
         expect(() =>
           service.enforceAccessControl({
             authorizationResult,
-            typesRequiringAccessControl: new Set(['dashboard']),
-            typesRequiringRbac: new Set(),
+            objectsRequiringPrivilegeCheck: [
+              { type: 'dashboard', id: '1', requiresManageAccessControl: true },
+            ],
             currentSpace: 'default',
           })
         ).not.toThrow();
@@ -315,20 +320,20 @@ describe('AccessControlService', () => {
         expect(() =>
           service.enforceAccessControl({
             authorizationResult,
-            typesRequiringAccessControl: new Set(['dashboard']),
-            typesRequiringRbac: new Set(),
+            objectsRequiringPrivilegeCheck: [
+              { type: 'dashboard', id: '1', requiresManageAccessControl: true },
+            ],
             currentSpace: 'default',
           })
         ).not.toThrow();
       });
 
-      it('does not throw if typesRequiringAccessControl is empty', () => {
+      it('does not throw if objectsRequiringPrivilegeCheck is empty', () => {
         const authorizationResult = makeAuthResult('fully_authorized', {});
         expect(() =>
           service.enforceAccessControl({
             authorizationResult,
-            typesRequiringAccessControl: new Set(),
-            typesRequiringRbac: new Set(),
+            objectsRequiringPrivilegeCheck: [],
             currentSpace: 'default',
           })
         ).not.toThrow();
@@ -336,13 +341,16 @@ describe('AccessControlService', () => {
     });
 
     describe(`owner scenarios`, () => {
+      // Owner objects have requiresManageAccessControl: false (they need RBAC/update privilege instead)
       it('throws if authorizationResult.status is "unauthorized"', () => {
         const authorizationResult = makeAuthResult('unauthorized');
         expect(() =>
           service.enforceAccessControl({
             authorizationResult,
-            typesRequiringAccessControl: new Set(),
-            typesRequiringRbac: new Set(['dashboard']),
+            // Owner object: requiresManageAccessControl = false
+            objectsRequiringPrivilegeCheck: [
+              { type: 'dashboard', id: '1', requiresManageAccessControl: false },
+            ],
             currentSpace: 'default',
           })
         ).toThrow(/Access denied/);
@@ -360,8 +368,9 @@ describe('AccessControlService', () => {
         expect(() =>
           service.enforceAccessControl({
             authorizationResult,
-            typesRequiringAccessControl: new Set(),
-            typesRequiringRbac: new Set(['dashboard']),
+            objectsRequiringPrivilegeCheck: [
+              { type: 'dashboard', id: '1', requiresManageAccessControl: false },
+            ],
             currentSpace: 'default',
           })
         ).toThrow(/Access denied/);
@@ -379,8 +388,9 @@ describe('AccessControlService', () => {
         expect(() =>
           service.enforceAccessControl({
             authorizationResult,
-            typesRequiringAccessControl: new Set(),
-            typesRequiringRbac: new Set(['dashboard']),
+            objectsRequiringPrivilegeCheck: [
+              { type: 'dashboard', id: '1', requiresManageAccessControl: false },
+            ],
             currentSpace: 'default',
           })
         ).not.toThrow();
@@ -398,23 +408,212 @@ describe('AccessControlService', () => {
         expect(() =>
           service.enforceAccessControl({
             authorizationResult,
-            typesRequiringAccessControl: new Set(),
-            typesRequiringRbac: new Set(['dashboard']),
+            objectsRequiringPrivilegeCheck: [
+              { type: 'dashboard', id: '1', requiresManageAccessControl: false },
+            ],
             currentSpace: 'default',
           })
         ).not.toThrow();
       });
 
-      it('does not throw if typesRequiringAccessControl is empty', () => {
+      it('does not throw if objectsRequiringPrivilegeCheck is empty', () => {
         const authorizationResult = makeAuthResult('fully_authorized', {});
         expect(() =>
           service.enforceAccessControl({
             authorizationResult,
-            typesRequiringAccessControl: new Set(),
-            typesRequiringRbac: new Set(),
+            objectsRequiringPrivilegeCheck: [],
             currentSpace: 'default',
           })
         ).not.toThrow();
+      });
+    });
+
+    describe('error message content', () => {
+      it('includes unauthorized access control objects in error when non-owner lacks manage_access_control privilege', () => {
+        const authorizationResult = makeAuthResult('partially_authorized', {
+          dashboard: {
+            manage_access_control: {
+              isGloballyAuthorized: false,
+              authorizedSpaces: ['other-space'],
+            },
+          },
+        });
+        expect(() =>
+          service.enforceAccessControl({
+            authorizationResult,
+            objectsRequiringPrivilegeCheck: [
+              { type: 'dashboard', id: 'obj-123', requiresManageAccessControl: true },
+            ],
+            currentSpace: 'default',
+          })
+        ).toThrow(
+          /Unable to manage access control for objects dashboard:obj-123: the "manage_access_control" privilege is required/
+        );
+      });
+
+      it('includes multiple unauthorized access control objects in error message', () => {
+        const authorizationResult = makeAuthResult('partially_authorized', {
+          dashboard: {
+            manage_access_control: {
+              isGloballyAuthorized: false,
+              authorizedSpaces: [], // Not authorized in any space
+            },
+          },
+        });
+        expect(() =>
+          service.enforceAccessControl({
+            authorizationResult,
+            objectsRequiringPrivilegeCheck: [
+              { type: 'dashboard', id: 'obj-1', requiresManageAccessControl: true },
+              { type: 'dashboard', id: 'obj-2', requiresManageAccessControl: true },
+            ],
+            currentSpace: 'default',
+          })
+        ).toThrow(
+          /Unable to manage access control for objects dashboard:obj-1, dashboard:obj-2: the "manage_access_control" privilege is required/
+        );
+      });
+
+      it('includes unauthorized RBAC types in error when owner lacks update privilege', () => {
+        const authorizationResult = makeAuthResult('partially_authorized', {
+          dashboard: {
+            update: {
+              isGloballyAuthorized: false,
+              authorizedSpaces: ['other-space'], // Not authorized in 'default' space
+            },
+          },
+        });
+        expect(() =>
+          service.enforceAccessControl({
+            authorizationResult,
+            objectsRequiringPrivilegeCheck: [
+              { type: 'dashboard', id: 'obj-456', requiresManageAccessControl: false },
+            ],
+            currentSpace: 'default',
+          })
+        ).toThrow(
+          /Unable to perform manage access control for types dashboard\. The "update" privilege is required to change access control of objects owned by the current user/
+        );
+      });
+
+      it('includes both RBAC types and access control objects in error for mixed scenarios', () => {
+        // Mixed scenario: owner object lacking update privilege AND non-owner object lacking manage_access_control
+        const authorizationResult = makeAuthResult('partially_authorized', {
+          dashboard: {
+            update: {
+              isGloballyAuthorized: false,
+              authorizedSpaces: [], // Owner not authorized
+            },
+            manage_access_control: {
+              isGloballyAuthorized: false,
+              authorizedSpaces: [], // Non-owner not authorized
+            },
+          },
+        });
+        const errorFn = () =>
+          service.enforceAccessControl({
+            authorizationResult,
+            objectsRequiringPrivilegeCheck: [
+              { type: 'dashboard', id: 'owner-obj', requiresManageAccessControl: false }, // Owner object
+              { type: 'dashboard', id: 'non-owner-obj', requiresManageAccessControl: true }, // Non-owner object
+            ],
+            currentSpace: 'default',
+          });
+
+        // Error should include both the RBAC type message and the access control objects message
+        expect(errorFn).toThrow(/Unable to perform manage access control for types dashboard/);
+        expect(errorFn).toThrow(
+          /Unable to manage access control for objects dashboard:non-owner-obj/
+        );
+      });
+
+      it('combines rbacTypes and objectsRequiringAccessControl in a single error message', () => {
+        const authorizationResult = makeAuthResult('partially_authorized', {
+          dashboard: {
+            update: {
+              isGloballyAuthorized: false,
+              authorizedSpaces: [],
+            },
+            manage_access_control: {
+              isGloballyAuthorized: false,
+              authorizedSpaces: [],
+            },
+          },
+        });
+
+        expect(() =>
+          service.enforceAccessControl({
+            authorizationResult,
+            objectsRequiringPrivilegeCheck: [
+              { type: 'dashboard', id: 'owner-obj', requiresManageAccessControl: false },
+              { type: 'dashboard', id: 'non-owner-obj', requiresManageAccessControl: true },
+            ],
+            currentSpace: 'default',
+          })
+        ).toThrow(
+          'Access denied: Unable to perform manage access control for types dashboard. ' +
+            'The "update" privilege is required to change access control of objects owned by the current user. ' +
+            'Unable to manage access control for objects dashboard:non-owner-obj: ' +
+            'the "manage_access_control" privilege is required to change access control of objects owned by another user.'
+        );
+      });
+
+      it('calls addAuditEventFn with all unauthorized types when access control check fails', () => {
+        const addAuditEventFn = jest.fn();
+        const authorizationResult = makeAuthResult('partially_authorized', {
+          dashboard: {
+            update: {
+              isGloballyAuthorized: false,
+              authorizedSpaces: [],
+            },
+            manage_access_control: {
+              isGloballyAuthorized: false,
+              authorizedSpaces: [],
+            },
+          },
+        });
+
+        expect(() =>
+          service.enforceAccessControl({
+            authorizationResult,
+            objectsRequiringPrivilegeCheck: [
+              { type: 'dashboard', id: 'obj-1', requiresManageAccessControl: false },
+              { type: 'dashboard', id: 'obj-2', requiresManageAccessControl: true },
+            ],
+            currentSpace: 'default',
+            addAuditEventFn,
+          })
+        ).toThrow(/Access denied/);
+
+        // Should be called with all unauthorized types (deduplicated and sorted)
+        expect(addAuditEventFn).toHaveBeenCalledWith(['dashboard']);
+      });
+
+      it('filters unauthorized objects to only include types that failed manage_access_control check', () => {
+        const authorizationResult = makeAuthResult('partially_authorized', {
+          dashboard: {
+            manage_access_control: {
+              isGloballyAuthorized: true, // Dashboard HAS manage_access_control privilege
+              authorizedSpaces: [],
+            },
+            update: {
+              isGloballyAuthorized: false,
+              authorizedSpaces: [], // But lacks update privilege
+            },
+          },
+        });
+
+        expect(() =>
+          service.enforceAccessControl({
+            authorizationResult,
+            objectsRequiringPrivilegeCheck: [
+              { type: 'dashboard', id: 'owner-obj', requiresManageAccessControl: false },
+            ],
+            currentSpace: 'default',
+          })
+        ).toThrow(
+          /Unable to perform manage access control for types dashboard\. The "update" privilege is required/
+        );
       });
     });
   });

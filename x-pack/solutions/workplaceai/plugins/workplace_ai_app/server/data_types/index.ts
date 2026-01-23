@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin/common';
-import type { DataSourcesRegistryPluginSetup } from '@kbn/data-sources-registry-plugin/server';
+import type { DataSource } from '@kbn/data-catalog-plugin/common';
+import type { DataCatalogPluginSetup } from '@kbn/data-catalog-plugin/server';
 
-export const workplaceAIDataTypes: DataTypeDefinition[] = [];
+export const workplaceAIDataTypes: DataSource[] = [];
 
 export const registerWorkplaceAIDataTypes = ({
-  dataSourcesRegistry,
+  dataCatalog,
 }: {
-  dataSourcesRegistry: DataSourcesRegistryPluginSetup;
+  dataCatalog: DataCatalogPluginSetup;
 }) => {
-  workplaceAIDataTypes.forEach((dataType) => {
-    dataSourcesRegistry.register(dataType);
+  workplaceAIDataTypes.forEach((dataSource) => {
+    dataCatalog.register(dataSource);
   });
 };

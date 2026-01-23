@@ -13,14 +13,14 @@ export const PrebuiltRuleAssetsFilter = z.object({
   fields: z.object({
     name: z
       .object({
-        include: z.array(z.string()).optional(),
-        exclude: z.array(z.string()).optional(),
+        include: z.object({ values: z.array(z.string()) }).optional(),
+        exclude: z.object({ values: z.array(z.string()) }).optional(),
       })
       .optional(),
     tags: z
       .object({
-        include: z.array(z.string()).optional(),
-        exclude: z.array(z.string()).optional(),
+        include: z.object({ values: z.array(z.string()) }).optional(),
+        exclude: z.object({ values: z.array(z.string()) }).optional(),
       })
       .optional(),
   }),

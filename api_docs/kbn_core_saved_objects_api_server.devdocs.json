@@ -2656,6 +2656,14 @@
             "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search_migrations.ts"
           },
           {
+            "plugin": "dataCatalog",
+            "path": "x-pack/platform/plugins/shared/data_catalog/common/data_source_spec.ts"
+          },
+          {
+            "plugin": "dataCatalog",
+            "path": "x-pack/platform/plugins/shared/data_catalog/common/data_source_spec.ts"
+          },
+          {
             "plugin": "canvas",
             "path": "x-pack/platform/plugins/private/canvas/server/routes/custom_elements/find.ts"
           },

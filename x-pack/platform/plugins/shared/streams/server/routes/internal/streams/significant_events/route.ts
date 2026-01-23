@@ -135,7 +135,6 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
             scheduleConfig: {
               taskType: SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE,
               taskId,
-              streamName: name,
               params: await (async (): Promise<SignificantEventsQueriesGenerationTaskParams> => {
                 const connectorId = await resolveConnectorId({
                   connectorId: body.connectorId,
@@ -148,6 +147,7 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
                   end: body.to.getTime(),
                   systems: body.systems,
                   sampleDocsSize: body.sampleDocsSize,
+                  streamName: name,
                 };
               })(),
               request,
