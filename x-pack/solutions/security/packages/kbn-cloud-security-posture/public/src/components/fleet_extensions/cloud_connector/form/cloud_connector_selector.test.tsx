@@ -289,7 +289,7 @@ describe('CloudConnectorSelector', () => {
       });
     });
   });
-  
+
   describe('Account Type Filtering', () => {
     it('should call useGetCloudConnectors with correct filter options', () => {
       renderSelector({

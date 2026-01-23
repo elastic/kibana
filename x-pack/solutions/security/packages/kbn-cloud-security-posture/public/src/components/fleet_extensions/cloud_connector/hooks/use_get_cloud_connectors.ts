@@ -17,10 +17,10 @@ import { CLOUD_CONNECTOR_API_ROUTES } from '@kbn/fleet-plugin/public';
 import type { CoreStart, HttpStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-export type CloudConnectorQueryFilterOptions = {
+export interface CloudConnectorQueryFilterOptions {
   cloudProvider?: CloudProvider;
   accountType?: AccountType;
-};
+}
 
 const fetchCloudConnectors = async (
   http: HttpStart,

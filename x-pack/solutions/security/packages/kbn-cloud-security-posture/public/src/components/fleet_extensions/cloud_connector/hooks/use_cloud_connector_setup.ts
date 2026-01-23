@@ -89,7 +89,7 @@ export const getAccountTypeFromInputs = (
   }
 
   const accountTypeValue = extractVarValue(vars[accountTypeVarName]);
-  
+
   // Return the account type if it's a valid AccountType value
   if (accountTypeValue === SINGLE_ACCOUNT || accountTypeValue === ORGANIZATION_ACCOUNT) {
     return accountTypeValue;
