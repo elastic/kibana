@@ -11,6 +11,8 @@ import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import { type InternalLoggingServiceSetup } from '@kbn/core-logging-server-internal';
 import { map } from 'rxjs';
+import type { ConsoleAppenderConfig, FileAppenderConfig } from '@kbn/core-logging-server';
+import { func } from 'joi';
 import { config as userActivityConfig, type UserActivityConfigType } from './user_activity_config';
 
 /** @internal */
@@ -66,21 +68,22 @@ export class UserActivityService
     logging.configure(
       ['user_activity'],
       config$.pipe(
-        map((config) => ({
-          appenders: {
-            user_activity_json: {
-              type: 'console',
-              layout: { type: 'json' },
+        map((config) => {
+          const userActivityJsonFileAppender = getuserActivityAppender(config.file);
+
+          return {
+            appenders: {
+              user_activity_json_file: userActivityJsonFileAppender,
             },
-          },
-          loggers: [
-            {
-              name: 'event',
-              level: 'info',
-              appenders: ['user_activity_json'],
-            },
-          ],
-        }))
+            loggers: [
+              {
+                name: 'event',
+                level: 'info',
+                appenders: ['user_activity_json_file'],
+              },
+            ],
+          };
+        })
       )
     );
 
@@ -108,5 +111,23 @@ export class UserActivityService
     }
 
     this.logger.info(message, { message, event, object });
+  };
+}
+
+function getuserActivityAppender(
+  fileName: string | undefined
+): ConsoleAppenderConfig | FileAppenderConfig {
+  if (fileName) {
+    return {
+      type: 'file',
+      layout: { type: 'json' },
+      fileName,
+    };
+  }
+
+  // TODO: figure out what to do with the default, is it console or some file that we decide?
+  return {
+    type: 'console',
+    layout: { type: 'json' },
   };
 }
