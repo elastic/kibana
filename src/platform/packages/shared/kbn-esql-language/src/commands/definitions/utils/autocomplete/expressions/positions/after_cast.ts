@@ -41,7 +41,11 @@ export async function suggestAfterCast(ctx: ExpressionContext): Promise<ISuggest
 
   // Get the type of the value being casted
   const typeBeingCasted = inlineCastNode
-    ? getExpressionType(inlineCastNode.value, ctx.context?.columns)
+    ? getExpressionType(
+        inlineCastNode.value,
+        ctx.context?.columns,
+        ctx.context?.unmappedFieldsStrategy
+      )
     : undefined;
 
   return getCastingTypesSuggestions(typeBeingCasted);

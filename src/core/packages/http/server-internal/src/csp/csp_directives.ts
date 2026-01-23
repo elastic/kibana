@@ -41,7 +41,7 @@ export const defaultReportOnlyRules: Partial<Record<CspDirectiveName, string[]>>
   'form-action': [`'report-sample'`, `'self'`],
   'default-src': [`'report-sample'`, `'none'`],
   'font-src': [`'report-sample'`, `'self'`],
-  'img-src': [`'report-sample'`, `'self'`, 'data:'],
+  'img-src': [`'report-sample'`, `'self'`, 'data:', 'tiles.maps.elastic.co'], // Same as below for tiles.maps.elastic.co
   'connect-src': [
     `'report-sample'`,
     `'self'`,
@@ -49,6 +49,10 @@ export const defaultReportOnlyRules: Partial<Record<CspDirectiveName, string[]>>
     // This can be improved once https://github.com/elastic/kibana/issues/181812 is implemented.
     'telemetry.elastic.co',
     'telemetry-staging.elastic.co',
+    // Same as above, but these endpoints are related to maps
+    'feeds.elastic.co',
+    'tiles.maps.elastic.co',
+    'vector.maps.elastic.co',
   ],
 };
 

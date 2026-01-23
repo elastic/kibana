@@ -1313,3 +1313,98 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "partial-entity-event",
+    "index": ".ds-logs-gcp.audit-default-2024.09.12-000001",
+    "source": {
+      "@timestamp": "2024-09-12T10:00:00.000Z",
+      "user": {
+        "entity": {
+          "id": "partial-user@example.com"
+        }
+      },
+      "client": {
+        "user": {
+          "email": "partial-user@example.com"
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "partial-data-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.compute.v1.Instances.start",
+        "agent_id_status": "missing",
+        "category": [
+          "process"
+        ],
+        "id": "partial-entity-event-id",
+        "ingested": "2024-09-12T10:00:00.000Z",
+        "kind": "event",
+        "outcome": "success",
+        "provider": "activity",
+        "type": [
+          "start"
+        ]
+      },
+      "gcp": {
+        "audit": {
+          "authorization_info": [
+            {
+              "granted": true,
+              "permission": "compute.instances.start",
+              "resource": "projects/partial-data-project-id"
+            }
+          ],
+          "logentry_operation": {
+            "id": "partial-entity-operation-id"
+          },
+          "resource_name": "projects/partial-data-project-id/zones/us-central1-a/instances/partial-instance-1",
+          "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+        }
+      },
+      "log": {
+        "level": "NOTICE",
+        "logger": "projects/partial-data-project-id/logs/cloudaudit.googleapis.com%2Factivity"
+      },
+      "related": {
+        "ip": [
+          "10.0.0.20"
+        ],
+        "user": [
+          "partial-user@example.com"
+        ]
+      },
+      "service": {
+        "name": "compute.googleapis.com"
+      },
+      "source": {
+        "ip": "10.0.0.20"
+      },
+      "host": {
+        "target": {
+          "entity": {
+            "id": "partial-host-instance-1"
+          }
+        }
+      },
+      "tags": [],
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "Other",
+        "original": "google-cloud-sdk/390.0.0"
+      }
+    }
+  }
+}
