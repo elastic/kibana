@@ -20,6 +20,12 @@ import { useMetadataStateContext } from '../../hooks/use_metadata_state';
 import { useDataViewsContext } from '../../hooks/use_data_views';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
+import {
+  HOST1_NAME,
+  DATE_WITH_HOSTS_DATA_FROM,
+  DATE_WITH_HOSTS_DATA_TO,
+  BASE_DEFAULT_INVENTORY_VIEW_ATTRIBUTES,
+} from '../../../../../test/scout/ui/fixtures/constants';
 
 jest.mock('../../../../hooks/use_kibana');
 jest.mock('../../../../hooks/use_reload_request_time');
@@ -52,6 +58,15 @@ const useAssetDetailsRenderPropsContextMock =
     typeof useAssetDetailsRenderPropsContext
   >;
 
+// Test constants
+const TEST_HOST_TYPE = 'host';
+const TEST_ENTITY_TYPE = 'host';
+const TEST_RENDER_MODE = 'page';
+const TEST_DATA_VIEW_ID = 'test-id';
+const TEST_DATA_VIEW_TITLE = 'test-title';
+const TEST_OS_NAME = 'Ubuntu';
+const TEST_APM_CAPABILITY = 'apm';
+
 const mockUseKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
@@ -59,7 +74,7 @@ const mockUseKibana = () => {
       data: dataPluginMock.createStartContract(),
       application: {
         capabilities: {
-          apm: { show: true },
+          [TEST_APM_CAPABILITY]: { show: true },
         },
       },
     },
@@ -82,13 +97,13 @@ const mockUseInfraMLCapabilitiesContext = () => {
 const mockUseMetadataStateContext = () => {
   useMetadataStateContextMock.mockReturnValue({
     metadata: {
-      id: 'host-1',
-      name: 'host-1',
+      id: HOST1_NAME,
+      name: HOST1_NAME,
       features: [],
       info: {
         host: {
           os: {
-            name: 'Ubuntu',
+            name: TEST_OS_NAME,
           },
         },
       },
@@ -103,8 +118,8 @@ const mockUseDataViewsContext = () => {
   useDataViewsContextMock.mockReturnValue({
     metrics: {
       dataView: {
-        id: 'test-id',
-        title: 'test-title',
+        id: TEST_DATA_VIEW_ID,
+        title: TEST_DATA_VIEW_TITLE,
       },
     },
   } as unknown as ReturnType<typeof useDataViewsContext>);
@@ -113,8 +128,8 @@ const mockUseDataViewsContext = () => {
 const mockUseDatePickerContext = () => {
   useDatePickerContextMock.mockReturnValue({
     dateRange: {
-      from: '2023-04-09T11:07:49Z',
-      to: '2023-04-09T11:23:49Z',
+      from: DATE_WITH_HOSTS_DATA_FROM,
+      to: DATE_WITH_HOSTS_DATA_TO,
     },
   } as unknown as ReturnType<typeof useDatePickerContext>);
 };
@@ -122,14 +137,14 @@ const mockUseDatePickerContext = () => {
 const mockUseAssetDetailsRenderPropsContext = () => {
   useAssetDetailsRenderPropsContextMock.mockReturnValue({
     entity: {
-      id: 'host-1',
-      name: 'host-1',
-      type: 'host',
+      id: HOST1_NAME,
+      name: HOST1_NAME,
+      type: TEST_HOST_TYPE,
     },
     renderMode: {
-      mode: 'page',
+      mode: TEST_RENDER_MODE,
     },
-    schema: 'ecs',
+    schema: BASE_DEFAULT_INVENTORY_VIEW_ATTRIBUTES.preferredSchema,
   } as unknown as ReturnType<typeof useAssetDetailsRenderPropsContext>);
 };
 
@@ -137,15 +152,15 @@ const renderOverview = () =>
   render(
     <I18nProvider>
       <ContextProviders
-        entityType="host"
-        entityId="host-1"
-        entityName="host-1"
+        entityType={TEST_ENTITY_TYPE}
+        entityId={HOST1_NAME}
+        entityName={HOST1_NAME}
         dateRange={{
-          from: '2023-04-09T11:07:49Z',
-          to: '2023-04-09T11:23:49Z',
+          from: DATE_WITH_HOSTS_DATA_FROM,
+          to: DATE_WITH_HOSTS_DATA_TO,
         }}
         renderMode={{
-          mode: 'page',
+          mode: TEST_RENDER_MODE,
         }}
       >
         <Overview />
@@ -173,13 +188,6 @@ describe('Overview Tab', () => {
     const result = renderOverview();
     // Verify the component renders without errors
     // Detailed behavior is tested in e2e tests
-    expect(result.container).toBeTruthy();
-  });
-
-  it('should render KPI grid', () => {
-    const result = renderOverview();
-    // KPI grid is rendered as part of the overview
-    // Specific KPI values are tested in e2e tests
     expect(result.container).toBeTruthy();
   });
 });
