@@ -40,7 +40,7 @@ export const createEntityAttachmentType = (): AttachmentTypeDefinition => {
     validate: (input) => {
       const parseResult = riskEntityAttachmentDataSchema.safeParse(input);
       if (parseResult.success) {
-        return { valid: true, data: formatEntityRiskData(parseResult.data) };
+        return { valid: true, data: parseResult.data };
       } else {
         return { valid: false, error: parseResult.error.message };
       }
@@ -73,8 +73,4 @@ RISK ENTITY DATA:
       return description;
     },
   };
-};
-
-const formatEntityRiskData = (data: EntityRiskAttachmentData): string => {
-  return `identifier: ${data.identifier}, identifierType: ${data.identifierType}`;
 };
