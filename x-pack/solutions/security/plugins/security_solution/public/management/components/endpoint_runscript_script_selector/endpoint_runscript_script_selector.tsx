@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import type { EuiSuperSelectOption, EuiSuperSelectProps } from '@elastic/eui';
-import { EuiSuperSelect } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EndpointScript } from '../../../../common/endpoint/types';
 import { useGetCustomScripts } from '../../hooks/custom_scripts/use_get_custom_scripts';
@@ -15,9 +15,21 @@ import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import type { CustomScriptsRequestQueryParams } from '../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
 
+const CLEAR_SELECTION_LABEL = i18n.translate(
+  'xpack.securitySolution.endpointRunscriptScriptSelector.clearSelection',
+  {
+    defaultMessage: 'Clear selection',
+  }
+);
+
 export interface EndpointRunscriptScriptSelectorProps {
   selectedScriptId: string | undefined;
   onChange: (script: EndpointScript | undefined) => void;
+  /**
+   * Called with the loaded scripts everytime they are fetched. This is a convenience prop that
+   * allows consumers of this component to access the list of scripts loaded into memory.
+   */
+  onScriptsLoaded?: (scripts: EndpointScript[]) => void;
   'data-test-subj'?: string;
   osType?: CustomScriptsRequestQueryParams['osType'];
 }
@@ -28,18 +40,33 @@ export interface EndpointRunscriptScriptSelectorProps {
  * users must have the authz to execute runscript to be able to use this component.
  */
 export const EndpointRunscriptScriptSelector = memo<EndpointRunscriptScriptSelectorProps>(
-  ({ osType, selectedScriptId, onChange, 'data-test-subj': dataTestSubj }) => {
+  ({ osType, selectedScriptId, onChange, onScriptsLoaded, 'data-test-subj': dataTestSubj }) => {
     const hasAuthz = useUserPrivileges().endpointPrivileges.canWriteExecuteOperations;
     const getTestId = useTestIdGenerator(dataTestSubj);
-    const { data, isLoading, error } = useGetCustomScripts<EndpointScript>(
+    const { data, isLoading } = useGetCustomScripts<EndpointScript>(
       'endpoint',
       { osType },
-      { enabled: hasAuthz }
+      {
+        enabled: hasAuthz,
+        onSuccess: (loadedScripts) => {
+          if (onScriptsLoaded) {
+            // For Endpoint the `meta` will always be populated
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            onScriptsLoaded(loadedScripts.map((script) => script.meta!));
+          }
+        },
+      }
+    );
+
+    const clearCurrentSelectionHandler = useCallback(
+      (ev: React.MouseEvent) => {
+        onChange(undefined);
+        ev.stopPropagation();
+      },
+      [onChange]
     );
 
     const selectedScript: EndpointScript | undefined = useMemo(() => {
-      // FIXME:PT handle case where script is not found on a update flow
-
       if (selectedScriptId && data) {
         return data.find((script) => script.id === selectedScriptId)?.meta ?? undefined;
       }
@@ -51,22 +78,52 @@ export const EndpointRunscriptScriptSelector = memo<EndpointRunscriptScriptSelec
       }
 
       return data.map<EuiSuperSelectOption<EndpointScript>>((script) => {
+        // TODO:PT add ability to clear selection (inputDisplay)
+        // TODO:PT add more display info. to the dropdownDisplay
+
         return {
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           value: script.meta!,
-          inputDisplay: script.name,
+          inputDisplay: (
+            <EuiFlexGroup responsive={false} wrap={false} gutterSize="xs" alignItems="center">
+              <EuiFlexItem>{script.name}</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType="crossInCircle"
+                  color="text"
+                  display="empty"
+                  onClick={clearCurrentSelectionHandler}
+                  aria-label={CLEAR_SELECTION_LABEL}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
           dropdownDisplay: script.name,
         };
       });
-    }, [data]);
+    }, [clearCurrentSelectionHandler, data]);
 
-    const handleScriptSelectorOnChange: EuiSuperSelectProps<EndpointScript>['onChange'] =
-      useCallback(
-        (script) => {
-          onChange(script);
-        },
-        [onChange]
-      );
+    const handleScriptSelectorOnChange = useCallback<
+      Required<EuiSuperSelectProps<EndpointScript>>['onChange']
+    >(
+      (script) => {
+        // if user clicked on the same script name, then unselect it
+        if (script.id === selectedScriptId) {
+          onChange(undefined);
+          return;
+        }
+
+        onChange(script);
+      },
+      [onChange, selectedScriptId]
+    );
+
+    useEffect(() => {
+      // If scripts were loaded and we can't find the selected script, then emit change (script could have been deleted)
+      if (data && !selectedScript && selectedScriptId) {
+        onChange(undefined);
+      }
+    }, [data, onChange, selectedScript, selectedScriptId]);
 
     if (!hasAuthz) {
       return null;

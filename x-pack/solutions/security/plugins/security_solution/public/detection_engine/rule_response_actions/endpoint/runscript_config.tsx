@@ -207,17 +207,35 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
   ({ config, onChange, 'data-test-subj': dataTestSubj, platform, showFieldLabels = true }) => {
     const [scriptSelected, setSelectedScript] = useState<EndpointScript | undefined>(undefined);
 
+    // TODO:PT maybe allow timeout to be entered using the `1h, 10m` etc. type of format and convert it to seconds for API call?
+
     const scriptSelectionOnChangeHandler: EndpointRunscriptScriptSelectorProps['onChange'] =
       useCallback(
         (selectedScript) => {
-          onChange({
-            ...config,
-            scriptId: selectedScript?.id ?? '',
-          });
+          if (selectedScript?.id !== config.scriptId) {
+            onChange({
+              ...config,
+              scriptId: selectedScript?.id ?? '',
+              // reset script input ++ timeout if no script is selected
+              ...(!selectedScript ? { scriptInput: '', timeout: undefined } : {}),
+            });
+          }
+
           setSelectedScript(selectedScript);
         },
         [config, onChange]
       );
+
+    const scriptSelectionOnScriptsLoadedHandler = useCallback<
+      Required<EndpointRunscriptScriptSelectorProps>['onScriptsLoaded']
+    >(
+      (scriptList) => {
+        if (config.scriptId && !scriptSelected) {
+          setSelectedScript(scriptList.find((script) => script.id === config.scriptId));
+        }
+      },
+      [config.scriptId, scriptSelected]
+    );
 
     const scriptParamsOnChangeHandler: Required<EuiFieldTextProps>['onChange'] = useCallback(
       (ev) => {
@@ -279,6 +297,7 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
               selectedScriptId={config.scriptId}
               osType={platform}
               onChange={scriptSelectionOnChangeHandler}
+              onScriptsLoaded={scriptSelectionOnScriptsLoadedHandler}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -297,6 +316,7 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
             <EuiFieldText
               name="scriptParms"
               disabled={!scriptSelected}
+              value={config.scriptInput}
               fullWidth
               onChange={scriptParamsOnChangeHandler}
             />
@@ -332,6 +352,7 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
               disabled={!scriptSelected}
               fullWidth
               onChange={scriptTimeoutOnChangeHandler}
+              value={config.timeout ?? ''}
             />
           </EuiFormRow>
         </EuiFlexItem>
