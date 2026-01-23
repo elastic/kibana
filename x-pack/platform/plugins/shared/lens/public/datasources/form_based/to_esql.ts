@@ -331,11 +331,9 @@ export function getESQLForLayer(
       Object.keys(allParams).length > 0 ? esql(queryString, allParams) : esql(queryString);
 
     // Inline parameters to produce final query string with resolved values
-    // (matching the old @kbn/esql-composer toString() behavior)
     query.inlineParams();
 
     return {
-      // Use multi-line format (default) to match old @kbn/esql-composer output
       esql: query.print(),
       partialRows,
       esAggsIdMap,
