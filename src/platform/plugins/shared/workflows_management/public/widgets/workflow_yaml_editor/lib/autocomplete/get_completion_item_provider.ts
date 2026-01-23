@@ -88,32 +88,11 @@ export function getCompletionItemProvider(
     // '{' - start of Liquid blocks (e.g., {{ ... }})
     triggerCharacters: ['@', '.', ' ', '|', '{'],
     provideCompletionItems: async (model, position, completionContext) => {
-      const editorState = getState();
-      const autocompleteContext = buildAutocompleteContext({
-        editorState,
-        model,
-        position,
-        completionContext,
-      });
-      if (!autocompleteContext) {
-        return {
-          suggestions: [],
-          incomplete: false,
-        };
-      }
-
-      // Start with workflow suggestions (they typically have snippets and get priority in deduplication)
-      const workflowSuggestions = await getSuggestions({
-        ...autocompleteContext,
-        model,
-        position,
-      });
-
       // Incremental deduplication accumulator
       const deduplicatedMap = new Map<string, monaco.languages.CompletionItem>();
-      mapSuggestions(deduplicatedMap, workflowSuggestions);
 
-      // Get suggestions from all stored YAML providers (excluding workflow provider)
+      // First, get suggestions from Monaco YAML providers (includes schema-based completion for workflow keys)
+      // This should run even if workflowDefinition is null to allow autocompletion when YAML is invalid
       const allYamlProviders = getAllYamlProviders();
       let isIncomplete = false;
 
@@ -137,6 +116,25 @@ export function getCompletionItemProvider(
             // Continue with other providers if one fails
           }
         }
+      }
+
+      // Then, get workflow-specific suggestions (variables, connectors, etc.)
+      // These require workflowDefinition, so only run if available
+      const editorState = getState();
+      const autocompleteContext = buildAutocompleteContext({
+        editorState,
+        model,
+        position,
+        completionContext,
+      });
+      if (autocompleteContext) {
+        // Start with workflow suggestions (they typically have snippets and get priority in deduplication)
+        const workflowSuggestions = await getSuggestions({
+          ...autocompleteContext,
+          model,
+          position,
+        });
+        mapSuggestions(deduplicatedMap, workflowSuggestions);
       }
 
       return {
