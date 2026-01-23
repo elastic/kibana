@@ -7,9 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './kibana_7';
-export * from './kibana_7_behind_text';
-export * from './kibana_4';
-export * from './elastic_classic';
-export * from './neutral';
-export * from './severity';
+import { i18n } from '@kbn/i18n';
+import { KbnCategoricalPalette } from '../../../classes/categorical_palette';
+import { KbnPalette } from '../../../constants';
+
+export const severityPalette = new KbnCategoricalPalette({
+  id: KbnPalette.Severity,
+  name: i18n.translate('palettes.severity.name', {
+    defaultMessage: 'Severity',
+  }),
+  colorCount: 6,
+  colors: ['#EE4C48', '#FF995E', '#FCD883', '#24C292', '#B5E5F2', '#E3E8F2'],
+});
