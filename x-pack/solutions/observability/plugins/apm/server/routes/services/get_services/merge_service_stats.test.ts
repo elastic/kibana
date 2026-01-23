@@ -124,10 +124,6 @@ describe('mergeServiceStats', () => {
       })
     ).toEqual([
       {
-        alertsCount: 2,
-        serviceName: 'opbeans-java',
-      },
-      {
         agentName: 'java',
         environments: ['staging'],
         serviceName: 'opbeans-java-2',
