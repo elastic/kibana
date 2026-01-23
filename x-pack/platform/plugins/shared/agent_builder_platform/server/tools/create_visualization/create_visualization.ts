@@ -8,17 +8,14 @@
 import { z } from '@kbn/zod';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID } from '@kbn/management-settings-ids';
 import type { VisualizationConfig } from './types';
 import { guessChartType } from './guess_chart_type';
 import { createVisualizationGraph } from './graph_lens';
 import { getSchemaForChartType } from './schemas';
-
-/** Attachment type for visualization configurations */
-const VISUALIZATION_ATTACHMENT_TYPE = 'visualization';
 
 const createVisualizationSchema = z.object({
   query: z.string().describe('A natural language query describing the desired visualization.'),

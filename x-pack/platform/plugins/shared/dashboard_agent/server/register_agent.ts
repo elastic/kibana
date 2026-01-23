@@ -54,7 +54,7 @@ When the user asks to create a dashboard:
    - Pass \`chartType\` (${Object.values(SupportedChartType).join(
      ', '
    )}) to skip chart type detection
-   - The tool returns an array of results, each with a \`tool_result_id\` for use in dashboard creation
+   - The tool returns an array of results, each with an \`attachment_id\` for use in dashboard creation
    - Example input:
      \`\`\`
      {
@@ -68,9 +68,9 @@ When the user asks to create a dashboard:
 3. **Create the dashboard** - Call ${dashboardTools.createDashboard} with:
    - \`title\`: Dashboard title
    - \`description\`: Dashboard description
-   - \`panels\`: Array of \`tool_result_id\` values from the ${
+   - \`visualizations\`: Array of \`attachment_id\` values from the ${
      dashboardTools.createVisualizations
-   } call (preferred), or full visualization configs
+   } call
    - \`markdownContent\`: A markdown summary displayed at the top of the dashboard
      - Should describe what the dashboard shows and provide helpful context
      - Use markdown formatting (headers, lists, bold text)
@@ -91,7 +91,7 @@ The dashboard is created as an **in-memory dashboard** (not saved automatically)
 
 When the user wants to modify an existing in-memory dashboard:
 
-1. **Get the previous dashboard's tool_result_id** - This was returned by ${
+1. **Get the previous dashboard's dashboardAttachmentId** - This was returned by ${
           dashboardTools.createDashboard
         } or a previous ${dashboardTools.manageDashboard} call
 
@@ -100,28 +100,30 @@ When the user wants to modify an existing in-memory dashboard:
         } first
 
 3. **Call ${dashboardTools.manageDashboard}** with:
-   - \`dashboardId\`: The \`tool_result_id\` from the previous dashboard operation
-   - \`visualizationsToAdd\`: (optional) Array of \`tool_result_id\` values for new visualizations to add
-   - \`visualizationsToRemove\`: (optional) Array of \`tool_result_id\` values to remove from the dashboard
+   - \`dashboardAttachmentId\`: The \`dashboardAttachmentId\` from the previous dashboard operation
+   - \`visualizationsToAdd\`: (optional) Array of \`attachment_id\` values for new visualizations to add
+   - \`visualizationsToRemove\`: (optional) Array of visualization \`attachment_id\` values to remove from the dashboard
    - \`title\`: (optional) Updated dashboard title
    - \`description\`: (optional) Updated dashboard description
    - \`markdownContent\`: (optional) Updated markdown summary
 
-The tool returns a new \`tool_result_id\` that can be used for subsequent modifications.
+The tool updates the dashboard attachment and returns the same \`dashboardAttachmentId\` with a new version.
 
 **Example workflow:**
 1. User: "Create a dashboard with CPU metrics"
    -> ${platformCoreTools.listIndices} -> ${platformCoreTools.getIndexMapping} -> ${
           dashboardTools.createVisualizations
         } -> ${dashboardTools.createDashboard}
-   -> Returns dashboard with \`tool_result_id: "abc123"\`
+   -> Returns dashboard with \`dashboardAttachmentId: "dash-abc123"\`
 
 2. User: "Add memory metrics to that dashboard"
    -> ${
      dashboardTools.createVisualizations
-   } (for memory viz) -> Returns \`tool_result_id: "viz456"\`
-   -> ${dashboardTools.manageDashboard}({ dashboardId: "abc123", visualizationsToAdd: ["viz456"] })
-   -> Returns updated dashboard with new \`tool_result_id: "def789"\`
+   } (for memory viz) -> Returns \`attachment_id: "viz-456"\`
+   -> ${
+     dashboardTools.manageDashboard
+   }({ dashboardAttachmentId: "dash-abc123", visualizationsToAdd: ["viz-456"] })
+   -> Returns updated dashboard (same \`dashboardAttachmentId\`, new version)
 `,
       },
       answer: {
@@ -176,14 +178,14 @@ Tool response includes:
   "tool_result_id": "abc123",
   "type": "${dashboard}",
   "data": {
-    "content": {
-      "url": "/app/dashboards#/create?...",
-      "title": "My Dashboard",
-      "description": "Dashboard showing metrics",
-      "markdownContent": "## Overview\\nThis dashboard shows...",
-      "panelCount": 3,
-      "visualizationIds": ["viz1", "viz2"]
-    }
+    "dashboardAttachmentId": "dash-abc123",
+    "version": 1,
+    "url": "/app/dashboards#/create?...",
+    "title": "My Dashboard",
+    "description": "Dashboard showing metrics",
+    "markdownContent": "## Overview\\nThis dashboard shows...",
+    "panelCount": 3,
+    "visualizationIds": ["viz1", "viz2"]
   }
 }
 

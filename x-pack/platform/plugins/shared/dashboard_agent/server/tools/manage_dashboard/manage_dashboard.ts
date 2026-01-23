@@ -9,7 +9,6 @@ import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import { getToolResultId, isToolResultId } from '@kbn/agent-builder-server';
 import type { DashboardAppLocator } from '@kbn/dashboard-plugin/common/locator/locator';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
@@ -21,13 +20,13 @@ import {
   getMarkdownPanelHeight,
   filterVisualizationIds,
 } from '../utils';
-import type { DashboardContent } from '../types';
+import { DASHBOARD_ATTACHMENT_TYPE, type DashboardAttachmentData } from '../../attachment_types';
 
 const manageDashboardSchema = z.object({
-  dashboardId: z
+  dashboardAttachmentId: z
     .string()
     .describe(
-      'The ID of the dashboard to modify, returned by a previous create_dashboard or manage_dashboard call.'
+      'The dashboard attachment ID to modify, returned by a previous create_dashboard or manage_dashboard call.'
     ),
   title: z.string().optional().describe('(optional) Updated title for the dashboard.'),
   description: z.string().optional().describe('(optional) Updated description for the dashboard.'),
@@ -41,14 +40,12 @@ const manageDashboardSchema = z.object({
     .array(z.string())
     .optional()
     .describe(
-      '(optional) Array of tool_result_ids from create_visualizations calls to add to the dashboard.'
+      '(optional) Array of attachment_ids from create_visualizations calls to add to the dashboard.'
     ),
   visualizationsToRemove: z
     .array(z.string())
     .optional()
-    .describe(
-      '(optional) Array of tool_result_ids to remove from the dashboard. These are the same IDs returned by create_visualizations.'
-    ),
+    .describe('(optional) Array of visualization attachment_ids to remove from the dashboard.'),
 });
 
 export const manageDashboardTool = ({
@@ -68,10 +65,10 @@ export const manageDashboardTool = ({
     description: `Incrementally update an in-memory dashboard by adding or removing visualizations, or updating metadata.
 
 This tool will:
-1. Read the previous dashboard state from the provided dashboardId
+1. Read the previous dashboard state from the provided dashboardAttachmentId
 2. Apply incremental changes (add/remove visualizations, update title/description/markdown)
 3. Generate a new in-memory dashboard URL with the updated state
-4. Return a new dashboard ID for subsequent modifications
+4. Update the dashboard attachment with the new state
 
 Use this tool when you need to:
 - Add new visualizations to an existing dashboard
@@ -81,45 +78,47 @@ Use this tool when you need to:
     tags: [],
     handler: async (
       {
-        dashboardId,
+        dashboardAttachmentId,
         title,
         description,
         markdownContent,
         visualizationsToAdd,
         visualizationsToRemove,
       },
-      { logger, request, resultStore }
+      { logger, request, attachments }
     ) => {
       try {
-        if (!isToolResultId(dashboardId)) {
+        const dashboardAttachment = attachments.get(dashboardAttachmentId);
+
+        if (!dashboardAttachment) {
           throw new Error(
-            `Invalid dashboardId "${dashboardId}". Expected an ID from a previous create_dashboard or manage_dashboard call.`
+            `Dashboard attachment "${dashboardAttachmentId}" not found. Make sure you're using a dashboardAttachmentId from a previous create_dashboard or manage_dashboard call.`
           );
         }
 
-        if (!resultStore.has(dashboardId)) {
+        if (dashboardAttachment.type !== DASHBOARD_ATTACHMENT_TYPE) {
           throw new Error(
-            `Dashboard not found for ID "${dashboardId}". Make sure you're using an ID from a previous dashboard operation.`
+            `Attachment "${dashboardAttachmentId}" is not a dashboard attachment (got "${dashboardAttachment.type}").`
           );
         }
 
-        const storedResult = resultStore.get(dashboardId);
-        if (storedResult.type !== ToolResultType.dashboard) {
+        // Get the latest version of the dashboard attachment
+        const latestVersion = attachments.getLatest(dashboardAttachmentId);
+        if (!latestVersion) {
           throw new Error(
-            `The provided dashboardId "${dashboardId}" is not a dashboard (got "${storedResult.type}").`
+            `Could not retrieve latest version of dashboard attachment "${dashboardAttachmentId}".`
           );
         }
 
-        // Extract the stored dashboard content
-        const previousContent = storedResult.data.content;
+        const previousData = latestVersion.data as DashboardAttachmentData;
 
         // Start with the previous state
-        const updatedTitle = title ?? previousContent.title;
-        const updatedDescription = description ?? previousContent.description;
-        const updatedMarkdownContent = markdownContent ?? previousContent.markdownContent;
+        const updatedTitle = title ?? previousData.title;
+        const updatedDescription = description ?? previousData.description;
+        const updatedMarkdownContent = markdownContent ?? previousData.markdownContent;
 
         // Work with visualization IDs directly
-        let visualizationIds = [...previousContent.visualizationIds];
+        let visualizationIds = [...previousData.visualizationIds];
 
         // Remove visualizations if specified
         if (visualizationsToRemove && visualizationsToRemove.length > 0) {
@@ -138,7 +137,7 @@ Use this tool when you need to:
         const yOffset = getMarkdownPanelHeight(updatedMarkdownContent);
         const dashboardPanels = [
           markdownPanel,
-          ...normalizePanels(visualizationIds, yOffset, resultStore),
+          ...normalizePanels(visualizationIds, yOffset, attachments),
         ];
 
         const spaceId = spaces?.spacesService?.getSpaceId(request);
@@ -157,23 +156,33 @@ Use this tool when you need to:
 
         logger.info(`Dashboard updated with ${dashboardPanels.length} panels`);
 
-        const newToolResultId = getToolResultId();
-
-        const content: DashboardContent = {
-          url: dashboardUrl,
+        // Update the dashboard attachment with new state
+        const updatedDashboardData: DashboardAttachmentData = {
           title: updatedTitle,
           description: updatedDescription,
           markdownContent: updatedMarkdownContent,
-          panelCount: dashboardPanels.length,
           visualizationIds,
         };
+
+        const updatedAttachment = await attachments.update(dashboardAttachmentId, {
+          data: updatedDashboardData,
+          description: `Dashboard: ${updatedTitle}`,
+        });
 
         return {
           results: [
             {
               type: ToolResultType.dashboard,
-              tool_result_id: newToolResultId,
-              data: { content },
+              data: {
+                dashboardAttachmentId,
+                version: updatedAttachment?.current_version ?? latestVersion.version + 1,
+                url: dashboardUrl,
+                title: updatedTitle,
+                description: updatedDescription,
+                markdownContent: updatedMarkdownContent,
+                panelCount: dashboardPanels.length,
+                visualizationIds,
+              },
             },
           ],
         };
@@ -185,7 +194,7 @@ Use this tool when you need to:
               type: ToolResultType.error,
               data: {
                 message: `Failed to manage dashboard: ${error.message}`,
-                metadata: { dashboardId, title, description },
+                metadata: { dashboardAttachmentId, title, description },
               },
             },
           ],
