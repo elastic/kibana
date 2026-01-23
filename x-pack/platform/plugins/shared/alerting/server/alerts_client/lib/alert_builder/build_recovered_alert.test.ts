@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Alert as LegacyAlert } from '../../alert/alert';
+import { Alert as LegacyAlert } from '../../../alert/alert';
 import { buildRecoveredAlert } from './build_recovered_alert';
 import {
   ALERT_RULE_NAME,
@@ -41,7 +41,7 @@ import {
   existingFlattenedActiveAlert,
   existingExpandedActiveAlert,
   rule,
-} from './test_fixtures';
+} from '../test_fixtures';
 import { omit } from 'lodash';
 
 for (const flattened of [true, false]) {
