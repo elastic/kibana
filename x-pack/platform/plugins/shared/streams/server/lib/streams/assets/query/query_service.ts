@@ -9,13 +9,13 @@ import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import { buildEsqlWhereCondition } from '@kbn/streams-schema';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import {
   QUERY_ESQL_WHERE,
   QUERY_KQL_BODY,
   QUERY_FEATURE_FILTER,
   QUERY_FEATURE_NAME,
 } from '../fields';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { StreamsPluginStartDependencies } from '../../../../types';
 import { queryStorageSettings, type QueryStorageSettings } from '../storage_settings';
 import { QueryClient, type StoredQueryLink } from './query_client';
