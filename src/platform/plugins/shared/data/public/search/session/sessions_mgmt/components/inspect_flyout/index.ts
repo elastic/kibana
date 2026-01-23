@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { InspectFlyout, InspectFlyoutWrapper } from './inspect_flyout';
+export { InspectFlyout } from './inspect_flyout';

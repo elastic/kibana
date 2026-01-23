@@ -8,8 +8,8 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ISessionsClient } from '../../../..';
 import { SearchSessionsMgmtAPI } from '../lib/api';
@@ -48,36 +48,34 @@ export function openSearchSessionsFlyout({
       usageCollector,
       featureFlags: coreStart.featureFlags,
     });
-    const { Provider: KibanaReactContextProvider } = createKibanaReactContext(coreStart);
 
     const flyout = coreStart.overlays.openSystemFlyout(
-      coreStart.rendering.addContext(
-        <KibanaReactContextProvider>
-          <Flyout
-            onClose={() => flyout.close()}
-            onBackgroundSearchOpened={(params) => {
-              attrs.onBackgroundSearchOpened?.(params);
-              flyout.close();
-            }}
-            appId={attrs.appId}
-            api={api}
-            coreStart={coreStart}
-            usageCollector={usageCollector}
-            ebtManager={ebtManager}
-            config={config}
-            kibanaVersion={kibanaVersion}
-            locators={share.url.locators}
-            trackingProps={{ openedFrom: attrs.trackingProps.openedFrom }}
-          />
-        </KibanaReactContextProvider>
-      ),
+      <Flyout
+        onClose={() => flyout.close()}
+        onBackgroundSearchOpened={(params) => {
+          attrs.onBackgroundSearchOpened?.(params);
+          flyout.close();
+        }}
+        appId={attrs.appId}
+        api={api}
+        coreStart={coreStart}
+        usageCollector={usageCollector}
+        ebtManager={ebtManager}
+        config={config}
+        kibanaVersion={kibanaVersion}
+        locators={share.url.locators}
+        trackingProps={{ openedFrom: attrs.trackingProps.openedFrom }}
+      />,
       {
+        id: 'backgroundSearchesFlyout',
+        title: i18n.translate('data.sessions.management.backgroundSearchesFlyoutTitle', {
+          defaultMessage: 'Background searches',
+        }),
         size: FLYOUT_WIDTH,
         session: 'start',
         type: 'overlay',
         ownFocus: true,
         outsideClickCloses: true,
-        'aria-labelledby': 'backgroundSearchesFlyoutTitle',
       }
     );
 

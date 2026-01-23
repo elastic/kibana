@@ -11,8 +11,6 @@ import { EuiFlyoutBody, EuiSpacer, EuiText, type UseEuiTheme } from '@elastic/eu
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { css } from '@emotion/react';
-import type { CoreStart } from '@kbn/core/public';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { CodeEditor } from '@kbn/code-editor';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { UISession } from '../../types';
@@ -62,32 +60,6 @@ export const InspectFlyout: React.FC<InspectFlyoutProps> = ({ searchSession }) =
         {renderInfo()}
       </EuiText>
     </EuiFlyoutBody>
-  );
-};
-
-interface InspectFlyoutWrapperProps {
-  searchSession: UISession;
-  uiSettings: CoreStart['uiSettings'];
-  settings: CoreStart['settings'];
-  theme: CoreStart['theme'];
-}
-
-export const InspectFlyoutWrapper: React.FC<InspectFlyoutWrapperProps> = ({
-  searchSession,
-  uiSettings,
-  settings,
-  theme,
-}) => {
-  const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
-    uiSettings,
-    settings,
-    theme,
-  });
-
-  return (
-    <KibanaReactContextProvider>
-      <InspectFlyout searchSession={searchSession} />
-    </KibanaReactContextProvider>
   );
 };
 

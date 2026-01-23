@@ -14,7 +14,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { UISession } from '../../../types';
 import type { IClickActionDescriptor } from './types';
 import type { SearchSessionsMgmtAPI } from '../../../lib/api';
-import { InspectFlyoutWrapper } from '../../inspect_flyout';
+import { InspectFlyout } from '../../inspect_flyout';
 
 export const createInspectActionDescriptor = (
   api: SearchSessionsMgmtAPI,
@@ -30,25 +30,16 @@ export const createInspectActionDescriptor = (
     />
   ),
   onClick: async () => {
-    const overlay = core.overlays.openSystemFlyout(
-      <InspectFlyoutWrapper
-        uiSettings={core.uiSettings}
-        settings={core.settings}
-        theme={core.theme}
-        searchSession={uiSession}
-      />,
-      {
-        id: `inspect-background-search-${uiSession.id}`,
-        title: i18n.translate('data.sessions.management.backgroundSearchFlyoutTitle', {
-          defaultMessage: 'Inspect background search',
-        }),
-        size: 'm',
-        session: 'inherit',
-        type: 'overlay',
-        ownFocus: true,
-        outsideClickCloses: true,
-      }
-    );
+    const overlay = core.overlays.openSystemFlyout(<InspectFlyout searchSession={uiSession} />, {
+      id: `inspect-background-search-${uiSession.id}`,
+      title: i18n.translate('data.sessions.management.backgroundSearchFlyoutTitle', {
+        defaultMessage: 'Inspect background search',
+      }),
+      size: 'm',
+      session: 'inherit',
+      type: 'overlay',
+      outsideClickCloses: true,
+    });
     await overlay.onClose;
   },
 });
