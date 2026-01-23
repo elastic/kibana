@@ -32,6 +32,8 @@ import {
   DATASOURCES_SCOPE,
   TASK_NOT_FOUND_ERROR,
   TASK_MANAGER_NOT_AVAILABLE_ERROR,
+  DEFAULT_ITEMS_PER_PAGE,
+  PAGINATION_ITEMS_PER_PAGE_OPTIONS,
 } from '../../common/constants';
 import { TYPE } from '../tasks/bulk_delete_task';
 
@@ -67,7 +69,11 @@ export function registerRoutes(dependencies: RouteDependencies) {
       path: API_BASE_PATH,
       validate: {
         query: schema.object({
-          per_page: schema.number({ min: 1, defaultValue: 100, max: 1000 }),
+          per_page: schema.number({
+            min: 1,
+            defaultValue: DEFAULT_ITEMS_PER_PAGE,
+            max: Math.max(...PAGINATION_ITEMS_PER_PAGE_OPTIONS),
+          }),
           page: schema.number({ min: 1, defaultValue: 1 }),
         }),
       },

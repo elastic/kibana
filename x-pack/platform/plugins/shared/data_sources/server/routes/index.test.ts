@@ -18,6 +18,7 @@ import {
   DATASOURCES_SCOPE,
   TASK_NOT_FOUND_ERROR,
   TASK_MANAGER_NOT_AVAILABLE_ERROR,
+  DEFAULT_ITEMS_PER_PAGE,
 } from '../../common/constants';
 import * as helpers from './data_sources_helpers';
 
@@ -137,7 +138,7 @@ describe('registerRoutes', () => {
       mockSavedObjectsClient.find.mockResolvedValue({
         saved_objects: mockDataSources as any,
         total: 2,
-        per_page: 100,
+        per_page: DEFAULT_ITEMS_PER_PAGE,
         page: 1,
       });
 
@@ -145,7 +146,7 @@ describe('registerRoutes', () => {
 
       const routeHandler = mockRouter.get.mock.calls[0][1];
       const mockRequest = httpServerMock.createKibanaRequest({
-        query: { page: 1, per_page: 100 },
+        query: { page: 1, per_page: DEFAULT_ITEMS_PER_PAGE },
       });
       const mockResponse = httpServerMock.createResponseFactory();
 
@@ -153,7 +154,7 @@ describe('registerRoutes', () => {
 
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
         type: DATA_SOURCE_SAVED_OBJECT_TYPE,
-        perPage: 100,
+        perPage: DEFAULT_ITEMS_PER_PAGE,
         page: 1,
       });
       expect(mockResponse.ok).toHaveBeenCalledWith({
@@ -174,7 +175,7 @@ describe('registerRoutes', () => {
 
       const routeHandler = mockRouter.get.mock.calls[0][1];
       const mockRequest = httpServerMock.createKibanaRequest({
-        query: { page: 1, per_page: 100 },
+        query: { page: 1, per_page: DEFAULT_ITEMS_PER_PAGE },
       });
       const mockResponse = httpServerMock.createResponseFactory();
 
