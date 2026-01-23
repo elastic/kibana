@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { useWatch } from 'react-hook-form';
 import { EuiCode, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
+import { useWatch } from 'react-hook-form';
 import { ToggleField } from './toggle_field';
 
 export const IgnoreFailureToggle = () => {
