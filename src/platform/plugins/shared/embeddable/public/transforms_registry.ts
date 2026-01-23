@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EmbeddableTransforms } from '../common';
+import type { DrilldownTransforms, EmbeddableTransforms } from '../common';
 import type { getTransformDrilldownsOut } from '../common/drilldowns/transform_drilldowns_out';
 
 const registry: {
@@ -18,7 +18,7 @@ const registry: {
 
 export function registerLegacyURLTransform(
   type: string,
-  getTransformOut: () => Promise<EmbeddableTransforms['transformOut']>
+  getTransformOut: (transformDrilldownsOut: DrilldownTransforms['transformOut']) => Promise<EmbeddableTransforms['transformOut']>
 ) {
   if (registry[type]) {
     throw new Error(`Embeddable legacy URL transform for type "${type}" is already registered.`);

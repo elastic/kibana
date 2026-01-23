@@ -8,19 +8,15 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils/src/types';
-import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { VISUALIZE_SAVED_OBJECT_TYPE } from '@kbn/visualizations-common';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import type { StoredVisualizeByValueState, StoredVisualizeEmbeddableState } from './types';
 import { VIS_SAVED_OBJECT_REF_NAME } from './get_transform_in';
 import { injectVisReferences } from '../../references/inject_vis_references';
 
-export function getTransformOut(
-  transformEnhancementsOut: EmbeddableSetup['transformEnhancementsOut']
-) {
-  function transformOut(state: StoredVisualizeEmbeddableState, references?: Reference[]) {
-    const enhancementsState = state.enhancements
-      ? transformEnhancementsOut(state.enhancements, references ?? [])
-      : undefined;
+export function getTransformOut(transformDrilldownsOut: DrilldownTransforms['transformOut']) {
+  function transformOut(storedState: StoredVisualizeEmbeddableState, references?: Reference[]) {
+    const state = transformDrilldownsOut(storedState, references);
 
     // by ref
     const savedObjectRef = (references ?? []).find(
@@ -29,7 +25,6 @@ export function getTransformOut(
     if (savedObjectRef) {
       return {
         ...state,
-        ...(enhancementsState ? { enhancements: enhancementsState } : {}),
         savedObjectId: savedObjectRef.id,
       };
     }
@@ -43,14 +38,12 @@ export function getTransformOut(
 
       return {
         ...state,
-        ...(enhancementsState ? { enhancements: enhancementsState } : {}),
         savedVis,
       };
     }
 
     return {
       ...state,
-      ...(enhancementsState ? { enhancements: enhancementsState } : {}),
     };
   }
   return transformOut;

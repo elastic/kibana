@@ -68,6 +68,7 @@ import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plu
 import { css, injectGlobal } from '@emotion/css';
 import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
 import type { KqlPluginStart } from '@kbn/kql/public';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
 import {
@@ -493,10 +494,13 @@ export class VisualizationsPlugin
         return getTypes().get(visState.type)?.icon ?? '';
       },
     });
-    embeddable.registerLegacyURLTransform(VISUALIZE_EMBEDDABLE_TYPE, async () => {
-      const { getTransformOut } = await import('./embeddable/embeddable_module');
-      return getTransformOut(embeddable.transformEnhancementsOut);
-    });
+    embeddable.registerLegacyURLTransform(
+      VISUALIZE_EMBEDDABLE_TYPE,
+      async (transformDrilldownsOut: DrilldownTransforms['transformOut']) => {
+        const { getTransformOut } = await import('./embeddable/embeddable_module');
+        return getTransformOut(transformDrilldownsOut);
+      }
+    );
 
     contentManagement.registry.register({
       id: CONTENT_ID,

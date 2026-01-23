@@ -17,7 +17,7 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { registerAddFromLibraryType } from './add_from_library/registry';
 import type { registerReactEmbeddableFactory } from './react_embeddable_system';
 import type { EmbeddableStateTransfer } from './state_transfer';
-import type { EmbeddableTransforms } from '../common';
+import type { DrilldownTransforms, EmbeddableTransforms } from '../common';
 import type { AddFromLibraryFormProps } from './add_from_library/add_from_library_flyout';
 
 export interface EmbeddableSetupDependencies {
@@ -73,7 +73,7 @@ export interface EmbeddableSetup {
    */
   registerLegacyURLTransform: (
     type: string,
-    getTransformOut: () => Promise<EmbeddableTransforms['transformOut']>
+    getTransformOut: (transformDrilldownsOut: DrilldownTransforms['transformOut']) => Promise<EmbeddableTransforms['transformOut']>
   ) => void;
 }
 

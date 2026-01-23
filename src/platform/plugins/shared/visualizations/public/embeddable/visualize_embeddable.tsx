@@ -69,7 +69,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
     const titleManager = initializeTitleManager(initialState);
 
     // Initialize dynamic actions
-    const dynamicActionsManager = embeddableEnhancedStart?.initializeEmbeddableDynamicActions(
+    const dynamicActionsManager = await embeddableEnhancedStart?.initializeEmbeddableDynamicActions(
       uuid,
       () => titleManager.api.title$.getValue(),
       initialState
@@ -186,7 +186,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
       ).pipe(map(() => undefined)),
       getComparators: () => {
         return {
-          ...(dynamicActionsManager?.comparators ?? { enhancements: 'skip' }),
+          ...(dynamicActionsManager?.comparators ?? { drilldowns: 'skip', enhancements: 'skip' }),
           ...titleComparators,
           ...timeRangeComparators,
           savedObjectId: 'skip',
