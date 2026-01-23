@@ -4334,6 +4334,16 @@
     "dynamic": false,
     "properties": {}
   },
+  "trial-companion-nba-milestone": {
+    "properties": {
+      "dismiss": {
+        "type": "boolean"
+      },
+      "openTODOs": {
+        "type": "integer"
+      }
+    }
+  },
   "ui-metric": {
     "properties": {
       "count": {
