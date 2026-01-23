@@ -979,19 +979,35 @@ const ESQLEditorInternal = function ESQLEditor({
     [serverErrors, serverWarning, code, queryValidation]
   );
 
-  const handleResourceBrowserSelect = useCallback((resourceName: string, oldLength: number) => {
+  const handleResourceBrowserSelect = useCallback((newResourceNames: string, oldLength: number) => {
     if (editorRef.current && editorModel.current && browserCursorPositionRef.current) {
       const initialCursorPosition = browserCursorPositionRef.current;
+      const textAfterInitialCursor = editorModel.current
+        .getValue()
+        .substring(initialCursorPosition.column);
+      // Check if there is a resource after the initial cursor - match any whitespace or newline followed by a letter or dot
+      const hasExistingResourceAfterInitialCursor =
+        textAfterInitialCursor.match(/^[\s\n]*[a-zA-Z.].*/);
+
       const range = {
         startLineNumber: initialCursorPosition.lineNumber,
         startColumn: initialCursorPosition.column,
         endLineNumber: initialCursorPosition.lineNumber,
-        endColumn: initialCursorPosition.column + oldLength,
+        endColumn:
+          initialCursorPosition.column +
+          oldLength +
+          (oldLength > 0 && newResourceNames.length === 0 && hasExistingResourceAfterInitialCursor
+            ? 1
+            : 0), // Delete comma if all resources are deleted and there was some inserted resource before
       };
       editorRef.current.executeEdits('indicesBrowser', [
         {
           range,
-          text: resourceName,
+          text:
+            newResourceNames +
+            (oldLength === 0 && newResourceNames.length > 0 && hasExistingResourceAfterInitialCursor
+              ? ','
+              : ''), // Add comma if there is initially an existing resource and there is currently no inserted resource
         },
       ]);
     }
@@ -1091,7 +1107,13 @@ const ESQLEditorInternal = function ESQLEditor({
         onOpenIndicesBrowser: enableEsqlResourceBrowser ? openIndicesBrowser : undefined,
         onOpenFieldsBrowser: enableEsqlResourceBrowser ? openFieldsBrowser : undefined,
       }),
-    [esqlCallbacks, telemetryCallbacks, enableEsqlResourceBrowser, openIndicesBrowser, openFieldsBrowser]
+    [
+      esqlCallbacks,
+      telemetryCallbacks,
+      enableEsqlResourceBrowser,
+      openIndicesBrowser,
+      openFieldsBrowser,
+    ]
   );
 
   const hoverProvider = useMemo(
@@ -1352,7 +1374,9 @@ const ESQLEditorInternal = function ESQLEditor({
                       esqlVariables: esqlVariablesRef,
                       controlsContext: controlsContextRef,
                       openTimePickerPopover,
-                      openIndicesBrowser: enableEsqlResourceBrowser ? openIndicesBrowser : undefined,
+                      openIndicesBrowser: enableEsqlResourceBrowser
+                        ? openIndicesBrowser
+                        : undefined,
                       openFieldsBrowser: enableEsqlResourceBrowser ? openFieldsBrowser : undefined,
                     });
 
