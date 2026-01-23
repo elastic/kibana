@@ -40,7 +40,6 @@ import {
   SECURITY_SOLUTION_RULES_APP_ID,
   SERVER_APP_ID,
   USERS_API_READ,
-  EXCEPTIONS_SUBFEATURE_ALL,
   ALERTS_FEATURE_ID,
 } from '../../constants';
 import { type BaseKibanaFeatureConfig } from '../../types';
@@ -103,7 +102,7 @@ export const getRulesV2BaseKibanaFeature = (
         minimal: [
           {
             feature: RULES_FEATURE_ID_V3,
-            privileges: ['minimal_all', EXCEPTIONS_SUBFEATURE_ALL],
+            privileges: ['minimal_all'],
           },
           { feature: ALERTS_FEATURE_ID, privileges: ['minimal_all'] },
         ],
