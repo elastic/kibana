@@ -263,7 +263,12 @@ export async function suggest(
     }
 
     // Show fields browser when we have field suggestions and we're not in a source command or stats command
-    if (!isSourceCommand && !isStatsCommand && hasFieldSuggestions && resourceRetriever?.onOpenFieldsBrowser) {
+    if (
+      !isSourceCommand &&
+      !isStatsCommand &&
+      hasFieldSuggestions &&
+      resourceRetriever?.onOpenFieldsBrowser
+    ) {
       const fieldsBrowserSuggestion = createResourceBrowserSuggestion(
         i18n.translate('esqlEditor.fieldsBrowser.suggestionLabel', {
           defaultMessage: 'Browse fields',
