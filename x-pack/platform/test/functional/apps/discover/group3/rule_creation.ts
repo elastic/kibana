@@ -12,12 +12,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Discover rule creation', function () {
     const { common } = getPageObjects(['common', 'settings', 'shareSavedObjectsToSpace']);
     const find = getService('find');
+    const testSubjects = getService('testSubjects');
 
     it('navigate to Discover', () => {
       return common.navigateToApp('discover');
     });
 
     it('begin creating rule', async () => {
+      await testSubjects.click('app-menu-overflow-button');
       await find.clickByButtonText('Alerts');
       await find.clickByButtonText('Create search threshold rule');
       await find.clickByButtonText('Details');
