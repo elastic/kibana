@@ -40,6 +40,7 @@ export const HostCharts = React.forwardRef<HTMLDivElement, Props>(
       <Section
         title={
           <TitleWithTooltip
+            data-test-subj={`infraAssetDetailsHostChartsSection${metric}Title`}
             title={HOST_METRIC_GROUP_TITLES[metric]}
             tooltipContent={
               <EuiText size="xs">
@@ -49,7 +50,7 @@ export const HostCharts = React.forwardRef<HTMLDivElement, Props>(
                   values={{
                     link: (
                       <EuiLink
-                        data-test-subj="infraAssetDetailsViewHostMetricsDocumentationLink"
+                        data-test-subj={`infraAssetDetailsHostChartsSection${metric}DocumentationLink`}
                         href={`${HOST_METRICS_DOC_HREF}#${FRAGMENT_BASE}-${metric}`}
                         target="_blank"
                         className={cx({

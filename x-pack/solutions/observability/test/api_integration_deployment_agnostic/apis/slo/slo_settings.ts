@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { DEFAULT_SETTINGS } from '@kbn/slo-plugin/server/services/slo_settings_repository';
+import { pick } from 'lodash';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -31,16 +32,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('returns default settings', async () => {
         const settings = await sloApi.getSettings(adminRoleAuthc);
 
-        expect(settings.staleThresholdInHours).to.eql(DEFAULT_SETTINGS.staleThresholdInHours);
-        expect(settings.useAllRemoteClusters).to.eql(DEFAULT_SETTINGS.useAllRemoteClusters);
-        expect(settings.selectedRemoteClusters).to.eql(DEFAULT_SETTINGS.selectedRemoteClusters);
+        expect(settings).to.eql(DEFAULT_SETTINGS);
       });
     });
 
     describe('PUT /internal/slo/settings', () => {
       afterEach(async () => {
         const defaultSettings = isServerless
-          ? { staleThresholdInHours: DEFAULT_SETTINGS.staleThresholdInHours }
+          ? pick(DEFAULT_SETTINGS, ['staleThresholdInHours', 'staleInstancesCleanupEnabled'])
           : DEFAULT_SETTINGS;
 
         await sloApi.updateSettings(defaultSettings, adminRoleAuthc);
@@ -49,12 +48,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       if (isServerless) {
         it('updates setting (serverless)', async () => {
           const updatedSettings = await sloApi.updateSettings(
-            { staleThresholdInHours: 72 },
+            { staleThresholdInHours: 72, staleInstancesCleanupEnabled: true },
             adminRoleAuthc
           );
 
           expect(updatedSettings).to.eql({
             staleThresholdInHours: 72,
+            staleInstancesCleanupEnabled: true,
             useAllRemoteClusters: DEFAULT_SETTINGS.useAllRemoteClusters,
             selectedRemoteClusters: DEFAULT_SETTINGS.selectedRemoteClusters,
           });
@@ -62,6 +62,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const retrievedSettings = await sloApi.getSettings(adminRoleAuthc);
           expect(retrievedSettings).to.eql({
             staleThresholdInHours: 72,
+            staleInstancesCleanupEnabled: true,
             useAllRemoteClusters: DEFAULT_SETTINGS.useAllRemoteClusters,
             selectedRemoteClusters: DEFAULT_SETTINGS.selectedRemoteClusters,
           });
@@ -74,6 +75,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             useAllRemoteClusters: true,
             selectedRemoteClusters: ['cluster-1', 'cluster-2'],
             staleThresholdInHours: 12,
+            staleInstancesCleanupEnabled: true,
           };
 
           const updatedSettings = await sloApi.updateSettings(payload, adminRoleAuthc);
@@ -81,6 +83,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             useAllRemoteClusters: true,
             selectedRemoteClusters: ['cluster-1', 'cluster-2'],
             staleThresholdInHours: 12,
+            staleInstancesCleanupEnabled: true,
           });
 
           const retrievedSettings = await sloApi.getSettings(adminRoleAuthc);
@@ -88,6 +91,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             useAllRemoteClusters: true,
             selectedRemoteClusters: ['cluster-1', 'cluster-2'],
             staleThresholdInHours: 12,
+            staleInstancesCleanupEnabled: true,
           });
         });
       }
