@@ -192,7 +192,7 @@ export interface AdditionalCellActionsParams {
   /**
    * Available actions for the additional cell actions extension
    */
-  actions: {
+  actions?: {
     /**
      * Opens a new tab
      * @param params The parameters for the open in new tab action
@@ -395,7 +395,9 @@ export type DiscoverCellAction = CellAction<DiscoverCellActionExecutionContext>;
  * Context object passed to additional cell action methods
  */
 export type AdditionalCellActionContext = CellActionsData &
-  Omit<OmitIndexSignature<DiscoverCellActionMetadata>, 'instanceId'>;
+  Omit<OmitIndexSignature<DiscoverCellActionMetadata>, 'instanceId'> & {
+    additionalActions?: AdditionalCellActionsParams['actions'];
+  };
 
 /**
  * Additional action to show within expanded cell popovers in the data grid

@@ -20,10 +20,6 @@ import {
 } from '../types';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { useProfileAccessor } from './use_profile_accessor';
-import {
-  internalStateActions,
-  useInternalStateDispatch,
-} from '../../application/main/state_management/redux';
 
 export const DISCOVER_CELL_ACTION_TYPE = 'discover-cellAction-type';
 
@@ -38,20 +34,17 @@ export const useAdditionalCellActions = ({
   query,
   filters,
   timeRange,
+  additionalActions,
 }: Omit<AdditionalCellActionContext, 'field' | 'value'>) => {
   const { uiActions } = useDiscoverServices();
-  const dispatch = useInternalStateDispatch();
   const [instanceId, setInstanceId] = useState<string | undefined>();
   const getAdditionalCellActionsAccessor = useProfileAccessor('getAdditionalCellActions');
   const additionalCellActions = useMemo(
     () =>
       getAdditionalCellActionsAccessor(() => [])({
-        actions: {
-          openInNewTab: (params) =>
-            dispatch(internalStateActions.openInNewTabExtPointAction(params)),
-        },
+        actions: additionalActions ?? {},
       }),
-    [dispatch, getAdditionalCellActionsAccessor]
+    [additionalActions, getAdditionalCellActionsAccessor]
   );
 
   useEffect(() => {

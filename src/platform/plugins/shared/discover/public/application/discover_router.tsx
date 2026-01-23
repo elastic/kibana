@@ -53,7 +53,7 @@ export const DiscoverRoutes = ({
   return (
     <Routes>
       <Route path="/context/:dataViewId/:id">
-        <ContextAppRoute {...routeProps} />
+        <ContextAppRoute />
       </Route>
       <Route
         path="/doc/:dataView/:index/:type"
