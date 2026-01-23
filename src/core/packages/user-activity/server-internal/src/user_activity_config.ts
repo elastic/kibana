@@ -12,7 +12,7 @@ import { schema } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 
 const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
+  enabled: schema.boolean({ defaultValue: false }),
   file: schema.maybe(schema.string()),
 });
 

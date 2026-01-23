@@ -12,7 +12,6 @@ import type { Logger } from '@kbn/logging';
 import { type InternalLoggingServiceSetup } from '@kbn/core-logging-server-internal';
 import { map } from 'rxjs';
 import type { ConsoleAppenderConfig, FileAppenderConfig } from '@kbn/core-logging-server';
-import { func } from 'joi';
 import { config as userActivityConfig, type UserActivityConfigType } from './user_activity_config';
 
 /** @internal */
