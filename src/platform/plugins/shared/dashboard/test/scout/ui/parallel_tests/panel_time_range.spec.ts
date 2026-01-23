@@ -7,28 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { spaceTest, tags } from '@kbn/scout';
-import type { PageObjects } from '@kbn/scout';
+import { spaceTest, expect, tags } from '@kbn/scout';
+import type { PageObjects, ScoutPage } from '@kbn/scout';
+import {
+  LENS_BASIC_DATA_VIEW,
+  LENS_BASIC_KIBANA_ARCHIVE,
+  LENS_BASIC_TIME_RANGE,
+} from '../constants';
 
-const KIBANA_ARCHIVE_PATH =
-  'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json';
-const DATA_VIEW_NAME = 'logstash-*';
-const LENS_TITLE = 'Artistpreviouslyknownaslens';
+const TIME_RANGE_LENS_TITLE = 'lnsXYvis';
 
-spaceTest.describe('Dashboard panel custom time range', { tag: tags.ESS_ONLY }, () => {
+spaceTest.describe('Panel custom time range (dashboard)', { tag: tags.ESS_ONLY }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
-    await scoutSpace.savedObjects.load(KIBANA_ARCHIVE_PATH);
-    await scoutSpace.uiSettings.setDefaultIndex(DATA_VIEW_NAME);
-    await scoutSpace.uiSettings.setDefaultTime({
-      from: 'Sep 22, 2015 @ 00:00:00.000',
-      to: 'Sep 23, 2015 @ 00:00:00.000',
-    });
+    await scoutSpace.savedObjects.cleanStandardList();
+    await scoutSpace.savedObjects.load(LENS_BASIC_KIBANA_ARCHIVE);
+    await scoutSpace.uiSettings.setDefaultIndex(LENS_BASIC_DATA_VIEW);
+    await scoutSpace.uiSettings.setDefaultTime(LENS_BASIC_TIME_RANGE);
   });
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.dashboard.goto();
     await pageObjects.dashboard.openNewDashboard();
+    await pageObjects.dashboard.waitForRenderComplete();
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -37,100 +38,111 @@ spaceTest.describe('Dashboard panel custom time range', { tag: tags.ESS_ONLY }, 
   });
 
   const addLensPanelFromLibrary = async (pageObjects: PageObjects) => {
-    await pageObjects.dashboard.addLens(LENS_TITLE);
+    await pageObjects.dashboard.addLens(TIME_RANGE_LENS_TITLE);
     await pageObjects.dashboard.waitForRenderComplete();
   };
 
   const addByValueLensPanel = async (pageObjects: PageObjects) => {
     await addLensPanelFromLibrary(pageObjects);
-    await pageObjects.dashboard.clonePanel(LENS_TITLE);
-    await pageObjects.dashboard.removePanel(LENS_TITLE);
+    await pageObjects.dashboard.clonePanel(TIME_RANGE_LENS_TITLE);
+    await pageObjects.dashboard.removePanel(TIME_RANGE_LENS_TITLE);
     await pageObjects.dashboard.waitForRenderComplete();
   };
 
-  spaceTest('by value: can add a custom time range to a panel', async ({ pageObjects }) => {
+  const addCustomTimeRange = async (pageObjects: PageObjects) => {
+    await pageObjects.dashboard.openCustomizePanel();
+    await pageObjects.dashboard.enableCustomTimeRange();
+    await pageObjects.dashboard.openDatePickerQuickMenu();
+    await pageObjects.dashboard.clickCommonlyUsedTimeRange('Last_30 days');
+    await pageObjects.dashboard.saveCustomizePanel();
+    await pageObjects.dashboard.waitForRenderComplete();
+  };
+
+  const removeCustomTimeRange = async (pageObjects: PageObjects) => {
+    await pageObjects.dashboard.clickTimeRangeBadge();
+    await pageObjects.dashboard.disableCustomTimeRange();
+    await pageObjects.dashboard.saveCustomizePanel();
+    await pageObjects.dashboard.waitForRenderComplete();
+  };
+
+  const expectEmptyPlaceholder = async (page: ScoutPage) => {
+    await expect(page.testSubj.locator('emptyPlaceholder')).toHaveCount(1);
+  };
+
+  const expectXyChartRendered = async (page: ScoutPage) => {
+    await expect(page.testSubj.locator('xyVisChart')).toHaveCount(1);
+  };
+
+  spaceTest('by value: can add a custom time range to a panel', async ({ page, pageObjects }) => {
     await spaceTest.step('add by value panel', async () => {
       await addByValueLensPanel(pageObjects);
+      expect(await pageObjects.dashboard.getPanelCount()).toBe(1);
     });
 
     await spaceTest.step('enable custom time range and save', async () => {
-      await pageObjects.dashboard.openCustomizePanel();
-      await pageObjects.dashboard.enableCustomTimeRange();
-      await pageObjects.dashboard.openDatePickerQuickMenu();
-      await pageObjects.dashboard.clickCommonlyUsedTimeRange('Last_30 days');
-      await pageObjects.dashboard.saveCustomizePanel();
-      await pageObjects.dashboard.waitForRenderComplete();
+      await addCustomTimeRange(pageObjects);
     });
 
     await spaceTest.step('verify custom time range badge', async () => {
       await pageObjects.dashboard.expectTimeRangeBadgeExists();
+      await expectEmptyPlaceholder(page);
+      await pageObjects.dashboard.clickQuickSave();
     });
   });
 
-  spaceTest('by value: can remove a custom time range from a panel', async ({ pageObjects }) => {
-    await spaceTest.step('add by value panel with custom time range', async () => {
-      await addByValueLensPanel(pageObjects);
-      await pageObjects.dashboard.openCustomizePanel();
-      await pageObjects.dashboard.enableCustomTimeRange();
-      await pageObjects.dashboard.openDatePickerQuickMenu();
-      await pageObjects.dashboard.clickCommonlyUsedTimeRange('Last_30 days');
-      await pageObjects.dashboard.saveCustomizePanel();
-      await pageObjects.dashboard.waitForRenderComplete();
-    });
+  spaceTest(
+    'by value: can remove a custom time range from a panel',
+    async ({ page, pageObjects }) => {
+      await spaceTest.step('add by value panel with custom time range', async () => {
+        await addByValueLensPanel(pageObjects);
+        await addCustomTimeRange(pageObjects);
+        expect(await pageObjects.dashboard.getPanelCount()).toBe(1);
+      });
 
-    await spaceTest.step('remove custom time range', async () => {
-      await pageObjects.dashboard.clickTimeRangeBadge();
-      await pageObjects.dashboard.disableCustomTimeRange();
-      await pageObjects.dashboard.saveCustomizePanel();
-      await pageObjects.dashboard.waitForRenderComplete();
-    });
+      await spaceTest.step('remove custom time range', async () => {
+        await removeCustomTimeRange(pageObjects);
+      });
 
-    await spaceTest.step('verify badge removed', async () => {
-      await pageObjects.dashboard.expectTimeRangeBadgeMissing();
-    });
-  });
+      await spaceTest.step('verify badge removed and chart returns', async () => {
+        await pageObjects.dashboard.expectTimeRangeBadgeMissing();
+        await expectXyChartRendered(page);
+      });
+    }
+  );
 
-  spaceTest('by reference: can add a custom time range to panel', async ({ pageObjects }) => {
+  spaceTest('by reference: can add a custom time range to panel', async ({ page, pageObjects }) => {
     await spaceTest.step('add by reference panel', async () => {
       await addLensPanelFromLibrary(pageObjects);
+      expect(await pageObjects.dashboard.getPanelCount()).toBe(1);
     });
 
     await spaceTest.step('enable custom time range and save', async () => {
-      await pageObjects.dashboard.openCustomizePanel();
-      await pageObjects.dashboard.enableCustomTimeRange();
-      await pageObjects.dashboard.openDatePickerQuickMenu();
-      await pageObjects.dashboard.clickCommonlyUsedTimeRange('Last_30 days');
-      await pageObjects.dashboard.saveCustomizePanel();
-      await pageObjects.dashboard.waitForRenderComplete();
+      await addCustomTimeRange(pageObjects);
     });
 
     await spaceTest.step('verify custom time range badge', async () => {
       await pageObjects.dashboard.expectTimeRangeBadgeExists();
+      await expectEmptyPlaceholder(page);
+      await pageObjects.dashboard.clickQuickSave();
     });
   });
 
   spaceTest(
     'by reference: can remove a custom time range from a panel',
-    async ({ pageObjects }) => {
+    async ({ page, pageObjects }) => {
       await spaceTest.step('add by reference panel with custom time range', async () => {
         await addLensPanelFromLibrary(pageObjects);
-        await pageObjects.dashboard.openCustomizePanel();
-        await pageObjects.dashboard.enableCustomTimeRange();
-        await pageObjects.dashboard.openDatePickerQuickMenu();
-        await pageObjects.dashboard.clickCommonlyUsedTimeRange('Last_30 days');
-        await pageObjects.dashboard.saveCustomizePanel();
-        await pageObjects.dashboard.waitForRenderComplete();
+        await addCustomTimeRange(pageObjects);
+        expect(await pageObjects.dashboard.getPanelCount()).toBe(1);
       });
 
       await spaceTest.step('remove custom time range', async () => {
-        await pageObjects.dashboard.clickTimeRangeBadge();
-        await pageObjects.dashboard.disableCustomTimeRange();
-        await pageObjects.dashboard.saveCustomizePanel();
-        await pageObjects.dashboard.waitForRenderComplete();
+        await removeCustomTimeRange(pageObjects);
       });
 
-      await spaceTest.step('verify badge removed', async () => {
+      await spaceTest.step('verify badge removed and chart returns', async () => {
         await pageObjects.dashboard.expectTimeRangeBadgeMissing();
+        await expectXyChartRendered(page);
       });
     }
   );
