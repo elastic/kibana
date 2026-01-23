@@ -85,8 +85,4 @@ export class DatasetQualityServerPlugin
 
     return {};
   }
-
-  start(core: CoreStart, plugins: DatasetQualityPluginStartDependencies) {
-    return {};
-  }
 }

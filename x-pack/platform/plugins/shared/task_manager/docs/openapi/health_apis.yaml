@@ -510,7 +510,8 @@ paths:
                                   "p90": 56,
                                   "p95": 56,
                                   "p99": 56
-                                },                                "security:telemetry-lists": {
+                                },
+                                "security:telemetry-lists": {
                                   "p50": 14,
                                   "p90": 14,
                                   "p95": 14,
@@ -757,7 +758,8 @@ paths:
                                   "RetryScheduled": 0,
                                   "Failed": 0,
                                   "status": "OK"
-                                },                                "security:telemetry-lists": {
+                                },
+                                "security:telemetry-lists": {
                                   "Success": 100,
                                   "RetryScheduled": 0,
                                   "Failed": 0,
@@ -1001,7 +1003,8 @@ paths:
                                 "status": {
                                   "idle": 1
                                 }
-                              },                              "osquery:telemetry-configs": {
+                              },
+                              "osquery:telemetry-configs": {
                                 "count": 1,
                                 "cost": 2,
                                 "status": {
