@@ -88,6 +88,35 @@ describe('SystemFlyoutService', () => {
       expect(renderedElement).toBeDefined();
     });
 
+    it('renders flyoutMenuProps with custom properties', () => {
+      const expectedFlyoutMenuProps = {
+        title: 'Visible Title',
+        'data-test-subj': 'test-menu',
+        hideTitle: false,
+      };
+
+      systemFlyouts.open(<div>System flyout content</div>, {
+        flyoutMenuProps: expectedFlyoutMenuProps,
+      });
+      expect(mockReactDomRender).toHaveBeenCalledTimes(1);
+
+      // Navigate to the actual EuiFlyout component to check its props
+      const renderedElement = mockReactDomRender.mock.calls[0][0];
+      // The structure is: KibanaRenderContextProvider > EuiFlyout
+      const euiFlyoutElement = renderedElement.props.children;
+      expect(euiFlyoutElement.props.flyoutMenuProps).toEqual(expectedFlyoutMenuProps);
+    });
+
+    it('does not allow title in both top-level and flyoutMenuProps', () => {
+      // TypeScript should prevent this at compile time.
+      // This test is just to document the behavior.
+      systemFlyouts.open(<div>System flyout content</div>, {
+        title: 'Top Level Title',
+        // @ts-expect-error - Title can not be in both places
+        flyoutMenuProps: { title: 'Menu Title', 'data-test-subj': 'test-menu' },
+      });
+    });
+
     it('applies additional EuiFlyout options', () => {
       systemFlyouts.open(<div>System flyout content</div>, {
         size: 'l',

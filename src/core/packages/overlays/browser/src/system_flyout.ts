@@ -11,13 +11,59 @@ import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { EuiFlyoutProps } from '@elastic/eui';
 import type { OverlayFlyoutOpenOptions } from './flyout';
 
-export type OverlaySystemFlyoutOpenOptions = Omit<OverlayFlyoutOpenOptions, 'session'> & {
-  /**
-   * Control the flyout session behavior. See {@link EuiFlyoutProps.session}
-   * @default "start"
-   */
-  session?: EuiFlyoutProps['session'];
-};
+/**
+ * Options for opening a system flyout. Title can be provided either at the top level
+ * or within flyoutMenuProps, but not both.
+ */
+export type OverlaySystemFlyoutOpenOptions =
+  | (Omit<OverlayFlyoutOpenOptions, 'session' | 'flyoutMenuProps' | 'title'> & {
+      /**
+       * Control the flyout session behavior. See {@link EuiFlyoutProps.session}
+       * @default "start"
+       */
+      session?: EuiFlyoutProps['session'];
+      /**
+       * Title for the flyout (for flyout system managed history). When provided at the top level,
+       * do not provide title in flyoutMenuProps.
+       */
+      title: string;
+      /**
+       * Props for the flyout menu. Title should not be provided here when using top-level title.
+       */
+      flyoutMenuProps?: Omit<NonNullable<EuiFlyoutProps['flyoutMenuProps']>, 'title'>;
+    })
+  | (Omit<OverlayFlyoutOpenOptions, 'session' | 'flyoutMenuProps' | 'title'> & {
+      /**
+       * Control the flyout session behavior. See {@link EuiFlyoutProps.session}
+       * @default "start"
+       */
+      session?: EuiFlyoutProps['session'];
+      /**
+       * Title for the flyout. When providing title in flyoutMenuProps, do not use top-level title.
+       */
+      title?: never;
+      /**
+       * Props for the flyout menu with title.
+       */
+      flyoutMenuProps: Omit<NonNullable<EuiFlyoutProps['flyoutMenuProps']>, 'title'> & {
+        title: string;
+      };
+    })
+  | (Omit<OverlayFlyoutOpenOptions, 'session' | 'flyoutMenuProps' | 'title'> & {
+      /**
+       * Control the flyout session behavior. See {@link EuiFlyoutProps.session}
+       * @default "start"
+       */
+      session?: EuiFlyoutProps['session'];
+      /**
+       * Title for the flyout (for accessibility).
+       */
+      title?: never;
+      /**
+       * Props for the flyout menu.
+       */
+      flyoutMenuProps?: Omit<NonNullable<EuiFlyoutProps['flyoutMenuProps']>, 'title'>;
+    });
 
 /**
  * APIs to open and manage fly-out dialogs.

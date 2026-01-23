@@ -53,6 +53,7 @@ export class SystemFlyoutService {
         content: React.ReactElement,
         { session = 'start', title, ...options }: OverlaySystemFlyoutOpenOptions = {}
       ): OverlayRef => {
+        const { flyoutMenuProps } = options;
         const flyoutId = `system-flyout-${uuidV4()}`;
 
         // Create a container for this flyout within the main React tree
@@ -75,6 +76,9 @@ export class SystemFlyoutService {
           flyoutRef.close();
         };
 
+        // Merge top-level title into flyoutMenuProps
+        const mergedFlyoutMenuProps = title ? { ...flyoutMenuProps, title } : flyoutMenuProps;
+
         // Render the flyout content using EuiFlyout with session="start"
         // This ensures full EUI Flyout System integration as a new MAIN flyout.
         render(
@@ -86,7 +90,7 @@ export class SystemFlyoutService {
           >
             <EuiFlyout
               {...options}
-              flyoutMenuProps={{ title }}
+              flyoutMenuProps={mergedFlyoutMenuProps}
               session={session}
               onClose={onCloseFlyout}
               aria-label={options['aria-label']}
