@@ -40,6 +40,7 @@ export const createInspectActionDescriptor = (
       size: 'm',
       session: isWithinFlyout ? 'inherit' : 'start',
       type: 'overlay',
+      outsideClickCloses: false,
     });
     await overlay.onClose;
   },

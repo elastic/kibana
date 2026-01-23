@@ -76,7 +76,7 @@ export function openSearchSessionsFlyout({
         session: 'start',
         type: 'overlay',
         ownFocus: true,
-        outsideClickCloses: true,
+        outsideClickCloses: false,
       }
     );
 
