@@ -48,7 +48,7 @@ describe('useBulkAlertTagsItems', () => {
   beforeEach(() => {
     (useSetAlertTags as jest.Mock).mockReturnValue(jest.fn());
     (useUiSetting$ as jest.Mock).mockReturnValue([['default-test-tag-1']]);
-    mockUseAlertsPrivileges.mockReturnValue({ hasAlertsAll: true });
+    mockUseAlertsPrivileges.mockReturnValue({ hasAlertsUpdate: true });
   });
 
   it('should render alert tagging actions', () => {
@@ -98,7 +98,7 @@ describe('useBulkAlertTagsItems', () => {
   });
 
   it('should return empty arrays when user does not have alerts privileges', () => {
-    mockUseAlertsPrivileges.mockReturnValue({ hasAlertsAll: false });
+    mockUseAlertsPrivileges.mockReturnValue({ hasAlertsUpdate: false });
 
     const { result } = renderHook(() => useBulkAlertTagsItems(defaultProps), {
       wrapper: TestProviders,

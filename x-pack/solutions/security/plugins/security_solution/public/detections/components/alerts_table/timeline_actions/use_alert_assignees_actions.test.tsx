@@ -66,7 +66,7 @@ const renderContextMenu = (
 describe('useAlertAssigneesActions', () => {
   beforeEach(() => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({
-      hasAlertsAll: true,
+      hasAlertsUpdate: true,
     });
     (useLicense as jest.Mock).mockReturnValue({ isPlatinumPlus: () => true });
   });
@@ -119,7 +119,7 @@ describe('useAlertAssigneesActions', () => {
 
   it("should not render alert assignees actions if user doesn't have write permissions", () => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({
-      hasAlertsAll: false,
+      hasAlertsUpdate: false,
     });
     const { result } = renderHook(() => useAlertAssigneesActions(defaultProps), {
       wrapper: TestProviders,

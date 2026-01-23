@@ -163,6 +163,7 @@ describe('AIValue', () => {
       hasIndexUpdateDelete: false,
       hasAlertsRead: false,
       hasAlertsAll: false,
+      hasAlertsUpdate: false,
       loading: false,
       isAuthenticated: true,
       hasEncryptionKey: true,

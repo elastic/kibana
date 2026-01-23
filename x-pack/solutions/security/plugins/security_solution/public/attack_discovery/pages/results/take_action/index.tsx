@@ -78,7 +78,7 @@ const TakeActionComponent: React.FC<Props> = ({
     canUserCreateAndReadCases,
   });
 
-  const { hasAlertsAll } = useAlertsPrivileges();
+  const { hasAlertsUpdate } = useAlertsPrivileges();
 
   // boilerplate for the take action popover:
   const takeActionContextMenuPopoverId = useGeneratedHtmlId({
@@ -329,7 +329,7 @@ const TakeActionComponent: React.FC<Props> = ({
     const isClosed = isAlert && firstAttackDiscovery.alertWorkflowStatus === 'closed';
 
     const markAsOpenItem =
-      !isOpen && hasAlertsAll
+      !isOpen && hasAlertsUpdate
         ? [
             <EuiContextMenuItem
               data-test-subj="markAsOpen"
@@ -342,7 +342,7 @@ const TakeActionComponent: React.FC<Props> = ({
         : [];
 
     const markAsAcknowledgedItem =
-      !isAcknowledged && hasAlertsAll
+      !isAcknowledged && hasAlertsUpdate
         ? [
             <EuiContextMenuItem
               data-test-subj="markAsAcknowledged"
@@ -355,7 +355,7 @@ const TakeActionComponent: React.FC<Props> = ({
         : [];
 
     const markAsClosedItem =
-      !isClosed && hasAlertsAll
+      !isClosed && hasAlertsUpdate
         ? [
             <EuiContextMenuItem
               data-test-subj="markAsClosed"
@@ -368,7 +368,7 @@ const TakeActionComponent: React.FC<Props> = ({
         : [];
 
     return [...markAsOpenItem, ...markAsAcknowledgedItem, ...markAsClosedItem, ...items].flat();
-  }, [attackDiscoveries, items, onUpdateWorkflowStatus, hasAlertsAll]);
+  }, [attackDiscoveries, items, onUpdateWorkflowStatus, hasAlertsUpdate]);
 
   const onCloseOrCancel = useCallback(() => {
     setPendingAction(null);

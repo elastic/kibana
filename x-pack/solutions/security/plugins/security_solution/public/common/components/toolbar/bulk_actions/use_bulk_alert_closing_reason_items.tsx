@@ -38,10 +38,10 @@ export interface UseBulkAlertClosingReasonItemsProps {
 export const useBulkAlertClosingReasonItems = ({
   onSubmitCloseReason,
 }: UseBulkAlertClosingReasonItemsProps = {}) => {
-  const { hasAlertsAll } = useAlertsPrivileges();
+  const { hasAlertsUpdate } = useAlertsPrivileges();
   const item = useMemo(
     () =>
-      hasAlertsAll
+      hasAlertsUpdate
         ? ({
             key: 'close-alert-with-reason',
             'data-test-subj': 'alert-close-context-menu-item',
@@ -49,7 +49,7 @@ export const useBulkAlertClosingReasonItems = ({
             panel: ALERT_CLOSING_REASON_PANEL_ID,
           } as BulkActionsConfig)
         : undefined,
-    [hasAlertsAll]
+    [hasAlertsUpdate]
   );
 
   const getRenderContent = useCallback(
@@ -76,7 +76,7 @@ export const useBulkAlertClosingReasonItems = ({
 
   const panels = useMemo(
     () =>
-      hasAlertsAll
+      hasAlertsUpdate
         ? ([
             {
               id: ALERT_CLOSING_REASON_PANEL_ID,
@@ -85,7 +85,7 @@ export const useBulkAlertClosingReasonItems = ({
             },
           ] as ContentPanelConfig[])
         : [],
-    [hasAlertsAll, getRenderContent, onSubmitCloseReason]
+    [hasAlertsUpdate, getRenderContent, onSubmitCloseReason]
   );
 
   /**
@@ -98,7 +98,7 @@ export const useBulkAlertClosingReasonItems = ({
     }: {
       onSubmitCloseReason?: UseBulkAlertClosingReasonItemsProps['onSubmitCloseReason'];
     }) =>
-      hasAlertsAll
+      hasAlertsUpdate
         ? ([
             {
               id: ALERT_CLOSING_REASON_PANEL_ID,
@@ -107,7 +107,7 @@ export const useBulkAlertClosingReasonItems = ({
             },
           ] as ContentPanelConfig[])
         : [],
-    [getRenderContent, hasAlertsAll]
+    [getRenderContent, hasAlertsUpdate]
   );
 
   return useMemo(
