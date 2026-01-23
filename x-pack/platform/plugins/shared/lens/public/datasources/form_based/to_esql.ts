@@ -58,6 +58,7 @@ export function getESQLForLayer(
 
   // indexPattern.title is the actual ES pattern
   // Build query parts as strings, then combine with esql() for proper parameterization
+  // ES|QL composer docs: src/platform/packages/shared/kbn-esql-language/src/composer/README.md
   const queryParts: string[] = [`FROM ${indexPattern.title}`];
   const queryParams: Record<string, string | number> = {};
 
