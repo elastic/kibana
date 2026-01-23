@@ -114,7 +114,7 @@ test('with default case', () => {
 });
 
 describe('throws if any schema has no ID', () => {
-  it('first schema has no ID', () => {
+  test('first schema has no ID', () => {
     const parsed = joi2JsonInternal(
       schema
         .discriminatedUnion('type', [
@@ -131,7 +131,7 @@ describe('throws if any schema has no ID', () => {
       'When using schema.discriminator ensure that every entry schema has an ID.'
     );
   });
-  it('other schema has no ID', () => {
+  test('other schema has no ID', () => {
     const parsed = joi2JsonInternal(
       schema
         .discriminatedUnion('type', [
