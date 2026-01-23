@@ -11,10 +11,9 @@ import {
   transformInternalReplacements,
 } from '@kbn/elastic-assistant-common';
 
-import { MAX_DOCS_PER_PAGE, MAX_TITLE_LENGTH } from '../../../../common/constants';
+import { MAX_DOCS_PER_PAGE, MAX_TITLE_LENGTH, MAX_OPEN_CASES } from '../../../../common/constants';
 import { AttackDiscoveryExpandedAlertsSchema } from './schema';
 import type { CaseAlert, CasesGroupedAlerts } from '../types';
-import { MAX_OPEN_CASES } from '../constants';
 
 export const groupAttackDiscoveryAlerts = (alerts: CaseAlert[]): CasesGroupedAlerts[] => {
   /**
