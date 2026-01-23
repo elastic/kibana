@@ -75,5 +75,7 @@
     "@kbn/actions-plugin",
     "@kbn/apm-utils",
     "@kbn/alerting-types",
+    "@kbn/core-http-common",
+    "@kbn/scout",
   ]
 }
