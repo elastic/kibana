@@ -7,8 +7,8 @@
 
 import { EuiFlexItem } from '@elastic/eui';
 import React from 'react';
+import type { EdgeDataDefinition } from 'cytoscape';
 import { SERVICE_NAME } from '../../../../../common/es_fields/apm';
-import type { ConnectionEdge } from '../../../../../common/service_map/types';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import type { ContentsProps } from '.';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
@@ -24,7 +24,7 @@ const INITIAL_STATE: Partial<EdgeReturn> = {
 };
 
 export function EdgeContents({ elementData, environment, start, end }: ContentsProps) {
-  const edgeData = elementData as ConnectionEdge;
+  const edgeData = elementData as EdgeDataDefinition;
 
   const { query } = useAnyOfApmParams(
     '/service-map',

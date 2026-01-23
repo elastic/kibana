@@ -233,8 +233,8 @@ function mapEdges({
     // Check if edge already exists (multiple resources can map to the same edge - e.g. two load balancers serving the same service)
     const existingEdge = acc.get(id);
     if (existingEdge) {
-      if (resource && !existingEdge.resources.includes(resource)) {
-        existingEdge.resources.push(resource);
+      if (resource && !existingEdge.resources?.includes(resource)) {
+        existingEdge.resources?.push(resource);
       }
       return acc;
     }
@@ -254,7 +254,7 @@ function mapEdges({
     });
 
     return acc;
-  }, new Map<string, ConnectionEdge>());
+  }, new Map<string, ConnectionEdge & { sourceData: ConnectionNode; targetData: ConnectionNode }>());
 
   return [...connections.values()];
 }
