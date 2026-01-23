@@ -85,7 +85,7 @@ describe('createHandler', () => {
 
     it('should use null for optional parameters without defaults', async () => {
       const config: EsqlToolConfig = {
-        query: 'FROM users | WHERE status == ?status AND name == ?name',
+        query: 'FROM users | WHERE status == ?status',
         params: {
           status: { type: 'string', description: 'User status', optional: true },
           name: { type: 'string', description: 'User name', optional: true }, // No default
@@ -99,7 +99,7 @@ describe('createHandler', () => {
 
       // Verify ES|QL was called with null for missing parameter
       expect(mockEsClient.asCurrentUser.esql.query).toHaveBeenCalledWith({
-        query: 'FROM users | WHERE status == ?status AND name == ?name',
+        query: 'FROM users | WHERE status == ?status',
         params: [{ status: 'active' }, { name: null }],
       });
     });
