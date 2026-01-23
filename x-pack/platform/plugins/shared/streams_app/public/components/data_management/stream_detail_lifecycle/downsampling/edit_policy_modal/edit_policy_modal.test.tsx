@@ -56,8 +56,24 @@ describe('EditPolicyModal', () => {
       />
     );
 
-    expect(screen.queryByTestId('editPolicyModalTitle')).not.toBeInTheDocument();
+    expect(screen.getByTestId('editPolicyModalTitle')).toHaveTextContent('Confirm policy changes');
     expect(screen.queryByTestId('editPolicyModal-affectedResourcesList')).not.toBeInTheDocument();
+  });
+
+  it('renders a managed title when the policy is managed but not in use', () => {
+    renderWithI18n(
+      <EditPolicyModal
+        affectedResources={[]}
+        isManaged={true}
+        onCancel={() => {}}
+        onOverwrite={() => {}}
+        onSaveAsNew={() => {}}
+      />
+    );
+
+    expect(screen.getByTestId('editPolicyModalTitle')).toHaveTextContent(
+      'Confirm changes to managed policy'
+    );
   });
 
   it('renders managed policy warning', () => {

@@ -53,89 +53,93 @@ export function EditPolicyModal({
   const streamsCount = affectedResources.filter((resource) => resource.type === 'stream').length;
   const indicesCount = affectedResources.filter((resource) => resource.type === 'index').length;
   const isInUse = affectedResources.length > 0;
+  const modalTitle = isInUse
+    ? i18n.translate('xpack.streams.editPolicyModal.title', {
+        defaultMessage:
+          '{streamsCount, plural, one {# stream} other {# streams}} and {indicesCount, plural, one {# index} other {# indices}} will be affected',
+        values: {
+          streamsCount,
+          indicesCount,
+        },
+      })
+    : isManaged
+    ? i18n.translate('xpack.streams.editPolicyModal.managedNotInUseTitle', {
+        defaultMessage: 'Confirm changes to managed policy',
+      })
+    : i18n.translate('xpack.streams.editPolicyModal.notInUseTitle', {
+        defaultMessage: 'Confirm policy changes',
+      });
 
   return (
     <EuiModal onClose={onCancel} aria-labelledby={modalTitleId} css={{ width: '576px' }}>
       <EuiModalHeader>
-        {isInUse && (
-          <EuiModalHeaderTitle id={modalTitleId} data-test-subj="editPolicyModalTitle">
- {i18n.translate('xpack.streams.editPolicyModal.title', {
-              defaultMessage:
-                '{streamsCount, plural, one {# stream} other {# streams}} and {indicesCount, plural, one {# index} other {# indices}} will be affected',
-              values: {
-                streamsCount,
-                indicesCount,
-              },
-            })}
-          </EuiModalHeaderTitle>
-        )}
+        <EuiModalHeaderTitle id={modalTitleId} data-test-subj="editPolicyModalTitle">
+          {modalTitle}
+        </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
-        <>
-          {isManaged && (
-            <>
-              <EuiCallOut
-                announceOnMount
-                title={i18n.translate('xpack.streams.editPolicyModal.managedWarningTitle', {
-                  defaultMessage: 'This is a managed policy',
-                })}
-                color="warning"
-                iconType="alert"
-                data-test-subj="editPolicyModal-managedWarning"
-              >
-                <p>
-                  {i18n.translate('xpack.streams.editPolicyModal.managedWarningDescription', {
-                    defaultMessage:
-                      'This policy is managed by Elasticsearch. Modifying it may cause unexpected behavior. Consider saving as a new policy instead.',
-                  })}
-                </p>
-              </EuiCallOut>
-              <EuiSpacer size="m" />
-            </>
-          )}
-          {isInUse && (
-            <>
-              <EuiText size="s">
-                {i18n.translate('xpack.streams.editPolicyModal.description', {
+        {isManaged && (
+          <>
+            <EuiCallOut
+              announceOnMount
+              title={i18n.translate('xpack.streams.editPolicyModal.managedWarningTitle', {
+                defaultMessage: 'This is a managed policy',
+              })}
+              color="warning"
+              iconType="alert"
+              data-test-subj="editPolicyModal-managedWarning"
+            >
+              <p>
+                {i18n.translate('xpack.streams.editPolicyModal.managedWarningDescription', {
                   defaultMessage:
-                    'The ILM policy you are updating is currently used in {streamsCount, plural, one {# stream} other {# streams}} and {indicesCount, plural, one {# index} other {# indices}}. If you would like your updates to only affect this stream, you may save as a new ILM policy.',
-
-                  values: {
-                    streamsCount,
-                    indicesCount,
-                  },
+                    'This policy is managed by Elasticsearch. Modifying it may cause unexpected behavior. Consider saving as a new policy instead.',
                 })}
-              </EuiText>
-              <EuiSpacer size="m" />
-              <EuiPanel
-                hasBorder={false}
-                hasShadow={false}
-                paddingSize="s"
-                style={{
-                  maxHeight: '160px',
-                  overflowY: 'auto',
-                }}
-                color="subdued"
-                data-test-subj="editPolicyModal-affectedResourcesList"
-              >
-                <EuiFlexGroup direction="column" gutterSize="s">
-                  {affectedResources.map((resource) => (
-                    <EuiFlexItem key={resource.name}>
-                      <EuiFlexGroup
-                        justifyContent="spaceBetween"
-                        data-test-subj={`editPolicyModal-affectedResourcesList-${resource.name}`}
-                      >
-                        <EuiText size="s">{resource.name}</EuiText>
-                        <EuiText size="s">{capitalize(resource.type)}</EuiText>
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                  ))}
-                </EuiFlexGroup>
-              </EuiPanel>
-            </>
-          )}
-        </>
+              </p>
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        )}
+        {isInUse && (
+          <>
+            <EuiText size="s">
+              {i18n.translate('xpack.streams.editPolicyModal.description', {
+                defaultMessage:
+                  'The ILM policy you are updating is currently used in {streamsCount} streams and {indicesCount} indices. If you would like your updates to only affect this stream, you may save as a new ILM policy.',
+                values: {
+                  streamsCount,
+                  indicesCount,
+                },
+              })}
+            </EuiText>
+            <EuiSpacer size="m" />
+            <EuiPanel
+              hasBorder={false}
+              hasShadow={false}
+              paddingSize="s"
+              style={{
+                maxHeight: '160px',
+                overflowY: 'auto',
+              }}
+              color="subdued"
+              data-test-subj="editPolicyModal-affectedResourcesList"
+            >
+              <EuiFlexGroup direction="column" gutterSize="s">
+                {affectedResources.map((resource) => (
+                  <EuiFlexItem key={resource.name}>
+                    <EuiFlexGroup
+                      justifyContent="spaceBetween"
+                      data-test-subj={`editPolicyModal-affectedResourcesList-${resource.name}`}
+                    >
+                      <EuiText size="s">{resource.name}</EuiText>
+                      <EuiText size="s">{capitalize(resource.type)}</EuiText>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            </EuiPanel>
+          </>
+        )}
       </EuiModalBody>
 
       <EuiModalFooter>
