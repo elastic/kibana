@@ -96,8 +96,6 @@ export const alertAnalysisSkill = defineSkillType({
   ],
   getAllowedTools: () => [
     `security.alerts`,
-    `security.entity_risk_score`,
-    `security.attack_discovery_search`,
     `security.security_labs_search`,
   ],
   getInlineTools: () => [
