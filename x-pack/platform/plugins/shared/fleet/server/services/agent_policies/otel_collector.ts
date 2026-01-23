@@ -32,10 +32,10 @@ export function generateOtelcolConfig(
       // Get package info from input meta if available
       let packageInfo: PackageInfo | undefined;
 
-      if (packageInfoCache && 'meta' in input && input.meta?.package) {
+      if (packageInfoCache && 'meta' in input && (input as FullAgentPolicyInput).meta?.package) {
         const pkgKey = pkgToPkgKey({
-          name: input.meta?.package?.name || '',
-          version: input.meta?.package?.version || '',
+          name: (input as FullAgentPolicyInput).meta?.package?.name || '',
+          version: (input as FullAgentPolicyInput).meta?.package?.version || '',
         });
         packageInfo = packageInfoCache.get(pkgKey);
       }
