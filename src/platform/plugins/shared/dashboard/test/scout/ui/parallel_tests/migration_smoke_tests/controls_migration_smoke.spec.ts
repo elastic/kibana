@@ -14,9 +14,9 @@ import {
   getDashboardPanels,
   openDashboard,
 } from '../../../utils/migration_smoke_helpers';
-import { EXPORTS_DIR, SHAKESPEARE_DATA_VIEW_TITLE } from './constants';
+import { MIGRATION_SMOKE_EXPORTS_DIR, SHAKESPEARE_DATA_VIEW_TITLE } from '../../constants';
 
-const EXPORT_PATH = `${EXPORTS_DIR}/controls_dashboard_migration_test_8_0_0.json`;
+const EXPORT_PATH = `${MIGRATION_SMOKE_EXPORTS_DIR}/controls_dashboard_migration_test_8_0_0.json`;
 const DASHBOARD_TITLE = '[8.0.0] Controls Dashboard';
 
 let dashboardId = '';

@@ -82,3 +82,9 @@ export const LENS_BASIC_TIME_RANGE = {
 export const DASHBOARD_SAVED_SEARCH_ARCHIVE =
   'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana';
 export const DASHBOARD_DEFAULT_INDEX_TITLE = 'logstash-*';
+
+export const MIGRATION_SMOKE_EXPORTS_DIR =
+  'src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/migration_smoke_tests/exports';
+export const DASHBOARD_EDIT_PANEL_ACTION_TEST_SUBJ = 'embeddablePanelAction-editPanel';
+export const SHAKESPEARE_DATA_VIEW_TITLE = 'shakespeare';
+export const LOGSTASH_DATA_VIEW_TITLE = 'logstash*';

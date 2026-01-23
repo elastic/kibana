@@ -13,9 +13,13 @@ import {
   findImportedSavedObjectId,
   getDashboardPanels,
 } from '../../../utils/migration_smoke_helpers';
-import { EDIT_PANEL_ACTION_TEST_SUBJ, EXPORTS_DIR, SHAKESPEARE_DATA_VIEW_TITLE } from './constants';
+import {
+  DASHBOARD_EDIT_PANEL_ACTION_TEST_SUBJ,
+  MIGRATION_SMOKE_EXPORTS_DIR,
+  SHAKESPEARE_DATA_VIEW_TITLE,
+} from '../../constants';
 
-const EXPORT_PATH = `${EXPORTS_DIR}/lens_dashboard_migration_test_7_12_1.json`;
+const EXPORT_PATH = `${MIGRATION_SMOKE_EXPORTS_DIR}/lens_dashboard_migration_test_7_12_1.json`;
 const DASHBOARD_TITLE = '[7.12.1] Lens By Value Test Dashboard';
 
 let dashboardId = '';
@@ -73,7 +77,7 @@ spaceTest.describe('Lens migration smoke (7.12.1)', { tag: tags.ESS_ONLY }, () =
         for (const title of panelTitles) {
           expect(
             await pageObjects.dashboard.panelHasAction(
-              EDIT_PANEL_ACTION_TEST_SUBJ,
+              DASHBOARD_EDIT_PANEL_ACTION_TEST_SUBJ,
               title || undefined
             )
           ).toBe(true);
