@@ -101,7 +101,7 @@ test.describe('Stream data quality', { tag: ['@ess', '@svlOblt'] }, () => {
       to: 'Sep 20, 2023 @ 00:30:00.000',
     };
     // Change date picker
-    await pageObjects.streams.setAbsoluteTimeRange(mainTimeRange);
+    await pageObjects.datePicker.setAbsoluteRange(mainTimeRange);
 
     // Go to Data Quality tab
     await pageObjects.streams.clickStreamNameLink('logs.nginx');
@@ -116,8 +116,7 @@ test.describe('Stream data quality', { tag: ['@ess', '@svlOblt'] }, () => {
       from: 'Sep 20, 2023 @ 00:00:00.000',
       to: 'Sep 20, 2023 @ 00:30:00.000',
     };
-    // Change date picker
-    await pageObjects.streams.setAbsoluteTimeRange(dataQualityTimeRange);
+    await pageObjects.datePicker.setAbsoluteRange(dataQualityTimeRange);
 
     // Go to Streams main page
     await pageObjects.streams.clickStreamsBreadcrumb();
@@ -133,7 +132,7 @@ test.describe('Stream data quality', { tag: ['@ess', '@svlOblt'] }, () => {
       to: 'Sep 20, 2023 @ 00:30:00.000',
     };
     // Set time range
-    await pageObjects.streams.setAbsoluteTimeRange(timeRange);
+    await pageObjects.datePicker.setAbsoluteRange(timeRange);
 
     // Refresh the page
     await page.reload();
@@ -153,8 +152,10 @@ test.describe('Stream data quality', { tag: ['@ess', '@svlOblt'] }, () => {
     // Go to Retention tab
     await pageObjects.streams.clickRetentionTab();
 
-    // Set time range
     await pageObjects.streams.setAbsoluteTimeRange(timeRange);
+
+    // Verify time range is displayed correctly on Retention tab
+    await pageObjects.streams.verifyDatePickerTimeRange(timeRange);
 
     // Refresh the page
     await page.reload();
@@ -170,7 +171,7 @@ test.describe('Stream data quality', { tag: ['@ess', '@svlOblt'] }, () => {
     };
 
     // Set time on Data Quality tab
-    await pageObjects.streams.setAbsoluteTimeRange(timeRange);
+    await pageObjects.datePicker.setAbsoluteRange(timeRange);
 
     // Verify on Retention tab
     await pageObjects.streams.clickRetentionTab();

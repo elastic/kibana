@@ -153,35 +153,43 @@ export class StreamsApp {
   }
 
   /**
-   * Set absolute time range using the Streams app search bar date picker.
-   * Uses .first() to target the correct date picker when multiple are present
-   * (e.g., Retention tab has two IngestionRatePanel components each with their own date picker)
+   * Set absolute time range using the first date picker on the page.
+   * Uses .first() to handle pages with multiple date pickers (e.g., Retention tab).
+   * For pages with single date picker, prefer using pageObjects.datePicker.setAbsoluteRange().
    */
   async setAbsoluteTimeRange(range: { from: string; to: string }) {
-    // Click the date picker button to open it (use .first() for the Streams app search bar)
     const showDatesBtn = this.page.testSubj.locator('superDatePickerShowDatesButton').first();
-    await showDatesBtn.click();
-
-    // Set the start date
-    const startBtn = this.page.testSubj.locator('superDatePickerstartDatePopoverButton').first();
-    await startBtn.click();
-    await this.page.testSubj.locator('superDatePickerAbsoluteTab').click();
-    const startInput = this.page.testSubj.locator('superDatePickerAbsoluteDateInput');
-    await startInput.clear();
-    await startInput.fill(range.from);
-    await startInput.press('Enter');
-
-    // Set the end date
     const endBtn = this.page.testSubj.locator('superDatePickerendDatePopoverButton').first();
+    const startBtn = this.page.testSubj.locator('superDatePickerstartDatePopoverButton').first();
+    const dateInput = this.page.testSubj.locator('superDatePickerAbsoluteDateInput');
+
+    // Expand the date picker if it's in compact mode
+    if (await showDatesBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await showDatesBtn.click();
+    }
+
+    await expect(endBtn).toBeVisible();
+
+    // Set end date
     await endBtn.click();
-    await this.page.testSubj.locator('superDatePickerAbsoluteTab').click();
-    const endInput = this.page.testSubj.locator('superDatePickerAbsoluteDateInput');
-    await endInput.clear();
-    await endInput.fill(range.to);
-    await endInput.press('Enter');
+    await this.page.testSubj.click('superDatePickerAbsoluteTab');
+    await dateInput.click();
+    await dateInput.clear();
+    await dateInput.fill(range.to);
+    await dateInput.press('Enter');
+    await endBtn.click();
+
+    // Set start date
+    await startBtn.click();
+    await this.page.testSubj.click('superDatePickerAbsoluteTab');
+    await dateInput.click();
+    await dateInput.clear();
+    await dateInput.fill(range.from);
+    await dateInput.press('Enter');
+    await this.page.keyboard.press('Escape');
 
     // Apply the time range
-    await this.page.testSubj.locator('querySubmitButton').click();
+    await this.page.testSubj.locator('querySubmitButton').first().click();
   }
 
   async verifyDocCount(streamName: string, expectedCount: number) {
