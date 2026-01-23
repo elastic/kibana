@@ -36,7 +36,7 @@ describe('ProductInterceptPrompter', () => {
     const rendering = renderingServiceMock.create();
     const analytics = analyticsServiceMock.createAnalyticsServiceStart();
     const notifications = notificationServiceMock.createStartContract();
-    const isFeedbackEnabled = notifications.feedback.isEnabled();
+    const userAllowsFeedback = notifications.feedback.isEnabled();
 
     const interceptDialogServiceStartFnSpy = jest.spyOn(InterceptDialogService.prototype, 'start');
     const userInterceptRunPersistenceServiceStartFnSpy = jest.spyOn(
@@ -64,7 +64,7 @@ describe('ProductInterceptPrompter', () => {
           rendering,
           analytics,
           targetDomElement: document.createElement('div'),
-          isFeedbackEnabled,
+          userAllowsFeedback,
         })
       ).toEqual({
         registerIntercept: expect.any(Function),
@@ -138,7 +138,7 @@ describe('ProductInterceptPrompter', () => {
           rendering,
           analytics,
           targetDomElement: document.createElement('div'),
-          isFeedbackEnabled,
+          userAllowsFeedback,
         }));
       });
 
@@ -169,7 +169,7 @@ describe('ProductInterceptPrompter', () => {
           rendering,
           analytics,
           targetDomElement: document.createElement('div'),
-          isFeedbackEnabled: false,
+          userAllowsFeedback: false,
         }));
 
         const intercept$ = registerIntercept({

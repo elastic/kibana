@@ -37,7 +37,7 @@ export class InterceptPublicPlugin implements Plugin {
       http: core.http,
       analytics: core.analytics,
       rendering: core.rendering,
-      isFeedbackEnabled: core.notifications.feedback.isEnabled(),
+      userAllowsFeedback: core.notifications.feedback.isEnabled(),
       targetDomElement: this.interceptsTargetDomElement,
     });
 
