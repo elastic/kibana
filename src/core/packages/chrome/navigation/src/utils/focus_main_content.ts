@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Default selectors matching Kibana's constants for backward compatibility
-const DEFAULT_MAIN_CONTENT_SELECTORS = ['main', '[role="main"]', '#app-content'];
+import { DEFAULT_MAIN_CONTENT_SELECTORS } from '../constants';
 
 /**
  * Utility function for focusing the main content area.

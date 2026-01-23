@@ -21,3 +21,4 @@ export const BOTTOM_POPOVER_GAP = 17;
 export const POPOVER_OFFSET = 5;
 export const TOOLTIP_OFFSET = 4;
 export const ITEM_HORIZONTAL_SPACING_OFFSET = 30;
+export const DEFAULT_MAIN_CONTENT_SELECTORS = ['main', '[role="main"]', '#app-content'];

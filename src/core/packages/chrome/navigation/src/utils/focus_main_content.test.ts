@@ -15,8 +15,8 @@ import { focusMainContent } from './focus_main_content';
 
 describe('focusMainContent', () => {
   it('focuses the first matching main content element', () => {
-    const main = document.createElement('div');
-    main.id = 'main-content';
+    const main = document.createElement('main');
+    main.id = 'app-content';
 
     const focusSpy = jest.spyOn(main, 'focus');
 
