@@ -6,9 +6,10 @@
  */
 
 import type { AgentName } from '@kbn/elastic-agent-utils';
+import type { GroupedStatsResult } from '@kbn/slo-schema';
 import type { ServiceHealthStatus } from './service_health_status';
 
-export type SloStatus = 'violated' | 'degrading' | 'noData' | 'healthy';
+export type SloStatus = keyof GroupedStatsResult['summary'];
 
 export interface ServiceListItem {
   serviceName: string;

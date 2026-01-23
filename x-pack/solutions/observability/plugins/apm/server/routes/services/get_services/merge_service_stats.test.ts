@@ -52,7 +52,13 @@ describe('mergeServiceStats', () => {
             serviceName: 'opbeans-java',
           },
         ],
-        sloCounts: [],
+        sloStats: [
+          {
+            serviceName: 'opbeans-java',
+            sloStatus: 'violated',
+            sloCount: 1,
+          },
+        ],
       })
     ).toEqual([
       {
@@ -74,6 +80,8 @@ describe('mergeServiceStats', () => {
         transactionErrorRate: 3,
         transactionType: 'request',
         alertsCount: 1,
+        sloStatus: 'violated',
+        sloCount: 1,
       },
     ]);
   });
@@ -101,9 +109,24 @@ describe('mergeServiceStats', () => {
             serviceName: 'opbeans-java', // Not in serviceStats - will be excluded
           },
         ],
-        sloCounts: [],
+        sloStats: [
+          {
+            serviceName: 'opbeans-java-2',
+            sloStatus: 'degrading',
+            sloCount: 1,
+          },
+          {
+            serviceName: 'unknown-service',
+            sloStatus: 'violated',
+            sloCount: 5,
+          },
+        ],
       })
     ).toEqual([
+      {
+        alertsCount: 2,
+        serviceName: 'opbeans-java',
+      },
       {
         agentName: 'java',
         environments: ['staging'],
@@ -112,6 +135,8 @@ describe('mergeServiceStats', () => {
         throughput: 2,
         transactionErrorRate: 3,
         transactionType: 'request',
+        sloStatus: 'degrading',
+        sloCount: 1,
       },
     ]);
   });
@@ -137,7 +162,13 @@ describe('mergeServiceStats', () => {
             serviceName: 'opbeans-java-2',
           },
         ],
-        sloCounts: [],
+        sloStats: [
+          {
+            serviceName: 'opbeans-java-2',
+            sloStatus: 'violated',
+            sloCount: 2,
+          },
+        ],
       })
     ).toEqual([
       {
@@ -149,6 +180,8 @@ describe('mergeServiceStats', () => {
         transactionErrorRate: 3,
         transactionType: 'request',
         alertsCount: 3,
+        sloStatus: 'violated',
+        sloCount: 2,
       },
     ]);
   });

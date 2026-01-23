@@ -9,7 +9,7 @@ import { joinByKey } from '../../../../common/utils/join_by_key';
 import type { SloStatus } from '../../../../common/service_inventory';
 import type { ServiceHealthStatusesResponse } from './get_health_statuses';
 import type { ServiceAlertsResponse } from './get_service_alerts';
-import type { ServiceSlosResponse } from './get_service_slos';
+import type { ServiceSloStatsResponse } from './get_services_slo_stats';
 import type { ServiceTransactionStatsResponse } from './get_service_transaction_stats';
 import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import type { ServiceHealthStatus } from '../../../../common/service_health_status';
@@ -32,16 +32,16 @@ export function mergeServiceStats({
   serviceStats,
   healthStatuses,
   alertCounts,
-  sloCounts,
+  sloStats,
 }: {
   serviceStats: ServiceTransactionStatsResponse['serviceStats'];
   healthStatuses: ServiceHealthStatusesResponse;
   alertCounts: ServiceAlertsResponse;
-  sloCounts: ServiceSlosResponse;
+  sloStats: ServiceSloStatsResponse;
 }): MergedServiceStat[] {
   const allServiceNames = serviceStats.map(({ serviceName }) => serviceName);
 
-  // Make sure to exclude health statuses, alerts, and SLO counts from services
+  // Make sure to exclude health statuses, alerts, and SLO stats from services
   // that are not found in APM data (e.g., wildcard "*" services from SLO alerts)
   const matchedHealthStatuses = healthStatuses.filter(({ serviceName }) =>
     allServiceNames.includes(serviceName)
@@ -51,7 +51,7 @@ export function mergeServiceStats({
     allServiceNames.includes(serviceName)
   );
 
-  const matchedSloCounts = sloCounts.filter(({ serviceName }) =>
+  const matchedSloStats = sloStats.filter(({ serviceName }) =>
     allServiceNames.includes(serviceName)
   );
 
@@ -60,7 +60,7 @@ export function mergeServiceStats({
       ...serviceStats,
       ...matchedHealthStatuses,
       ...matchedAlertCounts,
-      ...matchedSloCounts,
+      ...matchedSloStats,
     ] as const),
     'serviceName',
     function merge(a, b) {

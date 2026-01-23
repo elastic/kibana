@@ -135,7 +135,7 @@ export function SloPopoverAndFlyout({ canReadSlos, canWriteSlos }: Props) {
           },
           onClose: closeFlyout,
           formSettings: {
-            allowedIndicatorTypes: ['sli.apm.transactionDuration', 'sli.apm.transactionErrorRate'],
+            allowedIndicatorTypes: [...APM_SLO_INDICATOR_TYPES],
           },
         })
       : null;
