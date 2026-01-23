@@ -535,7 +535,11 @@ export interface Profile {
 
   /**
    * Supports customizing the behaviour of the Discover document
-   * viewer flyout, such as the flyout title and available tabs
+   * viewer flyout, such as the flyout title and available tabs.
+   *
+   * To add restorable state to your custom doc viewer tabs, see:
+   * {@link /src/platform/plugins/shared/unified_doc_viewer/README.md#using-restorable-state-in-doc-viewer-tabs}
+   *
    * @param params The doc viewer extension parameters
    * @returns The doc viewer extension
    */

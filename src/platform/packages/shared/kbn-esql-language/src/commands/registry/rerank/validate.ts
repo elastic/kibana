@@ -29,7 +29,11 @@ export const validate = (
   const messages: ESQLMessage[] = [];
 
   const { query, location, inferenceId } = command as ESQLAstRerankCommand;
-  const rerankExpressionType = getExpressionType(query, context?.columns);
+  const rerankExpressionType = getExpressionType(
+    query,
+    context?.columns,
+    context?.unmappedFieldsStrategy
+  );
 
   // check for supported query types
   if (!supportedQueryTypes.includes(rerankExpressionType)) {

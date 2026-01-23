@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/eslint-plugin-telemetry'
 type: unknown
 owners:
-  defaultOwner: '@elastic/obs-knowledge-team'
+  defaultOwner: '@elastic/kibana-core'
 toolchain:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   name: '@kbn/eslint-plugin-telemetry'
   description: Moon project for @kbn/eslint-plugin-telemetry
   channel: ''
-  owner: '@elastic/obs-knowledge-team'
+  owner: '@elastic/kibana-core'
   metadata:
     sourceRoot: packages/kbn-eslint-plugin-telemetry
 dependsOn:
