@@ -298,7 +298,7 @@
         "label": "uiSettingsConfig",
         "description": [],
         "path": "src/core/packages/ui-settings/server-internal/src/ui_settings_config.ts",
-        "lineNumber": 40,
+        "lineNumber": 41,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -311,7 +311,7 @@
             "label": "path",
             "description": [],
             "path": "src/core/packages/ui-settings/server-internal/src/ui_settings_config.ts",
-            "lineNumber": 41,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -339,6 +339,14 @@
                 "section": "def-common.ObjectType",
                 "text": "ObjectType"
               },
+              "<{}>; globalOverrides: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.ObjectType",
+                "text": "ObjectType"
+              },
               "<{}>; publicApiEnabled: ",
               {
                 "pluginId": "@kbn/config-schema",
@@ -358,7 +366,7 @@
               "<Readonly<{ themeSwitcherEnabled?: boolean | undefined; defaultTheme?: string | undefined; } & {}> | undefined>; }>"
             ],
             "path": "src/core/packages/ui-settings/server-internal/src/ui_settings_config.ts",
-            "lineNumber": 42,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -390,7 +398,7 @@
               "[]"
             ],
             "path": "src/core/packages/ui-settings/server-internal/src/ui_settings_config.ts",
-            "lineNumber": 43,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
