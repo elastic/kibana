@@ -35,4 +35,5 @@ export const packageRegistryDocker = {
   args: dockerArgs,
   waitForLogLine: 'package manifests loaded',
   waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
+  preferCached: true,
 };
