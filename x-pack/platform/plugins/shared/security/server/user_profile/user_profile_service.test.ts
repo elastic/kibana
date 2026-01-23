@@ -112,10 +112,7 @@ describe('UserProfileService', () => {
           mockStartParams.clusterClient.asInternalUser.security.getUserProfile
         ).not.toHaveBeenCalled();
 
-        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenCalledWith({
-          requiresProfileActivation: false,
-          requiresApiKeyRetrieval: false,
-        });
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenCalledWith();
       });
 
       it('returns `null` if session available, but not user profile id', async () => {
@@ -134,10 +131,7 @@ describe('UserProfileService', () => {
           mockStartParams.clusterClient.asInternalUser.security.getUserProfile
         ).not.toHaveBeenCalled();
 
-        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenCalledWith({
-          requiresProfileActivation: false,
-          requiresApiKeyRetrieval: false,
-        });
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenCalledWith();
       });
 
       it('fails if session retrieval fails', async () => {
@@ -158,10 +152,7 @@ describe('UserProfileService', () => {
           mockStartParams.clusterClient.asInternalUser.security.getUserProfile
         ).not.toHaveBeenCalled();
 
-        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenCalledWith({
-          requiresProfileActivation: false,
-          requiresApiKeyRetrieval: false,
-        });
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenCalledWith();
       });
 
       it('fails if profile retrieval fails', async () => {
@@ -194,10 +185,7 @@ describe('UserProfileService', () => {
           uid: 'UID',
         });
 
-        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenCalledWith({
-          requiresProfileActivation: false,
-          requiresApiKeyRetrieval: false,
-        });
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenCalledWith();
       });
 
       it('fails if cannot find user profile', async () => {
@@ -227,10 +215,7 @@ describe('UserProfileService', () => {
           uid: 'UID',
         });
 
-        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenCalledWith({
-          requiresProfileActivation: false,
-          requiresApiKeyRetrieval: false,
-        });
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenCalledWith();
       });
 
       it('properly parses returned profile', async () => {
@@ -272,10 +257,7 @@ describe('UserProfileService', () => {
           uid: 'UID',
         });
 
-        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenCalledWith({
-          requiresProfileActivation: false,
-          requiresApiKeyRetrieval: false,
-        });
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenCalledWith();
       });
 
       it('should get user profile and application data scoped to Kibana', async () => {
@@ -329,10 +311,7 @@ describe('UserProfileService', () => {
           data: 'kibana.one,kibana.two',
         });
 
-        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenCalledWith({
-          requiresProfileActivation: false,
-          requiresApiKeyRetrieval: false,
-        });
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenCalledWith();
       });
     });
 
@@ -378,8 +357,7 @@ describe('UserProfileService', () => {
         expect(mockStartParams.session.get).not.toHaveBeenCalled();
 
         expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenCalledWith({
-          requiresProfileActivation: true,
-          requiresApiKeyRetrieval: false,
+          profileActivationRequired: true,
         });
       });
 
@@ -438,8 +416,7 @@ describe('UserProfileService', () => {
         });
 
         expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenCalledWith({
-          requiresProfileActivation: true,
-          requiresApiKeyRetrieval: false,
+          profileActivationRequired: true,
         });
       });
     });
@@ -478,8 +455,7 @@ describe('UserProfileService', () => {
         expect(mockStartParams.session.get).not.toHaveBeenCalled();
 
         expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenCalledWith({
-          requiresProfileActivation: false,
-          requiresApiKeyRetrieval: true,
+          apiKeyRetrievalRequired: true,
         });
       });
 
@@ -508,8 +484,7 @@ describe('UserProfileService', () => {
         expect(mockStartParams.session.get).not.toHaveBeenCalled();
 
         expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenCalledWith({
-          requiresProfileActivation: false,
-          requiresApiKeyRetrieval: true,
+          apiKeyRetrievalRequired: true,
         });
       });
 
@@ -542,8 +517,7 @@ describe('UserProfileService', () => {
         expect(mockStartParams.session.get).not.toHaveBeenCalled();
 
         expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenCalledWith({
-          requiresProfileActivation: false,
-          requiresApiKeyRetrieval: true,
+          apiKeyRetrievalRequired: true,
         });
       });
 
@@ -615,8 +589,7 @@ describe('UserProfileService', () => {
         expect(mockStartParams.session.get).not.toHaveBeenCalled();
 
         expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenCalledWith({
-          requiresProfileActivation: false,
-          requiresApiKeyRetrieval: true,
+          apiKeyRetrievalRequired: true,
         });
       });
     });

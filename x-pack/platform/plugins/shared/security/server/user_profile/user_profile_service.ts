@@ -325,10 +325,7 @@ export class UserProfileService {
 
     if (request.headers.cookie) {
       this.logger.debug(`Request to get current user profile is authenticated via session.`);
-      securityTelemetry.recordGetCurrentProfileInvocation({
-        requiresProfileActivation: false,
-        requiresApiKeyRetrieval: false,
-      });
+      securityTelemetry.recordGetCurrentProfileInvocation();
       ({ profileId, sessionId } = await this.getCurrentUserProfileIdViaSession(session, request));
     } else {
       const authType = this.getAuthHeaderType(request.headers.authorization);
@@ -338,8 +335,7 @@ export class UserProfileService {
           `Request to get current user profile is authenticated via Basic credentials.`
         );
         securityTelemetry.recordGetCurrentProfileInvocation({
-          requiresProfileActivation: true,
-          requiresApiKeyRetrieval: false,
+          profileActivationRequired: true,
         });
 
         const activatedProfile = await this.activateProfileViaBasicAuth(clusterClient, request);
@@ -353,8 +349,7 @@ export class UserProfileService {
       } else if (authType === 'apikey') {
         this.logger.debug(`Request to get current user profile is authenticated via API key.`);
         securityTelemetry.recordGetCurrentProfileInvocation({
-          requiresProfileActivation: false,
-          requiresApiKeyRetrieval: true,
+          apiKeyRetrievalRequired: true,
         });
         profileId = await this.getCurrentUserProfileIdViaApiKey(clusterClient, request);
       }

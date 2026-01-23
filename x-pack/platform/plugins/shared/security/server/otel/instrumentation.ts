@@ -27,8 +27,8 @@ interface UserAuthenticationAttributes extends BasicAttributes {
 }
 
 interface GetCurrentProfileAttributes {
-  requiresProfileActivation: boolean;
-  requiresApiKeyRetrieval: boolean;
+  profileActivationRequired?: boolean;
+  apiKeyRetrievalRequired?: boolean;
 }
 
 export type SecurityTelemetryAttributes = Partial<BasicAttributes> &
@@ -127,8 +127,8 @@ class SecurityTelemetry {
       providerType,
       outcome,
       deletedPrivileges,
-      requiresProfileActivation,
-      requiresApiKeyRetrieval,
+      profileActivationRequired,
+      apiKeyRetrievalRequired,
       ...rest
     } = attributes;
 
@@ -137,11 +137,11 @@ class SecurityTelemetry {
       ...(deletedPrivileges ? { 'deleted.privileges': deletedPrivileges } : {}),
       ...(providerType ? { 'auth.provider.type': providerType } : {}),
       ...(outcome ? { 'auth.outcome': outcome } : {}),
-      ...(requiresProfileActivation
-        ? { 'profile.get_current.requires_profile_activation': requiresProfileActivation }
+      ...(profileActivationRequired
+        ? { 'profile.get_current.profile_activation_required': profileActivationRequired }
         : {}),
-      ...(requiresApiKeyRetrieval
-        ? { 'profile.get_current.requires_api_key_retrieval': requiresApiKeyRetrieval }
+      ...(apiKeyRetrievalRequired
+        ? { 'profile.get_current.api_key_retrieval_required': apiKeyRetrievalRequired }
         : {}),
       ...rest,
     };
@@ -183,8 +183,10 @@ class SecurityTelemetry {
     this.privilegeRegistrationDuration.record(duration, transformedAttributes);
   };
 
-  recordGetCurrentProfileInvocation = (attributes: GetCurrentProfileAttributes) => {
-    const transformedAttributes = this.transformAttributes<GetCurrentProfileAttributes>(attributes);
+  recordGetCurrentProfileInvocation = (attributes?: GetCurrentProfileAttributes) => {
+    const transformedAttributes = this.transformAttributes<GetCurrentProfileAttributes>(
+      attributes ?? {}
+    );
     this.getCurrentProfileCounter.add(1, transformedAttributes);
   };
 }
