@@ -17,12 +17,6 @@ const riskEntityAttachmentDataSchema = securityAttachmentDataSchema.extend({
 });
 
 /**
- * Data for a risk entity attachment.
- * Note: After validation, the data is stored as a formatted string.
- */
-type EntityRiskAttachmentData = z.infer<typeof riskEntityAttachmentDataSchema>;
-
-/**
  * Type guard to check if data is a formatted risk entity string
  */
 const isEntityRiskFormattedData = (data: unknown): data is string => {
