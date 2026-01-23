@@ -53,6 +53,7 @@ Defaults to `{REPO_ROOT}/build/temp-kb-artifacts`
 `sourceClusterUrl` / env.KIBANA_SOURCE_CLUSTER_URL
 `sourceClusterUsername` / env.KIBANA_SOURCE_CLUSTER_USERNAME
 `sourceClusterPassword` / env.KIBANA_SOURCE_CLUSTER_PASSWORD
+ sourceClusterIndex / env.KIBANA_SOURCE_INDEX
 
 - params for the embedding cluster:
 `embeddingClusterUrl` / env.KIBANA_EMBEDDING_CLUSTER_URL
