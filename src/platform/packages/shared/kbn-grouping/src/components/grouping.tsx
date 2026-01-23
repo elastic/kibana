@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { Filter } from '@kbn/es-query';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { UiCounterMetricType } from '@kbn/analytics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { defaultUnit, firstNonNullValue } from '../helpers';
@@ -136,19 +136,6 @@ const GroupingComponent = <T,>({
     return `${groupsUnit(groupCount, selectedGroup, hasNullGroupInCurrentPage || hasNullGroup)}`;
   }, [data?.groupByFields?.buckets, data?.nullGroupItems, groupCount, groupsUnit, selectedGroup]);
 
-  type GetActionItems = Parameters<typeof GroupStats>[0]['takeActionItems'];
-  type GetTakeActionItemsWithBucket = (groupBucket: GroupingBucket<T>) => GetActionItems;
-
-  const getTakeActionItemsWithBucket: GetTakeActionItemsWithBucket = useCallback(
-    (groupBucket) => {
-      if (!takeActionItems) return;
-
-      return (groupFilters, groupNumber) => {
-        return takeActionItems(groupFilters, groupNumber, groupBucket);
-      };
-    },
-    [takeActionItems]
-  );
   const groupPanels = useMemo(
     () =>
       data?.groupByFields?.buckets?.map((groupBucket: GroupingBucket<T>, groupNumber) => {
@@ -158,6 +145,15 @@ const GroupingComponent = <T,>({
         const nullGroupMessage = isNullGroup
           ? NULL_GROUP(selectedGroup, unit(groupBucket.doc_count))
           : undefined;
+        const groupFilters = isNullGroup
+          ? getNullGroupFilter(selectedGroup)
+          : createGroupFilter(
+              selectedGroup,
+              Array.isArray(groupBucket.key) ? groupBucket.key : [groupBucket.key],
+              multiValueFields
+            );
+
+        const actionItems = takeActionItems?.(groupFilters, groupNumber, groupBucket);
 
         return (
           <span key={groupKey} data-test-subj={`level-${groupingLevel}-group-${groupNumber}`}>
@@ -168,18 +164,8 @@ const GroupingComponent = <T,>({
               extraAction={
                 <GroupStats
                   bucketKey={groupKey}
-                  groupFilter={
-                    isNullGroup
-                      ? getNullGroupFilter(selectedGroup)
-                      : createGroupFilter(
-                          selectedGroup,
-                          Array.isArray(groupBucket.key) ? groupBucket.key : [groupBucket.key],
-                          multiValueFields
-                        )
-                  }
-                  groupNumber={groupNumber}
                   stats={getGroupStats && getGroupStats(selectedGroup, groupBucket)}
-                  takeActionItems={getTakeActionItemsWithBucket(groupBucket)}
+                  actionItems={actionItems}
                   additionalActionButtons={
                     getAdditionalActionButtons &&
                     getAdditionalActionButtons(selectedGroup, groupBucket)
@@ -231,7 +217,7 @@ const GroupingComponent = <T,>({
       onGroupToggle,
       renderChildComponent,
       selectedGroup,
-      getTakeActionItemsWithBucket,
+      takeActionItems,
       tracker,
       trigger,
       unit,
