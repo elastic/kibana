@@ -832,9 +832,15 @@ components:
       format: nonempty
       minLength: 1
       type: string
+    ExceptionListItemOsType:
+      enum:
+        - linux
+        - macos
+        - windows
+      type: string
     ExceptionListItemOsTypeArray:
       items:
-        $ref: '#/components/schemas/ExceptionListOsType'
+        $ref: '#/components/schemas/ExceptionListItemOsType'
       type: array
     ExceptionListItemTags:
       items:
