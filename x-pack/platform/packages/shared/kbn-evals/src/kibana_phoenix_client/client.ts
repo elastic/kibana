@@ -29,6 +29,7 @@ import type { PhoenixConfig } from '../utils/get_phoenix_config';
  */
 export class KibanaPhoenixClient implements EvalsExecutorClient {
   private readonly phoenixClient: PhoenixClient;
+  private readonly allowPhoenixDatasetDeleteRecreateFallback: boolean;
 
   private readonly experiments: RanExperiment[] = [];
 
@@ -44,6 +45,8 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
     this.phoenixClient = createClient({
       options: this.options.config,
     });
+    this.allowPhoenixDatasetDeleteRecreateFallback =
+      process.env.KBN_EVALS_PHOENIX_ALLOW_DATASET_DELETE_RECREATE_FALLBACK === 'true';
   }
 
   private async syncDataSet(dataset: EvaluationDataset): Promise<{ datasetId: string }> {
@@ -93,7 +96,18 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
       });
     } catch (error) {
       // Some Phoenix versions/environments intermittently fail the GraphQL dataset upsert.
-      // For local/dev usage we can fall back to deleting and recreating the dataset via REST.
+      // Deleting a dataset wipes all past experiments on that dataset, so only do this with explicit consent.
+      if (!this.allowPhoenixDatasetDeleteRecreateFallback) {
+        this.options.log.warning(
+          `Phoenix dataset upsert failed for "${dataset.name}" (id: ${storedDataset.id}). ` +
+            `Refusing to delete+recreate without explicit opt-in. ` +
+            `To allow the destructive fallback (will wipe past experiments), set ` +
+            `KBN_EVALS_PHOENIX_ALLOW_DATASET_DELETE_RECREATE_FALLBACK=true.`
+        );
+        this.options.log.debug(error);
+        throw error;
+      }
+
       const message = `Phoenix dataset upsert failed for "${dataset.name}" (id: ${storedDataset.id}); falling back to delete+recreate`;
       this.options.log.warning(message);
       this.options.log.debug(error);

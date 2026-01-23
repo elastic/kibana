@@ -486,6 +486,16 @@ If your Phoenix instance requires auth, also set:
 PHOENIX_API_KEY=... PHOENIX_BASE_URL=... KBN_EVALS_EXECUTOR=phoenix node scripts/playwright test --config ...
 ```
 
+#### Dataset upsert fallback (Phoenix-only)
+
+Some Phoenix environments intermittently fail the GraphQL dataset upsert used to keep datasets in sync. As a fallback, `@kbn/evals` can **delete and recreate** the dataset via Phoenix REST APIs.
+
+Because deleting a dataset **wipes all past experiments** on that dataset, this fallback is **disabled by default**. To explicitly allow it, set:
+
+```bash
+KBN_EVALS_PHOENIX_ALLOW_DATASET_DELETE_RECREATE_FALLBACK=true
+```
+
 Alternatively, you can configure a Phoenix exporter in `kibana.dev.yml` so `@kbn/evals` can read Phoenix API settings via `getPhoenixConfig()`.
 
 ```yaml
