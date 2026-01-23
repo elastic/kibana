@@ -19,7 +19,8 @@ import { InspectFlyout } from '../../inspect_flyout';
 export const createInspectActionDescriptor = (
   api: SearchSessionsMgmtAPI,
   uiSession: UISession,
-  core: CoreStart
+  core: CoreStart,
+  isWithinFlyout: boolean = false
 ): IClickActionDescriptor => ({
   iconType: 'document',
   label: (
@@ -35,10 +36,10 @@ export const createInspectActionDescriptor = (
       title: i18n.translate('data.sessions.management.backgroundSearchFlyoutTitle', {
         defaultMessage: 'Inspect background search',
       }),
+      flyoutMenuProps: { hideTitle: false },
       size: 'm',
-      session: 'inherit',
+      session: isWithinFlyout ? 'inherit' : 'start',
       type: 'overlay',
-      outsideClickCloses: true,
     });
     await overlay.onClose;
   },
