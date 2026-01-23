@@ -59,11 +59,11 @@ export function EditPolicyModal({
       <EuiModalHeader>
         {isInUse && (
           <EuiModalHeaderTitle id={modalTitleId} data-test-subj="editPolicyModalTitle">
-            {i18n.translate('xpack.streams.editPolicyModal.title', {
+ {i18n.translate('xpack.streams.editPolicyModal.title', {
               defaultMessage:
-                '{dataStreamsCount} streams and {indicesCount} indices will be affected',
+                '{streamsCount, plural, one {# stream} other {# streams}} and {indicesCount, plural, one {# index} other {# indices}} will be affected',
               values: {
-                dataStreamsCount: streamsCount,
+                streamsCount,
                 indicesCount,
               },
             })}
@@ -99,7 +99,8 @@ export function EditPolicyModal({
               <EuiText size="s">
                 {i18n.translate('xpack.streams.editPolicyModal.description', {
                   defaultMessage:
-                    'The ILM policy you are updating is currently used in {streamsCount} streams and {indicesCount} indices. If you would like your updates to only affect this stream, you may save as a new ILM policy.',
+                    'The ILM policy you are updating is currently used in {streamsCount, plural, one {# stream} other {# streams}} and {indicesCount, plural, one {# index} other {# indices}}. If you would like your updates to only affect this stream, you may save as a new ILM policy.',
+
                   values: {
                     streamsCount,
                     indicesCount,

@@ -74,7 +74,7 @@ describe('EditPolicyModal', () => {
     expect(screen.getByTestId('editPolicyModal-managedWarning')).toBeInTheDocument();
   });
 
-  it('does not render managed policy warning when is no managed', () => {
+  it('does not render managed policy warning when is not managed', () => {
     renderWithI18n(
       <EditPolicyModal
         affectedResources={affectedResources}
