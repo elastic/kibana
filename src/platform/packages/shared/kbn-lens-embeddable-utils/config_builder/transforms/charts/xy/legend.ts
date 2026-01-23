@@ -117,6 +117,7 @@ export function convertLegendToStateFormat(legend: XYState['legend']): {
           isInside: true,
           position: DEFAULT_LEGEND_POSITON,
           ...(legend?.columns ? { floatingColumns: legend?.columns } : {}),
+          showSingleSeries: legend?.visible == null ? undefined : true,
         }
       : {
           position: legend?.position ?? DEFAULT_LEGEND_POSITON,
@@ -146,12 +147,14 @@ function getLegendSizeAPI(
 
 // @TODO improve this check
 function isLegendInside(legend: XYLensState['legend']): boolean {
+  if (legend.isInside != null) {
+    return legend.isInside;
+  }
   return (
-    legend.isInside === true ||
-    (legend.legendSize == null &&
-      (legend.floatingColumns != null ||
-        legend.verticalAlignment != null ||
-        legend.horizontalAlignment != null))
+    legend.legendSize == null &&
+    (legend.floatingColumns != null ||
+      legend.verticalAlignment != null ||
+      legend.horizontalAlignment != null)
   );
 }
 

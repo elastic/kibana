@@ -1150,3 +1150,88 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
     language: 'kuery',
   },
 };
+
+export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
+  title: '',
+  type: 'xy',
+  legend: {
+    visible: true,
+    inside: false,
+    position: 'bottom',
+  },
+  fitting: {
+    type: 'linear',
+  },
+  axis: {
+    x: {
+      title: {
+        visible: true,
+      },
+      ticks: true,
+      grid: true,
+      label_orientation: 'horizontal',
+    },
+    left: {
+      title: {
+        visible: false,
+      },
+      ticks: true,
+      grid: true,
+      label_orientation: 'horizontal',
+    },
+    right: {
+      title: {
+        visible: true,
+      },
+      ticks: true,
+      grid: true,
+      label_orientation: 'horizontal',
+    },
+  },
+  decorations: {
+    value_labels: false,
+  },
+  layers: [
+    {
+      type: 'bar_stacked',
+      dataset: {
+        type: 'dataView',
+        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      },
+      sampling: 1,
+      ignore_global_filters: false,
+      x: {
+        operation: 'date_histogram',
+        field: 'timestamp',
+        suggested_interval: 'auto',
+        use_original_time_range: false,
+        include_empty_rows: true,
+        drop_partial_intervals: false,
+      },
+      y: [
+        {
+          operation: 'count',
+          empty_as_null: true,
+        },
+      ],
+      breakdown_by: {
+        operation: 'terms',
+        fields: ['clientip'],
+        size: 9,
+        other_bucket: {
+          include_documents_without_field: false,
+        },
+        rank_by: {
+          type: 'column',
+          metric: 0,
+          direction: 'desc',
+        },
+        aggregate_first: true,
+      },
+    },
+  ],
+  query: {
+    query: '',
+    language: 'kuery',
+  },
+};
