@@ -151,7 +151,7 @@ export const CalendarsListTable = ({
         loading={loading}
         selection={tableSelection}
         tableCaption={i18n.translate('xpack.ml.calendarsList.tableCaption', {
-          defaultMessage: 'Machine learning calendars',
+          defaultMessage: 'Calendars',
         })}
         data-test-subj={loading ? 'mlCalendarTable loading' : 'mlCalendarTable loaded'}
         rowProps={(item) => ({
