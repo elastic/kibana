@@ -78,3 +78,6 @@ export const LENS_BASIC_TIME_RANGE = {
   from: 'Sep 22, 2015 @ 00:00:00.000',
   to: 'Sep 23, 2015 @ 00:00:00.000',
 };
+
+export const MAPS_LAYER_GROUP_TITLE = 'Layer group';
+export const MAPS_LIBRARY_NAME_PREFIX = 'my map';

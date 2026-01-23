@@ -16,9 +16,9 @@ import {
   LENS_BASIC_TIME_RANGE,
 } from '../constants';
 
-let lensSavedObjectId = '';
-
 spaceTest.describe('Lens by-value panels (dashboard)', { tag: tags.ESS_ONLY }, () => {
+  let lensSavedObjectId = '';
+
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     const importedObjects = await scoutSpace.savedObjects.load(LENS_BASIC_KIBANA_ARCHIVE);
     const lensObject = importedObjects.find(

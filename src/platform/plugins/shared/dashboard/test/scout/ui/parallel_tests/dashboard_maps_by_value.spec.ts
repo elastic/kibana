@@ -9,16 +9,18 @@
 
 import { spaceTest, expect, tags } from '@kbn/scout';
 import type { PageObjects, ScoutPage } from '@kbn/scout';
+import {
+  LENS_BASIC_KIBANA_ARCHIVE,
+  MAPS_LAYER_GROUP_TITLE,
+  MAPS_LIBRARY_NAME_PREFIX,
+} from '../constants';
 
-const KIBANA_ARCHIVE_PATH =
-  'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json';
-
-spaceTest.describe('Dashboard maps by value', { tag: tags.ESS_ONLY }, () => {
+spaceTest.describe('Maps by-value panels (dashboard)', { tag: tags.ESS_ONLY }, () => {
   let mapCounter = 0;
   let dashboardUrl = '';
 
   spaceTest.beforeAll(async ({ scoutSpace }) => {
-    await scoutSpace.savedObjects.load(KIBANA_ARCHIVE_PATH);
+    await scoutSpace.savedObjects.load(LENS_BASIC_KIBANA_ARCHIVE);
   });
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects, page }) => {
@@ -37,7 +39,6 @@ spaceTest.describe('Dashboard maps by value', { tag: tags.ESS_ONLY }, () => {
     await pageObjects.maps.waitForRenderComplete();
     await pageObjects.maps.clickSaveAndReturnButton();
     await pageObjects.dashboard.waitForRenderComplete();
-    await expect.poll(async () => pageObjects.dashboard.getPanelCount()).toBe(1);
   };
 
   const openMapEditorAndAddLayer = async (pageObjects: PageObjects) => {
@@ -46,7 +47,7 @@ spaceTest.describe('Dashboard maps by value', { tag: tags.ESS_ONLY }, () => {
     await pageObjects.maps.waitForRenderComplete();
 
     await pageObjects.maps.clickAddLayer();
-    await pageObjects.maps.selectLayerWizardByTitle('Layer group');
+    await pageObjects.maps.selectLayerWizardByTitle(MAPS_LAYER_GROUP_TITLE);
     await pageObjects.maps.clickImportFileButton();
   };
 
@@ -57,7 +58,7 @@ spaceTest.describe('Dashboard maps by value', { tag: tags.ESS_ONLY }, () => {
 
   const saveMapToLibraryAndReturn = async (pageObjects: PageObjects) => {
     await pageObjects.maps.clickSaveButton();
-    await pageObjects.maps.saveFromModal(`my map ${mapCounter++}`, {
+    await pageObjects.maps.saveFromModal(`${MAPS_LIBRARY_NAME_PREFIX} ${mapCounter++}`, {
       redirectToOrigin: true,
     });
     await pageObjects.dashboard.waitForRenderComplete();
@@ -65,24 +66,24 @@ spaceTest.describe('Dashboard maps by value', { tag: tags.ESS_ONLY }, () => {
 
   const saveMapToLibraryAndStay = async (pageObjects: PageObjects, page: ScoutPage) => {
     await pageObjects.maps.clickSaveButton();
-    await pageObjects.maps.saveFromModal(`my map ${mapCounter++}`, {
+    await pageObjects.maps.saveFromModal(`${MAPS_LIBRARY_NAME_PREFIX} ${mapCounter++}`, {
       redirectToOrigin: false,
     });
     await page.goto(dashboardUrl);
     await pageObjects.dashboard.waitForRenderComplete();
   };
 
-  spaceTest('can add a map by value', async ({ pageObjects }) => {
+  spaceTest('adds a map by value', async ({ pageObjects }) => {
     await spaceTest.step('add map panel', async () => {
       await createAndAddMapByValue(pageObjects);
     });
 
     await spaceTest.step('verify panel count', async () => {
-      await expect.poll(async () => pageObjects.dashboard.getPanelCount()).toBe(1);
+      expect(await pageObjects.dashboard.getPanelCount()).toBe(1);
     });
   });
 
-  spaceTest('editing a map by value retains the same number of panels', async ({ pageObjects }) => {
+  spaceTest('editing a by-value map updates the panel', async ({ pageObjects }) => {
     await spaceTest.step('add map panel', async () => {
       await createAndAddMapByValue(pageObjects);
     });
@@ -92,46 +93,29 @@ spaceTest.describe('Dashboard maps by value', { tag: tags.ESS_ONLY }, () => {
       await saveMapByValueAndReturn(pageObjects);
     });
 
-    await spaceTest.step('verify panel count', async () => {
-      await expect.poll(async () => pageObjects.dashboard.getPanelCount()).toBe(1);
+    await spaceTest.step('verify panel count and layer', async () => {
+      expect(await pageObjects.dashboard.getPanelCount()).toBe(1);
+      expect(await pageObjects.maps.doesLayerExist(MAPS_LAYER_GROUP_TITLE)).toBe(true);
     });
   });
 
-  spaceTest('editing a map by value updates the panel on return', async ({ pageObjects }) => {
+  spaceTest('saving to library updates the panel', async ({ pageObjects }) => {
     await spaceTest.step('add map panel', async () => {
       await createAndAddMapByValue(pageObjects);
     });
 
-    await spaceTest.step('edit map panel', async () => {
+    await spaceTest.step('edit map panel and save to library', async () => {
       await openMapEditorAndAddLayer(pageObjects);
-      await saveMapByValueAndReturn(pageObjects);
+      await saveMapToLibraryAndReturn(pageObjects);
     });
 
     await spaceTest.step('verify layer exists', async () => {
-      expect(await pageObjects.maps.doesLayerExist('Layer group')).toBe(true);
+      expect(await pageObjects.maps.doesLayerExist(MAPS_LAYER_GROUP_TITLE)).toBe(true);
     });
   });
 
   spaceTest(
-    'editing a map and adding to map library updates the panel',
-    async ({ pageObjects }) => {
-      await spaceTest.step('add map panel', async () => {
-        await createAndAddMapByValue(pageObjects);
-      });
-
-      await spaceTest.step('edit map panel and save to library', async () => {
-        await openMapEditorAndAddLayer(pageObjects);
-        await saveMapToLibraryAndReturn(pageObjects);
-      });
-
-      await spaceTest.step('verify layer exists', async () => {
-        expect(await pageObjects.maps.doesLayerExist('Layer group')).toBe(true);
-      });
-    }
-  );
-
-  spaceTest(
-    'saving map to library without returning does not update panel',
+    'saving to library without return does not update panel',
     async ({ pageObjects, page }) => {
       await spaceTest.step('add map panel', async () => {
         await createAndAddMapByValue(pageObjects);
@@ -143,7 +127,7 @@ spaceTest.describe('Dashboard maps by value', { tag: tags.ESS_ONLY }, () => {
       });
 
       await spaceTest.step('verify layer does not exist', async () => {
-        expect(await pageObjects.maps.doesLayerExist('Layer group')).toBe(false);
+        expect(await pageObjects.maps.doesLayerExist(MAPS_LAYER_GROUP_TITLE)).toBe(false);
       });
     }
   );
