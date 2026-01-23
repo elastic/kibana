@@ -2,180 +2,109 @@
 
 ## Summary
 
-Scout exposes a custom API `expect` object with dynamic matchers for API testing. To enforce best practices, Playwright's default matchers are restricted.
-
-**Key Features:**
-
-- Custom matchers for API-specific assertions
-- Supports both `apiClient` and `kbnClient` response interfaces
-- Matchers created at runtime based on asserted object's properties
-- Full TypeScript support for dynamically generated matchers
-- Partial and exact matching provided
-- Asymmetric matchers for flexible assertions
-- Error format identical to Playwright's for consistent developer experience
-- Restricted Playwright matchers exposure
-- Supports `not` for all matchers
-- Exports from `@kbn/scout/api`, retaining the familiar `expect` name while also providing API-related matchers
-
----
-
-## Changes
-
-### New API Matchers
-
-Custom `expect` function that provides type-safe, API-focused matchers based on response object properties:
+Scout exposes a custom API `expect` object with custom and default matchers for API testing. To enforce best practices, Playwright's default matchers are restricted.
 
 ```typescript
 import { expect } from '@kbn/scout/api';
+```
 
-// Example response object from apiClient
-const response = {
-  statusCode: 200,
-  statusMessage: 'OK',
-  headers: {
-    'Content-Type': 'application/json',
-    'Set-Cookie': ['session=abc', 'token=xyz'], // array values joined as 'session=abc, token=xyz'
-  },
-  body: {
-    cases: [{ id: 'case-123', title: 'Test Case', version: 'WzEsMV0=' }],
-    total: 1,
-  },
-};
+---
 
-// Status code assertions
+## Custom Response Matchers
+
+Scout-specific matchers for API response assertions. These support both `apiClient` and `kbnClient` response interfaces.
+
+### toHaveStatusCode
+
+Asserts response has the expected HTTP status code. Checks `status` or `statusCode` property.
+
+```typescript
 expect(response).toHaveStatusCode(200);
 expect(response).toHaveStatusCode({ oneOf: [200, 201] });
 expect(response).not.toHaveStatusCode(500);
+```
 
-// Payload assertions with partial matching (default). Use `toHaveData` for kbnClient/apiServices responses
-expect(response).toHaveBody({ total: 1 });
-expect(response).toHaveBody({ cases: [{ id: 'case-123' }] });
+### toHaveStatusText
 
-// Asymmetric matchers for flexible assertions
-expect(response).toHaveBody({ total: expect.toBeGreaterThan(0) });
-expect(response).toHaveBody({ cases: [{ version: expect.toBeDefined() }] });
+Asserts response has the expected status text. Checks `statusText` or `statusMessage` property.
 
-// Payload assertions with exact matching
-expect(response).toHaveBody(
-  {
-    total: 1,
-    cases: [
-      {
-        id: 'case-123',
-        title: 'Test Case',
-        version: 'WzEsMV0=',
-      },
-    ],
-  },
-  { exactMatch: true }
-);
-
-// Headers
-expect(response).toHaveHeaders({ 'content-type': 'application/json' }); // case-insensitive
-expect(response).toHaveHeaders({ 'set-cookie': 'session=abc, token=xyz' }); // arrays joined
-
-// Status text
+```typescript
 expect(response).toHaveStatusText('OK');
-
-// Value assertions (restricted)
-expect(response.body.cases[0].version).toBeDefined();
-expect(response.body.total).toStrictEqual(1);
-expect(response.body.total).toBeGreaterThan(0);
-expect(response.body.total).toBeLessThan(100);
+expect(response).not.toHaveStatusText('Not Found');
 ```
 
-### Dynamic Matcher Selection
+### toHaveHeaders
 
-Matchers are dynamically created at runtime based on object properties, with static type inference providing accurate autocomplete and compile-time checking:
-
-```typescript
-const response = { statusCode: 200, body: { id: 'abc' } }; // no statusMessage
-
-expect(response).toHaveStatusCode(200); // ✅ available
-expect(response).toHaveBody({ id: 'abc' }); // ✅ available
-expect(response).toHaveStatusText('OK'); // ❌ type error - statusMessage not in response
-```
-
-### Restricted Value Matchers
-
-Default playwright's value matchers are restricted to guide developers toward API-specific assertions and enforce best practices:
+Asserts response contains the expected headers (partial match). Checks `headers` property. Case-insensitive keys. Response header arrays are joined with `, ` before comparison.
 
 ```typescript
-// Available for checking system-generated values
-expect(response.body.version).toBeDefined();
-
-// NOT available: ❌
-expect(response.body.cases).toHaveLength(1);
-expect(response.body.cases[0].id).toBe(caseId);
-
-// Instead do this: ✅
-expect(response).toHaveBody({ cases: [{ id: caseId }] });
+expect(response).toHaveHeaders({ 'content-type': 'application/json' });
+expect(response).toHaveHeaders({ 'set-cookie': 'session=abc, token=xyz' });
 ```
 
 ---
 
-## Before & After
+## Custom Asymmetric Matchers
 
-Real example from `cases.spec.ts`:
+Custom asymmetric matchers for use with `toMatchObject`:
+
+- **`expect.toBeGreaterThan(n)`** - Matches if value > n
+- **`expect.toBeLessThan(n)`** - Matches if value < n
 
 ```typescript
-// ❌ Before: Playwright's expect with destructuring and multiple assertions
-const { data, status } = await apiServices.cases.create({ ... });
-expect(status).toBe(200);
-expect(data.owner).toBe(caseOwner);
-expect(data.status).toBe('open');
-
-// ✅ After: Scout API expect with partial matching
-const response = await apiServices.cases.create({ ... });
-expect(response).toHaveStatusCode(200);
-expect(response).toHaveData({ owner: caseOwner, status: 'open' });
+expect(response).toMatchObject({
+  body: {
+    count: expect.toBeGreaterThan(0),
+    limit: expect.toBeLessThan(100),
+  },
+});
 ```
 
 ---
 
-## Why `toHaveBody`/`toHaveData` over `toMatchObject`?
+## Supported Playwright Matchers
 
-These matchers are tailored for API testing workflows:
+The following [Playwright matchers](https://playwright.dev/docs/api/class-genericassertions) are available:
 
-1. **Partial array matching** - `toMatchObject` requires arrays to match exactly in length and order. These matchers find matching items anywhere in the array:
+**Matchers:**
 
-   ```typescript
-   // response.body.items = [{ id: 3, title: 'c' }, { id: 1, title: 'a' }, { id: 2, title: 'b' }]
+- `toBe(expected)` - compares using `Object.is`, use for primitive literals
+- `toBeDefined()` - value is not `undefined`
+- `toBeUndefined()` - value is `undefined`
+- `toContain(expected)` - string contains substring, or Array/Set contains item
+- `toHaveLength(n)` - value has `.length` property equal to n
+- `toStrictEqual(expected)` - deep equality with type checking
+- `toBeGreaterThan(n)` - value > n
+- `toBeLessThan(n)` - value < n
+- `toMatchObject(expected)` - partial object matching
 
-   // ❌ toMatchObject fails (wrong order, wrong length)
-   expect(response.body).toMatchObject({ items: [{ id: 1 }] });
+**Asymmetric matchers:**
 
-   // ✅ toHaveBody passes (finds id:1 somewhere in the array)
-   expect(response).toHaveBody({ items: [{ id: 1 }] });
-   ```
-
-2. **Existence check** - Call without arguments to verify payload exists:
-
-   ```typescript
-   // ❌ Manual check
-   expect(response.body).toBeDefined();
-
-   // ✅ Built-in
-   expect(response).toHaveBody();
-   ```
-
-3. **Custom asymmetric matchers** - Built-in helpers for common checks:
-
-   ```typescript
-   expect(response).toHaveBody({
-     count: expect.toBeGreaterThan(0),
-     id: expect.toBeDefined(),
-   });
-   ```
-
-4. **Exact matching when needed** - Opt-in strict mode:
-   ```typescript
-   expect(response).toHaveBody({ id: 1 }, { exactMatch: true });
-   ```
+- `expect.anything()` - matches anything except `null`/`undefined`
+- `expect.arrayContaining(array)` - array contains all expected elements
+- `expect.objectContaining(object)` - object contains expected properties
 
 ---
+
+## Restricted Matchers
+
+To enforce best practices, some Playwright matchers are restricted. Use these alternatives:
+
+```typescript
+expect({ name: 'Alice', metadata: undefined }).toEqual({ name: 'Alice' }); // ❌ would pass even if extra keys exist
+expect({ name: 'Alice', metadata: undefined }).toStrictEqual({ name: 'Alice' }); // ✅ fails if extra/missing keys exist
+
+expect(response).toHaveProperty('apiKey'); // ❌ passes even if apiKey is undefined
+expect(response.apiKey).toBeDefined(); // ✅ it will fail if undefined
+
+expect(exists).toBeTruthy(); // ❌ too loose
+expect(exists).toBe(true); // ✅ be explicit
+```
+
+**UI-specific matchers** like `toBeVisible`, `toBeEnabled`, `toHaveAttribute`, etc. are not available for API tests.
 
 ## Notes
 
-- Custom matchers throw Playwright-style errors; stack traces can be trimmed via `skipStackLines` to point directly at the test file
+- Custom matchers throw Playwright-style errors
+- Stack traces can be trimmed via `skipStackLines` to point directly at the test file
 - `toHaveStatusCode` options interface is designed for extensibility (e.g., future `range` option)

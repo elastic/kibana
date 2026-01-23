@@ -17,11 +17,22 @@ import { createMatcherError } from './utils';
  * expect(response).toHaveStatusText('OK');
  * expect(response).not.toHaveStatusText('Not Found');
  */
-export function toHaveStatusText<T extends { statusText: unknown } | { statusMessage: unknown }>(
-  obj: T,
-  expected: string,
-  isNegated = false
-): void {
+export function toHaveStatusText(obj: unknown, expected: string, isNegated = false): void {
+  if (
+    typeof obj !== 'object' ||
+    obj === null ||
+    (!('statusText' in obj) && !('statusMessage' in obj))
+  ) {
+    throw createMatcherError({
+      expected: `${JSON.stringify({ statusText: expected })} or ${JSON.stringify({
+        statusMessage: expected,
+      })}`,
+      matcherName: 'toHaveStatusText',
+      received: obj,
+      isNegated,
+    });
+  }
+
   const actual = 'statusText' in obj ? obj.statusText : obj.statusMessage;
   try {
     if (isNegated) {

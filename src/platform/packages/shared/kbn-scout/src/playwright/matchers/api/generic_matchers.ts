@@ -8,24 +8,35 @@
  */
 
 import { expect as baseExpect } from '@playwright/test';
-import type { ValueMatchers } from './types';
+import type { GenericMatchers } from './types';
 
 /**
- * Create value matchers delegating to Playwright expect
+ * Create generic matchers delegating to Playwright/Jest expect
  */
-export function createValueMatchers(actual: unknown): ValueMatchers {
+export function createGenericMatchers(actual: unknown): GenericMatchers {
   // eslint-disable-next-line playwright/valid-expect
   const base = baseExpect(actual);
   return {
+    toBe: (expected: unknown) => base.toBe(expected),
     toBeDefined: () => base.toBeDefined(),
+    toBeUndefined: () => base.toBeUndefined(),
+    toContain: (expected: unknown) => base.toContain(expected),
+    toHaveLength: (expected: number) => base.toHaveLength(expected),
     toStrictEqual: (expected: unknown) => base.toStrictEqual(expected),
     toBeGreaterThan: (expected: number) => base.toBeGreaterThan(expected),
     toBeLessThan: (expected: number) => base.toBeLessThan(expected),
+    toMatchObject: (expected: Record<string, unknown> | unknown[]) => base.toMatchObject(expected),
     not: {
+      toBe: (expected: unknown) => base.not.toBe(expected),
       toBeDefined: () => base.not.toBeDefined(),
+      toBeUndefined: () => base.not.toBeUndefined(),
+      toContain: (expected: unknown) => base.not.toContain(expected),
+      toHaveLength: (expected: number) => base.not.toHaveLength(expected),
       toStrictEqual: (expected: unknown) => base.not.toStrictEqual(expected),
       toBeGreaterThan: (expected: number) => base.not.toBeGreaterThan(expected),
       toBeLessThan: (expected: number) => base.not.toBeLessThan(expected),
+      toMatchObject: (expected: Record<string, unknown> | unknown[]) =>
+        base.not.toMatchObject(expected),
     },
   };
 }

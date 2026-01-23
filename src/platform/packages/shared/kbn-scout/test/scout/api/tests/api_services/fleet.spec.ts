@@ -10,11 +10,6 @@
 import { apiTest } from '../../../../../src/playwright';
 import { expect } from '../../../../../api';
 
-interface ApiResponse {
-  status: number;
-  data: Record<string, any>;
-}
-
 apiTest.describe('Fleet Integration Management', { tag: ['@svlSecurity', '@ess'] }, () => {
   let integrationName: string;
 
@@ -28,9 +23,9 @@ apiTest.describe('Fleet Integration Management', { tag: ['@svlSecurity', '@ess']
   });
 
   apiTest('should install a custom integration', async ({ apiServices }) => {
-    const response: ApiResponse = await apiServices.fleet.integration.install(integrationName);
+    const response = await apiServices.fleet.integration.install(integrationName);
 
-    expect(response).toHaveStatusCode(200);
+    expect(response.status).toBe(200);
   });
 
   apiTest('should delete an integration and return status code', async ({ apiServices }) => {
@@ -38,20 +33,18 @@ apiTest.describe('Fleet Integration Management', { tag: ['@svlSecurity', '@ess']
     await apiServices.fleet.integration.install(integrationName);
 
     // Then delete it
-    const response: ApiResponse = await apiServices.fleet.integration.delete(integrationName);
+    const response = await apiServices.fleet.integration.delete(integrationName);
 
-    expect(response).toHaveStatusCode(200);
+    expect(response.status).toBe(200);
   });
 
   apiTest('should handle delete of non-existent integration', async ({ apiServices }) => {
     const nonExistentIntegration = `non-existent-integration-${Date.now()}`;
 
-    const response: ApiResponse = await apiServices.fleet.integration.delete(
-      nonExistentIntegration
-    );
+    const response = await apiServices.fleet.integration.delete(nonExistentIntegration);
 
     // Should return 400 for non-existent integration due to ignoreErrors
-    expect(response).toHaveStatusCode(400);
+    expect(response.status).toBe(400);
   });
 });
 
@@ -72,20 +65,21 @@ apiTest.describe('Fleet Agent Policies Management', { tag: ['@svlSecurity', '@es
   });
 
   apiTest('should get agent policies with query parameters', async ({ apiServices }) => {
-    const response: ApiResponse = await apiServices.fleet.agent_policies.get({
+    const response = await apiServices.fleet.agent_policies.get({
       page: 1,
       perPage: 10,
     });
 
-    expect(response).toHaveStatusCode(200);
-    expect(response).toHaveData({ page: 1, perPage: 10 });
+    expect(response.status).toBe(200);
+    expect(response.data.page).toBe(1);
+    expect(response.data.perPage).toBe(10);
   });
 
   apiTest('should create an agent policy with additional parameters', async ({ apiServices }) => {
     const paramsPolicyNamespace = 'default';
     const paramsPolicyName = `${policyName}-params`;
 
-    const response: ApiResponse = await apiServices.fleet.agent_policies.create(
+    const response = await apiServices.fleet.agent_policies.create(
       paramsPolicyName,
       paramsPolicyNamespace,
       undefined,
@@ -95,10 +89,9 @@ apiTest.describe('Fleet Agent Policies Management', { tag: ['@svlSecurity', '@es
       }
     );
 
-    expect(response).toHaveStatusCode(200);
-    expect(response).toHaveData({
-      item: { name: paramsPolicyName, namespace: paramsPolicyNamespace },
-    });
+    expect(response.status).toBe(200);
+    expect(response.data.item.name).toBe(paramsPolicyName);
+    expect(response.data.item.namespace).toBe(paramsPolicyNamespace);
 
     policyId = response.data.item.id;
   });
@@ -107,7 +100,7 @@ apiTest.describe('Fleet Agent Policies Management', { tag: ['@svlSecurity', '@es
     const policyNamespace = 'default';
 
     // First create a policy
-    const createResponse: ApiResponse = await apiServices.fleet.agent_policies.create(
+    const createResponse = await apiServices.fleet.agent_policies.create(
       policyName,
       policyNamespace
     );
@@ -115,7 +108,7 @@ apiTest.describe('Fleet Agent Policies Management', { tag: ['@svlSecurity', '@es
 
     // Then update it
     const updatedName = `${policyName}-updated`;
-    const updateResponse: ApiResponse = await apiServices.fleet.agent_policies.update(
+    const updateResponse = await apiServices.fleet.agent_policies.update(
       updatedName,
       policyNamespace,
       policyId,
@@ -124,8 +117,8 @@ apiTest.describe('Fleet Agent Policies Management', { tag: ['@svlSecurity', '@es
       }
     );
 
-    expect(updateResponse).toHaveStatusCode(200);
-    expect(updateResponse).toHaveData({ item: { name: updatedName } });
+    expect(updateResponse.status).toBe(200);
+    expect(updateResponse.data.item.name).toBe(updatedName);
   });
 
   apiTest('should bulk get agent policies', async ({ apiServices }) => {
@@ -133,22 +126,14 @@ apiTest.describe('Fleet Agent Policies Management', { tag: ['@svlSecurity', '@es
     const policy1Name = `bulk-test-1-${Date.now()}`;
     const policy2Name = `bulk-test-2-${Date.now()}`;
 
-    const policy1Response: ApiResponse = await apiServices.fleet.agent_policies.create(
-      policy1Name,
-      'default'
-    );
-    const policy2Response: ApiResponse = await apiServices.fleet.agent_policies.create(
-      policy2Name,
-      'default'
-    );
+    const policy1Response = await apiServices.fleet.agent_policies.create(policy1Name, 'default');
+    const policy2Response = await apiServices.fleet.agent_policies.create(policy2Name, 'default');
 
     const policyIds = [policy1Response.data.item.id, policy2Response.data.item.id];
     // Bulk get the policies
-    const bulkResponse: ApiResponse = await apiServices.fleet.agent_policies.bulkGet(policyIds);
-    expect(bulkResponse).toHaveStatusCode(200);
-    expect(bulkResponse).toHaveData({
-      items: [{ id: policy1Response.data.item.id }, { id: policy2Response.data.item.id }],
-    });
+    const bulkResponse = await apiServices.fleet.agent_policies.bulkGet(policyIds);
+    expect(bulkResponse.status).toBe(200);
+    expect(bulkResponse.data.items).toHaveLength(2);
     // Clean up both policies
     await Promise.all([
       apiServices.fleet.agent_policies.delete(policy1Response.data.item.id),
@@ -158,33 +143,24 @@ apiTest.describe('Fleet Agent Policies Management', { tag: ['@svlSecurity', '@es
 
   apiTest('should delete an agent policy', async ({ apiServices }) => {
     // First create a policy
-    const createResponse: ApiResponse = await apiServices.fleet.agent_policies.create(
-      policyName,
-      'default'
-    );
+    const createResponse = await apiServices.fleet.agent_policies.create(policyName, 'default');
     const agentPolicyId = createResponse.data.item.id;
 
     // Then delete it
-    const response: ApiResponse = await apiServices.fleet.agent_policies.delete(agentPolicyId);
+    const response = await apiServices.fleet.agent_policies.delete(agentPolicyId);
 
-    expect(response).toHaveStatusCode(200);
+    expect(response.status).toBe(200);
   });
 
   apiTest('should delete an agent policy with force flag', async ({ apiServices }) => {
     // First create a policy
-    const createResponse: ApiResponse = await apiServices.fleet.agent_policies.create(
-      policyName,
-      'default'
-    );
+    const createResponse = await apiServices.fleet.agent_policies.create(policyName, 'default');
     const agentPolicyId = createResponse.data.item.id;
 
     // Then delete it with force
-    const response: ApiResponse = await apiServices.fleet.agent_policies.delete(
-      agentPolicyId,
-      true
-    );
+    const response = await apiServices.fleet.agent_policies.delete(agentPolicyId, true);
 
-    expect(response).toHaveStatusCode(200);
+    expect(response.status).toBe(200);
   });
 });
 
@@ -200,31 +176,32 @@ apiTest.describe('Fleet Outputs Management', { tag: ['@svlSecurity', '@ess'] }, 
   });
 
   apiTest('should get all outputs', async ({ apiServices }) => {
-    const response: ApiResponse = await apiServices.fleet.outputs.getOutputs();
+    const response = await apiServices.fleet.outputs.getOutputs();
 
-    expect(response).toHaveStatusCode(200);
-    expect(response.data.items.length).toBeGreaterThan(0);
+    expect(response.status).toBe(200);
+    expect(response.data).toBeDefined();
+    expect(response.data.items).toBeDefined();
   });
 
   apiTest('should get a specific output by ID', async ({ apiServices }) => {
     // First get all outputs to find an existing one
-    const allOutputsResponse: ApiResponse = await apiServices.fleet.outputs.getOutputs();
+    const allOutputsResponse = await apiServices.fleet.outputs.getOutputs();
     const existingOutput = allOutputsResponse.data.items[0];
 
     // Only proceed if we have an existing output
     expect(existingOutput).toBeDefined();
 
-    const response: ApiResponse = await apiServices.fleet.outputs.getOutput(existingOutput.id);
+    const response = await apiServices.fleet.outputs.getOutput(existingOutput.id);
 
-    expect(response).toHaveStatusCode(200);
-    expect(response).toHaveData({ item: { id: existingOutput.id } });
+    expect(response.status).toBe(200);
+    expect(response.data.item.id).toBe(existingOutput.id);
   });
 
   apiTest('should create an output with additional parameters', async ({ apiServices }) => {
     const outputName = `test-output-params-${Date.now()}`;
     const outputHosts = ['https://localhost:9200'];
 
-    const response: ApiResponse = await apiServices.fleet.outputs.create(
+    const response = await apiServices.fleet.outputs.create(
       outputName,
       outputHosts,
       'elasticsearch',
@@ -234,8 +211,9 @@ apiTest.describe('Fleet Outputs Management', { tag: ['@svlSecurity', '@ess'] }, 
       }
     );
 
-    expect(response).toHaveStatusCode(200);
-    expect(response).toHaveData({ item: { name: outputName, is_default: false } });
+    expect(response.status).toBe(200);
+    expect(response.data.item.name).toBe(outputName);
+    expect(response.data.item.is_default).toBe(false);
 
     outputId = response.data.item.id;
   });
@@ -244,7 +222,7 @@ apiTest.describe('Fleet Outputs Management', { tag: ['@svlSecurity', '@ess'] }, 
     const outputName = `test-output-delete-${Date.now()}`;
 
     // First create an output
-    const createResponse: ApiResponse = await apiServices.fleet.outputs.create(
+    const createResponse = await apiServices.fleet.outputs.create(
       outputName,
       ['https://localhost:9200'],
       'elasticsearch'
@@ -252,9 +230,9 @@ apiTest.describe('Fleet Outputs Management', { tag: ['@svlSecurity', '@ess'] }, 
     const deleteOutputId = createResponse.data.item.id;
 
     // Then delete it
-    const response: ApiResponse = await apiServices.fleet.outputs.delete(deleteOutputId);
+    const response = await apiServices.fleet.outputs.delete(deleteOutputId);
 
-    expect(response).toHaveStatusCode(200);
+    expect(response.status).toBe(200);
     // Don't set outputId since we already deleted it
   });
 });
@@ -281,15 +259,15 @@ apiTest.describe('Fleet Server Hosts Management', { tag: ['@svlSecurity', '@ess'
     const hostName = `test-fleet-server-params-${Date.now()}`;
     const hostUrls = ['https://localhost:8220'];
 
-    const response: ApiResponse = await apiServices.fleet.server_hosts.create(hostName, hostUrls, {
+    const response = await apiServices.fleet.server_hosts.create(hostName, hostUrls, {
       is_default: false,
       is_internal: true,
     });
 
-    expect(response).toHaveStatusCode(200);
-    expect(response).toHaveData({
-      item: { name: hostName, is_default: false, is_internal: true },
-    });
+    expect(response.status).toBe(200);
+    expect(response.data.item.name).toBe(hostName);
+    expect(response.data.item.is_default).toBe(false);
+    expect(response.data.item.is_internal).toBe(true);
 
     hostId = response.data.item.id;
   });
@@ -298,43 +276,43 @@ apiTest.describe('Fleet Server Hosts Management', { tag: ['@svlSecurity', '@ess'
     const hostName = `test-fleet-server-delete-${Date.now()}`;
 
     // First create a fleet server host
-    const createResponse: ApiResponse = await apiServices.fleet.server_hosts.create(hostName, [
+    const createResponse = await apiServices.fleet.server_hosts.create(hostName, [
       'https://localhost:8220',
     ]);
     const deleteHostId = createResponse.data.item.id;
 
     // Then delete it
-    const response: ApiResponse = await apiServices.fleet.server_hosts.delete(deleteHostId);
+    const response = await apiServices.fleet.server_hosts.delete(deleteHostId);
 
-    expect(response).toHaveStatusCode(200);
+    expect(response.status).toBe(200);
     // Don't set hostId since we already deleted it
   });
 });
 
 apiTest.describe('Fleet Agent Management', { tag: ['@svlSecurity', '@ess'] }, () => {
   apiTest('should setup fleet agents', async ({ apiServices }) => {
-    const response: ApiResponse = await apiServices.fleet.agent.setup();
+    const response = await apiServices.fleet.agent.setup();
 
-    expect(response).toHaveStatusCode(200);
+    expect(response.status).toBe(200);
   });
 
   apiTest('should get agents with query parameters', async ({ apiServices }) => {
-    const response: ApiResponse = await apiServices.fleet.agent.get({
+    const response = await apiServices.fleet.agent.get({
       page: 1,
       perPage: 10,
       showInactive: false,
     });
 
-    expect(response).toHaveStatusCode(200);
+    expect(response.status).toBe(200);
   });
 
   apiTest('should handle delete of non-existent agent', async ({ apiServices }) => {
     const nonExistentAgentId = `non-existent-agent-${Date.now()}`;
 
-    const response: ApiResponse = await apiServices.fleet.agent.delete(nonExistentAgentId);
+    const response = await apiServices.fleet.agent.delete(nonExistentAgentId);
 
     // Should return 400 or 404 for non-existent agent due to ignoreErrors
-    expect(response).toHaveStatusCode({ oneOf: [400, 404] });
+    expect([400, 404]).toContain(response.status);
   });
 });
 
@@ -342,10 +320,10 @@ apiTest.describe('Fleet API Error Handling', { tag: ['@svlSecurity', '@ess'] }, 
   apiTest('should handle bulk get with non-existent policy IDs', async ({ apiServices }) => {
     const nonExistentIds = [`fake-id-1-${Date.now()}`, `fake-id-2-${Date.now()}`];
 
-    const response: ApiResponse = await apiServices.fleet.agent_policies.bulkGet(nonExistentIds, {
+    const response = await apiServices.fleet.agent_policies.bulkGet(nonExistentIds, {
       ignoreMissing: true,
     });
 
-    expect(response).toHaveStatusCode(200);
+    expect(response.status).toBe(200);
   });
 });

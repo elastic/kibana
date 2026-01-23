@@ -19,11 +19,20 @@ import { createMatcherError } from './utils';
  * expect(response).toHaveHeaders({ 'content-type': 'application/json' });
  * expect(response).not.toHaveHeaders({ 'x-forbidden': 'value' });
  */
-export function toHaveHeaders<T extends { headers: unknown }>(
-  obj: T,
+export function toHaveHeaders(
+  obj: unknown,
   expectedHeaders: Record<string, string>,
   isNegated = false
 ): void {
+  if (typeof obj !== 'object' || obj === null || !('headers' in obj)) {
+    throw createMatcherError({
+      expected: JSON.stringify({ headers: expectedHeaders }),
+      matcherName: 'toHaveHeaders',
+      received: obj,
+      isNegated,
+    });
+  }
+
   const actualHeaders: Record<string, string> = {};
   const headers = obj.headers ?? {};
   for (const [key, value] of Object.entries(headers)) {

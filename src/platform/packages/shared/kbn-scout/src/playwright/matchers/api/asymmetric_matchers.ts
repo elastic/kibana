@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expect as baseExpect } from '@playwright/test';
 import type { AsymmetricMatcher, AsymmetricMatchers } from './types';
 
 // Symbol used by Jest/Playwright to identify asymmetric matchers
 const ASYMMETRIC_MATCHER_SYMBOL = Symbol.for('jest.asymmetricMatcher');
 
 /**
- * Creates a custom asymmetric matcher that can be used inside toHavePayload().
+ * Creates a custom asymmetric matcher that can be used inside toMatchObject().
  */
 function createAsymmetricMatcher(
   matchFn: (actual: unknown) => boolean,
@@ -28,28 +29,34 @@ function createAsymmetricMatcher(
 }
 
 /**
- * Asymmetric matchers for flexible value assertions.
- * These can be used inside toHavePayload() for partial matching.
+ * Asymmetric matchers that allow partial, flexible, or pattern-based assertions
+ * inside objects or arrays without requiring an exact value match
  *
  * @example
- * expect(response).toHaveBody({ count: expect.toBeGreaterThan(0) });
+ * expect({ count: 5 }).toMatchObject({ count: expect.toBeGreaterThan(0) });
  */
 export const asymmetricMatchers: AsymmetricMatchers = {
-  /** Matches any value that is not null or undefined */
-  toBeDefined: () =>
-    createAsymmetricMatcher((actual) => actual !== null && actual !== undefined, 'toBeDefined()'),
+  /** Matches everything except `null` and `undefined` */
+  anything: () => baseExpect.anything(),
 
-  /** Matches any number greater than the specified value */
+  /** Ensures that `value > expected` for number values */
   toBeGreaterThan: (min: number) =>
     createAsymmetricMatcher(
       (actual) => typeof actual === 'number' && actual > min,
       `toBeGreaterThan(${min})`
     ),
 
-  /** Matches any number less than the specified value */
+  /** Ensures that `value < expected` for number values */
   toBeLessThan: (max: number) =>
     createAsymmetricMatcher(
       (actual) => typeof actual === 'number' && actual < max,
       `toBeLessThan(${max})`
     ),
+
+  /** Matches an array that contains all of the elements in the expected array, in any order */
+  arrayContaining: <T>(expected: T[]) => baseExpect.arrayContaining(expected),
+
+  /** Matches an object that contains and matches all of the properties in the expected object */
+  objectContaining: <T extends Record<string, unknown>>(expected: T) =>
+    baseExpect.objectContaining(expected),
 };

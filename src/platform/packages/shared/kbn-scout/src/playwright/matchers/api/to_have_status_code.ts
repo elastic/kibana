@@ -24,11 +24,23 @@ export interface ToHaveStatusCodeOptions {
  * expect(response).toHaveStatusCode({ oneOf: [200, 201] });
  * expect(response).not.toHaveStatusCode(404);
  */
-export function toHaveStatusCode<T extends { status: unknown } | { statusCode: unknown }>(
-  obj: T,
+export function toHaveStatusCode(
+  obj: unknown,
   expected: number | ToHaveStatusCodeOptions,
   isNegated = false
 ): void {
+  if (typeof obj !== 'object' || obj === null || (!('status' in obj) && !('statusCode' in obj))) {
+    const expectedValue = typeof expected === 'number' ? expected : expected.oneOf;
+    throw createMatcherError({
+      expected: `${JSON.stringify({ status: expectedValue })} or ${JSON.stringify({
+        statusCode: expectedValue,
+      })}`,
+      matcherName: 'toHaveStatusCode',
+      received: obj,
+      isNegated,
+    });
+  }
+
   const actual = 'status' in obj ? obj.status : obj.statusCode;
   const codes = typeof expected === 'number' ? [expected] : expected.oneOf;
 
