@@ -38,7 +38,7 @@ describe('RuleDetailsLocator', () => {
     });
     expect(location.path).toEqual(
       `${RULES_PATH}/${mockedRuleId}?tabId=alerts&searchBarParams=(` +
-        `controlConfigs:!((displaySettings:(hideActionBar:!t,hideExists:!t),fieldName:kibana.alert.status,persist:!t,selectedOptions:!(active),title:Status),(displaySettings:(hideExists:!t),fieldName:kibana.alert.rule.name,title:Rule),(fieldName:kibana.alert.group.value,title:Group),(fieldName:tags,title:Tags)),kuery:'',rangeFrom:now-15m,rangeTo:now)`
+        `controlConfigs:!((display_settings:(hide_action_bar:!t,hide_exists:!t),field_name:kibana.alert.status,persist:!t,selected_options:!(active),title:Status),(display_settings:(hide_exists:!t),field_name:kibana.alert.rule.name,title:Rule),(field_name:kibana.alert.group.value,title:Group),(field_name:tags,title:Tags)),kuery:'',rangeFrom:now-15m,rangeTo:now)`
     );
   });
 
@@ -52,7 +52,7 @@ describe('RuleDetailsLocator', () => {
     });
     expect(location.path).toEqual(
       `${RULES_PATH}/${mockedRuleId}?tabId=alerts&searchBarParams=(` +
-        `controlConfigs:!((displaySettings:(hideActionBar:!t,hideExists:!t),fieldName:kibana.alert.status,persist:!t,selectedOptions:!(active),title:Status),(displaySettings:(hideExists:!t),fieldName:kibana.alert.rule.name,title:Rule),(fieldName:kibana.alert.group.value,title:Group),(fieldName:tags,title:Tags)),kuery:mockedKuery,rangeFrom:mockedRangeTo,rangeTo:mockedRangeFrom)`
+        `controlConfigs:!((display_settings:(hide_action_bar:!t,hide_exists:!t),field_name:kibana.alert.status,persist:!t,selected_options:!(active),title:Status),(display_settings:(hide_exists:!t),field_name:kibana.alert.rule.name,title:Rule),(field_name:kibana.alert.group.value,title:Group),(field_name:tags,title:Tags)),kuery:mockedKuery,rangeFrom:mockedRangeTo,rangeTo:mockedRangeFrom)`
     );
   });
 
@@ -94,9 +94,9 @@ describe('RuleDetailsLocator', () => {
     });
     expect(location.path).toEqual(
       `${RULES_PATH}/${mockedRuleId}?tabId=alerts&searchBarParams=(` +
-        `controlConfigs:!((displaySettings:(hideActionBar:!t,hideExists:!t),fieldName:kibana.alert.status,persist:!t,selectedOptions:!(untracked)` +
-        `,title:Status),(displaySettings:(hideExists:!t),fieldName:kibana.alert.rule.name,title:Rule),(fieldName:kibana.alert.group.value,title:Group)` +
-        `,(fieldName:tags,title:Tags)),kuery:mockedKuery,rangeFrom:mockedRangeTo,rangeTo:mockedRangeFrom)`
+        `controlConfigs:!((display_settings:(hide_action_bar:!t,hide_exists:!t),field_name:kibana.alert.status,persist:!t,selected_options:!(untracked)` +
+        `,title:Status),(display_settings:(hide_exists:!t),field_name:kibana.alert.rule.name,title:Rule),(field_name:kibana.alert.group.value,title:Group)` +
+        `,(field_name:tags,title:Tags)),kuery:mockedKuery,rangeFrom:mockedRangeTo,rangeTo:mockedRangeFrom)`
     );
   });
 });
