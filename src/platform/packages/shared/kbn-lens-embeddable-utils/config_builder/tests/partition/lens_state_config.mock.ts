@@ -112,7 +112,7 @@ export const pieLegacyBasicState = {
     adHocDataViews: {},
   },
   title: 'Partition baseline',
-  version: 1,
+  version: 2,
   visualizationType: 'lnsPie',
   references: [
     {
