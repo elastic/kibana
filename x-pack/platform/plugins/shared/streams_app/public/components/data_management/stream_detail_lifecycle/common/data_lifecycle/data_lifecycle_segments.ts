@@ -9,24 +9,23 @@ import type { EuiFlexItemProps } from '@elastic/eui';
 import type { DownsampleStep } from '@kbn/streams-schema/src/models/ingest/lifecycle';
 import { splitSizeAndUnits, toMillis } from '../../helpers/format_size_units';
 
-export interface TimelineSegment {
+interface BaseLifecycleSegment {
   grow: EuiFlexItemProps['grow'];
-  leftValue?: string;
   isDelete?: boolean;
 }
 
-export interface DownsamplingSegment {
-  grow: EuiFlexItemProps['grow'];
+export interface TimelineSegment extends BaseLifecycleSegment {
+  leftValue?: string;
+}
+
+export interface DownsamplingSegment extends BaseLifecycleSegment {
   step?: DownsampleStep;
   stepIndex?: number;
-  isDelete?: boolean;
   phaseName?: string;
 }
 
-export interface SegmentPhase {
-  grow: EuiFlexItemProps['grow'];
+export interface SegmentPhase extends BaseLifecycleSegment {
   min_age?: string;
-  isDelete?: boolean;
   downsample?: DownsampleStep;
   label?: string;
 }
@@ -59,6 +58,12 @@ const filterStepStartsBeforeRetention = (
     const startMs = toMillis(value);
     return startMs === undefined || startMs < retentionMs;
   });
+};
+
+const partitionPhases = (phases: SegmentPhase[]) => {
+  const deletePhase = phases.find((phase) => phase.isDelete);
+  const nonDeletePhases = phases.filter((phase) => !phase.isDelete);
+  return { deletePhase, nonDeletePhases };
 };
 
 const calculateGrowValues = (
@@ -96,8 +101,8 @@ export const buildDslSegments = (
   phases: SegmentPhase[],
   downsampleSteps: DownsampleStep[]
 ): { timelineSegments: TimelineSegment[]; downsamplingSegments: DownsamplingSegment[] } => {
-  const deletePhase = phases.find((phase) => phase.isDelete);
-  const basePhase = phases.find((phase) => !phase.isDelete);
+  const { deletePhase, nonDeletePhases } = partitionPhases(phases);
+  const basePhase = nonDeletePhases[0];
   const retentionLabel = deletePhase?.min_age;
   const retentionMs = toMillis(retentionLabel);
 
@@ -160,8 +165,7 @@ export const buildDslSegments = (
 export const buildIlmDownsamplingSegments = (
   phases: SegmentPhase[]
 ): DownsamplingSegment[] | null => {
-  const nonDeletePhases = phases.filter((phase) => !phase.isDelete);
-  const deletePhase = phases.find((phase) => phase.isDelete);
+  const { deletePhase, nonDeletePhases } = partitionPhases(phases);
 
   // Find which phases have downsampling
   const phasesWithDownsample = nonDeletePhases
