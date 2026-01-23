@@ -37,6 +37,7 @@ import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
+import { SidebarServiceProvider } from '@kbn/core-chrome-sidebar-context';
 import type {
   AppDeepLinkId,
   ChromeBadge,
@@ -58,6 +59,7 @@ import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { RecentlyAccessedService } from '@kbn/recently-accessed';
 import type { Logger } from '@kbn/logging';
+import { SidebarService } from '@kbn/core-chrome-sidebar-internal';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import { isPrinting$ } from './utils/printing_observable';
 import { handleEuiFullScreenChanges } from './handle_eui_fullscreen_changes';
@@ -66,7 +68,7 @@ import { DocTitleService } from './doc_title';
 import { NavControlsService } from './nav_controls';
 import { NavLinksService } from './nav_links';
 import { ProjectNavigationService } from './project_navigation';
-import { Header, LoadingIndicator, ProjectHeader } from './ui';
+import { Header, LoadingIndicator, ProjectHeader, Sidebar } from './ui';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import type { InternalChromeSetup, InternalChromeStart } from './types';
 import { HeaderTopBanner } from './ui/header/header_top_banner';
@@ -82,6 +84,7 @@ const SNAPSHOT_REGEX = /-snapshot/i;
 interface ConstructorParams {
   browserSupportsCsp: boolean;
   kibanaVersion: string;
+  basePath: string;
   coreContext: CoreContext;
 }
 
@@ -114,6 +117,7 @@ export class ChromeService {
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
   private readonly projectNavigation: ProjectNavigationService;
+  private readonly sidebar: SidebarService;
   private readonly isSideNavCollapsed$ = new BehaviorSubject(
     localStorage.getItem(IS_SIDENAV_COLLAPSED_KEY) === 'true'
   );
@@ -125,6 +129,7 @@ export class ChromeService {
     this.logger = params.coreContext.logger.get('chrome-browser');
     this.isServerless = params.coreContext.env.packageInfo.buildFlavor === 'serverless';
     this.projectNavigation = new ProjectNavigationService(this.isServerless);
+    this.sidebar = new SidebarService({ basePath: params.basePath });
   }
 
   /**
@@ -164,7 +169,10 @@ export class ChromeService {
   public setup({ analytics }: SetupDeps): InternalChromeSetup {
     const docTitle = this.docTitle.setup({ document: window.document });
     registerAnalyticsContextProvider(analytics, docTitle.title$);
-    return {};
+
+    return {
+      sidebar: this.sidebar.setup(),
+    };
   }
 
   public async start({
@@ -274,6 +282,8 @@ export class ChromeService {
     const docTitle = this.docTitle.start();
     const { customBranding$ } = customBranding;
     const helpMenuLinks$ = navControls.getHelpMenuLinks$();
+
+    const sidebar = this.sidebar.start(http.basePath.get());
 
     // erase chrome fields from a previous app while switching to a next app
     application.currentAppId$.subscribe(() => {
@@ -501,6 +511,15 @@ export class ChromeService {
         );
       },
 
+      getSidebarComponent: () => {
+        return <Sidebar />;
+      },
+
+      wrapInChromeProvider: (children: ReactNode) => {
+        // TODO: we can have more chrome context values here in the future
+        return <SidebarServiceProvider value={{ sidebar }}>{children}</SidebarServiceProvider>;
+      },
+
       // chrome APIs
       navControls,
       navLinks,
@@ -625,6 +644,7 @@ export class ChromeService {
         updateSolutionNavigations: projectNavigation.updateSolutionNavigations,
         changeActiveSolutionNavigation: projectNavigation.changeActiveSolutionNavigation,
       },
+      sidebar,
     };
   }
 
