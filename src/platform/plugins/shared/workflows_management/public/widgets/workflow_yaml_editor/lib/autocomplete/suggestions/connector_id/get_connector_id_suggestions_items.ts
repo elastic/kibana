@@ -14,10 +14,7 @@ import type { ConnectorTypeInfo } from '@kbn/workflows';
 // We use this workaround until that happens.
 // Ideally, it should be managed on custom step level.
 const aiSteps = ['ai.prompt', 'ai.summarize', 'ai.classify'];
-const aiConnectors = [
-  'gen-ai.run',
-  // 'inference.completion' // for some reason inference connectors are not recognized by InferencePluginStart
-];
+const aiConnectors = ['gen-ai.run', 'inference.chatCompletion'];
 
 /**
  * Generate connector-id suggestions for a specific connector type
