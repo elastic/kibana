@@ -429,7 +429,7 @@ export type ExceptionListItemOsTypeEnum = typeof ExceptionListItemOsType.enum;
 export const ExceptionListItemOsTypeEnum = ExceptionListItemOsType.enum;
 
 export type ExceptionListItemOsTypeArray = z.infer<typeof ExceptionListItemOsTypeArray>;
-export const ExceptionListItemOsTypeArray = z.array(ExceptionListOsType);
+export const ExceptionListItemOsTypeArray = z.array(ExceptionListItemOsType);
 
 export type ExceptionListItemComment = z.infer<typeof ExceptionListItemComment>;
 export const ExceptionListItemComment = z.object({
