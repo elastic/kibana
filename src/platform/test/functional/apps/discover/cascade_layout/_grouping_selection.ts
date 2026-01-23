@@ -66,7 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(await discover.isShowingCascadeLayout()).to.be(true);
 
-        await testSubjects.click('switch-to-dataviews');
+        await discover.selectDataViewMode();
       });
 
       it('revert to the non-group experience when the none option is selected', async () => {
