@@ -499,10 +499,10 @@ paths:
                       message: Invalid monitored field
                       username: john.doe
                   stats:
-                    failed: 1
-                    successful: 1
-                    successfulPrivilegedUsers: 1
-                    total: 2
+                    failedOperations: 1
+                    successfulOperations: 1
+                    totalOperations: 2
+                    uploaded: 1
                 type: object
                 properties:
                   errors:
@@ -2317,19 +2317,19 @@ components:
     PrivmonUserCsvUploadStats:
       type: object
       properties:
-        failed:
+        failedOperations:
           type: integer
-        successful:
+        successfulOperations:
           type: integer
-        successfulPrivilegedUsers:
+        totalOperations:
           type: integer
-        total:
+        uploaded:
           type: integer
       required:
-        - successful
-        - successfulPrivilegedUsers
-        - failed
-        - total
+        - successfulOperations
+        - uploaded
+        - failedOperations
+        - totalOperations
     RiskEngineScheduleNowErrorResponse:
       type: object
       properties:
