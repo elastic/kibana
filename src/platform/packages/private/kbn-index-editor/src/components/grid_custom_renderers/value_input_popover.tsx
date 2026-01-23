@@ -17,7 +17,7 @@ import { EuiFocusTrap, EuiForm, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useUnmount from 'react-use/lib/useUnmount';
 import { getInputComponentForType } from '../value_inputs_factory';
-import { isPlaceholderColumn } from '../../utils';
+import { getCellValue, isPlaceholderColumn } from '../../utils';
 import type { IndexEditorTelemetryService } from '../../telemetry/telemetry_service';
 
 export type OnCellValueChange = (docId: string, update: any) => void;
@@ -38,7 +38,7 @@ export const getValueInputPopover =
   ({ rowIndex, colIndex, columnId, cellContentsElement }: EuiDataGridCellPopoverElementProps) => {
     const row = rows[rowIndex];
     const docId = row.id as string;
-    const cellValue = row.flattened[columnId]?.toString() ?? '';
+    const cellValue = getCellValue(row.flattened[columnId]) ?? '';
 
     const isPlaceholder = isPlaceholderColumn(columnId);
 
@@ -171,7 +171,7 @@ export const getValueInputPopover =
           announceOnMount
           size="s"
           title={i18n.translate('indexEditor.flyout.grid.cell.noColumnDefined', {
-            defaultMessage: 'Define a column name before adding cell values',
+            defaultMessage: 'Define a field name before adding cell values',
           })}
         />
       );

@@ -26,15 +26,16 @@ export const testRollback: Task = async (ctx, task) => {
 
   const subtasks: ListrTask<TaskContext>[] = [
     {
-      title: `Run rollback migration on updated types: '${ctx.updatedTypes
+      title: `Run rollback migration on updated types: '${updatedTypes
         .map(({ name }) => name)
         .join(', ')}'`,
       task: async () => await performRollback(),
     },
     {
-      title: `Ensure SO API-retrieved SOs match previous version fixtures`,
+      title: `Ensure API-retrieved SOs match previous version fixtures`,
       task: checkDocuments({
         repository: savedObjectsRepository,
+        types: previousVersionTypes,
         fixtures: ctx.fixtures.previous,
       }),
     },

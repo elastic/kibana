@@ -46,6 +46,7 @@
       "triggersActionsUi",
       "uiActions",
       "unifiedSearch",
+      "kql",
       "files",
       "controls",
       "dataViewEditor",
@@ -63,6 +64,7 @@
       "productDocBase",
       "telemetry",
       "elasticAssistantSharedState",
+      "share"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",
@@ -78,7 +80,9 @@
       "osquery",
       "savedObjectsTaggingOss",
       "automaticImport",
-      "serverless"
+      "serverless",
+      "agentBuilder",
+      "llmTasks"
     ],
     "requiredBundles": [
       "esUiShared",
@@ -89,7 +93,8 @@
       "lists",
       "ml",
       "unifiedSearch",
-      "esql"
+      "esql",
+      "agentBuilder"
     ],
     "extraPublicDirs": [
       "common"

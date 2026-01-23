@@ -38,6 +38,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/private/kbn-split-button/src/split_button.tsx",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -58,6 +60,59 @@
               }
             ],
             "path": "src/platform/packages/private/kbn-split-button/src/split_button.tsx",
+            "lineNumber": 29,
+            "columnNumber": 29,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/split-button",
+        "id": "def-common.SplitButtonWithNotification",
+        "type": "Function",
+        "tags": [],
+        "label": "SplitButtonWithNotification",
+        "description": [],
+        "signature": [
+          "({ showNotificationIndicator, notificationIndicatorColor, notificationIndicatorSize, notifcationIndicatorTooltipContent, notificationIndicatorPosition, notificationIndicatorHasStroke, ...splitButtonProps }: ",
+          {
+            "pluginId": "@kbn/split-button",
+            "scope": "common",
+            "docId": "kibKbnSplitButtonPluginApi",
+            "section": "def-common.SplitButtonWithNotificationProps",
+            "text": "SplitButtonWithNotificationProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/private/kbn-split-button/src/split_button_with_notification.tsx",
+        "lineNumber": 35,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/split-button",
+            "id": "def-common.SplitButtonWithNotification.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  showNotificationIndicator = false,\n  notificationIndicatorColor = 'primary',\n  notificationIndicatorSize = 'l',\n  notifcationIndicatorTooltipContent,\n  notificationIndicatorPosition,\n  notificationIndicatorHasStroke = true,\n  ...splitButtonProps\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/split-button",
+                "scope": "common",
+                "docId": "kibKbnSplitButtonPluginApi",
+                "section": "def-common.SplitButtonWithNotificationProps",
+                "text": "SplitButtonWithNotificationProps"
+              }
+            ],
+            "path": "src/platform/packages/private/kbn-split-button/src/split_button_with_notification.tsx",
+            "lineNumber": 35,
+            "columnNumber": 45,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -101,6 +156,32 @@
           "; secondaryButtonAriaLabel?: string | undefined; secondaryButtonTitle?: string | undefined; secondaryButtonFill?: boolean | undefined; onSecondaryButtonClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; }"
         ],
         "path": "src/platform/packages/private/kbn-split-button/src/split_button.tsx",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/split-button",
+        "id": "def-common.SplitButtonWithNotificationProps",
+        "type": "Type",
+        "tags": [],
+        "label": "SplitButtonWithNotificationProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/split-button",
+            "scope": "common",
+            "docId": "kibKbnSplitButtonPluginApi",
+            "section": "def-common.SplitButtonProps",
+            "text": "SplitButtonProps"
+          },
+          " & { showNotificationIndicator?: boolean | undefined; notificationIndicatorColor?: string | undefined; notificationIndicatorSize?: \"m\" | \"original\" | \"s\" | \"l\" | \"xl\" | \"xxl\" | undefined; notifcationIndicatorTooltipContent?: string | undefined; notificationIndicatorPosition?: { top?: number | undefined; right?: number | undefined; left?: number | undefined; bottom?: number | undefined; } | undefined; notificationIndicatorHasStroke?: boolean | undefined; }"
+        ],
+        "path": "src/platform/packages/private/kbn-split-button/src/split_button_with_notification.tsx",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -31,6 +31,7 @@ import {
   processingDissectSuggestionsSchema,
 } from './dissect_suggestions_handler';
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
+import { isNoLLMSuggestionsError } from './no_llm_suggestions_error';
 
 const paramsSchema = z.object({
   path: z.object({ name: z.string() }),
@@ -75,7 +76,7 @@ export interface ProcessingSuggestionBody {
 type GrokSuggestionResponse = Observable<
   ServerSentEventBase<
     'grok_suggestion',
-    { grokProcessor: Awaited<ReturnType<typeof handleProcessingGrokSuggestions>> }
+    { grokProcessor: Awaited<ReturnType<typeof handleProcessingGrokSuggestions>> | null }
   >
 >;
 
@@ -95,6 +96,7 @@ export const processingGrokSuggestionRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    logger,
   }): Promise<GrokSuggestionResponse> => {
     const isAvailableForTier = server.core.pricing.isFeatureAvailable(STREAMS_TIERED_ML_FEATURE.id);
     if (!isAvailableForTier) {
@@ -116,6 +118,14 @@ export const processingGrokSuggestionRoute = createServerRoute({
         scopedClusterClient,
         fieldsMetadataClient,
         signal: getRequestAbortSignal(request),
+        logger,
+      }).catch((error) => {
+        if (isNoLLMSuggestionsError(error)) {
+          logger.debug('No LLM suggestions available for grok processing');
+          // Return null to indicate no suggestions were generated
+          return null;
+        }
+        throw error;
       })
     ).pipe(
       map((grokProcessor) => ({
@@ -129,7 +139,7 @@ export const processingGrokSuggestionRoute = createServerRoute({
 type DissectSuggestionResponse = Observable<
   ServerSentEventBase<
     'dissect_suggestion',
-    { dissectProcessor: Awaited<ReturnType<typeof handleProcessingDissectSuggestions>> }
+    { dissectProcessor: Awaited<ReturnType<typeof handleProcessingDissectSuggestions>> | null }
   >
 >;
 
@@ -149,6 +159,7 @@ export const processingDissectSuggestionRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    logger,
   }): Promise<DissectSuggestionResponse> => {
     const isAvailableForTier = server.core.pricing.isFeatureAvailable(STREAMS_TIERED_ML_FEATURE.id);
     if (!isAvailableForTier) {
@@ -170,6 +181,14 @@ export const processingDissectSuggestionRoute = createServerRoute({
         scopedClusterClient,
         fieldsMetadataClient,
         signal: getRequestAbortSignal(request),
+        logger,
+      }).catch((error) => {
+        if (isNoLLMSuggestionsError(error)) {
+          logger.debug('No LLM suggestions available for dissect processing');
+          // Return null to indicate no suggestions were generated
+          return null;
+        }
+        throw error;
       })
     ).pipe(
       map((dissectProcessor) => ({

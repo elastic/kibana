@@ -10,6 +10,7 @@
 // TODO: Remove eslint exceptions comments and fix the issues
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { ExecutionError } from '@kbn/workflows/server';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
 import type { ConnectorExecutor } from '../connector_executor';
@@ -51,26 +52,15 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
       const isSubAction = subActionName !== null;
 
       // TODO: remove this once we have a proper connector executor/step for console
-      if (step.type === 'console.log' || step.type === 'console') {
+      if (step.type === 'console') {
         this.workflowLogger.logInfo(`Log from step ${step.name}: \n${withInputs.message}`, {
           workflow: { step_id: step.name },
           event: { action: 'log', outcome: 'success' },
           tags: ['console', 'log'],
         });
-        // eslint-disable-next-line no-console
-        console.log(withInputs.message);
         return {
           input: withInputs,
           output: withInputs.message,
-          error: undefined,
-        };
-      } else if (step.type === 'delay') {
-        const delayTime = step.with?.delay ?? 1000;
-        // this.contextManager.logDebug(`Delaying for ${delayTime}ms`);
-        await new Promise((resolve) => setTimeout(resolve, delayTime));
-        return {
-          input: withInputs,
-          output: `Delayed for ${delayTime}ms`,
           error: undefined,
         };
       }
@@ -100,7 +90,7 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
         this.stepExecutionRuntime.abortController
       );
 
-      const { data, status, message } = output;
+      const { data, status, message, serviceMessage } = output;
 
       if (status === 'ok') {
         return {
@@ -109,7 +99,14 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
           error: undefined,
         };
       } else {
-        return this.handleFailure(withInputs, message);
+        return {
+          input: withInputs,
+          output: undefined,
+          error: new ExecutionError({
+            type: 'ConnectorExecutionError',
+            message: serviceMessage ?? message ?? 'Unknown error',
+          }),
+        };
       }
     } catch (error) {
       return this.handleFailure(withInputs, error);

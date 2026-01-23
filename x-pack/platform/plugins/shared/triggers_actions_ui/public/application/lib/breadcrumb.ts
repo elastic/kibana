@@ -89,3 +89,22 @@ export const getAlertingSectionBreadcrumb = (
       };
   }
 };
+
+/**
+ * Get the rules breadcrumb with the appropriate href based on app registration
+ */
+export const getRulesBreadcrumbWithHref = (
+  isAppRegistered: (appId: string) => boolean,
+  getUrlForApp: (appId: string, options?: { path?: string }) => string
+) => {
+  const rulesBreadcrumb = getAlertingSectionBreadcrumb('rules', true);
+
+  const breadcrumbHref = isAppRegistered('rules')
+    ? getUrlForApp('rules', { path: '/' })
+    : getUrlForApp('management', { path: 'insightsAndAlerting/triggersActions/rules' });
+
+  return {
+    ...rulesBreadcrumb,
+    href: breadcrumbHref,
+  };
+};

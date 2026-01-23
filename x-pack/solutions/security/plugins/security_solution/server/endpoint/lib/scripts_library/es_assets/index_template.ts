@@ -32,21 +32,7 @@ export const ScriptsFileMetadataIndexTemplate = deepFreeze<IndicesPutIndexTempla
     },
     mappings: {
       dynamic: false,
-      properties: {
-        file: {
-          properties: {
-            Status: { type: 'keyword' },
-            ChunkSize: { type: 'integer' },
-            Compression: { type: 'keyword' },
-            name: { type: 'keyword' },
-            Meta: {
-              properties: {
-                script_id: { type: 'keyword' },
-              },
-            },
-          },
-        },
-      },
+      properties: {},
     },
   },
 }) as IndicesPutIndexTemplateRequest;
@@ -71,23 +57,7 @@ export const ScriptsFileDataIndexTemplate = deepFreeze<IndicesPutIndexTemplateRe
     },
     mappings: {
       dynamic: false,
-      properties: {
-        data: {
-          type: 'binary',
-          store: true,
-        },
-        bid: {
-          type: 'keyword',
-        },
-        sha2: {
-          type: 'keyword',
-          index: false,
-        },
-        last: {
-          type: 'boolean',
-          index: false,
-        },
-      },
+      properties: {},
     },
   },
 }) as IndicesPutIndexTemplateRequest;

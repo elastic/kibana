@@ -15,6 +15,7 @@ import type { CoreStart } from '@kbn/core/server';
 import type { EsWorkflowExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import { ExecutionError } from '@kbn/workflows/server';
 import { buildWorkflowContext } from './build_workflow_context';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
@@ -201,9 +202,10 @@ export class WorkflowExecutionRuntimeManager {
     });
   }
 
-  public setWorkflowError(error: Error | string | undefined): void {
+  public setWorkflowError(error: Error | undefined): void {
+    const executionError = error ? ExecutionError.fromError(error) : undefined;
     this.workflowExecutionState.updateWorkflowExecution({
-      error: error ? String(error) : undefined,
+      error: executionError ? executionError.toSerializableObject() : undefined,
     });
   }
 

@@ -39,7 +39,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
   data-test-subj="hoverVisibilityContainer"
 >
   <div
-    class="euiFlexGroup e1v2bxdw0 emotion-euiFlexGroup-responsive-l-flexStart-stretch-row-OverviewWrapper"
+    class="euiFlexGroup e1v2bxdw0 emotion-euiFlexGroup-responsive-m-flexStart-stretch-row-OverviewWrapper"
     data-test-subj="host-overview"
   >
     <button
@@ -99,6 +99,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                           >
                             <span
                               class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                              id="generated-id-wrapper"
                             >
                               aa7ca589f1b8220002f2fc61c64cfbf1
                             </span>
@@ -186,6 +187,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       <button
                         class="euiLink emotion-euiLink-primary"
@@ -259,6 +261,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       42:01:0a:8e:00:07
                     </span>
@@ -303,6 +306,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       debian
                     </span>
@@ -356,6 +360,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       Debian GNU/Linux
                     </span>
@@ -400,6 +405,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       debian
                     </span>
@@ -444,6 +450,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       9 (stretch)
                     </span>
@@ -488,6 +495,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       x86_64
                     </span>
@@ -541,6 +549,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       gce
                     </span>
@@ -585,6 +594,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       us-east-1
                     </span>
@@ -629,6 +639,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       423232333829362673777
                     </span>
@@ -673,6 +684,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       custom-4-16384
                     </span>
@@ -735,7 +747,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
   data-test-subj="hoverVisibilityContainer"
 >
   <div
-    class="euiFlexGroup e1v2bxdw0 emotion-euiFlexGroup-l-flexStart-stretch-column-OverviewWrapper"
+    class="euiFlexGroup e1v2bxdw0 emotion-euiFlexGroup-m-flexStart-stretch-column-OverviewWrapper"
     data-test-subj="host-overview"
   >
     <div
@@ -780,6 +792,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                           >
                             <span
                               class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                              id="generated-id-wrapper"
                             >
                               aa7ca589f1b8220002f2fc61c64cfbf1
                             </span>
@@ -867,6 +880,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       <button
                         class="euiLink emotion-euiLink-primary"
@@ -940,6 +954,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       42:01:0a:8e:00:07
                     </span>
@@ -984,6 +999,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       debian
                     </span>
@@ -1037,6 +1053,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       Debian GNU/Linux
                     </span>
@@ -1081,6 +1098,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       debian
                     </span>
@@ -1125,6 +1143,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       9 (stretch)
                     </span>
@@ -1169,6 +1188,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       x86_64
                     </span>
@@ -1222,6 +1242,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       gce
                     </span>
@@ -1266,6 +1287,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       us-east-1
                     </span>
@@ -1310,6 +1332,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       423232333829362673777
                     </span>
@@ -1354,6 +1377,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       custom-4-16384
                     </span>

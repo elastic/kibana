@@ -9,7 +9,13 @@ import moment from 'moment';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
 import type { EuiTableSortingType, EuiSelectableOption } from '@elastic/eui';
+import {
+  getRuleDetailsRoute,
+  getRulesAppDetailsRoute,
+  triggersActionsRoute,
+} from '@kbn/rule-data-utils/src/routes/stack_rule_paths';
 import {
   EuiBasicTable,
   EuiFlexGroup,
@@ -32,6 +38,10 @@ import {
   parseDuration,
   MONITORING_HISTORY_LIMIT,
 } from '@kbn/alerting-plugin/common';
+
+import { getRouterLinkProps } from '@kbn/router-utils';
+
+import { useKibana } from '../../../../common/lib/kibana';
 
 import {
   SELECT_ALL_RULES,
@@ -247,6 +257,13 @@ export const RulesListTable = (props: RulesListTableProps) => {
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const { euiTheme } = useEuiTheme();
 
+  // Detect current app to determine the correct path format
+  const {
+    services: { application },
+  } = useKibana();
+  const currentAppId = useObservable(application.currentAppId$, undefined);
+  const isInRulesApp = currentAppId === 'rules';
+
   const ruleRowCss = css`
     .actRulesList__tableRowDisabled {
       background-color: ${euiTheme.colors.lightestShade};
@@ -377,6 +394,13 @@ export const RulesListTable = (props: RulesListTableProps) => {
             disabled={!rule.isEditable || rule.isInternallyManaged}
             checked={isRowSelected(rule)}
             data-test-subj={`checkboxSelectRow-${rule.id}`}
+            aria-label={i18n.translate(
+              'xpack.triggersActionsUI.sections.rulesList.selectRuleCheckbox',
+              {
+                defaultMessage: 'Select rule {ruleName}',
+                values: { ruleName: rule.name },
+              }
+            )}
           />
         );
       },
@@ -406,13 +430,22 @@ export const RulesListTable = (props: RulesListTableProps) => {
         render: (name: string, rule: RuleTableItem) => {
           const ruleType = ruleTypesState.data.get(rule.ruleTypeId);
           const checkEnabledResult = checkRuleTypeEnabled(ruleType);
+          const pathToRuleDetails = isInRulesApp
+            ? `rules${getRulesAppDetailsRoute(rule.id)}`
+            : `${triggersActionsRoute}${getRuleDetailsRoute(rule.id)}`;
+
+          const linkProps = getRouterLinkProps({
+            href: pathToRuleDetails,
+            onClick: () => onRuleClick(rule),
+          });
+
           const link = (
             <>
               <EuiFlexGroup direction="column" gutterSize="xs">
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="xs">
                     <EuiFlexItem grow={false}>
-                      <EuiLink title={name} onClick={() => onRuleClick(rule)}>
+                      <EuiLink title={name} {...linkProps}>
                         {name}
                       </EuiLink>
                     </EuiFlexItem>
@@ -865,6 +898,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
     config.minimumScheduleInterval,
     isLoadingMap,
     isRuleTypeEditableInContext,
+    isInRulesApp,
     onRuleChanged,
     onRuleClick,
     onRuleDeleteClick,

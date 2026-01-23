@@ -22,18 +22,16 @@ describe('buildStateSubscribe', () => {
   const stateContainer = getDiscoverStateMock({ savedSearch });
   stateContainer.dataState.refetch$.next = jest.fn();
   stateContainer.dataState.reset = jest.fn();
-  stateContainer.actions.setDataView = jest.fn();
   stateContainer.savedSearchState.update = jest.fn();
+  jest.spyOn(internalStateActions, 'assignNextDataView');
 
   const getSubscribeFn = () => {
     return buildStateSubscribe({
-      appState: stateContainer.appState,
       savedSearchState: stateContainer.savedSearchState,
       dataState: stateContainer.dataState,
       internalState: stateContainer.internalState,
       runtimeStateManager: stateContainer.runtimeStateManager,
       services: discoverServiceMock,
-      setDataView: stateContainer.actions.setDataView,
       getCurrentTab: stateContainer.getCurrentTab,
     });
   };
@@ -47,20 +45,23 @@ describe('buildStateSubscribe', () => {
       dataSource: createDataViewDataSource({ dataViewId: dataViewComplexMock.id! }),
     });
 
-    expect(stateContainer.actions.setDataView).toHaveBeenCalledWith(dataViewComplexMock);
+    expect(internalStateActions.assignNextDataView as jest.Mock).toHaveBeenCalledWith({
+      tabId: 'the-saved-search-id',
+      dataView: dataViewComplexMock,
+    });
     expect(stateContainer.dataState.reset).toHaveBeenCalled();
     expect(stateContainer.dataState.refetch$.next).toHaveBeenCalled();
   });
 
   it('should not call refetch$ if nothing changes', async () => {
-    await getSubscribeFn()(stateContainer.appState.get());
+    await getSubscribeFn()(stateContainer.getCurrentTab().appState);
 
     expect(stateContainer.dataState.refetch$.next).not.toHaveBeenCalled();
   });
 
   it('should not call refetch$ if viewMode changes', async () => {
     await getSubscribeFn()({
-      ...stateContainer.appState.get(),
+      ...stateContainer.getCurrentTab().appState,
       dataSource: {
         type: DataSourceType.Esql,
       },
@@ -86,6 +87,12 @@ describe('buildStateSubscribe', () => {
 
   it('should call refetch$ if breakdownField has changed', async () => {
     await getSubscribeFn()({ breakdownField: '💣' });
+
+    expect(stateContainer.dataState.refetch$.next).toHaveBeenCalled();
+  });
+
+  it('should call refetch$ if interval has changed', async () => {
+    await getSubscribeFn()({ interval: 'm' });
 
     expect(stateContainer.dataState.refetch$.next).toHaveBeenCalled();
   });

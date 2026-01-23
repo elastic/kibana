@@ -14,7 +14,7 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/apm-synthtrace-client",
+    "@kbn/synthtrace-client",
     "@kbn/evals",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/tooling-log",
@@ -30,7 +30,8 @@
     "@kbn/test",
     "@kbn/scout",
     "@kbn/some-dev-log",
-    "@kbn/apm-synthtrace",
-    "@kbn/onechat-common",
+    "@kbn/synthtrace",
+    "@kbn/agent-builder-common",
+    "@kbn/es-snapshot-loader"
   ]
 }

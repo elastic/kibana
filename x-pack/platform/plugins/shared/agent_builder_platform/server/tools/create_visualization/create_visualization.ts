@@ -6,15 +6,18 @@
  */
 
 import { z } from '@kbn/zod';
-import { platformCoreTools, ToolType } from '@kbn/onechat-common';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { ToolResultType, SupportedChartType } from '@kbn/onechat-common/tools/tool_result';
+import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import parse from 'joi-to-json';
 
 import { esqlMetricState } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/metric';
 import { gaugeStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/gauge';
 import { tagcloudStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/tagcloud';
-import { getToolResultId } from '@kbn/onechat-server';
+import { xyStateSchema } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/xy';
+import { regionMapStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/region_map';
+import { heatmapStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/heatmap';
+import { getToolResultId } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID } from '@kbn/management-settings-ids';
 import { guessChartType } from './guess_chart_type';
 import { createVisualizationGraph } from './graph_lens';
@@ -22,15 +25,31 @@ import { createVisualizationGraph } from './graph_lens';
 const metricSchema = parse(esqlMetricState.getSchema()) as object;
 const gaugeSchema = parse(gaugeStateSchemaESQL.getSchema()) as object;
 const tagcloudSchema = parse(tagcloudStateSchemaESQL.getSchema()) as object;
+const xySchema = parse(xyStateSchema.getSchema()) as object;
+const regionMapSchema = parse(regionMapStateSchemaESQL.getSchema()) as object;
+const heatmapSchema = parse(heatmapStateSchemaESQL.getSchema()) as object;
 
 const createVisualizationSchema = z.object({
   query: z.string().describe('A natural language query describing the desired visualization.'),
+  index: z
+    .string()
+    .optional()
+    .describe(
+      '(optional) Index, alias, or datastream to target. If not provided, the tool will attempt to discover the best index to use.'
+    ),
   existingConfig: z
     .string()
     .optional()
     .describe('An existing visualization configuration to modify.'),
   chartType: z
-    .enum([SupportedChartType.Metric, SupportedChartType.Gauge, SupportedChartType.Tagcloud])
+    .enum([
+      SupportedChartType.Metric,
+      SupportedChartType.Gauge,
+      SupportedChartType.Tagcloud,
+      SupportedChartType.XY,
+      SupportedChartType.RegionMap,
+      SupportedChartType.Heatmap,
+    ])
     .optional()
     .describe(
       '(optional) The type of chart to create as indicated by the user. If not provided, the LLM will suggest the best chart type.'
@@ -67,7 +86,7 @@ This tool will:
     },
     tags: [],
     handler: async (
-      { query: nlQuery, chartType, esql, existingConfig },
+      { query: nlQuery, index, chartType, esql, existingConfig },
       { esClient, modelProvider, logger, events }
     ) => {
       try {
@@ -92,6 +111,12 @@ This tool will:
           schema = gaugeSchema;
         } else if (selectedChartType === SupportedChartType.Tagcloud) {
           schema = tagcloudSchema;
+        } else if (selectedChartType === SupportedChartType.XY) {
+          schema = xySchema;
+        } else if (selectedChartType === SupportedChartType.RegionMap) {
+          schema = regionMapSchema;
+        } else if (selectedChartType === SupportedChartType.Heatmap) {
+          schema = heatmapSchema;
         } else {
           schema = metricSchema;
         }
@@ -101,6 +126,7 @@ This tool will:
 
         const finalState = await graph.invoke({
           nlQuery,
+          index,
           chartType: selectedChartType,
           schema,
           existingConfig,

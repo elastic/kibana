@@ -5,10 +5,10 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { apm, timerange } from '@kbn/synthtrace-client';
 import type { APIClientRequestParamsOf } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import type { RecursivePartial } from '@kbn/apm-plugin/typings/common';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import { keyBy } from 'lodash';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 

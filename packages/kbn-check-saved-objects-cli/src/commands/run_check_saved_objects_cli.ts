@@ -40,7 +40,6 @@ export function runCheckSavedObjectsCli() {
 
       const context: TaskContext = {
         gitRev: gitRev!,
-        newTypes: [],
         updatedTypes: [],
         currentRemovedTypes: [],
         newRemovedTypes: [],
@@ -141,6 +140,7 @@ export function runCheckSavedObjectsCli() {
           fallbackRenderer: 'simple',
           rendererOptions: {
             collapseSubtasks: false,
+            showErrorMessage: false,
             timer: PRESET_TIMER,
           },
         }
@@ -168,6 +168,11 @@ export function runCheckSavedObjectsCli() {
           ],
           { fallbackRenderer: 'simple', exitOnError: false }
         ).run(context);
+      }
+      if (exitCode) {
+        log.warning(
+          'Validation Failed. Please refer to our troubleshooting guide for more information: https://www.elastic.co/docs/extend/kibana/saved-objects#troubleshooting'
+        );
       }
       process.exit(exitCode);
     },

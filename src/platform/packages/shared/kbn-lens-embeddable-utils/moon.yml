@@ -30,6 +30,9 @@ dependsOn:
   - '@kbn/content-management-utils'
   - '@kbn/lens-common'
   - '@kbn/chart-expressions-common'
+  - '@kbn/expression-xy-plugin'
+  - '@kbn/utility-types'
+  - '@kbn/transpose-utils'
 tags:
   - shared-common
   - package

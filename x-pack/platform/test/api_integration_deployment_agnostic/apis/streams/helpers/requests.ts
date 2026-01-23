@@ -179,80 +179,6 @@ export async function getQueries(
     .then((response) => response.body);
 }
 
-export async function linkDashboard(
-  apiClient: StreamsSupertestRepositoryClient,
-  stream: string,
-  id: string
-) {
-  const response = await apiClient.fetch(
-    'PUT /api/streams/{name}/dashboards/{dashboardId} 2023-10-31',
-    {
-      params: { path: { name: stream, dashboardId: id } },
-    }
-  );
-
-  expect(response.status).to.be(200);
-}
-
-export async function linkRule(
-  apiClient: StreamsSupertestRepositoryClient,
-  stream: string,
-  id: string
-) {
-  const response = await apiClient.fetch('PUT /api/streams/{name}/rules/{ruleId} 2023-10-31', {
-    params: { path: { name: stream, ruleId: id } },
-  });
-
-  expect(response.status).to.be(200);
-}
-
-export async function unlinkRule(
-  apiClient: StreamsSupertestRepositoryClient,
-  stream: string,
-  id: string
-) {
-  const response = await apiClient.fetch('DELETE /api/streams/{name}/rules/{ruleId} 2023-10-31', {
-    params: { path: { name: stream, ruleId: id } },
-  });
-
-  expect(response.status).to.be(200);
-}
-
-export async function getRules(apiClient: StreamsSupertestRepositoryClient, stream: string) {
-  const response = await apiClient.fetch('GET /api/streams/{name}/rules 2023-10-31', {
-    params: { path: { name: stream } },
-  });
-
-  expect(response.status).to.be(200);
-
-  return response.body;
-}
-
-export async function getDashboards(apiClient: StreamsSupertestRepositoryClient, stream: string) {
-  const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
-    params: { path: { name: stream } },
-  });
-
-  expect(response.status).to.be(200);
-
-  return response.body;
-}
-
-export async function getDashboardSuggestions(options: {
-  apiClient: StreamsSupertestRepositoryClient;
-  stream: string;
-  tags: string[];
-  query?: string;
-}) {
-  const { apiClient, stream, tags, query = '' } = options;
-  const response = await apiClient.fetch('POST /internal/streams/{name}/dashboards/_suggestions', {
-    params: { path: { name: stream }, body: { tags }, query: { query } },
-  });
-  expect(response.status).to.be(200);
-
-  return response.body;
-}
-
 export async function linkAttachment(options: {
   apiClient: StreamsSupertestRepositoryClient;
   stream: string;
@@ -304,21 +230,30 @@ export async function unlinkAttachment(options: {
 export async function getAttachments(options: {
   apiClient: StreamsSupertestRepositoryClient;
   stream: string;
-  type?: AttachmentType;
+  filters?: {
+    types?: AttachmentType[];
+    query?: string;
+    tags?: string[];
+  };
   expectedStatusCode?: number;
   spaceId?: string;
 }) {
-  const { apiClient, stream, type, expectedStatusCode = 200, spaceId } = options;
+  const { apiClient, stream, filters, expectedStatusCode = 200, spaceId } = options;
 
   const baseEndpoint = 'GET /api/streams/{streamName}/attachments 2023-10-31';
   const endpoint = spaceId
     ? (baseEndpoint.replace('/api/', `/s/${spaceId}/api/`) as typeof baseEndpoint)
     : baseEndpoint;
 
+  const queryParams: Record<string, unknown> = {};
+  if (filters?.types) queryParams.attachmentTypes = filters.types;
+  if (filters?.query) queryParams.query = filters.query;
+  if (filters?.tags) queryParams.tags = filters.tags;
+
   const response = await apiClient.fetch(endpoint, {
     params: {
       path: { streamName: stream },
-      query: type ? { attachmentType: type } : {},
+      query: queryParams,
     },
   });
 
@@ -357,32 +292,30 @@ export async function bulkAttachments(options: {
 export async function getAttachmentSuggestions(options: {
   apiClient: StreamsSupertestRepositoryClient;
   stream: string;
-  type?: AttachmentType;
-  tags?: string[];
-  query?: string;
+  filters?: {
+    types?: AttachmentType[];
+    query?: string;
+    tags?: string[];
+  };
   expectedStatusCode?: number;
   spaceId?: string;
 }) {
-  const {
-    apiClient,
-    stream,
-    type,
-    tags = [],
-    query = '',
-    expectedStatusCode = 200,
-    spaceId,
-  } = options;
+  const { apiClient, stream, filters, expectedStatusCode = 200, spaceId } = options;
 
-  const baseEndpoint = 'POST /internal/streams/{streamName}/attachments/_suggestions';
+  const baseEndpoint = 'GET /internal/streams/{streamName}/attachments/_suggestions';
   const endpoint = spaceId
     ? (baseEndpoint.replace('/internal/', `/s/${spaceId}/internal/`) as typeof baseEndpoint)
     : baseEndpoint;
 
+  const queryParams: Record<string, unknown> = {};
+  if (filters?.query) queryParams.query = filters.query;
+  if (filters?.types) queryParams.attachmentTypes = filters.types;
+  if (filters?.tags) queryParams.tags = filters.tags;
+
   const response = await apiClient.fetch(endpoint, {
     params: {
       path: { streamName: stream },
-      body: { tags },
-      query: { query, ...(type ? { attachmentType: type } : {}) },
+      query: queryParams,
     },
   });
   expect(response.status).to.be(expectedStatusCode);

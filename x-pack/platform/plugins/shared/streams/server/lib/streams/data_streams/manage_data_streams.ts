@@ -12,7 +12,7 @@ import type {
   IngestStreamLifecycleDisabled,
   IngestStreamLifecycleILM,
 } from '@kbn/streams-schema';
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import type {
   IndicesDataStreamFailureStore,
   IndicesSimulateTemplateTemplate,
@@ -67,8 +67,10 @@ export async function upsertDataStream({ esClient, name, logger }: DataStreamMan
     await retryTransientEsErrors(() => esClient.indices.createDataStream({ name }), { logger });
     logger.debug(() => `Installed data stream: ${name}`);
   } catch (error: any) {
-    logger.error(`Error creating data stream: ${error.message}`);
-    throw error;
+    if (error?.meta?.body?.error?.type !== 'resource_already_exists_exception') {
+      logger.error(`Error creating data stream: ${error.message}`);
+      throw error;
+    }
   }
 }
 
@@ -301,11 +303,6 @@ export async function updateDataStreamsFailureStore({
 
     // Handle { inherit: {} }
     if (isInheritFailureStore(failureStore)) {
-      if (Streams.WiredStream.Definition.is(stream)) {
-        throw new Error(
-          `Inherit failure store configuration is not supported for wired streams. Stream ${stream.name} is a wired stream.`
-        );
-      }
       const response = await retryTransientEsErrors(
         () => esClient.indices.simulateIndexTemplate({ name: stream.name }),
         { logger }

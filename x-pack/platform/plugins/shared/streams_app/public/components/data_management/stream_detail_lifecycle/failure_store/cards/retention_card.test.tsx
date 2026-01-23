@@ -26,8 +26,6 @@ const mockUseFailureStoreConfig = useFailureStoreConfig as jest.MockedFunction<
 
 const renderI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
-const mockRefresh = jest.fn();
-
 const createMockConfig = (
   config: Partial<ReturnType<typeof useFailureStoreConfig>>
 ): ReturnType<typeof useFailureStoreConfig> => {
@@ -41,7 +39,7 @@ const createMockConfig = (
       isWired: false,
       isCurrentlyInherited: false,
     },
-    refreshDefaultRetention: mockRefresh,
+
     ...config,
   };
   mockUseFailureStoreConfig.mockReturnValue(fullConfig);
@@ -58,7 +56,6 @@ const mockClassicInheritConfig: ReturnType<typeof useFailureStoreConfig> = {
     isWired: false,
     isCurrentlyInherited: true,
   },
-  refreshDefaultRetention: mockRefresh,
 };
 
 const mockClassicOverrideConfig: ReturnType<typeof useFailureStoreConfig> = {
@@ -71,7 +68,6 @@ const mockClassicOverrideConfig: ReturnType<typeof useFailureStoreConfig> = {
     isWired: false,
     isCurrentlyInherited: false,
   },
-  refreshDefaultRetention: mockRefresh,
 };
 
 const mockWiredInheritConfig: ReturnType<typeof useFailureStoreConfig> = {
@@ -84,7 +80,6 @@ const mockWiredInheritConfig: ReturnType<typeof useFailureStoreConfig> = {
     isWired: true,
     isCurrentlyInherited: true,
   },
-  refreshDefaultRetention: mockRefresh,
 };
 
 const mockWiredOverrideConfig: ReturnType<typeof useFailureStoreConfig> = {
@@ -97,7 +92,6 @@ const mockWiredOverrideConfig: ReturnType<typeof useFailureStoreConfig> = {
     isWired: true,
     isCurrentlyInherited: false,
   },
-  refreshDefaultRetention: mockRefresh,
 };
 
 const mockWiredRootConfig: ReturnType<typeof useFailureStoreConfig> = {
@@ -110,7 +104,6 @@ const mockWiredRootConfig: ReturnType<typeof useFailureStoreConfig> = {
     isWired: true,
     isCurrentlyInherited: false,
   },
-  refreshDefaultRetention: mockRefresh,
 };
 
 describe('RetentionCard', () => {
@@ -165,7 +158,7 @@ describe('RetentionCard', () => {
     );
   });
 
-  it('includes edit & discover actions when privileged', () => {
+  it('includes edit action when privileged', () => {
     const openModal = jest.fn();
     const mockConfig = createMockConfig({});
     renderI18n(
@@ -178,7 +171,6 @@ describe('RetentionCard', () => {
     );
     fireEvent.click(screen.getByTestId('streamFailureStoreEditRetention'));
     expect(openModal).toHaveBeenCalledWith(true);
-    expect(screen.getByTestId('streamFailureStoreViewInDiscover')).toBeInTheDocument();
   });
 
   it('omits edit action when lacking privilege', () => {
@@ -192,7 +184,6 @@ describe('RetentionCard', () => {
       />
     );
     expect(screen.queryByTestId('streamFailureStoreEditRetention')).toBeNull();
-    expect(screen.getByTestId('streamFailureStoreViewInDiscover')).toBeInTheDocument();
   });
 
   it('renders infinite retention when lifecycle is disabled', () => {
@@ -208,7 +199,7 @@ describe('RetentionCard', () => {
 
     expect(screen.getByTestId('failureStoreRetention-metric')).toHaveTextContent('∞');
     expect(screen.getByTestId('failureStoreRetention-metric-subtitle')).toHaveTextContent(
-      /Infinite retention/i
+      /Indefinite retention/i
     );
   });
 

@@ -25,6 +25,7 @@ import { ReorderProvider } from '@kbn/dom-drag-drop';
 import { DimensionButton } from '@kbn/visualization-ui-components';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import type { VisualizationDimensionGroupConfig } from '@kbn/lens-common';
 import { getTabIdAttribute } from '@kbn/unified-tabs';
 import { isOperation } from '../../../types_guards';
@@ -44,7 +45,6 @@ import { FlyoutContainer } from '../../../shared_components/flyout_container';
 import { LENS_LAYER_TABS_CONTENT_ID } from '../../../app_plugin/shared/edit_on_the_fly/layer_tabs';
 import { FakeDimensionButton } from './buttons/fake_dimension_button';
 import { getLongMessage } from '../../../user_messages_utils';
-import { isApiESQLVariablesCompatible } from '../../../react_embeddable/type_guards';
 import { ESQLEditor } from './esql_editor';
 import { useEditorFrameService } from '../../editor_frame_service_context';
 import { getOpenLayerSettingsAction } from './layer_actions/open_layer_settings';
@@ -88,7 +88,7 @@ export function LayerPanel(props: LayerPanelProps) {
 
   const { parentApi } = editorProps;
   const esqlVariables = useStateFromPublishingSubject(
-    isApiESQLVariablesCompatible(parentApi)
+    apiPublishesESQLVariables(parentApi)
       ? parentApi?.esqlVariables$
       : new BehaviorSubject(undefined)
   );
@@ -374,9 +374,10 @@ export function LayerPanel(props: LayerPanelProps) {
         tabIndex={-1}
         css={css`
           margin-bottom: ${euiTheme.size.base};
-          // disable focus ring for mouse clicks, leave it for keyboard users
-          &:focus:not(:focus-visible) {
-            animation: none !important; // sass-lint:disable-line no-important
+          // disable focus ring - this is a container element that receives programmatic focus
+          // for screen reader announcements, not an interactive element
+          &:focus {
+            outline: none;
           }
         `}
         data-test-subj={`lns-layerPanel-${layerIndex}`}
@@ -445,7 +446,7 @@ export function LayerPanel(props: LayerPanelProps) {
                       />
                     </EuiToolTip>
                   </EuiFlexItem>
-                  {supportsMultipleLayers ? (
+                  {supportsMultipleLayers && !isTextBasedLanguage ? (
                     <EuiFlexItem grow={false}>
                       <EuiToolTip
                         content={layerActions.cloneLayerAction.displayName}
@@ -483,6 +484,7 @@ export function LayerPanel(props: LayerPanelProps) {
             )}
             <ESQLEditor
               uiSettings={core.uiSettings}
+              http={core.http}
               isTextBasedLanguage={isTextBasedLanguage}
               framePublicAPI={framePublicAPI}
               layerId={layerId}
@@ -882,25 +884,19 @@ export function LayerPanel(props: LayerPanelProps) {
               activeVisualization.DimensionEditorComponent &&
               openColumnGroup?.enableDimensionEditor && (
                 <>
-                  <div
-                    css={css`
-                      padding: ${euiTheme.size.base} 0;
-                    `}
-                  >
-                    <activeVisualization.DimensionEditorComponent
-                      {...{
-                        ...layerVisualizationConfigProps,
-                        groupId: openColumnGroup.groupId,
-                        accessor: openColumnId,
-                        datasource,
-                        setState: props.updateVisualization,
-                        addLayer: props.addLayer,
-                        removeLayer: props.onRemoveLayer,
-                        panelRef,
-                        isInlineEditing,
-                      }}
-                    />
-                  </div>
+                  <activeVisualization.DimensionEditorComponent
+                    {...{
+                      ...layerVisualizationConfigProps,
+                      groupId: openColumnGroup.groupId,
+                      accessor: openColumnId,
+                      datasource,
+                      setState: props.updateVisualization,
+                      addLayer: props.addLayer,
+                      removeLayer: props.onRemoveLayer,
+                      panelRef,
+                      isInlineEditing,
+                    }}
+                  />
                   {activeVisualization.DimensionEditorAdditionalSectionComponent && (
                     <activeVisualization.DimensionEditorAdditionalSectionComponent
                       {...{

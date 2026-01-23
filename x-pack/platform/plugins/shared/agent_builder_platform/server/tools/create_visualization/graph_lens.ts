@@ -5,15 +5,18 @@
  * 2.0.
  */
 import { StateGraph, Annotation } from '@langchain/langgraph';
-import type { ScopedModel, ToolEventEmitter } from '@kbn/onechat-server';
+import type { ScopedModel, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { esqlMetricState } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/metric';
 import { gaugeStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/gauge';
 import { tagcloudStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/tagcloud';
-import { generateEsql } from '@kbn/onechat-genai-utils';
-import { extractTextContent } from '@kbn/onechat-genai-utils/langchain';
+import { xyStateSchema } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/xy';
+import { regionMapStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/region_map';
+import { heatmapStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/heatmap';
+import { generateEsql } from '@kbn/agent-builder-genai-utils';
+import { extractTextContent } from '@kbn/agent-builder-genai-utils/langchain';
 import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { SupportedChartType } from '@kbn/onechat-common/tools/tool_result';
+import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { VisualizationConfig } from './types';
 import {
   GENERATE_ESQL_NODE,
@@ -32,9 +35,53 @@ import { createGenerateConfigPrompt } from './prompts';
 // Regex to extract JSON from markdown code blocks
 const INLINE_JSON_REGEX = /```(?:json)?\s*([\s\S]*?)\s*```/gm;
 
+/**
+ * Helper to extract ESQL queries from a visualization config.
+ * Handles both single-dataset configs (metric, gauge, tagcloud) and layers-based configs (XY).
+ * For XY charts with multiple layers, returns all unique ESQL queries.
+ */
+function getExistingEsqlQueries(config: VisualizationConfig | null): string[] {
+  if (!config) return [];
+
+  const queries: string[] = [];
+
+  // For XY charts, check all layers' datasets
+  if ('layers' in config && Array.isArray(config.layers)) {
+    for (const layer of config.layers) {
+      if (layer && 'dataset' in layer && layer.dataset) {
+        const dataset = layer.dataset as { type?: string; query?: string };
+        if (dataset.type === 'esql' && dataset.query && !queries.includes(dataset.query)) {
+          queries.push(dataset.query);
+        }
+      }
+    }
+    return queries;
+  }
+
+  // For single-dataset configs (metric, gauge, tagcloud)
+  if ('dataset' in config && config.dataset) {
+    const dataset = config.dataset as { type?: string; query?: string };
+    if (dataset.type === 'esql' && dataset.query) {
+      queries.push(dataset.query);
+    }
+  }
+
+  return queries;
+}
+
+/**
+ * Helper to get a single existing ESQL query (for backward compatibility).
+ * Returns the first query if multiple exist.
+ */
+function getExistingEsqlQuery(config: VisualizationConfig | null): string | null {
+  const queries = getExistingEsqlQueries(config);
+  return queries.length > 0 ? queries[0] : null;
+}
+
 const VisualizationStateAnnotation = Annotation.Root({
   // inputs
   nlQuery: Annotation<string>(),
+  index: Annotation<string | undefined>(),
   chartType: Annotation<SupportedChartType>(),
   schema: Annotation<object>(),
   existingConfig: Annotation<string | undefined>(),
@@ -65,11 +112,21 @@ export const createVisualizationGraph = (
 
     let action: GenerateEsqlAction;
     try {
+      const existingQueries = getExistingEsqlQueries(state.parsedExistingConfig);
+
+      let nlQueryWithContext = state.nlQuery;
+      if (existingQueries.length > 0) {
+        if (existingQueries.length === 1) {
+          nlQueryWithContext = `Existing esql query to modify: "${existingQueries[0]}"\n\nUser query: ${state.nlQuery}`;
+        } else {
+          const queriesContext = existingQueries.map((q, i) => `Layer ${i + 1}: "${q}"`).join('\n');
+          nlQueryWithContext = `Existing esql queries from multiple layers:\n${queriesContext}\n\nUser query: ${state.nlQuery}`;
+        }
+      }
+
       const generateEsqlResponse = await generateEsql({
-        nlQuery:
-          state.parsedExistingConfig && 'query' in state.parsedExistingConfig.dataset
-            ? `Existing esql query to modify: "${state.parsedExistingConfig.dataset.query}"\n\nUser query: ${state.nlQuery}`
-            : state.nlQuery,
+        nlQuery: nlQueryWithContext,
+        index: state.index,
         model,
         events,
         logger,
@@ -248,6 +305,12 @@ export const createVisualizationGraph = (
           validatedConfig = gaugeStateSchemaESQL.validate(config);
         } else if (state.chartType === SupportedChartType.Tagcloud) {
           validatedConfig = tagcloudStateSchemaESQL.validate(config);
+        } else if (state.chartType === SupportedChartType.XY) {
+          validatedConfig = xyStateSchema.validate(config);
+        } else if (state.chartType === SupportedChartType.RegionMap) {
+          validatedConfig = regionMapStateSchemaESQL.validate(config);
+        } else if (state.chartType === SupportedChartType.Heatmap) {
+          validatedConfig = heatmapStateSchemaESQL.validate(config);
         } else {
           throw new Error(`Unsupported chart type: ${state.chartType}`);
         }
@@ -317,7 +380,8 @@ export const createVisualizationGraph = (
   // Router: Decide whether to generate ESQL or use existing
   const shouldGenerateESQLRouter = (state: VisualizationState): string => {
     // If we have existing config with a query, skip ES|QL generation
-    if (state.parsedExistingConfig && 'query' in state.parsedExistingConfig.dataset) {
+    const existingQuery = getExistingEsqlQuery(state.parsedExistingConfig);
+    if (existingQuery) {
       logger.debug('Using existing ES|QL query from parsed config');
       return GENERATE_CONFIG_NODE;
     }

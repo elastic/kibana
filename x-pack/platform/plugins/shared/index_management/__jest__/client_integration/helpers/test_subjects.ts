@@ -119,4 +119,9 @@ export type TestSubjects =
   | 'clearIndicesSearch'
   | 'usingMaxRetention'
   | 'componentTemplatesLink'
+  | 'summaryTabBtn'
+  | 'settingsTabBtn'
+  | 'mappingsTabBtn'
+  | 'aliasesTabBtn'
+  | 'previewTabBtn'
   | 'configureFailureStoreButton';

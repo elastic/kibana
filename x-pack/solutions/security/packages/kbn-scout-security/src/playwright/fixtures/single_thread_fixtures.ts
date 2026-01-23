@@ -12,7 +12,7 @@ import type {
   SecurityTestFixtures,
   SecurityWorkerFixtures,
 } from './types';
-import { getDetectionRuleApiService } from './worker';
+import { getDetectionRuleApiService, getEntityAnalyticsApiService } from './worker';
 import { extendPageObjects, securityBrowserAuthFixture } from './test';
 
 const securityFixtures = mergeTests(baseTest, securityBrowserAuthFixture);
@@ -43,6 +43,10 @@ export const test = securityFixtures.extend<SecurityTestFixtures, SecurityWorker
     ) => {
       const extendedApiServices = apiServices as SecurityApiServicesFixture;
       extendedApiServices.detectionRule = getDetectionRuleApiService({
+        kbnClient,
+        log,
+      });
+      extendedApiServices.entityAnalytics = getEntityAnalyticsApiService({
         kbnClient,
         log,
       });

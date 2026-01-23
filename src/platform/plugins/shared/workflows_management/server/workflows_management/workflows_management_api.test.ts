@@ -12,7 +12,7 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { type WorkflowDetailDto } from '@kbn/workflows';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { WorkflowsManagementApi } from './workflows_management_api';
 import type { WorkflowsService } from './workflows_management_service';
 

@@ -32,6 +32,7 @@ exports[`ProcessTreeAlerts component When ProcessTreeAlert is mounted should ren
       >
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          id="generated-id-wrapper"
         >
           <span
             color="danger"

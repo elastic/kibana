@@ -91,6 +91,21 @@ const MyComponent = () => {
 />
 ```
 
+### With Custom Disabled Button Label
+
+```typescript
+<FailureStoreModal
+  onCloseModal={handleClose}
+  onSaveModal={handleSave}
+  failureStoreProps={{
+    failureStoreEnabled: true,
+    defaultRetentionPeriod: '30d'
+  }}
+  canShowDisableLifecycle={true}
+  disableButtonLabel="Forever"
+/>
+```
+
 ### With Inheritance Options
 
 ```typescript
@@ -122,6 +137,7 @@ const MyComponent = () => {
 | `inheritOptions` | `InheritOptions` | ✗ | Configuration for inheritance behavior from parent stream or index template |
 | `showIlmDescription` | `boolean` | ✗ | Whether to display tier-specific messaging (defaults to `true`) |
 | `canShowDisableLifecycle` | `boolean` | ✗ | Whether to show the option to disable lifecycle management (defaults to `false`) |
+| `disableButtonLabel` | `string` | ✗ | Custom label for the disabled lifecycle button. If not provided, defaults to "Disabled" |
 
 ### FailureStoreFormProps
 

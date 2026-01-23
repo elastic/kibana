@@ -51,7 +51,7 @@ interface Props {
   agentPolicy: AgentPolicy;
   // Pass through props to InMemoryTable
   loading?: EuiInMemoryTableProps<InMemoryPackagePolicy>['loading'];
-  message?: EuiInMemoryTableProps<InMemoryPackagePolicy>['message'];
+  noItemsMessage?: EuiInMemoryTableProps<InMemoryPackagePolicy>['noItemsMessage'];
   refreshAgentPolicy: () => void;
 }
 
@@ -418,6 +418,12 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         itemId="id"
         items={packagePolicies}
         columns={columns}
+        tableCaption={i18n.translate(
+          'xpack.fleet.policyDetails.packagePoliciesTable.tableCaption',
+          {
+            defaultMessage: 'Integration policies',
+          }
+        )}
         sorting={{
           sort: {
             field: 'name',

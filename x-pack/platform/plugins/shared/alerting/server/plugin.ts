@@ -48,7 +48,7 @@ import type {
   IEventLogClientService,
 } from '@kbn/event-log-plugin/server';
 import type { FeaturesPluginStart, FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified-search-plugin/server';
+import type { PluginSetup as KQLPluginSetup } from '@kbn/kql/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
@@ -82,6 +82,7 @@ import {
   setupSavedObjects,
   RULE_SAVED_OBJECT_TYPE,
   AD_HOC_RUN_SAVED_OBJECT_TYPE,
+  GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
 } from './saved_objects';
 import {
   initializeApiKeyInvalidator,
@@ -112,6 +113,7 @@ import { createGetAlertIndicesAliasFn, spaceIdToNamespace } from './lib';
 import { BackfillClient } from './backfill_client/backfill_client';
 import { MaintenanceWindowsService } from './task_runner/maintenance_windows';
 import { AlertDeletionClient } from './alert_deletion';
+import { registerGapAutoFillSchedulerTask } from './lib/rule_gaps/task/gap_auto_fill_scheduler_task';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -126,6 +128,7 @@ export const EVENT_LOG_ACTIONS = {
   untrackedInstance: 'untracked-instance',
   gap: 'gap',
   deleteAlerts: 'delete-alerts',
+  gapAutoFillSchedule: 'gap-auto-fill-schedule',
 };
 export const LEGACY_EVENT_LOG_ACTIONS = {
   resolvedInstance: 'resolved-instance',
@@ -172,6 +175,14 @@ export interface AlertingServerStart {
   getType: RuleTypeRegistry['get'];
   getAlertIndicesAlias: GetAlertIndicesAlias;
   getRulesClientWithRequest(request: KibanaRequest): Promise<RulesClientApi>;
+  /**
+   * Creates a RulesClient that is bound to the provided spaceId (namespace) while preserving
+   * the original request (and its auth context).
+   */
+  getRulesClientWithRequestInSpace(
+    request: KibanaRequest,
+    spaceId: string
+  ): Promise<RulesClientApi>;
   getAlertingAuthorizationWithRequest(
     request: KibanaRequest
   ): Promise<PublicMethodsOf<AlertingAuthorization>>;
@@ -190,7 +201,7 @@ export interface AlertingPluginsSetup {
   monitoringCollection: MonitoringCollectionSetup;
   data: DataPluginSetup;
   features: FeaturesPluginSetup;
-  unifiedSearch: UnifiedSearchServerPluginSetup;
+  kql: KQLPluginSetup;
 }
 
 export interface AlertingPluginsStart {
@@ -236,6 +247,7 @@ export class AlertingPlugin {
   private readonly connectorAdapterRegistry = new ConnectorAdapterRegistry();
   private readonly disabledRuleTypes: Set<string>;
   private readonly enabledRuleTypes: Set<string> | null = null;
+  private getRulesClientWithRequest?: (request: KibanaRequest) => Promise<RulesClientApi>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -425,6 +437,16 @@ export class AlertingPlugin {
       });
     }
 
+    if (this?.config?.gapAutoFillScheduler?.enabled ?? false) {
+      registerGapAutoFillSchedulerTask({
+        taskManager: plugins.taskManager,
+        logger: this.logger,
+        getRulesClientWithRequest: (request) => this?.getRulesClientWithRequest?.(request),
+        eventLogger: this.eventLogger!,
+        schedulerConfig: this.config.gapAutoFillScheduler,
+      });
+    }
+
     // Routes
     const router = core.http.createRouter<AlertingRequestHandlerContext>();
     // Register routes
@@ -434,7 +456,7 @@ export class AlertingPlugin {
       usageCounter: this.usageCounter,
       getAlertIndicesAlias: createGetAlertIndicesAliasFn(this.ruleTypeRegistry!),
       encryptedSavedObjects: plugins.encryptedSavedObjects,
-      config$: plugins.unifiedSearch.autocomplete.getInitializerContextConfig().create(),
+      config$: plugins.kql.autocomplete.getInitializerContextConfig().create(),
       isServerless: this.isServerless,
       docLinks: core.docLinks,
       alertingConfig: this.config,
@@ -581,14 +603,22 @@ export class AlertingPlugin {
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
-      includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, AD_HOC_RUN_SAVED_OBJECT_TYPE],
+      includedHiddenTypes: [
+        RULE_SAVED_OBJECT_TYPE,
+        AD_HOC_RUN_SAVED_OBJECT_TYPE,
+        GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+      ],
     });
 
     alertingAuthorizationClientFactory.initialize({
       ruleTypeRegistry: ruleTypeRegistry!,
       securityPluginStart: plugins.security,
+      logger,
       async getSpace(request: KibanaRequest) {
         return plugins.spaces?.spacesService.getActiveSpace(request);
+      },
+      async getSpaceById(request: KibanaRequest, spaceId: string) {
+        return plugins.spaces?.spacesService.createSpacesClient(request).get(spaceId);
       },
       getSpaceId(request: KibanaRequest) {
         return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
@@ -605,6 +635,7 @@ export class AlertingPlugin {
       internalSavedObjectsRepository: core.savedObjects.createInternalRepository([
         RULE_SAVED_OBJECT_TYPE,
         AD_HOC_RUN_SAVED_OBJECT_TYPE,
+        GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
       ]),
       encryptedSavedObjectsClient,
       spaceIdToNamespace: (spaceId?: string) => spaceIdToNamespace(plugins.spaces, spaceId),
@@ -642,6 +673,17 @@ export class AlertingPlugin {
       return rulesClientFactory!.create(request, core.savedObjects);
     };
 
+    const getRulesClientWithRequestInSpace = async (request: KibanaRequest, spaceId: string) => {
+      if (isESOCanEncrypt !== true) {
+        throw new Error(
+          `Unable to create alerts client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+        );
+      }
+      return rulesClientFactory!.createWithSpaceId(request, core.savedObjects, spaceId);
+    };
+
+    this.getRulesClientWithRequest = getRulesClientWithRequest;
+
     const getAlertingAuthorizationWithRequest = async (request: KibanaRequest) => {
       return alertingAuthorizationClientFactory!.create(request);
     };
@@ -650,11 +692,11 @@ export class AlertingPlugin {
       return rulesSettingsClientFactory!.create(request);
     };
 
-    const getMaintenanceWindowClientInternal = (request: KibanaRequest) => {
+    const getMaintenanceWindowClient = (request: KibanaRequest) => {
       if (!plugins.maintenanceWindows) {
         return;
       }
-      return plugins.maintenanceWindows.getMaintenanceWindowClientInternal(request);
+      return plugins.maintenanceWindows.getMaintenanceWindowClientWithoutAuth(request);
     };
 
     taskRunnerFactory.initialize({
@@ -676,7 +718,7 @@ export class AlertingPlugin {
       maintenanceWindowsService: new MaintenanceWindowsService({
         cacheInterval: this.config.rulesSettings.cacheInterval,
         logger,
-        getMaintenanceWindowClientInternal,
+        getMaintenanceWindowClient,
       }),
       maxAlerts: this.config.rules.run.alerts.max,
       ruleTypeRegistry: this.ruleTypeRegistry!,
@@ -695,15 +737,22 @@ export class AlertingPlugin {
       isServerless: this.isServerless,
     });
 
-    this.eventLogService!.registerSavedObjectProvider(RULE_SAVED_OBJECT_TYPE, (request) => {
-      return async (objects?: SavedObjectsBulkGetObject[]) => {
-        const client = await getRulesClientWithRequest(request);
+    this.eventLogService!.registerSavedObjectProvider(
+      RULE_SAVED_OBJECT_TYPE,
+      (request, spaceId) => {
+        return async (objects?: SavedObjectsBulkGetObject[]) => {
+          const client = spaceId
+            ? await getRulesClientWithRequestInSpace(request, spaceId)
+            : await getRulesClientWithRequest(request);
 
-        return objects
-          ? Promise.all(objects.map(async (objectItem) => await client.get({ id: objectItem.id })))
-          : Promise.resolve([]);
-      };
-    });
+          return objects
+            ? Promise.all(
+                objects.map(async (objectItem) => await client.get({ id: objectItem.id }))
+              )
+            : Promise.resolve([]);
+        };
+      }
+    );
 
     this.eventLogService!.isEsContextReady()
       .then(() => {
@@ -723,6 +772,7 @@ export class AlertingPlugin {
       getAlertIndicesAlias: createGetAlertIndicesAliasFn(this.ruleTypeRegistry!),
       getAlertingAuthorizationWithRequest,
       getRulesClientWithRequest,
+      getRulesClientWithRequestInSpace,
       getFrameworkHealth: async () =>
         await getHealth(core.savedObjects.createInternalRepository([RULE_SAVED_OBJECT_TYPE])),
     };

@@ -23,8 +23,12 @@ dependsOn:
   - '@kbn/share-plugin'
   - '@kbn/console-plugin'
   - '@kbn/try-in-console'
+  - '@kbn/test-jest-helpers'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/core'
+  - '@kbn/i18n-react'
 tags:
-  - shared-common
+  - shared-browser
   - package
   - prod
   - group-platform

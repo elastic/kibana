@@ -118,6 +118,8 @@ dependsOn:
   - '@kbn/setup-node-env'
   - '@kbn/react-query'
   - '@kbn/fs'
+  - '@kbn/kql'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -133,5 +135,6 @@ fileGroups:
     - server/**/*.json
     - scripts/**/*
     - package.json
+    - test/scout/**/*
     - '!target/**/*'
 tasks: {}

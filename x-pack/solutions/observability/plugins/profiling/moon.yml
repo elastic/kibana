@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/profiling-plugin'
 type: unknown
 owners:
-  defaultOwner: '@elastic/obs-ux-infra_services-team'
+  defaultOwner: '@elastic/obs-presentation-team'
 toolchain:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   name: '@kbn/profiling-plugin'
   description: Moon project for @kbn/profiling-plugin
   channel: ''
-  owner: '@elastic/obs-ux-infra_services-team'
+  owner: '@elastic/obs-presentation-team'
   metadata:
     sourceRoot: x-pack/solutions/observability/plugins/profiling
 dependsOn:
@@ -65,6 +65,7 @@ dependsOn:
   - '@kbn/charts-theme'
   - '@kbn/shared-ux-error-boundary'
   - '@kbn/licensing-types'
+  - '@kbn/kql'
 tags:
   - plugin
   - prod

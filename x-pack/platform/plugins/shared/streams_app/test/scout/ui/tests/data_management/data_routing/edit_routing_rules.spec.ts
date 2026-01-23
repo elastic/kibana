@@ -39,11 +39,16 @@ test.describe('Stream data routing - editing routing rules', { tag: ['@ess', '@s
     await pageObjects.streams.updateRoutingRule();
 
     // Verify success
-    const routingRuleLocator = page.testSubj.locator(`streamDetailRoutingItem-${rountingRuleName}`);
-    await expect(routingRuleLocator).toBeVisible();
-    await expect(routingRuleLocator.locator('[title="service.name"]')).toBeVisible();
-    await expect(routingRuleLocator.locator('text=equals')).toBeVisible();
-    await expect(routingRuleLocator.locator('[title="updated-service"]')).toBeVisible();
+    const routingRule = page.getByTestId('routingRule-logs.edit-test');
+    await expect(routingRule.getByTestId('streamsAppConditionDisplayField')).toContainText(
+      'service.name'
+    );
+    await expect(routingRule.getByTestId('streamsAppConditionDisplayOperator')).toContainText(
+      'equals'
+    );
+    await expect(routingRule.getByTestId('streamsAppConditionDisplayValue')).toContainText(
+      'updated-service'
+    );
   });
 
   test('should cancel editing routing rule', async ({ page, pageObjects }) => {
@@ -55,11 +60,16 @@ test.describe('Stream data routing - editing routing rules', { tag: ['@ess', '@s
     await pageObjects.streams.cancelRoutingRule();
 
     // Verify success
-    const routingRuleLocator = page.testSubj.locator(`streamDetailRoutingItem-${rountingRuleName}`);
-    await expect(routingRuleLocator).toBeVisible();
-    await expect(routingRuleLocator.locator('[title="service.name"]')).toBeVisible();
-    await expect(routingRuleLocator.locator('text=equals')).toBeVisible();
-    await expect(routingRuleLocator.locator('[title="test-service"]')).toBeVisible();
+    const routingRule = page.getByTestId('routingRule-logs.edit-test');
+    await expect(routingRule.getByTestId('streamsAppConditionDisplayField')).toContainText(
+      'service.name'
+    );
+    await expect(routingRule.getByTestId('streamsAppConditionDisplayOperator')).toContainText(
+      'equals'
+    );
+    await expect(routingRule.getByTestId('streamsAppConditionDisplayValue')).toContainText(
+      'test-service'
+    );
   });
 
   test('should switch between editing different rules', async ({ pageObjects }) => {

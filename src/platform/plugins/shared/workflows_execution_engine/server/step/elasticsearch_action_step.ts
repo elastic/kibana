@@ -10,7 +10,7 @@
 // TODO: Remove eslint exceptions comments
 /* eslint-disable @typescript-eslint/no-explicit-any,  */
 
-import { buildRequestFromConnector } from '@kbn/workflows';
+import { buildElasticsearchRequest } from '@kbn/workflows';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
@@ -77,7 +77,7 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
       const stepType = (this.step as any).configuration?.type || this.step.type;
       const stepWith = withInputs || this.step.with || (this.step as any).configuration?.with;
 
-      this.workflowLogger.logError(`Elasticsearch action failed: ${stepType}`, error as Error, {
+      this.workflowLogger.logError(`Elasticsearch action failed: ${stepType}`, error, {
         event: { action: 'elasticsearch-action', outcome: 'failure' },
         tags: ['elasticsearch', 'internal-action', 'error'],
         labels: {
@@ -110,8 +110,8 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
         method,
         path,
         body: requestBody,
-        params: queryParams,
-      } = buildRequestFromConnector(stepType, params);
+        query: queryParams,
+      } = buildElasticsearchRequest(stepType, params);
 
       // Build query string manually if needed
       let finalPath = path;

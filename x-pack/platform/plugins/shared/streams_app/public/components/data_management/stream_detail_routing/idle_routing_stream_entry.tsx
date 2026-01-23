@@ -137,7 +137,11 @@ export function IdleRoutingStreamEntry({
                     }
                   )}
                 >
-                  <EuiBadge color="hollow" tabIndex={0}>{`+${childrenCount}`}</EuiBadge>
+                  <EuiBadge
+                    color="hollow"
+                    tabIndex={0}
+                    data-test-subj="streamsAppRoutingRuleChildCountBadge"
+                  >{`+${childrenCount}`}</EuiBadge>
                 </EuiToolTip>
                 <VerticalRule />
               </>

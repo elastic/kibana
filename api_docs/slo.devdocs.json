@@ -12,6 +12,8 @@
         "label": "SLOPublicPluginsSetup",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+        "lineNumber": 63,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -32,6 +34,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -52,6 +56,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -72,6 +78,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -135,11 +143,11 @@
               },
               "<",
               {
-                "pluginId": "observability",
-                "scope": "public",
-                "docId": "kibObservabilityPluginApi",
-                "section": "def-public.RulesParams",
-                "text": "RulesParams"
+                "pluginId": "@kbn/deeplinks-observability",
+                "scope": "common",
+                "docId": "kibKbnDeeplinksObservabilityPluginApi",
+                "section": "def-common.RulesLocatorParams",
+                "text": "RulesLocatorParams"
               },
               ">; ruleDetailsLocator: ",
               {
@@ -162,6 +170,8 @@
               "; }"
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -183,6 +193,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -207,6 +219,8 @@
               "[]>) => void; }; }"
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -227,6 +241,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -248,6 +264,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -268,6 +286,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -288,6 +308,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -315,7 +337,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<Context>) => ",
+              "<Context, {}>) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -323,7 +345,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<Context>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
+              "<Context, object>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -331,7 +353,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<Context>>) => void; readonly unregisterAction: (actionId: string) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+              "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -339,7 +361,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<any>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+              "<any, {}>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -347,9 +369,11 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<any>>) => void; }"
+              "<any, {}>>) => void; }"
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -370,6 +394,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -391,6 +417,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -405,6 +433,8 @@
         "label": "SLOPublicPluginsStart",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+        "lineNumber": 79,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -425,6 +455,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -446,6 +478,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -469,6 +503,8 @@
               "; }"
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -490,6 +526,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -510,6 +548,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -530,6 +570,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -550,6 +592,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -570,6 +614,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -590,6 +636,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -611,6 +659,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -631,6 +681,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -651,6 +703,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -672,6 +726,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -691,7 +747,7 @@
                 "section": "def-common.FieldFormatsRegistry",
                 "text": "FieldFormatsRegistry"
               },
-              ", \"init\" | \"register\"> & { deserialize: ",
+              ", \"register\" | \"init\"> & { deserialize: ",
               {
                 "pluginId": "fieldFormats",
                 "scope": "common",
@@ -702,6 +758,8 @@
               "; }"
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -722,6 +780,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -742,6 +802,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -790,6 +852,8 @@
               "; }"
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -811,6 +875,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -845,6 +911,8 @@
               "; }) => void; }"
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -865,6 +933,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 99,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -886,6 +956,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 100,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -905,7 +977,25 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ") => Promise<void>; } & { url: ",
+              ") => Promise<void>; getExportHandler: (options: Omit<",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.ShowShareMenuOptions",
+                "text": "ShowShareMenuOptions"
+              },
+              ", \"asExport\" | \"anchorElement\">, exportId: string, intl: ",
+              "IntlShape",
+              ") => Promise<(() => Promise<void>) | null>; getExportDerivativeHandler: (options: Omit<",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.ShowShareMenuOptions",
+                "text": "ShowShareMenuOptions"
+              },
+              ", \"asExport\" | \"anchorElement\">, derivativeId: string) => Promise<(() => Promise<void>) | null>; } & { url: ",
               {
                 "pluginId": "share",
                 "scope": "public",
@@ -928,6 +1018,8 @@
               "[]; }"
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -949,6 +1041,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -969,6 +1063,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -998,7 +1094,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<Context>) => ",
+              "<Context, {}>) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -1006,7 +1102,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<Context>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
+              "<Context, object>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -1014,7 +1110,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<Context>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+              "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -1022,7 +1118,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<any>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+              "<any, {}>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -1030,7 +1126,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<any>>) => void; readonly getAction: (id: string) => Promise<",
+              "<any, {}>>) => void; readonly getAction: (id: string) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -1038,7 +1134,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
+              "<object, object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -1046,7 +1142,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
+              "<object, object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -1054,7 +1150,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
+              "<object, object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -1067,6 +1163,8 @@
               "; }"
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1087,6 +1185,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1107,6 +1207,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1128,6 +1230,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1148,6 +1252,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1190,6 +1296,8 @@
               "<{}>>; }"
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1210,6 +1318,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1228,7 +1338,7 @@
       "label": "SLOPublicStart",
       "description": [],
       "signature": [
-        "{ getCreateSLOFlyout: React.FunctionComponent<{ onClose: () => void; initialValues?: ",
+        "{ getCreateSLOFormFlyout: React.FunctionComponent<{ onClose: () => void; initialValues: ",
         {
           "pluginId": "@kbn/utility-types",
           "scope": "common",
@@ -1236,9 +1346,11 @@
           "section": "def-common.RecursivePartial",
           "text": "RecursivePartial"
         },
-        "<{ name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.synthetics.availability\"; params: { monitorIds: { value: string; label: string; }[]; index: string; } & { tags?: { value: string; label: string; }[] | undefined; projects?: { value: string; label: string; }[] | undefined; filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; }; total: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }))[]; equation: string; }; total: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }))[]; equation: string; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.metric.timeslice\"; params: { index: string; metric: { metrics: (({ name: string; aggregation: \"min\" | \"max\" | \"sum\" | \"avg\" | \"cardinality\" | \"last_value\" | \"std_deviation\"; field: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ name: string; aggregation: \"percentile\"; field: string; percentile: number; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }))[]; equation: string; threshold: number; comparator: \"GT\" | \"GTE\" | \"LT\" | \"LTE\"; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }); } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; } & { id?: string | undefined; settings?: { syncDelay?: string | undefined; frequency?: string | undefined; preventInitialBackfill?: boolean | undefined; syncField?: string | null | undefined; } | undefined; tags?: string[] | undefined; groupBy?: string | string[] | undefined; revision?: number | undefined; artifacts?: { dashboards?: { id: string; }[] | undefined; } | undefined; }> | undefined; }>; }"
+        "<{ name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.synthetics.availability\"; params: { monitorIds: { value: string; label: string; }[]; index: string; } & { tags?: { value: string; label: string; }[] | undefined; projects?: { value: string; label: string; }[] | undefined; filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; }; total: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }))[]; equation: string; }; total: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }))[]; equation: string; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.metric.timeslice\"; params: { index: string; metric: { metrics: (({ name: string; aggregation: \"min\" | \"max\" | \"sum\" | \"avg\" | \"cardinality\" | \"last_value\" | \"std_deviation\"; field: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ name: string; aggregation: \"percentile\"; field: string; percentile: number; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }))[]; equation: string; threshold: number; comparator: \"GT\" | \"GTE\" | \"LT\" | \"LTE\"; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; }); } & { filter?: string | { kqlQuery: string; filters: ({ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; field?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; } & { $state?: any; })[]; } | undefined; dataViewId?: string | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; } & { id?: string | undefined; settings?: { syncDelay?: string | undefined; frequency?: string | undefined; preventInitialBackfill?: boolean | undefined; syncField?: string | null | undefined; } | undefined; tags?: string[] | undefined; groupBy?: string | string[] | undefined; revision?: number | undefined; artifacts?: { dashboards?: { id: string; }[] | undefined; } | undefined; }>; }>; }"
       ],
       "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+      "lineNumber": 114,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -1261,7 +1373,13 @@
           "text": "LocatorPublic"
         },
         "<",
-        "SloDetailsLocatorParams",
+        {
+          "pluginId": "@kbn/deeplinks-observability",
+          "scope": "common",
+          "docId": "kibKbnDeeplinksObservabilityPluginApi",
+          "section": "def-common.SloDetailsLocatorParams",
+          "text": "SloDetailsLocatorParams"
+        },
         ">; sloDetailsHistoryLocator: ",
         {
           "pluginId": "share",
@@ -1271,7 +1389,13 @@
           "text": "LocatorPublic"
         },
         "<",
-        "SloDetailsHistoryLocatorParams",
+        {
+          "pluginId": "@kbn/deeplinks-observability",
+          "scope": "common",
+          "docId": "kibKbnDeeplinksObservabilityPluginApi",
+          "section": "def-common.SloDetailsHistoryLocatorParams",
+          "text": "SloDetailsHistoryLocatorParams"
+        },
         ">; sloEditLocator: ",
         {
           "pluginId": "share",
@@ -1291,10 +1415,18 @@
           "text": "LocatorPublic"
         },
         "<",
-        "SloListLocatorParams",
+        {
+          "pluginId": "@kbn/deeplinks-observability",
+          "scope": "common",
+          "docId": "kibKbnDeeplinksObservabilityPluginApi",
+          "section": "def-common.SloListLocatorParams",
+          "text": "SloListLocatorParams"
+        },
         ">; }"
       ],
       "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+      "lineNumber": 113,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",
@@ -1313,6 +1445,8 @@
         "label": "SloClient",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/slo/server/client/index.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1327,9 +1461,55 @@
               "() => Promise<string[]>"
             ],
             "path": "x-pack/solutions/observability/plugins/slo/server/client/index.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "slo",
+            "id": "def-server.SloClient.getGroupedStats",
+            "type": "Function",
+            "tags": [],
+            "label": "getGroupedStats",
+            "description": [],
+            "signature": [
+              "(params: { type: \"apm\"; } & { size?: number | undefined; serviceNames?: string[] | undefined; environment?: string | undefined; }) => Promise<",
+              {
+                "pluginId": "@kbn/slo-schema",
+                "scope": "common",
+                "docId": "kibKbnSloSchemaPluginApi",
+                "section": "def-common.GetSLOGroupedStatsResponse",
+                "text": "GetSLOGroupedStatsResponse"
+              },
+              ">"
+            ],
+            "path": "x-pack/solutions/observability/plugins/slo/server/client/index.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "slo",
+                "id": "def-server.SloClient.getGroupedStats.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "{ type: \"apm\"; } & { size?: number | undefined; serviceNames?: string[] | undefined; environment?: string | undefined; }"
+                ],
+                "path": "x-pack/solutions/observability/plugins/slo/server/client/index.ts",
+                "lineNumber": 21,
+                "columnNumber": 19,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           }
         ],
@@ -1347,6 +1527,8 @@
       "label": "SLOServerSetup",
       "description": [],
       "path": "x-pack/solutions/observability/plugins/slo/server/types.ts",
+      "lineNumber": 32,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -1361,6 +1543,8 @@
       "label": "SLOServerStart",
       "description": [],
       "path": "x-pack/solutions/observability/plugins/slo/server/types.ts",
+      "lineNumber": 34,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1374,16 +1558,19 @@
           "signature": [
             "(request: ",
             "KibanaRequest",
-            "<unknown, unknown, unknown, any>) => ",
+            "<unknown, unknown, unknown, any>) => Promise<",
             {
               "pluginId": "slo",
               "scope": "server",
               "docId": "kibSloPluginApi",
               "section": "def-server.SloClient",
               "text": "SloClient"
-            }
+            },
+            ">"
           ],
           "path": "x-pack/solutions/observability/plugins/slo/server/types.ts",
+          "lineNumber": 35,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1399,6 +1586,8 @@
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "x-pack/solutions/observability/plugins/slo/server/types.ts",
+              "lineNumber": 35,
+              "columnNumber": 29,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1428,6 +1617,8 @@
           "\"SLOs\""
         ],
         "path": "x-pack/solutions/observability/plugins/slo/common/index.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1443,27 +1634,13 @@
           "\"slo\""
         ],
         "path": "x-pack/solutions/observability/plugins/slo/common/index.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": [
-      {
-        "parentPluginId": "slo",
-        "id": "def-common.sloPaths",
-        "type": "Object",
-        "tags": [],
-        "label": "sloPaths",
-        "description": [],
-        "signature": [
-          "{ slos: string; slosSettings: string; slosWelcome: string; slosManagement: string; sloCreate: string; sloCreateWithEncodedForm: (encodedParams: string) => string; sloEdit: (sloId: string) => string; sloEditWithEncodedForm: (sloId: string, encodedParams: string) => string; sloDetails: (sloId: string, instanceId: string, remoteName?: string | undefined, tabId?: string | undefined) => string; }"
-        ],
-        "path": "x-pack/solutions/observability/plugins/slo/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ]
+    "objects": []
   }
 }
