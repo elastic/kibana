@@ -269,6 +269,11 @@ export function createDiscoverServicesMock(): DiscoverServices {
     setHeaderActionMenu: jest.fn(),
     discoverShared: discoverSharedPluginMock.createStartContract(),
     discoverFeatureFlags: {},
+    embeddableEditor: {
+      isByValueEditor: jest.fn(() => false),
+      isEmbeddedEditor: jest.fn(() => false),
+      transferBackToEditor: jest.fn(),
+    },
   } as unknown as DiscoverServices;
 }
 
