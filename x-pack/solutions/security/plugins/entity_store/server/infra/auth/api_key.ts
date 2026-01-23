@@ -11,10 +11,13 @@ import type { Logger } from '@kbn/logging';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
-import { SavedObjectsErrorHelpers, SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { SO_ENTITY_STORE_API_KEY_TYPE } from './saved_object';
 import type { EntityType } from '../../domain/definitions/entity_schema';
 
+/**
+ * Entity Store API key saved object.
+ */
 export interface EntityStoreAPIKey {
   id: string;
   name: string;
@@ -25,25 +28,37 @@ export interface EntityStoreAPIKey {
 
 const ENTITY_STORE_API_KEY_SO_ID = 'entity-store-api-key';
 
-/**
- * Generates a namespace-aware saved object ID for the API key.
- * With enforceRandomId: false in the encrypted saved object registration,
- * we can use simple string IDs instead of UUIDs.
- */
 export const getSpaceAwareEntityStoreSavedObjectId = (namespace: string): string => {
   return `${ENTITY_STORE_API_KEY_SO_ID}-${namespace}`;
 };
 
 export interface ApiKeyManager {
+  /**
+   * Generates a new API key and stores in a encrypted saved object.
+   */
   generate: (type: EntityType) => Promise<void>;
+
+  /**
+   * Retrieves the API key from the encrypted saved object.
+   */
   getApiKey: () => Promise<EntityStoreAPIKey | undefined>;
-  getRequestFromApiKey: (apiKey: EntityStoreAPIKey) => Promise<KibanaRequest>;
+
+  /**
+   * Returns ClusterClient (for ElasticsearchClient) and SavedObjectsClient
+   * with permissions granted to the API key.
+   */
   getClientFromApiKey: (apiKey: EntityStoreAPIKey) => Promise<{
     clusterClient: ReturnType<CoreStart['elasticsearch']['client']['asScoped']>;
     soClient: ReturnType<CoreStart['savedObjects']['getScopedClient']>;
   }>;
 }
 
+/**
+ * The entity store API Key is used for
+ * Querying indices and saved objects in
+ * kibana tasks, not scoped for a specific
+ * request.
+ */
 const generateEntityStoreAPIKey = async ({
   logger,
   security,
@@ -110,7 +125,6 @@ export const getApiKeyManager = ({
     });
 
     const soClient = core.savedObjects.getScopedClient(request, {
-      excludedExtensions: [SECURITY_EXTENSION_ID],
       includedHiddenTypes: [SO_ENTITY_STORE_API_KEY_TYPE],
     });
 
@@ -139,12 +153,6 @@ export const getApiKeyManager = ({
       }
       throw err;
     }
-  },
-  getRequestFromApiKey: async (apiKey: EntityStoreAPIKey) => {
-    return getFakeKibanaRequest({
-      id: apiKey.id,
-      api_key: apiKey.apiKey,
-    });
   },
   getClientFromApiKey: async (apiKey: EntityStoreAPIKey) => {
     const fakeRequest = getFakeKibanaRequest({
