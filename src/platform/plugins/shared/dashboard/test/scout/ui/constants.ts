@@ -79,24 +79,6 @@ export const LENS_BASIC_TIME_RANGE = {
   to: 'Sep 23, 2015 @ 00:00:00.000',
 };
 
-export const MAPS_LAYER_GROUP_TITLE = 'Layer group';
-export const MAPS_LIBRARY_NAME_PREFIX = 'my map';
-
 export const DASHBOARD_SAVED_SEARCH_ARCHIVE =
   'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana';
-export const DASHBOARD_SAVED_SEARCH_NAME = 'Rendering-Test:-saved-search';
 export const DASHBOARD_DEFAULT_INDEX_TITLE = 'logstash-*';
-export const DASHBOARD_TIME_RANGE = {
-  from: 'Sep 22, 2015 @ 00:00:00.000',
-  to: 'Sep 23, 2015 @ 00:00:00.000',
-};
-
-export const DASHBOARD_PANEL_GROUP_ORDER = [
-  'visualizationsGroup',
-  'controlsGroup',
-  'annotation-and-navigationGroup',
-  'mlGroup',
-  'observabilityGroup',
-  'legacyGroup',
-];
-export const DASHBOARD_PANEL_TYPE_COUNT = 24;

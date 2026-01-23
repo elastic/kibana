@@ -8,12 +8,17 @@
  */
 
 import { spaceTest, expect, tags } from '@kbn/scout';
-import {
-  DASHBOARD_DEFAULT_INDEX_TITLE,
-  DASHBOARD_PANEL_GROUP_ORDER,
-  DASHBOARD_SAVED_SEARCH_ARCHIVE,
-  DASHBOARD_PANEL_TYPE_COUNT,
-} from '../constants';
+import { DASHBOARD_DEFAULT_INDEX_TITLE, DASHBOARD_SAVED_SEARCH_ARCHIVE } from '../constants';
+
+const DASHBOARD_PANEL_GROUP_ORDER = [
+  'visualizationsGroup',
+  'controlsGroup',
+  'annotation-and-navigationGroup',
+  'mlGroup',
+  'observabilityGroup',
+  'legacyGroup',
+];
+const DASHBOARD_PANEL_TYPE_COUNT = 24;
 
 spaceTest.describe('Dashboard panel listing', { tag: tags.ESS_ONLY }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {

@@ -9,11 +9,10 @@
 
 import { spaceTest, expect, tags } from '@kbn/scout';
 import type { PageObjects, ScoutPage } from '@kbn/scout';
-import {
-  LENS_BASIC_KIBANA_ARCHIVE,
-  MAPS_LAYER_GROUP_TITLE,
-  MAPS_LIBRARY_NAME_PREFIX,
-} from '../constants';
+import { LENS_BASIC_KIBANA_ARCHIVE } from '../constants';
+
+const MAPS_LAYER_GROUP_TITLE = 'Layer group';
+const MAPS_LIBRARY_NAME_PREFIX = 'my map';
 
 spaceTest.describe('Maps by-value panels (dashboard)', { tag: tags.ESS_ONLY }, () => {
   let mapCounter = 0;
