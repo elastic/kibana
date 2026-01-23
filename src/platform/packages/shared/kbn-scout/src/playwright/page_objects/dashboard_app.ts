@@ -245,6 +245,13 @@ export class DashboardApp {
   }
 
   /**
+   * Adds a panel from the library without forcing a type filter.
+   */
+  async addPanelFromLibrary(panelName: string, embeddableType?: string) {
+    return this.addEmbeddable(panelName, embeddableType);
+  }
+
+  /**
    * Adds a saved search to the dashboard.
    * Wrapper around addEmbeddable() with type='search'.
    *

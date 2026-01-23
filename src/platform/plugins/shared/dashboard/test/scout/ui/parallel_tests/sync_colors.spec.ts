@@ -34,8 +34,10 @@ const getChartDebugState = async (page: ScoutPage, panelIndex: number) => {
   const chart = charts[panelIndex];
   const status = chart.locator('.echChartStatus');
   const debugState = await status.getAttribute('data-ech-debug-state');
-  const parsed = debugState && (JSON.parse(debugState) as DebugState);
-  return parsed ?? null;
+  if (!debugState) {
+    return null;
+  }
+  return JSON.parse(debugState) as DebugState;
 };
 
 // eslint-disable-next-line playwright/no-skipped-test
