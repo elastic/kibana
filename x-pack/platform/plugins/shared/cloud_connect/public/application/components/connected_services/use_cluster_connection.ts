@@ -56,7 +56,6 @@ export const useClusterConnection = () => {
     apiService,
     justConnected,
     setJustConnected,
-    autoEnablingEis,
     setAutoEnablingEis,
     hasConfigurePermission,
     notifications,
