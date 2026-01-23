@@ -9,6 +9,26 @@ import type { ExpressionRenderError } from '@kbn/expressions-plugin/public';
 import { renderSearchError } from '@kbn/search-errors';
 import React from 'react';
 import type { UserMessage } from '@kbn/lens-common';
+import { EXPRESSION_ABORT_ERROR } from '@kbn/expressions-plugin/common';
+
+export const ignoredBlockingMessagesByMessageText = new Set<string>([
+  EXPRESSION_ABORT_ERROR.message,
+]);
+
+function extractErrorMessageText(
+  message: string | { short: string; long: React.ReactNode }
+): string {
+  return typeof message === 'string' ? message : message.short;
+}
+
+export function isIgnorableBlockingMessage(error: ExpressionRenderError | null): boolean {
+  const message = error?.original?.message ?? error?.message;
+  if (!message) {
+    return false;
+  }
+  const messageText = extractErrorMessageText(message);
+  return ignoredBlockingMessagesByMessageText.has(messageText);
+}
 
 export function getOriginalRequestErrorMessages(
   error: ExpressionRenderError | null
@@ -34,14 +54,18 @@ export function getOriginalRequestErrorMessages(
   } else if (error?.message) {
     errorMessages.push(error.message);
   }
-  return errorMessages.map((message) => ({
-    uniqueId: typeof message === 'string' ? message : message.short,
-    severity: 'error',
-    displayLocations: [{ id: 'visualizationOnEmbeddable' }],
-    longMessage: typeof message === 'string' ? '' : message.long,
-    shortMessage: typeof message === 'string' ? message : message.short,
-    fixableInEditor: false,
-  }));
+  return errorMessages.map((message) => {
+    const messageText = extractErrorMessageText(message);
+    return {
+      uniqueId: messageText,
+      severity: 'error',
+      displayLocations: [{ id: 'visualizationOnEmbeddable' }],
+      longMessage: typeof message === 'string' ? '' : message.long,
+      shortMessage: typeof message === 'string' ? message : message.short,
+      fixableInEditor: false,
+      canBeSkipped: ignoredBlockingMessagesByMessageText.has(messageText),
+    };
+  });
 }
 
 // NOTE - if you are adding a new error message, add it as a UserMessage in get_application_error_messages
