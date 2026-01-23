@@ -16,11 +16,13 @@ export const fromLastValueAPItoLensState = (
   options: LensApiLastValueOperation
 ): LastValueIndexPatternColumn => {
   const { field, format, sort_by, show_array_values } = options;
+  const sharedProps = getLensStateMetricSharedProps(options);
 
   return {
     operationType: 'last_value',
     sourceField: field,
-    ...getLensStateMetricSharedProps(options),
+    ...sharedProps,
+    dataType: 'unknown',
     params: {
       sortField: sort_by,
       showArrayValues: show_array_values,
