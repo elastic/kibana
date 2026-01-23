@@ -729,7 +729,7 @@ class AnnotationsTableUI extends Component {
         <EuiInMemoryTable
           data-test-subj={'mlAnnotationsTable'}
           tableCaption={i18n.translate('xpack.ml.annotationsTable.annotation.tableCaption', {
-            defaultMessage: 'Annotation',
+            defaultMessage: 'Annotations',
           })}
           error={searchError}
           className="eui-textBreakWord"
