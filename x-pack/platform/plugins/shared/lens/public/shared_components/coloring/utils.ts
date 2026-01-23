@@ -54,7 +54,7 @@ export function getAccessorTypeFromOperation(
   const useFallback = operation?.dataType === 'unknown' && dataTypeFallback != null;
   const dataType = useFallback ? dataTypeFallback : operation?.dataType;
   const hasArraySupport = operation?.hasArraySupport;
-  const isBucketed = operation?.isBucketed;
+  const isBucketed = useFallback ? dataTypeFallback !== 'number' : operation?.isBucketed;
 
   const isNumericTypeFromOperation = Boolean(
     !isBucketed && dataType === 'number' && !hasArraySupport
