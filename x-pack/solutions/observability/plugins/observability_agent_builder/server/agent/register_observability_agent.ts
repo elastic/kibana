@@ -42,6 +42,7 @@ export async function registerObservabilityAgent({
         
         ${getInvestigationInstructions()}
         ${getReasoningInstructions()}
+        ${getTraceMetricFormatInstructions()}
         ${getFieldDiscoveryInstructions()}
         ${getKqlInstructions()}
       `),
@@ -95,5 +96,15 @@ function getKqlInstructions() {
     - Negation: \`NOT field: value\`
     - Logical operators: Combine with \`AND\`/\`OR\`, \`(field: value OR field: value) AND field: value\`, use parentheses for precedence
     - Use quotes for exact phrases in text fields: \`message: "connection refused"\`
+  `);
+}
+
+function getTraceMetricFormatInstructions() {
+  return dedent(`
+    ### TRACE METRIC FORMATS
+    All observability tools use these standardized units for trace metrics:
+    - **Latency**: milliseconds (ms)
+    - **Throughput**: transactions per minute (tpm)
+    - **Failure rate**: 0-1 scale (e.g., 0.05 = 5% failure rate)
   `);
 }

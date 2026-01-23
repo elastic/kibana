@@ -1,0 +1,128 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Logger } from '@kbn/core/server';
+import { ApmDocumentType, RollupInterval } from '@kbn/apm-data-access-plugin/common';
+import {
+  AGENT_NAME,
+  AGENT_VERSION,
+  ERROR_CULPRIT,
+  ERROR_EXC_HANDLED,
+  ERROR_EXC_MESSAGE,
+  ERROR_EXC_TYPE,
+  ERROR_GROUP_ID,
+  ERROR_LOG_MESSAGE,
+  HTTP_REQUEST_METHOD,
+  HTTP_RESPONSE_STATUS_CODE,
+  SERVICE_ENVIRONMENT,
+  SERVICE_LANGUAGE_NAME,
+  SERVICE_NAME,
+  SPAN_ID,
+  TRACE_ID,
+  TRANSACTION_ID,
+  TRANSACTION_NAME,
+  TRANSACTION_PAGE_URL,
+  URL_FULL,
+  USER_AGENT_NAME,
+  USER_AGENT_VERSION,
+} from '@kbn/observability-shared-plugin/common';
+import { ERROR_STACK_TRACE } from '@kbn/apm-types/es_fields';
+import { timeRangeFilter, kqlFilter as buildKqlFilter } from '../../utils/dsl_filters';
+import type { ApmEventClient } from './types';
+
+export type ErrorGroupSample = Awaited<ReturnType<typeof getErrorGroupSamples>>['0'];
+
+export async function getErrorGroupSamples({
+  apmEventClient,
+  startMs,
+  endMs,
+  kqlFilter,
+  includeStackTrace,
+  logger,
+}: {
+  apmEventClient: ApmEventClient;
+  startMs: number;
+  endMs: number;
+  kqlFilter?: string;
+  includeStackTrace?: boolean;
+  logger: Logger;
+}) {
+  logger.debug(`Fetching error groups, kqlFilter: ${kqlFilter ?? 'none'}`);
+
+  const response = await apmEventClient.search('get_error_groups', {
+    apm: {
+      sources: [
+        {
+          documentType: ApmDocumentType.ErrorEvent,
+          rollupInterval: RollupInterval.None,
+        },
+      ],
+    },
+    size: 0,
+    track_total_hits: false,
+    query: {
+      bool: {
+        filter: [
+          ...timeRangeFilter('@timestamp', { start: startMs, end: endMs }),
+          ...buildKqlFilter(kqlFilter),
+        ],
+      },
+    },
+    aggs: {
+      error_groups: {
+        terms: {
+          field: ERROR_GROUP_ID,
+          size: 50,
+          order: { _count: 'desc' as const },
+        },
+        aggs: {
+          last_seen: { max: { field: '@timestamp' } },
+          sample: {
+            top_hits: {
+              size: 1,
+              _source: false,
+              fields: [
+                // Error fields
+                ERROR_GROUP_ID,
+                ERROR_EXC_TYPE,
+                ERROR_EXC_MESSAGE,
+                ERROR_LOG_MESSAGE,
+                ERROR_CULPRIT,
+                ERROR_EXC_HANDLED,
+                // Service fields
+                SERVICE_ENVIRONMENT,
+                SERVICE_NAME,
+                SERVICE_LANGUAGE_NAME,
+                // Agent fields
+                AGENT_NAME,
+                AGENT_VERSION,
+                // Trace fields
+                TRACE_ID,
+                TRANSACTION_ID,
+                TRANSACTION_NAME,
+                SPAN_ID,
+                // HTTP fields
+                URL_FULL,
+                HTTP_REQUEST_METHOD,
+                HTTP_RESPONSE_STATUS_CODE,
+                TRANSACTION_PAGE_URL,
+                // User agent fields
+                USER_AGENT_NAME,
+                USER_AGENT_VERSION,
+                // Stack trace (optional, can be large)
+                ...(includeStackTrace ? [ERROR_STACK_TRACE] : []),
+              ],
+              sort: [{ '@timestamp': 'desc' as const }],
+            },
+          },
+        },
+      },
+    },
+  });
+
+  return response.aggregations?.error_groups?.buckets ?? [];
+}
