@@ -38,6 +38,8 @@ export type ApmUserAgentFields = Partial<{
 
 export interface ApmException {
   message: string;
+  type?: string;
+  stacktrace?: APMStacktrace[];
 }
 
 export interface Observer {
