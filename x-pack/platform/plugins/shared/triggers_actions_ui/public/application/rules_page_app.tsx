@@ -10,7 +10,12 @@ import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { QueryClientProvider } from '@kbn/react-query';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
-import { ruleDetailsRoute } from '@kbn/rule-data-utils';
+import {
+  rulesAppDetailsRoute,
+  createRuleRoute,
+  createRuleFromTemplateRoute,
+  ruleLogsRoute,
+} from '@kbn/rule-data-utils';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import { setDataViewsService } from '../common/lib/data_apis';
 import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
@@ -22,6 +27,7 @@ const RuleDetailsRouteWrapper = lazy(
   () => import('./sections/rule_details/components/rule_details_route_wrapper')
 );
 const RulesPage = lazy(() => import('./sections/rules_page/rules_page'));
+const RuleFormRoute = lazy(() => import('./sections/rule_form/rule_form_route'));
 
 export const renderRulesPageApp = (deps: TriggersAndActionsUiServices) => {
   const { element } = deps;
@@ -58,7 +64,22 @@ const AppWithoutRouter = () => {
       <PerformanceContextProvider>
         <Routes>
           <Route
-            path={ruleDetailsRoute}
+            exact
+            path={createRuleFromTemplateRoute}
+            component={suspendedComponentWithProps(RuleFormRoute, 'xl')}
+          />
+          <Route
+            exact
+            path={createRuleRoute}
+            component={suspendedComponentWithProps(RuleFormRoute, 'xl')}
+          />
+          <Route
+            exact
+            path={ruleLogsRoute}
+            component={suspendedComponentWithProps(RulesPage, 'xl')}
+          />
+          <Route
+            path={rulesAppDetailsRoute}
             component={suspendedComponentWithProps(RuleDetailsRouteWrapper, 'xl')}
           />
           <Route path="/" component={suspendedComponentWithProps(RulesPage, 'xl')} />

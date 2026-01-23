@@ -100,10 +100,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     nextInput,
     previousRounds: conversation?.rounds ?? [],
     context,
-    conversationAttachments: conversation?.attachments,
   });
 
-  const selectedTools = await selectTools({
+  const { attachmentBoundTools, versionedAttachmentTools, registryTools } = await selectTools({
     conversation: processedConversation,
     toolProvider,
     agentConfiguration,
@@ -111,6 +110,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     request,
     runner: context.runner,
   });
+
+  const selectedTools = [...attachmentBoundTools, ...versionedAttachmentTools, ...registryTools];
 
   const {
     tools: langchainTools,
@@ -197,6 +198,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       startTime,
       modelProvider,
       stateManager,
+      attachmentStateManager: context.attachmentStateManager,
     }),
     evictInternalEvents(),
     shareReplay()

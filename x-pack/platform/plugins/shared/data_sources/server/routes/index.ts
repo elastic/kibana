@@ -14,7 +14,6 @@ import type {
   StartServicesAccessor,
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { DATA_SOURCES_ROUTE } from '../../common';
 import {
   createDataSourceAndRelatedResources,
   deleteDataSourceAndRelatedResources,
@@ -101,7 +100,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
   // Get one data source by ID
   router.get(
     {
-      path: `${DATA_SOURCES_ROUTE}/{id}`,
+      path: `${API_BASE_PATH}/{id}`,
       validate: { params: schema.object({ id: schema.string() }) },
       security: {
         authz: {

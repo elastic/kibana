@@ -23,6 +23,7 @@ import type {
   ToolProvider,
   WritableToolResultStore,
   AttachmentsService,
+  SkillsService,
   PromptManager,
   ConversationStateManager,
 } from '../runner';
@@ -79,6 +80,10 @@ export interface AgentHandlerContext {
    * Attachment service to interact with attachments.
    */
   attachments: AttachmentsService;
+  /**
+   * Skills service to interact with skills.
+   */
+  skills: SkillsService;
   /**
    * Result store to access and add tool results during execution.
    */

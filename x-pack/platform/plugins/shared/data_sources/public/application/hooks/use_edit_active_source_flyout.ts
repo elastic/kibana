@@ -8,13 +8,12 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useKibana } from './use_kibana';
 import { API_BASE_PATH } from '../../../common/constants';
 import type { ActiveSource } from '../../types/connector';
-import type { StackConnectorApiResponse } from '../../types/stack_connector';
-import { transformStackConnectorResponse } from '../../types/stack_connector';
 import { queryKeys } from '../query_keys';
+import { useStackConnector } from './use_stack_connector';
 
 export interface UseEditActiveSourceFlyoutOptions {
   activeSource: ActiveSource | null;
@@ -46,32 +45,11 @@ export const useEditActiveSourceFlyout = ({
       ? activeSource.stackConnectors[0]
       : null;
 
-  // Fetch stack connector using useQuery
-  const { data: stackConnector, isLoading: isLoadingConnector } = useQuery(
-    queryKeys.stackConnectors.byId(stackConnectorId ?? ''),
-    async () => {
-      if (!stackConnectorId) {
-        throw new Error('No stack connector ID provided');
-      }
-
-      const connectorResponse = await http.get<StackConnectorApiResponse>(
-        `/api/actions/connector/${stackConnectorId}`
-      );
-
-      // Transform snake_case response to camelCase
-      return transformStackConnectorResponse(connectorResponse);
-    },
-    {
-      enabled: isOpen && !!stackConnectorId, // Only fetch when flyout is open and we have an ID
-      onError: (error: Error) => {
-        toasts.addError(error, {
-          title: i18n.translate('xpack.dataSources.hooks.useEditActiveSourceFlyout.loadError', {
-            defaultMessage: 'Failed to load connector details',
-          }),
-        });
-      },
-    }
-  );
+  // Fetch stack connector details
+  const { stackConnector, isLoading: isLoadingConnector } = useStackConnector({
+    stackConnectorId,
+    enabled: isOpen,
+  });
 
   const openFlyout = useCallback(() => {
     setIsOpen(true);

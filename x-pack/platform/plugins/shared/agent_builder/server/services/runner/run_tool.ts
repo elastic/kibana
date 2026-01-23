@@ -26,7 +26,12 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import { ToolCallSource } from '../../telemetry';
-import { forkContextForToolRun, createToolEventEmitter, createToolProvider } from './utils';
+import {
+  forkContextForToolRun,
+  createToolEventEmitter,
+  createToolProvider,
+  createSkillsService,
+} from './utils';
 import { toolConfirmationId, createToolConfirmationPrompt } from './utils/prompts';
 import type { RunnerManager } from './runner';
 
@@ -165,6 +170,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     spaces,
     modelProvider,
     toolsService,
+    skillsService,
     resultStore,
     logger,
     promptManager,
@@ -191,5 +197,12 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     }),
     resultStore: resultStore.asReadonly(),
     events: createToolEventEmitter({ eventHandler: onEvent, context: manager.context }),
+    skillsService: createSkillsService({
+      skillsStart: skillsService,
+      toolsStart: toolsService,
+      request,
+      spaceId,
+      runner: manager.getRunner(),
+    }),
   };
 };

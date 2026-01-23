@@ -357,13 +357,13 @@
         "tags": [],
         "label": "extractPropertyPathsFromKql",
         "description": [
-          "\nExtracts property paths from a KQL (Kibana Query Language) query string.\n\nThis function parses a KQL query and extracts field names that appear before\ncolons in field:value expressions, ignoring quoted strings and handling\nlogical operators (AND, OR, NOT) and parentheses.\n"
+          "\nExtracts property paths from a KQL (Kibana Query Language) query string.\n\nThis function parses a KQL query and extracts field names that appear before\ncolons in field:value expressions, ignoring quoted strings and handling\nlogical operators (AND, OR, NOT) and parentheses.\n\nIt also handles template expressions ({{ ... }}) by:\n1. Replacing them with placeholders before KQL parsing\n2. Extracting template variables separately\n3. Combining both sets of results\n"
         ],
         "signature": [
           "(kql: string) => string[]"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/common/utils/extract_property_paths_from_kql/extract_property_paths_from_kql.ts",
-        "lineNumber": 12,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -381,7 +381,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/common/utils/extract_property_paths_from_kql/extract_property_paths_from_kql.ts",
-            "lineNumber": 31,
+            "lineNumber": 64,
             "columnNumber": 45,
             "deprecated": false,
             "trackAdoption": false,
@@ -5313,7 +5313,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
+              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
               "default",
               "; helpers: ",
               "default",
@@ -5876,6 +5876,8 @@
               " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<boolean>; }; profiling: ",
+              "default",
+              "; project: ",
               "default",
               "; putScript: { (this: That, params: ",
               "PutScriptRequest",

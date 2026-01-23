@@ -14,7 +14,7 @@ import type {
 } from '@kbn/agent-builder-common';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server';
-import { runDefaultAgentMode } from './default';
+import { runDefaultAgentMode } from './deep-agent';
 
 export interface RunAgentParams {
   /**

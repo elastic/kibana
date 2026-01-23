@@ -3909,7 +3909,7 @@
           "\"cloud.provider\""
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
-        "lineNumber": 16,
+        "lineNumber": 17,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3926,7 +3926,7 @@
           "\"container.id\""
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
-        "lineNumber": 12,
+        "lineNumber": 13,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3960,7 +3960,7 @@
           "\"data_stream.dataset\""
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
-        "lineNumber": 22,
+        "lineNumber": 23,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3977,7 +3977,24 @@
           "\"event.module\""
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
-        "lineNumber": 18,
+        "lineNumber": 19,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "metricsDataAccess",
+        "id": "def-common.HOST_HOSTNAME",
+        "type": "string",
+        "tags": [],
+        "label": "HOST_HOSTNAME",
+        "description": [],
+        "signature": [
+          "\"host.hostname\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
+        "lineNumber": 12,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3994,7 +4011,7 @@
           "\"hostmetricsreceiver.otel\""
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
-        "lineNumber": 30,
+        "lineNumber": 31,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4028,7 +4045,7 @@
           "\"host.os.name\""
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
-        "lineNumber": 15,
+        "lineNumber": 16,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6822,7 +6839,7 @@
           "\"kubernetes.pod.uid\""
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
-        "lineNumber": 13,
+        "lineNumber": 14,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7002,7 +7019,7 @@
           "\"metricset.module\""
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
-        "lineNumber": 20,
+        "lineNumber": 21,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7019,7 +7036,7 @@
           "\"metricset.name\""
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
-        "lineNumber": 21,
+        "lineNumber": 22,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7055,7 +7072,7 @@
           "\"os.name\""
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
-        "lineNumber": 26,
+        "lineNumber": 27,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7072,7 +7089,7 @@
           "\"service.name\""
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
-        "lineNumber": 17,
+        "lineNumber": 18,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7106,7 +7123,7 @@
           "\"system\""
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
-        "lineNumber": 29,
+        "lineNumber": 30,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

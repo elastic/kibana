@@ -325,6 +325,44 @@
           },
           {
             "parentPluginId": "@kbn/evals",
+            "id": "def-common.KibanaPhoenixClient.getDatasetByName",
+            "type": "Function",
+            "tags": [],
+            "label": "getDatasetByName",
+            "description": [],
+            "signature": [
+              "(name: string) => Promise<",
+              "DatasetInfo",
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/evals",
+                "id": "def-common.KibanaPhoenixClient.getDatasetByName.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
+                "lineNumber": 86,
+                "columnNumber": 26,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/evals",
             "id": "def-common.KibanaPhoenixClient.runExperiment",
             "type": "Function",
             "tags": [],
@@ -343,14 +381,14 @@
               "TaskOutput",
               ">(options: { dataset: TEvaluationDataset; metadata?: Record<string, unknown> | undefined; task: ",
               "ExperimentTask",
-              "<TEvaluationDataset[\"examples\"][number], TTaskOutput>; concurrency?: number | undefined; }, evaluators: ",
+              "<TEvaluationDataset[\"examples\"][number], TTaskOutput>; concurrency?: number | undefined; trustUpstreamDataset?: boolean | undefined; }, evaluators: ",
               "Evaluator",
               "<TEvaluationDataset[\"examples\"][number], TTaskOutput>[]) => Promise<",
               "RanExperiment",
               ">"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
-            "lineNumber": 96,
+            "lineNumber": 125,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -360,10 +398,10 @@
                 "id": "def-common.KibanaPhoenixClient.runExperiment.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n      dataset,\n      task,\n      metadata: experimentMetadata,\n      concurrency,\n    }",
+                "label": "{\n      dataset,\n      task,\n      metadata: experimentMetadata,\n      concurrency,\n      trustUpstreamDataset,\n    }",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
-                "lineNumber": 102,
+                "lineNumber": 132,
                 "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -385,7 +423,7 @@
                       }
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
-                    "lineNumber": 103,
+                    "lineNumber": 133,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -405,7 +443,7 @@
                       ">"
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
-                    "lineNumber": 104,
+                    "lineNumber": 134,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false,
@@ -440,7 +478,7 @@
                       "Record<string, unknown> | undefined"
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
-                    "lineNumber": 105,
+                    "lineNumber": 135,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -456,7 +494,23 @@
                       "number | undefined"
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
-                    "lineNumber": 106,
+                    "lineNumber": 136,
+                    "columnNumber": 7,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/evals",
+                    "id": "def-common.KibanaPhoenixClient.runExperiment.$1.trustUpstreamDataset",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "trustUpstreamDataset",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
+                    "lineNumber": 137,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -479,7 +533,7 @@
                   ">[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
-                "lineNumber": 108,
+                "lineNumber": 139,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -501,7 +555,7 @@
               "[]>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
-            "lineNumber": 154,
+            "lineNumber": 193,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -523,7 +577,7 @@
               "[]>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
-            "lineNumber": 158,
+            "lineNumber": 197,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -539,7 +593,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
-                "lineNumber": 162,
+                "lineNumber": 201,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,

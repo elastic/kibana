@@ -26,6 +26,7 @@ import { createAgentBuilderUsageCounter } from './telemetry/usage_counters';
 import { TrackingService } from './telemetry/tracking_service';
 import { registerTelemetryCollector } from './telemetry/telemetry_collector';
 import { AnalyticsService } from './telemetry';
+import { createLoadSkillTool } from './services/tools/builtin/skills';
 
 export class AgentBuilderPlugin
   implements
@@ -79,6 +80,9 @@ export class AgentBuilderPlugin
       trackingService: this.trackingService,
     });
 
+    // Register builtin tools
+    serviceSetups.tools.register(createLoadSkillTool()); // TODO: Remove this once the file system is implemented
+
     registerFeatures({ features: setupDeps.features });
 
     registerUISettings({ uiSettings: coreSetup.uiSettings });
@@ -115,6 +119,9 @@ export class AgentBuilderPlugin
       },
       attachments: {
         registerType: serviceSetups.attachments.registerType.bind(serviceSetups.attachments),
+      },
+      skill: {
+        registerSkill: serviceSetups.skills.registerSkill.bind(serviceSetups.skills),
       },
     };
   }

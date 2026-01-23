@@ -8,7 +8,9 @@
 import { ToolType } from './definition';
 import { internalNamespaces } from '../base/namespaces';
 
-const platformCoreTool = (toolName: string) => {
+const platformCoreTool = <TName extends string>(
+  toolName: TName
+): `${typeof internalNamespaces.platformCore}.${TName}` => {
   return `${internalNamespaces.platformCore}.${toolName}`;
 };
 
@@ -34,6 +36,8 @@ export const platformCoreTools = {
   attachmentAdd: platformCoreTool('attachment_add'),
   attachmentList: platformCoreTool('attachment_list'),
   attachmentDiff: platformCoreTool('attachment_diff'),
+  // Skill tools
+  loadSkill: platformCoreTool('load_skill'), // TODO: Remove this once the file system is implemented
 } as const;
 
 /**

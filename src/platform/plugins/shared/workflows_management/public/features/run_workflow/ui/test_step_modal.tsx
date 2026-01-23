@@ -28,6 +28,10 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { z } from '@kbn/zod/v4';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
+import {
+  useWorkflowsMonacoTheme,
+  WORKFLOWS_MONACO_EDITOR_THEME,
+} from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
 
 export function TestStepModal({
   initialcontextOverride,
@@ -40,6 +44,7 @@ export function TestStepModal({
 }) {
   const [overflowWidgetsDomNode, setOverflowWidgetsDomNode] = useState<HTMLDivElement | null>(null);
   const styles = useMemoCss(componentStyles);
+  useWorkflowsMonacoTheme();
   const [inputsJson, setInputsJson] = React.useState<string>(
     JSON.stringify(initialcontextOverride.stepContext, null, 2)
   );
@@ -169,7 +174,7 @@ export function TestStepModal({
                 language: 'json',
                 overflowWidgetsDomNode,
                 fixedOverflowWidgets: true,
-                theme: 'workflows-subdued',
+                theme: WORKFLOWS_MONACO_EDITOR_THEME,
                 automaticLayout: true,
                 fontSize: 12,
                 minimap: {

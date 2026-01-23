@@ -7,18 +7,19 @@
 
 import { z } from '@kbn/zod';
 import { baseFeatureSchema, featureStatusSchema, type Feature } from '@kbn/streams-schema';
-import { identifyFeatures } from '@kbn/streams-ai';
-import type { Observable } from 'rxjs';
-import { from, map, catchError } from 'rxjs';
-import { createConnectorSSEError } from '../../../utils/create_connector_sse_error';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
-import type { IdentifiedFeaturesEvent } from './types';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
-import { PromptsConfigService } from '../../../../lib/saved_objects/significant_events/prompts_config_service';
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
 import { getFeatureId } from '../../../../lib/streams/feature/feature_client';
+import {
+  type IdentifyFeaturesResult,
+  type FeaturesIdentificationTaskParams,
+  getFeaturesIdentificationTaskId,
+  FEATURES_IDENTIFICATION_TASK_TYPE,
+} from '../../../../lib/tasks/task_definitions/features_identification';
+import type { TaskResult } from '../../../../lib/tasks/types';
+import { handleTaskAction } from '../../../utils/task_helpers';
 
 const dateFromString = z.string().transform((input) => new Date(input));
 
@@ -147,12 +148,15 @@ export const listFeaturesRoute = createServerRoute({
   },
 });
 
-export const identifyFeaturesRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{name}/features/_identify',
+export type FeaturesIdentificationTaskResult = TaskResult<IdentifyFeaturesResult>;
+
+export const featuresStatusRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/{name}/features/_status',
   options: {
     access: 'internal',
-    summary: 'Identify features in a stream',
-    description: 'Identify features in a stream with an LLM',
+    summary: 'Check the status of feature identification',
+    description:
+      'Feature identification happens as a background task, this endpoints allows the user to check the status of this task. This endpoints combine with POST /internal/streams/{name}/features/_task which manages the task lifecycle.',
   },
   security: {
     authz: {
@@ -161,16 +165,62 @@ export const identifyFeaturesRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ name: z.string() }),
-    query: z.object({
-      connectorId: z
-        .string()
-        .optional()
-        .describe(
-          'Optional connector ID. If not provided, the default AI connector from settings will be used.'
-        ),
-      from: dateFromString,
-      to: dateFromString,
-    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<FeaturesIdentificationTaskResult> => {
+    const { streamsClient, licensing, uiSettingsClient, taskClient } = await getScopedClients({
+      request,
+    });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const { name } = params.path;
+    await streamsClient.ensureStream(name);
+
+    return await taskClient.getStatus<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>(
+      getFeaturesIdentificationTaskId(name)
+    );
+  },
+});
+
+export const featuresTaskRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{name}/features/_task',
+  options: {
+    access: 'internal',
+    summary: 'Identify features in a stream',
+    description:
+      'Identify features in a stream with an LLM, this happens as a background task and this endpoint manages the task lifecycle.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    path: z.object({ name: z.string() }),
+    body: z.discriminatedUnion('action', [
+      z.object({
+        action: z.literal('schedule'),
+        from: dateFromString,
+        to: dateFromString,
+        connector_id: z
+          .string()
+          .optional()
+          .describe(
+            'Optional connector ID. If not provided, the default AI connector from settings will be used.'
+          ),
+      }),
+      z.object({
+        action: z.literal('cancel'),
+      }),
+      z.object({
+        action: z.literal('acknowledge'),
+      }),
+    ]),
   }),
   handler: async ({
     params,
@@ -178,72 +228,51 @@ export const identifyFeaturesRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
-  }): Promise<Observable<IdentifiedFeaturesEvent>> => {
-    const {
-      featureClient,
-      scopedClusterClient,
-      soClient,
-      licensing,
-      uiSettingsClient,
-      streamsClient,
-      inferenceClient,
-    } = await getScopedClients({ request });
+  }): Promise<FeaturesIdentificationTaskResult> => {
+    const { streamsClient, licensing, uiSettingsClient, taskClient } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const [stream, { featurePromptOverride }] = await Promise.all([
-      streamsClient.getStream(params.path.name),
-      new PromptsConfigService({ soClient, logger }).getPrompt(),
-    ]);
+    const {
+      path: { name },
+      body,
+    } = params;
+    await streamsClient.ensureStream(name);
 
-    const connectorId = await resolveConnectorId({
-      connectorId: params.query.connectorId,
-      uiSettingsClient,
-      logger,
+    const taskId = getFeaturesIdentificationTaskId(name);
+
+    const actionParams =
+      body.action === 'schedule'
+        ? ({
+            action: body.action,
+            scheduleConfig: {
+              taskType: FEATURES_IDENTIFICATION_TASK_TYPE,
+              taskId,
+              streamName: name,
+              params: await (async (): Promise<FeaturesIdentificationTaskParams> => {
+                const connectorId = await resolveConnectorId({
+                  connectorId: body.connector_id,
+                  uiSettingsClient,
+                  logger,
+                });
+                return {
+                  connectorId,
+                  start: body.from.getTime(),
+                  end: body.to.getTime(),
+                };
+              })(),
+              request,
+            },
+          } as const)
+        : ({ action: body.action } as const);
+
+    return handleTaskAction<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>({
+      taskClient,
+      taskId,
+      ...actionParams,
     });
-    const boundInferenceClient = inferenceClient.bindTo({ connectorId });
-    const esClient = scopedClusterClient.asCurrentUser;
-    const signal = getRequestAbortSignal(request);
-
-    return from(
-      identifyFeatures({
-        start: params.query.from.getTime(),
-        end: params.query.to.getTime(),
-        esClient,
-        inferenceClient: boundInferenceClient,
-        logger: logger.get('feature_identification'),
-        stream,
-        prompt: featurePromptOverride,
-        signal,
-      }).then(async ({ features: baseFeatures, tokensUsed }) => {
-        const now = new Date().toISOString();
-        const features = baseFeatures.map((feature) => ({
-          ...feature,
-          status: 'active' as const,
-          last_seen: now,
-          id: getFeatureId(stream.name, feature),
-        }));
-
-        await featureClient.bulk(
-          stream.name,
-          features.map((feature) => ({ index: { feature } }))
-        );
-
-        return { features, tokensUsed };
-      })
-    ).pipe(
-      map(({ features, tokensUsed }) => {
-        return {
-          type: 'identified_features' as const,
-          features,
-          tokensUsed,
-        };
-      }),
-      catchError(async (error: Error) => {
-        const connector = await inferenceClient.getConnectorById(connectorId);
-        throw createConnectorSSEError(error, connector);
-      })
-    );
   },
 });
 
@@ -251,5 +280,6 @@ export const featureRoutes = {
   ...upsertFeatureRoute,
   ...deleteFeatureRoute,
   ...listFeaturesRoute,
-  ...identifyFeaturesRoute,
+  ...featuresStatusRoute,
+  ...featuresTaskRoute,
 };

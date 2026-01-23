@@ -240,6 +240,10 @@ export interface ValidationErrors {
     message: string;
     type: { name: string | number };
   };
+  unmappedColumnWarning: {
+    message: string;
+    type: { name: string | number };
+  };
   unknownFunction: {
     message: string;
     type: { name: string };

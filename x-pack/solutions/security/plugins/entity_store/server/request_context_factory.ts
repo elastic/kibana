@@ -13,7 +13,7 @@ import type {
   EntityStoreRequestHandlerContext,
   EntityStoreStartPlugins,
 } from './types';
-import { AssetManager } from './domain/asst_manager';
+import { AssetManager } from './domain/asset_manager';
 import { FeatureFlags } from './infra/feature_flags';
 
 interface EntityStoreApiRequestHandlerContextDeps {
@@ -41,7 +41,11 @@ export async function createRequestHandlerContext({
   return {
     core,
     logger,
-    assetManager: new AssetManager(logger, taskManagerStart),
+    assetManager: new AssetManager(
+      logger,
+      core.elasticsearch.client.asCurrentUser,
+      taskManagerStart
+    ),
     featureFlags: new FeatureFlags(core.uiSettings.client),
   };
 }

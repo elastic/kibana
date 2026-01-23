@@ -19,6 +19,7 @@ import type {
   ToolResultStore,
   ToolPromptManager,
   ToolStateManager,
+  SkillsService,
 } from '../runner';
 
 /**
@@ -119,4 +120,8 @@ export interface ToolHandlerContext {
    * Manager to store/load tool state during interrupted executions.
    */
   stateManager: ToolStateManager;
+  /**
+   * Skills service to interact with skills.
+   */
+  skillsService: SkillsService;
 }
