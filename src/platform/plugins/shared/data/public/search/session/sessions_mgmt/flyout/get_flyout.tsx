@@ -71,6 +71,7 @@ export function openSearchSessionsFlyout({
         title: i18n.translate('data.sessions.management.backgroundSearchesFlyoutTitle', {
           defaultMessage: 'Background searches',
         }),
+        flyoutMenuProps: { hideTitle: false },
         size: FLYOUT_WIDTH,
         session: 'start',
         type: 'overlay',
