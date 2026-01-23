@@ -33,6 +33,7 @@ dependsOn:
   - '@kbn/data-plugin'
   - '@kbn/core-ui-settings-browser'
   - '@kbn/apm-types'
+  - '@kbn/unified-doc-viewer'
 tags:
   - shared-common
   - package
