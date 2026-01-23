@@ -154,6 +154,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
               isLoading={isLoadingCurrentRound}
             />
           </EuiFlexItem>
+          <EuiSpacer />
           <RoundAttachmentReferences
             attachmentRefs={input.attachment_refs}
             conversationAttachments={conversationAttachments}
