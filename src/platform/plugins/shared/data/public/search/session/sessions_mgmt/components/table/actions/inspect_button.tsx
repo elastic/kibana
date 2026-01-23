@@ -7,9 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlyoutBody, EuiFlyoutHeader, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { Fragment } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
@@ -24,9 +31,15 @@ interface InspectFlyoutProps {
 }
 
 const InspectFlyout: React.FC<InspectFlyoutProps> = ({ searchSession }) => {
+  const { euiTheme } = useEuiTheme();
+
   const renderInfo = () => {
     return (
-      <Fragment>
+      <div
+        css={css({
+          height: `calc(100% - ${euiTheme.size.l})`,
+        })}
+      >
         <CodeEditor
           languageId="json"
           value={JSON.stringify(searchSession, null, 2)}
@@ -43,7 +56,7 @@ const InspectFlyout: React.FC<InspectFlyoutProps> = ({ searchSession }) => {
             automaticLayout: true,
           }}
         />
-      </Fragment>
+      </div>
     );
   };
 
@@ -134,6 +147,7 @@ const styles = {
   flyout: css({
     '.euiFlyoutBody__overflowContent': {
       height: '100%',
+      overflow: 'hidden',
       '> div': {
         height: '100%',
       },
