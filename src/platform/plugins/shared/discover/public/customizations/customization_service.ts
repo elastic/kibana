@@ -10,7 +10,6 @@
 import type { Observable } from 'rxjs';
 import { filter, map, startWith, Subject } from 'rxjs';
 import type {
-  DataTableCustomization,
   FlyoutCustomization,
   SearchBarCustomization,
   UnifiedHistogramCustomization,
@@ -21,7 +20,6 @@ export type DiscoverCustomization =
   | FlyoutCustomization
   | SearchBarCustomization
   | UnifiedHistogramCustomization
-  | DataTableCustomization
   | FieldListCustomization;
 
 export type DiscoverCustomizationId = DiscoverCustomization['id'];
