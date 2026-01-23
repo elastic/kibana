@@ -1368,6 +1368,54 @@ describe('Azure credentials with mixed secret and text vars', () => {
   });
 
   describe('getAccountTypeFromInputs', () => {
+    const mockInput = {
+      type: 'cloudbeat/cis_aws',
+      policy_template: 'cis_aws',
+      enabled: true,
+      streams: [
+        {
+          enabled: true,
+          data_stream: { type: 'logs', dataset: 'aws.cloudtrail' },
+          vars: {
+            role_arn: { value: 'arn:aws:iam::123456789012:role/TestRole' },
+            external_id: { value: 'test-external-id' },
+          },
+        },
+      ],
+    } as NewPackagePolicyInput;
+
+    const mockPolicy = {
+      id: 'test-policy-id',
+      enabled: true,
+      policy_id: 'test-policy',
+      policy_ids: ['test-policy'],
+      name: 'test-policy',
+      namespace: 'default',
+      package: {
+        name: 'cloud_security_posture',
+        title: 'Cloud Security Posture',
+        version: '1.0.0',
+      },
+      supports_cloud_connector: true,
+      inputs: [
+        {
+          type: 'cloudbeat/cis_aws',
+          policy_template: 'cis_aws',
+          enabled: true,
+          streams: [
+            {
+              enabled: true,
+              data_stream: { type: 'logs', dataset: 'aws.cloudtrail' },
+              vars: {
+                role_arn: { value: 'arn:aws:iam::123456789012:role/TestRole' },
+                external_id: { value: 'test-external-id' },
+              },
+            },
+          ],
+        },
+      ],
+    } as NewPackagePolicy;
+
     it('should extract account type from AWS policy inputs', () => {
       const { result } = renderHook(() =>
         useCloudConnectorSetup(
@@ -1507,7 +1555,7 @@ describe('Azure credentials with mixed secret and text vars', () => {
 
     it('should return undefined for unsupported cloud provider', () => {
       const { result } = renderHook(() =>
-        useCloudConnectorSetup(mockInput, mockPolicy, mockUpdatePolicy, 'gcp' as any)
+        useCloudConnectorSetup(mockInput, mockPolicy, mockUpdatePolicy, 'gcp')
       );
 
       expect(result.current.accountTypeFromInputs).toBeUndefined();
