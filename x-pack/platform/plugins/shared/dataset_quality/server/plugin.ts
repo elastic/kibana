@@ -79,4 +79,8 @@ export class DatasetQualityServerPlugin
 
     return {};
   }
+
+  start() {
+    return {};
+  }
 }
