@@ -19,6 +19,7 @@ project:
     sourceRoot: x-pack/platform/test/security_api_integration/packages/helpers
 dependsOn:
   - '@kbn/dev-utils'
+  - '@kbn/mock-idp-utils'
 tags:
   - shared-common
   - package
