@@ -11,8 +11,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ErrorPrompt } from '../../common/prompt/error_prompt';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useAssetBasePath } from '../../../hooks/use_asset_base_path';
+import type { PromptLayoutVariant } from '../../common/prompt/layout';
 
-export const AddLlmConnectionPrompt = () => {
+export interface AddLlmConnectionPromptProps {
+  variant?: PromptLayoutVariant;
+}
+
+export const AddLlmConnectionPrompt: React.FC<AddLlmConnectionPromptProps> = ({ variant }) => {
   const { navigationService, docLinksService } = useAgentBuilderServices();
   const { colorMode } = useEuiTheme();
   const assetBasePath = useAssetBasePath();
@@ -46,6 +51,7 @@ export const AddLlmConnectionPrompt = () => {
 
   return (
     <ErrorPrompt
+      variant={variant}
       errorType="ADD_LLM_CONNECTION"
       imageSrc={brainImage}
       primaryButton={primaryButton}

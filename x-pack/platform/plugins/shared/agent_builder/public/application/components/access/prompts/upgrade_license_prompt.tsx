@@ -8,13 +8,18 @@
 import { EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { PromptLayoutVariant } from '../../common/prompt/layout';
 import { ErrorPrompt } from '../../common/prompt/error_prompt';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useAssetBasePath } from '../../../hooks/use_asset_base_path';
 
 const SUBSCRIPTIONS_LINK = 'https://www.elastic.co/subscriptions';
 
-export const UpgradeLicensePrompt: React.FC = () => {
+export interface UpgradeLicensePromptProps {
+  variant?: PromptLayoutVariant;
+}
+
+export const UpgradeLicensePrompt: React.FC<UpgradeLicensePromptProps> = ({ variant }) => {
   const assetBasePath = useAssetBasePath();
   const { colorMode } = useEuiTheme();
   const { navigationService } = useAgentBuilderServices();
@@ -43,6 +48,7 @@ export const UpgradeLicensePrompt: React.FC = () => {
 
   return (
     <ErrorPrompt
+      variant={variant}
       errorType="UPGRADE_LICENSE"
       imageSrc={
         colorMode === 'LIGHT' ? `${assetBasePath}/lock_light.svg` : `${assetBasePath}/lock_dark.svg`

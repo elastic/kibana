@@ -123,17 +123,13 @@ export const ErrorPrompt: React.FC<ErrorPromptProps> = ({
   imageSrc,
   primaryButton,
   secondaryButton,
-  variant,
+  variant = PROMPT_LAYOUT_VARIANTS.DEFAULT,
 }) => {
-  const { isEmbeddedContext } = useConversationContext();
   const errorDetails = ERROR_DETAILS_MAPPINGS[errorType];
-  const layoutVariant =
-    variant ??
-    (isEmbeddedContext ? PROMPT_LAYOUT_VARIANTS.EMBEDDABLE : PROMPT_LAYOUT_VARIANTS.DEFAULT);
 
   return (
     <PromptLayout
-      variant={layoutVariant}
+      variant={variant}
       iconType={errorDetails.icon}
       imageSrc={imageSrc}
       title={errorDetails.title}
