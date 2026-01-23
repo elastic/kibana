@@ -64,7 +64,7 @@ export const CustomFooter = {
 export const OpenInFlyout = {
   render: () => {
     return (
-      <EuiFlyout onClose={() => {}}>
+      <EuiFlyout onClose={() => {}} session="start">
         <FlyoutFrame
           title="Create drilldown"
           footer={<EuiButton>Save</EuiButton>}
