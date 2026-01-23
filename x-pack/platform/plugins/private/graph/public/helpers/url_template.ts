@@ -15,14 +15,11 @@ const ALLOWED_PROTOCOLS = ['http:', 'https:', 'mailto:'];
  * case if it contains the placeholder `{{gquery}}`
  * @param url The url to check
  */
-export function isUrlTemplateValid(urlString: string) {
-  try {
-    // with window.location.origin we can also handle also relative paths correctly
-    const url = new URL(urlString, window.location.origin);
-    return ALLOWED_PROTOCOLS.includes(url.protocol) && urlString.includes(urlTemplatePlaceholder);
-  } catch {
-    return false;
-  }
+export function isUrlTemplateValid(url: string) {
+  // with window.location.origin we can also handle also relative paths correctly
+  const parsedUrl = URL.parse(url, window.location.origin);
+  if (!parsedUrl) return false;
+  return ALLOWED_PROTOCOLS.includes(parsedUrl.protocol) && url.includes(urlTemplatePlaceholder);
 }
 
 /**
