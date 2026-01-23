@@ -254,12 +254,13 @@ export const myStepDefinition: PublicStepDefinition = {
 };
 ```
 
-### Custom Property Completion and Validation
+### Custom Property Selection
 
-Custom steps can provide property-level completion and validation handlers for both config properties (step-level, outside `with`) and input properties (inside `with`). This enables:
+Custom steps can provide property-level selection handlers for both config properties (step-level, outside `with`) and input properties (inside `with`). The selection interface provides a unified API for entity selection that handles:
 
-- **Autocomplete suggestions**: Dynamic options from external services (e.g., list of agents, connectors, proxies)
-- **Runtime validation with decorations**: Visual feedback in the editor showing connection status, errors, or success indicators
+- **Search**: Autocomplete suggestions when the user types
+- **Resolution**: Entity lookup when loading or pasting values
+- **Decoration**: Visual feedback and metadata display in the editor
 
 #### Property Handler Structure
 
@@ -275,22 +276,20 @@ export const myStepDefinition = createPublicStepDefinition({
     // Handlers for config properties (step-level, outside `with`)
     config: {
       'property.path': {
-        completion: {
-          /* ... */
-        },
-        validation: {
-          /* ... */
+        selection: {
+          search: async (input, context) => { /* ... */ },
+          resolve: async (value, context) => { /* ... */ },
+          getDetails: async (value, context, option) => { /* ... */ },
         },
       },
     },
     // Handlers for input properties (inside `with`)
     input: {
       property: {
-        completion: {
-          /* ... */
-        },
-        validation: {
-          /* ... */
+        selection: {
+          search: async (input, context) => { /* ... */ },
+          resolve: async (value, context) => { /* ... */ },
+          getDetails: async (value, context, option) => { /* ... */ },
         },
       },
     },
@@ -310,34 +309,119 @@ z.object({
 
 Use `'agent.id'` as the property key in `editorHandlers.config`.
 
-#### Implementing Completion
+#### Implementing Selection
 
-The `completion.getOptions` function provides autocomplete suggestions when the user edits the property value:
+The `selection` interface provides three functions that work together:
+
+**1. `search`** - Provides autocomplete options when the user types:
 
 ```typescript
 editorHandlers: {
   config: {
-    'agent.id': {
-      completion: {
-        getOptions: async (currentValue) => {
-          // Fetch options from external service
-          const agents = await agentService.list();
-
-          // Filter based on current input (optional)
-          const filtered = agents.filter((agent) =>
-            currentValue ? agent.id.includes(currentValue) : true
-          );
-
-          return filtered.map((agent) => ({
-            // Required: the value inserted into YAML
+    'agent-id': {
+      selection: {
+        search: async (input: string, context: SelectionContext) => {
+          const agents = await agentService.search(input);
+          return agents.map((agent) => ({
             value: agent.id,
-            // Required: displayed in completion popup
-            label: agent.id,
-            // Optional: brief detail shown inline
-            detail: agent.name,
-            // Optional: extended documentation in side panel
-            documentation: agent.description,
+            label: agent.name,
+            description: agent.description,
+            documentation: agent.documentation,
           }));
+        },
+        // ...
+      },
+    },
+  },
+},
+```
+
+**2. `resolve`** - Resolves an entity by its value (used on load, paste, etc.):
+
+```typescript
+resolve: async (value: string, context: SelectionContext) => {
+  const agent = await agentService.get(value);
+  if (!agent) {
+    return null;
+  }
+  return {
+    value: agent.id,
+    label: agent.name,
+    description: agent.description,
+  };
+},
+```
+
+**3. `getDetails`** - Provides detailed information for decoration and metadata:
+
+```typescript
+getDetails: async (value, context, option) => {
+  if (option) {
+    return {
+      message: `Successfully connected to ${option.label}`,
+      links: [
+        { text: 'Edit agent', path: `/app/agent-builder/agents/${option.value}` },
+        { text: 'Create agent', path: `/app/agent-builder/agents/new` },
+        { text: 'Manage agents', path: `/app/agent-builder/agents` },
+      ],
+    };
+  }
+  return {
+    message: `Agent ID "${value}" not found. Please select an existing agent or create a new one.`,
+    links: [
+      { text: 'Create agent', path: `/app/agent-builder/agents/new` },
+      { text: 'Manage agents', path: `/app/agent-builder/agents` },
+    ],
+  };
+},
+```
+
+#### Complete Example
+
+```typescript
+editorHandlers: {
+  config: {
+    'agent-id': {
+      selection: {
+        search: async (input: string, context: SelectionContext) => {
+          const agents = await agentService.search(input);
+          return agents.map((agent) => ({
+            value: agent.id,
+            label: agent.name,
+            description: agent.description,
+          }));
+        },
+        resolve: async (value: string, context: SelectionContext) => {
+          const agent = await agentService.get(value);
+          return agent
+            ? {
+                value: agent.id,
+                label: agent.name,
+                description: agent.description,
+              }
+            : null;
+        },
+        getDetails: async (
+          value: string,
+          context: SelectionContext,
+          option: SelectionOption | null
+        ) => {
+          if (option) {
+            return {
+              message: `✓ Agent connected: ${option.label}`,
+              links: [
+                { text: 'Edit agent', path: `/agents/${option.value}` },
+                { text: 'Manage agents', path: '/agents' },
+              ],
+            };
+          }
+          return {
+            message: `Agent "${value}" not found`,
+            links: [
+              { text: 'Create agent', path: '/agents/new' },
+              { text: 'Manage agents', path: '/agents' },
+            ],
+          };
         },
       },
     },
@@ -345,114 +429,56 @@ editorHandlers: {
 },
 ```
 
-The `PropertyCompletionOption` interface:
+#### Type Definitions
 
 ```typescript
-interface PropertyCompletionOption {
+interface SelectionOption {
   /** The value that will be stored in the YAML */
   value: string;
-  /** The label displayed in the completion popup */
+  /** The label displayed in the UI */
   label: string;
-  /** Brief detail shown inline in completion popup (optional) */
-  detail?: string;
+  /** Description shown in completion popup or tooltips (optional) */
+  description?: string;
   /** Extended documentation shown in side panel (optional) */
   documentation?: string;
 }
-```
 
-#### Implementing Validation
-
-The `validation.validate` function provides runtime validation with visual decorations in the editor:
-
-```typescript
-editorHandlers: {
-  config: {
-    'agent.id': {
-      validation: {
-        validate: async (value, context) => {
-          // Skip validation for null/undefined values
-          if (value === null) {
-            return { severity: null };
-          }
-
-          // Type checking
-          if (typeof value !== 'string') {
-            return { severity: 'error', message: 'Agent ID must be a string' };
-          }
-
-          try {
-            // Validate against external service
-            const agent = await agentService.get(value);
-
-            // Success: show green decoration
-            return {
-              severity: null,
-              afterMessage: '✓ Agent connected',
-            };
-          } catch (error) {
-            if (error?.response?.status === 404) {
-              // Error with helpful hover message (markdown supported)
-              return {
-                severity: 'error',
-                message: `Agent ${value} not found`,
-                hoverMessage: '[Open agents management](https://example.com/agents)',
-              };
-            }
-            // Warning for network/unknown errors
-            return {
-              severity: 'warning',
-              message: 'Cannot validate agent ID',
-            };
-          }
-        },
-      },
-    },
-  },
-},
-```
-
-The `PropertyValidationResult` interface:
-
-```typescript
-interface PropertyValidationResult {
-  /** null = valid (show success decoration), 'error'|'warning'|'info' = show error */
-  severity: 'error' | 'warning' | 'info' | null;
-  /** Error message for markers panel (only when severity is not null) */
-  message?: string;
-  /** Decoration text shown after the value (e.g., "✓ Connected") */
-  afterMessage?: string;
-  /** Hover tooltip (markdown supported) */
-  hoverMessage?: string;
+interface SelectionDetails {
+  /** Message to display (e.g., "✓ Agent connected" or "Agent not found") */
+  message: string;
+  /** Links to related actions (e.g., "Edit agent", "Create agent") */
+  links?: Array<{
+    /** Link text */
+    text: string;
+    /** Link path (relative or absolute URL) */
+    path: string;
+  }>;
 }
-```
 
-The `PropertyValidationContext` provides additional context:
-
-```typescript
-interface PropertyValidationContext {
+interface SelectionContext {
   /** The step type ID (e.g., "oneChat.runAgent") */
   stepType: string;
   /** The property scope ("config" or "input") */
   scope: 'config' | 'input';
-  /** The property key (e.g., "agent.id") */
+  /** The property key (e.g., "agent-id") */
   propertyKey: string;
 }
 ```
 
 #### Example Implementation
 
-For a complete working example of custom property completion and validation, see the `external_step` implementation in `examples/workflows_extensions_example`:
+For a complete working example, see the `external_step` implementation in `examples/workflows_extensions_example`:
 
 - Common definition: `examples/workflows_extensions_example/common/step_types/external_step.ts`
 - Public definition with `editorHandlers`: `examples/workflows_extensions_example/public/step_types/external_step.ts`
 
 #### Performance Considerations
 
-**Important**: The `validation.validate` function is called every time the YAML document changes. For validators that check external resources:
+The selection interface includes built-in caching for resolved entities to optimize performance:
 
-- Consider using a client-side caching solution (e.g., React Query) within your validator implementation
-- Handle cache invalidation when external data changes
-- Return early for null/undefined values to avoid unnecessary API calls
+- Resolved entities are cached for 30 seconds to avoid redundant API calls
+- The `resolve` function is only called when needed (on load, paste, or when validation is triggered), and if the value is valid against the schema.
+- The `search` function is called lazily when the user triggers autocomplete
 
 ### Step 4: Register in Plugin Setup
 
