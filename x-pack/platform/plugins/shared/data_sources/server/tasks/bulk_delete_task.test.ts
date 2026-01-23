@@ -11,10 +11,7 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { BulkDeleteTask, TYPE, type BulkDeleteTaskState } from './bulk_delete_task';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { deleteDataSourceAndRelatedResources } from '../routes/data_sources_helpers';
-import {
-  FAKE_REQUEST_NOT_DEFINED_ERROR,
-  PARTIALLY_DELETED_ERROR,
-} from '../../common/constants';
+import { FAKE_REQUEST_NOT_DEFINED_ERROR, PARTIALLY_DELETED_ERROR } from '../../common/constants';
 import { createToolRegistryMock } from '@kbn/agent-builder-plugin/server/test_utils/tools';
 
 jest.mock('../routes/data_sources_helpers', () => ({
