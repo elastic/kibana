@@ -20,7 +20,7 @@ import {
   METRICS_GRID_RESTRICT_BODY_CLASS,
 } from '../common/constants';
 
-export interface ChartSectionGridWrapperProps
+export interface ChartsGridProps
   extends Pick<ChartSectionTemplateProps, 'toolbar' | 'toolbarCss' | 'toolbarWrapAt' | 'id'> {
   isFullscreen?: boolean;
   isComponentVisible?: boolean;
@@ -28,7 +28,7 @@ export interface ChartSectionGridWrapperProps
   onKeyDown?: (e: React.KeyboardEvent<HTMLElement>) => void;
 }
 
-export const ChartSectionGridWrapper = ({
+export const ChartsGrid = ({
   id,
   toolbarCss,
   toolbar,
@@ -37,7 +37,7 @@ export const ChartSectionGridWrapper = ({
   children,
   isComponentVisible,
   onKeyDown,
-}: React.PropsWithChildren<ChartSectionGridWrapperProps>) => {
+}: React.PropsWithChildren<ChartsGridProps>) => {
   const { metricsGridId, setMetricsGridWrapper, styles } = useMetricsGridFullScreen({ prefix: id });
 
   const restrictBodyClass = styles[METRICS_GRID_RESTRICT_BODY_CLASS];

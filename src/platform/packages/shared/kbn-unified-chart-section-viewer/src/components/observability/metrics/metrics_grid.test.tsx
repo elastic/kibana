@@ -12,15 +12,15 @@ import { fireEvent, render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { MetricsGridProps } from './metrics_grid';
 import { MetricsGrid } from './metrics_grid';
-import { Chart } from './chart';
+import { Chart } from '../../chart';
 import type { UnifiedHistogramServices } from '@kbn/unified-histogram';
 import { getFetchParamsMock, getFetch$Mock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import type { UnifiedHistogramFetch$ } from '@kbn/unified-histogram/types';
-import type { UnifiedMetricsGridProps } from '../types';
+import type { UnifiedMetricsGridProps } from '../../../types';
 
-jest.mock('./chart', () => ({
+jest.mock('../../chart', () => ({
   Chart: jest.fn(() => <div data-test-subj="chart" />),
 }));
 

@@ -12,16 +12,16 @@ import type { EuiFlexGridProps } from '@elastic/eui';
 import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import type { MetricField, Dimension } from '../types';
-import type { ChartSize } from './chart';
-import { Chart } from './chart';
-import { MetricInsightsFlyout } from './flyout/metrics_insights_flyout';
-import { EmptyState } from './empty_state/empty_state';
-import { useGridNavigation } from '../hooks/use_grid_navigation';
-import { FieldsMetadataProvider } from '../context/fields_metadata';
-import { createESQLQuery } from '../common/utils';
-import { useChartLayers } from './chart/hooks/use_chart_layers';
-import type { UnifiedMetricsGridProps } from '../types';
+import type { MetricField, Dimension } from '../../../types';
+import type { ChartSize } from '../../chart';
+import { Chart } from '../../chart';
+import { MetricInsightsFlyout } from '../../flyout/metrics_insights_flyout';
+import { EmptyState } from '../../empty_state/empty_state';
+import { useGridNavigation } from '../../../hooks/use_grid_navigation';
+import { FieldsMetadataProvider } from '../../../context/fields_metadata';
+import { createESQLQuery } from '../../../common/utils';
+import { useChartLayers } from '../../chart/hooks/use_chart_layers';
+import type { UnifiedMetricsGridProps } from '../../../types';
 
 export type MetricsGridProps = Pick<
   UnifiedMetricsGridProps,

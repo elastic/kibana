@@ -22,7 +22,7 @@ import {
 
 import type { MetricField, UnifiedMetricsGridProps } from '../../../types';
 import { PAGE_SIZE } from '../../../common/constants';
-import { MetricsGrid } from '../../metrics_grid';
+import { MetricsGrid } from './metrics_grid';
 import { Pagination } from '../../pagination';
 import { usePagination } from './hooks';
 import { MetricsGridLoadingProgress } from '../../empty_state/empty_state';
