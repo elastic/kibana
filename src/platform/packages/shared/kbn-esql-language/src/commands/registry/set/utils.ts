@@ -8,6 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { UnmappedFieldsStrategy, type ISuggestionItem } from '../types';
+import { EsqlSetting } from '../../definitions/generated/settings';
 
 const getProjectRoutingCommonCompletionItems = (): ISuggestionItem[] => {
   return [
@@ -68,6 +69,6 @@ const getUnmappedFieldsCompletionItems = (): ISuggestionItem[] => {
 };
 
 export const COMPLETIONS_BY_SETTING_NAME: Record<string, ISuggestionItem[]> = {
-  project_routing: getProjectRoutingCommonCompletionItems(),
-  unmapped_fields: getUnmappedFieldsCompletionItems(),
+  [EsqlSetting.PROJECT_ROUTING]: getProjectRoutingCommonCompletionItems(),
+  [EsqlSetting.UNMAPPED_FIELDS]: getUnmappedFieldsCompletionItems(),
 };
