@@ -13,7 +13,6 @@ import type {
   DataTableCustomization,
   FlyoutCustomization,
   SearchBarCustomization,
-  TopNavCustomization,
   UnifiedHistogramCustomization,
   FieldListCustomization,
 } from './customization_types';
@@ -21,7 +20,6 @@ import type {
 export type DiscoverCustomization =
   | FlyoutCustomization
   | SearchBarCustomization
-  | TopNavCustomization
   | UnifiedHistogramCustomization
   | DataTableCustomization
   | FieldListCustomization;

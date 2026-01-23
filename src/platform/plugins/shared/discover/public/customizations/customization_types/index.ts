@@ -9,7 +9,6 @@
 
 export type * from './flyout_customization';
 export type * from './search_bar_customization';
-export type * from './top_nav_customization';
 export type * from './histogram_customization';
 export type * from './data_table_customisation';
 export type * from './field_list_customisation';
