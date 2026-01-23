@@ -78,7 +78,7 @@ describe('getSearchStatus', () => {
       });
     });
 
-    describe('when the search already has a Kibana error', () => {
+    describe('when the search was failed', () => {
       it('should return error status immediately', async () => {
         // Given
         const { mockEsClient, mockFunctions } = getClientMock({});

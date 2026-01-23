@@ -44,12 +44,9 @@ export async function getSearchStatus({
 }): Promise<SearchSessionRequestStatus> {
   // TODO: Handle strategies other than the default one
   // https://github.com/elastic/kibana/issues/127880
-  const isCompleted = search.status === SearchStatus.COMPLETE;
-  const isKibanaError =
-    search.status === SearchStatus.ERROR && search.error && search.error.code < 500;
-
+  const isFinished = !!search.status && search.status !== SearchStatus.IN_PROGRESS;
   try {
-    if (isCompleted || isKibanaError) {
+    if (isFinished) {
       return {
         status: search.status!,
         startedAt: search.startedAt,

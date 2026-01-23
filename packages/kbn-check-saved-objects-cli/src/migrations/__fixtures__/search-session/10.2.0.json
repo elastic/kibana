@@ -1,0 +1,52 @@
+{
+  "10.1.0": [
+    {
+      "sessionId": "sessionId",
+      "name": "Search session",
+      "created": "2021-03-26T00:00:00.000Z",
+      "expires": "2021-03-30T00:00:00.000Z",
+      "appId": "my_app_id",
+      "locatorId": "DISCOVER_APP_LOCATOR",
+      "initialState": {},
+      "restoreState": {},
+      "idMapping": {
+        "search1": {
+          "id": "newSearchId1",
+          "strategy": "esql_async"
+        }
+      },
+      "realmType": "realmType",
+      "realmName": "realmName",
+      "username": "username",
+      "version": "10.1.0",
+      "isCanceled": false
+    }
+  ],
+  "10.2.0": [
+    {
+      "sessionId": "sessionId",
+      "name": "Search session",
+      "created": "2021-03-26T00:00:00.000Z",
+      "expires": "2021-03-30T00:00:00.000Z",
+      "appId": "my_app_id",
+      "locatorId": "DISCOVER_APP_LOCATOR",
+      "initialState": {},
+      "restoreState": {},
+      "idMapping": {
+        "search1": {
+          "id": "newSearchId1",
+          "strategy": "esql_async",
+          "status": "completed",
+          "startedAt": "2021-03-26T01:00:00.000Z",
+          "completedAt": "2021-03-26T01:05:00.000Z"
+        }
+      },
+      "realmType": "realmType",
+      "realmName": "realmName",
+      "username": "username",
+      "version": "10.1.0",
+      "isCanceled": false,
+      "status": "completed"
+    }
+  ]
+}
