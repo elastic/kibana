@@ -28,50 +28,61 @@ export type EsqlConversionFailureReason =
 
 export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureReason, string> = {
   multi_layer_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlMultiLayer', {
-    defaultMessage: 'Cannot convert to ES|QL: Multi-layer visualizations are not supported.',
+    defaultMessage:
+      'Cannot convert to ES|QL: Multi-layer visualizations will be supported in an upcoming update.',
   }),
   trend_line_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlTrendLine', {
     defaultMessage:
-      'Cannot convert to ES|QL: Metric visualization with a trend line are not supported.',
+      'Cannot convert to ES|QL: Metric visualizations with trend lines will be supported in an upcoming update.',
   }),
   non_utc_timezone: i18n.translate('xpack.lens.config.cannotConvertToEsqlNonUtcTimezone', {
-    defaultMessage: 'Cannot convert to ES|QL: UTC timezone is required.',
+    defaultMessage:
+      'Cannot convert to ES|QL: Non-UTC timezones will be supported in an upcoming update.',
   }),
   formula_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlFormula', {
-    defaultMessage: 'Cannot convert to ES|QL: Formula operations are not yet supported.',
+    defaultMessage:
+      'Cannot convert to ES|QL: Formula operations will be supported in an upcoming update.',
   }),
   time_shift_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlTimeShift', {
-    defaultMessage: 'Cannot convert to ES|QL: Time shift is not yet supported.',
+    defaultMessage: 'Cannot convert to ES|QL: Time shift will be supported in an upcoming update.',
   }),
   runtime_field_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlRuntimeField', {
-    defaultMessage: 'Cannot convert to ES|QL: Runtime fields are not yet supported.',
+    defaultMessage:
+      'Cannot convert to ES|QL: Runtime fields will be supported in an upcoming update.',
   }),
   reduced_time_range_not_supported: i18n.translate(
     'xpack.lens.config.cannotConvertToEsqlReducedTimeRange',
     {
-      defaultMessage: 'Cannot convert to ES|QL: Reduced time range is not yet supported.',
+      defaultMessage:
+        'Cannot convert to ES|QL: Reduced time range will be supported in an upcoming update.',
     }
   ),
   function_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlOperation', {
-    defaultMessage: 'Cannot convert to ES|QL: One or more functions are not yet supported.',
+    defaultMessage:
+      'Cannot convert to ES|QL: Support for one or more functions used will be coming in an upcoming update.',
   }),
   drop_partials_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlDropPartials', {
-    defaultMessage: 'Cannot convert to ES|QL: "Drop partial buckets" option is not yet supported.',
+    defaultMessage:
+      'Cannot convert to ES|QL: "Drop partial buckets" will be supported in an upcoming update.',
   }),
   include_empty_rows_not_supported: i18n.translate(
     'xpack.lens.config.cannotConvertToEsqlIncludeEmptyRows',
     {
-      defaultMessage: 'Cannot convert to ES|QL: "Include empty rows" option is not yet supported.',
+      defaultMessage:
+        'Cannot convert to ES|QL: "Include empty rows" will be supported in an upcoming update.',
     }
   ),
   terms_not_supported: i18n.translate('xpack.lens.config.cannotConvertToEsqlTerms', {
-    defaultMessage: 'Cannot convert to ES|QL: Top values (terms) aggregation is not yet supported.',
+    defaultMessage:
+      'Cannot convert to ES|QL: Top values (terms) aggregation will be supported in an upcoming update.',
   }),
   unsupported_settings: i18n.translate('xpack.lens.config.cannotConvertToEsqlUnsupportedSettings', {
-    defaultMessage: 'Cannot convert to ES|QL: This visualization has unsupported settings.',
+    defaultMessage:
+      'Cannot convert to ES|QL: Some settings used will be supported in an upcoming update.',
   }),
   unknown: i18n.translate('xpack.lens.config.cannotConvertToEsqlUnknown', {
-    defaultMessage: 'This visualization cannot be converted to ES|QL.',
+    defaultMessage:
+      'Cannot convert to ES|QL: This visualization will be supported in an upcoming update.',
   }),
 };
 
