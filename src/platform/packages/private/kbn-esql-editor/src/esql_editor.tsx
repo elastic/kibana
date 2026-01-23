@@ -92,7 +92,7 @@ import {
 } from './use_latency_tracking';
 import { addQueriesToCache } from './history_local_storage';
 import { ResizableButton } from './resizable_button';
-import { useRestorableState, withRestorableState } from './restorable_state';
+import { useRestorableRef, useRestorableState, withRestorableState } from './restorable_state';
 import { getHistoryItems } from './history_local_storage';
 import type { StarredQueryMetadata } from './editor_footer/esql_starred_queries_service';
 import type { ESQLEditorDeps, ESQLEditorProps as ESQLEditorPropsInternal } from './types';
@@ -206,7 +206,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
-  const [isVisorOpen, setIsVisorOpen] = useState(false);
+  const [isVisorOpen, setIsVisorOpen] = useRestorableState('isVisorOpen', false);
   const [hasUserDismissedVisorAutoOpen, setHasUserDismissedVisorAutoOpen] = useLocalStorage(
     VISOR_AUTO_OPEN_DISMISSED_KEY,
     !openVisorOnSourceCommands
@@ -216,7 +216,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const esqlVariablesRef = useRef(esqlVariables);
   const controlsContextRef = useRef(controlsContext);
   const isVisorOpenRef = useRef(isVisorOpen);
-  const hasOpenedVisorOnMount = useRef(false);
+  const hasOpenedVisorOnMount = useRestorableRef('hasOpenedVisorOnMount', false);
 
   // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
@@ -227,7 +227,11 @@ const ESQLEditorInternal = function ESQLEditor({
     warnings: serverWarning ? parseWarning(serverWarning) : [],
   });
 
-  // Open visor on initial render if query has only source commands
+  // The visor opens automatically if:
+  // - the user has not dismissed the auto open behavior
+  // - the query contains only a source command
+  // - the visor has not been opened automatically on mount before
+  // - The openVisorOnSourceCommands prop is true
   useEffect(() => {
     if (
       !hasOpenedVisorOnMount.current &&
@@ -238,22 +242,19 @@ const ESQLEditorInternal = function ESQLEditor({
       setIsVisorOpen(true);
       hasOpenedVisorOnMount.current = true;
     }
-  }, [code, hasUserDismissedVisorAutoOpen]);
+  }, [code, hasOpenedVisorOnMount, hasUserDismissedVisorAutoOpen, setIsVisorOpen]);
 
   const onToggleVisor = useCallback(() => {
-    if (hasOpenedVisorOnMount.current) {
-      // User manually closed the visor after it was auto-opened
-      setHasUserDismissedVisorAutoOpen(true);
-    }
-    setIsVisorOpen((prevIsOpen) => !prevIsOpen);
-  }, [setHasUserDismissedVisorAutoOpen]);
+    setHasUserDismissedVisorAutoOpen(!hasUserDismissedVisorAutoOpen);
+    setIsVisorOpen(!isVisorOpenRef.current);
+  }, [hasUserDismissedVisorAutoOpen, setHasUserDismissedVisorAutoOpen, setIsVisorOpen]);
 
   const onQueryUpdate = useCallback(
     (value: string) => {
       onTextLangQueryChange({ esql: value } as AggregateQuery);
       setIsVisorOpen(false);
     },
-    [onTextLangQueryChange]
+    [onTextLangQueryChange, setIsVisorOpen]
   );
 
   const { onSuggestionsReady, resetSuggestionsTracking } = useSuggestionsLatencyTracking({
@@ -909,10 +910,6 @@ const ESQLEditorInternal = function ESQLEditor({
     ]
   );
 
-  const toggleVisor = useCallback(() => {
-    setIsVisorOpen(!isVisorOpenRef.current);
-  }, []);
-
   const onLookupIndexCreate = useCallback(
     async (resultQuery: string) => {
       // forces refresh
@@ -1241,7 +1238,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     });
 
                     // Add editor key bindings
-                    addEditorKeyBindings(editor, onQuerySubmit, toggleVisor, onPrettifyQuery);
+                    addEditorKeyBindings(editor, onQuerySubmit, onToggleVisor, onPrettifyQuery);
 
                     // Store disposables for cleanup
                     const currentEditor = editorRef.current;
