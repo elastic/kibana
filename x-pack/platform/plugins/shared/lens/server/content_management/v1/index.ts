@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export { LENS_ITEM_VERSION } from './constants';
-
 export * from './service';
 export * from './schema';
 export type * from './types';
