@@ -10,6 +10,7 @@ import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/ut
 import { type Error } from '@kbn/apm-types';
 import type { Logger } from '@kbn/logging';
 import { last } from 'lodash';
+import type { ErrorWithDocIndex } from '../../../common/waterfall/error_with_doc_index';
 import type { APMConfig } from '../..';
 import type { WaterfallSpan, WaterfallTransaction } from '../../../common/waterfall/typings';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
@@ -96,7 +97,7 @@ export async function getApmTraceError(params: {
 }) {
   const response = await getApmTraceErrorQuery(params);
 
-  return compactMap(response.hits.hits, (hit): Error | undefined => {
+  return compactMap(response.hits.hits, (hit): ErrorWithDocIndex | undefined => {
     const errorSource = 'error' in hit._source ? hit._source : undefined;
     const event = hit.fields
       ? accessKnownApmEventFields(hit.fields).requireFields(requiredFields)
@@ -128,6 +129,7 @@ export async function getApmTraceError(params: {
         id: error?.id,
         log: errorSource?.error.log,
       },
+      docIndex: hit._index,
     };
   });
 }

@@ -8,10 +8,9 @@
 import type { Sort } from '@elastic/elasticsearch/lib/api/types';
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
-import type { EventOutcome, StatusCode } from '@kbn/apm-types';
+import type { EventOutcome, StatusCode, Transaction } from '@kbn/apm-types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import type { Transaction } from '@kbn/apm-types';
 import type { APMConfig } from '../..';
 import {
   AGENT_NAME,
@@ -55,6 +54,7 @@ import { MAX_ITEMS_PER_PAGE } from './get_trace_items';
 import { getUnifiedTraceErrors, type UnifiedTraceErrors } from './get_unified_trace_errors';
 import { compactMap } from '../../utils/compact_map';
 import { isRumAgentName } from '../../../common/agent_name';
+import type { ErrorWithDocIndex } from '../../../common/waterfall/error_with_doc_index';
 
 const fields = asMutableArray(['@timestamp', 'trace.id', 'service.name'] as const);
 
@@ -86,16 +86,27 @@ const optionalFields = asMutableArray([
 ] as const);
 
 export function getErrorsByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
-  const groupedErrorsByDocId: Record<string, Array<{ errorDocId: string }>> = {};
+  const groupedErrorsByDocId: Record<
+    string,
+    Array<{ errorDocId: string; errorDocIndex?: string }>
+  > = {};
 
   unifiedTraceErrors.apmErrors.forEach((errorDoc) => {
     if (errorDoc.span?.id) {
-      (groupedErrorsByDocId[errorDoc.span.id] ??= []).push({ errorDocId: errorDoc.id });
+      const errorDocIndex = (errorDoc as ErrorWithDocIndex).docIndex;
+      (groupedErrorsByDocId[errorDoc.span.id] ??= []).push({
+        errorDocId: errorDoc.id,
+        ...(errorDocIndex ? { errorDocIndex } : {}),
+      });
     }
   });
   unifiedTraceErrors.unprocessedOtelErrors.forEach((errorDoc) => {
     if (errorDoc.span?.id) {
-      (groupedErrorsByDocId[errorDoc.span.id] ??= []).push({ errorDocId: errorDoc.id });
+      const errorDocIndex = (errorDoc as ErrorWithDocIndex).docIndex;
+      (groupedErrorsByDocId[errorDoc.span.id] ??= []).push({
+        errorDocId: errorDoc.id,
+        ...(errorDocIndex ? { errorDocIndex } : {}),
+      });
     }
   });
 

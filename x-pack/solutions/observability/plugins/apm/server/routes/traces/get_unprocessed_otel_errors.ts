@@ -13,7 +13,6 @@
 
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import type { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/utility_types';
-import type { Error } from '@kbn/apm-types';
 import { existsQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import {
   AT_TIMESTAMP,
@@ -30,6 +29,7 @@ import {
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import type { LogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
 import { compactMap } from '../../utils/compact_map';
+import type { ErrorWithDocIndex } from '../../../common/waterfall/error_with_doc_index';
 
 const requiredOtelFields = asMutableArray([SPAN_ID, ID, SERVICE_NAME, AT_TIMESTAMP] as const);
 const optionalOtelFields = asMutableArray([
@@ -83,7 +83,7 @@ export async function getUnprocessedOtelErrors({
 
     const timestamp = event[TIMESTAMP_US] ?? new Date(event[AT_TIMESTAMP]).getTime() * 1000;
 
-    const error: Error = {
+    const error: ErrorWithDocIndex = {
       id: event[ID],
       span: { id: event[SPAN_ID] },
       trace: { id: traceId },
@@ -96,6 +96,7 @@ export async function getUnprocessedOtelErrors({
           message: event[EXCEPTION_MESSAGE],
         },
       },
+      docIndex: hit._index,
     };
 
     return error;
