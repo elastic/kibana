@@ -12,20 +12,20 @@ import { schema } from '@kbn/config-schema';
 import {
   fieldMetricOrFormulaOperationDefinitionSchema,
   esqlColumnSchema,
-  genericOperationOptionsSchema,
+  esqlColumnOperationWithLabelAndFormatSchema,
 } from '../metric_ops';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 import { mergeAllBucketsWithChartDimensionSchema } from './shared';
 
-const regionMapStateRegionOptionsSchema = schema.object({
+const regionMapStateRegionOptionsSchema = {
   ems: schema.maybe(
     schema.object({
       boundaries: schema.string({ meta: { description: 'EMS boundaries' } }),
       join: schema.string({ meta: { description: 'EMS join field' } }),
     })
   ),
-});
+};
 
 export const regionMapStateSchemaNoESQL = schema.object(
   {
@@ -55,11 +55,11 @@ export const regionMapStateSchemaESQL = schema.object(
     /**
      * Metric configuration
      */
-    metric: schema.allOf([schema.object(genericOperationOptionsSchema), esqlColumnSchema]),
+    metric: esqlColumnOperationWithLabelAndFormatSchema,
     /**
      * Configure how to break down to regions
      */
-    region: schema.allOf([regionMapStateRegionOptionsSchema, esqlColumnSchema]),
+    region: esqlColumnSchema.extends(regionMapStateRegionOptionsSchema),
   },
   { meta: { id: 'regionMapESQL' } }
 );

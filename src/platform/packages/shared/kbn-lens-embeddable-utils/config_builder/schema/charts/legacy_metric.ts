@@ -9,14 +9,14 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { esqlColumnSchema, genericOperationOptionsSchema } from '../metric_ops';
+import { esqlColumnOperationWithLabelAndFormatSchema } from '../metric_ops';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import { layerSettingsSchema, sharedPanelInfoSchema, dslOnlyPanelInfoSchema } from '../shared';
 import { applyColorToSchema, colorByValueAbsolute } from '../color';
 import { horizontalAlignmentSchema, verticalAlignmentSchema } from '../alignments';
 import { mergeAllMetricsWithChartDimensionSchema } from './shared';
 
-const legacyMetricStateMetricOptionsSchema = schema.object({
+const legacyMetricStateMetricOptionsSchema = {
   /**
    * Size of the legacy metric label and value. Possible values:
    * - 'xs': Extra small
@@ -74,7 +74,7 @@ const legacyMetricStateMetricOptionsSchema = schema.object({
    * Color configuration
    */
   color: schema.maybe(colorByValueAbsolute),
-});
+};
 
 export const legacyMetricStateSchemaNoESQL = schema.object(
   {
@@ -100,11 +100,9 @@ const esqlLegacyMetricState = schema.object(
     /**
      * Metric configuration, must define operation.
      */
-    metric: schema.allOf([
-      schema.object(genericOperationOptionsSchema),
-      legacyMetricStateMetricOptionsSchema,
-      esqlColumnSchema,
-    ]),
+    metric: esqlColumnOperationWithLabelAndFormatSchema.extends(
+      legacyMetricStateMetricOptionsSchema
+    ),
   },
   { meta: { id: 'legacyMetricESQL' } }
 );

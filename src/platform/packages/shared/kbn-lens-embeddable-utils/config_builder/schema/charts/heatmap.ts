@@ -121,7 +121,7 @@ export const heatmapStateSchemaNoESQL = schema.object(
     ...dslOnlyPanelInfoSchema,
     ...datasetSchema,
     metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
-      schema.object(heatmapStateMetricOptionsSchemaProps)
+      heatmapStateMetricOptionsSchemaProps
     ),
   },
   { meta: { id: 'heatmapNoESQL' } }
@@ -132,7 +132,7 @@ export const heatmapStateSchemaESQL = schema.object(
     ...heatmapSharedStateSchema,
     ...heatmapAxesStateESQLSchemaProps,
     ...datasetEsqlTableSchema,
-    metric: schema.allOf([schema.object(heatmapStateMetricOptionsSchemaProps), esqlColumnSchema]),
+    metric: esqlColumnSchema.extends(heatmapStateMetricOptionsSchemaProps),
   },
   { meta: { id: 'heatmapESQL' } }
 );

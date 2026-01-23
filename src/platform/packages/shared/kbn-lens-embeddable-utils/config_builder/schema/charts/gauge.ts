@@ -10,8 +10,8 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import {
+  esqlColumnOperationWithLabelAndFormatSchema,
   esqlColumnSchema,
-  genericOperationOptionsSchema,
   metricOperationDefinitionSchema,
 } from '../metric_ops';
 import { colorByValueSchema } from '../color';
@@ -124,12 +124,10 @@ export const gaugeStateSchemaNoESQL = schema.object(
     /**
      * Primary value configuration, must define operation.
      */
-    metric: mergeAllMetricsWithChartDimensionSchema(
-      schema.object({
-        ...gaugeStateMetricOptionsSchema,
-        ...gaugeStateMetricInnerNoESQLOpsSchema,
-      })
-    ),
+    metric: mergeAllMetricsWithChartDimensionSchema({
+      ...gaugeStateMetricOptionsSchema,
+      ...gaugeStateMetricInnerNoESQLOpsSchema,
+    }),
   },
   { meta: { id: 'gaugeNoESQL' } }
 );
@@ -144,14 +142,10 @@ export const gaugeStateSchemaESQL = schema.object(
     /**
      * Primary value configuration, must define operation.
      */
-    metric: schema.allOf([
-      schema.object({
-        ...genericOperationOptionsSchema,
-        ...gaugeStateMetricOptionsSchema,
-        ...gaugeStateMetricInnerESQLOpsSchema,
-      }),
-      esqlColumnSchema,
-    ]),
+    metric: esqlColumnOperationWithLabelAndFormatSchema.extends({
+      ...gaugeStateMetricOptionsSchema,
+      ...gaugeStateMetricInnerESQLOpsSchema,
+    }),
   },
   { meta: { id: 'gaugeESQL' } }
 );

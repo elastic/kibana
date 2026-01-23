@@ -10,7 +10,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { LENS_TAGCLOUD_DEFAULT_STATE } from '@kbn/lens-common';
-import { esqlColumnSchema, genericOperationOptionsSchema } from '../metric_ops';
+import { esqlColumnOperationWithLabelAndFormatSchema, esqlColumnSchema } from '../metric_ops';
 import { colorMappingSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
@@ -20,7 +20,7 @@ import {
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
 
-const tagcloudStateMetricOptionsSchema = schema.object({
+const tagcloudStateMetricOptionsSchema = {
   /**
    * Whether to show the metric label
    */
@@ -30,14 +30,14 @@ const tagcloudStateMetricOptionsSchema = schema.object({
       defaultValue: LENS_TAGCLOUD_DEFAULT_STATE.showLabel,
     })
   ),
-});
+};
 
-const tagcloudStateTagsByOptionsSchema = schema.object({
+const tagcloudStateTagsByOptionsSchema = {
   /**
    * Color configuration
    */
   color: schema.maybe(colorMappingSchema),
-});
+};
 
 const tagcloudStateSharedOptionsSchema = {
   orientation: schema.maybe(
@@ -97,15 +97,11 @@ export const tagcloudStateSchemaESQL = schema.object(
     /**
      * Primary value configuration, must define operation.
      */
-    metric: schema.allOf([
-      schema.object(genericOperationOptionsSchema),
-      tagcloudStateMetricOptionsSchema,
-      esqlColumnSchema,
-    ]),
+    metric: esqlColumnOperationWithLabelAndFormatSchema.extends(tagcloudStateMetricOptionsSchema),
     /**
      * Configure how to break down the metric (e.g. show one metric per term).
      */
-    tag_by: schema.allOf([tagcloudStateTagsByOptionsSchema, esqlColumnSchema]),
+    tag_by: esqlColumnSchema.extends(tagcloudStateTagsByOptionsSchema),
   },
   { meta: { id: 'tagcloudESQL' } }
 );

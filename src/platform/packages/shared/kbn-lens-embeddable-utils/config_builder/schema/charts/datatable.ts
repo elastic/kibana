@@ -11,7 +11,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_HEADER_ROW_HEIGHT_LINES, DEFAULT_ROW_HEIGHT_LINES } from '@kbn/lens-common';
 import { omit } from 'lodash';
-import { esqlColumn, esqlColumnSchema, genericOperationOptionsSchema } from '../metric_ops';
+import { esqlColumnOperationWithLabelAndFormatSchema, esqlColumnSchema } from '../metric_ops';
 import { applyColorToSchema, colorByValueSchema, colorMappingSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import {
@@ -159,7 +159,7 @@ const datatableStateCommonOptionsSchema = {
   ),
 };
 
-const datatableStateRowsOptionsSchema = schema.object({
+const datatableStateRowsOptionsSchema = {
   ...datatableStateCommonOptionsSchema,
   /**
    * Alignment of the rows
@@ -189,9 +189,9 @@ const datatableStateRowsOptionsSchema = schema.object({
    * number of columns specified in the columns parameter.
    */
   collapse_by: schema.maybe(collapseBySchema),
-});
+};
 
-const datatableStateMetricsOptionsSchema = schema.object({
+const datatableStateMetricsOptionsSchema = {
   ...datatableStateCommonOptionsSchema,
   /**
    * Color configuration
@@ -227,9 +227,9 @@ const datatableStateMetricsOptionsSchema = schema.object({
       { meta: { description: 'Summary row configuration' } }
     )
   ),
-});
+};
 
-const datatableStateSplitMetricsByOptionsSchema = schema.object({
+const datatableStateSplitMetricsByOptionsSchema = {
   /**
    * Sorting configuration for the split metrics by
    */
@@ -241,7 +241,7 @@ const datatableStateSplitMetricsByOptionsSchema = schema.object({
       },
     })
   ),
-});
+};
 
 function validateSorting({
   metrics,
@@ -321,11 +321,9 @@ export const datatableStateSchemaESQL = schema.object(
      * Metric columns configuration, must define operation.
      */
     metrics: schema.arrayOf(
-      schema.allOf([
-        schema.object(genericOperationOptionsSchema),
-        datatableStateMetricsOptionsSchema,
-        esqlColumnSchema,
-      ]),
+      esqlColumnOperationWithLabelAndFormatSchema.extends(datatableStateMetricsOptionsSchema, {
+        meta: { id: 'datatableESQLMetric' },
+      }),
       {
         minSize: 1,
         maxSize: 1000,
@@ -336,7 +334,7 @@ export const datatableStateSchemaESQL = schema.object(
      * Row configuration, optional operations.
      */
     rows: schema.maybe(
-      schema.arrayOf(datatableStateRowsOptionsSchema.extends(esqlColumn), {
+      schema.arrayOf(esqlColumnSchema.extends(datatableStateRowsOptionsSchema), {
         minSize: 1,
         maxSize: 50,
         meta: { description: 'Array of operations to split the datatable rows by' },

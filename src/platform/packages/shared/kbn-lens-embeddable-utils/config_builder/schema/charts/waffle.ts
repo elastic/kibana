@@ -9,7 +9,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { esqlColumnSchema, genericOperationOptionsSchema } from '../metric_ops';
+import { esqlColumnOperationWithLabelAndFormatSchema, esqlColumnSchema } from '../metric_ops';
 import { colorByValueSchema, colorMappingSchema, staticColorSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import {
@@ -57,14 +57,14 @@ export const waffleStateSharedSchema = {
 /**
  * Color configuration for primary metric in waffle chart
  */
-const partitionStatePrimaryMetricOptionsSchema = schema.object({
+const partitionStatePrimaryMetricOptionsSchema = {
   color: schema.maybe(staticColorSchema),
-});
+};
 
 /**
  * Breakdown configuration including color mapping and collapse behavior
  */
-const partitionStateBreakdownByOptionsSchema = schema.object({
+const partitionStateBreakdownByOptionsSchema = {
   color: schema.maybe(
     schema.oneOf([colorByValueSchema, colorMappingSchema], {
       meta: {
@@ -73,7 +73,7 @@ const partitionStateBreakdownByOptionsSchema = schema.object({
     })
   ),
   collapse_by: schema.maybe(collapseBySchema),
-});
+};
 
 function validateGroupings({
   metrics,
@@ -141,27 +141,15 @@ const waffleStateSchemaESQL = schema.object(
     ...datasetEsqlTableSchema,
     ...waffleStateSharedSchema,
     metrics: schema.arrayOf(
-      schema.allOf(
-        [
-          schema.object(genericOperationOptionsSchema),
-          partitionStatePrimaryMetricOptionsSchema,
-          esqlColumnSchema,
-        ],
-        { meta: { description: 'ES|QL column reference for primary metric' } }
-      ),
+      esqlColumnOperationWithLabelAndFormatSchema.extends(partitionStatePrimaryMetricOptionsSchema),
       { maxSize: 100 }
     ),
     group_by: schema.maybe(
-      schema.arrayOf(
-        schema.allOf([partitionStateBreakdownByOptionsSchema, esqlColumnSchema], {
-          meta: { description: 'ES|QL column reference for breakdown dimension' },
-        }),
-        {
-          minSize: 1,
-          maxSize: 100,
-          meta: { description: 'Array of ES|QL breakdown columns (minimum 1)' },
-        }
-      )
+      schema.arrayOf(esqlColumnSchema.extends(partitionStateBreakdownByOptionsSchema), {
+        minSize: 1,
+        maxSize: 100,
+        meta: { description: 'Array of ES|QL breakdown columns (minimum 1)' },
+      })
     ),
   },
   {

@@ -92,43 +92,40 @@ const colorByValueBase = schema.object({
   ),
 });
 
-export const colorByValueAbsolute = schema.allOf(
-  [colorByValueBase, schema.object({ range: schema.literal('absolute') })],
+export const colorByValueAbsolute = colorByValueBase.extends(
+  { range: schema.literal('absolute') },
   { meta: { id: 'colorByValueAbsolute' } }
 );
 
 export const colorByValueSchema = schema.oneOf(
   [
     colorByValueAbsolute,
-    schema.allOf(
-      [
-        colorByValueBase,
-        schema.object({
-          /**
-           * The minimum value for the color range. Used as the lower bound for value-based color assignment.
-           */
-          min: schema.number({
-            meta: {
-              description:
-                'The minimum value for the color range. Used as the lower bound for value-based color assignment.',
-            },
-          }),
-          /**
-           * The maximum value for the color range. Used as the upper bound for value-based color assignment.
-           */
-          max: schema.number({
-            meta: {
-              description:
-                'The maximum value for the color range. Used as the upper bound for value-based color assignment.',
-            },
-          }),
-          /**
-           * Determines whether the range is interpreted as absolute or as a percentage of the data.
-           * Possible values: 'absolute', 'percentage'
-           */
-          range: schema.literal('percentage'), // Range is interpreted as percentage values. Possible value: 'percentage'
+    colorByValueBase.extends(
+      {
+        /**
+         * The minimum value for the color range. Used as the lower bound for value-based color assignment.
+         */
+        min: schema.number({
+          meta: {
+            description:
+              'The minimum value for the color range. Used as the lower bound for value-based color assignment.',
+          },
         }),
-      ],
+        /**
+         * The maximum value for the color range. Used as the upper bound for value-based color assignment.
+         */
+        max: schema.number({
+          meta: {
+            description:
+              'The maximum value for the color range. Used as the upper bound for value-based color assignment.',
+          },
+        }),
+        /**
+         * Determines whether the range is interpreted as absolute or as a percentage of the data.
+         * Possible values: 'absolute', 'percentage'
+         */
+        range: schema.literal('percentage'), // Range is interpreted as percentage values. Possible value: 'percentage'
+      },
       { meta: { id: 'colorByValueRelative' } }
     ),
   ],

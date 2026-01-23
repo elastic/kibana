@@ -365,41 +365,24 @@ const xyDataLayerSchemaNoESQL = schema.object(
     ...datasetSchema,
     ...xyDataLayerSharedSchema,
     breakdown_by: schema.maybe(
-      mergeAllBucketsWithChartDimensionSchema(
-        schema.object(
-          {
-            collapse_by: schema.maybe(collapseBySchema),
-            color: schema.maybe(colorMappingSchema),
-            aggregate_first: schema.maybe(
-              schema.boolean({
-                meta: { description: 'Whether to aggregate before splitting series' },
-              })
-            ),
-          },
-          { meta: { description: 'Split series configuration with color mapping' } }
-        )
-      )
+      mergeAllBucketsWithChartDimensionSchema({
+        collapse_by: schema.maybe(collapseBySchema),
+        color: schema.maybe(colorMappingSchema),
+        aggregate_first: schema.maybe(
+          schema.boolean({
+            meta: { description: 'Whether to aggregate before splitting series' },
+          })
+        ),
+      })
     ),
     y: schema.arrayOf(
-      mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
-        schema.object(
-          {
-            axis: schema.maybe(schema.oneOf([schema.literal('left'), schema.literal('right')])),
-            color: schema.maybe(staticColorSchema),
-          },
-          { meta: { description: 'Y-axis metric configuration with axis assignment' } }
-        )
-      ),
+      mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps({
+        axis: schema.maybe(schema.oneOf([schema.literal('left'), schema.literal('right')])),
+        color: schema.maybe(staticColorSchema),
+      }),
       { meta: { description: 'Array of metrics to display on Y-axis' }, maxSize: 100 }
     ),
-    x: schema.maybe(
-      mergeAllBucketsWithChartDimensionSchema(
-        schema.object(
-          {},
-          { meta: { id: 'xyXMetricNoESQL', description: 'X-axis bucket configuration' } }
-        )
-      )
-    ),
+    x: schema.maybe(mergeAllBucketsWithChartDimensionSchema({})),
   },
   {
     meta: {
@@ -510,14 +493,7 @@ const referenceLineLayerSchemaNoESQL = schema.object(
     ...datasetSchema,
     type: schema.literal('referenceLines'),
     thresholds: schema.arrayOf(
-      mergeAllMetricsWithChartDimensionSchemaWithStaticOps(
-        schema.object(referenceLineLayerShared, {
-          meta: {
-            id: 'xyReferenceLineThresholdNoESQL',
-            description: 'Reference line threshold configuration',
-          },
-        })
-      ),
+      mergeAllMetricsWithChartDimensionSchemaWithStaticOps(referenceLineLayerShared),
       { meta: { description: 'Array of reference line thresholds' }, minSize: 1, maxSize: 100 }
     ),
   },
@@ -537,19 +513,11 @@ const referenceLineLayerSchemaESQL = schema.object(
     ...layerSettingsSchema,
     ...datasetEsqlTableSchema,
     type: schema.literal('referenceLines'),
-    thresholds: schema.arrayOf(
-      schema.allOf([
-        esqlColumnSchema,
-        schema.object(referenceLineLayerShared, {
-          meta: { description: 'ES|QL reference line threshold' },
-        }),
-      ]),
-      {
-        meta: { description: 'Array of ES|QL-based reference line thresholds' },
-        minSize: 1,
-        maxSize: 100,
-      }
-    ),
+    thresholds: schema.arrayOf(esqlColumnSchema.extends(referenceLineLayerShared), {
+      meta: { description: 'Array of ES|QL-based reference line thresholds' },
+      minSize: 1,
+      maxSize: 100,
+    }),
   },
   {
     meta: { id: 'xyReferenceLineLayerESQL', description: 'Reference line layer for ES|QL queries' },
