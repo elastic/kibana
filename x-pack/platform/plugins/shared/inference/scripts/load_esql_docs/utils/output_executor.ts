@@ -96,6 +96,7 @@ export const bindOutput: PromptCallerFactory = ({
 
         // Log retry attempt for debugging
         if (isRateLimitError) {
+          // eslint-disable-next-line no-console
           console.warn(
             `Rate limit error (429) on attempt ${attempt + 1}/${
               totalRetries + 1
