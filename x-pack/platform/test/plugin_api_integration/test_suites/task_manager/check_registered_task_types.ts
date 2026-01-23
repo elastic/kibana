@@ -204,7 +204,6 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:upgrade-agentless-deployments-task',
         'fleet:upgrade_action:retry',
         'gap-auto-fill-scheduler-task',
-        'logs-data-telemetry',
         'maintenance-window:generate-events',
         'osquery:telemetry-configs',
         'osquery:telemetry-packs',
