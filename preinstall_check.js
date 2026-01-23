@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// test
 (() => {
   const isUsingNpm = process.env.npm_config_git !== undefined;
 
