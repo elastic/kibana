@@ -469,6 +469,11 @@ export const promqlFunctionDefinitions: PromQLFunctionDefinition[] = [
   const allFunctionDefinitions = ESFunctionDefinitions.concat(ESFOperatorDefinitions);
 
   const functionNames = allFunctionDefinitions.map((def) => def.name.toUpperCase());
+
+  const functionsEnum = `export enum EsqlFunctionNames {
+${ESFunctionDefinitions.map((f) => `  ${f.name.toUpperCase()} = '${f.name}',`).join('\n')}
+}`;
+
   await writeFile(
     join(__dirname, '../src/commands/definitions/generated/function_names.ts'),
     `/**
@@ -491,6 +496,8 @@ export const promqlFunctionDefinitions: PromQLFunctionDefinition[] = [
  */
 
 export const esqlFunctionNames = ${JSON.stringify(functionNames, null, 2)};
+
+${functionsEnum}
 `
   );
 

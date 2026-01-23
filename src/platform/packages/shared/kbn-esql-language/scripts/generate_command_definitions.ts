@@ -9,6 +9,7 @@
 
 /* eslint-disable no-console */
 
+import { snakeCase } from 'lodash';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import type { ElasticsearchCommandDefinition } from '../src/commands/definitions/types';
@@ -42,6 +43,12 @@ async function generateElasticsearchCommandDefinitions(): Promise<void> {
     commandsMetadata[command.name] = updatedComand;
   });
 
+  const commandEnum = `export enum EsqlCommandNames {
+${esCommandDefinitions
+  .map((command) => `  ${snakeCase(command.name).toUpperCase()} = '${command.name}',`)
+  .join('\n')}
+}`;
+
   const outputTsPath = join(outputCommandsDir, 'commands.ts');
   const tsContent = `
 // This file is auto-generated. Do not edit it manually.
@@ -51,6 +58,8 @@ export const commandsMetadata: Record<string, unknown> = ${JSON.stringify(
     null,
     2
   )};
+
+${commandEnum}
 `;
 
   await writeFile(outputTsPath, tsContent);
