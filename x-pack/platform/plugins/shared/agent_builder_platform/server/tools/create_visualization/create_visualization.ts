@@ -8,16 +8,14 @@
 import { z } from '@kbn/zod';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
+import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID } from '@kbn/management-settings-ids';
 import type { VisualizationConfig } from './types';
 import { guessChartType } from './guess_chart_type';
 import { createVisualizationGraph } from './graph_lens';
 import { getSchemaForChartType } from './schemas';
-
-/** Attachment type for visualization configurations */
-const VISUALIZATION_ATTACHMENT_TYPE = 'visualization';
 
 const createVisualizationSchema = z.object({
   query: z.string().describe('A natural language query describing the desired visualization.'),
@@ -150,7 +148,7 @@ This tool will:
         let isUpdate = false;
 
         if (attachmentId && attachments.get(attachmentId)) {
-          const updated = attachments.update(attachmentId, {
+          const updated = await attachments.update(attachmentId, {
             data: visualizationData,
             description: `Visualization: ${nlQuery.slice(0, 50)}${
               nlQuery.length > 50 ? '...' : ''
@@ -161,8 +159,8 @@ This tool will:
           isUpdate = true;
           logger.debug(`Updated visualization attachment ${attachmentId} to version ${version}`);
         } else {
-          const newAttachment = attachments.add({
-            type: VISUALIZATION_ATTACHMENT_TYPE,
+          const newAttachment = await attachments.add({
+            type: AttachmentType.visualization,
             data: visualizationData,
             description: `Visualization: ${nlQuery.slice(0, 50)}${
               nlQuery.length > 50 ? '...' : ''

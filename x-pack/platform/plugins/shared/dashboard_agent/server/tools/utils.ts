@@ -16,13 +16,12 @@ import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-plugin/common/page_bundle_constants';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/common/constants';
 
-import type {
-  ToolAvailabilityContext,
-  ToolAvailabilityResult,
-  ToolResultStore,
-} from '@kbn/agent-builder-server';
-import { isToolResultId } from '@kbn/agent-builder-server';
-import { ToolResultType } from '@kbn/agent-builder-common';
+import type { ToolAvailabilityContext, ToolAvailabilityResult } from '@kbn/agent-builder-server';
+import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import {
+  AttachmentType,
+  type VisualizationAttachmentData,
+} from '@kbn/agent-builder-common/attachments';
 import {
   DEFAULT_PANEL_HEIGHT,
   SMALL_PANEL_WIDTH,
@@ -73,22 +72,23 @@ export const getMarkdownPanelHeight = (content: string): number =>
   calculateMarkdownPanelHeight(content);
 
 /**
- * Normalizes panel configurations (tool_result_ids) to the correct DashboardPanel format.
- * @param panels - Array of tool_result_id strings referencing visualizations
+ * Normalizes panel configurations (visualization attachment IDs) to the correct DashboardPanel format.
+ * @param visualizationIds - Array of visualization attachment IDs
  * @param yOffset - Optional Y offset for positioning (e.g., when a markdown panel is prepended)
+ * @param attachments - The attachment state manager to resolve visualization configs from
  */
 export const normalizePanels = (
-  panels: string[] | undefined,
+  visualizationIds: string[] | undefined,
   yOffset: number = 0,
-  resultStore?: ToolResultStore
+  attachments: AttachmentStateManager
 ): DashboardPanel[] => {
-  const panelIds = panels ?? [];
+  const panelIds = visualizationIds ?? [];
   const dashboardPanels: DashboardPanel[] = [];
   let currentX = 0;
   let currentY = yOffset;
 
-  for (const panelId of panelIds) {
-    const config = resolveLensConfig(panelId, resultStore);
+  for (const attachmentId of panelIds) {
+    const config = resolveLensConfigFromAttachment(attachmentId, attachments);
     const w = getPanelWidth(config.type);
 
     // Check if panel fits in current row, if not move to next row
@@ -107,30 +107,37 @@ export const normalizePanels = (
   return dashboardPanels;
 };
 
-export const resolveLensConfig = (
-  toolResultId: string,
-  resultStore?: ToolResultStore
+/**
+ * Resolves a Lens configuration from a visualization attachment.
+ * Always uses the latest version of the attachment.
+ * @param attachmentId - The visualization attachment ID
+ * @param attachments - The attachment state manager
+ */
+export const resolveLensConfigFromAttachment = (
+  attachmentId: string,
+  attachments: AttachmentStateManager
 ): LensApiSchemaType => {
-  if (!isToolResultId(toolResultId)) {
-    throw new Error(
-      `Invalid panel reference "${toolResultId}". Expected a tool_result_id from a previous visualization tool call.`
-    );
-  }
-  if (!resultStore || !resultStore.has(toolResultId)) {
-    throw new Error(`Panel reference "${toolResultId}" was not found in the tool result store.`);
-  }
+  const latestVersion = attachments.getLatest(attachmentId);
 
-  const result = resultStore.get(toolResultId);
-  if (result.type !== ToolResultType.visualization) {
+  if (!latestVersion) {
     throw new Error(
-      `Provided tool_result_id "${toolResultId}" is not a visualization result (got "${result.type}").`
+      `Visualization attachment "${attachmentId}" was not found. Make sure you're using an attachment_id from a previous create_visualizations call.`
     );
   }
 
-  const visualization = result.data.visualization;
+  const attachment = attachments.get(attachmentId);
+  if (!attachment || attachment.type !== AttachmentType.visualization) {
+    throw new Error(
+      `Attachment "${attachmentId}" is not a visualization attachment (got "${attachment?.type}").`
+    );
+  }
+
+  const data = latestVersion.data as VisualizationAttachmentData;
+  const visualization = data.visualization;
+
   if (!visualization || typeof visualization !== 'object') {
     throw new Error(
-      `Visualization result "${toolResultId}" does not contain a valid visualization config.`
+      `Visualization attachment "${attachmentId}" does not contain a valid visualization config.`
     );
   }
 

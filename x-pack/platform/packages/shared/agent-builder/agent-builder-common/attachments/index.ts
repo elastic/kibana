@@ -18,9 +18,11 @@ export {
   textAttachmentDataSchema,
   esqlAttachmentDataSchema,
   screenContextAttachmentDataSchema,
+  visualizationAttachmentDataSchema,
   type TextAttachmentData,
   type ScreenContextAttachmentData,
   type EsqlAttachmentData,
+  type VisualizationAttachmentData,
 } from './attachment_types';
 
 export type {

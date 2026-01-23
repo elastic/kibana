@@ -8,8 +8,8 @@
 import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import { getToolResultId } from '@kbn/agent-builder-server';
 import {
   createVisualizationGraph,
   guessChartType,
@@ -62,18 +62,21 @@ This tool will process each visualization sequentially:
     )})
 2. Generate an ES|QL query if not provided
 3. Generate valid visualization configurations
+4. Store each visualization as an attachment
 
-Returns an array of visualization results, each with a unique tool_result_id that can be passed to create_dashboard or manage_dashboard.`,
+Returns an array of visualization results, each with an attachment_id that can be passed to create_dashboard or manage_dashboard.`,
     schema: createVisualizationsSchema,
     availability: {
       cacheMode: 'space',
       handler: checkDashboardToolsAvailability,
     },
     tags: [],
-    handler: async ({ visualizations }, { esClient, modelProvider, logger, events }) => {
+    handler: async (
+      { visualizations },
+      { esClient, modelProvider, logger, events, attachments }
+    ) => {
       const results: Array<{
         type: typeof ToolResultType.visualization | typeof ToolResultType.error;
-        tool_result_id?: string;
         data: Record<string, unknown>;
       }> = [];
 
@@ -126,12 +129,27 @@ Returns an array of visualization results, each with a unique tool_result_id tha
             );
           }
 
-          const toolResultId = getToolResultId();
+          // Step 4: Store visualization as an attachment
+          const visualizationData = {
+            query: nlQuery,
+            visualization: validatedConfig,
+            chart_type: selectedChartType,
+            esql: esqlQuery,
+          };
+
+          const newAttachment = await attachments.add({
+            type: AttachmentType.visualization,
+            data: visualizationData,
+            description: `Visualization: ${nlQuery.slice(0, 50)}${
+              nlQuery.length > 50 ? '...' : ''
+            }`,
+          });
 
           results.push({
             type: ToolResultType.visualization,
-            tool_result_id: toolResultId,
             data: {
+              attachment_id: newAttachment.id,
+              version: newAttachment.current_version,
               query: nlQuery,
               visualization: validatedConfig,
               chart_type: selectedChartType,
@@ -139,7 +157,7 @@ Returns an array of visualization results, each with a unique tool_result_id tha
             },
           });
 
-          logger.debug(`Successfully created visualization: ${toolResultId}`);
+          logger.debug(`Successfully created visualization attachment: ${newAttachment.id}`);
         } catch (error) {
           logger.error(`Error creating visualization for query "${nlQuery}": ${error.message}`);
           results.push({

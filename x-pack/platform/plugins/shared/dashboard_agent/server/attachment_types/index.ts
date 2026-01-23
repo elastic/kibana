@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { DashboardResult } from '@kbn/agent-builder-common/tools/tool_result';
-
-/** Dashboard result data structure */
-export type DashboardResultData = DashboardResult['data'];
+export {
+  createDashboardAttachmentType,
+  DASHBOARD_ATTACHMENT_TYPE,
+  dashboardAttachmentDataSchema,
+  type DashboardAttachmentData,
+} from './dashboard';

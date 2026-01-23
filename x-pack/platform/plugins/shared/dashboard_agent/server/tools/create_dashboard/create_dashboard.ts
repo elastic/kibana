@@ -8,8 +8,7 @@
 import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import { getToolResultId } from '@kbn/agent-builder-server';
+import { getToolResultId, type BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { DashboardAppLocator } from '@kbn/dashboard-plugin/common/locator/locator';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
@@ -20,7 +19,7 @@ import {
   buildMarkdownPanel,
   getMarkdownPanelHeight,
 } from '../utils';
-import type { DashboardContent } from '../types';
+import { DASHBOARD_ATTACHMENT_TYPE, type DashboardAttachmentData } from '../../attachment_types';
 
 const createDashboardSchema = z.object({
   title: z.string().describe('The title of the dashboard to create.'),
@@ -29,7 +28,7 @@ const createDashboardSchema = z.object({
     .array(z.string())
     .optional()
     .describe(
-      'An array of tool_result_ids from previous create_visualizations calls. These reference the visualizations to include in the dashboard.'
+      'An array of attachment_ids from previous create_visualizations calls. These reference the visualization attachments to include in the dashboard.'
     ),
   markdownContent: z
     .string()
@@ -57,15 +56,16 @@ export const createDashboardTool = ({
 This tool will:
 1. Accept a title and description for the dashboard
 2. Accept markdown content for a summary panel at the top
-3. Accept an array of visualization tool_result_ids from previous create_visualizations calls
+3. Accept an array of visualization attachment_ids from previous create_visualizations calls
 4. Generate an in-memory dashboard URL (not saved until user explicitly saves it)
+5. Store the dashboard state as an attachment for future modifications
 
 The dashboard is created in edit mode so the user can review and save it.`,
     schema: createDashboardSchema,
     tags: [],
     handler: async (
       { title, description, visualizations, markdownContent },
-      { logger, request, resultStore }
+      { logger, request, attachments }
     ) => {
       try {
         const visualizationIds = visualizations ?? [];
@@ -75,7 +75,7 @@ The dashboard is created in edit mode so the user can review and save it.`,
         const yOffset = getMarkdownPanelHeight(markdownContent);
         const dashboardPanels = [
           markdownPanel,
-          ...normalizePanels(visualizationIds, yOffset, resultStore),
+          ...normalizePanels(visualizationIds, yOffset, attachments),
         ];
 
         const spaceId = spaces?.spacesService?.getSpaceId(request);
@@ -96,23 +96,35 @@ The dashboard is created in edit mode so the user can review and save it.`,
 
         logger.info(`In-memory dashboard created with ${dashboardPanels.length} panels`);
 
-        const toolResultId = getToolResultId();
-
-        const content: DashboardContent = {
-          url: dashboardUrl,
+        // Create dashboard attachment to store state for future modifications
+        const dashboardData: DashboardAttachmentData = {
           title,
           description,
           markdownContent,
-          panelCount: dashboardPanels.length,
           visualizationIds,
         };
+
+        const dashboardAttachment = await attachments.add({
+          type: DASHBOARD_ATTACHMENT_TYPE,
+          data: dashboardData,
+          description: `Dashboard: ${title}`,
+        });
 
         return {
           results: [
             {
               type: ToolResultType.dashboard,
-              tool_result_id: toolResultId,
-              data: { content },
+              tool_result_id: getToolResultId(),
+              data: {
+                dashboardAttachmentId: dashboardAttachment.id,
+                version: dashboardAttachment.current_version,
+                url: dashboardUrl,
+                title,
+                description,
+                markdownContent,
+                panelCount: dashboardPanels.length,
+                visualizationIds,
+              },
             },
           ],
         };
