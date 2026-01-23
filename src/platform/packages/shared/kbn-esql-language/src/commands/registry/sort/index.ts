@@ -11,6 +11,7 @@ import type { ICommandMethods } from '../registry';
 import { autocomplete } from './autocomplete';
 import { validate } from './validate';
 import type { ICommandContext } from '../types';
+import { EsqlKeywords } from '../../definitions/keywords';
 
 const sortCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
@@ -18,7 +19,7 @@ const sortCommandMethods: ICommandMethods<ICommandContext> = {
 };
 
 export const sortCommand = {
-  name: 'sort',
+  name: EsqlKeywords.Commands.SORT,
   methods: sortCommandMethods,
   metadata: {
     description: i18n.translate('kbn-esql-language.esql.definitions.sortDoc', {

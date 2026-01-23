@@ -45,7 +45,7 @@ async function generateElasticsearchSettingsDefinitions(): Promise<void> {
       };
       return `const ${camelCase(settingName)} = ${JSON.stringify(modifiedSetting, null, 2).replace(
         `"name": "${settingName}"`,
-        `name: EsqlSetting.${settingName.toUpperCase()}`
+        `name: EsqlSettingNames.${settingName.toUpperCase()}`
       )};`;
     })
     .join('\n\n');
@@ -54,7 +54,7 @@ async function generateElasticsearchSettingsDefinitions(): Promise<void> {
   const settingNames = esSettingsDefinitions.map((setting) => camelCase(setting.name)).join(', ');
 
   // Generate an enum for settings names
-  const settingEnum = `export enum EsqlSetting {
+  const settingEnum = `export enum EsqlSettingNames {
 ${esSettingsDefinitions
   .map((setting) => `  ${setting.name.toUpperCase()} = '${setting.name}',`)
   .join('\n')}

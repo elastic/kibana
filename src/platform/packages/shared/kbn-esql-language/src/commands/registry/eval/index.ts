@@ -13,6 +13,7 @@ import { validate } from './validate';
 import { columnsAfter } from './columns_after';
 import { summary } from './summary';
 import type { ICommandContext } from '../types';
+import { EsqlKeywords } from '../../definitions/keywords';
 
 const evalCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
@@ -22,7 +23,7 @@ const evalCommandMethods: ICommandMethods<ICommandContext> = {
 };
 
 export const evalCommand = {
-  name: 'eval',
+  name: EsqlKeywords.Commands.EVAL,
   methods: evalCommandMethods,
   metadata: {
     description: i18n.translate('kbn-esql-language.esql.definitions.evalDoc', {

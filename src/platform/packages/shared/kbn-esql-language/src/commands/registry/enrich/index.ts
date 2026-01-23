@@ -13,6 +13,7 @@ import { validate } from './validate';
 import { columnsAfter } from './columns_after';
 import { summary } from './summary';
 import type { ICommandContext } from '../types';
+import { EsqlKeywords } from '../../definitions/keywords';
 
 const enrichCommandMethods: ICommandMethods<ICommandContext> = {
   validate,
@@ -22,7 +23,7 @@ const enrichCommandMethods: ICommandMethods<ICommandContext> = {
 };
 
 export const enrichCommand = {
-  name: 'enrich',
+  name: EsqlKeywords.Commands.ENRICH,
   methods: enrichCommandMethods,
   metadata: {
     description: i18n.translate('kbn-esql-language.esql.definitions.enrichDoc', {
