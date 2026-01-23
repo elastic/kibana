@@ -160,7 +160,7 @@ export const breakdownMetricAttributes: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 1,
+  version: 2,
   references: [
     {
       type: 'index-pattern',
@@ -345,7 +345,7 @@ export const breakdownMetricWithFormulaRefColumnsAttributes: LensAttributes = {
   ],
   title: 'metric formula',
   visualizationType: 'lnsMetric',
-  version: 1,
+  version: 2,
   state: {
     visualization: {
       layerId: 'fe6cb443-ec2b-4f72-ad1e-87f3f84ad30f',
