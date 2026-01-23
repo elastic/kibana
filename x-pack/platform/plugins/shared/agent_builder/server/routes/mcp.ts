@@ -31,7 +31,8 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
       access: 'public',
       summary: 'MCP server',
       description: `> warn
-> This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS Code, etc.) and should not be used directly via REST APIs. Use MCP Inspector or native MCP clients instead.`,
+> This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS Code, etc.) and should not be used directly via REST APIs. Use MCP Inspector or native MCP clients instead.
+For further information on MCP servers, refer to the [documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/mcp-server).`,
       options: {
         tags: ['mcp', 'oas-tag:agent builder'],
         xsrfRequired: false,

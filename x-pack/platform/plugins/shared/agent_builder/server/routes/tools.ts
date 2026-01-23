@@ -42,7 +42,7 @@ export function registerToolsRoutes({
       access: 'public',
       summary: 'List tools',
       description:
-        'List all available tools. Use this endpoint to retrieve complete tool definitions including their schemas and configuration requirements.',
+        'List all available tools. Use this endpoint to retrieve complete tool definitions including their schemas and configuration requirements. For further information on tools, refer to the [tool documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).',
       options: {
         tags: ['tools', 'oas-tag:agent builder'],
         availability: {
@@ -80,7 +80,7 @@ export function registerToolsRoutes({
       access: 'public',
       summary: 'Get a tool by id',
       description:
-        'Get a specific tool by ID. Use this endpoint to retrieve the complete tool definition including its schema and configuration requirements.',
+        'Get a specific tool by ID. Use this endpoint to retrieve the complete tool definition including its schema and configuration requirements. For further information on tools, refer to the [tool documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).',
       options: {
         tags: ['tools', 'oas-tag:agent builder'],
         availability: {
@@ -125,7 +125,7 @@ export function registerToolsRoutes({
       access: 'public',
       summary: 'Create a tool',
       description:
-        'Create a new tool. Use this endpoint to define a custom tool with specific functionality and configuration for use by agents.',
+        'Create a new tool. Use this endpoint to define a custom tool with specific functionality and configuration for use by agents. For further information on tools, refer to the [tool documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).',
       options: {
         tags: ['tools', 'oas-tag:agent builder'],
         availability: {
@@ -200,7 +200,7 @@ export function registerToolsRoutes({
       access: 'public',
       summary: 'Update a tool',
       description:
-        "Update an existing tool. Use this endpoint to modify any aspect of the tool's configuration or metadata.",
+        "Update an existing tool. Use this endpoint to modify any aspect of the tool's configuration or metadata. For further information on tools, refer to the [tool documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).",
       options: {
         tags: ['tools', 'oas-tag:agent builder'],
         availability: {
@@ -271,7 +271,7 @@ export function registerToolsRoutes({
       },
       access: 'public',
       summary: 'Delete a tool',
-      description: 'Delete a tool by ID. This action cannot be undone.',
+      description: 'Delete a tool by ID. This action cannot be undone. For further information on tools, refer to the [tool documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).',
       options: {
         tags: ['tools', 'oas-tag:agent builder'],
         availability: {
@@ -316,7 +316,7 @@ export function registerToolsRoutes({
       access: 'public',
       summary: 'Execute a Tool',
       description:
-        'Execute a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration.',
+        'Execute a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration. For further information on tools, refer to the [tool documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).',
       options: {
         timeout: {
           idleSocket: AGENT_SOCKET_TIMEOUT_MS,
