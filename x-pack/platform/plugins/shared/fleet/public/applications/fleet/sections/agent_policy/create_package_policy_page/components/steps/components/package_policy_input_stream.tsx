@@ -56,11 +56,12 @@ import { useAgentless } from '../../../single_page_layout/hooks/setup_technology
 
 import { useIndexTemplateExists } from '../../datastream_hooks';
 
+import { shouldShowVar, isVarRequiredByVarGroup } from '../../../services/var_group_helpers';
+
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
-import { useDataStreamId } from './hooks';
+import { useDataStreamId, useVarGroupSelections } from './hooks';
 import { sortDatastreamsByDataset } from './sort_datastreams';
-import { VarGroupSelector, shouldShowVar, isVarRequiredByVarGroup } from './var_group_selector';
-import { useVarGroupSelections } from './hooks';
+import { VarGroupSelector } from './var_group_selector';
 
 const ScrollAnchor = styled.div`
   display: none;
@@ -176,7 +177,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
             return; // Skip this var, it's hidden by var_group selection
           }
 
-          if (isAdvancedVar(varDef)) {
+          if (isAdvancedVar(varDef, effectiveVarGroups, effectiveVarGroupSelections)) {
             _advancedVars.push(varDef);
           } else {
             _requiredVars.push(varDef);

@@ -72,8 +72,10 @@ import {
   StepSelectHosts,
 } from '../components';
 
-import type { VarGroupSelection } from '../components/steps/components';
-import { computeDefaultVarGroupSelections } from '../components/steps/components';
+import {
+  computeDefaultVarGroupSelections,
+  type VarGroupSelection,
+} from '../services/var_group_helpers';
 
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services/generate_new_agent_policy';
 

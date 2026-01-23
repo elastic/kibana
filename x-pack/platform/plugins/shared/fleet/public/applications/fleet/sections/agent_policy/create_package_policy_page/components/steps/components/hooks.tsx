@@ -14,8 +14,10 @@ import type { RegistryVarGroup } from '../../../../../../types';
 import { getAllowedOutputTypesForPackagePolicy } from '../../../../../../../../../common/services/output_helpers';
 import { useGetOutputs, useLicense } from '../../../../../../hooks';
 
-import { computeDefaultVarGroupSelections } from './var_group_selector';
-import type { VarGroupSelection } from './var_group_selector';
+import {
+  computeDefaultVarGroupSelections,
+  type VarGroupSelection,
+} from '../../../services/var_group_helpers';
 
 export function useDataStreamId() {
   const history = useHistory();

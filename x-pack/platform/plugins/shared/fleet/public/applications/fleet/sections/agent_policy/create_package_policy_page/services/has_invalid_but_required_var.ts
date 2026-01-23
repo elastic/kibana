@@ -13,13 +13,12 @@ import type {
   RegistryVarGroup,
 } from '../../../../types';
 
+import { validatePackagePolicyConfig } from '.';
 import {
   shouldShowVar,
   isVarRequiredByVarGroup,
   type VarGroupSelection,
-} from '../components/steps/components';
-
-import { validatePackagePolicyConfig } from '.';
+} from './var_group_helpers';
 
 export const hasInvalidButRequiredVar = (
   registryVars?: RegistryVarsEntry[],

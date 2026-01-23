@@ -31,10 +31,9 @@ import type {
 import { Loading } from '../../../../../components';
 import { doesPackageHaveIntegrations } from '../../../../../services';
 
-import type { PackagePolicyValidationResults } from '../../services';
+import type { PackagePolicyValidationResults, VarGroupSelection } from '../../services';
 
 import { PackagePolicyInputPanel } from './components';
-import type { VarGroupSelection } from './components';
 
 /**
  * Check if an input is compatible with the current var_group selections.

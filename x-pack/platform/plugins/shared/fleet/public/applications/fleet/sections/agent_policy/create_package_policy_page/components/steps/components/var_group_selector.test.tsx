@@ -11,14 +11,15 @@ import { render, fireEvent, screen } from '@testing-library/react';
 import type { RegistryVarGroup } from '../../../../../../types';
 
 import {
-  VarGroupSelector,
   getVisibleOptions,
   getVisibleVarsForOption,
   getVarsControlledByVarGroups,
   shouldShowVar,
   computeDefaultVarGroupSelections,
   isVarRequiredByVarGroup,
-} from './var_group_selector';
+} from '../../../services/var_group_helpers';
+
+import { VarGroupSelector } from './var_group_selector';
 
 const mockVarGroup: RegistryVarGroup = {
   name: 'credential_type',

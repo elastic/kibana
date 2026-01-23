@@ -32,16 +32,10 @@ import type { PackageInfo, NewPackagePolicy, RegistryVarsEntry } from '../../../
 import { Loading } from '../../../../../components';
 import { useGetEpmDatastreams, useStartServices } from '../../../../../hooks';
 
-import { isAdvancedVar } from '../../services';
+import { isAdvancedVar, shouldShowVar, isVarRequiredByVarGroup } from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
 
-import {
-  PackagePolicyInputVarField,
-  VarGroupSelector,
-  shouldShowVar,
-  useVarGroupSelections,
-  isVarRequiredByVarGroup,
-} from './components';
+import { PackagePolicyInputVarField, VarGroupSelector, useVarGroupSelections } from './components';
 import { useOutputs } from './components/hooks';
 
 // on smaller screens, fields should be displayed in one column
@@ -105,7 +99,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
             return; // Skip this var, it's hidden by var_group selection
           }
 
-          if (isAdvancedVar(varDef)) {
+          if (isAdvancedVar(varDef, packageInfo.var_groups, varGroupSelections)) {
             _advancedVars.push(varDef);
           } else {
             _requiredVars.push(varDef);
