@@ -36,9 +36,6 @@ function createAsymmetricMatcher(
  * expect({ count: 5 }).toMatchObject({ count: expect.toBeGreaterThan(0) });
  */
 export const asymmetricMatchers: AsymmetricMatchers = {
-  /** Matches everything except `null` and `undefined` */
-  anything: () => baseExpect.anything(),
-
   /** Ensures that `value > expected` for number values */
   toBeGreaterThan: (min: number) =>
     createAsymmetricMatcher(

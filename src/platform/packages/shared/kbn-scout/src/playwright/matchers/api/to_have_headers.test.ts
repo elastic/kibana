@@ -42,20 +42,4 @@ describe('toHaveHeaders', () => {
       })
     ).not.toThrow();
   });
-
-  it('should support negation', () => {
-    expect(() =>
-      apiExpect({ headers: { 'content-type': 'application/json' } }).not.toHaveHeaders({
-        'x-forbidden': 'value',
-      })
-    ).not.toThrow();
-  });
-
-  it('should fail negation when headers match', () => {
-    expect(() =>
-      apiExpect({ headers: { 'content-type': 'application/json' } }).not.toHaveHeaders({
-        'content-type': 'application/json',
-      })
-    ).toThrow();
-  });
 });

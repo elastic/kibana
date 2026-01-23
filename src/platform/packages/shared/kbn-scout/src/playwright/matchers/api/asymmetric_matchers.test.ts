@@ -43,7 +43,6 @@ describe('custom asymmetric matchers', () => {
     expect(() =>
       apiExpect(response).toMatchObject({
         data: {
-          id: apiExpect.anything(),
           count: apiExpect.toBeGreaterThan(0),
           items: apiExpect.arrayContaining([apiExpect.objectContaining({ name: 'a' })]),
         },

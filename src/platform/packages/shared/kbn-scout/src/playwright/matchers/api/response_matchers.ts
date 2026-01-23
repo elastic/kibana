@@ -22,11 +22,5 @@ export function createResponseMatchers(obj: unknown): ResponseMatchers {
     toHaveStatusCode: (code: number | ToHaveStatusCodeOptions) => toHaveStatusCode(obj, code),
     toHaveStatusText: (text: string) => toHaveStatusText(obj, text),
     toHaveHeaders: (headers: Record<string, string>) => toHaveHeaders(obj, headers),
-    not: {
-      toHaveStatusCode: (code: number | ToHaveStatusCodeOptions) =>
-        toHaveStatusCode(obj, code, true),
-      toHaveStatusText: (text: string) => toHaveStatusText(obj, text, true),
-      toHaveHeaders: (headers: Record<string, string>) => toHaveHeaders(obj, headers, true),
-    },
   };
 }

@@ -28,7 +28,6 @@ export function createGenericMatchers(actual: unknown): GenericMatchers {
     toMatchObject: (expected: Record<string, unknown> | unknown[]) => base.toMatchObject(expected),
     not: {
       toBe: (expected: unknown) => base.not.toBe(expected),
-      toBeDefined: () => base.not.toBeDefined(),
       toBeUndefined: () => base.not.toBeUndefined(),
       toContain: (expected: unknown) => base.not.toContain(expected),
       toHaveLength: (expected: number) => base.not.toHaveLength(expected),

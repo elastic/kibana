@@ -34,7 +34,7 @@ export interface GenericMatchers {
   /** Compares contents of the value with contents of `expected`, performing "deep equality" check. Allows extra properties to be present in the value */
   toMatchObject(expected: unknown): void;
 
-  not: Omit<GenericMatchers, 'not'>;
+  not: Omit<GenericMatchers, 'not' | 'toBeDefined'>;
 }
 
 /**
@@ -48,8 +48,6 @@ export interface ResponseMatchers {
   toHaveStatusText(text: string): void;
   /** Asserts the response has the expected headers */
   toHaveHeaders(headers: Record<string, string>): void;
-
-  not: Omit<ResponseMatchers, 'not'>;
 }
 
 /**
@@ -58,7 +56,7 @@ export interface ResponseMatchers {
  */
 export type Matchers = GenericMatchers &
   ResponseMatchers & {
-    not: Omit<GenericMatchers, 'not'> & Omit<ResponseMatchers, 'not'>;
+    not: Omit<GenericMatchers, 'not' | 'toBeDefined'>;
   };
 
 /**
@@ -73,8 +71,6 @@ export type AsymmetricMatcher = ReturnType<typeof baseExpect.anything>;
  * These can be used inside toMatchObject() for flexible value matching.
  */
 export interface AsymmetricMatchers {
-  /** Matches everything except `null` and `undefined` */
-  anything(): AsymmetricMatcher;
   /** Ensures that `value > expected` for number values */
   toBeGreaterThan(min: number): AsymmetricMatcher;
   /** Ensures that `value < expected` for number values */

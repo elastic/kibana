@@ -26,7 +26,7 @@ function expectFn(actual: unknown): Matchers {
   return {
     ...genericMatchers,
     ...responseMatchers,
-    not: { ...genericMatchers.not, ...responseMatchers.not },
+    not: { ...genericMatchers.not },
   };
 }
 

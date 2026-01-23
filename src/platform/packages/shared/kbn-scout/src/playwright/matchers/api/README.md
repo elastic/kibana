@@ -21,7 +21,6 @@ Asserts response has the expected HTTP status code. Checks `status` or `statusCo
 ```typescript
 expect(response).toHaveStatusCode(200);
 expect(response).toHaveStatusCode({ oneOf: [200, 201] });
-expect(response).not.toHaveStatusCode(500);
 ```
 
 ### toHaveStatusText
@@ -30,7 +29,6 @@ Asserts response has the expected status text. Checks `statusText` or `statusMes
 
 ```typescript
 expect(response).toHaveStatusText('OK');
-expect(response).not.toHaveStatusText('Not Found');
 ```
 
 ### toHaveHeaders
@@ -80,7 +78,6 @@ The following [Playwright matchers](https://playwright.dev/docs/api/class-generi
 
 **Asymmetric matchers:**
 
-- `expect.anything()` - matches anything except `null`/`undefined`
 - `expect.arrayContaining(array)` - array contains all expected elements
 - `expect.objectContaining(object)` - object contains expected properties
 
@@ -99,6 +96,9 @@ expect(response.apiKey).toBeDefined(); // ✅ it will fail if undefined
 
 expect(exists).toBeTruthy(); // ❌ too loose
 expect(exists).toBe(true); // ✅ be explicit
+
+expect(response.apiKey).not.toBeDefined(); // ❌ not available
+expect(response.apiKey).toBeUndefined(); // ✅ preferred by playwright
 ```
 
 **UI-specific matchers** like `toBeVisible`, `toBeEnabled`, `toHaveAttribute`, etc. are not available for API tests.

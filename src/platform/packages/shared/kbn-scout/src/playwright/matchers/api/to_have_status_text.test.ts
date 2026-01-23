@@ -20,12 +20,4 @@ describe('toHaveStatusText', () => {
   it('should fail when status text does not match', () => {
     expect(() => apiExpect({ statusText: 'Not Found' }).toHaveStatusText('OK')).toThrow();
   });
-
-  it('should support negation', () => {
-    expect(() => apiExpect({ statusText: 'OK' }).not.toHaveStatusText('Not Found')).not.toThrow();
-  });
-
-  it('should fail negation when status text matches', () => {
-    expect(() => apiExpect({ statusText: 'OK' }).not.toHaveStatusText('OK')).toThrow();
-  });
 });
