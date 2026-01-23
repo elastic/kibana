@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { from, stats } from '@kbn/esql-composer';
+import { esql } from '@kbn/esql-language';
 import { buildExpression, parseExpression } from '@kbn/expressions-plugin/common';
 import { operationDefinitionMap } from '.';
 import type { FormBasedLayer } from '../../../..';
@@ -143,36 +143,37 @@ describe('count operation', () => {
         return undefined;
       }
 
-      // Output format: "FROM _\n  | STATS result = <expression>"
+      // Output format: "FROM _ | STATS result = <expression>"
       // We then just split on ' = ' to get the expression part
-      return from('_')
-        .pipe(stats(`result = ${esqlExpr.template}`, esqlExpr.params))
-        .toString()
-        .split(' = ')[1];
+      const queryString = `FROM _ | STATS result = ${esqlExpr.template}`;
+      const query = esqlExpr.params ? esql(queryString, esqlExpr.params) : esql(queryString);
+      // Inline params to resolve ??paramName placeholders to actual values
+      query.inlineParams();
+      return query.print('basic').split(' = ')[1];
     };
 
     test('doesnt support timeShift', () => {
-      const esql = callToESQL({
+      const esqlResult = callToESQL({
         sourceField: 'bytes',
         operationType: 'count',
         timeShift: '1m',
       });
-      expect(esql).toBeUndefined();
+      expect(esqlResult).toBeUndefined();
     });
 
     test('returns COUNT(*) for document fields', () => {
-      const esql = callToESQL({
+      const esqlResult = callToESQL({
         operationType: 'count',
       });
-      expect(esql).toBe('COUNT(*)');
+      expect(esqlResult).toBe('COUNT(*)');
     });
 
     test('returns COUNT(field) for non-document fields', () => {
-      const esql = callToESQL({
+      const esqlResult = callToESQL({
         sourceField: 'bytes',
         operationType: 'count',
       });
-      expect(esql).toBe('COUNT(bytes)');
+      expect(esqlResult).toBe('COUNT(bytes)');
     });
   });
 });
