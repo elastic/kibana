@@ -128,6 +128,7 @@ export const FullScreenWaterfall = ({
       session="start"
       size="m"
       onClose={onExitFullScreen}
+      ownFocus={false}
       aria-labelledby={traceWaterfallTitleId}
       flyoutMenuProps={{
         title: traceWaterfallTitle,
