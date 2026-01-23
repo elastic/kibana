@@ -18,6 +18,8 @@
         "label": "I18nService",
         "description": [],
         "path": "src/core/packages/i18n/server-internal/src/i18n_service.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -32,6 +34,8 @@
               "any"
             ],
             "path": "src/core/packages/i18n/server-internal/src/i18n_service.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -46,6 +50,8 @@
                   "CoreContext"
                 ],
                 "path": "src/core/packages/i18n/server-internal/src/i18n_service.ts",
+                "lineNumber": 46,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -68,6 +74,8 @@
               ">"
             ],
             "path": "src/core/packages/i18n/server-internal/src/i18n_service.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -82,6 +90,8 @@
                   "PrebootDeps"
                 ],
                 "path": "src/core/packages/i18n/server-internal/src/i18n_service.ts",
+                "lineNumber": 51,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -104,6 +114,8 @@
               ">"
             ],
             "path": "src/core/packages/i18n/server-internal/src/i18n_service.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -118,6 +130,8 @@
                   "SetupDeps"
                 ],
                 "path": "src/core/packages/i18n/server-internal/src/i18n_service.ts",
+                "lineNumber": 63,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -141,6 +155,8 @@
           "(locale: string, pluginPaths: string[]) => Promise<string[]>"
         ],
         "path": "src/core/packages/i18n/server-internal/src/get_kibana_translation_files.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -155,6 +171,8 @@
               "string"
             ],
             "path": "src/core/packages/i18n/server-internal/src/get_kibana_translation_files.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -170,6 +188,8 @@
               "string[]"
             ],
             "path": "src/core/packages/i18n/server-internal/src/get_kibana_translation_files.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -188,6 +208,8 @@
         "label": "InternalI18nServicePreboot",
         "description": [],
         "path": "src/core/packages/i18n/server-internal/src/i18n_service.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -202,6 +224,8 @@
               "() => string"
             ],
             "path": "src/core/packages/i18n/server-internal/src/i18n_service.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -224,6 +248,8 @@
           "{ readonly locale: string; }"
         ],
         "path": "src/core/packages/i18n/server-internal/src/i18n_config.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -241,6 +267,8 @@
           "string[]"
         ],
         "path": "src/core/packages/i18n/server-internal/src/constants.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

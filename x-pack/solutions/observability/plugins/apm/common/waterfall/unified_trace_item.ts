@@ -9,6 +9,14 @@ import { STATUS_CODE, EVENT_OUTCOME } from '@kbn/apm-types';
 
 const STATUS_FIELD_NAME = [EVENT_OUTCOME, STATUS_CODE] as const;
 
+export type CompressionStrategy = 'exact_match' | 'same_kind';
+
+export interface TraceItemComposite {
+  count: number;
+  sum: number;
+  compressionStrategy: CompressionStrategy;
+}
+
 export interface TraceItem {
   id: string;
   timestampUs: number;
@@ -31,4 +39,5 @@ export interface TraceItem {
   };
   icon?: string;
   coldstart?: boolean;
+  composite?: TraceItemComposite;
 }

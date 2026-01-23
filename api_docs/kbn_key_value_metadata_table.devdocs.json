@@ -38,6 +38,8 @@
           "[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-key-value-metadata-table/src/utils/get_flattened_key_value_pairs.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -52,6 +54,8 @@
               "Maybe<Record<string, any>>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-key-value-metadata-table/src/utils/get_flattened_key_value_pairs.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -67,6 +71,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-key-value-metadata-table/src/utils/get_flattened_key_value_pairs.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -96,6 +102,8 @@
           " & React.TableHTMLAttributes<HTMLTableElement>) | undefined; }) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/kbn-key-value-metadata-table/src/index.tsx",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -107,6 +115,8 @@
             "label": "{\n  keyValuePairs,\n  tableProps = {},\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-key-value-metadata-table/src/index.tsx",
+            "lineNumber": 19,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -128,6 +138,8 @@
                   "[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-key-value-metadata-table/src/index.tsx",
+                "lineNumber": 20,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -144,6 +156,8 @@
                   " & React.TableHTMLAttributes<HTMLTableElement>) | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-key-value-metadata-table/src/index.tsx",
+                "lineNumber": 21,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -163,6 +177,8 @@
         "label": "KeyValuePair",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-key-value-metadata-table/src/utils/get_flattened_key_value_pairs.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -174,6 +190,8 @@
             "label": "key",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-key-value-metadata-table/src/utils/get_flattened_key_value_pairs.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -188,6 +206,8 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/shared/kbn-key-value-metadata-table/src/utils/get_flattened_key_value_pairs.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

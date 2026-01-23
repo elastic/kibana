@@ -1012,7 +1012,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.knn', {
         defaultMessage: 'KNN',
       }),
-      preview: true,
+      preview: false,
       license: undefined,
       description: {
         markdownContent: i18n.translate('languageDocumentation.documentationESQL.knn.markdown', {
@@ -3155,7 +3155,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.text_embedding', {
         defaultMessage: 'TEXT_EMBEDDING',
       }),
-      preview: true,
+      preview: false,
       license: undefined,
       description: {
         markdownContent: i18n.translate(
@@ -4079,7 +4079,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.v_cosine', {
         defaultMessage: 'V_COSINE',
       }),
-      preview: true,
+      preview: false,
       license: undefined,
       description: {
         markdownContent: i18n.translate(
@@ -4108,7 +4108,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.v_dot_product', {
         defaultMessage: 'V_DOT_PRODUCT',
       }),
-      preview: true,
+      preview: false,
       license: undefined,
       description: {
         markdownContent: i18n.translate(
@@ -4136,7 +4136,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.v_hamming', {
         defaultMessage: 'V_HAMMING',
       }),
-      preview: true,
+      preview: false,
       license: undefined,
       description: {
         markdownContent: i18n.translate(
@@ -4164,7 +4164,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.v_l1_norm', {
         defaultMessage: 'V_L1_NORM',
       }),
-      preview: true,
+      preview: false,
       license: undefined,
       description: {
         markdownContent: i18n.translate(
@@ -4192,7 +4192,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.v_l2_norm', {
         defaultMessage: 'V_L2_NORM',
       }),
-      preview: true,
+      preview: false,
       license: undefined,
       description: {
         markdownContent: i18n.translate(

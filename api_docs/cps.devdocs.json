@@ -12,6 +12,8 @@
         "label": "CPSConfigType",
         "description": [],
         "path": "src/platform/plugins/shared/cps/public/types.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -23,6 +25,8 @@
             "label": "cpsEnabled",
             "description": [],
             "path": "src/platform/plugins/shared/cps/public/types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -41,6 +45,8 @@
       "label": "CPSPluginSetup",
       "description": [],
       "path": "src/platform/plugins/shared/cps/public/types.ts",
+      "lineNumber": 12,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -55,6 +61,8 @@
             "boolean | undefined"
           ],
           "path": "src/platform/plugins/shared/cps/public/types.ts",
+          "lineNumber": 13,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -70,6 +78,8 @@
       "label": "CPSPluginStart",
       "description": [],
       "path": "src/platform/plugins/shared/cps/public/types.ts",
+      "lineNumber": 25,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -91,6 +101,8 @@
             " | undefined"
           ],
           "path": "src/platform/plugins/shared/cps/public/types.ts",
+          "lineNumber": 26,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -114,6 +126,8 @@
       "label": "CPSServerSetup",
       "description": [],
       "path": "src/platform/plugins/shared/cps/server/types.ts",
+      "lineNumber": 10,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -128,6 +142,8 @@
             "() => boolean"
           ],
           "path": "src/platform/plugins/shared/cps/server/types.ts",
+          "lineNumber": 11,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],

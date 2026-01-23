@@ -21,6 +21,7 @@ import type { LensApiState } from '../../schema';
 import { buildReferences, getAdhocDataviews, isTextBasedLayer, nonNullable } from '../utils';
 import { LENS_LAYER_SUFFIX } from '../constants';
 import type { APIAdHocDataView, APIDataView } from '../columns/types';
+import type { AnyMetricLensStateColumn } from '../columns/types';
 
 export function getSharedChartLensStateToAPI(
   config: Pick<LensAttributes, 'title' | 'description'>
@@ -115,4 +116,35 @@ export function getDataViewsMetadata(
   const references = regularDataViews.length ? buildReferences(regularDataViewsMap) : [];
 
   return { adHocDataViews, internalReferences, references, dataViewLayerToIdMap };
+}
+
+/**
+ * Processes converted metric columns and their optional reference columns,
+ * assigning IDs.
+ */
+export function processMetricColumnsWithReferences<T extends AnyMetricLensStateColumn>(
+  convertedMetrics: T[][],
+  getAccessorName: (index: number) => string,
+  getRefAccessorName: (index: number) => string
+): Array<{ column: T; id: string }> {
+  const result: Array<{ column: T; id: string }> = [];
+
+  for (const [index, convertedColumns] of Object.entries(convertedMetrics)) {
+    const [mainMetric, refMetric] = convertedColumns;
+    const id = getAccessorName(Number(index));
+    result.push({ column: mainMetric, id });
+
+    if (refMetric) {
+      // Use a different format for reference column ids
+      // as visualization doesn't know about them, so wrong id could be generated on that side
+      const refId = getRefAccessorName(Number(index));
+      // Rewrite the main metric's reference to match the new ID
+      if ('references' in mainMetric && Array.isArray(mainMetric.references)) {
+        mainMetric.references = [refId];
+      }
+      result.push({ column: refMetric, id: refId });
+    }
+  }
+
+  return result;
 }

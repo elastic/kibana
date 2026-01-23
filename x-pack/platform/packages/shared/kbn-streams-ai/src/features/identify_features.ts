@@ -19,14 +19,14 @@ export interface IdentifyFeaturesOptions {
   end: number;
   esClient: ElasticsearchClient;
   inferenceClient: BoundInferenceClient;
-  prompt: string;
+  systemPrompt: string;
   logger: Logger;
   signal: AbortSignal;
 }
 
 export async function identifyFeatures({
   stream,
-  prompt,
+  systemPrompt,
   inferenceClient,
   logger,
   start,
@@ -52,7 +52,7 @@ export async function identifyFeatures({
       input: {
         sample_documents: JSON.stringify(sampleDocuments),
       },
-      prompt: createIdentifyFeaturesPrompt({ systemPrompt: prompt }),
+      prompt: createIdentifyFeaturesPrompt({ systemPrompt }),
       finalToolChoice: {
         function: 'finalize_features',
       },
