@@ -321,7 +321,8 @@ export async function getStringSamples(
             // 25 is the default shard size set for size:10 by Elasticsearch.
             // Setting it to 25 for every size below 10 makes sure the shard size doesn't change for sizes 1-10, keeping the top terms stable.
             shard_size: size <= 10 ? 25 : undefined,
-            missing: MISSING_TOKEN,
+            // include `null` values for string fields
+            missing: field.type === 'string' ? MISSING_TOKEN : undefined,
           },
         },
       },
