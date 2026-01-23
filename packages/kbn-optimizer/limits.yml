@@ -75,7 +75,7 @@ pageLoadAssetSize:
   files: 6037
   filesManagement: 5208
   fileUpload: 22957
-  fleet: 187942
+  fleet: 209495
   genAiSettings: 5663
   globalSearch: 6890
   globalSearchBar: 26986
@@ -130,7 +130,7 @@ pageLoadAssetSize:
   osquery: 47422
   painlessLab: 6299
   presentationPanel: 11418
-  presentationUtil: 9285
+  presentationUtil: 8985
   productDocBase: 5678
   productIntercept: 9860
   profiling: 20716
