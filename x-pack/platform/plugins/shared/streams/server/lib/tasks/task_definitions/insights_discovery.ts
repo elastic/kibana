@@ -11,7 +11,7 @@ import type { InsightsResult } from '@kbn/streams-schema';
 import type { TaskContext } from '.';
 import { cancellableTask } from '../cancellable_task';
 import type { TaskParams } from '../types';
-import { generateSignificantEventsSummary } from '../../significant_events/insights/generate_significant_events_summary';
+import { generateInsights } from '../../significant_events/insights/generate_insights';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 
 export interface InsightsDiscoveryTaskParams {
@@ -47,7 +47,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
               const boundInferenceClient = inferenceClient.bindTo({ connectorId });
 
               try {
-                const result = await generateSignificantEventsSummary({
+                const result = await generateInsights({
                   streamsClient,
                   queryClient,
                   esClient: scopedClusterClient.asCurrentUser,

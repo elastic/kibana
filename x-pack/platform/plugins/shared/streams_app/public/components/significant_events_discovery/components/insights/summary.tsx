@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TaskStatus } from '@kbn/streams-schema';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import type { Insight } from '@kbn/streams-schema';
 import { useAIFeatures } from '../../../../hooks/use_ai_features';
@@ -55,7 +55,12 @@ export function Summary({ count }: { count: number }) {
     getTaskStatus();
   }, [getTaskStatus]);
 
+  const previousTaskStatusRef = useRef<TaskStatus | undefined>(undefined);
+
   useEffect(() => {
+    const previousStatus = previousTaskStatusRef.current;
+    previousTaskStatusRef.current = task?.status;
+
     if (task?.status === TaskStatus.Failed) {
       notifications.toasts.addError(getFormattedError(new Error(task.error)), {
         title: i18n.translate('xpack.streams.insights.errorTitle', {
@@ -66,6 +71,17 @@ export function Summary({ count }: { count: number }) {
     }
 
     if (task?.status === TaskStatus.Completed) {
+      if (previousStatus === TaskStatus.InProgress && task.insights.length === 0) {
+        notifications.toasts.addInfo({
+          title: i18n.translate('xpack.streams.insights.noInsightsTitle', {
+            defaultMessage: 'No insights found',
+          }),
+          text: i18n.translate('xpack.streams.insights.noInsightsDescription', {
+            defaultMessage:
+              'The AI could not generate any insights from the current significant events. Try again later when more events are available.',
+          }),
+        });
+      }
       setInsights(task.insights);
     }
   }, [task, notifications.toasts]);

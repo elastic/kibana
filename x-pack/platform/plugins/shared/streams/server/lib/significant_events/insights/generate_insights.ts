@@ -16,7 +16,7 @@ import { SummarizeQueriesPrompt } from './prompts/summarize_queries/prompt';
 import { SummarizeStreamsPrompt } from './prompts/summarize_streams/prompt';
 import { extractInsightsFromResponse, collectQueryData, type QueryData } from './utils';
 
-export async function generateSignificantEventsSummary({
+export async function generateInsights({
   streamsClient,
   queryClient,
   esClient,

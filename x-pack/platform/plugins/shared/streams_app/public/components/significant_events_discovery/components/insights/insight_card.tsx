@@ -56,6 +56,7 @@ export function InsightCard({ insight, index }: InsightCardProps) {
     <EuiPanel hasBorder paddingSize="m">
       <EuiAccordion
         id={accordionId}
+        data-test-subj="streamsInsightCardAccordion"
         forceState={isOpen ? 'open' : 'closed'}
         onToggle={toggleIsOpen}
         buttonContent={
@@ -101,11 +102,10 @@ export function InsightCard({ insight, index }: InsightCardProps) {
                       </EuiFlexItem>
                       <EuiFlexItem>
                         <EuiText size="xs">
-                          {ev.queryTitle} ({ev.eventCount}{' '}
-                          {i18n.translate('xpack.streams.insights.events', {
-                            defaultMessage: 'events',
+                          {i18n.translate('xpack.streams.insights.evidenceDescription', {
+                            defaultMessage: '{queryTitle} ({eventCount} events)',
+                            values: { queryTitle: ev.queryTitle, eventCount: ev.eventCount },
                           })}
-                          )
                         </EuiText>
                       </EuiFlexItem>
                     </EuiFlexGroup>
