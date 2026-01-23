@@ -1068,7 +1068,7 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
             class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <nav
-              aria-label="Pagination for table: Machine learning filter lists"
+              aria-label="Pagination for table: Filter lists"
               class="euiPagination emotion-euiPagination"
             >
               <span
