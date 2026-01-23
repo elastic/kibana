@@ -10,7 +10,7 @@ import { EuiButton } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
-import { PromptLayout } from './layout';
+import { PromptLayout, PROMPT_LAYOUT_VARIANTS, type PromptLayoutVariant } from './layout';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
 
@@ -91,6 +91,7 @@ interface ErrorPromptProps {
   imageSrc?: string;
   primaryButton?: React.ReactNode;
   secondaryButton?: React.ReactNode;
+  variant?: PromptLayoutVariant;
 }
 
 const StartNewConversationAction: React.FC = () => {
@@ -117,18 +118,34 @@ const StartNewConversationAction: React.FC = () => {
   );
 };
 
+const getErrorDetails = (errorType: AppErrorType): ErrorDetails => {
+  return ERROR_DETAILS_MAPPINGS[errorType];
+};
+
+const getVariant = (
+  providedVariant: PromptLayoutVariant | undefined,
+  isEmbeddedContext: boolean
+): PromptLayoutVariant => {
+  return (
+    providedVariant ??
+    (isEmbeddedContext ? PROMPT_LAYOUT_VARIANTS.EMBEDDABLE : PROMPT_LAYOUT_VARIANTS.DEFAULT)
+  );
+};
+
 export const ErrorPrompt: React.FC<ErrorPromptProps> = ({
   errorType,
   imageSrc,
   primaryButton,
   secondaryButton,
+  variant,
 }) => {
   const { isEmbeddedContext } = useConversationContext();
-  const errorDetails = ERROR_DETAILS_MAPPINGS[errorType];
+  const errorDetails = getErrorDetails(errorType);
+  const layoutVariant = getVariant(variant, isEmbeddedContext);
 
   return (
     <PromptLayout
-      variant={isEmbeddedContext ? 'embeddable' : 'default'}
+      variant={layoutVariant}
       iconType={errorDetails.icon}
       imageSrc={imageSrc}
       title={errorDetails.title}

@@ -16,7 +16,14 @@ const defaultPromptStyles = css`
   }
 `;
 
-export type PromptLayoutVariant = 'default' | 'embeddable';
+export const PROMPT_LAYOUT_VARIANTS = {
+  DEFAULT: 'default',
+  EMBEDDABLE: 'embeddable',
+} as const;
+
+export type PromptLayoutVariant =
+  | typeof PROMPT_LAYOUT_VARIANTS.DEFAULT
+  | typeof PROMPT_LAYOUT_VARIANTS.EMBEDDABLE;
 
 interface IconProps {
   imageSrc?: string;
@@ -38,11 +45,11 @@ export const PromptLayout: React.FC<PromptLayoutProps> = ({
   subtitle,
   primaryButton,
   secondaryButton,
-  variant = 'default',
+  variant = PROMPT_LAYOUT_VARIANTS.DEFAULT,
 }) => {
   const actions = [primaryButton, ...(secondaryButton ? [secondaryButton] : [])];
 
-  const isEmbeddable = variant === 'embeddable';
+  const isEmbeddable = variant === PROMPT_LAYOUT_VARIANTS.EMBEDDABLE;
 
   let iconContent: React.ReactNode;
   if (imageSrc) {

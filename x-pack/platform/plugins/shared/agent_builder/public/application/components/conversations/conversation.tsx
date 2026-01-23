@@ -33,6 +33,7 @@ import { ScrollButton } from './scroll_button';
 import { useAppLeave } from '../../context/app_leave_context';
 import { useNavigationAbort } from '../../hooks/use_navigation_abort';
 import { ErrorPrompt } from '../common/prompt/error';
+import { PROMPT_LAYOUT_VARIANTS } from '../common/prompt/layout';
 
 export const Conversation: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
@@ -109,7 +110,7 @@ export const Conversation: React.FC<{}> = () => {
   }
 
   if (errorType) {
-    return <ErrorPrompt errorType={errorType} />;
+    return <ErrorPrompt errorType={errorType} variant={PROMPT_LAYOUT_VARIANTS.EMBEDDABLE} />;
   }
 
   return (
