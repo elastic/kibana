@@ -65,8 +65,14 @@ describe('KibanaEvalsClient', () => {
       ],
     };
 
-    const expA = await client.runExperiment({ dataset: datasetA, task: async () => ({ ok: true }) }, []);
-    const expB = await client.runExperiment({ dataset: datasetB, task: async () => ({ ok: true }) }, []);
+    const expA = await client.runExperiment(
+      { dataset: datasetA, task: async () => ({ ok: true }) },
+      []
+    );
+    const expB = await client.runExperiment(
+      { dataset: datasetB, task: async () => ({ ok: true }) },
+      []
+    );
 
     expect(expA.datasetId).toBe(expB.datasetId);
   });
@@ -80,9 +86,15 @@ describe('KibanaEvalsClient', () => {
       examples: [{ input: { q: 1 }, output: { a: 1 } }],
     };
 
-    const exp1 = await client.runExperiment({ dataset: base, task: async () => ({ ok: true }) }, []);
+    const exp1 = await client.runExperiment(
+      { dataset: base, task: async () => ({ ok: true }) },
+      []
+    );
     const exp2 = await client.runExperiment(
-      { dataset: { ...base, examples: [{ input: { q: 2 }, output: { a: 1 } }] }, task: async () => ({ ok: true }) },
+      {
+        dataset: { ...base, examples: [{ input: { q: 2 }, output: { a: 1 } }] },
+        task: async () => ({ ok: true }),
+      },
       []
     );
 
@@ -170,7 +182,12 @@ describe('KibanaEvalsClient', () => {
     const dataset: EvaluationDataset = {
       name: 'ds',
       description: 'desc',
-      examples: [{ input: { i: 1 } }, { input: { i: 2 } }, { input: { i: 3 } }, { input: { i: 4 } }],
+      examples: [
+        { input: { i: 1 } },
+        { input: { i: 2 } },
+        { input: { i: 3 } },
+        { input: { i: 4 } },
+      ],
     };
 
     let inFlight = 0;
@@ -188,7 +205,10 @@ describe('KibanaEvalsClient', () => {
       return { ok: true };
     };
 
-    const promise: Promise<RanExperiment> = client.runExperiment({ dataset, task, concurrency: 2 }, []);
+    const promise: Promise<RanExperiment> = client.runExperiment(
+      { dataset, task, concurrency: 2 },
+      []
+    );
 
     // Wait until the limiter allows 2 tasks to start (and then blocks).
     for (let i = 0; i < 200; i++) {
@@ -205,4 +225,3 @@ describe('KibanaEvalsClient', () => {
     expect(maxInFlight).toBe(2);
   });
 });
-
