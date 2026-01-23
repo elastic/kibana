@@ -47,7 +47,8 @@ export const validate = (
 ): ESQLMessage[] => {
   const command = _command as ESQLAstPromqlCommand;
   const messages: ESQLMessage[] = [];
-  const paramValues = collectPromqlParamValues(command);
+  const queryText = getPromqlQueryText(command);
+  const paramValues = collectPromqlParamValues(command, queryText);
   const usedParams = new Set(paramValues.keys());
   for (const param of getUsedPromqlParamNames(command.text)) {
     usedParams.add(param);
@@ -158,9 +159,9 @@ export const validate = (
   }
 
   // Query presence check (ignore "fake" query that is actually a trailing param assignment).
-  const queryText = getPromqlQueryText(command).trim();
+  const trimmedQueryText = queryText.trim();
   const tailQueryText = getPromqlQueryTail(command);
-  const hasQuery = [queryText, tailQueryText].some(
+  const hasQuery = [trimmedQueryText, tailQueryText].some(
     (text) => text !== '' && !looksLikePromqlParamAssignment(text)
   );
 
@@ -176,7 +177,7 @@ export const validate = (
 
   // Check for named query assignments requiring parentheses.
   // Use tailQueryText as fallback when AST query field is empty (parser limitations).
-  const queryToCheckForParens = queryText || tailQueryText;
+  const queryToCheckForParens = trimmedQueryText || tailQueryText;
   const assignmentMatch = queryToCheckForParens
     ? queryToCheckForParens.match(PROMQL_QUERY_ASSIGNMENT_REGEX)
     : null;
@@ -221,7 +222,8 @@ function stripQuotes(value: string): string {
 
 /* Collects param values from AST and from the query tail when the parser misplaces the last param. */
 function collectPromqlParamValues(
-  command: ESQLAstPromqlCommand
+  command: ESQLAstPromqlCommand,
+  queryText: string
 ): Map<string, { value: string; location: ESQLLocation; entryLocation?: ESQLLocation }> {
   const values = new Map<
     string,
@@ -246,7 +248,6 @@ function collectPromqlParamValues(
     }
   }
 
-  const queryText = getPromqlQueryText(command);
   if (queryText && looksLikePromqlParamAssignment(queryText)) {
     const parsed = extractTrailingParamFromQuery(queryText);
 
@@ -334,17 +335,17 @@ function getPromqlQueryTail(command: ESQLAstPromqlCommand): string {
 function extractTrailingParamFromQuery(
   queryText: string
 ): { param: string; value: string } | undefined {
-  if (!looksLikePromqlParamAssignment(queryText)) {
-    return undefined;
-  }
-
   const match = queryText.match(PROMQL_QUERY_PARAM_VALUE_REGEX);
   if (!match) {
     return undefined;
   }
 
-  const [, rawParam, rawValue] = match;
-  return { param: rawParam.toLowerCase(), value: rawValue ?? '' };
+  const param = match[1].toLowerCase();
+  if (!isPromqlParamName(param)) {
+    return undefined;
+  }
+
+  return { param, value: match[2] ?? '' };
 }
 
 /* Detects empty "<param>=" assignments in a loose, text-only way. */

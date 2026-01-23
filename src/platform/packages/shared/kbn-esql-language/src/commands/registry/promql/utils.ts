@@ -244,11 +244,7 @@ export function looksLikePromqlParamAssignment(text: string): boolean {
  */
 export function getUsedPromqlParamNames(commandText: string): Set<string> {
   const used = new Set<string>();
-  let text = commandText.toLowerCase();
-
-  if (text.startsWith(PROMQL_KEYWORD)) {
-    text = text.slice(PROMQL_KEYWORD.length);
-  }
+  const text = commandText.toLowerCase();
 
   for (const param of PROMQL_PARAM_NAMES) {
     let index = text.indexOf(param);
@@ -274,7 +270,10 @@ export function getUsedPromqlParamNames(commandText: string): Set<string> {
   return used;
 }
 
-/* Prevents value suggestions when a concrete value already follows the cursor. */
+/*
+ * Prevents value suggestions when a concrete value already follows the cursor.
+ * This keepsus from suggesting values inthe middleof existing assignments.
+ */
 export function isParamValueComplete(
   fullQuery: string,
   cursorPosition: number,
@@ -292,7 +291,7 @@ export function isParamValueComplete(
     return false;
   }
 
-  /* Cache the type guard result to avoid narrowing firstToken to never. */
+  // Cache the type guard result to avoid narrowing firstToken to never. */
   const isParamToken = isPromqlParamName(firstToken);
   if (isParamToken) {
     return false;
