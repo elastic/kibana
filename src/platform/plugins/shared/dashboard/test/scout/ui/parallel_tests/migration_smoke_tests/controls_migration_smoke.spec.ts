@@ -14,11 +14,10 @@ import {
   getDashboardPanels,
   openDashboard,
 } from '../../../utils/migration_smoke_helpers';
+import { EXPORTS_DIR, SHAKESPEARE_DATA_VIEW_TITLE } from './constants';
 
-const EXPORT_PATH =
-  'src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/migration_smoke_tests/exports/controls_dashboard_migration_test_8_0_0.json';
+const EXPORT_PATH = `${EXPORTS_DIR}/controls_dashboard_migration_test_8_0_0.json`;
 const DASHBOARD_TITLE = '[8.0.0] Controls Dashboard';
-const DATA_VIEW_TITLE = 'shakespeare';
 
 let dashboardId = '';
 
@@ -59,7 +58,7 @@ spaceTest.describe('Controls migration smoke (8.0.0)', { tag: tags.ESS_ONLY }, (
     await scoutSpace.savedObjects.cleanStandardList();
     const imported = await scoutSpace.savedObjects.load(EXPORT_PATH);
     dashboardId = findImportedSavedObjectId(imported, 'dashboard', DASHBOARD_TITLE);
-    await scoutSpace.uiSettings.setDefaultIndex(DATA_VIEW_TITLE);
+    await scoutSpace.uiSettings.setDefaultIndex(SHAKESPEARE_DATA_VIEW_TITLE);
   });
 
   spaceTest.beforeEach(async ({ browserAuth }) => {
