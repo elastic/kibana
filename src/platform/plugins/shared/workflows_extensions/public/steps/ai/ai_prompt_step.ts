@@ -9,7 +9,9 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type { z } from '@kbn/zod/v4';
 import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
+import type { InputSchema } from '../../../common/steps/ai';
 import {
   AiPromptOutputSchema,
   AiPromptStepCommonDefinition,
@@ -23,11 +25,13 @@ export const AiPromptStepDefinition: PublicStepDefinition = {
   editorHandlers: {
     dynamicSchema: {
       getOutputSchema: ({ input }) => {
-        if (!input.schema) {
+        const typedInput = input as z.infer<typeof InputSchema>;
+
+        if (!typedInput.schema) {
           return AiPromptOutputSchema;
         }
 
-        const zodSchema = fromJSONSchema(input.schema);
+        const zodSchema = fromJSONSchema(typedInput.schema);
 
         if (!zodSchema) {
           return AiPromptOutputSchema;
