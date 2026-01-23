@@ -43,7 +43,7 @@ export class StorageService implements StorageServiceContract {
     }
 
     const operations: NonNullable<BulkRequest<TDocument>['operations']> = docs.flatMap((doc, i) => [
-      { index: { _index: index, ...(getId ? { _id: getId(doc, i) } : {}) } },
+      { create: { _index: index, ...(getId ? { _id: getId(doc, i) } : {}) } },
       doc,
     ]);
 
@@ -106,7 +106,7 @@ export class StorageService implements StorageServiceContract {
     docsCount: number;
     response: BulkResponse;
   }): string {
-    const failedItemCount = response.items.filter((item) => item.index?.error).length;
+    const failedItemCount = response.items.filter((item) => item.create?.error).length;
 
     if (!response.errors) {
       return `StorageService: Successfully bulk indexed ${docsCount} documents to index: ${index}`;

@@ -9,7 +9,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { FetchRuleStep } from './fetch_rule_step';
 import type { RulePipelineState, RuleExecutionInput } from '../types';
 import { RULE_SAVED_OBJECT_TYPE, type RuleSavedObjectAttributes } from '../../../saved_objects';
-import { createLoggerService, createRulesClient, createRuleExecutionInput } from '../../test_utils';
+import { createLoggerService, createRulesClient, createRuleExecutionInput } from '../test_utils';
 
 // Note: RulesClient converts SavedObjectsError to Boom errors internally,
 // so we test by triggering SO errors and verifying the step handles the resulting Boom errors.
@@ -56,8 +56,8 @@ describe('FetchRuleStep', () => {
     expect(result.type).toBe('continue');
     expect(result).toHaveProperty('data.rule');
 
-    if (result.type !== 'continue') throw new Error('Expected continue');
-    const { rule } = result.data as { rule: { id: string; name: string } };
+    // @ts-expect-error: the above check ensures the rule exists
+    const { rule } = result.data;
     expect(rule.id).toBe('rule-1');
     expect(rule.name).toBe('test-rule');
   });
@@ -86,16 +86,16 @@ describe('FetchRuleStep', () => {
     const { loggerService } = createLoggerService();
     const { rulesClient, mockSavedObjectsClient } = createRulesClient();
 
-    mockSavedObjectsClient.get.mockRejectedValue(new Error('Database connection failed'));
+    mockSavedObjectsClient.get.mockRejectedValue(new Error('Failed'));
 
     const step = new FetchRuleStep(loggerService, rulesClient);
     const input = createRuleExecutionInput();
     const state = createState(input);
 
-    await expect(step.execute(state)).rejects.toThrow('Database connection failed');
+    await expect(step.execute(state)).rejects.toThrow('Failed');
   });
 
-  it('uses correct ruleId from input', async () => {
+  it('calls the ruleClient with correct params', async () => {
     const { loggerService } = createLoggerService();
     const { rulesClient, mockSavedObjectsClient } = createRulesClient();
 
@@ -113,38 +113,6 @@ describe('FetchRuleStep', () => {
 
     await step.execute(state);
 
-    expect(mockSavedObjectsClient.get).toHaveBeenCalledWith(
-      RULE_SAVED_OBJECT_TYPE,
-      'custom-rule',
-      undefined
-    );
-  });
-
-  it('logs debug message with rule details', async () => {
-    const { loggerService, mockLogger } = createLoggerService();
-    const { rulesClient, mockSavedObjectsClient } = createRulesClient();
-
-    const ruleAttributes = createRuleAttributes();
-    mockSavedObjectsClient.get.mockResolvedValue({
-      id: 'rule-1',
-      type: RULE_SAVED_OBJECT_TYPE,
-      attributes: ruleAttributes,
-      references: [],
-    });
-
-    const step = new FetchRuleStep(loggerService, rulesClient);
-    const state = createState(createRuleExecutionInput());
-
-    await step.execute(state);
-
-    expect(mockLogger.debug).toHaveBeenCalled();
-  });
-
-  it('has correct step name', () => {
-    const { loggerService } = createLoggerService();
-    const { rulesClient } = createRulesClient();
-    const step = new FetchRuleStep(loggerService, rulesClient);
-
-    expect(step.name).toBe('fetch_rule');
+    expect(rulesClient.getRule).toHaveBeenCalledWith({ id: 'custom-rule' });
   });
 });

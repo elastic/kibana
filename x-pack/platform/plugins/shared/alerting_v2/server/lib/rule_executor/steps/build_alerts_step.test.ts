@@ -7,54 +7,23 @@
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { BuildAlertsStep } from './build_alerts_step';
-import type { RulePipelineState, RuleExecutionInput } from '../types';
+import type { RulePipelineState } from '../types';
 import type { RuleResponse } from '../../rules_client';
+import { createRuleResponse, createRuleExecutionInput, createEsqlResponse } from '../test_utils';
 
 describe('BuildAlertsStep', () => {
-  const createInput = (): RuleExecutionInput => ({
-    ruleId: 'rule-1',
-    spaceId: 'default',
-    scheduledAt: '2025-01-01T00:00:00.000Z',
-    abortSignal: new AbortController().signal,
-  });
-
-  const createRule = (overrides: Partial<RuleResponse> = {}): RuleResponse => ({
-    id: 'rule-1',
-    name: 'test-rule',
-    tags: ['tag1', 'tag2'],
-    schedule: { custom: '1m' },
-    enabled: true,
-    query: 'FROM logs-* | LIMIT 10',
-    timeField: '@timestamp',
-    lookbackWindow: '5m',
-    groupingKey: ['host.name'],
-    createdBy: 'elastic',
-    createdAt: '2025-01-01T00:00:00.000Z',
-    updatedBy: 'elastic',
-    updatedAt: '2025-01-01T00:00:00.000Z',
-    ...overrides,
-  });
-
-  const createEsqlResponse = (
-    columns: Array<{ name: string; type: string }> = [{ name: 'host.name', type: 'keyword' }],
-    values: unknown[][] = [['host-a'], ['host-b']]
-  ): ESQLSearchResponse => ({
-    columns,
-    values,
-  });
-
   const createState = (
     rule?: RuleResponse,
     esqlResponse?: ESQLSearchResponse
   ): RulePipelineState => ({
-    input: createInput(),
+    input: createRuleExecutionInput(),
     rule,
     esqlResponse,
   });
 
   it('builds alert events from esql response', async () => {
     const step = new BuildAlertsStep();
-    const state = createState(createRule(), createEsqlResponse());
+    const state = createState(createRuleResponse(), createEsqlResponse());
 
     const result = await step.execute(state);
 
@@ -71,7 +40,7 @@ describe('BuildAlertsStep', () => {
   it('returns empty array when esql response has no values', async () => {
     const step = new BuildAlertsStep();
     const emptyResponse = createEsqlResponse([{ name: 'host.name', type: 'keyword' }], []);
-    const state = createState(createRule(), emptyResponse);
+    const state = createState(createRuleResponse(), emptyResponse);
 
     const result = await step.execute(state);
 
@@ -84,7 +53,7 @@ describe('BuildAlertsStep', () => {
   it('returns empty array when esql response has no columns', async () => {
     const step = new BuildAlertsStep();
     const emptyResponse = createEsqlResponse([], []);
-    const state = createState(createRule(), emptyResponse);
+    const state = createState(createRuleResponse(), emptyResponse);
 
     const result = await step.execute(state);
 
@@ -96,7 +65,7 @@ describe('BuildAlertsStep', () => {
 
   it('includes rule tags in alert events', async () => {
     const step = new BuildAlertsStep();
-    const rule = createRule({ tags: ['production', 'critical'] });
+    const rule = createRuleResponse({ tags: ['production', 'critical'] });
     const state = createState(rule, createEsqlResponse());
 
     const result = await step.execute(state);
@@ -110,7 +79,7 @@ describe('BuildAlertsStep', () => {
 
   it('uses groupingKey for alert grouping', async () => {
     const step = new BuildAlertsStep();
-    const rule = createRule({ groupingKey: ['host.name', 'service.name'] });
+    const rule = createRuleResponse({ groupingKey: ['host.name', 'service.name'] });
     const esqlResponse = createEsqlResponse(
       [
         { name: 'host.name', type: 'keyword' },
@@ -143,7 +112,7 @@ describe('BuildAlertsStep', () => {
 
   it('throws when esqlResponse is missing from state', async () => {
     const step = new BuildAlertsStep();
-    const state = createState(createRule(), undefined);
+    const state = createState(createRuleResponse(), undefined);
 
     await expect(step.execute(state)).rejects.toThrow(
       'BuildAlertsStep requires esqlResponse from previous step'

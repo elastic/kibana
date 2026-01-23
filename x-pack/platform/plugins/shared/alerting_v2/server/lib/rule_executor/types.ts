@@ -22,11 +22,6 @@ export interface RuleExecutionInput {
   readonly abortSignal: AbortSignal;
 }
 
-export interface AlertDocument {
-  readonly id: string;
-  readonly doc: Record<string, unknown>;
-}
-
 export interface RulePipelineState {
   readonly input: RuleExecutionInput;
   readonly rule?: RuleResponse;
@@ -41,7 +36,7 @@ export type RuleStepOutput =
   | { type: 'continue'; data?: Partial<Omit<RulePipelineState, 'input'>> }
   | { type: 'halt'; reason: HaltReason };
 
-export const continueWith = <T extends Partial<Omit<RulePipelineState, 'input'>>>(
+export const continueExecutionWith = <T extends Partial<Omit<RulePipelineState, 'input'>>>(
   data: T
 ): RuleStepOutput => ({
   type: 'continue',

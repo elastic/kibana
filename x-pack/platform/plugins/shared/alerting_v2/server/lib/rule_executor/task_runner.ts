@@ -9,13 +9,19 @@ import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task
 import { inject, injectable } from 'inversify';
 
 import type { RuleExecutionInput, HaltReason, RuleExecutorTaskParams } from './types';
-import { RuleExecutionPipeline, type PipelineResult } from './execution_pipeline';
+import type {
+  RuleExecutionPipelineContract,
+  RuleExecutionPipelineResult,
+} from './execution_pipeline';
+import { RuleExecutionPipeline } from './execution_pipeline';
 
 type TaskRunParams = Pick<RunContext, 'taskInstance' | 'abortController'>;
 
 @injectable()
 export class RuleExecutorTaskRunner {
-  constructor(@inject(RuleExecutionPipeline) private readonly pipeline: RuleExecutionPipeline) {}
+  constructor(
+    @inject(RuleExecutionPipeline) private readonly pipeline: RuleExecutionPipelineContract
+  ) {}
 
   public async run({ taskInstance, abortController }: TaskRunParams): Promise<RunResult> {
     const input = this.createRuleExecutionInput(taskInstance, abortController);
@@ -62,7 +68,7 @@ export class RuleExecutorTaskRunner {
    * Translate pipeline result to task manager state.
    */
   private buildRunResult(
-    result: PipelineResult,
+    result: RuleExecutionPipelineResult,
     taskInstance: TaskRunParams['taskInstance']
   ): RunResult {
     if (result.completed) {

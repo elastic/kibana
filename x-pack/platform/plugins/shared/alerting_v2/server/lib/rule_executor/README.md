@@ -1,12 +1,35 @@
-# Rule Execution Pipeline Steps
+# Rule Executor
 
-This directory contains the execution steps for the rule executor pipeline. Each step is a self-contained unit of work that follows the **Pipeline Pattern** with immutable state.
+The Rule Executor is responsible for executing alerting rules on a schedule. It fetches rule definitions, executes ES|QL queries, builds alert events from query results, and stores them in Elasticsearch.
 
-## Architecture Overview
+## Overview
 
-The pipeline uses a hybrid architecture combining **middleware** for global operations and **decorators** for per-step control.
+When a rule is scheduled to run, the Task Manager triggers the Rule Executor. The executor follows a **pipeline pattern** where execution flows through a series of discrete steps, each handling a specific responsibility.
+
+### What the Rule Executor Does
+
+1. **Waits for resources** - Ensures required Elasticsearch resources (data streams, templates) are ready
+2. **Fetches the rule** - Retrieves the rule definition from Saved Objects
+3. **Validates the rule** - Checks if the rule is enabled and can be executed
+4. **Builds the query** - Constructs the ES|QL query with time range filters
+5. **Executes the query** - Runs the ES|QL query against Elasticsearch
+6. **Builds alerts** - Transforms query results into alert events
+7. **Stores alerts** - Persists alert events to the alerts event data stream
+
+## Architecture
+
+The executor uses a **hybrid architecture** combining:
+- **Pipeline Pattern** for sequential step execution
+- **Middleware** for global cross-cutting concerns
+- **Decorators** for per-step operations
 
 ```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              Task Manager                                   │
+│                         (triggers rule execution)                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                           RuleExecutorTaskRunner                            │
 │                    (translates task manager ↔ domain)                       │
@@ -22,20 +45,19 @@ The pipeline uses a hybrid architecture combining **middleware** for global oper
                     ▼                                   ▼
           ┌─────────────────┐                 ┌─────────────────┐
           │   Middleware    │                 │     Steps       │
-          │ (global ops)    │                 │  (some wrapped  │
-          │                 │    wraps each   │  with decorators│
-          │ • ErrorHandling │ ─────────────►  │  for per-step   │
-          │ • Performance   │                 │  operations)    │
-          │ • ...           │                 │                 │
+          │ (global ops)    │    wraps each   │  (sequential    │
+          │                 │ ─────────────►  │   execution)    │
+          │ • ErrorHandling │                 │                 │
           └─────────────────┘                 └─────────────────┘
                                                       │
-          ┌───────────────────────────┬───────────────┴───────────────┐
-          ▼                           ▼                               ▼
-   ┌─────────────┐             ┌─────────────┐                 ┌─────────────┐
-   │   Step 1    │  ────────►  │   Step 2    │  ────────────►  │   Step N    │
-   └─────────────┘             └─────────────┘                 └─────────────┘
-          │                           │                               │
-          └───────────────────────────┴───────────────────────────────┘
+    ┌─────────────┬─────────────┬─────────────┬──────┴──────┬─────────────┐
+    ▼             ▼             ▼             ▼             ▼             ▼
+┌───────┐   ┌───────┐   ┌───────┐   ┌───────┐   ┌───────┐   ┌───────┐   ┌───────┐
+│ Wait  │──►│ Fetch │──►│Validate│──►│ Build │──►│Execute│──►│ Build │──►│ Store │
+│  For  │   │ Rule  │   │ Rule  │   │ Query │   │ Query │   │Alerts │   │Alerts │
+│Resources  │       │   │       │   │       │   │       │   │       │   │       │
+└───────┘   └───────┘   └───────┘   └───────┘   └───────┘   └───────┘   └───────┘
+                                      │
                                       ▼
                           ┌─────────────────────┐
                           │  RulePipelineState  │
@@ -43,12 +65,41 @@ The pipeline uses a hybrid architecture combining **middleware** for global oper
                           └─────────────────────┘
 ```
 
-### Middleware vs Decorators
+## Core Components
 
-| Layer | Purpose | Scope | When to Use |
-|-------|---------|-------|-------------|
-| **Middleware** | Global cross-cutting concerns | ALL steps | Error handling, performance timing, logging |
-| **Decorators** | Step-specific operations | Selected steps | Audit logging on sensitive operations |
+### RuleExecutorTaskRunner
+
+**Location:** `task_runner.ts`
+
+The entry point for rule execution. It:
+- Receives task instance data from Task Manager
+- Extracts execution input (ruleId, spaceId, scheduledAt, abortSignal)
+- Delegates to `RuleExecutionPipeline`
+- Translates pipeline results back to Task Manager's `RunResult`
+
+### RuleExecutionPipeline
+
+**Location:** `execution_pipeline.ts`
+
+Orchestrates step execution with middleware support. It:
+- Maintains immutable pipeline state
+- Executes steps sequentially
+- Wraps each step with the middleware chain
+- Handles halt conditions (rule deleted, rule disabled)
+
+### Execution Steps
+
+Steps are self-contained units of work that implement `RuleExecutionStep`:
+
+| Step | Purpose |
+|------|---------|
+| `WaitForResourcesStep` | Waits for ES resources to be ready | 
+| `FetchRuleStep` | Fetches rule from Saved Objects | 
+| `ValidateRuleStep` | Validates rule is enabled | 
+| `BuildQueryStep` | Builds ES|QL query payload | 
+| `ExecuteQueryStep` | Executes ES|QL query | 
+| `BuildAlertsStep` | Transforms results to alerts | 
+| `StoreAlertsStep` | Bulk indexes alerts | 
 
 ## Key Design Principles
 
@@ -62,6 +113,15 @@ The pipeline uses a hybrid architecture combining **middleware** for global oper
 
 5. **Separation of Concerns**: Global operations use middleware; step-specific operations use decorators.
 
+## Middleware vs Decorators
+
+| Layer | Purpose |  
+|-------|---------|
+| **Middleware** | Global cross-cutting concerns | ALL steps | 
+| **Decorators** | Step-specific operations | Selected steps |  
+
+---
+
 ## Creating a New Step
 
 ### Step 1: Create the Step File
@@ -69,16 +129,9 @@ The pipeline uses a hybrid architecture combining **middleware** for global oper
 Create a new file in `steps/` directory (e.g., `my_new_step.ts`):
 
 ```typescript
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
 import { inject, injectable } from 'inversify';
 import type { RuleExecutionStep, RulePipelineState, RuleStepOutput } from '../types';
-import { continueWith, continueExecution, halt } from '../types';
+import { continueExecutionWith, continueExecution, halt } from '../types';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -86,30 +139,27 @@ import {
 
 @injectable()
 export class MyNewStep implements RuleExecutionStep {
-  // Step name - used for logging and debugging
   public readonly name = 'my_new_step';
 
   constructor(
-    // Inject dependencies via constructor
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {}
 
   public async execute(state: Readonly<RulePipelineState>): Promise<RuleStepOutput> {
-    // Access input and previously accumulated state
-    const { input, ruleDoc } = state;
+    const { input, rule } = state;
 
     // Validate required state from previous steps
-    if (!ruleDoc) {
-      throw new Error('MyNewStep requires ruleDoc from previous step');
+    if (!rule) {
+      throw new Error('MyNewStep requires rule from previous step');
     }
 
     // Perform your logic here
-    const myResult = await this.doSomething(ruleDoc);
+    const myResult = await this.doSomething(rule);
 
     // Return one of three options:
 
     // Option 1: Continue with new data to add to state
-    return continueWith({ myNewField: myResult });
+    return continueExecutionWith({ myNewField: myResult });
 
     // Option 2: Continue without adding data
     // return continueExecution();
@@ -118,8 +168,7 @@ export class MyNewStep implements RuleExecutionStep {
     // return halt('rule_disabled');
   }
 
-  private async doSomething(ruleDoc: RuleResponse): Promise<unknown> {
-    // Your implementation
+  private async doSomething(rule: RuleResponse): Promise<unknown> {
     return {};
   }
 }
@@ -143,7 +192,7 @@ If your step produces new data, add the field to `RulePipelineState` in `types.t
 ```typescript
 export interface RulePipelineState {
   readonly input: RuleExecutionInput;
-  readonly ruleDoc?: RuleResponse;
+  readonly rule?: RuleResponse;
   readonly queryPayload?: QueryPayload;
   readonly esqlResponse?: ESQLSearchResponse;
   readonly alertEvents?: Array<{ id: string; doc: AlertEvent }>;
@@ -159,11 +208,7 @@ Add your step to `setup/bind_services.ts`:
 import { MyNewStep } from '../lib/rule_executor/steps';
 
 const bindRuleExecutionServices = (bind: ContainerModuleLoadOptions['bind']) => {
-  // ... existing bindings ...
-  
   // Bind your new step
-  // Use inSingletonScope() for stateless steps
-  // Use inRequestScope() for steps that need request-scoped dependencies
   bind(MyNewStep).toSelf().inSingletonScope();
 
   // Add to the steps array at the desired position
@@ -179,8 +224,6 @@ const bindRuleExecutionServices = (bind: ContainerModuleLoadOptions['bind']) => 
       get(StoreAlertsStep),
     ])
     .inRequestScope();
-
-  bind(RuleExecutionPipeline).toSelf().inRequestScope();
 };
 ```
 
@@ -189,62 +232,34 @@ const bindRuleExecutionServices = (bind: ContainerModuleLoadOptions['bind']) => 
 Create a test file `steps/my_new_step.test.ts`:
 
 ```typescript
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
 import { MyNewStep } from './my_new_step';
-import type { RulePipelineState, RuleExecutionInput } from '../types';
-import { createMockLoggerService } from '../../services/logger_service/logger_service.mock';
+import { createLoggerService, createRuleExecutionInput, createRuleResponse } from '../test_utils';
 
 describe('MyNewStep', () => {
-  const createInput = (): RuleExecutionInput => ({
-    ruleId: 'rule-1',
-    spaceId: 'default',
-    scheduledAt: '2025-01-01T00:00:00.000Z',
-    abortSignal: new AbortController().signal,
-  });
-
-  const createState = (overrides: Partial<RulePipelineState> = {}): RulePipelineState => ({
-    input: createInput(),
-    ...overrides,
-  });
-
   it('continues with data when successful', async () => {
-    const { loggerService } = createMockLoggerService();
+    const { loggerService } = createLoggerService();
     const step = new MyNewStep(loggerService);
 
-    const state = createState({
-      ruleDoc: { id: 'rule-1', name: 'Test', /* ... */ },
-    });
+    const state = {
+      input: createRuleExecutionInput(),
+      rule: createRuleResponse(),
+    };
 
     const result = await step.execute(state);
 
-    expect(result).toEqual({
-      type: 'continue',
-      data: { myNewField: expect.anything() },
-    });
+    expect(result.type).toBe('continue');
+    expect(result).toHaveProperty('data.myNewField');
   });
 
   it('throws when required state is missing', async () => {
-    const { loggerService } = createMockLoggerService();
+    const { loggerService } = createLoggerService();
     const step = new MyNewStep(loggerService);
 
-    const state = createState(); // No ruleDoc
+    const state = { input: createRuleExecutionInput() };
 
     await expect(step.execute(state)).rejects.toThrow(
-      'MyNewStep requires ruleDoc from previous step'
+      'MyNewStep requires rule from previous step'
     );
-  });
-
-  it('has correct step name', () => {
-    const { loggerService } = createMockLoggerService();
-    const step = new MyNewStep(loggerService);
-
-    expect(step.name).toBe('my_new_step');
   });
 });
 ```
@@ -271,7 +286,7 @@ Create a new file in `middleware/` directory (e.g., `performance_middleware.ts`)
 
 ```typescript
 import { inject, injectable } from 'inversify';
-import type { MiddlewareContext, StepMiddleware } from './types';
+import type { RuleExecutionMiddlewareContext, RuleExecutionMiddleware } from './types';
 import type { RuleStepOutput } from '../types';
 import {
   LoggerServiceToken,
@@ -279,7 +294,7 @@ import {
 } from '../../services/logger_service/logger_service';
 
 @injectable()
-export class PerformanceMiddleware implements StepMiddleware {
+export class PerformanceMiddleware implements RuleExecutionMiddleware {
   public readonly name = 'performance';
 
   constructor(
@@ -287,12 +302,12 @@ export class PerformanceMiddleware implements StepMiddleware {
   ) {}
 
   public async execute(
-    ctx: MiddlewareContext,
+    ctx: RuleExecutionMiddlewareContext,
     next: () => Promise<RuleStepOutput>
   ): Promise<RuleStepOutput> {
     const start = performance.now();
     try {
-      return await next();  // Call next middleware or step
+      return await next();
     } finally {
       const duration = performance.now() - start;
       this.logger.debug({
@@ -311,19 +326,16 @@ Add your middleware to `setup/bind_services.ts`:
 import { PerformanceMiddleware } from '../lib/rule_executor/middleware';
 
 const bindRuleExecutionServices = (bind: ContainerModuleLoadOptions['bind']) => {
-  // Bind middleware classes
   bind(ErrorHandlingMiddleware).toSelf().inSingletonScope();
   bind(PerformanceMiddleware).toSelf().inSingletonScope();
 
-  // Bind middleware array (order matters - first is outermost)
-  bind(StepMiddlewareToken)
+  // Order matters - first is outermost
+  bind(RuleExecutionMiddlewaresToken)
     .toDynamicValue(({ get }) => [
       get(PerformanceMiddleware),     // Outermost - measures total time
       get(ErrorHandlingMiddleware),   // Inner - catches errors
     ])
     .inSingletonScope();
-
-  // ... rest of bindings
 };
 ```
 
@@ -344,10 +356,10 @@ Decorators wrap **specific steps** to add behavior without modifying the step im
 Create a new file in `steps/decorators/` directory (e.g., `audit_logging_decorator.ts`):
 
 ```typescript
-import { StepDecorator } from './step_decorator';
+import { RuleStepDecorator } from './step_decorator';
 import type { RulePipelineState, RuleStepOutput } from '../../types';
 
-export class AuditLoggingDecorator extends StepDecorator {
+export class AuditLoggingDecorator extends RuleStepDecorator {
   constructor(
     step: RuleExecutionStep,
     private readonly auditService: AuditServiceContract
@@ -399,30 +411,42 @@ bind(RuleExecutionStepsToken)
   })
   .inRequestScope();
 ```
-
-### When to Use Decorators vs Middleware
-
-| Scenario | Use |
-|----------|-----|
-| Operation applies to ALL steps | Middleware |
-| Operation applies to SOME steps | Decorator |
-| Need conditionals based on step name | Decorator (avoid conditionals in middleware) |
-| Global error handling | Middleware |
-| Audit logging for sensitive operations | Decorator |
-
 ---
 
 ## Testing
 
+### Test Utilities
+
+Test utilities are available in `test_utils.ts`:
+
 ### Testing Steps
 
-See the step testing example above. Use `createLoggerService()`, `createRulesClient()`, and other utilities from `lib/test_utils.ts`.
+```typescript
+import { MyStep } from './my_step';
+import { createLoggerService, createRuleExecutionInput, createRuleResponse } from '../test_utils';
+
+describe('MyStep', () => {
+  it('executes successfully', async () => {
+    const { loggerService } = createLoggerService();
+    const step = new MyStep(loggerService);
+
+    const state = {
+      input: createRuleExecutionInput(),
+      rule: createRuleResponse(),
+    };
+
+    const result = await step.execute(state);
+
+    expect(result.type).toBe('continue');
+  });
+});
+```
 
 ### Testing Middleware
 
 ```typescript
 import { ErrorHandlingMiddleware } from './error_handling_middleware';
-import { createLoggerService } from '../../test_utils';
+import { createLoggerService, createRuleExecutionInput } from '../test_utils';
 
 describe('ErrorHandlingMiddleware', () => {
   it('calls next and returns result on success', async () => {
@@ -434,13 +458,12 @@ describe('ErrorHandlingMiddleware', () => {
 
     const context = {
       step: { name: 'test_step', execute: jest.fn() },
-      state: { input: { ruleId: 'r1', spaceId: 's1', scheduledAt: '', abortSignal: new AbortController().signal } },
+      state: { input: createRuleExecutionInput() },
     };
 
     const result = await middleware.execute(context, next);
 
     expect(result).toEqual(expectedResult);
-    expect(next).toHaveBeenCalledTimes(1);
     expect(mockLogger.error).not.toHaveBeenCalled();
   });
 
@@ -448,12 +471,10 @@ describe('ErrorHandlingMiddleware', () => {
     const { loggerService, mockLogger } = createLoggerService();
     const middleware = new ErrorHandlingMiddleware(loggerService);
 
-    const error = new Error('Step failed');
-    const next = jest.fn().mockRejectedValue(error);
-
+    const next = jest.fn().mockRejectedValue(new Error('Step failed'));
     const context = {
       step: { name: 'failing_step', execute: jest.fn() },
-      state: { input: { ruleId: 'r1', spaceId: 's1', scheduledAt: '', abortSignal: new AbortController().signal } },
+      state: { input: createRuleExecutionInput() },
     };
 
     await expect(middleware.execute(context, next)).rejects.toThrow('Step failed');
@@ -466,6 +487,7 @@ describe('ErrorHandlingMiddleware', () => {
 
 ```typescript
 import { AuditLoggingDecorator } from './audit_logging_decorator';
+import { createRuleExecutionInput } from '../test_utils';
 
 describe('AuditLoggingDecorator', () => {
   it('logs before and after step execution', async () => {
@@ -476,17 +498,24 @@ describe('AuditLoggingDecorator', () => {
     const mockAuditService = { log: jest.fn() };
 
     const decorator = new AuditLoggingDecorator(mockStep, mockAuditService);
-    const state = { input: { ruleId: 'r1', spaceId: 's1', scheduledAt: '', abortSignal: new AbortController().signal } };
+    const state = { input: createRuleExecutionInput() };
 
     await decorator.execute(state);
 
-    expect(mockAuditService.log).toHaveBeenCalledTimes(2);
-    expect(mockAuditService.log).toHaveBeenNthCalledWith(1, expect.objectContaining({
-      action: 'rule_execution.step.test_step.start',
-    }));
-    expect(mockAuditService.log).toHaveBeenNthCalledWith(2, expect.objectContaining({
-      action: 'rule_execution.step.test_step.continue',
-    }));
+    expect(mockAuditService.log).toHaveBeenCalledTimes(1);
+  });
+
+  it('propagates errors from wrapped step', async () => {
+    const mockStep = {
+      name: 'failing_step',
+      execute: jest.fn().mockRejectedValue(new Error('Step failed')),
+    };
+    const mockAuditService = { log: jest.fn() };
+
+    const decorator = new AuditLoggingDecorator(mockStep, mockAuditService);
+    const state = { input: createRuleExecutionInput() };
+
+    await expect(decorator.execute(state)).rejects.toThrow('Step failed');
   });
 });
 ```

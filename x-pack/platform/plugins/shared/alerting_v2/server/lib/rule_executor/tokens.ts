@@ -7,6 +7,7 @@
 
 import type { ServiceIdentifier } from 'inversify';
 import type { RuleExecutionStep } from './types';
+import type { RuleExecutionMiddleware } from './middleware';
 
 /**
  * Token for injecting the ordered steps array.
@@ -14,3 +15,11 @@ import type { RuleExecutionStep } from './types';
 export const RuleExecutionStepsToken = Symbol.for(
   'alerting_v2.RuleExecutionSteps'
 ) as ServiceIdentifier<RuleExecutionStep[]>;
+
+/**
+ * DI token for the array of step middleware.
+ * Middleware are executed in order (first middleware is outermost).
+ */
+export const RuleExecutionMiddlewaresToken = Symbol.for(
+  'alerting_v2.RuleExecutionMiddlewares'
+) as ServiceIdentifier<RuleExecutionMiddleware[]>;

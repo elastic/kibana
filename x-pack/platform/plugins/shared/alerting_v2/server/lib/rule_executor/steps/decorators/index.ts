@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { StepDecorator } from './step_decorator';
+export { RuleStepDecorator } from './step_decorator';

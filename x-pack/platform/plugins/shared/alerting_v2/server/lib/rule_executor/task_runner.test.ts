@@ -5,79 +5,71 @@
  * 2.0.
  */
 
-import type { RunContext } from '@kbn/task-manager-plugin/server/task';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
 
 import { RuleExecutorTaskRunner } from './task_runner';
-import type { ExecutionPipelineContract, PipelineResult } from './execution_pipeline';
-import type { RulePipelineState } from './types';
+import type { RuleExecutionPipelineContract } from './execution_pipeline';
+import { createRuleExecutionInput } from './test_utils';
 
 describe('RuleExecutorTaskRunner', () => {
-  const taskInstance = {
+  // @ts-expect-error: not all fields are required
+  const taskInstance: ConcreteTaskInstance = {
     id: 'task-1',
     params: { ruleId: 'rule-1', spaceId: 'default' },
     state: { foo: 'bar' },
-    scheduledAt: '2025-01-01T00:00:00.000Z',
+    scheduledAt: new Date('2025-01-01T00:00:10.000Z'),
     startedAt: new Date('2025-01-01T00:00:10.000Z'),
-  } as unknown as RunContext['taskInstance'];
+  };
 
-  const createMockPipeline = (): jest.Mocked<ExecutionPipelineContract> => ({
+  const createMockPipeline = (): jest.Mocked<RuleExecutionPipelineContract> => ({
     execute: jest.fn(),
   });
 
   const createRunner = () => {
     const pipeline = createMockPipeline();
-    const runner = new RuleExecutorTaskRunner(pipeline as any);
+    const runner = new RuleExecutorTaskRunner(pipeline);
     return { runner, pipeline };
   };
 
   describe('extractExecutionInput', () => {
-    it('extracts domain input from task instance', async () => {
+    it('constructs the pipeline input from task instance correctly', async () => {
       const { runner, pipeline } = createRunner();
       const abortController = new AbortController();
-
-      const basePipelineState: RulePipelineState = {
-        input: {
-          ruleId: 'rule-1',
-          spaceId: 'default',
-          scheduledAt: '2025-01-01T00:00:00.000Z',
-          abortSignal: abortController.signal,
-        },
-      };
+      const input = createRuleExecutionInput({ abortSignal: abortController.signal });
 
       pipeline.execute.mockResolvedValue({
         completed: true,
-        finalState: basePipelineState,
+        finalState: { input },
       });
 
       await runner.run({ taskInstance, abortController });
 
-      expect(pipeline.execute).toHaveBeenCalledWith({
-        ruleId: 'rule-1',
-        spaceId: 'default',
-        scheduledAt: '2025-01-01T00:00:00.000Z',
-        abortSignal: abortController.signal,
-      });
+      expect(pipeline.execute).toHaveBeenCalledWith(input);
     });
 
-    it('uses startedAt when scheduledAt is not a string', async () => {
+    it('uses startedAt when scheduledAt is a string', async () => {
       const { runner, pipeline } = createRunner();
       const abortController = new AbortController();
+      const input = createRuleExecutionInput({ abortSignal: abortController.signal });
 
       const taskWithDateScheduledAt = {
         ...taskInstance,
-        scheduledAt: new Date('2025-01-01T00:00:00.000Z'),
-      } as unknown as RunContext['taskInstance'];
+        scheduledAt: '2025-01-01T00:00:00.000Z',
+      };
 
       pipeline.execute.mockResolvedValue({
         completed: true,
-        finalState: { input: expect.anything() },
+        finalState: {
+          input,
+        },
       });
 
+      // @ts-expect-error: testing the scheduledAt as a string
       await runner.run({ taskInstance: taskWithDateScheduledAt, abortController });
 
       expect(pipeline.execute).toHaveBeenCalledWith(
         expect.objectContaining({
-          scheduledAt: '2025-01-01T00:00:10.000Z', // startedAt is used
+          scheduledAt: '2025-01-01T00:00:00.000Z',
         })
       );
     });
@@ -87,10 +79,11 @@ describe('RuleExecutorTaskRunner', () => {
     it('returns empty state when pipeline completes successfully', async () => {
       const { runner, pipeline } = createRunner();
       const abortController = new AbortController();
+      const input = createRuleExecutionInput({ abortSignal: abortController.signal });
 
       pipeline.execute.mockResolvedValue({
         completed: true,
-        finalState: { input: expect.anything() },
+        finalState: { input },
       });
 
       const result = await runner.run({ taskInstance, abortController });
@@ -101,26 +94,28 @@ describe('RuleExecutorTaskRunner', () => {
     it('preserves previous state when pipeline halts with rule_deleted', async () => {
       const { runner, pipeline } = createRunner();
       const abortController = new AbortController();
+      const input = createRuleExecutionInput({ abortSignal: abortController.signal });
 
       pipeline.execute.mockResolvedValue({
         completed: false,
         haltReason: 'rule_deleted',
-        finalState: { input: expect.anything() },
+        finalState: { input },
       });
 
       const result = await runner.run({ taskInstance, abortController });
 
-      expect(result).toEqual({ state: { foo: 'bar' } }); // preserves taskInstance.state
+      expect(result).toEqual({ state: { foo: 'bar' } });
     });
 
     it('preserves previous state when pipeline halts with rule_disabled', async () => {
       const { runner, pipeline } = createRunner();
       const abortController = new AbortController();
+      const input = createRuleExecutionInput({ abortSignal: abortController.signal });
 
       pipeline.execute.mockResolvedValue({
         completed: false,
         haltReason: 'rule_disabled',
-        finalState: { input: expect.anything() },
+        finalState: { input },
       });
 
       const result = await runner.run({ taskInstance, abortController });
@@ -131,12 +126,13 @@ describe('RuleExecutorTaskRunner', () => {
     it('returns empty state for unknown halt reasons', async () => {
       const { runner, pipeline } = createRunner();
       const abortController = new AbortController();
+      const input = createRuleExecutionInput({ abortSignal: abortController.signal });
 
       pipeline.execute.mockResolvedValue({
         completed: false,
         haltReason: undefined,
-        finalState: { input: expect.anything() },
-      } as PipelineResult);
+        finalState: { input },
+      });
 
       const result = await runner.run({ taskInstance, abortController });
 

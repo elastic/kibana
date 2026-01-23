@@ -8,7 +8,7 @@
 import { inject, injectable } from 'inversify';
 import Boom from '@hapi/boom';
 import type { RuleExecutionStep, RulePipelineState, RuleStepOutput } from '../types';
-import { continueWith, halt } from '../types';
+import { continueExecutionWith, halt } from '../types';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -34,11 +34,12 @@ export class FetchRuleStep implements RuleExecutionStep {
         message: () => `Rule saved object attributes: ${JSON.stringify(rule, null, 2)}`,
       });
 
-      return continueWith({ rule });
+      return continueExecutionWith({ rule });
     } catch (error) {
       if (Boom.isBoom(error) && error.output.statusCode === 404) {
         return halt('rule_deleted');
       }
+
       throw error;
     }
   }

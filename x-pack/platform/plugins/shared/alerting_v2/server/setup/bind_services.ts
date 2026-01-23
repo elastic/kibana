@@ -27,7 +27,10 @@ import type { AlertingServerStartDependencies } from '../types';
 import { RetryServiceToken } from '../lib/services/retry_service/tokens';
 import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
 import { RuleExecutionPipeline } from '../lib/rule_executor/execution_pipeline';
-import { RuleExecutionStepsToken } from '../lib/rule_executor/tokens';
+import {
+  RuleExecutionStepsToken,
+  RuleExecutionMiddlewaresToken,
+} from '../lib/rule_executor/tokens';
 import {
   WaitForResourcesStep,
   FetchRuleStep,
@@ -37,7 +40,7 @@ import {
   BuildAlertsStep,
   StoreAlertsStep,
 } from '../lib/rule_executor/steps';
-import { StepMiddlewareToken, ErrorHandlingMiddleware } from '../lib/rule_executor/middleware';
+import { ErrorHandlingMiddleware } from '../lib/rule_executor/middleware';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(RulesClient).toSelf().inRequestScope();
@@ -99,18 +102,24 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
 }
 
 const bindRuleExecutionServices = (bind: ContainerModuleLoadOptions['bind']) => {
-  // Bind middleware classes
+  /**
+   * Middlewares
+   */
   bind(ErrorHandlingMiddleware).toSelf().inSingletonScope();
 
-  // Bind middleware array (order matters - first middleware is outermost)
-  bind(StepMiddlewareToken)
+  /**
+   * Middleware list
+   */
+  bind(RuleExecutionMiddlewaresToken)
     .toDynamicValue(({ get }) => [
+      // Add more middleware here as needed
       get(ErrorHandlingMiddleware),
-      // Add more middleware here as needed (e.g., PerformanceMiddleware)
     ])
     .inSingletonScope();
 
-  // Bind step classes
+  /**
+   * Rule executor steps
+   */
   bind(WaitForResourcesStep).toSelf().inSingletonScope();
   bind(FetchRuleStep).toSelf().inRequestScope();
   bind(ValidateRuleStep).toSelf().inSingletonScope();
@@ -119,9 +128,12 @@ const bindRuleExecutionServices = (bind: ContainerModuleLoadOptions['bind']) => 
   bind(BuildAlertsStep).toSelf().inSingletonScope();
   bind(StoreAlertsStep).toSelf().inSingletonScope();
 
-  // Bind steps array (order defines execution order)
-  // Steps can be wrapped with decorators for per-step behavior:
-  // new AuditLoggingDecorator(get(ValidateRuleStep), auditService)
+  /**
+   * Bind steps array (order defines execution order)
+   * Steps can be wrapped with decorators for per-step behavior
+   * For example: new AuditLoggingDecorator(get(ValidateRuleStep), auditService)
+   */
+
   bind(RuleExecutionStepsToken)
     .toDynamicValue(({ get }) => [
       get(WaitForResourcesStep),

@@ -13,48 +13,45 @@ import type {
   RuleStepOutput,
   HaltReason,
 } from './types';
-import { RuleExecutionStepsToken } from './tokens';
-import { StepMiddlewareToken, type StepMiddleware, type MiddlewareContext } from './middleware';
+import { RuleExecutionMiddlewaresToken, RuleExecutionStepsToken } from './tokens';
+import { type RuleExecutionMiddleware, type RuleExecutionMiddlewareContext } from './middleware';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
 
-/**
- * Pipeline result - pure domain, NO task manager types.
- * TaskRunner interprets this to build RunResult.
- */
-export interface PipelineResult {
+export interface RuleExecutionPipelineResult {
   readonly completed: boolean;
   readonly haltReason?: HaltReason;
   readonly finalState: RulePipelineState;
 }
 
-export interface ExecutionPipelineContract {
-  execute(input: RuleExecutionInput): Promise<PipelineResult>;
+export interface RuleExecutionPipelineContract {
+  execute(input: RuleExecutionInput): Promise<RuleExecutionPipelineResult>;
 }
 
 @injectable()
-export class RuleExecutionPipeline implements ExecutionPipelineContract {
+export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
   constructor(
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
     @inject(RuleExecutionStepsToken) private readonly steps: RuleExecutionStep[],
-    @inject(StepMiddlewareToken) private readonly middlewares: StepMiddleware[]
+    @inject(RuleExecutionMiddlewaresToken) private readonly middlewares: RuleExecutionMiddleware[]
   ) {}
 
-  public async execute(input: RuleExecutionInput): Promise<PipelineResult> {
+  public async execute(input: RuleExecutionInput): Promise<RuleExecutionPipelineResult> {
     let pipelineState: RulePipelineState = { input };
 
     for (const step of this.steps) {
-      this.logger.debug({ message: `Executing step: ${step.name}` });
+      this.logger.debug({ message: `RuleExecutor: Executing step: ${step.name}` });
 
-      const context: MiddlewareContext = { step, state: pipelineState };
+      const context: RuleExecutionMiddlewareContext = { step, state: pipelineState };
       const output = await this.runMiddlewareChain(context);
 
       if (output.type === 'halt') {
         this.logger.debug({
-          message: `Pipeline halted at step: ${step.name}, reason: ${output.reason}`,
+          message: `RuleExecutor: Pipeline halted at step: ${step.name}, reason: ${output.reason}`,
         });
+
         return {
           completed: false,
           haltReason: output.reason,
@@ -79,7 +76,7 @@ export class RuleExecutionPipeline implements ExecutionPipelineContract {
    * Middleware are executed in order (first middleware is outermost).
    * Each middleware wraps the next, with the innermost being the step itself.
    */
-  private runMiddlewareChain(context: MiddlewareContext): Promise<RuleStepOutput> {
+  private runMiddlewareChain(context: RuleExecutionMiddlewareContext): Promise<RuleStepOutput> {
     const { step, state } = context;
 
     // Build chain from right to left: last middleware wraps step.execute()

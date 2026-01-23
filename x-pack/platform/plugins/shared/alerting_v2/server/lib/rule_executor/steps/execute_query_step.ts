@@ -7,24 +7,17 @@
 
 import { inject, injectable } from 'inversify';
 import type { RuleExecutionStep, RulePipelineState, RuleStepOutput } from '../types';
-import { continueWith } from '../types';
+import { continueExecutionWith } from '../types';
 import {
   QueryService,
   type QueryServiceContract,
 } from '../../services/query_service/query_service';
-import {
-  LoggerServiceToken,
-  type LoggerServiceContract,
-} from '../../services/logger_service/logger_service';
 
 @injectable()
 export class ExecuteQueryStep implements RuleExecutionStep {
   public readonly name = 'execute_query';
 
-  constructor(
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
-    @inject(QueryService) private readonly queryService: QueryServiceContract
-  ) {}
+  constructor(@inject(QueryService) private readonly queryService: QueryServiceContract) {}
 
   public async execute(state: Readonly<RulePipelineState>): Promise<RuleStepOutput> {
     const { rule, queryPayload, input } = state;
@@ -54,10 +47,6 @@ export class ExecuteQueryStep implements RuleExecutionStep {
       throw error;
     }
 
-    this.logger.debug({
-      message: () => `ES|QL response values: ${JSON.stringify(esqlResponse.values, null, 2)}`,
-    });
-
-    return continueWith({ esqlResponse });
+    return continueExecutionWith({ esqlResponse });
   }
 }

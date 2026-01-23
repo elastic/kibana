@@ -16,30 +16,8 @@ import type { RuleExecutionStep, RulePipelineState, RuleStepOutput } from '../..
  *
  * Use decorators when you need per-step control without adding conditionals
  * to middleware.
- *
- * @example
- * ```typescript
- * export class AuditLoggingDecorator extends StepDecorator {
- *   constructor(
- *     step: RuleExecutionStep,
- *     private readonly auditService: AuditServiceContract
- *   ) {
- *     super(step);
- *   }
- *
- *   async execute(state: Readonly<RulePipelineState>): Promise<RuleStepOutput> {
- *     await this.auditService.log({ action: `step.${this.name}.start` });
- *     const result = await this.step.execute(state);
- *     await this.auditService.log({ action: `step.${this.name}.${result.type}` });
- *     return result;
- *   }
- * }
- *
- * // In DI bindings:
- * new AuditLoggingDecorator(container.get(ValidateRuleStep), auditService)
- * ```
  */
-export abstract class StepDecorator implements RuleExecutionStep {
+export abstract class RuleStepDecorator implements RuleExecutionStep {
   constructor(protected readonly step: RuleExecutionStep) {}
 
   /**

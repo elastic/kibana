@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export type { StepMiddleware, MiddlewareContext } from './types';
-export { StepMiddlewareToken } from './types';
+export type { RuleExecutionMiddleware, RuleExecutionMiddlewareContext } from './types';
 export { ErrorHandlingMiddleware } from './error_handling_middleware';

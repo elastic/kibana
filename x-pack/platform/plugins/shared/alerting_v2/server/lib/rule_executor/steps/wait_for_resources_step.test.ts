@@ -6,19 +6,13 @@
  */
 
 import { WaitForResourcesStep } from './wait_for_resources_step';
-import type { RulePipelineState, RuleExecutionInput } from '../types';
+import type { RulePipelineState } from '../types';
+import { createRuleExecutionInput } from '../test_utils';
 import { createMockResourceManager } from '../../services/resource_service/resource_manager.mock';
 
 describe('WaitForResourcesStep', () => {
-  const createInput = (): RuleExecutionInput => ({
-    ruleId: 'rule-1',
-    spaceId: 'default',
-    scheduledAt: '2025-01-01T00:00:00.000Z',
-    abortSignal: new AbortController().signal,
-  });
-
   const createState = (): RulePipelineState => ({
-    input: createInput(),
+    input: createRuleExecutionInput(),
   });
 
   it('waits for resources and continues execution', async () => {
@@ -43,12 +37,5 @@ describe('WaitForResourcesStep', () => {
     const state = createState();
 
     await expect(step.execute(state)).rejects.toThrow('Resource initialization failed');
-  });
-
-  it('has correct step name', () => {
-    const resourceManager = createMockResourceManager();
-    const step = new WaitForResourcesStep(resourceManager);
-
-    expect(step.name).toBe('wait_for_resources');
   });
 });

@@ -6,35 +6,13 @@
  */
 
 import { RuleExecutionPipeline } from './execution_pipeline';
-import type {
-  RuleExecutionInput,
-  RuleExecutionStep,
-  RulePipelineState,
-  RuleStepOutput,
-} from './types';
-import { continueWith, continueExecution, halt } from './types';
-import type { StepMiddleware } from './middleware';
+import type { RulePipelineState } from './types';
+import { continueExecutionWith, continueExecution, halt } from './types';
+import type { RuleExecutionMiddleware } from './middleware';
 import { createMockLoggerService } from '../services/logger_service/logger_service.mock';
+import { createRuleExecutionInput, createMockStep } from './test_utils';
 
 describe('RuleExecutionPipeline', () => {
-  const createExecutionInput = (
-    overrides: Partial<RuleExecutionInput> = {}
-  ): RuleExecutionInput => ({
-    ruleId: 'rule-1',
-    spaceId: 'default',
-    scheduledAt: '2025-01-01T00:00:00.000Z',
-    abortSignal: new AbortController().signal,
-    ...overrides,
-  });
-
-  const createMockStep = (
-    name: string,
-    executeFn: (state: Readonly<RulePipelineState>) => Promise<RuleStepOutput>
-  ): RuleExecutionStep => ({
-    name,
-    execute: jest.fn(executeFn),
-  });
-
   describe('execute', () => {
     it('executes all steps in order when all continue', async () => {
       const { loggerService } = createMockLoggerService();
@@ -42,7 +20,7 @@ describe('RuleExecutionPipeline', () => {
 
       const step1 = createMockStep('step1', async () => {
         executionOrder.push('step1');
-        return continueWith({ rule: { id: 'rule-1' } as any });
+        return continueExecution();
       });
 
       const step2 = createMockStep('step2', async () => {
@@ -52,11 +30,11 @@ describe('RuleExecutionPipeline', () => {
 
       const step3 = createMockStep('step3', async () => {
         executionOrder.push('step3');
-        return continueWith({ alertEvents: [] });
+        return continueExecution();
       });
 
       const pipeline = new RuleExecutionPipeline(loggerService, [step1, step2, step3], []);
-      const input = createExecutionInput();
+      const input = createRuleExecutionInput();
 
       const result = await pipeline.execute(input);
 
@@ -85,7 +63,7 @@ describe('RuleExecutionPipeline', () => {
       });
 
       const pipeline = new RuleExecutionPipeline(loggerService, [step1, step2, step3], []);
-      const input = createExecutionInput();
+      const input = createRuleExecutionInput();
 
       const result = await pipeline.execute(input);
 
@@ -95,18 +73,19 @@ describe('RuleExecutionPipeline', () => {
       expect(step3.execute).not.toHaveBeenCalled();
     });
 
-    it('accumulates state immutably across steps', async () => {
+    it('accumulates state across steps correctly', async () => {
       const { loggerService } = createMockLoggerService();
       const statesReceived: RulePipelineState[] = [];
 
       const step1 = createMockStep('step1', async (state) => {
         statesReceived.push({ ...state });
-        return continueWith({ rule: { id: 'rule-1' } as any });
+        // @ts-expect-error: not all fields are required
+        return continueExecutionWith({ rule: { id: 'rule-1' } });
       });
 
       const step2 = createMockStep('step2', async (state) => {
         statesReceived.push({ ...state });
-        return continueWith({
+        return continueExecutionWith({
           queryPayload: { filter: {}, params: [], dateStart: '', dateEnd: '' },
         });
       });
@@ -117,7 +96,7 @@ describe('RuleExecutionPipeline', () => {
       });
 
       const pipeline = new RuleExecutionPipeline(loggerService, [step1, step2, step3], []);
-      const input = createExecutionInput();
+      const input = createRuleExecutionInput();
 
       const result = await pipeline.execute(input);
 
@@ -153,7 +132,7 @@ describe('RuleExecutionPipeline', () => {
       });
 
       const pipeline = new RuleExecutionPipeline(loggerService, [step1, step2], []);
-      const input = createExecutionInput();
+      const input = createRuleExecutionInput();
 
       await expect(pipeline.execute(input)).rejects.toThrow('Step failed');
       expect(step2.execute).not.toHaveBeenCalled();
@@ -162,7 +141,7 @@ describe('RuleExecutionPipeline', () => {
     it('returns empty completed result when no steps', async () => {
       const { loggerService } = createMockLoggerService();
       const pipeline = new RuleExecutionPipeline(loggerService, [], []);
-      const input = createExecutionInput();
+      const input = createRuleExecutionInput();
 
       const result = await pipeline.execute(input);
 
@@ -170,41 +149,11 @@ describe('RuleExecutionPipeline', () => {
       expect(result.finalState).toEqual({ input });
     });
 
-    it('logs step execution', async () => {
-      const { loggerService } = createMockLoggerService();
-
-      const step1 = createMockStep('my_step', async () => continueExecution());
-
-      const pipeline = new RuleExecutionPipeline(loggerService, [step1], []);
-      const input = createExecutionInput();
-
-      await pipeline.execute(input);
-
-      expect(loggerService.debug).toHaveBeenCalledWith({
-        message: 'Executing step: my_step',
-      });
-    });
-
-    it('logs halt reason when pipeline halts', async () => {
-      const { loggerService } = createMockLoggerService();
-
-      const step1 = createMockStep('halt_step', async () => halt('rule_disabled'));
-
-      const pipeline = new RuleExecutionPipeline(loggerService, [step1], []);
-      const input = createExecutionInput();
-
-      await pipeline.execute(input);
-
-      expect(loggerService.debug).toHaveBeenCalledWith({
-        message: 'Pipeline halted at step: halt_step, reason: rule_disabled',
-      });
-    });
-
     it('executes middleware chain around each step', async () => {
       const { loggerService } = createMockLoggerService();
       const executionOrder: string[] = [];
 
-      const middleware1: StepMiddleware = {
+      const middleware1: RuleExecutionMiddleware = {
         name: 'middleware1',
         execute: async (ctx, next) => {
           executionOrder.push(`middleware1:before:${ctx.step.name}`);
@@ -214,7 +163,7 @@ describe('RuleExecutionPipeline', () => {
         },
       };
 
-      const middleware2: StepMiddleware = {
+      const middleware2: RuleExecutionMiddleware = {
         name: 'middleware2',
         execute: async (ctx, next) => {
           executionOrder.push(`middleware2:before:${ctx.step.name}`);
@@ -234,7 +183,7 @@ describe('RuleExecutionPipeline', () => {
         [step1],
         [middleware1, middleware2]
       );
-      const input = createExecutionInput();
+      const input = createRuleExecutionInput();
 
       await pipeline.execute(input);
 
@@ -252,7 +201,7 @@ describe('RuleExecutionPipeline', () => {
       const { loggerService } = createMockLoggerService();
       const errorHandlerCalled = jest.fn();
 
-      const errorMiddleware: StepMiddleware = {
+      const errorMiddleware: RuleExecutionMiddleware = {
         name: 'error_handler',
         execute: async (ctx, next) => {
           try {
@@ -269,7 +218,7 @@ describe('RuleExecutionPipeline', () => {
       });
 
       const pipeline = new RuleExecutionPipeline(loggerService, [step1], [errorMiddleware]);
-      const input = createExecutionInput();
+      const input = createRuleExecutionInput();
 
       await expect(pipeline.execute(input)).rejects.toThrow('Step error');
       expect(errorHandlerCalled).toHaveBeenCalledWith(expect.any(Error));

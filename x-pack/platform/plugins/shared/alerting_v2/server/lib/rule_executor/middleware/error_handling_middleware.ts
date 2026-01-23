@@ -6,7 +6,7 @@
  */
 
 import { inject, injectable } from 'inversify';
-import type { MiddlewareContext, StepMiddleware } from './types';
+import type { RuleExecutionMiddlewareContext, RuleExecutionMiddleware } from './types';
 import type { RuleStepOutput } from '../types';
 import {
   LoggerServiceToken,
@@ -20,25 +20,24 @@ import {
  * consistent formatting before re-throwing.
  */
 @injectable()
-export class ErrorHandlingMiddleware implements StepMiddleware {
+export class ErrorHandlingMiddleware implements RuleExecutionMiddleware {
   public readonly name = 'error_handling';
 
-  constructor(
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
-  ) {}
+  constructor(@inject(LoggerServiceToken) private readonly logger: LoggerServiceContract) {}
 
   public async execute(
-    ctx: MiddlewareContext,
+    ctx: RuleExecutionMiddlewareContext,
     next: () => Promise<RuleStepOutput>
   ): Promise<RuleStepOutput> {
     try {
       return await next();
     } catch (error) {
       this.logger.error({
-        error: error instanceof Error ? error : new Error(String(error)),
+        error,
         type: 'StepExecutionError',
         code: ctx.step.name,
       });
+
       throw error;
     }
   }

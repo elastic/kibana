@@ -7,7 +7,7 @@
 
 import { inject, injectable } from 'inversify';
 import type { RuleExecutionStep, RulePipelineState, RuleStepOutput } from '../types';
-import { continueWith } from '../types';
+import { continueExecutionWith } from '../types';
 import { getQueryPayload } from '../get_query_payload';
 import {
   LoggerServiceToken,
@@ -35,15 +35,13 @@ export class BuildQueryStep implements RuleExecutionStep {
 
     this.logger.debug({
       message: () =>
-        `executing ES|QL query for rule ${input.ruleId} in space ${
-          input.spaceId
-        } - ${JSON.stringify({
+        `build ES|QL query for rule ${input.ruleId} in space ${input.spaceId} - ${JSON.stringify({
           query: rule.query,
           filter: queryPayload.filter,
           params: queryPayload.params,
         })}`,
     });
 
-    return continueWith({ queryPayload });
+    return continueExecutionWith({ queryPayload });
   }
 }
