@@ -216,12 +216,10 @@ describe('TableActions', () => {
       const filterForProps = JSON.parse(
         screen.getByTestId('addFilterForValueButton-extension').innerHTML
       );
-      expect(filterForProps.disabled).toBe(false);
       expect(filterForProps.title).toBe('Filter for value');
       const filterOutProps = JSON.parse(
         screen.getByTestId('addFilterOutValueButton-extension').innerHTML
       );
-      expect(filterOutProps.disabled).toBe(false);
       expect(filterOutProps.title).toBe('Filter out value');
     });
 
@@ -241,16 +239,37 @@ describe('TableActions', () => {
         />
       ));
       render(<>{actions}</>);
+      expect(screen.queryByTestId('addFilterForValueButton-extension')).toBeNull();
+      expect(screen.queryByTestId('addFilterOutValueButton-extension')).toBeNull();
+    });
+
+    it('should allow filtering on multifields in ES|QL mode when on Dashboard', () => {
+      const actions = getFieldValueCellActions({
+        rows: getRows('extension', ['foo', 'bar']),
+        isEsqlMode: true,
+        hideFilteringOnComputedColumns: true,
+        toasts: toastsMock,
+        onFilter: jest.fn(),
+      }).map((Action, i) => (
+        <Action
+          key={i}
+          {...EuiCellParams}
+          Component={(props: any) => (
+            <div data-test-subj={props['data-test-subj']}>{JSON.stringify(props)}</div>
+          )}
+        />
+      ));
+      render(<>{actions}</>);
       const filterForProps = JSON.parse(
         screen.getByTestId('addFilterForValueButton-extension').innerHTML
       );
-      expect(filterForProps.disabled).toBe(true);
-      expect(filterForProps.title).toBe('Multivalue filtering is not supported in ES|QL');
+      expect(filterForProps.title).toBe('Filter for value');
       const filterOutProps = JSON.parse(
         screen.getByTestId('addFilterOutValueButton-extension').innerHTML
       );
-      expect(filterOutProps.disabled).toBe(true);
-      expect(filterOutProps.title).toBe('Multivalue filtering is not supported in ES|QL');
+      expect(filterOutProps.title).toBe('Filter out value');
     });
+
+    // TODO: Extend
   });
 });
