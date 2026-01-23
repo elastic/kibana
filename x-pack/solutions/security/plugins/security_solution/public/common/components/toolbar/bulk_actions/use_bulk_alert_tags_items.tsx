@@ -26,7 +26,7 @@ export interface UseBulkAlertTagsPanel {
 }
 
 export const useBulkAlertTagsItems = ({ refetch }: UseBulkAlertTagsItemsProps) => {
-  const { hasAlertsAll } = useAlertsPrivileges();
+  const { hasAlertsUpdate } = useAlertsPrivileges();
   const setAlertTags = useSetAlertTags();
   const handleOnAlertTagsSubmit = useCallback<BulkAlertTagsPanelComponentProps['onSubmit']>(
     async (tags, ids, onSuccess, setIsLoading) => {
@@ -39,7 +39,7 @@ export const useBulkAlertTagsItems = ({ refetch }: UseBulkAlertTagsItemsProps) =
 
   const alertTagsItems = useMemo(
     () =>
-      hasAlertsAll
+      hasAlertsUpdate
         ? [
             {
               key: 'manage-alert-tags',
@@ -51,7 +51,7 @@ export const useBulkAlertTagsItems = ({ refetch }: UseBulkAlertTagsItemsProps) =
             },
           ]
         : [],
-    [hasAlertsAll]
+    [hasAlertsUpdate]
   );
 
   const TitleContent = useMemo(
@@ -89,7 +89,7 @@ export const useBulkAlertTagsItems = ({ refetch }: UseBulkAlertTagsItemsProps) =
 
   const alertTagsPanels: UseBulkAlertTagsPanel[] = useMemo(
     () =>
-      hasAlertsAll
+      hasAlertsUpdate
         ? [
             {
               id: 1,
@@ -99,7 +99,7 @@ export const useBulkAlertTagsItems = ({ refetch }: UseBulkAlertTagsItemsProps) =
             },
           ]
         : [],
-    [TitleContent, hasAlertsAll, renderContent]
+    [TitleContent, hasAlertsUpdate, renderContent]
   );
 
   return useMemo(() => {

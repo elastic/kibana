@@ -79,7 +79,7 @@ export const useGroupTakeActionsItems = ({
   const {
     services: { telemetry },
   } = useKibana<StartServices>();
-  const { hasAlertsAll } = useAlertsPrivileges();
+  const { hasAlertsUpdate } = useAlertsPrivileges();
 
   const { promptAlertCloseConfirmation } = useAlertCloseInfoModal();
 
@@ -208,7 +208,7 @@ export const useGroupTakeActionsItems = ({
     ({ query, tableId, groupNumber, selectedGroup }) => {
       const actionItems: EuiContextMenuPanelItemDescriptor[] = [];
 
-      if (!hasAlertsAll || !showAlertStatusActions) {
+      if (!hasAlertsUpdate || !showAlertStatusActions) {
         return;
       }
 
@@ -337,7 +337,7 @@ export const useGroupTakeActionsItems = ({
       getAlertClosingReasonPanels,
       onClickUpdate,
       showAlertStatusActions,
-      hasAlertsAll,
+      hasAlertsUpdate,
     ]
   );
 };

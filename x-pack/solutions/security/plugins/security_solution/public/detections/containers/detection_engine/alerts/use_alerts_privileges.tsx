@@ -22,6 +22,7 @@ export interface AlertsPrivelegesState {
   hasIndexRead: boolean | null;
   hasAlertsRead: boolean;
   hasAlertsAll: boolean;
+  hasAlertsUpdate: boolean;
 }
 /**
  * Hook to get user privilege from
@@ -31,7 +32,7 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
   const {
     detectionEnginePrivileges: { error, result, loading },
     alertsPrivileges: {
-      alerts: { edit: hasAlertsAll, read: hasAlertsRead },
+      alerts: { edit: hasAlertsAll, read: hasAlertsRead, legacyUpdate: hasLegacyAlertsUpdate },
     },
   } = useUserPrivileges();
 
@@ -43,6 +44,7 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
   }, [result?.index]);
 
   const privileges = useMemo(() => {
+    const hasAlertsUpdate = hasAlertsAll || hasLegacyAlertsUpdate;
     if (error != null) {
       return {
         isAuthenticated: false,
@@ -54,6 +56,7 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
         hasIndexMaintenance: false,
         hasAlertsRead,
         hasAlertsAll,
+        hasAlertsUpdate,
       };
     }
 
@@ -76,6 +79,7 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
         // We do this to avoid doing this double wherever this hook is used.
         hasAlertsRead: hasAlertsRead && hasIndexRead,
         hasAlertsAll: hasAlertsAll && hasIndexWrite,
+        hasAlertsUpdate: hasAlertsUpdate && hasIndexWrite,
       };
     }
 
@@ -89,8 +93,9 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
       hasIndexMaintenance: null,
       hasAlertsRead: false,
       hasAlertsAll: false,
+      hasAlertsUpdate: false,
     };
-  }, [error, result, indexName, hasAlertsRead, hasAlertsAll]);
+  }, [error, result, indexName, hasAlertsRead, hasAlertsAll, hasLegacyAlertsUpdate]);
 
   return { loading: loading ?? false, ...privileges };
 };
