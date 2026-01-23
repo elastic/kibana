@@ -139,5 +139,37 @@ describe('observability_ai_assistant usage collector', () => {
         })
       );
     });
+
+    it('returns zeros when aggregations are missing (index does not exist)', async () => {
+      // Simulate what ES returns when index doesn't exist
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: { hits: [], total: { value: 0, relation: 'eq' } },
+        // No aggregations key - happens when wildcard matches no indices
+      });
+
+      // No aggregations key
+      mockEsClient.search.mockResolvedValueOnce({
+        hits: { hits: [], total: { value: 0, relation: 'eq' } },
+      });
+
+      const result = await collector.fetch(mockedFetchContext);
+
+      expect(result).toEqual({
+        knowledge_base: {
+          users_with_global_entries: 0,
+          users_with_global_entries_user_created: 0,
+          users_with_global_entries_assistant_created: 0,
+          users_with_private_entries: 0,
+          users_with_private_entries_user_created: 0,
+          users_with_private_entries_assistant_created: 0,
+          users_with_user_instructions: 0,
+        },
+        conversations: {
+          users_with_archived_conversations: 0,
+          users_with_private_conversations: 0,
+          users_with_shared_conversations: 0,
+        },
+      });
+    });
   });
 });
