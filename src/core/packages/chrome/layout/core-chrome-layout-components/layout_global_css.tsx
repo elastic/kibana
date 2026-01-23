@@ -46,7 +46,7 @@ export const LayoutGlobalCSS = () => {
     ${layoutVarName('header.height')}: ${headerHeight}px;
     ${layoutVarName('header.width')}: 100vw;
     ${layoutVarName('header.bottom')}: calc(
-      100vh - ${layoutVar('banner.height')} + ${layoutVar('header.height')}
+      100vh - ${layoutVar('banner.height')} - ${layoutVar('header.height')}
     );
   `;
 
@@ -108,7 +108,7 @@ export const LayoutGlobalCSS = () => {
     ${layoutVarName('application.topBar.width')}: ${layoutVar('application.width')};
     ${layoutVarName('application.topBar.right')}: ${layoutVar('application.right')};
     ${layoutVarName('application.topBar.bottom')}: calc(
-      ${layoutVar('application.top')} + ${layoutVar('application.topBar.height')}
+      100vh - ${layoutVar('application.top')} - ${layoutVar('application.topBar.height')}
     );
   `;
 
@@ -131,7 +131,7 @@ export const LayoutGlobalCSS = () => {
       ${layoutVar('application.top')} + ${layoutVar('application.topBar.height')}
     );
     ${layoutVarName('application.content.bottom')}: calc(
-      ${layoutVar('footer.height')} + ${layoutVar('application.bottomBar.height')}
+      ${layoutVar('application.bottom')} + ${layoutVar('application.bottomBar.height')}
     );
     ${layoutVarName('application.content.left')}: ${layoutVar('application.left')};
     ${layoutVarName('application.content.right')}: ${layoutVar('application.right')};
