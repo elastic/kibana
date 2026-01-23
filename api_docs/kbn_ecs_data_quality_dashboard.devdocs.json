@@ -14,6 +14,8 @@
           "(indexName: string) => string"
         ],
         "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/translations.ts",
+        "lineNumber": 59,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,6 +30,8 @@
               "string"
             ],
             "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/translations.ts",
+            "lineNumber": 59,
+            "columnNumber": 50,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -49,6 +53,8 @@
           "React.NamedExoticComponent<Props>"
         ],
         "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/index.tsx",
+        "lineNumber": 171,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -64,6 +70,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -83,6 +91,8 @@
           "(phase: string) => string"
         ],
         "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/utils/get_ilm_phase_description.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -97,6 +107,8 @@
               "string"
             ],
             "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/utils/get_ilm_phase_description.ts",
+            "lineNumber": 13,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -117,6 +129,8 @@
         "label": "DATA_QUALITY_DASHBOARD_CONVERSATION_ID",
         "description": [],
         "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/translations.ts",
+        "lineNumber": 293,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -129,6 +143,8 @@
         "label": "DATA_QUALITY_PROMPT_CONTEXT_PILL_TOOLTIP",
         "description": [],
         "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/translations.ts",
+        "lineNumber": 65,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -143,6 +159,8 @@
           "The subtitle displayed on the Data Quality dashboard"
         ],
         "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/translations.ts",
+        "lineNumber": 73,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -155,6 +173,8 @@
         "label": "DATA_QUALITY_SUGGESTED_USER_PROMPT",
         "description": [],
         "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/translations.ts",
+        "lineNumber": 80,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -170,6 +190,8 @@
           "\"https://www.elastic.co/guide/en/ecs/current/ecs-field-reference.html\""
         ],
         "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/constants.ts",
+        "lineNumber": 63,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -187,6 +209,8 @@
           "\"https://www.elastic.co/guide/en/ecs/current/ecs-reference.html\""
         ],
         "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/constants.ts",
+        "lineNumber": 67,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -201,6 +225,8 @@
           "The label displayed for the `ILM phase` combo box on the Data Quality dashboard"
         ],
         "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/translations.ts",
+        "lineNumber": 179,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -215,6 +241,8 @@
           "The tooltip for the `ILM phase` combo box on the Data Quality Dashboard"
         ],
         "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/translations.ts",
+        "lineNumber": 163,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -230,6 +258,8 @@
           "\"https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html\""
         ],
         "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/constants.ts",
+        "lineNumber": 68,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -244,6 +274,8 @@
           "The placeholder for the `ILM phase` combo box on the Data Quality Dashboard"
         ],
         "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/translations.ts",
+        "lineNumber": 215,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

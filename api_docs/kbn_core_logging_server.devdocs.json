@@ -22,6 +22,8 @@
           "\nConfiguration of a console appender"
         ],
         "path": "src/core/packages/logging/server/src/appenders/console.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -36,6 +38,8 @@
               "\"console\""
             ],
             "path": "src/core/packages/logging/server/src/appenders/console.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -52,6 +56,8 @@
               "JsonLayoutConfigType"
             ],
             "path": "src/core/packages/logging/server/src/appenders/console.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -68,6 +74,8 @@
           "\nConfiguration of a file appender"
         ],
         "path": "src/core/packages/logging/server/src/appenders/file.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -82,6 +90,8 @@
               "\"file\""
             ],
             "path": "src/core/packages/logging/server/src/appenders/file.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -98,6 +108,8 @@
               "JsonLayoutConfigType"
             ],
             "path": "src/core/packages/logging/server/src/appenders/file.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -109,6 +121,8 @@
             "label": "fileName",
             "description": [],
             "path": "src/core/packages/logging/server/src/appenders/file.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -125,6 +139,8 @@
           "\nConfiguration of a json layout"
         ],
         "path": "src/core/packages/logging/server/src/layout.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -139,6 +155,8 @@
               "\"json\""
             ],
             "path": "src/core/packages/logging/server/src/layout.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -155,6 +173,8 @@
           "\nDescribes the configuration of a given logger.\n"
         ],
         "path": "src/core/packages/logging/server/src/logger.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -169,6 +189,8 @@
               "string[]"
             ],
             "path": "src/core/packages/logging/server/src/logger.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -180,6 +202,8 @@
             "label": "name",
             "description": [],
             "path": "src/core/packages/logging/server/src/logger.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -194,6 +218,8 @@
               "\"info\" | \"error\" | \"off\" | \"all\" | \"trace\" | \"debug\" | \"warn\" | \"fatal\""
             ],
             "path": "src/core/packages/logging/server/src/logger.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -210,6 +236,8 @@
           "\nInput used to configure logging dynamically using {@link LoggingServiceSetup.configure}"
         ],
         "path": "src/core/packages/logging/server/src/contracts.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -228,6 +256,8 @@
               "> | undefined"
             ],
             "path": "src/core/packages/logging/server/src/contracts.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -243,6 +273,8 @@
               "[] | undefined"
             ],
             "path": "src/core/packages/logging/server/src/contracts.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -259,6 +291,8 @@
           "\nProvides APIs to plugins for customizing the plugin's logger."
         ],
         "path": "src/core/packages/logging/server/src/contracts.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -279,6 +313,8 @@
               ">) => void"
             ],
             "path": "src/core/packages/logging/server/src/contracts.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -296,6 +332,8 @@
                   ">"
                 ],
                 "path": "src/core/packages/logging/server/src/contracts.ts",
+                "lineNumber": 39,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -314,6 +352,8 @@
         "label": "MetaRewritePolicyConfig",
         "description": [],
         "path": "src/core/packages/logging/server/src/appenders/rewrite.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -328,6 +368,8 @@
               "\"meta\""
             ],
             "path": "src/core/packages/logging/server/src/appenders/rewrite.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -344,6 +386,8 @@
               "\"update\" | \"remove\""
             ],
             "path": "src/core/packages/logging/server/src/appenders/rewrite.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -361,6 +405,8 @@
               "[]"
             ],
             "path": "src/core/packages/logging/server/src/appenders/rewrite.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -375,6 +421,8 @@
         "label": "MetaRewritePolicyConfigProperty",
         "description": [],
         "path": "src/core/packages/logging/server/src/appenders/rewrite.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -386,6 +434,8 @@
             "label": "path",
             "description": [],
             "path": "src/core/packages/logging/server/src/appenders/rewrite.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -400,6 +450,8 @@
               "string | number | boolean | null | undefined"
             ],
             "path": "src/core/packages/logging/server/src/appenders/rewrite.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -414,6 +466,8 @@
         "label": "NumericRollingStrategyConfig",
         "description": [],
         "path": "src/core/packages/logging/server/src/appenders/rolling_file.ts",
+        "lineNumber": 85,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -428,6 +482,8 @@
               "\"numeric\""
             ],
             "path": "src/core/packages/logging/server/src/appenders/rolling_file.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -441,6 +497,8 @@
               "\nThe suffix pattern to apply when renaming a file. The suffix will be applied\nafter the `appender.fileName` file name, but before the file extension.\n\nMust include `%i`, as it is the value that will be converted to the file index\n"
             ],
             "path": "src/core/packages/logging/server/src/appenders/rolling_file.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -456,6 +514,8 @@
               "\nThe maximum number of files to keep. Once this number is reached, oldest\nfiles will be deleted. Defaults to `7`\n"
             ],
             "path": "src/core/packages/logging/server/src/appenders/rolling_file.ts",
+            "lineNumber": 111,
+            "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
             "references": [
@@ -502,6 +562,8 @@
           "\nConfiguration of a pattern layout"
         ],
         "path": "src/core/packages/logging/server/src/layout.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -516,6 +578,8 @@
               "\"pattern\""
             ],
             "path": "src/core/packages/logging/server/src/layout.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -530,6 +594,8 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/logging/server/src/layout.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -544,6 +610,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/logging/server/src/layout.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -558,6 +626,8 @@
         "label": "RetentionPolicyConfig",
         "description": [],
         "path": "src/core/packages/logging/server/src/appenders/rolling_file.ts",
+        "lineNumber": 120,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -572,6 +642,8 @@
               "number | undefined"
             ],
             "path": "src/core/packages/logging/server/src/appenders/rolling_file.ts",
+            "lineNumber": 121,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -593,6 +665,8 @@
               " | undefined"
             ],
             "path": "src/core/packages/logging/server/src/appenders/rolling_file.ts",
+            "lineNumber": 122,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -607,6 +681,8 @@
               "moment.Duration | undefined"
             ],
             "path": "src/core/packages/logging/server/src/appenders/rolling_file.ts",
+            "lineNumber": 123,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -623,6 +699,8 @@
           "\nConfiguration of a rewrite appender"
         ],
         "path": "src/core/packages/logging/server/src/appenders/rewrite.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -637,6 +715,8 @@
               "\"rewrite\""
             ],
             "path": "src/core/packages/logging/server/src/appenders/rewrite.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -653,6 +733,8 @@
               "string[]"
             ],
             "path": "src/core/packages/logging/server/src/appenders/rewrite.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -669,6 +751,8 @@
               "MetaRewritePolicyConfig"
             ],
             "path": "src/core/packages/logging/server/src/appenders/rewrite.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -685,6 +769,8 @@
           "\nConfiguration of a rolling-file appender"
         ],
         "path": "src/core/packages/logging/server/src/appenders/rolling_file.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -699,6 +785,8 @@
               "\"rolling-file\""
             ],
             "path": "src/core/packages/logging/server/src/appenders/rolling_file.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -717,6 +805,8 @@
               "JsonLayoutConfigType"
             ],
             "path": "src/core/packages/logging/server/src/appenders/rolling_file.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -730,6 +820,8 @@
               "\nThe absolute path of the file to write to."
             ],
             "path": "src/core/packages/logging/server/src/appenders/rolling_file.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -748,6 +840,8 @@
               "SizeLimitTriggeringPolicyConfig"
             ],
             "path": "src/core/packages/logging/server/src/appenders/rolling_file.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -764,6 +858,8 @@
               "NumericRollingStrategyConfig"
             ],
             "path": "src/core/packages/logging/server/src/appenders/rolling_file.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -781,6 +877,8 @@
               " | undefined"
             ],
             "path": "src/core/packages/logging/server/src/appenders/rolling_file.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -795,6 +893,8 @@
         "label": "SizeLimitTriggeringPolicyConfig",
         "description": [],
         "path": "src/core/packages/logging/server/src/appenders/rolling_file.ts",
+        "lineNumber": 51,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -809,6 +909,8 @@
               "\"size-limit\""
             ],
             "path": "src/core/packages/logging/server/src/appenders/rolling_file.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -831,6 +933,8 @@
               }
             ],
             "path": "src/core/packages/logging/server/src/appenders/rolling_file.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -845,6 +949,8 @@
         "label": "TimeIntervalTriggeringPolicyConfig",
         "description": [],
         "path": "src/core/packages/logging/server/src/appenders/rolling_file.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -859,6 +965,8 @@
               "\"time-interval\""
             ],
             "path": "src/core/packages/logging/server/src/appenders/rolling_file.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -875,6 +983,8 @@
               "moment.Duration"
             ],
             "path": "src/core/packages/logging/server/src/appenders/rolling_file.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -888,6 +998,8 @@
               "\nIndicates whether the interval should be adjusted to cause the next rollover to occur on the interval boundary.\n\nFor example, if the interval is `4h` and the current hour is 3 am then\nthe first rollover will occur at 4 am and then next ones will occur at 8 am, noon, 4pm, etc.\nThe default value is true."
             ],
             "path": "src/core/packages/logging/server/src/appenders/rolling_file.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -914,6 +1026,8 @@
           "RollingFileAppenderConfig"
         ],
         "path": "src/core/packages/logging/server/src/appenders/index.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -933,6 +1047,8 @@
           "JsonLayoutConfigType"
         ],
         "path": "src/core/packages/logging/server/src/layout.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -950,6 +1066,8 @@
           "MetaRewritePolicyConfig"
         ],
         "path": "src/core/packages/logging/server/src/appenders/rewrite.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -965,6 +1083,8 @@
           "NumericRollingStrategyConfig"
         ],
         "path": "src/core/packages/logging/server/src/appenders/rolling_file.ts",
+        "lineNumber": 83,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -984,6 +1104,8 @@
           "SizeLimitTriggeringPolicyConfig"
         ],
         "path": "src/core/packages/logging/server/src/appenders/rolling_file.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

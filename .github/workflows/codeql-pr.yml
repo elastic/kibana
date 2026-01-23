@@ -3,7 +3,7 @@ name: "CodeQL PR"
 on:
   pull_request:
     branches: [ "main" ]
-    types: [ opened, ready_for_review ]
+    types: [ opened, ready_for_review, synchronize ]
 
 jobs:
 
@@ -11,7 +11,7 @@ jobs:
     name: Test CodeQL queries
     runs-on: ubuntu-latest
     if: |
-      (contains(fromJSON('["MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.pull_request.author_association) 
+      (contains(fromJSON('["MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.pull_request.author_association)
         && toJSON(github.event.pull_request.labels) != '[]'
         && github.event.pull_request.user.type != 'Bot'
         && github.event.pull_request.draft == false
@@ -48,7 +48,7 @@ jobs:
     name: Analyze javascript
     runs-on: kibana
     if: |
-      (contains(fromJSON('["MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.pull_request.author_association) 
+      (contains(fromJSON('["MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.pull_request.author_association)
         && toJSON(github.event.pull_request.labels) != '[]'
         && github.event.pull_request.user.type != 'Bot'
         && github.event.pull_request.draft == false

@@ -16,6 +16,8 @@
           "<TSchema>) => React.JSX.Element[]"
         ],
         "path": "src/platform/packages/shared/response-ops/form-generator/src/form.tsx",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -31,6 +33,8 @@
               "<TSchema>"
             ],
             "path": "src/platform/packages/shared/response-ops/form-generator/src/form.tsx",
+            "lineNumber": 36,
+            "columnNumber": 80,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

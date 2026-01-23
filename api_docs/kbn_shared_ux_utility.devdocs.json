@@ -40,6 +40,8 @@
           ") => React.ForwardRefExoticComponent<React.PropsWithoutRef<React.ComponentPropsWithRef<TElement>> & React.RefAttributes<TRef>>"
         ],
         "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -54,6 +56,8 @@
               "Loader<TElement>"
             ],
             "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -75,6 +79,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -96,6 +102,8 @@
           "() => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/fallback.tsx",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -115,6 +123,8 @@
           "(element: HTMLElement | null | undefined, container?: HTMLElement | undefined) => HTMLAnchorElement | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/utils.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -129,6 +139,8 @@
               "HTMLElement | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/utils.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -144,6 +156,8 @@
               "HTMLElement | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/utils.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -172,6 +186,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/browser/platform.ts",
+        "lineNumber": 63,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -191,6 +207,8 @@
           "(event: React.MouseEvent<Element, MouseEvent>) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/utils.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -205,6 +223,8 @@
               "React.MouseEvent<Element, MouseEvent>"
             ],
             "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/utils.ts",
+            "lineNumber": 15,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -234,6 +254,8 @@
           "> & React.RefAttributes<R>>"
         ],
         "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/with_suspense.tsx",
+        "lineNumber": 33,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -250,6 +272,8 @@
               "React.ComponentType<P>"
             ],
             "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/with_suspense.tsx",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -267,6 +291,8 @@
               "React.ReactElement<any, string | React.JSXElementConstructor<any>> | null"
             ],
             "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/with_suspense.tsx",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -287,6 +313,8 @@
           "\nOptions for the lazy loaded component"
         ],
         "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -301,6 +329,8 @@
               "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -317,6 +347,8 @@
           "\nOptional services that the Suspense wrapper can use"
         ],
         "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/with_suspense.tsx",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -334,6 +366,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/with_suspense.tsx",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -353,6 +387,8 @@
           "\nChecks if the current platform is Linux."
         ],
         "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/browser/platform.ts",
+        "lineNumber": 58,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -367,6 +403,8 @@
           "\nChecks if the current platform is macOS."
         ],
         "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/browser/platform.ts",
+        "lineNumber": 48,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -381,6 +419,8 @@
           "\nChecks if the current platform is Windows."
         ],
         "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/browser/platform.ts",
+        "lineNumber": 53,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -396,6 +436,8 @@
           "\"other\" | \"windows\" | \"linux\" | \"mac\""
         ],
         "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/browser/platform.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

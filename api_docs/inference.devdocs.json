@@ -29,6 +29,8 @@
           }
         ],
         "path": "x-pack/platform/plugins/shared/inference/common/utils/get_default_connector.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -40,6 +42,8 @@
             "label": "{\n  connectors,\n}",
             "description": [],
             "path": "x-pack/platform/plugins/shared/inference/common/utils/get_default_connector.ts",
+            "lineNumber": 13,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -61,6 +65,8 @@
                   "[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/inference/common/utils/get_default_connector.ts",
+                "lineNumber": 14,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -83,6 +89,8 @@
       "label": "InferencePublicSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/inference/public/types.ts",
+      "lineNumber": 18,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -97,6 +105,8 @@
       "label": "InferencePublicStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/inference/public/types.ts",
+      "lineNumber": 20,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -127,6 +137,8 @@
             "<TOptions>"
           ],
           "path": "x-pack/platform/plugins/shared/inference/public/types.ts",
+          "lineNumber": 21,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -142,6 +154,8 @@
                 "TOptions"
               ],
               "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
+              "lineNumber": 78,
+              "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -178,6 +192,8 @@
             "<TId, TOutputSchema, TStream>"
           ],
           "path": "x-pack/platform/plugins/shared/inference/public/types.ts",
+          "lineNumber": 22,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -200,6 +216,8 @@
                 "<TId, TOutputSchema, TStream>"
               ],
               "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/output/api.ts",
+              "lineNumber": 58,
+              "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -224,6 +242,8 @@
             "[]>"
           ],
           "path": "x-pack/platform/plugins/shared/inference/public/types.ts",
+          "lineNumber": 23,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -244,6 +264,8 @@
         "label": "EsqlDocumentBase",
         "description": [],
         "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/doc_base/esql_doc_base.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -266,6 +288,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/doc_base/esql_doc_base.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -282,6 +306,8 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/doc_base/esql_doc_base.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -296,6 +322,8 @@
                   "EsqlDocData"
                 ],
                 "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/doc_base/esql_doc_base.ts",
+                "lineNumber": 25,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -315,6 +343,8 @@
               "EsqlPrompts"
             ],
             "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/doc_base/esql_doc_base.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -333,6 +363,8 @@
               "() => string"
             ],
             "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/doc_base/esql_doc_base.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
             "references": [
@@ -357,6 +389,8 @@
               ") => Record<string, string>"
             ],
             "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/doc_base/esql_doc_base.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -371,6 +405,8 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/doc_base/esql_doc_base.ts",
+                "lineNumber": 43,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -386,6 +422,8 @@
                   "GetDocsOptions"
                 ],
                 "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/doc_base/esql_doc_base.ts",
+                "lineNumber": 44,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -415,6 +453,8 @@
           "<TToolOptions>>"
         ],
         "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/task.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -430,6 +470,8 @@
               "<TToolOptions>"
             ],
             "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/task.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -491,6 +533,8 @@
           "<string>>>>"
         ],
         "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/task.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -524,6 +568,8 @@
               "<string>>>"
             ],
             "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/task.ts",
+            "lineNumber": 23,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -547,6 +593,8 @@
           ">"
         ],
         "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/validate_esql_query.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -558,6 +606,8 @@
             "label": "{\n  query,\n  client,\n}",
             "description": [],
             "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/validate_esql_query.ts",
+            "lineNumber": 27,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -569,6 +619,8 @@
                 "label": "query",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/validate_esql_query.ts",
+                "lineNumber": 28,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -660,7 +712,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "WriteResponseBase",
-                  ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
+                  ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
                   "default",
                   "; helpers: ",
                   "default",
@@ -1224,6 +1276,8 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<boolean>; }; profiling: ",
                   "default",
+                  "; project: ",
+                  "default",
                   "; putScript: { (this: That, params: ",
                   "PutScriptRequest",
                   ", options?: ",
@@ -1569,6 +1623,8 @@
                   "; }"
                 ],
                 "path": "x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/validate_esql_query.ts",
+                "lineNumber": 29,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1593,6 +1649,8 @@
         "\nSetup contract of the inference plugin."
       ],
       "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+      "lineNumber": 32,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -1609,6 +1667,8 @@
         "\nStart contract of the inference plugin, exposing APIs to interact with LLMs."
       ],
       "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+      "lineNumber": 68,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1644,6 +1704,8 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+          "lineNumber": 72,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1658,6 +1720,8 @@
                 "T"
               ],
               "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+              "lineNumber": 104,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1688,6 +1752,8 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+          "lineNumber": 107,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1702,6 +1768,8 @@
                 "CreateChatModelOptions"
               ],
               "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+              "lineNumber": 121,
+              "columnNumber": 18,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1732,6 +1800,8 @@
             "[]>"
           ],
           "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+          "lineNumber": 123,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1749,6 +1819,8 @@
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+              "lineNumber": 129,
+              "columnNumber": 22,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1781,6 +1853,8 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+          "lineNumber": 131,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1798,6 +1872,8 @@
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+              "lineNumber": 137,
+              "columnNumber": 25,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1832,6 +1908,8 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+          "lineNumber": 139,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1848,6 +1926,8 @@
                 "string"
               ],
               "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+              "lineNumber": 147,
+              "columnNumber": 22,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1866,6 +1946,8 @@
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
+              "lineNumber": 147,
+              "columnNumber": 34,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1896,6 +1978,8 @@
           "(query: string) => { input: string; output: string; isCorrection: boolean; }"
         ],
         "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/correct_esql_query.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1910,6 +1994,8 @@
               "string"
             ],
             "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/correct_esql_query.ts",
+            "lineNumber": 18,
+            "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1944,6 +2030,8 @@
           }
         ],
         "path": "x-pack/platform/plugins/shared/inference/common/output/create_output_api.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1964,6 +2052,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/inference/common/output/create_output_api.ts",
+            "lineNumber": 27,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2013,6 +2103,8 @@
           " | undefined>"
         ],
         "path": "x-pack/platform/plugins/shared/inference/common/output/create_output_api.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2033,6 +2125,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/inference/common/output/create_output_api.ts",
+            "lineNumber": 29,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2059,6 +2153,8 @@
           }
         ],
         "path": "x-pack/platform/plugins/shared/inference/common/rest/create_client.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2073,6 +2169,8 @@
               "RestOptions"
             ],
             "path": "x-pack/platform/plugins/shared/inference/common/rest/create_client.ts",
+            "lineNumber": 21,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2099,6 +2197,8 @@
           }
         ],
         "path": "x-pack/platform/plugins/shared/inference/common/rest/create_client.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2113,6 +2213,8 @@
               "BoundRestOptions"
             ],
             "path": "x-pack/platform/plugins/shared/inference/common/rest/create_client.ts",
+            "lineNumber": 22,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2147,6 +2249,8 @@
           }
         ],
         "path": "x-pack/platform/plugins/shared/inference/common/rest/create_client.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2161,6 +2265,8 @@
               "RestOptions | BoundRestOptions"
             ],
             "path": "x-pack/platform/plugins/shared/inference/common/rest/create_client.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2180,6 +2286,8 @@
           "() => string"
         ],
         "path": "x-pack/platform/plugins/shared/inference/common/utils/generate_fake_tool_call_id.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -2197,6 +2305,8 @@
           "(query: string) => { name: string | undefined; command: string; }[]"
         ],
         "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/non_ast/correct_common_esql_mistakes.ts",
+        "lineNumber": 86,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2211,6 +2321,8 @@
               "string"
             ],
             "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/non_ast/correct_common_esql_mistakes.ts",
+            "lineNumber": 86,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2229,6 +2341,8 @@
         "label": "GetConnectorsResponseBody",
         "description": [],
         "path": "x-pack/platform/plugins/shared/inference/common/http_apis.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2250,6 +2364,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/inference/common/http_apis.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2297,6 +2413,8 @@
           "<string>>"
         ],
         "path": "x-pack/platform/plugins/shared/inference/common/http_apis.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2339,6 +2457,8 @@
           "[] | undefined; input?: unknown; }"
         ],
         "path": "x-pack/platform/plugins/shared/inference/common/http_apis.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
