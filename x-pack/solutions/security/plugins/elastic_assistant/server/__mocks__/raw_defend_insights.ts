@@ -74,7 +74,7 @@ export const getParsedDefendInsightsMock = (timestamp: string): EsDefendInsightS
       model: 'anthropic.claude-3-5-sonnet-20240620-v1:0',
     },
     endpoint_ids: ['b557bb12-8206-44b6-b2a5-dbcce5b1e65e'],
-    insight_type: DefendInsightType.Enum.noisy_process_tree,
+    insight_type: DefendInsightType.Enum.incompatible_antivirus,
     insights: [
       {
         group: 'linux_security',

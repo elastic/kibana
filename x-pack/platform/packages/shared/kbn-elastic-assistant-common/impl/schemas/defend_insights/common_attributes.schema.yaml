@@ -29,8 +29,8 @@ components:
       type: string
       enum:
         - incompatible_antivirus
-        - noisy_process_tree
         - policy_response_failure
+        - custom
 
     DefendInsight:
       type: object
