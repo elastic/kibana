@@ -70,7 +70,7 @@ export const FieldList = ({
       sorting={true}
       noItemsMessage={message}
       data-test-subj={dataTestSubj}
-      tableCaption={i18n.translate('fieldList.tableCaption', {
+      tableCaption={i18n.translate('xpack.rollupJobs.fieldList.tableCaption', {
         defaultMessage: 'Available fields',
       })}
     />
