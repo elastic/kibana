@@ -90,3 +90,13 @@ export const DASHBOARD_TIME_RANGE = {
   from: 'Sep 22, 2015 @ 00:00:00.000',
   to: 'Sep 23, 2015 @ 00:00:00.000',
 };
+
+export const DASHBOARD_PANEL_GROUP_ORDER = [
+  'visualizationsGroup',
+  'controlsGroup',
+  'annotation-and-navigationGroup',
+  'mlGroup',
+  'observabilityGroup',
+  'legacyGroup',
+];
+export const DASHBOARD_PANEL_TYPE_COUNT = 24;

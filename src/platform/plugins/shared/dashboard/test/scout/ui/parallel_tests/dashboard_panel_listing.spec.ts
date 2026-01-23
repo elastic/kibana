@@ -8,16 +8,18 @@
  */
 
 import { spaceTest, expect, tags } from '@kbn/scout';
-
-const DASHBOARD_FIXTURES_PATH =
-  'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana';
+import {
+  DASHBOARD_DEFAULT_INDEX_TITLE,
+  DASHBOARD_PANEL_GROUP_ORDER,
+  DASHBOARD_SAVED_SEARCH_ARCHIVE,
+  DASHBOARD_PANEL_TYPE_COUNT,
+} from '../constants';
 
 spaceTest.describe('Dashboard panel listing', { tag: tags.ESS_ONLY }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
-    await scoutSpace.savedObjects.load(DASHBOARD_FIXTURES_PATH);
-    await scoutSpace.uiSettings.set({
-      defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
-    });
+    await scoutSpace.savedObjects.cleanStandardList();
+    await scoutSpace.savedObjects.load(DASHBOARD_SAVED_SEARCH_ARCHIVE);
+    await scoutSpace.uiSettings.setDefaultIndex(DASHBOARD_DEFAULT_INDEX_TITLE);
   });
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -30,62 +32,20 @@ spaceTest.describe('Dashboard panel listing', { tag: tags.ESS_ONLY }, () => {
     await scoutSpace.savedObjects.cleanStandardList();
   });
 
-  spaceTest(
-    'renders panel groups in predefined order with expected panel count',
-    async ({ page, pageObjects }) => {
-      await spaceTest.step('open new dashboard and add panel flyout', async () => {
-        await pageObjects.dashboard.openNewDashboard();
-        await pageObjects.dashboard.openAddPanelFlyout();
-      });
+  spaceTest('renders panel groups and panel count', async ({ pageObjects }) => {
+    await spaceTest.step('open new dashboard and add panel flyout', async () => {
+      await pageObjects.dashboard.openNewDashboard();
+      await pageObjects.dashboard.openAddPanelFlyout();
+    });
 
-      await spaceTest.step('verify panel groups are in correct order', async () => {
-        const panelSelectionList = page.testSubj.locator('dashboardPanelSelectionList');
+    await spaceTest.step('verify panel groups order', async () => {
+      const panelGroupOrder = await pageObjects.dashboard.getPanelGroupOrder();
+      expect(panelGroupOrder).toHaveLength(DASHBOARD_PANEL_GROUP_ORDER.length);
+      expect(panelGroupOrder).toStrictEqual(DASHBOARD_PANEL_GROUP_ORDER);
+    });
 
-        // Get all panel group elements
-        const panelGroups = await panelSelectionList
-          .locator('[data-test-subj*="dashboardEditorMenu-"]')
-          .all();
-
-        // Build array of [order, groupTitle] pairs
-        const panelGroupData = await Promise.all(
-          panelGroups.map(async (panelGroup) => {
-            const order = await panelGroup.getAttribute('data-group-sort-order');
-            const testSubj = await panelGroup.getAttribute('data-test-subj');
-            const match = testSubj?.match(/dashboardEditorMenu-(.*)/);
-            return { order, groupTitle: match?.[1] };
-          })
-        );
-
-        // Filter valid entries and build map
-        const panelGroupByOrder = new Map<string, string>();
-        panelGroupData
-          .filter((item): item is { order: string; groupTitle: string } =>
-            Boolean(item.order && item.groupTitle)
-          )
-          .forEach((item) => panelGroupByOrder.set(item.order, item.groupTitle));
-
-        expect(panelGroupByOrder.size).toBe(6);
-
-        // Verify groups are in the expected order
-        expect([...panelGroupByOrder.values()]).toStrictEqual([
-          'visualizationsGroup',
-          'controlsGroup',
-          'annotation-and-navigationGroup',
-          'mlGroup',
-          'observabilityGroup',
-          'legacyGroup',
-        ]);
-      });
-
-      await spaceTest.step('verify total panel count', async () => {
-        const panelSelectionList = page.testSubj.locator('dashboardPanelSelectionList');
-
-        // Count all panel type list items
-        const panelTypes = panelSelectionList.locator('li');
-
-        // Any changes to the number of panels needs to be audited by @elastic/kibana-presentation
-        await expect(panelTypes).toHaveCount(24);
-      });
-    }
-  );
+    await spaceTest.step('verify total panel count', async () => {
+      expect(await pageObjects.dashboard.getPanelTypeCount()).toBe(DASHBOARD_PANEL_TYPE_COUNT);
+    });
+  });
 });

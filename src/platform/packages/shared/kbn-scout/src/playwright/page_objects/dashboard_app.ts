@@ -433,6 +433,36 @@ export class DashboardApp {
     return Number(attribute);
   }
 
+  async getPanelGroupOrder(): Promise<string[]> {
+    const panelSelectionList = this.page.testSubj.locator('dashboardPanelSelectionList');
+    const panelGroups = await panelSelectionList
+      .locator('[data-test-subj*="dashboardEditorMenu-"]')
+      .all();
+
+    const panelGroupData = await Promise.all(
+      panelGroups.map(async (panelGroup) => {
+        const order = await panelGroup.getAttribute('data-group-sort-order');
+        const testSubj = await panelGroup.getAttribute('data-test-subj');
+        const match = testSubj?.match(/dashboardEditorMenu-(.*)/);
+        return { order, groupTitle: match?.[1] };
+      })
+    );
+
+    const panelGroupByOrder = new Map<string, string>();
+    panelGroupData
+      .filter((item): item is { order: string; groupTitle: string } =>
+        Boolean(item.order && item.groupTitle)
+      )
+      .forEach((item) => panelGroupByOrder.set(item.order, item.groupTitle));
+
+    return [...panelGroupByOrder.values()];
+  }
+
+  async getPanelTypeCount(): Promise<number> {
+    const panelSelectionList = this.page.testSubj.locator('dashboardPanelSelectionList');
+    return panelSelectionList.locator('li').count();
+  }
+
   /**
    * Waits for all dashboard panels to finish rendering.
    * Uses the data-render-complete attribute to determine completion.
