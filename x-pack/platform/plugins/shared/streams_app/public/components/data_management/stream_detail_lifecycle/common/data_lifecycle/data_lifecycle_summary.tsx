@@ -50,14 +50,14 @@ export const DataLifecycleSummary = ({
   const phaseColumnSpans = getPhaseColumnSpans(phases, timelineSegments);
 
   return (
-    <EuiPanel hasShadow={false} hasBorder grow>
+    <EuiPanel hasShadow={false} hasBorder grow paddingSize="s">
       <EuiFlexGroup
         direction="column"
         gutterSize="s"
         justifyContent="spaceBetween"
         css={{ height: '100%' }}
       >
-        <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s">
+        <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s" grow={false}>
           <EuiText>
             <h5 data-test-subj="dataLifecycleSummary-title">
               {i18n.translate('xpack.streams.streamDetailLifecycle.dataLifecycle', {
@@ -83,14 +83,12 @@ export const DataLifecycleSummary = ({
                   defaultMessage: 'Data phases',
                 })}
               </EuiText>
-              <EuiSpacer size="xs" />
               <LifecycleBar
                 phases={phases}
                 gridTemplateColumns={gridTemplateColumns}
                 phaseColumnSpans={phaseColumnSpans}
                 onPhaseClick={onPhaseClick}
               />
-              <EuiSpacer size="xs" />
               <DownsamplingBar
                 segments={downsamplingSegments}
                 gridTemplateColumns={gridTemplateColumns}

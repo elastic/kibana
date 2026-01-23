@@ -6,18 +6,33 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useEuiTheme } from '@elastic/eui';
+import { colorPalette, useEuiTheme } from '@elastic/eui';
 import { useMemo } from 'react';
 
 export const useIlmPhasesColorAndDescription = () => {
   const { euiTheme } = useEuiTheme();
+
+  const hotPalette = colorPalette(
+    [euiTheme.colors.severity.risk, euiTheme.colors.backgroundFilledRisk],
+    3
+  );
+
+  const coldPalette = colorPalette(
+    [euiTheme.colors.severity.neutral, euiTheme.colors.backgroundFilledNeutral],
+    6
+  );
+
+  const frozenPalette = colorPalette(
+    [euiTheme.colors.vis.euiColorVis3, euiTheme.colors.vis.euiColorVis2],
+    4
+  );
 
   return useMemo(
     () => ({
       ilmPhases: {
         hot: {
           color: euiTheme.colors.severity.risk,
-          hoverColor: euiTheme.colors.backgroundFilledRisk,
+          hoverColor: hotPalette[1],
           description: i18n.translate('xpack.streams.streamDetailLifecycle.hotPhaseDescription', {
             defaultMessage:
               'Use for data that is searched frequently and actively updated, optimized for indexing and search performance.',
@@ -33,7 +48,7 @@ export const useIlmPhasesColorAndDescription = () => {
         },
         cold: {
           color: euiTheme.colors.severity.neutral,
-          hoverColor: euiTheme.colors.backgroundFilledNeutral,
+          hoverColor: coldPalette[1],
           description: i18n.translate('xpack.streams.streamDetailLifecycle.coldPhaseDescription', {
             defaultMessage:
               'Use for infrequently searched, read-only data where cost savings are prioritized over performance.',
@@ -41,7 +56,7 @@ export const useIlmPhasesColorAndDescription = () => {
         },
         frozen: {
           color: euiTheme.colors.vis.euiColorVis3,
-          hoverColor: euiTheme.colors.vis.euiColorVis2,
+          hoverColor: frozenPalette[1],
           description: i18n.translate(
             'xpack.streams.streamDetailLifecycle.frozenPhaseDescription',
             {
@@ -52,7 +67,7 @@ export const useIlmPhasesColorAndDescription = () => {
         },
         delete: {
           color: euiTheme.colors.borderBasePlain,
-          hoverColor: euiTheme.colors.backgroundBaseFormsPrepend,
+          hoverColor: euiTheme.colors.backgroundLightText,
           description: i18n.translate(
             'xpack.streams.streamDetailLifecycle.deletePhaseDescription',
             {
@@ -62,6 +77,6 @@ export const useIlmPhasesColorAndDescription = () => {
         },
       },
     }),
-    [euiTheme]
+    [euiTheme, coldPalette, frozenPalette, hotPalette]
   );
 };

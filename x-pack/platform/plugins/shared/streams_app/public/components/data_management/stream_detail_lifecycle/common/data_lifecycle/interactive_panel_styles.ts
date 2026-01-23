@@ -40,7 +40,7 @@ export const getInteractivePanelStyles = ({
     borderRadius: euiTheme.border.radius.small,
     boxShadow: isPopoverOpen ? `inset 0 0 0 2px ${euiTheme.colors.shadow}` : 'none !important',
     transform: 'none !important',
-    transition: 'background-color 150ms ease-in-out',
+    transition: 'background-color 150ms ease-in-out !important',
     '&:hover': {
       backgroundColor: hoverColor,
       transform: 'none !important',

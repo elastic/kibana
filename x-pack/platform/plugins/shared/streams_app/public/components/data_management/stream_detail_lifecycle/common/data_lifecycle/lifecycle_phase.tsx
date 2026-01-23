@@ -98,7 +98,7 @@ export const LifecyclePhase = ({
         backgroundColor: phaseColor ?? euiTheme.colors.backgroundBaseSubdued,
         hoverBackgroundColor: phaseColorHover ?? phaseColor,
         isPopoverOpen,
-        minHeight: '50px',
+        minHeight: '48px',
         ...(isDelete
           ? {
               minWidth: '50px',
@@ -126,6 +126,12 @@ export const LifecyclePhase = ({
             size="xs"
             color={euiTheme.colors.plainDark}
             data-test-subj={`lifecyclePhase-${label}-name`}
+            style={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              maxWidth: '100%',
+            }}
           >
             <b>{capitalize(label)}</b>
           </EuiText>
@@ -134,6 +140,13 @@ export const LifecyclePhase = ({
               size="xs"
               color={euiTheme.colors.plainDark}
               data-test-subj={`lifecyclePhase-${label}-size`}
+              title={size}
+              style={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                maxWidth: '100%',
+              }}
             >
               {size}
             </EuiText>

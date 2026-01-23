@@ -105,14 +105,14 @@ export const DownsamplingBar = ({ segments, gridTemplateColumns }: DownsamplingB
           defaultMessage: 'Downsample steps',
         })}
       </EuiText>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="xs" />
       <EuiPanel
         hasShadow={false}
         hasBorder={false}
         paddingSize="xs"
         style={{
           backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-          borderRadius: euiTheme.border.radius.small,
+          borderRadius: '8px',
         }}
       >
         <EuiFlexGrid
@@ -244,6 +244,12 @@ const DownsamplingPhaseBar = ({
           size="xs"
           color={euiTheme.colors.plainDark}
           data-test-subj={`downsamplingPhase-${intervalLabel}-interval`}
+          style={{
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            maxWidth: '100%',
+          }}
         >
           <b>
             {downsample.fixed_interval}{' '}

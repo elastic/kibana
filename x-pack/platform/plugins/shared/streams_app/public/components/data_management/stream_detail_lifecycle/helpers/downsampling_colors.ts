@@ -8,9 +8,9 @@
 // Replace with colors from the palette when available https://github.com/elastic/kibana/issues/249185
 const DOWNSAMPLING_COLORS = [
   '#E2D3FE',
-  '#CEB6FC',
-  '#BF9CF9',
-  '#B084F5',
+  '#D1BAFC',
+  '#C5A5FA',
+  '#B386F9',
   '#A36DEF',
   '#925CDA',
   '#8144CC',

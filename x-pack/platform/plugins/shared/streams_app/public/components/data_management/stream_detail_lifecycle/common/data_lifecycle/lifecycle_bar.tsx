@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGrid, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import type { LifecyclePhase } from './data_lifecycle_summary';
 import { LifecyclePhase as LifecyclePhaseComponent } from './lifecycle_phase';
 
@@ -26,59 +26,62 @@ export const LifecycleBar = ({
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiPanel
-      hasShadow={false}
-      hasBorder={false}
-      paddingSize="xs"
-      css={{
-        backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-        borderRadius: euiTheme.border.radius.small,
-      }}
-    >
-      <EuiFlexGrid
-        columns={1}
-        gutterSize="none"
-        responsive={false}
+    <>
+      <EuiSpacer size="xs" />
+      <EuiPanel
+        hasShadow={false}
+        hasBorder={false}
+        paddingSize="xs"
         css={{
-          gridTemplateColumns,
-          paddingInline: euiTheme.size.xxs,
-          boxSizing: 'border-box',
+          backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+          borderRadius: '8px',
         }}
       >
-        {phases.map((phase, index) => (
-          <EuiFlexItem
-            key={index}
-            grow={phase.grow}
-            css={{
-              display: 'flex',
-              flexBasis: 0,
-              minWidth: 0,
-              gridColumn: `span ${phaseColumnSpans[index]}`,
-              paddingBlock: euiTheme.size.xxs,
-              paddingInline: euiTheme.size.xxs,
-              boxSizing: 'border-box',
-              justifyContent: 'center',
-            }}
-          >
-            <LifecyclePhaseComponent
-              color={phase.color}
-              label={phase.label}
-              size={phase.size}
-              isDelete={phase.isDelete}
-              onClick={() => {
-                onPhaseClick?.(phase, index);
+        <EuiFlexGrid
+          columns={1}
+          gutterSize="none"
+          responsive={false}
+          css={{
+            gridTemplateColumns,
+            paddingInline: euiTheme.size.xxs,
+            boxSizing: 'border-box',
+          }}
+        >
+          {phases.map((phase, index) => (
+            <EuiFlexItem
+              key={index}
+              grow={phase.grow}
+              css={{
+                display: 'flex',
+                flexBasis: 0,
+                minWidth: 0,
+                gridColumn: `span ${phaseColumnSpans[index]}`,
+                paddingBlock: euiTheme.size.xxs,
+                paddingInline: euiTheme.size.xxs,
+                boxSizing: 'border-box',
+                justifyContent: 'center',
               }}
-              phaseColorHover={phase.colorHover}
-              description={phase.description}
-              sizeInBytes={phase.sizeInBytes}
-              docsCount={phase.docsCount}
-              minAge={phase.min_age}
-              isReadOnly={phase.isReadOnly}
-              searchableSnapshot={phase.searchableSnapshot}
-            />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGrid>
-    </EuiPanel>
+            >
+              <LifecyclePhaseComponent
+                color={phase.color}
+                label={phase.label}
+                size={phase.size}
+                isDelete={phase.isDelete}
+                onClick={() => {
+                  onPhaseClick?.(phase, index);
+                }}
+                phaseColorHover={phase.colorHover}
+                description={phase.description}
+                sizeInBytes={phase.sizeInBytes}
+                docsCount={phase.docsCount}
+                minAge={phase.min_age}
+                isReadOnly={phase.isReadOnly}
+                searchableSnapshot={phase.searchableSnapshot}
+              />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGrid>
+      </EuiPanel>
+    </>
   );
 };
