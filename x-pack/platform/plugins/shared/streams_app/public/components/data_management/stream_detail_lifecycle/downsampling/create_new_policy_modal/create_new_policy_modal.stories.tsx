@@ -7,7 +7,7 @@
 
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiOverlayMask } from '@elastic/eui';
 import { CreatePolicyModal } from './create_new_policy_modal';
 
@@ -24,19 +24,20 @@ export const Default: Story = {
     policyNames: ['logs-default', 'metrics-prod', 'my-policy'],
   },
   render: (args) => {
-    const Story = () => {
-      action('policyNames')(args.policyNames);
-
+    const Story = ({ policyNames }: { policyNames: string[] }) => {
+      useEffect(() => {
+        action('policyNames')(policyNames);
+      }, [policyNames]);
       return (
         <EuiOverlayMask>
           <CreatePolicyModal
-            policyNames={args.policyNames ?? []}
+            policyNames={policyNames}
             onBack={action('onBack')}
             onSave={action('onSave')}
           />
         </EuiOverlayMask>
       );
     };
-    return <Story />;
+    return <Story policyNames={args.policyNames ?? []} />;
   },
 };
