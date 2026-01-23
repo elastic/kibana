@@ -291,6 +291,26 @@ function createNavTree({
               {
                 link: 'ml:dataVisualizer',
               },
+              {
+                link: 'ml:dataDrift',
+                sideNavStatus: 'hidden',
+              },
+              {
+                link: 'ml:dataDriftPage',
+                sideNavStatus: 'hidden',
+              },
+              {
+                link: 'ml:fileUpload',
+                sideNavStatus: 'hidden',
+              },
+              {
+                link: 'ml:indexDataVisualizer',
+                sideNavStatus: 'hidden',
+              },
+              {
+                link: 'ml:indexDataVisualizerPage',
+                sideNavStatus: 'hidden',
+              },
             ],
           },
           {
@@ -326,7 +346,7 @@ function createNavTree({
           {
             id: 'category-aiops_labs',
             title: i18n.translate('xpack.observability.obltNav.ml.aiops_labs', {
-              defaultMessage: 'AIOps labs',
+              defaultMessage: 'AIOps Labs',
             }),
             breadcrumbStatus: 'hidden',
             children: [
@@ -334,10 +354,22 @@ function createNavTree({
                 link: 'ml:logRateAnalysis',
               },
               {
+                link: 'ml:logRateAnalysisPage',
+                sideNavStatus: 'hidden',
+              },
+              {
                 link: 'ml:logPatternAnalysis',
               },
               {
+                link: 'ml:logPatternAnalysisPage',
+                sideNavStatus: 'hidden',
+              },
+              {
                 link: 'ml:changePointDetections',
+              },
+              {
+                link: 'ml:changePointDetectionsPage',
+                sideNavStatus: 'hidden',
               },
             ],
           },

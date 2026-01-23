@@ -7,6 +7,7 @@
 
 import { useCallback, useMemo, useState, useRef } from 'react';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
+import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useKibana } from './use_kibana';
@@ -17,6 +18,7 @@ export interface UseAddConnectorFlyoutOptions {
   onConnectorCreated?: (connector: ActionConnector) => void;
   dataSourceType?: string;
   suggestedName?: string;
+  icon?: IconType;
 }
 
 interface CreateDataConnectorPayload {
@@ -32,6 +34,7 @@ export const useAddConnectorFlyout = ({
   onConnectorCreated,
   dataSourceType,
   suggestedName,
+  icon,
 }: UseAddConnectorFlyoutOptions = {}) => {
   const {
     services: {
@@ -135,12 +138,12 @@ export const useAddConnectorFlyout = ({
 
       // Create data connector in the background using mutation
       createDataConnectorMutation.mutate({
-        name: suggestedName || connector.name, // Use suggested name for cloning, fallback to connector name
+        name: connector.name,
         stack_connector_id: connector.id,
         type: dataSourceType,
       });
     },
-    [dataSourceType, suggestedName, onConnectorCreated, closeFlyout, createDataConnectorMutation]
+    [dataSourceType, onConnectorCreated, closeFlyout, createDataConnectorMutation]
   );
 
   const flyout = useMemo(() => {
@@ -151,6 +154,7 @@ export const useAddConnectorFlyout = ({
     return triggersActionsUi.getAddConnectorFlyout({
       onClose: closeFlyout,
       onConnectorCreated: handleConnectorCreated,
+      ...(icon && { icon }),
       ...(selectedConnectorType && {
         initialConnector: {
           actionTypeId: selectedConnectorType,
@@ -162,6 +166,7 @@ export const useAddConnectorFlyout = ({
     isOpen,
     selectedConnectorType,
     suggestedName,
+    icon,
     closeFlyout,
     handleConnectorCreated,
     triggersActionsUi,

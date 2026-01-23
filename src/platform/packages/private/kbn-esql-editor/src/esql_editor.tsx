@@ -35,6 +35,7 @@ import {
   fixESQLQueryWithVariables,
   prettifyQuery,
   hasOnlySourceCommand,
+  getESQLAdHocDataview,
 } from '@kbn/esql-utils';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
@@ -46,6 +47,7 @@ import type {
   ESQLCallbacks,
   TelemetryQuerySubmittedProps,
 } from '@kbn/esql-types';
+import { KQL_TYPE_TO_KIND_MAP } from '@kbn/esql-types';
 import { FavoritesClient } from '@kbn/content-management-favorites-public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ILicense } from '@kbn/licensing-types';
@@ -53,6 +55,7 @@ import { ESQLLang, ESQL_LANG_ID, monaco } from '@kbn/monaco';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 import type { ComponentProps } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { QuerySource } from '@kbn/esql-types';
@@ -71,6 +74,8 @@ import { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
 import {
   clearCacheWhenOld,
   filterDataErrors,
+  filterDuplicatedWarnings,
+  filterOutWarningsOverlappingWithErrors,
   getEditorOverwrites,
   onKeyDownResizeHandler,
   onMouseDownResizeHandler,
@@ -78,6 +83,12 @@ import {
   parseWarning,
   useDebounceWithOptions,
 } from './helpers';
+import {
+  useInitLatencyTracking,
+  useInputLatencyTracking,
+  useSuggestionsLatencyTracking,
+  useValidationLatencyTracking,
+} from './use_latency_tracking';
 import { addQueriesToCache } from './history_local_storage';
 import { ResizableButton } from './resizable_button';
 import { useRestorableState, withRestorableState } from './restorable_state';
@@ -134,11 +145,14 @@ const ESQLEditorInternal = function ESQLEditor({
     new WeakMap<monaco.editor.IStandaloneCodeEditor, monaco.IDisposable[]>()
   );
 
+  const sessionIdRef = useRef<string>(uuidv4());
+  const interactionIdRef = useRef(0);
+
   const datePickerOpenStatusRef = useRef<boolean>(false);
   const isFirstFocusRef = useRef<boolean>(true);
   const theme = useEuiTheme();
   const kibana = useKibana<ESQLEditorDeps>();
-  const { application, core, fieldsMetadata, uiSettings, uiActions, data, usageCollection } =
+  const { application, core, fieldsMetadata, uiSettings, uiActions, data, usageCollection, kql } =
     kibana.services;
 
   const favoritesClient = useMemo(
@@ -226,6 +240,32 @@ const ESQLEditorInternal = function ESQLEditor({
     },
     [onTextLangQueryChange]
   );
+
+  const { onSuggestionsReady, resetSuggestionsTracking } = useSuggestionsLatencyTracking({
+    telemetryService,
+    sessionIdRef,
+    interactionIdRef,
+  });
+
+  const { trackInputLatencyOnKeystroke, reportInputLatency } = useInputLatencyTracking({
+    telemetryService,
+    sessionIdRef,
+    interactionIdRef,
+  });
+
+  const { trackValidationLatencyStart, trackValidationLatencyEnd, resetValidationTracking } =
+    useValidationLatencyTracking({
+      telemetryService,
+      sessionIdRef,
+      interactionIdRef,
+    });
+
+  const { reportInitLatency } = useInitLatencyTracking({ telemetryService, sessionIdRef });
+
+  const resetPendingTracking = useCallback(() => {
+    resetValidationTracking();
+    resetSuggestionsTracking();
+  }, [resetValidationTracking, resetSuggestionsTracking]);
 
   const onQuerySubmit = useCallback(
     (source: TelemetryQuerySubmittedProps['source']) => {
@@ -315,6 +355,11 @@ const ESQLEditorInternal = function ESQLEditor({
   useEffect(() => {
     if (!isLoading) setIsQueryLoading(false);
   }, [isLoading]);
+
+  // Measure keystroke to React commit by waiting for the code state update.
+  useEffect(() => {
+    reportInputLatency();
+  }, [code, reportInputLatency]);
 
   useEffect(() => {
     if (editorRef.current) {
@@ -568,8 +613,9 @@ const ESQLEditorInternal = function ESQLEditor({
         telemetryService.trackLookupJoinHoverActionShown(hoverMessage),
       onSuggestionsWithCustomCommandShown: (commands) =>
         telemetryService.trackSuggestionsWithCustomCommandShown(commands),
+      onSuggestionsReady,
     }),
-    [telemetryService]
+    [onSuggestionsReady, telemetryService]
   );
 
   const onClickQueryHistory = useCallback(
@@ -657,19 +703,49 @@ const ESQLEditorInternal = function ESQLEditor({
       },
       canCreateLookupIndex,
       isServerless: Boolean(kibana.services?.esql?.isServerless),
+      getKqlSuggestions: async (kqlQuery: string, cursorPositionInKql: number) => {
+        const hasQuerySuggestions = kql?.autocomplete?.hasQuerySuggestions('kuery');
+        if (!hasQuerySuggestions) {
+          return undefined;
+        }
+        const dataView = await getESQLAdHocDataview({
+          dataViewsService: data.dataViews,
+          query: minimalQueryRef.current,
+        });
+        const suggestions = await kql?.autocomplete.getQuerySuggestions({
+          language: 'kuery',
+          query: kqlQuery,
+          selectionStart: cursorPositionInKql,
+          selectionEnd: cursorPositionInKql,
+          indexPatterns: [dataView],
+        });
+        return (
+          suggestions?.map((suggestion) => {
+            return {
+              text: suggestion.text,
+              label: suggestion.text,
+              detail:
+                typeof suggestion.description === 'string' ? suggestion.description : undefined,
+              kind: KQL_TYPE_TO_KIND_MAP[suggestion.type] ?? 'Value',
+            };
+          }) ?? []
+        );
+      },
     };
     return callbacks;
   }, [
     fieldsMetadata,
     getJoinIndicesCallback,
-    kibana.services?.esql,
     canCreateLookupIndex,
+    kibana.services?.esql,
+    kql?.autocomplete,
     dataSourcesCache,
     memoizedSources,
     core,
     esqlFieldsCache,
     data.query.timefilter.timefilter,
     data.search.search,
+    data.dataViews,
     memoizedFieldsFromESQL,
     abortController.signal,
     variablesService?.esqlVariables,
@@ -777,18 +853,26 @@ const ESQLEditorInternal = function ESQLEditor({
         allWarnings = [...parserWarnings, ...externalErrorsParsedWarnings];
       }
 
+      const unerlinedWarnings = allWarnings.filter((warning) => warning.underlinedWarning);
+      const nonOverlappingWarnings = filterOutWarningsOverlappingWithErrors(
+        allErrors,
+        unerlinedWarnings
+      );
+
+      const underlinedMessages = [...allErrors, ...nonOverlappingWarnings];
       const markers = [];
 
-      if (allErrors.length) {
-        if (dataErrorsControl?.enabled === false) {
-          markers.push(...filterDataErrors(allErrors));
-        } else {
-          markers.push(...allErrors);
-        }
+      if (dataErrorsControl?.enabled === false) {
+        markers.push(...filterDataErrors(underlinedMessages));
+      } else {
+        markers.push(...underlinedMessages);
       }
 
+      trackValidationLatencyEnd(active);
+
       if (active) {
-        setEditorMessages({ errors: allErrors, warnings: allWarnings });
+        const uniqueWarnings = filterDuplicatedWarnings(allWarnings);
+        setEditorMessages({ errors: allErrors, warnings: uniqueWarnings });
         monaco.editor.setModelMarkers(
           editorModel.current,
           'Unified search',
@@ -806,6 +890,7 @@ const ESQLEditorInternal = function ESQLEditor({
       serverWarning,
       dataErrorsControl?.enabled,
       mergeExternalMessages,
+      trackValidationLatencyEnd,
     ]
   );
 
@@ -849,7 +934,11 @@ const ESQLEditorInternal = function ESQLEditor({
     async () => {
       if (!editorModel.current) return;
       const subscription = { active: true };
+      trackValidationLatencyStart(code);
+
       if (code === codeWhenSubmitted && (serverErrors || serverWarning)) {
+        resetValidationTracking();
+
         const parsedErrors = parseErrors(serverErrors || [], code);
         const parsedWarning = serverWarning ? parseWarning(serverWarning) : [];
         setEditorMessages({
@@ -923,12 +1012,14 @@ const ESQLEditorInternal = function ESQLEditor({
         }
       }
 
+      resetPendingTracking();
+
       editorModel.current?.dispose();
       editorRef.current?.dispose();
       editorModel.current = undefined;
       editorRef.current = undefined;
     };
-  }, []);
+  }, [resetPendingTracking]);
 
   // When the layout changes, and the editor is not focused, we want to
   // recalculate the visible code so it fills up the available space. We
@@ -1108,6 +1199,9 @@ const ESQLEditorInternal = function ESQLEditor({
                   onFocus={() => setLabelInFocus(true)}
                   onBlur={() => setLabelInFocus(false)}
                   editorDidMount={async (editor) => {
+                    // Track editor init time once per mount
+                    reportInitLatency();
+
                     editorRef.current = editor;
                     const model = editor.getModel();
                     if (model) {
@@ -1186,6 +1280,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     });
 
                     editor.onDidChangeModelContent(async () => {
+                      trackInputLatencyOnKeystroke(editor.getValue() ?? '');
                       await addLookupIndicesDecorator();
                       maybeTriggerSuggestions();
                     });
@@ -1229,7 +1324,6 @@ const ESQLEditorInternal = function ESQLEditor({
           query={code}
           isSpaceReduced={Boolean(editorIsInline) || measuredEditorWidth < BREAKPOINT_WIDTH}
           isVisible={isVisorOpen}
-          onClose={() => setIsVisorOpen(false)}
           onUpdateAndSubmitQuery={(newQuery) =>
             onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH)
           }
