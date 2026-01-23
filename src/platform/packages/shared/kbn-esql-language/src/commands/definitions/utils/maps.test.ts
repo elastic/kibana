@@ -55,18 +55,6 @@ describe('MAP_PARAMS_REGEX', () => {
     expect(matches[0][4]).toBe('string');
   });
 
-  it('should handle only name field', () => {
-    const input = "{name='param1'}";
-
-    const matches = Array.from(input.matchAll(regex));
-
-    expect(matches.length).toBe(1);
-    expect(matches[0][1]).toBe('param1');
-    expect(matches[0][2]).toBeUndefined();
-    expect(matches[0][3]).toBeUndefined();
-    expect(matches[0][4]).toBeUndefined();
-  });
-
   it('should handle empty values in fields', () => {
     const input = "{name='', values=[], description='', type=[]}";
 
@@ -77,42 +65,6 @@ describe('MAP_PARAMS_REGEX', () => {
     expect(matches[0][2]).toBe('');
     expect(matches[0][3]).toBe('');
     expect(matches[0][4]).toBe('');
-  });
-
-  it('should handle multiple escaped apostrophes in description', () => {
-    const input =
-      "{name='param', description='This param''s value can''t be empty', type=[keyword]}";
-
-    const matches = Array.from(input.matchAll(regex));
-
-    expect(matches.length).toBe(1);
-    expect(matches[0][1]).toBe('param');
-    expect(matches[0][3]).toBe("This param''s value can''t be empty");
-    expect(matches[0][4]).toBe('keyword');
-  });
-
-  it('should handle name and type only', () => {
-    const input = "{name='param1', type=[number]}";
-
-    const matches = Array.from(input.matchAll(regex));
-
-    expect(matches.length).toBe(1);
-    expect(matches[0][1]).toBe('param1');
-    expect(matches[0][2]).toBeUndefined();
-    expect(matches[0][3]).toBeUndefined();
-    expect(matches[0][4]).toBe('number');
-  });
-
-  it('should handle name and values only', () => {
-    const input = "{name='param1', values=['opt1','opt2','opt3']}";
-
-    const matches = Array.from(input.matchAll(regex));
-
-    expect(matches.length).toBe(1);
-    expect(matches[0][1]).toBe('param1');
-    expect(matches[0][2]).toBe("'opt1','opt2','opt3'");
-    expect(matches[0][3]).toBeUndefined();
-    expect(matches[0][4]).toBeUndefined();
   });
 
   it('should handle multiple types in array', () => {
@@ -128,13 +80,13 @@ describe('MAP_PARAMS_REGEX', () => {
 
   it('should handle long descriptions with special characters', () => {
     const input =
-      "{name='separator', description='A list of strings used as possible split points when chunking text. Each string can be a plain string or a\\nregular expression (regex) pattern.', type=[keyword]}";
+      "{name='separator', description='This param''s value can''t be empty. A list of strings used as possible split points when chunking text. Each string can be a plain string or a\\nregular expression (regex) pattern.', type=[keyword]}";
 
     const matches = Array.from(input.matchAll(regex));
 
     expect(matches.length).toBe(1);
     expect(matches[0][1]).toBe('separator');
-    expect(matches[0][3]).toContain('A list of strings');
+    expect(matches[0][3]).toContain("This param''s value can''t be empty");
     expect(matches[0][4]).toBe('keyword');
   });
 

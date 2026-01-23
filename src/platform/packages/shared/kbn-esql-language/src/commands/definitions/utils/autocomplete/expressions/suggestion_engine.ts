@@ -221,12 +221,12 @@ function getMapExpressionSuggestions(innerText: string): ISuggestionItem[] | nul
     return null;
   }
 
-  const parsedParamters = parseMapParams(mapParamsStr);
-  if (Object.keys(parsedParamters).length === 0) {
+  const parsedParameters = parseMapParams(mapParamsStr);
+  if (Object.keys(parsedParameters).length === 0) {
     return null;
   }
 
-  const availableParameters = Object.entries(parsedParamters).reduce<MapParameters>(
+  const availableParameters = Object.entries(parsedParameters).reduce<MapParameters>(
     (acc, [paramName, paramDef]) => {
       acc[paramName] = {
         ...paramDef,
