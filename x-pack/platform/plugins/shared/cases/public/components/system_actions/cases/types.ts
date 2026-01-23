@@ -11,6 +11,7 @@ export interface CasesSubActionParamsUI {
   groupingBy: string[];
   templateId?: string;
   autoPushCase?: boolean;
+  maximumCasesToOpen?: number;
 }
 export interface CasesActionParams {
   subAction: string;
