@@ -8,6 +8,7 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { UISession } from '../../../types';
@@ -38,12 +39,14 @@ export const createInspectActionDescriptor = (
       />,
       {
         id: `inspect-background-search-${uiSession.id}`,
+        title: i18n.translate('data.sessions.management.backgroundSearchFlyoutTitle', {
+          defaultMessage: 'Inspect background search',
+        }),
         size: 'm',
         session: 'inherit',
         type: 'overlay',
         ownFocus: true,
         outsideClickCloses: true,
-        'aria-labelledby': 'inspectBackgroundSearchFlyoutTitle',
       }
     );
     await overlay.onClose;

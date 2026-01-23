@@ -7,20 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlyoutBody, EuiSpacer, EuiText, type UseEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { CodeEditor } from '@kbn/code-editor';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { UISession } from '../../types';
 
 interface InspectFlyoutProps {
@@ -28,15 +22,11 @@ interface InspectFlyoutProps {
 }
 
 export const InspectFlyout: React.FC<InspectFlyoutProps> = ({ searchSession }) => {
-  const { euiTheme } = useEuiTheme();
+  const styles = useMemoCss(componentStyles);
 
   const renderInfo = () => {
     return (
-      <div
-        css={css({
-          height: `calc(100% - ${euiTheme.size.l})`,
-        })}
-      >
+      <div css={styles.jsonCodeEditor}>
         <CodeEditor
           languageId="json"
           value={JSON.stringify(searchSession, null, 2)}
@@ -58,32 +48,20 @@ export const InspectFlyout: React.FC<InspectFlyoutProps> = ({ searchSession }) =
   };
 
   return (
-    <>
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2 id="inspectBackgroundSearchFlyoutTitle">
+    <EuiFlyoutBody css={styles.flyout} data-test-subj="searchSessionsFlyout">
+      <EuiText>
+        <EuiText size="xs">
+          <p>
             <FormattedMessage
-              id="data.sessions.management.backgroundSearchFlyoutTitle"
-              defaultMessage="Inspect background search"
+              id="data.sessions.management.backgroundSearchFlyoutText"
+              defaultMessage="Configuration for this background search"
             />
-          </h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody css={styles.flyout} data-test-subj="searchSessionsFlyout">
-        <EuiText>
-          <EuiText size="xs">
-            <p>
-              <FormattedMessage
-                id="data.sessions.management.backgroundSearchFlyoutText"
-                defaultMessage="Configuration for this background search"
-              />
-            </p>
-          </EuiText>
-          <EuiSpacer />
-          {renderInfo()}
+          </p>
         </EuiText>
-      </EuiFlyoutBody>
-    </>
+        <EuiSpacer />
+        {renderInfo()}
+      </EuiText>
+    </EuiFlyoutBody>
   );
 };
 
@@ -113,7 +91,7 @@ export const InspectFlyoutWrapper: React.FC<InspectFlyoutWrapperProps> = ({
   );
 };
 
-const styles = {
+const componentStyles = {
   flyout: css({
     '.euiFlyoutBody__overflowContent': {
       height: '100%',
@@ -123,4 +101,8 @@ const styles = {
       },
     },
   }),
+  jsonCodeEditor: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      height: `calc(100% - ${euiTheme.size.l})`,
+    }),
 };
