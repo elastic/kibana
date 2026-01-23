@@ -15,8 +15,6 @@ source .buildkite/scripts/common/util.sh
 # setup/sync actions in the future, we will need to remove or conditionally set this variable.
 export MOON_NO_ACTIONS=true
 
-export MOON_CACHE=off
-
 # Set up general-purpose tokens and credentials
 {
   BUILDKITE_TOKEN="$(vault_get buildkite-ci buildkite_token_all_jobs)"
