@@ -114,4 +114,28 @@ describe('OpenAlertsPopover', () => {
       expect(findTestSubject(component, 'discoverManageAlertsButton').exists()).toBeTruthy();
     });
   });
+
+  describe('Manage rules and connectors link', () => {
+    it('should link to the unified rules page when rules app is registered', () => {
+      (discoverServiceMock.application.isAppRegistered as jest.Mock).mockReturnValue(true);
+      (discoverServiceMock.application.getUrlForApp as jest.Mock).mockImplementation(
+        (appId: string) => `/app/${appId}`
+      );
+      const component = mount();
+      const manageButton = findTestSubject(component, 'discoverManageAlertsButton');
+      expect(manageButton.prop('href')).toContain('/app/rules');
+    });
+
+    it('should link to the management page when rules app is not registered', () => {
+      (discoverServiceMock.application.isAppRegistered as jest.Mock).mockReturnValue(false);
+      (discoverServiceMock.application.getUrlForApp as jest.Mock).mockImplementation(
+        (appId: string) => `/app/${appId}`
+      );
+      const component = mount();
+      const manageButton = findTestSubject(component, 'discoverManageAlertsButton');
+      expect(manageButton.prop('href')).toContain(
+        '/app/management/insightsAndAlerting/triggersActions/rules'
+      );
+    });
+  });
 });

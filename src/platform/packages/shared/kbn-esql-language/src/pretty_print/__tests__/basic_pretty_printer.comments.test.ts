@@ -182,6 +182,18 @@ describe('map expression', () => {
   test('comments around multiple map fields', () => {
     assertPrint('ROW F(0, /*1*/ {/*2*/ "a": /*3*/ "b" /*4*/, /*5*/ "c": /*6*/ "d" /*7*/} /*8*/)');
   });
+
+  describe('representation: assignment', () => {
+    test('one entry', () => {
+      assertPrint('PROMQL /*0*/ index /*1*/ = /*2*/ my_index /*3*/ bytes[5m]');
+    });
+
+    test('two entries', () => {
+      assertPrint(
+        'PROMQL /*0*/ index /*1*/ = /*2*/ my_index /*3*/ /*4*/ a /*5*/ = /*6*/ b /*7*/ bytes[5m]'
+      );
+    });
+  });
 });
 
 describe('binary expressions', () => {
