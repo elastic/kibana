@@ -1444,7 +1444,7 @@
           "(feature: any) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-        "lineNumber": 51,
+        "lineNumber": 53,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1460,7 +1460,7 @@
               "any"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-            "lineNumber": 51,
+            "lineNumber": 53,
             "columnNumber": 27,
             "deprecated": false,
             "trackAdoption": false,
@@ -2069,7 +2069,7 @@
         "label": "DocumentsMetrics",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/processing_simulation.ts",
-        "lineNumber": 71,
+        "lineNumber": 74,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2082,7 +2082,7 @@
             "label": "failed_rate",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/processing_simulation.ts",
-            "lineNumber": 72,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2095,7 +2095,7 @@
             "label": "partially_parsed_rate",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/processing_simulation.ts",
-            "lineNumber": 73,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2108,7 +2108,7 @@
             "label": "skipped_rate",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/processing_simulation.ts",
-            "lineNumber": 74,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2121,7 +2121,7 @@
             "label": "parsed_rate",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/processing_simulation.ts",
-            "lineNumber": 75,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2134,7 +2134,7 @@
             "label": "dropped_rate",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/processing_simulation.ts",
-            "lineNumber": 76,
+            "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2257,7 +2257,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"active\" | \"stale\" | \"expired\""
+              "\"active\" | \"expired\" | \"stale\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
             "lineNumber": 28,
@@ -2274,6 +2274,22 @@
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
             "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.Feature.expires_at",
+            "type": "string",
+            "tags": [],
+            "label": "expires_at",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3132,13 +3148,58 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.InsightsResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "InsightsResult",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/insights/index.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.InsightsResult.summary",
+            "type": "string",
+            "tags": [],
+            "label": "summary",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/insights/index.ts",
+            "lineNumber": 9,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.InsightsResult.tokenUsage",
+            "type": "Object",
+            "tags": [],
+            "label": "tokenUsage",
+            "description": [],
+            "signature": [
+              "{ prompt: number; completion: number; cached: number; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/insights/index.ts",
+            "lineNumber": 10,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.ProcessingSimulationResponse",
         "type": "Interface",
         "tags": [],
         "label": "ProcessingSimulationResponse",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/processing_simulation.ts",
-        "lineNumber": 79,
+        "lineNumber": 82,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3186,7 +3247,7 @@
               " & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; alias_for?: string | undefined; } & { name: string; esType?: string | undefined; suggestedType?: string | undefined; }) | ({ type: \"system\"; } & { from: string; alias_for?: string | undefined; } & { name: string; esType?: string | undefined; suggestedType?: string | undefined; }))[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/processing_simulation.ts",
-            "lineNumber": 80,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3209,7 +3270,7 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/processing_simulation.ts",
-            "lineNumber": 81,
+            "lineNumber": 84,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3233,7 +3294,7 @@
               "; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/processing_simulation.ts",
-            "lineNumber": 82,
+            "lineNumber": 85,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3256,7 +3317,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/processing_simulation.ts",
-            "lineNumber": 83,
+            "lineNumber": 86,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3278,7 +3339,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/processing_simulation.ts",
-            "lineNumber": 84,
+            "lineNumber": 87,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3294,7 +3355,7 @@
         "label": "ProcessorMetrics",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/processing_simulation.ts",
-        "lineNumber": 52,
+        "lineNumber": 55,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3310,7 +3371,7 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/processing_simulation.ts",
-            "lineNumber": 53,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3333,7 +3394,7 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/processing_simulation.ts",
-            "lineNumber": 54,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3346,7 +3407,7 @@
             "label": "failed_rate",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/processing_simulation.ts",
-            "lineNumber": 55,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3359,7 +3420,7 @@
             "label": "skipped_rate",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/processing_simulation.ts",
-            "lineNumber": 56,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3372,7 +3433,7 @@
             "label": "parsed_rate",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/processing_simulation.ts",
-            "lineNumber": 57,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3385,7 +3446,7 @@
             "label": "dropped_rate",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/processing_simulation.ts",
-            "lineNumber": 58,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3618,7 +3679,7 @@
         "label": "SimulationDocReport",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/processing_simulation.ts",
-        "lineNumber": 44,
+        "lineNumber": 47,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3634,7 +3695,7 @@
               "{ processor_id: string; name: string; }[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/processing_simulation.ts",
-            "lineNumber": 45,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3657,7 +3718,7 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/processing_simulation.ts",
-            "lineNumber": 46,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3673,7 +3734,7 @@
               "\"skipped\" | \"failed\" | \"dropped\" | \"parsed\" | \"partially_parsed\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/processing_simulation.ts",
-            "lineNumber": 47,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3689,7 +3750,7 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/processing_simulation.ts",
-            "lineNumber": 48,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3717,7 +3778,7 @@
               "[]; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/processing_simulation.ts",
-            "lineNumber": 49,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4062,7 +4123,7 @@
           " & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; alias_for?: string | undefined; } & { name: string; esType?: string | undefined; suggestedType?: string | undefined; }) | ({ type: \"system\"; } & { from: string; alias_for?: string | undefined; } & { name: string; esType?: string | undefined; suggestedType?: string | undefined; })"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/processing_simulation.ts",
-        "lineNumber": 61,
+        "lineNumber": 64,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4079,7 +4140,7 @@
           "\"skipped\" | \"failed\" | \"dropped\" | \"parsed\" | \"partially_parsed\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/processing_simulation.ts",
-        "lineNumber": 42,
+        "lineNumber": 45,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4151,7 +4212,7 @@
         "label": "FeatureStatus",
         "description": [],
         "signature": [
-          "\"active\" | \"stale\" | \"expired\""
+          "\"active\" | \"expired\" | \"stale\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
         "lineNumber": 11,
@@ -4680,7 +4741,7 @@
             "section": "def-common.BaseSimulationError",
             "text": "BaseSimulationError"
           },
-          " & ({ type: \"field_mapping_failure\"; } | { type: \"generic_processor_failure\"; processor_id: string; } | { type: \"generic_simulation_failure\"; processor_id?: string | undefined; } | { type: \"ignored_fields_failure\"; ignored_fields: Record<string, string>[]; } | { type: \"non_namespaced_fields_failure\"; processor_id: string; } | { type: \"reserved_field_failure\"; processor_id: string; })"
+          " & ({ type: \"field_mapping_failure\"; } | { type: \"generic_processor_failure\"; processor_id: string; } | { type: \"generic_simulation_failure\"; processor_id?: string | undefined; } | { type: \"ignored_fields_failure\"; ignored_fields: Record<string, string>[]; } | { type: \"non_namespaced_fields_failure\"; processor_id: string; } | { type: \"reserved_field_failure\"; processor_id: string; } | { type: \"validation_error\"; })"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/processing_simulation.ts",
         "lineNumber": 15,
@@ -4805,7 +4866,7 @@
           "TObj & { name: string; esType?: string | undefined; suggestedType?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/processing_simulation.ts",
-        "lineNumber": 65,
+        "lineNumber": 68,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4843,7 +4904,7 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-        "lineNumber": 32,
+        "lineNumber": 33,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4955,7 +5016,7 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-        "lineNumber": 43,
+        "lineNumber": 44,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
