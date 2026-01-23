@@ -79,8 +79,9 @@ export const FullScreenWaterfall = ({
    * we can replace this workaround with a direct ref usage.
    */
   const embeddableContainerRef = useCallback((node: HTMLDivElement | null) => {
-    const scrollContainer = node?.closest(`.${EUI_FLYOUT_BODY_OVERFLOW_CLASS}`) ?? null;
-    setScrollElement(scrollContainer);
+    if (node) {
+      setScrollElement(node.closest(`.${EUI_FLYOUT_BODY_OVERFLOW_CLASS}`) ?? null);
+    }
   }, []);
 
   const getParentApi = useCallback(() => {
