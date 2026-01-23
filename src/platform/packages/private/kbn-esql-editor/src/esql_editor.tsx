@@ -91,7 +91,7 @@ import {
 } from './use_latency_tracking';
 import { addQueriesToCache } from './history_local_storage';
 import { ResizableButton } from './resizable_button';
-import { useRestorableState, withRestorableState } from './restorable_state';
+import { useRestorableRef, useRestorableState, withRestorableState } from './restorable_state';
 import { getHistoryItems } from './history_local_storage';
 import type { StarredQueryMetadata } from './editor_footer/esql_starred_queries_service';
 import type { ESQLEditorDeps, ESQLEditorProps as ESQLEditorPropsInternal } from './types';
@@ -203,13 +203,13 @@ const ESQLEditorInternal = function ESQLEditor({
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
-  const [isVisorOpen, setIsVisorOpen] = useState(false);
+  const [isVisorOpen, setIsVisorOpen] = useRestorableState('isVisorOpen', false);
 
   // Refs for dynamic dependencies that commands need to access
   const esqlVariablesRef = useRef(esqlVariables);
   const controlsContextRef = useRef(controlsContext);
   const isVisorOpenRef = useRef(isVisorOpen);
-  const hasOpenedVisorOnMount = useRef(false);
+  const hasOpenedVisorOnMount = useRestorableRef('hasOpenedVisorOnMount', false);
 
   // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
@@ -231,14 +231,14 @@ const ESQLEditorInternal = function ESQLEditor({
       setIsVisorOpen(true);
       hasOpenedVisorOnMount.current = true;
     }
-  }, [code, openVisorOnSourceCommands]);
+  }, [code, hasOpenedVisorOnMount, openVisorOnSourceCommands, setIsVisorOpen]);
 
   const onQueryUpdate = useCallback(
     (value: string) => {
       onTextLangQueryChange({ esql: value } as AggregateQuery);
       setIsVisorOpen(false);
     },
-    [onTextLangQueryChange]
+    [onTextLangQueryChange, setIsVisorOpen]
   );
 
   const { onSuggestionsReady, resetSuggestionsTracking } = useSuggestionsLatencyTracking({
@@ -896,7 +896,7 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const toggleVisor = useCallback(() => {
     setIsVisorOpen(!isVisorOpenRef.current);
-  }, []);
+  }, [setIsVisorOpen]);
 
   const onLookupIndexCreate = useCallback(
     async (resultQuery: string) => {
