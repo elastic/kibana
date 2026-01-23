@@ -77,7 +77,7 @@ export function getValueColumns(config: DatatableStateESQL) {
     ...(config.rows ?? []).map((row, index) => ({
       ...getValueColumn(getAccessorName(ROW_ACCESSOR_PREFIX, index), row.column),
       meta: {
-        type: 'unknown',
+        type: 'unknown' as const,
       },
     })),
     ...(config.split_metrics_by ?? []).map((splitBy, index) =>
@@ -86,7 +86,7 @@ export function getValueColumns(config: DatatableStateESQL) {
     ...config.metrics.map((metric, index) => ({
       ...getValueColumn(getAccessorName(METRIC_ACCESSOR_PREFIX, index), metric.column),
       meta: {
-        type: 'unknown',
+        type: 'unknown' as const,
       },
     })),
   ];
