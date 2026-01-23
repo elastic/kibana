@@ -271,7 +271,8 @@ export function registerToolsRoutes({
       },
       access: 'public',
       summary: 'Delete a tool',
-      description: 'Delete a tool by ID. This action cannot be undone. For further information on tools, refer to the [tool documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).',
+      description:
+        'Delete a tool by ID. This action cannot be undone. For further information on tools, refer to the [tool documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).',
       options: {
         tags: ['tools', 'oas-tag:agent builder'],
         availability: {

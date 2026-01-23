@@ -316,7 +316,8 @@ export function registerAgentRoutes({
       },
       access: 'public',
       summary: 'Delete an agent',
-      description: 'Delete an agent by ID. This action cannot be undone. For further information on Agent Builder agents, refer to the [documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
+      description:
+        'Delete an agent by ID. This action cannot be undone. For further information on Agent Builder agents, refer to the [documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: {
