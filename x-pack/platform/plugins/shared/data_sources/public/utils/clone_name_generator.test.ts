@@ -12,6 +12,7 @@ const createMockSource = (name: string): ActiveSource => ({
   id: `source-${name}`,
   name,
   type: 'github',
+  iconType: '.github',
   stackConnectors: ['connector-1'],
   workflows: [],
   agentTools: [],
