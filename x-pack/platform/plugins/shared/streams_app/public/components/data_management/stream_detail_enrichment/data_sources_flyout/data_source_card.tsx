@@ -60,7 +60,8 @@ export const DataSourceCard = ({
   const canDeleteDataSource = dataSourceState.can({ type: 'dataSource.delete' });
   const isEnabled = dataSourceState.matches('enabled');
   const isLoading = dataSourceState.matches({ enabled: 'loadingData' });
-  const isDeletableDataSource = dataSource.type !== 'latest-samples'; // We don't allow deleting the latest-samples source to always have a data source available
+  const isDeletableDataSource =
+    dataSource.type !== 'latest-samples' && dataSource.type !== 'failure-store'; // We don't allow deleting the latest-samples or failure store data sources to always have a data source available
 
   const handleSelection = () => selectDataSource(dataSourceRef.id);
 
