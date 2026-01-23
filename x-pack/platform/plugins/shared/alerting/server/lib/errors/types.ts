@@ -18,7 +18,6 @@ export interface ElasticsearchErrorCausedByObject {
       caused_by?: ElasticsearchErrorCausedByObject;
     };
   }>;
-  additional_unsuccessful_credentials?: string;
 }
 
 interface ElasticsearchErrorMeta {
