@@ -139,7 +139,7 @@ export const useTopNavLinks = ({
       services.capabilities.discover_v2.storeSearchSession
     ) {
       const backgroundSearchFlyoutMenuItem = getBackgroundSearchFlyout({
-        onClick: () => {
+        onClick: ({ context: { onFinishAction } }) => {
           services.data.search.showSearchSessionsFlyout({
             appId,
             trackingProps: { openedFrom: 'background search button' },
@@ -147,6 +147,7 @@ export const useTopNavLinks = ({
               event?.preventDefault();
               dispatch(internalStateActions.openSearchSessionInNewTab({ searchSession: session }));
             },
+            onClose: onFinishAction,
           });
         },
       });
