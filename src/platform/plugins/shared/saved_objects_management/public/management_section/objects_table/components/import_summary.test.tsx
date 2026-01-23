@@ -19,6 +19,7 @@ import type { FailedImport } from '../../../lib';
 
 describe('ImportSummary', () => {
   let basePath: ReturnType<typeof httpServiceMock.createBasePath>;
+  type PrependType = jest.MockInstance<string, [url: string], unknown> & ((url: string) => string);
 
   const getProps = (parts: Partial<ImportSummaryProps>): ImportSummaryProps => ({
     basePath,
@@ -181,12 +182,7 @@ describe('ImportSummary', () => {
   it('should use /app/rules actionPath when rules app is registered', async () => {
     const coreStart = coreMock.createStart();
     coreStart.application.isAppRegistered = jest.fn().mockReturnValue(true);
-    basePath.prepend = ((path: string) => path) as jest.MockInstance<
-      string,
-      [url: string],
-      unknown
-    > &
-      ((url: string) => string);
+    basePath.prepend = ((path: string) => path) as PrependType;
 
     const props = getProps({
       successfulImports: [successNew],
@@ -214,12 +210,7 @@ describe('ImportSummary', () => {
   it('should use original actionPath when rules app is not registered', async () => {
     const coreStart = coreMock.createStart();
     coreStart.application.isAppRegistered = jest.fn().mockReturnValue(false);
-    basePath.prepend = ((path: string) => path) as jest.MockInstance<
-      string,
-      [url: string],
-      unknown
-    > &
-      ((url: string) => string);
+    basePath.prepend = ((path: string) => path) as PrependType;
 
     const originalActionPath = '/app/management/insightsAndAlerting/triggersActions/rules';
     const props = getProps({
