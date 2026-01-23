@@ -566,7 +566,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         const cloudConnector = await this.createCloudConnectorForPackagePolicy(
           soClient,
           enrichedPackagePolicy,
-          agentPolicies[0]
+          agentPolicies[0],
+          pkgInfo
         );
         if (cloudConnector) {
           enrichedPackagePolicy.cloud_connector_id = cloudConnector.id;
@@ -3190,7 +3191,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
   public async createCloudConnectorForPackagePolicy(
     soClient: SavedObjectsClientContract,
     enrichedPackagePolicy: NewPackagePolicy,
-    agentPolicy: AgentPolicy
+    agentPolicy: AgentPolicy,
+    packageInfo: PackageInfo
   ): Promise<CloudConnector | undefined> {
     const logger = this.getLogger('createCloudConnectorForPackagePolicy');
 
@@ -3229,7 +3231,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       } else {
         logger.info(`Creating cloud connector: ${enrichedPackagePolicy.cloud_connector_id}`);
         // Extract account type from package policy vars
-        const accountType = extractAccountType(cloudProvider, enrichedPackagePolicy);
+        const accountType = extractAccountType(cloudProvider, enrichedPackagePolicy, packageInfo);
         try {
           // Extract cloud connector name from package policy
           const cloudConnectorName = enrichedPackagePolicy.cloud_connector_name;
