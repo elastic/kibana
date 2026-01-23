@@ -25,8 +25,8 @@ describe('removeVersionSuffixFromPolicyId', () => {
   });
 
   it('should return undefined if policy ID is undefined', () => {
-    const result = removeVersionSuffixFromPolicyId('');
-    expect(result).toEqual('');
+    const result = removeVersionSuffixFromPolicyId(undefined);
+    expect(result).toEqual(undefined);
   });
 
   it('should remove version suffix correctly if policy has multiple # characters', () => {
@@ -55,10 +55,9 @@ describe('splitVersionSuffixFromPolicyId', () => {
     expect(result).toEqual({ baseId: 'policy123', version: null });
   });
 
-  it('should return null for version if policy ID is empty', () => {
-    const emptyPolicyId = '';
-    const result = splitVersionSuffixFromPolicyId(emptyPolicyId);
-    expect(result).toEqual({ baseId: '', version: null });
+  it('should return null for version if policy ID is undefined', () => {
+    const result = splitVersionSuffixFromPolicyId(undefined);
+    expect(result).toEqual({ baseId: undefined, version: null });
   });
 
   it('should split version suffix correctly if policy has multiple # characters', () => {
@@ -87,9 +86,8 @@ describe('hasVersionSuffix', () => {
     expect(result).toBe(false);
   });
 
-  it('should return false if policy ID is empty', () => {
-    const emptyPolicyId = '';
-    const result = hasVersionSuffix(emptyPolicyId);
+  it('should return false if policy ID is undefined', () => {
+    const result = hasVersionSuffix(undefined);
     expect(result).toBe(false);
   });
 
