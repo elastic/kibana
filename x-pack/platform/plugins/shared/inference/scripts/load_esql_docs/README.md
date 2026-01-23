@@ -8,6 +8,10 @@ The generated documentation is validated and will emit warnings when invalid que
 - a running Kibana instance
 - an installed Generative AI connector
 
+### Run
+yarn es snapshot --license trial
+node scripts/kibana --dev --no-base-path
+
 ## Incremental Updates
 
 The script uses a hash-based caching mechanism to optimize performance. This means:
