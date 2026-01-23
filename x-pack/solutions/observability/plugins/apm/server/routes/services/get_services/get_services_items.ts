@@ -88,7 +88,6 @@ export async function getServicesItems({
       searchQuery,
     };
 
-    // First, fetch the main service stats, health statuses, and alerts in parallel
     const [{ serviceStats, serviceOverflowCount, maxCountExceeded }, healthStatuses, alertCounts] =
       await Promise.all([
         getServiceTransactionStats({

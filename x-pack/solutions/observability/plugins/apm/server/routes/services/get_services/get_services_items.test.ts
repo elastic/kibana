@@ -9,7 +9,7 @@ import { getServicesItems } from './get_services_items';
 import { getServiceTransactionStats } from './get_service_transaction_stats';
 import { getHealthStatuses } from './get_health_statuses';
 import { getServicesAlerts } from './get_service_alerts';
-import { getServicesSlos } from './get_service_slos';
+import { getServicesSloStats } from './get_services_slo_stats';
 import { mergeServiceStats } from './merge_service_stats';
 import { ServiceInventoryFieldName } from '../../../../common/service_inventory';
 import { ServiceHealthStatus } from '../../../../common/service_health_status';
@@ -18,13 +18,13 @@ import type { Logger } from '@kbn/logging';
 jest.mock('./get_service_transaction_stats');
 jest.mock('./get_health_statuses');
 jest.mock('./get_service_alerts');
-jest.mock('./get_service_slos');
+jest.mock('./get_services_slo_stats');
 jest.mock('./merge_service_stats');
 
 const mockGetServiceTransactionStats = getServiceTransactionStats as jest.Mock;
 const mockGetHealthStatuses = getHealthStatuses as jest.Mock;
 const mockGetServicesAlerts = getServicesAlerts as jest.Mock;
-const mockGetServicesSlos = getServicesSlos as jest.Mock;
+const mockGetServicesSloStats = getServicesSloStats as jest.Mock;
 const mockMergeServiceStats = mergeServiceStats as jest.Mock;
 
 describe('getServicesItems', () => {
@@ -37,6 +37,7 @@ describe('getServicesItems', () => {
     kuery: '',
     apmEventClient: {} as any,
     apmAlertsClient: {} as any,
+    sloClient: {} as any,
     logger: mockLogger,
     start: 1000,
     end: 2000,
@@ -74,7 +75,7 @@ describe('getServicesItems', () => {
     mockGetServiceTransactionStats.mockResolvedValue(mockServiceStats);
     mockGetHealthStatuses.mockResolvedValue(mockHealthStatuses);
     mockGetServicesAlerts.mockResolvedValue(mockAlertCounts);
-    mockGetServicesSlos.mockResolvedValue(mockSloCounts);
+    mockGetServicesSloStats.mockResolvedValue(mockSloCounts);
     mockMergeServiceStats.mockReturnValue(mockMergedItems);
   });
 
@@ -82,8 +83,6 @@ describe('getServicesItems', () => {
     it('fetches all data when all include flags are true', async () => {
       const result = await getServicesItems({
         ...baseParams,
-        esClient: {} as any,
-        spaceId: 'default',
         includeAlerts: true,
         includeHealthStatus: true,
         includeSloStatus: true,
@@ -92,15 +91,13 @@ describe('getServicesItems', () => {
       expect(mockGetServiceTransactionStats).toHaveBeenCalled();
       expect(mockGetHealthStatuses).toHaveBeenCalled();
       expect(mockGetServicesAlerts).toHaveBeenCalled();
-      expect(mockGetServicesSlos).toHaveBeenCalled();
+      expect(mockGetServicesSloStats).toHaveBeenCalled();
       expect(result.items).toEqual(mockMergedItems);
     });
 
     it('skips health statuses when includeHealthStatus is false', async () => {
       await getServicesItems({
         ...baseParams,
-        esClient: {} as any,
-        spaceId: 'default',
         includeAlerts: true,
         includeHealthStatus: false,
         includeSloStatus: true,
@@ -109,7 +106,7 @@ describe('getServicesItems', () => {
       expect(mockGetServiceTransactionStats).toHaveBeenCalled();
       expect(mockGetHealthStatuses).not.toHaveBeenCalled();
       expect(mockGetServicesAlerts).toHaveBeenCalled();
-      expect(mockGetServicesSlos).toHaveBeenCalled();
+      expect(mockGetServicesSloStats).toHaveBeenCalled();
 
       expect(mockMergeServiceStats).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -121,8 +118,6 @@ describe('getServicesItems', () => {
     it('skips alerts when includeAlerts is false', async () => {
       await getServicesItems({
         ...baseParams,
-        esClient: {} as any,
-        spaceId: 'default',
         includeAlerts: false,
         includeHealthStatus: true,
         includeSloStatus: true,
@@ -131,7 +126,7 @@ describe('getServicesItems', () => {
       expect(mockGetServiceTransactionStats).toHaveBeenCalled();
       expect(mockGetHealthStatuses).toHaveBeenCalled();
       expect(mockGetServicesAlerts).not.toHaveBeenCalled();
-      expect(mockGetServicesSlos).toHaveBeenCalled();
+      expect(mockGetServicesSloStats).toHaveBeenCalled();
 
       expect(mockMergeServiceStats).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -143,8 +138,6 @@ describe('getServicesItems', () => {
     it('skips SLOs when includeSloStatus is false', async () => {
       await getServicesItems({
         ...baseParams,
-        esClient: {} as any,
-        spaceId: 'default',
         includeAlerts: true,
         includeHealthStatus: true,
         includeSloStatus: false,
@@ -153,65 +146,35 @@ describe('getServicesItems', () => {
       expect(mockGetServiceTransactionStats).toHaveBeenCalled();
       expect(mockGetHealthStatuses).toHaveBeenCalled();
       expect(mockGetServicesAlerts).toHaveBeenCalled();
-      expect(mockGetServicesSlos).not.toHaveBeenCalled();
+      expect(mockGetServicesSloStats).not.toHaveBeenCalled();
 
       expect(mockMergeServiceStats).toHaveBeenCalledWith(
         expect.objectContaining({
-          sloCounts: [],
+          sloStats: [],
         })
       );
     });
 
-    it('skips SLOs when esClient is not provided', async () => {
+    it('skips SLOs when sloClient is not provided', async () => {
       await getServicesItems({
         ...baseParams,
-        esClient: undefined,
-        spaceId: 'default',
+        sloClient: undefined,
         includeSloStatus: true,
       });
 
-      expect(mockGetServicesSlos).not.toHaveBeenCalled();
-    });
-
-    it('skips SLOs when spaceId is not provided', async () => {
-      await getServicesItems({
-        ...baseParams,
-        esClient: {} as any,
-        spaceId: undefined,
-        includeSloStatus: true,
-      });
-
-      expect(mockGetServicesSlos).not.toHaveBeenCalled();
-    });
-
-    it('skips SLOs when there are no services', async () => {
-      mockGetServiceTransactionStats.mockResolvedValue({
-        serviceStats: [],
-        serviceOverflowCount: 0,
-        maxCountExceeded: false,
-      });
-
-      await getServicesItems({
-        ...baseParams,
-        esClient: {} as any,
-        spaceId: 'default',
-        includeSloStatus: true,
-      });
-
-      expect(mockGetServicesSlos).not.toHaveBeenCalled();
+      // getServicesSloStats is still called, but it returns [] internally when sloClient is undefined
+      expect(mockGetServicesSloStats).toHaveBeenCalled();
     });
   });
 
   describe('sort field priority', () => {
     it('returns AlertsCount as sortField when alerts exist', async () => {
       mockGetServicesAlerts.mockResolvedValue(mockAlertCounts);
-      mockGetServicesSlos.mockResolvedValue(mockSloCounts);
+      mockGetServicesSloStats.mockResolvedValue(mockSloCounts);
       mockGetHealthStatuses.mockResolvedValue(mockHealthStatuses);
 
       const result = await getServicesItems({
         ...baseParams,
-        esClient: {} as any,
-        spaceId: 'default',
       });
 
       expect(result.sortField).toBe(ServiceInventoryFieldName.AlertsCount);
@@ -219,13 +182,11 @@ describe('getServicesItems', () => {
 
     it('returns SloStatus as sortField when no alerts but SLOs exist', async () => {
       mockGetServicesAlerts.mockResolvedValue([]);
-      mockGetServicesSlos.mockResolvedValue(mockSloCounts);
+      mockGetServicesSloStats.mockResolvedValue(mockSloCounts);
       mockGetHealthStatuses.mockResolvedValue(mockHealthStatuses);
 
       const result = await getServicesItems({
         ...baseParams,
-        esClient: {} as any,
-        spaceId: 'default',
       });
 
       expect(result.sortField).toBe(ServiceInventoryFieldName.SloStatus);
@@ -233,13 +194,11 @@ describe('getServicesItems', () => {
 
     it('returns HealthStatus as sortField when no alerts or SLOs but health statuses exist', async () => {
       mockGetServicesAlerts.mockResolvedValue([]);
-      mockGetServicesSlos.mockResolvedValue([]);
+      mockGetServicesSloStats.mockResolvedValue([]);
       mockGetHealthStatuses.mockResolvedValue(mockHealthStatuses);
 
       const result = await getServicesItems({
         ...baseParams,
-        esClient: {} as any,
-        spaceId: 'default',
       });
 
       expect(result.sortField).toBe(ServiceInventoryFieldName.HealthStatus);
@@ -247,13 +206,11 @@ describe('getServicesItems', () => {
 
     it('returns Throughput as sortField when no alerts, SLOs, or health statuses exist', async () => {
       mockGetServicesAlerts.mockResolvedValue([]);
-      mockGetServicesSlos.mockResolvedValue([]);
+      mockGetServicesSloStats.mockResolvedValue([]);
       mockGetHealthStatuses.mockResolvedValue([]);
 
       const result = await getServicesItems({
         ...baseParams,
-        esClient: {} as any,
-        spaceId: 'default',
       });
 
       expect(result.sortField).toBe(ServiceInventoryFieldName.Throughput);
@@ -267,8 +224,6 @@ describe('getServicesItems', () => {
 
       const result = await getServicesItems({
         ...baseParams,
-        esClient: {} as any,
-        spaceId: 'default',
       });
 
       expect(mockLogger.debug).toHaveBeenCalledWith(error);
@@ -286,8 +241,6 @@ describe('getServicesItems', () => {
 
       const result = await getServicesItems({
         ...baseParams,
-        esClient: {} as any,
-        spaceId: 'default',
       });
 
       expect(mockLogger.debug).toHaveBeenCalledWith(error);
@@ -299,20 +252,18 @@ describe('getServicesItems', () => {
       expect(result.items).toEqual(mockMergedItems);
     });
 
-    it('returns empty array and logs debug when getServicesSlos fails', async () => {
+    it('returns empty array and logs debug when getServicesSloStats fails', async () => {
       const error = new Error('SLO error');
-      mockGetServicesSlos.mockRejectedValue(error);
+      mockGetServicesSloStats.mockRejectedValue(error);
 
       const result = await getServicesItems({
         ...baseParams,
-        esClient: {} as any,
-        spaceId: 'default',
       });
 
       expect(mockLogger.debug).toHaveBeenCalledWith(error);
       expect(mockMergeServiceStats).toHaveBeenCalledWith(
         expect.objectContaining({
-          sloCounts: [],
+          sloStats: [],
         })
       );
       expect(result.items).toEqual(mockMergedItems);
@@ -323,8 +274,6 @@ describe('getServicesItems', () => {
     it('returns correct response structure', async () => {
       const result = await getServicesItems({
         ...baseParams,
-        esClient: {} as any,
-        spaceId: 'default',
       });
 
       expect(result).toEqual({
@@ -343,8 +292,6 @@ describe('getServicesItems', () => {
 
       const result = await getServicesItems({
         ...baseParams,
-        esClient: {} as any,
-        spaceId: 'default',
       });
 
       expect(result.maxCountExceeded).toBe(true);
@@ -358,8 +305,6 @@ describe('getServicesItems', () => {
 
       const result = await getServicesItems({
         ...baseParams,
-        esClient: {} as any,
-        spaceId: 'default',
       });
 
       expect(result.serviceOverflowCount).toBe(50);
