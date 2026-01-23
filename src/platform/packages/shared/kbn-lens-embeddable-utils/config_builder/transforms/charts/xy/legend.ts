@@ -11,6 +11,7 @@ import type { XYLegendValue } from '@kbn/chart-expressions-common';
 import { LegendSize, LegendLayout } from '@kbn/chart-expressions-common';
 import type { XYState as XYLensState } from '@kbn/lens-common';
 import type { XYState } from '../../../schema';
+import { stripUndefined } from '../utils';
 
 type OutsideLegendType = Extract<Required<XYState['legend']>, { inside: false }>;
 
@@ -113,6 +114,7 @@ export function convertLegendToStateFormat(legend: XYState['legend']): {
     ...extractAlignment(legend),
     ...(legend?.inside
       ? {
+          isInside: true,
           position: DEFAULT_LEGEND_POSITON,
           ...(legend?.columns ? { floatingColumns: legend?.columns } : {}),
         }
@@ -145,10 +147,11 @@ function getLegendSizeAPI(
 // @TODO improve this check
 function isLegendInside(legend: XYLensState['legend']): boolean {
   return (
-    legend.legendSize == null &&
-    (legend.floatingColumns != null ||
-      legend.verticalAlignment != null ||
-      legend.horizontalAlignment != null)
+    legend.isInside === true ||
+    (legend.legendSize == null &&
+      (legend.floatingColumns != null ||
+        legend.verticalAlignment != null ||
+        legend.horizontalAlignment != null))
   );
 }
 
@@ -179,16 +182,14 @@ function getLegendLayout(legend: XYLensState['legend']) {
 export function convertLegendToAPIFormat(
   legend: XYLensState['legend']
 ): Pick<XYState, 'legend'> | {} {
-  const legendOptions = {
+  const legendOptions = stripUndefined({
     visible: legend.isVisible,
-    ...(legend?.maxLines == null ? {} : { truncate_after_lines: legend.maxLines }),
-    ...(legend?.legendStats?.length
-      ? {
-          statistics: legend.legendStats.map(mapStatToSnakeCase),
-        }
-      : {}),
+    truncate_after_lines: legend?.maxLines == null ? undefined : legend.maxLines,
+    statistics: legend?.legendStats?.length
+      ? legend.legendStats.map(mapStatToSnakeCase)
+      : undefined,
     ...getLegendLayout(legend),
-  };
+  });
 
   return { legend: legendOptions };
 }
