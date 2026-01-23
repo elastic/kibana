@@ -47,7 +47,7 @@ export const HighlightDetailsTable = ({ breakdown }: Props) => {
     <EuiBasicTable
       items={breakdown}
       columns={columns}
-      tableCaption={i18n.translate('highlightDetailsTable.tableCaption', {
+      tableCaption={i18n.translate('xpack.searchProfiler.highlightDetailsTable.tableCaption', {
         defaultMessage: 'Highlight breakdown details',
       })}
     />
