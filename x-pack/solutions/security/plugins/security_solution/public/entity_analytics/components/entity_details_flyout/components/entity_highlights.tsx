@@ -53,9 +53,7 @@ export const EntityHighlightsAccordion: React.FC<{
     isLoading: isLoadingConnectors,
     data: aiConnectors,
     refetch: refetchAiConnectors,
-  } = useLoadInferenceConnectors({
-    http,
-  });
+  } = useLoadInferenceConnectors();
   const spaceId = useSpaceId();
   const [storedConnectorId, setStoredConnectorId] = useStoredAssistantConnectorId(spaceId ?? '');
   const connectorId = useMemo(() => {
