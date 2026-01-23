@@ -12,7 +12,6 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
-import { z } from '@kbn/zod/v4';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { registerLocators } from './locator/register_locators';
@@ -102,13 +101,13 @@ export class AgentBuilderPlugin
     registerWorkflowSteps(deps.workflowsExtensions);
 
     // Register sidebar app for conversation UI
-    core.chrome.sidebar.registerApp<{}>({
+    core.chrome.sidebar.registerApp({
       appId: 'agentBuilder',
-      getParamsSchema: () => z.object({}),
       loadComponent: async () => {
         const { SidebarConversation } = await import('./sidebar/sidebar_conversation');
         return SidebarConversation;
       },
+      restoreOnReload: false,
     });
 
     return {};
@@ -155,7 +154,7 @@ export class AgentBuilderPlugin
     setSidebarServices(core, internalServices);
 
     const hasAgentBuilder = core.application.capabilities.agentBuilder?.show === true;
-    const sidebar = core.chrome.sidebar.getApp<{}>('agentBuilder');
+    const sidebar = core.chrome.sidebar.getApp('agentBuilder');
 
     const openSidebarInternal = (options?: OpenConversationFlyoutOptions) => {
       const config = options ?? this.conversationFlyoutActiveConfig;
@@ -179,7 +178,7 @@ export class AgentBuilderPlugin
         },
       });
 
-      sidebar.open({});
+      sidebar.open();
 
       const flyoutRef: ConversationFlyoutRef = {
         close: () => {
