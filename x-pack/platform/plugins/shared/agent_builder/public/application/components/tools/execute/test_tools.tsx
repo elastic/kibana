@@ -8,6 +8,7 @@
 import {
   EuiButton,
   EuiCodeBlock,
+  EuiComboBox,
   EuiDatePicker,
   EuiFieldNumber,
   EuiFieldText,
@@ -25,6 +26,7 @@ import {
   EuiText,
   EuiTitle,
   useIsWithinBreakpoints,
+  type EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -249,6 +251,57 @@ const renderFormField = ({
                 onChange={(date) => onChange(date ? date.toISOString() : undefined)}
               />
             )}
+          />
+        );
+      }
+
+      if (type === 'array') {
+        return (
+          <Controller
+            {...commonProps}
+            defaultValue={[]}
+            render={({ field: { onChange, value } }) => {
+              const arrayValue: Array<string | number> = Array.isArray(value) ? value : [];
+
+              const selectedOptions: Array<EuiComboBoxOptionOption<string | number>> =
+                arrayValue.map((item) => ({
+                  label: String(item),
+                  value: item,
+                }));
+
+              const handleChange = (selected: Array<EuiComboBoxOptionOption<string | number>>) => {
+                onChange(selected.map((opt) => opt.value ?? opt.label));
+              };
+
+              const handleCreateOption = (searchValue: string) => {
+                const trimmed = searchValue.trim();
+                if (!trimmed) return;
+
+                const numericValue = Number(trimmed);
+                const newValue = Number.isNaN(numericValue) ? trimmed : numericValue;
+                onChange([...arrayValue, newValue]);
+              };
+
+              return (
+                <EuiComboBox<string | number>
+                  options={[]}
+                  selectedOptions={selectedOptions}
+                  onChange={handleChange}
+                  onCreateOption={handleCreateOption}
+                  fullWidth
+                  noSuggestions
+                  aria-label={label}
+                  data-test-subj={`agentBuilderToolTestInput-${name}`}
+                  delimiter=","
+                  onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => {
+                    if (event.key === 'Enter') {
+                      // Enter key should not submit the form, instead it should add a new option
+                      event.preventDefault();
+                    }
+                  }}
+                />
+              );
+            }}
           />
         );
       }

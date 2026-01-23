@@ -13,6 +13,7 @@ export const paramValueTypeSchema = schema.oneOf([
   schema.literal('float'),
   schema.literal('boolean'),
   schema.literal('date'),
+  schema.literal('array'),
 ]);
 
 export const paramSchema = schema.object({
@@ -22,7 +23,14 @@ export const paramSchema = schema.object({
   defaultValue: schema.conditional(
     schema.siblingRef('optional'),
     true,
-    schema.maybe(schema.oneOf([schema.string(), schema.number(), schema.boolean()])),
+    schema.maybe(
+      schema.oneOf([
+        schema.string(),
+        schema.number(),
+        schema.boolean(),
+        schema.arrayOf(schema.oneOf([schema.string(), schema.number()])),
+      ])
+    ),
     schema.never()
   ),
 });
