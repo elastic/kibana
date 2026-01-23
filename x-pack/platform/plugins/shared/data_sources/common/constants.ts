@@ -25,6 +25,8 @@ export const PAGINATION_ITEMS_PER_PAGE_OPTIONS = [10, 25, 50, 100];
 
 // Task Manager constants
 export const DATASOURCES_SCOPE = 'dataSources';
+export const WORKFLOWS_SCOPE = 'workflows';
+export const TOOLS_SCOPE = 'tools';
 export const FAKE_REQUEST_NOT_DEFINED_ERROR = 'fakeRequest is not defined';
 export const UNKNOWN_DATA_SOURCE_ID = 'unknown';
 

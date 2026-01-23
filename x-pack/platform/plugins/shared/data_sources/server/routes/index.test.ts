@@ -19,6 +19,8 @@ import {
   TASK_NOT_FOUND_ERROR,
   TASK_MANAGER_NOT_AVAILABLE_ERROR,
   DEFAULT_ITEMS_PER_PAGE,
+  WORKFLOWS_SCOPE,
+  TOOLS_SCOPE,
 } from '../../common/constants';
 import * as helpers from './data_sources_helpers';
 
@@ -652,7 +654,7 @@ describe('registerRoutes', () => {
       expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith(
         expect.objectContaining({
           taskType: 'data-sources:bulk-delete-task',
-          scope: [DATASOURCES_SCOPE],
+          scope: [DATASOURCES_SCOPE, WORKFLOWS_SCOPE, TOOLS_SCOPE],
           state: { isDone: false, deletedCount: 0, errors: [] },
         }),
         expect.objectContaining({
@@ -943,7 +945,7 @@ describe('DELETE /api/data_sources', () => {
       expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith(
         expect.objectContaining({
           taskType: 'data-sources:bulk-delete-task',
-          scope: [DATASOURCES_SCOPE],
+          scope: [DATASOURCES_SCOPE, WORKFLOWS_SCOPE, TOOLS_SCOPE],
           state: { isDone: false, deletedCount: 0, errors: [] },
         }),
         expect.objectContaining({

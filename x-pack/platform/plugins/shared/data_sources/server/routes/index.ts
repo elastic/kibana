@@ -34,6 +34,8 @@ import {
   TASK_MANAGER_NOT_AVAILABLE_ERROR,
   DEFAULT_ITEMS_PER_PAGE,
   PAGINATION_ITEMS_PER_PAGE_OPTIONS,
+  WORKFLOWS_SCOPE,
+  TOOLS_SCOPE,
 } from '../../common/constants';
 import { TYPE } from '../tasks/bulk_delete_task';
 
@@ -316,7 +318,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
           {
             id: taskId,
             taskType: TYPE,
-            scope: [DATASOURCES_SCOPE],
+            scope: [DATASOURCES_SCOPE, WORKFLOWS_SCOPE, TOOLS_SCOPE],
             state: { isDone: false, deletedCount: 0, errors: [] },
             runAt: new Date(Date.now() + 3 * 1000),
             params: {},
