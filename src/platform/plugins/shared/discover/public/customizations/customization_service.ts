@@ -13,14 +13,12 @@ import type {
   FlyoutCustomization,
   SearchBarCustomization,
   UnifiedHistogramCustomization,
-  FieldListCustomization,
 } from './customization_types';
 
 export type DiscoverCustomization =
   | FlyoutCustomization
   | SearchBarCustomization
-  | UnifiedHistogramCustomization
-  | FieldListCustomization;
+  | UnifiedHistogramCustomization;
 
 export type DiscoverCustomizationId = DiscoverCustomization['id'];
 
