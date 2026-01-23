@@ -209,8 +209,10 @@ const ImportWarning: FC<{ warning: SavedObjectsImportWarning; basePath: IBasePat
   basePath,
 }) => {
   const kibana = useKibana<CoreStart & StartDependencies>();
-  const isUnifiedRulesPageEnabled =
-    kibana.services.application?.isAppRegistered?.('rules') ?? false;
+  const isUnifiedRulesPageEnabled = useMemo(
+    () => kibana.services.application?.isAppRegistered?.('rules') ?? false,
+    [kibana.services.application]
+  );
 
   const warning = useMemo(
     () =>
