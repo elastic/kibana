@@ -2837,10 +2837,10 @@
         "x-pack/platform/packages/shared/response-ops/form-generator/*"
       ],
       "@kbn/response-ops-recurring-schedule-form": [
-        "src/platform/packages/shared/response-ops/recurring-schedule-form"
+        "x-pack/platform/packages/shared/response-ops/recurring-schedule-form"
       ],
       "@kbn/response-ops-recurring-schedule-form/*": [
-        "src/platform/packages/shared/response-ops/recurring-schedule-form/*"
+        "x-pack/platform/packages/shared/response-ops/recurring-schedule-form/*"
       ],
       "@kbn/response-ops-retry-service": [
         "x-pack/platform/packages/shared/response-ops/retry-service"

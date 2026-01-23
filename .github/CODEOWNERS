@@ -665,8 +665,6 @@ src/platform/packages/shared/react/kibana_context/styled @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_context/theme @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_mount @elastic/appex-sharedux
 src/platform/packages/shared/react/use_observable @elastic/appex-sharedux
-src/platform/packages/shared/response-ops/form-generator @elastic/response-ops
-src/platform/packages/shared/response-ops/recurring-schedule-form @elastic/response-ops
 src/platform/packages/shared/response-ops/rule_form @elastic/response-ops
 src/platform/packages/shared/response-ops/rule_params @elastic/response-ops
 src/platform/packages/shared/response-ops/rules-apis @elastic/response-ops
@@ -1000,6 +998,7 @@ x-pack/platform/packages/shared/response-ops/alerts-fields-browser @elastic/resp
 x-pack/platform/packages/shared/response-ops/alerts-filters-form @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/alerts-table @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/form-generator @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/recurring-schedule-form @elastic/response-ops
 x-pack/platform/packages/shared/security/api_key_management @elastic/kibana-security
 x-pack/platform/packages/shared/security/form_components @elastic/kibana-security
 x-pack/platform/packages/shared/security/plugin_types_common @elastic/kibana-security
