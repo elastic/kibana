@@ -14,10 +14,12 @@ export const fetchLogDocumentById = async (
     id,
     data,
     logSourcesService,
+    index,
   }: {
     id: string;
     data: DataPublicPluginStart;
     logSourcesService: LogSourcesService;
+    index?: string;
   },
   signal: AbortSignal
 ): Promise<
@@ -36,7 +38,7 @@ export const fetchLogDocumentById = async (
     data.search.search(
       {
         params: {
-          index: indexPattern,
+          index: index ?? indexPattern,
           size: 1,
           body: {
             timeout: '20s',
@@ -46,11 +48,7 @@ export const fetchLogDocumentById = async (
                 include_unmapped: true,
               },
             ],
-            query: {
-              term: {
-                _id: id,
-              },
-            },
+            query: { term: { _id: id } },
           },
         },
       },
