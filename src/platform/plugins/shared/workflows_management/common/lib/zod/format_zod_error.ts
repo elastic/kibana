@@ -12,7 +12,7 @@ import type { Document } from 'yaml';
 import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod';
 import type { ZodError } from '@kbn/zod/v4';
 import { z } from '@kbn/zod/v4';
-import { getCompactTypeDescription, getDetailedTypeDescription } from './zod_type_description';
+import { getDetailedTypeDescription } from './zod_type_description';
 import { getAllConnectors } from '../../schema';
 import type { FormattedZodError, MockZodError } from '../errors/invalid_yaml_schema';
 
@@ -185,7 +185,11 @@ function getGenericUnionErrorMessage(issue: any): string | null {
 }
 
 // Cache for schema lookups to avoid repeated computation
-const schemaCache = new Map<string, any>();
+const errorMessageCache = new Map<string, any>();
+
+export function clearErrorMessageCache(): void {
+  errorMessageCache.clear();
+}
 
 /**
  * Generates a detailed union error message by analyzing the schema at the given path
@@ -198,10 +202,16 @@ function generateUnionErrorMessage(
   yamlDocument?: any
 ): string | null {
   try {
-    // Create cache key for this lookup
-    const cacheKey = `${path.join('.')}-${fieldName}`;
-    if (schemaCache.has(cacheKey)) {
-      return schemaCache.get(cacheKey);
+    // Get step type from YAML document for cache key (if path is within a step)
+    let stepType: string | null = null;
+    if (path.length >= 2 && path[0] === 'steps' && typeof path[1] === 'number') {
+      stepType = getStepTypeFromYaml(yamlDocument, path[1]);
+    }
+
+    // Create cache key that includes the step type to handle step reordering/type changes
+    const cacheKey = `${path.join('.')}-${fieldName}-${stepType ?? 'unknown'}`;
+    if (errorMessageCache.has(cacheKey)) {
+      return errorMessageCache.get(cacheKey);
     }
 
     let result: string | null = null;
@@ -264,7 +274,7 @@ function generateUnionErrorMessage(
     }
 
     // Cache the result (even if null)
-    schemaCache.set(cacheKey, result);
+    errorMessageCache.set(cacheKey, result);
     return result;
   } catch (error) {
     // If anything goes wrong, return null to fall back to default behavior
@@ -283,34 +293,39 @@ function getBetterFieldErrorMessage(
   try {
     // Check if this is a field in a step's 'with' block
     if (
-      path.length >= 4 &&
+      path.length >= 3 &&
       path[0] === 'steps' &&
       typeof path[1] === 'number' &&
       path[2] === 'with'
     ) {
       const stepIndex = path[1];
-      const fieldNameStr = String(fieldName);
+      const pathAfterStepIndex = path.slice(2);
 
       // Get the step type from the YAML document
+      // TODO: handle nested steps (e.g. steps[0].steps[0].type)
       const stepType = getStepTypeFromYaml(yamlDocument, stepIndex);
       if (!stepType) {
         return null;
       }
 
       // Look up the connector definition for this step type
-      const connectorSchema = getConnectorParamsSchema(stepType);
-      if (!connectorSchema) {
+      // TODO: handle configSchema
+      const paramsSchema = getConnectorParamsSchema(stepType);
+      if (!paramsSchema) {
         return null;
       }
 
       // Extract the field schema from the connector params schema
-      const fieldSchema = getFieldSchemaFromConnectorParams(connectorSchema, fieldNameStr);
+      const fieldSchema =
+        pathAfterStepIndex.length === 1 && pathAfterStepIndex[0] === 'with'
+          ? paramsSchema
+          : getSchemaAtPath(paramsSchema, pathAfterStepIndex.slice(1).join('.'))?.schema;
       if (!fieldSchema) {
         return null;
       }
 
       // Generate a better error message based on the schema type
-      return generateFieldTypeErrorMessage(fieldNameStr, fieldSchema);
+      return generateFieldTypeErrorMessage(fieldName, fieldSchema);
     }
 
     return null;
@@ -327,7 +342,7 @@ function analyzeUnionSchema(
 ): Array<{ name: string; description: string }> {
   const options: Array<{ name: string; description: string }> = [];
 
-  for (const option of unionSchema._def.options) {
+  for (const option of unionSchema.def.options) {
     let name = 'unknown';
     let description = 'unknown option';
 
@@ -415,7 +430,7 @@ function isOptionalSchema(schema: z.ZodType): boolean {
  */
 function getSchemaTypeName(schema: z.ZodType): string | null {
   try {
-    return getCompactTypeDescription(schema);
+    return getTypeDescriptionForError(schema);
   } catch {
     return null;
   }
@@ -512,38 +527,38 @@ function analyzeUnionErrorForOption(issues: any[]): { name: string; description:
 function generateFieldTypeErrorMessage(fieldName: string, fieldSchema: z.ZodType): string | null {
   try {
     // Handle ZodObject specially to show structure
-    if (fieldSchema.constructor.name === 'ZodObject') {
-      const objectStructure = getObjectStructureDescription(fieldSchema);
-      if (objectStructure) {
-        return `${fieldName} should be an object with structure:\n${objectStructure}`;
-      }
-      return `${fieldName} should be an object, not a primitive value`;
+    if (fieldSchema instanceof z.ZodObject) {
+      // const objectStructure = getObjectStructureDescription(fieldSchema);
+      // if (objectStructure) {
+      //   return `${fieldName} should be an object with structure:\n${objectStructure}`;
+      // }
+      return `${fieldName} should be ${getObjectPropertiesDescription(fieldSchema)}`;
     }
 
     // For all other types, use the compact type description
-    const expectedType = getCompactTypeDescription(fieldSchema);
+    const expectedType = getTypeDescriptionForError(fieldSchema);
     return `${fieldName} should be ${expectedType}`;
   } catch {
     return null;
   }
 }
 
-/**
- * Gets a description of an object's expected structure
- */
-function getObjectStructureDescription(objectSchema: z.ZodType): string | null {
-  try {
-    return getDetailedTypeDescription(objectSchema, {
-      detailed: true,
-      maxDepth: 2,
-      showOptional: true,
-      includeDescriptions: false,
-      singleLine: false,
-      indentSpacesNumber: 2,
-    });
-  } catch {
-    return null;
-  }
+export function getTypeDescriptionForError(schema: z.ZodType): string {
+  return getDetailedTypeDescription(schema, {
+    detailed: true,
+    maxDepth: 3,
+    showOptional: false,
+    includeDescriptions: false,
+  });
+}
+
+function getObjectPropertiesDescription(
+  fieldSchema: z.ZodObject,
+  maxProperties: number = 5
+): string {
+  return `an object with properties: ${Object.keys(fieldSchema.def.shape)
+    .slice(0, maxProperties)
+    .join(', ')}${Object.keys(fieldSchema.def.shape).length > maxProperties ? '...' : ''}`;
 }
 
 /**
@@ -665,14 +680,9 @@ function getFieldSchemaFromConnectorParams(
 ): z.ZodType | null {
   try {
     // Check if it's a ZodObject with a shape
-    if (
-      paramsSchema &&
-      typeof paramsSchema === 'object' &&
-      (paramsSchema as any)._def &&
-      typeof (paramsSchema as any)._def.shape === 'function'
-    ) {
-      const shape = (paramsSchema as any)._def.shape();
-      return shape[fieldName] || null;
+    if (paramsSchema instanceof z.ZodObject) {
+      const shape = paramsSchema.def.shape;
+      return shape[fieldName] ?? null;
     }
 
     return null;
