@@ -7,8 +7,8 @@
 
 import { END as _END_, START as _START_, StateGraph } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
-import type { BaseMessage } from '@langchain/core/messages';
-import type { Logger } from '@kbn/core/server';
+import { ToolMessage, type BaseMessage } from '@langchain/core/messages';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode as ErrCodes } from '@kbn/agent-builder-common/agents';
@@ -43,6 +43,8 @@ import {
 } from './actions';
 import type { ProcessedConversation } from '../utils/prepare_conversation';
 import { ToolManager } from './tool_manager';
+import type { SkillsService, ToolProvider } from '@kbn/agent-builder-server/runner';
+import { pickTools } from '../utils/select_tools';
 
 // number of successive recoverable errors we try to recover from before throwing
 const MAX_ERROR_COUNT = 2;
@@ -57,6 +59,9 @@ export const createAgentGraph = ({
   structuredOutput = false,
   outputSchema,
   processedConversation,
+  skills,
+  toolProvider,
+  request,
 }: {
   chatModel: InferenceChatModel;
   toolManager: ToolManager;
@@ -67,6 +72,9 @@ export const createAgentGraph = ({
   structuredOutput?: boolean;
   outputSchema?: Record<string, unknown>;
   processedConversation: ProcessedConversation;
+  skills: SkillsService;
+  toolProvider: ToolProvider;
+  request: KibanaRequest;
 }) => {
   const init = async () => {
     return {};
@@ -92,6 +100,7 @@ export const createAgentGraph = ({
           attachmentTypes: processedConversation.attachmentTypes,
           versionedAttachmentPresentation: processedConversation.versionedAttachmentPresentation,
           outputSchema,
+          skills,
         })
       );
 
@@ -152,9 +161,42 @@ export const createAgentGraph = ({
     lastAction.tool_calls.forEach(toolCall => toolManager.getTool(toolCall.toolName)) // ensures tools are marked as used in LRUMap
 
     const toolCallMessage = createToolCallMessage(lastAction.tool_calls, lastAction.message);
-    
+
 
     const toolNodeResult = await toolNode.invoke([toolCallMessage], {});
+
+    /* 
+    * Here we check which skills were loaded and add the skill tools to the tool manager.
+    * Once hooks are available, this should be moved to a hook.
+    */
+    await Promise.all(toolNodeResult.flatMap(result => {
+      if (!ToolMessage.isInstance(result)) {
+        return []
+      }
+      return result?.artifact?.results ?? []
+    })
+      .flatMap(result => {
+        if ('data' in result && result.data.type === 'skill') {
+          return [result.data.id]
+        }
+        return []
+      })
+      .map(async skillId => {
+        const skillDefinition = skills.getSkillDefinition(skillId);
+        if (skillDefinition && skillDefinition.getInlineTools) {
+          const tools = await skillDefinition.getInlineTools();
+          const langchainTools = tools.map(tool => skills.convertSkillTool(tool));
+          langchainTools.forEach(tool => toolManager.addTool(tool));
+        }
+        if (skillDefinition && skillDefinition.getAllowedTools) {
+          const tools = await pickTools({
+            selection: [{ tool_ids: skillDefinition.getAllowedTools() }],
+            toolProvider,
+            request,
+          });
+          tools.forEach(tool => toolManager.addTool(tool));
+        }
+      }))
 
     const action = processToolNodeResponse(toolNodeResult);
     return {

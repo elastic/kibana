@@ -31,10 +31,10 @@ class SkillTypeRegistryImpl implements SkillTypeRegistry {
       throw new Error(`Skill type with id ${skill.id} already registered`);
     }
 
-    const fullPath = `${skill.path}:${skill.name}`;
+    const fullPath = `${skill.basePath}/${skill.name}/SKILL.md`;
 
     if (this.skillFullPaths.has(fullPath)) {
-      throw new Error(`Skill with path ${skill.path} and name ${skill.name} already registered`);
+      throw new Error(`Skill with path ${skill.basePath} and name ${skill.name} already registered`);
     }
     this.skillFullPaths.add(fullPath);
 

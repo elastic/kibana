@@ -120,7 +120,7 @@ const getToolsForAttachmentTypes = (
   return [...tools];
 };
 
-const pickTools = async ({
+export const pickTools = async ({
   toolProvider,
   selection,
   request,

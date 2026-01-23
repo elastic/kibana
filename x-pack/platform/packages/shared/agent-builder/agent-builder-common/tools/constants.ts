@@ -36,6 +36,8 @@ export const platformCoreTools = {
   attachmentAdd: platformCoreTool('attachment_add'),
   attachmentList: platformCoreTool('attachment_list'),
   attachmentDiff: platformCoreTool('attachment_diff'),
+  // Skill tools
+  loadSkill: platformCoreTool('load_skill'), // TODO: Remove this once the file system is implemented
 } as const;
 
 /**

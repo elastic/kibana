@@ -20,11 +20,11 @@ import type { AgentBuilderBuiltinTool } from '../allow_lists';
 /**
  * Skill directory structure - explicit about how skills are organized.
  *
- * The purpose of this is to encorage skills to be well organized and grouped logically.
+ * The purpose of this is to encorage skills to be well organized, grouped logically and consistently.
  *
  * In order to store skills in a new directory, you need to add the directory to the structure.
  */
-export type DirectoryStructure = Directory<{
+export type SkillsDirectoryStructure = Directory<{
   skills: Directory<{
     platform: FileDirectory;
     observability: FileDirectory<{}>;
@@ -41,14 +41,14 @@ export type DirectoryStructure = Directory<{
 /**
  * Base paths where files can be placed (exact paths from the structure)
  */
-type DirectoryPath = FilePathsFromStructure<DirectoryStructure>;
+type DirectoryPath = FilePathsFromStructure<SkillsDirectoryStructure>;
 
 /**
  * Server-side definition of a skill type.
  */
 export interface SkillTypeDefinition<
   TName extends string = string,
-  TPath extends DirectoryPath = DirectoryPath
+  TBasePath extends DirectoryPath = DirectoryPath
 > {
   /**
    * Stable unique identifier for the skill.
@@ -61,18 +61,18 @@ export interface SkillTypeDefinition<
    */
   name: StringWithoutSpace<StringWithoutSlash<TName>>;
   /**
-   * Path to the skill. Must start with "skills/".
+   * Base path of the skill. Must start with "skills/".
    *
    * Skills should be grouped logically by path to be discoverable by the agent.
    *
    * If a directory path is not available, you can modify the DirectoryStructure in the agent-builder-server package.
    *
    * Example:
-   * - "skills/security/alerts/rules" - skill is stored in the "security/alerts/rules" directory
-   * - "skills/observability/alerts" - skill is stored in the "observability/alerts" directory
-   * - "skills/platform/core" - skill is stored in the "platform/core" directory
+   * - "skills/security/alerts/rules" - skill is stored in "security/alerts/rules/<name>/SKILL.md" directory
+   * - "skills/observability/alerts" - skill is stored in the "observability/alerts/<name>/SKILL.md" directory
+   * - "skills/platform/core" - skill is stored in the "platform/core/<name>/SKILL.md" directory
    */
-  path: TPath;
+  basePath: TBasePath;
 
   /**
    * Description of the skill.
@@ -83,6 +83,34 @@ export interface SkillTypeDefinition<
    * Body of the skill.
    */
   body: string;
+  /**
+   * Referenced content
+   */
+  referencedContent?: {
+    /**
+     * Name of the content. Also used as the file name. 
+     * Must contain only lowercase letters, numbers, and hyphens. Max 64 characters.
+     * <basePath>/<name>/<relativePath>/<reference-name> must be unique.
+     */
+    name: string;
+    /**
+     * Relative path of the referenced content. Must start with a dot `.`
+     * 
+     * Valid relative paths are:
+     * - "." - stores reference content in the same directory as the skill
+     * - "./<directory>" - stores reference content in the "<directory>" directory
+     * - Avoid multiple levels of directories (such as "./<directory>/<subdirectory>") to keep the structure flat.
+     * 
+     * Examples:
+     * - basePath: "skills/security/alerts/rules" & relativePath: "." - stores reference content in the "skills/security/alerts/rules/<name>.md" file
+     * - basePath: "skills/security/alerts/rules" & relativePath: "./queries" - stores reference content in the "skills/security/alerts/rules/queries/<name>.md" file
+     */
+    relativePath: string;
+    /**
+     * Body of the content.
+     */
+    body: string;
+  }[];
   /**
    * should return the list of tools from the registry which should be exposed to the agent
    * when this skill is used in the conversation.

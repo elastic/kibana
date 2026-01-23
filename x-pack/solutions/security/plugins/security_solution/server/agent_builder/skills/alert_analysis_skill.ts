@@ -16,9 +16,9 @@ import { z } from '@kbn/zod';
  * This skill helps analyze security threats, investigate alerts, and assess risk.
  */
 export const alertAnalysisSkill = defineSkillType({
-  id: 'security.alert-analysis',
+  id: 'alert-analysis',
   name: 'alert-analysis',
-  path: 'skills/security/alerts',
+  basePath: 'skills/security/alerts',
   description:
     'Comprehensive guide to analyze a security alert, finding related alerts, events and cases and identifying potential threats.',
   body: `# Alert Analysis Guide
@@ -26,6 +26,7 @@ export const alertAnalysisSkill = defineSkillType({
 ## Alert Analysis Process
 
 ### 1. Initial Alert Assessment
+- Fetch the alert
 - Review the alert's core details: severity, timestamp, rule name, and description
 - Identify key entities involved: users, hosts, IP addresses, file hashes, domains
 - Understand the alert context: what triggered it, what it indicates
@@ -73,6 +74,26 @@ export const alertAnalysisSkill = defineSkillType({
 - Cross-reference findings across alerts, events, and cases for validation
 - Prioritize high-severity alerts and critical risk entities
 - Document your analysis process and reasoning clearly`,
+  referencedContent: [
+    {
+      relativePath: './queries',
+      name: 'related_by_entities',
+      body: `FROM .alerts-security.alerts-* METADATA _id, _index
+| WHERE (
+    host.name == "ENTITY_VALUE_PLACEHOLDER" OR
+    user.name == "ENTITY_VALUE_PLACEHOLDER" OR
+    source.ip == "ENTITY_VALUE_PLACEHOLDER" OR
+    destination.ip == "ENTITY_VALUE_PLACEHOLDER" OR
+    entity.name == "ENTITY_VALUE_PLACEHOLDER"
+  )
+| WHERE @timestamp >= NOW() - INTERVAL 7 DAYS
+| KEEP _id, _index, @timestamp, kibana.alert.rule.name, kibana.alert.severity, 
+       kibana.alert.workflow_status, host.name, user.name, source.ip, 
+       destination.ip, entity.name, entity.type, message
+| SORT @timestamp DESC
+| LIMIT 100`,
+    },
+  ],
   getAllowedTools: () => [
     `security.alerts`,
     `security.entity_risk_score`,

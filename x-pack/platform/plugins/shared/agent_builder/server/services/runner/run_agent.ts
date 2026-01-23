@@ -17,6 +17,7 @@ import {
   createAgentEventEmitter,
   forkContextForAgentRun,
   createAttachmentsService,
+  createSkillsService,
   createToolProvider,
 } from './utils';
 import type { RunnerManager } from './runner';
@@ -36,6 +37,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     modelProvider,
     toolsService,
     attachmentsService,
+    skillsService,
     resultStore,
     attachmentStateManager,
     logger,
@@ -63,6 +65,13 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     promptManager,
     attachments: createAttachmentsService({
       attachmentsStart: attachmentsService,
+      toolsStart: toolsService,
+      request,
+      spaceId,
+      runner: manager.getRunner(),
+    }),
+    skills: createSkillsService({
+      skillsStart: skillsService,
       toolsStart: toolsService,
       request,
       spaceId,

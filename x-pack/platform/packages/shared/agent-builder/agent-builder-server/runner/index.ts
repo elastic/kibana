@@ -45,5 +45,6 @@ export type {
 } from './model_provider';
 export type { ToolResultStore, WritableToolResultStore } from './result_store';
 export type { AttachmentsService } from './attachments_service';
+export type { SkillsService } from './skills_service';
 export type { PromptManager, ToolPromptManager, ConfirmationInfo } from './prompt_manager';
 export type { ConversationStateManager, ToolStateManager } from './state_manager';

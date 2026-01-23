@@ -12,3 +12,4 @@ export {
   attachmentToolIds,
   type AttachmentToolsOptions,
 } from './attachments';
+export { createLoadSkillTool } from './skills';

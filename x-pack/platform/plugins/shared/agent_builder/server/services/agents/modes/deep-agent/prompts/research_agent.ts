@@ -17,6 +17,8 @@ import { attachmentTypeInstructions } from './utils/attachments';
 import { customInstructionsBlock, structuredOutputDescription } from './utils/custom_instructions';
 import { formatResearcherActionHistory } from './utils/actions';
 import { formatDate } from './utils/helpers';
+import { SkillsService } from '@kbn/agent-builder-server/runner';
+import { skillInstructions } from './utils/skills';
 
 const tools = {
   indexExplorer: sanitizeToolId(platformCoreTools.indexExplorer),
@@ -33,6 +35,7 @@ interface ResearchAgentPromptParams {
   versionedAttachmentPresentation?: AttachmentPresentation;
   clearSystemMessage?: boolean;
   outputSchema?: Record<string, unknown>;
+  skills: SkillsService;
 }
 
 export const getResearchAgentPrompt = (params: ResearchAgentPromptParams): BaseMessageLike[] => {
@@ -52,6 +55,7 @@ export const getBaseSystemMessage = ({
   customInstructions,
   attachmentTypes,
   outputSchema,
+  skills,
 }: ResearchAgentPromptParams): string => {
   return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
@@ -72,6 +76,8 @@ ${structuredOutputDescription(outputSchema)}
 
 ${attachmentTypeInstructions(attachmentTypes)}
 
+${skillInstructions(skills)}
+
 ## ADDITIONAL INFO
 - Current date: ${formatDate()}
 
@@ -85,6 +91,7 @@ export const getResearchSystemMessage = ({
   customInstructions,
   attachmentTypes,
   outputSchema,
+  skills,
 }: ResearchAgentPromptParams): string => {
   return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
@@ -174,6 +181,8 @@ Constraints:
 ${customInstructionsBlock(customInstructions)}
 
 ${structuredOutputDescription(outputSchema)}
+
+${skillInstructions(skills)}
 
 ${attachmentTypeInstructions(attachmentTypes)}
 

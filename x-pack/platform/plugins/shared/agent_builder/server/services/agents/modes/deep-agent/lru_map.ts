@@ -5,6 +5,12 @@ type Node<K, V> = {
     next?: Node<K, V>;
 };
 
+/**
+ * LRUMap is a simple implementation of a Least Recently Used (LRU) cache.
+ * It is used to store tools that are used frequently and need to be kept in memory.
+ * It is a simple implementation of a Least Recently Used (LRU) cache.
+ * It is used to store tools that are used frequently and need to be kept in memory.
+ */
 export class LRUMap<K, V> {
     private readonly map = new Map<K, Node<K, V>>();
     private head?: Node<K, V>; // most recently used
@@ -106,7 +112,7 @@ export class LRUMap<K, V> {
         node.next = undefined;
     }
 
-    private moveToHead(node: Node<K, V>): void {
+    moveToHead(node: Node<K, V>): void {
         if (node === this.head) return;
         this.removeNode(node);
         this.addToHead(node);

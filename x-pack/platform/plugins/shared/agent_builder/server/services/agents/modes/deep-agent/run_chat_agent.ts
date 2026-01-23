@@ -11,12 +11,10 @@ import { Command } from '@langchain/langgraph';
 import {
   isStreamEvent,
   type ToolIdMapping,
-  toolsToLangchain,
 } from '@kbn/agent-builder-genai-utils/langchain';
 import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
-import type { StructuredTool } from '@langchain/core/tools';
 import type { ConversationInternalState } from '@kbn/agent-builder-common/chat';
 import type { PromptManager } from '@kbn/agent-builder-server/runner';
 import type { ProcessedConversation } from '../utils/prepare_conversation';
@@ -36,7 +34,6 @@ import { roundToActions } from '../utils/round_to_actions';
 import { createAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
 import type { RunAgentParams, RunAgentResponse } from '../run_agent';
-import { browserToolsToLangchain } from '../../../tools/browser_tool_adapter';
 import { steps } from './constants';
 import type { StateType } from './state';
 import { ToolManager } from './tool_manager';
@@ -77,6 +74,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     modelProvider,
     toolProvider,
     attachments,
+    skills,
     request,
     stateManager,
     events,
@@ -116,36 +114,15 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     runner: context.runner,
   });
 
-  const selectedTools = [...attachmentBoundTools, ...versionedAttachmentTools, ...registryTools];
-
-  const {
-    tools: langchainTools,
-    idMappings: toolIdMapping,
-    agentBuilderToLangchainIdMap,
-  } = await toolsToLangchain({
-    tools: selectedTools,
-    logger,
+  const toolManager = await ToolManager.from({
+    attachmentBoundTools,
+    versionedAttachmentTools,
+    registryTools,
+    browserApiTools,
+    dynamicToolCapacity: 10, // TODO: make this configurable
     request,
-    sendEvent: eventEmitter,
-  });
-
-  let browserLangchainTools: StructuredTool[] = [];
-  let browserIdMappings = new Map<string, string>();
-  if (browserApiTools && browserApiTools.length > 0) {
-    const browserToolResult = browserToolsToLangchain({
-      browserApiTools,
-    });
-    browserLangchainTools = browserToolResult.tools;
-    browserIdMappings = browserToolResult.idMappings;
-  }
-
-  const allTools = [...langchainTools, ...browserLangchainTools];
-  const allToolIdMappings = new Map([...toolIdMapping, ...browserIdMappings]);
-
-  const toolManager = ToolManager.from({
-    staticTools: allTools,
-    dynamicTools: [],
-    capacity: 20 - allTools.length, // TODO: make this configurable
+    logger,
+    eventEmitter,
   });
 
   const cycleLimit = 10;
@@ -156,11 +133,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     events: { emit: eventEmitter },
     chatModel: model.chatModel,
     toolManager: toolManager,
+    skills: skills,
     configuration: resolvedConfiguration,
     capabilities: resolvedCapabilities,
     structuredOutput,
     outputSchema,
     processedConversation,
+    toolProvider,
+    request,
   });
 
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
@@ -168,7 +148,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const eventStream = agentGraph.streamEvents(
     createInitializerCommand({
       conversation: processedConversation,
-      agentBuilderToLangchainIdMap,
+      agentBuilderToLangchainIdMap: toolManager.getToolIdMapping(),
       cycleLimit,
     }),
     {
@@ -188,7 +168,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     filter(isStreamEvent),
     convertGraphEvents({
       graphName: chatAgentGraphName,
-      toolIdMapping: allToolIdMappings,
+      toolManager,
       logger,
       startTime,
       pendingRound,
