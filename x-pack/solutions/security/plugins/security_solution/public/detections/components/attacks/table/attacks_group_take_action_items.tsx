@@ -16,7 +16,7 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useAttackAssigneesContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_assignees_context_menu_items';
 
 interface AttacksGroupTakeActionItemsProps {
-  attack?: AttackDiscoveryAlert;
+  attack: AttackDiscoveryAlert;
 }
 
 export function AttacksGroupTakeActionItems({ attack }: AttacksGroupTakeActionItemsProps) {
@@ -28,16 +28,13 @@ export function AttacksGroupTakeActionItems({ attack }: AttacksGroupTakeActionIt
   }, [globalQueries]);
 
   const attacksWithAssignees = useMemo(() => {
-    if (attack?.id) {
-      return [
-        {
-          attackId: attack.id,
-          assignees: attack?.assignees,
-          relatedAlertIds: attack?.alertIds ?? [],
-        },
-      ];
-    }
-    return [];
+    return [
+      {
+        attackId: attack.id,
+        assignees: attack?.assignees,
+        relatedAlertIds: attack?.alertIds ?? [],
+      },
+    ];
   }, [attack]);
 
   const onAssignSuccess = useCallback(() => {
