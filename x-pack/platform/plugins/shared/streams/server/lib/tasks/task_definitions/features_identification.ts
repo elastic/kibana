@@ -14,12 +14,13 @@ import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
 import { PromptsConfigService } from '../../saved_objects/significant_events/prompts_config_service';
 import { cancellableTask } from '../cancellable_task';
-import { getFeatureId } from '../../streams/feature/feature_client';
+import { getFeatureId, MAX_FEATURE_AGE_MS } from '../../streams/feature/feature_client';
 
 export interface FeaturesIdentificationTaskParams {
   connectorId: string;
   start: number;
   end: number;
+  streamName: string;
 }
 
 export interface IdentifyFeaturesResult {
@@ -43,9 +44,8 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 throw new Error('Request is required to run this task');
               }
 
-              const { connectorId, start, end, _task } = runContext.taskInstance
+              const { connectorId, start, end, streamName, _task } = runContext.taskInstance
                 .params as TaskParams<FeaturesIdentificationTaskParams>;
-              const { stream: name } = _task;
 
               const {
                 taskClient,
@@ -60,7 +60,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
 
               try {
                 const [stream, { featurePromptOverride }] = await Promise.all([
-                  streamsClient.getStream(name),
+                  streamsClient.getStream(streamName),
                   new PromptsConfigService({
                     soClient,
                     logger: taskContext.logger,
@@ -81,12 +81,13 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   systemPrompt: featurePromptOverride,
                 });
 
-                const now = new Date().toISOString();
+                const now = Date.now();
                 const features = baseFeatures.map((feature) => ({
                   ...feature,
                   status: 'active' as const,
-                  last_seen: now,
+                  last_seen: new Date(now).toISOString(),
                   id: getFeatureId(stream.name, feature),
+                  expires_at: new Date(now + MAX_FEATURE_AGE_MS).toISOString(),
                 }));
 
                 await featureClient.bulk(
@@ -96,7 +97,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
 
                 await taskClient.complete<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>(
                   _task,
-                  { connectorId, start, end },
+                  { connectorId, start, end, streamName },
                   { features }
                 );
               } catch (error) {
@@ -120,7 +121,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
 
                 await taskClient.fail<FeaturesIdentificationTaskParams>(
                   _task,
-                  { connectorId, start, end },
+                  { connectorId, start, end, streamName },
                   errorMessage
                 );
               }
