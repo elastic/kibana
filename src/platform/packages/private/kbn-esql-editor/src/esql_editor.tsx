@@ -238,6 +238,16 @@ const ESQLEditorInternal = function ESQLEditor({
     [onTextLangQueryChange]
   );
 
+  const onAddUnmappedFieldsSetting = useCallback(() => {
+    const currentQuery = editorRef.current?.getValue() || code;
+    // Check if the query already has SET unmapped_fields
+    if (/SET\s+unmapped_fields\s*=/i.test(currentQuery)) {
+      return; // Already has the setting, don't add it
+    }
+    const newQuery = `SET unmapped_fields = "LOAD";\n${currentQuery}`;
+    onQueryUpdate(newQuery);
+  }, [code, onQueryUpdate]);
+
   const { onSuggestionsReady, resetSuggestionsTracking } = useSuggestionsLatencyTracking({
     telemetryService,
     sessionIdRef,
@@ -1323,6 +1333,7 @@ const ESQLEditorInternal = function ESQLEditor({
         dataErrorsControl={dataErrorsControl}
         toggleVisor={() => setIsVisorOpen(!isVisorOpen)}
         hideQuickSearch={hideQuickSearch}
+        onAddUnmappedFieldsSetting={onAddUnmappedFieldsSetting}
       />
       {createPortal(
         Object.keys(popoverPosition).length !== 0 && popoverPosition.constructor === Object && (

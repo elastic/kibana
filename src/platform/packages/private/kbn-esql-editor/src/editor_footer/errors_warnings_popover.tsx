@@ -8,6 +8,7 @@
  */
 
 import {
+  EuiButton,
   EuiButtonEmpty,
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -64,10 +65,12 @@ function ErrorsWarningsContent({
   items,
   type,
   onErrorClick,
+  onQuickFixClick,
 }: {
   items: MonacoMessage[];
   type: 'error' | 'warning';
   onErrorClick: (error: MonacoMessage) => void;
+  onQuickFixClick?: (error: MonacoMessage) => void;
 }) {
   const { euiTheme } = useEuiTheme();
   const { color } = getConstsByType(type, items.length);
@@ -123,6 +126,32 @@ function ErrorsWarningsContent({
                   {item.message}
                 </EuiFlexItem>
               </EuiFlexGroup>
+              {onQuickFixClick &&
+                (item.code === 'unknownColumn' ||
+                  item.code === 'unmappedColumnWarning' ||
+                  (item.code === 'errorFromES' && item.message.includes('Unknown column'))) && (
+                  <EuiFlexGroup
+                    gutterSize="s"
+                    alignItems="center"
+                    css={{ marginTop: euiTheme.size.xs }}
+                  >
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        size="s"
+                        color="primary"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onQuickFixClick(item);
+                        }}
+                        data-test-subj="ESQLEditor-quickfix-unmapped-fields"
+                      >
+                        {i18n.translate('esqlEditor.query.addUnmappedFieldsQuickFix', {
+                          defaultMessage: 'Load unmapped fields',
+                        })}
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                )}
             </EuiDescriptionListDescription>
           );
         })}
@@ -182,6 +211,7 @@ export function ErrorsWarningsFooterPopover({
   onErrorClick,
   isSpaceReduced,
   dataErrorsControl,
+  onQuickFixClick,
 }: {
   isPopoverOpen: boolean;
   items: MonacoMessage[];
@@ -190,6 +220,7 @@ export function ErrorsWarningsFooterPopover({
   onErrorClick: (error: MonacoMessage) => void;
   isSpaceReduced?: boolean;
   dataErrorsControl?: DataErrorsControl;
+  onQuickFixClick?: (error: MonacoMessage) => void;
 }) {
   // Visible items may be 0 if dataErrorsControl is enabled and there are only data errors.
   // In this case, we still want to show the popover with the switch, so the user can disable it to see the errors.
@@ -230,7 +261,12 @@ export function ErrorsWarningsFooterPopover({
           closePopover={closePopover}
         >
           {visibleItems.length > 0 && (
-            <ErrorsWarningsContent items={visibleItems} type={type} onErrorClick={onErrorClick} />
+            <ErrorsWarningsContent
+              items={visibleItems}
+              type={type}
+              onErrorClick={onErrorClick}
+              onQuickFixClick={onQuickFixClick}
+            />
           )}
           {dataErrorsControl && (
             <ErrorsWarningsFooter

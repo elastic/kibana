@@ -67,6 +67,7 @@ interface EditorFooterProps {
   displayDocumentationAsFlyout?: boolean;
   dataErrorsControl?: DataErrorsControl;
   toggleVisor: () => void;
+  onAddUnmappedFieldsSetting?: () => void;
 }
 
 export const EditorFooter = memo(function EditorFooter({
@@ -95,6 +96,7 @@ export const EditorFooter = memo(function EditorFooter({
   code,
   dataErrorsControl,
   toggleVisor,
+  onAddUnmappedFieldsSetting,
 }: EditorFooterProps) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { docLinks } = kibana.services;
@@ -112,6 +114,21 @@ export const EditorFooter = memo(function EditorFooter({
   }, [isLanguageComponentOpen, setIsHistoryOpen, setIsLanguageComponentOpen]);
 
   const limit = useMemo(() => getLimitFromESQLQuery(code), [code]);
+  const handleQuickFix = useCallback(
+    (error: MonacoMessage) => {
+      if (
+        (error.code === 'unknownColumn' ||
+          error.code === 'unmappedColumnWarning' ||
+          (error.code === 'errorFromES' && error.message.includes('Unknown column'))) &&
+        onAddUnmappedFieldsSetting
+      ) {
+        onAddUnmappedFieldsSetting();
+        setIsErrorPopoverOpen(false);
+        setIsWarningPopoverOpen(false);
+      }
+    },
+    [onAddUnmappedFieldsSetting]
+  );
 
   return (
     <EuiFlexGroup
@@ -205,6 +222,7 @@ export const EditorFooter = memo(function EditorFooter({
                   }}
                   onErrorClick={onErrorClick}
                   dataErrorsControl={dataErrorsControl}
+                  onQuickFixClick={handleQuickFix}
                 />
               )}
               {warnings && warnings.length > 0 && (
@@ -219,6 +237,7 @@ export const EditorFooter = memo(function EditorFooter({
                     setIsWarningPopoverOpen(isOpen);
                   }}
                   onErrorClick={onErrorClick}
+                  onQuickFixClick={handleQuickFix}
                 />
               )}
             </EuiFlexGroup>
