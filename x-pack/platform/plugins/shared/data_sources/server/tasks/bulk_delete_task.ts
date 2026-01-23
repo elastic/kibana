@@ -6,7 +6,7 @@
  */
 
 import type { CoreSetup, Logger, LoggerFactory } from '@kbn/core/server';
-import type { RunContext } from '@kbn/task-manager-plugin/server';
+import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type {
   DataSourcesServerSetupDependencies,
   DataSourcesServerStartDependencies,
@@ -30,29 +30,21 @@ export interface BulkDeleteTaskState {
 
 interface TaskSetupContract {
   core: CoreSetup<DataSourcesServerStartDependencies>;
+  taskManager: TaskManagerSetupContract;
   logFactory: LoggerFactory;
-  plugins: {
-    [key in keyof DataSourcesServerSetupDependencies]: {
-      setup: Required<DataSourcesServerSetupDependencies>[key];
-    };
-  } & {
-    [key in keyof DataSourcesServerStartDependencies]: {
-      start: () => Promise<Required<DataSourcesServerStartDependencies>[key]>;
-    };
-  };
+  workflowManagement: DataSourcesServerSetupDependencies['workflowsManagement'];
 }
 
 export class BulkDeleteTask {
   private logger: Logger;
 
   constructor(setupContract: TaskSetupContract) {
-    const { core, plugins, logFactory } = setupContract;
+    const { core, taskManager, logFactory, workflowManagement } = setupContract;
     this.logger = logFactory.get(TYPE);
 
     this.logger.debug('Registering task with [30m] timeout');
 
-    // taskManager is guaranteed to be available here because plugin.ts checks before instantiating
-    plugins.taskManager!.setup.registerTaskDefinitions({
+    taskManager.registerTaskDefinitions({
       [TYPE]: {
         title: 'Data sources bulk delete',
         timeout: '30m',
@@ -95,7 +87,6 @@ export class BulkDeleteTask {
               const toolRegistry = await pluginStart.agentBuilder.tools.getRegistry({
                 request: fakeRequest,
               });
-              const workflowManagement = plugins.workflowsManagement.setup;
 
               let deletedCount = 0;
               const errors: Array<{ dataSourceId: string; error: string }> = [];

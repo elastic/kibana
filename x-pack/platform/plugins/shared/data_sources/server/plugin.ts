@@ -12,7 +12,6 @@ import type {
   Logger,
   Plugin,
 } from '@kbn/core/server';
-import { mapValues } from 'lodash';
 import { registerRoutes } from './routes';
 import { registerDataSources } from './sources';
 import type {
@@ -57,20 +56,11 @@ export class DataSourcesServerPlugin
 
     // Register bulk delete task if Task Manager is available
     if (plugins.taskManager) {
-      const mappedPlugins = mapValues(plugins, (value, key) => {
-        return {
-          setup: value,
-          start: () =>
-            core.getStartServices().then(([, pluginStart]) => {
-              return pluginStart[key as keyof DataSourcesServerStartDependencies];
-            }),
-        };
-      }) as any;
-
       new BulkDeleteTask({
         core,
         logFactory: this.logger,
-        plugins: mappedPlugins,
+        taskManager: plugins.taskManager,
+        workflowManagement: plugins.workflowsManagement,
       });
     }
 

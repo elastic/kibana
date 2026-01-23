@@ -92,17 +92,10 @@ describe('BulkDeleteTask', () => {
     return { mockCoreSetup, mockCoreStart, mockPluginStart };
   };
 
-  const createMockPlugins = () => {
+  const createMockTaskManager = () => {
     return {
-      taskManager: {
-        setup: {
-          registerTaskDefinitions: jest.fn(),
-        },
-      },
-      workflowsManagement: {
-        setup: mockWorkflowManagement,
-      },
-    } as any;
+      registerTaskDefinitions: jest.fn(),
+    };
   };
 
   const createMockPointInTimeFinder = (dataSources: any[]) => {
@@ -131,15 +124,16 @@ describe('BulkDeleteTask', () => {
   describe('task registration', () => {
     it('should register task definition with correct configuration', () => {
       const { mockCoreSetup } = createMockCoreSetup();
-      const mockPlugins = createMockPlugins();
+      const mockTaskManager = createMockTaskManager();
 
       new BulkDeleteTask({
         core: mockCoreSetup as any,
         logFactory: mockLogFactory as any,
-        plugins: mockPlugins,
+        taskManager: mockTaskManager as any,
+        workflowManagement: mockWorkflowManagement as any,
       });
 
-      expect(mockPlugins.taskManager.setup.registerTaskDefinitions).toHaveBeenCalledWith({
+      expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledWith({
         [TYPE]: expect.objectContaining({
           title: 'Data sources bulk delete',
           timeout: '30m',
@@ -157,16 +151,16 @@ describe('BulkDeleteTask', () => {
 
     const setupTaskRunner = (initialState?: Partial<BulkDeleteTaskState>) => {
       const { mockCoreSetup } = createMockCoreSetup();
-      const mockPlugins = createMockPlugins();
+      const mockTaskManager = createMockTaskManager();
 
       new BulkDeleteTask({
         core: mockCoreSetup as any,
         logFactory: mockLogFactory as any,
-        plugins: mockPlugins,
+        taskManager: mockTaskManager as any,
+        workflowManagement: mockWorkflowManagement as any,
       });
 
-      const registerCall = (mockPlugins.taskManager.setup.registerTaskDefinitions as jest.Mock).mock
-        .calls[0][0];
+      const registerCall = (mockTaskManager.registerTaskDefinitions as jest.Mock).mock.calls[0][0];
       const createTaskRunner = registerCall[TYPE].createTaskRunner;
 
       mockTaskInstance = {
@@ -182,7 +176,7 @@ describe('BulkDeleteTask', () => {
         abortController: new AbortController(),
       });
 
-      return { mockCoreSetup, mockPlugins };
+      return { mockCoreSetup, mockTaskManager };
     };
 
     describe('full deletion success', () => {
@@ -557,16 +551,17 @@ describe('BulkDeleteTask', () => {
 
       it('should handle missing fakeRequest', async () => {
         const { mockCoreSetup } = createMockCoreSetup();
-        const mockPlugins = createMockPlugins();
+        const mockTaskManager = createMockTaskManager();
 
         new BulkDeleteTask({
           core: mockCoreSetup as any,
           logFactory: mockLogFactory as any,
-          plugins: mockPlugins,
+          taskManager: mockTaskManager as any,
+          workflowManagement: mockWorkflowManagement as any,
         });
 
-        const registerCall = (mockPlugins.taskManager.setup.registerTaskDefinitions as jest.Mock)
-          .mock.calls[0][0];
+        const registerCall = (mockTaskManager.registerTaskDefinitions as jest.Mock).mock
+          .calls[0][0];
         const createTaskRunner = registerCall[TYPE].createTaskRunner;
 
         const taskRunner = createTaskRunner({
