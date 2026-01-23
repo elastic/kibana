@@ -18,32 +18,37 @@ import type {
 } from './utils/reporting/report_table';
 import type { DatasetScoreWithStats } from './utils/evaluation_stats';
 
-export interface EvaluationDataset {
+export interface EvaluationDataset<TExample extends Example = Example> {
   name: string;
   description: string;
-  examples: Example[];
+  examples: TExample[];
   id?: undefined;
 }
 
-export interface EvaluationDatasetWithId extends Omit<EvaluationDataset, 'id'> {
+export interface EvaluationDatasetWithId<TExample extends Example = Example>
+  extends Omit<EvaluationDataset<TExample>, 'id'> {
   id: string;
 }
 
 export type TaskOutput = unknown;
 
-export interface Example {
-  input: Record<string, unknown>;
+export interface Example<
+  TInput extends Record<string, unknown> = Record<string, unknown>,
+  TExpected = any,
+  TMetadata extends Record<string, unknown> | null = Record<string, unknown> | null
+> {
+  input: TInput;
   /**
    * Expected output/ground truth for the example.
    *
    * Note: kept intentionally loose to stay compatible with existing datasets and
    * the Phoenix-backed executor types.
    */
-  output?: any;
+  output?: TExpected;
   /**
    * Phoenix may return `null` metadata in stored examples.
    */
-  metadata?: Record<string, unknown> | null;
+  metadata?: TMetadata;
 }
 
 export interface EvaluatorParams<TExample extends Example, TTaskOutput extends TaskOutput> {
@@ -179,6 +184,13 @@ export interface EvaluationReport {
 
 export interface EvaluationSpecificWorkerFixtures {
   inferenceClient: BoundInferenceClient;
+  /**
+   * Executor client used to run experiments (defaults to in-Kibana; Phoenix-backed via `KBN_EVALS_EXECUTOR=phoenix`).
+   */
+  executorClient: EvalsExecutorClient;
+  /**
+   * @deprecated Use `executorClient`. Kept for backwards compatibility while suites migrate off Phoenix naming.
+   */
   phoenixClient: EvalsExecutorClient;
   evaluators: DefaultEvaluators;
   fetch: HttpHandler;
@@ -193,6 +205,13 @@ export interface EvaluationSpecificWorkerFixtures {
 
 export interface EvaluationWorkerFixtures extends ScoutWorkerFixtures {
   inferenceClient: BoundInferenceClient;
+  /**
+   * Executor client used to run experiments (defaults to in-Kibana; Phoenix-backed via `KBN_EVALS_EXECUTOR=phoenix`).
+   */
+  executorClient: EvalsExecutorClient;
+  /**
+   * @deprecated Use `executorClient`. Kept for backwards compatibility while suites migrate off Phoenix naming.
+   */
   phoenixClient: EvalsExecutorClient;
   evaluators: DefaultEvaluators;
   fetch: HttpHandler;

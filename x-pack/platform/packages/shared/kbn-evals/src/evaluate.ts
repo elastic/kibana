@@ -35,7 +35,7 @@ import {
 
 /**
  * Test type for evaluations. Loads an inference client and a
- * (Kibana-flavored) Phoenix client.
+ * executor client (defaults to in-Kibana; Phoenix-backed via `KBN_EVALS_EXECUTOR=phoenix`).
  */
 
 export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
@@ -231,6 +231,12 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     {
       scope: 'worker',
     },
+  ],
+  executorClient: [
+    async ({ phoenixClient }, use) => {
+      await use(phoenixClient);
+    },
+    { scope: 'worker' },
   ],
   evaluators: [
     async ({ log, inferenceClient, evaluationConnector, traceEsClient }, use) => {

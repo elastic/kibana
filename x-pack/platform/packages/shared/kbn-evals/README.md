@@ -22,7 +22,7 @@ This package is built on top of `@kbn/scout` and the `@kbn/inference-*` packages
 // my_eval.test.ts
 import { evaluate } from '@kbn/evals';
 
-evaluate('the model should answer truthfully', async ({ inferenceClient, phoenixClient }) => {
+evaluate('the model should answer truthfully', async ({ inferenceClient, executorClient }) => {
   const dataset = {
     name: 'my-dataset',
     description: 'my-description',
@@ -38,44 +38,64 @@ evaluate('the model should answer truthfully', async ({ inferenceClient, phoenix
     ],
   };
 
-  await phoenixClient.runExperiment({
-    dataset,
-    evaluators: [
+  await executorClient.runExperiment(
+    {
+      dataset,
+      task: async ({ input }) => {
+        const result = await inferenceClient.output({
+          id: 'foo',
+          input: input.content as string,
+        });
+
+        return { content: result.content };
+      },
+    },
+    [
       {
         name: 'equals',
         kind: 'CODE',
-        evaluate: ({ input, output, expected }) => {
+        evaluate: async ({ output, expected }) => {
           return {
-            score: output === 'bar' ? 1 : 0,
+            score: output?.content === expected?.content ? 1 : 0,
+            metadata: { output: output?.content, expected: expected?.content },
           };
         },
       },
-    ],
-    task: async ({ input }) => {
-      return (
-        await inferenceClient.output({
-          id: 'foo',
-          input: input.content as string,
-        })
-      ).content;
-    },
-  });
+    ]
+  );
 });
 ```
+
+### Typing datasets (recommended)
+
+For strong typing of \(input\), \(expected\), and \(metadata\), define a suite-local `Example` type and use it consistently in your dataset, task, and evaluator selection:
+
+```ts
+import type { Example } from '@kbn/evals';
+
+type MyExample = Example<
+  { question: string },
+  { expectedAnswer: string },
+  { tags?: string[] } | null
+>;
+```
+
+Then use helpers like `selectEvaluators<MyExample, MyTaskOutput>(...)` so your evaluator callback receives typed `expected`/`metadata`.
 
 ### Available fixtures
 
 | Fixture                     | Description                                                                                                                                   |
 | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | `inferenceClient`           | Bound to the connector declared by the active Playwright project.                                                                             |
-| `phoenixClient`             | Client for the Phoenix API (to run experiments)                                                                                               |
+| `executorClient`            | **Executor client** (implements `EvalsExecutorClient`) used to run experiments. Defaults to the **in-Kibana executor**; can be switched to the Phoenix-backed executor via `KBN_EVALS_EXECUTOR=phoenix`. |
+| `phoenixClient`             | Alias for `executorClient` (kept for backwards compatibility).                                                                                |
 | `evaluationAnalysisService` | Service for analyzing and comparing evaluation results across different models and datasets                                                   |
 | `reportModelScore`          | Function that displays evaluation results (can be overridden for custom reporting)                                                            |
 | `traceEsClient`             | Dedicated ES client for querying traces. Defaults to `esClient` Scout fixture. See [Trace-Based Evaluators](#trace-based-evaluators-optional) |
 
 ## Running the suite
 
-Make sure that you've configured a Phoenix exporter in `kibana.dev.yml`:
+If you want to view traces in the Phoenix UI, configure a Phoenix exporter in `kibana.dev.yml`:
 
 ```yaml
 telemetry.tracing.exporters:
@@ -86,7 +106,7 @@ telemetry.tracing.exporters:
       api_key: '<my-api-key>'
 ```
 
-or alternatively have the edot collector running to capture traces locally (see src/platform/packages/shared/kbn-edot-collector/README.md).
+This is **optional** for the default (in-Kibana) executor. If you only care about trace-based evaluators stored in Elasticsearch, you can just run the EDOT collector to capture traces locally (see `src/platform/packages/shared/kbn-edot-collector/README.md`).
 
 
 
@@ -124,7 +144,8 @@ By default, these evaluators query traces from the same Elasticsearch cluster as
 
 #### Prerequisites
 
-To enable trace-based evaluators, configure the HTTP exporter in `kibana.dev.yml` to export traces via OpenTelemetry:
+To enable trace-based evaluators, configure the HTTP exporter in `kibana.dev.yml` to export traces via OpenTelemetry.
+You can also include the Phoenix exporter if you want traces visible in Phoenix (optional):
 
 ```yaml
 telemetry.tracing.exporters:
@@ -263,7 +284,7 @@ export const evaluate = base.extend({
   },
 });
 
-evaluate('my test', async ({ phoenixClient }) => {
+evaluate('my test', async ({ executorClient }) => {
   // Your test logic here
 });
 ```
@@ -368,7 +389,7 @@ To enable selective evaluator execution, wrap your evaluators with the `selectEv
 ```ts
 import { selectEvaluators } from '@kbn/evals';
 
-await phoenixClient.runExperiment(
+await executorClient.runExperiment(
   {
     dataset,
     task: myTask,
