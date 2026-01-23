@@ -10,8 +10,8 @@
 import React from 'react';
 import { fireEvent, render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { MetricsGridProps } from './metrics_grid';
-import { MetricsGrid } from './metrics_grid';
+import type { ChartSectionGridProps } from './chart_section_grid';
+import { ChartSectionGrid } from './chart_section_grid';
 import { Chart } from './chart';
 import type { UnifiedHistogramServices } from '@kbn/unified-histogram';
 import { getFetchParamsMock, getFetch$Mock } from '@kbn/unified-histogram/__mocks__/fetch_params';
@@ -32,7 +32,7 @@ describe('MetricsGrid', () => {
     updateESQLQuery: jest.fn(),
   };
 
-  const fetchParams: MetricsGridProps['fetchParams'] = getFetchParamsMock({
+  const fetchParams: ChartSectionGridProps['fetchParams'] = getFetchParamsMock({
     filters: [],
     query: {
       esql: 'FROM metrics-*',
@@ -45,7 +45,7 @@ describe('MetricsGrid', () => {
     fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
   } as unknown as UnifiedHistogramServices;
 
-  const fields: MetricsGridProps['fields'] = [
+  const fields: ChartSectionGridProps['fields'] = [
     {
       name: 'system.cpu.utilization',
       dimensions: [{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }],
@@ -60,7 +60,7 @@ describe('MetricsGrid', () => {
     },
   ];
 
-  const defaultProps: MetricsGridProps = {
+  const defaultProps: ChartSectionGridProps = {
     columns: 2,
     dimensions: [],
     discoverFetch$: undefined as unknown as UnifiedHistogramFetch$,
@@ -70,8 +70,10 @@ describe('MetricsGrid', () => {
     actions,
   };
 
-  const renderMetricsGrid = (props: Partial<MetricsGridProps> = {}) => {
-    return render(<MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} {...props} />);
+  const renderMetricsGrid = (props: Partial<ChartSectionGridProps> = {}) => {
+    return render(
+      <ChartSectionGrid {...defaultProps} discoverFetch$={discoverFetch$} {...props} />
+    );
   };
 
   beforeEach(() => {
@@ -92,7 +94,7 @@ describe('MetricsGrid', () => {
 
   it('passes the correct size prop', () => {
     const { rerender } = render(
-      <MetricsGrid
+      <ChartSectionGrid
         {...defaultProps}
         columns={3}
         dimensions={[{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }]}
@@ -103,7 +105,7 @@ describe('MetricsGrid', () => {
     expect(Chart).toHaveBeenCalledWith(expect.objectContaining({ size: 's' }), expect.anything());
 
     rerender(
-      <MetricsGrid
+      <ChartSectionGrid
         {...defaultProps}
         columns={4}
         dimensions={[{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }]}
@@ -192,7 +194,7 @@ describe('MetricsGrid', () => {
 
     it('should handle vertical arrow navigation in multi-row grid', async () => {
       const user = userEvent.setup({ delay: null });
-      const multipleFields: MetricsGridProps['fields'] = [
+      const multipleFields: ChartSectionGridProps['fields'] = [
         ...fields,
         {
           name: 'system.disk.utilization',

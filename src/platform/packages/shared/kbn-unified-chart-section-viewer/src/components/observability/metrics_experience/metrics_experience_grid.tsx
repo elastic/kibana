@@ -12,7 +12,7 @@ import { keys } from '@elastic/eui';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ } from '../../../common/constants';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
-import { MetricsGridWrapper } from '../../metrics_grid_wrapper';
+import { ChartSectionGridWrapper } from '../../chart_section_grid_wrapper';
 import { EmptyState } from '../../empty_state/empty_state';
 import { useToolbarActions } from '../../toolbar/hooks/use_toolbar_actions';
 import { SearchButton } from '../../toolbar/right_side_actions/search_button';
@@ -82,7 +82,7 @@ export const MetricsExperienceGrid = ({
   }
 
   return (
-    <MetricsGridWrapper
+    <ChartSectionGridWrapper
       id="metricsExperienceGrid"
       toolbarCss={chartToolbarCss}
       toolbar={{
@@ -117,7 +117,7 @@ export const MetricsExperienceGrid = ({
         histogramCss={histogramCss}
         isDiscoverLoading={isDiscoverLoading}
       />
-    </MetricsGridWrapper>
+    </ChartSectionGridWrapper>
   );
 };
 

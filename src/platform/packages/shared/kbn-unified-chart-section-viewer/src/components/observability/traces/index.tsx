@@ -14,7 +14,7 @@ import { useEsqlQueryInfo } from '../../../hooks/use_esql_query_info';
 import { ErrorRateChart } from './error_rate';
 import { LatencyChart } from './latency';
 import { ThroughputChart } from './throughput';
-import { MetricsGridWrapper } from '../../metrics_grid_wrapper';
+import { ChartSectionGridWrapper } from '../../chart_section_grid_wrapper';
 import type { UnifiedMetricsGridProps } from '../../../types';
 
 export const chartPalette = euiPaletteColorBlind({ rotations: 2 });
@@ -64,7 +64,7 @@ function TraceMetricsGrid({
   }
 
   return (
-    <MetricsGridWrapper
+    <ChartSectionGridWrapper
       id="tracesGrid"
       toolbarCss={chartToolbarCss}
       toolbar={toolbar}
@@ -103,7 +103,7 @@ function TraceMetricsGrid({
           </EuiFlexGrid>
         </EuiPanel>
       </TraceMetricsProvider>
-    </MetricsGridWrapper>
+    </ChartSectionGridWrapper>
   );
 }
 

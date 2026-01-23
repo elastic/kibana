@@ -23,7 +23,7 @@ import { createESQLQuery } from '../common/utils';
 import { useChartLayers } from './chart/hooks/use_chart_layers';
 import type { UnifiedMetricsGridProps } from '../types';
 
-export type MetricsGridProps = Pick<
+export type ChartSectionGridProps = Pick<
   UnifiedMetricsGridProps,
   'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams' | 'actions'
 > & {
@@ -38,7 +38,7 @@ export type MetricsGridProps = Pick<
 const getItemKey = (metric: MetricField, index: number) => {
   return `${metric.name}-${index}`;
 };
-export const MetricsGrid = ({
+export const ChartSectionGrid = ({
   fields,
   onBrushEnd,
   onFilter,
@@ -50,7 +50,7 @@ export const MetricsGrid = ({
   fetchParams,
   discoverFetch$,
   searchTerm,
-}: MetricsGridProps) => {
+}: ChartSectionGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const chartRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const { euiTheme } = useEuiTheme();
