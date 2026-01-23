@@ -56,19 +56,7 @@ export class BulkDeleteTask {
 
               if (!fakeRequest) {
                 this.logger.error(FAKE_REQUEST_NOT_DEFINED_ERROR);
-                return {
-                  runAt: new Date(Date.now() + 60 * 60 * 1000),
-                  state: {
-                    isDone: true,
-                    deletedCount: 0,
-                    errors: [
-                      {
-                        dataSourceId: UNKNOWN_DATA_SOURCE_ID,
-                        error: FAKE_REQUEST_NOT_DEFINED_ERROR,
-                      },
-                    ],
-                  } satisfies BulkDeleteTaskState,
-                };
+                return;
               }
 
               const state = taskInstance.state as BulkDeleteTaskState;
