@@ -255,22 +255,6 @@ export const useTopNavLinks = ({
     if (services.capabilities.discover_v2.save && !defaultMenu?.saveItem?.disabled) {
       const isEmbeddedEditor = services.embeddableEditor.isEmbeddedEditor();
 
-      // In embedded editor mode, add "Cancel" button
-      if (isEmbeddedEditor) {
-        newAppMenuRegistry.registerItems([
-          {
-            id: 'cancel',
-            order: 100,
-            label: i18n.translate('discover.localMenu.cancelTitle', {
-              defaultMessage: 'Cancel',
-            }),
-            testId: 'discoverCancelButton',
-            run: services.embeddableEditor.transferBackToEditor,
-            iconType: 'editorUndo',
-          },
-        ]);
-      }
-
       newAppMenuRegistry.setPrimaryActionItem({
         id: 'save',
         label: isEmbeddedEditor
@@ -289,26 +273,36 @@ export const useTopNavLinks = ({
             onSaveCb: isEmbeddedEditor ? services.embeddableEditor.transferBackToEditor : undefined,
           });
         },
-        // Only show split button options when not in embedded editor mode
-        ...(isEmbeddedEditor
-          ? {}
-          : {
-              popoverWidth: 150,
-              popoverTestId: 'discoverSaveButtonPopover',
-              splitButtonProps: {
+        popoverWidth: 150,
+        popoverTestId: 'discoverSaveButtonPopover',
+        splitButtonProps: {
+          secondaryButtonIcon: 'arrowDown',
+          secondaryButtonAriaLabel: i18n.translate('discover.localMenu.saveOptionsAriaLabel', {
+            defaultMessage: 'Save options',
+          }),
+          // Show different split button options when in embedded editor mode
+          ...(isEmbeddedEditor
+            ? {
+                items: [
+                  {
+                    run: services.embeddableEditor.transferBackToEditor,
+                    id: 'cancel',
+                    order: 100,
+                    label: i18n.translate('discover.localMenu.cancelTitle', {
+                      defaultMessage: 'Cancel',
+                    }),
+                    iconType: 'editorUndo',
+                    testId: 'discoverCancelButton',
+                  },
+                ],
+              }
+            : {
                 showNotificationIndicator: hasUnsavedChanges,
                 notifcationIndicatorTooltipContent: hasUnsavedChanges
                   ? i18n.translate('discover.localMenu.unsavedChangesTooltip', {
                       defaultMessage: 'You have unsaved changes',
                     })
                   : undefined,
-                secondaryButtonIcon: 'arrowDown',
-                secondaryButtonAriaLabel: i18n.translate(
-                  'discover.localMenu.saveOptionsAriaLabel',
-                  {
-                    defaultMessage: 'Save options',
-                  }
-                ),
                 items: [
                   {
                     run: async () => {
@@ -348,8 +342,8 @@ export const useTopNavLinks = ({
                     disableButton: !hasUnsavedChanges,
                   },
                 ],
-              },
-            }),
+              }),
+        },
       });
     }
 

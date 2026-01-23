@@ -13,11 +13,16 @@ import React, {
   useContext,
   useState,
   useLayoutEffect,
+  useEffect,
 } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import useUnmount from 'react-use/lib/useUnmount';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { ChromeBreadcrumbsBadge } from '@kbn/core-chrome-browser';
+import useObservable from 'react-use/lib/useObservable';
 import type { useDiscoverTopNav } from './use_discover_topnav';
+import type { DiscoverCustomizationContext } from '../../../../customizations';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 
 /**
  * We handle the top nav menu this way because we need to render it higher in the tree than
@@ -28,6 +33,7 @@ import type { useDiscoverTopNav } from './use_discover_topnav';
 
 const createTopNavMenuContext = () => ({
   topNavMenu$: new BehaviorSubject<AppMenuConfig | undefined>(undefined),
+  topNavBadges$: new BehaviorSubject<ChromeBreadcrumbsBadge[] | undefined>(undefined),
 });
 
 type DiscoverTopNavMenuContext = ReturnType<typeof createTopNavMenuContext>;
@@ -36,10 +42,32 @@ export const discoverTopNavMenuContext = createContext<DiscoverTopNavMenuContext
   createTopNavMenuContext()
 );
 
-export const DiscoverTopNavMenuProvider = ({ children }: PropsWithChildren) => {
+export const DiscoverTopNavMenuProvider = ({
+  customizationContext,
+  children,
+}: PropsWithChildren<{ customizationContext: DiscoverCustomizationContext }>) => {
+  const { chrome } = useDiscoverServices();
   const [topNavMenuContext] = useState<DiscoverTopNavMenuContext>(() => createTopNavMenuContext());
 
+  const topNavBadges = useObservable(
+    topNavMenuContext.topNavBadges$,
+    topNavMenuContext.topNavBadges$.getValue()
+  );
+
+  useEffect(() => {
+    if (customizationContext.displayMode === 'embedded') {
+      return;
+    }
+
+    chrome.setBreadcrumbsBadges(topNavBadges ?? []);
+
+    return () => {
+      chrome.setBreadcrumbsBadges([]);
+    };
+  }, [chrome, customizationContext.displayMode, topNavBadges]);
+
   useUnmount(() => {
+    topNavMenuContext.topNavBadges$.next(undefined);
     topNavMenuContext.topNavMenu$.next(undefined);
   });
 
@@ -51,9 +79,14 @@ export const DiscoverTopNavMenuProvider = ({ children }: PropsWithChildren) => {
 };
 
 export const DiscoverTopNavMenu = ({
+  topNavBadges,
   topNavMenu,
-}: Pick<ReturnType<typeof useDiscoverTopNav>, 'topNavMenu'>) => {
-  const { topNavMenu$ } = useContext(discoverTopNavMenuContext);
+}: ReturnType<typeof useDiscoverTopNav>) => {
+  const { topNavBadges$, topNavMenu$ } = useContext(discoverTopNavMenuContext);
+
+  useLayoutEffect(() => {
+    topNavBadges$.next(topNavBadges);
+  }, [topNavBadges, topNavBadges$]);
 
   useLayoutEffect(() => {
     topNavMenu$.next(topNavMenu);

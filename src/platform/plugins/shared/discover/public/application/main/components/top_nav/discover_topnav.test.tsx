@@ -104,7 +104,7 @@ const getTestComponent = (props: DiscoverTopNavProps) =>
       stateContainer={props.stateContainer}
       runtimeState={{ currentDataView: dataViewMock, adHocDataViews: [] }}
     >
-      <DiscoverTopNavMenuProvider>
+      <DiscoverTopNavMenuProvider customizationContext={props.stateContainer.customizationContext}>
         <TopNavMenuCapture />
         <DiscoverTopNav {...props} />
       </DiscoverTopNavMenuProvider>
