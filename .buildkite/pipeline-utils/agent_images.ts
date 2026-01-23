@@ -91,7 +91,7 @@ const expandAgentQueue = (queueName: string = 'n2d-4-spot', diskSizeGb?: number)
     ...getAgentImageConfig(),
     machineType: `${kind}-standard-${cores}`,
     ...(diskSizeGb ? { diskSizeGb } : {}),
-    spotZones: 'us-central1-f,southamerica-east1-c,asia-south2-a',
+    spotZones: 'southamerica-east1-c,asia-south2-a,us-central1-f',
     ...additionalProps,
   };
 };
