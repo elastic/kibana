@@ -12,7 +12,6 @@ import {
   DATE_WITH_K8S_HOSTS_DATA_FROM,
   DATE_WITH_K8S_HOSTS_DATA_TO,
   K8S_HOST_NAME,
-  EXTENDED_TIMEOUT,
 } from '../../fixtures/constants';
 
 const START_K8S_HOST_DATE = moment.utc(DATE_WITH_K8S_HOSTS_DATA_FROM);
@@ -28,107 +27,67 @@ test.describe('Node Details: host with kubernetes section', { tag: ['@ess', '@sv
     });
   });
 
-  test('Overview Tab - KPI tiles show correct values', async ({
+  test('Overview Tab validates all KPIs and charts', async ({
     pageObjects: { nodeDetailsPage },
+    page,
   }) => {
     await nodeDetailsPage.clickOverviewTab();
+    await nodeDetailsPage.waitForChartsToLoad();
+
+    // Soft assertions for all KPIs
     const kpiTiles = [
       { metric: 'cpuUsage', value: '50.0%' },
       { metric: 'normalizedLoad1m', value: '18.8%' },
       { metric: 'memoryUsage', value: '35.0%' },
       { metric: 'diskUsage', value: '1,223.0%' },
     ];
-
     for (const { metric, value } of kpiTiles) {
-      await test.step(`verify ${metric} KPI tile value`, async () => {
-        const tileValue = await nodeDetailsPage.getKPITileValue(metric);
-        expect(tileValue).toBe(value);
-      });
+      expect.soft(await nodeDetailsPage.getKPITileValue(metric)).toBe(value);
     }
-  });
 
-  test('Overview Tab - renders kubernetes charts', async ({ pageObjects: { nodeDetailsPage } }) => {
-    await nodeDetailsPage.clickOverviewTab();
-    await nodeDetailsPage.waitForChartsToLoad();
-    const charts = await nodeDetailsPage.getOverviewTabKubernetesMetricCharts();
-    await expect(charts).toHaveCount(2);
-  });
+    // Kubernetes charts
+    await expect.soft(await nodeDetailsPage.getOverviewTabKubernetesMetricCharts()).toHaveCount(2);
 
-  test('Overview Tab - renders host charts', async ({ pageObjects: { nodeDetailsPage }, page }) => {
-    await nodeDetailsPage.clickOverviewTab();
-    const metricCharts = [
-      { metric: 'cpu' },
-      { metric: 'memory' },
-      { metric: 'disk' },
-      { metric: 'network' },
-    ];
-
-    await expect(
-      page.getByRole('listitem').filter({ hasText: 'Normalized LoadAverage18.8%' })
-    ).toBeVisible({
-      timeout: EXTENDED_TIMEOUT,
-    });
-
-    for (const { metric } of metricCharts) {
+    // Host charts (merged)
+    const hostMetrics = ['cpu', 'memory', 'disk', 'network'];
+    for (const metric of hostMetrics) {
       await nodeDetailsPage.expectChartsCount(`infraAssetDetailsHostChartsSection${metric}`, 2);
     }
+    await expect
+      .soft(page.getByRole('listitem').filter({ hasText: 'Normalized LoadAverage18.8%' }))
+      .toBeVisible();
   });
 
-  test('Metrics Tab - renders kubernetes charts', async ({ pageObjects: { nodeDetailsPage } }) => {
-    await nodeDetailsPage.clickMetricsTab();
-    const charts = await nodeDetailsPage.getMetricsTabKubernetesCharts();
-    await expect(charts).toHaveCount(4);
-  });
-
-  test('Metrics Tab - renders host charts', async ({
+  test('Metrics Tab validates all charts and quick access', async ({
     pageObjects: { nodeDetailsPage, assetDetailsPage },
-    page,
   }) => {
     await nodeDetailsPage.clickMetricsTab();
-    await expect(page.getByTestId('infraMetricsQuickAccessItemcpu')).toBeVisible({
-      timeout: EXTENDED_TIMEOUT,
-    });
-
     await nodeDetailsPage.waitForChartsToLoad();
 
-    await nodeDetailsPage.expectChartsCount('infraAssetDetailsHostChartsSection', 18);
-
-    await test.step('verify CPU charts', async () => {
-      await expect(assetDetailsPage.hostMetricsTab.cpuUsageChart).toBeVisible();
-      await expect(assetDetailsPage.hostMetricsTab.cpuUsageBreakdownChart).toBeVisible();
-      await expect(assetDetailsPage.hostMetricsTab.cpuNormalizedLoadChart).toBeVisible();
-      await expect(assetDetailsPage.hostMetricsTab.cpuLoadBreakdownChart).toBeVisible();
-    });
-
-    await test.step('verify Memory charts', async () => {
-      await expect(assetDetailsPage.hostMetricsTab.memoryUsageChart).toBeVisible();
-      await expect(assetDetailsPage.hostMetricsTab.memoryUsageBreakdownChart).toBeVisible();
-    });
-
-    await test.step('verify Network chart', async () => {
-      await expect(assetDetailsPage.hostMetricsTab.networkChart).toBeVisible();
-    });
-
-    await test.step('verify Disk charts', async () => {
-      await expect(assetDetailsPage.hostMetricsTab.diskUsageChart).toBeVisible();
-      await expect(assetDetailsPage.hostMetricsTab.diskIOChart).toBeVisible();
-      await expect(assetDetailsPage.hostMetricsTab.diskThroughputChart).toBeVisible();
-    });
-
-    await test.step('verify Log chart', async () => {
-      await expect(assetDetailsPage.hostMetricsTab.logRateChart).toBeVisible();
-    });
-  });
-
-  test('Metrics Tab - renders quick access items', async ({ pageObjects: { nodeDetailsPage } }) => {
-    await nodeDetailsPage.clickMetricsTab();
-    const metrics = ['cpu', 'memory', 'disk', 'network', 'log', 'kubernetes'];
-    for (const metric of metrics) {
-      await test.step(`verify quick access item for ${metric} exists`, async () => {
-        await expect(
-          nodeDetailsPage.page.testSubj.locator(`infraMetricsQuickAccessItem${metric}`)
-        ).toBeVisible();
-      });
+    // Quick access items
+    const quickAccess = ['cpu', 'memory', 'disk', 'network', 'log', 'kubernetes'];
+    for (const metric of quickAccess) {
+      await expect
+        .soft(nodeDetailsPage.page.testSubj.locator(`infraMetricsQuickAccessItem${metric}`))
+        .toBeVisible();
     }
+
+    // Kubernetes charts
+    await expect.soft(await nodeDetailsPage.getMetricsTabKubernetesCharts()).toHaveCount(4);
+
+    // Host charts by category (soft checks)
+    await expect.soft(assetDetailsPage.hostMetricsTab.cpuUsageChart).toBeVisible();
+    await expect.soft(assetDetailsPage.hostMetricsTab.cpuUsageBreakdownChart).toBeVisible();
+    await expect.soft(assetDetailsPage.hostMetricsTab.cpuNormalizedLoadChart).toBeVisible();
+    await expect.soft(assetDetailsPage.hostMetricsTab.cpuLoadBreakdownChart).toBeVisible();
+    await expect.soft(assetDetailsPage.hostMetricsTab.memoryUsageChart).toBeVisible();
+    await expect.soft(assetDetailsPage.hostMetricsTab.memoryUsageBreakdownChart).toBeVisible();
+    await expect.soft(assetDetailsPage.hostMetricsTab.networkChart).toBeVisible();
+    await expect.soft(assetDetailsPage.hostMetricsTab.diskUsageChart).toBeVisible();
+    await expect.soft(assetDetailsPage.hostMetricsTab.diskIOChart).toBeVisible();
+    await expect.soft(assetDetailsPage.hostMetricsTab.diskThroughputChart).toBeVisible();
+    await expect.soft(assetDetailsPage.hostMetricsTab.logRateChart).toBeVisible();
+
+    await nodeDetailsPage.expectChartsCount('infraAssetDetailsHostChartsSection', 18);
   });
 });
