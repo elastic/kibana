@@ -25,7 +25,14 @@ import { licenseMock } from '../../common/licensing/index.mock';
 import { userProfileMock } from '../../common/model/user_profile.mock';
 import { authorizationMock } from '../authorization/index.mock';
 import { securityMock } from '../mocks';
+import { securityTelemetry } from '../otel/instrumentation';
 import { sessionMock } from '../session_management/session.mock';
+
+jest.mock('../otel/instrumentation', () => ({
+  securityTelemetry: {
+    recordGetCurrentProfileInvocation: jest.fn(),
+  },
+}));
 
 const logger = loggingSystemMock.createLogger();
 describe('UserProfileService', () => {
@@ -104,6 +111,11 @@ describe('UserProfileService', () => {
         expect(
           mockStartParams.clusterClient.asInternalUser.security.getUserProfile
         ).not.toHaveBeenCalled();
+
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenCalledWith({
+          requiresProfileActivation: false,
+          requiresApiKeyRetrieval: false,
+        });
       });
 
       it('returns `null` if session available, but not user profile id', async () => {
@@ -121,6 +133,11 @@ describe('UserProfileService', () => {
         expect(
           mockStartParams.clusterClient.asInternalUser.security.getUserProfile
         ).not.toHaveBeenCalled();
+
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenCalledWith({
+          requiresProfileActivation: false,
+          requiresApiKeyRetrieval: false,
+        });
       });
 
       it('fails if session retrieval fails', async () => {
@@ -140,6 +157,11 @@ describe('UserProfileService', () => {
         expect(
           mockStartParams.clusterClient.asInternalUser.security.getUserProfile
         ).not.toHaveBeenCalled();
+
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenCalledWith({
+          requiresProfileActivation: false,
+          requiresApiKeyRetrieval: false,
+        });
       });
 
       it('fails if profile retrieval fails', async () => {
@@ -171,6 +193,11 @@ describe('UserProfileService', () => {
         ).toHaveBeenCalledWith({
           uid: 'UID',
         });
+
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenCalledWith({
+          requiresProfileActivation: false,
+          requiresApiKeyRetrieval: false,
+        });
       });
 
       it('fails if cannot find user profile', async () => {
@@ -198,6 +225,11 @@ describe('UserProfileService', () => {
           mockStartParams.clusterClient.asInternalUser.security.getUserProfile
         ).toHaveBeenCalledWith({
           uid: 'UID',
+        });
+
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenCalledWith({
+          requiresProfileActivation: false,
+          requiresApiKeyRetrieval: false,
         });
       });
 
@@ -238,6 +270,11 @@ describe('UserProfileService', () => {
           mockStartParams.clusterClient.asInternalUser.security.getUserProfile
         ).toHaveBeenCalledWith({
           uid: 'UID',
+        });
+
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenCalledWith({
+          requiresProfileActivation: false,
+          requiresApiKeyRetrieval: false,
         });
       });
 
@@ -291,6 +328,11 @@ describe('UserProfileService', () => {
           uid: 'UID',
           data: 'kibana.one,kibana.two',
         });
+
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenCalledWith({
+          requiresProfileActivation: false,
+          requiresApiKeyRetrieval: false,
+        });
       });
     });
 
@@ -334,6 +376,11 @@ describe('UserProfileService', () => {
         });
 
         expect(mockStartParams.session.get).not.toHaveBeenCalled();
+
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenCalledWith({
+          requiresProfileActivation: true,
+          requiresApiKeyRetrieval: false,
+        });
       });
 
       it('should get user profile and application data scoped to Kibana', async () => {
@@ -389,6 +436,11 @@ describe('UserProfileService', () => {
           uid: mockedProfile.uid,
           data: 'kibana.one,kibana.two',
         });
+
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenCalledWith({
+          requiresProfileActivation: true,
+          requiresApiKeyRetrieval: false,
+        });
       });
     });
 
@@ -424,6 +476,11 @@ describe('UserProfileService', () => {
           mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
         ).not.toHaveBeenCalled();
         expect(mockStartParams.session.get).not.toHaveBeenCalled();
+
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenCalledWith({
+          requiresProfileActivation: false,
+          requiresApiKeyRetrieval: true,
+        });
       });
 
       it('returns `null` if api key is not found', async () => {
@@ -449,6 +506,11 @@ describe('UserProfileService', () => {
           mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
         ).not.toHaveBeenCalled();
         expect(mockStartParams.session.get).not.toHaveBeenCalled();
+
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenCalledWith({
+          requiresProfileActivation: false,
+          requiresApiKeyRetrieval: true,
+        });
       });
 
       it('returns `null` if api key is found, but has no associated user profile id', async () => {
@@ -478,6 +540,11 @@ describe('UserProfileService', () => {
           mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
         ).not.toHaveBeenCalled();
         expect(mockStartParams.session.get).not.toHaveBeenCalled();
+
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenCalledWith({
+          requiresProfileActivation: false,
+          requiresApiKeyRetrieval: true,
+        });
       });
 
       it('should get user profile and application data scoped to Kibana', async () => {
@@ -546,6 +613,11 @@ describe('UserProfileService', () => {
           mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
         ).not.toHaveBeenCalled();
         expect(mockStartParams.session.get).not.toHaveBeenCalled();
+
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenCalledWith({
+          requiresProfileActivation: false,
+          requiresApiKeyRetrieval: true,
+        });
       });
     });
   });

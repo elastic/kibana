@@ -31,6 +31,7 @@ import type {
 } from '../../common';
 import type { AuthorizationServiceSetupInternal } from '../authorization';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
+import { securityTelemetry } from '../otel/instrumentation';
 import { getPrintableSessionId, type Session } from '../session_management';
 
 const KIBANA_DATA_ROOT = 'kibana';
@@ -324,6 +325,10 @@ export class UserProfileService {
 
     if (request.headers.cookie) {
       this.logger.debug(`Request to get current user profile is authenticated via session.`);
+      securityTelemetry.recordGetCurrentProfileInvocation({
+        requiresProfileActivation: false,
+        requiresApiKeyRetrieval: false,
+      });
       ({ profileId, sessionId } = await this.getCurrentUserProfileIdViaSession(session, request));
     } else {
       const authType = this.getAuthHeaderType(request.headers.authorization);
@@ -332,6 +337,11 @@ export class UserProfileService {
         this.logger.debug(
           `Request to get current user profile is authenticated via Basic credentials.`
         );
+        securityTelemetry.recordGetCurrentProfileInvocation({
+          requiresProfileActivation: true,
+          requiresApiKeyRetrieval: false,
+        });
+
         const activatedProfile = await this.activateProfileViaBasicAuth(clusterClient, request);
 
         // It is not possible to select/filter profile data when activating, so unless the dataPath is empty,
@@ -342,6 +352,10 @@ export class UserProfileService {
         profileId = activatedProfile?.uid;
       } else if (authType === 'apikey') {
         this.logger.debug(`Request to get current user profile is authenticated via API key.`);
+        securityTelemetry.recordGetCurrentProfileInvocation({
+          requiresProfileActivation: false,
+          requiresApiKeyRetrieval: true,
+        });
         profileId = await this.getCurrentUserProfileIdViaApiKey(clusterClient, request);
       }
     }
