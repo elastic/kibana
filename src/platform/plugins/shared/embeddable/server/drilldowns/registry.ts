@@ -31,6 +31,6 @@ export function getDrilldownRegistry() {
           );
         })
         .map(({ schema }) => schema);
-    }
+    },
   };
 }
