@@ -57,7 +57,7 @@ export class AssetManager {
     // Generate API key if dependencies are available
     await this.generateApiKey(type);
 
-    const definition = getEntityDefinition({ type });
+    const definition = getEntityDefinition(type, this.namespace);
 
     await installElasticsearchAssets({
       esClient: this.esClient,
@@ -71,7 +71,7 @@ export class AssetManager {
   }
 
   public async uninstall(type: EntityType) {
-    const definition = getEntityDefinition({ type });
+    const definition = getEntityDefinition(type, this.namespace);
     await this.stop(type);
     await uninstallElasticsearchAssets({
       esClient: this.esClient,

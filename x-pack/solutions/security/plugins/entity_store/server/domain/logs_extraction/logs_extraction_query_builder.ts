@@ -156,7 +156,9 @@ function castSrcType(field: EntityField) {
 }
 
 function castDestType(fieldName: string, field: EntityField) {
-  // TODO: Investigate why these types are not accepted in LAST/FIRST
+  // We only to cast boolean, date and ip to string and back to the original type
+  // because of a limitation in ESQL.
+  // This should not be needed after https://github.com/elastic/elasticsearch/issues/141101
   switch (field.mapping?.type) {
     case 'boolean':
       return `TO_BOOLEAN(${fieldName})`;

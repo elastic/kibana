@@ -51,7 +51,7 @@ export class LogsExtractionClient {
     this.logger.debug('starting entity extraction');
 
     try {
-      const entityDefinition = getEntityDefinition({ type });
+      const entityDefinition = getEntityDefinition(type, this.namespace);
 
       const maxPageSearchSize = 10000; // TODO: get from config in the saved object
       const indexPatterns = await this.getIndexPatterns(type);

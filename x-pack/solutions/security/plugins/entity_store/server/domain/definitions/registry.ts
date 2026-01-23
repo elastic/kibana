@@ -22,19 +22,13 @@ const entitiesDefinitionRegistry = {
   generic: genericEntityDefinition,
 } as const satisfies Record<EntityType, EntityDefinitionWithoutId>;
 
-interface EntityDefinitionParams {
-  type: EntityType;
-}
-
-export function getEntityDefinition({ type }: EntityDefinitionParams): ManagedEntityDefinition {
-  // TODO: get index patterns from data view in runtime
-
+export function getEntityDefinition(type: EntityType, namespace: string): ManagedEntityDefinition {
   const description = entitiesDefinitionRegistry[type];
   assert(description, `No entity description found for type: ${type}`);
 
   return {
     ...description,
-    id: getEntityDefinitionId(type, 'default'), // TODO: get namespace
+    id: getEntityDefinitionId(type, namespace),
     type,
   };
 }
