@@ -141,7 +141,7 @@ const ESQLEditorInternal = function ESQLEditor({
   mergeExternalMessages,
   hideQuickSearch,
   openVisorOnSourceCommands,
-  enableIndicesBrowser = false,
+  enableEsqlResourceBrowser = false,
 }: ESQLEditorPropsInternal) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -1088,10 +1088,10 @@ const ESQLEditorInternal = function ESQLEditor({
       ESQLLang.getSuggestionProvider?.({
         ...esqlCallbacks,
         telemetry: telemetryCallbacks,
-        onOpenIndicesBrowser: enableIndicesBrowser ? openIndicesBrowser : undefined,
-        onOpenFieldsBrowser: enableIndicesBrowser ? openFieldsBrowser : undefined,
+        onOpenIndicesBrowser: enableEsqlResourceBrowser ? openIndicesBrowser : undefined,
+        onOpenFieldsBrowser: enableEsqlResourceBrowser ? openFieldsBrowser : undefined,
       }),
-    [esqlCallbacks, telemetryCallbacks, enableIndicesBrowser, openIndicesBrowser, openFieldsBrowser]
+    [esqlCallbacks, telemetryCallbacks, enableEsqlResourceBrowser, openIndicesBrowser, openFieldsBrowser]
   );
 
   const hoverProvider = useMemo(
@@ -1352,8 +1352,8 @@ const ESQLEditorInternal = function ESQLEditor({
                       esqlVariables: esqlVariablesRef,
                       controlsContext: controlsContextRef,
                       openTimePickerPopover,
-                      openIndicesBrowser: enableIndicesBrowser ? openIndicesBrowser : undefined,
-                      openFieldsBrowser: enableIndicesBrowser ? openFieldsBrowser : undefined,
+                      openIndicesBrowser: enableEsqlResourceBrowser ? openIndicesBrowser : undefined,
+                      openFieldsBrowser: enableEsqlResourceBrowser ? openFieldsBrowser : undefined,
                     });
 
                     // Add editor key bindings
@@ -1564,7 +1564,7 @@ const ESQLEditorInternal = function ESQLEditor({
         document.body
       )}
 
-      {enableIndicesBrowser && (
+      {enableEsqlResourceBrowser && (
         <>
           <DataSourceBrowser
             isOpen={isDataSourceBrowserOpen}

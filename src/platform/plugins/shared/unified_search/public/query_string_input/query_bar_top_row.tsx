@@ -237,7 +237,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   /**
    * Enable indices browser suggestion in ESQL editor (for Discover context)
    */
-  enableIndicesBrowser?: boolean;
+  enableEsqlResourceBrowser?: boolean;
 }
 
 export const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -978,7 +978,7 @@ export const QueryBarTopRow = React.memo(
             }
             esqlVariables={props.esqlVariablesConfig?.esqlVariables ?? []}
             onOpenQueryInNewTab={props.onOpenQueryInNewTab}
-            enableIndicesBrowser={props.enableIndicesBrowser}
+            enableEsqlResourceBrowser={props.enableEsqlResourceBrowser}
             openVisorOnSourceCommands
           />
         )
