@@ -48,14 +48,19 @@ export function getPaletteDisplayColors(
 }
 
 export function getAccessorTypeFromOperation(
-  operation: Pick<OperationDescriptor, 'isBucketed' | 'dataType' | 'hasArraySupport'> | null
+  operation: Pick<OperationDescriptor, 'isBucketed' | 'dataType' | 'hasArraySupport'> | null,
+  dataTypeFallback?: DataType | DatatableColumnType
 ) {
+  const useFallback = operation?.dataType === 'unknown' && dataTypeFallback != null;
+  const dataType = useFallback ? dataTypeFallback : operation?.dataType;
+  const hasArraySupport = operation?.hasArraySupport;
+  const isBucketed = operation?.isBucketed;
+
   const isNumericTypeFromOperation = Boolean(
-    !operation?.isBucketed && operation?.dataType === 'number' && !operation.hasArraySupport
+    !isBucketed && dataType === 'number' && !hasArraySupport
   );
   const isBucketableTypeFromOperationType = Boolean(
-    operation?.isBucketed ||
-      (!['number', 'date'].includes(operation?.dataType || '') && !operation?.hasArraySupport)
+    isBucketed || (!['number', 'date'].includes(dataType || '') && !hasArraySupport)
   );
   return { isNumeric: isNumericTypeFromOperation, isCategory: isBucketableTypeFromOperationType };
 }
@@ -67,7 +72,8 @@ export function getAccessorTypeFromOperation(
  */
 export function getAccessorType(
   datasource: Pick<DatasourcePublicAPI, 'getOperationForColumnId'> | undefined,
-  accessor: string | undefined
+  accessor: string | undefined,
+  dataTypeFallback?: DataType | DatatableColumnType
 ) {
   // No accessor means it's not a numeric type by default
   if (!accessor || !datasource) {
@@ -76,7 +82,7 @@ export function getAccessorType(
 
   const operation = datasource.getOperationForColumnId(accessor);
 
-  return getAccessorTypeFromOperation(operation);
+  return getAccessorTypeFromOperation(operation, dataTypeFallback);
 }
 
 /**

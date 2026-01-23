@@ -93,7 +93,11 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
   const allowCustomMatch = canCreateCustomMatch(columnMeta);
   const datasource = frame.datasourceLayers?.[localState.layerId];
 
-  const { isNumeric, isCategory: isBucketable } = getAccessorType(datasource, accessor);
+  const { isNumeric, isCategory: isBucketable } = getAccessorType(
+    datasource,
+    accessor,
+    columnMeta?.type
+  );
   const showColorByTerms = isBucketable;
   const showDynamicColoringFeature = isBucketable || isNumeric;
   const currentAlignment = getColumnAlignment(column, isNumeric);

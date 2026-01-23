@@ -66,6 +66,7 @@ import {
   TableDimensionEditor,
   TableDimensionEditorAdditionalSection,
 } from './components';
+import { getDatatableColumn } from '../../../common/expressions/impl/datatable/utils';
 
 const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
   defaultMessage: 'Table',
@@ -148,7 +149,14 @@ export const getDatatableVisualization = ({
     const columns = state.columns.map((column) => {
       const newColumn = { ...column };
       const accessor = newColumn.columnId;
-      const { isNumeric, isCategory: isBucketable } = getAccessorType(datasource, accessor);
+      const currentData = frame?.activeData?.[state.layerId];
+      // get the column meta from the current data
+      const columnMeta = getDatatableColumn(currentData, accessor)?.meta;
+      const { isNumeric, isCategory: isBucketable } = getAccessorType(
+        datasource,
+        accessor,
+        columnMeta?.type
+      );
 
       if (newColumn.palette && (isNumeric || isBucketable)) {
         const showColorByTerms = isBucketable;
@@ -163,7 +171,6 @@ export const getDatatableVisualization = ({
           newColumn.colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
         }
 
-        const currentData = frame?.activeData?.[state.layerId];
         const palette = paletteMap.get(newColumn.palette?.name ?? '');
         const columnsToCheck = hasTransposedColumn
           ? currentData?.columns
