@@ -56,6 +56,8 @@ new relevance scores. `FUSE` enables hybrid search to combine and score results 
         AVG: calculate the average of a numeric field
         COUNT: return the total number of input values
         COUNT_DISTINCT: return the number of distinct values in a field
+        COUNT_DISTINCT_OVER_TIME: calculates the count of distinct values for a specified field over time
+        COUNT_OVER_TIME: Calculates the count of values for a specified field within a given time window
         MAX: calculate the maximum value of a field
         MEDIAN: calculate the median value of a numeric field
         MEDIAN_ABSOLUTE_DEVIATION: calculate the median absolute deviation of a numeric field
@@ -115,6 +117,7 @@ new relevance scores. `FUSE` enables hybrid search to combine and score results 
         TO_LOWER: convert a string to lowercase
         TO_UPPER: convert a string to uppercase
         TRIM: remove leading and trailing whitespaces from a string
+        CHUNK: splits a text field into smaller chunks using a sentence-based chunking strategy
     </string-functions>
 
     <ip-functions>
