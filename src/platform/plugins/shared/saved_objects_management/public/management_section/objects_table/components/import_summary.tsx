@@ -231,6 +231,7 @@ const ImportWarning: FC<{ warning: SavedObjectsImportWarning; basePath: IBasePat
             <EuiButton
               size="s"
               color="warning"
+              data-test-subj="warningActionButton"
               href={basePath.prepend(warning.actionPath)}
               target="_blank"
             >
