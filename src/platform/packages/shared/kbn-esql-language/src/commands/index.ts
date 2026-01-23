@@ -21,3 +21,4 @@ export * from './definitions/utils/promql';
 export { METADATA_FIELDS } from './registry/options/metadata';
 export { TIME_SYSTEM_PARAMS } from './definitions/utils/literals';
 export { withAutoSuggest } from './definitions/utils/autocomplete/helpers';
+export { EsqlKeywords } from './definitions/keywords';
