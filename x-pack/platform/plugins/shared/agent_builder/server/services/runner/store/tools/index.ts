@@ -6,8 +6,16 @@
  */
 
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
+import type { IFileSystemStore } from '../store';
 import { readTool } from './read';
+import { lsTool } from './ls';
+import { globTool } from './glob';
+import { grepTool } from './grep';
 
-export const getStoreTools = (): BuiltinToolDefinition<any>[] => {
-  return [readTool()];
+export const getStoreTools = ({
+  fsStore,
+}: {
+  fsStore: IFileSystemStore;
+}): BuiltinToolDefinition<any>[] => {
+  return [readTool({ fsStore }), lsTool({ fsStore }), globTool({ fsStore }), grepTool({ fsStore })];
 };

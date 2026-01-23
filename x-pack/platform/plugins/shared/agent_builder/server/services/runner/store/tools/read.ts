@@ -14,6 +14,7 @@ import {
   truncateTokens,
 } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import type { IFileSystemStore } from '../store';
+import { fsToolsNamespace } from '../constants';
 
 const schema = z.object({
   path: z.string().describe('Path of the file to read'),
@@ -34,7 +35,7 @@ export const readTool = ({
   fsStore: IFileSystemStore;
 }): BuiltinToolDefinition<typeof schema> => {
   return {
-    id: 'platform.fs.read',
+    id: `${fsToolsNamespace}.read`,
     description: `Read an entry from the filesystem`,
     type: ToolType.builtin,
     schema,

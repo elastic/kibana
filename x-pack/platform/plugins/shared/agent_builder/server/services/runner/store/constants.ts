@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { createStore } from './create_store';
-export { getStoreTools } from './tools';
-export type { DirEntry, FileEntry, FsEntry } from './filesystem';
+import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
+
+export const fsToolsNamespace = internalNamespaces.platformFs;

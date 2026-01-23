@@ -10,11 +10,11 @@ import { normalizePath, dirname } from './filesystem/path_utils';
 
 // ------- store interface types  -------
 
-interface DirEntryWithChildren extends DirEntry {
+export interface DirEntryWithChildren extends DirEntry {
   children?: LsEntry[];
 }
 
-type LsEntry = DirEntryWithChildren | FileEntry;
+export type LsEntry = DirEntryWithChildren | FileEntry;
 
 interface GrepMatch {
   /**
