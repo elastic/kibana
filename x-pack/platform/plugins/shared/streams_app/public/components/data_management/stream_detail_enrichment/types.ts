@@ -15,6 +15,7 @@ import type {
   ManualIngestPipelineProcessor,
   MathProcessor,
   ReplaceProcessor,
+  RedactProcessor,
   SetProcessor,
   StreamlangConditionBlockWithUIAttributes,
   UppercaseProcessor,
@@ -40,6 +41,7 @@ export type DropFormState = DropDocumentProcessor;
 export type ManualIngestPipelineFormState = ManualIngestPipelineProcessor;
 export type ConvertFormState = ConvertProcessor;
 export type ReplaceFormState = ReplaceProcessor;
+export type RedactFormState = RedactProcessor;
 export type SetFormState = SetProcessor;
 export type MathFormState = MathProcessor;
 export type UppercaseFormState = UppercaseProcessor;
@@ -56,6 +58,7 @@ export type SpecialisedFormState =
   | ManualIngestPipelineFormState
   | ConvertFormState
   | ReplaceFormState
+  | RedactFormState
   | SetFormState
   | MathFormState
   | UppercaseFormState

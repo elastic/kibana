@@ -232,6 +232,13 @@ function extractModifiedFields(processor: StreamlangProcessorDefinition): string
       }
       break;
 
+    case 'redact':
+      // Redact processor modifies 'from' field in place
+      if (processor.from) {
+        fields.push(processor.from);
+      }
+      break;
+
     case 'math':
       // Math processor writes result to 'to' field
       if (processor.to) {
@@ -352,11 +359,12 @@ function getProcessorOutputType(
 
     case 'dissect':
     case 'replace':
+    case 'redact':
     case 'uppercase':
     case 'lowercase':
     case 'trim':
     case 'concat':
-      // Dissect, replace, uppercase, lowercase, trim, and concat always produce string output
+      // Dissect, replace, redact, uppercase, lowercase, trim, and concat always produce string output
       return 'string';
 
     case 'date':
@@ -429,7 +437,8 @@ function getExpectedInputType(
       return null;
 
     case 'replace':
-      // Replace requires string input
+    case 'redact':
+      // Replace and redact require string input
       if (processor.from === fieldName) {
         return ['string'];
       }
@@ -535,6 +544,7 @@ function trackFieldTypesAndValidate(flattenedSteps: StreamlangProcessorDefinitio
       case 'date':
       case 'convert':
       case 'replace':
+      case 'redact':
       case 'remove':
       case 'grok':
       case 'dissect':
@@ -778,6 +788,7 @@ function validateProcessorValues(
     case 'convert':
     case 'append':
     case 'replace':
+    case 'redact':
     case 'remove':
     case 'remove_by_prefix':
     case 'drop_document':

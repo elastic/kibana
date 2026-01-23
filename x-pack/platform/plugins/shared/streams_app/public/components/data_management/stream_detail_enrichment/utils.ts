@@ -15,6 +15,7 @@ import type {
   LowercaseProcessor,
   MathProcessor,
   ProcessorType,
+  RedactProcessor,
   ReplaceProcessor,
   StreamlangConditionBlockWithUIAttributes,
   StreamlangDSL,
@@ -57,6 +58,7 @@ import type {
   ManualIngestPipelineFormState,
   MathFormState,
   ProcessorFormState,
+  RedactFormState,
   ReplaceFormState,
   SetFormState,
   TrimFormState,
@@ -74,6 +76,7 @@ export const SPECIALISED_TYPES = [
   'math',
   'set',
   'replace',
+  'redact',
   'drop_document',
   'uppercase',
   'lowercase',
@@ -229,6 +232,15 @@ const defaultReplaceProcessorFormState = (): ReplaceFormState => ({
   where: ALWAYS_CONDITION,
 });
 
+const defaultRedactProcessorFormState = (sampleDocs: FlattenRecord[]): RedactFormState => ({
+  action: 'redact' as const,
+  from: getDefaultTextField(sampleDocs, PRIORITIZED_CONTENT_FIELDS),
+  patterns: [],
+  ignore_missing: true,
+  ignore_failure: true,
+  where: ALWAYS_CONDITION,
+});
+
 const defaultUppercaseProcessorFormState = (): UppercaseFormState => ({
   action: 'uppercase' as const,
   from: '',
@@ -300,6 +312,7 @@ const defaultProcessorFormStateByType: Record<
   manual_ingest_pipeline: defaultManualIngestPipelineProcessorFormState,
   math: defaultMathProcessorFormState,
   replace: defaultReplaceProcessorFormState,
+  redact: defaultRedactProcessorFormState,
   uppercase: defaultUppercaseProcessorFormState,
   lowercase: defaultLowercaseProcessorFormState,
   trim: defaultTrimProcessorFormState,
@@ -345,6 +358,7 @@ export const getFormStateFromActionStep = (
     step.action === 'set' ||
     step.action === 'convert' ||
     step.action === 'replace' ||
+    step.action === 'redact' ||
     step.action === 'math' ||
     step.action === 'uppercase' ||
     step.action === 'lowercase' ||
@@ -539,6 +553,36 @@ export const convertFormStateToProcessor = (
           description,
           where: 'where' in formState ? formState.where : undefined,
         } as ReplaceProcessor,
+      };
+    }
+
+    if (formState.action === 'redact') {
+      const {
+        from,
+        patterns,
+        pattern_definitions,
+        prefix,
+        suffix,
+        ignore_failure,
+        ignore_missing,
+      } = formState;
+
+      // Ensure patterns is always an array
+      const patternsArray = Array.isArray(patterns) ? patterns : [];
+
+      return {
+        processorDefinition: {
+          action: 'redact',
+          from,
+          patterns: patternsArray.filter((p) => !isEmpty(p)),
+          pattern_definitions: isEmpty(pattern_definitions) ? undefined : pattern_definitions,
+          prefix: isEmpty(prefix) ? undefined : prefix,
+          suffix: isEmpty(suffix) ? undefined : suffix,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as RedactProcessor,
       };
     }
 

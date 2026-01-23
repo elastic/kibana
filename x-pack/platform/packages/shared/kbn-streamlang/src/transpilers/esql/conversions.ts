@@ -23,6 +23,7 @@ import type {
   RemoveProcessor,
   DropDocumentProcessor,
   ReplaceProcessor,
+  RedactProcessor,
   UppercaseProcessor,
   LowercaseProcessor,
   TrimProcessor,
@@ -41,6 +42,7 @@ import { convertRemoveByPrefixProcessorToESQL } from './processors/remove_by_pre
 import { convertRemoveProcessorToESQL } from './processors/remove';
 import { convertDropDocumentProcessorToESQL } from './processors/drop_document';
 import { convertReplaceProcessorToESQL } from './processors/replace';
+import { convertRedactProcessorToESQL } from './processors/redact';
 import { convertMathProcessorToESQL } from './processors/math';
 import { createTransformStringESQL } from './transform_string';
 import { convertJoinProcessorToESQL } from './processors/join';
@@ -83,6 +85,9 @@ function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLA
 
     case 'replace':
       return convertReplaceProcessorToESQL(processor as ReplaceProcessor);
+
+    case 'redact':
+      return convertRedactProcessorToESQL(processor as RedactProcessor);
 
     case 'uppercase':
       const convertUppercaseProcessorToESQL = createTransformStringESQL('TO_UPPER');

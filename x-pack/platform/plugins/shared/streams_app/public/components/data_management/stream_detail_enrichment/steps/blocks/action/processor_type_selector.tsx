@@ -281,6 +281,37 @@ const getAvailableProcessors: (
       );
     },
   },
+  redact: {
+    type: 'redact' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.redactInputDisplay',
+      {
+        defaultMessage: 'Redact',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.redactHelpText"
+          defaultMessage="{redactLink} Uses Grok patterns to identify and mask sensitive information like IP addresses, emails, and other PII."
+          values={{
+            redactLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsRedactLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.redact}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.redactLinkLabel', {
+                  defaultMessage: 'Masks sensitive data in a field.',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
+  },
   drop_document: {
     type: 'drop_document' as const,
     inputDisplay: i18n.translate(
@@ -481,6 +512,7 @@ const PROCESSOR_GROUP_MAP: Record<
   convert: 'convert',
   date: 'convert',
   replace: 'convert',
+  redact: 'convert',
   append: 'set',
   set: 'set',
   rename: 'set',
