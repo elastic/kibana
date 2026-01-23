@@ -195,15 +195,15 @@ export class DiscoverPageObject extends FtrService {
     await this.testSubjects.click('discoverOpenButton');
   }
 
-  public async hasUnsavedChangesBadge() {
-    return await this.testSubjects.exists('unsavedChangesBadge');
+  public async hasUnsavedChangesIndicator() {
+    return await this.testSubjects.exists('split-button-notification-indicator');
   }
 
   public async revertUnsavedChanges() {
-    await this.testSubjects.moveMouseTo('unsavedChangesBadge');
-    await this.testSubjects.click('unsavedChangesBadge');
+    await this.testSubjects.moveMouseTo('discoverSaveButton-secondary-button');
+    await this.testSubjects.click('discoverSaveButton-secondary-button');
     await this.retry.waitFor('popover is open', async () => {
-      return Boolean(await this.testSubjects.find('unsavedChangesBadgeMenuPanel'));
+      return Boolean(await this.testSubjects.find('discoverSaveButtonPopover'));
     });
     await this.testSubjects.click('revertUnsavedChangesButton');
     await this.header.waitUntilLoadingHasFinished();
@@ -211,12 +211,8 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async saveUnsavedChanges() {
-    await this.testSubjects.moveMouseTo('unsavedChangesBadge');
-    await this.testSubjects.click('unsavedChangesBadge');
-    await this.retry.waitFor('popover is open', async () => {
-      return Boolean(await this.testSubjects.find('unsavedChangesBadgeMenuPanel'));
-    });
-    await this.testSubjects.click('saveUnsavedChangesButton');
+    await this.testSubjects.moveMouseTo('discoverSaveButton');
+    await this.testSubjects.click('discoverSaveButton');
     await this.retry.waitFor('modal is open', async () => {
       return Boolean(await this.testSubjects.find('confirmSaveSavedObjectButton'));
     });
@@ -258,9 +254,19 @@ export class DiscoverPageObject extends FtrService {
       await this.testSubjects.existOrFail('unifiedHistogramBreakdownSelectorSelectable');
     });
 
-    await (
-      await this.testSubjects.find('unifiedHistogramBreakdownSelectorSelectorSearch')
-    ).type(field, { charByChar: true });
+    const searchInput = await this.testSubjects.find(
+      'unifiedHistogramBreakdownSelectorSelectorSearch'
+    );
+
+    await searchInput.type(field, { charByChar: true });
+
+    await this.retry.waitFor('options to be filtered', async () => {
+      const isSearching = await this.testSubjects.getAttribute(
+        'unifiedHistogramBreakdownSelectorSelectable',
+        'data-is-searching'
+      );
+      return isSearching === 'false';
+    });
 
     const optionValue = value ?? field;
 
@@ -268,9 +274,7 @@ export class DiscoverPageObject extends FtrService {
       `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${optionValue}"]`
     );
 
-    await this.retry.waitFor('the dropdown to close', async () => {
-      return !(await this.testSubjects.exists('unifiedHistogramBreakdownSelectorSelectable'));
-    });
+    await this.testSubjects.missingOrFail('unifiedHistogramBreakdownSelectorSelectable');
 
     await this.retry.waitFor('the value to be selected', async () => {
       const breakdownButton = await this.testSubjects.find(
@@ -650,10 +654,49 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async selectTextBaseLang() {
+    // First check if the button is directly visible
     if (await this.testSubjects.exists('select-text-based-language-btn')) {
       await this.testSubjects.click('select-text-based-language-btn');
       await this.header.waitUntilLoadingHasFinished();
       await this.waitUntilSearchingHasFinished();
+      return;
+    }
+
+    // If not visible, try the overflow menu
+    if (await this.testSubjects.exists('app-menu-overflow-button')) {
+      await this.testSubjects.click('app-menu-overflow-button');
+
+      if (await this.testSubjects.exists('select-text-based-language-btn')) {
+        await this.testSubjects.click('select-text-based-language-btn');
+        await this.header.waitUntilLoadingHasFinished();
+        await this.waitUntilSearchingHasFinished();
+      }
+
+      // Close the popover if open
+      if (await this.testSubjects.exists('app-menu-popover')) {
+        await this.testSubjects.click('app-menu-overflow-button');
+      }
+    }
+  }
+
+  public async selectDataViewMode() {
+    // Find the selected tab and open its menu
+    const tabElements = await this.find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]');
+    for (const tabElement of tabElements) {
+      const tabRoleElement = await tabElement.findByCssSelector('[role="tab"]');
+      if ((await tabRoleElement.getAttribute('aria-selected')) === 'true') {
+        const menuButton = await tabElement.findByCssSelector(
+          '[data-test-subj^="unifiedTabs_tabMenuBtn_"]'
+        );
+        await menuButton.click();
+        await this.retry.waitFor('tab menu to open', async () => {
+          return await this.testSubjects.exists('unifiedTabs_tabMenuItem_switchToClassic');
+        });
+        await this.testSubjects.click('unifiedTabs_tabMenuItem_switchToClassic');
+        await this.header.waitUntilLoadingHasFinished();
+        await this.waitUntilSearchingHasFinished();
+        return;
+      }
     }
   }
 
@@ -943,5 +986,13 @@ export class DiscoverPageObject extends FtrService {
       await cb();
     }
     await this.expectRequestCount(endpointRegExp, expectedCount);
+  }
+
+  public async ensureHasUnsavedChangesIndicator() {
+    await this.testSubjects.existOrFail('split-button-notification-indicator');
+  }
+
+  public async ensureNoUnsavedChangesIndicator() {
+    await this.testSubjects.missingOrFail('split-button-notification-indicator');
   }
 }
