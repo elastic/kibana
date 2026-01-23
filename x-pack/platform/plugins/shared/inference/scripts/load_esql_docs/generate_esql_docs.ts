@@ -664,20 +664,38 @@ yargs(process.argv.slice(2))
               // Check if file is cached and unchanged (unless force flag is set)
               const cached = cache[cacheKey];
               if (!argv.force && cached && cached.hash === contentHash) {
-                // File hash matches, populate mapping from cached outputFiles
-                if (cached.outputFiles) {
-                  for (const outputFileName of cached.outputFiles) {
-                    outputToSourceMap.set(outputFileName, cacheKey);
+                // File hash matches, verify output files exist on disk
+                if (cached.outputFiles && cached.outputFiles.length > 0) {
+                  const allOutputFilesExist = await Promise.all(
+                    cached.outputFiles.map(async (outputFileName) => {
+                      const outputFilePath = Path.join(outDir, outputFileName);
+                      try {
+                        await Fs.access(outputFilePath);
+                        return true;
+                      } catch {
+                        return false;
+                      }
+                    })
+                  ).then((results) => results.every((exists) => exists));
+
+                  if (allOutputFilesExist) {
+                    // All output files exist, skip processing
+                    for (const outputFileName of cached.outputFiles) {
+                      outputToSourceMap.set(outputFileName, cacheKey);
+                    }
+                    log.debug(
+                      `Skipping extraction for ${mdFile} (hash: ${contentHash.substring(
+                        0,
+                        8
+                      )}...) - all output files exist`
+                    );
+                    continue;
+                  } else {
+                    // Some output files are missing, process the file
+                    log.info(`Processing ${mdFile} - some output files are missing from disk`);
                   }
-                  // Skip extraction - will check if final files exist on disk in LLM phase
-                  log.debug(
-                    `Skipping extraction for ${mdFile} (hash: ${contentHash.substring(
-                      0,
-                      8
-                    )}...) - will check disk for final files`
-                  );
-                  continue;
                 } else {
+                  // No output files in cache, skip
                   continue;
                 }
               }
@@ -743,17 +761,37 @@ yargs(process.argv.slice(2))
                   // Check if file is cached and unchanged (unless force flag is set)
                   const cached = cache[cacheKey];
                   if (!argv.force && cached && cached.hash === contentHash) {
-                    // Source file hasn't changed, skip processing
-                    log.debug(
-                      `Skipping ${mdFile} (hash: ${contentHash.substring(0, 8)}... unchanged)`
-                    );
-                    // Populate mapping from cached outputFiles if they exist
-                    if (cached.outputFiles) {
-                      for (const outputFileName of cached.outputFiles) {
-                        outputToSourceMap.set(outputFileName, cacheKey);
+                    // Source file hash matches, verify output files exist on disk
+                    if (cached.outputFiles && cached.outputFiles.length > 0) {
+                      const allOutputFilesExist = await Promise.all(
+                        cached.outputFiles.map(async (outputFileName) => {
+                          const outputFilePath = Path.join(outDir, outputFileName);
+                          try {
+                            await Fs.access(outputFilePath);
+                            return true;
+                          } catch {
+                            return false;
+                          }
+                        })
+                      ).then((results) => results.every((exists) => exists));
+
+                      if (allOutputFilesExist) {
+                        // All output files exist, skip processing
+                        log.debug(
+                          `Skipping ${mdFile} (hash: ${contentHash.substring(0, 8)}... unchanged)`
+                        );
+                        for (const outputFileName of cached.outputFiles) {
+                          outputToSourceMap.set(outputFileName, cacheKey);
+                        }
+                        continue;
+                      } else {
+                        // Some output files are missing, process the file
+                        log.info(`Processing ${mdFile} - some output files are missing from disk`);
                       }
+                    } else {
+                      // No output files in cache, skip
+                      continue;
                     }
-                    continue;
                   }
 
                   // Extract raw sections and check which ones have changed
@@ -779,8 +817,25 @@ yargs(process.argv.slice(2))
 
                       // Check if this section has changed (unless force flag is set)
                       const cachedSectionHash = cache[cacheKey].sections?.[outputFileName]?.hash;
+                      const sectionHashMatches = cachedSectionHash === sectionHash;
+
+                      // Also check if output file exists on disk
+                      let outputFileExists = false;
+                      if (sectionHashMatches && !argv.force) {
+                        const outputFilePath = Path.join(outDir, outputFileName);
+                        try {
+                          await Fs.access(outputFilePath);
+                          outputFileExists = true;
+                        } catch {
+                          outputFileExists = false;
+                        }
+                      }
+
                       const sectionChanged =
-                        argv.force || !cachedSectionHash || cachedSectionHash !== sectionHash;
+                        argv.force ||
+                        !cachedSectionHash ||
+                        cachedSectionHash !== sectionHash ||
+                        !outputFileExists;
 
                       if (sectionChanged) {
                         // Process the section
