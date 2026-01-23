@@ -35,7 +35,7 @@ import { CUSTOM_YAML_VALIDATION_MARKER_OWNERS, type YamlValidationResult } from 
 const SEVERITY_MAP = {
   error: MarkerSeverity.Error,
   warning: MarkerSeverity.Warning,
-  info: MarkerSeverity.Hint,
+  info: MarkerSeverity.Info,
 };
 
 export interface UseYamlValidationResult {
@@ -263,7 +263,7 @@ function createMarkersAndDecorations(validationResults: YamlValidationResult[]):
         markers.push({
           ...marker,
           severity: SEVERITY_MAP[validationResult.severity],
-          message: validationResult.message,
+          message: validationResult.message ?? '',
           source: 'connector-id-validation',
         });
       }

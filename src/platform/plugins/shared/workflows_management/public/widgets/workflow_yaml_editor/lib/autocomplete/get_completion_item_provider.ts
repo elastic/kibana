@@ -13,7 +13,10 @@ import { buildAutocompleteContext } from './context/build_autocomplete_context';
 import { getAllYamlProviders } from './intercept_monaco_yaml_provider';
 import { getSuggestions } from './suggestions/get_suggestions';
 import { openCreateConnectorFlyout } from '../../../../entities/workflows/store';
-import type { WorkflowDetailState } from '../../../../entities/workflows/store';
+import type {
+  MonacoInsertPosition,
+  WorkflowDetailState,
+} from '../../../../entities/workflows/store';
 
 // Unique identifier for the workflow completion provider
 export const WORKFLOW_COMPLETION_PROVIDER_ID = 'workflows-yaml-completion-provider';
@@ -84,9 +87,9 @@ export function getCompletionItemProvider(
   // Note: This should ideally be registered once, but Monaco's command system handles duplicates
   monaco.editor.registerCommand(
     'workflows.editor.action.createConnector',
-    (_, connectorType: string) => {
+    (_, connectorType: string, insertPosition?: MonacoInsertPosition) => {
       if (connectorType) {
-        dispatch(openCreateConnectorFlyout({ connectorType }));
+        dispatch(openCreateConnectorFlyout({ connectorType, insertPosition }));
       }
     }
   );

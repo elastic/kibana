@@ -92,7 +92,6 @@ export function validateConnectorIds(
         endLineNumber: connectorIdItem.endLineNumber,
         endColumn: connectorIdItem.endColumn,
         beforeMessage: null,
-        afterMessage: null,
         hoverMessage: `${createConnectorLink} | ${manageConnectorLink}`,
       };
       results.push(errorResult);
@@ -103,21 +102,27 @@ export function validateConnectorIds(
         text: TRANSLATIONS.editConnector,
       });
 
+      const connectedMessage = i18n.translate(
+        'workflows.validateConnectorIds.connectorFoundMessage',
+        {
+          defaultMessage: `Successfully connected to {displayName} connector "{name}"`,
+          values: { displayName, name: instance.name },
+        }
+      );
+      const uuidMessage = `Connector uuid: <code>${instance.id}</code>`;
+      const actionsMessage = `${editConnectorLink} | ${createConnectorLink} | ${manageConnectorLink}`;
+
       const validResult: YamlValidationResult = {
         id: connectorIdItem.id,
         severity: 'info',
-        message: i18n.translate('workflows.validateConnectorIds.connectorFoundMessage', {
-          defaultMessage: `Successfully connected to {displayName} connector "{name}"\nUUID: {id}\n`,
-          values: { displayName, name: instance.name, id: instance.id },
-        }),
+        message: null,
         owner: 'connector-id-validation',
         startLineNumber: connectorIdItem.startLineNumber,
         startColumn: connectorIdItem.startColumn,
         endLineNumber: connectorIdItem.endLineNumber,
         endColumn: connectorIdItem.endColumn,
         beforeMessage: `✓ ${instance.name}`,
-        afterMessage: null,
-        hoverMessage: `${editConnectorLink} | ${createConnectorLink} | ${manageConnectorLink}`,
+        hoverMessage: `${connectedMessage}\n\n${uuidMessage}\n\n${actionsMessage}`,
       };
       results.push(validResult);
     }

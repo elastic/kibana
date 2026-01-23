@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { monaco } from '@kbn/monaco';
 import { getConnectorIdSuggestionsItems } from './get_connector_id_suggestions_items';
+import type { MonacoInsertPosition } from '../../../../../../entities/workflows/store';
 import type { AutocompleteContext } from '../../context/autocomplete.types';
 
 export function getConnectorIdSuggestions({
@@ -16,7 +18,8 @@ export function getConnectorIdSuggestions({
   range,
   focusedStepInfo,
   dynamicConnectorTypes,
-}: AutocompleteContext) {
+  position,
+}: AutocompleteContext & { position?: monaco.Position }) {
   const stepConnectorType = focusedStepInfo?.stepType ?? null;
 
   if (
@@ -27,6 +30,16 @@ export function getConnectorIdSuggestions({
   ) {
     return [];
   }
+
+  // Extract position from range if position is not provided
+  const insertPosition: MonacoInsertPosition = position
+    ? { lineNumber: position.lineNumber, column: position.column }
+    : {
+        lineNumber: range.startLineNumber,
+        column:
+          lineParseResult.fullKey !== '' ? lineParseResult.valueStartIndex + 1 : range.startColumn,
+      };
+
   // If the user has typed part of the connector-id, we replace from the start of the value to the end of the line
   if (lineParseResult.fullKey !== '') {
     const replaceRange = {
@@ -34,8 +47,18 @@ export function getConnectorIdSuggestions({
       startColumn: lineParseResult.valueStartIndex + 1,
       endColumn: line.length + 1,
     };
-    return getConnectorIdSuggestionsItems(stepConnectorType, replaceRange, dynamicConnectorTypes);
+    return getConnectorIdSuggestionsItems(
+      stepConnectorType,
+      replaceRange,
+      dynamicConnectorTypes,
+      insertPosition
+    );
   }
 
-  return getConnectorIdSuggestionsItems(stepConnectorType, range, dynamicConnectorTypes);
+  return getConnectorIdSuggestionsItems(
+    stepConnectorType,
+    range,
+    dynamicConnectorTypes,
+    insertPosition
+  );
 }

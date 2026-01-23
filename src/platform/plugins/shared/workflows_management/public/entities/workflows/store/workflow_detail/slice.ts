@@ -9,7 +9,7 @@
 
 import { createSlice } from '@reduxjs/toolkit';
 import type { EsWorkflow, WorkflowDetailDto, WorkflowExecutionDto } from '@kbn/workflows';
-import type { ActiveTab, ComputedData, WorkflowDetailState } from './types';
+import type { ActiveTab, ComputedData, MonacoInsertPosition, WorkflowDetailState } from './types';
 import { addLoadingStateReducers, initialLoadingState } from './utils/loading_states';
 import { findStepByLine } from './utils/step_finder';
 import { getWorkflowZodSchema } from '../../../../../common/schema';
@@ -32,6 +32,7 @@ const initialState: WorkflowDetailState = {
     isOpen: false,
     connectorType: undefined,
     connectorIdToEdit: undefined,
+    insertPosition: undefined,
   },
 };
 
@@ -82,7 +83,10 @@ const workflowDetailSlice = createSlice({
     },
 
     // Connector flyout actions
-    openCreateConnectorFlyout: (state, action: { payload: { connectorType: string } }) => {
+    openCreateConnectorFlyout: (
+      state,
+      action: { payload: { connectorType: string; insertPosition?: MonacoInsertPosition } }
+    ) => {
       state.connectorFlyout = { isOpen: true, ...action.payload };
     },
     openEditConnectorFlyout: (
@@ -92,7 +96,7 @@ const workflowDetailSlice = createSlice({
       state.connectorFlyout = { isOpen: true, ...action.payload };
     },
     closeConnectorFlyout: (state) => {
-      state.connectorFlyout = { isOpen: false }; // connectorType and connectorToEdit are undefined
+      state.connectorFlyout = { isOpen: false }; // connectorType, connectorToEdit, and insertPosition are undefined
     },
 
     // Internal actions - these are not for components usage

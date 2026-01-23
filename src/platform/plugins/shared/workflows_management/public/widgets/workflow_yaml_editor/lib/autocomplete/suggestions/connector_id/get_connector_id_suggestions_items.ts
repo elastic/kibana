@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
+import type { MonacoInsertPosition } from '../../../../../../entities/workflows/store';
 
 /**
  * Generate connector-id suggestions for a specific connector type
@@ -17,7 +19,8 @@ import type { ConnectorTypeInfo } from '@kbn/workflows';
 export function getConnectorIdSuggestionsItems(
   connectorType: string,
   range: monaco.IRange | monaco.languages.CompletionItemRanges,
-  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
+  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>,
+  insertPosition?: MonacoInsertPosition
 ): monaco.languages.CompletionItem[] {
   const suggestions: monaco.languages.CompletionItem[] = [];
 
@@ -55,7 +58,9 @@ export function getConnectorIdSuggestionsItems(
   });
 
   suggestions.push({
-    label: 'Create a new connector',
+    label: i18n.translate('workflows.editor.autocomplete.createConnectorLabel', {
+      defaultMessage: 'Create a new connector',
+    }),
     kind: monaco.languages.CompletionItemKind.Text,
     insertText: '',
     range,
@@ -65,7 +70,7 @@ export function getConnectorIdSuggestionsItems(
     command: {
       id: 'workflows.editor.action.createConnector',
       title: 'Create connector',
-      arguments: [getConnectorActionType(connectorType)],
+      arguments: [getConnectorActionType(connectorType), insertPosition],
     },
   });
 

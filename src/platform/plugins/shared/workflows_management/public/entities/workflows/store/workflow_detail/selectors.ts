@@ -171,3 +171,7 @@ export const selectConnectorFlyoutConnectorToEdit = createSelector(
   selectConnectorFlyout,
   (flyout) => flyout.connectorIdToEdit
 );
+export const selectConnectorFlyoutInsertPosition = createSelector(
+  selectConnectorFlyout,
+  (flyout) => flyout.insertPosition
+);

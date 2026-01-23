@@ -10,6 +10,7 @@
 import { useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import type { monaco } from '@kbn/monaco';
+import type { MonacoInsertPosition } from '../../../../entities/workflows/store';
 import {
   openCreateConnectorFlyout,
   openEditConnectorFlyout,
@@ -78,7 +79,17 @@ export function useMonacoHoverClickInterceptor(
       if (action === WorkflowAction.OpenConnectorFlyout) {
         const connectorType = actionElement.getAttribute('data-connector-type');
         if (connectorType) {
-          dispatch(openCreateConnectorFlyout({ connectorType: decodeURIComponent(connectorType) }));
+          // Get the current editor position to insert the connector ID later
+          const position = editor.getPosition();
+          const insertPosition: MonacoInsertPosition | undefined = position
+            ? { lineNumber: position.lineNumber, column: position.column }
+            : undefined;
+          dispatch(
+            openCreateConnectorFlyout({
+              connectorType: decodeURIComponent(connectorType),
+              insertPosition,
+            })
+          );
         }
       }
       if (action === WorkflowAction.OpenConnectorEditFlyout) {
