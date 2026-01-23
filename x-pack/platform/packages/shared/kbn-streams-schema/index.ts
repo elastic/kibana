@@ -10,6 +10,7 @@ export { IngestBase } from './src/models/ingest/base';
 export { Ingest } from './src/models/ingest';
 export { WiredIngest } from './src/models/ingest/wired';
 export { ClassicIngest } from './src/models/ingest/classic';
+export { Query } from './src/models/query';
 
 export {
   type RoutingDefinition,

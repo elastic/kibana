@@ -54,11 +54,8 @@ const getCountByType = (attachments: Attachment[]): Record<AttachmentType, numbe
   );
 };
 
-export function StreamDetailAttachments({
-  definition,
-}: {
-  definition: Streams.ingest.all.GetResponse;
-}) {
+export function StreamDetailAttachments({ definition }: { definition: Streams.all.GetResponse }) {
+  const [query, setQuery] = useState('');
   const [filters, setFilters] = useState<AttachmentFiltersState>(DEFAULT_ATTACHMENT_FILTERS);
   const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
 

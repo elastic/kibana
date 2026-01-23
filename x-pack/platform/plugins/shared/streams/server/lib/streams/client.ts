@@ -361,6 +361,30 @@ export class StreamsClient {
     return { acknowledged: true, result: 'created' };
   }
 
+  async createQueryStream({
+    name,
+    query,
+  }: {
+    name: string;
+    query: Streams.QueryStream.UpsertRequest['stream']['query'];
+  }): Promise<UpsertStreamResponse> {
+    await State.attemptChanges(
+      [
+        {
+          type: 'upsert',
+          definition: {
+            name,
+            description: '',
+            query,
+          },
+        },
+      ],
+      { ...this.dependencies, streamsClient: this }
+    );
+
+    return { acknowledged: true, result: 'created' };
+  }
+
   /**
    * Make sure there is a stream definition for a given stream.
    * If the data stream exists but the stream definition does not, it creates an empty stream definition.
@@ -698,11 +722,19 @@ export class StreamsClient {
       .flatMap((hit) => this.getStreamDefinitionFromSource(hit._source));
 
     const privileges = await checkAccessBulk({
-      names: streams.map((stream) => stream.name),
+      names: streams
+        .filter(
+          (stream) =>
+            !Streams.QueryStream.Definition.is(stream)
+        )
+        .map((stream) => stream.name),
       scopedClusterClient,
     });
 
-    return streams.filter((stream) => privileges[stream.name]?.read);
+    return streams.filter((stream) => {
+      if (Streams.QueryStream.Definition.is(stream)) return true;
+      return privileges[stream.name]?.read === true;
+    });
   }
 
   private async checkElasticsearchStreamStatus(): Promise<boolean> {

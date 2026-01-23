@@ -21,9 +21,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-plugin/public';
 import type { ReactNode } from 'react';
 import React, { useMemo, useState } from 'react';
-import type { StatefulStreamsAppRouter } from '../../../hooks/use_streams_app_router';
-import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
-import { useStreamsRoutingSelector } from './state_management/stream_routing_state_machine';
+import type { StatefulStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { useStreamsRoutingSelector } from '../data_management/stream_detail_routing/state_management/stream_routing_state_machine';
 
 interface StreamNameFormRowProps {
   onChange?: (value: string) => void;
@@ -36,7 +36,7 @@ interface StreamNameFormRowProps {
   errorMessage?: ReactNode | string | undefined;
   isStreamNameValid?: boolean;
   partitionName: string;
-  prefix: string;
+  prefix?: string;
 }
 
 const MIN_NAME_LENGTH = 1;
@@ -257,7 +257,7 @@ export function StreamNameFormRow({
         autoFocus={autoFocus}
         onChange={handleChange}
         minLength={MIN_NAME_LENGTH}
-        prepend={[
+        prepend={prefix ? [
           <EuiIcon type="streamsWired" />,
           <EuiFormLabel
             css={css`
@@ -275,7 +275,7 @@ export function StreamNameFormRow({
             </EuiScreenReaderOnly>
             <EuiTextTruncate text={prefix} truncation="start" data-test-subj={`streamNamePrefix`} />
           </EuiFormLabel>,
-        ]}
+        ] : undefined}
       />
     </EuiFormRow>
   );

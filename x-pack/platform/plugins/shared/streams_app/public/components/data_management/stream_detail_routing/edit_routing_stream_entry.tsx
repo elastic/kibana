@@ -10,7 +10,7 @@ import { EuiPanel, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { RoutingConditionEditor } from './routing_condition_editor';
 import { EditRoutingRuleControls } from './control_bars';
-import { StreamNameFormRow, useChildStreamInput } from './stream_name_form_row';
+import { StreamNameFormRow, useChildStreamInput } from '../../stream_name_form_row';
 import type { RoutingDefinitionWithUIAttributes } from './types';
 
 export function EditRoutingStreamEntry({

@@ -75,6 +75,17 @@ export function StreamDetailRouting(props: StreamDetailRoutingProps) {
 }
 
 export function StreamDetailRoutingImpl() {
+  const { appParams, core } = useKibana();
+
+  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
+  const { cancelChanges, saveChanges } = useStreamRoutingEvents();
+
+  const definition = routingSnapshot.context.definition;
+
+  const shouldDisplayBottomBar =
+    routingSnapshot.matches({ ready: { ingestMode: { reorderingRules: 'reordering' } } }) &&
+    routingSnapshot.can({ type: 'routingRule.save' });
+
   const {
     appParams,
     core,
@@ -225,7 +236,7 @@ export function StreamDetailRoutingImpl() {
               onCancel={cancelChanges}
               onConfirm={saveChanges}
               isLoading={routingSnapshot.matches({
-                ready: { reorderingRules: 'updatingStream' },
+                ready: { ingestMode: { reorderingRules: 'updatingStream' } },
               })}
               disabled={!routingSnapshot.can({ type: 'routingRule.save' })}
               insufficientPrivileges={!routingSnapshot.can({ type: 'routingRule.save' })}

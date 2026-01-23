@@ -17,7 +17,7 @@ export async function importContent({
 }: {
   file: File;
   http: HttpSetup;
-  definition: Streams.ingest.all.GetResponse;
+  definition: Streams.all.GetResponse;
   include: ContentPackIncludedObjects;
 }) {
   const body = new FormData();
@@ -42,7 +42,7 @@ export async function previewContent({
 }: {
   http: HttpSetup;
   file: File;
-  definition: Streams.ingest.all.GetResponse;
+  definition: Streams.all.GetResponse;
 }) {
   const body = new FormData();
   body.append('content', file);

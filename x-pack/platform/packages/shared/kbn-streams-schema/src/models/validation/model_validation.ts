@@ -19,17 +19,10 @@ export interface ModelValidation<TLeft extends IModel = any, TRight extends TLef
   UpsertRequest: Validation<TLeft['UpsertRequest'], TRight['UpsertRequest']>;
 }
 
-export function joinValidation<TLeft extends IModel, TRight extends TLeft>(
+export function joinValidation<TLeft extends IModel, TRights extends [TLeft, TLeft, ...TLeft[]]>(
   left: ModelValidation<any, TLeft>,
-  rights: Array<ModelValidation<any, TRight>>
-): ModelValidation<TLeft, TRight>;
-
-export function joinValidation<TLeft extends IModel, TRight1 extends TLeft, TRight2 extends TLeft>(
-  left: ModelValidation<any, TLeft>,
-  rights: [ModelValidation<any, TRight1>, ModelValidation<any, TRight2>]
-): ModelValidation<TLeft, TRight1 | TRight2>;
-
-export function joinValidation(left: ModelValidation, rights: ModelValidation[]) {
+  rights: { [K in keyof TRights]: ModelValidation<any, TRights[K]> }
+): ModelValidation<TLeft, TRights[number]> {
   function join<TKey extends keyof IModel>(key: TKey) {
     return validation(
       left[key].right,
