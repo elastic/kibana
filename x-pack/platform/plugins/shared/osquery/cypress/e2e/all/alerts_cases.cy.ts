@@ -25,7 +25,6 @@ import {
 } from '../../tasks/live_query';
 import { generateRandomStringName, interceptCaseId } from '../../tasks/integrations';
 
-// Failing: See https://github.com/elastic/kibana/issues/197151
 describe(
   'Alert Event Details - Cases',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },

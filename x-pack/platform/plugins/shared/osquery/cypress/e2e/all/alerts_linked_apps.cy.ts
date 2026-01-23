@@ -17,7 +17,6 @@ import {
 } from '../../tasks/live_query';
 import { closeModalIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 
-// FLAKY: https://github.com/elastic/kibana/issues/218206
 describe(
   'Alert Event Details',
   {
