@@ -125,7 +125,7 @@ describe('POST /internal/global_search/find', () => {
   it('allows requests with max length options.preference string', async () => {
     const longPreference = 'a'.repeat(64); // maxLength is 64
 
-    const response = await supertest(server.listener)
+    const response = await supertest(httpSetup.server.listener)
       .post('/internal/global_search/find')
       .send({ params: { term: 'search' }, options: { preference: longPreference } })
       .expect(200);
@@ -136,7 +136,7 @@ describe('POST /internal/global_search/find', () => {
   it('disallows requests with large options.preference string', async () => {
     const longPreference = 'a'.repeat(65); // maxLength is 64
 
-    const response = await supertest(server.listener)
+    const response = await supertest(httpSetup.server.listener)
       .post('/internal/global_search/find')
       .send({ params: { term: 'search' }, options: { preference: longPreference } })
       .expect(400);
