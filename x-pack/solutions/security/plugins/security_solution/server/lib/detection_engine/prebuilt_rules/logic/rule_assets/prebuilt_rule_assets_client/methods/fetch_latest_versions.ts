@@ -184,7 +184,7 @@ function sortRuleVersions(
 function createRuleVersionInfoCompareFn(
   sortField: string,
   order: 'asc' | 'desc'
-): RuleVersionInfoCompareFn {
+): RuleVersionInfoCompareFn | undefined {
   const direction = order === 'desc' ? -1 : 1;
 
   switch (sortField) {
@@ -198,7 +198,5 @@ function createRuleVersionInfoCompareFn(
         const rankB = SEVERITY_RANK[b.severity] ?? -1;
         return (rankA - rankB) * direction;
       };
-    default:
-      return () => 0;
   }
 }
