@@ -9,7 +9,6 @@ import type { AgentBuilderEvent } from '../base/events';
 import type { ToolResult } from '../tools/tool_result';
 import type { ConversationInternalState, ConversationRound } from './conversation';
 import type { PromptRequestSource, PromptRequest } from '../agents/prompts';
-import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
 import type { VersionedAttachment } from '../attachments';
 
 export enum ChatEventType {
@@ -222,8 +221,6 @@ export interface RoundCompleteEventData {
    * Updated conversation-level attachments after this round.
    **/
   attachments?: VersionedAttachment[];
-  /** Runtime configuration overrides that were applied to this round. */
-  configuration_overrides?: RuntimeAgentConfigurationOverrides;
 }
 
 export type RoundCompleteEvent = ChatEventBase<ChatEventType.roundComplete, RoundCompleteEventData>;
