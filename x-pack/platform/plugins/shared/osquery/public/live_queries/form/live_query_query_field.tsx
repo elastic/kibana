@@ -29,7 +29,7 @@ const euiAccordionCss = ({ euiTheme }: UseEuiTheme) => ({
     color: euiTheme.colors.primary,
   },
   '.euiAccordion__childWrapper': {
-    '-webkit-transition': 'none',
+    WebkitTransition: 'none',
   },
 });
 

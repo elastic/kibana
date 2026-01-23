@@ -31,7 +31,7 @@ import type {
   SuggestForExpressionParams,
   SuggestForExpressionResult,
 } from './types';
-import { isNullCheckOperator } from './utils';
+import { getKqlSuggestionsIfApplicable, isNullCheckOperator } from './utils';
 
 const WHITESPACE_REGEX = /\s/;
 const LAST_WORD_BOUNDARY_REGEX = /\b\w(?=\w*$)/;
@@ -44,6 +44,15 @@ export async function suggestForExpression(
 ): Promise<SuggestForExpressionResult> {
   const baseCtx = buildContext(params);
   const computed = computeDerivedState(baseCtx);
+
+  const kqlSuggestions = await getKqlSuggestionsIfApplicable(baseCtx);
+
+  if (kqlSuggestions !== null) {
+    return {
+      suggestions: kqlSuggestions,
+      computed,
+    };
+  }
 
   const mapSuggestions = getMapExpressionSuggestions(baseCtx.innerText);
 
