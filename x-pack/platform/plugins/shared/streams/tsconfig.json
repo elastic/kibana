@@ -10,6 +10,7 @@
     "server/**/*",
     "public/**/*",
     "types/**/*",
+    "test/**/*",
   ],
   "exclude": [
     "target/**/*"
