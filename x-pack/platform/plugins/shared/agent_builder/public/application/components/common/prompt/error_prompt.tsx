@@ -14,7 +14,7 @@ import { PromptLayout, PROMPT_LAYOUT_VARIANTS, type PromptLayoutVariant } from '
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
 
-export type AppErrorType =
+export type ErrorPromptType =
   | 'GENERIC_ERROR'
   | 'CONVERSATION_NOT_FOUND'
   | 'MISSING_PRIVILEGES'
@@ -27,23 +27,23 @@ interface ErrorDetails {
   icon?: IconType;
 }
 
-const ERROR_DETAILS_MAPPINGS: Record<AppErrorType, ErrorDetails> = {
+const ERROR_DETAILS_MAPPINGS: Record<ErrorPromptType, ErrorDetails> = {
   GENERIC_ERROR: {
-    title: i18n.translate('xpack.agentBuilder.appError.genericErrorTitle', {
+    title: i18n.translate('xpack.agentBuilder.errorPrompt.genericErrorTitle', {
       defaultMessage: 'Something didn’t work',
     }),
-    description: i18n.translate('xpack.agentBuilder.appError.genericErrorDescription', {
+    description: i18n.translate('xpack.agentBuilder.errorPrompt.genericErrorDescription', {
       defaultMessage:
         'We ran into an issue while running this request. Try again or start a new conversation.',
     }),
     icon: 'warning',
   },
   CONVERSATION_NOT_FOUND: {
-    title: i18n.translate('xpack.agentBuilder.appError.conversationNotFoundErrorTitle', {
+    title: i18n.translate('xpack.agentBuilder.errorPrompt.conversationNotFoundErrorTitle', {
       defaultMessage: 'Conversation not found',
     }),
     description: i18n.translate(
-      'xpack.agentBuilder.appError.conversationNotFoundErrorDescription',
+      'xpack.agentBuilder.errorPrompt.conversationNotFoundErrorDescription',
       {
         defaultMessage:
           "The conversation ID in the URL doesn't exist. Browse your previous conversations or start a new one.",
@@ -87,7 +87,7 @@ const NEW_CONVERSATION_BUTTON_LABEL = i18n.translate(
 );
 
 interface ErrorPromptProps {
-  errorType: AppErrorType;
+  errorType: ErrorPromptType;
   imageSrc?: string;
   primaryButton?: React.ReactNode;
   secondaryButton?: React.ReactNode;
