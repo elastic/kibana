@@ -20,6 +20,7 @@ import { attachmentTypeInstructions } from './utils/attachments';
 interface AnswerAgentPromptParams {
   customInstructions?: string;
   initialMessages: BaseMessageLike[];
+  conversationTimestamp: string;
   actions: ResearchAgentAction[];
   answerActions: AnswerAgentAction[];
   capabilities: ResolvedAgentCapabilities;
@@ -40,6 +41,7 @@ export const getAnswerAgentPrompt = (params: AnswerAgentPromptParams): BaseMessa
 
 export const getAnswerSystemMessage = ({
   customInstructions,
+  conversationTimestamp,
   capabilities,
   attachmentTypes,
 }: AnswerAgentPromptParams): string => {
@@ -77,7 +79,7 @@ ${attachmentTypeInstructions(attachmentTypes)}
 ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
 
 ## ADDITIONAL INFO
-- Current date: ${formatDate()}
+- Current date: ${formatDate(conversationTimestamp)}
 
 ## PRE-RESPONSE COMPLIANCE CHECK
 - [ ] I answered with a text response
@@ -92,6 +94,7 @@ ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
 export const getStructuredAnswerPrompt = ({
   customInstructions,
   initialMessages,
+  conversationTimestamp,
   actions,
   answerActions,
   capabilities,
@@ -99,6 +102,7 @@ export const getStructuredAnswerPrompt = ({
 }: {
   customInstructions?: string;
   initialMessages: BaseMessageLike[];
+  conversationTimestamp: string;
   actions: ResearchAgentAction[];
   answerActions: AnswerAgentAction[];
   capabilities: ResolvedAgentCapabilities;
@@ -142,7 +146,7 @@ ${attachmentTypeInstructions(attachmentTypes)}
 ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
 
 ## ADDITIONAL INFO
-- Current date: ${formatDate()}
+- Current date: ${formatDate(conversationTimestamp)}
 
 ## PRE-RESPONSE COMPLIANCE CHECK
 - [ ] I responded using the structured output format with all required fields filled
