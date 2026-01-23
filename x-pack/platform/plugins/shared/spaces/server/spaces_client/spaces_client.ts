@@ -135,7 +135,7 @@ export class SpacesClient implements ISpacesClient {
     const savedObject = await this.repository.get('space', id);
     const space = this.transformSavedObjectToSpace(savedObject);
 
-    if (this.cpsSetup?.getCpsEnabled() && (await this.npreClient.canGetNpre())) {
+    if (this.cpsSetup?.getCpsEnabled()) {
       space.projectRouting = await this.npreClient.getNpre(getSpaceDefaultNpreName(id));
     }
 
@@ -280,11 +280,9 @@ export class SpacesClient implements ISpacesClient {
     if (
       this.cpsSetup?.getCpsEnabled() &&
       !(await this.npreClient.canDeleteNpre()) &&
-      (!this.npreClient.canGetNpre() ||
-        (await this.npreClient.getNpre(getSpaceDefaultNpreName(id))))
+      (await this.npreClient.getNpre(getSpaceDefaultNpreName(id)))
     ) {
-      // CPS is enabled and the user is not authorized to delete npre
-      // and is either unable to check for the existence of the npre or the npre exists
+      // CPS is enabled and the user is not authorized to delete an existing npre
       throw Boom.forbidden(
         'Unable to delete Space, unauthorized to delete default projectRouting expression.'
       );

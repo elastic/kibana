@@ -45,7 +45,7 @@ export const CustomizeCps: FC<Props> = ({ space, onChange }) => {
   };
 
   const canEdit = () => {
-    return application?.capabilities?.management?.kibana.manage_project_routing ?? false;
+    return application?.capabilities?.project_routing.manage_space_default ?? false;
   };
 
   return (

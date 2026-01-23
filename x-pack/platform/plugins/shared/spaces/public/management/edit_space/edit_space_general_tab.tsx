@@ -136,7 +136,7 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
   }, []);
 
   const canReadProjectRouting = () => {
-    return application?.capabilities?.management?.kibana?.read_project_routing ?? false;
+    return application?.capabilities?.project_routing?.read_space_default ?? false;
   };
 
   const performSave = useCallback(

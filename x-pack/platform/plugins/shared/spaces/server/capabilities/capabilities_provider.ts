@@ -15,8 +15,6 @@ export const capabilitiesProvider = () => ({
   management: {
     kibana: {
       spaces: true,
-      manage_project_routing: false,
-      read_project_routing: false,
     },
   },
 });
