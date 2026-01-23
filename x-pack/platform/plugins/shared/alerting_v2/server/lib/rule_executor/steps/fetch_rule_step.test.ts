@@ -56,6 +56,7 @@ describe('FetchRuleStep', () => {
     expect(result.type).toBe('continue');
     expect(result).toHaveProperty('data.rule');
 
+    if (result.type !== 'continue') throw new Error('Expected continue');
     const { rule } = result.data as { rule: { id: string; name: string } };
     expect(rule.id).toBe('rule-1');
     expect(rule.name).toBe('test-rule');

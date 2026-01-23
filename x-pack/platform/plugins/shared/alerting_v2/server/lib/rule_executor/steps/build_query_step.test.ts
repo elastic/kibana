@@ -28,6 +28,7 @@ describe('BuildQueryStep', () => {
     expect(result.type).toBe('continue');
     expect(result).toHaveProperty('data.queryPayload');
 
+    if (result.type !== 'continue') throw new Error('Expected continue');
     const { queryPayload } = result.data as { queryPayload: unknown };
     expect(queryPayload).toHaveProperty('filter');
     expect(queryPayload).toHaveProperty('dateStart');

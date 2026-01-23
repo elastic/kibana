@@ -36,7 +36,7 @@ describe('BuildAlertsStep', () => {
   });
 
   const createEsqlResponse = (
-    columns: Array<{ name: string; type?: string }> = [{ name: 'host.name', type: 'keyword' }],
+    columns: Array<{ name: string; type: string }> = [{ name: 'host.name', type: 'keyword' }],
     values: unknown[][] = [['host-a'], ['host-b']]
   ): ESQLSearchResponse => ({
     columns,
@@ -61,6 +61,7 @@ describe('BuildAlertsStep', () => {
     expect(result.type).toBe('continue');
     expect(result).toHaveProperty('data.alertEvents');
 
+    if (result.type !== 'continue') throw new Error('Expected continue');
     const { alertEvents } = result.data as { alertEvents: Array<{ id: string; doc: unknown }> };
     expect(alertEvents).toHaveLength(2);
     expect(alertEvents[0]).toHaveProperty('id');
@@ -69,12 +70,13 @@ describe('BuildAlertsStep', () => {
 
   it('returns empty array when esql response has no values', async () => {
     const step = new BuildAlertsStep();
-    const emptyResponse = createEsqlResponse([{ name: 'host.name' }], []);
+    const emptyResponse = createEsqlResponse([{ name: 'host.name', type: 'keyword' }], []);
     const state = createState(createRule(), emptyResponse);
 
     const result = await step.execute(state);
 
     expect(result.type).toBe('continue');
+    if (result.type !== 'continue') throw new Error('Expected continue');
     const { alertEvents } = result.data as { alertEvents: unknown[] };
     expect(alertEvents).toHaveLength(0);
   });
@@ -87,6 +89,7 @@ describe('BuildAlertsStep', () => {
     const result = await step.execute(state);
 
     expect(result.type).toBe('continue');
+    if (result.type !== 'continue') throw new Error('Expected continue');
     const { alertEvents } = result.data as { alertEvents: unknown[] };
     expect(alertEvents).toHaveLength(0);
   });
@@ -98,6 +101,7 @@ describe('BuildAlertsStep', () => {
 
     const result = await step.execute(state);
 
+    if (result.type !== 'continue') throw new Error('Expected continue');
     const { alertEvents } = result.data as {
       alertEvents: Array<{ id: string; doc: { tags?: string[] } }>;
     };
@@ -121,6 +125,7 @@ describe('BuildAlertsStep', () => {
 
     const result = await step.execute(state);
 
+    if (result.type !== 'continue') throw new Error('Expected continue');
     const { alertEvents } = result.data as {
       alertEvents: Array<{ id: string; doc: { grouping?: { key: string; value: string } } }>;
     };

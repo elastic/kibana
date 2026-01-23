@@ -37,6 +37,7 @@ import {
   BuildAlertsStep,
   StoreAlertsStep,
 } from '../lib/rule_executor/steps';
+import { StepMiddlewareToken, ErrorHandlingMiddleware } from '../lib/rule_executor/middleware';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(RulesClient).toSelf().inRequestScope();
@@ -98,6 +99,18 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
 }
 
 const bindRuleExecutionServices = (bind: ContainerModuleLoadOptions['bind']) => {
+  // Bind middleware classes
+  bind(ErrorHandlingMiddleware).toSelf().inSingletonScope();
+
+  // Bind middleware array (order matters - first middleware is outermost)
+  bind(StepMiddlewareToken)
+    .toDynamicValue(({ get }) => [
+      get(ErrorHandlingMiddleware),
+      // Add more middleware here as needed (e.g., PerformanceMiddleware)
+    ])
+    .inSingletonScope();
+
+  // Bind step classes
   bind(WaitForResourcesStep).toSelf().inSingletonScope();
   bind(FetchRuleStep).toSelf().inRequestScope();
   bind(ValidateRuleStep).toSelf().inSingletonScope();
@@ -106,6 +119,9 @@ const bindRuleExecutionServices = (bind: ContainerModuleLoadOptions['bind']) => 
   bind(BuildAlertsStep).toSelf().inSingletonScope();
   bind(StoreAlertsStep).toSelf().inSingletonScope();
 
+  // Bind steps array (order defines execution order)
+  // Steps can be wrapped with decorators for per-step behavior:
+  // new AuditLoggingDecorator(get(ValidateRuleStep), auditService)
   bind(RuleExecutionStepsToken)
     .toDynamicValue(({ get }) => [
       get(WaitForResourcesStep),

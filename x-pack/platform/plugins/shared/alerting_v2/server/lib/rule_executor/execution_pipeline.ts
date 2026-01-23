@@ -6,8 +6,15 @@
  */
 
 import { inject, injectable } from 'inversify';
-import type { RuleExecutionInput, RuleExecutionStep, RulePipelineState, HaltReason } from './types';
+import type {
+  RuleExecutionInput,
+  RuleExecutionStep,
+  RulePipelineState,
+  RuleStepOutput,
+  HaltReason,
+} from './types';
 import { RuleExecutionStepsToken } from './tokens';
+import { StepMiddlewareToken, type StepMiddleware, type MiddlewareContext } from './middleware';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -31,7 +38,8 @@ export interface ExecutionPipelineContract {
 export class RuleExecutionPipeline implements ExecutionPipelineContract {
   constructor(
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
-    @inject(RuleExecutionStepsToken) private readonly steps: RuleExecutionStep[]
+    @inject(RuleExecutionStepsToken) private readonly steps: RuleExecutionStep[],
+    @inject(StepMiddlewareToken) private readonly middlewares: StepMiddleware[]
   ) {}
 
   public async execute(input: RuleExecutionInput): Promise<PipelineResult> {
@@ -40,13 +48,8 @@ export class RuleExecutionPipeline implements ExecutionPipelineContract {
     for (const step of this.steps) {
       this.logger.debug({ message: `Executing step: ${step.name}` });
 
-      let output;
-      try {
-        output = await step.execute(pipelineState);
-      } catch (error) {
-        this.logger.error({ error, type: `StepExecutionError:${step.name}` });
-        throw error;
-      }
+      const context: MiddlewareContext = { step, state: pipelineState };
+      const output = await this.runMiddlewareChain(context);
 
       if (output.type === 'halt') {
         this.logger.debug({
@@ -68,5 +71,23 @@ export class RuleExecutionPipeline implements ExecutionPipelineContract {
       completed: true,
       finalState: pipelineState,
     };
+  }
+
+  /**
+   * Builds and executes the middleware chain for a step.
+   *
+   * Middleware are executed in order (first middleware is outermost).
+   * Each middleware wraps the next, with the innermost being the step itself.
+   */
+  private runMiddlewareChain(context: MiddlewareContext): Promise<RuleStepOutput> {
+    const { step, state } = context;
+
+    // Build chain from right to left: last middleware wraps step.execute()
+    const chain = this.middlewares.reduceRight(
+      (next, middleware) => () => middleware.execute(context, next),
+      () => step.execute(state)
+    );
+
+    return chain();
   }
 }

@@ -4,6 +4,8 @@ This directory contains the execution steps for the rule executor pipeline. Each
 
 ## Architecture Overview
 
+The pipeline uses a hybrid architecture combining **middleware** for global operations and **decorators** for per-step control.
+
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                           RuleExecutorTaskRunner                            │
@@ -16,19 +18,37 @@ This directory contains the execution steps for the rule executor pipeline. Each
 │                    (orchestrates step execution)                            │
 └─────────────────────────────────────────────────────────────────────────────┘
                                       │
-          ┌───────────────────────────┼───────────────────────────┐
-          ▼                           ▼                           ▼
-   ┌─────────────┐             ┌─────────────┐             ┌─────────────┐
-   │   Step 1    │  ────────►  │   Step 2    │  ────────►  │   Step N    │
-   └─────────────┘             └─────────────┘             └─────────────┘
-          │                           │                           │
-          └───────────────────────────┼───────────────────────────┘
+                    ┌─────────────────┴─────────────────┐
+                    ▼                                   ▼
+          ┌─────────────────┐                 ┌─────────────────┐
+          │   Middleware    │                 │     Steps       │
+          │ (global ops)    │                 │  (some wrapped  │
+          │                 │    wraps each   │  with decorators│
+          │ • ErrorHandling │ ─────────────►  │  for per-step   │
+          │ • Performance   │                 │  operations)    │
+          │ • ...           │                 │                 │
+          └─────────────────┘                 └─────────────────┘
+                                                      │
+          ┌───────────────────────────┬───────────────┴───────────────┐
+          ▼                           ▼                               ▼
+   ┌─────────────┐             ┌─────────────┐                 ┌─────────────┐
+   │   Step 1    │  ────────►  │   Step 2    │  ────────────►  │   Step N    │
+   └─────────────┘             └─────────────┘                 └─────────────┘
+          │                           │                               │
+          └───────────────────────────┴───────────────────────────────┘
                                       ▼
                           ┌─────────────────────┐
                           │  RulePipelineState  │
                           │   (immutable)       │
                           └─────────────────────┘
 ```
+
+### Middleware vs Decorators
+
+| Layer | Purpose | Scope | When to Use |
+|-------|---------|-------|-------------|
+| **Middleware** | Global cross-cutting concerns | ALL steps | Error handling, performance timing, logging |
+| **Decorators** | Step-specific operations | Selected steps | Audit logging on sensitive operations |
 
 ## Key Design Principles
 
@@ -39,6 +59,8 @@ This directory contains the execution steps for the rule executor pipeline. Each
 3. **Single Responsibility**: Each step handles one logical unit of work.
 
 4. **Dependency Injection**: Steps use Inversify for dependency injection. Dependencies are injected via constructor.
+
+5. **Separation of Concerns**: Global operations use middleware; step-specific operations use decorators.
 
 ## Creating a New Step
 
@@ -223,6 +245,248 @@ describe('MyNewStep', () => {
     const step = new MyNewStep(loggerService);
 
     expect(step.name).toBe('my_new_step');
+  });
+});
+```
+
+---
+
+## Middleware
+
+Middleware applies to **all steps** and is ideal for global cross-cutting concerns like error handling, performance measurement, or request tracing.
+
+### Middleware Execution Flow
+
+```
+MiddlewareA.execute()
+  └─► MiddlewareB.execute()
+        └─► step.execute()
+        ◄── returns result
+  ◄── returns result
+```
+
+### Creating a New Middleware
+
+Create a new file in `middleware/` directory (e.g., `performance_middleware.ts`):
+
+```typescript
+import { inject, injectable } from 'inversify';
+import type { MiddlewareContext, StepMiddleware } from './types';
+import type { RuleStepOutput } from '../types';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../../services/logger_service/logger_service';
+
+@injectable()
+export class PerformanceMiddleware implements StepMiddleware {
+  public readonly name = 'performance';
+
+  constructor(
+    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
+  ) {}
+
+  public async execute(
+    ctx: MiddlewareContext,
+    next: () => Promise<RuleStepOutput>
+  ): Promise<RuleStepOutput> {
+    const start = performance.now();
+    try {
+      return await next();  // Call next middleware or step
+    } finally {
+      const duration = performance.now() - start;
+      this.logger.debug({
+        message: `Step [${ctx.step.name}] completed in ${duration.toFixed(2)}ms`,
+      });
+    }
+  }
+}
+```
+
+### Registering Middleware
+
+Add your middleware to `setup/bind_services.ts`:
+
+```typescript
+import { PerformanceMiddleware } from '../lib/rule_executor/middleware';
+
+const bindRuleExecutionServices = (bind: ContainerModuleLoadOptions['bind']) => {
+  // Bind middleware classes
+  bind(ErrorHandlingMiddleware).toSelf().inSingletonScope();
+  bind(PerformanceMiddleware).toSelf().inSingletonScope();
+
+  // Bind middleware array (order matters - first is outermost)
+  bind(StepMiddlewareToken)
+    .toDynamicValue(({ get }) => [
+      get(PerformanceMiddleware),     // Outermost - measures total time
+      get(ErrorHandlingMiddleware),   // Inner - catches errors
+    ])
+    .inSingletonScope();
+
+  // ... rest of bindings
+};
+```
+
+### Current Middleware
+
+| Middleware | Purpose |
+|------------|---------|
+| `ErrorHandlingMiddleware` | Centralized error logging for all steps |
+
+---
+
+## Decorators
+
+Decorators wrap **specific steps** to add behavior without modifying the step implementation. Use decorators when you need per-step control without adding conditionals to middleware.
+
+### Creating a Decorator
+
+Create a new file in `steps/decorators/` directory (e.g., `audit_logging_decorator.ts`):
+
+```typescript
+import { StepDecorator } from './step_decorator';
+import type { RulePipelineState, RuleStepOutput } from '../../types';
+
+export class AuditLoggingDecorator extends StepDecorator {
+  constructor(
+    step: RuleExecutionStep,
+    private readonly auditService: AuditServiceContract
+  ) {
+    super(step);
+  }
+
+  public async execute(state: Readonly<RulePipelineState>): Promise<RuleStepOutput> {
+    await this.auditService.log({
+      action: `rule_execution.step.${this.name}.start`,
+      ruleId: state.input.ruleId,
+      spaceId: state.input.spaceId,
+    });
+
+    const result = await this.step.execute(state);
+
+    await this.auditService.log({
+      action: `rule_execution.step.${this.name}.${result.type}`,
+      ruleId: state.input.ruleId,
+      spaceId: state.input.spaceId,
+    });
+
+    return result;
+  }
+}
+```
+
+### Applying Decorators
+
+Wrap specific steps at DI binding time in `setup/bind_services.ts`:
+
+```typescript
+import { AuditLoggingDecorator } from '../lib/rule_executor/steps/decorators';
+
+bind(RuleExecutionStepsToken)
+  .toDynamicValue(({ get }) => {
+    const auditService = get(AuditService);
+
+    return [
+      get(WaitForResourcesStep),
+      get(FetchRuleStep),
+      // Only ValidateRuleStep gets audit logging
+      new AuditLoggingDecorator(get(ValidateRuleStep), auditService),
+      get(BuildQueryStep),
+      get(ExecuteQueryStep),
+      get(BuildAlertsStep),
+      get(StoreAlertsStep),
+    ];
+  })
+  .inRequestScope();
+```
+
+### When to Use Decorators vs Middleware
+
+| Scenario | Use |
+|----------|-----|
+| Operation applies to ALL steps | Middleware |
+| Operation applies to SOME steps | Decorator |
+| Need conditionals based on step name | Decorator (avoid conditionals in middleware) |
+| Global error handling | Middleware |
+| Audit logging for sensitive operations | Decorator |
+
+---
+
+## Testing
+
+### Testing Steps
+
+See the step testing example above. Use `createLoggerService()`, `createRulesClient()`, and other utilities from `lib/test_utils.ts`.
+
+### Testing Middleware
+
+```typescript
+import { ErrorHandlingMiddleware } from './error_handling_middleware';
+import { createLoggerService } from '../../test_utils';
+
+describe('ErrorHandlingMiddleware', () => {
+  it('calls next and returns result on success', async () => {
+    const { loggerService, mockLogger } = createLoggerService();
+    const middleware = new ErrorHandlingMiddleware(loggerService);
+
+    const expectedResult = { type: 'continue' as const };
+    const next = jest.fn().mockResolvedValue(expectedResult);
+
+    const context = {
+      step: { name: 'test_step', execute: jest.fn() },
+      state: { input: { ruleId: 'r1', spaceId: 's1', scheduledAt: '', abortSignal: new AbortController().signal } },
+    };
+
+    const result = await middleware.execute(context, next);
+
+    expect(result).toEqual(expectedResult);
+    expect(next).toHaveBeenCalledTimes(1);
+    expect(mockLogger.error).not.toHaveBeenCalled();
+  });
+
+  it('logs error and rethrows on failure', async () => {
+    const { loggerService, mockLogger } = createLoggerService();
+    const middleware = new ErrorHandlingMiddleware(loggerService);
+
+    const error = new Error('Step failed');
+    const next = jest.fn().mockRejectedValue(error);
+
+    const context = {
+      step: { name: 'failing_step', execute: jest.fn() },
+      state: { input: { ruleId: 'r1', spaceId: 's1', scheduledAt: '', abortSignal: new AbortController().signal } },
+    };
+
+    await expect(middleware.execute(context, next)).rejects.toThrow('Step failed');
+    expect(mockLogger.error).toHaveBeenCalled();
+  });
+});
+```
+
+### Testing Decorators
+
+```typescript
+import { AuditLoggingDecorator } from './audit_logging_decorator';
+
+describe('AuditLoggingDecorator', () => {
+  it('logs before and after step execution', async () => {
+    const mockStep = {
+      name: 'test_step',
+      execute: jest.fn().mockResolvedValue({ type: 'continue' }),
+    };
+    const mockAuditService = { log: jest.fn() };
+
+    const decorator = new AuditLoggingDecorator(mockStep, mockAuditService);
+    const state = { input: { ruleId: 'r1', spaceId: 's1', scheduledAt: '', abortSignal: new AbortController().signal } };
+
+    await decorator.execute(state);
+
+    expect(mockAuditService.log).toHaveBeenCalledTimes(2);
+    expect(mockAuditService.log).toHaveBeenNthCalledWith(1, expect.objectContaining({
+      action: 'rule_execution.step.test_step.start',
+    }));
+    expect(mockAuditService.log).toHaveBeenNthCalledWith(2, expect.objectContaining({
+      action: 'rule_execution.step.test_step.continue',
+    }));
   });
 });
 ```

@@ -9,7 +9,11 @@ import { StoreAlertsStep } from './store_alerts_step';
 import type { RulePipelineState } from '../types';
 import type { AlertEvent } from '../../../resources/alert_events';
 import { ALERT_EVENTS_DATA_STREAM } from '../../../resources/alert_events';
-import { createStorageService, createRuleExecutionInput, createLoggerService } from '../../test_utils';
+import {
+  createStorageService,
+  createRuleExecutionInput,
+  createLoggerService,
+} from '../../test_utils';
 
 describe('StoreAlertsStep', () => {
   const createAlertEvents = (count: number = 2): Array<{ id: string; doc: AlertEvent }> => {
@@ -39,11 +43,11 @@ describe('StoreAlertsStep', () => {
   });
 
   it('stores alert events and continues execution', async () => {
-    const { loggerService, mockLogger } = createLoggerService();
+    const { loggerService } = createLoggerService();
     const { storageService, mockEsClient } = createStorageService();
 
     mockEsClient.bulk.mockResolvedValue({
-      items: [{ index: { _id: 'alert-0', status: 201 } }],
+      items: [{ index: { _index: ALERT_EVENTS_DATA_STREAM, _id: 'alert-0', status: 201 } }],
       errors: false,
       took: 1,
     });
@@ -63,7 +67,7 @@ describe('StoreAlertsStep', () => {
     const { storageService, mockEsClient } = createStorageService();
 
     mockEsClient.bulk.mockResolvedValue({
-      items: [{ index: { _id: 'alert-0', status: 201 } }],
+      items: [{ index: { _index: ALERT_EVENTS_DATA_STREAM, _id: 'alert-0', status: 201 } }],
       errors: false,
       took: 1,
     });
@@ -76,7 +80,9 @@ describe('StoreAlertsStep', () => {
     expect(mockEsClient.bulk).toHaveBeenCalledWith(
       expect.objectContaining({
         operations: expect.arrayContaining([
-          expect.objectContaining({ index: expect.objectContaining({ _index: ALERT_EVENTS_DATA_STREAM }) }),
+          expect.objectContaining({
+            index: expect.objectContaining({ _index: ALERT_EVENTS_DATA_STREAM }),
+          }),
         ]),
       })
     );
@@ -88,9 +94,9 @@ describe('StoreAlertsStep', () => {
 
     mockEsClient.bulk.mockResolvedValue({
       items: [
-        { index: { _id: 'alert-0', status: 201 } },
-        { index: { _id: 'alert-1', status: 201 } },
-        { index: { _id: 'alert-2', status: 201 } },
+        { index: { _index: ALERT_EVENTS_DATA_STREAM, _id: 'alert-0', status: 201 } },
+        { index: { _index: ALERT_EVENTS_DATA_STREAM, _id: 'alert-1', status: 201 } },
+        { index: { _index: ALERT_EVENTS_DATA_STREAM, _id: 'alert-2', status: 201 } },
       ],
       errors: false,
       took: 1,
@@ -156,7 +162,7 @@ describe('StoreAlertsStep', () => {
     const { storageService, mockEsClient } = createStorageService();
 
     mockEsClient.bulk.mockResolvedValue({
-      items: [{ index: { _id: 'alert-0', status: 201 } }],
+      items: [{ index: { _index: ALERT_EVENTS_DATA_STREAM, _id: 'alert-0', status: 201 } }],
       errors: false,
       took: 1,
     });
