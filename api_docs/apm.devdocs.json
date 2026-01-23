@@ -9382,7 +9382,7 @@
       "label": "APMPluginSetup",
       "description": [],
       "path": "x-pack/solutions/observability/plugins/apm/server/types.ts",
-      "lineNumber": 69,
+      "lineNumber": 70,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -9401,7 +9401,7 @@
             "; telemetryCollectionEnabled: boolean; metricsInterval: number; forceSyntheticSource: boolean; latestAgentVersionsUrl: string; serverless: Readonly<{} & { enabled: true; }>; serverlessOnboarding: boolean; managedServiceUrl: string; managedOtlpServiceUrl: string; featureFlags: Readonly<{} & { agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; profilingIntegrationAvailable: boolean; ruleFormV2Enabled: boolean; }>; }>>"
           ],
           "path": "x-pack/solutions/observability/plugins/apm/server/types.ts",
-          "lineNumber": 70,
+          "lineNumber": 71,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
