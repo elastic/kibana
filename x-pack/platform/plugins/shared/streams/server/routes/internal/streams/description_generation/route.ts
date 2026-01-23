@@ -137,6 +137,7 @@ export const descriptionGenerationTaskRoute = createServerRoute({
                   connectorId,
                   start: body.from.getTime(),
                   end: body.to.getTime(),
+                  streamName: name,
                 };
               })(),
               request,
