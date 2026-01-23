@@ -230,7 +230,7 @@ function mapEdges({
     const id = getEdgeId(sourceData.id, targetData.id);
     const resource = targetData[SPAN_DESTINATION_SERVICE_RESOURCE] as string | undefined;
 
-    // Check if edge already exists (multiple resources can map to the same service-to-service edge)
+    // Check if edge already exists (multiple resources can map to the same edge - e.g. two load balancers serving the same service)
     const existingEdge = acc.get(id);
     if (existingEdge) {
       if (resource && !existingEdge.resources.includes(resource)) {
