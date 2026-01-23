@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import type {
-  CoreSetup,
-  CoreStart,
-  Logger,
-  Plugin,
-  PluginInitializerContext,
-} from '@kbn/core/server';
+import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { mapValues } from 'lodash';
 import { getDatasetQualityServerRouteRepository } from './routes';
 import { registerRoutes } from './routes/register_routes';
