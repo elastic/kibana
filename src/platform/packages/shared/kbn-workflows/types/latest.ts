@@ -59,6 +59,7 @@ export type {
   SelectionDetails,
   SelectionContext,
   PropertyValidationContext,
+  RequestOptions,
 } from './v1';
 
 // exported full to use enum as values

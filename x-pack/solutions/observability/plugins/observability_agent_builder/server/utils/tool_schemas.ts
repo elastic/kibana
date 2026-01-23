@@ -8,12 +8,12 @@
 import { z } from '@kbn/zod';
 
 const startDescription =
-  'The start time of the query window using Elasticsearch date math (e.g., "now-24h", "now-15m").';
+  'The start time of the query window using Elasticsearch date math. Examples: "now-24h", "now-15m".';
 const endDescription =
-  'The end time of the query window using Elasticsearch date math (e.g., "now").';
+  'The end time of the query window using Elasticsearch date math. Example: "now".';
 
 export const indexDescription =
-  'Concrete index or index pattern to analyze (for example `logs-payments.api-default`).';
+  'Concrete index or index pattern to analyze. Example: "logs-payments.api-default".';
 
 export const timeRangeSchemaRequired = {
   start: z.string().describe(startDescription),
