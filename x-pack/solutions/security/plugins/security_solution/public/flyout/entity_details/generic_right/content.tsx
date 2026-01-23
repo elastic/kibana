@@ -65,8 +65,9 @@ export const GenericEntityFlyoutContent = ({
   const { euiTheme } = useEuiTheme();
 
   const fieldsSectionExpandedState = useExpandSection({
-    title: GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_FIELDS_SECTION,
+    title: 'fields',
     defaultValue: true,
+    storageKey: GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_FIELDS_SECTION,
   });
 
   const { pinnedFields } = usePinnedFields(GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_FIELDS_TABLE_PINS);
@@ -117,6 +118,7 @@ export const GenericEntityFlyoutContent = ({
         }
         expanded={fieldsSectionExpandedState}
         localStorageKey={GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_FIELDS_SECTION}
+        sectionId={'fields'}
       >
         <ExpandablePanel
           header={{

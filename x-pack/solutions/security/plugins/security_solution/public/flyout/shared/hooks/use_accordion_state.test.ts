@@ -6,11 +6,7 @@
  */
 
 import type { ToggleReducerAction, UseAccordionStateValue } from './use_accordion_state';
-import {
-  useAccordionState,
-  toggleReducer,
-  EXPANDABLE_SECTION_STORAGE_KEY,
-} from './use_accordion_state';
+import { useAccordionState, toggleReducer } from './use_accordion_state';
 import type { RenderHookResult } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
 
@@ -36,34 +32,100 @@ describe('toggleReducer', () => {
 
   it('should return correct state and pass values to localStorage', () => {
     const mockStorage = {
-      get: jest.fn(),
+      get: jest.fn().mockReturnValue({}), // ensure reducer spreads an object
       set: mockSet,
     };
-    const mockLocalStorageKey = 'test';
+
+    const mockLocalStorageKey = 'test-storage-key';
+    const mockTitle = 'AISummary';
     const mockAction = {
       storage: mockStorage,
-      title: mockLocalStorageKey,
+      localStorageKey: mockLocalStorageKey,
+      title: mockTitle,
     } as unknown as ToggleReducerAction;
+
     const mockState = 'closed';
 
     const result = toggleReducer(mockState, mockAction);
+
     expect(result).toBe('open');
-    expect(mockSet).toHaveBeenCalledWith(EXPANDABLE_SECTION_STORAGE_KEY, {
-      [mockLocalStorageKey]: true,
+    expect(mockSet).toHaveBeenCalledWith(mockLocalStorageKey, {
+      [mockTitle]: true,
     });
   });
 
-  it(`should not pass values to localStorage if key isn't provided`, () => {
+  it(`should merge with existing localStorage value`, () => {
+    const mockStorage = {
+      get: jest.fn().mockReturnValue({ existingSection: false }),
+      set: mockSet,
+    };
+
+    const mockLocalStorageKey = 'test-storage-key';
+    const mockTitle = 'AISummary';
+    const mockAction = {
+      storage: mockStorage,
+      localStorageKey: mockLocalStorageKey,
+      title: mockTitle,
+    } as unknown as ToggleReducerAction;
+
+    const mockState = 'closed';
+
+    toggleReducer(mockState, mockAction);
+
+    expect(mockSet).toHaveBeenCalledWith(mockLocalStorageKey, {
+      existingSection: false,
+      [mockTitle]: true,
+    });
+  });
+
+  it(`should not pass values to localStorage if localStorageKey isn't provided`, () => {
     const mockStorage = {
       get: jest.fn(),
       set: mockSet,
     };
+
     const mockAction = {
       storage: mockStorage,
+      title: 'AISummary',
     } as unknown as ToggleReducerAction;
+
     const mockState = 'open';
 
     const result = toggleReducer(mockState, mockAction);
+
+    expect(result).toBe('closed');
+    expect(mockSet).not.toHaveBeenCalled();
+  });
+
+  it(`should not pass values to localStorage if title isn't provided`, () => {
+    const mockStorage = {
+      get: jest.fn(),
+      set: mockSet,
+    };
+
+    const mockAction = {
+      storage: mockStorage,
+      localStorageKey: 'test-storage-key',
+    } as unknown as ToggleReducerAction;
+
+    const mockState = 'open';
+
+    const result = toggleReducer(mockState, mockAction);
+
+    expect(result).toBe('closed');
+    expect(mockSet).not.toHaveBeenCalled();
+  });
+
+  it(`should not pass values to localStorage if storage isn't provided`, () => {
+    const mockAction = {
+      localStorageKey: 'test-storage-key',
+      title: 'AISummary',
+    } as unknown as ToggleReducerAction;
+
+    const mockState = 'open';
+
+    const result = toggleReducer(mockState, mockAction);
+
     expect(result).toBe('closed');
     expect(mockSet).not.toHaveBeenCalled();
   });
