@@ -57,10 +57,11 @@ export const createPrivilegedUsersCsvService = (dataClient: PrivilegeMonitoringD
     return {
       errors: softDeletedResults.updated.errors.concat(softDeletedResults.deleted.errors),
       stats: {
-        failed: softDeletedResults.updated.failed + softDeletedResults.deleted.failed,
-        successful: softDeletedResults.updated.successful + softDeletedResults.deleted.successful,
-        successfulPrivilegedUsers: results.successful,
-        total:
+        failedOperations: softDeletedResults.updated.failed + softDeletedResults.deleted.failed,
+        successfulOperations:
+          softDeletedResults.updated.successful + softDeletedResults.deleted.successful,
+        uploaded: results.successful,
+        totalOperations:
           softDeletedResults.updated.failed +
           softDeletedResults.updated.successful +
           softDeletedResults.deleted.failed +

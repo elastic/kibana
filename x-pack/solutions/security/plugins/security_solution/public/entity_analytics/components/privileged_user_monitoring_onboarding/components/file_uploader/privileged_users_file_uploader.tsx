@@ -124,7 +124,7 @@ export const PrivilegedUsersFileUploader: React.FC<PrivilegedUsersFileUploaderPr
             },
           });
         } else {
-          onFileUploaded(result.stats.successfulPrivilegedUsers);
+          onFileUploaded(result.stats.uploaded);
         }
       } catch (e) {
         dispatch({
