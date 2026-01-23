@@ -19,9 +19,10 @@ apiTest.describe(
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
+        // Note: We use 'body.text' because 'message' is a field alias for 'body.text' in the logs stream
         const testDocuments = [
-          { message: 'GET /api/users HTTP/1.1', '@timestamp': new Date().toISOString() },
-          { message: 'POST /api/orders HTTP/1.1', '@timestamp': new Date().toISOString() },
+          { 'body.text': 'GET /api/users HTTP/1.1', '@timestamp': new Date().toISOString() },
+          { 'body.text': 'POST /api/orders HTTP/1.1', '@timestamp': new Date().toISOString() },
         ];
 
         const { statusCode, body } = await apiClient.post(
@@ -36,8 +37,10 @@ apiTest.describe(
                 steps: [
                   {
                     action: 'grok',
-                    from: 'message',
-                    patterns: ['%{WORD:method} %{URIPATH:path} HTTP/%{NUMBER:http_version}'],
+                    from: 'body.text',
+                    patterns: [
+                      '%{WORD:attributes.method} %{URIPATH:attributes.path} HTTP/%{NUMBER:attributes.http_version}',
+                    ],
                   },
                 ],
               },
@@ -66,12 +69,14 @@ apiTest.describe(
               steps: [
                 {
                   action: 'grok',
-                  from: 'message',
-                  patterns: ['%{IP:client_ip} - %{WORD:user}'],
+                  from: 'body.text',
+                  patterns: ['%{IP:attributes.client_ip} - %{WORD:attributes.user}'],
                 },
               ],
             },
-            documents: [{ message: '192.168.1.1 - john', '@timestamp': new Date().toISOString() }],
+            documents: [
+              { 'body.text': '192.168.1.1 - john', '@timestamp': new Date().toISOString() },
+            ],
           },
           responseType: 'json',
         }
@@ -95,17 +100,20 @@ apiTest.describe(
                 steps: [
                   {
                     action: 'grok',
-                    from: 'message',
+                    from: 'body.text',
                     patterns: [
-                      '%{IP:client_ip} %{WORD:method} %{URIPATH:path}',
-                      '%{WORD:method} %{URIPATH:path}',
+                      '%{IP:attributes.client_ip} %{WORD:attributes.method} %{URIPATH:attributes.path}',
+                      '%{WORD:attributes.method} %{URIPATH:attributes.path}',
                     ],
                   },
                 ],
               },
               documents: [
-                { message: '192.168.1.1 GET /api/users', '@timestamp': new Date().toISOString() },
-                { message: 'POST /api/orders', '@timestamp': new Date().toISOString() },
+                {
+                  'body.text': '192.168.1.1 GET /api/users',
+                  '@timestamp': new Date().toISOString(),
+                },
+                { 'body.text': 'POST /api/orders', '@timestamp': new Date().toISOString() },
               ],
             },
             responseType: 'json',
@@ -131,14 +139,14 @@ apiTest.describe(
                 steps: [
                   {
                     action: 'grok',
-                    from: 'message',
-                    patterns: ['%{IP:ip_address}'],
+                    from: 'body.text',
+                    patterns: ['%{IP:attributes.ip_address}'],
                   },
                 ],
               },
               documents: [
                 {
-                  message: 'This does not contain an IP address',
+                  'body.text': 'This does not contain an IP address',
                   '@timestamp': new Date().toISOString(),
                 },
               ],
@@ -167,15 +175,15 @@ apiTest.describe(
                 steps: [
                   {
                     action: 'grok',
-                    from: 'message',
-                    patterns: ['%{CUSTOM_STATUS:status}'],
+                    from: 'body.text',
+                    patterns: ['%{CUSTOM_STATUS:attributes.status}'],
                     pattern_definitions: {
                       CUSTOM_STATUS: '(SUCCESS|FAILURE|PENDING)',
                     },
                   },
                 ],
               },
-              documents: [{ message: 'SUCCESS', '@timestamp': new Date().toISOString() }],
+              documents: [{ 'body.text': 'SUCCESS', '@timestamp': new Date().toISOString() }],
             },
             responseType: 'json',
           }
@@ -197,12 +205,12 @@ apiTest.describe(
               {
                 action: 'grok',
                 from: 'nonexistent_field',
-                patterns: ['%{WORD:word}'],
+                patterns: ['%{WORD:attributes.word}'],
                 ignore_missing: true,
               },
             ],
           },
-          documents: [{ message: 'test', '@timestamp': new Date().toISOString() }],
+          documents: [{ 'body.text': 'test', '@timestamp': new Date().toISOString() }],
         },
         responseType: 'json',
       });
@@ -225,13 +233,13 @@ apiTest.describe(
                 steps: [
                   {
                     action: 'dissect',
-                    from: 'message',
-                    pattern: 'user=%{user} action=%{action}',
+                    from: 'body.text',
+                    pattern: 'user=%{attributes.user} action=%{attributes.action}',
                   },
                 ],
               },
               documents: [
-                { message: 'user=john action=login', '@timestamp': new Date().toISOString() },
+                { 'body.text': 'user=john action=login', '@timestamp': new Date().toISOString() },
               ],
             },
             responseType: 'json',
@@ -255,14 +263,15 @@ apiTest.describe(
               steps: [
                 {
                   action: 'dissect',
-                  from: 'message',
-                  pattern: '%{timestamp}|%{level}|%{component}|%{message_text}',
+                  from: 'body.text',
+                  pattern:
+                    '%{attributes.timestamp}|%{attributes.level}|%{attributes.component}|%{attributes.message_text}',
                 },
               ],
             },
             documents: [
               {
-                message: '2026-01-19|ERROR|auth|Login failed',
+                'body.text': '2026-01-19|ERROR|auth|Login failed',
                 '@timestamp': new Date().toISOString(),
               },
             ],
@@ -284,13 +293,13 @@ apiTest.describe(
             steps: [
               {
                 action: 'dissect',
-                from: 'message',
-                pattern: '%{+name} %{+name}',
+                from: 'body.text',
+                pattern: '%{+attributes.name} %{+attributes.name}',
                 append_separator: ' ',
               },
             ],
           },
-          documents: [{ message: 'John Doe', '@timestamp': new Date().toISOString() }],
+          documents: [{ 'body.text': 'John Doe', '@timestamp': new Date().toISOString() }],
         },
         responseType: 'json',
       });
@@ -309,12 +318,12 @@ apiTest.describe(
               {
                 action: 'dissect',
                 from: 'nonexistent',
-                pattern: '%{field}',
+                pattern: '%{attributes.field}',
                 ignore_missing: true,
               },
             ],
           },
-          documents: [{ message: 'test', '@timestamp': new Date().toISOString() }],
+          documents: [{ 'body.text': 'test', '@timestamp': new Date().toISOString() }],
         },
         responseType: 'json',
       });
@@ -341,6 +350,7 @@ apiTest.describe(
           documents: [
             {
               timestamp_string: '2026-01-19T12:00:00.000Z',
+              'body.text': 'test',
               '@timestamp': new Date().toISOString(),
             },
           ],
@@ -371,6 +381,7 @@ apiTest.describe(
             documents: [
               {
                 timestamp_string: '2026-01-19 12:00:00',
+                'body.text': 'test',
                 '@timestamp': new Date().toISOString(),
               },
             ],
@@ -399,7 +410,11 @@ apiTest.describe(
             ],
           },
           documents: [
-            { timestamp_string: '2026-01-19 12:00:00', '@timestamp': new Date().toISOString() },
+            {
+              timestamp_string: '2026-01-19 12:00:00',
+              'body.text': 'test',
+              '@timestamp': new Date().toISOString(),
+            },
           ],
         },
         responseType: 'json',
@@ -424,7 +439,9 @@ apiTest.describe(
               },
             ],
           },
-          documents: [{ old_field: 'value', '@timestamp': new Date().toISOString() }],
+          documents: [
+            { old_field: 'value', 'body.text': 'test', '@timestamp': new Date().toISOString() },
+          ],
         },
         responseType: 'json',
       });
@@ -447,7 +464,7 @@ apiTest.describe(
               },
             ],
           },
-          documents: [{ message: 'test', '@timestamp': new Date().toISOString() }],
+          documents: [{ 'body.text': 'test', '@timestamp': new Date().toISOString() }],
         },
         responseType: 'json',
       });
@@ -466,11 +483,11 @@ apiTest.describe(
               {
                 action: 'set',
                 to: 'backup_message',
-                copy_from: 'message',
+                copy_from: 'body.text',
               },
             ],
           },
-          documents: [{ message: 'original', '@timestamp': new Date().toISOString() }],
+          documents: [{ 'body.text': 'original', '@timestamp': new Date().toISOString() }],
         },
         responseType: 'json',
       });
@@ -493,7 +510,11 @@ apiTest.describe(
             ],
           },
           documents: [
-            { message: 'test', sensitive_data: 'secret', '@timestamp': new Date().toISOString() },
+            {
+              'body.text': 'test',
+              sensitive_data: 'secret',
+              '@timestamp': new Date().toISOString(),
+            },
           ],
         },
         responseType: 'json',
@@ -516,7 +537,9 @@ apiTest.describe(
               },
             ],
           },
-          documents: [{ level: 'error', '@timestamp': new Date().toISOString() }],
+          documents: [
+            { level: 'error', 'body.text': 'test', '@timestamp': new Date().toISOString() },
+          ],
         },
         responseType: 'json',
       });
@@ -538,7 +561,9 @@ apiTest.describe(
               },
             ],
           },
-          documents: [{ level: 'ERROR', '@timestamp': new Date().toISOString() }],
+          documents: [
+            { level: 'ERROR', 'body.text': 'test', '@timestamp': new Date().toISOString() },
+          ],
         },
         responseType: 'json',
       });
@@ -560,7 +585,13 @@ apiTest.describe(
               },
             ],
           },
-          documents: [{ padded_value: '  trimmed  ', '@timestamp': new Date().toISOString() }],
+          documents: [
+            {
+              padded_value: '  trimmed  ',
+              'body.text': 'test',
+              '@timestamp': new Date().toISOString(),
+            },
+          ],
         },
         responseType: 'json',
       });
@@ -583,7 +614,9 @@ apiTest.describe(
               },
             ],
           },
-          documents: [{ status_code: '200', '@timestamp': new Date().toISOString() }],
+          documents: [
+            { status_code: '200', 'body.text': 'test', '@timestamp': new Date().toISOString() },
+          ],
         },
         responseType: 'json',
       });
@@ -601,7 +634,7 @@ apiTest.describe(
             steps: [
               {
                 action: 'replace',
-                from: 'message',
+                from: 'body.text',
                 pattern: 'password=[^&]+',
                 replacement: 'password=***',
               },
@@ -609,7 +642,7 @@ apiTest.describe(
           },
           documents: [
             {
-              message: 'login?user=john&password=secret123',
+              'body.text': 'login?user=john&password=secret123',
               '@timestamp': new Date().toISOString(),
             },
           ],
@@ -633,22 +666,27 @@ apiTest.describe(
               steps: [
                 {
                   action: 'grok',
-                  from: 'message',
-                  patterns: ['%{IP:client_ip} %{WORD:method} %{URIPATH:path}'],
+                  from: 'body.text',
+                  patterns: [
+                    '%{IP:attributes.client_ip} %{WORD:attributes.method} %{URIPATH:attributes.path}',
+                  ],
                 },
                 {
                   action: 'uppercase',
-                  from: 'method',
+                  from: 'attributes.method',
                 },
                 {
                   action: 'set',
-                  to: 'processed',
+                  to: 'attributes.processed',
                   value: true,
                 },
               ],
             },
             documents: [
-              { message: '192.168.1.1 get /api/users', '@timestamp': new Date().toISOString() },
+              {
+                'body.text': '192.168.1.1 get /api/users',
+                '@timestamp': new Date().toISOString(),
+              },
             ],
           },
           responseType: 'json',
@@ -678,8 +716,8 @@ apiTest.describe(
               ],
             },
             documents: [
-              { level: 'error', '@timestamp': new Date().toISOString() },
-              { level: 'info', '@timestamp': new Date().toISOString() },
+              { level: 'error', 'body.text': 'test', '@timestamp': new Date().toISOString() },
+              { level: 'info', 'body.text': 'test', '@timestamp': new Date().toISOString() },
             ],
           },
           responseType: 'json',
@@ -749,8 +787,8 @@ apiTest.describe(
               steps: [
                 {
                   action: 'grok',
-                  from: 'message',
-                  patterns: ['%{WORD:word}'],
+                  from: 'body.text',
+                  patterns: ['%{WORD:attributes.word}'],
                 },
               ],
             },
@@ -775,7 +813,7 @@ apiTest.describe(
             processing: {
               steps: [],
             },
-            documents: [{ message: 'test', '@timestamp': new Date().toISOString() }],
+            documents: [{ 'body.text': 'test', '@timestamp': new Date().toISOString() }],
           },
           responseType: 'json',
         }
