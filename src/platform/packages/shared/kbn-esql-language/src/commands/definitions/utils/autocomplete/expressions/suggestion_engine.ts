@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getExpressionType, getFunctionDefinition } from '../..';
+import { getFunctionDefinition } from '../../functions';
+import { getExpressionType } from '../../expressions';
 import { isFunctionExpression } from '../../../../../ast/is';
 import { within } from '../../../../../ast/location';
 import { buildMapValueCompleteItem } from '../../../../registry/complete_items';
@@ -17,7 +18,7 @@ import { isExpressionComplete } from '../../expressions';
 import { getOverlapRange } from '../../shared';
 import { dispatchPartialOperators } from './operators/partial/dispatcher';
 import { detectIn, detectLike, detectNullCheck } from './operators/partial/utils';
-import { getPosition, type ExpressionPosition } from './position';
+import { getPosition } from './position';
 import { dispatchStates } from './positions/dispatcher';
 import type { MapParameters } from '../map_expression';
 import { DOUBLE_QUOTED_STRING_REGEX, getCommandMapExpressionSuggestions } from '../map_expression';
@@ -26,6 +27,7 @@ import type {
   ExpressionComputedMetadata,
   ExpressionContext,
   ExpressionContextOptions,
+  ExpressionPosition,
   SuggestForExpressionParams,
   SuggestForExpressionResult,
 } from './types';
@@ -147,6 +149,7 @@ function buildContext(params: SuggestForExpressionParams): ExpressionContext {
     context: params.context,
     callbacks: params.callbacks,
     options,
+    recursiveSuggest: suggestForExpression,
   };
 }
 

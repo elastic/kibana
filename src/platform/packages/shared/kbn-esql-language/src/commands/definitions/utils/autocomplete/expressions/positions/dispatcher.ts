@@ -8,8 +8,7 @@
  */
 
 import type { ISuggestionItem } from '../../../../../registry/types';
-import type { ExpressionPosition } from '../position';
-import type { ExpressionContext } from '../types';
+import type { ExpressionContext, ExpressionPosition } from '../types';
 import { suggestAfterCast } from './after_cast';
 import { suggestAfterComplete } from './after_complete';
 import { suggestAfterNot } from './after_not';

@@ -75,7 +75,11 @@ async function handleFunctionParameterContext(
   }
 
   // Try exclusive suggestions first (COUNT(*), enum values)
-  const exclusiveSuggestions = tryExclusiveSuggestions(functionParamContext, ctx);
+  const exclusiveSuggestions = tryExclusiveSuggestions(
+    functionParamContext,
+    ctx,
+    analyzer.acceptsArbitraryExpressions
+  );
 
   if (exclusiveSuggestions.length > 0) {
     return exclusiveSuggestions;
@@ -88,7 +92,8 @@ async function handleFunctionParameterContext(
 /** Try suggestions that are exclusive (if present, return only these) */
 function tryExclusiveSuggestions(
   functionParamContext: FunctionParamContext,
-  ctx: ExpressionContext
+  ctx: ExpressionContext,
+  isExpressionHeavy: boolean
 ): ISuggestionItem[] {
   const { functionDefinition, paramDefinitions } = functionParamContext;
   const { options } = ctx;
@@ -98,7 +103,8 @@ function tryExclusiveSuggestions(
     paramDefinitions,
     functionDefinition!,
     Boolean(functionParamContext.hasMoreMandatoryArgs),
-    options.isCursorFollowedByComma ?? false
+    options.isCursorFollowedByComma ?? false,
+    isExpressionHeavy
   );
   if (enumItems.length > 0) {
     return enumItems;
@@ -340,7 +346,7 @@ function getParamSuggestionConfig(
     hasMoreMandatoryArgs,
     functionType: functionDefinition!.type,
     isCursorFollowedByComma,
-    functionSignatures: functionDefinition!.signatures,
+    isExpressionHeavy: analyzer.acceptsArbitraryExpressions,
   };
 
   const shouldAddComma = shouldSuggestComma(commaContext);
@@ -358,7 +364,8 @@ function buildEnumValueSuggestions(
   paramDefinitions: FunctionParameter[],
   functionDefinition: FunctionDefinition,
   hasMoreMandatoryArgs: boolean,
-  isCursorFollowedByComma: boolean
+  isCursorFollowedByComma: boolean,
+  isExpressionHeavy: boolean
 ): ISuggestionItem[] {
   const values = collectSuggestedValues(paramDefinitions);
 
@@ -371,7 +378,7 @@ function buildEnumValueSuggestions(
     hasMoreMandatoryArgs,
     functionType: functionDefinition.type,
     isCursorFollowedByComma,
-    functionSignatures: functionDefinition.signatures,
+    isExpressionHeavy,
   };
 
   const shouldAddComma = shouldSuggestComma(commaContext);

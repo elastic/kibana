@@ -183,7 +183,7 @@ export async function suggestAfterComplete(ctx: ExpressionContext): Promise<ISug
       hasMoreParams: paramState.hasMoreParams,
       isVariadic: paramState.isVariadic,
       isAmbiguousPosition: signatureAnalysis?.isAmbiguousPosition,
-      functionSignatures: signatureAnalysis?.getValidSignatures(),
+      isExpressionHeavy: signatureAnalysis?.acceptsArbitraryExpressions,
       expressionType,
       isCursorFollowedByComma: options.isCursorFollowedByComma,
     });

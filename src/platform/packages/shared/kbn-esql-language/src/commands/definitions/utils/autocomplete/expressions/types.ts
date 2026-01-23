@@ -23,7 +23,14 @@ import type {
   Signature,
   SupportedDataType,
 } from '../../../types';
-import type { ExpressionPosition } from './position';
+
+export type ExpressionPosition =
+  | 'in_function'
+  | 'after_not'
+  | 'after_operator'
+  | 'after_complete'
+  | 'after_cast'
+  | 'empty_expression';
 
 export interface SuggestForExpressionParams {
   query: string;
@@ -47,6 +54,8 @@ export interface ExpressionContext {
   context?: ICommandContext;
   callbacks?: ICommandCallbacks;
   options: ExpressionContextOptions;
+  /** Callback to recursively suggest for nested expressions (e.g., inside functions) */
+  recursiveSuggest: (params: SuggestForExpressionParams) => Promise<SuggestForExpressionResult>;
 }
 
 export interface ExpressionContextOptions {
