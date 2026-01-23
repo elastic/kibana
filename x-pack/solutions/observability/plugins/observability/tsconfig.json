@@ -148,6 +148,7 @@
     "@kbn/observability-agent-builder-plugin",
     "@kbn/kql",
     "@kbn/shared-ux-utility",
+    "@kbn/lens-common",
   ],
   "exclude": ["target/**/*"]
 }
