@@ -34,8 +34,6 @@ export default function ({ getService }: FtrProviderContext) {
     .find((s) => s.startsWith('--xpack.securitySolution.enableExperimental'))
     ?.includes('endpointExceptionsMovedUnderManagement');
 
-  // @skipInServerlessMKI due to authentication issues - we should migrate from Basic to Bearer token when available
-  // @skipInServerlessMKI - if you are removing this annotation, make sure to add the test suite to the MKI pipeline in .buildkite/pipelines/security_solution_quality_gate/mki_periodic/mki_periodic_defend_workflows.yml
   // FLAKY: https://github.com/elastic/kibana/issues/247211
   describe.skip('@ess @serverless @skipInServerlessMKI Endpoint List API (deprecated): RBAC and Validation', function () {
     let fleetEndpointPolicy: PolicyTestResourceInfo;
@@ -359,6 +357,47 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(403);
         });
       }
+    });
+
+    // @skipInServerless - waiting for https://github.com/elastic/kibana/pull/248962
+    describe('@skipInServerless read-only user on non-existent list', () => {
+      let readOnlyNoSoWriteSupertest: TestAgent;
+
+      before(async () => {
+        const loadedRole = await rolesUsersProvider.loader.create({
+          name: 'endpoint_exceptions_read_no_so_write',
+          kibana: [
+            {
+              base: [],
+              feature: {
+                [SECURITY_FEATURE_ID]: ['minimal_read', 'endpoint_exceptions_read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+          elasticsearch: { cluster: [], indices: [], run_as: [] },
+        });
+
+        readOnlyNoSoWriteSupertest = await utils.createSuperTest(loadedRole.username);
+      });
+
+      after(async () => {
+        await rolesUsersProvider.loader.delete('endpoint_exceptions_read_no_so_write');
+      });
+
+      beforeEach(async () => {
+        await endpointArtifactTestResources.deleteList(
+          'endpoint_list',
+          endpointPolicyManagerSupertest
+        );
+      });
+
+      it('should return 404 when endpoint list does not exist', async () => {
+        await readOnlyNoSoWriteSupertest
+          .get(`${ENDPOINT_LIST_ITEM_URL}/_find?page=1&per_page=1&sort_field=name&sort_order=asc`)
+          .set('kbn-xsrf', 'true')
+          .expect(404);
+      });
     });
   });
 }

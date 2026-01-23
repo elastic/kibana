@@ -194,7 +194,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    *  Enables the QRadar rules import feature
    */
-  qradarRulesMigration: false,
+  qradarRulesMigration: true,
   /**
    * Enables the Kubernetes Dashboard in Security Solution
    */
@@ -206,6 +206,11 @@ export const allowedExperimentalValues = Object.freeze({
   entityAnalyticsWatchlistEnabled: false,
 
   /**
+   * Enables the Trial Companion feature.
+   */
+  trialCompanionEnabled: false,
+
+  /*
    * Enables the Gap Auto Fill Scheduler feature.
    */
   gapAutoFillSchedulerEnabled: false,
