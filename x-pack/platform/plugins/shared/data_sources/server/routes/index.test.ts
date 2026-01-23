@@ -14,6 +14,11 @@ import type { RequestHandlerContext } from '@kbn/core/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { registerRoutes, type RouteDependencies } from '.';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import {
+  DATASOURCES_SCOPE,
+  TASK_NOT_FOUND_ERROR,
+  TASK_MANAGER_NOT_AVAILABLE_ERROR,
+} from '../../common/constants';
 import * as helpers from './data_sources_helpers';
 
 // Mock the helper functions
@@ -646,7 +651,7 @@ describe('registerRoutes', () => {
       expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith(
         expect.objectContaining({
           taskType: 'data-sources:bulk-delete-task',
-          scope: ['dataSources'],
+          scope: [DATASOURCES_SCOPE],
           state: { isDone: false, deletedCount: 0, errors: [] },
         }),
         expect.objectContaining({
@@ -689,7 +694,7 @@ describe('registerRoutes', () => {
       expect(mockResponse.customError).toHaveBeenCalledWith({
         statusCode: 503,
         body: {
-          message: 'Task Manager is not available',
+          message: TASK_MANAGER_NOT_AVAILABLE_ERROR,
         },
       });
     });
@@ -937,7 +942,7 @@ describe('DELETE /api/data_sources', () => {
       expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith(
         expect.objectContaining({
           taskType: 'data-sources:bulk-delete-task',
-          scope: ['dataSources'],
+          scope: [DATASOURCES_SCOPE],
           state: { isDone: false, deletedCount: 0, errors: [] },
         }),
         expect.objectContaining({
@@ -987,7 +992,7 @@ describe('DELETE /api/data_sources', () => {
       expect(mockResponse.customError).toHaveBeenCalledWith({
         statusCode: 503,
         body: {
-          message: 'Task Manager is not available',
+          message: TASK_MANAGER_NOT_AVAILABLE_ERROR,
         },
       });
     });
@@ -1165,7 +1170,7 @@ describe('GET /api/data_sources/_bulk_delete/{taskId}', () => {
 
       expect(mockResponse.notFound).toHaveBeenCalledWith({
         body: {
-          message: 'Task not found',
+          message: TASK_NOT_FOUND_ERROR,
         },
       });
     });
@@ -1192,7 +1197,7 @@ describe('GET /api/data_sources/_bulk_delete/{taskId}', () => {
       expect(mockResponse.customError).toHaveBeenCalledWith({
         statusCode: 503,
         body: {
-          message: 'Task Manager is not available',
+          message: TASK_MANAGER_NOT_AVAILABLE_ERROR,
         },
       });
     });

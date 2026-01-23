@@ -14,6 +14,11 @@ import type {
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import type { DataSourceAttributes } from '../saved_objects';
 import { deleteDataSourceAndRelatedResources } from '../routes/data_sources_helpers';
+import {
+  FAKE_REQUEST_NOT_DEFINED_ERROR,
+  UNKNOWN_DATA_SOURCE_ID,
+  PARTIALLY_DELETED_ERROR,
+} from '../../common/constants';
 
 export const TYPE = 'data-sources:bulk-delete-task';
 
@@ -58,13 +63,18 @@ export class BulkDeleteTask {
               this.logger.debug('Starting bulk delete operation');
 
               if (!fakeRequest) {
-                this.logger.error('fakeRequest is not defined');
+                this.logger.error(FAKE_REQUEST_NOT_DEFINED_ERROR);
                 return {
                   runAt: new Date(Date.now() + 60 * 60 * 1000),
                   state: {
                     isDone: true,
                     deletedCount: 0,
-                    errors: [{ dataSourceId: 'unknown', error: 'fakeRequest is not defined' }],
+                    errors: [
+                      {
+                        dataSourceId: UNKNOWN_DATA_SOURCE_ID,
+                        error: FAKE_REQUEST_NOT_DEFINED_ERROR,
+                      },
+                    ],
                   } satisfies BulkDeleteTaskState,
                 };
               }
@@ -119,7 +129,7 @@ export class BulkDeleteTask {
                           // Partial deletion - saved object was updated with remaining resources
                           errors.push({
                             dataSourceId: dataSource.id,
-                            error: `Partially deleted: some resources failed to delete`,
+                            error: PARTIALLY_DELETED_ERROR,
                           });
                         }
                       } catch (error) {
@@ -161,7 +171,10 @@ export class BulkDeleteTask {
                   state: {
                     isDone: true,
                     deletedCount,
-                    errors: [...errors, { dataSourceId: 'unknown', error: (err as Error).message }],
+                    errors: [
+                      ...errors,
+                      { dataSourceId: UNKNOWN_DATA_SOURCE_ID, error: (err as Error).message },
+                    ],
                   } satisfies BulkDeleteTaskState,
                 };
               }

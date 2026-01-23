@@ -22,3 +22,13 @@ export const STACK_CONNECTOR_API_ROUTE = '/api/actions/connector';
 // Pagination constants
 export const DEFAULT_ITEMS_PER_PAGE = 10;
 export const PAGINATION_ITEMS_PER_PAGE_OPTIONS = [10, 25, 50, 100];
+
+// Task Manager constants
+export const DATASOURCES_SCOPE = 'dataSources';
+export const FAKE_REQUEST_NOT_DEFINED_ERROR = 'fakeRequest is not defined';
+export const UNKNOWN_DATA_SOURCE_ID = 'unknown';
+
+// Error and success messages
+export const PARTIALLY_DELETED_ERROR = 'Partially deleted: some resources failed to delete';
+export const TASK_NOT_FOUND_ERROR = 'Task not found';
+export const TASK_MANAGER_NOT_AVAILABLE_ERROR = 'Task Manager is not available';

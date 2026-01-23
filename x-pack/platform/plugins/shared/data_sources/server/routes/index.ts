@@ -27,7 +27,12 @@ import type {
   DataSourcesServerStartDependencies,
 } from '../types';
 import { convertSOtoAPIResponse, createDataSourceRequestSchema } from './schema';
-import { API_BASE_PATH } from '../../common/constants';
+import {
+  API_BASE_PATH,
+  DATASOURCES_SCOPE,
+  TASK_NOT_FOUND_ERROR,
+  TASK_MANAGER_NOT_AVAILABLE_ERROR,
+} from '../../common/constants';
 import { TYPE } from '../tasks/bulk_delete_task';
 
 function createErrorResponse(
@@ -291,11 +296,11 @@ export function registerRoutes(dependencies: RouteDependencies) {
         const taskManager = plugins.taskManager;
 
         if (!taskManager) {
-          logger.error('Task Manager is not available');
+          logger.error(TASK_MANAGER_NOT_AVAILABLE_ERROR);
           return response.customError({
             statusCode: 503,
             body: {
-              message: 'Task Manager is not available',
+              message: TASK_MANAGER_NOT_AVAILABLE_ERROR,
             },
           });
         }
@@ -305,7 +310,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
           {
             id: taskId,
             taskType: TYPE,
-            scope: ['dataSources'],
+            scope: [DATASOURCES_SCOPE],
             state: { isDone: false, deletedCount: 0, errors: [] },
             runAt: new Date(Date.now() + 3 * 1000),
             params: {},
@@ -354,7 +359,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
           return response.customError({
             statusCode: 503,
             body: {
-              message: 'Task Manager is not available',
+              message: TASK_MANAGER_NOT_AVAILABLE_ERROR,
             },
           });
         }
@@ -367,7 +372,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
           if (SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
             return response.notFound({
               body: {
-                message: 'Task not found',
+                message: TASK_NOT_FOUND_ERROR,
               },
             });
           }
