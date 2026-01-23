@@ -149,10 +149,14 @@ export class DiscoverApp {
   }
 
   async revertUnsavedChanges() {
-    await this.page.testSubj.hover('unsavedChangesBadge');
-    await this.page.testSubj.click('unsavedChangesBadge');
-    await this.page.testSubj.waitForSelector('unsavedChangesBadgeMenuPanel', { state: 'visible' });
-    await this.page.testSubj.click('revertUnsavedChangesButton');
+    // Click the secondary button on the split save button
+    await this.page.testSubj.click('discoverSaveButton-secondary-button');
+
+    // Wait for popover and revert
+    const revertButton = this.page.testSubj.locator('revertUnsavedChangesButton');
+    await expect(revertButton).toBeVisible();
+    await revertButton.click();
+
     await this.waitUntilSearchingHasFinished();
   }
 
