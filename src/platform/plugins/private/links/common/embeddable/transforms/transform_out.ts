@@ -19,10 +19,10 @@ export function transformOut(
   storedState: LinksEmbeddableState | StoredLinksEmbeddableState | StoredLinksByValueState910,
   references?: Reference[]
 ) {
-  const state = isLegacyState(storedState)
+  const latestState = isLegacyState(storedState)
     ? transformLegacyState(storedState)
     : (storedState as StoredLinksEmbeddableState);
-  const stateWithApiTitles = transformTitlesOut(state);
+  const state = transformTitlesOut(latestState);
 
   // inject saved object reference when by-reference
   const savedObjectRef = (references ?? []).find(
@@ -30,14 +30,14 @@ export function transformOut(
   );
   if (savedObjectRef) {
     return {
-      ...stateWithApiTitles,
+      ...state,
       savedObjectId: savedObjectRef.id,
     };
   }
 
   // inject dashboard references when by-value
   return {
-    ...stateWithApiTitles,
+    ...state,
     links: injectReferences(state.links, references).map((link) => ({
       ...link,
       ...(link.options && { options: getOptions(link.type, link.options) }),

@@ -18,8 +18,8 @@ import type { StoredVisualizeByValueState, StoredVisualizeEmbeddableState } from
 export function getTransformOut(
   transformEnhancementsOut: EmbeddableSetup['transformEnhancementsOut']
 ) {
-  function transformOut(state: StoredVisualizeEmbeddableState, references?: Reference[]) {
-    transformTitlesOut(state);
+  function transformOut(storedState: StoredVisualizeEmbeddableState, references?: Reference[]) {
+    const state = transformTitlesOut(storedState);
     const enhancementsState = state.enhancements
       ? transformEnhancementsOut(state.enhancements, references ?? [])
       : undefined;

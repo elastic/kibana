@@ -18,15 +18,13 @@ interface LegacyStoredTitles {
  * a legacy stored state. This should only be used for embeddables that existed before 9.4.
  */
 export const transformTitlesOut = <StoredStateType extends SerializedTitles>(
-  state: StoredStateType
+  storedState: StoredStateType
 ): StoredStateType => {
-  const hideTitle = state.hide_title ?? (state as LegacyStoredTitles).hidePanelTitles;
-  if (typeof (state as LegacyStoredTitles).hidePanelTitles === 'boolean') {
-    delete (state as LegacyStoredTitles).hidePanelTitles;
-  }
+  const { hidePanelTitles, ...state } = storedState as StoredStateType & LegacyStoredTitles;
+  const hideTitle = state.hide_title ?? hidePanelTitles;
 
   return {
-    ...state,
+    ...(state as StoredStateType),
     ...(typeof hideTitle === 'boolean' ? { hide_title: hideTitle } : {}),
   };
 };

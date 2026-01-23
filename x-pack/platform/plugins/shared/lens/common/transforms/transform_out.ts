@@ -25,8 +25,8 @@ export const getTransformOut = ({
   builder,
   transformEnhancementsOut,
 }: LensTransformDependencies): LensTransformOut => {
-  return function transformOut(state, panelReferences) {
-    transformTitlesOut(state);
+  return function transformOut(storedState, panelReferences) {
+    const state = transformTitlesOut(storedState);
     const enhancements = state.enhancements
       ? transformEnhancementsOut?.(state.enhancements, panelReferences ?? [])
       : undefined;

@@ -11,10 +11,10 @@ import { LOG_RATE_ANALYSIS_DATA_VIEW_REF_NAME } from '@kbn/aiops-log-rate-analys
 import type { LogRateAnalysisEmbeddableState, StoredLogRateAnalysisEmbeddableState } from './types';
 
 export function transformOut(
-  state: StoredLogRateAnalysisEmbeddableState,
+  storedState: StoredLogRateAnalysisEmbeddableState,
   references?: Reference[]
 ): LogRateAnalysisEmbeddableState {
-  transformTitlesOut(state);
+  const state = transformTitlesOut(storedState);
   const dataViewIdRef = references?.find(
     (ref) => ref.name === LOG_RATE_ANALYSIS_DATA_VIEW_REF_NAME
   );

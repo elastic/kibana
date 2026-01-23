@@ -28,7 +28,12 @@ import type { AllowedXYOverrides } from '@kbn/expression-xy-plugin/common';
 import type { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-plugin/common';
 import type { AllowedGaugeOverrides } from '@kbn/expression-gauge-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
-import type { PublishesDataViews, PublishingSubject, ViewMode } from '@kbn/presentation-publishing';
+import type {
+  PublishesDataViews,
+  PublishingSubject,
+  SerializedTitles,
+  ViewMode,
+} from '@kbn/presentation-publishing';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import type {
   BrushTriggerEvent,

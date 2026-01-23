@@ -11,10 +11,10 @@ import { PATTERN_ANALYSIS_DATA_VIEW_REF_NAME } from '@kbn/aiops-log-pattern-anal
 import type { PatternAnalysisEmbeddableState, StoredPatternAnalysisEmbeddableState } from './types';
 
 export function transformOut(
-  state: StoredPatternAnalysisEmbeddableState,
+  storedState: StoredPatternAnalysisEmbeddableState,
   references?: Reference[]
 ): PatternAnalysisEmbeddableState {
-  transformTitlesOut(state);
+  const state = transformTitlesOut(storedState);
   const dataViewIdRef = references?.find((ref) => ref.name === PATTERN_ANALYSIS_DATA_VIEW_REF_NAME);
   return {
     ...state,

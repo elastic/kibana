@@ -32,14 +32,14 @@ export function getTransforms(
         references: enhancementResult.references,
       };
     },
-    transformOut: (state: ImageEmbeddableState, references?: Reference[]) => {
-      const stateWithApiTitles = transformTitlesOut(state);
+    transformOut: (storedState: ImageEmbeddableState, references?: Reference[]) => {
+      const state = transformTitlesOut(storedState);
       const enhancementsState = state.enhancements
-        ? transformEnhancementsOut(stateWithApiTitles.enhancements, references ?? [])
+        ? transformEnhancementsOut(state.enhancements, references ?? [])
         : undefined;
 
       return {
-        ...stateWithApiTitles,
+        ...state,
         ...(enhancementsState ? { enhancements: enhancementsState } : {}),
       };
     },

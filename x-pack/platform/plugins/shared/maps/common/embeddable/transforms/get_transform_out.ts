@@ -18,11 +18,11 @@ export function getTransformOut(
   transformEnhancementsOut: EmbeddableSetup['transformEnhancementsOut']
 ) {
   function transformOut(
-    state: StoredMapEmbeddableState,
+    storedState: StoredMapEmbeddableState,
     panelReferences?: Reference[],
     containerReferences?: Reference[]
   ) {
-    transformTitlesOut(state);
+    const state = transformTitlesOut(storedState);
     const enhancementsState = state.enhancements
       ? transformEnhancementsOut(state.enhancements, panelReferences ?? [])
       : undefined;

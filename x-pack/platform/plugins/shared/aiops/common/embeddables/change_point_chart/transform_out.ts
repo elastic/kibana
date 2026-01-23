@@ -11,10 +11,10 @@ import { CHANGE_POINT_CHART_DATA_VIEW_REF_NAME } from '@kbn/aiops-change-point-d
 import type { ChangePointEmbeddableState, StoredChangePointEmbeddableState } from './types';
 
 export function transformOut(
-  state: StoredChangePointEmbeddableState,
+  storedState: StoredChangePointEmbeddableState,
   references?: Reference[]
 ): ChangePointEmbeddableState {
-  transformTitlesOut(state);
+  const state = transformTitlesOut(storedState);
   const dataViewIdRef = references?.find(
     (ref) => ref.name === CHANGE_POINT_CHART_DATA_VIEW_REF_NAME
   );

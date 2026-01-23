@@ -32,12 +32,15 @@ function isByValue(
 export function getTransformOut(
   transformEnhancementsOut: EmbeddableSetup['transformEnhancementsOut']
 ) {
-  function transformOut(state: StoredSearchEmbeddableState, references?: SavedObjectReference[]) {
+  function transformOut(
+    storedState: StoredSearchEmbeddableState,
+    references?: SavedObjectReference[]
+  ) {
+    const state = transformTitlesOut(storedState);
     const enhancementsState = state.enhancements
       ? transformEnhancementsOut(state.enhancements, references ?? [])
       : undefined;
 
-    transformTitlesOut(state);
     const enhancements = enhancementsState ? { enhancements: enhancementsState } : {};
     if (isByValue(state)) {
       const tabsState = {
