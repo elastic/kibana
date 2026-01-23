@@ -655,6 +655,7 @@ export class AlertingPlugin {
       connectorAdapterRegistry: this.connectorAdapterRegistry,
       uiSettings: core.uiSettings,
       securityService: core.security,
+      isServerless: this.isServerless,
     });
 
     rulesSettingsClientFactory.initialize({

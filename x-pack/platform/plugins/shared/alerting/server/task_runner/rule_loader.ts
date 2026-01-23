@@ -56,7 +56,7 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
     spaceId,
   } = params;
 
-  const { enabled, apiKey, alertTypeId: ruleTypeId } = rawRule;
+  const { enabled, apiKey, uiam, alertTypeId: ruleTypeId } = rawRule;
 
   if (!enabled) {
     throw createTaskRunError(
@@ -68,7 +68,7 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
     );
   }
 
-  const fakeRequest = getFakeKibanaRequest(context, spaceId, apiKey);
+  const fakeRequest = getFakeKibanaRequest(context, spaceId, apiKey, uiam);
   const rule = getAlertFromRaw({
     id: ruleId,
     includeLegacyId: false,
@@ -152,11 +152,14 @@ export async function getDecryptedRule(
 export function getFakeKibanaRequest(
   context: TaskRunnerContext,
   spaceId: string,
-  apiKey: RawRule['apiKey']
+  apiKey: RawRule['apiKey'],
+  uiam?: RawRule['uiam']
 ) {
   const requestHeaders: Headers = {};
 
-  if (apiKey) {
+  if (uiam) {
+    requestHeaders.authorization = `ApiKey ${uiam.apiKey}`;
+  } else if (apiKey) {
     requestHeaders.authorization = `ApiKey ${apiKey}`;
   }
 

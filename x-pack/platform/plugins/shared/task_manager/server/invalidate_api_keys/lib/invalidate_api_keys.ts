@@ -9,7 +9,7 @@ import type {
   InvalidateAPIKeysParams,
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
 } from '@kbn/security-plugin-types-server';
-import type { ApiKeyInvalidationFn } from '../invalidate_api_keys_task';
+import type { ApiKeyInvalidationFn, UiamApiKeyInvalidationFn } from '../invalidate_api_keys_task';
 
 export type InvalidateAPIKeyResult =
   | { apiKeysEnabled: false }
@@ -17,7 +17,7 @@ export type InvalidateAPIKeyResult =
 
 export async function invalidateAPIKeys(
   params: InvalidateAPIKeysParams,
-  invalidateApiKeyFn?: ApiKeyInvalidationFn
+  invalidateApiKeyFn?: ApiKeyInvalidationFn | UiamApiKeyInvalidationFn
 ): Promise<InvalidateAPIKeyResult> {
   if (!invalidateApiKeyFn) {
     return { apiKeysEnabled: false };

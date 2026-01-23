@@ -12,7 +12,7 @@ import { getFindFilter } from './get_find_filter';
 import { getApiKeyIdsToInvalidate } from './get_api_key_ids_to_invalidate';
 import { PAGE_SIZE } from './constants';
 import { invalidateApiKeysAndDeletePendingApiKeySavedObject } from './invalidate_api_keys_and_delete_so';
-import type { ApiKeyInvalidationFn } from '../invalidate_api_keys_task';
+import type { ApiKeyInvalidationFn, UiamApiKeyInvalidationFn } from '../invalidate_api_keys_task';
 
 export interface SavedObjectTypesToQuery {
   type: string;
@@ -21,7 +21,7 @@ export interface SavedObjectTypesToQuery {
 
 interface RunInvalidateOpts {
   encryptedSavedObjectsClient?: EncryptedSavedObjectsClient;
-  invalidateApiKeyFn?: ApiKeyInvalidationFn;
+  invalidateApiKeyFn?: ApiKeyInvalidationFn | UiamApiKeyInvalidationFn;
   logger: Logger;
   removalDelay: string;
   savedObjectsClient: SavedObjectsClientContract;
@@ -47,7 +47,7 @@ export async function runInvalidate(opts: RunInvalidateOpts) {
     // Query for PAGE_SIZE api keys to invalidate at a time. At the end of each iteration,
     // we should have deleted the deletable keys and added keys still in use to the excluded list
     const filter = getFindFilter({
-      removalDelay,
+      removalDelay: '1s',
       excludedSOIds: [...excludedSOIds],
       savedObjectType,
     });

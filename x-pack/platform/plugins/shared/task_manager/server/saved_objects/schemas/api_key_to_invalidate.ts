@@ -13,4 +13,10 @@ export const apiKeyToInvalidateSchemaV1 = schema.object({
   createdAt: schema.string(),
 });
 
-export type ApiKeyToInvalidate = TypeOf<typeof apiKeyToInvalidateSchemaV1>;
+export const apiKeyToInvalidateSchemaV2 = schema.object({
+  apiKeyId: schema.string(),
+  createdAt: schema.string(),
+  isUiam: schema.boolean({ defaultValue: false }),
+});
+
+export type ApiKeyToInvalidate = TypeOf<typeof apiKeyToInvalidateSchemaV2>;

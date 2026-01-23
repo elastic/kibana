@@ -18,12 +18,14 @@ export async function createNewAPIKeySet(
     username,
     shouldUpdateApiKey,
     errorMessage,
+    existingApiKey,
   }: {
     id: string;
     ruleName: string;
     username: string | null;
     shouldUpdateApiKey: boolean;
     errorMessage?: string;
+    existingApiKey: string | null;
   }
 ): Promise<Pick<RawRule, 'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser'>> {
   let createdAPIKey = null;
@@ -41,5 +43,5 @@ export async function createNewAPIKeySet(
     throw Boom.badRequest(`${message} - ${error.message}`);
   }
 
-  return apiKeyAsAlertAttributes(createdAPIKey, username, isAuthTypeApiKey);
+  return apiKeyAsAlertAttributes(createdAPIKey, username, isAuthTypeApiKey, existingApiKey);
 }

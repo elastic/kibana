@@ -58,6 +58,7 @@ export interface RulesClientFactoryOpts {
   connectorAdapterRegistry: ConnectorAdapterRegistry;
   uiSettings: CoreStart['uiSettings'];
   securityService: CoreStart['security'];
+  isServerless: boolean;
 }
 
 export class RulesClientFactory {
@@ -84,6 +85,7 @@ export class RulesClientFactory {
   private connectorAdapterRegistry!: ConnectorAdapterRegistry;
   private uiSettings!: CoreStart['uiSettings'];
   private securityService!: CoreStart['security'];
+  private isServerless: boolean = false;
 
   public initialize(options: RulesClientFactoryOpts) {
     if (this.isInitialized) {
@@ -112,6 +114,7 @@ export class RulesClientFactory {
     this.connectorAdapterRegistry = options.connectorAdapterRegistry;
     this.uiSettings = options.uiSettings;
     this.securityService = options.securityService;
+    this.isServerless = options.isServerless;
   }
 
   /**
@@ -198,6 +201,7 @@ export class RulesClientFactory {
       backfillClient: this.backfillClient,
       connectorAdapterRegistry: this.connectorAdapterRegistry,
       uiSettings: this.uiSettings,
+      isServerless: this.isServerless,
 
       async getUserName() {
         const user = securityService.authc.getCurrentUser(request);
@@ -210,14 +214,21 @@ export class RulesClientFactory {
         // Create an API key using the new grant API - in this case the Kibana system user is creating the
         // API key for the user, instead of having the user create it themselves, which requires api_key
         // privileges
-        const createAPIKeyResult = await securityPluginStart.authc.apiKeys.grantAsInternalUser(
-          request,
-          {
-            name,
-            role_descriptors: {},
-            metadata: { managed: true, kibana: { type: 'alerting_rule' } },
-          }
-        );
+        let createAPIKeyResult;
+
+        if (this.isServerless) {
+          createAPIKeyResult = await securityService.authc.apiKeys.uiam?.grant(request, { name });
+        } else {
+          createAPIKeyResult = await securityPluginStart.authc.apiKeys.grantAsInternalUser(
+            request,
+            {
+              name,
+              role_descriptors: {},
+              metadata: { managed: true, kibana: { type: 'alerting_rule' } },
+            }
+          );
+        }
+
         if (!createAPIKeyResult) {
           return { apiKeysEnabled: false };
         }
@@ -248,6 +259,7 @@ export class RulesClientFactory {
         return user && user.authentication_type ? user.authentication_type === 'api_key' : false;
       },
       getAuthenticationAPIKey(name: string) {
+        // Should we still allow users to pass old API Keys?
         const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
         if (authorizationHeader && authorizationHeader.credentials) {
           const apiKey = Buffer.from(authorizationHeader.credentials, 'base64')

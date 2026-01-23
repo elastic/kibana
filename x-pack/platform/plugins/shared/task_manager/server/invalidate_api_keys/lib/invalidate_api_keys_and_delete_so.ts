@@ -8,11 +8,11 @@
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ApiKeyIdAndSOId } from './get_api_key_ids_to_invalidate';
 import { invalidateAPIKeys } from './invalidate_api_keys';
-import type { ApiKeyInvalidationFn } from '../invalidate_api_keys_task';
+import type { ApiKeyInvalidationFn, UiamApiKeyInvalidationFn } from '../invalidate_api_keys_task';
 
 interface InvalidateApiKeysAndDeleteSO {
   apiKeyIdsToInvalidate: ApiKeyIdAndSOId[];
-  invalidateApiKeyFn?: ApiKeyInvalidationFn;
+  invalidateApiKeyFn?: ApiKeyInvalidationFn | UiamApiKeyInvalidationFn;
   logger: Logger;
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectType: string;

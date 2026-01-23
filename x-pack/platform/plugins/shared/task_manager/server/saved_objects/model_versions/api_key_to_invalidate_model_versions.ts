@@ -6,7 +6,10 @@
  */
 
 import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
-import { apiKeyToInvalidateSchemaV1 } from '../schemas/api_key_to_invalidate';
+import {
+  apiKeyToInvalidateSchemaV1,
+  apiKeyToInvalidateSchemaV2,
+} from '../schemas/api_key_to_invalidate';
 
 export const apiKeyToInvalidateModelVersions: SavedObjectsModelVersionMap = {
   '1': {
@@ -14,6 +17,13 @@ export const apiKeyToInvalidateModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: apiKeyToInvalidateSchemaV1.extends({}, { unknowns: 'ignore' }),
       create: apiKeyToInvalidateSchemaV1,
+    },
+  },
+  '2': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: apiKeyToInvalidateSchemaV2.extends({}, { unknowns: 'ignore' }),
+      create: apiKeyToInvalidateSchemaV2,
     },
   },
 };
