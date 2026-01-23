@@ -13,24 +13,25 @@ import type { AcknowledgeResponse } from '@kbn/core-saved-objects-migration-serv
 import { errors } from '@elastic/elasticsearch';
 
 /**
- * Represents a project routing expression.
+ * Represents a named project routing expression.
  */
 interface NpreExpressionResponse {
   expression: ProjectRouting;
 }
 
 /**
- * Client interface for interacting with project routing expressions.
+ * Client interface for interacting with named project routing expressions.
  */
 export interface INpreClient {
-  canGetNpre(): Promise<boolean>;
-
   /**
    * Retrieves a project routing expression by name.
    * @param expressionName the name of the expression to retrieve.
    */
   getNpre(expressionName: string): Promise<ProjectRouting>;
 
+  /**
+   * Checks if the current user has permission to create or update named project routing expressions.
+   */
   canPutNpre(): Promise<boolean>;
 
   /**
@@ -38,8 +39,11 @@ export interface INpreClient {
    * @param expressionName the name of the expression.
    * @param expression the Lucene expression string.
    */
-  putNpre(expressionName: string, expression: ProjectRouting): Promise<AcknowledgeResponse>;
+  putNpre(expressionName: string, expression: string): Promise<AcknowledgeResponse>;
 
+  /**
+   * Checks if the current user has permission to delete named project routing expressions.
+   */
   canDeleteNpre(): Promise<boolean>;
 
   /**
@@ -63,21 +67,11 @@ export class NpreClient implements INpreClient {
     return this.core.elasticsearch.client;
   }
 
-  public async canGetNpre(): Promise<boolean> {
-    return this.getClient()
-      .asScoped(this.request)
-      .asCurrentUser.security.hasPrivileges({
-        cluster: ['monitor'],
-      })
-      .then((response) => response.has_all_requested);
-  }
-
   public async getNpre(expressionName: string): Promise<ProjectRouting> {
     this.logger.debug(`Getting NPRE for expression: ${expressionName}`);
 
     return this.getClient()
-      .asScoped(this.request)
-      .asCurrentUser.transport.request<NpreExpressionResponse>({
+      .asInternalUser.transport.request<NpreExpressionResponse>({
         method: 'GET',
         path: `/_project_routing/${expressionName}`,
       })

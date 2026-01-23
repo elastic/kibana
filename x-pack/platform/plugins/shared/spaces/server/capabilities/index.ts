@@ -6,7 +6,6 @@
  */
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import type { CPSServerSetup } from '@kbn/cps/server';
 
 import { capabilitiesProvider } from './capabilities_provider';
 import { setupCapabilitiesSwitcher } from './capabilities_switcher';
@@ -15,15 +14,11 @@ import type { SpacesServiceStart } from '../spaces_service';
 
 export const setupCapabilities = (
   core: CoreSetup<PluginsStart>,
-  cps: CPSServerSetup,
   getSpacesService: () => SpacesServiceStart,
   logger: Logger
 ) => {
   core.capabilities.registerProvider(capabilitiesProvider);
-  core.capabilities.registerSwitcher(
-    setupCapabilitiesSwitcher(core, cps, getSpacesService, logger),
-    {
-      capabilityPath: '*',
-    }
-  );
+  core.capabilities.registerSwitcher(setupCapabilitiesSwitcher(core, getSpacesService, logger), {
+    capabilityPath: '*',
+  });
 };

@@ -206,7 +206,23 @@ export class SpacesPlugin
       getFeatures: async () => (await core.getStartServices())[1].features,
     });
 
-    setupCapabilities(core, plugins.cps, getSpacesService, this.log);
+    setupCapabilities(core, getSpacesService, this.log);
+
+    if (plugins.cps.getCpsEnabled()) {
+      plugins.features.registerElasticsearchFeature({
+        id: 'project_routing',
+        privileges: [
+          {
+            requiredClusterPrivileges: ['manage'],
+            ui: ['manage_space_default'],
+          },
+          {
+            requiredClusterPrivileges: ['monitor'],
+            ui: ['read_space_default'],
+          },
+        ],
+      });
+    }
 
     if (plugins.usageCollection) {
       const getIndexForType = (type: string) =>
