@@ -31,7 +31,7 @@ pageLoadAssetSize:
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 19000
-  dashboardEnhanced: 12500
+  dashboardEnhanced: 12159
   dashboardMarkdown: 4994
   data: 454500
   dataQuality: 11469
@@ -67,7 +67,7 @@ pageLoadAssetSize:
   expressionMetricVis: 17559
   expressionPartitionVis: 29826
   expressions: 105076
-  expressionTagcloud: 12643
+  expressionTagcloud: 14009
   expressionXY: 45000
   features: 4145
   fieldFormats: 64634
@@ -166,7 +166,7 @@ pageLoadAssetSize:
   serverless: 7451
   serverlessObservability: 19472
   serverlessSearch: 26287
-  serverlessWorkplaceAI: 6608
+  serverlessWorkplaceAI: 7718
   sessionView: 47912
   share: 58677
   slo: 36645
@@ -175,7 +175,7 @@ pageLoadAssetSize:
   stackAlerts: 31499
   stackConnectors: 85421
   streams: 10000
-  streamsApp: 25991
+  streamsApp: 25375
   synthetics: 31571
   telemetry: 25755
   telemetryManagementSection: 5522
