@@ -66,8 +66,6 @@ export interface PresentationPanelInternalProps<
    */
   setDragHandles?: (refs: Array<HTMLElement | null>) => void;
 
-  hidePanelChrome?: boolean;
-
   /**
    * Optional search term to highlight in the panel title
    */
