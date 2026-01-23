@@ -500,9 +500,9 @@ paths:
                       username: john.doe
                   stats:
                     failed: 1
-                    upserted: 1
-                    deleted: 1
-                    total: 3
+                    successful: 1
+                    successfulPrivilegedUsers: 1
+                    total: 2
                 type: object
                 properties:
                   errors:
@@ -2319,15 +2319,15 @@ components:
       properties:
         failed:
           type: integer
-        upserted:
+        successful:
           type: integer
-        deleted:
+        successfulPrivilegedUsers:
           type: integer
         total:
           type: integer
       required:
-        - upserted
-        - deleted
+        - successful
+        - successfulPrivilegedUsers
         - failed
         - total
     RiskEngineScheduleNowErrorResponse:

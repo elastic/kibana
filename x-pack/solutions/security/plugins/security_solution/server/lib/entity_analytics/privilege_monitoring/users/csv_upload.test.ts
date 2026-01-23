@@ -174,8 +174,7 @@ describe('CSV Upload Service', () => {
       expect(result).toHaveProperty('errors');
       expect(result).toHaveProperty('stats');
       expect(result.stats).toHaveProperty('total');
-      expect(result.stats).toHaveProperty('upserted');
-      expect(result.stats).toHaveProperty('deleted');
+      expect(result.stats).toHaveProperty('successful');
       expect(result.stats).toHaveProperty('failed');
     });
 
@@ -187,8 +186,7 @@ describe('CSV Upload Service', () => {
       const result = await csvService.bulkUpload(mockStream, options);
 
       expect(result.stats.total).toBe(0);
-      expect(result.stats.upserted).toBe(0);
-      expect(result.stats.deleted).toBe(0);
+      expect(result.stats.successful).toBe(0);
       expect(result.stats.failed).toBe(0);
     });
 
@@ -357,9 +355,8 @@ describe('CSV Upload Service', () => {
       const result = await csvService.bulkUpload(mockStream, options);
 
       expect(result.stats.failed).toBe(2); // 1 from updated + 1 from deleted
-      expect(result.stats.upserted).toBe(2);
-      expect(result.stats.deleted).toBe(1);
-      expect(result.stats.total).toBe(5); // failed + upserted + deleted
+      expect(result.stats.successful).toBe(3); // 2 from updated + 1 from deleted
+      expect(result.stats.total).toBe(5); // failed + successful
       expect(result.errors).toHaveLength(1); // 1 error from deleted operation
     });
   });
