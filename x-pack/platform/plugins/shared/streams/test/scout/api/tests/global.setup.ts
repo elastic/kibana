@@ -7,7 +7,7 @@
 
 import { globalSetupHook } from '@kbn/scout';
 
-globalSetupHook('Setup environment for Streams API tests', async ({ kbnClient, log }) => {
+globalSetupHook('Setup environment for Streams API tests', async ({ kbnClient, esClient, log }) => {
   log.debug('[setup] Enabling Streams...');
 
   try {
@@ -18,5 +18,23 @@ globalSetupHook('Setup environment for Streams API tests', async ({ kbnClient, l
     log.debug('[setup] Streams enabled successfully');
   } catch (error) {
     log.debug(`[setup] Streams may already be enabled: ${error}`);
+  }
+
+  // Index a document to the 'logs' stream to initialize the data stream
+  // This is required for the processing simulation API to work, as it needs
+  // a data stream with at least one index to simulate against
+  log.debug('[setup] Indexing test document to logs stream...');
+  try {
+    await esClient.index({
+      index: 'logs',
+      document: {
+        '@timestamp': new Date().toISOString(),
+        message: 'Test document for streams API tests',
+      },
+      refresh: true,
+    });
+    log.debug('[setup] Test document indexed successfully');
+  } catch (error) {
+    log.debug(`[setup] Failed to index test document: ${error}`);
   }
 });
