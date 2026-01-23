@@ -77,7 +77,9 @@ export class CustomLinksPage {
     try {
       await table.waitFor({ state: 'visible', timeout: 5000 });
       await expect(table).not.toHaveAttribute('aria-busy', 'true', { timeout: BIGGER_TIMEOUT });
-    } catch {}
+    } catch {
+      console.warn('Custom links table did not become stable in time');
+    }
 
     // Wait for the edit button to be visible and stable before clicking
     const editButton = row.getByTestId('editCustomLink');
