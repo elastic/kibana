@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, InferenceClient } from '@kbn/inference-common';
-import type { GeneratedSignificantEventQuery, Streams, System } from '@kbn/streams-schema';
+import type { Feature, GeneratedSignificantEventQuery, Streams, System } from '@kbn/streams-schema';
 import { generateSignificantEvents } from '@kbn/streams-ai';
 
 interface Params {
@@ -18,6 +18,7 @@ interface Params {
   system?: System;
   sampleDocsSize?: number;
   systemPrompt: string;
+  features: Feature[];
 }
 
 interface Dependencies {
@@ -31,7 +32,8 @@ export async function generateSignificantEventDefinitions(
   params: Params,
   dependencies: Dependencies
 ): Promise<{ queries: GeneratedSignificantEventQuery[]; tokensUsed: ChatCompletionTokenCount }> {
-  const { definition, connectorId, start, end, system, sampleDocsSize, systemPrompt } = params;
+  const { definition, connectorId, start, end, system, sampleDocsSize, systemPrompt, features } =
+    params;
   const { inferenceClient, esClient, logger, signal } = dependencies;
 
   const boundInferenceClient = inferenceClient.bindTo({
@@ -49,6 +51,7 @@ export async function generateSignificantEventDefinitions(
     signal,
     sampleDocsSize,
     systemPrompt,
+    features,
   });
 
   return {

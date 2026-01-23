@@ -260,7 +260,7 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiColumnSelector.dragHandleAriaLabel': i18n.translate(
       'core.euiColumnSelector.dragHandleAriaLabel',
       {
-        defaultMessage: 'Drag handle',
+        defaultMessage: 'drag handle',
       }
     ),
     'euiColumnSelector.hideAll': i18n.translate('core.euiColumnSelector.hideAll', {
