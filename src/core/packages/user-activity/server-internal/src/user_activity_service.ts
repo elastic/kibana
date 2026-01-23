@@ -10,6 +10,7 @@
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import { type InternalLoggingServiceSetup } from '@kbn/core-logging-server-internal';
+import { map } from 'rxjs';
 import { config as userActivityConfig, type UserActivityConfigType } from './user_activity_config';
 
 /** @internal */
@@ -54,13 +55,35 @@ export class UserActivityService
   }
 
   setup({ logging }: UserActivitySetupDeps): InternalUserActivityServiceSetup {
-    this.coreContext.configService
-      .atPath<UserActivityConfigType>(userActivityConfig.path)
-      .subscribe((config) => {
-        this.enabled = config.enabled;
-      });
+    const config$ = this.coreContext.configService.atPath<UserActivityConfigType>(
+      userActivityConfig.path
+    );
 
-    // logging.configure()
+    config$.subscribe((config) => {
+      this.enabled = config.enabled;
+    });
+
+    logging.configure(
+      ['user_activity'],
+      config$.pipe(
+        map((config) => ({
+          appenders: {
+            user_activity_json: {
+              type: 'console',
+              layout: { type: 'json' },
+            },
+          },
+          loggers: [
+            {
+              name: 'event',
+              level: 'info',
+              appenders: ['user_activity_json'],
+            },
+          ],
+        }))
+      )
+    );
+
     return {
       trackUserAction: this.trackUserAction,
     };
@@ -72,7 +95,9 @@ export class UserActivityService
     };
   }
 
-  stop() {}
+  stop() {
+    this.enabled = false;
+  }
 
   private trackUserAction = ({ message, event, object }: TrackUserActionParams): void => {
     if (!this.enabled) return;

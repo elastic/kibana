@@ -13,7 +13,7 @@ import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
-  file: schema.string({ defaultValue: 'testign' }),
+  file: schema.maybe(schema.string()),
 });
 
 export type UserActivityConfigType = TypeOf<typeof configSchema>;
