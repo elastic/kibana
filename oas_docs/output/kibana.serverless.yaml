@@ -9799,9 +9799,21 @@ paths:
           application/json:
             examples:
               add:
-                $ref: '#/components/examples/Security_Detections_API_SetAlertAssigneesBodyAdd'
+                value:
+                  assignees:
+                    add:
+                      - u_MxY0jbrft7EcfC6iNZSUGeI_n6iYrSwZj5mWF5EqmSU_0
+                    remove: []
+                  ids:
+                    - 681c2a707335aa7df5f349b70013d87254746191712ecf0ced9b3e2d538503a6
               remove:
-                $ref: '#/components/examples/Security_Detections_API_SetAlertAssigneesBodyRemove'
+                value:
+                  assignees:
+                    add: []
+                    remove:
+                      - u_MxY0jbrft7EcfC6iNZSUGeI_n6iYrSwZj5mWF5EqmSU_0
+                  ids:
+                    - 681c2a707335aa7df5f349b70013d87254746191712ecf0ced9b3e2d538503a6
             schema:
               type: object
               properties:
@@ -10097,9 +10109,21 @@ paths:
           application/json:
             examples:
               add:
-                $ref: '#/components/examples/Security_Detections_API_SetAlertTagsBodyAdd'
+                value:
+                  ids:
+                    - 549c7129c76cbd554aba1bd638f8a49dde95088f5832e50218358e7eca1cf16e
+                  tags:
+                    tags_to_add:
+                      - Duplicate
+                    tags_to_remove: []
               remove:
-                $ref: '#/components/examples/Security_Detections_API_SetAlertTagsBodyRemove'
+                value:
+                  ids:
+                    - 549c7129c76cbd554aba1bd638f8a49dde95088f5832e50218358e7eca1cf16e
+                  tags:
+                    tags_to_add: []
+                    tags_to_remove:
+                      - Duplicate
             schema:
               type: object
               properties:
@@ -56016,38 +56040,6 @@ components:
             myjob2:
               success: true
         savedObjectsDeleted: {}
-    Security_Detections_API_SetAlertAssigneesBodyAdd:
-      value:
-        assignees:
-          add:
-            - u_MxY0jbrft7EcfC6iNZSUGeI_n6iYrSwZj5mWF5EqmSU_0
-          remove: []
-        ids:
-          - 681c2a707335aa7df5f349b70013d87254746191712ecf0ced9b3e2d538503a6
-    Security_Detections_API_SetAlertAssigneesBodyRemove:
-      value:
-        assignees:
-          add: []
-          remove:
-            - u_MxY0jbrft7EcfC6iNZSUGeI_n6iYrSwZj5mWF5EqmSU_0
-        ids:
-          - 681c2a707335aa7df5f349b70013d87254746191712ecf0ced9b3e2d538503a6
-    Security_Detections_API_SetAlertTagsBodyAdd:
-      value:
-        ids:
-          - 549c7129c76cbd554aba1bd638f8a49dde95088f5832e50218358e7eca1cf16e
-        tags:
-          tags_to_add:
-            - Duplicate
-          tags_to_remove: []
-    Security_Detections_API_SetAlertTagsBodyRemove:
-      value:
-        ids:
-          - 549c7129c76cbd554aba1bd638f8a49dde95088f5832e50218358e7eca1cf16e
-        tags:
-          tags_to_add: []
-          tags_to_remove:
-            - Duplicate
     Task_manager_health_Serverless_APIs_health_200response_serverless:
       description: A successful response from `GET api/task_manager/_health`.
       value: |-
@@ -64257,20 +64249,6 @@ components:
             - risk_score
             - severity
         - $ref: '#/components/schemas/Security_Detections_API_SavedQueryRuleCreateFields'
-<<<<<<< HEAD
-=======
-    Security_Detections_API_SetAlertAssigneesBody:
-      type: object
-      properties:
-        assignees:
-          $ref: '#/components/schemas/Security_Detections_API_AlertAssignees'
-          description: Details about the assignees to assign and unassign.
-        ids:
-          $ref: '#/components/schemas/Security_Detections_API_AlertIds'
-      required:
-        - assignees
-        - ids
->>>>>>> da6bf3ecab9d ([DOCS] Fix OpenAPI linting error in detection_engine (#248570))
     Security_Detections_API_SetAlertsStatusByIds:
       type: object
       properties:
@@ -64315,19 +64293,6 @@ components:
       required:
         - tags_to_add
         - tags_to_remove
-<<<<<<< HEAD
-=======
-    Security_Detections_API_SetAlertTagsBody:
-      type: object
-      properties:
-        ids:
-          $ref: '#/components/schemas/Security_Detections_API_AlertIds'
-        tags:
-          $ref: '#/components/schemas/Security_Detections_API_SetAlertTags'
-      required:
-        - ids
-        - tags
->>>>>>> da6bf3ecab9d ([DOCS] Fix OpenAPI linting error in detection_engine (#248570))
     Security_Detections_API_SetupGuide:
       description: Populates the rule’s setup guide with instructions on rule prerequisites such as required integrations, configuration steps, and anything else needed for the rule to work correctly.
       type: string
