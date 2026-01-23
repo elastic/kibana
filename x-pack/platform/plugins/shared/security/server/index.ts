@@ -34,7 +34,7 @@ export type {
   AuditRequest,
   AuditLogger,
   AuditServiceSetup,
-  APIKeys,
+  NativeAPIKeysType,
   AuthenticationServiceStart,
   InvalidateAPIKeyResult,
   GrantAPIKeyResult,

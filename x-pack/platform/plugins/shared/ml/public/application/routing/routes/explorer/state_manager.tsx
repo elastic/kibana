@@ -11,7 +11,6 @@ import useObservable from 'react-use/lib/useObservable';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { ML_JOB_ID } from '@kbn/ml-anomaly-utils';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
@@ -24,7 +23,6 @@ import { useJobSelection } from '../../../components/job_selector/use_job_select
 import { useTableSeverity } from '../../../components/controls/select_severity';
 import { MlPageHeader } from '../../../components/page_header';
 import { PageTitle } from '../../../components/page_title';
-import { AnomalyResultsViewSelector } from '../../../components/anomaly_results_view_selector';
 import { AnomalyDetectionEmptyState } from '../../../jobs/jobs_list/components/anomaly_detection_empty_state';
 import { useAnomalyExplorerContext } from '../../../explorer/anomaly_explorer_context';
 import { getInfluencers } from '../../../explorer/explorer_utils';
@@ -118,15 +116,7 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
 
   return (
     <div className="ml-explorer">
-      <MlPageHeader
-        leftSideItems={
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <AnomalyResultsViewSelector viewId="explorer" selectedJobs={selectedJobs} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-      >
+      <MlPageHeader>
         <PageTitle
           title={i18n.translate('xpack.ml.explorer.pageTitle', {
             defaultMessage: 'Anomaly Explorer',

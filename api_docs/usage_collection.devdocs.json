@@ -26,6 +26,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/plugins/shared/usage_collection/public/components/track_application_view/track_application_view.tsx",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -48,6 +50,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/usage_collection/public/components/track_application_view/track_application_view.tsx",
+            "lineNumber": 25,
+            "columnNumber": 69,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -68,6 +72,8 @@
           "\nProps to provide to the {@link TrackApplicationView} component."
         ],
         "path": "src/platform/plugins/shared/usage_collection/public/components/track_application_view/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -81,6 +87,8 @@
               "\nThe name of the view to be tracked. The appId will be obtained automatically."
             ],
             "path": "src/platform/plugins/shared/usage_collection/public/components/track_application_view/types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -97,6 +105,8 @@
               "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "src/platform/plugins/shared/usage_collection/public/components/track_application_view/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -117,6 +127,8 @@
         "Public's setup APIs exposed by the UsageCollection Service"
       ],
       "path": "src/platform/plugins/shared/usage_collection/public/plugin.tsx",
+      "lineNumber": 43,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -133,6 +145,8 @@
             "{ ApplicationUsageTrackingProvider: React.FC<{ children?: React.ReactNode; }>; }"
           ],
           "path": "src/platform/plugins/shared/usage_collection/public/plugin.tsx",
+          "lineNumber": 45,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -149,6 +163,8 @@
             "(appName: string, type: string, eventNames: string | string[], count?: number | undefined) => void"
           ],
           "path": "src/platform/plugins/shared/usage_collection/public/plugin.tsx",
+          "lineNumber": 82,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -163,6 +179,8 @@
                 "string"
               ],
               "path": "src/platform/plugins/shared/usage_collection/public/plugin.tsx",
+              "lineNumber": 84,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -178,6 +196,8 @@
                 "string"
               ],
               "path": "src/platform/plugins/shared/usage_collection/public/plugin.tsx",
+              "lineNumber": 85,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -193,6 +213,8 @@
                 "string | string[]"
               ],
               "path": "src/platform/plugins/shared/usage_collection/public/plugin.tsx",
+              "lineNumber": 86,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -208,6 +230,8 @@
                 "number | undefined"
               ],
               "path": "src/platform/plugins/shared/usage_collection/public/plugin.tsx",
+              "lineNumber": 87,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -229,6 +253,8 @@
         "Public's start APIs exposed by the UsageCollection Service"
       ],
       "path": "src/platform/plugins/shared/usage_collection/public/plugin.tsx",
+      "lineNumber": 91,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -245,6 +271,8 @@
             "(appName: string, type: string, eventNames: string | string[], count?: number | undefined) => void"
           ],
           "path": "src/platform/plugins/shared/usage_collection/public/plugin.tsx",
+          "lineNumber": 93,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -259,6 +287,8 @@
                 "string"
               ],
               "path": "src/platform/plugins/shared/usage_collection/public/plugin.tsx",
+              "lineNumber": 95,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -274,6 +304,8 @@
                 "string"
               ],
               "path": "src/platform/plugins/shared/usage_collection/public/plugin.tsx",
+              "lineNumber": 96,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -289,6 +321,8 @@
                 "string | string[]"
               ],
               "path": "src/platform/plugins/shared/usage_collection/public/plugin.tsx",
+              "lineNumber": 97,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -304,6 +338,8 @@
                 "number | undefined"
               ],
               "path": "src/platform/plugins/shared/usage_collection/public/plugin.tsx",
+              "lineNumber": 98,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -330,6 +366,8 @@
           "\nThe context for the `fetch` method: It includes the most commonly used clients in the collectors (ES and SO clients).\nBoth are scoped based on the request and the context:\n- When users are requesting a sample of data, it is scoped to their role to avoid exposing data they shouldn't read\n- When building the telemetry data payload to report to the remote cluster, the requests are scoped to the `kibana` internal user\n"
         ],
         "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+        "lineNumber": 111,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -423,7 +461,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
+              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
               "default",
               "; helpers: ",
               "default",
@@ -987,6 +1025,8 @@
               "TransportRequestOptions",
               " | undefined): Promise<boolean>; }; profiling: ",
               "default",
+              "; project: ",
+              "default",
               "; putScript: { (this: That, params: ",
               "PutScriptRequest",
               ", options?: ",
@@ -1332,6 +1372,8 @@
               "; }"
             ],
             "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+            "lineNumber": 120,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1348,6 +1390,8 @@
               "SavedObjectsClientContract"
             ],
             "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+            "lineNumber": 125,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1374,6 +1418,8 @@
           "<TFetchReturn, ExtraOptions>"
         ],
         "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+        "lineNumber": 165,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1396,6 +1442,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+            "lineNumber": 169,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1409,6 +1457,8 @@
               "The registered type (aka name) of the collector"
             ],
             "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+            "lineNumber": 171,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1441,6 +1491,8 @@
               ") => TFetchReturn | Promise<TFetchReturn>"
             ],
             "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+            "lineNumber": 173,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1462,6 +1514,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+                "lineNumber": 139,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1480,6 +1534,8 @@
               "() => boolean | Promise<boolean>"
             ],
             "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+            "lineNumber": 185,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1498,6 +1554,8 @@
           "\nInterface to register and manage Usage Collectors through a CollectorSet"
         ],
         "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1530,6 +1588,8 @@
               "<TFetchReturn, ExtraOptions>"
             ],
             "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1551,6 +1611,8 @@
                   "<TFetchReturn, ExtraOptions>"
                 ],
                 "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+                "lineNumber": 33,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1579,6 +1641,8 @@
               "<TFetchReturn, ExtraOptions>) => void"
             ],
             "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1600,6 +1664,8 @@
                   "<TFetchReturn, ExtraOptions>"
                 ],
                 "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+                "lineNumber": 40,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1628,6 +1694,8 @@
               "<TFetchReturn, ExtraOptions> | undefined"
             ],
             "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1642,6 +1710,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+                "lineNumber": 46,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1662,6 +1732,8 @@
           "\nUsage Counter allows to keep track of any events that occur.\nBy calling {@link IUsageCounter.incrementCounter} devs can notify this\nAPI whenever the event happens."
         ],
         "path": "src/platform/plugins/shared/usage_collection/server/usage_counters/usage_counter.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1675,6 +1747,8 @@
               "\nDefines a domainId (aka a namespace) under which multiple counters can be stored"
             ],
             "path": "src/platform/plugins/shared/usage_collection/server/usage_counters/usage_counter.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1691,6 +1765,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/usage_collection/server/usage_counters/usage_counter.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1709,6 +1785,8 @@
               ") => void"
             ],
             "path": "src/platform/plugins/shared/usage_collection/server/usage_counters/usage_counter.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1725,6 +1803,8 @@
                   "IncrementCounterParams"
                 ],
                 "path": "src/platform/plugins/shared/usage_collection/server/usage_counters/usage_counter.ts",
+                "lineNumber": 39,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1756,6 +1836,8 @@
           "AbstractCounter"
         ],
         "path": "src/platform/plugins/shared/usage_collection/server/usage_counters/saved_objects.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1769,6 +1851,8 @@
               "Number of times the event has occurred"
             ],
             "path": "src/platform/plugins/shared/usage_collection/server/usage_counters/saved_objects.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1791,6 +1875,8 @@
           "\"boolean\" | \"keyword\" | \"text\" | \"date\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"double\""
         ],
         "path": "node_modules/@elastic/ebt/client/src/schema/types.d.ts",
+        "lineNumber": 7,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1824,6 +1910,8 @@
           ") => TReturn | Promise<TReturn>"
         ],
         "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+        "lineNumber": 132,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1845,6 +1933,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+            "lineNumber": 139,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1880,6 +1970,8 @@
           "<TFetchReturn, ExtraOptions>; } & ExtraOptions"
         ],
         "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+        "lineNumber": 142,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1892,6 +1984,8 @@
         "label": "IncrementCounterParams",
         "description": [],
         "path": "src/platform/plugins/shared/usage_collection/server/usage_counters/index.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1913,6 +2007,8 @@
           "<Required<Base>[Key], RequireMeta>; }"
         ],
         "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+        "lineNumber": 100,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1930,6 +2026,8 @@
           "\"usage-counter\""
         ],
         "path": "src/platform/plugins/shared/usage_collection/server/usage_counters/saved_objects.ts",
+        "lineNumber": 34,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1979,6 +2077,8 @@
           "<TFetchReturn, {}>; }, \"schema\">>"
         ],
         "path": "src/platform/plugins/shared/usage_collection/server/collector/usage_collector.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2005,6 +2105,8 @@
           ">"
         ],
         "path": "src/platform/plugins/shared/usage_collection/server/usage_counters/saved_objects.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2032,6 +2134,8 @@
         "UsageCountersServiceSetup"
       ],
       "path": "src/platform/plugins/shared/usage_collection/server/plugin.ts",
+      "lineNumber": 25,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",
@@ -2050,6 +2154,8 @@
         "UsageCountersServiceStart"
       ],
       "path": "src/platform/plugins/shared/usage_collection/server/plugin.ts",
+      "lineNumber": 28,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",

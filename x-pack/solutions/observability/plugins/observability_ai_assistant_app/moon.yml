@@ -92,7 +92,8 @@ dependsOn:
   - '@kbn/utility-types-jest'
   - '@kbn/zod'
   - '@kbn/connector-schemas'
-  - '@kbn/onechat-plugin'
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/object-utils'
 tags:
   - plugin
   - prod
