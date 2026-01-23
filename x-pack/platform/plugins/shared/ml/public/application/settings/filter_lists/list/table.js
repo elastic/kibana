@@ -218,7 +218,7 @@ export function FilterListsTable({
             sorting={sorting}
             selection={tableSelection}
             tableCaption={i18n.translate('xpack.ml.settings.filterLists.tableCaption', {
-              defaultMessage: 'Machine learning filter lists',
+              defaultMessage: 'Filter lists',
             })}
             data-test-subj="mlFilterListsTable"
             rowProps={(item) => ({
