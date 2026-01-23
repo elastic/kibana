@@ -31,9 +31,9 @@ import {
 const FORMAT_DATE_LITERAL_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/;
 // Prometheus duration format (one or more number+unit segments).
 const FORMAT_STEP_DURATION_REGEX = /^([0-9]+(ms|s|m|h|d|w|y))+$/;
-/* Catches split step values like "step= 1 m" which the parser drops from params. */
+// Catches split step values like "step= 1 m" which the parser drops from params.
 const STEP_WITH_SPACES_REGEX = /\bstep\s*=\s*\d+\s+[a-z]+/i;
-/* Strips the leading PROMQL keyword from the raw command text. */
+// Strips the leading PROMQL keyword from the raw command text.
 const PROMQL_LEADING_KEYWORD_REGEX = new RegExp(`^\\s*${PROMQL_KEYWORD}\\s*`, 'i');
 // Detects a named query assignment: name = <rhs>.
 const PROMQL_QUERY_ASSIGNMENT_REGEX = new RegExp(`^\\s*(${IDENTIFIER_PATTERN})\\s*=\\s*(.+)$`);
@@ -50,6 +50,7 @@ export const validate = (
   const queryText = getPromqlQueryText(command);
   const paramValues = collectPromqlParamValues(command, queryText);
   const usedParams = new Set(paramValues.keys());
+
   for (const param of getUsedPromqlParamNames(command.text)) {
     usedParams.add(param);
   }
@@ -158,7 +159,6 @@ export const validate = (
     }
   }
 
-  // Query presence check (ignore "fake" query that is actually a trailing param assignment).
   const trimmedQueryText = queryText.trim();
   const tailQueryText = getPromqlQueryTail(command);
   const hasQuery = [trimmedQueryText, tailQueryText].some(
@@ -175,9 +175,8 @@ export const validate = (
     });
   }
 
-  // Check for named query assignments requiring parentheses.
-  // Use tailQueryText as fallback when AST query field is empty (parser limitations).
-  const queryToCheckForParens = trimmedQueryText || tailQueryText;
+  // Check parens requirement: col0=(query) not col0=query
+  const queryToCheckForParens = tailQueryText;
   const assignmentMatch = queryToCheckForParens
     ? queryToCheckForParens.match(PROMQL_QUERY_ASSIGNMENT_REGEX)
     : null;
@@ -262,10 +261,23 @@ function collectPromqlParamValues(
   return values;
 }
 
-/* Extracts the PROMQL query text from the command node (handles parser variations). */
+/*
+ * Extracts the PromQL query text from the AST.
+ *
+ * Examples of what this function returns:
+ *   PROMQL (rate(x[5m]))           → "rate(x[5m])"
+ *   PROMQL rate(x[5m])             → "rate(x[5m])"
+ *   PROMQL col0=(rate(x[5m]))      → "" (assignment case, use getPromqlQueryTail instead)
+ */
 function getPromqlQueryText(command: ESQLAstPromqlCommand): string {
   if (command.query?.text) {
     return command.query.text;
+  }
+
+  const queryNode = command.query as { type?: string; child?: { text?: string } } | undefined;
+
+  if (queryNode?.type === 'parens' && queryNode.child?.text) {
+    return queryNode.child.text;
   }
 
   const args = (command as { args?: Array<{ type?: string; text?: string }> }).args;
@@ -291,14 +303,19 @@ function getPromqlParamsMap(command: ESQLAstPromqlCommand) {
     : undefined;
 }
 
-/* Removes the PROMQL keyword and leading params to isolate the actual query text. */
+/*
+ * Text-based extraction of the query portion from command.text.
+ * Used for the parens check and when getPromqlQueryText can't extract from AST.
+ *
+ * Example: "PROMQL step=5m col0=(rate(x[5m]))" → "col0=(rate(x[5m]))"
+ */
 function getPromqlQueryTail(command: ESQLAstPromqlCommand): string {
   let rest = command.text.replace(PROMQL_LEADING_KEYWORD_REGEX, '');
   const params = getPromqlParamsMap(command);
 
   if (params && params.type === 'map') {
     for (const entry of params.entries) {
-      /* Consume whitespace and an optional comma separator before the next param. */
+      // Consume whitespace and an optional comma separator before the next param.
       rest = rest.trimStart();
 
       if (rest.startsWith(',')) {
