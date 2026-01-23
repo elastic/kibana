@@ -123,7 +123,10 @@ const prepareLayers = (
       'date' in (xAccessor?.params || {}),
       'interval' in (xAccessor?.params || {})
     ),
-    splitAccessors: splitAccessors ? splitAccessors.map(prepareVisDimension) : undefined,
+    splitAccessors:
+      splitAccessors && splitAccessors.length > 0
+        ? splitAccessors.map(prepareVisDimension)
+        : undefined,
     markSizeAccessor:
       markSizeAccessor && !isBar ? prepareVisDimension(markSizeAccessor) : undefined,
     palette: palette ? preparePalette(palette) : undefined,
