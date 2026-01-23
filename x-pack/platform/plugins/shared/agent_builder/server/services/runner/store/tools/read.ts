@@ -9,59 +9,59 @@ import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/agent-builder-common';
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
-import type { VirtualFileSystem } from '../virtual_filesystem';
+import {
+  estimateTokens,
+  truncateTokens,
+} from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
+import type { IFileSystemStore } from '../store';
 
 const schema = z.object({
   path: z.string().describe('Path of the file to read'),
-  version: z
-    .number()
-    .optional()
-    .describe('Version of the file to read. If not specified, latest version is read.'),
-  fullContent: z
+  raw: z
     .boolean()
     .optional()
     .default(false)
     .describe(
-      'Return full content of the file. Should only be used if accessing the full content is mandatory'
+      'If true, will return the full, raw content of the file. Only use when context was already accessed, redacted, and you need to access the full version'
     ),
 });
 
+const SAFEGUARD_TOKEN_COUNT = 10_000;
+
 export const readTool = ({
-  vfs,
+  fsStore,
 }: {
-  vfs: VirtualFileSystem;
+  fsStore: IFileSystemStore;
 }): BuiltinToolDefinition<typeof schema> => {
   return {
-    id: 'platform.store.read',
-    description: `Read an entry in the artifact store`,
+    id: 'platform.fs.read',
+    description: `Read an entry from the filesystem`,
     type: ToolType.builtin,
     schema,
     tags: ['store'],
-    handler: async ({ path, version, fullContent }, context) => {
-      // TODO: handle version
-
-      const entry = await vfs.get(path);
-
+    handler: async ({ path, raw }, context) => {
+      const entry = await fsStore.read(path);
       if (!entry) {
         return {
           results: [createErrorResult(`Entry '${path}' not found`)],
         };
       }
 
-      if (entry.type === 'dir') {
-        return {
-          results: [createErrorResult(`Entry '${path}' is a directory, not a file`)],
-        };
+      let content: string | object;
+      let truncated = false;
+      if (raw) {
+        content = entry.content.raw;
+      } else {
+        content = entry.content.plain_text ?? JSON.stringify(entry.content.raw, undefined, 2);
+        const tokenCount = estimateTokens(content);
+        if (tokenCount > SAFEGUARD_TOKEN_COUNT) {
+          content = truncateTokens(content, SAFEGUARD_TOKEN_COUNT);
+          truncated = true;
+        }
       }
 
-      const content = entry.content;
-      if (!fullContent) {
-        // TODO: truncate
-      }
-
-      // TODO
       return {
-        results: [createOtherResult({ path, content })],
+        results: [createOtherResult({ path, content, truncated })],
       };
     },
   };

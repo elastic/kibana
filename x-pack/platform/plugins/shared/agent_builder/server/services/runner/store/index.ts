@@ -6,3 +6,4 @@
  */
 
 export { createStore } from './create_store';
+export type { DirEntry, FileEntry, FsEntry } from './filesystem';
