@@ -16,7 +16,7 @@ import {
   EuiPopover,
   EuiSpacer,
 } from '@elastic/eui';
-import { useGetRuleTagsQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query';
+import { useGetRuleTagsQuery } from 'x-pack/platform/packages/shared/response-ops/rules-apis/hooks/use_get_rule_tags_query';
 import { useKibana } from '../../../../common';
 
 export interface RuleTagFilterProps {

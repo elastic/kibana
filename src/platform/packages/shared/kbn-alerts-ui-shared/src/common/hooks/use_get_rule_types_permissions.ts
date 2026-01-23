@@ -17,7 +17,7 @@ import type {
   RuleTypeIndexWithDescriptions,
   RuleTypeWithDescription,
 } from '@kbn/triggers-actions-ui-types';
-import { useGetRuleTypesQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_rule_types_query';
+import { useGetRuleTypesQuery } from 'x-pack/platform/packages/shared/response-ops/rules-apis/hooks/use_get_rule_types_query';
 import { i18n } from '@kbn/i18n';
 import { ALERTS_FEATURE_ID } from '../constants';
 

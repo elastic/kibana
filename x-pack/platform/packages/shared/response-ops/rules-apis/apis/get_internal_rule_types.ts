@@ -1,22 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import type { HttpStart } from '@kbn/core-http-browser';
 import type { AsApiContract, RewriteRequestCase } from '@kbn/actions-types';
 import type { RuleType } from '@kbn/triggers-actions-ui-types';
-import { BASE_ALERTING_API_PATH } from '../constants';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { RuleTypeSolution } from '@kbn/alerting-types';
+import { INTERNAL_BASE_ALERTING_API_PATH } from '../constants';
 
-const rewriteResponse = (results: Array<AsApiContract<RuleType>>): RuleType[] => {
+export interface InternalRuleType extends RuleType<string, string> {
+  solution: RuleTypeSolution;
+}
+
+const rewriteResponse = (results: Array<AsApiContract<InternalRuleType>>): InternalRuleType[] => {
   return results.map((item) => rewriteRuleType(item));
 };
 
-const rewriteRuleType: RewriteRequestCase<RuleType> = ({
+const rewriteRuleType: RewriteRequestCase<InternalRuleType> = ({
   enabled_in_license: enabledInLicense,
   recovery_action_group: recoveryActionGroup,
   action_groups: actionGroups,
@@ -32,7 +35,7 @@ const rewriteRuleType: RewriteRequestCase<RuleType> = ({
   auto_recover_alerts: autoRecoverAlerts,
   is_internally_managed: isInternallyManaged,
   ...rest
-}: AsApiContract<RuleType>) => ({
+}: AsApiContract<InternalRuleType>) => ({
   enabledInLicense,
   recoveryActionGroup,
   actionGroups,
@@ -50,9 +53,9 @@ const rewriteRuleType: RewriteRequestCase<RuleType> = ({
   ...rest,
 });
 
-export async function getRuleTypes({ http }: { http: HttpStart }): Promise<RuleType[]> {
-  const res = await http.get<Array<AsApiContract<RuleType<string, string>>>>(
-    `${BASE_ALERTING_API_PATH}/rule_types`
+export async function getInternalRuleTypes({ http }: { http: HttpStart }) {
+  const res = await http.get<Array<AsApiContract<InternalRuleType>>>(
+    `${INTERNAL_BASE_ALERTING_API_PATH}/_rule_types`
   );
   return rewriteResponse(res);
 }
