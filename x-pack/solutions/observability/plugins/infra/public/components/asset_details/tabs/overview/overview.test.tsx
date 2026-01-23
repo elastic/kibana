@@ -20,12 +20,6 @@ import { useMetadataStateContext } from '../../hooks/use_metadata_state';
 import { useDataViewsContext } from '../../hooks/use_data_views';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
-import {
-  HOST1_NAME,
-  DATE_WITH_HOSTS_DATA_FROM,
-  DATE_WITH_HOSTS_DATA_TO,
-  BASE_DEFAULT_INVENTORY_VIEW_ATTRIBUTES,
-} from '../../../../../test/scout/ui/fixtures/constants';
 
 jest.mock('../../../../hooks/use_kibana');
 jest.mock('../../../../hooks/use_reload_request_time');
@@ -59,6 +53,41 @@ const useAssetDetailsRenderPropsContextMock =
   >;
 
 // Test constants
+const HOST1_NAME = 'host-1';
+const DATE_WITH_HOSTS_DATA_FROM = '2023-03-28T18:20:00.000Z';
+const DATE_WITH_HOSTS_DATA_TO = '2023-03-28T18:21:00.000Z';
+
+// Should match CreateInventoryViewAttributesRequestPayload but without the nodeType, name, time, and metric properties
+const BASE_DEFAULT_INVENTORY_VIEW_ATTRIBUTES = {
+  groupBy: [],
+  view: 'map',
+  customOptions: [],
+  customMetrics: [],
+  boundsOverride: {
+    max: 1,
+    min: 0,
+  },
+  autoBounds: true,
+  accountId: '',
+  region: '',
+  legend: {
+    palette: 'cool',
+    reverseColors: false,
+    steps: 10,
+  },
+  sort: {
+    by: 'name',
+    direction: 'desc',
+  },
+  timelineOpen: false,
+  autoReload: false,
+  filterQuery: {
+    expression: '',
+    kind: 'kuery',
+  },
+  preferredSchema: 'ecs',
+};
+
 const TEST_HOST_TYPE = 'host';
 const TEST_ENTITY_TYPE = 'host';
 const TEST_RENDER_MODE = 'page';
