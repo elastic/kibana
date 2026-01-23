@@ -253,7 +253,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   return (
     <rootProfileState.AppWrapper>
       <ChartPortalsRenderer runtimeStateManager={runtimeStateManager}>
-        <DiscoverTopNavMenuProvider>
+        <DiscoverTopNavMenuProvider customizationContext={customizationContext}>
           <>
             <h1 className="euiScreenReaderOnly" data-test-subj="discoverSavedSearchTitle">
               {persistedDiscoverSession?.title

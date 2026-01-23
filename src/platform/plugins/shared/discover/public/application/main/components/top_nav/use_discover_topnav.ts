@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { useIsWithinBreakpoints } from '@elastic/eui';
 import { useDiscoverCustomization } from '../../../../customizations';
@@ -45,15 +45,6 @@ export const useDiscoverTopNav = ({
       }),
     [stateContainer, services, isMobile]
   );
-
-  useEffect(() => {
-    if (stateContainer.customizationContext.displayMode === 'standalone') {
-      services.chrome.setBreadcrumbsBadges(topNavBadges);
-      return () => {
-        services.chrome.setBreadcrumbsBadges([]);
-      };
-    }
-  }, [topNavBadges, services.chrome, stateContainer.customizationContext.displayMode]);
 
   const dataView = useCurrentDataView();
   const adHocDataViews = useAdHocDataViews();
