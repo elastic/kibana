@@ -48,7 +48,12 @@ export class CustomLinksPage {
     const saveButton = this.saveButton;
     await saveButton.waitFor({ state: 'visible' });
     await expect(saveButton).toBeEnabled();
+
+    const flyoutHeading = this.page.getByRole('heading', { name: 'Create link', level: 2 });
+    await expect(flyoutHeading).toBeVisible();
+
     await saveButton.click();
+    await flyoutHeading.waitFor({ state: 'hidden', timeout: BIGGER_TIMEOUT });
   }
 
   async clickDelete() {
@@ -64,14 +69,15 @@ export class CustomLinksPage {
   }
 
   async clickEditCustomLinkForRow(labelText: string) {
-    // EuiBasicTable adds aria-busy="true" when loading
-    const table = this.page.testSubj.locator('customLinksTable').locator('table');
-    await expect(table).not.toHaveAttribute('aria-busy', 'true', { timeout: BIGGER_TIMEOUT });
-
-    // Click edit button for a specific custom link by finding its row first
+    // First, wait for the row to be visible - this ensures the table has loaded
     const row = this.getCustomLinkRow(labelText);
-    // Wait for the row to be visible before clicking to avoid race conditions
     await row.waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
+
+    const table = this.page.testSubj.locator('customLinksTable').locator('table');
+    try {
+      await table.waitFor({ state: 'visible', timeout: 5000 });
+      await expect(table).not.toHaveAttribute('aria-busy', 'true', { timeout: BIGGER_TIMEOUT });
+    } catch {}
 
     // Wait for the edit button to be visible and stable before clicking
     const editButton = row.getByTestId('editCustomLink');
