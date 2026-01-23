@@ -173,15 +173,16 @@ export const simulateProcessing = async ({
   const otelStream = isOtelStream(stream);
 
   /* 4. Extract all the documents reports and processor metrics from the simulations */
-  const { docReports, processorsMetrics, finalDetectedFieldNames } = computePipelineSimulationResult(
-    pipelineSimulationResult.simulation,
-    ingestSimulationResult.simulation,
-    simulationData.docs,
-    params.body.processing,
-    Streams.WiredStream.Definition.is(stream),
-    otelStream,
-    streamFields
-  );
+  const { docReports, processorsMetrics, finalDetectedFieldNames } =
+    computePipelineSimulationResult(
+      pipelineSimulationResult.simulation,
+      ingestSimulationResult.simulation,
+      simulationData.docs,
+      params.body.processing,
+      Streams.WiredStream.Definition.is(stream),
+      otelStream,
+      streamFields
+    );
 
   /* 5. Extract valid detected fields with intelligent type suggestions from fieldsMetadataService */
   const detectedFields = await computeDetectedFields(
