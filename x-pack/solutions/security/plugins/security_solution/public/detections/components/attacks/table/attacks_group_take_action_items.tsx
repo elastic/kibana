@@ -16,6 +16,7 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useAttackAssigneesContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_assignees_context_menu_items';
 import { useAttackWorkflowStatusContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_workflow_status_context_menu_items';
 import type { AttackWithWorkflowStatus } from '../../../hooks/attacks/bulk_actions/types';
+import { useAttackTagsContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_tags_context_menu_items';
 
 interface AttacksGroupTakeActionItemsProps {
   attack: AttackDiscoveryAlert;
@@ -64,17 +65,31 @@ export function AttacksGroupTakeActionItems({ attack }: AttacksGroupTakeActionIt
     onSuccess,
   });
 
+  const attacksWithTags = useMemo(() => {
+    return [
+      {
+        attackId: attack.id,
+        relatedAlertIds: attack?.alertIds ?? [],
+        tags: attack.tags,
+      },
+    ];
+  }, [attack]);
+  const { items: tagsItems, panels: tagsPanels } = useAttackTagsContextMenuItems({
+    attacksWithTags,
+    onSuccess,
+  });
+
   const defaultPanel: EuiContextMenuPanelDescriptor = useMemo(
     () => ({
       id: 0,
-      items: [...workflowItems, ...assignItems],
+      items: [...workflowItems, ...assignItems, ...tagsItems],
     }),
-    [workflowItems, assignItems]
+    [workflowItems, assignItems, tagsItems]
   );
 
   const panels: EuiContextMenuPanelDescriptor[] = useMemo(
-    () => [defaultPanel, ...workflowPanels, ...assignPanels],
-    [workflowPanels, assignPanels, defaultPanel]
+    () => [defaultPanel, ...workflowPanels, ...assignPanels, ...tagsPanels],
+    [workflowPanels, assignPanels, defaultPanel, tagsPanels]
   );
 
   return <EuiContextMenu initialPanelId={defaultPanel.id} panels={panels} />;
