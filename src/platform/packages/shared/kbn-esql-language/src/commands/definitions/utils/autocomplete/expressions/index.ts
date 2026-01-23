@@ -8,5 +8,5 @@
  */
 
 export { suggestForExpression } from './suggestion_engine';
-export { getPosition as getExpressionPosition, type ExpressionPosition } from './position';
+export type { ExpressionPosition } from './types';
 export { buildExpressionFunctionParameterContext } from './utils';
