@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EditDashboard, UnlinkDashboard, LinkDashboard } from '.';
+import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useTabSwitcherContext } from '../../../hooks/use_tab_switcher';
 import * as fetchCustomDashboards from '../../../hooks/use_fetch_custom_dashboards';
 import * as hooks from '../../../hooks/use_saved_objects_permissions';
@@ -21,6 +22,7 @@ const TEST_CURRENT_DASHBOARD = {
 } as const;
 
 jest.mock('../../../hooks/use_tab_switcher');
+jest.mock('../../../../../hooks/use_kibana');
 
 const tabSwitcherContextHookMock = useTabSwitcherContext as jest.MockedFunction<
   typeof useTabSwitcherContext
@@ -36,6 +38,17 @@ describe('Custom Dashboards Actions', () => {
 
   beforeAll(() => {
     mockUseSearchSession();
+
+    useKibanaContextForPlugin.mockReturnValue({
+      services: {
+        notifications: {
+          toasts: {
+            addSuccess: jest.fn(),
+            addError: jest.fn(),
+          },
+        },
+      },
+    });
   });
 
   afterAll(() => {
