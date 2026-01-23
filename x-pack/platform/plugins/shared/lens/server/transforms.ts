@@ -12,8 +12,8 @@ import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 import { schema } from '@kbn/config-schema';
 import { getLensTransforms } from '../common/transforms';
 import type { LensTransforms } from '../common/transforms/types';
-import { lensItemDataSchema } from './content_management';
 import { isByRefLensConfig } from '../common/transforms/utils';
+import { lensItemDataSchemaV2 } from './content_management';
 
 export const getLensServerTransforms = (
   builder: LensConfigBuilder,
@@ -29,7 +29,7 @@ export const getLensServerTransforms = (
   };
 };
 
-const legacyPanelAttributesSchema = lensItemDataSchema.extends({
+const legacyPanelAttributesSchema = lensItemDataSchemaV2.extends({
   // Why are these added to the panel attributes?
   // See https://github.com/elastic/kibana/issues/250115
   id: schema.maybe(schema.string()),
