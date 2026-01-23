@@ -71,6 +71,7 @@ describe('observability_ai_assistant usage collector', () => {
     it('returns usage data with all metrics', async () => {
       mockEsClient.search.mockResolvedValueOnce({
         aggregations: {
+          any_entries: { value: 15 },
           global_entries: { unique_users: { value: 10 } },
           global_entries_user_created: { unique_users: { value: 8 } },
           global_entries_assistant_created: { unique_users: { value: 2 } },
@@ -93,6 +94,7 @@ describe('observability_ai_assistant usage collector', () => {
 
       expect(result).toEqual({
         knowledge_base: {
+          users_with_any_entries: 15,
           users_with_global_entries: 10,
           users_with_global_entries_user_created: 8,
           users_with_global_entries_assistant_created: 2,
@@ -112,6 +114,7 @@ describe('observability_ai_assistant usage collector', () => {
     it('queries both KB and conversations indices', async () => {
       mockEsClient.search.mockResolvedValue({
         aggregations: {
+          any_entries: { value: 0 },
           global_entries: { unique_users: { value: 0 } },
           global_entries_user_created: { unique_users: { value: 0 } },
           global_entries_assistant_created: { unique_users: { value: 0 } },
@@ -156,6 +159,7 @@ describe('observability_ai_assistant usage collector', () => {
 
       expect(result).toEqual({
         knowledge_base: {
+          users_with_any_entries: 0,
           users_with_global_entries: 0,
           users_with_global_entries_user_created: 0,
           users_with_global_entries_assistant_created: 0,
