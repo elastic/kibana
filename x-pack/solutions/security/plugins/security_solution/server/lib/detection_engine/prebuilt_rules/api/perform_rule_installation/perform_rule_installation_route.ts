@@ -20,6 +20,8 @@ import {
 import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 import { performRuleInstallationHandler } from './perform_rule_installation_handler';
 
+// Test comment
+
 export const performRuleInstallationRoute = (
   router: SecuritySolutionPluginRouter,
   logger: Logger
