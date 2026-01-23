@@ -214,7 +214,6 @@ const addIndexAliases = async ({
           index: concreteIndexName,
           alias: aadIndexAliasName,
           is_write_index: false,
-          is_hidden: true,
         },
       };
     }),
