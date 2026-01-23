@@ -31,6 +31,7 @@ export { logLevelPalette } from './semantic';
 const darkKbnPalettes = new KbnPalettes(
   [
     elasticPalette,
+    severityPalette,
     kibana7Palette,
     kibana4Palette,
     getNeutralPalette(true),
@@ -44,7 +45,6 @@ const darkKbnPalettes = new KbnPalettes(
     warmPalette,
     elasticClassicPalette,
     compareToPalette,
-    severityPalette,
   ],
   elasticPalette
 );
