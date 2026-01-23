@@ -509,6 +509,109 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
+    describe('Temporary field handling', () => {
+      it('should not surface temporary fields as modified in top-level detected_fields', async () => {
+        // This test verifies that fields created by one processor and removed by another
+        // are not surfaced in the top-level detected_fields, as they don't exist in the
+        // final output document.
+        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+          processing: {
+            steps: [
+              basicDissectProcessor, // Creates attributes.parsed_timestamp, attributes.parsed_level, attributes.parsed_message
+              {
+                customIdentifier: 'remove-temp',
+                action: 'manual_ingest_pipeline' as const,
+                processors: [
+                  {
+                    remove: {
+                      field: 'attributes.parsed_timestamp', // Remove a field created by previous processor
+                      ignore_missing: true,
+                    },
+                  },
+                ],
+                where: { always: {} },
+              },
+            ],
+          },
+          documents: [createTestDocument()],
+        });
+
+        expect(response.body.documents_metrics.parsed_rate).to.be(1);
+
+        const { detected_fields, value } = response.body.documents[0];
+
+        // Per-document detected_fields still shows per-processor changes (for processor metrics)
+        expect(detected_fields).to.eql([
+          { processor_id: 'dissect-uuid', name: 'attributes.parsed_level' },
+          { processor_id: 'dissect-uuid', name: 'attributes.parsed_message' },
+          { processor_id: 'dissect-uuid', name: 'attributes.parsed_timestamp' },
+        ]);
+
+        // Verify the field was indeed removed from the final output
+        expect(value).to.not.have.property('attributes.parsed_timestamp');
+        expect(value).to.have.property('attributes.parsed_level');
+        expect(value).to.have.property('attributes.parsed_message');
+
+        // Top-level detected_fields should NOT include the temporary field
+        // that was removed before the final output
+        const topLevelFieldNames = response.body.detected_fields.map(
+          (f: { name: string }) => f.name
+        );
+        expect(topLevelFieldNames).to.not.contain('attributes.parsed_timestamp');
+        expect(topLevelFieldNames).to.contain('attributes.parsed_level');
+        expect(topLevelFieldNames).to.contain('attributes.parsed_message');
+      });
+
+      it('should not surface temporary ECS fields as modified', async () => {
+        // This test verifies that temporary ECS fields (which would normally be
+        // auto-configured as mapped) are not surfaced if they don't exist in the final output
+        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+          processing: {
+            steps: [
+              {
+                customIdentifier: 'add-ecs',
+                action: 'manual_ingest_pipeline' as const,
+                processors: [
+                  {
+                    set: {
+                      field: 'host.name', // Known ECS field
+                      value: 'temp-host',
+                    },
+                  },
+                ],
+                where: { always: {} },
+              },
+              {
+                customIdentifier: 'remove-ecs',
+                action: 'manual_ingest_pipeline' as const,
+                processors: [
+                  {
+                    remove: {
+                      field: 'host.name', // Remove the ECS field
+                      ignore_missing: true,
+                    },
+                  },
+                ],
+                where: { always: {} },
+              },
+            ],
+          },
+          documents: [createTestDocument()],
+        });
+
+        expect(response.body.documents_metrics.parsed_rate).to.be(1);
+
+        // Verify the field was removed from the final output
+        expect(response.body.documents[0].value).to.not.have.property('host.name');
+
+        // Top-level detected_fields should NOT include the temporary ECS field
+        const topLevelFieldNames = response.body.detected_fields.map(
+          (f: { name: string }) => f.name
+        );
+        expect(topLevelFieldNames).to.not.contain('host.name');
+      });
+    });
+
     describe('Geo point field handling', () => {
       const CLASSIC_STREAM_NAME = 'logs-geotest-default';
 

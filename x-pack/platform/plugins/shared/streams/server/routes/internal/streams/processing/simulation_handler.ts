@@ -173,7 +173,7 @@ export const simulateProcessing = async ({
   const otelStream = isOtelStream(stream);
 
   /* 4. Extract all the documents reports and processor metrics from the simulations */
-  const { docReports, processorsMetrics } = computePipelineSimulationResult(
+  const { docReports, processorsMetrics, finalDetectedFieldNames } = computePipelineSimulationResult(
     pipelineSimulationResult.simulation,
     ingestSimulationResult.simulation,
     simulationData.docs,
@@ -185,7 +185,7 @@ export const simulateProcessing = async ({
 
   /* 5. Extract valid detected fields with intelligent type suggestions from fieldsMetadataService */
   const detectedFields = await computeDetectedFields(
-    processorsMetrics,
+    finalDetectedFieldNames,
     params,
     streamFields,
     streamIndexFieldCaps,
@@ -512,6 +512,7 @@ const computePipelineSimulationResult = (
 ): {
   docReports: SimulationDocReport[];
   processorsMetrics: Record<string, ProcessorMetrics>;
+  finalDetectedFieldNames: string[];
 } => {
   const transpiledProcessors = transpileIngestPipeline(processing, {
     ignoreMalformed: true,
@@ -583,7 +584,11 @@ const computePipelineSimulationResult = (
     sampleSize: docReports.length,
   });
 
-  return { docReports, processorsMetrics };
+  // Compute the final detected fields by diffing the initial input with the final output
+  // This ensures temporary fields that are created and then removed don't appear as modified
+  const finalDetectedFieldNames = computeFinalDetectedFields(sampleDocs, docReports);
+
+  return { docReports, processorsMetrics, finalDetectedFieldNames };
 };
 
 const initProcessorMetricsMap = (
@@ -644,6 +649,32 @@ const extractProcessorMetrics = ({
       dropped_rate: parseFloat(droppedRate.toFixed(3)),
     };
   });
+};
+
+/**
+ * Computes the final detected fields by comparing the initial input documents
+ * with the final simulated output documents. This ensures that temporary fields
+ * (created by one processor and removed by another) are not surfaced as modified.
+ */
+const computeFinalDetectedFields = (
+  sampleDocs: Array<{ _source: FlattenRecord }>,
+  docReports: SimulationDocReport[]
+): string[] => {
+  const allFinalFields = new Set<string>();
+
+  docReports.forEach((report, id) => {
+    const initialDoc = flattenObjectNestedLast(sampleDocs[id]._source);
+    const finalDoc = report.value;
+
+    const { added, updated } = calculateObjectDiff(initialDoc, finalDoc);
+
+    const addedFields = Object.keys(flattenObjectNestedLast(added));
+    const updatedFields = Object.keys(flattenObjectNestedLast(updated));
+
+    [...addedFields, ...updatedFields].forEach((field) => allFinalFields.add(field));
+  });
+
+  return Array.from(allFinalFields).sort();
 };
 
 const getDocumentStatus = (
@@ -916,17 +947,17 @@ const getStreamFields = async (
 
 /**
  * In case new fields have been detected, we want to tell the user which ones are inherited and already mapped.
+ * Uses the final detected field names (diff between initial input and final output) to ensure
+ * temporary fields that are created and then removed don't appear as modified.
  */
 const computeDetectedFields = async (
-  processorsMetrics: Record<string, ProcessorMetrics>,
+  finalDetectedFieldNames: string[],
   params: ProcessingSimulationParams,
   streamFields: FieldDefinition,
   streamFieldCaps: FieldCapsResponse['fields'],
   fieldsMetadataClient: IFieldsMetadataClient
 ): Promise<DetectedField[]> => {
-  const fields = Object.values(processorsMetrics).flatMap((metrics) => metrics.detected_fields);
-
-  const uniqueFields = uniq(fields);
+  const uniqueFields = finalDetectedFieldNames;
 
   // Short-circuit to avoid fetching streams fields if none is detected
   if (isEmpty(uniqueFields)) {
