@@ -19,6 +19,9 @@ project:
     sourceRoot: src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data
 dependsOn:
   - '@kbn/content-management-table-list-view-common'
+  - '@kbn/content-management-tags'
+  - '@kbn/content-management-favorites-public'
+  - '@kbn/content-management-user-profiles'
   - '@kbn/user-profile-components'
 tags:
   - shared-browser
