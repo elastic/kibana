@@ -430,6 +430,133 @@ function extractFunctionSections(content: string): Array<{ name: string; content
   }));
 }
 
+/**
+ * Extract brief description from raw section content
+ */
+function extractBriefDescription(rawContent: string): string {
+  // Extract description section
+  const descriptionRegex = /\*\*Description\*\*\s*\n([\s\S]*?)(?=\*\*|\n\n\n|$)/;
+  const descriptionMatch = rawContent.match(descriptionRegex);
+
+  if (descriptionMatch && descriptionMatch[1]) {
+    let description = descriptionMatch[1].trim();
+    // Take first sentence or first line, whichever is shorter
+    const firstSentence = description.split(/[.!?]\s+/)[0];
+    const firstLine = description.split('\n')[0];
+    description = firstSentence.length < firstLine.length ? firstSentence : firstLine;
+    // Clean up: remove markdown formatting, limit length
+    description = description
+      .replace(/\*\*/g, '')
+      .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
+      .replace(/`([^`]+)`/g, '$1')
+      .trim();
+    // Limit to reasonable length (first 200 chars)
+    if (description.length > 200) {
+      description = description.substring(0, 197) + '...';
+    }
+    return description;
+  }
+  return '';
+}
+
+/**
+ * Map markdown file name to syntax.txt section name
+ */
+function getSyntaxSectionName(mdFileName: string): string {
+  // Remove .md extension and convert to section format
+  const baseName = mdFileName.replace(/\.md$/, '');
+  // Map specific file names to section names
+  const sectionMap: { [key: string]: string } = {
+    'aggregation-functions': 'aggregation-functions',
+    'time-series-aggregation-functions': 'time-series-aggregation-functions',
+    'conditional-functions-and-expressions': 'conditional-functions',
+    'date-time-functions': 'date-time-functions',
+    'dense-vector-functions': 'dense-vector-functions',
+    'grouping-functions': 'grouping-functions',
+    'ip-functions': 'ip-functions',
+    'math-functions': 'math-functions',
+    'mv-functions': 'mv-functions',
+    operators: 'operators',
+    'search-functions': 'search-functions',
+    'spatial-functions': 'spatial-functions',
+    'string-functions': 'string-functions',
+    'type-conversion-functions': 'type-conversion-functions',
+  };
+  return sectionMap[baseName] || baseName;
+}
+
+/**
+ * Update syntax.txt file with function descriptions
+ */
+async function updateSyntaxFile(
+  syntaxFilePath: string,
+  mdFileName: string,
+  functionDescriptions: Array<{ name: string; description: string }>,
+  log: any
+): Promise<void> {
+  try {
+    // Read current syntax.txt
+    let syntaxContent = await Fs.readFile(syntaxFilePath, 'utf-8');
+    const sectionName = getSyntaxSectionName(mdFileName);
+    const sectionTag = `<${sectionName}>`;
+    const closingTag = `</${sectionName}>`;
+
+    // Find the section
+    const sectionStart = syntaxContent.indexOf(sectionTag);
+
+    if (sectionStart === -1) {
+      log.warning(
+        `Section ${sectionTag} not found in syntax.txt, skipping update for ${mdFileName}`
+      );
+      return;
+    }
+
+    // Find the LAST occurrence of the closing tag (in case there are duplicates)
+    const sectionEnd = syntaxContent.lastIndexOf(closingTag);
+    if (sectionEnd === -1) {
+      log.warning(
+        `Closing tag ${closingTag} not found in syntax.txt, skipping update for ${mdFileName}`
+      );
+      return;
+    }
+
+    // Extract content before and after the section
+    const beforeSection = syntaxContent.substring(0, sectionStart + sectionTag.length);
+    // Find the position after the LAST closing tag
+    const afterSectionStart = sectionEnd + closingTag.length;
+    let afterSection = syntaxContent.substring(afterSectionStart);
+
+    // Strip any leading closing tags from afterSection (in case of duplicates)
+    while (afterSection.trim().startsWith(closingTag)) {
+      afterSection = afterSection.substring(afterSection.indexOf(closingTag) + closingTag.length);
+    }
+
+    // Build new section content
+    const sectionEntries = functionDescriptions
+      .filter((f) => f.description) // Only include functions with descriptions
+      .map((f) => {
+        const functionName = f.name.toUpperCase();
+        return `        ${functionName}: ${f.description}`;
+      })
+      .join('\n');
+
+    // Reconstruct syntax.txt with updated section
+    syntaxContent = `${beforeSection}\n${sectionEntries}\n    ${closingTag}${afterSection}`;
+
+    // Write updated content
+    await Fs.writeFile(syntaxFilePath, syntaxContent, 'utf-8');
+    log.info(
+      `Updated syntax.txt section ${sectionTag} with ${functionDescriptions.length} functions from ${mdFileName}`
+    );
+  } catch (error) {
+    log.warning(
+      `Failed to update syntax.txt for ${mdFileName}: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+}
+
 interface FileToWrite {
   name: string;
   content: string;
@@ -578,6 +705,10 @@ yargs(process.argv.slice(2))
             'functions-operators'
           );
           const outDir = Path.join(__dirname, '../../server/tasks/nl_to_esql/esql_docs');
+          const syntaxFilePath = Path.join(
+            __dirname,
+            '../../server/tasks/nl_to_esql/prompts/syntax.txt'
+          );
 
           try {
             // Check if zip file already exists
@@ -875,6 +1006,14 @@ yargs(process.argv.slice(2))
                     }
                     cache[cacheKey].outputFiles = outputFileNames;
                     cacheUpdated = true;
+
+                    // Extract descriptions and update syntax.txt
+                    const functionDescriptions = rawSections.map((section) => ({
+                      name: section.name,
+                      description: extractBriefDescription(section.rawContent),
+                    }));
+
+                    await updateSyntaxFile(syntaxFilePath, mdFile, functionDescriptions, log);
                   } else {
                     log.warning(`No function sections found in ${mdFile}, skipping`);
                   }
