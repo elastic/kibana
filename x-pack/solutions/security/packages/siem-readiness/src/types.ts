@@ -37,3 +37,29 @@ export interface SiemReadinessPackageInfo {
   version: string;
   status: string;
 }
+
+export interface CaseItem {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  severity: string;
+  tags: string[];
+  owner: string;
+  created_at: string;
+  updated_at: string;
+  assignees: Array<{
+    uid: string;
+  }>;
+  category: string | null;
+}
+
+export interface CasesSearchResponse {
+  cases: CaseItem[];
+  page: number;
+  per_page: number;
+  total: number;
+  countOpenCases: number;
+  countClosedCases: number;
+  countInProgressCases: number;
+}
