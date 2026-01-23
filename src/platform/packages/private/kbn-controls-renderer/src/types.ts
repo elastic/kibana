@@ -52,3 +52,7 @@ export type ControlsRendererParentApi = Pick<
 export interface HasPrependWrapperRef {
   prependWrapperRef: React.RefObject<HTMLDivElement>;
 }
+
+export interface PublishesFocusedPanelId {
+  focusedPanelId$: BehaviorSubject<string | undefined>;
+}

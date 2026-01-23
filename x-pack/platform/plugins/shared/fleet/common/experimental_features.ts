@@ -25,6 +25,7 @@ const _allowedExperimentalValues = {
   enableEsqlViewInstall: false,
   enableSloTemplates: false,
   newBrowseIntegrationUx: false, // When enabled integrations, browse integrations page will use the new UX.
+  enableVersionSpecificPolicies: false, // When enabled, version specific policies will be created when packages use agent version conditions
 };
 
 /**

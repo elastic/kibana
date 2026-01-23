@@ -12,7 +12,7 @@ import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 import { schema } from '@kbn/config-schema';
 import { getLensTransforms } from '../common/transforms';
 import type { LensTransforms } from '../common/transforms/types';
-import { lensItemDataSchema } from './content_management';
+import { lensItemDataSchemaV2 } from './content_management';
 
 export const getLensServerTransforms = (
   builder: LensConfigBuilder,
@@ -28,7 +28,7 @@ export const getLensServerTransforms = (
   };
 };
 
-const legacyPanelAttributesSchema = lensItemDataSchema.extends({
+const legacyPanelAttributesSchema = lensItemDataSchemaV2.extends({
   type: schema.maybe(schema.literal('lens')), // why is this added to the panel state?
 });
 

@@ -22,20 +22,10 @@ interface AppMenuBarProps {
   // TODO: get rid of observable
   appMenuActions$?: Observable<MountPoint | undefined> | null;
   appMenu$: Observable<AppMenuConfig | undefined>;
-
-  /**
-   * Whether the menu bar should be fixed (sticky) or static.
-   */
-  isFixed?: boolean;
 }
 
 const useAppMenuBarStyles = (euiTheme: UseEuiTheme['euiTheme']) =>
   useMemo(() => {
-    const zIndex =
-      typeof euiTheme.levels.header === 'number'
-        ? euiTheme.levels.header - 10 // Appear right below the header
-        : euiTheme.levels.header;
-
     // Root bar styles
     const root = {
       display: 'flex',
@@ -45,22 +35,13 @@ const useAppMenuBarStyles = (euiTheme: UseEuiTheme['euiTheme']) =>
       background: euiTheme.colors.backgroundBasePlain,
       borderBottom: euiTheme.border.thin,
       marginBottom: `-${euiTheme.border.width.thin}`,
-    };
-    // Styles for fixed (sticky) mode
-    const fixed = {
-      zIndex,
-      position: 'sticky', // Fixates the element in the viewport
-      top: 'var(--euiFixedHeadersOffset, 0)', // Below primary fixed EuiHeader
-      height: `var(--kbnProjectHeaderAppActionMenuHeight, ${euiTheme.size.xxxl})`,
-    };
-    // Styles for static mode
-    const staticStyle = {
       height: '100%',
     };
-    return { root, fixed, static: staticStyle };
+
+    return { root };
   }, [euiTheme]);
 
-export const AppMenuBar = ({ appMenuActions$, appMenu$, isFixed = true }: AppMenuBarProps) => {
+export const AppMenuBar = ({ appMenuActions$, appMenu$ }: AppMenuBarProps) => {
   const headerActionMenuMounter = useHeaderActionMenuMounter(appMenuActions$ ?? EMPTY);
   const { euiTheme } = useEuiTheme();
 
@@ -80,7 +61,7 @@ export const AppMenuBar = ({ appMenuActions$, appMenu$, isFixed = true }: AppMen
     <div
       className="header__actionMenu"
       data-test-subj="kibanaProjectHeaderActionMenu"
-      css={[styles.root, isFixed ? styles.fixed : styles.static]}
+      css={styles.root}
     >
       {hasBetaConfig ? (
         <HeaderAppMenu config={appMenu$} />

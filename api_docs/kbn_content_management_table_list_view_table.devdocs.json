@@ -24,7 +24,7 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/content-management/table_list_view_table/src/services.tsx",
-        "lineNumber": 199,
+        "lineNumber": 202,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -48,7 +48,7 @@
               ">"
             ],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/services.tsx",
-            "lineNumber": 201,
+            "lineNumber": 204,
             "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
@@ -236,10 +236,8 @@
               "Observable",
               "<string | undefined>; navigateToUrl: (url: string) => void | Promise<void>; }; notifications: { toasts: { addDanger: (notifyArgs: { title: ",
               "MountPoint",
-              "<HTMLElement>; text?: string | undefined; }) => void; }; }; http: { basePath: { prepend: (path: string) => string; }; }; overlays: { openFlyout(mount: ",
-              "MountPoint",
-              "<HTMLElement>, options?: ",
-              "OverlayFlyoutOpenOptions",
+              "<HTMLElement>; text?: string | undefined; }) => void; }; }; http: { basePath: { prepend: (path: string) => string; }; }; overlays: { openSystemFlyout(content: React.ReactElement<any, string | React.JSXElementConstructor<any>>, options?: ",
+              "OverlaySystemFlyoutOpenOptions",
               " | undefined): ",
               "OverlayRef",
               "; }; userProfile: { bulkGet: <D extends ",
@@ -295,7 +293,7 @@
               "[]) => string[]; }; } | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/services.tsx",
-            "lineNumber": 137,
+            "lineNumber": 140,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -321,7 +319,7 @@
               ") => React.JSX.Element"
             ],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/services.tsx",
-            "lineNumber": 176,
+            "lineNumber": 179,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -371,7 +369,7 @@
               "<void> | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/services.tsx",
-            "lineNumber": 179,
+            "lineNumber": 182,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -396,7 +394,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/services.tsx",
-            "lineNumber": 184,
+            "lineNumber": 187,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -414,7 +412,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/table_list_view_table/src/services.tsx",
-            "lineNumber": 189,
+            "lineNumber": 192,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

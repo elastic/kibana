@@ -70,7 +70,7 @@ export const singleMetricDatatableAttributes: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 1,
+  version: 2,
   references: [
     {
       type: 'index-pattern',
@@ -196,7 +196,7 @@ export const singleMetricRowSplitDatatableAttributes: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 1,
+  version: 2,
   references: [
     {
       type: 'index-pattern',
@@ -386,7 +386,7 @@ export const multiMetricRowSplitDatatableAttributes: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 1,
+  version: 2,
   references: [
     {
       type: 'index-pattern',
@@ -697,7 +697,7 @@ export const fullConfigDatatableAttributes: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 1,
+  version: 2,
   references: [
     {
       type: 'index-pattern',
@@ -854,7 +854,7 @@ export const sortedByTransposedMetricColumnDatatableAttributes: LensAttributes =
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 1,
+  version: 2,
   references: [
     {
       type: 'index-pattern',
@@ -1011,7 +1011,7 @@ export const sortedByRowDatatableAttributes: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 1,
+  version: 2,
   references: [
     {
       type: 'index-pattern',

@@ -15,7 +15,7 @@
         "label": "settingsServiceMock",
         "description": [],
         "path": "src/core/packages/ui-settings/browser-mocks/src/settings_service.mock.ts",
-        "lineNumber": 27,
+        "lineNumber": 30,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -31,7 +31,7 @@
               "() => any"
             ],
             "path": "src/core/packages/ui-settings/browser-mocks/src/settings_service.mock.ts",
-            "lineNumber": 28,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -53,7 +53,7 @@
               ">; }"
             ],
             "path": "src/core/packages/ui-settings/browser-mocks/src/settings_service.mock.ts",
-            "lineNumber": 29,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -75,7 +75,7 @@
               ">; }"
             ],
             "path": "src/core/packages/ui-settings/browser-mocks/src/settings_service.mock.ts",
-            "lineNumber": 30,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

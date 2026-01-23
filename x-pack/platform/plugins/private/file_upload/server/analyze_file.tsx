@@ -33,7 +33,8 @@ export async function analyzeFile(
   logger: Logger,
   data: InputData,
   overrides: InputOverrides,
-  includePreview: boolean
+  includePreview: boolean,
+  abortSignal?: AbortSignal
 ): Promise<AnalysisResult> {
   overrides.explain = overrides.explain === undefined ? 'true' : overrides.explain;
   const results = await client.asInternalUser.textStructure.findStructure(
@@ -42,7 +43,7 @@ export async function analyzeFile(
       ecs_compatibility: 'v1',
       ...overrides,
     },
-    { maxRetries: 0 }
+    { maxRetries: 0, signal: abortSignal }
   );
 
   const { hasOverrides, reducedOverrides } = formatOverrides(overrides);

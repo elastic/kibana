@@ -3255,9 +3255,11 @@
           },
           "; } & { profilingSetup: ",
           "ProfilingSetupFixture",
+          "; } & { sloData: ",
+          "SloDataFixture",
           "; }>"
         ],
-        "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/global_hooks/profiling_setup.ts",
+        "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/global_hook/index.ts",
         "lineNumber": 13,
         "columnNumber": 14,
         "deprecated": false,

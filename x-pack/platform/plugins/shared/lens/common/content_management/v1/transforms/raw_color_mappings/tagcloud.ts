@@ -34,7 +34,7 @@ export const convertTagcloudToRawColorMappings = (
 
   if (!hasDeprecatedColorMapping) return state as TagcloudState;
 
-  const columnMeta = state.tagAccessor ? getColumnMeta?.(state.layerId, state.tagAccessor) : null;
+  const columnMeta = state.tagAccessor ? getColumnMeta?.(state.layerId, [state.tagAccessor]) : null;
 
   return {
     ...state,

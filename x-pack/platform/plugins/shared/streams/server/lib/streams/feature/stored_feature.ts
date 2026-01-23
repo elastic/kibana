@@ -21,6 +21,7 @@ import {
   FEATURE_TYPE,
   FEATURE_TAGS,
   FEATURE_META,
+  FEATURE_EXPIRES_AT,
 } from './fields';
 
 export interface StoredFeature {
@@ -36,6 +37,7 @@ export interface StoredFeature {
   [FEATURE_LAST_SEEN]: string;
   [FEATURE_TAGS]: string[];
   [FEATURE_META]: Record<string, any>;
+  [FEATURE_EXPIRES_AT]?: string;
 }
 
 export const storedFeatureSchema: z.Schema<StoredFeature> = z.object({
@@ -51,4 +53,5 @@ export const storedFeatureSchema: z.Schema<StoredFeature> = z.object({
   [FEATURE_LAST_SEEN]: z.string(),
   [FEATURE_TAGS]: z.array(z.string()),
   [FEATURE_META]: z.record(z.string(), z.any()),
+  [FEATURE_EXPIRES_AT]: z.string().optional(),
 });
