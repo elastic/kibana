@@ -10,15 +10,11 @@ import { globalSetupHook } from '@kbn/scout';
 globalSetupHook('Setup environment for Streams API tests', async ({ kbnClient, esClient, log }) => {
   log.debug('[setup] Enabling Streams...');
 
-  try {
-    await kbnClient.request({
-      method: 'POST',
-      path: '/api/streams/_enable',
-    });
-    log.debug('[setup] Streams enabled successfully');
-  } catch (error) {
-    log.debug(`[setup] Streams may already be enabled: ${error}`);
-  }
+  await kbnClient.request({
+    method: 'POST',
+    path: '/api/streams/_enable',
+  });
+  log.debug('[setup] Streams enabled successfully');
 
   // Index a document to the 'logs' stream to initialize the data stream
   // This is required for the processing simulation API to work, as it needs
@@ -35,6 +31,8 @@ globalSetupHook('Setup environment for Streams API tests', async ({ kbnClient, e
     });
     log.debug('[setup] Test document indexed successfully');
   } catch (error) {
-    log.debug(`[setup] Failed to index test document: ${error}`);
+    throw new Error(
+      `[setup] Failed to index test document - this is required for processing simulation tests: ${error}`
+    );
   }
 });

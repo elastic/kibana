@@ -97,6 +97,9 @@ test.describe(
 
       // Click the "Add field" button
       await page.getByTestId('streamsAppContentAddFieldButton').click();
+      await expect(
+        page.getByTestId('streamsAppSchemaEditorAddFieldFlyoutCloseButton')
+      ).toBeVisible();
 
       // Add an Otel field that should have type recommendation (IP type)
       const ecsFieldName = 'resource.attributes.host.ip';

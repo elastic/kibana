@@ -39,21 +39,12 @@ test.describe(
 
       // Navigate to Discover and wait for the page to be ready
       await pageObjects.discover.goto();
-
-      // Wait for the data view switcher to be available before selecting
-      await page.locator('[data-test-subj*="dataView-switch-link"]').waitFor({
-        state: 'visible',
-        timeout: 30_000,
-      });
+      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.discover.waitForHistogramRendered();
 
       await pageObjects.discover.selectDataView('All logs');
       await pageObjects.discover.waitUntilSearchingHasFinished();
-
-      // Wait for the data grid to be fully rendered
-      await page.locator('[data-test-subj="discoverDocTable"]').waitFor({
-        state: 'visible',
-        timeout: 30_000,
-      });
+      await pageObjects.discover.waitForDocTableRendered();
 
       // Expand the first document row to open the flyout
       const expandButton = page.locator(
@@ -64,8 +55,8 @@ test.describe(
       await expandButton.waitFor({ state: 'visible', timeout: 30_000 });
       await expandButton.click();
 
-      // Verify the doc viewer flyout is open (with extended timeout for flyout animation)
-      await expect(page.getByTestId('kbnDocViewer')).toBeVisible({ timeout: 30_000 });
+      // Verify the doc viewer flyout is open
+      await pageObjects.discover.waitForDocViewerFlyoutOpen();
 
       // Click on the Log Overview tab
       const logOverviewTab = page.getByTestId('docViewerTab-doc_view_logs_overview');
@@ -98,12 +89,8 @@ test.describe(
 
       // Navigate to Discover and wait for the page to be ready
       await pageObjects.discover.goto();
-
-      // Wait for the data view switcher to be available before selecting
-      await page.locator('[data-test-subj*="dataView-switch-link"]').waitFor({
-        state: 'visible',
-        timeout: 30_000,
-      });
+      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.discover.waitForHistogramRendered();
 
       await pageObjects.discover.selectDataView('All logs');
       await pageObjects.discover.waitUntilSearchingHasFinished();
@@ -113,12 +100,7 @@ test.describe(
 
       // Wait for ES|QL results to load
       await pageObjects.discover.waitUntilSearchingHasFinished();
-
-      // Wait for the data grid to be fully rendered
-      await page.locator('[data-test-subj="discoverDocTable"]').waitFor({
-        state: 'visible',
-        timeout: 30_000,
-      });
+      await pageObjects.discover.waitForDocTableRendered();
 
       // Expand the first document row to open the flyout
       const expandButton = page.locator(
@@ -129,8 +111,8 @@ test.describe(
       await expandButton.waitFor({ state: 'visible', timeout: 30_000 });
       await expandButton.click();
 
-      // Verify the doc viewer flyout is open (with extended timeout for flyout animation)
-      await expect(page.getByTestId('kbnDocViewer')).toBeVisible({ timeout: 30_000 });
+      // Verify the doc viewer flyout is open
+      await pageObjects.discover.waitForDocViewerFlyoutOpen();
 
       // Click on the Log Overview tab
       const logOverviewTab = page.getByTestId('docViewerTab-doc_view_logs_overview');
