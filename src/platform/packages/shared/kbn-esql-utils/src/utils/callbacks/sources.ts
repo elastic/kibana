@@ -77,7 +77,6 @@ const getIntegrations = async (
         title: source.title,
         dataStreams: source.dataStreams,
         type: SOURCES_TYPES.INTEGRATION,
-        integrationName: source.title,
       })) ?? []
   );
 };

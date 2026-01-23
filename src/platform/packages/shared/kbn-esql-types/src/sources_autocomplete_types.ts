@@ -22,7 +22,6 @@ export interface ESQLSourceResult {
   title?: string;
   dataStreams?: Array<{ name: string; title?: string }>;
   type?: string;
-  integrationName?: string;
 }
 
 // response from resolve_index api

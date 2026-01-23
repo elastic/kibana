@@ -125,7 +125,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
         data: {
           type: source.type,
           typeKey: getSourceTypeKey(source.type),
-          integrationName: source.integrationName,
+          title: source.title,
         },
       }));
     },
@@ -187,7 +187,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
     items.forEach((item) => {
       const typeKey = getTypeKey(item);
       if (typeKey === 'integration') {
-        const integrationName = (item as any).integrationName;
+        const integrationName = item.title;
         if (integrationName) {
           integrationSet.add(integrationName);
         }
@@ -202,7 +202,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
     items.forEach((item) => {
       const typeKey = getTypeKey(item);
       if (typeKey === 'integration') {
-        const integrationName = (item as any).integrationName;
+        const integrationName = item.title;
         if (integrationName) {
           counts.set(integrationName, (counts.get(integrationName) ?? 0) + 1);
         }
@@ -245,7 +245,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
         const typeKey = option.data?.typeKey as string | undefined;
 
         if (typeKey === 'integration' && availableIntegrations.length > 0) {
-          const integrationName = option.data?.integrationName as string | undefined;
+          const integrationName = option.data?.title as string | undefined;
           return integrationName && selectedIntegrations.includes(integrationName);
         }
 
