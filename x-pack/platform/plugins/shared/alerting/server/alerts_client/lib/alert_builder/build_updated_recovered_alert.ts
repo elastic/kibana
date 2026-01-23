@@ -19,9 +19,9 @@ import {
 } from '@kbn/rule-data-utils';
 import type { RawAlertInstance } from '@kbn/alerting-state-types';
 import { get, omit } from 'lodash';
-import type { RuleAlertData } from '../../types';
-import type { AlertRule } from '../types';
-import { removeUnflattenedFieldsFromAlert, replaceRefreshableAlertFields } from './format_alert';
+import type { RuleAlertData } from '../../../types';
+import type { AlertRule } from '../../types';
+import { removeUnflattenedFieldsFromAlert, replaceRefreshableAlertFields } from '../format_alert';
 
 interface BuildUpdatedRecoveredAlertOpts<AlertData extends RuleAlertData> {
   alert: Alert & AlertData;

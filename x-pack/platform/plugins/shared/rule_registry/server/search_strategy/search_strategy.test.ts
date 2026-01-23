@@ -666,6 +666,15 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
                 ],
               },
             },
+            Object {
+              "bool": Object {
+                "must_not": Object {
+                  "term": Object {
+                    "kibana.alert.status": "delayed",
+                  },
+                },
+              },
+            },
           ],
         },
       }
@@ -709,6 +718,15 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
                 "kibana.alert.rule.rule_type_id": Array [
                   "siem.esqlRule",
                 ],
+              },
+            },
+            Object {
+              "bool": Object {
+                "must_not": Object {
+                  "term": Object {
+                    "kibana.alert.status": "delayed",
+                  },
+                },
               },
             },
           ],
