@@ -78,10 +78,10 @@ export function fromTermsLensApiToLensState(
             excludeIsRegex: excludes?.as_regex ?? false,
           }
         : {}),
-      ...(other_bucket != null ? { otherBucket: true } : {}),
+      ...(other_bucket != null ? { otherBucket: true } : { otherBucket: false }),
       ...(other_bucket?.include_documents_without_field != null
         ? { missingBucket: other_bucket?.include_documents_without_field }
-        : {}),
+        : { missingBucket: false }),
       orderBy: orderByConfig,
       orderDirection,
       ...(rank_by?.type === 'custom'
@@ -173,7 +173,7 @@ export function fromTermsLensStateToAPI(
           },
         }
       : {}),
-    ...(column.params.otherBucket != null
+    ...(column.params.otherBucket
       ? {
           other_bucket: {
             include_documents_without_field: Boolean(column.params.missingBucket),
