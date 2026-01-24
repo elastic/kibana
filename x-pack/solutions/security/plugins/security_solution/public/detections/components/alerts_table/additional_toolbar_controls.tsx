@@ -13,6 +13,7 @@ import {
   dataTableActions,
   dataTableSelectors,
   tableDefaults,
+  TableId,
 } from '@kbn/securitysolution-data-table';
 import { useGetGroupSelectorStateless } from '@kbn/grouping/src/hooks/use_get_group_selector';
 import { getTelemetryEvent } from '@kbn/grouping/src/telemetry/const';
@@ -119,6 +120,8 @@ const AdditionalToolbarControlsComponent = ({
     setShowOnlyThreatIndicatorAlerts,
   } = useDataTableFilters(tableType);
 
+  const hideBuildingBlockFilter = tableType === TableId.alertsOnRuleDetailsPage;
+
   const additionalFiltersComponent = useMemo(
     () => (
       <AdditionalFiltersAction
@@ -127,9 +130,11 @@ const AdditionalToolbarControlsComponent = ({
         showBuildingBlockAlerts={showBuildingBlockAlerts}
         onShowOnlyThreatIndicatorAlertsChanged={setShowOnlyThreatIndicatorAlerts}
         showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
+        hideBuildingBlockFilter={hideBuildingBlockFilter}
       />
     ),
     [
+      hideBuildingBlockFilter,
       showBuildingBlockAlerts,
       setShowBuildingBlockAlerts,
       showOnlyThreatIndicatorAlerts,

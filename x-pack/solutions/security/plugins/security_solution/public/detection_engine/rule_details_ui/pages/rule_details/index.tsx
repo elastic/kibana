@@ -76,7 +76,6 @@ import { StepRuleActionsReadOnly } from '../../../rule_creation/components/step_
 import {
   buildAlertsFilter,
   buildAlertStatusFilter,
-  buildShowBuildingBlockFilter,
   buildThreatMatchFilter,
 } from '../../../../detections/components/alerts_table/default_config';
 import { RuleSwitch } from '../../../common/components/rule_switch';
@@ -319,8 +318,7 @@ export const RuleDetailsPage = connector(
             ruleActionsData: null,
           };
 
-    const { showBuildingBlockAlerts, setShowBuildingBlockAlerts, showOnlyThreatIndicatorAlerts } =
-      useDataTableFilters(TableId.alertsOnRuleDetailsPage);
+    const { showOnlyThreatIndicatorAlerts } = useDataTableFilters(TableId.alertsOnRuleDetailsPage);
 
     const mlCapabilities = useMlCapabilities();
     const { globalFullScreen } = useGlobalFullScreen();
@@ -406,24 +404,15 @@ export const RuleDetailsPage = connector(
       [clearEventsLoading, clearEventsDeleted, clearSelected, setFilterGroup]
     );
 
-    const isBuildingBlockRule = rule?.building_block_type != null;
-    // Set showBuildingBlockAlerts if rule is a Building Block Rule otherwise we won't show alerts
-    useEffect(() => {
-      setShowBuildingBlockAlerts(isBuildingBlockRule);
-    }, [isBuildingBlockRule, setShowBuildingBlockAlerts]);
-
     const ruleRuleId = rule?.rule_id ?? '';
-    // Use isBuildingBlockRule directly to ensure correct filter on first render
-    // (useEffect runs after render, so showBuildingBlockAlerts may not be updated yet)
-    const shouldShowBuildingBlockAlerts = isBuildingBlockRule || showBuildingBlockAlerts;
+
     const alertDefaultFilters = useMemo(
       () => [
         ...buildAlertsFilter(ruleRuleId ?? ''),
-        ...buildShowBuildingBlockFilter(shouldShowBuildingBlockAlerts),
         ...buildAlertStatusFilter(filterGroup),
         ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
       ],
-      [ruleRuleId, shouldShowBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filterGroup]
+      [ruleRuleId, showOnlyThreatIndicatorAlerts, filterGroup]
     );
 
     const alertMergedFilters = useMemo(

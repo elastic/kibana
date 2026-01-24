@@ -35,30 +35,34 @@ export const AdditionalFiltersAction = ({
   showBuildingBlockAlerts,
   onShowOnlyThreatIndicatorAlertsChanged,
   showOnlyThreatIndicatorAlerts,
+  hideBuildingBlockFilter = false,
 }: {
   areEventsLoading: boolean;
   onShowBuildingBlockAlertsChanged: (showBuildingBlockAlerts: boolean) => void;
   showBuildingBlockAlerts: boolean;
   onShowOnlyThreatIndicatorAlertsChanged: (showOnlyThreatIndicatorAlerts: boolean) => void;
   showOnlyThreatIndicatorAlerts: boolean;
+  hideBuildingBlockFilter?: boolean;
 }) => {
   const UtilityBarAdditionalFiltersContent = useCallback(
     (closePopover: () => void) => (
       <UtilityBarFlexGroup direction="column" gutterSize="none">
-        <BuildingBlockContainer>
-          <EuiCheckbox
-            id="showBuildingBlockAlertsCheckbox"
-            aria-label="showBuildingBlockAlerts"
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              closePopover();
-              onShowBuildingBlockAlertsChanged(e.target.checked);
-            }}
-            checked={showBuildingBlockAlerts}
-            color="text"
-            data-test-subj="showBuildingBlockAlertsCheckbox"
-            label={i18n.ADDITIONAL_FILTERS_ACTIONS_SHOW_BUILDING_BLOCK}
-          />
-        </BuildingBlockContainer>
+        {!hideBuildingBlockFilter && (
+          <BuildingBlockContainer>
+            <EuiCheckbox
+              id="showBuildingBlockAlertsCheckbox"
+              aria-label="showBuildingBlockAlerts"
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                closePopover();
+                onShowBuildingBlockAlertsChanged(e.target.checked);
+              }}
+              checked={showBuildingBlockAlerts}
+              color="text"
+              data-test-subj="showBuildingBlockAlertsCheckbox"
+              label={i18n.ADDITIONAL_FILTERS_ACTIONS_SHOW_BUILDING_BLOCK}
+            />
+          </BuildingBlockContainer>
+        )}
         <AdditionalFiltersItem>
           <EuiCheckbox
             id="showOnlyThreatIndicatorAlertsCheckbox"
@@ -76,6 +80,7 @@ export const AdditionalFiltersAction = ({
       </UtilityBarFlexGroup>
     ),
     [
+      hideBuildingBlockFilter,
       onShowBuildingBlockAlertsChanged,
       onShowOnlyThreatIndicatorAlertsChanged,
       showBuildingBlockAlerts,
@@ -84,7 +89,8 @@ export const AdditionalFiltersAction = ({
   );
 
   const additionalFilterCount =
-    (showBuildingBlockAlerts ? 1 : 0) + (showOnlyThreatIndicatorAlerts ? 1 : 0);
+    (!hideBuildingBlockFilter && showBuildingBlockAlerts ? 1 : 0) +
+    (showOnlyThreatIndicatorAlerts ? 1 : 0);
 
   return (
     <UtilityBarAction
