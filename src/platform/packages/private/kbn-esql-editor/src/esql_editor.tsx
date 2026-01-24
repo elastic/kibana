@@ -691,8 +691,7 @@ const ESQLEditorInternal = function ESQLEditor({
         // Only fetch recommendations if there's an active solutionId and a non-empty query
         // Otherwise the route will return an error
         if (activeSolutionId && queryString.trim() !== '') {
-          const extensions = await getEditorExtensions(core.http, queryString, activeSolutionId);
-          return extensions;
+          return await getEditorExtensions(core.http, queryString, activeSolutionId);
         }
         return {
           recommendedQueries: [],
