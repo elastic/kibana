@@ -141,7 +141,7 @@ const ESQLEditorInternal = function ESQLEditor({
   mergeExternalMessages,
   hideQuickSearch,
   openVisorOnSourceCommands,
-  enableEsqlResourceBrowser = false,
+  enableResourceBrowser = false,
 }: ESQLEditorPropsInternal) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -1104,13 +1104,13 @@ const ESQLEditorInternal = function ESQLEditor({
       ESQLLang.getSuggestionProvider?.({
         ...esqlCallbacks,
         telemetry: telemetryCallbacks,
-        onOpenIndicesBrowser: enableEsqlResourceBrowser ? openIndicesBrowser : undefined,
-        onOpenFieldsBrowser: enableEsqlResourceBrowser ? openFieldsBrowser : undefined,
+        onOpenIndicesBrowser: enableResourceBrowser ? openIndicesBrowser : undefined,
+        onOpenFieldsBrowser: enableResourceBrowser ? openFieldsBrowser : undefined,
       }),
     [
       esqlCallbacks,
       telemetryCallbacks,
-      enableEsqlResourceBrowser,
+      enableResourceBrowser,
       openIndicesBrowser,
       openFieldsBrowser,
     ]
@@ -1374,10 +1374,10 @@ const ESQLEditorInternal = function ESQLEditor({
                       esqlVariables: esqlVariablesRef,
                       controlsContext: controlsContextRef,
                       openTimePickerPopover,
-                      openIndicesBrowser: enableEsqlResourceBrowser
+                      openIndicesBrowser: enableResourceBrowser
                         ? openIndicesBrowser
                         : undefined,
-                      openFieldsBrowser: enableEsqlResourceBrowser ? openFieldsBrowser : undefined,
+                      openFieldsBrowser: enableResourceBrowser ? openFieldsBrowser : undefined,
                     });
 
                     // Add editor key bindings
@@ -1588,7 +1588,7 @@ const ESQLEditorInternal = function ESQLEditor({
         document.body
       )}
 
-      {enableEsqlResourceBrowser && (
+      {enableResourceBrowser && (
         <>
           <DataSourceBrowser
             isOpen={isDataSourceBrowserOpen}

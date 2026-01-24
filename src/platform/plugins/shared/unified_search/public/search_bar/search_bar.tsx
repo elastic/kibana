@@ -169,7 +169,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   /**
    * Enable indices browser suggestion in ESQL editor (for Discover context)
    */
-  enableEsqlResourceBrowser?: boolean;
+  enableResourceBrowser?: boolean;
 }
 
 export type SearchBarProps<QT extends Query | AggregateQuery = Query> = SearchBarOwnProps<QT> &
@@ -808,7 +808,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           esqlVariablesConfig={this.props.esqlVariablesConfig}
           onOpenQueryInNewTab={this.props.onOpenQueryInNewTab}
           useBackgroundSearchButton={this.props.useBackgroundSearchButton}
-          enableEsqlResourceBrowser={this.props.enableEsqlResourceBrowser}
+          enableResourceBrowser={this.props.enableResourceBrowser}
         />
       </div>
     );

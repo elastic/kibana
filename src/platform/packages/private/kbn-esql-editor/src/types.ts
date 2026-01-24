@@ -99,8 +99,8 @@ export interface ESQLEditorProps {
   formLabel?: string;
   /** Whether to merge external messages into the editor's message list */
   mergeExternalMessages?: boolean;
-  /** Enable indices browser suggestion (for Discover context) */
-  enableEsqlResourceBrowser?: boolean;
+  /** Enable resource browser */
+  enableResourceBrowser?: boolean;
   /** If true, automatically opens the quick search visor when the editor initially loads with a query that has only source commands */
   openVisorOnSourceCommands?: boolean;
 }
