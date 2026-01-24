@@ -31,28 +31,31 @@ import { BrowserPopoverWrapper } from './browser_popover_wrapper';
 const FILTER_PANEL_WIDTH = 250; // Width in pixels for the filter panel lists
 const FILTER_PANEL_MAX_HEIGHT = 250; // Maximum height in pixels for the filter panel lists
 
+const SOURCE_TYPE_PATTERNS = [
+  { patterns: ['lookup'], label: 'Lookup Index', key: 'lookup_index' },
+  { patterns: ['integration'], label: 'Integration', key: 'integration' },
+  { patterns: ['timeseries', 'time series'], label: 'Timeseries', key: 'timeseries' },
+  { patterns: ['stream', 'data stream'], label: 'Stream', key: 'stream' },
+  { patterns: ['alias'], label: 'Alias', key: 'alias' },
+  { patterns: ['index'], label: 'Index', key: 'index' },
+] as const;
+
 const getSourceTypeLabel = (type?: string): string => {
   if (!type) return 'Index';
   const typeLower = type.toLowerCase();
-  if (typeLower.includes('index') && !typeLower.includes('lookup')) return 'Index';
-  if (typeLower.includes('alias')) return 'Alias';
-  if (typeLower.includes('stream') || typeLower.includes('data stream')) return 'Stream';
-  if (typeLower.includes('integration')) return 'Integration';
-  if (typeLower.includes('lookup')) return 'Lookup Index';
-  if (typeLower.includes('timeseries') || typeLower.includes('time series')) return 'Timeseries';
-  return type;
+  const match = SOURCE_TYPE_PATTERNS.find(({ patterns }) =>
+    patterns.some((pattern) => typeLower.includes(pattern))
+  );
+  return match?.label ?? type;
 };
 
 const getSourceTypeKey = (type?: string): string => {
   if (!type) return 'index';
   const typeLower = type.toLowerCase();
-  if (typeLower.includes('index') && !typeLower.includes('lookup')) return 'index';
-  if (typeLower.includes('alias')) return 'alias';
-  if (typeLower.includes('stream') || typeLower.includes('data stream')) return 'stream';
-  if (typeLower.includes('integration')) return 'integration';
-  if (typeLower.includes('lookup')) return 'lookup_index';
-  if (typeLower.includes('timeseries') || typeLower.includes('time series')) return 'timeseries';
-  return 'index';
+  const match = SOURCE_TYPE_PATTERNS.find(({ patterns }) =>
+    patterns.some((pattern) => typeLower.includes(pattern))
+  );
+  return match?.key ?? 'index';
 };
 
 interface DataSourceBrowserProps {
