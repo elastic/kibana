@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IconType } from '@elastic/eui';
 import { EuiButton, EuiContextMenu, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
@@ -266,28 +265,6 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
               />
             </EuiFlexItem>
           );
-        },
-      });
-
-      customizations.set({
-        id: 'flyout',
-        size: 650,
-        title: 'Example custom flyout',
-        actions: {
-          getActionItems: () =>
-            Array.from({ length: 5 }, (__, i) => {
-              const index = i + 1;
-              return {
-                id: `action-item-${index}`,
-                enabled: true,
-                label: `Action ${index}`,
-                iconType: ['faceHappy', 'faceNeutral', 'faceSad', 'infinity', 'bell'].at(
-                  i
-                ) as IconType,
-                dataTestSubj: `customActionItem${index}`,
-                onClick: () => alert(index),
-              };
-            }),
         },
       });
 
