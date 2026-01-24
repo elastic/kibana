@@ -18,104 +18,10 @@ import type { ESQLColumnData } from '@kbn/esql-language/src/commands/registry/ty
 import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups';
 import { FieldIcon } from '@kbn/react-field';
 import { getEditorExtensions } from '@kbn/esql-utils';
+import { getFieldIconType } from '@kbn/field-utils/src/components/field_select/utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { BrowserPopoverWrapper } from './browser_popover_wrapper';
 import type { ESQLEditorDeps } from '../types';
-
-// Map ESQL field types to FieldIcon types (matching typeToEuiIconMap keys)
-const getFieldIconType = (type: string): string => {
-  const typeLower = type.toLowerCase();
-
-  // Date types
-  if (typeLower === 'date' || typeLower === 'date_nanos' || typeLower === 'date_range') {
-    return 'date';
-  }
-
-  // Counter types (metric counters) - map to number since counter isn't in typeToEuiIconMap
-  if (
-    typeLower === 'counter_integer' ||
-    typeLower === 'counter_long' ||
-    typeLower === 'counter_double'
-  ) {
-    return 'number';
-  }
-
-  // Histogram types
-  if (
-    typeLower === 'histogram' ||
-    typeLower === 'exponential_histogram' ||
-    typeLower === 'tdigest'
-  ) {
-    return 'histogram';
-  }
-
-  // Numeric types
-  if (
-    typeLower === 'number' ||
-    typeLower === 'long' ||
-    typeLower === 'double' ||
-    typeLower === 'integer' ||
-    typeLower === 'float' ||
-    typeLower === 'byte' ||
-    typeLower === 'short' ||
-    typeLower === 'half_float' ||
-    typeLower === 'scaled_float' ||
-    typeLower === 'unsigned_long' ||
-    typeLower === 'aggregate_metric_double'
-  ) {
-    return 'number';
-  }
-
-  // IP types
-  if (typeLower === 'ip' || typeLower === 'ip_range') {
-    return 'ip';
-  }
-
-  // Geo types
-  if (typeLower === 'geo_point' || typeLower === 'geo_shape') {
-    return 'geo_point';
-  }
-
-  // Cartesian types - map to shape
-  if (typeLower === 'cartesian_point' || typeLower === 'cartesian_shape') {
-    return 'shape';
-  }
-
-  // Keyword types
-  if (typeLower === 'keyword' || typeLower === 'constant_keyword') {
-    return 'keyword';
-  }
-
-  // Text types
-  if (
-    typeLower === 'text' ||
-    typeLower === 'string' ||
-    typeLower === 'match_only_text' ||
-    typeLower === 'wildcard' ||
-    typeLower === 'search_as_you_type' ||
-    typeLower === 'semantic_text'
-  ) {
-    return 'text';
-  }
-
-  // Vector types
-  if (typeLower === 'dense_vector') {
-    return 'dense_vector';
-  }
-
-  // Version
-  if (typeLower === 'version') {
-    return 'version';
-  }
-
-  // Boolean
-  if (typeLower === 'boolean') {
-    return 'boolean';
-  }
-
-  // Default to text for unknown types
-  return 'text';
-};
 
 const getFieldTypeLabel = (type: string): string => {
   const typeLower = type.toLowerCase();
