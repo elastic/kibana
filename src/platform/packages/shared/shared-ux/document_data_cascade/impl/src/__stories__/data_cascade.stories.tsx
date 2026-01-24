@@ -149,7 +149,7 @@ export const CascadeNestedGridImplementation: StoryObj<
     );
 
     const onCascadeGroupingChange = useCallback<
-      DataCascadeProps<MockGroupData, LeafNode>['onCascadeGroupingChange']
+      NonNullable<DataCascadeProps<MockGroupData, LeafNode>['onCascadeGroupingChange']>
     >((groupBy) => {
       // eslint-disable-next-line no-console -- Handle group by change if needed
       console.log('Group By Changed:', groupBy);
@@ -970,7 +970,7 @@ export const CascadeCustomHeaderWithHiddenRowActions: StoryObj<
     const rowHeaderTitleSlot = useRowHeaderTitleSlot();
 
     const onCascadeGroupingChange = useCallback<
-      NonNullable<DataCascadeProps<MockGroupData, LeafNode>>['onCascadeGroupingChange']
+      NonNullable<DataCascadeProps<MockGroupData, LeafNode>['onCascadeGroupingChange']>
     >((groupBy) => {
       // eslint-disable-next-line no-console -- Handle group by change if needed
       console.log('Group By Changed:', groupBy);
