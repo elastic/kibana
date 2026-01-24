@@ -9,9 +9,13 @@
 
 import type { ESQLAstComment, ESQLSingleAstItem } from '../types';
 
+interface NodeWithLocation {
+  location: { min: number; max: number };
+}
+
 export const within = (
-  inner: number | ESQLSingleAstItem,
-  outer: ESQLSingleAstItem | ESQLAstComment | undefined
+  inner: number | NodeWithLocation,
+  outer: NodeWithLocation | ESQLSingleAstItem | ESQLAstComment | undefined
 ) => {
   if (!outer?.location) {
     return false;

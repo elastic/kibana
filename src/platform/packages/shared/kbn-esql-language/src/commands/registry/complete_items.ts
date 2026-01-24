@@ -179,10 +179,11 @@ export function getPromqlParamKeySuggestions(): ISuggestionItem[] {
     withAutoSuggest({
       label: name,
       text: `${name} = `,
-      kind: 'Keyword',
+      kind: 'Value',
       detail: i18n.translate(`kbn-esql-language.esql.autocomplete.promql.${name}ParamDoc`, {
         defaultMessage: description,
       }),
+      category: SuggestionCategory.VALUE,
     })
   );
 }
@@ -194,6 +195,16 @@ export const commaCompleteItem = buildCharCompleteItem(
   }),
   { sortText: 'B', quoted: false, category: SuggestionCategory.COMMA }
 );
+
+export const promqlByCompleteItem: ISuggestionItem = withAutoSuggest({
+  label: 'by',
+  text: 'by ($0) ',
+  asSnippet: true,
+  kind: 'Reference',
+  detail: i18n.translate('kbn-esql-language.esql.autocomplete.promql.byDoc', {
+    defaultMessage: 'Group by labels',
+  }),
+});
 
 export const byCompleteItem: ISuggestionItem = withAutoSuggest({
   label: 'BY',
