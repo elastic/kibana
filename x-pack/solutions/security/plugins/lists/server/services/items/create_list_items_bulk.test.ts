@@ -45,10 +45,9 @@ describe('crete_list_item_bulk', () => {
     expect(options.esClient.bulk).not.toBeCalled();
   });
 
-  test('It should skip over a value if it is not able to add that item because it is not parsable such as an ip_range with a serializer that only matches one ip', async () => {
+  test('It should skip over a value if it is not able to add that item because it is not parsable such as an ip_range with invalid values', async () => {
     const options: CreateListItemsBulkOptions = {
       ...getCreateListItemBulkOptionsMock(),
-      serializer: '(?<value>127.0.0.1)', // this will create a regular expression which will only match 127.0.0.1 and not 127.0.0.1
       type: 'ip_range',
       value: ['127.0.0.1', '127.0.0.2'],
     };

@@ -64,10 +64,9 @@ describe('create_list_item', () => {
     expect(list).toEqual(expected);
   });
 
-  test('It returns null if an item does not match something such as an ip_range with an empty serializer', async () => {
+  test('It returns null if an item does not match something such as an ip_range with an invalid value', async () => {
     const options: CreateListItemOptions = {
       ...getCreateListItemOptionsMock(),
-      serializer: '',
       type: 'ip_range',
       value: '# some comment',
     };

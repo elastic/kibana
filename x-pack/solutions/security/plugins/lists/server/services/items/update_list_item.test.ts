@@ -50,10 +50,9 @@ describe('update_list_item', () => {
     expect(updatedListItem).toEqual(null);
   });
 
-  test('it returns null when the serializer and type such as ip_range returns nothing', async () => {
+  test('it returns null when the type such as ip_range returns nothing', async () => {
     const listItem: ListItemSchema = {
       ...getListItemResponseMock(),
-      serializer: '',
       type: 'ip_range',
       value: '127.0.0.1',
     };
