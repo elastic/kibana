@@ -435,10 +435,10 @@
           "\nA badge component to display numbers in a consistent way."
         ],
         "signature": [
-          "({ value, shortenAtExpSize, align = 'end' }: NumberBadgeProps) => React.JSX.Element"
+          "({ value, shortenAtExpSize, textAlign = 'right' }: NumberBadgeProps) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/helpers/number_badge/number_badge.tsx",
-        "lineNumber": 70,
+        "lineNumber": 66,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -448,13 +448,13 @@
             "id": "def-common.NumberBadge.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ value, shortenAtExpSize, align = 'end' }",
+            "label": "{ value, shortenAtExpSize, textAlign = 'right' }",
             "description": [],
             "signature": [
               "NumberBadgeProps"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/helpers/number_badge/number_badge.tsx",
-            "lineNumber": 73,
+            "lineNumber": 69,
             "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
@@ -488,7 +488,7 @@
           "<G>, \"getScrollElement\">"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/types.ts",
-        "lineNumber": 35,
+        "lineNumber": 47,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -504,7 +504,7 @@
               "() => number"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/types.ts",
-            "lineNumber": 41,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -522,7 +522,7 @@
               "() => number"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/types.ts",
-            "lineNumber": 42,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -546,7 +546,7 @@
           "DataCascadeImplBaseProps<G, L> & ({ customTableHeader: (props: { availableColumns: string[]; currentSelectedColumns: string[]; onGroupSelection: (groupByColumn: string[]) => void; selectedRows: string[]; }) => React.ReactNode; tableTitleSlot?: undefined; } | { customTableHeader?: undefined; tableTitleSlot: React.FC<{}>; })"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/types.ts",
-        "lineNumber": 226,
+        "lineNumber": 262,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -560,7 +560,7 @@
         "label": "DataCascadeRowCellProps",
         "description": [],
         "signature": [
-          "{ children: (args: { data: L[] | null; cellId: string; } & ",
+          "{ children: (args: { data: L[] | null; cellId: string; nodePath: string[]; } & ",
           {
             "pluginId": "@kbn/shared-ux-document-data-cascade",
             "scope": "common",
@@ -568,10 +568,10 @@
             "section": "def-common.CascadeRowCellNestedVirtualizationAnchorProps",
             "text": "CascadeRowCellNestedVirtualizationAnchorProps"
           },
-          "<G>) => React.ReactNode; onCascadeLeafNodeExpanded: (args: OnCascadeLeafNodeExpandedArgs<G>) => Promise<L[]>; }"
+          "<G>) => React.ReactNode; onCascadeLeafNodeExpanded: (args: OnCascadeLeafNodeExpandedArgs<G>) => Promise<L[]>; onCascadeLeafNodeCollapsed?: ((args: OnCascadeLeafNodeCollapsedArgs<G>) => void) | undefined; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/types.ts",
-        "lineNumber": 162,
+        "lineNumber": 197,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -587,7 +587,7 @@
         "signature": [
           "Pick<",
           "CascadeRowPrimitiveProps",
-          "<G, L>, \"enableSecondaryExpansionAction\" | \"onCascadeGroupNodeExpanded\" | \"rowHeaderTitleSlot\" | \"rowHeaderMetaSlots\" | \"rowHeaderActions\"> & { children: React.ReactElement<",
+          "<G, L>, \"enableSecondaryExpansionAction\" | \"onCascadeGroupNodeExpanded\" | \"onCascadeGroupNodeCollapsed\" | \"rowHeaderTitleSlot\" | \"rowHeaderMetaSlots\" | \"rowHeaderActions\"> & { children: React.ReactElement<",
           {
             "pluginId": "@kbn/shared-ux-document-data-cascade",
             "scope": "common",
@@ -598,7 +598,7 @@
           "<G, L>, string | React.JSXElementConstructor<any>>; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/types.ts",
-        "lineNumber": 167,
+        "lineNumber": 202,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

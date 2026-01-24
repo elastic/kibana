@@ -2980,7 +2980,7 @@
             "label": "update",
             "description": [],
             "signature": [
-              "Record<string, { id: string; title?: string | undefined; category?: \"assistant\" | \"insights\" | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: ",
+              "Record<string, { id: string; title?: string | undefined; category?: \"insights\" | \"assistant\" | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: ",
               "objectOutputType",
               "<{}, ",
               "ZodString",
@@ -3086,7 +3086,7 @@
             "label": "create",
             "description": [],
             "signature": [
-              "Record<string, { title: string; id?: string | undefined; category?: \"assistant\" | \"insights\" | undefined; replacements?: ",
+              "Record<string, { title: string; id?: string | undefined; category?: \"insights\" | \"assistant\" | undefined; replacements?: ",
               "objectOutputType",
               "<{}, ",
               "ZodString",

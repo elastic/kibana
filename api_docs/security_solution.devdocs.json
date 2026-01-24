@@ -2342,24 +2342,6 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "securitySolution",
-            "id": "def-public.TimelineModel.confirmingNoteId",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "confirmingNoteId",
-            "description": [
-              "the note id pending deletion"
-            ],
-            "signature": [
-              "string | null | undefined"
-            ],
-            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
-            "lineNumber": 140,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3096,7 +3078,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-            "lineNumber": 683,
+            "lineNumber": 684,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3112,7 +3094,7 @@
                   "CoreStart"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 684,
+                "lineNumber": 685,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3129,7 +3111,7 @@
                   "SecuritySolutionPluginStartDependencies"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 685,
+                "lineNumber": 686,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3149,7 +3131,7 @@
               "() => void"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-            "lineNumber": 974,
+            "lineNumber": 975,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

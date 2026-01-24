@@ -163,7 +163,7 @@
         ">; } & { kuery?: string | undefined; rangeFrom?: string | undefined; rangeTo?: string | undefined; }; })>; }"
       ],
       "path": "x-pack/solutions/observability/plugins/apm/public/plugin.ts",
-      "lineNumber": 103,
+      "lineNumber": 104,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -181,7 +181,7 @@
         "void"
       ],
       "path": "x-pack/solutions/observability/plugins/apm/public/plugin.ts",
-      "lineNumber": 104,
+      "lineNumber": 105,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
