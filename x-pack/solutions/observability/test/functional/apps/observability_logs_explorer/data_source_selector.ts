@@ -214,7 +214,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('should display a list of installed integrations', async () => {
           const { integrations } = await PageObjects.observabilityLogsExplorer.getIntegrations();
 
-          expect(integrations.length).to.be(3);
+          expect(integrations.length).to.be(2);
           expect(integrations).to.eql(initialPackagesTexts);
         });
 
