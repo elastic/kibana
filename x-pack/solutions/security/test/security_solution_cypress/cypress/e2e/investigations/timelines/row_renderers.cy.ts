@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import { elementsOverlap } from '../../../helpers/rules';
 import {
   TIMELINE_ROW_RENDERERS_DISABLE_ALL_BTN,
   TIMELINE_ROW_RENDERERS_MODAL_ITEMS_CHECKBOX,
   TIMELINE_ROW_RENDERERS_SEARCHBOX,
   TIMELINE_SHOW_ROW_RENDERERS_GEAR,
+  TIMELINE_ROW_RENDERERS_SURICATA_SIGNATURE,
+  TIMELINE_ROW_RENDERERS_SURICATA_SIGNATURE_TOOLTIP,
+  TIMELINE_ROW_RENDERERS_SURICATA_LINK_TOOLTIP,
   TIMELINE_ROW_RENDERERS_MODAL_CLOSE_BUTTON,
   TIMELINE_ROW_RENDERERS_WRAPPER,
 } from '../../../screens/timeline';
@@ -125,5 +129,23 @@ describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
     addNameToTimelineAndSave('Test');
 
     cy.wait('@updateTimeline').its('response.statusCode').should('eq', 200);
+  });
+
+  describe('Suricata', () => {
+    // This test has become very flaky over time and was blocking a lot of PRs.
+    // A follw-up ticket to tackle this issue has been created.
+    it.skip('Signature tooltips do not overlap', () => {
+      // Hover the signature to show the tooltips
+      cy.get(TIMELINE_ROW_RENDERERS_SURICATA_SIGNATURE).parents('.euiPopover').realHover();
+
+      cy.get(TIMELINE_ROW_RENDERERS_SURICATA_LINK_TOOLTIP).then(($googleLinkTooltip) => {
+        cy.get(TIMELINE_ROW_RENDERERS_SURICATA_SIGNATURE_TOOLTIP).then(($signatureTooltip) => {
+          expect(
+            elementsOverlap($googleLinkTooltip, $signatureTooltip),
+            'tooltips do not overlap'
+          ).to.equal(false);
+        });
+      });
+    });
   });
 });
