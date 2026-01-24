@@ -150,7 +150,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
         defaultMessage: 'Close',
       }),
       loading: i18n.translate('esqlEditor.indicesBrowser.loading', {
-        defaultMessage: 'Loading data srources',
+        defaultMessage: 'Loading data sources',
       }),
       empty: i18n.translate('esqlEditor.indicesBrowser.empty', {
         defaultMessage: 'No data sources found',
