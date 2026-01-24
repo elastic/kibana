@@ -1374,9 +1374,7 @@ const ESQLEditorInternal = function ESQLEditor({
                       esqlVariables: esqlVariablesRef,
                       controlsContext: controlsContextRef,
                       openTimePickerPopover,
-                      openIndicesBrowser: enableResourceBrowser
-                        ? openIndicesBrowser
-                        : undefined,
+                      openIndicesBrowser: enableResourceBrowser ? openIndicesBrowser : undefined,
                       openFieldsBrowser: enableResourceBrowser ? openFieldsBrowser : undefined,
                     });
 
