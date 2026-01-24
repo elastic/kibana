@@ -27,6 +27,10 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ESQLEditorDeps } from '../types';
 import { BrowserPopoverWrapper } from './browser_popover_wrapper';
 
+// Filter panel size constants
+const FILTER_PANEL_WIDTH = 250; // Width in pixels for the filter panel lists
+const FILTER_PANEL_MAX_HEIGHT = 250; // Maximum height in pixels for the filter panel lists
+
 const getSourceTypeLabel = (type?: string): string => {
   if (!type) return 'Index';
   const typeLower = type.toLowerCase();
@@ -364,7 +368,14 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
         }}
       >
         {(integrationList) => (
-          <div css={filterListStyles} style={{ width: '250px', maxHeight: 250, overflowY: 'auto' }}>
+          <div
+            css={filterListStyles}
+            style={{
+              width: `${FILTER_PANEL_WIDTH}px`,
+              maxHeight: FILTER_PANEL_MAX_HEIGHT,
+              overflowY: 'auto',
+            }}
+          >
             {integrationList}
           </div>
         )}
@@ -383,7 +394,14 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
         }}
       >
         {(list) => (
-          <div css={filterListStyles} style={{ width: '250px', maxHeight: 250, overflowY: 'auto' }}>
+          <div
+            css={filterListStyles}
+            style={{
+              width: `${FILTER_PANEL_WIDTH}px`,
+              maxHeight: FILTER_PANEL_MAX_HEIGHT,
+              overflowY: 'auto',
+            }}
+          >
             {list}
           </div>
         )}
