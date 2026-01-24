@@ -9,6 +9,9 @@ import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 
+// Note: Processor update and removal API correctness is covered by
+// API tests in x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts
+// These UI tests focus on the user experience: cancel flows, confirmation modals, and permission handling
 test.describe('Stream data processing - editing steps', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeAll(async ({ logsSynthtraceEsClient }) => {
     await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });

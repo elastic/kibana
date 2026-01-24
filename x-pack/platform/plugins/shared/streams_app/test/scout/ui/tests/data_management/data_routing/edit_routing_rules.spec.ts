@@ -11,6 +11,9 @@
 import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 
+// Note: Routing rule condition updates and status changes API correctness is covered by
+// API tests in x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts
+// These UI tests focus on the user experience: cancel flows, confirmation modals, and switching between rules
 test.describe('Stream data routing - editing routing rules', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();

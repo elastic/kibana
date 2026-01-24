@@ -11,6 +11,9 @@ import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 
+// Note: Field mapping and unmapping API correctness (all field types, multiple fields, nested fields) is covered by
+// API tests in x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts
+// These UI tests focus on the user experience: table display, search, filtering, flyout interactions, and staging changes
 test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
     // Clear existing rules
