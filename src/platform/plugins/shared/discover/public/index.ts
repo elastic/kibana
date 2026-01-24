@@ -23,7 +23,6 @@ export type {
   CustomizationCallback,
   DiscoverCustomization,
   DiscoverCustomizationService,
-  FlyoutCustomization,
   SearchBarCustomization,
   UnifiedHistogramCustomization,
 } from './customizations';

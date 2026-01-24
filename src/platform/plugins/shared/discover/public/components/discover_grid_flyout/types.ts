@@ -7,5 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type * from './search_bar_customization';
-export type * from './histogram_customization';
+import type { IconType } from '@elastic/eui';
+import type { MouseEventHandler } from 'react';
+
+export interface FlyoutActionItem {
+  id: string;
+  enabled: boolean;
+  label: string;
+  helpText?: string;
+  iconType: IconType;
+  onClick: (() => void) | MouseEventHandler;
+  href?: string;
+  dataTestSubj?: string;
+}
