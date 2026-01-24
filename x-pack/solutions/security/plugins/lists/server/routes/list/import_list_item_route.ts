@@ -21,11 +21,16 @@ import type { ListsPluginRouter } from '../../types';
 import type { ConfigType } from '../../config';
 import { buildSiemResponse } from '../utils';
 import { createStreamFromBuffer } from '../utils/create_stream_from_buffer';
+import { getDeprecatedParamWarnings } from '../utils/get_deprecated_param_warnings';
 import { getListClient } from '..';
 
 const validFileExtensions = ['.csv', '.txt'];
 
-export const importListItemRoute = (router: ListsPluginRouter, config: ConfigType): void => {
+export const importListItemRoute = (
+  router: ListsPluginRouter,
+  config: ConfigType,
+  kibanaVersion: string
+): void => {
   router.versioned
     .post({
       access: 'public',
@@ -60,6 +65,9 @@ export const importListItemRoute = (router: ListsPluginRouter, config: ConfigTyp
         const siemResponse = buildSiemResponse(response);
         try {
           const { list_id: listId, type, refresh } = request.query;
+
+          // Check for deprecated query parameters and generate warning headers
+          const warningHeaders = getDeprecatedParamWarnings(request, kibanaVersion);
           const lists = await getListClient(context);
 
           const filename = await lists.getImportFilename({
@@ -125,7 +133,10 @@ export const importListItemRoute = (router: ListsPluginRouter, config: ConfigTyp
               version: 1,
             });
 
-            return response.ok({ body: ImportListItemsResponse.parse(list) });
+            return response.ok({
+              body: ImportListItemsResponse.parse(list),
+              ...(warningHeaders && { headers: warningHeaders }),
+            });
           } else if (type != null) {
             const importedList = await lists.importListItemsToStream({
               listId: undefined,
@@ -142,7 +153,10 @@ export const importListItemRoute = (router: ListsPluginRouter, config: ConfigTyp
               });
             }
 
-            return response.ok({ body: ImportListItemsResponse.parse(importedList) });
+            return response.ok({
+              body: ImportListItemsResponse.parse(importedList),
+              ...(warningHeaders && { headers: warningHeaders }),
+            });
           } else {
             return siemResponse.error({
               body: 'Either type or list_id need to be defined in the query',

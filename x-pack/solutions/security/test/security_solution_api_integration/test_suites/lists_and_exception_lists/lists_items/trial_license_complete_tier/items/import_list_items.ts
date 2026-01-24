@@ -149,6 +149,32 @@ export default ({ getService }: FtrProviderContext): void => {
         };
         expect(bodyToCompare).to.eql(outputtedList);
       });
+
+      it('should return warning header when serializer parameter is provided', async () => {
+        const { body, headers } = await supertest
+          .post(
+            `${LIST_ITEM_URL}/_import?type=ip&serializer=(?<value>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))`
+          )
+          .set('kbn-xsrf', 'true')
+          .attach('file', getImportListItemAsBuffer(['127.0.0.1', '127.0.0.2']), 'list_items.txt')
+          .expect('Content-Type', 'application/json; charset=utf-8')
+          .expect(200);
+        expect(headers.warning).to.contain(
+          'The "serializer" query parameter is deprecated and will be ignored. Custom serializers are no longer supported.'
+        );
+      });
+
+      it('should return warning header when deserializer parameter is provided', async () => {
+        const { body, headers } = await supertest
+          .post(`${LIST_ITEM_URL}/_import?type=ip&deserializer={{value}}`)
+          .set('kbn-xsrf', 'true')
+          .attach('file', getImportListItemAsBuffer(['127.0.0.1', '127.0.0.2']), 'list_items.txt')
+          .expect('Content-Type', 'application/json; charset=utf-8')
+          .expect(200);
+        expect(headers.warning).to.contain(
+          'The "deserializer" query parameter is deprecated and will be ignored. Custom deserializers are no longer supported.'
+        );
+      });
     });
   });
 };

@@ -79,27 +79,6 @@ export type ListMetadata = z.infer<typeof ListMetadata>;
 export const ListMetadata = z.object({}).catchall(z.unknown());
 
 /**
-  * Determines how uploaded list item values are parsed. By default, list items are parsed using these named regex groups:
-
-- `(?<value>.+)` - Single value item types, such as ip, long, date, keyword, and text.
-- `(?<gte>.+)-(?<lte>.+)|(?<value>.+)` - Range value item types, such as `date_range`, `ip_range`, `double_range`, `float_range`, `integer_range`, and `long_range`.
-
-  */
-export type ListSerializer = z.infer<typeof ListSerializer>;
-export const ListSerializer = z.string();
-
-/**
-  * Determines how retrieved list item values are presented. By default list items are presented using these Handelbar expressions:
-
-- `{{{value}}}` - Single value item types, such as `ip`, `long`, `date`, `keyword`, and `text`.
-- `{{{gte}}}-{{{lte}}}` - Range value item types, such as `ip_range`, `double_range`, `float_range`, `integer_range`, and `long_range`.
-- `{{{gte}}},{{{lte}}}` - Date range values.
-
-  */
-export type ListDeserializer = z.infer<typeof ListDeserializer>;
-export const ListDeserializer = z.string();
-
-/**
  * The document version number.
  */
 export type ListVersion = z.infer<typeof ListVersion>;
