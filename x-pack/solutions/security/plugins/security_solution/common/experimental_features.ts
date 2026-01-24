@@ -194,7 +194,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    *  Enables the QRadar rules import feature
    */
-  qradarRulesMigration: false,
+  qradarRulesMigration: true,
   /**
    * Enables the Kubernetes Dashboard in Security Solution
    */
@@ -204,6 +204,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Entity Analytics Watchlist feature.
    */
   entityAnalyticsWatchlistEnabled: false,
+
+  /**
+   * Enables the Trial Companion feature.
+   */
+  trialCompanionEnabled: false,
 
   /**
    * Enables DNS events toggle for Linux in Endpoint policy configuration.

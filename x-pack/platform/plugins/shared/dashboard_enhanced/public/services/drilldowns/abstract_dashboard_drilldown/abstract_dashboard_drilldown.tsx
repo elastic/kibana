@@ -14,7 +14,7 @@ import type {
   UiActionsEnhancedDrilldownDefinition as Drilldown,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import type { CollectConfigProps, StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import { DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS } from '@kbn/presentation-util-plugin/public';
+import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
@@ -64,7 +64,7 @@ export abstract class AbstractDashboardDrilldown<Context extends object = object
 
   public readonly createConfig = () => ({
     dashboardId: '',
-    ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
+    ...DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
   });
 
   public readonly isConfigValid = (
@@ -87,7 +87,7 @@ export abstract class AbstractDashboardDrilldown<Context extends object = object
   };
 
   public readonly execute = async (config: DashboardDrilldownConfig, context: Context) => {
-    if (config.openInNewTab) {
+    if (config.open_in_new_tab) {
       window.open(await this.getHref(config, context), '_blank');
     } else {
       const { app, path, state } = await this.getLocation(config, context, false);

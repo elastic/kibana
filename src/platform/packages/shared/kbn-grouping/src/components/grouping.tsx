@@ -7,10 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor,
-} from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -61,13 +57,7 @@ export interface GroupingProps<T> {
   renderChildComponent: GroupChildComponentRenderer<T>;
   onGroupClose: () => void;
   selectedGroup: string;
-  takeActionItems?: (
-    groupFilters: Filter[],
-    groupNumber: number
-  ) => {
-    items: EuiContextMenuPanelItemDescriptor[];
-    panels: EuiContextMenuPanelDescriptor[];
-  };
+  takeActionItems?: (groupFilters: Filter[], groupNumber: number) => JSX.Element | undefined;
   tracker?: (
     type: UiCounterMetricType,
     event: string | string[],
@@ -243,13 +233,16 @@ const GroupingComponent = <T,>({
   }, [emptyGroupingComponent]);
 
   return (
-    <>
+    <div css={() => ({ padding: `0 8px` })}>
       {groupingLevel > 0 ? null : (
         <EuiFlexGroup
           data-test-subj="grouping-table"
           justifyContent="spaceBetween"
           alignItems="center"
-          style={{ paddingBottom: 20, paddingTop: 20 }}
+          css={() => ({
+            paddingBottom: 20,
+            paddingTop: 20,
+          })}
         >
           <EuiFlexItem grow={false}>
             {groupCount > 0 && unitCount > 0 ? (
@@ -319,7 +312,7 @@ const GroupingComponent = <T,>({
           emptyComponent
         )}
       </div>
-    </>
+    </div>
   );
 };
 

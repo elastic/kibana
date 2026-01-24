@@ -37,12 +37,14 @@ export function WelcomeMessage({
   knowledgeBase,
   showElasticLlmCalloutInChat,
   showKnowledgeBaseReIndexingCallout,
+  eisCalloutZIndex,
   onSelectPrompt,
 }: {
   connectors: UseGenAIConnectorsResult;
   knowledgeBase: UseKnowledgeBaseResult;
   showElasticLlmCalloutInChat: boolean;
   showKnowledgeBaseReIndexingCallout: boolean;
+  eisCalloutZIndex?: number;
   onSelectPrompt: (prompt: string) => void;
 }) {
   const breakpoint = useCurrentEuiBreakpoint();
@@ -110,7 +112,10 @@ export function WelcomeMessage({
             onSetupConnectorClick={handleConnectorClick}
           />
           {knowledgeBase.status.value?.enabled && connectors.connectors?.length ? (
-            <WelcomeMessageKnowledgeBase knowledgeBase={knowledgeBase} />
+            <WelcomeMessageKnowledgeBase
+              knowledgeBase={knowledgeBase}
+              eisCalloutZIndex={eisCalloutZIndex}
+            />
           ) : null}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

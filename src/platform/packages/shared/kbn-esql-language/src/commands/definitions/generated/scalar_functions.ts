@@ -5664,7 +5664,7 @@ const knnDefinition: FunctionDefinition = {
     defaultMessage:
       'Finds the k nearest vectors to a query vector, as measured by a similarity metric. knn function finds nearest vectors through approximate search on indexed dense_vectors or semantic_text fields.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -17585,7 +17585,7 @@ const textEmbeddingDefinition: FunctionDefinition = {
     defaultMessage:
       'Generates dense vector embeddings from text input using a specified inference endpoint. Use this function to generate query vectors for KNN searches against your vectorized data or others dense vector based operations.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -20925,7 +20925,7 @@ const vCosineDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-language.esql.definitions.v_cosine', {
     defaultMessage: 'Calculates the cosine similarity between two dense_vectors.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -20971,7 +20971,7 @@ const vDotProductDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-language.esql.definitions.v_dot_product', {
     defaultMessage: 'Calculates the dot product between two dense_vectors.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -21017,7 +21017,7 @@ const vHammingDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-language.esql.definitions.v_hamming', {
     defaultMessage: 'Calculates the Hamming distance between two dense vectors.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -21063,7 +21063,7 @@ const vL1NormDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-language.esql.definitions.v_l1_norm', {
     defaultMessage: 'Calculates the l1 norm between two dense_vectors.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -21109,7 +21109,7 @@ const vL2NormDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-language.esql.definitions.v_l2_norm', {
     defaultMessage: 'Calculates the l2 norm between two dense_vectors.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
