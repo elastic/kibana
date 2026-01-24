@@ -104,8 +104,8 @@ import {
   DataSourceBrowser,
   FieldsBrowser,
   useResourcesBadge,
-  BROWSER_POPOVER_WIDTH,
 } from './resource_browser';
+import { useResourceBrowser } from './resource_browser/use_resource_browser';
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
@@ -211,16 +211,6 @@ const ESQLEditorInternal = function ESQLEditor({
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
   const [isVisorOpen, setIsVisorOpen] = useState(false);
-  const [isDataSourceBrowserOpen, setIsDataSourceBrowserOpen] = useState(false);
-  const [isFieldsBrowserOpen, setIsFieldsBrowserOpen] = useState(false);
-  const fieldsBrowserGetColumnMapRef = useRef<(() => Promise<Map<string, any>>) | undefined>(
-    undefined
-  );
-  const [browserPopoverPosition, setBrowserPopoverPosition] = useState<{
-    top?: number;
-    left?: number;
-  }>({});
-  const browserCursorPositionRef = useRef<monaco.Position | null>(null);
 
   // Refs for dynamic dependencies that commands need to access
   const esqlVariablesRef = useRef(esqlVariables);
@@ -757,9 +747,9 @@ const ESQLEditorInternal = function ESQLEditor({
     kibana.services?.esql,
     kql?.autocomplete,
     dataSourcesCache,
+    esqlFieldsCache,
     memoizedSources,
     core,
-    esqlFieldsCache,
     data.query.timefilter.timefilter,
     data.search.search,
     data.dataViews,
@@ -767,12 +757,29 @@ const ESQLEditorInternal = function ESQLEditor({
     abortController.signal,
     variablesService?.esqlVariables,
     variablesService?.isCreateControlSuggestionEnabled,
+    memoizedHistoryStarredItems,
     histogramBarTarget,
     activeSolutionId,
-    historyStarredItemsCache,
-    memoizedHistoryStarredItems,
     favoritesClient,
+    getHistoryItems,
   ]);
+
+  const {
+    isDataSourceBrowserOpen,
+    setIsDataSourceBrowserOpen,
+    isFieldsBrowserOpen,
+    setIsFieldsBrowserOpen,
+    browserPopoverPosition,
+    fieldsBrowserGetColumnMapRef,
+    fieldsBrowserQueryStringRef,
+    handleResourceBrowserSelect,
+    openIndicesBrowser,
+    openFieldsBrowser,
+  } = useResourceBrowser({
+    editorRef,
+    editorModel,
+    esqlCallbacks,
+  });
 
   const queryRunButtonProperties = useMemo(() => {
     if (allowQueryCancellation && isLoading) {
@@ -978,118 +985,6 @@ const ESQLEditorInternal = function ESQLEditor({
     [serverErrors, serverWarning, code, queryValidation]
   );
 
-  const handleResourceBrowserSelect = useCallback((newResourceNames: string, oldLength: number) => {
-    if (editorRef.current && editorModel.current && browserCursorPositionRef.current) {
-      const initialCursorPosition = browserCursorPositionRef.current;
-      const textAfterInitialCursor = editorModel.current
-        .getValue()
-        .substring(initialCursorPosition.column);
-      // Check if there is a resource after the initial cursor - match any whitespace or newline followed by a letter or dot
-      const hasExistingResourceAfterInitialCursor =
-        textAfterInitialCursor.match(/^[\s\n]*[a-zA-Z.].*/);
-
-      const range = {
-        startLineNumber: initialCursorPosition.lineNumber,
-        startColumn: initialCursorPosition.column,
-        endLineNumber: initialCursorPosition.lineNumber,
-        endColumn:
-          initialCursorPosition.column +
-          oldLength +
-          (oldLength > 0 && newResourceNames.length === 0 && hasExistingResourceAfterInitialCursor
-            ? 1
-            : 0), // Delete comma if all resources are deleted and there was some inserted resource before
-      };
-      editorRef.current.executeEdits('indicesBrowser', [
-        {
-          range,
-          text:
-            newResourceNames +
-            (oldLength === 0 && newResourceNames.length > 0 && hasExistingResourceAfterInitialCursor
-              ? ','
-              : ''), // Add comma if there is initially an existing resource and there is currently no inserted resource
-        },
-      ]);
-    }
-  }, []);
-
-  const updateResourceBrowserPosition = useCallback(() => {
-    if (editorRef.current) {
-      const cursorPosition = editorRef.current.getPosition();
-      if (cursorPosition) {
-        // Save the cursor position for use in handleIndexSelect
-        browserCursorPositionRef.current = cursorPosition;
-
-        const editorCoords = editorRef.current.getDomNode()?.getBoundingClientRect();
-        const editorPosition = editorRef.current.getScrolledVisiblePosition(cursorPosition);
-        if (editorCoords && editorPosition) {
-          const editorTop = editorCoords.top;
-          const editorLeft = editorCoords.left;
-          // Calculate the absolute position of the popover
-          const absoluteTop = editorTop + (editorPosition?.top ?? 0) - 120;
-          let absoluteLeft = editorLeft + (editorPosition?.left ?? 0);
-          if (absoluteLeft > editorCoords.width) {
-            // date picker is out of the editor
-            absoluteLeft = absoluteLeft - BROWSER_POPOVER_WIDTH;
-          }
-
-          setBrowserPopoverPosition({ top: absoluteTop, left: absoluteLeft });
-        }
-      }
-    }
-  }, []);
-
-  const openIndicesBrowser = useCallback(() => {
-    updateResourceBrowserPosition();
-    setIsDataSourceBrowserOpen(true);
-  }, [updateResourceBrowserPosition]);
-
-  const fieldsBrowserQueryStringRef = useRef<string>('');
-
-  const openFieldsBrowser = useCallback(async () => {
-    if (editorRef.current && editorModel.current) {
-      const position = editorRef.current.getPosition();
-      if (position) {
-        // Use the same logic as autocomplete to get fields
-        const fullText = editorModel.current.getValue() || '';
-        const offset = editorModel.current.getOffsetAt(position) || 0;
-        const innerText = fullText.substring(0, offset);
-
-        // Store the query string for fetching recommended fields
-        fieldsBrowserQueryStringRef.current = innerText;
-
-        // Import the necessary functions dynamically to avoid circular dependencies
-        const { correctQuerySyntax } = await import(
-          '@kbn/esql-language/src/commands/definitions/utils/ast'
-        );
-        const { parse } = await import('@kbn/esql-language/src/parser');
-        const { getCursorContext } = await import(
-          '@kbn/esql-language/src/language/shared/get_cursor_context'
-        );
-        const { getQueryForFields } = await import(
-          '@kbn/esql-language/src/language/shared/get_query_for_fields'
-        );
-        const { getColumnsByTypeRetriever } = await import(
-          '@kbn/esql-language/src/language/shared/columns_retrieval_helpers'
-        );
-
-        const correctedQuery = correctQuerySyntax(innerText);
-        const { root } = parse(correctedQuery, { withFormatting: true });
-        const astContext = getCursorContext(innerText, root, offset);
-        const astForFields = astContext.astForContext;
-
-        const { getColumnMap } = getColumnsByTypeRetriever(
-          getQueryForFields(correctedQuery, astForFields),
-          innerText,
-          esqlCallbacks
-        );
-
-        // Store the getColumnMap function in a ref so it can be used by the popup
-        fieldsBrowserGetColumnMapRef.current = getColumnMap;
-      }
-    }
-    updateResourceBrowserPosition();
-    setIsFieldsBrowserOpen(true);
-  }, [esqlCallbacks, updateResourceBrowserPosition]);
 
   const {
     resourcesBadgeStyle,
