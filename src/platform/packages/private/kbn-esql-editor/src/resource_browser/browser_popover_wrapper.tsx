@@ -29,6 +29,10 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 export const BROWSER_POPOVER_WIDTH = 400;
 export const BROWSER_POPOVER_HEIGHT = 500;
 
+// Filter popover positioning constants
+const FILTER_POPOVER_HORIZONTAL_OFFSET = 60; // Horizontal offset in pixels for the filter popover
+const FILTER_POPOVER_VERTICAL_OFFSET = -35; // Vertical offset in pixels to align with the filter button
+
 const filterPopoverStyle = (euiTheme: EuiThemeComputed) => css`
   .euiFilterButton__wrapper {
     ${logicalCSS('left', `-${euiTheme.size.s}`)}
@@ -190,8 +194,8 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
               button={filterButton}
               isOpen={isFilterPopoverOpen}
               closePopover={() => setIsFilterPopoverOpen(false)}
-              panelStyle={{ transform: `translateX(60px)` }}
-              offset={-35} // Move popover up to align with the filter button
+              panelStyle={{ transform: `translateX(${FILTER_POPOVER_HORIZONTAL_OFFSET}px)` }}
+              offset={FILTER_POPOVER_VERTICAL_OFFSET}
             >
               {filterPanel}
             </EuiPopover>
