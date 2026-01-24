@@ -690,70 +690,70 @@ apiTest.describe(
       expect(updatedRule.where.eq).toBe('updated-service');
     });
 
-    apiTest('should update routing rule status from enabled to disabled', async ({
-      apiClient,
-      samlAuth,
-    }) => {
-      const { cookieHeader } = await samlAuth.asStreamsAdmin();
-      const childStreamName = `${streamNamePrefix}-toggle-status`;
+    apiTest(
+      'should update routing rule status from enabled to disabled',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asStreamsAdmin();
+        const childStreamName = `${streamNamePrefix}-toggle-status`;
 
-      // Create stream with enabled status
-      await apiClient.post('api/streams/logs/_fork', {
-        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
-        body: {
-          stream: { name: childStreamName },
-          where: { field: 'service.name', eq: 'toggle-test' },
-          status: 'enabled',
-        },
-        responseType: 'json',
-      });
+        // Create stream with enabled status
+        await apiClient.post('api/streams/logs/_fork', {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          body: {
+            stream: { name: childStreamName },
+            where: { field: 'service.name', eq: 'toggle-test' },
+            status: 'enabled',
+          },
+          responseType: 'json',
+        });
 
-      // Get parent stream
-      const { body: parentBody } = await apiClient.get('api/streams/logs', {
-        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
-        responseType: 'json',
-      });
+        // Get parent stream
+        const { body: parentBody } = await apiClient.get('api/streams/logs', {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          responseType: 'json',
+        });
 
-      // Update status to disabled
-      const updatedRouting = parentBody.stream.ingest.wired.routing.map(
-        (rule: { destination: string; where: any; status: string }) => {
-          if (rule.destination === childStreamName) {
-            return { ...rule, status: 'disabled' };
+        // Update status to disabled
+        const updatedRouting = parentBody.stream.ingest.wired.routing.map(
+          (rule: { destination: string; where: any; status: string }) => {
+            if (rule.destination === childStreamName) {
+              return { ...rule, status: 'disabled' };
+            }
+            return rule;
           }
-          return rule;
-        }
-      );
+        );
 
-      const { updated_at: _, ...processingWithoutUpdatedAt } =
-        parentBody.stream.ingest.processing || {};
-      const updateResponse = await apiClient.put('api/streams/logs/_ingest', {
-        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
-        body: {
-          ingest: {
-            ...parentBody.stream.ingest,
-            processing: processingWithoutUpdatedAt,
-            wired: {
-              ...parentBody.stream.ingest.wired,
-              routing: updatedRouting,
+        const { updated_at: _, ...processingWithoutUpdatedAt } =
+          parentBody.stream.ingest.processing || {};
+        const updateResponse = await apiClient.put('api/streams/logs/_ingest', {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          body: {
+            ingest: {
+              ...parentBody.stream.ingest,
+              processing: processingWithoutUpdatedAt,
+              wired: {
+                ...parentBody.stream.ingest.wired,
+                routing: updatedRouting,
+              },
             },
           },
-        },
-        responseType: 'json',
-      });
+          responseType: 'json',
+        });
 
-      expect(updateResponse.statusCode).toBe(200);
+        expect(updateResponse.statusCode).toBe(200);
 
-      // Verify status was updated
-      const { body: verifyBody } = await apiClient.get('api/streams/logs', {
-        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
-        responseType: 'json',
-      });
+        // Verify status was updated
+        const { body: verifyBody } = await apiClient.get('api/streams/logs', {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          responseType: 'json',
+        });
 
-      const updatedRule = verifyBody.stream.ingest.wired.routing.find(
-        (r: { destination: string }) => r.destination === childStreamName
-      );
-      expect(updatedRule.status).toBe('disabled');
-    });
+        const updatedRule = verifyBody.stream.ingest.wired.routing.find(
+          (r: { destination: string }) => r.destination === childStreamName
+        );
+        expect(updatedRule.status).toBe('disabled');
+      }
+    );
 
     apiTest('should reorder routing rules', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
@@ -849,78 +849,78 @@ apiTest.describe(
       expect(stream1Index).toBeLessThan(stream2Index);
     });
 
-    apiTest('should update routing rule to use complex condition', async ({
-      apiClient,
-      samlAuth,
-    }) => {
-      const { cookieHeader } = await samlAuth.asStreamsAdmin();
-      const childStreamName = `${streamNamePrefix}-complex-upd`;
+    apiTest(
+      'should update routing rule to use complex condition',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asStreamsAdmin();
+        const childStreamName = `${streamNamePrefix}-complex-upd`;
 
-      // Create stream with simple condition
-      await apiClient.post('api/streams/logs/_fork', {
-        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
-        body: {
-          stream: { name: childStreamName },
-          where: { field: 'service.name', eq: 'simple' },
-          status: 'enabled',
-        },
-        responseType: 'json',
-      });
+        // Create stream with simple condition
+        await apiClient.post('api/streams/logs/_fork', {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          body: {
+            stream: { name: childStreamName },
+            where: { field: 'service.name', eq: 'simple' },
+            status: 'enabled',
+          },
+          responseType: 'json',
+        });
 
-      // Get parent stream
-      const { body: parentBody } = await apiClient.get('api/streams/logs', {
-        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
-        responseType: 'json',
-      });
+        // Get parent stream
+        const { body: parentBody } = await apiClient.get('api/streams/logs', {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          responseType: 'json',
+        });
 
-      // Update to complex AND condition
-      const updatedRouting = parentBody.stream.ingest.wired.routing.map(
-        (rule: { destination: string; where: any; status: string }) => {
-          if (rule.destination === childStreamName) {
-            return {
-              ...rule,
-              where: {
-                and: [
-                  { field: 'service.name', eq: 'api-gateway' },
-                  { field: 'log.level', eq: 'error' },
-                ],
-              },
-            };
+        // Update to complex AND condition
+        const updatedRouting = parentBody.stream.ingest.wired.routing.map(
+          (rule: { destination: string; where: any; status: string }) => {
+            if (rule.destination === childStreamName) {
+              return {
+                ...rule,
+                where: {
+                  and: [
+                    { field: 'service.name', eq: 'api-gateway' },
+                    { field: 'log.level', eq: 'error' },
+                  ],
+                },
+              };
+            }
+            return rule;
           }
-          return rule;
-        }
-      );
+        );
 
-      const { updated_at: _, ...processingWithoutUpdatedAt } =
-        parentBody.stream.ingest.processing || {};
-      const updateResponse = await apiClient.put('api/streams/logs/_ingest', {
-        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
-        body: {
-          ingest: {
-            ...parentBody.stream.ingest,
-            processing: processingWithoutUpdatedAt,
-            wired: {
-              ...parentBody.stream.ingest.wired,
-              routing: updatedRouting,
+        const { updated_at: _, ...processingWithoutUpdatedAt } =
+          parentBody.stream.ingest.processing || {};
+        const updateResponse = await apiClient.put('api/streams/logs/_ingest', {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          body: {
+            ingest: {
+              ...parentBody.stream.ingest,
+              processing: processingWithoutUpdatedAt,
+              wired: {
+                ...parentBody.stream.ingest.wired,
+                routing: updatedRouting,
+              },
             },
           },
-        },
-        responseType: 'json',
-      });
+          responseType: 'json',
+        });
 
-      expect(updateResponse.statusCode).toBe(200);
+        expect(updateResponse.statusCode).toBe(200);
 
-      // Verify the complex condition was saved
-      const { body: verifyBody } = await apiClient.get('api/streams/logs', {
-        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
-        responseType: 'json',
-      });
+        // Verify the complex condition was saved
+        const { body: verifyBody } = await apiClient.get('api/streams/logs', {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          responseType: 'json',
+        });
 
-      const updatedRule = verifyBody.stream.ingest.wired.routing.find(
-        (r: { destination: string }) => r.destination === childStreamName
-      );
-      expect(updatedRule.where.and).toBeDefined();
-      expect(updatedRule.where.and).toHaveLength(2);
-    });
+        const updatedRule = verifyBody.stream.ingest.wired.routing.find(
+          (r: { destination: string }) => r.destination === childStreamName
+        );
+        expect(updatedRule.where.and).toBeDefined();
+        expect(updatedRule.where.and).toHaveLength(2);
+      }
+    );
   }
 );

@@ -36,7 +36,9 @@ apiTest.describe(
       if (forkResponse.statusCode !== 200) {
         return {
           success: false,
-          error: `Fork failed with status ${forkResponse.statusCode}: ${JSON.stringify(forkResponse.body)}`,
+          error: `Fork failed with status ${forkResponse.statusCode}: ${JSON.stringify(
+            forkResponse.body
+          )}`,
         };
       }
 
@@ -637,23 +639,20 @@ apiTest.describe(
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asStreamsAdmin();
 
-        const { statusCode } = await apiClient.put(
-          'api/streams/non-existent-stream/_ingest',
-          {
-            headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
-            body: {
-              ingest: {
-                processing: { steps: [] },
-                lifecycle: { inherit: {} },
-                wired: {
-                  fields: { 'attributes.test': { type: 'keyword' } },
-                  routing: [],
-                },
+        const { statusCode } = await apiClient.put('api/streams/non-existent-stream/_ingest', {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          body: {
+            ingest: {
+              processing: { steps: [] },
+              lifecycle: { inherit: {} },
+              wired: {
+                fields: { 'attributes.test': { type: 'keyword' } },
+                routing: [],
               },
             },
-            responseType: 'json',
-          }
-        );
+          },
+          responseType: 'json',
+        });
 
         // May return 400 (bad request), 403 (forbidden), or 404 (not found)
         expect([400, 403, 404]).toContain(statusCode);
