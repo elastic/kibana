@@ -15,15 +15,20 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { CreateDataStreamFlyout } from './create_data_stream_flyout';
 import { UIStateProvider } from '../../contexts';
 import { IntegrationFormProvider } from '../../forms/integration_form';
-import { useFetchIndices } from '../../../../common/hooks/use_fetch_indices';
-import { useValidateIndex } from '../../../../common/hooks/use_validate_index';
-import { useGetIntegrationById } from '../../../../common/hooks/use_get_integration_by_id';
-import { useCreateUpdateIntegration } from '../../../../common/hooks/use_create_update_integration';
+import {
+  useFetchIndices,
+  useValidateIndex,
+  useGetIntegrationById,
+  useCreateUpdateIntegration,
+} from '../../../../common';
 
-jest.mock('../../../../common/hooks/use_fetch_indices');
-jest.mock('../../../../common/hooks/use_validate_index');
-jest.mock('../../../../common/hooks/use_get_integration_by_id');
-jest.mock('../../../../common/hooks/use_create_update_integration');
+jest.mock('../../../../common', () => ({
+  useFetchIndices: jest.fn(),
+  useValidateIndex: jest.fn(),
+  useGetIntegrationById: jest.fn(),
+  useCreateUpdateIntegration: jest.fn(),
+  generateId: jest.fn(() => 'mock-id'),
+}));
 jest.mock('../../../../common/lib/api', () => ({
   getInstalledPackages: jest.fn(() =>
     Promise.resolve({

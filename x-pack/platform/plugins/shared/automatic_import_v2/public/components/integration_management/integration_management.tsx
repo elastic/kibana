@@ -15,7 +15,7 @@ import { IntegrationFormProvider, useIntegrationForm } from './forms/integration
 import type { IntegrationFormData } from './forms/types';
 import { PAGE_RESTRICT_WIDTH } from './constants';
 import * as i18n from './translations';
-import { useGetIntegrationById } from '../../common/hooks/use_get_integration_by_id';
+import { useGetIntegrationById } from '../../common';
 
 const IntegrationManagementContents: React.FC = () => {
   const { submit, isValid } = useIntegrationForm();

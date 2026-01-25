@@ -7,12 +7,6 @@
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { IntegrationFormData, IntegrationFields, DataStreamFields } from './types';
-import {
-  MAX_DESCRIPTION_LENGTH,
-  MAX_NAME_LENGTH,
-  MAX_DATA_STREAM_TITLE_LENGTH,
-  MAX_DATA_STREAM_DESCRIPTION_LENGTH,
-} from './constants';
 import * as i18n from './translations';
 
 export const REQUIRED_FIELDS = [
@@ -86,26 +80,12 @@ const createIntegrationFieldsSchema = (
     label: 'Integration name',
     validations: [
       { validator: emptyField(i18n.TITLE_REQUIRED) },
-      {
-        validator: maxLengthField({
-          length: MAX_NAME_LENGTH,
-          message: i18n.TITLE_MAX_LENGTH,
-        }),
-      },
       createUniqueTitleValidator(packageNames, currentPackageName),
     ],
   },
   description: {
     label: 'Description',
-    validations: [
-      { validator: emptyField(i18n.DESCRIPTION_REQUIRED) },
-      {
-        validator: maxLengthField({
-          length: MAX_DESCRIPTION_LENGTH,
-          message: i18n.DESCRIPTION_MAX_LENGTH,
-        }),
-      },
-    ],
+    validations: [{ validator: emptyField(i18n.DESCRIPTION_REQUIRED) }],
   },
   logo: {
     label: 'Logo',
@@ -120,27 +100,11 @@ const createIntegrationFieldsSchema = (
 const dataStreamFieldsSchema: FormSchema<DataStreamFields> = {
   dataStreamTitle: {
     label: 'Data stream title',
-    validations: [
-      { validator: emptyField(i18n.DATA_STREAM_TITLE_REQUIRED) },
-      {
-        validator: maxLengthField({
-          length: MAX_DATA_STREAM_TITLE_LENGTH,
-          message: i18n.DATA_STREAM_TITLE_MAX_LENGTH,
-        }),
-      },
-    ],
+    validations: [{ validator: emptyField(i18n.DATA_STREAM_TITLE_REQUIRED) }],
   },
   dataStreamDescription: {
     label: 'Data stream description',
-    validations: [
-      { validator: emptyField(i18n.DATA_STREAM_DESCRIPTION_REQUIRED) },
-      {
-        validator: maxLengthField({
-          length: MAX_DATA_STREAM_DESCRIPTION_LENGTH,
-          message: i18n.DATA_STREAM_DESCRIPTION_MAX_LENGTH,
-        }),
-      },
-    ],
+    validations: [{ validator: emptyField(i18n.DATA_STREAM_DESCRIPTION_REQUIRED) }],
   },
   dataCollectionMethod: {
     label: 'Data collection method',

@@ -11,7 +11,7 @@ export const INDEX_MISSING_EVENT_ORIGINAL = i18n.translate(
   'xpack.automaticImportV2.dataStreams.indexMissingEventOriginal',
   {
     defaultMessage:
-      'The selected index does not contain the event.original field. Please select another index to continue.',
+      'The selected index does not contain the `event.original` field. Please select another index to continue.',
   }
 );
 
@@ -39,5 +39,18 @@ export const SAVE_INTEGRATION_ERROR = i18n.translate(
   'xpack.automaticImportV2.saveIntegration.error',
   {
     defaultMessage: 'Failed to save integration',
+  }
+);
+
+export const LOAD_CONNECTORS_ERROR_TITLE = i18n.translate(
+  'xpack.automaticImportV2.hooks.loadConnectors.errorTitle',
+  {
+    defaultMessage: 'Unable to load connectors',
+  }
+);
+export const LOAD_CONNECTORS_ERROR_MESSAGE = i18n.translate(
+  'xpack.automaticImportV2.hooks.loadConnectors.errorMessage',
+  {
+    defaultMessage: 'Failed to load connectors',
   }
 );

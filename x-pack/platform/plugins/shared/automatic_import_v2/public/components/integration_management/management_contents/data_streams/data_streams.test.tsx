@@ -11,9 +11,11 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { MemoryRouter, Route } from '@kbn/shared-ux-router';
 import { DataStreams } from './data_streams';
 import { UIStateProvider } from '../../contexts';
-import { useGetIntegrationById } from '../../../../common/hooks/use_get_integration_by_id';
+import { useGetIntegrationById } from '../../../../common';
 
-jest.mock('../../../../common/hooks/use_get_integration_by_id');
+jest.mock('../../../../common', () => ({
+  useGetIntegrationById: jest.fn(),
+}));
 const mockUseGetIntegrationById = useGetIntegrationById as jest.Mock;
 
 jest.mock('./create_data_stream_flyout', () => ({

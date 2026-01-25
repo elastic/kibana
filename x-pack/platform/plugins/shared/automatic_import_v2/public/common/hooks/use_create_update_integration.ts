@@ -8,14 +8,14 @@
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { CreateAutoImportIntegrationResponse } from '../../../common';
 import { PLUGIN_ID } from '../../../common/constants';
-import { createIntegration, type CreateIntegrationRequest } from '../lib/api';
+import { createIntegration, type CreateUpdateIntegrationRequest } from '../lib/api';
 import { useKibana } from './use_kibana';
 import * as i18n from './translations';
 import { useUIState } from '../../components/integration_management/contexts';
 
 export interface UseCreateUpdateIntegrationResult {
   createUpdateIntegrationMutation: ReturnType<
-    typeof useMutation<CreateAutoImportIntegrationResponse, Error, CreateIntegrationRequest>
+    typeof useMutation<CreateAutoImportIntegrationResponse, Error, CreateUpdateIntegrationRequest>
   >;
   isLoading: boolean;
   error: Error | null;
@@ -34,9 +34,9 @@ export function useCreateUpdateIntegration(): UseCreateUpdateIntegrationResult {
   const mutation = useMutation<
     CreateAutoImportIntegrationResponse,
     Error,
-    CreateIntegrationRequest
+    CreateUpdateIntegrationRequest
   >({
-    mutationFn: async (request: CreateIntegrationRequest) => {
+    mutationFn: async (request: CreateUpdateIntegrationRequest) => {
       return createIntegration({ http, ...request });
     },
     onSuccess: (data) => {

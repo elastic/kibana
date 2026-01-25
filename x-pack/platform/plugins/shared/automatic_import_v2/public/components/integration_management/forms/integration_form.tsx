@@ -15,8 +15,7 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { createFormSchema, REQUIRED_FIELDS } from './integration_form_validation';
 import type { IntegrationFormData } from './types';
-import { useKibana } from '../../../common/hooks/use_kibana';
-import { getInstalledPackages } from '../../../common/lib/api';
+import { useKibana, getInstalledPackages } from '../../../common';
 import * as i18n from './translations';
 import { DEFAULT_DATA_STREAM_VALUES, DEFAULT_INTEGRATION_VALUES } from './constants';
 

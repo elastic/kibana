@@ -14,7 +14,7 @@ import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mo
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ConnectorSelector } from './connector_selector';
 import { ConnectorSetup } from './connector_setup';
-import { useLoadConnectors } from '../hooks/use_load_connectors';
+import { useLoadConnectors } from '..';
 
 const mockConnectors = [
   {

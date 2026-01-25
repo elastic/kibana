@@ -17,7 +17,7 @@ import { useParams } from 'react-router-dom';
 import { useUIState } from '../../contexts';
 import { CreateDataStreamFlyout } from './create_data_stream_flyout';
 import * as i18n from './translations';
-import { useGetIntegrationById } from '../../../../common/hooks/use_get_integration_by_id';
+import { useGetIntegrationById } from '../../../../common';
 
 export const DataStreams = React.memo<{ integrationId?: string }>(() => {
   const { isCreateDataStreamFlyoutOpen, openCreateDataStreamFlyout, closeCreateDataStreamFlyout } =

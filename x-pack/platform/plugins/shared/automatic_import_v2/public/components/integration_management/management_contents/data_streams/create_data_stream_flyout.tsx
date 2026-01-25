@@ -35,11 +35,13 @@ import type { LogsSourceOption } from '../../forms/types';
 import { useIntegrationForm } from '../../forms/integration_form';
 import * as i18n from './translations';
 import { FormStyledLabel } from '../../../../common/components/form_styled_label';
-import { useFetchIndices } from '../../../../common/hooks/use_fetch_indices';
-import { useValidateIndex } from '../../../../common/hooks/use_validate_index';
-import { useCreateUpdateIntegration } from '../../../../common/hooks/use_create_update_integration';
-import { useGetIntegrationById } from '../../../../common/hooks/use_get_integration_by_id';
-import { generateId } from '../../../../common/lib/helper_functions';
+import {
+  useFetchIndices,
+  useValidateIndex,
+  useCreateUpdateIntegration,
+  useGetIntegrationById,
+  generateId,
+} from '../../../../common';
 
 interface CreateDataStreamFlyoutProps {
   onClose: () => void;

@@ -42,7 +42,7 @@ export const getInstalledPackages = async ({
     signal: abortSignal,
   });
 
-export interface CreateIntegrationRequest {
+export interface CreateUpdateIntegrationRequest {
   connectorId: string;
   integrationId: string;
   title: string;
@@ -55,7 +55,7 @@ export const createIntegration = async ({
   http,
   abortSignal,
   ...body
-}: RequestDeps & CreateIntegrationRequest): Promise<CreateAutoImportIntegrationResponse> =>
+}: RequestDeps & CreateUpdateIntegrationRequest): Promise<CreateAutoImportIntegrationResponse> =>
   http.put<CreateAutoImportIntegrationResponse>(AUTOMATIC_IMPORT_INTEGRATIONS_PATH, {
     version: '1',
     body: JSON.stringify(body),
