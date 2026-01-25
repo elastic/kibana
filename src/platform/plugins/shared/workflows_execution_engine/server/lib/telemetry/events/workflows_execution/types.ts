@@ -349,6 +349,10 @@ export interface WorkflowExecutionCancelledParams extends BaseWorkflowExecutionT
    */
   cancellationReason?: string;
   /**
+   * Who cancelled the workflow
+   */
+  cancelledBy?: string;
+  /**
    * Number of steps that were executed before cancellation
    */
   executedStepCount: number;

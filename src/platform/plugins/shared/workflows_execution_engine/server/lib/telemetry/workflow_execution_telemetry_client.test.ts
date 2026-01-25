@@ -108,15 +108,32 @@ describe('WorkflowExecutionTelemetryClient', () => {
       });
 
       const stepExecutions = [
-        createMockStepExecution({ stepId: 'step1', status: ExecutionStatus.COMPLETED }),
-        createMockStepExecution({ stepId: 'step2', status: ExecutionStatus.COMPLETED }),
+        createMockStepExecution({
+          stepId: 'step1',
+          status: ExecutionStatus.COMPLETED,
+          startedAt: '2024-01-01T00:00:01.000Z', // 1 second after workflow started
+        }),
+        createMockStepExecution({
+          stepId: 'step2',
+          status: ExecutionStatus.COMPLETED,
+          startedAt: '2024-01-01T00:00:02.000Z', // 2 seconds after workflow started
+        }),
       ];
 
+      const workflowExecutionWithQueueMetrics = {
+        ...workflowExecution,
+        queueMetrics: {
+          scheduledAt: '2024-01-01T00:00:00.000Z',
+          runAt: '2024-01-01T00:00:00.000Z',
+          startedAt: '2024-01-01T00:00:00.500Z',
+          queueDelayMs: 500,
+          scheduleDelayMs: 500,
+        },
+      };
+
       client.reportWorkflowExecutionCompleted({
-        workflowExecution,
+        workflowExecution: workflowExecutionWithQueueMetrics,
         stepExecutions,
-        timeToFirstStep: 1000,
-        queueMetrics: { queueDelayMs: 500 },
       });
 
       expect(telemetry.reportEvent).toHaveBeenCalledTimes(1);
@@ -140,7 +157,7 @@ describe('WorkflowExecutionTelemetryClient', () => {
         successfulStepCount: 2,
         failedStepCount: 0,
         skippedStepCount: 0,
-        timeToFirstStep: 1000,
+        timeToFirstStep: 1000, // 1 second difference
         queueDelayMs: 500,
         timedOut: false,
         timeoutMs: 300000, // 5 minutes in ms
@@ -240,10 +257,20 @@ describe('WorkflowExecutionTelemetryClient', () => {
         }),
       ];
 
+      const workflowExecutionWithQueueMetrics = {
+        ...workflowExecution,
+        queueMetrics: {
+          scheduledAt: '2024-01-01T00:00:00.000Z',
+          runAt: '2024-01-01T00:00:00.000Z',
+          startedAt: '2024-01-01T00:00:00.200Z',
+          queueDelayMs: 200,
+          scheduleDelayMs: 200,
+        },
+      };
+
       client.reportWorkflowExecutionFailed({
-        workflowExecution,
+        workflowExecution: workflowExecutionWithQueueMetrics,
         stepExecutions,
-        queueMetrics: { queueDelayMs: 200 },
       });
 
       expect(telemetry.reportEvent).toHaveBeenCalledTimes(1);
@@ -302,10 +329,20 @@ describe('WorkflowExecutionTelemetryClient', () => {
         createMockStepExecution({ stepId: 'step1', status: ExecutionStatus.COMPLETED }),
       ];
 
+      const workflowExecutionWithQueueMetrics = {
+        ...workflowExecution,
+        queueMetrics: {
+          scheduledAt: '2024-01-01T00:00:00.000Z',
+          runAt: '2024-01-01T00:00:00.000Z',
+          startedAt: '2024-01-01T00:00:00.100Z',
+          queueDelayMs: 100,
+          scheduleDelayMs: 100,
+        },
+      };
+
       client.reportWorkflowExecutionCancelled({
-        workflowExecution,
+        workflowExecution: workflowExecutionWithQueueMetrics,
         stepExecutions,
-        queueMetrics: { queueDelayMs: 100 },
       });
 
       expect(telemetry.reportEvent).toHaveBeenCalledTimes(1);

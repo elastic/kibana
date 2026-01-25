@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ExecutionStatus } from '@kbn/workflows';
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
+import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
+import { parseDuration } from '../../../utils';
 
 /**
  * Metadata extracted from a workflow execution for telemetry purposes
@@ -53,10 +56,82 @@ export interface WorkflowExecutionTelemetryMetadata {
    * Number of unique step IDs that were executed (accounts for loops/retries)
    */
   uniqueStepIdsExecuted: number;
+  /**
+   * Alert rule ID if triggered by alert
+   */
+  ruleId?: string;
+  /**
+   * Time to first step in milliseconds
+   */
+  timeToFirstStep?: number;
+  /**
+   * Queue delay in milliseconds
+   */
+  queueDelayMs?: number;
+  /**
+   * Whether the workflow execution timed out
+   */
+  timedOut: boolean;
+  /**
+   * Configured timeout in milliseconds
+   */
+  timeoutMs?: number;
+  /**
+   * How much the timeout was exceeded by in milliseconds
+   */
+  timeoutExceededByMs?: number;
+}
+
+/**
+ * Extracts timeout information from workflow execution.
+ * Returns timeout configuration and whether the workflow timed out.
+ *
+ * @param workflowExecution - The workflow execution
+ * @param workflowDefinition - The workflow definition
+ * @returns Object with timedOut flag, timeoutMs, and timeoutExceededByMs
+ */
+function extractTimeoutInfo(
+  workflowExecution: EsWorkflowExecution,
+  workflowDefinition: WorkflowYaml
+): {
+  timedOut: boolean;
+  timeoutMs?: number;
+  timeoutExceededByMs?: number;
+} {
+  const timedOut = workflowExecution.status === ExecutionStatus.TIMED_OUT;
+
+  // Extract timeout from workflow settings
+  const timeoutDuration = workflowDefinition.settings?.timeout;
+  let timeoutMs: number | undefined;
+  if (timeoutDuration && typeof timeoutDuration === 'string') {
+    try {
+      timeoutMs = parseDuration(timeoutDuration);
+    } catch {
+      // Invalid timeout format, ignore
+    }
+  }
+
+  // Calculate how much timeout was exceeded (only if timed out and timeout is configured)
+  let timeoutExceededByMs: number | undefined;
+  if (timedOut && timeoutMs !== undefined) {
+    const startedAt = new Date(workflowExecution.startedAt).getTime();
+    const finishedAt = workflowExecution.finishedAt
+      ? new Date(workflowExecution.finishedAt).getTime()
+      : Date.now();
+    const actualDuration = finishedAt - startedAt;
+    timeoutExceededByMs = Math.max(0, actualDuration - timeoutMs);
+  }
+
+  return {
+    timedOut,
+    ...(timeoutMs !== undefined && { timeoutMs }),
+    ...(timeoutExceededByMs !== undefined && { timeoutExceededByMs }),
+  };
 }
 
 /**
  * Extracts telemetry metadata from a workflow execution and its step executions.
+ * This includes execution statistics, alert rule ID, queue delay, time to first step, and timeout information.
  *
  * @param workflowExecution - The workflow execution
  * @param stepExecutions - Array of step executions for this workflow execution
@@ -108,6 +183,18 @@ export function extractExecutionMetadata(
     workflowExecution.status !== 'failed' &&
     workflowExecution.status !== 'cancelled';
 
+  // Extract alert rule ID
+  const ruleId = extractAlertRuleId(workflowExecution);
+
+  // Extract or calculate queue delay
+  const queueDelayMs = extractQueueDelayMs(workflowExecution);
+
+  // Calculate time to first step
+  const timeToFirstStep = extractTimeToFirstStep(workflowExecution, stepExecutions);
+
+  // Extract timeout information
+  const timeoutInfo = extractTimeoutInfo(workflowExecution, workflowExecution.workflowDefinition);
+
   return {
     executedStepCount,
     successfulStepCount,
@@ -119,6 +206,14 @@ export function extractExecutionMetadata(
     hasRetries,
     hasErrorHandling,
     uniqueStepIdsExecuted: uniqueStepIdsSet.size,
+    ...(ruleId && { ruleId }),
+    ...(timeToFirstStep !== undefined && { timeToFirstStep }),
+    ...(queueDelayMs !== undefined && { queueDelayMs }),
+    timedOut: timeoutInfo.timedOut,
+    ...(timeoutInfo.timeoutMs !== undefined && { timeoutMs: timeoutInfo.timeoutMs }),
+    ...(timeoutInfo.timeoutExceededByMs !== undefined && {
+      timeoutExceededByMs: timeoutInfo.timeoutExceededByMs,
+    }),
   };
 }
 
@@ -140,6 +235,83 @@ export function extractAlertRuleId(workflowExecution: EsWorkflowExecution): stri
 
   if (event?.type === 'alert' && event?.rule?.id) {
     return event.rule.id;
+  }
+
+  return undefined;
+}
+
+/**
+ * Calculates the time to first step (TTFS) in milliseconds.
+ * This is the time from when the workflow execution started to when the first step execution started.
+ *
+ * @param workflowExecution - The workflow execution
+ * @param stepExecutions - Array of step executions for this workflow execution
+ * @returns Time to first step in milliseconds, or undefined if no steps were executed or timestamps are missing
+ */
+export function extractTimeToFirstStep(
+  workflowExecution: EsWorkflowExecution,
+  stepExecutions: EsWorkflowStepExecution[]
+): number | undefined {
+  if (stepExecutions.length === 0 || !workflowExecution.startedAt) {
+    return undefined;
+  }
+
+  // Find the step with the earliest startedAt timestamp
+  const firstStep = stepExecutions.reduce((earliest, step) => {
+    if (!earliest.startedAt) return step;
+    if (!step.startedAt) return earliest;
+    return new Date(step.startedAt) < new Date(earliest.startedAt) ? step : earliest;
+  });
+
+  if (!firstStep.startedAt) {
+    return undefined;
+  }
+
+  return new Date(firstStep.startedAt).getTime() - new Date(workflowExecution.startedAt).getTime();
+}
+
+/**
+ * Extracts or calculates queue delay in milliseconds from workflow execution.
+ * Queue delay is the time from when a workflow was scheduled/queued to when it started executing.
+ *
+ * Priority:
+ * 1. Use queueMetrics.queueDelayMs if available (most accurate, includes concurrency queue delays)
+ * 2. For scheduled workflows, calculate from taskRunAt and startedAt if available
+ * 3. Return undefined if insufficient data
+ *
+ * @param workflowExecution - The workflow execution
+ * @returns Queue delay in milliseconds, or undefined if not available or not applicable
+ */
+export function extractQueueDelayMs(workflowExecution: EsWorkflowExecution): number | undefined {
+  // First, try to use queueMetrics if available (most accurate)
+  if (
+    workflowExecution.queueMetrics?.queueDelayMs !== null &&
+    workflowExecution.queueMetrics?.queueDelayMs !== undefined
+  ) {
+    return workflowExecution.queueMetrics.queueDelayMs;
+  }
+
+  // For scheduled workflows, try to calculate from taskRunAt and startedAt
+  // taskRunAt represents when the task was scheduled to run
+  // startedAt represents when the workflow actually started executing
+  if (
+    workflowExecution.triggeredBy === 'scheduled' &&
+    workflowExecution.taskRunAt &&
+    workflowExecution.startedAt
+  ) {
+    try {
+      const taskRunAtTime = new Date(workflowExecution.taskRunAt).getTime();
+      const startedAtTime = new Date(workflowExecution.startedAt).getTime();
+
+      // Only return positive values (queue delay should be positive)
+      const queueDelay = startedAtTime - taskRunAtTime;
+      if (queueDelay >= 0) {
+        return queueDelay;
+      }
+    } catch (e) {
+      // Invalid date strings, return undefined
+      return undefined;
+    }
   }
 
   return undefined;

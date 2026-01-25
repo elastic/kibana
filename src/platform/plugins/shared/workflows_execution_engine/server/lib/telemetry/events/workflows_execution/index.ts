@@ -639,6 +639,13 @@ const workflowExecutionCancelledSchema: RootSchema<WorkflowExecutionCancelledPar
       optional: true,
     },
   },
+  cancelledBy: {
+    type: 'keyword',
+    _meta: {
+      description: 'Who cancelled the workflow',
+      optional: true,
+    },
+  },
   executedStepCount: {
     type: 'integer',
     _meta: {
