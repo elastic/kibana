@@ -45,7 +45,8 @@
     "@kbn/agent-builder-browser",
     "@kbn/sse-utils-server",
     "@kbn/kibana-utils-plugin",
-    "@kbn/server-route-repository-client"
+    "@kbn/server-route-repository-client",
+    "@kbn/apm-types"
   ],
   "exclude": ["target/**/*"]
 }
