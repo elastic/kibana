@@ -141,7 +141,10 @@ export async function updateDSFailureStore(
   });
 }
 
-export async function loadIndices(onIndicesLoaded: (indices: Index[]) => void) {
+export async function loadIndices(
+  onIndicesLoaded: (indices: Index[]) => void,
+  onEnrichmentError: (source: string) => void
+) {
   // Run all requests in parallel
   const enrichedPromises = indexDataEnricher.enrichIndices(httpService.httpClient);
 
@@ -163,9 +166,11 @@ export async function loadIndices(onIndicesLoaded: (indices: Index[]) => void) {
           }
         });
         onIndicesLoaded(Object.values(indices));
-      } else {
-        // todo need to add these to state
-        // console.error(enriched.error);
+      }
+
+      // If an enricher fails, keep the index list stable but surface the issue to the UI.
+      if (enriched.error) {
+        onEnrichmentError(enriched.source);
       }
     });
   });

@@ -301,6 +301,35 @@ export class IndexTable extends Component {
     );
   }
 
+  renderEnrichmentErrors() {
+    const { indicesEnrichmentErrors } = this.props;
+    if (!indicesEnrichmentErrors || indicesEnrichmentErrors.length === 0) {
+      return null;
+    }
+
+    return (
+      <>
+        <EuiCallOut
+          iconType="warning"
+          color="warning"
+          data-test-subj="indicesEnrichmentErrorCallout"
+          title={i18n.translate('xpack.idxMgmt.indexTable.enrichmentErrorTitle', {
+            defaultMessage: 'Some index details could not be loaded',
+          })}
+        >
+          <FormattedMessage
+            id="xpack.idxMgmt.indexTable.enrichmentErrorDescription"
+            defaultMessage="The following data sources failed to load: {sources}."
+            values={{
+              sources: indicesEnrichmentErrors.join(', '),
+            }}
+          />
+        </EuiCallOut>
+        <EuiSpacer size="m" />
+      </>
+    );
+  }
+
   onFilterChanged = ({ query, error }) => {
     if (error) {
       this.setState({ filterError: error });
@@ -520,6 +549,7 @@ export class IndexTable extends Component {
       loadIndices,
       indicesLoading,
       indicesError,
+      indicesEnrichmentErrors,
       allIndices,
       pager,
       pageChanged,
@@ -706,6 +736,8 @@ export class IndexTable extends Component {
               </EuiFlexGroup>
 
               {this.renderFilterError()}
+
+              {this.renderEnrichmentErrors()}
 
               <EuiSpacer size="m" />
 
