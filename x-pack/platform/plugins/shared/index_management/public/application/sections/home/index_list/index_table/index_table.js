@@ -549,7 +549,6 @@ export class IndexTable extends Component {
       loadIndices,
       indicesLoading,
       indicesError,
-      indicesEnrichmentErrors,
       allIndices,
       pager,
       pageChanged,
