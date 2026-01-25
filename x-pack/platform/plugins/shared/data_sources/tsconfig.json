@@ -41,6 +41,7 @@
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-plugin",
     "@kbn/deeplinks-workflows",
-    "@kbn/deeplinks-agent-builder"
+    "@kbn/deeplinks-agent-builder",
+    "@kbn/connector-schemas"
   ]
 }

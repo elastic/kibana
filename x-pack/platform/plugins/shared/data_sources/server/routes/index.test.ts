@@ -132,6 +132,11 @@ describe('registerRoutes', () => {
         page: 1,
       });
 
+      // Mock catalog to return iconType
+      mockDataCatalog.getCatalog.mockReturnValue({
+        get: jest.fn().mockReturnValue({ iconType: '.notion' }),
+      });
+
       registerRoutes(dependencies);
 
       const routeHandler = mockRouter.get.mock.calls[0][1];
@@ -197,6 +202,11 @@ describe('registerRoutes', () => {
 
       mockSavedObjectsClient.get.mockResolvedValue(mockDataSource);
 
+      // Mock catalog to return iconType
+      mockDataCatalog.getCatalog.mockReturnValue({
+        get: jest.fn().mockReturnValue({ iconType: '.notion' }),
+      });
+
       registerRoutes(dependencies);
 
       const routeHandler = mockRouter.get.mock.calls[1][1];
@@ -261,7 +271,7 @@ describe('registerRoutes', () => {
         body: {
           name: 'My Notion Data Source',
           type: 'notion',
-          token: 'secret-token-123',
+          credentials: 'secret-token-123',
         },
       });
       const mockResponse = httpServerMock.createResponseFactory();
@@ -272,7 +282,7 @@ describe('registerRoutes', () => {
         expect.objectContaining({
           name: 'My Notion Data Source',
           type: 'notion',
-          token: 'secret-token-123',
+          credentials: 'secret-token-123',
           dataSource: mockDataSource,
         })
       );
@@ -296,7 +306,7 @@ describe('registerRoutes', () => {
         body: {
           name: 'Invalid Data Source',
           type: 'invalid-type',
-          token: 'token',
+          credentials: 'token',
         },
       });
       const mockResponse = httpServerMock.createResponseFactory();
@@ -333,7 +343,7 @@ describe('registerRoutes', () => {
         body: {
           name: 'Test Data Source',
           type: 'notion',
-          token: 'token',
+          credentials: 'token',
         },
       });
       const mockResponse = httpServerMock.createResponseFactory();

@@ -156,13 +156,14 @@ describe('attachment_presentation', () => {
       expect(prompt).toBe('');
     });
 
-    it('should return inline mode instructions', () => {
+    it('should return inline mode instructions with attachment_read guidance', () => {
       const attachments = [createMockAttachment('1', 'text', 'Content')];
       const presentation = prepareAttachmentPresentation(attachments);
       const prompt = getAttachmentSystemPrompt(presentation);
 
       expect(prompt).toContain('1 attachment');
-      expect(prompt).toContain('shown inline');
+      expect(prompt).toContain('attachment_read');
+      expect(prompt).toContain('content truncated');
       expect(prompt).not.toContain('MUST use attachment tools');
     });
 

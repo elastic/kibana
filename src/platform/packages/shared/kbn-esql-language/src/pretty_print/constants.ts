@@ -25,7 +25,7 @@
  * GROK input "pattern1", "pattern2", "pattern3"
  * ```
  */
-export const commandsWithNoCommaArgSeparator = new Set(['dissect', 'sample', 'fork']);
+export const commandsWithNoCommaArgSeparator = new Set(['dissect', 'sample', 'fork', 'promql']);
 
 export const commandsWithSpecialCommaRules = new Map<string, (argIndex: number) => boolean>([
   ['grok', (argIndex: number) => argIndex > 1], // Comma before patterns starting from index 2

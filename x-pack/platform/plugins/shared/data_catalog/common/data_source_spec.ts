@@ -5,6 +5,19 @@
  * 2.0.
  */
 
+import type { SavedObjectAttributes } from '@kbn/core/server';
+
+/**
+ * Type for Stack connector secrets.
+ */
+export interface ConnectorSecrets extends SavedObjectAttributes {
+  token?: string;
+  apiKey?: string;
+  user?: string;
+  password?: string;
+  secretHeaders?: Record<string, string>;
+}
+
 /**
  * OAuth providers supported by EARS
  */
@@ -47,6 +60,7 @@ export interface CustomOAuthConfiguration {
 export interface StackConnectorConfig {
   type: string;
   config: Record<string, unknown>;
+  importedTools?: string[];
 }
 
 /**
@@ -64,6 +78,12 @@ export interface DataSource {
   name: string;
   /** Optional description of the data type */
   description?: string;
+  /**
+   * Icon type for UI display (e.g., '.github', '.notion', '.salesforce').
+   * This determines which icon to show in the UI and is separate from the stack connector type.
+   * Must correspond to an icon registered in @kbn/connector-specs ConnectorIconsMap.
+   */
+  iconType: string;
 
   /**
    * Generates workflows for interacting with the third-party data source.
