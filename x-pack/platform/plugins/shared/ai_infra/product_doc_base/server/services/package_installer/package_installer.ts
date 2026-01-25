@@ -6,12 +6,14 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import { readFile } from 'fs/promises';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   getArtifactName,
   getProductDocIndexName,
   getSecurityLabsArtifactName,
   getSecurityLabsIndexName,
+  getOpenApiSpecIndexName,
   DocumentationProduct,
   type ProductName,
 } from '@kbn/product-doc-common';
@@ -20,6 +22,7 @@ import { cloneDeep } from 'lodash';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { isImpliedDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
+import type { OpenAPIV3 } from 'openapi-types';
 import type { ProductDocInstallClient } from '../doc_install_status';
 import type { SecurityLabsStatusResponse } from '../doc_manager/types';
 import {
@@ -30,6 +33,7 @@ import {
   ensureDefaultElserDeployed,
   type ZipArchive,
   ensureInferenceDeployed,
+  ingestOpenApiSpec,
 } from './utils';
 import { majorMinor, latestVersion } from './utils/semver';
 import {
@@ -39,8 +43,8 @@ import {
   createIndex,
   populateIndex,
 } from './steps';
-import { overrideInferenceSettings } from './steps/create_index';
 
+import { overrideInferenceSettings } from './steps/create_index';
 interface PackageInstallerOpts {
   artifactsFolder: string;
   logger: Logger;
@@ -519,6 +523,115 @@ export class PackageInstaller {
     }
 
     await this.installSecurityLabs({ version: latest, inferenceId });
+  }
+
+  // OpenAPI Spec methods
+
+  /**
+   * Install OpenAPI Spec content from the CDN.
+   */
+  async installOpenAPISpec({
+    version,
+    inferenceId,
+  }: {
+    version?: string;
+    inferenceId?: string;
+  }): Promise<void> {
+    const effectiveInferenceId = inferenceId || this.elserInferenceId;
+
+    this.log.info(
+      `Starting OpenAPI Spec installation${
+        version ? ` for version [${version}]` : ''
+      } with inference ID [${effectiveInferenceId}]`
+    );
+
+    // Uninstall existing OpenAPI Spec content first
+    // await this.uninstallOpenApiSpec({ inferenceId: effectiveInferenceId });
+
+    let zipArchive: ZipArchive | undefined;
+    let selectedVersion: string | undefined;
+    try {
+      // Ensure ELSER is deployed
+      await ensureDefaultElserDeployed({
+        client: this.esClient,
+      });
+
+      await this.productDocClient.setOpenapiSpecInstallationStarted({
+        productName: 'elasticsearch',
+        inferenceId: effectiveInferenceId,
+      });
+
+      const url = 'https://www.elastic.co/docs/api/doc/elasticsearch.json';
+      const pathAtVolume = `${this.artifactsFolder}/elasticsearch.json`;
+
+      this.log.debug(`Downloading OpenAPI Spec from [${url}] to [${pathAtVolume}]`);
+      const downloadedFullPath = await downloadToDisk(url, pathAtVolume);
+      const openApiSpec: OpenAPIV3.Document = JSON.parse(
+        await readFile(downloadedFullPath, 'utf8')
+      );
+
+      const indexName = getOpenApiSpecIndexName(effectiveInferenceId);
+
+      await ingestOpenApiSpec({
+        openApiSpec,
+        indexName,
+        esClient: this.esClient,
+        logger: this.log,
+      });
+
+      await this.productDocClient.setOpenapiSpecInstallationSuccessful({
+        productName: 'elasticsearch',
+        indexName,
+        inferenceId: effectiveInferenceId,
+      });
+
+      this.log.info(`OpenAPI Spec installation successful for version [${selectedVersion}]`);
+    } catch (e) {
+      let message = e.message;
+      if (message.includes('End of central directory record signature not found.')) {
+        message = i18n.translate(
+          'aiInfra.productDocBase.packageInstaller.noOpenApiSpecArtifactAvailable',
+          {
+            values: { inferenceId: effectiveInferenceId },
+            defaultMessage:
+              'No OpenAPI Spec artifact available for Inference ID [{inferenceId}]. Please contact your administrator.',
+          }
+        );
+      }
+      this.log.error(`Error during OpenAPI Spec installation: ${message}`);
+      await this.productDocClient.setOpenapiSpecInstallationFailed({
+        productName: 'elasticsearch',
+        failureReason: message,
+        inferenceId: effectiveInferenceId,
+      });
+      throw e;
+    } finally {
+      zipArchive?.close();
+    }
+  }
+
+  /**
+   * Get the installation status of OpenAPI Spec content.
+   */
+  async getOpenApiSpecStatus({
+    inferenceId,
+  }: {
+    inferenceId?: string;
+  }): Promise<SecurityLabsStatusResponse> {
+    try {
+      const effectiveInferenceId = inferenceId ?? this.elserInferenceId;
+      const status = await this.productDocClient.getOpenapiSpecInstallationStatus({
+        inferenceId: effectiveInferenceId,
+      });
+
+      return status;
+    } catch (error) {
+      this.log.error(`Error checking OpenAPI Spec status: ${error.message}`);
+      return {
+        status: 'error',
+        failureReason: error.message,
+      };
+    }
   }
 }
 

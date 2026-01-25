@@ -387,6 +387,65 @@ export class DocumentationManager implements DocumentationManagerAPI {
       };
     }
   }
+
+  // openapi spec methods
+  async installOpenApiSpec(options: SecurityLabsInstallOptions): Promise<void> {
+    const { request, inferenceId, version } = options;
+
+    const license = await this.licensing.getLicense();
+    if (!checkLicense(license)) {
+      throw new Error('OpenAPI Spec content requires an enterprise license');
+    }
+
+    if (!this.packageInstaller) {
+      throw new Error('PackageInstaller not available');
+    }
+
+    if (request) {
+      this.auditService.asScoped(request).log({
+        message:
+          `User is requesting installation of OpenAPI Spec content for AI Assistants.` +
+          (inferenceId ? ` Inference ID=[${inferenceId}]` : '') +
+          (version ? ` Version=[${version}]` : ''),
+        event: {
+          action: 'openapi_spec_create',
+          category: ['database'],
+          type: ['creation'],
+          outcome: 'unknown',
+        },
+      });
+    }
+
+    try {
+      await this.packageInstaller.installOpenAPISpec({
+        version,
+        inferenceId,
+      });
+    } catch (error) {
+      this.logger.error(`Failed to install OpenAPI Spec content: ${error.message}`);
+      throw error;
+    }
+  }
+
+  async getOpenApiSpecStatus({
+    inferenceId,
+  }: {
+    inferenceId: string;
+  }): Promise<SecurityLabsStatusResponse> {
+    if (!this.packageInstaller) {
+      return { status: 'uninstalled' };
+    }
+
+    try {
+      return await this.packageInstaller.getOpenApiSpecStatus({ inferenceId });
+    } catch (error) {
+      this.logger.error(`Failed to get OpenAPI Spec status: ${error.message}`);
+      return {
+        status: 'error',
+        failureReason: error.message,
+      };
+    }
+  }
 }
 
 const convertTaskStatus = (taskStatus: TaskStatus): InstallationStatus | 'unknown' => {
