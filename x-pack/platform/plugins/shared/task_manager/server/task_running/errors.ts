@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isResponseError } from '@kbn/es-errors';
+import { isUnauthorizedError } from '@kbn/es-errors';
 
 import { TaskErrorSource } from '../../common';
 
@@ -72,7 +72,7 @@ export function getErrorSource(error: Error | DecoratedError): TaskErrorSource |
     return error[source];
   }
 
-  if (isResponseError(error) && error.statusCode === 401) {
+  if (isUnauthorizedError(error)) {
     return TaskErrorSource.USER;
   }
 }
