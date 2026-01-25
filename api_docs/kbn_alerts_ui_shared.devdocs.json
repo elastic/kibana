@@ -2861,7 +2861,7 @@
             "label": "alertStatus",
             "description": [],
             "signature": [
-              "\"active\" | \"recovered\" | \"untracked\""
+              "\"active\" | \"recovered\" | \"untracked\" | \"delayed\""
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/alert_lifecycle_status_badge/index.tsx",
             "lineNumber": 18,

@@ -17209,7 +17209,7 @@
           "\"SLO_DETAILS_LOCATOR\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
-        "lineNumber": 12,
+        "lineNumber": 13,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -17226,7 +17226,7 @@
           "\"SLO_EDIT_LOCATOR\""
         ],
         "path": "src/platform/packages/shared/deeplinks/observability/locators/slo.ts",
-        "lineNumber": 14,
+        "lineNumber": 15,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

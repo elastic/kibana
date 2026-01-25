@@ -2880,7 +2880,19 @@
               "section": "def-common.FailureStoreStatsResponse",
               "text": "FailureStoreStatsResponse"
             },
-            "; }, undefined>; \"POST /internal/streams/{name}/processing/_suggestions/date\": ",
+            "; }, undefined>; \"GET /internal/streams/{name}/processing/_failure_store_samples\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"GET /internal/streams/{name}/processing/_failure_store_samples\", any, ",
+            "StreamsRouteHandlerResources",
+            ", ",
+            "FailureStoreSamplesResponse",
+            ", undefined>; \"POST /internal/streams/{name}/processing/_suggestions/date\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -5944,7 +5956,19 @@
             "section": "def-common.FailureStoreStatsResponse",
             "text": "FailureStoreStatsResponse"
           },
-          "; }, undefined>; \"POST /internal/streams/{name}/processing/_suggestions/date\": ",
+          "; }, undefined>; \"GET /internal/streams/{name}/processing/_failure_store_samples\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/streams/{name}/processing/_failure_store_samples\", any, ",
+          "StreamsRouteHandlerResources",
+          ", ",
+          "FailureStoreSamplesResponse",
+          ", undefined>; \"POST /internal/streams/{name}/processing/_suggestions/date\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
