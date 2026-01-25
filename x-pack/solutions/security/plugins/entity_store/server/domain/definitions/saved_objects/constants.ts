@@ -34,7 +34,7 @@ export const LogExtractionState = z.object({
     .regex(/[smdh]$/)
     .default('30s'),
   paginationTimestamp: z.string().optional(),
-  lastExecutionTimestamp: z.string().default(''),
+  lastExecutionTimestamp: z.string().optional(),
 });
 
 export type EngineError = z.infer<typeof EngineError>;

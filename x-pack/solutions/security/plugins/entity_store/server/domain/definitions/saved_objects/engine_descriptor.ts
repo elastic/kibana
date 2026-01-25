@@ -35,14 +35,14 @@ export class EngineDescriptorClient {
         });
     }
 
-    async init(entityType: EntityType): Promise<EngineDescriptor> {
+    async init(entityType: EntityType): Promise<EngineDescriptor | void> {
         const defaultLogExtractionState = LogExtractionState.parse({});
         const defaultVersionState = VersionState.parse({});
-
         const engineDescriptor = await this.find(entityType);
 
         if (engineDescriptor.total > 0) {
-            throw new Error(`Found existing engine descriptor for entity type ${entityType}`);
+            this.logger.error(`Found existing engine descriptor for entity type ${entityType}`);
+            return;
         }
 
         const id = this.getSavedObjectId(entityType);
@@ -62,6 +62,12 @@ export class EngineDescriptorClient {
     }
 
     async delete(entityType: EntityType) {
+        const engineDescriptor = await this.find(entityType);
+
+        if (engineDescriptor.total === 0) {
+            throw new Error(`No engine descriptor found for entity type ${entityType}`);
+        }
+
         const id = this.getSavedObjectId(entityType);
         this.logger.debug(`Deleting engine descriptor with id ${id}`);
         this.soClient.delete(EngineDescriptorTypeName, id);

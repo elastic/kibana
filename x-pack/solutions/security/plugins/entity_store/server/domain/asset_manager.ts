@@ -13,6 +13,7 @@ import type { EntityType, ManagedEntityDefinition } from './definitions/entity_s
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../tasks/extract_entity_task';
 import { installElasticsearchAssets, uninstallElasticsearchAssets } from './assets/install_assets';
 import { EngineDescriptorClient } from './definitions/saved_objects';
+import { LogExtractionParams } from '../routes/constants';
 
 interface AssetManagerDependencies {
   logger: Logger;
@@ -37,12 +38,12 @@ export class AssetManager {
     this.namespace = deps.namespace;
   }
 
-  public async init(type: EntityType, logExtractionFrequency?: string) {
+  public async init(type: EntityType, logExtractionParams?: LogExtractionParams) {
     await this.install(type); // TODO: async
-    await this.start(type, logExtractionFrequency);
+    await this.start(type, logExtractionParams);
   }
 
-  public async start(type: EntityType, logExtractionFrequency?: string) {
+  public async start(type: EntityType, logExtractionParams?: LogExtractionParams) {
     this.logger.debug(`Scheduling extract entity task for type: ${type}`);
 
     // TODO: if this fails, set status to failed
@@ -50,7 +51,7 @@ export class AssetManager {
       logger: this.logger,
       taskManager: this.taskManager,
       type,
-      frequency: logExtractionFrequency,
+      logExtractionParams,
       namespace: this.namespace,
     });
   }

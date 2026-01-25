@@ -6,6 +6,7 @@
  */
 
 import type { AuthzEnabled } from '@kbn/core/server';
+import { z } from '@kbn/zod';
 
 export const DEFAULT_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
   requiredPrivileges: ['securitySolution'],
@@ -19,3 +20,29 @@ export const API_VERSIONS = {
     v2: '2',
   },
 };
+
+export type LogExtractionParams = z.infer<typeof LogExtractionParams>;
+export const LogExtractionParams = z.object({
+  filter: z.string().optional(),
+  fieldHistoryLength: z.number().int().optional().default(10),
+  additionalIndexPattern: z.string().optional(),
+  lookbackPeriod: z
+    .string()
+    .regex(/[smdh]$/)
+    .optional()
+    .default('3h'),
+  timeout: z
+    .string()
+    .regex(/[smdh]$/)
+    .optional(),
+  frequency: z
+    .string()
+    .regex(/[smdh]$/)
+    .optional(),
+  delay: z
+    .string()
+    .regex(/[smdh]$/)
+    .optional()
+    .default('1m'),
+  docsLimit: z.number().int().optional().default(-1),
+});
