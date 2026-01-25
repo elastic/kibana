@@ -51,8 +51,7 @@ export const DiscoverRouter = ({ services, ...routeProps }: DiscoverRouterProps)
   );
 };
 
-// this exists as a separate component to allow the tests to gather the routes
-export const DiscoverRoutes = ({
+const DiscoverRoutes = ({
   ...routeProps
 }: Pick<DiscoverRouterProps, 'customizationContext' | 'onAppLeave'>) => {
   return (
