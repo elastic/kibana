@@ -13,7 +13,7 @@ const os = require('node:os');
 const yaml = require('js-yaml');
 const { REPO_ROOT } = require('@kbn/repo-info');
 const { createComponentNameGenerator } = require('./component_name_generator');
-const { createProcessSchema } = require('./process_schema');
+const { createProcessSchema, stripMetadata } = require('./process_schema');
 
 /**
  * Deep clone helper to avoid mutating original object
@@ -46,13 +46,36 @@ const deepClone = (obj) => {
  * @param {string} relativeFilePath - Path to OAS YAML file relative to repository root
  * @param {Object} options - Configuration options
  * @param {Object} options.log - Logger instance with info/debug/warn/error methods (defaults to console)
+ * @param {boolean} options.extractPrimitives - Extract primitive properties as separate components (default: false)
+ * @param {boolean} options.removeProperties - Remove extracted properties from parent components (default: false)
+ * @param {boolean} options.preserveMetadata - Preserve metadata fields like additionalProperties, default, description (default: true)
+ * @param {boolean} options.extractEmpty - Extract empty object schemas { type: 'object' } (default: false)
  * @returns {Promise<void>}
  *
  * @example
  * // Componentize a single file
  * await componentizeObjectSchemas('oas_docs/bundle.yaml', { log: customLogger });
+ *
+ * @example
+ * // Componentize with strategy options
+ * await componentizeObjectSchemas('oas_docs/bundle.yaml', {
+ *   log: customLogger,
+ *   extractPrimitives: true,
+ *   removeProperties: true,
+ *   preserveMetadata: false,
+ *   extractEmpty: true
+ * });
  */
-const componentizeObjectSchemas = async (relativeFilePath, { log = console } = {}) => {
+const componentizeObjectSchemas = async (
+  relativeFilePath,
+  {
+    log = console,
+    extractPrimitives = false,
+    removeProperties = false,
+    preserveMetadata = true,
+    extractEmpty = false,
+  } = {}
+) => {
   const absPath = path.resolve(REPO_ROOT, relativeFilePath);
   let tempFilePath = null;
 
@@ -82,8 +105,22 @@ const componentizeObjectSchemas = async (relativeFilePath, { log = console } = {
       maxDepth: 0,
     };
 
-    // Create the schema processor with proper context
-    const processSchema = createProcessSchema(components, nameGenerator, stats, log);
+    // Store strategy options for use when storing top-level components
+    const strategyOptions = {
+      extractPrimitives,
+      removeProperties,
+      preserveMetadata,
+      extractEmpty,
+    };
+
+    // Create the schema processor with proper context and strategy options
+    const processSchema = createProcessSchema(
+      components,
+      nameGenerator,
+      stats,
+      log,
+      strategyOptions
+    );
 
     // MAIN FLOW
     //Process all paths
@@ -140,7 +177,11 @@ const componentizeObjectSchemas = async (relativeFilePath, { log = console } = {
                     log.warn(`Component name collision: ${name} - appending counter`);
                   }
 
-                  components[name] = deepClone(schema);
+                  // Apply metadata stripping if needed
+                  const schemaToStore = strategyOptions.preserveMetadata
+                    ? deepClone(schema)
+                    : stripMetadata(deepClone(schema));
+                  components[name] = schemaToStore;
                   stats.schemasExtracted++;
                   log.debug(`Extracted top-level request schema ${name}`);
 
@@ -149,7 +190,7 @@ const componentizeObjectSchemas = async (relativeFilePath, { log = console } = {
 
                   // Now recursively process the extracted component with fresh context
                   // Reset propertyPath since this is now a standalone component
-                  processSchema(components[name], {
+                  processSchema(schemaToStore, {
                     method: baseContext.method,
                     path: baseContext.path,
                     operationId: baseContext.operationId,
@@ -197,7 +238,11 @@ const componentizeObjectSchemas = async (relativeFilePath, { log = console } = {
                       log.warn(`Component name collision: ${name} - appending counter`);
                     }
 
-                    components[name] = deepClone(schema);
+                    // Apply metadata stripping if needed
+                    const schemaToStore = strategyOptions.preserveMetadata
+                      ? deepClone(schema)
+                      : stripMetadata(deepClone(schema));
+                    components[name] = schemaToStore;
                     stats.schemasExtracted++;
                     log.debug(`Extracted top-level response schema ${name}`);
 
@@ -206,7 +251,7 @@ const componentizeObjectSchemas = async (relativeFilePath, { log = console } = {
 
                     // Now recursively process the extracted component with fresh context
                     // Reset propertyPath since this is now a standalone component
-                    processSchema(components[name], {
+                    processSchema(schemaToStore, {
                       method: baseContext.method,
                       path: baseContext.path,
                       operationId: baseContext.operationId,

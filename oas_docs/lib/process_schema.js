@@ -57,6 +57,64 @@ function hasStructuralFields(schema) {
 }
 
 /**
+ * Check if a schema is a primitive type (string, number, boolean, integer)
+ * @param {Object} schema - The schema to check
+ * @returns {boolean} - True if schema is a primitive type
+ */
+function isPrimitiveType(schema) {
+  if (!schema || typeof schema !== 'object') return false;
+  const primitiveTypes = ['string', 'number', 'boolean', 'integer'];
+  return (
+    primitiveTypes.includes(schema.type) &&
+    !schema.properties &&
+    !schema.oneOf &&
+    !schema.anyOf &&
+    !schema.allOf
+  );
+}
+
+/**
+ * Strip metadata fields from a schema, keeping only structural fields
+ * @param {Object} schema - The schema to strip
+ * @returns {Object} - Schema with metadata removed
+ */
+function stripMetadata(schema) {
+  if (!schema || typeof schema !== 'object') return schema;
+  const result = {};
+  const structuralFields = [
+    'type',
+    'properties',
+    'items',
+    'additionalProperties',
+    'patternProperties',
+    'oneOf',
+    'anyOf',
+    'allOf',
+    'required',
+    '$ref',
+  ];
+  for (const [key, value] of Object.entries(schema)) {
+    if (structuralFields.includes(key)) {
+      if (key === 'properties' && typeof value === 'object') {
+        result[key] = {};
+        for (const [propName, propSchema] of Object.entries(value)) {
+          result[key][propName] = stripMetadata(propSchema);
+        }
+      } else if (key === 'items' && typeof value === 'object') {
+        result[key] = stripMetadata(value);
+      } else if (key === 'additionalProperties' && typeof value === 'object') {
+        result[key] = stripMetadata(value);
+      } else if (Array.isArray(value)) {
+        result[key] = value.map((item) => (typeof item === 'object' ? stripMetadata(item) : item));
+      } else {
+        result[key] = value;
+      }
+    }
+  }
+  return result;
+}
+
+/**
  * Creates a schema processing function that recursively extracts inline schemas into components.
  *
  * The processor extracts:
@@ -74,6 +132,11 @@ function hasStructuralFields(schema) {
  * @param {number} stats.allOfCount - Counter for allOf items extracted
  * @param {number} stats.maxDepth - Maximum recursion depth reached
  * @param {Object} log - Logger instance with debug/warn methods
+ * @param {Object} options - Strategy options
+ * @param {boolean} options.extractPrimitives - Extract primitive properties as separate components
+ * @param {boolean} options.removeProperties - Remove extracted properties from parent components
+ * @param {boolean} options.preserveMetadata - Preserve metadata fields like additionalProperties, default, description
+ * @param {boolean} options.extractEmpty - Extract empty object schemas { type: 'object' }
  * @returns {Function} processSchema function
  *
  * @example
@@ -81,7 +144,12 @@ function hasStructuralFields(schema) {
  * const nameGen = createComponentNameGenerator();
  * const stats = { schemasExtracted: 0, oneOfCount: 0, anyOfCount: 0, allOfCount: 0, maxDepth: 0 };
  * const log = console;
- * const processSchema = createProcessSchema(components, nameGen, stats, log);
+ * const processSchema = createProcessSchema(components, nameGen, stats, log, {
+ *   extractPrimitives: false,
+ *   removeProperties: false,
+ *   preserveMetadata: true,
+ *   extractEmpty: false
+ * });
  *
  * // Process a schema with oneOf
  * const schema = {
@@ -95,10 +163,17 @@ function hasStructuralFields(schema) {
  * // Result: schema.oneOf items replaced with $ref, components populated
  * // schema.oneOf = [{ $ref: '#/components/schemas/...' }, { $ref: '#/components/schemas/...' }]
  */
-const createProcessSchema = (components, nameGenerator, stats, log) => {
+const createProcessSchema = (components, nameGenerator, stats, log, options = {}) => {
   if (!components || !nameGenerator || !stats || !log) {
     throw new Error('components, nameGenerator, stats, and log are required');
   }
+
+  const {
+    extractPrimitives = false,
+    removeProperties = false,
+    preserveMetadata = true,
+    extractEmpty = false,
+  } = options;
 
   function processSchema(schema, context, depth = 0) {
     // base case: not a schema or the schema isn't an object
@@ -136,7 +211,9 @@ const createProcessSchema = (components, nameGenerator, stats, log) => {
             log.warn(`Component name collision: ${name} - appending counter`);
           }
 
-          components[name] = item;
+          // Apply metadata stripping if needed
+          const itemToStore = preserveMetadata ? item : stripMetadata(item);
+          components[name] = itemToStore;
           // Update stats
           stats.schemasExtracted++;
 
@@ -147,7 +224,7 @@ const createProcessSchema = (components, nameGenerator, stats, log) => {
           log.debug(`Extracted ${name}`);
 
           // Recursively process the extracted item until all compositions are extracted
-          processSchema(item, { ...context, depth: depth + 1 }, depth + 1);
+          processSchema(itemToStore, { ...context, depth: depth + 1 }, depth + 1);
 
           // Return reference
           return { $ref: `#/components/schemas/${name}` };
@@ -157,37 +234,63 @@ const createProcessSchema = (components, nameGenerator, stats, log) => {
 
     // Recurse into properties
     if (schema.properties && typeof schema.properties === 'object') {
+      const propertiesToRemove = [];
       Object.entries(schema.properties).forEach(([propName, propSchema]) => {
         const propContext = {
           ...context,
           propertyPath: [...(context.propertyPath || []), propName],
         };
-        // Extract nested objects as components if they have structural fields
-        // Properties are already nested by definition, so extract them if they have content
-        if (
-          propSchema &&
-          typeof propSchema === 'object' &&
-          propSchema.type === 'object' &&
-          hasStructuralFields(propSchema)
-        ) {
-          const name = nameGenerator(propContext, 'property');
-          // Check if name exists
-          if (components[name]) {
-            log.warn(`Component name already exists: ${name} - appending counter`);
+
+        let shouldExtract = false;
+        let extractedName = null;
+
+        // Check if we should extract this property
+        if (propSchema && typeof propSchema === 'object') {
+          // Extract empty objects if extractEmpty is true
+          if (extractEmpty && propSchema.type === 'object' && !hasStructuralFields(propSchema)) {
+            shouldExtract = true;
           }
-          // Store the object schema in components
-          components[name] = { ...propSchema };
+          // Extract objects with structural fields
+          else if (propSchema.type === 'object' && hasStructuralFields(propSchema)) {
+            shouldExtract = true;
+          }
+          // Extract primitives if extractPrimitives is true
+          else if (extractPrimitives && isPrimitiveType(propSchema)) {
+            shouldExtract = true;
+          }
+        }
+
+        if (shouldExtract) {
+          extractedName = nameGenerator(propContext, 'property');
+          // Check if name exists
+          if (components[extractedName]) {
+            log.warn(`Component name already exists: ${extractedName} - appending counter`);
+          }
+          // Apply metadata stripping if needed
+          const schemaToStore = preserveMetadata ? { ...propSchema } : stripMetadata(propSchema);
+          components[extractedName] = schemaToStore;
           stats.schemasExtracted++;
-          log.debug(`Extracted property object ${name}`);
-          // Recursively process the extracted object
-          processSchema(propSchema, propContext, depth + 1);
-          // Replace the inline object with a reference
-          schema.properties[propName] = { $ref: `#/components/schemas/${name}` };
+          log.debug(`Extracted property ${extractedName}`);
+          // Recursively process the extracted schema
+          processSchema(schemaToStore, propContext, depth + 1);
+          // Replace the inline schema with a reference
+          schema.properties[propName] = { $ref: `#/components/schemas/${extractedName}` };
+          // Mark for removal if removeProperties is true
+          if (removeProperties) {
+            propertiesToRemove.push(propName);
+          }
         } else {
-          // Not an object to extract, just recurse
+          // Not extracting, just recurse
           processSchema(propSchema, propContext, depth + 1);
         }
       });
+
+      // Remove extracted properties from parent if removeProperties is true
+      if (removeProperties && propertiesToRemove.length > 0) {
+        propertiesToRemove.forEach((propName) => {
+          delete schema.properties[propName];
+        });
+      }
     }
 
     // Recurse into array items
@@ -198,23 +301,30 @@ const createProcessSchema = (components, nameGenerator, stats, log) => {
       };
       // Extract nested objects as components if they have structural fields
       // Array items are already nested by definition, so extract them if they have content
-      if (
-        schema.items &&
-        typeof schema.items === 'object' &&
-        schema.items.type === 'object' &&
-        hasStructuralFields(schema.items)
-      ) {
+      let shouldExtractItem = false;
+      if (schema.items && typeof schema.items === 'object') {
+        if (extractEmpty && schema.items.type === 'object' && !hasStructuralFields(schema.items)) {
+          shouldExtractItem = true;
+        } else if (schema.items.type === 'object' && hasStructuralFields(schema.items)) {
+          shouldExtractItem = true;
+        } else if (extractPrimitives && isPrimitiveType(schema.items)) {
+          shouldExtractItem = true;
+        }
+      }
+
+      if (shouldExtractItem) {
         const name = nameGenerator(itemContext, 'arrayItem');
         // Check if name exists
         if (components[name]) {
           log.warn(`Component name already exists: ${name} - appending counter`);
         }
-        // Store object schema in components
-        components[name] = { ...schema.items };
+        // Apply metadata stripping if needed
+        const itemToStore = preserveMetadata ? { ...schema.items } : stripMetadata(schema.items);
+        components[name] = itemToStore;
         stats.schemasExtracted++;
         log.debug(`Extracted array item object ${name}`);
         // process extracted object
-        processSchema(schema.items, itemContext, depth + 1);
+        processSchema(itemToStore, itemContext, depth + 1);
         // Replace inline object with reference
         schema.items = { $ref: `#/components/schemas/${name}` };
       } else {
@@ -231,21 +341,30 @@ const createProcessSchema = (components, nameGenerator, stats, log) => {
       };
       // Extract nested objects as components if they have structural fields
       // AdditionalProperties are already nested by definition, so extract them if they have content
-      if (
-        schema.additionalProperties.type === 'object' &&
-        hasStructuralFields(schema.additionalProperties)
-      ) {
+      let shouldExtractAddlProp = false;
+      if (schema.additionalProperties.type === 'object') {
+        if (extractEmpty && !hasStructuralFields(schema.additionalProperties)) {
+          shouldExtractAddlProp = true;
+        } else if (hasStructuralFields(schema.additionalProperties)) {
+          shouldExtractAddlProp = true;
+        }
+      }
+
+      if (shouldExtractAddlProp) {
         const name = nameGenerator(addlPropContext, 'additionalProperty');
         // Check if name exists
         if (components[name]) {
           log.warn(`Component name already exists: ${name} - appending counter`);
         }
-        // Store the object schema in components
-        components[name] = { ...schema.additionalProperties };
+        // Apply metadata stripping if needed
+        const addlPropToStore = preserveMetadata
+          ? { ...schema.additionalProperties }
+          : stripMetadata(schema.additionalProperties);
+        components[name] = addlPropToStore;
         stats.schemasExtracted++;
         log.debug(`Extracted additionalProperties object ${name}`);
         // Recursively process the extracted object
-        processSchema(schema.additionalProperties, addlPropContext, depth + 1);
+        processSchema(addlPropToStore, addlPropContext, depth + 1);
         // Replace the inline object with a reference
         schema.additionalProperties = { $ref: `#/components/schemas/${name}` };
       } else {
@@ -257,4 +376,4 @@ const createProcessSchema = (components, nameGenerator, stats, log) => {
   return processSchema;
 };
 
-module.exports = { createProcessSchema };
+module.exports = { createProcessSchema, stripMetadata };
