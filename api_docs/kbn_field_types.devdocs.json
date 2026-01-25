@@ -433,7 +433,7 @@
         "label": "KBN_FIELD_TYPES",
         "description": [],
         "path": "src/platform/packages/shared/kbn-field-types/src/types.ts",
-        "lineNumber": 70,
+        "lineNumber": 72,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
