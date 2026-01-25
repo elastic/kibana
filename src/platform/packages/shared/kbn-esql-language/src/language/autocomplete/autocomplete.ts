@@ -21,7 +21,10 @@ import { esqlCommandRegistry } from '../../commands';
 import { isHeaderCommand, Walker } from '../../ast';
 import { parse } from '../../parser';
 import { SuggestionOrderingEngine } from '../../shared';
-import { getCommandAutocompleteDefinitions } from '../../commands/registry/complete_items';
+import {
+  getCommandAutocompleteDefinitions,
+  createResourceBrowserSuggestion,
+} from '../../commands/registry/complete_items';
 import { ESQL_VARIABLES_PREFIX } from '../../commands/registry/constants';
 import { getRecommendedQueriesSuggestionsFromStaticTemplates } from '../../commands/registry/options/recommended_queries';
 import type {
@@ -84,25 +87,6 @@ export async function suggest(
   const activeProduct = resourceRetriever?.getActiveProduct?.();
   const licenseInstance = await resourceRetriever?.getLicense?.();
   const hasMinimumLicenseRequired = licenseInstance?.hasAtLeast;
-
-  // Helper to create resource browser suggestion
-  const createResourceBrowserSuggestion = (
-    label: string,
-    description: string,
-    commandId: string
-  ): ISuggestionItem => {
-    return {
-      label,
-      text: '',
-      kind: 'Folder',
-      detail: description,
-      command: {
-        title: label,
-        id: commandId,
-      },
-      sortText: '0', // Sort to top
-    };
-  };
 
   if (astContext.type === 'newCommand') {
     // propose main commands here

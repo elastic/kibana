@@ -477,3 +477,21 @@ export const getDateHistogramCompletionItem: (histogramBarTarget?: number) => IS
     sortText: '1',
     category: SuggestionCategory.CUSTOM_ACTION,
   });
+
+export function createResourceBrowserSuggestion(
+  label: string,
+  description: string,
+  commandId: string
+): ISuggestionItem {
+  return {
+    label,
+    text: '',
+    kind: 'Folder',
+    detail: description,
+    command: {
+      title: label,
+      id: commandId,
+    },
+    sortText: '0', // Sort to top
+  };
+}
