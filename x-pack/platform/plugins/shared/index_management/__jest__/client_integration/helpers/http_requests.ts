@@ -66,6 +66,9 @@ const registerHttpRequestMockHelpers = (
   const setLoadTemplatesResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('GET', `${API_BASE_PATH}/index_templates`, response, error);
 
+  const setLoadIndicesStatsResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('GET', `${API_BASE_PATH}/indices_stats`, response, error);
+
   /**
    * The indices list endpoint switched from returning an array (`/indices`) to returning
    * a record keyed by index name (`/indices_get`). Most tests still pass an array, so we
@@ -247,6 +250,7 @@ const registerHttpRequestMockHelpers = (
   };
   return {
     setLoadTemplatesResponse,
+    setLoadIndicesStatsResponse,
     setLoadIndicesResponse,
     setReloadIndicesResponse,
     setLoadDataStreamsResponse,

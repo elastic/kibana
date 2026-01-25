@@ -17,6 +17,7 @@ import { API_BASE_PATH, INTERNAL_API_BASE_PATH } from '../../../common';
 import { setupEnvironment } from '../helpers/setup_environment';
 import { renderHome } from '../helpers/render_home';
 import { httpService } from '../../../public/application/services/http';
+import { indexDataEnricher } from '../../../public/services';
 import {
   createIndexTableActions,
   createCreateIndexActions,
@@ -420,6 +421,26 @@ describe('<IndexManagementHome />', () => {
       expect(screen.queryByTestId('indexTableCell-status')).not.toBeInTheDocument();
       expect(screen.queryByTestId('indexTableCell-documents')).not.toBeInTheDocument();
       expect(screen.queryByTestId('indexTableCell-size')).not.toBeInTheDocument();
+    });
+
+    test('shows a warning callout when an index enricher fails', async () => {
+      httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
+      const originalEnrichers = [...indexDataEnricher.enrichers];
+      indexDataEnricher.add(async () => ({ source: 'test enricher', error: true }));
+
+      try {
+        await renderHome(httpSetup);
+
+        await screen.findByTestId('indexTable');
+        expect(screen.getByTestId('indexTableCell-name')).toHaveTextContent('test');
+
+        const callout = await screen.findByTestId('indicesEnrichmentErrorCallout');
+        expect(callout).toHaveTextContent('test enricher');
+      } finally {
+        // Restore enrichers to avoid polluting other tests.
+        (indexDataEnricher as any)._enrichers.length = 0;
+        originalEnrichers.forEach((enricher) => indexDataEnricher.add(enricher));
+      }
     });
   });
 
