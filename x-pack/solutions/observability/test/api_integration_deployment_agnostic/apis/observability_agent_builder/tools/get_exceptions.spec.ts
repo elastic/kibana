@@ -17,9 +17,9 @@ import {
   DEFAULT_LOG_EXCEPTION_SERVICES,
 } from '@kbn/synthtrace';
 import type { OtherResult } from '@kbn/agent-builder-common';
-import { OBSERVABILITY_GET_ERROR_GROUPS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools/get_error_groups/tool';
-import type { ErrorGroup } from '@kbn/observability-agent-builder-plugin/server/tools/get_error_groups/handler';
-import type { LogExceptionGroup } from '@kbn/observability-agent-builder-plugin/server/tools/get_error_groups/get_otel_log_exceptions';
+import { OBSERVABILITY_GET_EXCEPTIONS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools/get_exceptions/tool';
+import type { ErrorGroup } from '@kbn/observability-agent-builder-plugin/server/tools/get_exceptions/handler';
+import type { LogExceptionGroup } from '@kbn/observability-agent-builder-plugin/server/tools/get_exceptions/get_otel_log_exceptions';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import type { SynthtraceProvider } from '../../../services/synthtrace';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
@@ -87,7 +87,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const synthtrace = getService('synthtrace');
 
-  describe(`tool: ${OBSERVABILITY_GET_ERROR_GROUPS_TOOL_ID}`, function () {
+  describe(`tool: ${OBSERVABILITY_GET_EXCEPTIONS_TOOL_ID}`, function () {
     let agentBuilderApiClient: ReturnType<typeof createAgentBuilderApiClient>;
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
     let logsSynthtraceEsClient: LogsSynthtraceEsClient;
@@ -111,7 +111,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('returns error groups with expected structure', async () => {
       const results = await agentBuilderApiClient.executeTool<GetErrorGroupsToolResult>({
-        id: OBSERVABILITY_GET_ERROR_GROUPS_TOOL_ID,
+        id: OBSERVABILITY_GET_EXCEPTIONS_TOOL_ID,
         params: { start: START, end: END },
       });
 
@@ -139,7 +139,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       before(async () => {
         const results = await agentBuilderApiClient.executeTool<GetErrorGroupsToolResult>({
-          id: OBSERVABILITY_GET_ERROR_GROUPS_TOOL_ID,
+          id: OBSERVABILITY_GET_EXCEPTIONS_TOOL_ID,
           params: {
             start: START,
             end: END,
@@ -168,7 +168,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       before(async () => {
         const results = await agentBuilderApiClient.executeTool<GetErrorGroupsToolResult>({
-          id: OBSERVABILITY_GET_ERROR_GROUPS_TOOL_ID,
+          id: OBSERVABILITY_GET_EXCEPTIONS_TOOL_ID,
           params: {
             start: START,
             end: END,
@@ -195,7 +195,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       before(async () => {
         const results = await agentBuilderApiClient.executeTool<GetErrorGroupsToolResult>({
-          id: OBSERVABILITY_GET_ERROR_GROUPS_TOOL_ID,
+          id: OBSERVABILITY_GET_EXCEPTIONS_TOOL_ID,
           params: {
             start: START,
             end: END,
@@ -244,7 +244,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       before(async () => {
         const results = await agentBuilderApiClient.executeTool<GetErrorGroupsToolResult>({
-          id: OBSERVABILITY_GET_ERROR_GROUPS_TOOL_ID,
+          id: OBSERVABILITY_GET_EXCEPTIONS_TOOL_ID,
           params: {
             start: START,
             end: END,
@@ -275,7 +275,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('does not include error.stack_trace for errors without includeStackTrace', async () => {
         // Fetch without includeStackTrace
         const results = await agentBuilderApiClient.executeTool<GetErrorGroupsToolResult>({
-          id: OBSERVABILITY_GET_ERROR_GROUPS_TOOL_ID,
+          id: OBSERVABILITY_GET_EXCEPTIONS_TOOL_ID,
           params: {
             start: START,
             end: END,
@@ -300,7 +300,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       before(async () => {
         const results = await agentBuilderApiClient.executeTool<GetErrorGroupsToolResult>({
-          id: OBSERVABILITY_GET_ERROR_GROUPS_TOOL_ID,
+          id: OBSERVABILITY_GET_EXCEPTIONS_TOOL_ID,
           params: { start: START, end: END },
         });
 
@@ -340,7 +340,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       before(async () => {
         const results = await agentBuilderApiClient.executeTool<GetErrorGroupsToolResult>({
-          id: OBSERVABILITY_GET_ERROR_GROUPS_TOOL_ID,
+          id: OBSERVABILITY_GET_EXCEPTIONS_TOOL_ID,
           params: {
             start: START,
             end: END,
@@ -373,7 +373,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       before(async () => {
         const results = await agentBuilderApiClient.executeTool<GetErrorGroupsToolResult>({
-          id: OBSERVABILITY_GET_ERROR_GROUPS_TOOL_ID,
+          id: OBSERVABILITY_GET_EXCEPTIONS_TOOL_ID,
           params: {
             start: START,
             end: END,
@@ -400,7 +400,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       before(async () => {
         const results = await agentBuilderApiClient.executeTool<GetErrorGroupsToolResult>({
-          id: OBSERVABILITY_GET_ERROR_GROUPS_TOOL_ID,
+          id: OBSERVABILITY_GET_EXCEPTIONS_TOOL_ID,
           params: { start: START, end: END },
         });
 

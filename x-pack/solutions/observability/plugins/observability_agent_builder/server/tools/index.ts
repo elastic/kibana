@@ -15,4 +15,4 @@ export { OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID } from './get_correlated_logs
 export { OBSERVABILITY_GET_HOSTS_TOOL_ID } from './get_hosts/tool';
 export { OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID } from './get_trace_metrics/tool';
 export { OBSERVABILITY_GET_INDEX_INFO_TOOL_ID } from './get_index_info';
-export { OBSERVABILITY_GET_ERROR_GROUPS_TOOL_ID } from './get_error_groups/tool';
+export { OBSERVABILITY_GET_EXCEPTIONS_TOOL_ID } from './get_exceptions/tool';

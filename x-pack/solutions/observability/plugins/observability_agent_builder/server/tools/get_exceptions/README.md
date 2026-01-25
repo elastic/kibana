@@ -1,4 +1,4 @@
-# get_error_groups
+# get_exceptions
 
 Retrieves error groups (structured exceptions) with counts and sample details.
 
@@ -7,10 +7,12 @@ Retrieves error groups (structured exceptions) with counts and sample details.
 This tool returns two arrays:
 
 ### `errorGroups`
+
 - Errors grouped by `error.grouping_key` (pre-computed hash based on exception type, stack trace fingerprint, and code location)
 - Includes errors from both Elastic APM agents and [OpenTelemetry span exceptions](https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-spans/)
 
 ### `logExceptionGroups`
+
 - [OpenTelemetry log exceptions](https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-logs/) from log indices that don't have a pre-computed grouping key
 - Grouped by message pattern using `categorize_text` aggregation
 
@@ -23,12 +25,12 @@ This tool returns two arrays:
 
 ## Relationship to other tools
 
-| Tool | Question it answers | Data |
-|------|---------------------|------|
-| `get_error_groups` | "What exceptions are being thrown?" | Errors and exceptions, grouped |
-| `get_log_categories` | "What's being logged?" | All logs, grouped by message pattern |
-| `get_trace_metrics` | "What's the service health?" | Transaction metrics (latency, throughput, failure rate) |
-| `get_correlated_logs` | "What happened before this error?" | Logs correlated by trace.id |
+| Tool                  | Question it answers                 | Data                                                    |
+| --------------------- | ----------------------------------- | ------------------------------------------------------- |
+| `get_exceptions`      | "What exceptions are being thrown?" | Errors and exceptions, grouped                          |
+| `get_log_categories`  | "What's being logged?"              | All logs, grouped by message pattern                    |
+| `get_trace_metrics`   | "What's the service health?"        | Transaction metrics (latency, throughput, failure rate) |
+| `get_correlated_logs` | "What happened before this error?"  | Logs correlated by trace.id                             |
 
 ## Examples
 
@@ -37,7 +39,7 @@ This tool returns two arrays:
 ```
 POST kbn://api/agent_builder/tools/_execute
 {
-  "tool_id": "observability.get_error_groups",
+  "tool_id": "observability.get_exceptions",
   "tool_params": {
     "start": "now-1h",
     "end": "now"
@@ -50,7 +52,7 @@ POST kbn://api/agent_builder/tools/_execute
 ```
 POST kbn://api/agent_builder/tools/_execute
 {
-  "tool_id": "observability.get_error_groups",
+  "tool_id": "observability.get_exceptions",
   "tool_params": {
     "start": "now-1h",
     "end": "now",
@@ -64,7 +66,7 @@ POST kbn://api/agent_builder/tools/_execute
 ```
 POST kbn://api/agent_builder/tools/_execute
 {
-  "tool_id": "observability.get_error_groups",
+  "tool_id": "observability.get_exceptions",
   "tool_params": {
     "start": "now-1h",
     "end": "now",
@@ -78,7 +80,7 @@ POST kbn://api/agent_builder/tools/_execute
 ```
 POST kbn://api/agent_builder/tools/_execute
 {
-  "tool_id": "observability.get_error_groups",
+  "tool_id": "observability.get_exceptions",
   "tool_params": {
     "start": "now-1h",
     "end": "now",
@@ -92,7 +94,7 @@ POST kbn://api/agent_builder/tools/_execute
 ```
 POST kbn://api/agent_builder/tools/_execute
 {
-  "tool_id": "observability.get_error_groups",
+  "tool_id": "observability.get_exceptions",
   "tool_params": {
     "start": "now-1h",
     "end": "now",
@@ -106,7 +108,7 @@ POST kbn://api/agent_builder/tools/_execute
 ```
 POST kbn://api/agent_builder/tools/_execute
 {
-  "tool_id": "observability.get_error_groups",
+  "tool_id": "observability.get_exceptions",
   "tool_params": {
     "start": "now-1h",
     "end": "now",
@@ -120,7 +122,7 @@ POST kbn://api/agent_builder/tools/_execute
 ```
 POST kbn://api/agent_builder/tools/_execute
 {
-  "tool_id": "observability.get_error_groups",
+  "tool_id": "observability.get_exceptions",
   "tool_params": {
     "start": "now-1h",
     "end": "now",
@@ -131,7 +133,7 @@ POST kbn://api/agent_builder/tools/_execute
 
 ## Typical workflow
 
-1. **Start broad**: Call `get_error_groups()` to see all errors
+1. **Start broad**: Call `get_exceptions()` to see all errors
 2. **Identify hotspot**: Find the service or pattern with most errors
-3. **Drill down**: Call `get_error_groups(kqlFilter='service.name: "..."')` to focus on a specific service
+3. **Drill down**: Call `get_exceptions(kqlFilter='service.name: "..."')` to focus on a specific service
 4. **Investigate**: Use `get_correlated_logs` with a trace.id from the sample to understand the sequence of events

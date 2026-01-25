@@ -2,10 +2,9 @@
 
 Compresses thousands of logs into a small set of categories to provide a high-level overview of what's being logged. This tool answers: **"What's being logged?"**
 
-## Relationship to `get_error_groups` tool
+## Relationship to `get_exceptions` tool
 
-`get_error_groups` returns structured exceptions with `exception.type`, `exception.message`, and `exception.stacktrace`. A log like `"Payment failed for user 12345"` at ERROR level appears in `get_log_categories` but NOT in `get_error_groups` (no exception type/stacktrace).
-
+`get_exceptions` returns structured exceptions with `exception.type`, `exception.message`, and `exception.stacktrace`. A log like `"Payment failed for user 12345"` at ERROR level appears in `get_log_categories` but NOT in `get_exceptions` (no exception type/stacktrace).
 
 ## Example
 

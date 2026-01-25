@@ -21,14 +21,14 @@ import { getToolHandler } from './handler';
 import { OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID } from '../get_correlated_logs/tool';
 import { OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID } from '../get_log_categories/tool';
 
-export const OBSERVABILITY_GET_ERROR_GROUPS_TOOL_ID = 'observability.get_error_groups';
+export const OBSERVABILITY_GET_EXCEPTIONS_TOOL_ID = 'observability.get_exceptions';
 
 const DEFAULT_TIME_RANGE = {
   start: 'now-1h',
   end: 'now',
 };
 
-const getErrorGroupsSchema = z.object({
+const getExceptionsSchema = z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
   kqlFilter: z
     .string()
@@ -55,7 +55,7 @@ const getErrorGroupsSchema = z.object({
     ),
 });
 
-export function createGetErrorGroupsTool({
+export function createGetExceptionsTool({
   core,
   plugins,
   logger,
@@ -63,12 +63,13 @@ export function createGetErrorGroupsTool({
   core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   logger: Logger;
-}): StaticToolRegistration<typeof getErrorGroupsSchema> {
-  const toolDefinition: BuiltinToolDefinition<typeof getErrorGroupsSchema> = {
-    id: OBSERVABILITY_GET_ERROR_GROUPS_TOOL_ID,
+}): StaticToolRegistration<typeof getExceptionsSchema> {
+  const toolDefinition: BuiltinToolDefinition<typeof getExceptionsSchema> = {
+    id: OBSERVABILITY_GET_EXCEPTIONS_TOOL_ID,
     type: ToolType.builtin,
     description: dedent`
       Retrieves error groups with occurrence counts and sample details.
+      Returns both span exceptions and log exceptions. Note that the same exception might appear in both groups if captured by both methods.
 
       When to use:
       - Get an overview of what exceptions are being thrown across services
@@ -82,7 +83,7 @@ export function createGetErrorGroupsTool({
       Do NOT use for:
       - Unstructured error-level logs (use \`${OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID}\`)
     `,
-    schema: getErrorGroupsSchema,
+    schema: getExceptionsSchema,
     tags: ['observability', 'errors', 'exceptions'],
     availability: {
       cacheMode: 'space',

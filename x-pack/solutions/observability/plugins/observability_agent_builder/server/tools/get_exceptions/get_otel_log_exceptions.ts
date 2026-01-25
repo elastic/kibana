@@ -21,7 +21,7 @@ import { timeRangeFilter, kqlFilter } from '../../utils/dsl_filters';
 import { unwrapEsFields } from '../../utils/unwrap_es_fields';
 
 // OTel exception fields (not in ECS, specific to OTel semantic conventions)
-// See: https://opentelemetry.io/docs/specs/otel/trace/exceptions/
+// See: https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-logs/
 const EXCEPTION_TYPE = 'exception.type';
 const EXCEPTION_MESSAGE = 'exception.message';
 const EXCEPTION_STACKTRACE = 'exception.stacktrace';
@@ -58,7 +58,7 @@ async function getSamplingProbability({
   return { samplingProbability, totalHits };
 }
 
-async function getExceptionCategories({
+async function getLogExceptionCategories({
   esClient,
   index,
   boolQuery,
@@ -171,7 +171,7 @@ export async function getLogExceptionGroups({
   const logsIndices = await getLogsIndices({ core, logger });
 
   if (logsIndices.length === 0) {
-    logger.debug('No log indices configured, skipping OTel log exceptions query');
+    logger.debug('No log indices configured, skipping log exceptions query');
     return [];
   }
 
@@ -194,17 +194,15 @@ export async function getLogExceptionGroups({
   });
 
   if (totalHits === 0) {
-    logger.debug('No OTel log exceptions found');
+    logger.debug('No log exceptions found');
     return [];
   }
 
   logger.debug(
-    `OTel log exceptions: ${totalHits} total, sampling probability: ${samplingProbability.toFixed(
-      4
-    )}`
+    `Log exceptions: ${totalHits} total, sampling probability: ${samplingProbability.toFixed(4)}`
   );
 
-  return getExceptionCategories({
+  return getLogExceptionCategories({
     esClient,
     index: logsIndices,
     boolQuery,

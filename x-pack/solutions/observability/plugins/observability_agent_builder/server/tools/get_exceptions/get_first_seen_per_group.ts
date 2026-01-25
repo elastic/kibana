@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/core/server';
 import { ApmDocumentType, RollupInterval } from '@kbn/apm-data-access-plugin/common';
 import { ERROR_GROUP_ID } from '@kbn/observability-shared-plugin/common';
 import type { ApmEventClient } from './types';
-import type { ErrorGroupSample } from './get_error_group_samples';
+import type { ErrorGroupSample } from './get_error_groups';
 
 const LOOKBACK_DAYS = 14;
 

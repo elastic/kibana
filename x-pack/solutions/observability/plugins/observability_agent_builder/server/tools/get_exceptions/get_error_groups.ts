@@ -31,13 +31,60 @@ import {
   USER_AGENT_VERSION,
 } from '@kbn/observability-shared-plugin/common';
 import { ERROR_STACK_TRACE } from '@kbn/apm-types/es_fields';
+import { ERROR_GROUP_ID as ERROR_GROUP_ID_MD } from '@kbn/observability-shared-plugin/common';
 import { timeRangeFilter, kqlFilter as buildKqlFilter } from '../../utils/dsl_filters';
 import { unwrapEsFields } from '../../utils/unwrap_es_fields';
 import type { ApmEventClient } from './types';
+import { getFirstSeenPerGroup } from './get_first_seen_per_group';
+import { getDownstreamServicePerGroup } from './get_downstream_service_resources';
 
 export type ErrorGroupSample = Awaited<ReturnType<typeof getErrorGroupSamples>>[number];
 
-export async function getErrorGroupSamples({
+// Span exceptions captured by Otel agents are represented as APM error documents
+// This function thus returns both APM error groups and Otel span exceptions
+export async function getApmErrorGroups({
+  apmEventClient,
+  startMs,
+  endMs,
+  kqlFilter,
+  includeStackTrace,
+  includeFirstSeen,
+  logger,
+}: {
+  apmEventClient: ApmEventClient;
+  startMs: number;
+  endMs: number;
+  kqlFilter?: string;
+  includeStackTrace?: boolean;
+  includeFirstSeen?: boolean;
+  logger: Logger;
+}) {
+  const errorGroups = await getErrorGroupSamples({
+    apmEventClient,
+    startMs,
+    endMs,
+    kqlFilter,
+    includeStackTrace,
+    logger,
+  });
+
+  const [firstSeenMap, downstreamServiceMap] = await Promise.all([
+    includeFirstSeen
+      ? getFirstSeenPerGroup({ apmEventClient, errorGroups, endMs, logger })
+      : new Map<string, string>(),
+    getDownstreamServicePerGroup({ apmEventClient, errorGroups, startMs, endMs, logger }),
+  ]);
+
+  return errorGroups.map((errorGroup) => {
+    const groupId = errorGroup.sample[ERROR_GROUP_ID_MD];
+    const downstreamServiceResource = downstreamServiceMap.get(groupId);
+    const firstSeen = firstSeenMap.get(groupId);
+
+    return { ...errorGroup, firstSeen, downstreamServiceResource };
+  });
+}
+
+async function getErrorGroupSamples({
   apmEventClient,
   startMs,
   endMs,

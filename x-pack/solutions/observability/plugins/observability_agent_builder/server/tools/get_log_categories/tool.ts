@@ -16,6 +16,7 @@ import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_build
 import type { getLogCategories } from './handler';
 import { getToolHandler } from './handler';
 import { OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID } from '../get_correlated_logs/tool';
+import { OBSERVABILITY_GET_EXCEPTIONS_TOOL_ID } from '../get_exceptions/tool';
 
 export interface GetLogCategoriesToolResult {
   type: ToolResultType.other;
@@ -77,7 +78,7 @@ After using this tool:
 - If you see resource lifecycle logs (acquire/release, open/close), check if counts match - mismatches can indicate leaks
 
 Do NOT use for:
-- Finding exceptions with stack traces (use \`observability.get_error_groups\`)
+- Finding exceptions with stack traces (use ${OBSERVABILITY_GET_EXCEPTIONS_TOOL_ID})
 - Understanding the sequence of events for a specific error (use ${OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID})
 - Investigating a specific incident in detail (use ${OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID})
 - Analyzing changes in log volume over time (use run_log_rate_analysis)`,
