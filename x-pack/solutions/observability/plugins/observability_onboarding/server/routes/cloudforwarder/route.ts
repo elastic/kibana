@@ -23,7 +23,7 @@ const createCloudForwarderOnboardingFlowRoute = createObservabilityOnboardingSer
   security: {
     authz: {
       enabled: false,
-      reason: 'Authorization is checked by custom logic using Elasticsearch client',
+      reason: 'This route has custom authorization logic using Elasticsearch client',
     },
   },
   async handler(resources): Promise<CreateCloudForwarderOnboardingFlowRouteResponse> {

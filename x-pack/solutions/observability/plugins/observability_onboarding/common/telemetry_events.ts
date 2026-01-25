@@ -158,6 +158,7 @@ interface OnboardingAutoDetectEventContext {
 }
 
 interface OnboardingCloudForwarderEventContext {
+  selectedLogType?: string;
   cloudServiceProvider?: string;
 }
 
@@ -217,6 +218,14 @@ const flowContextSchema: SchemaValue<OnboardingFlowEventContext | undefined> = {
     },
     cloudforwarder: {
       properties: {
+        selectedLogType: {
+          type: 'keyword',
+          _meta: {
+            description:
+              'Which log type is selected in the UI (e.g. vpcflow, elbaccess, cloudtrail). Serves as a good indication of the type of logs the user chose to forward.',
+            optional: true,
+          },
+        },
         cloudServiceProvider: {
           type: 'keyword',
           _meta: {

@@ -122,7 +122,7 @@ export function CloudForwarderPanel() {
         onboardingFlowType="cloudforwarder"
         error={error}
         telemetryEventContext={{
-          cloudforwarder: { cloudServiceProvider },
+          cloudforwarder: { cloudServiceProvider, selectedLogType },
         }}
         onRetryClick={refetch}
       />
