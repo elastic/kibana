@@ -16,6 +16,8 @@ import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 import { PageScope } from '../../../data_view_manager/constants';
 import * as useGetGroupSelectorHook from '@kbn/grouping/src/hooks/use_get_group_selector';
+import { useUserData } from '../user_info';
+import { useHasMixedBuildingBlockAlerts } from '../../../detection_engine/rule_details_ui/pages/rule_details/use_has_mixed_building_block_alerts';
 
 const mockDispatch = jest.fn();
 const mockedUseKibana = mockUseKibana();
@@ -29,6 +31,14 @@ jest.mock('react-redux', () => {
 });
 jest.mock('../../../sourcerer/containers');
 jest.mock('../../../common/hooks/use_selector');
+jest.mock('../user_info');
+jest.mock(
+  '../../../detection_engine/rule_details_ui/pages/rule_details/use_has_mixed_building_block_alerts'
+);
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: () => ({ detailName: undefined }),
+}));
 jest.mock('../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../common/lib/kibana');
 
@@ -76,6 +86,11 @@ describe('AdditionalToolbarControls', () => {
       ...sourcererDataView,
       selectedPatterns: ['myFakebeat-*'],
       sourcererDataView: {},
+    });
+    (useUserData as jest.Mock).mockReturnValue([{ signalIndexName: '.siem-signals-default' }]);
+    (useHasMixedBuildingBlockAlerts as jest.Mock).mockReturnValue({
+      loading: false,
+      hasMixedAlerts: false,
     });
   });
 
