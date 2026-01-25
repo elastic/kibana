@@ -12,7 +12,7 @@ import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 import { schema } from '@kbn/config-schema';
 import { getLensTransforms } from '../common/transforms';
 import type { LensTransforms } from '../common/transforms/types';
-import { lensItemDataSchema } from './content_management';
+import { lensItemDataSchemaV2 } from './content_management';
 
 export const getLensServerTransforms = (
   builder: LensConfigBuilder,
@@ -28,7 +28,7 @@ export const getLensServerTransforms = (
   };
 };
 
-const legacyPanelAttributesSchema = lensItemDataSchema.extends({
+const legacyPanelAttributesSchema = lensItemDataSchemaV2.extends({
   type: schema.maybe(schema.literal('lens')), // why is this added to the panel state?
 });
 
@@ -52,15 +52,15 @@ const lensPanelSchema = schema.oneOf([lensByValuePanelSchema, lensByRefPanelSche
 
 function getExtraServerTransformProps(
   builder: LensConfigBuilder
-): Pick<LensTransforms, 'schema' | 'throwOnUnmappedPanel'> {
-  if (!builder.isEnabled) return {};
-
+): Pick<LensTransforms, 'getSchema' | 'throwOnUnmappedPanel'> {
   return {
-    schema: lensPanelSchema,
+    getSchema: () => {
+      return builder.isEnabled ? lensPanelSchema : undefined;
+    },
     throwOnUnmappedPanel: (state: LensSerializedAPIConfig) => {
       const chartType = builder.getType(state.attributes);
 
-      if (!builder.isSupported(chartType)) {
+      if (builder.isEnabled && !builder.isSupported(chartType)) {
         throw new Error(`Lens "${chartType}" chart type is not supported`);
       }
     },
