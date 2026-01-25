@@ -59,6 +59,7 @@ dependsOn:
   - '@kbn/sse-utils-server'
   - '@kbn/kibana-utils-plugin'
   - '@kbn/server-route-repository-client'
+  - '@kbn/apm-types'
 tags:
   - plugin
   - prod
