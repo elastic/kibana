@@ -183,7 +183,12 @@ export const OnboardingFlowForm: FunctionComponent = () => {
     host: ['auto-detect-logs', 'otel-logs'],
     kubernetes: ['kubernetes-quick-start', 'otel-kubernetes'],
     application: ['apm-virtual', 'otel-virtual', 'synthetics-virtual'],
-    cloud: ['azure-logs-virtual', 'aws-logs-virtual', 'gcp-logs-virtual'],
+    cloud: [
+      'azure-logs-virtual',
+      'aws-logs-virtual',
+      'gcp-logs-virtual',
+      'cloudforwarder-quick-start',
+    ],
   };
   const customCards = useCustomCards(createCollectionCardHandler);
   const featuredCardsForCategory: IntegrationCardItem[] = customCards.filter((card) => {

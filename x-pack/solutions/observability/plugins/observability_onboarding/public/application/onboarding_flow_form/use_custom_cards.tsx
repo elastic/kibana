@@ -51,6 +51,10 @@ export function useCustomCards(
     history,
     `/otel-apm/${location.search}`
   );
+  const { href: cloudforwarderUrl } = reactRouterNavigate(
+    history,
+    `/cloudforwarder/${location.search}`
+  );
 
   const apmUrl = `${getUrlForApp?.('apm')}/${isServerless ? 'onboarding' : 'tutorial'}`;
   const otelApmUrl = isManagedOtlpServiceAvailable ? otelApmQuickstartUrl : apmUrl;
@@ -84,6 +88,33 @@ export function useCustomCards(
     version: '',
     integration: '',
     isQuickstart: true,
+  };
+
+  const cloudforwarderQuickstartCard: IntegrationCardItem = {
+    id: 'cloudforwarder-quick-start',
+    name: 'cloudforwarder-quick-start',
+    type: 'virtual',
+    title: i18n.translate('xpack.observability_onboarding.packageList.cloudforwarderTitle', {
+      defaultMessage: 'EDOT Cloud Forwarder',
+    }),
+    description: i18n.translate(
+      'xpack.observability_onboarding.packageList.cloudforwarderDescription',
+      {
+        defaultMessage: 'Forward AWS CloudWatch logs to Elastic using OpenTelemetry.',
+      }
+    ),
+    categories: ['observability'],
+    icons: [
+      {
+        type: 'svg',
+        src: http?.staticAssets.getPluginAssetHref('opentelemetry.svg') ?? '',
+      },
+    ],
+    url: cloudforwarderUrl,
+    version: '',
+    integration: '',
+    isQuickstart: true,
+    release: 'preview',
   };
 
   return [
@@ -464,6 +495,11 @@ export function useCustomCards(
      * which is not available for on-prem customers.
      */
     ...(isCloud ? [firehoseQuickstartCard] : []),
+    /**
+     * The EDOT Cloud Forwarder card should only be visible on Cloud
+     * as it requires Elastic Cloud infrastructure.
+     */
+    ...(isCloud ? [cloudforwarderQuickstartCard] : []),
   ];
 }
 

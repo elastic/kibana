@@ -18,6 +18,7 @@ import {
   OtelKubernetesPage,
   FirehosePage,
   OtelApmPage,
+  CloudForwarderPage,
 } from './pages';
 import type { ObservabilityOnboardingAppServices } from '..';
 import { useFlowBreadcrumb } from './shared/use_flow_breadcrumbs';
@@ -64,6 +65,11 @@ export function ObservabilityOnboardingFlow() {
         {isManagedOtlpServiceAvailable && (
           <Route path="/otel-apm">
             <OtelApmPage />
+          </Route>
+        )}
+        {(isCloud || isDev) && (
+          <Route path="/cloudforwarder">
+            <CloudForwarderPage />
           </Route>
         )}
         <Route>
