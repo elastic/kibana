@@ -8,7 +8,6 @@
  */
 import { ControlTriggerSource, ESQLVariableType, type ESQLCallbacks } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
-import { i18n } from '@kbn/i18n';
 import type {
   ESQLColumn,
   ESQLAstItem,
@@ -23,7 +22,8 @@ import { parse } from '../../parser';
 import { SuggestionOrderingEngine } from '../../shared';
 import {
   getCommandAutocompleteDefinitions,
-  createResourceBrowserSuggestion,
+  createIndicesBrowserSuggestion,
+  createFieldsBrowserSuggestion,
 } from '../../commands/registry/complete_items';
 import { ESQL_VARIABLES_PREFIX } from '../../commands/registry/constants';
 import { getRecommendedQueriesSuggestionsFromStaticTemplates } from '../../commands/registry/options/recommended_queries';
@@ -159,17 +159,8 @@ export async function suggest(
 
       // Add indices browser suggestion if enabled and we have source command suggestions
       if (sourceCommandsSuggestions.length > 0 && resourceRetriever?.onOpenIndicesBrowser) {
-        const indicesBrowserSuggestion = createResourceBrowserSuggestion(
-          i18n.translate('esqlEditor.indicesBrowser.suggestionLabel', {
-            defaultMessage: 'Browse indices',
-          }),
-          i18n.translate('esqlEditor.indicesBrowser.suggestionDescription', {
-            defaultMessage: 'Open resource browser',
-          }),
-          'esql.indicesBrowser.open'
-        );
         return [
-          indicesBrowserSuggestion,
+          createIndicesBrowserSuggestion(),
           ...headerCommandsSuggestions,
           ...sourceCommandsSuggestions,
           ...recommendedQueriesSuggestions,
@@ -234,16 +225,7 @@ export async function suggest(
     // Add prepended resource browser suggestion if enabled
     // Show indices browser when in FROM/TS commands (where indices are suggested)
     if (isSourceCommand && resourceRetriever?.onOpenIndicesBrowser) {
-      const indicesBrowserSuggestion = createResourceBrowserSuggestion(
-        i18n.translate('esqlEditor.indicesBrowser.suggestionLabel', {
-          defaultMessage: 'Browse indices',
-        }),
-        i18n.translate('esqlEditor.indicesBrowser.suggestionDescription', {
-          defaultMessage: 'Open resource browser',
-        }),
-        'esql.indicesBrowser.open'
-      );
-      return [indicesBrowserSuggestion, ...commandsSpecificSuggestions];
+      return [createIndicesBrowserSuggestion(), ...commandsSpecificSuggestions];
     }
 
     // Show fields browser when we have field suggestions and we're not in a source command or stats command
@@ -253,16 +235,7 @@ export async function suggest(
       hasFieldSuggestions &&
       resourceRetriever?.onOpenFieldsBrowser
     ) {
-      const fieldsBrowserSuggestion = createResourceBrowserSuggestion(
-        i18n.translate('esqlEditor.fieldsBrowser.suggestionLabel', {
-          defaultMessage: 'Browse fields',
-        }),
-        i18n.translate('esqlEditor.fieldsBrowser.suggestionDescription', {
-          defaultMessage: 'Open field browser',
-        }),
-        'esql.fieldsBrowser.open'
-      );
-      return [fieldsBrowserSuggestion, ...commandsSpecificSuggestions];
+      return [createFieldsBrowserSuggestion(), ...commandsSpecificSuggestions];
     }
 
     return commandsSpecificSuggestions;

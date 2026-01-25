@@ -495,3 +495,27 @@ export function createResourceBrowserSuggestion(
     sortText: '0', // Sort to top
   };
 }
+
+export function createIndicesBrowserSuggestion(): ISuggestionItem {
+  return createResourceBrowserSuggestion(
+    i18n.translate('kbn-esql-language.esql.autocomplete.indicesBrowser.suggestionLabel', {
+      defaultMessage: 'Browse indices',
+    }),
+    i18n.translate('kbn-esql-language.esql.autocomplete.indicesBrowser.suggestionDescription', {
+      defaultMessage: 'Open resource browser',
+    }),
+    'esql.indicesBrowser.open'
+  );
+}
+
+export function createFieldsBrowserSuggestion(): ISuggestionItem {
+  return createResourceBrowserSuggestion(
+    i18n.translate('kbn-esql-language.esql.autocomplete.fieldsBrowser.suggestionLabel', {
+      defaultMessage: 'Browse fields',
+    }),
+    i18n.translate('kbn-esql-language.esql.autocomplete.fieldsBrowser.suggestionDescription', {
+      defaultMessage: 'Open field browser',
+    }),
+    'esql.fieldsBrowser.open'
+  );
+}
