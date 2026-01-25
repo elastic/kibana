@@ -52,7 +52,6 @@ dependsOn:
   - '@kbn/core-http-server-mocks'
   - '@kbn/shared-ux-router'
   - '@kbn/react-query'
-  - '@kbn/elastic-assistant'
 tags:
   - plugin
   - prod
