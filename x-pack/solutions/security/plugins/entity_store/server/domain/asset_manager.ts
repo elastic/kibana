@@ -8,17 +8,17 @@
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { getEntityDefinition } from './definitions/registry';
-import type { EntityType } from './definitions/entity_schema';
+import type { EntityType, ManagedEntityDefinition } from './definitions/entity_schema';
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../tasks/extract_entity_task';
 import { installElasticsearchAssets, uninstallElasticsearchAssets } from './assets/install_assets';
+import { EngineDescriptorClient } from './definitions/saved_objects';
 
 interface AssetManagerDependencies {
   logger: Logger;
   esClient: ElasticsearchClient;
   taskManager: TaskManagerStartContract;
-  savedObjectsClient: SavedObjectsClientContract;
+  engineDescriptorClient: EngineDescriptorClient;
   namespace: string;
 }
 
@@ -26,14 +26,14 @@ export class AssetManager {
   private readonly logger: Logger;
   private readonly esClient: ElasticsearchClient;
   private readonly taskManager: TaskManagerStartContract;
-  private readonly savedObjectsClient: SavedObjectsClientContract;
+  private readonly engineDescriptorClient: EngineDescriptorClient;
   private readonly namespace: string;
 
   constructor(deps: AssetManagerDependencies) {
     this.logger = deps.logger;
     this.esClient = deps.esClient;
     this.taskManager = deps.taskManager;
-    this.savedObjectsClient = deps.savedObjectsClient;
+    this.engineDescriptorClient = deps.engineDescriptorClient;
     this.namespace = deps.namespace;
   }
 
@@ -64,32 +64,50 @@ export class AssetManager {
     });
   }
 
-  public async install(type: EntityType) {
+  public async install(type: EntityType): Promise<ManagedEntityDefinition> {
     // TODO: return early if already installed
-    this.logger.debug(`Installing assets for entity type: ${type}`);
-    const definition = getEntityDefinition({ type });
+    try {
+      this.logger.debug(`Installing assets for entity type: ${type}`);
+      const definition = getEntityDefinition({ type });
 
-    await installElasticsearchAssets({
-      esClient: this.esClient,
-      logger: this.logger,
-      definition,
-      namespace: this.namespace,
-    });
-    this.logger.debug(`Installed definition: ${type}`);
+      await Promise.all([
+        this.engineDescriptorClient.init(type),
+        installElasticsearchAssets({
+          esClient: this.esClient,
+          logger: this.logger,
+          definition,
+          namespace: this.namespace,
+        }),
+      ]);
 
-    return definition;
+      this.logger.debug(`Installed definition: ${type}`);
+
+      return definition;
+    } catch (error) {
+      this.logger.error(`Error installing assets for entity type ${type}: ${error}`);
+      throw error;
+    }
   }
 
   public async uninstall(type: EntityType) {
-    const definition = getEntityDefinition({ type });
-    await this.stop(type);
-    await uninstallElasticsearchAssets({
-      esClient: this.esClient,
-      logger: this.logger,
-      definition,
-      namespace: this.namespace,
-    });
+    try {
+      const definition = getEntityDefinition({ type });
+      await this.stop(type);
 
-    this.logger.debug(`Uninstalled definition: ${type}`);
+      await Promise.all([
+        this.engineDescriptorClient.delete(type),
+        uninstallElasticsearchAssets({
+          esClient: this.esClient,
+          logger: this.logger,
+          definition,
+          namespace: this.namespace,
+        }),
+      ]);
+
+      this.logger.debug(`Uninstalled definition: ${type}`);
+    } catch (error) {
+      this.logger.error(`Error uninstalling assets for entity type ${type}: ${error}`);
+      throw error;
+    }
   }
 }

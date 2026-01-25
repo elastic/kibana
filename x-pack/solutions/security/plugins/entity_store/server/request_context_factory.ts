@@ -15,6 +15,7 @@ import type {
 } from './types';
 import { AssetManager } from './domain/asset_manager';
 import { FeatureFlags } from './infra/feature_flags';
+import { EngineDescriptorClient } from './domain/definitions/saved_objects';
 
 interface EntityStoreApiRequestHandlerContextDeps {
   coreSetup: CoreSetup<EntityStoreStartPlugins, void>;
@@ -41,7 +42,7 @@ export async function createRequestHandlerContext({
       logger,
       esClient: core.elasticsearch.client.asCurrentUser,
       taskManager: taskManagerStart,
-      savedObjectsClient: core.savedObjects.client,
+      engineDescriptorClient: new EngineDescriptorClient(core.savedObjects.client, namespace, logger),
       namespace,
     }),
     featureFlags: new FeatureFlags(core.uiSettings.client),

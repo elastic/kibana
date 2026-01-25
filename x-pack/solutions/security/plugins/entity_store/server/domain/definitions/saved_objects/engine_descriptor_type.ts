@@ -78,11 +78,9 @@ export const EngineDescriptorTypeMappings: SavedObjectsType['mappings'] = {
   },
 };
 
-export function getEngineDescriptorType(savedObjectName: string): SavedObjectsType {
-  return {
-    name: savedObjectName,
-    hidden: false,
-    namespaceType: 'multiple-isolated',
-    mappings: EngineDescriptorTypeMappings,
-  };
-}
+export const EngineDescriptorType: SavedObjectsType = {
+  name: EngineDescriptorTypeName,
+  hidden: false,
+  namespaceType: 'multiple-isolated',
+  mappings: EngineDescriptorTypeMappings,
+};

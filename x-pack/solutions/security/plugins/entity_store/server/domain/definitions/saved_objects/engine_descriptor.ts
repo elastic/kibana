@@ -14,11 +14,13 @@ import type { EngineDescriptor } from './constants';
 import { LogExtractionState, VersionState } from './constants';
 import { EngineDescriptorTypeName } from './engine_descriptor_type';
 import { ENGINE_STATUS } from '../../constants';
+import { Logger } from '@kbn/core/server';
 
 export class EngineDescriptorClient {
     constructor(
         private readonly soClient: SavedObjectsClientContract,
-        private readonly namespace: string
+        private readonly namespace: string,
+        private readonly logger: Logger
     ) { }
 
     getSavedObjectId(entityType: EntityType) {
@@ -33,7 +35,7 @@ export class EngineDescriptorClient {
         });
     }
 
-    async init(entityType: EntityType) {
+    async init(entityType: EntityType): Promise<EngineDescriptor> {
         const defaultLogExtractionState = LogExtractionState.parse({});
         const defaultVersionState = VersionState.parse({});
 
@@ -44,7 +46,7 @@ export class EngineDescriptorClient {
         }
 
         const id = this.getSavedObjectId(entityType);
-
+        this.logger.debug(`Creating engine descriptor with id ${id}`);
         const { attributes } = await this.soClient.create<EngineDescriptor>(
             EngineDescriptorTypeName,
             {
@@ -55,6 +57,13 @@ export class EngineDescriptorClient {
             },
             { id }
         );
+
         return attributes;
+    }
+
+    async delete(entityType: EntityType) {
+        const id = this.getSavedObjectId(entityType);
+        this.logger.debug(`Deleting engine descriptor with id ${id}`);
+        this.soClient.delete(EngineDescriptorTypeName, id);
     }
 }

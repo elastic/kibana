@@ -19,6 +19,7 @@ import { createRequestHandlerContext } from './request_context_factory';
 import { PLUGIN_ID } from '../common';
 import { registerTasks } from './tasks/register_tasks';
 import { registerUiSettings } from './infra/feature_flags/register';
+import { EngineDescriptorType } from './domain/definitions/saved_objects';
 
 export class EntityStorePlugin
   implements
@@ -49,6 +50,9 @@ export class EntityStorePlugin
 
     this.logger.debug('Registering ui settings');
     registerUiSettings(core.uiSettings);
+
+    this.logger.debug('Registering saved objects type');
+    core.savedObjects.registerType(EngineDescriptorType);
   }
 
   public start(core: CoreStart, plugins: EntityStoreStartPlugins) {

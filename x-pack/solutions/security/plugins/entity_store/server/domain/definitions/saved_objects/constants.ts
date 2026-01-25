@@ -5,14 +5,6 @@
  * 2.0.
  */
 
-/*
- * NOTICE: This file is manually maintained.
- *
- * info:
- *   title: Entity Store V2 Saved Object Schema
- *   version: 2
- */
-
 import { z } from '@kbn/zod';
 import { EntityType } from '../entity_schema';
 
@@ -41,7 +33,7 @@ export const LogExtractionState = z.object({
     .string()
     .regex(/[smdh]$/)
     .default('30s'),
-  paginationTimestamp: z.string().default(''),
+  paginationTimestamp: z.string().optional(),
   lastExecutionTimestamp: z.string().default(''),
 });
 
@@ -53,8 +45,8 @@ export const EngineError = z.object({
 
 export type VersionState = z.infer<typeof VersionState>;
 export const VersionState = z.object({
-  version: z.union([z.literal(1), z.literal(2)]),
-  state: z.enum(['running', 'migrating']),
+  version: z.union([z.literal(1), z.literal(2)]).default(2),
+  state: z.enum(['running', 'migrating']).default('running'),
   isMigratedFromV1: z.boolean().default(false),
 });
 
