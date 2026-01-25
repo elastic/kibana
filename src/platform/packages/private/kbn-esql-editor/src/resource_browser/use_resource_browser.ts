@@ -10,6 +10,11 @@
 import { useCallback, useRef, useState } from 'react';
 import type * as monaco from 'monaco-editor';
 import type { ESQLCallbacks } from '@kbn/esql-types';
+import { correctQuerySyntax } from '@kbn/esql-language/src/commands/definitions/utils/ast';
+import { Parser } from '@kbn/esql-language';
+import { getCursorContext } from '@kbn/esql-language/src/language/shared/get_cursor_context';
+import { getQueryForFields } from '@kbn/esql-language/src/language/shared/get_query_for_fields';
+import { getColumnsByTypeRetriever } from '@kbn/esql-language/src/language/shared/columns_retrieval_helpers';
 import { BROWSER_POPOVER_WIDTH } from './browser_popover_wrapper';
 
 interface UseResourceBrowserProps {
@@ -113,24 +118,8 @@ export function useResourceBrowser({
 
         // Store the query string for fetching recommended fields
         fieldsBrowserQueryStringRef.current = innerText;
-
-        // Import the necessary functions dynamically to avoid circular dependencies
-        const { correctQuerySyntax } = await import(
-          '@kbn/esql-language/src/commands/definitions/utils/ast'
-        );
-        const { parse } = await import('@kbn/esql-language/src/parser');
-        const { getCursorContext } = await import(
-          '@kbn/esql-language/src/language/shared/get_cursor_context'
-        );
-        const { getQueryForFields } = await import(
-          '@kbn/esql-language/src/language/shared/get_query_for_fields'
-        );
-        const { getColumnsByTypeRetriever } = await import(
-          '@kbn/esql-language/src/language/shared/columns_retrieval_helpers'
-        );
-
         const correctedQuery = correctQuerySyntax(innerText);
-        const { root } = parse(correctedQuery, { withFormatting: true });
+        const { root } = Parser.parse(correctedQuery, { withFormatting: true });
         const astContext = getCursorContext(innerText, root, offset);
         const astForFields = astContext.astForContext;
 
