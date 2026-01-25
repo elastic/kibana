@@ -32,19 +32,27 @@ dependsOn:
   - '@kbn/spaces-utils'
   - '@kbn/search-types'
   - '@kbn/core-di'
+  - '@kbn/core-di-browser'
   - '@kbn/core-di-server'
   - '@kbn/esql-utils'
   - '@kbn/response-ops-retry-service'
-  - '@kbn/esql-language'
+  - '@kbn/core-application-browser'
+  - '@kbn/shared-ux-router'
+  - '@kbn/management-plugin'
+  - '@kbn/i18n-react'
+  - '@kbn/esql-types'
+  - '@kbn/yaml-rule-editor'
   - '@kbn/core-http-server-mocks'
-  - '@kbn/core-saved-objects-server-mocks'
-  - '@kbn/core-saved-objects-api-server-mocks'
   - '@kbn/core-security-common'
   - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/logging-mocks'
   - '@kbn/core-elasticsearch-client-server-mocks'
   - '@kbn/es-errors'
+  - '@kbn/alerting-v2-schemas'
   - '@kbn/zod'
+  - '@kbn/core-di-internal'
+  - '@kbn/i18n'
+  - '@kbn/zod-helpers'
 tags:
   - plugin
   - prod
@@ -56,7 +64,6 @@ fileGroups:
     - server/**/*
     - server/**/*.json
     - public/**/*
-    - common/**/*
     - '!target/**/*'
 tasks:
   jest:
