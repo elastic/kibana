@@ -33,11 +33,11 @@ const createCloudForwarderOnboardingFlowRoute = createObservabilityOnboardingSer
     } = await context.core;
 
     /**
-     * Check for log monitoring privileges with APM support (second parameter = true)
-     * since CloudForwarder uses the managed OTLP service which may handle traces.
-     * This is consistent with other OTLP-based flows (otel_apm, kubernetes_otel).
+     * Check for log monitoring privileges (logs and metrics only, no traces).
+     * CloudForwarder only forwards logs from AWS S3 (VPC Flow Logs, ELB Access Logs, CloudTrail).
+     * This is consistent with other log-only flows (firehose, otel_host).
      */
-    const hasPrivileges = await hasLogMonitoringPrivileges(client.asCurrentUser, true);
+    const hasPrivileges = await hasLogMonitoringPrivileges(client.asCurrentUser);
 
     if (!hasPrivileges) {
       throw Boom.forbidden(
