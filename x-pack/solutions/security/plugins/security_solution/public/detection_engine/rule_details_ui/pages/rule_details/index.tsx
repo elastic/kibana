@@ -76,8 +76,10 @@ import { StepRuleActionsReadOnly } from '../../../rule_creation/components/step_
 import {
   buildAlertsFilter,
   buildAlertStatusFilter,
+  buildShowBuildingBlockFilter,
   buildThreatMatchFilter,
 } from '../../../../detections/components/alerts_table/default_config';
+import { useHasMixedBuildingBlockAlerts } from './use_has_mixed_building_block_alerts';
 import { RuleSwitch } from '../../../common/components/rule_switch';
 import { StepPanel } from '../../../rule_creation/components/step_panel';
 import {
@@ -318,7 +320,23 @@ export const RuleDetailsPage = connector(
             ruleActionsData: null,
           };
 
-    const { showOnlyThreatIndicatorAlerts } = useDataTableFilters(TableId.alertsOnRuleDetailsPage);
+    const { showBuildingBlockAlerts, setShowBuildingBlockAlerts, showOnlyThreatIndicatorAlerts } =
+      useDataTableFilters(TableId.alertsOnRuleDetailsPage);
+
+    const isBuildingBlockRule = rule?.building_block_type != null;
+    const hasSetBuildingBlockDefault = useRef(false);
+    useEffect(() => {
+      if (isBuildingBlockRule && !hasSetBuildingBlockDefault.current) {
+        setShowBuildingBlockAlerts(true);
+        hasSetBuildingBlockDefault.current = true;
+      }
+    }, [isBuildingBlockRule, setShowBuildingBlockAlerts]);
+
+    const { hasMixedAlerts } = useHasMixedBuildingBlockAlerts({
+      ruleId: ruleId ?? '',
+      signalIndexName,
+      skip: !ruleId || !signalIndexName,
+    });
 
     const mlCapabilities = useMlCapabilities();
     const { globalFullScreen } = useGlobalFullScreen();
@@ -409,10 +427,17 @@ export const RuleDetailsPage = connector(
     const alertDefaultFilters = useMemo(
       () => [
         ...buildAlertsFilter(ruleRuleId ?? ''),
+        ...(hasMixedAlerts ? buildShowBuildingBlockFilter(showBuildingBlockAlerts) : []),
         ...buildAlertStatusFilter(filterGroup),
         ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
       ],
-      [ruleRuleId, showOnlyThreatIndicatorAlerts, filterGroup]
+      [
+        ruleRuleId,
+        hasMixedAlerts,
+        showBuildingBlockAlerts,
+        showOnlyThreatIndicatorAlerts,
+        filterGroup,
+      ]
     );
 
     const alertMergedFilters = useMemo(

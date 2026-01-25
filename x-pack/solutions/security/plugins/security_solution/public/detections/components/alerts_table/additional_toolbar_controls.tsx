@@ -8,6 +8,7 @@
 import type { ComponentProps } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import { useParams } from 'react-router-dom';
 import type { ViewSelection } from '@kbn/securitysolution-data-table';
 import {
   dataTableActions,
@@ -31,6 +32,8 @@ import { AdditionalFiltersAction } from './additional_filters_action';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { DETECTIONS_TABLE_IDS } from '../../constants';
+import { useUserData } from '../user_info';
+import { useHasMixedBuildingBlockAlerts } from '../../../detection_engine/rule_details_ui/pages/rule_details/use_has_mixed_building_block_alerts';
 
 const { changeViewMode } = dataTableActions;
 
@@ -120,7 +123,17 @@ const AdditionalToolbarControlsComponent = ({
     setShowOnlyThreatIndicatorAlerts,
   } = useDataTableFilters(tableType);
 
-  const hideBuildingBlockFilter = tableType === TableId.alertsOnRuleDetailsPage;
+  const { detailName: ruleId } = useParams<{ detailName?: string }>();
+  const [{ signalIndexName }] = useUserData();
+  const isRuleDetailsPage = tableType === TableId.alertsOnRuleDetailsPage;
+
+  const { hasMixedAlerts } = useHasMixedBuildingBlockAlerts({
+    ruleId: ruleId ?? '',
+    signalIndexName,
+    skip: !isRuleDetailsPage,
+  });
+
+  const hideBuildingBlockFilter = isRuleDetailsPage && hasMixedAlerts !== true;
 
   const additionalFiltersComponent = useMemo(
     () => (
