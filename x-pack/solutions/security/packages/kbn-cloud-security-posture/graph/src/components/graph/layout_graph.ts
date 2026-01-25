@@ -165,9 +165,18 @@ const layoutStackedLabels = (
   groupNode: Node<NodeViewModel>,
   nodes: Array<Node<NodeViewModel>>
 ): { size: Size; children: Array<Node<NodeViewModel>> } => {
-  const children = nodes.filter(
-    (child) => isConnectorNode(child.data) && child.parentId === groupNode.id
-  );
+  const children = nodes
+    .filter((child) => isConnectorNode(child.data) && child.parentId === groupNode.id)
+    // Sort: 1) relationship nodes on top, label nodes below  2) alphabetical by label within each group
+    .sort((a, b) => {
+      // Primary sort: relationship before label
+      if (a.data.shape === 'relationship' && b.data.shape === 'label') return -1;
+      if (a.data.shape === 'label' && b.data.shape === 'relationship') return 1;
+      // Secondary sort: alphabetical by label
+      const labelA = ('label' in a.data && a.data.label) || '';
+      const labelB = ('label' in b.data && b.data.label) || '';
+      return labelA.localeCompare(labelB);
+    });
   const stackSize = children.length;
   const stackWidth = NODE_LABEL_WIDTH + STACK_NODE_HORIZONTAL_PADDING * 2;
   const spaceBetweenLabelShapes = snapped(NODE_LABEL_DETAILS + STACK_NODE_VERTICAL_PADDING);

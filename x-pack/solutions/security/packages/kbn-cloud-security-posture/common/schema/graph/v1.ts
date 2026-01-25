@@ -9,6 +9,20 @@ import { schema } from '@kbn/config-schema';
 
 export const INDEX_PATTERN_REGEX = /^[^A-Z^\\/?"<>|\s#,]+$/;
 
+/**
+ * Entity ID with type for relationship queries.
+ * The type indicates which entity store index to query for relationships.
+ */
+export const entityIdSchema = schema.object({
+  id: schema.string(),
+  type: schema.oneOf([
+    schema.literal('user'),
+    schema.literal('host'),
+    schema.literal('service'),
+    schema.literal('generic'),
+  ]),
+});
+
 export const graphRequestSchema = schema.object({
   nodesLimit: schema.maybe(schema.number()),
   showUnknownTarget: schema.maybe(schema.boolean()),
@@ -42,6 +56,9 @@ export const graphRequestSchema = schema.object({
         }),
       })
     ),
+    // Entity IDs for fetching relationships from entity store
+    // Not shown in KQL search bar, passed directly to the API
+    entityIds: schema.maybe(schema.arrayOf(entityIdSchema)),
   }),
 });
 

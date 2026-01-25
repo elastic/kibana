@@ -20,6 +20,7 @@ import {
   getEntitiesLatestIndexName,
 } from '@kbn/cloud-security-posture-common/utils/helpers';
 import {
+  ENTITY_RELATIONSHIP_FIELDS,
   GRAPH_ACTOR_ENTITY_FIELDS,
   GRAPH_TARGET_ENTITY_FIELDS,
 } from '@kbn/cloud-security-posture-common/constants';
@@ -29,7 +30,7 @@ import {
   buildLookupJoinEsql,
   buildEnrichPolicyEsql,
 } from './utils';
-import type { EsQuery, GraphEdge, OriginEventId } from './types';
+import type { EsQuery, EntityId, GraphEdge, OriginEventId, RelationshipEdge } from './types';
 
 interface BuildEsqlQueryParams {
   indexPatterns: string[];
@@ -457,4 +458,228 @@ ${buildEnrichedEntityFieldsEsql()}
 | SORT action DESC, isOrigin`;
 
   return query;
+};
+
+interface BuildRelationshipsEsqlQueryParams {
+  indexName: string;
+  relationshipFields: readonly string[];
+  isLookupIndexAvailable: boolean;
+  spaceId: string;
+}
+
+/**
+ * Builds ES|QL query for fetching entity relationships from the generic entities index.
+ * Uses FORK to expand each relationship field and aggregates results.
+ * The relationshipQuery filter is applied via the DSL filter parameter.
+ * Conditionally includes LOOKUP JOIN, ENRICH, or fallback for target entity enrichment.
+ */
+const buildRelationshipsEsqlQuery = ({
+  indexName,
+  relationshipFields,
+  isLookupIndexAvailable,
+  spaceId,
+}: BuildRelationshipsEsqlQueryParams): string => {
+  const enrichPolicyName = getEnrichPolicyId(spaceId);
+
+  // Build COALESCE statements for each relationship field
+  const coalesceStatements = relationshipFields
+    .map(
+      (field) =>
+        `| EVAL entity.relationships.${field} = COALESCE(entity.relationships.${field}, [""])`
+    )
+    .join('\n');
+
+  // Build FORK branches for each relationship field
+  const forkBranches = relationshipFields
+    .map(
+      (field) =>
+        `  (MV_EXPAND entity.relationships.${field} | EVAL _relationship = "${field}" | EVAL _target_id = entity.relationships.${field} | DROP entity.relationships.*)`
+    )
+    .join('\n');
+
+  // Build enrichment section based on available method
+  // Since we're querying the entity store index, either lookup mode or enrich policy should be available
+  // We need to store source entity fields before LOOKUP JOIN as they get overwritten
+  const enrichmentSection = isLookupIndexAvailable
+    ? `// Store source entity fields before lookup (they get overwritten by target entity fields)
+| RENAME _source_id = entity.id
+| RENAME _source_name = entity.name
+| RENAME _source_type = entity.type
+| RENAME _source_sub_type = entity.sub_type
+// Lookup target entity metadata
+| EVAL entity.id = _target_id
+| LOOKUP JOIN ${indexName} ON entity.id
+| RENAME _target_name = entity.name
+| RENAME _target_type = entity.type
+| RENAME _target_sub_type = entity.sub_type
+// Restore source entity fields
+| RENAME entity.id = _source_id
+| RENAME entity.name = _source_name
+| RENAME entity.type = _source_type
+| RENAME entity.sub_type = _source_sub_type`
+    : `// Enrich target entity metadata using enrich policy
+| ENRICH ${enrichPolicyName} ON _target_id WITH _target_name = entity.name, _target_type = entity.type, _target_sub_type = entity.sub_type`;
+
+  // The ecsParentField hint is needed to later query actions done TO this entity
+  // (e.g., to find events where this entity is the target).
+  //
+  // Currently we only query the generic entities index which uses entity.id,
+  // so ecsParentField is always 'entity'.
+  //
+  // When entity-specific indices are added (user, host, service), we would use
+  // generateFieldHintCases similar to actorEntityFieldHint/targetEntityFieldHint to detect:
+  // - user.entity.id -> ecsParentField: 'user'
+  // - host.entity.id -> ecsParentField: 'host'
+  // - service.entity.id -> ecsParentField: 'service'
+  // - entity.id -> ecsParentField: 'entity'
+  const ecsParentFieldValue = 'entity';
+
+  return `FROM ${indexName}
+${coalesceStatements}
+| FORK
+${forkBranches}
+| WHERE _target_id != ""
+${enrichmentSection}
+// Build enriched source doc data with entity metadata (from the queried entity)
+| EVAL sourceDocData = CONCAT("{\\"id\\":\\"", entity.id, "\\",\\"type\\":\\"entity\\",\\"entity\\":{",
+    CASE(entity.name IS NOT NULL, CONCAT("\\"name\\":\\"", entity.name, "\\","), ""),
+    CASE(entity.type IS NOT NULL, CONCAT("\\"type\\":\\"", entity.type, "\\","), ""),
+    CASE(entity.sub_type IS NOT NULL, CONCAT("\\"sub_type\\":\\"", entity.sub_type, "\\","), ""),
+    "\\"availableInEntityStore\\":true",
+    ",\\"ecsParentField\\":\\"${ecsParentFieldValue}\\"",
+  "}}")
+// Build enriched target doc data with entity metadata
+| EVAL targetDocData = CONCAT("{\\"id\\":\\"", _target_id, "\\",\\"type\\":\\"entity\\",\\"entity\\":{",
+    CASE(_target_name IS NOT NULL, CONCAT("\\"name\\":\\"", _target_name, "\\","), ""),
+    CASE(_target_type IS NOT NULL, CONCAT("\\"type\\":\\"", _target_type, "\\","), ""),
+    CASE(_target_sub_type IS NOT NULL, CONCAT("\\"sub_type\\":\\"", _target_sub_type, "\\","), ""),
+    "\\"availableInEntityStore\\":", CASE(_target_name IS NOT NULL OR _target_type IS NOT NULL, "true", "false"),
+    ",\\"ecsParentField\\":\\"${ecsParentFieldValue}\\"",
+  "}}")
+| STATS count = COUNT(*), targetIds = VALUES(_target_id), targetDocData = VALUES(targetDocData), sourceDocData = VALUES(sourceDocData)
+    BY entity.id, _relationship`;
+};
+
+/**
+ * Parses ES|QL response into RelationshipEdge records.
+ */
+const parseRelationshipRecords = (
+  response: EsqlToRecords<Record<string, unknown>>
+): RelationshipEdge[] => {
+  const records: RelationshipEdge[] = [];
+
+  for (const record of response.records) {
+    const entityId = record['entity.id'] as string;
+    const relationship = record._relationship as string;
+    const count = record.count as number;
+    const targetIds = Array.isArray(record.targetIds)
+      ? (record.targetIds as string[])
+      : [record.targetIds as string];
+    // sourceDocData is a single value (same for all relationships from this entity)
+    const sourceDocData = record.sourceDocData
+      ? Array.isArray(record.sourceDocData)
+        ? (record.sourceDocData[0] as string)
+        : (record.sourceDocData as string)
+      : undefined;
+    const targetDocData = record.targetDocData
+      ? Array.isArray(record.targetDocData)
+        ? (record.targetDocData as string[])
+        : [record.targetDocData as string]
+      : undefined;
+
+    records.push({
+      entityId,
+      relationship,
+      count,
+      targetIds,
+      sourceDocData,
+      targetDocData,
+    });
+  }
+
+  return records;
+};
+
+/**
+ * Builds a DSL filter for relationship queries from entityIds.
+ * Creates a terms query on entity.id with all provided entity IDs.
+ */
+const buildRelationshipDslFilter = (entityIds: EntityId[]) => {
+  if (!entityIds || entityIds.length === 0) {
+    return undefined;
+  }
+
+  // Extract just the IDs for the terms query
+  const ids = entityIds.map((entity) => entity.id);
+
+  return {
+    bool: {
+      filter: [
+        {
+          terms: {
+            'entity.id': ids,
+          },
+        },
+      ],
+    },
+  };
+};
+
+/**
+ * Fetches entity relationships from the generic entities index.
+ * Queries for all relationship types for entities matching the provided entityIds.
+ */
+export const fetchEntityRelationships = async ({
+  esClient,
+  logger,
+  entityIds,
+  spaceId,
+}: {
+  esClient: IScopedClusterClient;
+  logger: Logger;
+  entityIds: EntityId[];
+  spaceId: string;
+}): Promise<RelationshipEdge[]> => {
+  const indexName = getEntitiesLatestIndexName(spaceId);
+
+  logger.trace(`Fetching relationships from index [${indexName}] for ${entityIds.length} entities`);
+
+  // Check if the entities lookup index exists and is in lookup mode (preferred)
+  // If not, fall back to using enrich policy (deprecated)
+  const isLookupIndexAvailable = await checkIfEntitiesIndexLookupMode(esClient, logger, spaceId);
+
+  const query = buildRelationshipsEsqlQuery({
+    indexName,
+    relationshipFields: ENTITY_RELATIONSHIP_FIELDS,
+    isLookupIndexAvailable,
+    spaceId,
+  });
+  const filter = buildRelationshipDslFilter(entityIds);
+
+  logger.trace(`Relationships ES|QL query: ${query}`);
+  logger.trace(`Relationships filter: ${JSON.stringify(filter)}`);
+
+  try {
+    const response = await esClient.asInternalUser.helpers
+      .esql({
+        columnar: false,
+        filter,
+        query,
+      })
+      .toRecords<Record<string, unknown>>();
+
+    const records = parseRelationshipRecords(response);
+
+    logger.trace(`Fetched [${records.length}] relationship records`);
+
+    return records;
+  } catch (error) {
+    // If the index doesn't exist, return empty array
+    if (error.statusCode === 404) {
+      logger.debug(`Entities index ${indexName} does not exist, skipping relationship fetch`);
+      return [];
+    }
+    logger.error(`Error fetching relationships: ${error.message}`);
+    return [];
+  }
 };

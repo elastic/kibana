@@ -118,6 +118,20 @@ export const CLOUD_SECURITY_PLUGIN_VERSION = '1.9.0';
 export const ENTITIES_LATEST_INDEX = '.entities.v2.latest.security_generic_<space>';
 
 /**
+ * Relationship fields available in the generic entities index.
+ * These represent static/configuration-based relationships between entities.
+ */
+export const ENTITY_RELATIONSHIP_FIELDS = [
+  'Owns',
+  'Depends_on',
+  'Communicates_with',
+  'Supervised_by',
+  'Accessed_frequently_by',
+] as const;
+
+export type EntityRelationshipField = (typeof ENTITY_RELATIONSHIP_FIELDS)[number];
+
+/**
  * ECS entity actor fields used for graph visualization.
  * NOTE: The order has meaning - it represents the fallback mechanism for detecting the actor field.
  */

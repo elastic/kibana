@@ -47,3 +47,21 @@ export interface GraphEdge {
   targetEntityName?: string | string[] | null;
   targetHostIps?: string[] | string;
 }
+
+/**
+ * Represents a relationship edge from the entity store.
+ * Used for static/configuration-based relationships between entities.
+ */
+export interface RelationshipEdge {
+  entityId: string; // Source entity ID
+  relationship: string; // "Owns", "Supervised_by", "Depends_on", etc.
+  count: number; // Count of relationships
+  targetIds: string[]; // Target entity IDs
+  sourceDocData?: string; // Source entity metadata as JSON string
+  targetDocData?: string[]; // Target entities metadata as JSON strings
+}
+
+/**
+ * Entity ID with type for relationship queries.
+ */
+export type EntityId = NonNullable<GraphRequest['query']['entityIds']>[number];
