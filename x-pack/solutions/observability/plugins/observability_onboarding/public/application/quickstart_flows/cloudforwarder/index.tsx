@@ -38,7 +38,11 @@ import { ManagedOtlpCallout } from '../shared/managed_otlp_callout';
 const EDOT_CLOUD_FORWARDER_DOCS_URL =
   'https://www.elastic.co/docs/reference/opentelemetry/edot-cloud-forwarder/aws';
 
-// CloudFormation template base URLs for different log types
+/**
+ * CloudFormation template configurations for different AWS log types.
+ * All log types use the same template URL but with different parameters
+ * (log type and OTLP endpoint) passed via URL hash parameters.
+ */
 const CLOUDFORMATION_TEMPLATES = {
   vpcflow: {
     templateUrl:
@@ -71,6 +75,11 @@ const CLOUDFORMATION_TEMPLATES = {
 
 type LogType = keyof typeof CLOUDFORMATION_TEMPLATES;
 
+/**
+ * Builds a CloudFormation console URL with pre-filled parameters for deploying
+ * the EDOT Cloud Forwarder. The URL includes the template URL, stack name, log type,
+ * and OTLP endpoint as hash parameters for the AWS CloudFormation console.
+ */
 function buildCloudFormationUrl(logType: LogType, otlpEndpoint: string): string {
   const config = CLOUDFORMATION_TEMPLATES[logType];
   const url = new URL('https://console.aws.amazon.com/cloudformation/home');

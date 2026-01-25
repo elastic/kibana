@@ -32,6 +32,11 @@ const createCloudForwarderOnboardingFlowRoute = createObservabilityOnboardingSer
       elasticsearch: { client },
     } = await context.core;
 
+    /**
+     * Check for log monitoring privileges with APM support (second parameter = true)
+     * since CloudForwarder uses the managed OTLP service which may handle traces.
+     * This is consistent with other OTLP-based flows (otel_apm, kubernetes_otel).
+     */
     const hasPrivileges = await hasLogMonitoringPrivileges(client.asCurrentUser, true);
 
     if (!hasPrivileges) {
