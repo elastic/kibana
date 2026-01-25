@@ -187,7 +187,6 @@ export const OnboardingFlowForm: FunctionComponent = () => {
       'azure-logs-virtual',
       'aws-logs-virtual',
       'gcp-logs-virtual',
-      'cloudforwarder-quick-start',
     ],
   };
   const customCards = useCustomCards(createCollectionCardHandler);

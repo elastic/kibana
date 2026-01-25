@@ -25,7 +25,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ValuesType } from 'utility-types';
+import type { ObservabilityOnboardingAppServices } from '../../..';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { FeedbackButtons } from '../shared/feedback_buttons';
 import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
@@ -95,6 +97,11 @@ export function CloudForwarderPanel() {
     ),
   });
 
+  const {
+    services: {
+      context: { cloudServiceProvider },
+    },
+  } = useKibana<ObservabilityOnboardingAppServices>();
   const [selectedLogType, setSelectedLogType] = useState<LogType>('vpcflow');
   const { data, status, error, refetch } = useCloudForwarderFlow();
   const { onPageReady } = usePerformanceContext();
@@ -110,7 +117,16 @@ export function CloudForwarderPanel() {
   }, [data, onPageReady]);
 
   if (error !== undefined) {
-    return <EmptyPrompt onboardingFlowType="cloudforwarder" error={error} onRetryClick={refetch} />;
+    return (
+      <EmptyPrompt
+        onboardingFlowType="cloudforwarder"
+        error={error}
+        telemetryEventContext={{
+          cloudforwarder: { cloudServiceProvider },
+        }}
+        onRetryClick={refetch}
+      />
+    );
   }
 
   const logTypeOptions = Object.entries(CLOUDFORMATION_TEMPLATES).map(([id, config]) => ({
@@ -237,6 +253,7 @@ export function CloudForwarderPanel() {
               </EuiText>
               <EuiSpacer size="m" />
               <EuiButtonGroup
+                data-test-subj="observabilityOnboardingCloudForwarderLogTypeSelector"
                 legend={i18n.translate(
                   'xpack.observability_onboarding.cloudforwarderPanel.logTypeLegend',
                   {
@@ -267,16 +284,9 @@ export function CloudForwarderPanel() {
                 <p>
                   <FormattedMessage
                     id="xpack.observability_onboarding.cloudforwarderPanel.launchStackNote"
-                    defaultMessage="In the AWS Console, you'll need to paste the API key you copied above into the OTLPAuthorizationHeader field in the format: {format}"
+                    defaultMessage="In the AWS Console, you'll need to paste the API key you copied above into the {paramName} field."
                     values={{
-                      format: (
-                        <code>
-                          {i18n.translate(
-                            'xpack.observability_onboarding.cloudForwarderPanel.code.apikeyYOURAPIKEYLabel',
-                            { defaultMessage: 'ApiKey YOUR_API_KEY' }
-                          )}
-                        </code>
-                      ),
+                      paramName: <code>ElasticAPIKey</code>,
                     }}
                   />
                 </p>
@@ -313,7 +323,7 @@ export function CloudForwarderPanel() {
                   logsPrefix: (
                     <strong>
                       {i18n.translate(
-                        'xpack.observability_onboarding.cloudForwarderPanel.strong.logsawsLabel',
+                        'xpack.observability_onboarding.cloudforwarderPanel.strong.logsawsLabel',
                         { defaultMessage: 'logs-aws.*' }
                       )}
                     </strong>
@@ -429,6 +439,12 @@ function CredentialsTable({
     <EuiBasicTable
       items={items}
       columns={columns}
+      tableCaption={i18n.translate(
+        'xpack.observability_onboarding.cloudforwarderPanel.credentialsTableCaption',
+        {
+          defaultMessage: 'OTLP credentials for AWS CloudFormation deployment',
+        }
+      )}
       data-test-subj="cloudforwarder-credentials-table"
     />
   );

@@ -27,7 +27,7 @@ export function useCustomCards(
     services: {
       application,
       http,
-      context: { isServerless, isCloud },
+      context: { isServerless, isCloud, isDev },
       share,
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
@@ -100,7 +100,8 @@ export function useCustomCards(
     description: i18n.translate(
       'xpack.observability_onboarding.packageList.cloudforwarderDescription',
       {
-        defaultMessage: 'Forward AWS CloudWatch logs to Elastic using OpenTelemetry.',
+        defaultMessage:
+          'Forward logs from AWS S3 to Elastic using the EDOT Cloud Forwarder, running as a Lambda function.',
       }
     ),
     categories: ['observability'],
@@ -114,7 +115,6 @@ export function useCustomCards(
     version: '',
     integration: '',
     isQuickstart: true,
-    release: 'preview',
   };
 
   return [
@@ -493,13 +493,15 @@ export function useCustomCards(
      * The new Firehose card should only be visible on Cloud
      * as Firehose integration requires additional proxy,
      * which is not available for on-prem customers.
+     * Also visible in dev mode for local development.
      */
-    ...(isCloud ? [firehoseQuickstartCard] : []),
+    ...(isCloud || isDev ? [firehoseQuickstartCard] : []),
     /**
      * The EDOT Cloud Forwarder card should only be visible on Cloud
      * as it requires Elastic Cloud infrastructure.
+     * Also visible in dev mode for local development.
      */
-    ...(isCloud ? [cloudforwarderQuickstartCard] : []),
+    ...(isCloud || isDev ? [cloudforwarderQuickstartCard] : []),
   ];
 }
 

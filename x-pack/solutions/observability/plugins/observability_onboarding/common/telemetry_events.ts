@@ -157,6 +157,10 @@ interface OnboardingAutoDetectEventContext {
   title: string;
 }
 
+interface OnboardingCloudForwarderEventContext {
+  cloudServiceProvider?: string;
+}
+
 /**
  * Additional flow-specific context that might
  * be attached to telemetry events.
@@ -164,6 +168,7 @@ interface OnboardingAutoDetectEventContext {
 export interface OnboardingFlowEventContext {
   autoDetect?: OnboardingAutoDetectEventContext;
   firehose?: OnboardingFirehoseFlowEventContext;
+  cloudforwarder?: OnboardingCloudForwarderEventContext;
 }
 
 const flowContextSchema: SchemaValue<OnboardingFlowEventContext | undefined> = {
@@ -202,6 +207,21 @@ const flowContextSchema: SchemaValue<OnboardingFlowEventContext | undefined> = {
           _meta: {
             description:
               "The cloud service provider where the stack is deployed. Can be 'aws', 'gcp' or 'azure'",
+            optional: true,
+          },
+        },
+      },
+      _meta: {
+        optional: true,
+      },
+    },
+    cloudforwarder: {
+      properties: {
+        cloudServiceProvider: {
+          type: 'keyword',
+          _meta: {
+            description:
+              "The cloud service provider where the cloud forwarder is deployed. Can be 'aws', 'gcp' or 'azure'",
             optional: true,
           },
         },

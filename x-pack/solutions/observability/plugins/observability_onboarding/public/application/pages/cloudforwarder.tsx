@@ -26,10 +26,9 @@ export const CloudForwarderPage = () => (
           'xpack.observability_onboarding.experimentalOnboardingFlow.customHeader.cloudforwarder.caption.description',
           {
             defaultMessage:
-              'Deploy the Elastic Distribution of OpenTelemetry Cloud Forwarder to forward AWS CloudWatch logs and metrics to Elastic.',
+              'Deploy the EDOT Cloud Forwarder as a Lambda function to forward logs from AWS S3 to Elastic.',
           }
         )}
-        isTechnicalPreview={true}
       />
     }
   >
