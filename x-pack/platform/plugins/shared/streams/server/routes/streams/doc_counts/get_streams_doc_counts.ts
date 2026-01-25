@@ -81,6 +81,7 @@ export async function getDocCountsForStreams(options: {
         (esClientAsSecondaryAuthUser ?? esClient).indices.stats({
           index: indexChunk,
           metric: ['docs'],
+          filter_path: 'indices.*.primaries.docs.count',
         }),
     });
 
