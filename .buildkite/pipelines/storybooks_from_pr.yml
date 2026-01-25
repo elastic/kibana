@@ -1,0 +1,21 @@
+steps:
+  - label: "Build Storybooks"
+    command: .buildkite/scripts/steps/storybooks/build_and_upload.sh
+    agents:
+      machineType: n2-standard-8
+      preemptible: true
+    timeout_in_minutes: 80
+
+  - label: "Comment Storybooks URL"
+    command: |
+      STORYBOOK_URL=$(buildkite-agent meta-data get pr_comment:storybooks:head)
+      ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
+        --message "$STORYBOOK_URL" \
+        --context "kibana-deploy-storybooks-from-pr" \
+        --clear-previous
+    agents:
+      provider: gcp
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      machineType: n2-standard-2
+    timeout_in_minutes: 5
