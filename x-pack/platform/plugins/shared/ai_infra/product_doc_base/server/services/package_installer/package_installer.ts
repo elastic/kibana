@@ -642,7 +642,7 @@ export class PackageInstaller {
       zipArchive = await openZipArchive(downloadedFullPath);
       validateArtifactArchive(zipArchive);
 
-      for (const { productName, indexName } of OPEN_API_SPEC_PRODUCTS) {
+      for (const { productName, indexName: unmodifiedIndexName } of OPEN_API_SPEC_PRODUCTS) {
         this.log.info(`Installing OpenAPI spec for ${productName}`);
 
         await this.productDocClient.setOpenapiSpecInstallationStarted({
@@ -673,6 +673,9 @@ export class PackageInstaller {
         const modifiedMappings = cloneDeep(mappings);
         overrideInferenceSettings(modifiedMappings, effectiveInferenceId);
 
+        const indexName = `${unmodifiedIndexName}${
+          !isImpliedDefaultElserInferenceId(effectiveInferenceId) ? `-${effectiveInferenceId}` : ''
+        }`;
         // Create index
         await createIndex({
           indexName,
