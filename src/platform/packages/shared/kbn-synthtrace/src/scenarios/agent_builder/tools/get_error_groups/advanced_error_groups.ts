@@ -34,7 +34,13 @@
  * ```
  */
 
-import type { ApmFields, Instance, Serializable, Timerange } from '@kbn/synthtrace-client';
+import type {
+  ApmFields,
+  APMStacktrace,
+  Instance,
+  Serializable,
+  Timerange,
+} from '@kbn/synthtrace-client';
 import { apm } from '@kbn/synthtrace-client';
 import { createCliScenario } from '../../../../lib/utils/create_scenario';
 import { withClient, type ScenarioReturnType } from '../../../../lib/utils/with_client';
@@ -74,6 +80,8 @@ export interface ErrorPatternConfig {
   onlyOnHosts?: string[];
   /** Optional explicit grouping key to force grouping across variations. */
   groupingKey?: string;
+  /** Optional stack trace frames for the error. */
+  stacktrace?: APMStacktrace[];
 }
 
 /**
@@ -111,6 +119,20 @@ const buildOverrides = (
     Object.entries(overrides).filter(([, value]) => value !== undefined)
   ) as Record<string, string | number | boolean>;
 
+/**
+ * Converts structured stacktrace to OTel/ECS compliant string format.
+ * Example output: "at validate (CartValidator.java:87)\n at processCheckout (CheckoutService.java:142)"
+ */
+function stacktraceToString(stacktrace?: APMStacktrace[]): string | undefined {
+  if (!stacktrace || stacktrace.length === 0) return undefined;
+  return stacktrace
+    .map((frame) => {
+      const lineNumber = frame.line && 'number' in frame.line ? frame.line.number : undefined;
+      return `at ${frame.function} (${frame.filename}:${lineNumber})`;
+    })
+    .join('\n');
+}
+
 const buildApmError = ({
   instance,
   errorConfig,
@@ -126,6 +148,7 @@ const buildApmError = ({
       type: errorConfig.type,
       culprit: errorConfig.culprit,
       groupingKey: errorConfig.groupingKey,
+      stacktrace: errorConfig.stacktrace,
     })
     .timestamp(timestamp);
 
@@ -133,9 +156,16 @@ const buildApmError = ({
     message: errorConfig.message,
     type: errorConfig.type,
     handled: errorConfig.handled,
+    ...(errorConfig.stacktrace ? { stacktrace: errorConfig.stacktrace } : {}),
   };
 
-  return error.overrides({ 'error.exception': [exception] });
+  // Convert structured stacktrace to string for OTel/ECS compliance
+  const stackTraceString = stacktraceToString(errorConfig.stacktrace);
+
+  return error.overrides({
+    'error.exception': [exception],
+    ...(stackTraceString ? { 'error.stack_trace': stackTraceString } : {}),
+  });
 };
 
 const buildFailureSpan = ({
@@ -323,6 +353,26 @@ export default createCliScenario(({ range, clients: { apmEsClient } }) => {
           culprit: 'com.acme.checkout.CartValidator.validate',
           handled: true,
           rate: 1,
+          stacktrace: [
+            {
+              filename: 'CartValidator.java',
+              function: 'validate',
+              line: { number: 87 },
+              module: 'com.acme.checkout',
+            },
+            {
+              filename: 'CheckoutService.java',
+              function: 'processCheckout',
+              line: { number: 142 },
+              module: 'com.acme.checkout',
+            },
+            {
+              filename: 'CheckoutController.java',
+              function: 'handleRequest',
+              line: { number: 56 },
+              module: 'com.acme.checkout.api',
+            },
+          ],
         },
         {
           type: 'SSLHandshakeException',
@@ -384,6 +434,26 @@ export default createCliScenario(({ range, clients: { apmEsClient } }) => {
           culprit: 'cart/serializer.ts:48',
           handled: false,
           rate: 1,
+          stacktrace: [
+            {
+              filename: 'serializer.ts',
+              function: 'serializeCartItem',
+              line: { number: 48 },
+              module: 'cart',
+            },
+            {
+              filename: 'cart_service.ts',
+              function: 'addItem',
+              line: { number: 112 },
+              module: 'cart',
+            },
+            {
+              filename: 'router.ts',
+              function: 'handleAddItem',
+              line: { number: 34 },
+              module: 'cart/routes',
+            },
+          ],
         },
         {
           type: 'RateLimitException',
@@ -479,6 +549,26 @@ export default createCliScenario(({ range, clients: { apmEsClient } }) => {
           handled: false,
           rate: 3,
           onlyInCanary: true,
+          stacktrace: [
+            {
+              filename: 'jwt_verifier.go',
+              function: 'VerifySignature',
+              line: { number: 142 },
+              module: 'auth',
+            },
+            {
+              filename: 'token.go',
+              function: 'ValidateToken',
+              line: { number: 78 },
+              module: 'auth',
+            },
+            {
+              filename: 'middleware.go',
+              function: 'AuthMiddleware',
+              line: { number: 35 },
+              module: 'auth/handlers',
+            },
+          ],
         },
         {
           type: 'NullPointerException',
@@ -514,6 +604,26 @@ export default createCliScenario(({ range, clients: { apmEsClient } }) => {
           culprit: 'inventory/reserve.py:87',
           handled: true,
           rate: 4,
+          stacktrace: [
+            {
+              filename: 'reserve.py',
+              function: 'reserve_inventory',
+              line: { number: 87 },
+              module: 'inventory',
+            },
+            {
+              filename: 'worker.py',
+              function: 'process_reservation',
+              line: { number: 156 },
+              module: 'inventory.workers',
+            },
+            {
+              filename: 'celery_tasks.py',
+              function: 'handle_task',
+              line: { number: 42 },
+              module: 'inventory.tasks',
+            },
+          ],
         },
         {
           type: 'DatabaseDeadlockException',

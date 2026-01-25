@@ -10,7 +10,6 @@ import moment from 'moment';
 import type { Logger } from '@kbn/core/server';
 import { ApmDocumentType, RollupInterval } from '@kbn/apm-data-access-plugin/common';
 import { ERROR_GROUP_ID } from '@kbn/observability-shared-plugin/common';
-import { getEsField } from '../../utils/unwrap_es_fields';
 import type { ApmEventClient } from './types';
 import type { ErrorGroupSample } from './get_error_group_samples';
 
@@ -35,10 +34,7 @@ export async function getFirstSeenPerGroup({
   logger: Logger;
 }): Promise<Map<string, string>> {
   const groupIds = compact(
-    errorGroups.map((errorGroup) => {
-      const fields = errorGroup.sample?.hits?.hits?.[0]?.fields ?? {};
-      return getEsField(fields, ERROR_GROUP_ID) as string | undefined;
-    })
+    errorGroups.map((errorGroup) => errorGroup.sample[ERROR_GROUP_ID] as string)
   );
 
   if (groupIds.length === 0) {

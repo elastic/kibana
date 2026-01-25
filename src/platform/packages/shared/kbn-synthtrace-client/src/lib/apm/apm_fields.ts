@@ -127,6 +127,7 @@ export type ApmFields = Fields<{
     'error.id': string;
     'error.type': string;
     'error.culprit': string;
+    'error.stack_trace': string;
     'event.ingested': string;
     'event.name': string;
     'event.action': string;

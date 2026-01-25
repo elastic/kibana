@@ -10,12 +10,16 @@ import expect from '@kbn/expect';
 import { timerange } from '@kbn/synthtrace-client';
 import {
   type ApmSynthtraceEsClient,
+  type LogsSynthtraceEsClient,
   generateErrorGroupsData,
-  type ErrorServiceConfig,
+  generateLogExceptionGroupsData,
+  DEFAULT_ERROR_SERVICES,
+  DEFAULT_LOG_EXCEPTION_SERVICES,
 } from '@kbn/synthtrace';
 import type { OtherResult } from '@kbn/agent-builder-common';
 import { OBSERVABILITY_GET_ERROR_GROUPS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools/get_error_groups/tool';
 import type { ErrorGroup } from '@kbn/observability-agent-builder-plugin/server/tools/get_error_groups/handler';
+import type { LogExceptionGroup } from '@kbn/observability-agent-builder-plugin/server/tools/get_error_groups/get_otel_log_exceptions';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import type { SynthtraceProvider } from '../../../services/synthtrace';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
@@ -23,109 +27,60 @@ import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
 interface GetErrorGroupsToolResult extends OtherResult {
   data: {
     errorGroups: ErrorGroup[];
+    logExceptionGroups: LogExceptionGroup[];
   };
 }
 
 const START = 'now-15m';
 const END = 'now';
-
-const testServices: ErrorServiceConfig[] = [
-  {
-    name: 'payment-service',
-    environment: 'production',
-    agentName: 'java',
-    transactionName: 'POST /api/payment',
-    errors: [
-      {
-        type: 'NullPointerException',
-        message: 'Cannot invoke method on null object',
-        culprit: 'com.example.payment.PaymentProcessor.processPayment',
-        handled: true,
-        rate: 5,
-      },
-      {
-        type: 'TimeoutException',
-        message: 'Connection timed out after 30000ms',
-        culprit: 'com.example.payment.PaymentGateway.connect',
-        handled: false,
-        rate: 2,
-      },
-    ],
-  },
-  {
-    name: 'user-service',
-    environment: 'production',
-    agentName: 'nodejs',
-    transactionName: 'GET /api/user',
-    errors: [
-      {
-        type: 'ValidationException',
-        message: 'Invalid email format',
-        culprit: 'UserValidator.validate at src/validators/user.js:42',
-        handled: true,
-        rate: 3,
-      },
-    ],
-  },
-  {
-    name: 'order-service',
-    environment: 'staging',
-    agentName: 'python',
-    transactionName: 'POST /api/order',
-    errors: [
-      {
-        type: 'OutOfStockException',
-        message: 'Product is out of stock',
-        culprit: 'inventory_service.reserve in app/services/inventory.py:87',
-        handled: true,
-        rate: 4,
-      },
-    ],
-  },
-];
-
-const historicalServices: ErrorServiceConfig[] = [
-  {
-    name: 'payment-service',
-    environment: 'production',
-    agentName: 'java',
-    transactionName: 'POST /api/payment',
-    errors: [
-      {
-        type: 'NullPointerException',
-        message: 'Cannot invoke method on null object',
-        culprit: 'com.example.payment.PaymentProcessor.processPayment',
-        handled: true,
-        rate: 1,
-      },
-    ],
-  },
-];
+let WINDOW_START: number;
+let WINDOW_END: number;
 
 async function setupSynthtraceData(synthtrace: ReturnType<typeof SynthtraceProvider>) {
-  const esClient = await synthtrace.createApmSynthtraceEsClient();
-  await esClient.clean();
+  const apmEsClient = await synthtrace.createApmSynthtraceEsClient();
+  const logsEsClient = synthtrace.createLogsSynthtraceEsClient();
+  await apmEsClient.clean();
+  await logsEsClient.clean();
+
+  WINDOW_START = datemath.parse(START)!.valueOf();
+  WINDOW_END = datemath.parse(END)!.valueOf();
 
   // generate an old error group
   const historicalRange = timerange('now-15d', 'now-15d+5m');
   const { client: historicalClient, generator: historicalGenerator } = generateErrorGroupsData({
     range: historicalRange,
-    apmEsClient: esClient,
-    services: historicalServices,
+    apmEsClient,
+    services: [
+      {
+        ...DEFAULT_ERROR_SERVICES[0],
+        errors: [{ ...DEFAULT_ERROR_SERVICES[0].errors[0], rate: 1 }],
+      },
+    ],
   });
 
   await historicalClient.index(historicalGenerator);
 
   const range = timerange(START, END);
-  const { client, generator } = generateErrorGroupsData({
+
+  // Generate APM error data
+  const { client: apmClient, generator: apmGenerator } = generateErrorGroupsData({
     range,
-    apmEsClient: esClient,
-    services: testServices,
+    apmEsClient,
+    services: DEFAULT_ERROR_SERVICES,
   });
 
-  await client.index(generator);
+  await apmClient.index(apmGenerator);
 
-  return esClient;
+  // Generate OTel log exception data
+  const { client: logsClient, generator: logsGenerator } = generateLogExceptionGroupsData({
+    range,
+    logsEsClient,
+    services: DEFAULT_LOG_EXCEPTION_SERVICES,
+  });
+
+  await logsClient.index(logsGenerator);
+
+  return { apmEsClient, logsEsClient };
 }
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -135,17 +90,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe(`tool: ${OBSERVABILITY_GET_ERROR_GROUPS_TOOL_ID}`, function () {
     let agentBuilderApiClient: ReturnType<typeof createAgentBuilderApiClient>;
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+    let logsSynthtraceEsClient: LogsSynthtraceEsClient;
 
     before(async () => {
       const scoped = await roleScopedSupertest.getSupertestWithRoleScope('editor');
       agentBuilderApiClient = createAgentBuilderApiClient(scoped);
-
-      apmSynthtraceEsClient = await setupSynthtraceData(synthtrace);
+      const clients = await setupSynthtraceData(synthtrace);
+      apmSynthtraceEsClient = clients.apmEsClient;
+      logsSynthtraceEsClient = clients.logsEsClient;
     });
 
     after(async () => {
       if (apmSynthtraceEsClient) {
         await apmSynthtraceEsClient.clean();
+      }
+      if (logsSynthtraceEsClient) {
+        await logsSynthtraceEsClient.clean();
       }
     });
 
@@ -156,19 +116,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       expect(results).to.have.length(1);
-      const { errorGroups } = results[0].data;
+      const { errorGroups, logExceptionGroups } = results[0].data;
 
+      // Should have error groups
       expect(errorGroups.length).to.be(4);
 
       for (const group of errorGroups) {
-        expect(group.groupId).to.be.a('string');
         expect(group.count).to.be.greaterThan(0);
         expect(group.lastSeen).to.be.a('string');
 
         const sample = group.sample as Record<string, unknown>;
-        expect(sample['error.grouping_key']).to.be(group.groupId);
+        expect(sample['error.grouping_key']).to.be.a('string');
         expect(sample['service.name']).to.be.a('string');
       }
+
+      // logExceptionGroups should be an array (may be empty if no log exception data)
+      expect(logExceptionGroups).to.be.an('array');
     });
 
     describe('when filtering by service.name', () => {
@@ -271,9 +234,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         const firstSeenTime = new Date(newGroup!.firstSeen!).getTime();
-
-        expect(firstSeenTime).to.be.greaterThan(datemath.parse(START)!.valueOf());
-        expect(firstSeenTime).to.be.lessThan(datemath.parse(END)!.valueOf());
+        expect(firstSeenTime).to.be.greaterThan(WINDOW_START);
+        expect(firstSeenTime).to.be.lessThan(WINDOW_END);
       });
     });
 
@@ -294,16 +256,178 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         errorGroups = results[0].data.errorGroups;
       });
 
-      it('returns all error groups', () => {
-        expect(errorGroups).to.have.length(4);
+      it('includes error.stack_trace string for errors that have it', () => {
+        // NullPointerException in payment-service has a stacktrace defined
+        const groupWithStackTrace = errorGroups.find((group) => {
+          const sample = group.sample as Record<string, unknown>;
+          return sample['error.exception.type'] === 'NullPointerException';
+        });
+
+        const sample = groupWithStackTrace!.sample as Record<string, unknown>;
+
+        // error.stack_trace is a string (OTel/ECS compliant)
+        const stackTrace = sample['error.stack_trace'] as string;
+        expect(stackTrace).to.be.a('string');
+        expect(stackTrace).to.contain('processPayment');
+        expect(stackTrace).to.contain('PaymentProcessor.java');
       });
 
-      it('includes error details in sample (stack trace may be undefined in dataset)', () => {
-        for (const group of errorGroups) {
+      it('does not include error.stack_trace for errors without includeStackTrace', async () => {
+        // Fetch without includeStackTrace
+        const results = await agentBuilderApiClient.executeTool<GetErrorGroupsToolResult>({
+          id: OBSERVABILITY_GET_ERROR_GROUPS_TOOL_ID,
+          params: {
+            start: START,
+            end: END,
+            includeStackTrace: false,
+          },
+        });
+
+        const groups = results[0].data.errorGroups;
+        const groupWithStackTrace = groups.find((group) => {
           const sample = group.sample as Record<string, unknown>;
-          expect(sample).to.have.property('error.exception.message');
-          expect(sample).to.have.property('error.exception.type');
+          return sample['error.exception.type'] === 'NullPointerException';
+        });
+
+        const sample = groupWithStackTrace!.sample as Record<string, unknown>;
+        // Without includeStackTrace, error.stack_trace should not be present
+        expect(sample['error.stack_trace']).to.be(undefined);
+      });
+    });
+
+    describe('logExceptionGroups', () => {
+      let logExceptionGroups: LogExceptionGroup[];
+
+      before(async () => {
+        const results = await agentBuilderApiClient.executeTool<GetErrorGroupsToolResult>({
+          id: OBSERVABILITY_GET_ERROR_GROUPS_TOOL_ID,
+          params: { start: START, end: END },
+        });
+
+        expect(results).to.have.length(1);
+        logExceptionGroups = results[0].data.logExceptionGroups;
+      });
+
+      it('returns log exception groups with expected structure', () => {
+        // Should have log exception groups from OTel log data
+        expect(logExceptionGroups.length).to.be.greaterThan(0);
+
+        for (const group of logExceptionGroups) {
+          expect(group.count).to.be.greaterThan(0);
+          expect(group.pattern).to.be.a('string');
+          expect(group.lastSeen).to.be.a('string');
+
+          const sample = group.sample as Record<string, unknown>;
+          expect(sample['service.name']).to.be.a('string');
         }
+      });
+
+      it('includes exception.type in samples', () => {
+        // Find a group with a known exception type from our test data
+        const smtpGroup = logExceptionGroups.find((group) => {
+          const sample = group.sample as Record<string, unknown>;
+          return sample['exception.type'] === 'SmtpConnectionException';
+        });
+
+        expect(smtpGroup).to.not.be(undefined);
+        const sample = smtpGroup!.sample as Record<string, unknown>;
+        expect(sample['service.name']).to.be('notification-service');
+      });
+    });
+
+    describe('logExceptionGroups with includeStackTrace', () => {
+      let logExceptionGroups: LogExceptionGroup[];
+
+      before(async () => {
+        const results = await agentBuilderApiClient.executeTool<GetErrorGroupsToolResult>({
+          id: OBSERVABILITY_GET_ERROR_GROUPS_TOOL_ID,
+          params: {
+            start: START,
+            end: END,
+            includeStackTrace: true,
+          },
+        });
+
+        expect(results).to.have.length(1);
+        logExceptionGroups = results[0].data.logExceptionGroups;
+      });
+
+      it('includes exception.stacktrace for groups that have it', () => {
+        // SmtpConnectionException has a stacktrace defined
+        const groupWithStackTrace = logExceptionGroups.find((group) => {
+          const sample = group.sample as Record<string, unknown>;
+          return sample['exception.type'] === 'SmtpConnectionException';
+        });
+
+        expect(groupWithStackTrace).to.not.be(undefined);
+        const sample = groupWithStackTrace!.sample as Record<string, unknown>;
+
+        const stackTrace = sample['exception.stacktrace'] as string;
+        expect(stackTrace).to.be.a('string');
+        expect(stackTrace).to.contain('SmtpClient.connect');
+      });
+    });
+
+    describe('logExceptionGroups when filtering by service.name', () => {
+      let logExceptionGroups: LogExceptionGroup[];
+
+      before(async () => {
+        const results = await agentBuilderApiClient.executeTool<GetErrorGroupsToolResult>({
+          id: OBSERVABILITY_GET_ERROR_GROUPS_TOOL_ID,
+          params: {
+            start: START,
+            end: END,
+            kqlFilter: 'service.name: "analytics-service"',
+          },
+        });
+
+        expect(results).to.have.length(1);
+        logExceptionGroups = results[0].data.logExceptionGroups;
+      });
+
+      it('returns only log exception groups from analytics-service', () => {
+        expect(logExceptionGroups.length).to.be.greaterThan(0);
+
+        for (const group of logExceptionGroups) {
+          const sample = group.sample as Record<string, unknown>;
+          expect(sample['service.name']).to.be('analytics-service');
+        }
+      });
+    });
+
+    describe('downstreamServiceResource', () => {
+      let errorGroups: ErrorGroup[];
+
+      before(async () => {
+        const results = await agentBuilderApiClient.executeTool<GetErrorGroupsToolResult>({
+          id: OBSERVABILITY_GET_ERROR_GROUPS_TOOL_ID,
+          params: { start: START, end: END },
+        });
+
+        expect(results).to.have.length(1);
+        errorGroups = results[0].data.errorGroups;
+      });
+
+      it('includes downstreamServiceResource for errors that occurred during downstream calls', () => {
+        // TimeoutException in payment-service has a downstream dependency (payment-gateway-api)
+        const groupWithDownstream = errorGroups.find((group) => {
+          const sample = group.sample as Record<string, unknown>;
+          return sample['error.exception.type'] === 'TimeoutException';
+        });
+
+        expect(groupWithDownstream).to.not.be(undefined);
+        expect(groupWithDownstream!.downstreamServiceResource).to.be('payment-gateway-api');
+      });
+
+      it('does not include downstreamServiceResource for errors without downstream calls', () => {
+        // NullPointerException in payment-service has no downstream dependency
+        const groupWithoutDownstream = errorGroups.find((group) => {
+          const sample = group.sample as Record<string, unknown>;
+          return sample['error.exception.type'] === 'NullPointerException';
+        });
+
+        expect(groupWithoutDownstream).to.not.be(undefined);
+        expect(groupWithoutDownstream!.downstreamServiceResource).to.be(undefined);
       });
     });
   });

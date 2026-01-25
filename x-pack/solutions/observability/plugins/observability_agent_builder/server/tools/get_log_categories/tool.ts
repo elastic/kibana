@@ -77,6 +77,7 @@ After using this tool:
 - If you see resource lifecycle logs (acquire/release, open/close), check if counts match - mismatches can indicate leaks
 
 Do NOT use for:
+- Finding exceptions with stack traces (use \`observability.get_error_groups\`)
 - Understanding the sequence of events for a specific error (use ${OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID})
 - Investigating a specific incident in detail (use ${OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID})
 - Analyzing changes in log volume over time (use run_log_rate_analysis)`,

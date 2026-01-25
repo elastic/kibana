@@ -17,17 +17,7 @@ import {
 import { timeRangeFilter } from '../../utils/dsl_filters';
 import { getEsField } from '../../utils/unwrap_es_fields';
 import type { ApmEventClient } from './types';
-// Inner error group bucket type - has sample with top_hits
-interface ErrorGroupBucket {
-  key: string | number;
-  doc_count: number;
-  last_seen?: { value: number | null };
-  sample?: {
-    hits?: {
-      hits?: Array<{ fields?: Record<string, unknown[] | undefined> }>;
-    };
-  };
-}
+import type { ErrorGroupSample } from './get_error_group_samples';
 
 /**
  * Fetches downstream service resources for errors that occurred during outbound calls.
@@ -42,18 +32,18 @@ export async function getDownstreamServicePerGroup({
   logger,
 }: {
   apmEventClient: ApmEventClient;
-  errorGroups: ErrorGroupBucket[];
+  errorGroups: ErrorGroupSample[];
   startMs: number;
   endMs: number;
   logger: Logger;
 }): Promise<Map<string, string>> {
   const errorSamples = compact(
     errorGroups.map((errorGroup) => {
-      const fields = errorGroup.sample?.hits?.hits?.[0]?.fields;
-      const traceId = getEsField<string>(fields, TRACE_ID);
-      const serviceName = getEsField<string>(fields, SERVICE_NAME);
-      if (traceId && serviceName) {
-        return { traceId, serviceName };
+      const traceId = errorGroup.sample['trace.id'];
+      const serviceName = errorGroup.sample['service.name'];
+      const groupId = errorGroup.sample['error.grouping_key'];
+      if (traceId && serviceName && groupId) {
+        return { traceId, serviceName, groupId };
       }
     })
   );
@@ -98,7 +88,7 @@ export async function getDownstreamServicePerGroup({
   // so responses[i] corresponds to errorSamples[i]
   const entries = compact(
     responses.map((response, i) => {
-      const { traceId } = errorSamples[i];
+      const { groupId } = errorSamples[i];
       const hit = response.hits?.hits?.[0];
       if (!hit?.fields) {
         return null;
@@ -109,7 +99,7 @@ export async function getDownstreamServicePerGroup({
         return null;
       }
 
-      return [traceId, resource] as const;
+      return [groupId, resource] as const;
     })
   );
 

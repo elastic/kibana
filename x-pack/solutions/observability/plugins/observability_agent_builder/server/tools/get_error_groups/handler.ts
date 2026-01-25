@@ -5,24 +5,27 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
+import { ERROR_GROUP_ID } from '@kbn/observability-shared-plugin/common';
 import type {
   ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../types';
 import { parseDatemath } from '../../utils/time';
 import { buildApmResources } from '../../utils/build_apm_resources';
-import { unwrapEsFields } from '../../utils/unwrap_es_fields';
 import { getErrorGroupSamples } from './get_error_group_samples';
 import { getDownstreamServicePerGroup } from './get_downstream_service_resources';
 import { getFirstSeenPerGroup } from './get_first_seen_per_group';
+import { getLogExceptionGroups } from './get_otel_log_exceptions';
 
-export type ErrorGroup = Awaited<ReturnType<typeof getErrorGroups>>[number];
+type GetErrorGroupsResult = Awaited<ReturnType<typeof getToolHandler>>;
+export type ErrorGroup = GetErrorGroupsResult['errorGroups'][number];
 
-export async function getErrorGroups({
+export async function getToolHandler({
   core,
   plugins,
   request,
+  esClient,
   logger,
   start,
   end,
@@ -33,6 +36,7 @@ export async function getErrorGroups({
   core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   request: KibanaRequest;
+  esClient: IScopedClusterClient;
   logger: Logger;
   start: string;
   end: string;
@@ -45,6 +49,48 @@ export async function getErrorGroups({
   const startMs = parseDatemath(start);
   const endMs = parseDatemath(end, { roundUp: true });
 
+  // Query error groups and log exception groups in parallel
+  const [errorGroups, logExceptionGroups] = await Promise.all([
+    getApmErrorGroups({
+      apmEventClient,
+      startMs,
+      endMs,
+      kqlFilter,
+      includeStackTrace,
+      includeFirstSeen,
+      logger,
+    }),
+    getLogExceptionGroups({
+      core,
+      esClient,
+      startMs,
+      endMs,
+      kqlFilter,
+      includeStackTrace,
+      logger,
+    }),
+  ]);
+
+  return { errorGroups, logExceptionGroups };
+}
+
+async function getApmErrorGroups({
+  apmEventClient,
+  startMs,
+  endMs,
+  kqlFilter,
+  includeStackTrace,
+  includeFirstSeen,
+  logger,
+}: {
+  apmEventClient: Awaited<ReturnType<typeof buildApmResources>>['apmEventClient'];
+  startMs: number;
+  endMs: number;
+  kqlFilter?: string;
+  includeStackTrace?: boolean;
+  includeFirstSeen?: boolean;
+  logger: Logger;
+}) {
   const errorGroups = await getErrorGroupSamples({
     apmEventClient,
     startMs,
@@ -57,33 +103,15 @@ export async function getErrorGroups({
   const [firstSeenMap, downstreamServiceMap] = await Promise.all([
     includeFirstSeen
       ? getFirstSeenPerGroup({ apmEventClient, errorGroups, endMs, logger })
-      : undefined,
-    getDownstreamServicePerGroup({
-      apmEventClient,
-      errorGroups,
-      startMs,
-      endMs,
-      logger,
-    }),
+      : new Map<string, string>(),
+    getDownstreamServicePerGroup({ apmEventClient, errorGroups, startMs, endMs, logger }),
   ]);
 
-  return errorGroups.map((bucket) => {
-    const fields = (bucket.sample?.hits?.hits?.[0]?.fields ?? {}) as Record<string, unknown[]>;
-    const sample = unwrapEsFields(fields);
-    const traceId = sample['trace.id'] as string | undefined;
-    const groupId = bucket.key as string;
-    const lastSeenMs = bucket.last_seen?.value ?? 0;
-    const downstreamServiceResource = traceId ? downstreamServiceMap.get(traceId) : undefined;
+  return errorGroups.map((errorGroup) => {
+    const groupId = errorGroup.sample[ERROR_GROUP_ID];
+    const downstreamServiceResource = downstreamServiceMap.get(groupId);
+    const firstSeen = firstSeenMap.get(groupId);
 
-    return {
-      groupId,
-      count: bucket.doc_count,
-      firstSeen: firstSeenMap ? firstSeenMap.get(groupId) : undefined,
-      lastSeen: new Date(lastSeenMs).toISOString(),
-      sample: {
-        ...sample,
-        downstreamServiceResource,
-      },
-    };
+    return { ...errorGroup, firstSeen, downstreamServiceResource };
   });
 }

@@ -17,18 +17,11 @@ import type {
 } from '../../types';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
-import { getErrorGroups, type ErrorGroup } from './handler';
+import { getToolHandler } from './handler';
 import { OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID } from '../get_correlated_logs/tool';
 import { OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID } from '../get_log_categories/tool';
 
 export const OBSERVABILITY_GET_ERROR_GROUPS_TOOL_ID = 'observability.get_error_groups';
-
-export interface GetErrorGroupsToolResult {
-  type: typeof ToolResultType.other;
-  data: {
-    errorGroups: ErrorGroup[];
-  };
-}
 
 const DEFAULT_TIME_RANGE = {
   start: 'now-1h',
@@ -75,30 +68,22 @@ export function createGetErrorGroupsTool({
     id: OBSERVABILITY_GET_ERROR_GROUPS_TOOL_ID,
     type: ToolType.builtin,
     description: dedent`
-      Retrieves error groups (exceptions and APM errors) with occurrence counts and sample details.
+      Retrieves error groups with occurrence counts and sample details.
 
       When to use:
-      - Get a quick overview of what errors are occurring across services
+      - Get an overview of what exceptions are being thrown across services
       - Identify which exception types are generating the most errors
-      - Find the most frequent error patterns
-      - Determine if errors are recently introduced or long-standing
-
-      How it works:
-      Groups errors by their error.grouping_key (unique identifier per error pattern), returning counts and a sample error for each group. Use kqlFilter to scope to specific services or error types.
+      - Find the most frequent error patterns with stack traces
 
       After using this tool:
       - To understand the sequence of events leading to an error, use \`${OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID}\` with a trace.id from the sample
-      - For log message pattern analysis (not exceptions), use \`${OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID}\`
+      - For general log message patterns (not exceptions), use \`${OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID}\`
 
-      Example workflows:
-      1. get_error_groups() → See all errors across services
-      2. get_error_groups(kqlFilter='service.name: "payment"') → Errors for a specific service
-      3. get_error_groups(kqlFilter='error.exception.type: "NullPointerException"') → Specific exception type
-
-      Returns: Array of error groups with groupId, count, lastSeen, and sample error details using ECS field names (error.grouping_key, error.exception.type, service.name, trace.id, etc.).
+      Do NOT use for:
+      - Unstructured error-level logs (use \`${OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID}\`)
     `,
     schema: getErrorGroupsSchema,
-    tags: ['observability', 'errors', 'apm', 'exceptions'],
+    tags: ['observability', 'errors', 'exceptions'],
     availability: {
       cacheMode: 'space',
       handler: async ({ request }) => {
@@ -106,13 +91,14 @@ export function createGetErrorGroupsTool({
       },
     },
     handler: async ({ start, end, kqlFilter, includeStackTrace, includeFirstSeen }, context) => {
-      const { request } = context;
+      const { request, esClient } = context;
 
       try {
-        const errorGroups = await getErrorGroups({
+        const result = await getToolHandler({
           core,
           plugins,
           request,
+          esClient,
           logger,
           start,
           end,
@@ -125,9 +111,7 @@ export function createGetErrorGroupsTool({
           results: [
             {
               type: ToolResultType.other,
-              data: {
-                errorGroups,
-              },
+              data: result,
             },
           ],
         };

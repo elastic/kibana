@@ -81,8 +81,13 @@ export type LogDocument = Fields &
     'event.outcome'?: string;
     'event.action'?: string;
     'event.sequence'?: number;
+    'event.name'?: string;
     'source.ip'?: string;
     'rule.name'?: string;
+    // OTel exception fields (per OTel semantic conventions)
+    'exception.type'?: string;
+    'exception.message'?: string;
+    'exception.stacktrace'?: string;
     labels?: Record<string, string>;
     test_field: string | string[];
     date: Date;

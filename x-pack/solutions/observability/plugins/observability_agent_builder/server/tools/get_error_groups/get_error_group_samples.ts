@@ -32,9 +32,10 @@ import {
 } from '@kbn/observability-shared-plugin/common';
 import { ERROR_STACK_TRACE } from '@kbn/apm-types/es_fields';
 import { timeRangeFilter, kqlFilter as buildKqlFilter } from '../../utils/dsl_filters';
+import { unwrapEsFields } from '../../utils/unwrap_es_fields';
 import type { ApmEventClient } from './types';
 
-export type ErrorGroupSample = Awaited<ReturnType<typeof getErrorGroupSamples>>['0'];
+export type ErrorGroupSample = Awaited<ReturnType<typeof getErrorGroupSamples>>[number];
 
 export async function getErrorGroupSamples({
   apmEventClient,
@@ -86,6 +87,7 @@ export async function getErrorGroupSamples({
               size: 1,
               _source: false,
               fields: [
+                '_index',
                 // Error fields
                 ERROR_GROUP_ID,
                 ERROR_EXC_TYPE,
@@ -113,7 +115,7 @@ export async function getErrorGroupSamples({
                 // User agent fields
                 USER_AGENT_NAME,
                 USER_AGENT_VERSION,
-                // Stack trace (optional, can be large)
+                // Stack trace string (OTel/ECS compliant)
                 ...(includeStackTrace ? [ERROR_STACK_TRACE] : []),
               ],
               sort: [{ '@timestamp': 'desc' as const }],
@@ -124,5 +126,21 @@ export async function getErrorGroupSamples({
     },
   });
 
-  return response.aggregations?.error_groups?.buckets ?? [];
+  const buckets = response.aggregations?.error_groups?.buckets ?? [];
+
+  return buckets.map((bucket) => {
+    const sample = unwrapEsFields(bucket.sample?.hits?.hits?.[0]?.fields) as {
+      [ERROR_GROUP_ID]: string;
+      [TRACE_ID]: string | undefined;
+      [SERVICE_NAME]: string | undefined;
+      [key: string]: unknown;
+    };
+    const lastSeen = bucket.last_seen?.value
+      ? new Date(bucket.last_seen?.value).toISOString()
+      : undefined;
+
+    const count = bucket.doc_count;
+
+    return { count, lastSeen, sample };
+  });
 }

@@ -1,5 +1,21 @@
 # API Integration Tests for Observability Agent Builder
 
+## Running Tests
+
+```bash
+node scripts/functional_test_runner \
+  --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_agent.stateful.config.ts 
+```
+
+### Running tests for a specific tool:
+
+```bash
+node scripts/functional_test_runner \
+  --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_agent.stateful.config.ts \
+  --grep "<tool_name>"
+```
+
+
 ## Test Structure Guidelines
 
 - **Single expectation per `it`** — Each test should verify one logical assertion. Multiple `expect()` calls are allowed if they test the same logical thing (e.g., verifying all items in an array have a property).
