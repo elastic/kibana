@@ -1,0 +1,9 @@
+steps:
+  - command: .buildkite/scripts/steps/storybooks/build_and_upload.sh
+    label: 'Build Storybooks Only'
+    agents:
+      machineType: n2-standard-8
+      preemptible: true
+    key: storybooks-only
+    timeout_in_minutes: 80
+    if: build.pull_request.draft == true && build.pull_request.labels includes "ci:build-storybooks-only"

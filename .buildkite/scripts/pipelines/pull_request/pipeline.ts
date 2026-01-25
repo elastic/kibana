@@ -376,8 +376,9 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/security_solution/explore.yml'));
     }
 
-    if (GITHUB_PR_LABELS.includes('ci:build-storybooks-only')) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/storybooks.yml', false));
+    // If the only label is "ci:build-storybooks-only", run just that pipeline
+    if (GITHUB_PR_LABELS === 'ci:build-storybooks-only') {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/storybooks_only.yml', false));
       emitPipeline(pipeline);
       return;
     }
