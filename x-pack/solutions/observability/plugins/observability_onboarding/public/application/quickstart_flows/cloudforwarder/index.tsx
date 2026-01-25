@@ -415,7 +415,9 @@ function CredentialsTable({
           </EuiText>
           {item.value && (
             <EuiButtonIcon
-              data-test-subj={`cloudforwarderCredentialsCopyButton-${item.setting.toLowerCase().replace(/\s+/g, '-')}`}
+              data-test-subj={`cloudforwarderCredentialsCopyButton-${item.setting
+                .toLowerCase()
+                .replace(/\s+/g, '-')}`}
               aria-label={i18n.translate(
                 'xpack.observability_onboarding.cloudforwarderPanel.copyIconText',
                 {
