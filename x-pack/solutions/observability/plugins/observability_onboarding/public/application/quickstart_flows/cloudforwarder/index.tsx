@@ -408,14 +408,14 @@ function CredentialsTable({
       name: i18n.translate('xpack.observability_onboarding.cloudforwarderPanel.configValue', {
         defaultMessage: 'Value',
       }),
-      render: (_, { value }) => (
+      render: (_, item) => (
         <>
           <EuiText size="s" color="accent">
-            <code>{value}</code>
+            <code>{item.value}</code>
           </EuiText>
-          {value && (
+          {item.value && (
             <EuiButtonIcon
-              data-test-subj="cloudforwarderCredentialsCopyButton"
+              data-test-subj={`cloudforwarderCredentialsCopyButton-${item.setting.toLowerCase().replace(/\s+/g, '-')}`}
               aria-label={i18n.translate(
                 'xpack.observability_onboarding.cloudforwarderPanel.copyIconText',
                 {
@@ -424,7 +424,7 @@ function CredentialsTable({
               )}
               color="text"
               iconType="copy"
-              onClick={() => copyToClipboard(value)}
+              onClick={() => copyToClipboard(item.value)}
             />
           )}
         </>
