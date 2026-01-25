@@ -92,7 +92,12 @@ export function registerChatRoutes({
             })
           ),
         }),
-        { meta: { description: 'Optional attachments to send with the message.' } }
+        {
+          meta: {
+            description:
+              '**Technical Preview; added in 9.3.0.** Optional attachments to send with the message.',
+          },
+        }
       )
     ),
     capabilities: schema.maybe(
@@ -212,7 +217,6 @@ export function registerChatRoutes({
         },
         tags: ['oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
@@ -290,7 +294,6 @@ export function registerChatRoutes({
         },
         tags: ['oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
