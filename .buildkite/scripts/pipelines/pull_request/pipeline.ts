@@ -376,6 +376,12 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/security_solution/explore.yml'));
     }
 
+    if (GITHUB_PR_LABELS.includes('ci:build-storybooks-only')) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/storybooks.yml', false));
+      emitPipeline(pipeline);
+      return;
+    }
+
     if (
       (await doAnyChangesMatch([
         /^package.json/,
