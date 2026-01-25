@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { consoleTutorials } from '@kbn/search-code-examples';
-import { TryInConsoleButton } from '@kbn/try-in-console';
 import {
   EuiBadge,
   EuiFlexGrid,
@@ -35,7 +34,7 @@ interface TutorialMetadata {
 }
 
 export const ConsoleTutorialsGroup = () => {
-  const { application, console: consolePlugin, share } = useKibana().services;
+  const { console: consolePlugin } = useKibana().services;
   const { euiTheme } = useEuiTheme();
   const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
   const isSmallBreakpoint = useIsWithinBreakpoints(['s']);
@@ -88,7 +87,6 @@ export const ConsoleTutorialsGroup = () => {
         icon: 'console',
         buttonRef: React.createRef<HTMLButtonElement>(),
       },
-      // TODO:  uncomment below lines when we are ready to show TSDS tutorial. review https://github.com/elastic/kibana/pull/237384#issuecomment-3411670210
       {
         title: i18n.translate('xpack.searchGettingStarted.consoleTutorials.tsdsTitle', {
           defaultMessage: 'Time series data streams',
@@ -131,16 +129,6 @@ export const ConsoleTutorialsGroup = () => {
     }
   `;
 
-  const NewBadge = () => (
-    <EuiFlexItem grow={false}>
-      <EuiBadge color="accent">
-        {i18n.translate('xpack.searchGettingStarted.consoleTutorials.newBadge', {
-          defaultMessage: 'New',
-        })}
-      </EuiBadge>
-    </EuiFlexItem>
-  );
-
   return (
     <EuiFlexGroup gutterSize="l" direction="column" justifyContent="spaceBetween">
       <SearchGettingStartedSectionHeading
@@ -149,60 +137,48 @@ export const ConsoleTutorialsGroup = () => {
         })}
         icon="commandLine"
       />
-      <EuiFlexItem grow={false}>
-        <EuiFlexGrid columns={tutorialColumns}>
-          {sortBy(tutorials, 'isNew').map((tutorial) => (
-            // The card
-            <EuiFlexItem key={tutorial.dataTestSubj} grow={true} css={tutorialCardStyles}>
-              {/* The card content */}
-              <EuiFlexGroup gutterSize="m" alignItems="flexStart" responsive={false}>
-                {/* Icon */}
-                <EuiFlexItem grow={false} className="tutorialIcon">
-                  <EuiIcon type={tutorial.icon} size="l" />
-                </EuiFlexItem>
-                {/* Title and description */}
-                <EuiFlexItem grow>
-                  <EuiFlexGroup gutterSize="xs" direction="column" alignItems="flexStart">
-                    {/* Badge and Title */}
-                    <EuiFlexItem grow={false}>
-                      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                        {tutorial.isNew && <NewBadge />}
-                        <EuiFlexItem grow={false}>
-                          <EuiTitle size="xs" className="tutorialTitle">
-                            <h4>{tutorial.title}</h4>
-                          </EuiTitle>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                    {/* Description */}
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="s" className="tutorialDescription" color="subdued">
-                        {tutorial.description}
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              {/* Hidden button for console functionality */}
-              <TryInConsoleButton
-                type="button"
-                request={tutorial.request}
-                application={application}
-                sharePlugin={share}
-                consolePlugin={consolePlugin}
-                telemetryId={tutorial.dataTestSubj}
-                data-test-subj={`${tutorial.dataTestSubj}-btn`}
-                buttonProps={{
-                  buttonRef: tutorial.buttonRef,
-                  css: css`
-                    display: none;
-                  `,
-                }}
-              />
+      <EuiFlexGrid columns={tutorialColumns}>
+        {sortBy(tutorials, 'isNew').map((tutorial) => (
+          <EuiFlexGroup
+            gutterSize="m"
+            alignItems="flexStart"
+            responsive={false}
+            key={tutorial.dataTestSubj}
+            css={tutorialCardStyles}
+            data-test-subj={`${tutorial.dataTestSubj}-btn`}
+            data-telemetry-id={tutorial.dataTestSubj}
+            onClick={() =>
+              consolePlugin?.openEmbeddedConsole &&
+              consolePlugin.openEmbeddedConsole(tutorial.request)
+            }
+          >
+            {/* Icon */}
+            <EuiFlexItem className="tutorialIcon" grow={false}>
+              <EuiIcon type={tutorial.icon} size="l" />
             </EuiFlexItem>
-          ))}
-        </EuiFlexGrid>
-      </EuiFlexItem>
+            {/* Badge, title and description */}
+            <EuiFlexGroup gutterSize="xs" direction="column">
+              <EuiFlexGroup alignItems="center" responsive={false}>
+                {tutorial.isNew && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="accent">
+                      {i18n.translate('xpack.searchGettingStarted.consoleTutorials.newBadge', {
+                        defaultMessage: 'New',
+                      })}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                )}
+                <EuiTitle size="xs" className="tutorialTitle">
+                  <h4>{tutorial.title}</h4>
+                </EuiTitle>
+              </EuiFlexGroup>
+              <EuiText size="s" className="tutorialDescription" color="subdued">
+                {tutorial.description}
+              </EuiText>
+            </EuiFlexGroup>
+          </EuiFlexGroup>
+        ))}
+      </EuiFlexGrid>
     </EuiFlexGroup>
   );
 };
