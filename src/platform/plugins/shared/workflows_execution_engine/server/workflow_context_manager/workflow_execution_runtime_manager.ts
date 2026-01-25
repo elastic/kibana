@@ -400,7 +400,7 @@ export class WorkflowExecutionRuntimeManager {
       const finishDate = new Date();
       workflowExecutionUpdate.finishedAt = finishDate.toISOString();
       workflowExecutionUpdate.duration = finishDate.getTime() - startedAt.getTime();
-      workflowExecutionUpdate.context = buildWorkflowContext(
+      workflowExecutionUpdate.context = await buildWorkflowContext(
         this.workflowExecution,
         this.coreStart,
         this.dependencies

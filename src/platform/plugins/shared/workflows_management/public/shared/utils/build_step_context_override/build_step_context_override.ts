@@ -19,7 +19,7 @@ import {
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import {
   applyInputDefaults,
-  normalizeInputsToJsonSchema,
+  normalizeInputsToJsonSchemaAsync,
 } from '@kbn/workflows/spec/lib/input_conversion';
 import { z } from '@kbn/zod/v4';
 
@@ -75,32 +75,32 @@ function readPropertyRecursive(
  * This allows the test step modal to pre-populate input fields with defined defaults.
  * Supports both legacy array format and new JSON Schema format.
  * Uses the same logic as the exec modal to ensure consistency.
+ * Note: This is async because it needs to resolve remote schema references.
  */
-function buildInputsFromDefinition(
+async function buildInputsFromDefinition(
   inputsDefinition: LegacyWorkflowInput[] | JsonModelSchemaType | undefined
-): Record<string, unknown> | undefined {
+): Promise<Record<string, unknown> | undefined> {
   if (!inputsDefinition) {
     return undefined;
   }
 
-  // Normalize inputs to JSON Schema format (handles both legacy array and JSON Schema formats)
-  const normalizedInputs = normalizeInputsToJsonSchema(inputsDefinition);
+  // Normalize inputs to JSON Schema format and resolve all references (local and remote)
+  const normalizedInputs = await normalizeInputsToJsonSchemaAsync(inputsDefinition);
 
   if (!normalizedInputs) {
     return undefined;
   }
 
-  // Use applyInputDefaults to get defaults with $ref resolution and nested object support
-  // This ensures the same behavior as the exec modal and handles all JSON Schema features
+  // Use applyInputDefaults to get defaults (schema is already resolved)
   const defaults = applyInputDefaults(undefined, normalizedInputs);
 
   return defaults;
 }
 
-export function buildContextOverride(
+export async function buildContextOverride(
   workflowGraph: WorkflowGraph,
   staticData: StaticContextData
-): ContextOverrideData {
+): Promise<ContextOverrideData> {
   const contextOverride = {} as Record<string, any>;
   const inputsInGraph = findInputsInGraph(workflowGraph);
   const allInputs = Object.values(inputsInGraph).flat();
@@ -111,10 +111,10 @@ export function buildContextOverride(
   );
   const inputsParsed = allInputsFiltered.map((input) => parseJsPropertyAccess(input));
 
-  // Build the static data with inputs defaults for lookup
+  // Build the static data with inputs defaults for lookup (async - resolves remote refs)
   const staticDataWithInputs = {
     ...staticData,
-    inputs: buildInputsFromDefinition(staticData.inputsDefinition),
+    inputs: await buildInputsFromDefinition(staticData.inputsDefinition),
   };
 
   inputsParsed.forEach((pathParts) => {

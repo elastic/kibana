@@ -12,19 +12,23 @@ import type { Document } from 'yaml';
 import { isPair, isScalar, visit } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import type { WorkflowYaml } from '@kbn/workflows';
-import { normalizeInputsToJsonSchema, resolveRef } from '@kbn/workflows/spec/lib/input_conversion';
+import {
+  normalizeInputsToJsonSchemaAsync,
+  resolveRef,
+} from '@kbn/workflows/spec/lib/input_conversion';
 import { convertJsonSchemaToZod } from '../../../../common/lib/json_schema_to_zod';
 import { getPathFromAncestors } from '../../../../common/lib/yaml';
 import type { YamlValidationResult } from '../model/types';
 
 /**
  * Validates that default values in JSON Schema inputs match their property constraints
+ * Resolves remote $ref references for validation
  */
-export function validateJsonSchemaDefaults(
+export async function validateJsonSchemaDefaults(
   yamlDocument: Document | null,
   workflowDefinition: WorkflowYaml,
   model?: monaco.editor.ITextModel
-): YamlValidationResult[] {
+): Promise<YamlValidationResult[]> {
   const errors: YamlValidationResult[] = [];
 
   if (!yamlDocument) {
@@ -51,8 +55,8 @@ export function validateJsonSchemaDefaults(
     return errors;
   }
 
-  // Normalize inputs to JSON Schema format
-  const normalizedInputs = normalizeInputsToJsonSchema(inputs);
+  // Normalize inputs to JSON Schema format and resolve remote references
+  const normalizedInputs = await normalizeInputsToJsonSchemaAsync(inputs);
   // Defensive check: ensure normalizedInputs has valid properties object
   if (
     !normalizedInputs ||

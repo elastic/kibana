@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { JSONSchema7 } from 'json-schema';
 import type { monaco } from '@kbn/monaco';
 import { getShape } from '@kbn/workflows/common/utils/zod';
+import { resolveAllReferences } from '@kbn/workflows/spec/lib/input_conversion';
 import { wrapAsMonacoSuggestion } from './wrap_as_monaco_suggestion';
 import { getDetailedTypeDescription } from '../../../../../../../common/lib/zod';
 import type { AutocompleteContext } from '../../context/autocomplete.types';
@@ -60,7 +62,47 @@ function isValidPath(
   return !(segmentDiff > 1 || (segmentDiff === 1 && lastPathSegment === null));
 }
 
-export function getVariableSuggestions(autocompleteContext: AutocompleteContext) {
+/**
+ * Get suggestions for properties from a remote $ref schema
+ */
+async function getRemoteRefPropertySuggestions(
+  propertySchema: JSONSchema7,
+  range: monaco.IRange,
+  triggerCharacter: string | null,
+  scalarType: unknown,
+  shouldBeQuoted: boolean,
+  shouldUseCurlyBraces: boolean
+): Promise<monaco.languages.CompletionItem[]> {
+  if (!propertySchema.$ref || !propertySchema.$ref.startsWith('http')) {
+    return [];
+  }
+
+  try {
+    const resolved = await resolveAllReferences(propertySchema);
+    if (resolved.properties && typeof resolved.properties === 'object') {
+      return Object.entries(resolved.properties).map(([propName, propSchema]) => {
+        const schema = propSchema as JSONSchema7;
+        return wrapAsMonacoSuggestion(
+          propName,
+          triggerCharacter,
+          range,
+          scalarType,
+          shouldBeQuoted,
+          schema.type || 'unknown',
+          schema.description,
+          shouldUseCurlyBraces
+        );
+      });
+    }
+  } catch (error) {
+    // Silently fail - remote refs might not be resolvable
+  }
+
+  return [];
+}
+
+// eslint-disable-next-line complexity
+export async function getVariableSuggestions(autocompleteContext: AutocompleteContext) {
   const {
     triggerCharacter,
     range,
@@ -69,6 +111,7 @@ export function getVariableSuggestions(autocompleteContext: AutocompleteContext)
     focusedYamlPair,
     scalarType,
     lineParseResult,
+    workflowDefinition,
   } = autocompleteContext;
 
   if (!lineParseResult || !isVariableLineParseResult(lineParseResult)) {
@@ -103,6 +146,42 @@ export function getVariableSuggestions(autocompleteContext: AutocompleteContext)
   // Check if we're trying to access a non-existent path
   if (!isValidPath(lineParseResult.fullKey, contextScopedToPath, lineParseResult.lastPathSegment)) {
     return [];
+  }
+
+  // Check if we're accessing inputs.<propertyName>. and that property has a remote $ref
+  const fullKeySegments = lineParseResult.fullKey.split('.');
+  if (
+    fullKeySegments.length === 2 &&
+    fullKeySegments[0] === 'inputs' &&
+    workflowDefinition?.inputs
+  ) {
+    const propertyName = fullKeySegments[1];
+    if (
+      typeof workflowDefinition.inputs === 'object' &&
+      !Array.isArray(workflowDefinition.inputs) &&
+      'properties' in workflowDefinition.inputs
+    ) {
+      const properties = workflowDefinition.inputs.properties as
+        | Record<string, JSONSchema7>
+        | undefined;
+      if (properties && propertyName in properties) {
+        const propertySchema = properties[propertyName] as JSONSchema7;
+        if (propertySchema.$ref && propertySchema.$ref.startsWith('http')) {
+          // Get suggestions from remote ref
+          const remoteSuggestions = await getRemoteRefPropertySuggestions(
+            propertySchema,
+            range,
+            triggerCharacter,
+            scalarType,
+            shouldBeQuoted,
+            shouldUseCurlyBraces
+          );
+          if (remoteSuggestions.length > 0) {
+            return remoteSuggestions;
+          }
+        }
+      }
+    }
   }
 
   const shape = getShape(contextSchema);

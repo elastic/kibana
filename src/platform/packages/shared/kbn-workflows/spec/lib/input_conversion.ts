@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import $RefParser from '@apidevtools/json-schema-ref-parser';
 import type { JSONSchema7 } from 'json-schema';
 import type { z } from '@kbn/zod/v4';
 import type { JsonModelSchemaType, LegacyWorkflowInput, WorkflowInputSchema } from '../schema';
@@ -83,9 +84,227 @@ export function convertLegacyInputsToJsonSchema(
 }
 
 /**
- * Normalizes workflow inputs to the new JSON Schema object format
- * If inputs are already in the new format, returns them as-is
- * If inputs are in the legacy array format, converts them
+ * Manually fetches and inlines remote $ref references using fetch (for browser compatibility).
+ * json-schema-ref-parser uses Node.js http module which doesn't work in browsers.
+ * This function recursively finds remote refs, fetches them, and inlines them into the schema.
+ */
+async function resolveRemoteRefsInBrowser(schema: JSONSchema7): Promise<JSONSchema7> {
+  const fetchedSchemas = new Map<string, JSONSchema7>();
+
+  // Find all unique remote URLs
+  function findRemoteUrls(obj: unknown, urls: Set<string>): void {
+    if (typeof obj !== 'object' || obj === null) {
+      return;
+    }
+
+    if (Array.isArray(obj)) {
+      obj.forEach((item) => findRemoteUrls(item, urls));
+      return;
+    }
+
+    for (const value of Object.values(obj)) {
+      if (typeof value === 'string' && value.startsWith('http')) {
+        // Found a remote reference
+        const url = value.split('#')[0]; // Get URL without fragment
+        urls.add(url);
+      } else if (typeof value === 'object' && value !== null) {
+        findRemoteUrls(value, urls);
+      }
+    }
+  }
+
+  const remoteUrls = new Set<string>();
+  findRemoteUrls(schema, remoteUrls);
+
+  // Fetch all remote schemas
+  for (const url of remoteUrls) {
+    // Use fetch if available (Node.js 18+ and browsers)
+    let data: JSONSchema7;
+
+    if (typeof fetch !== 'undefined') {
+      // Use native fetch (Node.js 18+ or browser)
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      data = (await response.json()) as JSONSchema7;
+      fetchedSchemas.set(url, data);
+    } else {
+      // If fetch is not available, skip this URL
+      // This should not happen in modern Node.js or browsers
+      throw new Error(`fetch is not available, cannot fetch ${url}`);
+    }
+  }
+
+  // Recursively replace remote $ref with fetched schema content
+  function inlineRemoteRefs(obj: unknown): unknown {
+    if (typeof obj !== 'object' || obj === null) {
+      return obj;
+    }
+
+    if (Array.isArray(obj)) {
+      return obj.map((item) => inlineRemoteRefs(item));
+    }
+
+    const result: Record<string, unknown> = {};
+
+    for (const [key, value] of Object.entries(obj)) {
+      if (key === '$ref' && typeof value === 'string' && value.startsWith('http')) {
+        // This is a remote reference - resolve it
+        const [url, fragment] = value.split('#');
+        const fetchedSchema = fetchedSchemas.get(url);
+
+        if (!fetchedSchema) {
+          // If we couldn't fetch it, keep the original ref
+          result[key] = value;
+        } else if (fragment) {
+          // If there's a fragment (JSON Pointer), resolve it
+          const path = fragment.substring(1).split('/'); // Remove leading # and split
+          let resolved: unknown = fetchedSchema;
+
+          for (const segment of path) {
+            if (segment && typeof resolved === 'object' && resolved !== null) {
+              resolved = (resolved as Record<string, unknown>)[segment];
+            } else {
+              resolved = undefined;
+              break;
+            }
+          }
+
+          if (resolved !== undefined) {
+            // Inline the resolved schema (may contain nested refs)
+            return inlineRemoteRefs(resolved);
+          }
+        } else {
+          // No fragment, use the entire fetched schema
+          return inlineRemoteRefs(fetchedSchema);
+        }
+      } else {
+        result[key] = inlineRemoteRefs(value);
+      }
+    }
+
+    return result;
+  }
+
+  return inlineRemoteRefs(schema) as JSONSchema7;
+}
+
+// Helper functions for checking schema references
+function hasRefs(obj: unknown): boolean {
+  if (typeof obj !== 'object' || obj === null) {
+    return false;
+  }
+  if (Array.isArray(obj)) {
+    return obj.some((item) => hasRefs(item));
+  }
+  for (const [key, value] of Object.entries(obj)) {
+    if (key === '$ref' && typeof value === 'string') {
+      return true;
+    }
+    if (hasRefs(value)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function hasRemoteRefs(obj: unknown): boolean {
+  if (typeof obj !== 'object' || obj === null) {
+    return false;
+  }
+  if (Array.isArray(obj)) {
+    return obj.some((item) => hasRemoteRefs(item));
+  }
+  for (const [key, value] of Object.entries(obj)) {
+    if (key === '$ref' && typeof value === 'string' && value.startsWith('http')) {
+      return true;
+    }
+    if (hasRemoteRefs(value)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function hasRefsAfterRemoteResolution(obj: unknown): boolean {
+  if (typeof obj !== 'object' || obj === null) {
+    return false;
+  }
+  if (Array.isArray(obj)) {
+    return obj.some((item) => hasRefsAfterRemoteResolution(item));
+  }
+  for (const [key, value] of Object.entries(obj)) {
+    if (key === '$ref' && typeof value === 'string') {
+      return true;
+    }
+    if (hasRefsAfterRemoteResolution(value)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Resolves all $ref references (local and remote) in a JSON Schema.
+ * Uses @apidevtools/json-schema-ref-parser to dereference all references.
+ * Manually resolves remote refs first using fetch (works in both browser and Node.js 18+),
+ * then uses json-schema-ref-parser for local refs only.
+ * @param schema - The JSON Schema with potential $ref references
+ * @returns Fully dereferenced schema with all references inlined
+ */
+export async function resolveAllReferences(schema: JSONSchema7): Promise<JSONSchema7> {
+  // Early return for null/undefined or empty schemas
+  if (!schema || typeof schema !== 'object') {
+    return schema;
+  }
+
+  try {
+    // If no refs at all, return schema as-is (no processing needed)
+    // Deep clone to ensure we don't return a reference that could be mutated
+    if (!hasRefs(schema)) {
+      return JSON.parse(JSON.stringify(schema)) as JSONSchema7;
+    }
+
+    // Only resolve remote refs if they exist
+    let schemaWithRemoteRefsResolved = schema;
+    if (hasRemoteRefs(schema)) {
+      schemaWithRemoteRefsResolved = await resolveRemoteRefsInBrowser(schema);
+    }
+
+    if (!hasRefsAfterRemoteResolution(schemaWithRemoteRefsResolved)) {
+      // Deep clone to ensure $RefParser doesn't modify the original
+      return JSON.parse(JSON.stringify(schemaWithRemoteRefsResolved)) as JSONSchema7;
+    }
+
+    // Only call $RefParser if there are local refs to resolve
+    const dereferenced = await $RefParser.dereference(schemaWithRemoteRefsResolved, {
+      resolve: {
+        http: false, // Already resolved manually (or no remote refs)
+        file: false, // Disable file system access for security
+      },
+    });
+    return dereferenced as JSONSchema7;
+  } catch (error) {
+    // If resolution fails, return original schema
+    // This allows workflows with invalid remote refs to still work with local refs
+    return schema;
+  }
+}
+
+/**
+ * Normalizes workflow inputs to the new JSON Schema object format.
+ * If inputs are already in the new format, returns them as-is.
+ * If inputs are in the legacy array format, converts them.
+ * Note: This is synchronous and does NOT resolve remote references.
+ * Use normalizeInputsToJsonSchemaAsync() if you need remote reference resolution.
  * @param inputs - The inputs to normalize (can be array or JSON Schema object)
  * @returns The inputs in the new JSON Schema object format, or undefined if no inputs
  */
@@ -124,15 +343,43 @@ export function normalizeInputsToJsonSchema(
 }
 
 /**
+ * Normalizes workflow inputs to the new JSON Schema object format and resolves all references (local and remote).
+ * If inputs are already in the new format, resolves references and returns.
+ * If inputs are in the legacy array format, converts them first, then resolves references.
+ * @param inputs - The inputs to normalize (can be array or JSON Schema object)
+ * @returns The inputs in the new JSON Schema object format with all references resolved, or undefined if no inputs
+ */
+export async function normalizeInputsToJsonSchemaAsync(
+  inputs?: JsonModelSchemaType | Array<z.infer<typeof WorkflowInputSchema>>
+): Promise<JsonModelSchemaType | undefined> {
+  const normalized = normalizeInputsToJsonSchema(inputs);
+  if (!normalized) {
+    return undefined;
+  }
+
+  // Resolve all $ref references (local and remote) before returning
+  // This will return the schema as-is if there are no refs (early return in resolveAllReferences)
+  try {
+    const resolved = await resolveAllReferences(normalized);
+    return resolved as JsonModelSchemaType;
+  } catch (error) {
+    // If resolution fails, return the normalized schema (without refs resolved)
+    // This ensures workflows still work even if ref resolution fails
+    return normalized;
+  }
+}
+
+/**
  * Applies defaults to a nested object property
  * @param prop - The property schema
  * @param currentValue - The current value for this property
+ * @param inputsSchema - The full inputs schema (for resolving $ref - should already be resolved)
  * @returns The value with defaults applied
  */
 function applyDefaultToObjectProperty(
   prop: JSONSchema7,
   currentValue: unknown,
-  inputsSchema?: ReturnType<typeof normalizeInputsToJsonSchema>
+  inputsSchema?: JsonModelSchemaType
 ): unknown {
   if (currentValue === undefined) {
     if (prop.default !== undefined) {
@@ -160,12 +407,13 @@ function applyDefaultToObjectProperty(
  * Applies defaults to all properties of an object
  * @param schema - The object schema
  * @param value - The current object value
+ * @param inputsSchema - The full inputs schema (for resolving $ref - should already be resolved)
  * @returns The object with defaults applied
  */
 function applyDefaultsToObjectProperties(
   schema: JSONSchema7,
   value: Record<string, unknown>,
-  inputsSchema?: ReturnType<typeof normalizeInputsToJsonSchema>
+  inputsSchema?: JsonModelSchemaType
 ): Record<string, unknown> {
   const result: Record<string, unknown> = { ...value };
   for (const [key, propSchema] of Object.entries(schema.properties || {})) {
@@ -181,12 +429,10 @@ function applyDefaultsToObjectProperties(
 
 /**
  * Recursively checks if a schema has any defaults (direct or nested)
+ * Note: After pre-resolution, $ref should be rare, but kept for backward compatibility
  */
-function hasDefaultsRecursive(
-  schema: JSONSchema7,
-  inputsSchema?: ReturnType<typeof normalizeInputsToJsonSchema>
-): boolean {
-  // Resolve $ref if present
+function hasDefaultsRecursive(schema: JSONSchema7, inputsSchema?: JsonModelSchemaType): boolean {
+  // Resolve $ref if present (should be rare after pre-resolution)
   if (schema.$ref && inputsSchema) {
     const resolvedSchema = resolveRef(schema.$ref, inputsSchema);
     if (resolvedSchema) {
@@ -220,7 +466,7 @@ function hasDefaultsRecursive(
 
 function createObjectWithDefaults(
   schema: JSONSchema7,
-  inputsSchema?: ReturnType<typeof normalizeInputsToJsonSchema>
+  inputsSchema?: JsonModelSchemaType
 ): Record<string, unknown> | undefined {
   const result: Record<string, unknown> = {};
   for (const [key, propSchema] of Object.entries(schema.properties || {})) {
@@ -241,17 +487,20 @@ function createObjectWithDefaults(
 }
 
 /**
- * Resolves a $ref reference within the inputs schema context
+ * Resolves a $ref reference within the inputs schema context.
+ * Note: After pre-resolution via resolveAllReferences(), most schemas won't have $ref anymore.
+ * This function is kept for backward compatibility and edge cases.
  * @param ref - The $ref string (e.g., "#/definitions/UserSchema")
  * @param inputsSchema - The full inputs schema containing definitions
  * @returns The resolved schema, or null if not found
  */
 export function resolveRef(
   ref: string,
-  inputsSchema: ReturnType<typeof normalizeInputsToJsonSchema>
+  inputsSchema: JsonModelSchemaType | undefined
 ): JSONSchema7 | null {
-  if (!ref.startsWith('#/')) {
-    // External references not supported yet
+  if (!inputsSchema || !ref.startsWith('#/')) {
+    // External references should be resolved by resolveAllReferences()
+    // Local references starting with #/ are handled below
     return null;
   }
 
@@ -271,18 +520,19 @@ export function resolveRef(
 }
 
 /**
- * Recursively applies default values from JSON Schema to input values
- * @param schema - The JSON Schema property definition
+ * Recursively applies default values from JSON Schema to input values.
+ * Note: After pre-resolution, $ref should be rare, but kept for backward compatibility.
+ * @param schema - The JSON Schema property definition (should already be resolved)
  * @param value - The current input value (may be undefined)
- * @param inputsSchema - The full inputs schema (for resolving $ref)
+ * @param inputsSchema - The full inputs schema (for resolving $ref if needed)
  * @returns The value with defaults applied
  */
 function applyDefaultFromSchema(
   schema: JSONSchema7,
   value: unknown,
-  inputsSchema?: ReturnType<typeof normalizeInputsToJsonSchema>
+  inputsSchema?: JsonModelSchemaType
 ): unknown {
-  // Resolve $ref if present
+  // Resolve $ref if present (should be rare after pre-resolution)
   if (schema.$ref && inputsSchema) {
     const resolvedSchema = resolveRef(schema.$ref, inputsSchema);
     if (resolvedSchema) {
@@ -330,14 +580,15 @@ function applyDefaultFromSchema(
 }
 
 /**
- * Applies default values from JSON Schema to workflow inputs
+ * Applies default values from JSON Schema to workflow inputs.
+ * The inputsSchema should already have all $ref references resolved via normalizeInputsToJsonSchema().
  * @param inputs - The actual input values provided (may be partial or undefined)
- * @param inputsSchema - The normalized JSON Schema inputs definition
+ * @param inputsSchema - The normalized JSON Schema inputs definition (with all refs resolved)
  * @returns The inputs with defaults applied
  */
 export function applyInputDefaults(
   inputs: Record<string, unknown> | undefined,
-  inputsSchema: ReturnType<typeof normalizeInputsToJsonSchema>
+  inputsSchema: JsonModelSchemaType | undefined
 ): Record<string, unknown> | undefined {
   if (!inputsSchema?.properties) {
     return inputs;
@@ -370,7 +621,7 @@ export function applyInputDefaults(
         hasAnyDefaults = true;
       }
     } else if (jsonSchema.$ref) {
-      // Handle $ref: resolve and apply defaults
+      // Handle $ref: resolve and apply defaults (should be rare after pre-resolution)
       const defaultValue = applyDefaultFromSchema(jsonSchema, currentValue, inputsSchema);
       if (defaultValue !== undefined) {
         result[propertyName] = defaultValue;

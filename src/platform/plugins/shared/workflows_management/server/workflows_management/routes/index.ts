@@ -15,6 +15,7 @@ import { registerDeleteWorkflowByIdRoute } from './delete_workflow_by_id';
 import { registerDeleteWorkflowsBulkRoute } from './delete_workflows_bulk';
 import { registerGetConnectorsRoute } from './get_connectors';
 import { registerGetStepExecutionRoute } from './get_step_execution';
+import { registerGetTypesRegistryRoute } from './get_types_registry';
 import { registerGetWorkflowAggsRoute } from './get_workflow_aggs';
 import { registerGetWorkflowByIdRoute } from './get_workflow_by_id';
 import { registerGetWorkflowExecutionByIdRoute } from './get_workflow_execution_by_id';
@@ -62,4 +63,5 @@ export function defineRoutes(
   registerGetWorkflowExecutionLogsRoute(deps);
   registerGetStepExecutionRoute(deps);
   registerGetWorkflowJsonSchemaRoute(deps);
+  registerGetTypesRegistryRoute(deps);
 }

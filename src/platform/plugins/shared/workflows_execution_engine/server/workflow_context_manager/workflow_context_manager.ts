@@ -64,9 +64,10 @@ export class WorkflowContextManager {
 
   // Any change here should be reflected in the 'getContextSchemaForPath' function for frontend validation to work
   // src/platform/plugins/shared/workflows_management/public/features/workflow_context/lib/get_context_for_path.ts
-  public getContext(): StepContext {
+  public async getContext(): Promise<StepContext> {
+    const workflowContext = await this.buildWorkflowContext();
     const stepContext: StepContext = {
-      ...this.buildWorkflowContext(),
+      ...workflowContext,
       steps: {},
       variables: this.getVariables(),
     };
@@ -131,21 +132,27 @@ export class WorkflowContextManager {
    * // => { url: "https://api.example.com", headers: { "X-Request-Id": "exec-123" } }
    * ```
    */
-  public renderValueAccordingToContext<T>(obj: T, additionalContext?: Record<string, unknown>): T {
-    const context = this.getContext();
+  public async renderValueAccordingToContext<T>(
+    obj: T,
+    additionalContext?: Record<string, unknown>
+  ): Promise<T> {
+    const context = await this.getContext();
     return this.templateEngine.render(obj, { ...context, ...additionalContext });
   }
 
-  public evaluateExpressionInContext(template: string): unknown {
-    const context = this.getContext();
+  public async evaluateExpressionInContext(template: string): Promise<unknown> {
+    const context = await this.getContext();
     return this.templateEngine.evaluateExpression(template, context);
   }
 
-  public evaluateBooleanExpressionInContext(
+  public async evaluateBooleanExpressionInContext(
     condition: string | boolean | undefined,
     additionalContext?: Record<string, unknown>
-  ): boolean {
-    const renderedCondition = this.renderValueAccordingToContext(condition, additionalContext);
+  ): Promise<boolean> {
+    const renderedCondition = await this.renderValueAccordingToContext(
+      condition,
+      additionalContext
+    );
 
     if (typeof renderedCondition === 'boolean') {
       return renderedCondition;
@@ -156,7 +163,8 @@ export class WorkflowContextManager {
 
     if (typeof renderedCondition === 'string') {
       try {
-        return evaluateKql(renderedCondition, this.getContext());
+        const context = await this.getContext();
+        return evaluateKql(renderedCondition, context);
       } catch (error) {
         if (error instanceof KQLSyntaxError) {
           throw new Error(
@@ -178,9 +186,11 @@ export class WorkflowContextManager {
     );
   }
 
-  public readContextPath(propertyPath: string): { pathExists: boolean; value: unknown } {
+  public async readContextPath(
+    propertyPath: string
+  ): Promise<{ pathExists: boolean; value: unknown }> {
     const propertyPathSegments = parseJsPropertyAccess(propertyPath);
-    let result: unknown = this.getContext();
+    let result: unknown = await this.getContext();
 
     for (const segment of propertyPathSegments) {
       if (result === null || result === undefined || typeof result !== 'object') {
@@ -252,7 +262,7 @@ export class WorkflowContextManager {
     return this.dependencies;
   }
 
-  private buildWorkflowContext(): WorkflowContext {
+  private async buildWorkflowContext(): Promise<WorkflowContext> {
     const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
     return buildWorkflowContext(workflowExecution, this.coreStart, this.dependencies);
   }
