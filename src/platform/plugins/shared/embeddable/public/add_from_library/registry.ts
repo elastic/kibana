@@ -35,7 +35,7 @@ export const registerAddFromLibraryType = <TSavedObjectAttributes extends Finder
   getSavedObjectSubType,
   getTooltipForSavedObject,
 }: {
-  onAdd: RegistryItem['onAdd'];
+  onAdd: RegistryItem<TSavedObjectAttributes>['onAdd'];
   savedObjectType: string;
   savedObjectName: string;
   getIconForSavedObject: (savedObject: SavedObjectCommon<TSavedObjectAttributes>) => IconType;
