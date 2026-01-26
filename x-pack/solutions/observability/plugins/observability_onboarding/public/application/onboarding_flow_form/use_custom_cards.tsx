@@ -497,11 +497,11 @@ export function useCustomCards(
      */
     ...(isCloud || isDev ? [firehoseQuickstartCard] : []),
     /**
-     * The EDOT Cloud Forwarder card should only be visible on Cloud
+     * The EDOT Cloud Forwarder card should only be visible on Serverless
      * as it requires Elastic Cloud infrastructure.
      * Also visible in dev mode for local development.
      */
-    ...(isCloud || isDev ? [cloudforwarderQuickstartCard] : []),
+    ...(isServerless || isDev ? [cloudforwarderQuickstartCard] : []),
   ];
 }
 

@@ -30,7 +30,7 @@ export function ObservabilityOnboardingFlow() {
   const { pathname } = useLocation();
   const {
     services: {
-      context: { isDev, isCloud },
+      context: { isDev, isCloud, isServerless },
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
 
@@ -67,7 +67,7 @@ export function ObservabilityOnboardingFlow() {
             <OtelApmPage />
           </Route>
         )}
-        {(isCloud || isDev) && (
+        {(isServerless || isDev) && (
           <Route path="/cloudforwarder">
             <CloudForwarderPage />
           </Route>
