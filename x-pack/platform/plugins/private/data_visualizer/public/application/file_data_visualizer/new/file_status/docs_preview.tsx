@@ -58,7 +58,7 @@ export const ResultsPreview: FC<ResultsPreviewProps> = ({ sampleDocs, mappings, 
         <EuiBasicTable
           data-test-subj={`dataVisualizerFilePreviewPanel-${index}`}
           tableLayout="auto"
-          tableCaption={i18n.translate('xpack.fileUpload.docsPreview.tableCaption', {
+          tableCaption={i18n.translate('xpack.dataVisualizer.docsPreview.tableCaption', {
             defaultMessage: 'Sample documents preview',
           })}
           columns={columns}
