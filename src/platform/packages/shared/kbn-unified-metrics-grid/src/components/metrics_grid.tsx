@@ -20,6 +20,7 @@ import { EmptyState } from './empty_state/empty_state';
 import { useGridNavigation } from '../hooks/use_grid_navigation';
 import { FieldsMetadataProvider } from '../context/fields_metadata';
 import { createESQLQuery } from '../common/utils';
+import { ACTION_OPEN_IN_DISCOVER } from '../common/constants';
 import { useChartLayers } from './chart/hooks/use_chart_layers';
 import type { UnifiedMetricsGridProps } from '../types';
 
@@ -280,7 +281,7 @@ const ChartItem = React.memo(
             title={metric.name}
             chartLayers={chartLayers}
             titleHighlight={searchTerm}
-            extraDisabledActions={['ACTION_OPEN_IN_DISCOVER']}
+            extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
           />
         </A11yGridCell>
       );
