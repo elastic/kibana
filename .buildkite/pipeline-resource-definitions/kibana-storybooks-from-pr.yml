@@ -27,7 +27,11 @@ spec:
       env:
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'false'
       teams:
-        platform-ui:
+        appex-sharedux:
+          access_level: MANAGE_BUILD_AND_READ
+        everyone:
+          access_level: BUILD_AND_READ
+        kibana-operations:
           access_level: MANAGE_BUILD_AND_READ
       tags:
         - kibana

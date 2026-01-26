@@ -145,7 +145,6 @@
       "set_commit_status": true,
       "commit_status_context": "kibana-deploy-storybooks-from-pr",
       "build_on_commit": false,
-      "build_on_comment": true,
       "build_drafts": false,
       "enable_trigger_checkbox": true,
       "kibana_versions_check": true
