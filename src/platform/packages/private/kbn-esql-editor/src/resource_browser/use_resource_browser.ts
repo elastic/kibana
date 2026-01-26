@@ -42,39 +42,44 @@ export function useResourceBrowser({
   const browserCursorPositionRef = useRef<monaco.Position | null>(null);
   const fieldsBrowserQueryStringRef = useRef<string>('');
 
-  const handleResourceBrowserSelect = useCallback((newResourceNames: string, oldLength: number) => {
-    if (editorRef.current && editorModel.current && browserCursorPositionRef.current) {
-      const initialCursorPosition = browserCursorPositionRef.current;
-      const textAfterInitialCursor = editorModel.current
-        .getValue()
-        .substring(initialCursorPosition.column);
-      // Check if there is a resource after the initial cursor - match any whitespace or newline followed by a letter or dot
-      const hasExistingResourceAfterInitialCursor =
-        textAfterInitialCursor.match(/^[\s\n]*[a-zA-Z.].*/);
+  const handleResourceBrowserSelect = useCallback(
+    (newResourceNames: string, oldLength: number) => {
+      if (editorRef.current && editorModel.current && browserCursorPositionRef.current) {
+        const initialCursorPosition = browserCursorPositionRef.current;
+        const textAfterInitialCursor = editorModel.current
+          .getValue()
+          .substring(initialCursorPosition.column);
+        // Check if there is a resource after the initial cursor - match any whitespace or newline followed by a letter or dot
+        const hasExistingResourceAfterInitialCursor =
+          textAfterInitialCursor.match(/^[\s\n]*[a-zA-Z.].*/);
 
-      const range = {
-        startLineNumber: initialCursorPosition.lineNumber,
-        startColumn: initialCursorPosition.column,
-        endLineNumber: initialCursorPosition.lineNumber,
-        endColumn:
-          initialCursorPosition.column +
-          oldLength +
-          (oldLength > 0 && newResourceNames.length === 0 && hasExistingResourceAfterInitialCursor
-            ? 1
-            : 0), // Delete comma if all resources are deleted and there was some inserted resource before
-      };
-      editorRef.current.executeEdits('indicesBrowser', [
-        {
-          range,
-          text:
-            newResourceNames +
-            (oldLength === 0 && newResourceNames.length > 0 && hasExistingResourceAfterInitialCursor
-              ? ','
-              : ''), // Add comma if there is initially an existing resource and there is currently no inserted resource
-        },
-      ]);
-    }
-  }, [editorRef, editorModel]);
+        const range = {
+          startLineNumber: initialCursorPosition.lineNumber,
+          startColumn: initialCursorPosition.column,
+          endLineNumber: initialCursorPosition.lineNumber,
+          endColumn:
+            initialCursorPosition.column +
+            oldLength +
+            (oldLength > 0 && newResourceNames.length === 0 && hasExistingResourceAfterInitialCursor
+              ? 1
+              : 0), // Delete comma if all resources are deleted and there was some inserted resource before
+        };
+        editorRef.current.executeEdits('indicesBrowser', [
+          {
+            range,
+            text:
+              newResourceNames +
+              (oldLength === 0 &&
+              newResourceNames.length > 0 &&
+              hasExistingResourceAfterInitialCursor
+                ? ','
+                : ''), // Add comma if there is initially an existing resource and there is currently no inserted resource
+          },
+        ]);
+      }
+    },
+    [editorRef, editorModel]
+  );
 
   const updateResourceBrowserPosition = useCallback(() => {
     if (editorRef.current) {

@@ -100,11 +100,7 @@ import {
   addEditorKeyBindings,
   addTabKeybindingRules,
 } from './custom_editor_commands';
-import {
-  DataSourceBrowser,
-  FieldsBrowser,
-  useResourcesBadge,
-} from './resource_browser';
+import { DataSourceBrowser, FieldsBrowser, useResourcesBadge } from './resource_browser';
 import { useResourceBrowser } from './resource_browser/use_resource_browser';
 
 // for editor width smaller than this value we want to start hiding some text
@@ -984,7 +980,6 @@ const ESQLEditorInternal = function ESQLEditor({
     256,
     [serverErrors, serverWarning, code, queryValidation]
   );
-
 
   const {
     resourcesBadgeStyle,
