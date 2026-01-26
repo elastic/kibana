@@ -8,15 +8,17 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { Wrapper } from '@kbn/alerts-ui-shared/src/common/test_utils/wrapper';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import * as api from '../apis/mute_alert_instance';
 import { useMuteAlertInstance } from './use_mute_alert_instance';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 jest.mock('../apis/mute_alert_instance');
 
 const params = { ruleId: '', alertInstanceId: '' };
+
+const { provider: wrapper } = createTestResponseOpsQueryClient();
 
 describe('useMuteAlertInstance', () => {
   const http = httpServiceMock.createStartContract();
@@ -31,7 +33,7 @@ describe('useMuteAlertInstance', () => {
     const muteAlertInstanceSpy = jest.spyOn(api, 'muteAlertInstance');
 
     const { result } = renderHook(() => useMuteAlertInstance({ http, notifications }), {
-      wrapper: Wrapper,
+      wrapper,
     });
 
     result.current.mutate(params);
@@ -49,7 +51,7 @@ describe('useMuteAlertInstance', () => {
     const spy = jest.spyOn(api, 'muteAlertInstance').mockRejectedValue(new Error('An error'));
 
     const { result } = renderHook(() => useMuteAlertInstance({ http, notifications }), {
-      wrapper: Wrapper,
+      wrapper,
     });
 
     result.current.mutate(params);

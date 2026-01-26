@@ -20,13 +20,10 @@ jest.mock('../apis/create_rule_from_template', () => ({
 }));
 
 const queryClient = new QueryClient({
-  logger: {
-    error: () => {},
-  } as any,
   defaultOptions: {
     queries: {
       retry: false,
-      cacheTime: 0,
+      gcTime: 0,
     },
   },
 });

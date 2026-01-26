@@ -7,17 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable no-console */
+import type { QueryClientConfig } from '@kbn/react-query';
 
-export const testQueryClientConfig = {
+export const testQueryClientConfig: QueryClientConfig = {
   defaultOptions: {
     queries: {
       retry: false,
+      gcTime: 0,
     },
-  },
-  logger: {
-    log: console.log,
-    warn: console.warn,
-    error: () => {},
   },
 };

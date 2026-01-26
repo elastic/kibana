@@ -6,17 +6,15 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import type { RulesSettingsQueryDelay } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../common/lib/kibana';
 import { getQueryDelaySettings } from '../lib/rule_api/get_query_delay_settings';
 
 interface UseGetQueryDelaySettingsProps {
   enabled: boolean;
-  onSuccess: (settings: RulesSettingsQueryDelay) => void;
 }
 
 export const useGetQueryDelaySettings = (props: UseGetQueryDelaySettingsProps) => {
-  const { enabled, onSuccess } = props;
+  const { enabled } = props;
   const { http } = useKibana().services;
 
   const queryFn = () => {
@@ -26,7 +24,6 @@ export const useGetQueryDelaySettings = (props: UseGetQueryDelaySettingsProps) =
   const { data, isFetching, isError, isLoadingError, isLoading } = useQuery({
     queryKey: ['getQueryDelaySettings'],
     queryFn,
-    onSuccess,
     enabled,
     refetchOnWindowFocus: false,
     retry: false,

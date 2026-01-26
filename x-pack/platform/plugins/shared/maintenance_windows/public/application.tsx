@@ -14,7 +14,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { ResponseOpsQueryClientProvider } from '@kbn/response-ops-react-query/providers/response_ops_query_client_provider';
 import { MAINTENANCE_WINDOW_PATHS } from '../common';
 import { useLicense } from './hooks/use_license';
 import type { MaintenanceWindowsPublicStartDependencies } from './types';
@@ -74,8 +74,6 @@ export const renderApp = ({
 }) => {
   const { element, history } = mountParams;
 
-  const queryClient = new QueryClient();
-
   ReactDOM.render(
     core.rendering.addContext(
       <KibanaContextProvider
@@ -87,9 +85,9 @@ export const renderApp = ({
         }}
       >
         <Router history={history}>
-          <QueryClientProvider client={queryClient}>
+          <ResponseOpsQueryClientProvider>
             <App />
-          </QueryClientProvider>
+          </ResponseOpsQueryClientProvider>
         </Router>
       </KibanaContextProvider>
     ),

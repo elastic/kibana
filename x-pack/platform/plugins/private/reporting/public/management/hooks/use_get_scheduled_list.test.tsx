@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { QueryClientProvider } from '@kbn/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import { getScheduledReportsList } from '../apis/get_scheduled_reports_list';
 import { useGetScheduledList } from './use_get_scheduled_list';
-import { testQueryClient } from '../test_utils/test_query_client';
 import { useKibana } from '@kbn/reporting-public';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 jest.mock('@kbn/reporting-public', () => ({
   useKibana: jest.fn(),
@@ -22,12 +20,10 @@ jest.mock('../apis/get_scheduled_reports_list', () => ({
   getScheduledReportsList: jest.fn(),
 }));
 
+const { provider: wrapper } = createTestResponseOpsQueryClient();
+
 describe('useGetScheduledList', () => {
   const http = httpServiceMock.createStartContract();
-
-  const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={testQueryClient}>{children}</QueryClientProvider>
-  );
 
   beforeEach(() => {
     jest.clearAllMocks();

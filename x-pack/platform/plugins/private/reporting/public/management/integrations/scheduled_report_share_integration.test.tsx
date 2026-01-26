@@ -13,8 +13,9 @@ import {
   shouldRegisterScheduledReportShareIntegration,
   createScheduledReportShareIntegration,
 } from './scheduled_report_share_integration';
-import { queryClient } from '../../query_client';
 import type { ExportShareConfig } from '@kbn/share-plugin/public/types';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
+import type { ScheduledReportMenuItem } from '../components/scheduled_report_flyout_share_wrapper';
 
 jest.mock('../hooks/use_get_reporting_health_query', () => ({
   getKey: jest.fn(() => 'reportingHealthKey'),
@@ -27,6 +28,20 @@ jest.mock('../components/scheduled_report_flyout_share_wrapper', () => ({
     <div data-test-subj="mockScheduledReportFlyoutShareWrapper" />
   ),
 }));
+
+const { queryClient, provider: MockQueryClientProvider } = createTestResponseOpsQueryClient();
+
+jest.mock('../components/scheduled_report_flyout_share_wrapper', () => {
+  const originalModule = jest.requireActual('../components/scheduled_report_flyout_share_wrapper');
+  return {
+    ...originalModule,
+    ScheduledReportFlyoutShareWrapper: (props: ScheduledReportMenuItem) => (
+      <MockQueryClientProvider>
+        <originalModule.ScheduledReportFlyoutShareWrapper {...props} />
+      </MockQueryClientProvider>
+    ),
+  };
+});
 
 describe('shouldRegisterScheduledReportShareIntegration', () => {
   const http = {} as any;
@@ -46,7 +61,9 @@ describe('shouldRegisterScheduledReportShareIntegration', () => {
       isSufficientlySecure: true,
       hasPermanentEncryptionKey: true,
     });
-    await expect(shouldRegisterScheduledReportShareIntegration(http)).resolves.toBe(true);
+    await expect(shouldRegisterScheduledReportShareIntegration(http, queryClient)).resolves.toBe(
+      true
+    );
   });
 
   it('should return false when not secure', async () => {
@@ -54,7 +71,9 @@ describe('shouldRegisterScheduledReportShareIntegration', () => {
       isSufficientlySecure: false,
       hasPermanentEncryptionKey: true,
     });
-    await expect(shouldRegisterScheduledReportShareIntegration(http)).resolves.toBe(false);
+    await expect(shouldRegisterScheduledReportShareIntegration(http, queryClient)).resolves.toBe(
+      false
+    );
   });
 
   it('should return false when no encryption key', async () => {
@@ -62,14 +81,16 @@ describe('shouldRegisterScheduledReportShareIntegration', () => {
       isSufficientlySecure: true,
       hasPermanentEncryptionKey: false,
     });
-    await expect(shouldRegisterScheduledReportShareIntegration(http)).resolves.toBe(false);
+    await expect(shouldRegisterScheduledReportShareIntegration(http, queryClient)).resolves.toBe(
+      false
+    );
   });
 });
 
 describe('createScheduledReportShareIntegration', () => {
   const apiClient = {} as any;
   const services = {} as any;
-  const integration = createScheduledReportShareIntegration({ apiClient, services });
+  const integration = createScheduledReportShareIntegration({ apiClient, queryClient, services });
 
   it('should return correct id, groupId', () => {
     expect(integration).toMatchObject({

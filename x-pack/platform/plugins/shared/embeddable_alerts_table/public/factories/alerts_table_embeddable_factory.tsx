@@ -17,11 +17,12 @@ import {
   useFetchContext,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
-import { QueryClientProvider } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { getRuleTypeIdsForSolution } from '@kbn/response-ops-alerts-filters-form/utils/solutions';
+import { ResponseOpsQueryClientProvider } from '@kbn/response-ops-react-query/providers/response_ops_query_client_provider';
+import type { QueryClient } from '@kbn/react-query';
 import { getInternalRuleTypesWithCache } from '../utils/get_internal_rule_types_with_cache';
 import { ALERTS_PANEL_LABEL } from '../translations';
 import type {
@@ -32,11 +33,11 @@ import type {
 } from '../types';
 import { EMBEDDABLE_ALERTS_TABLE_ID, PERSISTED_TABLE_CONFIG_KEY_PREFIX } from '../constants';
 import { EmbeddableAlertsTable } from '../components/embeddable_alerts_table';
-import { queryClient } from '../query_client';
 
 export const getAlertsTableEmbeddableFactory = (
   coreServices: CoreStart,
-  deps: EmbeddableAlertsTablePublicStartDependencies
+  deps: EmbeddableAlertsTablePublicStartDependencies,
+  queryClient: QueryClient
 ): EmbeddableFactory<EmbeddableAlertsTableSerializedState, EmbeddableAlertsTableApi> => ({
   type: EMBEDDABLE_ALERTS_TABLE_ID,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
@@ -77,7 +78,7 @@ export const getAlertsTableEmbeddableFactory = (
       },
     });
 
-    const ruleTypes = await getInternalRuleTypesWithCache(coreServices.http);
+    const ruleTypes = await getInternalRuleTypesWithCache(coreServices.http, queryClient);
     const ruleTypeIdsForSolution =
       !ruleTypes || !initialTableConfig?.solution
         ? []
@@ -130,7 +131,7 @@ export const getAlertsTableEmbeddableFactory = (
 
         return (
           <KibanaContextProvider services={services}>
-            <QueryClientProvider client={queryClient}>
+            <ResponseOpsQueryClientProvider queryClient={queryClient}>
               <EmbeddableAlertsTable
                 id={`${PERSISTED_TABLE_CONFIG_KEY_PREFIX}-${uuid}`}
                 timeRange={selectedTimeRange}
@@ -138,7 +139,7 @@ export const getAlertsTableEmbeddableFactory = (
                 query={tableConfig?.query}
                 services={services}
               />
-            </QueryClientProvider>
+            </ResponseOpsQueryClientProvider>
           </KibanaContextProvider>
         );
       },

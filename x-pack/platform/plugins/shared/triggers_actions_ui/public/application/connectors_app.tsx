@@ -20,12 +20,12 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
-import { QueryClientProvider } from '@kbn/react-query';
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { ResponseOpsQueryClientProvider } from '@kbn/response-ops-react-query/providers/response_ops_query_client_provider';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import type { ActionTypeRegistryContract, RuleTypeRegistryContract } from '../types';
 
@@ -33,7 +33,6 @@ import { setDataViewsService } from '../common/lib/data_apis';
 import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
 import { ConnectorProvider } from './context/connector_context';
 import type { Section } from './constants';
-import { queryClient } from './query_client';
 
 const ActionsConnectorsHome = lazy(
   () => import('./sections/actions_connectors_list/components/actions_connectors_home')
@@ -80,9 +79,9 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
   return deps.rendering.addContext(
     <KibanaContextProvider services={{ ...deps }}>
       <Router history={deps.history}>
-        <QueryClientProvider client={queryClient}>
+        <ResponseOpsQueryClientProvider>
           <AppWithoutRouter sectionsRegex={sectionsRegex} />
-        </QueryClientProvider>
+        </ResponseOpsQueryClientProvider>
       </Router>
     </KibanaContextProvider>
   );

@@ -19,13 +19,13 @@ export interface UseLoadRuleTypeAlertFieldsProps {
   http: HttpStart;
   ruleTypeId?: string;
   enabled: boolean;
-  cacheTime?: number;
+  gcTime?: number;
   fieldsMetadata?: FieldsMetadataPublicStart;
 }
 
 export const useLoadRuleTypeAlertFields = (props: UseLoadRuleTypeAlertFieldsProps) => {
   const ecsFlat = useRef<Record<string, any>>({});
-  const { http, ruleTypeId, enabled, cacheTime, fieldsMetadata } = props;
+  const { http, ruleTypeId, enabled, gcTime, fieldsMetadata } = props;
 
   const queryFn = async () => {
     if (!ruleTypeId) {
@@ -59,7 +59,7 @@ export const useLoadRuleTypeAlertFields = (props: UseLoadRuleTypeAlertFieldsProp
         description: getDescription(d.name, ecsFlat.current),
       }));
     },
-    cacheTime,
+    gcTime,
     refetchOnWindowFocus: false,
     enabled,
   });

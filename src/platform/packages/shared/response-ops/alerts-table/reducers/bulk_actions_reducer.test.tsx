@@ -25,10 +25,9 @@ import type {
 } from '../components/alerts_data_grid.test';
 import { mockDataGridProps } from '../components/alerts_data_grid.test';
 import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
-import { getJsDomPerformanceFix, testQueryClientConfig } from '../utils/test';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
+import { getJsDomPerformanceFix } from '../utils/test';
 import { useTagsAction } from '../components/tags/use_tags_action';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 jest.mock('../components/tags/use_tags_action');
 
@@ -51,7 +50,7 @@ type AlertsTableWithBulkActionsContextProps = TestAlertsDataGridProps & {
 const mockRefresh = jest.mocked(mockRenderContext.refresh);
 const mockCaseService = mockRenderContext.services.cases!;
 
-const queryClient = new QueryClient(testQueryClientConfig);
+const { provider: TestQueryClientProvider } = createTestResponseOpsQueryClient();
 
 const { fix, cleanup } = getJsDomPerformanceFix();
 beforeAll(() => {
@@ -182,13 +181,13 @@ describe('AlertsDataGrid bulk actions', () => {
     );
 
     return (
-      <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
+      <TestQueryClientProvider>
         <IntlProvider locale="en">
           <AlertsTableContextProvider value={renderContext}>
             <AlertsDataGrid {...({ ...props, renderContext } as BaseAlertsDataGridProps)} />
           </AlertsTableContextProvider>
         </IntlProvider>
-      </QueryClientProvider>
+      </TestQueryClientProvider>
     );
   };
 

@@ -20,7 +20,8 @@ export const useDeleteMaintenanceWindow = () => {
     return deleteMaintenanceWindow({ http, maintenanceWindowId });
   };
 
-  return useMutation(mutationFn, {
+  return useMutation({
+    mutationFn,
     onSuccess: () => {
       toasts.addSuccess(
         i18n.translate('xpack.maintenanceWindows.deleteSuccess', {

@@ -10,7 +10,7 @@
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { testQueryClientConfig } from '../test_utils/test_query_client_config';
+import { testQueryClientConfig } from '@kbn/response-ops-react-query/test_utils/test_query_client_config';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { useFindAlertsQuery } from './use_find_alerts_query';

@@ -6,14 +6,12 @@
  */
 
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import { ResponseOpsQueryClientProvider } from '@kbn/response-ops-react-query/providers/response_ops_query_client_provider';
 import { ConnectorProvider } from '../application/context/connector_context';
 import { RulesList } from '../application/sections';
 import type { RulesListProps } from '../application/sections/rules_list/components/rules_list';
 import type { ConnectorServices } from '../types';
-
-const queryClient = new QueryClient();
 
 export const getRulesListLazy = (props: {
   connectorServices: ConnectorServices;
@@ -21,11 +19,11 @@ export const getRulesListLazy = (props: {
 }) => {
   return (
     <ConnectorProvider value={{ services: props.connectorServices }}>
-      <QueryClientProvider client={queryClient}>
+      <ResponseOpsQueryClientProvider>
         <PerformanceContextProvider>
           <RulesList {...props.rulesListProps} />
         </PerformanceContextProvider>
-      </QueryClientProvider>
+      </ResponseOpsQueryClientProvider>
     </ConnectorProvider>
   );
 };

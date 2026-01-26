@@ -6,6 +6,8 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { QueryClient } from '@kbn/react-query';
+import { createResponseOpsQueryClient } from '@kbn/response-ops-react-query/utils/create_response_ops_query_client_config';
 import { registerAlertsTableEmbeddableFactory } from './factories/register_alerts_table_embeddable_factory';
 import type {
   EmbeddableAlertsTablePublicSetup,
@@ -24,11 +26,16 @@ export class EmbeddableAlertsTablePlugin
       EmbeddableAlertsTablePublicStartDependencies
     >
 {
+  private queryClient!: QueryClient;
+
   public setup(
     core: CoreSetup<EmbeddableAlertsTablePublicStartDependencies>,
     { embeddable }: EmbeddableAlertsTablePublicSetupDependencies
   ) {
-    registerAlertsTableEmbeddableFactory({ embeddable, core });
+    this.queryClient = createResponseOpsQueryClient({
+      dependencies: { notifications: core.notifications },
+    });
+    registerAlertsTableEmbeddableFactory({ embeddable, core, queryClient: this.queryClient });
     return {};
   }
 
@@ -36,7 +43,7 @@ export class EmbeddableAlertsTablePlugin
     coreServices: CoreStart,
     { uiActions }: EmbeddableAlertsTablePublicStartDependencies
   ) {
-    registerAddAlertsTableAction({ coreServices, uiActions });
+    registerAddAlertsTableAction({ coreServices, uiActions, queryClient: this.queryClient });
     return {};
   }
 

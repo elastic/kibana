@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-/* eslint-disable no-console */
-
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { ConfigEditorContent } from './config_editor_content';
 import { coreMock } from '@kbn/core/public/mocks';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
   FILTERS_FORM_ITEM_SUBJ,
@@ -22,6 +20,7 @@ import {
 import type { InternalRuleType } from '@kbn/response-ops-rules-apis/apis/get_internal_rule_types';
 import { getInternalRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_internal_rule_types';
 import { CONFIG_EDITOR_CLEAR_FILTERS_LABEL } from '../translations';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 const core = coreMock.createStart();
 
@@ -32,18 +31,15 @@ mockGetInternalRuleTypes.mockResolvedValue([
   { id: 'test-sec-rule-type', name: 'Test sec rule type', solution: 'security' },
 ] as unknown as InternalRuleType[]);
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-    },
-  },
-  logger: {
-    log: console.log,
-    warn: console.warn,
-    error: () => {},
-  },
-});
+const { queryClient, provider: TestQueryClientProvider } = createTestResponseOpsQueryClient();
+
+const wrapper = ({ children }: PropsWithChildren) => {
+  return (
+    <IntlProvider locale="en">
+      <TestQueryClientProvider>{children}</TestQueryClientProvider>
+    </IntlProvider>
+  );
+};
 
 describe('ConfigEditorContent', () => {
   afterEach(() => {
@@ -53,39 +49,33 @@ describe('ConfigEditorContent', () => {
 
   it("should not render the filters form if a solution wasn't chosen", async () => {
     render(
-      <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>
-          <ConfigEditorContent
-            onSave={jest.fn()}
-            onCancel={jest.fn()}
-            services={core}
-            ariaLabelledBy="configEditorFlyout"
-          />
-        </QueryClientProvider>
-      </IntlProvider>
+      <ConfigEditorContent
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+        services={core}
+        ariaLabelledBy="configEditorFlyout"
+      />,
+      { wrapper }
     );
     expect(screen.queryByTestId(FILTERS_FORM_SUBJ)).not.toBeInTheDocument();
   });
 
   it('should not render the filters form while loading rule types', async () => {
     render(
-      <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>
-          <ConfigEditorContent
-            onSave={jest.fn()}
-            onCancel={jest.fn()}
-            initialConfig={{
-              solution: 'observability',
-              query: {
-                type: 'alertsFilters',
-                filters: [{ filter: {} }],
-              },
-            }}
-            services={core}
-            ariaLabelledBy="configEditorFlyout"
-          />
-        </QueryClientProvider>
-      </IntlProvider>
+      <ConfigEditorContent
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+        initialConfig={{
+          solution: 'observability',
+          query: {
+            type: 'alertsFilters',
+            filters: [{ filter: {} }],
+          },
+        }}
+        services={core}
+        ariaLabelledBy="configEditorFlyout"
+      />,
+      { wrapper }
     );
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
     expect(screen.queryByTestId(FILTERS_FORM_SUBJ)).not.toBeInTheDocument();
@@ -95,23 +85,20 @@ describe('ConfigEditorContent', () => {
 
   it('should reset the (non-empty) filters form when switching solution', async () => {
     render(
-      <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>
-          <ConfigEditorContent
-            ariaLabelledBy="configEditorFlyout"
-            onSave={jest.fn()}
-            onCancel={jest.fn()}
-            initialConfig={{
-              solution: 'observability',
-              query: {
-                type: 'alertsFilters',
-                filters: [{ filter: { type: 'ruleTypes', value: ['test-o11y-rule-type'] } }],
-              },
-            }}
-            services={core}
-          />
-        </QueryClientProvider>
-      </IntlProvider>
+      <ConfigEditorContent
+        ariaLabelledBy="configEditorFlyout"
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+        initialConfig={{
+          solution: 'observability',
+          query: {
+            type: 'alertsFilters',
+            filters: [{ filter: { type: 'ruleTypes', value: ['test-o11y-rule-type'] } }],
+          },
+        }}
+        services={core}
+      />,
+      { wrapper }
     );
     expect(await screen.findByTestId(FILTERS_FORM_SUBJ)).toBeInTheDocument();
     await userEvent.click(within(screen.getByTestId(SOLUTION_SELECTOR_SUBJ)).getByRole('button'));
@@ -121,27 +108,24 @@ describe('ConfigEditorContent', () => {
 
   it("should reset the filters form when clicking on 'Clear all'", async () => {
     render(
-      <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>
-          <ConfigEditorContent
-            ariaLabelledBy="configEditorFlyout"
-            onSave={jest.fn()}
-            onCancel={jest.fn()}
-            initialConfig={{
-              solution: 'observability',
-              query: {
-                type: 'alertsFilters',
-                filters: [
-                  { filter: { type: 'ruleTypes', value: ['test-o11y-rule-type'] } },
-                  { operator: 'and' },
-                  { filter: { type: 'ruleTypes', value: ['test-o11y-rule-type'] } },
-                ],
-              },
-            }}
-            services={core}
-          />
-        </QueryClientProvider>
-      </IntlProvider>
+      <ConfigEditorContent
+        ariaLabelledBy="configEditorFlyout"
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+        initialConfig={{
+          solution: 'observability',
+          query: {
+            type: 'alertsFilters',
+            filters: [
+              { filter: { type: 'ruleTypes', value: ['test-o11y-rule-type'] } },
+              { operator: 'and' },
+              { filter: { type: 'ruleTypes', value: ['test-o11y-rule-type'] } },
+            ],
+          },
+        }}
+        services={core}
+      />,
+      { wrapper }
     );
     expect(await screen.findByTestId(FILTERS_FORM_SUBJ)).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: CONFIG_EDITOR_CLEAR_FILTERS_LABEL }));

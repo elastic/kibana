@@ -7,6 +7,9 @@
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
+import { useEffect } from 'react';
+import { keepPreviousData } from '@kbn/react-query';
+import type { ResponseOpsQueryMeta } from '@kbn/response-ops-react-query/types';
 import type { Pagination, RulesListFilters } from '../../types';
 import type { LoadRulesProps } from '../lib/rule_api';
 import { loadRulesWithKueryFilter } from '../lib/rule_api/rules_kuery_filter';
@@ -31,10 +34,7 @@ type UseLoadRulesQueryProps = Omit<LoadRulesProps, 'http'> & {
 export const useLoadRulesQuery = (props: UseLoadRulesQueryProps) => {
   const { ruleTypeIds, consumers, filters, page, sort, onPage, enabled, refresh, hasReference } =
     props;
-  const {
-    http,
-    notifications: { toasts },
-  } = useKibana().services;
+  const { http } = useKibana().services;
   const {
     refetch,
     isLoading,
@@ -80,23 +80,28 @@ export const useLoadRulesQuery = (props: UseLoadRulesQueryProps) => {
         hasReference,
       });
     },
-    onSuccess: (response) => {
-      if (!response?.data?.length && page.index > 0) {
-        onPage({ ...page, index: 0 });
-      }
-    },
-    onError: () => {
-      toasts.addDanger(
-        i18n.translate('xpack.triggersActionsUI.sections.rulesList.unableToLoadRulesMessage', {
-          defaultMessage: 'Unable to load rules',
-        })
-      );
-    },
     enabled,
-    keepPreviousData: true,
-    cacheTime: 0,
+    placeholderData: keepPreviousData,
+    gcTime: 0,
     refetchOnWindowFocus: false,
+    meta: {
+      getErrorToast: () => ({
+        type: 'danger',
+        title: i18n.translate(
+          'xpack.triggersActionsUI.sections.rulesList.unableToLoadRulesMessage',
+          {
+            defaultMessage: 'Unable to load rules',
+          }
+        ),
+      }),
+    } satisfies ResponseOpsQueryMeta,
   });
+
+  useEffect(() => {
+    if (!rulesResponse?.data?.length && page.index > 0) {
+      onPage({ ...page, index: 0 });
+    }
+  }, [onPage, page, rulesResponse?.data?.length]);
 
   const hasData = Boolean(rulesResponse && rulesResponse.data.length > 0);
 

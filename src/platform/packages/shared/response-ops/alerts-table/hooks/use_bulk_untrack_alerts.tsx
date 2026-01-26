@@ -8,36 +8,39 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { QueryClient } from '@kbn/react-query';
 import { useMutation } from '@kbn/react-query';
-import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
+import { useResponseOpsQueryClient } from '@kbn/response-ops-react-query/hooks/use_response_ops_query_client';
 import { INTERNAL_BASE_ALERTING_API_PATH, mutationKeys } from '../constants';
 
 export interface UseBulkUntrackAlertsParams {
   http: HttpStart;
   notifications: NotificationsStart;
+  queryClient?: QueryClient;
 }
 
 export const useBulkUntrackAlerts = ({
   http,
   notifications: { toasts },
+  queryClient,
 }: UseBulkUntrackAlertsParams) => {
+  const alertingQueryClient = useResponseOpsQueryClient();
   return useMutation<string, string, { indices: string[]; alertUuids: string[] }>(
-    mutationKeys.bulkUntrackAlerts(),
-    ({ indices, alertUuids }) => {
-      try {
-        const body = JSON.stringify({
-          ...(indices?.length ? { indices } : {}),
-          ...(alertUuids ? { alert_uuids: alertUuids } : {}),
-        });
-        return http.post(`${INTERNAL_BASE_ALERTING_API_PATH}/alerts/_bulk_untrack`, { body });
-      } catch (e) {
-        throw new Error(`Unable to parse bulk untrack params: ${e}`);
-      }
-    },
     {
-      context: AlertsQueryContext,
+      mutationKey: mutationKeys.bulkUntrackAlerts(),
+      mutationFn: ({ indices, alertUuids }) => {
+        try {
+          const body = JSON.stringify({
+            ...(indices?.length ? { indices } : {}),
+            ...(alertUuids ? { alert_uuids: alertUuids } : {}),
+          });
+          return http.post(`${INTERNAL_BASE_ALERTING_API_PATH}/alerts/_bulk_untrack`, { body });
+        } catch (e) {
+          throw new Error(`Unable to parse bulk untrack params: ${e}`);
+        }
+      },
       onError: (_err, params) => {
         toasts.addDanger(
           i18n.translate(
@@ -49,7 +52,6 @@ export const useBulkUntrackAlerts = ({
           )
         );
       },
-
       onSuccess: (_, params) => {
         toasts.addSuccess(
           i18n.translate(
@@ -61,6 +63,7 @@ export const useBulkUntrackAlerts = ({
           )
         );
       },
-    }
+    },
+    queryClient ?? alertingQueryClient
   );
 };

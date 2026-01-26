@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { QueryClientProvider } from '@kbn/react-query';
-import { testQueryClient } from '../test_utils/test_query_client';
 import { useUpdateScheduleReport } from './use_update_schedule_report';
 import { updateScheduleReport } from '../apis/update_schedule_report';
 import type { HttpSetup } from '@kbn/core/public';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 const mockHttp = {} as HttpSetup;
 
@@ -19,9 +17,7 @@ jest.mock('../apis/update_schedule_report', () => ({
   updateScheduleReport: jest.fn(),
 }));
 
-const wrapper = ({ children }: { children: React.ReactNode }) => (
-  <QueryClientProvider client={testQueryClient}>{children}</QueryClientProvider>
-);
+const { provider: wrapper } = createTestResponseOpsQueryClient();
 
 describe('useUpdateScheduleReport', () => {
   beforeEach(() => {

@@ -8,8 +8,10 @@
  */
 
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { UseQueryOptions } from '@kbn/react-query';
+import type { QueryClient, UseQueryOptions } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
+import type { RuleType } from '@kbn/triggers-actions-ui-types';
+import { useResponseOpsQueryClient } from '@kbn/response-ops-react-query/hooks/use_response_ops_query_client';
 import { getRuleTypes } from '../apis/get_rule_types';
 import { queryKeys } from '../query_keys';
 
@@ -22,20 +24,25 @@ export const getKey = queryKeys.getRuleTypes;
 export const useGetRuleTypesQuery = (
   { http }: GetRuleTypesQueryParams,
   {
-    onError,
     enabled,
-    context,
-  }: Pick<UseQueryOptions<typeof getRuleTypes>, 'onError' | 'enabled' | 'context'>
+    meta,
+    queryClient,
+  }: Pick<UseQueryOptions<RuleType[]>, 'enabled' | 'meta'> & {
+    queryClient?: QueryClient;
+  }
 ) => {
-  return useQuery({
-    queryKey: getKey(),
-    queryFn: () => getRuleTypes({ http }),
-    refetchOnWindowFocus: false,
-    // Leveraging TanStack Query's caching system to avoid duplicated requests as
-    // other state-sharing solutions turned out to be overly complex and less readable
-    staleTime: 60 * 1000,
-    onError,
-    enabled,
-    context,
-  });
+  const alertingQueryClient = useResponseOpsQueryClient();
+  return useQuery(
+    {
+      queryKey: getKey(),
+      queryFn: () => getRuleTypes({ http }),
+      refetchOnWindowFocus: false,
+      // Leveraging TanStack Query's caching system to avoid duplicated requests as
+      // other state-sharing solutions turned out to be overly complex and less readable
+      staleTime: 60 * 1000,
+      enabled,
+      meta,
+    },
+    queryClient ?? alertingQueryClient
+  );
 };

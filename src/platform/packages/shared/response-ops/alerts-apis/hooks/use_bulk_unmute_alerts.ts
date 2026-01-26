@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { QueryClient } from '@kbn/react-query';
 import { useMutation } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
-import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
+import { useResponseOpsQueryClient } from '@kbn/response-ops-react-query/hooks/use_response_ops_query_client';
 import { mutationKeys } from '../mutation_keys';
 import type { ServerError } from '../types';
 import { bulkUnmuteAlerts, type BulkUnmuteAlertsRule } from '../apis/bulk_unmute_alerts';
@@ -24,6 +25,7 @@ export interface UseBulkUnmuteAlertsParams {
   http: HttpStart;
   notifications: NotificationsStart;
   onSuccess?: () => void;
+  queryClient?: QueryClient;
 }
 
 export interface BulkUnmuteAlertsParams {
@@ -36,31 +38,39 @@ export const useBulkUnmuteAlerts = ({
   http,
   notifications: { toasts },
   onSuccess,
+  queryClient,
 }: UseBulkUnmuteAlertsParams) => {
-  return useMutation(({ rules }: BulkUnmuteAlertsParams) => bulkUnmuteAlerts({ http, rules }), {
-    mutationKey: getKey(),
-    context: AlertsQueryContext,
-    onSuccess(_data, variables) {
-      const alertCount = variables.rules.reduce(
-        (sum, rule) => sum + rule.alert_instance_ids.length,
-        0
-      );
-      const ruleCount = variables.rules.length;
-      toasts.addSuccess(
-        i18n.translate('xpack.responseOpsAlertsApis.alertsTable.alertsUnmuted', {
-          defaultMessage:
-            'Unmuted {alertCount} {alertCount, plural, one {alert instance} other {alert instances}} for {ruleCount} {ruleCount, plural, one {rule} other {rules}}',
-          values: { alertCount, ruleCount },
-        })
-      );
-      onSuccess?.();
+  const alertingQueryClient = useResponseOpsQueryClient();
+  return useMutation(
+    {
+      mutationFn: ({ rules }: BulkUnmuteAlertsParams) => bulkUnmuteAlerts({ http, rules }),
+      mutationKey: getKey(),
+      onSuccess(_data, variables) {
+        const alertCount = variables.rules.reduce(
+          (sum, rule) => sum + rule.alert_instance_ids.length,
+          0
+        );
+        const ruleCount = variables.rules.length;
+        toasts.addSuccess(
+          i18n.translate('xpack.responseOpsAlertsApis.alertsTable.alertsUnmuted', {
+            defaultMessage:
+              'Unmuted {alertCount} {alertCount, plural, one {alert instance} other {alert instances}} for {ruleCount} {ruleCount, plural, one {rule} other {rules}}',
+            values: { alertCount, ruleCount },
+          })
+        );
+        onSuccess?.();
+      },
+      onError: (error: ServerError) => {
+        if (error.name !== 'AbortError') {
+          toasts.addError(
+            error.body && error.body.message ? new Error(error.body.message) : error,
+            {
+              title: ERROR_TITLE,
+            }
+          );
+        }
+      },
     },
-    onError: (error: ServerError) => {
-      if (error.name !== 'AbortError') {
-        toasts.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
-          title: ERROR_TITLE,
-        });
-      }
-    },
-  });
+    queryClient ?? alertingQueryClient
+  );
 };

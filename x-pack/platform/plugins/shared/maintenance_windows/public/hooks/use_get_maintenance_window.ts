@@ -12,10 +12,7 @@ import { getMaintenanceWindow } from '../services/get';
 import { convertFromMaintenanceWindowToForm } from '../helpers/convert_from_maintenance_window_to_form';
 
 export const useGetMaintenanceWindow = (maintenanceWindowId: string) => {
-  const {
-    http,
-    notifications: { toasts },
-  } = useKibana().services;
+  const { http } = useKibana().services;
 
   const queryFn = async () => {
     const maintenanceWindow = await getMaintenanceWindow({ http, maintenanceWindowId });
@@ -32,21 +29,20 @@ export const useGetMaintenanceWindow = (maintenanceWindowId: string) => {
     };
   };
 
-  const onErrorFn = () => {
-    toasts.addDanger(
-      i18n.translate('xpack.maintenanceWindows.getMaintenanceWindowFailure', {
-        defaultMessage: 'Unable to get maintenance window.',
-      })
-    );
-  };
-
   const { isInitialLoading, isLoading, data, isError } = useQuery({
     queryKey: ['getMaintenanceWindow', maintenanceWindowId],
     queryFn,
-    onError: onErrorFn,
     refetchOnWindowFocus: false,
     retry: false,
-    cacheTime: 0,
+    gcTime: 0,
+    meta: {
+      getErrorToast: () => ({
+        type: 'danger',
+        message: i18n.translate('xpack.maintenanceWindows.getMaintenanceWindowFailure', {
+          defaultMessage: 'Unable to get maintenance window.',
+        }),
+      }),
+    },
   });
 
   return {

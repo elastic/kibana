@@ -8,12 +8,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { QueryClient } from '@kbn/react-query';
 import { EuiPage, EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 import type { AppMountParameters, CoreStart, ScopedHistory } from '@kbn/core/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { QueryClientProvider } from '@kbn/react-query';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -24,6 +22,7 @@ import { CREATE_RULE_ROUTE, EDIT_RULE_ROUTE, RuleForm } from '@kbn/response-ops-
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { ResponseOpsQueryClientProvider } from '@kbn/response-ops-react-query/providers/response_ops_query_client_provider';
 import type { TriggersActionsUiExamplePublicStartDeps } from './plugin';
 
 import { Page } from './components/page';
@@ -263,8 +262,6 @@ const TriggersActionsUiExampleApp = ({
   );
 };
 
-export const queryClient = new QueryClient();
-
 export const renderApp = (
   core: CoreStart,
   deps: TriggersActionsUiExamplePublicStartDeps,
@@ -283,7 +280,7 @@ export const renderApp = (
           actionTypeRegistry,
         }}
       >
-        <QueryClientProvider client={queryClient}>
+        <ResponseOpsQueryClientProvider>
           <IntlProvider locale="en">
             <TriggersActionsUiExampleApp
               history={history}
@@ -299,7 +296,7 @@ export const renderApp = (
               {...core}
             />
           </IntlProvider>
-        </QueryClientProvider>
+        </ResponseOpsQueryClientProvider>
       </KibanaContextProvider>
     ),
     element

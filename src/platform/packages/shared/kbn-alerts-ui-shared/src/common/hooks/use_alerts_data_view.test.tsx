@@ -16,7 +16,7 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { fetchAlertsIndexNames } from '../apis/fetch_alerts_index_names';
 import { fetchAlertsFields } from '../apis/fetch_alerts_fields';
-import { testQueryClientConfig } from '../test_utils/test_query_client_config';
+import { testQueryClientConfig } from '@kbn/response-ops-react-query/test_utils/test_query_client_config';
 import { useAlertsDataView } from './use_alerts_data_view';
 
 jest.mock('../apis/fetch_alerts_index_names');

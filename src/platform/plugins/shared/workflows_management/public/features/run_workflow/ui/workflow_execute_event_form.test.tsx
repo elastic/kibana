@@ -9,10 +9,7 @@
 
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
-import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
-import { I18nProvider } from '@kbn/i18n-react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 import {
   createCommonMockServices,
   createEventFormKibanaMocks,
@@ -43,13 +40,7 @@ jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => ({
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
-const queryClient = new QueryClient(testQueryClientConfig);
-
-const TestWrapper = ({ children }: { children: React.ReactNode }) => (
-  <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
-    <I18nProvider>{children}</I18nProvider>
-  </QueryClientProvider>
-);
+const { queryClient, provider: wrapper } = createTestResponseOpsQueryClient();
 
 describe('WorkflowExecuteEventForm', () => {
   const mockSetValue = jest.fn();
@@ -79,14 +70,13 @@ describe('WorkflowExecuteEventForm', () => {
 
   it('renders the form with search bar', async () => {
     const { getByTestId } = render(
-      <TestWrapper>
-        <WorkflowExecuteEventForm
-          value=""
-          setValue={mockSetValue}
-          errors={null}
-          setErrors={mockSetErrors}
-        />
-      </TestWrapper>
+      <WorkflowExecuteEventForm
+        value=""
+        setValue={mockSetValue}
+        errors={null}
+        setErrors={mockSetErrors}
+      />,
+      { wrapper }
     );
 
     await waitFor(() => {
@@ -96,14 +86,13 @@ describe('WorkflowExecuteEventForm', () => {
 
   it('creates data view for alerts index pattern', async () => {
     render(
-      <TestWrapper>
-        <WorkflowExecuteEventForm
-          value=""
-          setValue={mockSetValue}
-          errors={null}
-          setErrors={mockSetErrors}
-        />
-      </TestWrapper>
+      <WorkflowExecuteEventForm
+        value=""
+        setValue={mockSetValue}
+        errors={null}
+        setErrors={mockSetErrors}
+      />,
+      { wrapper }
     );
 
     await waitFor(() => {
@@ -116,14 +105,13 @@ describe('WorkflowExecuteEventForm', () => {
 
   it('fetches and displays alerts in table', async () => {
     const { getByText } = render(
-      <TestWrapper>
-        <WorkflowExecuteEventForm
-          value=""
-          setValue={mockSetValue}
-          errors={null}
-          setErrors={mockSetErrors}
-        />
-      </TestWrapper>
+      <WorkflowExecuteEventForm
+        value=""
+        setValue={mockSetValue}
+        errors={null}
+        setErrors={mockSetErrors}
+      />,
+      { wrapper }
     );
 
     await waitFor(() => {
@@ -137,14 +125,13 @@ describe('WorkflowExecuteEventForm', () => {
 
   it('displays message column in table', async () => {
     const { getByRole } = render(
-      <TestWrapper>
-        <WorkflowExecuteEventForm
-          value=""
-          setValue={mockSetValue}
-          errors={null}
-          setErrors={mockSetErrors}
-        />
-      </TestWrapper>
+      <WorkflowExecuteEventForm
+        value=""
+        setValue={mockSetValue}
+        errors={null}
+        setErrors={mockSetErrors}
+      />,
+      { wrapper }
     );
 
     await waitFor(() => {
@@ -154,14 +141,13 @@ describe('WorkflowExecuteEventForm', () => {
 
   it('handles query change without triggering fetch', async () => {
     const { getByTestId } = render(
-      <TestWrapper>
-        <WorkflowExecuteEventForm
-          value=""
-          setValue={mockSetValue}
-          errors={null}
-          setErrors={mockSetErrors}
-        />
-      </TestWrapper>
+      <WorkflowExecuteEventForm
+        value=""
+        setValue={mockSetValue}
+        errors={null}
+        setErrors={mockSetErrors}
+      />,
+      { wrapper }
     );
 
     // Wait for initial data view creation and fetch
@@ -193,14 +179,13 @@ describe('WorkflowExecuteEventForm', () => {
 
   it('calls setValue when alerts are selected', async () => {
     const { getByRole, getByTestId } = render(
-      <TestWrapper>
-        <WorkflowExecuteEventForm
-          value=""
-          setValue={mockSetValue}
-          errors={null}
-          setErrors={mockSetErrors}
-        />
-      </TestWrapper>
+      <WorkflowExecuteEventForm
+        value=""
+        setValue={mockSetValue}
+        errors={null}
+        setErrors={mockSetErrors}
+      />,
+      { wrapper }
     );
 
     // Wait for alerts to load

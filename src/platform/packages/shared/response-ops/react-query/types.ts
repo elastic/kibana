@@ -8,6 +8,7 @@
  */
 
 import type { UseQueryOptions } from '@kbn/react-query';
+import type { ErrorToastOptions, ToastInputFields } from '@kbn/core-notifications-browser';
 
 /**
  * Extracts the data type from a fetching function
@@ -33,3 +34,11 @@ export type QueryOptionsOverrides<
   UseQueryOptions<TQueryFnData, TError, TData, string[]>,
   'queryKey' | 'queryFn' | 'initialData'
 >;
+
+export interface ResponseOpsQueryMeta {
+  getErrorToast?: (
+    error: Error
+  ) =>
+    | (({ type: 'error' } & ErrorToastOptions) | ({ type: 'danger' } & ToastInputFields))
+    | undefined;
+}

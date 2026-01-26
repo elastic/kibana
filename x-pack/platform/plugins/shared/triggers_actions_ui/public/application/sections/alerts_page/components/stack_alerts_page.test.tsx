@@ -8,7 +8,6 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { fetchAlertsFields } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_fields';
-import { alertsTableQueryClient } from '@kbn/response-ops-alerts-table/query_client';
 import { StackAlertsPage } from './stack_alerts_page';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { createAppMockRenderer } from '../../test_utils';
@@ -45,7 +44,6 @@ describe('StackAlertsPage', () => {
 
   afterEach(() => {
     appMockRender.queryClient.clear();
-    alertsTableQueryClient.clear();
   });
 
   it('renders the stack alerts page with the correct permissions', async () => {

@@ -32,10 +32,7 @@ export const AlertsFilterByRuleTags: AlertsFilterComponentType<string[]> = ({
 }) => {
   const {
     ruleTypeIds,
-    services: {
-      http,
-      notifications: { toasts },
-    },
+    services: { http },
   } = useAlertsFiltersFormContext();
 
   const {
@@ -48,7 +45,6 @@ export const AlertsFilterByRuleTags: AlertsFilterComponentType<string[]> = ({
     // Only search tags from allowed rule type ids
     ruleTypeIds,
     http,
-    toasts,
   });
 
   const options = useMemo<Array<EuiComboBoxOptionOption<string>>>(

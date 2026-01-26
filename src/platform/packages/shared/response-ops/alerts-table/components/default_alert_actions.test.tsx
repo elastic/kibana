@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { DefaultAlertActions } from './default_alert_actions';
 import { render, screen } from '@testing-library/react';
 import type { AdditionalContext, AlertActionsProps, RenderContext } from '../types';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { createPartialObjectMock, testQueryClientConfig } from '../utils/test';
+import { createPartialObjectMock } from '../utils/test';
 import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions');
 
@@ -88,14 +88,12 @@ const context = createPartialObjectMock<RenderContext<AdditionalContext>>({
   },
 });
 
-const queryClient = new QueryClient(testQueryClientConfig);
+const { provider: TestQueryClientProvider } = createTestResponseOpsQueryClient();
 
-const TestComponent = (_props: AlertActionsProps) => (
-  <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
-    <AlertsTableContextProvider value={context}>
-      <DefaultAlertActions<AdditionalContext> {..._props} />
-    </AlertsTableContextProvider>
-  </QueryClientProvider>
+const wrapper = ({ children }: PropsWithChildren) => (
+  <TestQueryClientProvider>
+    <AlertsTableContextProvider value={context}>{children}</AlertsTableContextProvider>
+  </TestQueryClientProvider>
 );
 
 describe('DefaultAlertActions', () => {
@@ -123,7 +121,7 @@ describe('DefaultAlertActions', () => {
       it.each([nonSecurityProps, noRuleTypeProps])(
         'should show all modify options for rule type %s',
         async (standardProps) => {
-          render(<TestComponent {...standardProps} />);
+          render(<DefaultAlertActions {...standardProps} />, { wrapper });
 
           expect(screen.queryByText('MuteAlertAction')).toBeInTheDocument();
           expect(screen.queryByText('MarkAsUntrackedAlertAction')).toBeInTheDocument();
@@ -140,7 +138,7 @@ describe('DefaultAlertActions', () => {
           isMutedAlertsEnabled: false,
         });
 
-        render(<TestComponent {...mutedAlertsDisabledProps} />);
+        render(<DefaultAlertActions {...mutedAlertsDisabledProps} />, { wrapper });
 
         expect(screen.queryByText('MuteAlertAction')).not.toBeInTheDocument();
         expect(screen.queryByText('MarkAsUntrackedAlertAction')).toBeInTheDocument();
@@ -159,7 +157,7 @@ describe('DefaultAlertActions', () => {
             refresh: jest.fn(),
           });
 
-          render(<TestComponent {...securityProps} />);
+          render(<DefaultAlertActions {...securityProps} />, { wrapper });
 
           expect(screen.queryByText('MuteAlertAction')).not.toBeInTheDocument();
           expect(screen.queryByText('MarkAsUntrackedAlertAction')).not.toBeInTheDocument();
@@ -170,7 +168,7 @@ describe('DefaultAlertActions', () => {
 
     describe('view-only actions', () => {
       it('should always show "View rule details" and "View alert details" for all rule types', async () => {
-        render(<TestComponent {...props} />);
+        render(<DefaultAlertActions {...props} />, { wrapper });
 
         expect(await screen.findByText('ViewRuleDetailsAlertAction')).toBeInTheDocument();
         expect(await screen.findByText('ViewAlertDetailsAlertAction')).toBeInTheDocument();
@@ -184,7 +182,7 @@ describe('DefaultAlertActions', () => {
           refresh: jest.fn(),
         });
 
-        render(<TestComponent {...siemProps} />);
+        render(<DefaultAlertActions {...siemProps} />, { wrapper });
 
         expect(await screen.findByText('ViewRuleDetailsAlertAction')).toBeInTheDocument();
         expect(await screen.findByText('ViewAlertDetailsAlertAction')).toBeInTheDocument();
@@ -205,7 +203,7 @@ describe('DefaultAlertActions', () => {
         refresh: jest.fn(),
       });
 
-      render(<TestComponent {...nonSecurityProps} />);
+      render(<DefaultAlertActions {...nonSecurityProps} />, { wrapper });
 
       expect(screen.queryByText('MuteAlertAction')).not.toBeInTheDocument();
       expect(screen.queryByText('MarkAsUntrackedAlertAction')).not.toBeInTheDocument();
@@ -220,7 +218,7 @@ describe('DefaultAlertActions', () => {
         refresh: jest.fn(),
       });
 
-      render(<TestComponent {...siemProps} />);
+      render(<DefaultAlertActions {...siemProps} />, { wrapper });
 
       expect(screen.queryByText('MuteAlertAction')).not.toBeInTheDocument();
       expect(screen.queryByText('MarkAsUntrackedAlertAction')).not.toBeInTheDocument();
@@ -228,7 +226,7 @@ describe('DefaultAlertActions', () => {
     });
 
     it('should still show view actions', async () => {
-      render(<TestComponent {...props} />);
+      render(<DefaultAlertActions {...props} />, { wrapper });
 
       expect(await screen.findByText('ViewRuleDetailsAlertAction')).toBeInTheDocument();
       expect(await screen.findByText('ViewAlertDetailsAlertAction')).toBeInTheDocument();

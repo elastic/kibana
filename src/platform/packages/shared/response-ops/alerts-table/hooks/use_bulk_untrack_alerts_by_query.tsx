@@ -8,43 +8,46 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { QueryClient } from '@kbn/react-query';
 import { useMutation } from '@kbn/react-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
+import { useResponseOpsQueryClient } from '@kbn/response-ops-react-query/hooks/use_response_ops_query_client';
 import { INTERNAL_BASE_ALERTING_API_PATH, mutationKeys } from '../constants';
 
 export interface UseBulkUntrackAlertsByQueryParams {
   http: HttpStart;
   notifications: NotificationsStart;
+  queryClient?: QueryClient;
 }
 
 export const useBulkUntrackAlertsByQuery = ({
   http,
   notifications: { toasts },
+  queryClient,
 }: UseBulkUntrackAlertsByQueryParams) => {
+  const alertingQueryClient = useResponseOpsQueryClient();
   return useMutation<
     string,
     string,
     { query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>; ruleTypeIds: string[] }
   >(
-    mutationKeys.bulkUntrackAlertsByQuery(),
-    ({ query, ruleTypeIds }) => {
-      try {
-        const body = JSON.stringify({
-          query: Array.isArray(query) ? query : [query],
-          rule_type_ids: ruleTypeIds,
-        });
-        return http.post(`${INTERNAL_BASE_ALERTING_API_PATH}/alerts/_bulk_untrack_by_query`, {
-          body,
-        });
-      } catch (e) {
-        throw new Error(`Unable to parse bulk untrack by query params: ${e}`);
-      }
-    },
     {
-      context: AlertsQueryContext,
+      mutationKey: mutationKeys.bulkUntrackAlertsByQuery(),
+      mutationFn: ({ query, ruleTypeIds }) => {
+        try {
+          const body = JSON.stringify({
+            query: Array.isArray(query) ? query : [query],
+            rule_type_ids: ruleTypeIds,
+          });
+          return http.post(`${INTERNAL_BASE_ALERTING_API_PATH}/alerts/_bulk_untrack_by_query`, {
+            body,
+          });
+        } catch (e) {
+          throw new Error(`Unable to parse bulk untrack by query params: ${e}`);
+        }
+      },
       onError: () => {
         toasts.addDanger(
           i18n.translate('xpack.triggersActionsUI.alertsTable.untrackByQuery.failedMessage', {
@@ -60,6 +63,7 @@ export const useBulkUntrackAlertsByQuery = ({
           })
         );
       },
-    }
+    },
+    queryClient ?? alertingQueryClient
   );
 };

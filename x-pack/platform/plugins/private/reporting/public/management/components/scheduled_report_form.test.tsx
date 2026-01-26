@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, screen, waitFor, within } from '@testing-library/react';
@@ -14,7 +15,6 @@ import { mockScheduledReports } from '../../../common/test/fixtures';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import type { ScheduledReportFormProps } from './scheduled_report_form';
 import { ScheduledReportForm } from './scheduled_report_form';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { getReportingHealth } from '../apis/get_reporting_health';
 import { useGetUserProfileQuery } from '../hooks/use_get_user_profile_query';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
@@ -22,6 +22,7 @@ import userEvent from '@testing-library/user-event';
 import moment from 'moment';
 import * as i18n from '../translations';
 import { transformScheduledReport } from '../utils';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 jest.mock('@kbn/kibana-react-plugin/public');
 jest.mock('@kbn/reporting-public', () => ({
@@ -52,14 +53,6 @@ describe('ScheduledReportForm', () => {
       validateEmailAddresses: mockValidateEmailAddresses,
     },
   };
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-        cacheTime: 0,
-      },
-    },
-  });
 
   const defaultProps: Pick<
     ScheduledReportFormProps,
@@ -71,10 +64,12 @@ describe('ScheduledReportForm', () => {
     onSubmitForm,
   };
 
-  const renderWithProviders = (childComponent: React.ReactElement) => {
-    return render(
+  const { queryClient, provider: TestQueryClientProvider } = createTestResponseOpsQueryClient();
+
+  const wrapper = ({ children }: PropsWithChildren) => {
+    return (
       <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>{childComponent}</QueryClientProvider>
+        <TestQueryClientProvider>{children}</TestQueryClientProvider>
       </IntlProvider>
     );
   };
@@ -121,7 +116,7 @@ describe('ScheduledReportForm', () => {
   });
 
   it('renders correctly', async () => {
-    renderWithProviders(<ScheduledReportForm {...defaultProps} />);
+    render(<ScheduledReportForm {...defaultProps} />, { wrapper });
 
     expect(await screen.findByTestId('scheduleExportForm')).toBeInTheDocument();
     expect(screen.getByText(i18n.SCHEDULED_REPORT_FORM_DETAILS_SECTION_TITLE)).toBeInTheDocument();
@@ -130,15 +125,17 @@ describe('ScheduledReportForm', () => {
 
   it('calls onSubmit correctly', async () => {
     user = userEvent.setup({ delay: null });
-    renderWithProviders(
+    render(
       <ScheduledReportForm
         {...defaultProps}
         availableReportTypes={[{ label: 'PDF', id: 'printablePdfV2' }]}
-      />
+      />,
+      { wrapper }
     );
 
     const submitButton = await screen.findByTestId('scheduleExportSubmitButton');
 
+    await waitFor(() => expect(submitButton).toBeEnabled());
     await user.click(submitButton);
 
     await waitFor(() => {
@@ -170,7 +167,7 @@ describe('ScheduledReportForm', () => {
         },
       });
 
-      renderWithProviders(<ScheduledReportForm {...defaultProps} />);
+      render(<ScheduledReportForm {...defaultProps} />, { wrapper });
 
       const toggle = await screen.findByText('Send by email');
       await user.click(toggle);
@@ -188,7 +185,7 @@ describe('ScheduledReportForm', () => {
 
   it('shows cc and bcc fields if they have a value', async () => {
     user = userEvent.setup({ delay: null });
-    renderWithProviders(
+    render(
       <ScheduledReportForm
         {...defaultProps}
         editMode
@@ -199,7 +196,8 @@ describe('ScheduledReportForm', () => {
           emailCcRecipients: ['cc@email.com'],
           emailBccRecipients: ['bccemail.com'],
         }}
-      />
+      />,
+      { wrapper }
     );
 
     // Wait for email fields to be rendered
@@ -210,7 +208,7 @@ describe('ScheduledReportForm', () => {
 
   it("hides cc and bcc fields if they don't have a value", async () => {
     user = userEvent.setup({ delay: null });
-    renderWithProviders(
+    render(
       <ScheduledReportForm
         {...defaultProps}
         editMode
@@ -219,7 +217,8 @@ describe('ScheduledReportForm', () => {
           sendByEmail: true,
           emailRecipients: ['to@email.com'],
         }}
-      />
+      />,
+      { wrapper }
     );
 
     // Wait for email fields to be rendered
@@ -230,19 +229,20 @@ describe('ScheduledReportForm', () => {
 
   describe('when in edit mode', () => {
     it('disables report type', async () => {
-      renderWithProviders(<ScheduledReportForm {...defaultProps} editMode />);
+      render(<ScheduledReportForm {...defaultProps} editMode />, { wrapper });
 
       expect(await screen.findByTestId('reportTypeIdSelect')).toBeDisabled();
     });
 
     it('calls onSubmit correctly', async () => {
       user = userEvent.setup({ delay: null });
-      renderWithProviders(
+      render(
         <ScheduledReportForm
           {...defaultProps}
           editMode
           availableReportTypes={[{ label: 'PDF', id: 'printablePdfV2' }]}
-        />
+        />,
+        { wrapper }
       );
 
       const titleInput = await screen.findByTestId('reportTitleInput');
@@ -273,31 +273,31 @@ describe('ScheduledReportForm', () => {
 
   describe('when in readonly mode', () => {
     it('disables title', async () => {
-      renderWithProviders(<ScheduledReportForm {...defaultProps} readOnly />);
+      render(<ScheduledReportForm {...defaultProps} readOnly />, { wrapper });
 
       expect(await screen.findByTestId('reportTitleInput')).toHaveAttribute('readonly');
     });
 
     it('disables report type', async () => {
-      renderWithProviders(<ScheduledReportForm {...defaultProps} readOnly />);
+      render(<ScheduledReportForm {...defaultProps} readOnly />, { wrapper });
 
       expect(await screen.findByTestId('reportTypeIdSelect')).toBeDisabled();
     });
 
     it('disables date picker', async () => {
-      renderWithProviders(<ScheduledReportForm {...defaultProps} readOnly />);
+      render(<ScheduledReportForm {...defaultProps} readOnly />, { wrapper });
 
       expect(await screen.findByTestId('startDatePicker-input')).toHaveAttribute('readonly');
     });
 
     it('disables schedule', async () => {
-      renderWithProviders(<ScheduledReportForm {...defaultProps} readOnly />);
+      render(<ScheduledReportForm {...defaultProps} readOnly />, { wrapper });
 
       expect(await screen.findByTestId('recurringScheduleRepeatSelect')).toBeDisabled();
     });
 
     it('disables all email fields', async () => {
-      renderWithProviders(
+      render(
         <ScheduledReportForm
           {...defaultProps}
           readOnly
@@ -308,7 +308,8 @@ describe('ScheduledReportForm', () => {
             emailCcRecipients: ['cc@email.com'],
             emailBccRecipients: ['bccemail.com'],
           }}
-        />
+        />,
+        { wrapper }
       );
 
       expect(await screen.findByTestId('sendByEmailToggle')).toBeDisabled();
@@ -320,7 +321,7 @@ describe('ScheduledReportForm', () => {
     });
 
     it('disables submit button', async () => {
-      renderWithProviders(<ScheduledReportForm {...defaultProps} readOnly />);
+      render(<ScheduledReportForm {...defaultProps} readOnly />, { wrapper });
 
       expect(await screen.findByTestId('scheduleExportSubmitButton')).toBeDisabled();
     });
@@ -329,7 +330,7 @@ describe('ScheduledReportForm', () => {
   describe('validation', () => {
     it('shows validation error when title is empty', async () => {
       user = userEvent.setup({ delay: null });
-      renderWithProviders(<ScheduledReportForm {...defaultProps} />);
+      render(<ScheduledReportForm {...defaultProps} />, { wrapper });
 
       const titleInput = await screen.findByTestId('reportTitleInput');
       await user.clear(titleInput);
@@ -344,12 +345,13 @@ describe('ScheduledReportForm', () => {
 
     it('does not throw error for previous start date when it is not updated in edit mode', async () => {
       user = userEvent.setup();
-      renderWithProviders(
+      render(
         <ScheduledReportForm
           {...defaultProps}
           editMode
           availableReportTypes={[{ id: 'printablePdfV2', label: 'PDF' }]}
-        />
+        />,
+        { wrapper }
       );
 
       const submitButton = await screen.findByTestId('scheduleExportSubmitButton');

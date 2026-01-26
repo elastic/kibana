@@ -47,7 +47,7 @@ describe('AlertDelete Modal', () => {
         retry: false,
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
-        cacheTime: 0,
+        gcTime: 0,
       },
     },
   });
@@ -351,15 +351,8 @@ describe('AlertDelete Modal Error Handling', () => {
         retry: false,
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
-        cacheTime: 0,
+        gcTime: 0,
       },
-    },
-    logger: {
-      // eslint-disable-next-line no-console
-      log: console.log,
-      // eslint-disable-next-line no-console
-      warn: console.warn,
-      error: () => {},
     },
   });
 

@@ -6,8 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useQuery } from '@kbn/react-query';
+import { keepPreviousData, useQuery } from '@kbn/react-query';
 import { RuleExecutionStatusValues, RuleLastRunOutcomeValues } from '@kbn/alerting-plugin/common';
+import type { ResponseOpsQueryMeta } from '@kbn/response-ops-react-query/types';
 import type { RulesListFilters } from '../../types';
 import { loadRuleAggregationsWithKueryFilter } from '../lib/rule_api/aggregate_kuery_filter';
 import { useKibana } from '../../common/lib/kibana';
@@ -32,11 +33,7 @@ export interface UseLoadRuleAggregationsQueryProps {
 
 export const useLoadRuleAggregationsQuery = (props: UseLoadRuleAggregationsQueryProps) => {
   const { filters, enabled, refresh, ruleTypeIds, consumers } = props;
-
-  const {
-    http,
-    notifications: { toasts },
-  } = useKibana().services;
+  const { http } = useKibana().services;
 
   const internalLoadRuleAggregations = () => {
     return loadRuleAggregationsWithKueryFilter({
@@ -50,17 +47,6 @@ export const useLoadRuleAggregationsQuery = (props: UseLoadRuleAggregationsQuery
       ruleTypeIds,
       consumers,
     });
-  };
-
-  const onErrorFn = () => {
-    toasts.addDanger(
-      i18n.translate(
-        'xpack.triggersActionsUI.sections.rulesList.unableToLoadRuleStatusInfoMessage',
-        {
-          defaultMessage: 'Unable to load rule status info',
-        }
-      )
-    );
   };
 
   const { data, refetch, isLoading, isFetching } = useQuery({
@@ -78,11 +64,21 @@ export const useLoadRuleAggregationsQuery = (props: UseLoadRuleAggregationsQuery
       },
     ],
     queryFn: internalLoadRuleAggregations,
-    onError: onErrorFn,
     enabled,
-    keepPreviousData: true,
-    cacheTime: 0,
+    placeholderData: keepPreviousData,
+    gcTime: 0,
     refetchOnWindowFocus: false,
+    meta: {
+      getErrorToast: () => ({
+        type: 'danger',
+        title: i18n.translate(
+          'xpack.triggersActionsUI.sections.rulesList.unableToLoadRuleStatusInfoMessage',
+          {
+            defaultMessage: 'Unable to load rule status info',
+          }
+        ),
+      }),
+    } satisfies ResponseOpsQueryMeta,
   });
 
   const aggregation = data

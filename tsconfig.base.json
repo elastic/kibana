@@ -1796,6 +1796,8 @@
       "@kbn/response-ops-alerts-table/*": ["src/platform/packages/shared/response-ops/alerts-table/*"],
       "@kbn/response-ops-form-generator": ["src/platform/packages/shared/response-ops/form-generator"],
       "@kbn/response-ops-form-generator/*": ["src/platform/packages/shared/response-ops/form-generator/*"],
+      "@kbn/response-ops-react-query": ["src/platform/packages/shared/response-ops/react-query"],
+      "@kbn/response-ops-react-query/*": ["src/platform/packages/shared/response-ops/react-query/*"],
       "@kbn/response-ops-recurring-schedule-form": ["src/platform/packages/shared/response-ops/recurring-schedule-form"],
       "@kbn/response-ops-recurring-schedule-form/*": ["src/platform/packages/shared/response-ops/recurring-schedule-form/*"],
       "@kbn/response-ops-retry-service": ["x-pack/platform/packages/shared/response-ops/retry-service"],

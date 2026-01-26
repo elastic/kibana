@@ -10,8 +10,8 @@
 import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useInfiniteQuery } from '@kbn/react-query';
-import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { SetOptional } from 'type-fest';
+import type { ResponseOpsQueryMeta } from '@kbn/response-ops-react-query/types';
 import type { GetRuleTagsParams, GetRuleTagsResponse } from '../apis/get_rule_tags';
 import { getRuleTags } from '../apis/get_rule_tags';
 import { queryKeys } from '../query_keys';
@@ -20,12 +20,11 @@ interface UseGetRuleTagsQueryParams extends SetOptional<GetRuleTagsParams, 'page
   // Params
   refresh?: Date;
   enabled: boolean;
-
-  // Services
-  toasts: ToastsStart;
 }
 
 const EMPTY_TAGS: string[] = [];
+
+type PageParam = Pick<GetRuleTagsParams, 'page' | 'perPage'>;
 
 export const getKey = queryKeys.getRuleTags;
 
@@ -36,12 +35,11 @@ export function useGetRuleTagsQuery({
   refresh,
   search,
   ruleTypeIds,
-  perPage,
   page = 1,
+  perPage = 50,
   http,
-  toasts,
 }: UseGetRuleTagsQueryParams) {
-  const queryFn = ({ pageParam }: { pageParam?: GetRuleTagsParams }) =>
+  const queryFn = ({ pageParam }: { pageParam?: PageParam }) =>
     getRuleTags({
       http,
       perPage: pageParam?.perPage ?? perPage,
@@ -50,15 +48,7 @@ export function useGetRuleTagsQuery({
       ruleTypeIds,
     });
 
-  const onErrorFn = () => {
-    toasts.addDanger(
-      i18n.translate('responseOpsRulesApis.unableToLoadRuleTags', {
-        defaultMessage: 'Unable to load rule tags',
-      })
-    );
-  };
-
-  const getNextPageParam = (lastPage: GetRuleTagsResponse) => {
+  const getNextPageParam = (lastPage: GetRuleTagsResponse): PageParam | undefined => {
     const totalPages = Math.max(1, Math.ceil(lastPage.total / lastPage.perPage));
     if (totalPages === lastPage.page) {
       return;
@@ -87,10 +77,18 @@ export function useGetRuleTagsQuery({
       refresh,
     }),
     queryFn,
-    onError: onErrorFn,
     enabled,
+    initialPageParam: { page, perPage },
     getNextPageParam,
     refetchOnWindowFocus: false,
+    meta: {
+      getErrorToast: () => ({
+        type: 'danger',
+        title: i18n.translate('responseOpsRulesApis.unableToLoadRuleTags', {
+          defaultMessage: 'Unable to load rule tags',
+        }),
+      }),
+    } satisfies ResponseOpsQueryMeta,
   });
 
   const tags = useMemo(() => {

@@ -40,7 +40,7 @@ describe('AlertDeleteRuleSettingsSection', () => {
         retry: false,
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
-        cacheTime: 0,
+        gcTime: 0,
       },
     },
   });

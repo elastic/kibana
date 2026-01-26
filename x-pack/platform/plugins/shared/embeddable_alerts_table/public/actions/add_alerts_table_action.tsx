@@ -12,13 +12,14 @@ import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { QueryClient } from '@kbn/react-query';
 import { ADD_ALERTS_TABLE_ACTION_ID, EMBEDDABLE_ALERTS_TABLE_ID } from '../constants';
 import { ADD_ALERTS_TABLE_ACTION_LABEL } from '../translations';
 import { getInternalRuleTypesWithCache } from '../utils/get_internal_rule_types_with_cache';
 
-const checkRuleTypesPermissions = async (http: CoreStart['http']) => {
+const checkRuleTypesPermissions = async (http: CoreStart['http'], queryClient: QueryClient) => {
   try {
-    const ruleTypes = await getInternalRuleTypesWithCache(http);
+    const ruleTypes = await getInternalRuleTypesWithCache(http, queryClient);
     // If the user can access at least one rule type (with any authorizedConsumer, in any app) then
     // they can create alerts visualizations
     return Boolean(ruleTypes.length);
@@ -28,7 +29,8 @@ const checkRuleTypesPermissions = async (http: CoreStart['http']) => {
 };
 
 export const getAddAlertsTableAction = (
-  coreServices: CoreStart
+  coreServices: CoreStart,
+  queryClient: QueryClient
 ): ActionDefinition<EmbeddableApiContext> => {
   const { http } = coreServices;
   return {
@@ -36,7 +38,7 @@ export const getAddAlertsTableAction = (
     grouping: [ADD_PANEL_VISUALIZATION_GROUP],
     getIconType: () => 'bell',
     isCompatible: async ({ embeddable }) => {
-      const hasAccessToAnyRuleTypes = await checkRuleTypesPermissions(http);
+      const hasAccessToAnyRuleTypes = await checkRuleTypesPermissions(http, queryClient);
       return apiIsPresentationContainer(embeddable) && hasAccessToAnyRuleTypes;
     },
     execute: async ({ embeddable }) => {

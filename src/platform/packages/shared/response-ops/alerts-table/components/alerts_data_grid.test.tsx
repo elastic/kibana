@@ -17,10 +17,7 @@ import type { AlertsDataGridProps, BulkActionsState } from '../types';
 import type { AdditionalContext, RenderContext } from '../types';
 import type { EuiDataGridColumnCellAction } from '@elastic/eui';
 import { EuiButton, EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { bulkActionsReducer } from '../reducers/bulk_actions_reducer';
 import { getJsDomPerformanceFix } from '../utils/test';
 import { useCaseViewNavigation } from '../hooks/use_case_view_navigation';
@@ -41,6 +38,7 @@ import {
 } from '../constants';
 import { useIndividualTagsActionContext } from '../contexts/individual_tags_action_context';
 import { useTagsAction } from './tags/use_tags_action';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 jest.mock('../hooks/use_case_view_navigation');
 jest.mock('./tags/use_tags_action');
@@ -62,8 +60,6 @@ export type BaseAlertsDataGridProps = AlertsDataGridProps;
 export type TestAlertsDataGridProps = Partial<Omit<BaseAlertsDataGridProps, 'renderContext'>> & {
   renderContext?: Partial<RenderContext<AdditionalContext>>;
 };
-
-const queryClient = new QueryClient(testQueryClientConfig);
 
 export const mockDataGridProps: Partial<BaseAlertsDataGridProps> = {
   pageSizeOptions: [1, 10, 20, 50, 100],
@@ -103,6 +99,7 @@ export const mockDataGridProps: Partial<BaseAlertsDataGridProps> = {
 describe('AlertsDataGrid', () => {
   const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
   useCaseViewNavigationMock.mockReturnValue({ navigateToCaseView: jest.fn() });
+  const { provider: TestQueryClientProvider } = createTestResponseOpsQueryClient();
 
   const TestComponent: React.FunctionComponent<
     Omit<TestAlertsDataGridProps, 'renderContext'> & {
@@ -125,11 +122,11 @@ describe('AlertsDataGrid', () => {
 
     return (
       <AlertsTableContextProvider value={renderContext}>
-        <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
+        <TestQueryClientProvider>
           <IntlProvider locale="en">
             <AlertsDataGrid {...({ ...props, renderContext } as BaseAlertsDataGridProps)} />
           </IntlProvider>
-        </QueryClientProvider>
+        </TestQueryClientProvider>
       </AlertsTableContextProvider>
     );
   };

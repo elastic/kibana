@@ -17,6 +17,7 @@ import { getAlertsTableEmbeddableFactory } from './alerts_table_embeddable_facto
 import { PERSISTED_TABLE_CONFIG_KEY_PREFIX } from '../constants';
 import type { InternalRuleType } from '@kbn/response-ops-rules-apis/apis/get_internal_rule_types';
 import { getInternalRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_internal_rule_types';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 const core = coreMock.createStart();
 const mockPresentationContainer = getMockPresentationContainer();
@@ -35,13 +36,16 @@ Object.defineProperty(window, 'localStorage', {
   writable: true,
 });
 
+const { queryClient } = createTestResponseOpsQueryClient();
+
 const UUID = 'test-uuid';
 const TABLE_ID = `${PERSISTED_TABLE_CONFIG_KEY_PREFIX}-${UUID}`;
 
 describe('getEmbeddableAlertsTableFactory', () => {
   const factory = getAlertsTableEmbeddableFactory(
     core,
-    {} as EmbeddableAlertsTablePublicStartDependencies
+    {} as EmbeddableAlertsTablePublicStartDependencies,
+    queryClient
   );
   const embeddableParams: Parameters<typeof factory.buildEmbeddable>[0] = {
     initialState: {

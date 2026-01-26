@@ -49,7 +49,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: false,
-      cacheTime: 0,
+      gcTime: 0,
     },
   },
 });
@@ -483,6 +483,7 @@ describe('rules_settings_flyout', () => {
       expect(screen.queryByTestId('rulesSettingsFlyout')).not.toBe(null);
     });
 
+    expect(await result.findByTestId('alert-delete-open-modal-button')).toBeInTheDocument();
     expect(result.getByTestId('alert-delete-open-modal-button')).toBeDisabled();
   });
 

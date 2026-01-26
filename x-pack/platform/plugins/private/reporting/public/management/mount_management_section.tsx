@@ -17,11 +17,11 @@ import type { ClientConfigType, ReportingAPIClient, KibanaContext } from '@kbn/r
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { InternalApiClientProvider } from '@kbn/reporting-public';
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
-import { QueryClientProvider } from '@kbn/react-query';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { Redirect } from 'react-router-dom';
-import { queryClient } from '../query_client';
+import { ResponseOpsQueryClientProvider } from '@kbn/response-ops-react-query/providers/response_ops_query_client_provider';
+import type { QueryClient } from '@kbn/react-query';
 import type { Section } from '../constants';
 import { PolicyStatusContextProvider } from '../lib/default_status_context';
 
@@ -34,6 +34,7 @@ export async function mountManagementSection({
   shareService,
   config,
   apiClient,
+  queryClient,
   params,
   actionsService,
   notificationsService,
@@ -44,6 +45,7 @@ export async function mountManagementSection({
   shareService: SharePluginStart;
   config: ClientConfigType;
   apiClient: ReportingAPIClient;
+  queryClient: QueryClient;
   params: ManagementAppMountParams;
   actionsService: ActionsPublicPluginSetup;
   notificationsService: NotificationsStart;
@@ -71,7 +73,7 @@ export async function mountManagementSection({
       <KibanaContextProvider services={services}>
         <InternalApiClientProvider apiClient={apiClient} http={coreStart.http}>
           <PolicyStatusContextProvider config={config}>
-            <QueryClientProvider client={queryClient}>
+            <ResponseOpsQueryClientProvider queryClient={queryClient}>
               <Router history={history}>
                 <Routes>
                   <Route
@@ -87,7 +89,7 @@ export async function mountManagementSection({
                   <Redirect from={'/'} to="/exports" />
                 </Routes>
               </Router>
-            </QueryClientProvider>
+            </ResponseOpsQueryClientProvider>
           </PolicyStatusContextProvider>
         </InternalApiClientProvider>
       </KibanaContextProvider>

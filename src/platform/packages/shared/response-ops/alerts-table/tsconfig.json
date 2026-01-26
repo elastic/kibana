@@ -48,5 +48,6 @@
     "@kbn/field-types",
     "@kbn/react-query",
     "@kbn/maintenance-windows-plugin",
+    "@kbn/response-ops-react-query",
   ]
 }

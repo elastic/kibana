@@ -8,31 +8,28 @@
 import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { getRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_rule_types';
+import type { ResponseOpsQueryMeta } from '@kbn/response-ops-react-query/types';
 import { useKibana } from '../utils/kibana_react';
 
 export const useGetRuleTypes = () => {
-  const {
-    http,
-    notifications: { toasts },
-  } = useKibana().services;
+  const { http } = useKibana().services;
 
   const queryFn = () => {
     return getRuleTypes({ http });
   };
 
-  const onError = () => {
-    toasts.addDanger(
-      i18n.translate('xpack.maintenanceWindows.hooks.useGetRuleTypes.error', {
-        defaultMessage: 'Unable to load rule types.',
-      })
-    );
-  };
-
   const { isLoading, isFetching, data } = useQuery({
     queryKey: ['useGetRuleTypes'],
     queryFn,
-    onError,
     refetchOnWindowFocus: false,
+    meta: {
+      getErrorToast: () => ({
+        type: 'danger',
+        message: i18n.translate('xpack.maintenanceWindows.hooks.useGetRuleTypes.error', {
+          defaultMessage: 'Unable to load rule types.',
+        }),
+      }),
+    } satisfies ResponseOpsQueryMeta,
   });
 
   return {

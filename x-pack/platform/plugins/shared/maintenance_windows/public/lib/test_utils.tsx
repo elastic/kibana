@@ -8,7 +8,8 @@
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { QueryClient } from '@kbn/react-query';
+import {} from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
 import { render as reactRender } from '@testing-library/react';
@@ -16,8 +17,7 @@ import type { Capabilities, CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { ILicense } from '@kbn/licensing-types';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-
-/* eslint-disable no-console */
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
@@ -42,22 +42,7 @@ export const createAppMockRenderer = ({
 }: AppMockRendererArgs = {}): AppMockRenderer => {
   const licensingPluginMock = licensingMock.createStart();
 
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-      },
-    },
-    /**
-     * React query prints the errors in the console even though
-     * all tests are passings. We turn them off for testing.
-     */
-    logger: {
-      log: console.log,
-      warn: console.warn,
-      error: () => {},
-    },
-  });
+  const { queryClient, provider: TestQueryClientProvider } = createTestResponseOpsQueryClient();
 
   const mockedSetBadge = jest.fn();
   const core = coreMock.createStart();
@@ -79,10 +64,10 @@ export const createAppMockRenderer = ({
       setBadge: mockedSetBadge,
     },
   };
-  const AppWrapper = React.memo<PropsWithChildren<unknown>>(({ children }) =>
+  const AppWrapper = React.memo<PropsWithChildren>(({ children }) =>
     core.rendering.addContext(
       <KibanaContextProvider services={services}>
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        <TestQueryClientProvider>{children}</TestQueryClientProvider>
       </KibanaContextProvider>
     )
   );

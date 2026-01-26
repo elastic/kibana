@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createContext } from 'react';
-import type { QueryClient } from '@kbn/react-query';
-
-export const AlertsQueryContext = createContext<QueryClient | undefined>(undefined);
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/response-ops/react-query'],
+  setupFilesAfterEnv: [
+    '<rootDir>/src/platform/packages/shared/response-ops/react-query/setup_tests.ts',
+  ],
+};

@@ -5,28 +5,24 @@
  * 2.0.
  */
 
-import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import '@kbn/react-query/mock';
 import * as ReactQuery from '@kbn/react-query';
 import { useGetUserProfileQuery } from './use_get_user_profile_query';
 import type { UserProfileService } from '@kbn/core/public';
-import type { PropsWithChildren } from 'react';
-import { testQueryClient } from '../test_utils/test_query_client';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
-const { QueryClientProvider, useQuery } = ReactQuery;
+const { useQuery } = ReactQuery;
 
 const mockUserProfileService = {
   getCurrent: jest.fn(),
 };
 
-const wrapper = ({ children }: PropsWithChildren) => (
-  <QueryClientProvider client={testQueryClient}>{children}</QueryClientProvider>
-);
+const { queryClient, provider: wrapper } = createTestResponseOpsQueryClient();
 
 describe('useGetUserProfileQuery', () => {
   beforeEach(() => {
-    testQueryClient.clear();
+    queryClient.clear();
     jest.clearAllMocks();
   });
 
@@ -42,10 +38,12 @@ describe('useGetUserProfileQuery', () => {
       { wrapper }
     );
 
-    await waitFor(() => result.current.isSuccess);
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBeTruthy();
+      expect(result.current.data).toEqual(mockProfile);
+    });
 
     expect(mockUserProfileService.getCurrent).toHaveBeenCalled();
-    expect(result.current.data).toEqual(mockProfile);
   });
 
   it('should not enable the query if userProfileService is not provided', async () => {

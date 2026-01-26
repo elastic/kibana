@@ -8,13 +8,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { QueryClient } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
-import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
-import type { QueryOptionsOverrides } from '@kbn/alerts-ui-shared/src/common/types/tanstack_query_utility_types';
+import type {
+  ResponseOpsQueryMeta,
+  QueryOptionsOverrides,
+} from '@kbn/response-ops-react-query/types';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
+import { useResponseOpsQueryClient } from '@kbn/response-ops-react-query/hooks/use_response_ops_query_client';
 import { queryKeys } from '../query_keys';
-import type { MutedAlerts, ServerError } from '../types';
+import type { MutedAlerts } from '../types';
 import type { GetMutedAlertsInstancesByRuleParams } from '../apis/get_muted_alerts_instances_by_rule';
 import { getMutedAlertsInstancesByRule } from '../apis/get_muted_alerts_instances_by_rule';
 
@@ -39,21 +43,30 @@ export interface UseGetMutedAlertsQueryParams {
 export const getKey = queryKeys.getMutedAlerts;
 
 export const useGetMutedAlertsQuery = (
-  { ruleIds, http, notifications: { toasts } }: UseGetMutedAlertsQueryParams,
-  { enabled }: QueryOptionsOverrides<typeof getMutedAlerts> = {}
+  { ruleIds, http }: UseGetMutedAlertsQueryParams,
+  {
+    enabled,
+    queryClient,
+  }: QueryOptionsOverrides<typeof getMutedAlerts> & { queryClient?: QueryClient } = {}
 ) => {
-  return useQuery({
-    context: AlertsQueryContext,
-    queryKey: getKey(ruleIds),
-    queryFn: ({ signal }) => getMutedAlerts({ http, signal, ruleIds }),
-    onError: (error: ServerError) => {
-      if (error.name !== 'AbortError') {
-        toasts.addError(error.body?.message ? new Error(error.body.message) : error, {
-          title: ERROR_TITLE,
-        });
-      }
+  const alertingQueryClient = useResponseOpsQueryClient();
+  return useQuery(
+    {
+      queryKey: getKey(ruleIds),
+      queryFn: ({ signal }) => getMutedAlerts({ http, signal, ruleIds }),
+      enabled: ruleIds.length > 0 && enabled !== false,
+      refetchOnWindowFocus: false,
+      meta: {
+        getErrorToast: (error) => {
+          if (error.name !== 'AbortError') {
+            return {
+              type: 'error',
+              title: ERROR_TITLE,
+            };
+          }
+        },
+      } satisfies ResponseOpsQueryMeta,
     },
-    enabled: ruleIds.length > 0 && enabled !== false,
-    refetchOnWindowFocus: false,
-  });
+    queryClient ?? alertingQueryClient
+  );
 };

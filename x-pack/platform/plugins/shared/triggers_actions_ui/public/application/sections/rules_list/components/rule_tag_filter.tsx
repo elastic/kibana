@@ -170,10 +170,7 @@ export const RuleTagFilter = memo((props: RuleTagFilterProps) => {
   } = props;
 
   const {
-    services: {
-      http,
-      notifications: { toasts },
-    },
+    services: { http },
   } = useKibana();
   const observerRef = useRef<IntersectionObserver>();
   const [searchText, setSearchText] = useState<string>('');
@@ -186,7 +183,6 @@ export const RuleTagFilter = memo((props: RuleTagFilterProps) => {
     fetchNextPage,
   } = useGetRuleTagsQuery({
     http,
-    toasts,
     enabled: canLoadRules,
     refresh,
     search: searchText,

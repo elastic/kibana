@@ -79,13 +79,6 @@ describe('useAlertDeleteSchedule with muted console.errors', () => {
         retry: false,
       },
     },
-    logger: {
-      // eslint-disable-next-line no-console
-      log: console.log,
-      // eslint-disable-next-line no-console
-      warn: console.warn,
-      error: () => {},
-    },
   });
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (

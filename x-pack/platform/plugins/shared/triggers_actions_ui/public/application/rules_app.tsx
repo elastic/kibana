@@ -36,13 +36,13 @@ import {
   editRuleRoute,
   createRuleFromTemplateRoute,
 } from '@kbn/rule-data-utils';
-import { QueryClientProvider } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { ResponseOpsQueryClientProvider } from '@kbn/response-ops-react-query/providers/response_ops_query_client_provider';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import type { ActionTypeRegistryContract, RuleTypeRegistryContract } from '../types';
 import type { Section } from './constants';
@@ -52,7 +52,6 @@ import { setDataViewsService } from '../common/lib/data_apis';
 import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
 import { ConnectorProvider } from './context/connector_context';
 import { ALERTS_PAGE_ID, CONNECTORS_PLUGIN_ID } from '../common/constants';
-import { queryClient } from './query_client';
 
 const TriggersActionsUIHome = lazy(() => import('./home'));
 const RuleDetailsRoute = lazy(
@@ -108,9 +107,9 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
   return deps.rendering.addContext(
     <KibanaContextProvider services={{ ...deps }}>
       <Router history={deps.history}>
-        <QueryClientProvider client={queryClient}>
+        <ResponseOpsQueryClientProvider>
           <AppWithoutRouter sectionsRegex={sectionsRegex} />
-        </QueryClientProvider>
+        </ResponseOpsQueryClientProvider>
       </Router>
     </KibanaContextProvider>
   );

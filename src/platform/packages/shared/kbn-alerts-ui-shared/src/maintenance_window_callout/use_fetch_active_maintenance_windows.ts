@@ -7,26 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UseQueryOptions } from '@kbn/react-query';
+import type { QueryClient, UseQueryOptions } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
-import type { KibanaServices } from './types';
+import type { ResponseOpsQueryMeta } from '@kbn/response-ops-react-query/types';
+import { useResponseOpsQueryClient } from '@kbn/response-ops-react-query/hooks/use_response_ops_query_client';
+import type { KibanaServices, MaintenanceWindow } from './types';
 import { fetchActiveMaintenanceWindows } from './api';
 
 export const useFetchActiveMaintenanceWindows = (
-  { http, notifications: { toasts } }: KibanaServices,
-  { enabled }: Pick<UseQueryOptions, 'enabled'>
+  { http }: KibanaServices,
+  {
+    enabled,
+    queryClient,
+  }: Pick<UseQueryOptions<MaintenanceWindow[]>, 'enabled'> & { queryClient?: QueryClient }
 ) => {
+  const alertingQueryClient = useResponseOpsQueryClient();
   return useQuery(
-    ['GET', INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH],
-    ({ signal }) => fetchActiveMaintenanceWindows(http, signal),
     {
+      queryKey: ['GET', INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH],
+      queryFn: ({ signal }) => fetchActiveMaintenanceWindows(http, signal),
+      initialData: undefined,
       enabled,
       refetchInterval: 60000,
-      onError: (error: Error) => {
-        toasts.addError(error, { title: FETCH_ERROR, toastMessage: FETCH_ERROR_DESCRIPTION });
-      },
-    }
+      meta: {
+        getErrorToast: () => ({
+          type: 'error',
+          title: FETCH_ERROR,
+          toastMessage: FETCH_ERROR_DESCRIPTION,
+        }),
+      } satisfies ResponseOpsQueryMeta,
+    },
+    queryClient ?? alertingQueryClient
   );
 };
 

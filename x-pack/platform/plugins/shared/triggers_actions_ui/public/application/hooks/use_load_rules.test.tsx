@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
 import { useLoadRulesQuery as useLoadRules } from './use_load_rules_query';
 import {
@@ -12,32 +11,35 @@ import {
   RuleExecutionStatusWarningReasons,
 } from '@kbn/alerting-plugin/common';
 import type { RuleStatus } from '../../types';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from '../../common/lib/kibana';
-import type { IToasts } from '@kbn/core-notifications-browser';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
+import type { DeepPartial } from '@kbn/utility-types';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../lib/rule_api/rules_kuery_filter', () => ({
   loadRulesWithKueryFilter: jest.fn(),
 }));
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const mockUseKibana = useKibana as unknown as jest.MockedFunction<
+  () => DeepPartial<ReturnType<typeof useKibana>>
+>;
+const notifications = notificationServiceMock.createStartContract();
+mockUseKibana.mockReturnValue({
+  services: {
+    notifications,
+  },
+});
 
 const { loadRulesWithKueryFilter } = jest.requireMock('../lib/rule_api/rules_kuery_filter');
 
 const onPage = jest.fn();
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-      cacheTime: 0,
-    },
+const { queryClient, provider: wrapper } = createTestResponseOpsQueryClient({
+  dependencies: {
+    notifications,
   },
 });
-const wrapper = ({ children }: { children: React.ReactNode }) => (
-  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-);
 
 const mockedRulesData = [
   {
@@ -250,9 +252,6 @@ const MOCK_RULE_DATA = {
 
 describe('useLoadRules', () => {
   beforeEach(() => {
-    useKibanaMock().services.notifications.toasts = {
-      addDanger: jest.fn(),
-    } as unknown as IToasts;
     loadRulesWithKueryFilter.mockResolvedValue(MOCK_RULE_DATA);
   });
   afterEach(() => {
@@ -429,9 +428,7 @@ describe('useLoadRules', () => {
 
     renderHook(() => useLoadRules(params), { wrapper });
 
-    await waitFor(() =>
-      expect(useKibanaMock().services.notifications.toasts.addDanger).toBeCalled()
-    );
+    await waitFor(() => expect(notifications.toasts.addDanger).toBeCalled());
   });
 
   describe('No data', () => {

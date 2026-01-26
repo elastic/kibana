@@ -40,15 +40,9 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   history,
 }) => {
   const [headerActions, setHeaderActions] = useState<React.ReactNode[] | undefined>();
-  const {
-    chrome,
-    setBreadcrumbs,
-    http,
-    notifications: { toasts },
-  } = useKibana().services;
+  const { chrome, setBreadcrumbs, http } = useKibana().services;
   const { authorizedToReadAnyRules } = useGetRuleTypesPermissions({
     http,
-    toasts,
     filteredRuleTypes: [],
   });
 

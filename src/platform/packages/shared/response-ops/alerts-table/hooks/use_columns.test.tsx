@@ -7,23 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import type { FunctionComponent } from 'react';
 import type { EuiDataGridColumn } from '@elastic/eui';
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { BrowserFields } from '@kbn/alerting-types';
-import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
-import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { useColumns } from './use_columns';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
-const queryClient = new QueryClient(testQueryClientConfig);
-
-const wrapper: FunctionComponent<React.PropsWithChildren<{}>> = ({ children }) => (
-  <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
-    {children}
-  </QueryClientProvider>
-);
+const { provider: wrapper } = createTestResponseOpsQueryClient();
 
 const alertsFields: BrowserFields = {
   kibana: {

@@ -4,37 +4,37 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
 import type { UseLoadRuleAggregationsQueryProps } from './use_load_rule_aggregations_query';
 import { useLoadRuleAggregationsQuery as useLoadRuleAggregations } from './use_load_rule_aggregations_query';
 import type { RuleStatus } from '../../types';
 import { useKibana } from '../../common/lib/kibana';
-import type { IToasts } from '@kbn/core-notifications-browser';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
+import { notificationServiceMock } from '@kbn/core/public/mocks';
+import type { DeepPartial } from '@kbn/utility-types';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../lib/rule_api/aggregate_kuery_filter', () => ({
   loadRuleAggregationsWithKueryFilter: jest.fn(),
 }));
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const mockUseKibana = useKibana as unknown as jest.MockedFunction<
+  () => DeepPartial<ReturnType<typeof useKibana>>
+>;
+const notifications = notificationServiceMock.createStartContract();
+mockUseKibana.mockReturnValue({
+  services: {
+    notifications,
+  },
+});
 
 const { loadRuleAggregationsWithKueryFilter } = jest.requireMock(
   '../lib/rule_api/aggregate_kuery_filter'
 );
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-      cacheTime: 0,
-    },
-  },
+const { queryClient, provider: wrapper } = createTestResponseOpsQueryClient({
+  dependencies: { notifications },
 });
-const wrapper = ({ children }: { children: React.ReactNode }) => (
-  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-);
 
 const MOCK_TAGS = ['a', 'b', 'c'];
 
@@ -47,10 +47,6 @@ const MOCK_AGGS = {
 
 describe('useLoadRuleAggregations', () => {
   beforeEach(() => {
-    useKibanaMock().services.notifications.toasts = {
-      addDanger: jest.fn(),
-    } as unknown as IToasts;
-
     loadRuleAggregationsWithKueryFilter.mockResolvedValue(MOCK_AGGS);
   });
 
@@ -161,8 +157,6 @@ describe('useLoadRuleAggregations', () => {
 
     renderHook(() => useLoadRuleAggregations(params), { wrapper });
 
-    await waitFor(() =>
-      expect(useKibanaMock().services.notifications.toasts.addDanger).toBeCalled()
-    );
+    await waitFor(() => expect(notifications.toasts.addDanger).toBeCalled());
   });
 });

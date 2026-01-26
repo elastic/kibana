@@ -7,36 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { ToastsStart } from '@kbn/core-notifications-browser';
 
 import { useGetAlertsGroupAggregationsQuery } from './use_get_alerts_group_aggregations_query';
 import { waitFor, renderHook } from '@testing-library/react';
 import { BASE_RAC_ALERTS_API_PATH } from '../constants';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-    },
+const mockNotifications = notificationServiceMock.createStartContract();
+
+const { provider: wrapper } = createTestResponseOpsQueryClient({
+  dependencies: {
+    notifications: mockNotifications,
   },
 });
-
-const wrapper = ({ children }: { children: React.ReactNode }) => (
-  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-);
 
 const mockHttp = {
   post: jest.fn(),
 };
 const http = mockHttp as unknown as HttpStart;
-
-const mockToasts = {
-  addDanger: jest.fn(),
-};
-const toasts = mockToasts as unknown as ToastsStart;
 
 const params = {
   ruleTypeIds: ['.es-query'],
@@ -56,13 +46,12 @@ describe('useAlertsGroupAggregationsQuery', () => {
         useGetAlertsGroupAggregationsQuery({
           params,
           enabled: true,
-          toasts,
           http,
         }),
       { wrapper }
     );
 
-    await waitFor(() => expect(mockToasts.addDanger).toHaveBeenCalled());
+    await waitFor(() => expect(mockNotifications.toasts.addDanger).toHaveBeenCalled());
   });
 
   test('calls API endpoint with the correct body', async () => {
@@ -71,7 +60,6 @@ describe('useAlertsGroupAggregationsQuery', () => {
         useGetAlertsGroupAggregationsQuery({
           params,
           enabled: true,
-          toasts,
           http,
         }),
       { wrapper }

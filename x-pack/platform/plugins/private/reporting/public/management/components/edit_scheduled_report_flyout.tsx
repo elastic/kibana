@@ -34,7 +34,7 @@ export const EditScheduledReportFlyout = ({
     notifications: { toasts },
   } = useKibana().services;
 
-  const { mutateAsync: updateScheduleReport, isLoading: isSubmitLoading } = useUpdateScheduleReport(
+  const { mutateAsync: updateScheduleReport, isPending: isSubmitLoading } = useUpdateScheduleReport(
     {
       http,
     }

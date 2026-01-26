@@ -78,7 +78,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
   const { http, docLinks, notifications, ruleTypeRegistry, fieldsMetadata, ...deps } = plugins;
   const { toasts } = notifications;
 
-  const { mutate, isLoading: isSaving } = useCreateRule({
+  const { mutate, isPending: isSaving } = useCreateRule({
     http,
     onSuccess: ({ name, id }) => {
       toasts.addSuccess(RULE_CREATE_SUCCESS_TEXT(name));

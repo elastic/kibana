@@ -8,7 +8,6 @@
 import React, { lazy } from 'react';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { render, unmountComponentAtNode } from 'react-dom';
-
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 
 import { setDataViewsService } from '../common/lib/data_apis';

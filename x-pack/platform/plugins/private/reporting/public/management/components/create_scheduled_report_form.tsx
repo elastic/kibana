@@ -53,7 +53,7 @@ export const CreateScheduledReportForm = ({
     [http.basePath]
   );
 
-  const { mutateAsync: createScheduledReport, isLoading: isSubmitLoading } = useScheduleReport({
+  const { mutateAsync: createScheduledReport, isPending: isSubmitLoading } = useScheduleReport({
     http,
   });
 

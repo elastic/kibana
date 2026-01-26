@@ -46,7 +46,6 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
     const {
       application: { capabilities, navigateToApp },
       http,
-      notifications: { toasts },
     } = useKibana().services;
 
     const [ruleType, setRuleType] = useState<RuleType>();
@@ -56,7 +55,6 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
       ruleTypesState: { data: ruleTypeIndex, isLoading: ruleTypesIsLoading },
     } = useGetRuleTypesPermissions({
       http,
-      toasts,
       filteredRuleTypes,
     });
     const ruleTypes = useMemo(() => [...ruleTypeIndex.values()], [ruleTypeIndex]);

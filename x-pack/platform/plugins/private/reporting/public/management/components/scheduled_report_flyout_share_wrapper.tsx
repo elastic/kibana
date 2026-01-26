@@ -12,10 +12,10 @@ import type { ReportingAPIClient } from '@kbn/reporting-public';
 import { useKibana } from '@kbn/reporting-public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ReportingSharingData } from '@kbn/reporting-public/share/share_context_menu';
-import { QueryClientProvider } from '@kbn/react-query';
 import { isEmpty } from 'lodash';
+import { ResponseOpsQueryClientProvider } from '@kbn/response-ops-react-query/providers/response_ops_query_client_provider';
+import type { QueryClient } from '@kbn/react-query';
 import { supportedReportTypes } from '../report_params';
-import { queryClient } from '../../query_client';
 import type { ReportingPublicPluginStartDependencies } from '../../plugin';
 import type { ReportTypeId } from '../../types';
 import * as i18n from '../translations';
@@ -23,6 +23,7 @@ import { CreateScheduledReportForm } from './create_scheduled_report_form';
 
 export interface ScheduledReportMenuItem {
   apiClient: ReportingAPIClient;
+  queryClient: QueryClient;
   services: ReportingPublicPluginStartDependencies;
   sharingData: ReportingSharingData;
   onClose: () => void;
@@ -30,6 +31,7 @@ export interface ScheduledReportMenuItem {
 
 export const ScheduledReportFlyoutShareWrapper = ({
   apiClient,
+  queryClient,
   services: reportingServices,
   sharingData,
   onClose,
@@ -81,7 +83,7 @@ export const ScheduledReportFlyoutShareWrapper = ({
 
   return (
     <KibanaContextProvider services={services}>
-      <QueryClientProvider client={queryClient}>
+      <ResponseOpsQueryClientProvider queryClient={queryClient}>
         <CreateScheduledReportForm
           apiClient={apiClient}
           objectType={objectType}
@@ -90,7 +92,7 @@ export const ScheduledReportFlyoutShareWrapper = ({
           scheduledReport={scheduledReport}
           onClose={onClose}
         />
-      </QueryClientProvider>
+      </ResponseOpsQueryClientProvider>
     </KibanaContextProvider>
   );
 };

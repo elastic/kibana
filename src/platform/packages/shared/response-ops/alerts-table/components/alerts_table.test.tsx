@@ -8,8 +8,8 @@
  */
 
 import React from 'react';
-import type { ReactElement } from 'react';
-import { act, render as rtlRender, screen, waitFor } from '@testing-library/react';
+import type { PropsWithChildren } from 'react';
+import { render, act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BehaviorSubject } from 'rxjs';
 import {
@@ -20,10 +20,8 @@ import {
 } from '@kbn/rule-data-utils';
 import type { Alert, LegacyField } from '@kbn/alerting-types';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { fetchAlertsFields } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_fields';
 import { searchAlerts } from '@kbn/alerts-ui-shared/src/common/apis/search_alerts/search_alerts';
-import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { getMutedAlertsInstancesByRule } from '@kbn/response-ops-alerts-apis/apis/get_muted_alerts_instances_by_rule';
 import { applicationServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
@@ -48,6 +46,7 @@ import { useLicense } from '../hooks/use_license';
 import { getJsDomPerformanceFix } from '../utils/test';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { defaultAlertsTableColumns } from '../configuration';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 // Search alerts mock
 jest.mock('@kbn/alerts-ui-shared/src/common/apis/search_alerts/search_alerts');
@@ -268,14 +267,13 @@ const mockStorageWrapper = {
   clear: jest.fn(() => mockStorageData.clear()),
 };
 
-const queryClient = new QueryClient(testQueryClientConfig);
+const { provider: TestQueryClientProvider } = createTestResponseOpsQueryClient();
 
-const render = (ui: ReactElement) =>
-  rtlRender(
-    <QueryClientProvider client={queryClient}>
-      <IntlProvider locale="en">{ui}</IntlProvider>
-    </QueryClientProvider>
-  );
+const wrapper = ({ children }: PropsWithChildren) => (
+  <IntlProvider locale="en">
+    <TestQueryClientProvider>{children}</TestQueryClientProvider>
+  </IntlProvider>
+);
 
 describe('AlertsTable', () => {
   const tableProps: AlertsTableProps = {
@@ -338,7 +336,7 @@ describe('AlertsTable', () => {
   describe('Columns', () => {
     describe('with no saved configuration', () => {
       it('should show the default columns if the columns prop is not set', async () => {
-        render(<AlertsTable {...tableProps} columns={undefined} />);
+        render(<AlertsTable {...tableProps} columns={undefined} />, { wrapper });
 
         for (const { id: columnId } of defaultAlertsTableColumns) {
           expect(await screen.findByTestId(`dataGridHeaderCell-${columnId}`)).toBeInTheDocument();
@@ -346,7 +344,7 @@ describe('AlertsTable', () => {
       });
 
       it('should show the columns defined in the columns prop', async () => {
-        render(<AlertsTable {...tableProps} />);
+        render(<AlertsTable {...tableProps} />, { wrapper });
 
         for (const { id: columnId } of columns) {
           expect(await screen.findByTestId(`dataGridHeaderCell-${columnId}`)).toBeInTheDocument();
@@ -361,7 +359,8 @@ describe('AlertsTable', () => {
             {...tableProps}
             columns={[{ id: testColumnId, displayAsText: 'Test' }]}
             visibleColumns={[testColumnId]}
-          />
+          />,
+          { wrapper }
         );
 
         expect(await screen.findByTestId(`dataGridHeaderCell-test-column`)).toBeInTheDocument();
@@ -400,7 +399,7 @@ describe('AlertsTable', () => {
           })
         );
 
-        render(<AlertsTable {...tableProps} />);
+        render(<AlertsTable {...tableProps} />, { wrapper });
 
         expect(await screen.findByTestId('dataGridHeaderCell-savedColumnId')).toBeInTheDocument();
         for (const { id: columnId } of defaultAlertsTableColumns) {
@@ -418,7 +417,7 @@ describe('AlertsTable', () => {
           })
         );
 
-        render(<AlertsTable {...tableProps} />);
+        render(<AlertsTable {...tableProps} />, { wrapper });
 
         expect(
           (await screen.findByTestId(`dataGridHeaderCell-${AlertsField.name}`)).textContent
@@ -446,12 +445,12 @@ describe('AlertsTable', () => {
     });
 
     it('should show the cases column', async () => {
-      render(<AlertsTable {...casesTableProps} />);
+      render(<AlertsTable {...casesTableProps} />, { wrapper });
       expect(await screen.findByText('Cases')).toBeInTheDocument();
     });
 
     it('should show the cases titles correctly', async () => {
-      render(<AlertsTable {...casesTableProps} />);
+      render(<AlertsTable {...casesTableProps} />, { wrapper });
       expect(await screen.findByText('Test case')).toBeInTheDocument();
       expect(await screen.findByText('Test case 2')).toBeInTheDocument();
     });
@@ -459,12 +458,12 @@ describe('AlertsTable', () => {
     it('should show the loading skeleton when fetching cases', async () => {
       mockBulkGetCases.mockResolvedValue({ cases: mockCases, errors: [] });
 
-      render(<AlertsTable {...casesTableProps} />);
+      render(<AlertsTable {...casesTableProps} />, { wrapper });
       expect((await screen.findAllByTestId('cases-cell-loading')).length).toBe(3);
     });
 
     it('should pass the correct case ids to useBulkGetCases', async () => {
-      render(<AlertsTable {...casesTableProps} />);
+      render(<AlertsTable {...casesTableProps} />, { wrapper });
 
       await waitFor(() => {
         expect(mockBulkGetCases).toHaveBeenCalledWith(
@@ -481,7 +480,7 @@ describe('AlertsTable', () => {
         alerts: [...mockSearchAlertsResponse.alerts, ...mockSearchAlertsResponse.alerts],
       });
 
-      render(<AlertsTable {...casesTableProps} />);
+      render(<AlertsTable {...casesTableProps} />, { wrapper });
 
       await waitFor(() => {
         expect(mockBulkGetCases).toHaveBeenCalledWith(
@@ -504,7 +503,7 @@ describe('AlertsTable', () => {
         ],
       });
 
-      render(<AlertsTable {...casesTableProps} />);
+      render(<AlertsTable {...casesTableProps} />, { wrapper });
 
       await waitFor(() => {
         expect(mockBulkGetCases).toHaveBeenCalledWith(
@@ -520,7 +519,7 @@ describe('AlertsTable', () => {
         .fn()
         .mockReturnValue({ create: false, read: false });
 
-      render(<AlertsTable {...casesTableProps} />);
+      render(<AlertsTable {...casesTableProps} />, { wrapper });
 
       await waitFor(() => {
         expect(mockBulkGetCases).not.toHaveBeenCalled();
@@ -540,7 +539,8 @@ describe('AlertsTable', () => {
               displayAsText: 'Name',
             },
           ]}
-        />
+        />,
+        { wrapper }
       );
       await waitFor(() => {
         expect(mockBulkGetCases).not.toHaveBeenCalled();
@@ -548,7 +548,7 @@ describe('AlertsTable', () => {
     });
 
     it('calls canUseCases with an empty array if the case configuration is not defined', async () => {
-      render(<AlertsTable {...casesTableProps} />);
+      render(<AlertsTable {...casesTableProps} />, { wrapper });
       expect(mockCaseService.helpers.canUseCases).toHaveBeenCalledWith([]);
     });
 
@@ -557,7 +557,8 @@ describe('AlertsTable', () => {
         <AlertsTable
           {...casesTableProps}
           casesConfiguration={{ featureId: 'test-feature-id', owner: ['cases'] }}
-        />
+        />,
+        { wrapper }
       );
       expect(mockCaseService.helpers.canUseCases).toHaveBeenCalledWith(['cases']);
     });
@@ -570,7 +571,8 @@ describe('AlertsTable', () => {
         <AlertsTable
           {...casesTableProps}
           casesConfiguration={{ featureId: 'test-feature-id', owner: ['cases'] }}
-        />
+        />,
+        { wrapper }
       );
 
       expect(CasesContextMock).toHaveBeenCalledWith(
@@ -591,7 +593,7 @@ describe('AlertsTable', () => {
       const CasesContextMock = jest.fn().mockReturnValue(null);
       mockCaseService.ui.getCasesContext = jest.fn().mockReturnValue(CasesContextMock);
 
-      render(<AlertsTable {...casesTableProps} />);
+      render(<AlertsTable {...casesTableProps} />, { wrapper });
       expect(CasesContextMock).toHaveBeenCalledWith(
         {
           children: expect.anything(),
@@ -613,7 +615,7 @@ describe('AlertsTable', () => {
         .fn()
         .mockReturnValue({ create: false, read: false });
 
-      render(<AlertsTable {...casesTableProps} />);
+      render(<AlertsTable {...casesTableProps} />, { wrapper });
       expect(CasesContextMock).toHaveBeenCalledWith(
         {
           children: expect.anything(),
@@ -640,7 +642,8 @@ describe('AlertsTable', () => {
             owner: ['cases'],
             syncAlerts: true,
           }}
-        />
+        />,
+        { wrapper }
       );
       expect(CasesContextMock).toHaveBeenCalledWith(
         {
@@ -660,18 +663,18 @@ describe('AlertsTable', () => {
     });
 
     it('should show maintenance windows column', async () => {
-      render(<AlertsTable {...tableProps} />);
+      render(<AlertsTable {...tableProps} />, { wrapper });
       expect(await screen.findByText('Maintenance Windows')).toBeInTheDocument();
     });
 
     it('should show maintenance windows titles correctly', async () => {
-      render(<AlertsTable {...tableProps} />);
+      render(<AlertsTable {...tableProps} />, { wrapper });
       expect(await screen.findByText('test-title')).toBeInTheDocument();
       expect(await screen.findByText('test-title-2')).toBeInTheDocument();
     });
 
     it('should pass the correct maintenance window ids to useBulkGetMaintenanceWindows', async () => {
-      render(<AlertsTable {...tableProps} />);
+      render(<AlertsTable {...tableProps} />, { wrapper });
       await waitFor(() => {
         expect(mockBulkGetMaintenanceWindows).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -687,7 +690,7 @@ describe('AlertsTable', () => {
         alerts: [...mockSearchAlertsResponse.alerts, ...mockSearchAlertsResponse.alerts],
       });
 
-      render(<AlertsTable {...tableProps} />);
+      render(<AlertsTable {...tableProps} />, { wrapper });
       await waitFor(() => {
         expect(mockBulkGetMaintenanceWindows).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -709,7 +712,7 @@ describe('AlertsTable', () => {
         ],
       });
 
-      render(<AlertsTable {...tableProps} />);
+      render(<AlertsTable {...tableProps} />, { wrapper });
       await waitFor(() => {
         expect(mockBulkGetMaintenanceWindows).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -725,7 +728,7 @@ describe('AlertsTable', () => {
         errors: [],
       });
 
-      render(<AlertsTable {...tableProps} />);
+      render(<AlertsTable {...tableProps} />, { wrapper });
       expect((await screen.findAllByTestId('maintenance-window-cell-loading')).length).toBe(1);
     });
 
@@ -745,7 +748,8 @@ describe('AlertsTable', () => {
               },
             },
           }}
-        />
+        />,
+        { wrapper }
       );
 
       await waitFor(() => {
@@ -763,7 +767,8 @@ describe('AlertsTable', () => {
               displayAsText: 'Name',
             },
           ]}
-        />
+        />,
+        { wrapper }
       );
       await waitFor(() => {
         expect(mockBulkGetMaintenanceWindows).not.toHaveBeenCalled();
@@ -782,12 +787,12 @@ describe('AlertsTable', () => {
     });
 
     it('should show field browser', async () => {
-      render(<AlertsTable {...tableProps} />);
+      render(<AlertsTable {...tableProps} />, { wrapper });
       expect(await screen.findByTestId('show-field-browser')).toBeInTheDocument();
     });
 
     it('should remove an already existing field when selected', async () => {
-      render(<AlertsTable {...tableProps} />);
+      render(<AlertsTable {...tableProps} />, { wrapper });
 
       expect(screen.queryByTestId(`dataGridHeaderCell-${AlertsField.name}`)).not.toBe(null);
       await userEvent.click(await screen.findByTestId('show-field-browser'));
@@ -816,7 +821,7 @@ describe('AlertsTable', () => {
         })
       );
 
-      render(<AlertsTable {...tableProps} />);
+      render(<AlertsTable {...tableProps} />, { wrapper });
 
       expect(screen.queryByTestId(`dataGridHeaderCell-${AlertsField.name}`)).toBe(null);
       await userEvent.click(await screen.findByTestId('show-field-browser'));
@@ -832,7 +837,7 @@ describe('AlertsTable', () => {
     });
 
     it('should insert a new field as column when its not a default one', async () => {
-      render(<AlertsTable {...tableProps} />);
+      render(<AlertsTable {...tableProps} />, { wrapper });
 
       expect(screen.queryByTestId(`dataGridHeaderCell-${AlertsField.uuid}`)).toBe(null);
       await userEvent.click(await screen.findByTestId('show-field-browser'));
@@ -850,7 +855,9 @@ describe('AlertsTable', () => {
     });
 
     it('should remove a field from the sort configuration too', async () => {
-      render(<AlertsTable {...tableProps} sort={[{ [AlertsField.name]: { order: 'asc' } }]} />);
+      render(<AlertsTable {...tableProps} sort={[{ [AlertsField.name]: { order: 'asc' } }]} />, {
+        wrapper,
+      });
 
       expect(
         await screen.findByTestId(`dataGridHeaderCellSortingIcon-${AlertsField.name}`)
@@ -872,7 +879,8 @@ describe('AlertsTable', () => {
           <AlertsTable
             {...tableProps}
             renderAdditionalToolbarControls={() => <span>This is a persistent control</span>}
-          />
+          />,
+          { wrapper }
         );
         expect(await screen.findByText('This is a persistent control')).toBeInTheDocument();
       });
@@ -883,12 +891,12 @@ describe('AlertsTable', () => {
   const testInspectButton = () => {
     describe('Inspect button', () => {
       it('should hide the inspect button by default', () => {
-        render(<AlertsTable {...tableProps} />);
+        render(<AlertsTable {...tableProps} />, { wrapper });
         expect(screen.queryByTestId('inspect-icon-button')).not.toBeInTheDocument();
       });
 
       it('should show the inspect button if the right prop is set', async () => {
-        render(<AlertsTable {...tableProps} showInspectButton />);
+        render(<AlertsTable {...tableProps} showInspectButton />, { wrapper });
         expect(await screen.findByTestId('inspect-icon-button')).toBeInTheDocument();
       });
     });
@@ -907,7 +915,7 @@ describe('AlertsTable', () => {
     });
 
     it('should render an empty screen if there are no alerts', async () => {
-      render(<AlertsTable {...tableProps} />);
+      render(<AlertsTable {...tableProps} />, { wrapper });
       expect(await screen.findByTestId('alertsTableEmptyState')).toBeTruthy();
     });
 
@@ -949,7 +957,8 @@ describe('AlertsTable', () => {
               [ALERT_TIME_RANGE]: { order: 'asc' },
             },
           ]}
-        />
+        />,
+        { wrapper }
       );
 
       expect(mockSearchAlerts).toHaveBeenLastCalledWith(
@@ -978,7 +987,7 @@ describe('AlertsTable', () => {
         error: new Error('Error while fetching alerts'),
       });
 
-      render(<AlertsTable {...tableProps} />);
+      render(<AlertsTable {...tableProps} />, { wrapper });
 
       const resetButton = await screen.findByTestId('resetButton');
       expect(resetButton).toBeInTheDocument();
@@ -1003,7 +1012,8 @@ describe('AlertsTable', () => {
               [ALERT_TIME_RANGE]: { order: 'asc' },
             },
           ]}
-        />
+        />,
+        { wrapper }
       );
 
       expect(mockSearchAlerts).toHaveBeenLastCalledWith(
@@ -1039,7 +1049,7 @@ describe('AlertsTable', () => {
         error: new Error('Something went wrong'),
       });
 
-      render(<AlertsTable {...tableProps} />);
+      render(<AlertsTable {...tableProps} />, { wrapper });
 
       expect(mockSearchAlerts).toHaveBeenLastCalledWith(
         expect.objectContaining({
@@ -1066,13 +1076,17 @@ describe('AlertsTable', () => {
 
   describe('Client provided toolbar visibility options', () => {
     it('hide column order control', () => {
-      render(<AlertsTable {...tableProps} toolbarVisibility={{ showColumnSelector: false }} />);
+      render(<AlertsTable {...tableProps} toolbarVisibility={{ showColumnSelector: false }} />, {
+        wrapper,
+      });
 
       expect(screen.queryByTestId('dataGridColumnSelectorButton')).not.toBeInTheDocument();
     });
 
     it('hide sort Selection', () => {
-      render(<AlertsTable {...tableProps} toolbarVisibility={{ showSortSelector: false }} />);
+      render(<AlertsTable {...tableProps} toolbarVisibility={{ showSortSelector: false }} />, {
+        wrapper,
+      });
 
       expect(screen.queryByTestId('dataGridColumnSortingButton')).not.toBeInTheDocument();
     });
@@ -1088,7 +1102,7 @@ describe('AlertsTable', () => {
           [AlertsField.uuid]: [`alert-${i}`],
         })),
       });
-      const { rerender } = render(<AlertsTable {...tableProps} />);
+      const { rerender } = render(<AlertsTable {...tableProps} />, { wrapper });
       act(() => {
         onPageIndexChange(1);
       });
@@ -1110,7 +1124,7 @@ describe('AlertsTable', () => {
           [AlertsField.uuid]: [`alert-${i}`],
         })),
       });
-      render(<AlertsTable {...tableProps} />);
+      render(<AlertsTable {...tableProps} />, { wrapper });
       act(() => {
         onPageIndexChange(1);
       });
@@ -1121,7 +1135,7 @@ describe('AlertsTable', () => {
     });
 
     it('should fetch a new page if the expanded alert index is in the next page', async () => {
-      render(<AlertsTable {...tableProps} pageSize={1} expandedAlertIndex={1} />);
+      render(<AlertsTable {...tableProps} pageSize={1} expandedAlertIndex={1} />, { wrapper });
 
       expect(mockSearchAlerts).toHaveBeenLastCalledWith(
         expect.objectContaining({
@@ -1132,7 +1146,9 @@ describe('AlertsTable', () => {
     });
 
     it('should go back to a previous page if the expanded alert index is in the previous page', async () => {
-      render(<AlertsTable {...tableProps} pageSize={1} pageIndex={1} expandedAlertIndex={0} />);
+      render(<AlertsTable {...tableProps} pageSize={1} pageIndex={1} expandedAlertIndex={0} />, {
+        wrapper,
+      });
 
       expect(mockSearchAlerts).toHaveBeenLastCalledWith(
         expect.objectContaining({
@@ -1143,7 +1159,9 @@ describe('AlertsTable', () => {
     });
 
     it("doesn't call `refresh` when paginating and using `lastReloadRequestTime`", async () => {
-      render(<AlertsTable {...tableProps} lastReloadRequestTime={Date.now()} pageSize={1} />);
+      render(<AlertsTable {...tableProps} lastReloadRequestTime={Date.now()} pageSize={1} />, {
+        wrapper,
+      });
 
       await waitFor(() => expect(onPageIndexChange).not.toBeUndefined());
 

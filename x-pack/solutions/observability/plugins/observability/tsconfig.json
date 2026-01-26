@@ -146,6 +146,7 @@
     "@kbn/ai-assistant-common",
     "@kbn/management-settings-ids",
     "@kbn/observability-agent-builder-plugin",
+    "@kbn/response-ops-react-query",
     "@kbn/kql",
     "@kbn/shared-ux-utility",
     "@kbn/lens-common",

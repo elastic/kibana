@@ -12,7 +12,7 @@ import React from 'react';
 import '@kbn/react-query/mock';
 import * as ReactQuery from '@kbn/react-query';
 import { waitFor, renderHook } from '@testing-library/react';
-import { testQueryClientConfig } from '../test_utils/test_query_client_config';
+import { testQueryClientConfig } from '@kbn/response-ops-react-query/test_utils/test_query_client_config';
 import { queryKeyPrefix, useVirtualDataViewQuery } from './use_virtual_data_view_query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';

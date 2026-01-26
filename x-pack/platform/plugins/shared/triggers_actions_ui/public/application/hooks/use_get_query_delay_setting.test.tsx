@@ -18,7 +18,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: false,
-      cacheTime: 0,
+      gcTime: 0,
     },
   },
 });
@@ -32,7 +32,7 @@ describe('useGetQueryDelaySettings', () => {
   });
 
   it('should call getQueryDelaySettings', async () => {
-    renderHook(() => useGetQueryDelaySettings({ enabled: true, onSuccess: () => {} }), {
+    renderHook(() => useGetQueryDelaySettings({ enabled: true }), {
       wrapper,
     });
 
@@ -44,12 +44,9 @@ describe('useGetQueryDelaySettings', () => {
   it('should return isError = true if api fails', async () => {
     getQueryDelaySettings.mockRejectedValue('This is an error.');
 
-    const { result } = renderHook(
-      () => useGetQueryDelaySettings({ enabled: true, onSuccess: () => {} }),
-      {
-        wrapper,
-      }
-    );
+    const { result } = renderHook(() => useGetQueryDelaySettings({ enabled: true }), {
+      wrapper,
+    });
 
     await waitFor(() => expect(result.current.isError).toBe(true));
   });

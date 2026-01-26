@@ -16,8 +16,8 @@ import type { KibanaServices } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { NotificationsStart, ApplicationStart } from '@kbn/core/public';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
+import { ResponseOpsQueryClientProvider } from '@kbn/response-ops-react-query/providers/response_ops_query_client_provider';
 import { KibanaContextProvider } from '../public/common/lib/kibana';
 import { ExperimentalFeaturesService } from '../public/common/experimental_features_service';
 import { getHttp } from './context/http';
@@ -30,8 +30,6 @@ interface StorybookContextDecoratorProps {
   servicesApplicationOverride?: Partial<ApplicationStart>;
   servicesOverride?: Partial<KibanaServices>;
 }
-
-const queryClient = new QueryClient();
 
 const handler = (type: string, ...rest: any[]) => {
   action(`${type} Toast`)(rest);
@@ -133,7 +131,7 @@ export const StorybookContextDecorator: FC<PropsWithChildren<StorybookContextDec
               ...servicesOverride,
             }}
           >
-            <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+            <ResponseOpsQueryClientProvider>{children}</ResponseOpsQueryClientProvider>
           </KibanaContextProvider>
         </KibanaThemeProvider>
       </EuiThemeProvider>

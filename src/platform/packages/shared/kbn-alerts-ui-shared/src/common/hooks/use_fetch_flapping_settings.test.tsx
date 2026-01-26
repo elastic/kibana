@@ -11,7 +11,7 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
-import { testQueryClientConfig } from '../test_utils/test_query_client_config';
+import { testQueryClientConfig } from '@kbn/response-ops-react-query/test_utils/test_query_client_config';
 import { useFetchFlappingSettings } from './use_fetch_flapping_settings';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 
@@ -73,29 +73,5 @@ describe('useFetchFlappingSettings', () => {
     });
 
     expect(http.get).not.toHaveBeenCalled();
-  });
-
-  test('should call onSuccess when the fetching was successful', async () => {
-    const onSuccessMock = jest.fn();
-    const { result } = renderHook(
-      () => useFetchFlappingSettings({ http, enabled: true, onSuccess: onSuccessMock }),
-      {
-        wrapper,
-      }
-    );
-
-    await waitFor(() => {
-      return expect(result.current.isInitialLoading).toEqual(false);
-    });
-
-    expect(onSuccessMock).toHaveBeenCalledWith({
-      createdAt: now,
-      createdBy: 'test',
-      updatedAt: now,
-      updatedBy: 'test',
-      enabled: true,
-      lookBackWindow: 20,
-      statusChangeThreshold: 20,
-    });
   });
 });

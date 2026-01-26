@@ -45,7 +45,6 @@ export interface UseLoadDependencies {
 export const useLoadDependencies = (props: UseLoadDependencies) => {
   const {
     http,
-    toasts,
     ruleTypeRegistry,
     id,
     ruleTypeId,
@@ -73,7 +72,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     data: fetchedFormData,
     isLoading: isLoadingRule,
     isInitialLoading: isInitialLoadingRule,
-  } = useResolveRule({ http, id, cacheTime: 0 });
+  } = useResolveRule({ http, id, gcTime: 0 });
 
   const {
     ruleTypesState: {
@@ -83,7 +82,6 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     },
   } = useGetRuleTypesPermissions({
     http,
-    toasts,
     filteredRuleTypes,
   });
 
@@ -104,7 +102,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     http,
     includeSystemActions: true,
     enabled: canReadConnectors,
-    cacheTime: 0,
+    gcTime: 0,
   });
 
   const computedRuleTypeId = useMemo(() => {
@@ -131,7 +129,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     http,
     ruleTypeId: computedRuleTypeId,
     enabled: !!computedRuleTypeId && canReadConnectors,
-    cacheTime: 0,
+    gcTime: 0,
     fieldsMetadata,
   });
 

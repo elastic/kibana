@@ -21,20 +21,6 @@ import MaybeMockedDeep = jest.MaybeMockedDeep;
 export const createPartialObjectMock = <T>(partialObject: DeepPartial<T>) =>
   partialObject as MaybeMockedDeep<T>;
 
-/* eslint-disable no-console */
-export const testQueryClientConfig = {
-  defaultOptions: {
-    queries: {
-      retry: false,
-    },
-  },
-  logger: {
-    log: console.log,
-    warn: console.warn,
-    error: () => {},
-  },
-};
-
 export const getJsDomPerformanceFix = () => {
   const originalGetComputedStyle = Object.assign({}, window.getComputedStyle);
 

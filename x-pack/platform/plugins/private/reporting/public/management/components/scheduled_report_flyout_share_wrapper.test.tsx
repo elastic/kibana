@@ -11,6 +11,7 @@ import type { ScheduledReportMenuItem } from './scheduled_report_flyout_share_wr
 import { ScheduledReportFlyoutShareWrapper } from './scheduled_report_flyout_share_wrapper';
 import { useShareTypeContext } from '@kbn/share-plugin/public';
 import { CreateScheduledReportForm } from './create_scheduled_report_form';
+import { createTestResponseOpsQueryClient } from '@kbn/response-ops-react-query/test_utils/create_test_response_ops_query_client';
 
 jest.mock('./create_scheduled_report_form');
 jest.mocked(CreateScheduledReportForm).mockReturnValue(<div data-test-subj="flyoutContent" />);
@@ -29,8 +30,11 @@ const mockReportingServices = { serviceFromReporting: {} } as any;
 const mockSharingData = { title: 'Test Report' } as any;
 const mockOnClose = jest.fn();
 
+const { queryClient } = createTestResponseOpsQueryClient();
+
 const defaultProps: ScheduledReportMenuItem = {
   apiClient: mockApiClient,
+  queryClient,
   services: mockReportingServices,
   sharingData: mockSharingData,
   onClose: mockOnClose,

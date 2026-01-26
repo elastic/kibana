@@ -9,9 +9,8 @@
 
 import { useMemo } from 'react';
 import { keyBy } from 'lodash';
-import type { UseQueryOptions } from '@kbn/react-query';
+import type { QueryClient } from '@kbn/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { RuleType } from '@kbn/triggers-actions-ui-types';
 import type {
   RuleTypeIndexWithDescriptions,
@@ -19,15 +18,15 @@ import type {
 } from '@kbn/triggers-actions-ui-types';
 import { useGetRuleTypesQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_rule_types_query';
 import { i18n } from '@kbn/i18n';
+import type { ResponseOpsQueryMeta } from '@kbn/response-ops-react-query/types';
 import { ALERTS_FEATURE_ID } from '../constants';
 
 export interface UseGetRuleTypesPermissionsParams {
   http: HttpStart;
-  toasts: ToastsStart;
   filteredRuleTypes?: string[];
   registeredRuleTypes?: Array<{ id: string; description: string }>;
   enabled?: boolean;
-  context?: UseQueryOptions['context'];
+  queryClient?: QueryClient;
 }
 
 const getFilteredIndex = ({
@@ -65,28 +64,27 @@ const getFilteredIndex = ({
 
 export const useGetRuleTypesPermissions = ({
   http,
-  toasts,
   filteredRuleTypes,
   registeredRuleTypes,
-  context,
+  queryClient,
   enabled = true,
 }: UseGetRuleTypesPermissionsParams) => {
-  const onErrorFn = (error: unknown) => {
-    if (error) {
-      toasts.addDanger(
-        i18n.translate('alertsUIShared.hooks.useLoadRuleTypesQuery.unableToLoadRuleTypesMessage', {
-          defaultMessage: 'Unable to load rule types',
-        })
-      );
-    }
-  };
-
   const { data, isSuccess, isFetching, isInitialLoading, isLoading, error } = useGetRuleTypesQuery(
     { http },
     {
-      onError: onErrorFn,
       enabled,
-      context,
+      queryClient,
+      meta: {
+        getErrorToast: () => ({
+          type: 'danger',
+          title: i18n.translate(
+            'alertsUIShared.hooks.useLoadRuleTypesQuery.unableToLoadRuleTypesMessage',
+            {
+              defaultMessage: 'Unable to load rule types',
+            }
+          ),
+        }),
+      } satisfies ResponseOpsQueryMeta,
     }
   );
 
