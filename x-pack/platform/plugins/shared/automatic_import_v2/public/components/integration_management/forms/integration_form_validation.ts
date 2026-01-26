@@ -18,7 +18,7 @@ export const REQUIRED_FIELDS = [
   'dataCollectionMethod',
 ];
 
-const { emptyField, maxLengthField } = fieldValidators;
+const { emptyField } = fieldValidators;
 
 const titleToPackageName = (integrationTitle: string): string => {
   return integrationTitle.toLowerCase().replace(/[^a-z0-9]/g, '_');
