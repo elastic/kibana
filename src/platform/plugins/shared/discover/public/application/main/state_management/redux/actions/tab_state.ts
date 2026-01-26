@@ -298,17 +298,17 @@ export const updateCascadeGrouping: InternalStateThunkActionCreator<
   async function updateCascadeGroupingThunkFn(dispatch, getState) {
     addLog('updateCascadeGrouping');
     const currentState = getState();
-    const { uiState } = selectTab(currentState, tabId);
+    const { cascadedDocumentsState } = selectTab(currentState, tabId);
 
     const cascadeGrouping = isFunction(groupingUpdater)
-      ? groupingUpdater(uiState.cascadedDocuments!.selectedCascadeGroups)
+      ? groupingUpdater(cascadedDocumentsState.selectedCascadeGroups)
       : groupingUpdater;
 
     dispatch(
-      internalStateSlice.actions.setCascadeUiState({
+      internalStateSlice.actions.setCascadedDocumentsState({
         tabId,
-        cascadeUiState: {
-          availableCascadeGroups: uiState.cascadedDocuments!.availableCascadeGroups.slice(0),
+        cascadedDocumentsState: {
+          availableCascadeGroups: cascadedDocumentsState.availableCascadeGroups,
           selectedCascadeGroups: cascadeGrouping,
         },
       })

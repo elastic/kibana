@@ -266,7 +266,7 @@ export const internalStateSlice = createSlice({
       state,
       action: TabAction<Pick<TabState, 'cascadedDocumentsState'>>
     ) =>
-      withTab(state, action, (tab) => {
+      withTab(state, action.payload, (tab) => {
         tab.cascadedDocumentsState = action.payload.cascadedDocumentsState;
       }),
 
@@ -379,6 +379,14 @@ export const internalStateSlice = createSlice({
     ) =>
       withTab(state, action.payload, (tab) => {
         tab.uiState.metricsGrid = action.payload.metricsGridState;
+      }),
+
+    setDocViewerUiState: (
+      state,
+      action: TabAction<{ docViewerUiState: Partial<TabState['uiState']['docViewer']> }>
+    ) =>
+      withTab(state, action.payload, (tab) => {
+        tab.uiState.docViewer = action.payload.docViewerUiState;
       }),
   },
   extraReducers: (builder) => {
@@ -532,8 +540,8 @@ const createMiddleware = (options: InternalStateDependencies) => {
             const injectCurrentTab = createTabActionInjector(tabId);
 
             listenerApi.dispatch(
-              injectCurrentTab(internalStateSlice.actions.setCascadeUiState)({
-                cascadeUiState: {
+              injectCurrentTab(internalStateSlice.actions.setCascadedDocumentsState)({
+                cascadedDocumentsState: {
                   availableCascadeGroups,
                   selectedCascadeGroups: computeSelectedCascadeGroups(availableCascadeGroups),
                 },

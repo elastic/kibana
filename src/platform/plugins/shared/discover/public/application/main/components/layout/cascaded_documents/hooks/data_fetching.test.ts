@@ -21,10 +21,10 @@ import {
 import { fetchEsql } from '../../../../data_fetching/fetch_esql';
 import { constructCascadeQuery } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
 import { apm } from '@elastic/apm-rum';
-import type { CascadedDocumentsRestorableState } from '../cascaded_documents_restorable_state';
 import type { ESQLStatsQueryMeta } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
 import type { ESQLDataGroupNode } from '../blocks';
 import type { RecordsFetchResponse } from '../../../../../types';
+import type { CascadedDocumentsState } from '../../../../state_management/redux';
 
 jest.mock('../../../../data_fetching/fetch_esql', () => ({
   fetchEsql: jest.fn(),
@@ -65,7 +65,7 @@ describe('data_fetching related hooks', () => {
       appliedFunctions: [{ identifier: 'count', aggregation: 'count' }],
     };
 
-    const defaultCascadeConfig: CascadedDocumentsRestorableState = {
+    const defaultCascadeConfig: CascadedDocumentsState = {
       availableCascadeGroups: ['category'],
       selectedCascadeGroups: ['category'],
     };
@@ -180,7 +180,7 @@ describe('data_fetching related hooks', () => {
         { key: 'myVar', value: 'actualField', type: ESQLVariableType.FIELDS },
       ];
 
-      const cascadeConfigWithVariable: CascadedDocumentsRestorableState = {
+      const cascadeConfigWithVariable: CascadedDocumentsState = {
         availableCascadeGroups: ['??myVar'],
         selectedCascadeGroups: ['??myVar'],
       };
