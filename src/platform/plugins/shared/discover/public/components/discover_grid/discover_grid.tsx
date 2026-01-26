@@ -17,14 +17,16 @@ import {
 import type { UpdateESQLQueryFn } from '../../context_awareness';
 import { useProfileAccessor } from '../../context_awareness';
 import type { DiscoverAppState } from '../../application/main/state_management/redux';
+import type { CascadedDocumentsContext } from '../../application/main/components/layout/cascaded_documents';
 import {
-  useMaybeCascadedDocumentsContext,
   useGetGroupBySelectorRenderer,
   LazyCascadedDocumentsLayout,
+  CascadedDocumentsProvider,
 } from '../../application/main/components/layout/cascaded_documents';
 
 export interface DiscoverGridProps extends UnifiedDataTableProps {
   query?: DiscoverAppState['query'];
+  cascadedDocumentsContext?: CascadedDocumentsContext;
   onUpdateESQLQuery?: UpdateESQLQueryFn;
 }
 
@@ -35,6 +37,7 @@ export interface DiscoverGridProps extends UnifiedDataTableProps {
 export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
   ({
     query,
+    cascadedDocumentsContext,
     externalAdditionalControls: customExternalAdditionalControls,
     rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
     onUpdateESQLQuery,
@@ -82,7 +85,6 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
       return getColumnsConfigurationAccessor(() => ({}))();
     }, [getColumnsConfigurationAccessor]);
 
-    const cascadedDocumentsContext = useMaybeCascadedDocumentsContext();
     const cascadedDocumentsState = cascadedDocumentsContext?.cascadedDocumentsState;
 
     const cascadeGroupingChangeHandler = useCallback(
@@ -118,7 +120,9 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     ]);
 
     return props.isPlainRecord && !!cascadedDocumentsState?.selectedCascadeGroups.length ? (
-      <LazyCascadedDocumentsLayout {...props} dataView={dataView} />
+      <CascadedDocumentsProvider value={cascadedDocumentsContext}>
+        <LazyCascadedDocumentsLayout {...props} />
+      </CascadedDocumentsProvider>
     ) : (
       <UnifiedDataTable
         showColumnTokens

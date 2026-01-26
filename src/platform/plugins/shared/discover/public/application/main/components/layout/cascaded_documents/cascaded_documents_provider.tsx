@@ -51,14 +51,6 @@ export const isCascadedDocumentsVisible = (
   return isEsqlQuery && isValidState;
 };
 
-export const useMaybeCascadedDocumentsContext = () => {
-  const context = useContext(cascadedDocumentsContext);
-
-  if (isCascadedDocumentsVisible(context?.cascadedDocumentsState, context?.esqlQuery)) {
-    return context;
-  }
-};
-
 export const useCascadedDocumentsContext = () => {
   const context = useContext(cascadedDocumentsContext);
 

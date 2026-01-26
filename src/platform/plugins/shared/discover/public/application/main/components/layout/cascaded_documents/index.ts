@@ -17,7 +17,6 @@ export {
   type CascadedDocumentsContext,
   CascadedDocumentsProvider,
   isCascadedDocumentsVisible,
-  useMaybeCascadedDocumentsContext,
   useCascadedDocumentsContext,
 } from './cascaded_documents_provider';
 
