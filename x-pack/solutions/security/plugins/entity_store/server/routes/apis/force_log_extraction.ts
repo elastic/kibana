@@ -11,20 +11,21 @@ import type { IKibanaResponse } from '@kbn/core-http-server';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
-import { EntityType, ALL_ENTITY_TYPES } from '../../domain/definitions/entity_schema';
+import { EntityType } from '../../domain/definitions/entity_schema';
 
-const bodySchema = z.object({
-  entityTypes: z.array(EntityType).optional().default(ALL_ENTITY_TYPES),
-  logExtractionFrequency: z
-    .string()
-    .regex(/^\d+[smdh]$/)
-    .optional(),
+const paramsSchema = z.object({
+  entityType: EntityType,
 });
 
-export function registerInstall(router: EntityStorePluginRouter) {
+const bodySchema = z.object({
+  fromDateISO: z.string().datetime().optional(),
+  toDateISO: z.string().datetime().optional(),
+});
+
+export function registerForceLogExtraction(router: EntityStorePluginRouter) {
   router.versioned
     .post({
-      path: '/internal/security/entity-store/install',
+      path: '/internal/security/entity-store/{entityType}/force-log-extraction',
       access: 'internal',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
@@ -36,24 +37,23 @@ export function registerInstall(router: EntityStorePluginRouter) {
         version: API_VERSIONS.internal.v2,
         validate: {
           request: {
+            params: buildRouteValidationWithZod(paramsSchema),
             body: buildRouteValidationWithZod(bodySchema),
           },
         },
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
-        const { logger, assetManager } = entityStoreCtx;
-        const { entityTypes, logExtractionFrequency } = req.body;
-        logger.debug('Install api called');
+        const { logger: baseLogger, logsExtractionClient } = entityStoreCtx;
+        const { entityType } = req.params;
 
-        await Promise.all(
-          entityTypes.map((type) => assetManager.initEntityType(req, type, logExtractionFrequency))
-        );
+        const logger = baseLogger.get('forceLogExtraction').get(entityType);
+        logger.debug(`Force log extraction API called for entity type: ${entityType}`);
+
+        const summary = await logsExtractionClient.extractLogs(entityType, req.body);
 
         return res.ok({
-          body: {
-            ok: true,
-          },
+          body: summary,
         });
       })
     );

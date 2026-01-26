@@ -8,43 +8,48 @@
 import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityDefinition } from '../definitions/entity_schema';
 import {
-  ENTITY_LATEST,
+  ENTITY_UPDATES,
   ENTITY_BASE_PREFIX,
   ENTITY_SCHEMA_VERSION_V2,
   ECS_MAPPINGS_COMPONENT_TEMPLATE,
   getEntityIndexPattern,
   getEntitiesAliasPattern,
 } from '../constants';
-import { getComponentTemplateName } from './component_templates';
+import { getUpdatesComponentTemplateName } from './component_templates';
 
-// Mostly copied from x-pack/platform/plugins/shared/entity_manager/server/lib/entities/templates/entities_latest_template.ts
+const DATA_RETENTION_PERIOD = '1d';
+export const getUpdatesIndexTemplateId = (definition: EntityDefinition) =>
+  `.${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V2}_${ENTITY_UPDATES}_${definition.id}_index_template` as const;
 
-export const getLatestIndexTemplateId = (definition: EntityDefinition) =>
-  `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V2}_${ENTITY_LATEST}_${definition.id}_index_template` as const;
-
-export const getLatestEntityIndexTemplateConfig = (
+export const getUpdatesEntityIndexTemplateConfig = (
   definition: EntityDefinition
 ): IndicesPutIndexTemplateRequest => ({
-  name: getLatestIndexTemplateId(definition),
+  name: getUpdatesIndexTemplateId(definition),
   _meta: {
     description:
-      "Index template for indices managed by the Elastic Entity Model's entity discovery framework for the latest dataset",
-    ecs_version: '8.0.0',
+      'Index template for data streams managed by the Elastic Entity Store ' +
+      'used as for internal asynchronous entity store updates and ensuring that all ' +
+      'necessary mappings are available to be queried by the ESQL query',
+    ecs_version: '9.2.0',
     managed: true,
     managed_by: 'security_context_core_analysis',
   },
-  composed_of: [ECS_MAPPINGS_COMPONENT_TEMPLATE, getComponentTemplateName(definition.id)],
+  composed_of: [ECS_MAPPINGS_COMPONENT_TEMPLATE, getUpdatesComponentTemplateName(definition.id)],
   index_patterns: [
     getEntityIndexPattern({
       schemaVersion: ENTITY_SCHEMA_VERSION_V2,
-      dataset: ENTITY_LATEST,
+      dataset: ENTITY_UPDATES,
       definitionId: definition.id,
     }),
   ],
   priority: 200,
+  data_stream: {},
   template: {
+    lifecycle: {
+      data_retention: DATA_RETENTION_PERIOD,
+    },
     aliases: {
-      [getEntitiesAliasPattern({ type: definition.type, dataset: ENTITY_LATEST })]: {},
+      [getEntitiesAliasPattern({ type: definition.type, dataset: ENTITY_UPDATES })]: {},
     },
     mappings: {
       _meta: { n: '1.6.0' },
