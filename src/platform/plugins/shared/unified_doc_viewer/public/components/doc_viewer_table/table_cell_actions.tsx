@@ -12,11 +12,11 @@ import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { copyToClipboard } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import type { IToasts } from '@kbn/core/public';
 import {
   shouldShowFieldFilterExistAction,
   shouldShowFieldFilterInOutActions,
-} from '@kbn/discover-utils/src/utils/should_show_field_filter_actions';
+} from '@kbn/unified-doc-viewer/utils/should_show_field_filter_actions';
+import type { IToasts } from '@kbn/core/public';
 import type { FieldRow } from './field_row';
 
 interface TableActionsProps {

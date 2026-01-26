@@ -30,7 +30,3 @@ export * from './convert_value_to_string';
 export * from './sorting';
 export { DiscoverFlyouts, dismissAllFlyoutsExceptFor, dismissFlyouts } from './dismiss_flyouts';
 export { prepareDataViewForEditing } from './prepare_data_view_for_editing';
-export {
-  shouldShowFieldFilterInOutActions,
-  shouldShowFieldFilterExistAction,
-} from './should_show_field_filter_actions';

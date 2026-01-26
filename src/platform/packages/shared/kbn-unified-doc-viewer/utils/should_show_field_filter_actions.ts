@@ -8,17 +8,12 @@
  */
 
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-
-type FilterFn = (
-  mapping: { name: string; type: string } | string | undefined,
-  value: unknown,
-  mode: '+' | '-'
-) => void;
+import type { DocViewFilterFn } from '../types';
 
 interface Params {
   dataViewField: DataViewField | undefined;
   hideFilteringOnComputedColumns: boolean | undefined; // for ES|QL custom fields which do not not exist in the index
-  onFilter: FilterFn | undefined;
+  onFilter: DocViewFilterFn | undefined;
 }
 
 export function shouldShowFieldFilterInOutActions({

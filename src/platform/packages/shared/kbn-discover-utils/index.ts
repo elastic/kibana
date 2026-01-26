@@ -71,8 +71,6 @@ export {
   getEsQuerySort,
   getTieBreakerFieldName,
   severityOrder,
-  shouldShowFieldFilterInOutActions,
-  shouldShowFieldFilterExistAction,
 } from './src';
 
 export type { LogsContextService, ApmContextService, SortOrder, SortInput, SortPair } from './src';
