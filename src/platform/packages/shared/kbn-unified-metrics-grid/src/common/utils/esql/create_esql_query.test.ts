@@ -30,10 +30,10 @@ const mockCounterMetric: MetricField = {
   instrument: 'counter',
 };
 
-const mockHistogramMetric: MetricField = {
+const mockTdigestMetric: MetricField = {
   ...mockMetric,
   name: 'http.request.duration',
-  type: 'histogram',
+  type: 'tdigest',
   instrument: 'histogram',
 };
 
@@ -67,18 +67,6 @@ TS metrics-*
     );
   });
 
-  it('should generate a PERCENTILE with TO_TDIGEST query for histogram instrument with histogram type', () => {
-    const query = createESQLQuery({
-      metric: mockHistogramMetric,
-    });
-    expect(query).toBe(
-      `
-TS metrics-*
-  | STATS PERCENTILE(TO_TDIGEST(http.request.duration), 95) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
-`.trim()
-    );
-  });
-
   it('should generate a PERCENTILE query for histogram instrument with exponential_histogram type', () => {
     const query = createESQLQuery({
       metric: mockExponentialHistogramMetric,
@@ -91,33 +79,14 @@ TS metrics-*
     );
   });
 
-  it('should generate histogram query with single dimension', () => {
+  it('should generate a PERCENTILE query for histogram instrument with tdigest type', () => {
     const query = createESQLQuery({
-      metric: mockHistogramMetric,
-      dimensions: [{ name: 'service.name', type: ES_FIELD_TYPES.KEYWORD }],
+      metric: mockTdigestMetric,
     });
     expect(query).toBe(
       `
 TS metrics-*
-  | STATS PERCENTILE(TO_TDIGEST(http.request.duration), 95) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`service.name\`
-`.trim()
-    );
-  });
-
-  it('should generate histogram query with multiple dimensions', () => {
-    const query = createESQLQuery({
-      metric: mockHistogramMetric,
-      dimensions: [
-        { name: 'service.name', type: ES_FIELD_TYPES.KEYWORD },
-        { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
-      ],
-    });
-    expect(query).toBe(
-      `
-TS metrics-*
-  | STATS PERCENTILE(TO_TDIGEST(http.request.duration), 95) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`service.name\`, \`host.name\`
-  | EVAL ${DIMENSIONS_COLUMN} = CONCAT(\`service.name\`, " › ", \`host.name\`)
-  | DROP \`service.name\`, \`host.name\`
+  | STATS PERCENTILE(http.request.duration, 95) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
 `.trim()
     );
   });
@@ -138,6 +107,37 @@ TS metrics-*
   it('should generate exponential histogram query with multiple dimensions', () => {
     const query = createESQLQuery({
       metric: mockExponentialHistogramMetric,
+      dimensions: [
+        { name: 'service.name', type: ES_FIELD_TYPES.KEYWORD },
+        { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
+      ],
+    });
+    expect(query).toBe(
+      `
+TS metrics-*
+  | STATS PERCENTILE(http.request.duration, 95) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`service.name\`, \`host.name\`
+  | EVAL ${DIMENSIONS_COLUMN} = CONCAT(\`service.name\`, " › ", \`host.name\`)
+  | DROP \`service.name\`, \`host.name\`
+`.trim()
+    );
+  });
+
+  it('should generate tdigest histogram query with single dimension', () => {
+    const query = createESQLQuery({
+      metric: mockTdigestMetric,
+      dimensions: [{ name: 'service.name', type: ES_FIELD_TYPES.KEYWORD }],
+    });
+    expect(query).toBe(
+      `
+TS metrics-*
+  | STATS PERCENTILE(http.request.duration, 95) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`service.name\`
+`.trim()
+    );
+  });
+
+  it('should generate tdigest histogram query with multiple dimensions', () => {
+    const query = createESQLQuery({
+      metric: mockTdigestMetric,
       dimensions: [
         { name: 'service.name', type: ES_FIELD_TYPES.KEYWORD },
         { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
