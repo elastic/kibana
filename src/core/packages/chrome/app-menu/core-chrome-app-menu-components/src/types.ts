@@ -23,6 +23,7 @@ export interface AppMenuRunActionParams {
    * Consumers can extend this to add custom properties as needed.
    */
   context?: Record<string, unknown>;
+  returnFocus?(): void;
 }
 
 /**
