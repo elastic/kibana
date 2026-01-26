@@ -102,7 +102,7 @@ export function convertLegendToStateFormat(legend: XYState['legend']): {
   legend: XYLensState['legend'];
 } {
   const newStateLegend: XYLensState['legend'] = {
-    isVisible: Boolean(legend?.visible),
+    isVisible: legend?.visibility === 'auto' || legend?.visibility === 'visible',
     shouldTruncate: Boolean(legend?.truncate_after_lines), // 0 will be interpreted as false
     ...(legend?.truncate_after_lines ? { maxLines: legend?.truncate_after_lines } : {}),
     ...(legend?.statistics
@@ -112,12 +112,12 @@ export function convertLegendToStateFormat(legend: XYState['legend']): {
       ? { layout: legend?.statistics?.length ? LegendLayout.Table : LegendLayout.List }
       : {}),
     ...extractAlignment(legend),
+    ...(legend?.visibility === 'auto' ? { showSingleSeries: true } : {}),
     ...(legend?.inside
       ? {
           isInside: true,
           position: DEFAULT_LEGEND_POSITON,
           ...(legend?.columns ? { floatingColumns: legend?.columns } : {}),
-          showSingleSeries: legend?.visible == null ? undefined : true,
         }
       : {
           position: legend?.position ?? DEFAULT_LEGEND_POSITON,
@@ -186,7 +186,7 @@ export function convertLegendToAPIFormat(
   legend: XYLensState['legend']
 ): Pick<XYState, 'legend'> | {} {
   const legendOptions = stripUndefined({
-    visible: legend.isVisible,
+    visibility: !legend.isVisible ? 'hidden' : legend.showSingleSeries ? 'auto' : 'visible',
     truncate_after_lines: legend?.maxLines == null ? undefined : legend.maxLines,
     statistics: legend?.legendStats?.length
       ? legend.legendStats.map(mapStatToSnakeCase)

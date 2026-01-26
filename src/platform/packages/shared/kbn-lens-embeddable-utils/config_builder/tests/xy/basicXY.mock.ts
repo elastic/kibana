@@ -1070,7 +1070,7 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
   title: '',
   type: 'xy',
   legend: {
-    visible: true,
+    visibility: 'visible',
     inside: true,
     alignment: 'top_right',
   },
@@ -1155,7 +1155,7 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
   title: '',
   type: 'xy',
   legend: {
-    visible: true,
+    visibility: 'visible',
     inside: false,
     position: 'bottom',
   },

@@ -166,7 +166,10 @@ const xyDataLayerSharedSchema = {
  * Common legend configuration properties for positioning and statistics
  */
 const sharedLegendSchema = {
-  visible: schema.maybe(schema.boolean({ meta: { description: 'Whether to show the legend' } })),
+  visibility: schema.oneOf(
+    [schema.literal('auto'), schema.literal('visible'), schema.literal('hidden')],
+    { meta: { description: 'Whether to show the legend' } }
+  ),
   statistics: schema.maybe(
     schema.arrayOf(statisticsSchema, {
       meta: { description: 'Statistics to display in legend' },
