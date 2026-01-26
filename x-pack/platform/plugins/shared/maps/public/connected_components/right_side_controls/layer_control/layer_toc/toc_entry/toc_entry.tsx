@@ -80,6 +80,19 @@ export class TOCEntry extends Component<Props, State> {
     supportsFitToBounds: false,
   };
 
+  static getTOCEntryEditButton(layerId: string | null) {
+    if (!layerId) return null;
+    return document.querySelector(`[data-layerid="${layerId}"] button[data-edit-button]`);
+  }
+
+  static showHiddenTOCEntryPopoverAction(actionElement: HTMLElement) {
+    const layerTocEntry =
+      (actionElement
+        .closest('[data-layerid]')
+        ?.querySelector('button.mapTocEntry__layerName') as HTMLButtonElement) ?? null;
+    layerTocEntry?.focus();
+  }
+
   componentDidMount() {
     this._isMounted = true;
     this._updateDisplayName();
