@@ -35,6 +35,7 @@ import type { INullableBaseStateContainer } from '@kbn/kibana-utils-plugin/publi
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { DiscoverDataSource } from '../../../../../common/data_sources';
 import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
+import type { CascadedDocumentsRestorableState } from '../../components/layout/cascaded_documents/cascaded_documents_restorable_state';
 
 export interface InternalStateDataRequestParams {
   timeRangeAbsolute: TimeRange | undefined;
@@ -169,6 +170,7 @@ export interface TabState extends TabItem {
     layout?: Partial<DiscoverLayoutRestorableState>;
     searchDraft?: Partial<UnifiedSearchDraft>;
     metricsGrid?: Partial<UnifiedMetricsGridRestorableState>;
+    cascadedDocuments?: CascadedDocumentsRestorableState;
     docViewer?: Partial<DocViewerRestorableState>;
   };
   expandedDoc: DataTableRecord | undefined;
@@ -222,4 +224,9 @@ export interface UrlSyncObservables {
 export interface UpdateESQLQueryActionPayload {
   tabId: string;
   queryOrUpdater: string | ((prevQuery: string) => string);
+}
+
+export interface UpdateCascadeGroupingActionPayload {
+  tabId: string;
+  groupingOrUpdater: string[] | ((prevGrouping: string[]) => string[]);
 }
