@@ -35,7 +35,12 @@ import {
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  ExceptionListItemSchema,
+  ImportExceptionListItemSchemaDecoded,
+} from '@kbn/securitysolution-io-ts-list-types';
+import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
+import { cloneDeep } from 'lodash';
 
 describe('When using Artifacts Exceptions BaseValidator', () => {
   let endpointAppContextServices: EndpointAppContextService;
@@ -500,6 +505,152 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
         await expect(
           validator._validateCanReadItemInActiveSpace(savedExceptionItem)
         ).rejects.toThrowError(itemNotFoundInSpaceErrorMessage);
+      });
+    });
+
+    describe('#validatePreImportItems', () => {
+      const item1Mock = (): PromiseFromStreams['items'][number] => ({
+        item_id: 'itemId1',
+        name: 'name 1',
+        description: 'description 1',
+        entries: [],
+        os_types: ['macos'],
+        tags: ['tag1', 'tag2'],
+        namespace_type: 'agnostic',
+        list_id: 'list id 1',
+        type: 'simple',
+        comments: [],
+        expire_time: 'sometime',
+      });
+
+      const item2Mock = (): PromiseFromStreams['items'][number] => ({
+        item_id: 'itemId2',
+        name: 'name 2',
+        description: 'description 2',
+        entries: [],
+        os_types: ['linux'],
+        tags: ['tag3'],
+        namespace_type: 'agnostic',
+        list_id: 'list id 2',
+        type: 'simple',
+        comments: [],
+        expire_time: 'another time',
+      });
+
+      it('should call validator callback on all items with the item type converted to exception item', async () => {
+        const validateFn = jest.fn().mockResolvedValue(undefined);
+        const importItems: PromiseFromStreams = {
+          items: [item1Mock(), item2Mock()],
+          lists: [],
+        };
+        const expectedItems: PromiseFromStreams = {
+          items: [item1Mock(), item2Mock()],
+          lists: [],
+        };
+
+        await expect(
+          validator._validatePreImportItems(importItems, validateFn)
+        ).resolves.toBeUndefined();
+
+        expect(validateFn).toHaveBeenCalledTimes(2);
+        expect(validateFn).toHaveBeenNthCalledWith(1, {
+          name: 'name 1',
+          description: 'description 1',
+          entries: [],
+          osTypes: ['macos'],
+          tags: ['tag1', 'tag2'],
+          namespaceType: 'agnostic',
+          listId: 'list id 1',
+          comments: [],
+        });
+        expect(validateFn).toHaveBeenNthCalledWith(2, {
+          name: 'name 2',
+          description: 'description 2',
+          entries: [],
+          osTypes: ['linux'],
+          tags: ['tag3'],
+          namespaceType: 'agnostic',
+          listId: 'list id 2',
+          comments: [],
+        });
+
+        expect(importItems).toEqual(expectedItems);
+      });
+
+      it('should modify data in place', async () => {
+        const validateFn = jest.fn().mockImplementation(async (item: ExceptionItemLikeOptions) => {
+          item.name = `modified ${item.name}`;
+          item.tags = [...item.tags, 'cheese'];
+        });
+
+        const importItems: PromiseFromStreams = {
+          items: [item1Mock(), item2Mock()],
+          lists: [],
+        };
+        const expectedItems: PromiseFromStreams = {
+          items: [
+            {
+              ...item1Mock(),
+              name: 'modified name 1',
+              tags: [...(item1Mock() as ImportExceptionListItemSchemaDecoded).tags, 'cheese'],
+            },
+            {
+              ...item2Mock(),
+              name: 'modified name 2',
+              tags: [...(item2Mock() as ImportExceptionListItemSchemaDecoded).tags, 'cheese'],
+            },
+          ],
+          lists: [],
+        };
+
+        await expect(
+          validator._validatePreImportItems(importItems, validateFn)
+        ).resolves.toBeUndefined();
+
+        expect(validateFn).toHaveBeenCalledTimes(2);
+        expect(importItems).toEqual(expectedItems);
+      });
+
+      it('should put errors in items array when validator throws', async () => {
+        const validateFn = jest.fn().mockImplementation(async (item: ExceptionItemLikeOptions) => {
+          if (item.name === 'name 2') {
+            throw new Error('houston, we have a problem');
+          }
+        });
+
+        const importItems: PromiseFromStreams = {
+          items: [item1Mock(), item2Mock()],
+          lists: [],
+        };
+        const expectedItems: PromiseFromStreams = {
+          items: [item1Mock(), new Error('houston, we have a problem')],
+          lists: [],
+        };
+
+        await expect(
+          validator._validatePreImportItems(importItems, validateFn)
+        ).resolves.toBeUndefined();
+
+        expect(validateFn).toHaveBeenCalledTimes(2);
+        expect(importItems).toEqual(expectedItems);
+      });
+
+      it('should pass through decode errors', async () => {
+        const importItems: PromiseFromStreams = {
+          items: [item1Mock(), new Error('decode error')],
+          lists: [],
+        };
+
+        const expectedItems = cloneDeep(importItems);
+
+        const validateFn = jest.fn();
+
+        await expect(
+          validator._validatePreImportItems(importItems, validateFn)
+        ).resolves.toBeUndefined();
+
+        expect(validateFn).toHaveBeenCalledTimes(1);
+        expect(importItems).toEqual(expectedItems);
       });
     });
   });

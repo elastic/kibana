@@ -100,6 +100,7 @@ import { findValueListExceptionListItemsPointInTimeFinder } from './find_value_l
 import { findExceptionListItemPointInTimeFinder } from './find_exception_list_item_point_in_time_finder';
 import { duplicateExceptionListAndItems } from './duplicate_exception_list';
 import { updateOverwriteExceptionListItem } from './update_overwrite_exception_list_item';
+import { ImportExceptionListRequestQuery } from '@kbn/securitysolution-exceptions-common/api';
 
 /**
  * Class for use for exceptions that are with trusted applications or
@@ -1156,6 +1157,10 @@ export class ExceptionListClient {
     overwrite,
     generateNewListId,
   }: ImportExceptionListAndItemsOptions): Promise<ImportExceptionsResponseSchema> => {
+    console.log(
+      '🧀 exception_list_client.ts:1086 🥭 importExceptionListAndItems',
+      JSON.stringify({ overwrite }, null, ' ')
+    );
     const { savedObjectsClient, user } = this;
 
     // validation of import and sorting of lists and items
@@ -1165,18 +1170,26 @@ export class ExceptionListClient {
       ...readStream,
     ]);
 
+    let overwriteFinal = overwrite;
     if (this.enableServerExtensionPoints) {
-      await this.serverExtensionsClient.pipeRun(
+      const context = this.getServerExtensionCallbackContext();
+      const result = await this.serverExtensionsClient.pipeRun(
         'exceptionsListPreImport',
         parsedObjects,
-        this.getServerExtensionCallbackContext()
+        context
       );
+
+      // context.request?.query.overwrite; ???
+      // use this? is it healthy to modify the request implicitly, lets be explicit
+      // or return something?
+      console.log('🧀 exception_list_client.ts:1169 🥭 ', JSON.stringify({ result }, null, ' '));
+      overwriteFinal = (context.request?.query as ImportExceptionListRequestQuery).overwrite;
     }
 
     return importExceptions({
       exceptions: parsedObjects,
       generateNewListId,
-      overwrite,
+      overwrite: overwriteFinal,
       savedObjectsClient,
       user,
     });
@@ -1195,6 +1208,10 @@ export class ExceptionListClient {
     maxExceptionsImportSize,
     overwrite,
   }: ImportExceptionListAndItemsAsArrayOptions): Promise<ImportExceptionsResponseSchema> => {
+    console.log(
+      '🧀 exception_list_client.ts:1126 🥭 importExceptionListAndItemsAsArray',
+      JSON.stringify({}, null, ' ')
+    );
     const { savedObjectsClient, user } = this;
 
     // validation of import and sorting of lists and items
