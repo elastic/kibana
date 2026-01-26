@@ -80,7 +80,7 @@ interface SloStatusConfig {
   badgeLabel: (count?: number | string) => string;
 }
 
-export const SLO_COUNT_CAP = 100;
+export const SLO_COUNT_CAP = 50;
 
 const SLO_STATUS_CONFIG: Record<SloStatus, SloStatusConfig> = {
   violated: {

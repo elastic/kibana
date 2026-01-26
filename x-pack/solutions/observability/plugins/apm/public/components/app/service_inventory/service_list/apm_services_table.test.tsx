@@ -984,7 +984,7 @@ describe('ApmServicesTable', () => {
           {
             ...mockService,
             sloStatus: 'degrading',
-            sloCount: 50,
+            sloCount: SLO_COUNT_CAP - 1,
           },
         ];
 
@@ -992,7 +992,7 @@ describe('ApmServicesTable', () => {
 
         await screen.findByRole('table');
 
-        expect(screen.getByText('50 Degrading')).toBeInTheDocument();
+        expect(screen.getByText(`${SLO_COUNT_CAP - 1} Degrading`)).toBeInTheDocument();
       });
 
       it(`displays ${SLO_COUNT_CAP}+ when degrading SLO count exceeds ${SLO_COUNT_CAP}`, async () => {
