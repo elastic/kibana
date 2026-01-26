@@ -507,6 +507,119 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ]);
         expect(detectedFieldsFailureResponse.body.documents[0].status).to.be('failed');
       });
+
+      it('should not surface temporary fields in top-level detected_fields when created and then removed', async () => {
+        // This test verifies the fix for https://github.com/elastic/kibana/issues/248968
+        // Temporary fields created by one processor and removed by another should NOT
+        // appear in the top-level detected_fields response
+        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+          processing: {
+            steps: [
+              {
+                // First processor: create a temporary field
+                customIdentifier: 'set-temp',
+                action: 'manual_ingest_pipeline' as const,
+                processors: [
+                  {
+                    set: {
+                      field: 'temp_field',
+                      value: 'temporary_value',
+                    },
+                  },
+                ],
+                where: { always: {} },
+              },
+              {
+                // Second processor: remove the temporary field
+                customIdentifier: 'remove-temp',
+                action: 'manual_ingest_pipeline' as const,
+                processors: [
+                  {
+                    remove: {
+                      field: 'temp_field',
+                    },
+                  },
+                ],
+                where: { always: {} },
+              },
+            ],
+          },
+          documents: [createTestDocument()],
+        });
+
+        expect(response.body.documents_metrics.parsed_rate).to.be(1);
+        expect(response.body.documents_metrics.failed_rate).to.be(0);
+
+        // The top-level detected_fields should NOT include temp_field since it was removed
+        const topLevelFieldNames = response.body.detected_fields.map(
+          (f: { name: string }) => f.name
+        );
+        expect(topLevelFieldNames).not.to.contain('temp_field');
+
+        // Per-processor metrics should still track that the SET processor detected temp_field
+        const setProcessorMetrics = response.body.processors_metrics['set-temp'];
+        expect(setProcessorMetrics.detected_fields).to.contain('temp_field');
+
+        // Per-document detected_fields should still track the per-processor changes
+        const docDetectedFields = response.body.documents[0].detected_fields;
+        const tempFieldDetection = docDetectedFields.find(
+          (f: { name: string }) => f.name === 'temp_field'
+        );
+        expect(tempFieldDetection).to.eql({ processor_id: 'set-temp', name: 'temp_field' });
+
+        // Final document value should NOT contain temp_field
+        expect(response.body.documents[0].value).not.to.have.property('temp_field');
+      });
+
+      it('should not auto-configure ECS fields that only exist as temporary fields', async () => {
+        // This test verifies that known ECS fields that are created and then removed
+        // during processing are NOT auto-configured as mapped fields
+        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+          processing: {
+            steps: [
+              {
+                // Create a temporary ECS field (host.name is a known ECS field)
+                customIdentifier: 'set-ecs',
+                action: 'manual_ingest_pipeline' as const,
+                processors: [
+                  {
+                    set: {
+                      field: 'host.name',
+                      value: 'temporary-host',
+                    },
+                  },
+                ],
+                where: { always: {} },
+              },
+              {
+                // Remove the ECS field
+                customIdentifier: 'remove-ecs',
+                action: 'manual_ingest_pipeline' as const,
+                processors: [
+                  {
+                    remove: {
+                      field: 'host.name',
+                    },
+                  },
+                ],
+                where: { always: {} },
+              },
+            ],
+          },
+          documents: [createTestDocument()],
+        });
+
+        expect(response.body.documents_metrics.parsed_rate).to.be(1);
+
+        // The top-level detected_fields should NOT include host.name since it was removed
+        const topLevelFieldNames = response.body.detected_fields.map(
+          (f: { name: string }) => f.name
+        );
+        expect(topLevelFieldNames).not.to.contain('host.name');
+
+        // Final document value should NOT contain host.name
+        expect(response.body.documents[0].value).not.to.have.property('host.name');
+      });
     });
 
     describe('Geo point field handling', () => {

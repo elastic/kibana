@@ -173,7 +173,7 @@ export const simulateProcessing = async ({
   const otelStream = isOtelStream(stream);
 
   /* 4. Extract all the documents reports and processor metrics from the simulations */
-  const { docReports, processorsMetrics } = computePipelineSimulationResult(
+  const { docReports, processorsMetrics, finalDetectedFieldNames } = computePipelineSimulationResult(
     pipelineSimulationResult.simulation,
     ingestSimulationResult.simulation,
     simulationData.docs,
@@ -185,7 +185,7 @@ export const simulateProcessing = async ({
 
   /* 5. Extract valid detected fields with intelligent type suggestions from fieldsMetadataService */
   const detectedFields = await computeDetectedFields(
-    processorsMetrics,
+    finalDetectedFieldNames,
     params,
     streamFields,
     streamIndexFieldCaps,
@@ -493,6 +493,35 @@ const executeIngestSimulation = async (
 };
 
 /**
+ * Compute the final detected fields by comparing the initial input documents
+ * with their final output states. This ensures only fields that actually exist
+ * in the final output are returned, excluding temporary fields that were created
+ * and then removed during processing.
+ */
+const computeFinalDetectedFields = (
+  sampleDocs: Array<{ _source: FlattenRecord }>,
+  docReports: SimulationDocReport[]
+): Set<string> => {
+  const finalDetectedFields = new Set<string>();
+
+  for (let i = 0; i < sampleDocs.length; i++) {
+    const initialDoc = flattenObjectNestedLast(sampleDocs[i]._source);
+    const finalDoc = flattenObjectNestedLast(docReports[i].value);
+
+    const { added, updated } = calculateObjectDiff(initialDoc, finalDoc);
+
+    const addedFields = Object.keys(flattenObjectNestedLast(added));
+    const updatedFields = Object.keys(flattenObjectNestedLast(updated));
+
+    for (const field of [...addedFields, ...updatedFields]) {
+      finalDetectedFields.add(field);
+    }
+  }
+
+  return finalDetectedFields;
+};
+
+/**
  * Computing simulation insights for each document and processor takes a few steps:
  * 1. Extract the last document source and the status of the simulation.
  * 2. Compute the diff between the sample document and the simulation document to detect fields changes.
@@ -512,6 +541,7 @@ const computePipelineSimulationResult = (
 ): {
   docReports: SimulationDocReport[];
   processorsMetrics: Record<string, ProcessorMetrics>;
+  finalDetectedFieldNames: Set<string>;
 } => {
   const transpiledProcessors = transpileIngestPipeline(processing, {
     ignoreMalformed: true,
@@ -583,7 +613,11 @@ const computePipelineSimulationResult = (
     sampleSize: docReports.length,
   });
 
-  return { docReports, processorsMetrics };
+  // Compute final detected fields by comparing initial input with final output
+  // This excludes temporary fields that were created and then removed during processing
+  const finalDetectedFieldNames = computeFinalDetectedFields(sampleDocs, docReports);
+
+  return { docReports, processorsMetrics, finalDetectedFieldNames };
 };
 
 const initProcessorMetricsMap = (
@@ -916,17 +950,17 @@ const getStreamFields = async (
 
 /**
  * In case new fields have been detected, we want to tell the user which ones are inherited and already mapped.
+ * Uses finalDetectedFieldNames (computed from diff between initial input and final output) instead of
+ * aggregating from all processors, to exclude temporary fields that were created and then removed.
  */
 const computeDetectedFields = async (
-  processorsMetrics: Record<string, ProcessorMetrics>,
+  finalDetectedFieldNames: Set<string>,
   params: ProcessingSimulationParams,
   streamFields: FieldDefinition,
   streamFieldCaps: FieldCapsResponse['fields'],
   fieldsMetadataClient: IFieldsMetadataClient
 ): Promise<DetectedField[]> => {
-  const fields = Object.values(processorsMetrics).flatMap((metrics) => metrics.detected_fields);
-
-  const uniqueFields = uniq(fields);
+  const uniqueFields = Array.from(finalDetectedFieldNames).sort();
 
   // Short-circuit to avoid fetching streams fields if none is detected
   if (isEmpty(uniqueFields)) {
