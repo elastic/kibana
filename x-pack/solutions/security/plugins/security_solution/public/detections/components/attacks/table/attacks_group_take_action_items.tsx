@@ -69,7 +69,7 @@ export function AttacksGroupTakeActionItems({ attack }: AttacksGroupTakeActionIt
     return [
       {
         attackId: attack.id,
-        relatedAlertIds: attack?.alertIds ?? [],
+        relatedAlertIds: attack.alertIds,
         tags: attack.tags,
       },
     ];
