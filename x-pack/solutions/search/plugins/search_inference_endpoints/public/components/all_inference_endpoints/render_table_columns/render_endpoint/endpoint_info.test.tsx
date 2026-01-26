@@ -67,4 +67,38 @@ describe('RenderEndpoint component tests', () => {
     expect(screen.getByText('elastic-rerank')).toBeInTheDocument();
     expect(screen.getByText('TECH PREVIEW')).toBeInTheDocument();
   });
+
+  it('renders with lock icon for preconfigured endpoints', () => {
+    const mockProvider = {
+      inference_id: '.elser-2-elasticsearch',
+      service: 'elasticsearch',
+      service_settings: {
+        num_allocations: 1,
+        num_threads: 1,
+        model_id: '.elser_model_2',
+      },
+      task_settings: {},
+    } as any;
+
+    render(<EndpointInfo inferenceId={'.elser-2-elasticsearch'} endpointInfo={mockProvider} />);
+
+    expect(screen.getByText('.elser-2-elasticsearch')).toBeInTheDocument();
+    expect(screen.getByTestId('preconfigured-endpoint-icon')).toBeInTheDocument();
+  });
+
+  it('does not render lock icon for non-preconfigured endpoints', () => {
+    const mockProvider = {
+      inference_id: 'my-custom-endpoint',
+      service: 'cohere',
+      service_settings: {
+        model_id: 'embed-english-light-v3.0',
+      },
+      task_settings: {},
+    } as any;
+
+    render(<EndpointInfo inferenceId={'my-custom-endpoint'} endpointInfo={mockProvider} />);
+
+    expect(screen.getByText('my-custom-endpoint')).toBeInTheDocument();
+    expect(screen.queryByTestId('preconfigured-endpoint-icon')).not.toBeInTheDocument();
+  });
 });

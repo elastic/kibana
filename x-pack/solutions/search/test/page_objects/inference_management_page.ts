@@ -53,6 +53,22 @@ export function SearchInferenceManagementPageProvider({ getService }: FtrProvide
         expect(isEnabled).to.be(false);
       },
 
+      async expectPreconfiguredEndpointsToHaveLockIcon() {
+        await testSubjects.existOrFail('preconfigured-endpoint-icon');
+      },
+
+      async expectTypeBadgeUnderEndpointName() {
+        // Verify that type badges are displayed under endpoint names (e.g., sparse_embedding, text_embedding)
+        const sparseEmbeddingBadge = await testSubjects.exists(
+          'table-column-task-type-sparse_embedding'
+        );
+        const textEmbeddingBadge = await testSubjects.exists(
+          'table-column-task-type-text_embedding'
+        );
+        // At least one of these should exist in the preconfigured endpoints
+        expect(sparseEmbeddingBadge || textEmbeddingBadge).to.be(true);
+      },
+
       async expectEndpointWithoutUsageTobeDelete() {
         const userDefinedEdnpoint = await testSubjects.find('inferenceUIDeleteAction-user-defined');
         await userDefinedEdnpoint.click();
