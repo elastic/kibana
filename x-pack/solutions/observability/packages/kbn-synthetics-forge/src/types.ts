@@ -28,12 +28,18 @@ export interface Space {
   name: string;
 }
 
+export interface MonitorLocation {
+  id: string;
+  isServiceManaged: boolean;
+}
+
 export interface Monitor {
   id: string;
   name: string;
   type: string;
   config_id: string;
   tags?: string[];
+  locations?: MonitorLocation[];
 }
 
 export interface MonitorCounts {
@@ -66,4 +72,12 @@ export interface ForgeOutput {
   monitorIds: string[];
   monitorCount: number;
   kibanaUrl: string;
+}
+
+export interface CleanupResult {
+  monitorsDeleted: number;
+  packagePoliciesDeleted: number;
+  privateLocationsDeleted: number;
+  agentsUnenrolled: number;
+  agentPoliciesDeleted: number;
 }

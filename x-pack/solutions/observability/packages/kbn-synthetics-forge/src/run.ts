@@ -7,7 +7,7 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import { SyntheticsApiClient } from './api_client';
-import type { ForgeConfig, ForgeOutput, PrivateLocation } from './types';
+import type { ForgeConfig, ForgeOutput, PrivateLocation, CleanupResult } from './types';
 
 const BROWSER_SCRIPT = `
 step('Navigate to Elastic', async () => {
@@ -15,23 +15,26 @@ step('Navigate to Elastic', async () => {
 });
 `;
 
-// ICMP targets to distribute load and avoid rate limiting
 const ICMP_HOSTS = [
-  '8.8.8.8', // Google DNS
-  '8.8.4.4', // Google DNS
-  '1.1.1.1', // Cloudflare
-  '1.0.0.1', // Cloudflare
-  '9.9.9.9', // Quad9
-  '149.112.112.112', // Quad9
-  '208.67.222.222', // OpenDNS
-  '208.67.220.220', // OpenDNS
-  '4.2.2.1', // Level3
-  '4.2.2.2', // Level3
-  '8.26.56.26', // Comodo
-  '8.20.247.20', // Comodo
-  '94.140.14.14', // AdGuard
-  '94.140.15.15', // AdGuard
+  '8.8.8.8',
+  '8.8.4.4',
+  '1.1.1.1',
+  '1.0.0.1',
+  '9.9.9.9',
+  '149.112.112.112',
+  '208.67.222.222',
+  '208.67.220.220',
+  '4.2.2.1',
+  '4.2.2.2',
+  '8.26.56.26',
+  '8.20.247.20',
+  '94.140.14.14',
+  '94.140.15.15',
 ];
+
+async function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 async function createMonitorsInBatches<T>(
   items: T[],
@@ -49,7 +52,7 @@ async function createMonitorsInBatches<T>(
   return results;
 }
 
-export async function cleanup(config: ForgeConfig, log: ToolingLog): Promise<void> {
+export async function cleanup(config: ForgeConfig, log: ToolingLog): Promise<CleanupResult> {
   const client = new SyntheticsApiClient(
     {
       kibanaUrl: config.kibanaUrl,
@@ -59,100 +62,109 @@ export async function cleanup(config: ForgeConfig, log: ToolingLog): Promise<voi
     log
   );
 
-  log.info(`Cleaning up resources with prefix: ${config.resourcePrefix}`);
+  const result: CleanupResult = {
+    monitorsDeleted: 0,
+    packagePoliciesDeleted: 0,
+    privateLocationsDeleted: 0,
+    agentsUnenrolled: 0,
+    agentPoliciesDeleted: 0,
+  };
 
-  // Step 1: Delete all monitors (with retries until all are gone)
-  const maxRetries = 3;
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+  const spaceId = config.spaceId;
+  log.info(`Cleaning up ALL resources in space: ${spaceId}`);
+
+  // Collect agent policy IDs from private locations BEFORE deleting anything
+  const agentPolicyIds: string[] = [];
+
+  // Get ALL private locations in our space
+  const privateLocations = await client.getPrivateLocations(spaceId);
+  log.info(`Found ${privateLocations.length} private location(s) in space`);
+  for (const loc of privateLocations) {
+    log.info(`  - "${loc.label}" -> agent policy: ${loc.agentPolicyId}`);
+    if (loc.agentPolicyId && !agentPolicyIds.includes(loc.agentPolicyId)) {
+      agentPolicyIds.push(loc.agentPolicyId);
+    }
+  }
+
+  // Get ALL monitors in our space
+  const monitors = await client.getMonitors(spaceId);
+  log.info(`Found ${monitors.length} monitor(s) in space`);
+
+  // Step 1: Delete package policies for monitors
+  log.info('Step 1: Deleting package policies...');
+  if (monitors.length > 0) {
+    const { deleted, failed } = await client.deletePackagePoliciesForMonitors(monitors, spaceId);
+    result.packagePoliciesDeleted = deleted;
+    if (deleted > 0) {
+      log.success(`Deleted ${deleted} package policies`);
+    }
+    if (failed > 0) {
+      log.warning(`${failed} package policies failed to delete (may not exist)`);
+    }
+  } else {
+    log.info('No package policies to delete');
+  }
+
+  // Step 2: Delete ALL monitors in the space
+  log.info('Step 2: Deleting monitors...');
+  if (monitors.length > 0) {
+    const monitorIds = monitors.map((m) => m.config_id || m.id);
+    await client.deleteMonitors(monitorIds, spaceId);
+    result.monitorsDeleted = monitors.length;
+    log.success(`Deleted ${monitors.length} monitors`);
+  } else {
+    log.info('No monitors to delete');
+  }
+
+  // Step 3: Delete ALL private locations in the space
+  log.info('Step 3: Deleting private locations...');
+  for (const loc of privateLocations) {
     try {
-      const monitors = await client.getMonitors(config.spaceId);
-      log.info(`Found ${monitors.length} total monitors in space ${config.spaceId}`);
-
-      const taggedMonitors = monitors.filter(
-        (m) => m.tags?.includes(config.resourcePrefix) || m.name.startsWith('Scalability ')
-      );
-
-      if (taggedMonitors.length === 0) {
-        log.info('No monitors to delete');
-        break;
-      }
-
-      log.info(`Deleting ${taggedMonitors.length} monitors (attempt ${attempt}/${maxRetries})`);
-      const monitorIds = taggedMonitors.map((m) => m.config_id || m.id);
-      await client.deleteMonitors(monitorIds, config.spaceId);
-      log.success(`Deleted ${taggedMonitors.length} monitors`);
-
-      // Wait for deletion to propagate
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // Verify deletion
-      const remaining = await client.getMonitors(config.spaceId);
-      const remainingTagged = remaining.filter(
-        (m) => m.tags?.includes(config.resourcePrefix) || m.name.startsWith('Scalability ')
-      );
-      if (remainingTagged.length === 0) {
-        log.success('All monitors deleted successfully');
-        break;
-      } else {
-        log.warning(`${remainingTagged.length} monitors still remain, retrying...`);
-      }
+      await client.deletePrivateLocation(loc.id, spaceId);
+      result.privateLocationsDeleted++;
+      log.success(`Deleted private location: ${loc.label}`);
     } catch (err) {
-      log.warning(`Error during monitor cleanup (attempt ${attempt}): ${err}`);
+      log.warning(`Failed to delete private location ${loc.label}: ${err}`);
     }
   }
+  if (privateLocations.length === 0) {
+    log.info('No private locations to delete');
+  }
 
-  // Step 2: Delete private locations (retry if monitors were blocking)
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+  // Step 4: Unenroll agents and delete agent policies
+  log.info('Step 4: Unenrolling agents and deleting agent policies...');
+  for (const policyId of agentPolicyIds) {
+    // Unenroll agents first
+    const agents = await client.getAgentsForPolicy(policyId);
+    if (agents.length > 0) {
+      log.info(`Unenrolling ${agents.length} agents from policy ${policyId}`);
+      await client.bulkUnenrollAgents(policyId);
+      result.agentsUnenrolled += agents.length;
+      await delay(2000);
+    }
+
+    // Delete policy
     try {
-      const locations = await client.getPrivateLocations(config.spaceId);
-      const taggedLocations = locations.filter((l) =>
-        l.label.toLowerCase().includes(config.resourcePrefix.toLowerCase())
-      );
-
-      if (taggedLocations.length === 0) {
-        log.info('No private locations to delete');
-        break;
-      }
-
-      let allDeleted = true;
-      for (const location of taggedLocations) {
-        log.info(`Deleting private location: ${location.label} (attempt ${attempt}/${maxRetries})`);
-        try {
-          await client.deletePrivateLocation(location.id, config.spaceId);
-          log.success(`Deleted private location: ${location.label}`);
-        } catch (err) {
-          log.warning(`Failed to delete private location: ${err}`);
-          allDeleted = false;
-        }
-      }
-
-      if (allDeleted) break;
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await client.deleteAgentPolicy(policyId, true);
+      result.agentPoliciesDeleted++;
+      log.success(`Deleted agent policy: ${policyId}`);
     } catch (err) {
-      log.warning(`Error during private location cleanup: ${err}`);
+      log.warning(`Failed to delete agent policy ${policyId}: ${err}`);
     }
   }
-
-  // Step 3: Delete agent policies
-  try {
-    const policies = await client.getAgentPolicies();
-    const taggedPolicies = policies.filter((p) =>
-      p.name.toLowerCase().includes(config.resourcePrefix.toLowerCase())
-    );
-    for (const policy of taggedPolicies) {
-      log.info(`Deleting agent policy: ${policy.name}`);
-      try {
-        await client.deleteAgentPolicy(policy.id);
-        log.success(`Deleted agent policy: ${policy.name}`);
-      } catch (err) {
-        log.warning(`Failed to delete agent policy (may have agents attached): ${err}`);
-      }
-    }
-  } catch (err) {
-    log.warning(`Error during agent policy cleanup: ${err}`);
+  if (agentPolicyIds.length === 0) {
+    log.info('No agent policies to delete');
   }
 
-  log.success('Cleanup complete');
+  log.info('=== CLEANUP SUMMARY ===');
+  log.info(`  Monitors deleted: ${result.monitorsDeleted}`);
+  log.info(`  Package policies deleted: ${result.packagePoliciesDeleted}`);
+  log.info(`  Private locations deleted: ${result.privateLocationsDeleted}`);
+  log.info(`  Agents unenrolled: ${result.agentsUnenrolled}`);
+  log.info(`  Agent policies deleted: ${result.agentPoliciesDeleted}`);
+
+  log.success('=== CLEANUP COMPLETE ===');
+  return result;
 }
 
 export async function run(config: ForgeConfig, log: ToolingLog): Promise<ForgeOutput> {
@@ -195,7 +207,6 @@ export async function run(config: ForgeConfig, log: ToolingLog): Promise<ForgeOu
   let privateLocationLabel: string;
 
   if (config.privateLocationId) {
-    // Use existing private location (skip creating agent policy and private location)
     log.info(`Fetching existing private location: ${config.privateLocationId}`);
     privateLocation = await client.getPrivateLocationById(config.privateLocationId, config.spaceId);
     privateLocationLabel = privateLocation.label;
@@ -205,7 +216,6 @@ export async function run(config: ForgeConfig, log: ToolingLog): Promise<ForgeOu
       `Using existing Private Location: ${privateLocation.label} (${privateLocation.id})`
     );
   } else {
-    // Create new agent policy and private location (default behavior)
     agentPolicyName = `${resourcePrefix}-policy`;
     const agentPolicy = await client.createAgentPolicy(agentPolicyName);
     agentPolicyId = agentPolicy.id;
@@ -299,7 +309,6 @@ export async function run(config: ForgeConfig, log: ToolingLog): Promise<ForgeOu
     log.success(`Created ${browserIds.length} Browser monitor(s)`);
   }
 
-  // Verify
   const monitors = await client.getMonitors(config.spaceId);
   log.success(`Verified ${monitors.length} monitors in space ${config.spaceId}`);
 

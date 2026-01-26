@@ -30,7 +30,7 @@ function getConfigFromEnv(): ForgeConfig {
     password: process.env.KIBANA_PASSWORD || 'changeme',
     spaceId: resourcePrefix,
     resourcePrefix,
-    concurrency: 10,
+    concurrency: parseIntEnv('CONCURRENCY', 1),
     monitorCounts: {
       http: parseIntEnv('HTTP', 1),
       tcp: parseIntEnv('TCP', 1),

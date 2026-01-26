@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import type { AxiosInstance } from 'axios';
+import type { AxiosInstance, AxiosResponse } from 'axios';
 import axios from 'axios';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ApiClientConfig, PrivateLocation, AgentPolicy, Space, Monitor } from './types';
+
+const DEFAULT_RETRY_COUNT = 3;
+const DEFAULT_RETRY_DELAY_MS = 1000;
+const BATCH_SIZE = 50;
 
 export class SyntheticsApiClient {
   private client: AxiosInstance;
@@ -19,8 +23,8 @@ export class SyntheticsApiClient {
 
   constructor(config: ApiClientConfig, log: ToolingLog) {
     this.kibanaUrl = config.kibanaUrl.replace(/\/$/, '');
-    this.maxRetries = 3;
-    this.retryDelayMs = 1000;
+    this.maxRetries = DEFAULT_RETRY_COUNT;
+    this.retryDelayMs = DEFAULT_RETRY_DELAY_MS;
     this.log = log;
     this.client = axios.create({
       baseURL: this.kibanaUrl,
@@ -37,9 +41,13 @@ export class SyntheticsApiClient {
     });
   }
 
-  private async withRetry<T>(operation: () => Promise<T>, context: string): Promise<T> {
+  private async withRetry<T>(
+    operation: () => Promise<T>,
+    context: string,
+    retries: number = this.maxRetries
+  ): Promise<T> {
     let lastError: Error | undefined;
-    for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
+    for (let attempt = 1; attempt <= retries; attempt++) {
       try {
         return await operation();
       } catch (error) {
@@ -47,12 +55,14 @@ export class SyntheticsApiClient {
         const isRetryable =
           lastError.message?.includes('version_conflict') ||
           lastError.message?.includes('409') ||
-          lastError.message?.includes('500');
+          lastError.message?.includes('500') ||
+          lastError.message?.includes('ECONNREFUSED') ||
+          lastError.message?.includes('timeout');
 
-        if (isRetryable && attempt < this.maxRetries) {
+        if (isRetryable && attempt < retries) {
           const delay = this.retryDelayMs * Math.pow(2, attempt - 1);
-          this.log.debug(`Retry ${attempt}/${this.maxRetries} for ${context} after ${delay}ms`);
-          await new Promise((resolve) => setTimeout(resolve, delay));
+          this.log.debug(`Retry ${attempt}/${retries} for ${context} after ${delay}ms`);
+          await this.delay(delay);
         } else {
           throw lastError;
         }
@@ -61,10 +71,22 @@ export class SyntheticsApiClient {
     throw lastError;
   }
 
+  private async delay(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  private isSuccessResponse(response: AxiosResponse): boolean {
+    return response.status >= 200 && response.status < 300;
+  }
+
+  private getBasePath(spaceId?: string): string {
+    return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : '';
+  }
+
   async setupFleet(): Promise<void> {
     this.log.info('Setting up Fleet...');
     const response = await this.client.post('/api/fleet/setup');
-    if (response.status !== 200) {
+    if (!this.isSuccessResponse(response)) {
       throw new Error(`Fleet setup failed: ${JSON.stringify(response.data)}`);
     }
     this.log.success('Fleet setup complete');
@@ -94,7 +116,7 @@ export class SyntheticsApiClient {
       description: 'Space for Synthetics scalability testing',
     });
 
-    if (response.status !== 200) {
+    if (!this.isSuccessResponse(response)) {
       throw new Error(`Create space failed: ${JSON.stringify(response.data)}`);
     }
     this.log.success(`Space created: ${spaceId}`);
@@ -118,7 +140,7 @@ export class SyntheticsApiClient {
       monitoring_enabled: ['logs', 'metrics'],
     });
 
-    if (response.status !== 200) {
+    if (!this.isSuccessResponse(response)) {
       throw new Error(`Create agent policy failed: ${JSON.stringify(response.data)}`);
     }
     this.log.success(`Agent policy created: ${response.data.item.id}`);
@@ -126,9 +148,9 @@ export class SyntheticsApiClient {
   }
 
   async getPrivateLocations(spaceId?: string): Promise<PrivateLocation[]> {
-    const basePath = spaceId ? `/s/${spaceId}` : '';
+    const basePath = this.getBasePath(spaceId);
     const response = await this.client.get(`${basePath}/api/synthetics/private_locations`);
-    if (response.status !== 200) {
+    if (!this.isSuccessResponse(response)) {
       return [];
     }
     return response.data as PrivateLocation[];
@@ -153,7 +175,6 @@ export class SyntheticsApiClient {
     const existing = await this.getPrivateLocations(spaceId);
     const found = existing.find((loc) => loc.label === label);
     if (found) {
-      // Verify the linked agent policy still exists
       const policies = await this.getAgentPolicies();
       const policyExists = policies.some((p) => p.id === found.agentPolicyId);
 
@@ -161,25 +182,19 @@ export class SyntheticsApiClient {
         this.log.info(`Private location already exists: ${found.id}`);
         return found;
       } else {
-        // Agent policy was deleted, remove orphaned private location
         this.log.warning(
           `Private location ${found.id} has orphaned agent policy (${found.agentPolicyId}), deleting...`
         );
         try {
-          const basePath = spaceId ? `/s/${spaceId}` : '';
-          const deleteResponse = await this.client.delete(
-            `${basePath}/api/synthetics/private_locations/${found.id}`
-          );
-          this.log.info(`Delete response: ${deleteResponse.status}`);
+          await this.deletePrivateLocation(found.id, spaceId);
         } catch (err) {
           this.log.warning(`Failed to delete orphaned location: ${err}`);
         }
-        // Wait a moment for deletion to propagate
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await this.delay(1000);
       }
     }
 
-    const basePath = spaceId ? `/s/${spaceId}` : '';
+    const basePath = this.getBasePath(spaceId);
     const response = await this.client.post(`${basePath}/api/synthetics/private_locations`, {
       label,
       agentPolicyId,
@@ -187,7 +202,7 @@ export class SyntheticsApiClient {
       ...(spaceId ? { spaces: [spaceId] } : {}),
     });
 
-    if (response.status !== 200) {
+    if (!this.isSuccessResponse(response)) {
       throw new Error(`Create private location failed: ${JSON.stringify(response.data)}`);
     }
     this.log.success(`Private location created: ${response.data.id}`);
@@ -203,21 +218,19 @@ export class SyntheticsApiClient {
   ): Promise<Monitor> {
     return this.withRetry(async () => {
       this.log.debug(`Creating HTTP monitor: ${name}`);
-      const basePath = spaceId ? `/s/${spaceId}` : '';
+      const basePath = this.getBasePath(spaceId);
       const response = await this.client.post(`${basePath}/api/synthetics/monitors`, {
         type: 'http',
         name,
         urls: url,
         schedule: { number: '3', unit: 'm' },
-        locations: [
-          { id: privateLocation.id, label: privateLocation.label, isServiceManaged: false },
-        ],
+        locations: [{ id: privateLocation.id, isServiceManaged: false }],
         enabled: true,
         timeout: '16',
         tags,
       });
 
-      if (response.status !== 200) {
+      if (!this.isSuccessResponse(response)) {
         throw new Error(`Create HTTP monitor failed: ${JSON.stringify(response.data)}`);
       }
       return response.data as Monitor;
@@ -233,21 +246,19 @@ export class SyntheticsApiClient {
   ): Promise<Monitor> {
     return this.withRetry(async () => {
       this.log.debug(`Creating TCP monitor: ${name}`);
-      const basePath = spaceId ? `/s/${spaceId}` : '';
+      const basePath = this.getBasePath(spaceId);
       const response = await this.client.post(`${basePath}/api/synthetics/monitors`, {
         type: 'tcp',
         name,
         hosts: host,
         schedule: { number: '3', unit: 'm' },
-        locations: [
-          { id: privateLocation.id, label: privateLocation.label, isServiceManaged: false },
-        ],
+        locations: [{ id: privateLocation.id, isServiceManaged: false }],
         enabled: true,
         timeout: '16',
         tags,
       });
 
-      if (response.status !== 200) {
+      if (!this.isSuccessResponse(response)) {
         throw new Error(`Create TCP monitor failed: ${JSON.stringify(response.data)}`);
       }
       return response.data as Monitor;
@@ -263,22 +274,20 @@ export class SyntheticsApiClient {
   ): Promise<Monitor> {
     return this.withRetry(async () => {
       this.log.debug(`Creating ICMP monitor: ${name}`);
-      const basePath = spaceId ? `/s/${spaceId}` : '';
+      const basePath = this.getBasePath(spaceId);
       const response = await this.client.post(`${basePath}/api/synthetics/monitors`, {
         type: 'icmp',
         name,
         hosts: host,
         schedule: { number: '3', unit: 'm' },
-        locations: [
-          { id: privateLocation.id, label: privateLocation.label, isServiceManaged: false },
-        ],
+        locations: [{ id: privateLocation.id, isServiceManaged: false }],
         enabled: true,
         timeout: '16',
         wait: '1',
         tags,
       });
 
-      if (response.status !== 200) {
+      if (!this.isSuccessResponse(response)) {
         throw new Error(`Create ICMP monitor failed: ${JSON.stringify(response.data)}`);
       }
       return response.data as Monitor;
@@ -294,14 +303,12 @@ export class SyntheticsApiClient {
   ): Promise<Monitor> {
     return this.withRetry(async () => {
       this.log.debug(`Creating Browser monitor: ${name}`);
-      const basePath = spaceId ? `/s/${spaceId}` : '';
+      const basePath = this.getBasePath(spaceId);
       const response = await this.client.post(`${basePath}/api/synthetics/monitors`, {
         type: 'browser',
         name,
         schedule: { number: '3', unit: 'm' },
-        locations: [
-          { id: privateLocation.id, label: privateLocation.label, isServiceManaged: false },
-        ],
+        locations: [{ id: privateLocation.id, isServiceManaged: false }],
         enabled: true,
         timeout: '16',
         tags,
@@ -311,120 +318,15 @@ export class SyntheticsApiClient {
         ignore_https_errors: false,
       });
 
-      if (response.status !== 200) {
+      if (!this.isSuccessResponse(response)) {
         throw new Error(`Create Browser monitor failed: ${JSON.stringify(response.data)}`);
       }
       return response.data as Monitor;
     }, `Browser monitor: ${name}`);
   }
 
-  async createMonitorsBulk(
-    monitors: Array<{
-      type: 'http' | 'tcp' | 'icmp' | 'browser';
-      name: string;
-      target: string; // url for http, host for tcp/icmp, script for browser
-      tags?: string[];
-    }>,
-    privateLocation: PrivateLocation,
-    spaceId?: string,
-    projectName: string = 'scalability-forge'
-  ): Promise<{ created: number; failed: number }> {
-    if (monitors.length === 0) return { created: 0, failed: 0 };
-
-    // API limits: 250 browser monitors, 1500 lightweight per request
-    const BROWSER_LIMIT = 250;
-    const LIGHTWEIGHT_LIMIT = 1500;
-
-    // Split monitors by type
-    const browserMonitors = monitors.filter((m) => m.type === 'browser');
-    const lightweightMonitors = monitors.filter((m) => m.type !== 'browser');
-
-    let totalCreated = 0;
-    let totalFailed = 0;
-    const basePath = spaceId ? `/s/${spaceId}` : '';
-
-    // Process browser monitors in chunks of 250
-    for (let i = 0; i < browserMonitors.length; i += BROWSER_LIMIT) {
-      const chunk = browserMonitors.slice(i, i + BROWSER_LIMIT);
-      const result = await this.sendBulkRequest(chunk, privateLocation, basePath, projectName, i);
-      totalCreated += result.created;
-      totalFailed += result.failed;
-    }
-
-    // Process lightweight monitors in chunks of 1500
-    for (let i = 0; i < lightweightMonitors.length; i += LIGHTWEIGHT_LIMIT) {
-      const chunk = lightweightMonitors.slice(i, i + LIGHTWEIGHT_LIMIT);
-      const result = await this.sendBulkRequest(chunk, privateLocation, basePath, projectName, i);
-      totalCreated += result.created;
-      totalFailed += result.failed;
-    }
-
-    this.log.info(`Bulk create complete: ${totalCreated} created, ${totalFailed} failed`);
-    return { created: totalCreated, failed: totalFailed };
-  }
-
-  private async sendBulkRequest(
-    monitors: Array<{
-      type: 'http' | 'tcp' | 'icmp' | 'browser';
-      name: string;
-      target: string;
-      tags?: string[];
-    }>,
-    privateLocation: PrivateLocation,
-    basePath: string,
-    projectName: string,
-    batchOffset: number
-  ): Promise<{ created: number; failed: number }> {
-    const projectMonitors = monitors.map((m, idx) => {
-      const uniqueId = `${m.name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}-${
-        batchOffset + idx
-      }`;
-      const base = {
-        id: uniqueId,
-        name: m.name,
-        schedule: 10,
-        enabled: true,
-        tags: m.tags || [],
-        privateLocations: [privateLocation.label],
-        locations: [],
-      };
-
-      switch (m.type) {
-        case 'http':
-          return { ...base, type: 'http' as const, urls: m.target };
-        case 'tcp':
-          return { ...base, type: 'tcp' as const, hosts: m.target };
-        case 'icmp':
-          return { ...base, type: 'icmp' as const, hosts: m.target };
-        case 'browser':
-          return {
-            ...base,
-            type: 'browser' as const,
-            'source.inline.script': m.target,
-            screenshots: 'on',
-          };
-      }
-    });
-
-    this.log.info(`Bulk creating ${monitors.length} monitors (batch at offset ${batchOffset})`);
-    const response = await this.client.put(
-      `${basePath}/api/synthetics/project/${projectName}/monitors/_bulk_update`,
-      { monitors: projectMonitors }
-    );
-
-    if (response.status !== 200) {
-      this.log.warning(
-        `Bulk create response: ${response.status} - ${JSON.stringify(response.data)}`
-      );
-    }
-
-    const created = response.data?.createdMonitors?.length || 0;
-    const failed = response.data?.failedMonitors?.length || 0;
-    return { created, failed };
-  }
-
   async getMonitors(spaceId?: string): Promise<Monitor[]> {
-    const basePath = spaceId ? `/s/${spaceId}` : '';
+    const basePath = this.getBasePath(spaceId);
     const allMonitors: Monitor[] = [];
     let page = 1;
     const perPage = 100;
@@ -433,7 +335,7 @@ export class SyntheticsApiClient {
       const response = await this.client.get(
         `${basePath}/api/synthetics/monitors?perPage=${perPage}&page=${page}`
       );
-      if (response.status !== 200) {
+      if (!this.isSuccessResponse(response)) {
         throw new Error(`Get monitors failed: ${JSON.stringify(response.data)}`);
       }
 
@@ -449,44 +351,70 @@ export class SyntheticsApiClient {
     return allMonitors;
   }
 
-  async deleteMonitor(monitorId: string, spaceId?: string): Promise<void> {
-    await this.deleteMonitors([monitorId], spaceId);
-  }
-
   async deleteMonitors(monitorIds: string[], spaceId?: string): Promise<void> {
     if (monitorIds.length === 0) return;
 
-    const basePath = spaceId ? `/s/${spaceId}` : '';
+    const basePath = this.getBasePath(spaceId);
     const response = await this.client.delete(`${basePath}/api/synthetics/monitors`, {
       data: { ids: monitorIds },
     });
 
-    if (response.status !== 200) {
-      this.log.warning(`Bulk delete response: ${response.status}`);
+    if (!this.isSuccessResponse(response)) {
+      this.log.warning(`Bulk delete monitors response: ${response.status}`);
     }
   }
 
   async deletePrivateLocation(locationId: string, spaceId?: string): Promise<void> {
-    const basePath = spaceId ? `/s/${spaceId}` : '';
-    await this.client.delete(`${basePath}/api/synthetics/private_locations/${locationId}`);
+    const basePath = this.getBasePath(spaceId);
+    const response = await this.client.delete(
+      `${basePath}/api/synthetics/private_locations/${locationId}`
+    );
+    if (!this.isSuccessResponse(response) && response.status !== 404) {
+      throw new Error(`Delete private location failed: ${JSON.stringify(response.data)}`);
+    }
   }
 
-  async deleteAgentPolicy(policyId: string): Promise<void> {
-    await this.client.post('/api/fleet/agent_policies/delete', {
+  async deleteAgentPolicy(policyId: string, force: boolean = false): Promise<void> {
+    const response = await this.client.post('/api/fleet/agent_policies/delete', {
       agentPolicyId: policyId,
+      force,
     });
+    if (!this.isSuccessResponse(response) && response.status !== 404) {
+      throw new Error(`Delete agent policy failed: ${JSON.stringify(response.data)}`);
+    }
+  }
+
+  async getAgentsForPolicy(agentPolicyId: string): Promise<Array<{ id: string; status: string }>> {
+    const response = await this.client.get(
+      `/api/fleet/agents?kuery=policy_id:${agentPolicyId}&perPage=1000`
+    );
+    if (!this.isSuccessResponse(response)) {
+      return [];
+    }
+    return response.data.items || [];
+  }
+
+  async bulkUnenrollAgents(agentPolicyId: string): Promise<void> {
+    // Use bulk unenroll API
+    const response = await this.client.post('/api/fleet/agents/bulk_unenroll', {
+      agents: `policy_id:${agentPolicyId}`,
+      force: true,
+      revoke: true,
+    });
+
+    if (!this.isSuccessResponse(response)) {
+      this.log.warning(
+        `Bulk unenroll response: ${response.status} - ${JSON.stringify(response.data)}`
+      );
+    }
   }
 
   async getAgentPolicies(): Promise<AgentPolicy[]> {
-    const response = await this.client.get('/api/fleet/agent_policies');
-    if (response.status !== 200) {
+    const response = await this.client.get('/api/fleet/agent_policies?perPage=1000');
+    if (!this.isSuccessResponse(response)) {
       return [];
     }
     return response.data.items as AgentPolicy[];
-  }
-
-  async deleteSpace(spaceId: string): Promise<void> {
-    await this.client.delete(`/api/spaces/space/${spaceId}`);
   }
 
   async getEnrollmentToken(agentPolicyId: string): Promise<string> {
@@ -495,7 +423,7 @@ export class SyntheticsApiClient {
       `/api/fleet/enrollment_api_keys?kuery=policy_id:${agentPolicyId}`
     );
 
-    if (response.status !== 200 || !response.data?.list?.length) {
+    if (!this.isSuccessResponse(response) || !response.data?.list?.length) {
       throw new Error(`Failed to get enrollment token: ${JSON.stringify(response.data)}`);
     }
 
@@ -506,9 +434,65 @@ export class SyntheticsApiClient {
 
   async getKibanaVersion(): Promise<string> {
     const response = await this.client.get('/api/status');
-    if (response.status !== 200) {
+    if (!this.isSuccessResponse(response)) {
       throw new Error(`Failed to get Kibana version: ${JSON.stringify(response.data)}`);
     }
     return response.data.version.number;
+  }
+
+  async deletePackagePoliciesForMonitors(
+    monitors: Array<{
+      config_id?: string;
+      id: string;
+      locations?: Array<{ id: string; isServiceManaged: boolean }>;
+    }>,
+    spaceId: string
+  ): Promise<{ deleted: number; failed: number }> {
+    const policyIds: string[] = [];
+
+    for (const monitor of monitors) {
+      const configId = monitor.config_id || monitor.id;
+      if (monitor.locations) {
+        for (const loc of monitor.locations) {
+          if (!loc.isServiceManaged) {
+            const policyId = `${configId}-${loc.id}-${spaceId}`;
+            if (!policyIds.includes(policyId)) {
+              policyIds.push(policyId);
+            }
+          }
+        }
+      }
+    }
+
+    if (policyIds.length === 0) {
+      return { deleted: 0, failed: 0 };
+    }
+
+    this.log.info(`Deleting ${policyIds.length} package policies`);
+
+    let totalDeleted = 0;
+    let totalFailed = 0;
+
+    for (let i = 0; i < policyIds.length; i += BATCH_SIZE) {
+      const batch = policyIds.slice(i, i + BATCH_SIZE);
+
+      try {
+        const response = await this.client.post('/api/fleet/package_policies/delete', {
+          packagePolicyIds: batch,
+          force: true,
+        });
+
+        if (this.isSuccessResponse(response)) {
+          totalDeleted += batch.length;
+        } else {
+          totalFailed += batch.length;
+        }
+      } catch (err) {
+        this.log.warning(`Error deleting package policies: ${err}`);
+        totalFailed += batch.length;
+      }
+    }
+
+    return { deleted: totalDeleted, failed: totalFailed };
   }
 }
