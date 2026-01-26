@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useBoolean } from '@kbn/react-hooks';
 import { i18n } from '@kbn/i18n';
 import { TaskStatus } from '@kbn/streams-schema';
 import type { FeaturesIdentificationTaskResult } from '@kbn/streams-plugin/server/routes/internal/streams/features/route';
@@ -40,6 +41,8 @@ export function FeatureIdentificationControl({
     getFeaturesIdentificationStatus
   );
   const previousStatusRef = useRef<TaskStatus | undefined>();
+  const [isNoResultsDismissed, { on: dismissNoResults, off: resetNoResultsDismissed }] =
+    useBoolean(false);
 
   useEffect(() => {
     getTask();
@@ -60,6 +63,7 @@ export function FeatureIdentificationControl({
     previousStatusRef.current = currentStatus;
 
     if (currentStatus === TaskStatus.InProgress) {
+      resetNoResultsDismissed();
       onTaskStart();
     } else if (currentStatus === TaskStatus.Completed) {
       refreshFeatures();
@@ -67,7 +71,7 @@ export function FeatureIdentificationControl({
     } else if (currentStatus !== undefined) {
       onTaskEnd();
     }
-  }, [task?.status, refreshFeatures, onTaskStart, onTaskEnd]);
+  }, [task?.status, refreshFeatures, onTaskStart, onTaskEnd, resetNoResultsDismissed]);
 
   const handleStartIdentification = useCallback(() => {
     const connectorId = aiFeatures?.genAiConnectors.selectedConnector;
@@ -109,7 +113,8 @@ export function FeatureIdentificationControl({
           featuresCount={task.features.length}
           isLoading={isIdentifyingFeatures || isGettingTask}
           onStartIdentification={handleStartIdentification}
-          onDismiss={getTask}
+          isNoResultsDismissed={isNoResultsDismissed}
+          onDismiss={dismissNoResults}
         />
       );
 
@@ -176,6 +181,7 @@ interface CompletedStateProps {
   featuresCount: number;
   isLoading: boolean;
   onStartIdentification: () => void;
+  isNoResultsDismissed: boolean;
   onDismiss: () => void;
 }
 
@@ -183,9 +189,10 @@ function CompletedState({
   featuresCount,
   isLoading,
   onStartIdentification,
+  isNoResultsDismissed,
   onDismiss,
 }: CompletedStateProps) {
-  if (featuresCount === 0) {
+  if (featuresCount === 0 && !isNoResultsDismissed) {
     return (
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
