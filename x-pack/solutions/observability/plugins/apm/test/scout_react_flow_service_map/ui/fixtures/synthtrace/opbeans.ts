@@ -6,11 +6,12 @@
  */
 
 import { apm, timerange } from '@kbn/synthtrace-client';
-
-const SERVICE_OPBEANS_NODE = 'opbeans-node';
-const SERVICE_OPBEANS_JAVA = 'opbeans-java';
-const OPBEANS_JAVA_INSTANCE = 'opbeans-java-prod-1';
-const PRODUCTION_ENVIRONMENT = 'production';
+import {
+  SERVICE_OPBEANS_JAVA,
+  SERVICE_OPBEANS_NODE,
+  OPBEANS_JAVA_INSTANCE,
+  PRODUCTION_ENVIRONMENT,
+} from '../constants';
 
 export function opbeans({ from, to }: { from: number; to: number }) {
   const range = timerange(from, to);

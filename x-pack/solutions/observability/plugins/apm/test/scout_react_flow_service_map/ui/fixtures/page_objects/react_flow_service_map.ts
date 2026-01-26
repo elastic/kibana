@@ -6,8 +6,7 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
-
-const EXTENDED_TIMEOUT = 45000;
+import { EXTENDED_TIMEOUT } from '../constants';
 
 export class ReactFlowServiceMapPage {
   public reactFlowServiceMap: Locator;
@@ -20,9 +19,9 @@ export class ReactFlowServiceMapPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.reactFlowServiceMap = page.testSubj.locator('reactFlowServiceMap');
     this.reactFlowControls = this.reactFlowServiceMap.locator('.react-flow__controls');
-    this.reactFlowZoomInBtn = page.locator('.react-flow__controls button[aria-label="Zoom In"]');
-    this.reactFlowZoomOutBtn = page.locator('.react-flow__controls button[aria-label="Zoom Out"]');
-    this.reactFlowFitViewBtn = page.locator('.react-flow__controls button[aria-label="Fit View"]');
+    this.reactFlowZoomInBtn = this.reactFlowControls.getByRole('button', { name: 'Zoom In' });
+    this.reactFlowZoomOutBtn = this.reactFlowControls.getByRole('button', { name: 'Zoom Out' });
+    this.reactFlowFitViewBtn = this.reactFlowControls.getByRole('button', { name: 'Fit View' });
     this.noServicesPlaceholder = page.locator('.euiEmptyPrompt__content .euiTitle');
   }
 
