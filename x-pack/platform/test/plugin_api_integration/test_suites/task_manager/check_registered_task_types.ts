@@ -192,6 +192,7 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:policy-revisions-cleanup-task',
         'fleet:privilege_level_change:retry',
         'fleet:reassign_action:retry',
+        'fleet:reassign_agents_to_version_specific_policies',
         'fleet:reindex_integration_knowledge',
         'fleet:request_diagnostics:retry',
         'fleet:rollback_action:retry',
