@@ -25,11 +25,11 @@ import {
   getTelemetryFunction,
 } from './persistable_state';
 import { getAllMigrations } from './persistable_state/get_all_migrations';
-import type { EmbeddableTransforms, EmbeddableTransformsSetup } from '../common';
+import type { EmbeddableTransforms } from '../common';
 import type { DrilldownSetup } from './drilldowns/types';
 import { getDrilldownRegistry } from './drilldowns/registry';
-import { getTransformDrilldownsIn } from '../common/drilldowns/transform_drilldowns_in';
-import { getTransformDrilldownsOut } from '../common/drilldowns/transform_drilldowns_out';
+import type { EmbeddableTransformsSetup } from './transforms_registry';
+import { getTranformsRegistry } from './transforms_registry';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
@@ -59,7 +59,7 @@ export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> &
   /**
    * Returns all embeddable schemas registered with registerTransforms.
    */
-  getEmbeddableSchemas: () => ObjectType[];
+  getAllEmbeddableSchemas: () => ObjectType[];
 
   getTransforms: (type: string) =>
     | (EmbeddableTransforms & {
@@ -73,7 +73,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
   private migrateFn: PersistableStateMigrateFn | undefined;
   private drilldownRegistry = getDrilldownRegistry();
-  private transformsRegistry: { [key: string]: EmbeddableTransformsSetup<any, any> } = {};
+  private transformsRegistry = getTranformsRegistry(this.drilldownRegistry);
 
   public setup(core: CoreSetup) {
     this.migrateFn = getMigrateFunction(this.getEmbeddableFactory);
@@ -81,13 +81,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
       registerEmbeddableFactory: this.registerEmbeddableFactory,
       registerDrilldown: this.drilldownRegistry
         .registerDrilldown as EmbeddableSetup['registerDrilldown'],
-      registerTransforms: (type: string, transforms: EmbeddableTransformsSetup<any, any>) => {
-        if (this.transformsRegistry[type]) {
-          throw new Error(`Embeddable transforms for type "${type}" are already registered.`);
-        }
-
-        this.transformsRegistry[type] = transforms;
-      },
+      registerTransforms: this.transformsRegistry.registerTransforms,
       telemetry: getTelemetryFunction(this.getEmbeddableFactory),
       extract: getExtractFunction(this.getEmbeddableFactory),
       inject: getInjectFunction(this.getEmbeddableFactory),
@@ -98,39 +92,8 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
   public start(core: CoreStart) {
     return {
-      getEmbeddableSchemas: () =>
-        Object.values(this.transformsRegistry)
-          .map((transformSetup) =>
-            transformSetup?.getSchema?.(this.drilldownRegistry.getDrilldownsSchema)
-          )
-          .filter((schema) => Boolean(schema)) as ObjectType[],
-      getTransforms: (embeddableType: string) => {
-        const transformsSetup = this.transformsRegistry[embeddableType];
-        if (!transformsSetup) {
-          return;
-        }
-
-        const drilldownTransforms = {
-          transformIn: getTransformDrilldownsIn((drilldownType: string) =>
-            this.drilldownRegistry.getTransformIn(drilldownType)
-          ),
-          transformOut: getTransformDrilldownsOut((drilldownType: string) =>
-            this.drilldownRegistry.getTransformOut(drilldownType)
-          ),
-        };
-
-        return {
-          ...(transformsSetup.getTransforms
-            ? transformsSetup.getTransforms(drilldownTransforms)
-            : {}),
-          ...(transformsSetup.getSchema
-            ? { schema: transformsSetup.getSchema(this.drilldownRegistry.getDrilldownsSchema) }
-            : {}),
-          ...(typeof transformsSetup.throwOnUnmappedPanel === 'boolean'
-            ? { throwOnUnmappedPanel: transformsSetup.throwOnUnmappedPanel }
-            : {}),
-        };
-      },
+      getAllEmbeddableSchemas: this.transformsRegistry.getAllEmbeddableSchemas,
+      getTransforms: this.transformsRegistry.getEmbeddableTransforms,
       telemetry: getTelemetryFunction(this.getEmbeddableFactory),
       extract: getExtractFunction(this.getEmbeddableFactory),
       inject: getInjectFunction(this.getEmbeddableFactory),

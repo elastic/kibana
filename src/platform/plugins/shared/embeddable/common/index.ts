@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { DrilldownTransforms, EmbeddableTransforms, EmbeddableTransformsSetup } from './types';
+export type { DrilldownTransforms, EmbeddableTransforms } from './types';
 
 export type {
   EmbeddableRegistryDefinition,
