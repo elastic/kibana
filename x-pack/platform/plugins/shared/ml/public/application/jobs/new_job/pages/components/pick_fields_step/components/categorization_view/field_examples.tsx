@@ -69,6 +69,12 @@ export const FieldExamples: FC<Props> = ({ fieldExamples }) => {
       columns={columns}
       items={items}
       data-test-subj="mlJobWizardCategorizationExamplesTable"
+      tableCaption={i18n.translate(
+        'xpack.ml.newJob.wizard.pickFieldsStep.categorizationFieldExamples.tableCaption',
+        {
+          defaultMessage: 'Categorization field examples',
+        }
+      )}
     />
   );
 };
