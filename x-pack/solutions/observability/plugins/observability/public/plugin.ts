@@ -340,6 +340,7 @@ export class Plugin
     registerObservabilityRuleTypes(
       this.observabilityRuleTypeRegistry,
       coreSetup.uiSettings,
+      coreSetup.getStartServices,
       logsLocator
     );
 
