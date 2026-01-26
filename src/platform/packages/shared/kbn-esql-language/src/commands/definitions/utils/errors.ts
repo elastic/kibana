@@ -290,13 +290,6 @@ Expected one of:
         }),
         type: 'error',
       };
-    case 'promqlInvalidDateRange':
-      return {
-        message: i18n.translate('kbn-esql-language.esql.validation.promqlInvalidDateRange', {
-          defaultMessage: '[PROMQL] Start must be earlier than end',
-        }),
-        type: 'error',
-      };
     case 'promqlInvalidStepParam':
       return {
         message: i18n.translate('kbn-esql-language.esql.validation.promqlInvalidStepParam', {

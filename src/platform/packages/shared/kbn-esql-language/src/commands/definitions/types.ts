@@ -372,10 +372,6 @@ export interface ValidationErrors {
     message: string;
     type: { param: string };
   };
-  promqlInvalidDateRange: {
-    message: string;
-    type: {};
-  };
   promqlInvalidStepParam: {
     message: string;
     type: {};
