@@ -9,6 +9,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { CoreSetup, Logger } from '@kbn/core/server';
+import dedent from 'dedent';
 import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
   ObservabilityAgentBuilderPluginStart,
@@ -24,24 +25,25 @@ const getTraceChangePointsSchema = z.object({
   ...timeRangeSchemaRequired,
   kqlFilter: z
     .string()
+    .optional()
     .describe(
-      'Optional KQL query to filter the trace documents. Examples: trace.id:"abc123", service.name:"my-service"'
-    )
-    .optional(),
+      'KQL filter for traces. Examples: \'service.name: "my-service"\', \'host.name: "web-*"\'.'
+    ),
   groupBy: z
     .string()
+    .default('service.name')
     .describe(
-      `Field to group results by. Use only low-cardinality fields. Using many fields or high-cardinality fields can cause a large number of groups and severely impact performance. Common fields to group by include: 
-- Service level: 'service.name', 'service.environment', 'service.version'
-- Transaction level: 'transaction.name', 'transaction.type'
-- Infrastructure level: 'host.name', 'container.id', 'kubernetes.pod.name' 
-`
-    )
-    .optional(),
+      dedent(`Field to group results by. Use low-cardinality fields. 
+      Examples:
+        - Service level: service.name, service.environment, service.version
+        - Transaction level: transaction.name, transaction.type
+        - Infrastructure level: host.name, container.id, kubernetes.pod.name       
+      `)
+    ),
   latencyType: z
     .enum(['avg', 'p95', 'p99'])
-    .describe('Aggregation type for latency change points analysis. default is avg.')
-    .optional(),
+    .default('avg')
+    .describe('Aggregation type for latency change points analysis.'),
 });
 
 export function createGetTraceChangePointsTool({
@@ -72,10 +74,7 @@ When to use:
 `,
     schema: getTraceChangePointsSchema,
     tags: ['observability', 'traces'],
-    handler: async (
-      { start, end, kqlFilter, groupBy = 'service.name', latencyType = 'avg' },
-      { request }
-    ) => {
+    handler: async ({ start, end, kqlFilter, groupBy, latencyType }, { request }) => {
       try {
         const changePoints = await getToolHandler({
           core,

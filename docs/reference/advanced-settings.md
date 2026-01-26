@@ -45,8 +45,12 @@ Change the settings that apply only to a specific {{product.kibana}} space.
 
 ### General [kibana-general-settings]
 
-$$$hideAnnouncements$$$`hideAnnouncements` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
-:   Stops showing messages and tours that highlight new features. `false` by default.
+$$$hideAnnouncements$$$`hideAnnouncements` {applies_to}`stack: ga 9.0-9.3, deprecated 9.4+` {applies_to}`serverless: unavailable`
+:   Stops showing messages and tours that highlight new features. `false` by default. 
+    :::{note}
+    :applies_to: stack: ga 9.4+
+    If this setting is set to `false` but the `hideAnnouncements` setting located in the **Global Settings** tab is set to `true`, then messages and tours that highlight new features won't show for the current space.
+    :::
 
 $$$dateformat$$$`dateFormat` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
 :   The format to use for displaying [pretty formatted dates](https://momentjs.com/docs/#/displaying/format/).
@@ -166,6 +170,9 @@ $$$metrics-maxbuckets$$$`metrics:max_buckets` {applies_to}`stack: ga` {applies_t
 
 $$$metrics:allowStringIndices$$$`metrics:allowStringIndices` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
 :   Enables you to use {{es}} indices in **TSVB** visualizations. `false` by default.
+
+$$$workflows:ui:enabled$$$`workflows:ui:enabled` {applies_to}`stack: preview 9.3` {applies_to}`serverless: preview`
+:   Enables Elastic Workflows and related experiences. `false` by default.
 
 $$$fields-popularlimit$$$`fields:popularLimit` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
 :   The top N most popular fields to show. `10` by default.
@@ -647,6 +654,11 @@ Change the settings that apply to all of {{product.kibana}}.
 2. Click **Global Settings**.
 3. Scroll or search for the setting.
 4. Make your change, then click **Save changes**.
+
+### General [kibana-general-global-settings]
+
+$$$hideAnnouncements-global$$$`hideAnnouncements` {applies_to}`stack: ga 9.4+` {applies_to}`serverless: unavailable`
+:   Stops showing messages and tours that highlight new features. `false` by default.
 
 
 ### Custom branding [kibana-custom-branding-settings]

@@ -25,7 +25,6 @@ describe(
       ftrConfig: {
         kbnServerArgs: [
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'bulkEditAlertSuppressionEnabled',
             'doesNotMatchForIndicatorMatchRuleEnabled',
             'entityThreatHuntingEnabled',
           ])}`,
