@@ -31,7 +31,7 @@ import {
   getFilterExistsDisabledWarning,
   getFilterInOutPairDisabledWarning,
 } from './table_cell_actions';
-import type { UseTableFiltersReturn } from './table_filters';
+import type { UseTableFiltersCallbacksReturn } from './table_filters';
 
 function getGridProps(
   gridStyle?: EuiDataGridStyle
@@ -63,7 +63,7 @@ export interface TableGridProps {
   onAddColumn?: (columnName: string) => void;
   onRemoveColumn?: (columnName: string) => void;
   columns?: string[];
-  onFindSearchTermMatch?: UseTableFiltersReturn['onFindSearchTermMatch'];
+  onFindSearchTermMatch?: UseTableFiltersCallbacksReturn['onFindSearchTermMatch'];
   searchTerm?: string;
   initialPageSize: number;
   onChangePageSize?: (newPageSize: number) => void;
