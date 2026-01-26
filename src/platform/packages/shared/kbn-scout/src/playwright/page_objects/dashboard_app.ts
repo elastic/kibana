@@ -234,7 +234,6 @@ export class DashboardApp {
     await this.filterEmbeddableNames(embeddableName, embeddableType);
 
     // Click on the saved object title
-    // FTR uses: savedObjectTitle${embeddableName.split(' ').join('-')}
     const titleSelector = `savedObjectTitle${embeddableName.split(' ').join('-')}`;
     await this.page.testSubj.waitForSelector(titleSelector, { state: 'visible' });
     await this.page.testSubj.click(titleSelector);
@@ -719,9 +718,6 @@ export class DashboardApp {
         document.querySelectorAll('[data-test-subj="embeddablePanel"]').length > expectedCount,
       initialCount
     );
-    await this.waitForRenderComplete();
-    // FTR tests also call these after clonePanel to ensure panel state is updated
-    await this.page.waitForLoadingIndicatorHidden();
     await this.waitForRenderComplete();
   }
 

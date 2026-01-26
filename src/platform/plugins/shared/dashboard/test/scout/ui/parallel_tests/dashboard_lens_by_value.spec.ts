@@ -49,7 +49,6 @@ spaceTest.describe('Lens by-value panels (dashboard)', { tag: tags.ESS_ONLY }, (
     await pageObjects.dashboard.addLens(LENS_BASIC_TITLE);
     await pageObjects.dashboard.clonePanel(LENS_BASIC_TITLE);
     await pageObjects.dashboard.removePanel(LENS_BASIC_TITLE);
-    await pageObjects.dashboard.waitForRenderComplete();
   };
 
   spaceTest('by-value panel retains count after edit', async ({ pageObjects }) => {
@@ -67,7 +66,6 @@ spaceTest.describe('Lens by-value panels (dashboard)', { tag: tags.ESS_ONLY }, (
     });
 
     await spaceTest.step('verify panel count unchanged', async () => {
-      await pageObjects.dashboard.waitForRenderComplete();
       expect(await pageObjects.dashboard.getPanelCount()).toBe(originalPanelCount);
     });
   });
@@ -86,7 +84,6 @@ spaceTest.describe('Lens by-value panels (dashboard)', { tag: tags.ESS_ONLY }, (
       });
 
       await spaceTest.step('verify partition chart renders', async () => {
-        await pageObjects.dashboard.waitForRenderComplete();
         await expect(page.testSubj.locator('partitionVisChart')).toBeVisible();
       });
     }
@@ -106,7 +103,6 @@ spaceTest.describe('Lens by-value panels (dashboard)', { tag: tags.ESS_ONLY }, (
     });
 
     await spaceTest.step('verify panel count and title', async () => {
-      await pageObjects.dashboard.waitForRenderComplete();
       expect(await pageObjects.dashboard.getPanelCount()).toBe(originalPanelCount);
       const titles = await pageObjects.dashboard.getPanelTitles();
       expect(titles).toContain(newTitle);
