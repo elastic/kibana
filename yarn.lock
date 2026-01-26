@@ -16323,10 +16323,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@143.0.1:
-  version "143.0.1"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-143.0.1.tgz#d1328faa18a06d42759b8c867fbcc5f95adc68ba"
-  integrity sha512-qR0DKGV7C3r5Fo6WJD2bqQ1ny9THrJTL4X8JeArBQ6m5Cq6sHXAhIrVgsTZuKi9tL/YUcFoELMI3UTg6dMiKWA==
+chromedriver@143.0.4:
+  version "143.0.4"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-143.0.4.tgz#0ede0354f2970d8d650a6befc6b458d9cd8d32b9"
+  integrity sha512-mE++40DprY2n4d3OPxzW7ujIFRY9eLYwJf4uBgQtMaJQkapSVXRzUrLzSMcRaybrt47Y1t8xW5AKoaUIL3aYZw==
   dependencies:
     "@testim/chrome-version" "^1.1.4"
     axios "^1.12.0"
@@ -23850,7 +23850,7 @@ kuler@^2.0.0:
   resolved "https://registry.yarnpkg.com/kuler/-/kuler-2.0.0.tgz#e2c570a3800388fb44407e851531c1d670b061b3"
   integrity sha512-Xq9nH7KlWZmXAtodXDDRE7vs6DU1gTU8zYDHDiWLSip45Egwq3plLHzPn27NgvzL2r1LMPC1vdqh98sQxtqj4A==
 
-langchain@0.3.15, "langchain@>=0.2.3 <0.3.0 || >=0.3.4 <0.4.0":
+langchain@0.3.15:
   version "0.3.15"
   resolved "https://registry.yarnpkg.com/langchain/-/langchain-0.3.15.tgz#c6c8b17bf20c870795e31515f48abde7d13ccc9d"
   integrity sha512-+DQ4I2iy4b5sErkxo6jAkgmumvhgqLwLB2fmiGl3yDt8+VVZdB1MUULZMzf+6ubarNc7Mwn/sxHUqK4GhEndhg==
@@ -23868,7 +23868,7 @@ langchain@0.3.15, "langchain@>=0.2.3 <0.3.0 || >=0.3.4 <0.4.0":
     zod "^3.22.4"
     zod-to-json-schema "^3.22.3"
 
-langchain@0.3.37:
+langchain@0.3.37, "langchain@>=0.2.3 <0.3.0 || >=0.3.4 <0.4.0":
   version "0.3.37"
   resolved "https://registry.yarnpkg.com/langchain/-/langchain-0.3.37.tgz#6931ee5af763a6df35c0ac467eab028ba0ad17de"
   integrity sha512-1jPsZ6xsxkcQPUvqRjvfuOLwZLLyt49hzcOK7OYAJovIkkOxd5gzK4Yw6giPUQ8g4XHyvULNlWBz+subdkcokw==
