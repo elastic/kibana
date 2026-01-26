@@ -191,7 +191,7 @@ Embeddable serialized state can not be modified with breaking changes. Fields ca
 Kibana's REST APIs require snake_case. Therefore, embeddable serialized state must be in snake_case.
 
 #### Minimize required fields
-Avoid unnecessary information to keep public REST APIs concise. Do not require fields that have can have a default behavior. Do not store duplicate information. Derived fields can be created in public when initializing an embeddable.
+Avoid unnecessary information to keep public REST APIs concise. Do not store duplicate information. Derived fields can be created in public when initializing an embeddable. Where possible, avoid a required field by specifying a default.
 
 #### Apply defaults in your schema
 POST, PUT, and GET requests should return complete data. Apply defaults in your embeddable schemas by using the `defaultValue` key. Any key that has a `defaultValue` must not be wrapped
