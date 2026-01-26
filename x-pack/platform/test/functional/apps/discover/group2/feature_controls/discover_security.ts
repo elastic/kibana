@@ -157,12 +157,6 @@ export default function (ctx: FtrProviderContext) {
 
     describe('global discover read-only privileges', () => {
       before(async () => {
-        await spaces.create({
-          id: 'readonly-solution-space',
-          name: 'Readonly Solution Space',
-          solution: 'oblt',
-        });
-
         await securityService.role.create('global_discover_read_role', {
           elasticsearch: {
             indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
@@ -183,13 +177,15 @@ export default function (ctx: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await security.forceLogout();
-
         await security.login('global_discover_read_user', 'global_discover_read_user-password', {
-          expectSpaceSelector: true,
+          expectSpaceSelector: false,
         });
 
-        await spaceSelector.clickSpaceCard('default');
+        await spaces.create({
+          id: 'readonly-solution-space',
+          name: 'Readonly Solution Space',
+          solution: 'oblt',
+        });
       });
 
       after(async () => {
