@@ -40,17 +40,14 @@ export class ReactFlowServiceMapPage {
   }
 
   async clickReactFlowZoomIn() {
-    await this.reactFlowZoomInBtn.waitFor({ state: 'visible' });
     await this.reactFlowZoomInBtn.click();
   }
 
   async clickReactFlowZoomOut() {
-    await this.reactFlowZoomOutBtn.waitFor({ state: 'visible' });
     await this.reactFlowZoomOutBtn.click();
   }
 
   async clickReactFlowFitView() {
-    await this.reactFlowFitViewBtn.waitFor({ state: 'visible' });
     await this.reactFlowFitViewBtn.click();
   }
 }
