@@ -10,7 +10,7 @@ import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
 import { Coordinate } from '@kbn/apm-plugin/typings/timeseries';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { SPANS_PER_DESTINATION_METRIC } from '@kbn/synthtrace/src/lib/apm/aggregators/create_span_metrics_aggregator';
+import { SPANS_PER_DESTINATION_METRIC } from '@kbn/apm-synthtrace/src/lib/apm/aggregators/create_span_metrics_aggregator';
 import type { SupertestReturnType } from '../../../services/apm_api';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { roundNumber } from '../utils/common';
