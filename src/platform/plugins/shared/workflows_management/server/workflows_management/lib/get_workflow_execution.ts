@@ -13,6 +13,7 @@ import type {
   EsWorkflowStepExecution,
   WorkflowExecutionDto,
 } from '@kbn/workflows';
+import { isTerminalStatus } from '@kbn/workflows';
 import { searchStepExecutions } from './search_step_executions';
 import { stringifyWorkflowDefinition } from '../../../common/lib/yaml';
 
@@ -61,13 +62,26 @@ export const getWorkflowExecution = async ({
       return null;
     }
 
-    const stepExecutions = await searchStepExecutions({
+    let stepExecutions = await searchStepExecutions({
       esClient,
       logger,
       stepsExecutionIndex,
       workflowExecutionId,
       spaceId,
     });
+
+    // If workflow is in terminal status but no steps found, refresh and retry
+    // Steps may not be visible yet due to refresh: false on writes
+    if (isTerminalStatus(doc.status) && stepExecutions.length === 0) {
+      await esClient.indices.refresh({ index: stepsExecutionIndex });
+      stepExecutions = await searchStepExecutions({
+        esClient,
+        logger,
+        stepsExecutionIndex,
+        workflowExecutionId,
+        spaceId,
+      });
+    }
 
     return transformToWorkflowExecutionDetailDto(workflowExecutionId, doc, stepExecutions, logger);
   } catch (error) {
