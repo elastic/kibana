@@ -93,7 +93,7 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
           gutterSize="xs"
           responsive={false}
         >
-          <EuiFlexItem css={{ minWidth: 0, maxWidth: '300px' }} grow={false}>
+          <EuiFlexItem css={{ minWidth: 0, maxWidth: `${euiTheme.base * 18.75}px` }} grow={false}>
             <code
               data-test-subj={dataTestSubj}
               style={{

@@ -176,6 +176,7 @@ const MetricPanelEmpty = ({ panel }: MetricPanelEmptyProps) => {
       hasBorder
       onClick={() => onPanelClick && onPanelClick({ share, application })}
       data-test-subj={dataTestSubj}
+      css={css({ height: '100%' })}
     >
       <EuiSplitPanel.Inner
         grow

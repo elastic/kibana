@@ -50,19 +50,18 @@ const ResourceCard = ({
       direction="row"
       responsive={['xs', 's', 'm']}
       data-test-subj={dataTestSubj}
+      css={css({ height: '100%' })}
     >
-      <EuiSplitPanel.Inner
-        paddingSize="none"
-        css={css({
-          backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-        })}
-      >
-        <EuiFlexGroup justifyContent="center" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <div css={css({ margin: `${euiTheme.size.xxl} 0` })}>
-              <EuiImage size={euiTheme.base * 5} src={icon(assetBasePath)} alt="" />
-            </div>
-          </EuiFlexItem>
+      <EuiSplitPanel.Inner paddingSize="none" color="subdued">
+        <EuiFlexGroup
+          justifyContent="center"
+          alignItems="center"
+          css={css({
+            height: '100%',
+            padding: `${euiTheme.size.xxl} 0`,
+          })}
+        >
+          <EuiImage size={euiTheme.base * 5} src={icon(assetBasePath)} alt="" />
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner paddingSize="l">
