@@ -20,15 +20,16 @@ export function getDrilldownRegistry() {
 
       registry[type] = drilldown;
     },
-    getDrilldown: (type: string) => {
-      return registry[type];
+    getTransformIn: (type: string) => {
+      return registry[type]?.transformIn;
     },
-    getSchemas: (embeddableSupportedTriggers: string[]) => {
+    getTransformOut: (type: string) => {
+      return registry[type]?.transformOut;
+    },
+    getSchemasForSupportedTriggers: (supportedTriggers: string[]) => {
       return Object.values(registry)
         .filter(({ supportedTriggers: drilldownSupportedTriggers }) => {
-          return embeddableSupportedTriggers.some((trigger) =>
-            drilldownSupportedTriggers.includes(trigger)
-          );
+          return supportedTriggers.some((trigger) => drilldownSupportedTriggers.includes(trigger));
         })
         .map(({ schema }) => schema);
     },

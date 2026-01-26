@@ -9,27 +9,18 @@
 
 import type { ObjectType, Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import type { DrilldownRegistry } from './registry';
 
-export function getDrilldownsSchema(
-  registry: DrilldownRegistry,
-  embeddableSupportedTriggers: string[]
-) {
+export function getDrilldownsSchema(configSchemas: Type<{ type: string }>[]) {
   return schema.object({
-    drilldowns: schema.maybe(
-      schema.arrayOf(getDrilldownSchema(registry, embeddableSupportedTriggers))
-    ),
+    drilldowns: schema.maybe(schema.arrayOf(getDrilldownSchema(configSchemas))),
   });
 }
 
-export function getDrilldownSchema(
-  registry: DrilldownRegistry,
-  embeddableSupportedTriggers: string[]
-) {
+export function getDrilldownSchema(configSchemas: Type<{ type: string }>[]) {
   return schema.object({
     config: schema.discriminatedUnion(
       'type',
-      registry.getSchemas(embeddableSupportedTriggers) as [ObjectType<{ type: Type<string> }>]
+      configSchemas as [ObjectType<{ type: Type<string> }>]
     ),
     label: schema.maybe(schema.string()),
     triggers: schema.arrayOf(

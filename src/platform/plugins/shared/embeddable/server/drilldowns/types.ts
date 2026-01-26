@@ -15,7 +15,14 @@ export type DrilldownSetup<
   StoredState extends { type: string } = { type: string },
   State extends { type: string } = { type: string }
 > = {
+  /**
+   * Schema for drilldown config state
+   */
   schema: Type<State>;
+  /**
+   * List of triggers supported by this drilldown type
+   * Used to narrow registry schemas by intersection of (embeddable) supported triggers
+   */
   supportedTriggers: string[];
   /**
    * Called on REST read routes to inject references and convert Stored State into API State

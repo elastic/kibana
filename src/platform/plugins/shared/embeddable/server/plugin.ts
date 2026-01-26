@@ -105,13 +105,11 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
           .filter((schema) => Boolean(schema)) as ObjectType[],
       getTransforms: (embeddableType: string) => {
         const drilldownTransforms = {
-          transformIn: getTransformDrilldownsIn(
-            (drilldownType: string) =>
-              this.drilldownRegistry.getDrilldown(drilldownType)?.transformIn
+          transformIn: getTransformDrilldownsIn((drilldownType: string) =>
+            this.drilldownRegistry.getTransformIn(drilldownType)
           ),
-          transformOut: getTransformDrilldownsOut(
-            (drilldownType: string) =>
-              this.drilldownRegistry.getDrilldown(drilldownType)?.transformOut
+          transformOut: getTransformDrilldownsOut((drilldownType: string) =>
+            this.drilldownRegistry.getTransformOut(drilldownType)
           ),
         };
         const transformsSetup = this.transformsRegistry[embeddableType];
@@ -174,6 +172,6 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
     );
   };
 
-  private getDrilldownsSchema = (embeddableSupportedTriggers: string[]) =>
-    getDrilldownsSchema(this.drilldownRegistry, embeddableSupportedTriggers);
+  private getDrilldownsSchema = (supportedTriggers: string[]) =>
+    getDrilldownsSchema(this.drilldownRegistry.getSchemasForSupportedTriggers(supportedTriggers));
 }
