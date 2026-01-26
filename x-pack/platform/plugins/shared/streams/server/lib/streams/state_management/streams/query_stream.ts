@@ -8,6 +8,7 @@
 import { cloneDeep, isEqual } from 'lodash';
 import { Streams } from '@kbn/streams-schema';
 import { StatusError } from '../../errors/status_error';
+import { getEsqlViewName } from '../../esql_views/view_name';
 import type { ElasticsearchAction } from '../execution_plan/types';
 import type { State } from '../state';
 import type {
@@ -89,7 +90,7 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
       {
         type: 'upsert_esql_view',
         request: {
-          name: this._definition.name,
+          name: getEsqlViewName(this._definition.name),
           query: this._definition.query.esql,
         },
       },
@@ -116,7 +117,7 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
       actions.push({
         type: 'upsert_esql_view',
         request: {
-          name: this._definition.name,
+          name: getEsqlViewName(this._definition.name),
           query: this._definition.query.esql,
         },
       });
@@ -148,7 +149,7 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
       {
         type: 'delete_esql_view',
         request: {
-          name: this._definition.name,
+          name: getEsqlViewName(this._definition.name),
         },
       },
     ];
