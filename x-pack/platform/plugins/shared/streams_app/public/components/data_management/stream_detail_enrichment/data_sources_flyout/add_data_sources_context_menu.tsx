@@ -23,6 +23,27 @@ export const AddDataSourcesContextMenu = () => {
   const streamName = useStreamEnrichmentSelector((state) => state.context.definition.stream.name);
   const [isOpen, { toggle: toggleMenu, off: closeMenu }] = useBoolean();
 
+  const menuItems = [
+    {
+      name: DATA_SOURCES_I18N.contextMenu.addKqlDataSource,
+      icon: 'search',
+      'data-test-subj': 'streamsAppProcessingAddKqlDataSource',
+      onClick: () => {
+        addDataSource(defaultKqlSamplesDataSource);
+        closeMenu();
+      },
+    },
+    {
+      name: DATA_SOURCES_I18N.contextMenu.addCustomSamples,
+      icon: 'visText',
+      'data-test-subj': 'streamsAppProcessingAddCustomDataSource',
+      onClick: () => {
+        addDataSource(createDefaultCustomSamplesDataSource(streamName));
+        closeMenu();
+      },
+    },
+  ];
+
   return (
     <EuiPopover
       data-test-subj="streamsAppProcessingAddDataSourcesContextMenu"
@@ -42,26 +63,7 @@ export const AddDataSourcesContextMenu = () => {
         panels={[
           {
             id: 'data-source-options',
-            items: [
-              {
-                name: DATA_SOURCES_I18N.contextMenu.addKqlDataSource,
-                icon: 'search',
-                'data-test-subj': 'streamsAppProcessingAddKqlDataSource',
-                onClick: () => {
-                  addDataSource(defaultKqlSamplesDataSource);
-                  closeMenu();
-                },
-              },
-              {
-                name: DATA_SOURCES_I18N.contextMenu.addCustomSamples,
-                icon: 'visText',
-                'data-test-subj': 'streamsAppProcessingAddCustomDataSource',
-                onClick: () => {
-                  addDataSource(createDefaultCustomSamplesDataSource(streamName));
-                  closeMenu();
-                },
-              },
-            ],
+            items: menuItems,
           },
         ]}
       />

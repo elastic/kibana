@@ -24,7 +24,7 @@ import {
   createExceptionListItemSchema,
   updateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { createPromiseFromStreams } from '@kbn/utils';
 
 import type {
@@ -298,7 +298,7 @@ export class ExceptionListClient {
       entries,
       expireTime: undefined, // Not currently used with endpoint exceptions
       itemId,
-      listId: ENDPOINT_LIST_ID,
+      listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
       meta,
       name,
       namespaceType: 'agnostic',
@@ -1089,7 +1089,7 @@ export class ExceptionListClient {
 
     const findOptions = {
       filter,
-      listId: ENDPOINT_LIST_ID,
+      listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
       namespaceType: 'agnostic' as const,
       page,
       perPage,
