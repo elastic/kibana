@@ -36,7 +36,7 @@ import { timeRangeFilter, kqlFilter as buildKqlFilter } from '../../utils/dsl_fi
 import { unwrapEsFields } from '../../utils/unwrap_es_fields';
 import type { ApmEventClient } from './types';
 import { getFirstSeenPerGroup } from './get_first_seen_per_group';
-import { getDownstreamServicePerGroup } from './get_downstream_service_resources';
+import { getDownstreamServicePerGroup } from './get_downstream_service_resource';
 
 export type ErrorGroupSample = Awaited<ReturnType<typeof getErrorGroupSamples>>[number];
 
@@ -49,14 +49,16 @@ export async function getApmErrorGroups({
   kqlFilter,
   includeStackTrace,
   includeFirstSeen,
+  size,
   logger,
 }: {
   apmEventClient: ApmEventClient;
   startMs: number;
   endMs: number;
-  kqlFilter?: string;
-  includeStackTrace?: boolean;
-  includeFirstSeen?: boolean;
+  kqlFilter: string | undefined;
+  includeStackTrace: boolean;
+  includeFirstSeen: boolean;
+  size: number;
   logger: Logger;
 }) {
   const errorGroups = await getErrorGroupSamples({
@@ -65,6 +67,7 @@ export async function getApmErrorGroups({
     endMs,
     kqlFilter,
     includeStackTrace,
+    size,
     logger,
   });
 
@@ -90,13 +93,15 @@ async function getErrorGroupSamples({
   endMs,
   kqlFilter,
   includeStackTrace,
+  size,
   logger,
 }: {
   apmEventClient: ApmEventClient;
   startMs: number;
   endMs: number;
-  kqlFilter?: string;
-  includeStackTrace?: boolean;
+  kqlFilter: string | undefined;
+  includeStackTrace: boolean;
+  size: number;
   logger: Logger;
 }) {
   logger.debug(`Fetching error groups, kqlFilter: ${kqlFilter ?? 'none'}`);
@@ -124,7 +129,7 @@ async function getErrorGroupSamples({
       error_groups: {
         terms: {
           field: ERROR_GROUP_ID,
-          size: 50,
+          size,
           order: { _count: 'desc' as const },
         },
         aggs: {

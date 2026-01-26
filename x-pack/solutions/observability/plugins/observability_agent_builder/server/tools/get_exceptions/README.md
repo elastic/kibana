@@ -1,6 +1,6 @@
 # get_exceptions
 
-Retrieves error groups (structured exceptions) with counts and sample details.
+Retrieves span and log exception groups, and the occurence counts and sample details.
 
 ## Data Sources
 

@@ -29,6 +29,7 @@ export async function getToolHandler({
   kqlFilter,
   includeStackTrace,
   includeFirstSeen,
+  size,
 }: {
   core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
@@ -37,9 +38,10 @@ export async function getToolHandler({
   logger: Logger;
   start: string;
   end: string;
-  kqlFilter?: string;
-  includeStackTrace?: boolean;
-  includeFirstSeen?: boolean;
+  kqlFilter: string | undefined;
+  includeStackTrace: boolean;
+  includeFirstSeen: boolean;
+  size: number;
 }) {
   const { apmEventClient } = await buildApmResources({ core, plugins, request, logger });
 
@@ -55,6 +57,7 @@ export async function getToolHandler({
       kqlFilter,
       includeStackTrace,
       includeFirstSeen,
+      size,
       logger,
     }),
     getLogExceptionGroups({
@@ -64,6 +67,7 @@ export async function getToolHandler({
       endMs,
       kqlFilter,
       includeStackTrace,
+      size,
       logger,
     }),
   ]);

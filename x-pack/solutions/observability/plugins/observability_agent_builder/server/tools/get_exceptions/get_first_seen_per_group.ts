@@ -12,15 +12,15 @@ import { ApmDocumentType, RollupInterval } from '@kbn/apm-data-access-plugin/com
 import { ERROR_GROUP_ID } from '@kbn/observability-shared-plugin/common';
 import type { ApmEventClient } from './types';
 import type { ErrorGroupSample } from './get_error_groups';
+import { getTotalHits } from '../../utils/get_total_hits';
 
 const LOOKBACK_DAYS = 14;
 
 /**
- * Fetches the first seen information for each error group.
+ * Fetches "first seen" for each error group using a fixed 14-day lookback window
+ * (not the user's query range). This helps distinguish new errors from recurring ones.
  *
- * Returns either:
- * - An exact timestamp if the error first occurred within the lookback window
- * - "over X days ago" if the error existed before the lookback window
+ * Returns an exact ISO timestamp if first seen within 14 days, or "over 14 days ago" otherwise.
  */
 export async function getFirstSeenPerGroup({
   apmEventClient,
@@ -46,14 +46,14 @@ export async function getFirstSeenPerGroup({
   const lookbackStartMs = moment(endMs).subtract(LOOKBACK_DAYS, 'days').valueOf();
 
   // Run both queries in parallel
-  const [firstSeenWithinWindow, existedBeforeWindow] = await Promise.all([
+  const [firstSeenWithinWindow, groupsSeenBeforeWindow] = await Promise.all([
     getFirstSeenWithinWindow({
       apmEventClient,
       groupIds,
       startMs: lookbackStartMs,
       endMs,
     }),
-    checkExistedBeforeWindow({
+    getGroupsSeenBeforeWindow({
       apmEventClient,
       groupIds,
       beforeMs: lookbackStartMs,
@@ -64,7 +64,7 @@ export async function getFirstSeenPerGroup({
   // Otherwise, return the exact timestamp from within the window
   const entries = compact(
     groupIds.map((groupId) => {
-      if (existedBeforeWindow.has(groupId)) {
+      if (groupsSeenBeforeWindow.includes(groupId)) {
         return [groupId, `over ${LOOKBACK_DAYS} days ago`] as const;
       }
       const timestamp = firstSeenWithinWindow.get(groupId);
@@ -147,7 +147,7 @@ async function getFirstSeenWithinWindow({
  * Checks which groups existed before the lookback window using parallel queries.
  * Uses terminate_after: 1 per group for maximum efficiency.
  */
-async function checkExistedBeforeWindow({
+async function getGroupsSeenBeforeWindow({
   apmEventClient,
   groupIds,
   beforeMs,
@@ -155,7 +155,7 @@ async function checkExistedBeforeWindow({
   apmEventClient: ApmEventClient;
   groupIds: string[];
   beforeMs: number;
-}): Promise<Set<string>> {
+}): Promise<string[]> {
   // Build individual search params for each group
   const searches = groupIds.map((groupId) => ({
     apm: {
@@ -190,18 +190,5 @@ async function checkExistedBeforeWindow({
     ...searches
   );
 
-  // msearch returns responses in the same order as the input queries
-  const existedBefore = new Set<string>();
-  responses.forEach((response, i) => {
-    const totalHits =
-      typeof response.hits?.total === 'number'
-        ? response.hits.total
-        : response.hits?.total?.value ?? 0;
-
-    if (totalHits > 0) {
-      existedBefore.add(groupIds[i]);
-    }
-  });
-
-  return existedBefore;
+  return groupIds.filter((_, i) => getTotalHits(responses[i]) > 0);
 }

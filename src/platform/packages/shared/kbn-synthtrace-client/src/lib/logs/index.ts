@@ -84,10 +84,13 @@ export type LogDocument = Fields &
     'event.name'?: string;
     'source.ip'?: string;
     'rule.name'?: string;
-    // OTel exception fields (per OTel semantic conventions)
+
+    // OTel exception fields
+    // Per OTel semantic conventions: https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-logs/
     'exception.type'?: string;
     'exception.message'?: string;
     'exception.stacktrace'?: string;
+
     labels?: Record<string, string>;
     test_field: string | string[];
     date: Date;

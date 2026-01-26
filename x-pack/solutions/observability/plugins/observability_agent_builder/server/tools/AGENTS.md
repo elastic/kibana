@@ -103,15 +103,24 @@ Tools must work with both ECS (Elastic Common Schema) and OpenTelemetry data. Ob
 
 ### Common Aliases
 
-| Query This (ECS)       | Instead of (OTel)        |
-| ---------------------- | ------------------------ |
-| `message`              | `body.text`              |
-| `log.level`            | `severity_text`          |
-| `trace.id`             | `trace_id`               |
-| `span.id`              | `span_id`                |
-| `service.environment`  | `deployment.environment` |
-| `kubernetes.pod.name`  | `k8s.pod.name`           |
-| `kubernetes.namespace` | `k8s.namespace.name`     |
+| Query This (ECS)          | Instead of (OTel)                 |
+| ------------------------- | --------------------------------- |
+| `message`                 | `body.text`                       |
+| `log.level`               | `severity_text`                   |
+| `trace.id`                | `trace_id`                        |
+| `span.id`                 | `span_id`                         |
+| `service.environment`     | `deployment.environment`          |
+| `kubernetes.pod.name`     | `k8s.pod.name`                    |
+| `kubernetes.namespace`    | `k8s.namespace.name`              |
+| `error.stack_trace`       | `attributes.exception.stacktrace` |
+| `error.exception.message` | `attributes.exception.message`    |
+| `error.exception.type`    | `attributes.exception.type`       |
+
+You can retrieve the full list of OTel aliases in a cluster:
+
+```bash
+curl -s -u elastic:changeme "http://localhost:9200/*otel*/_mapping/field/*" | jq '[.[] | .mappings | to_entries[] | select(.value.mapping[].type == "alias") | {alias: .key, target: .value.mapping[].path}] | unique'
+```
 
 ---
 

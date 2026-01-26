@@ -53,6 +53,11 @@ const getExceptionsSchema = z.object({
     .describe(
       dedent`Include firstSeen timestamp for each error group. This requires an additional query with a 14-day lookback window, so only enable when needed.`
     ),
+  size: z
+    .number()
+    .optional()
+    .default(50)
+    .describe('Maximum number of exceptions to return per category'),
 });
 
 export function createGetExceptionsTool({
@@ -91,7 +96,10 @@ export function createGetExceptionsTool({
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async ({ start, end, kqlFilter, includeStackTrace, includeFirstSeen }, context) => {
+    handler: async (
+      { start, end, kqlFilter, includeStackTrace, includeFirstSeen, size },
+      context
+    ) => {
       const { request, esClient } = context;
 
       try {
@@ -106,6 +114,7 @@ export function createGetExceptionsTool({
           kqlFilter,
           includeStackTrace,
           includeFirstSeen,
+          size,
         });
 
         return {

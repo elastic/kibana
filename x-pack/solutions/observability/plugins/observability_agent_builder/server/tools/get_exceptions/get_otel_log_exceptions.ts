@@ -20,11 +20,10 @@ import { getTotalHits } from '../../utils/get_total_hits';
 import { timeRangeFilter, kqlFilter } from '../../utils/dsl_filters';
 import { unwrapEsFields } from '../../utils/unwrap_es_fields';
 
-// OTel exception fields (not in ECS, specific to OTel semantic conventions)
-// See: https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-logs/
-const EXCEPTION_TYPE = 'exception.type';
-const EXCEPTION_MESSAGE = 'exception.message';
-const EXCEPTION_STACKTRACE = 'exception.stacktrace';
+// These ECS fields map to OTel exception fields
+const EXCEPTION_TYPE = 'error.exception.type';
+const EXCEPTION_MESSAGE = 'error.exception.message';
+const EXCEPTION_STACKTRACE = 'error.stack_trace';
 const OTEL_EVENT_NAME = 'event.name';
 
 export type LogExceptionGroup = Awaited<ReturnType<typeof getLogExceptionGroups>>[number];
@@ -64,26 +63,16 @@ async function getLogExceptionCategories({
   boolQuery,
   samplingProbability,
   includeStackTrace,
+  size,
 }: {
   esClient: IScopedClusterClient;
   index: string[];
   boolQuery: Record<string, unknown>;
   samplingProbability: number;
-  includeStackTrace?: boolean;
+  includeStackTrace: boolean;
+  size: number;
 }) {
   const search = getTypedSearch(esClient.asCurrentUser);
-
-  const sampleFields = [
-    '@timestamp',
-    '_index',
-    EXCEPTION_TYPE,
-    EXCEPTION_MESSAGE,
-    SERVICE_NAME,
-    SERVICE_ENVIRONMENT,
-    TRACE_ID,
-    SPAN_ID,
-    ...(includeStackTrace ? [EXCEPTION_STACKTRACE] : []),
-  ];
 
   const response = await search({
     index,
@@ -97,7 +86,7 @@ async function getLogExceptionCategories({
           categories: {
             categorize_text: {
               field: EXCEPTION_MESSAGE,
-              size: 50,
+              size,
               min_doc_count: 1,
             },
             aggs: {
@@ -106,7 +95,17 @@ async function getLogExceptionCategories({
                 top_hits: {
                   size: 1,
                   _source: false,
-                  fields: sampleFields,
+                  fields: [
+                    '@timestamp',
+                    '_index',
+                    EXCEPTION_TYPE,
+                    EXCEPTION_MESSAGE,
+                    SERVICE_NAME,
+                    SERVICE_ENVIRONMENT,
+                    TRACE_ID,
+                    SPAN_ID,
+                    ...(includeStackTrace ? [EXCEPTION_STACKTRACE] : []),
+                  ],
                   sort: [{ '@timestamp': { order: 'desc' as const } }],
                 },
               },
@@ -158,14 +157,16 @@ export async function getLogExceptionGroups({
   endMs,
   kqlFilter: kqlFilterValue,
   includeStackTrace,
+  size,
   logger,
 }: {
   core: ObservabilityAgentBuilderCoreSetup;
   esClient: IScopedClusterClient;
   startMs: number;
   endMs: number;
-  kqlFilter?: string;
-  includeStackTrace?: boolean;
+  kqlFilter: string | undefined;
+  includeStackTrace: boolean;
+  size: number;
   logger: Logger;
 }) {
   const logsIndices = await getLogsIndices({ core, logger });
@@ -208,5 +209,6 @@ export async function getLogExceptionGroups({
     boolQuery,
     samplingProbability,
     includeStackTrace,
+    size,
   });
 }

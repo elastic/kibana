@@ -96,7 +96,11 @@ export class Instance extends Entity<ApmFields> {
         ...this.fields,
         ...(groupingKey ? { 'error.grouping_key': groupingKey } : {}),
         'error.exception': [
-          { message, ...(type ? { type } : {}), ...(stacktrace ? { stacktrace } : {}) },
+          {
+            message,
+            ...(type ? { type } : {}),
+            ...(stacktrace ? { stacktrace } : {}),
+          },
         ],
         'error.culprit': culprit,
       },

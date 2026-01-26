@@ -20,7 +20,7 @@ import type { ApmEventClient } from './types';
 import type { ErrorGroupSample } from './get_error_groups';
 
 /**
- * Fetches downstream service resources for errors that occurred during outbound calls.
+ * Fetches downstream service resource for errors that occurred during outbound calls.
  * Uses parallel queries (msearch) with terminate_after for efficiency.
  * Each query is scoped to the specific (traceId, serviceName) pair from the error.
  */
@@ -52,10 +52,10 @@ export async function getDownstreamServicePerGroup({
     return new Map();
   }
 
-  logger.debug(`Fetching downstream service resources for ${errorSamples.length} error samples`);
+  logger.debug(`Fetching downstream service resource for ${errorSamples.length} error samples`);
 
   const { responses } = await apmEventClient.msearch(
-    'get_error_groups_downstream_resources',
+    'get_downstream_service_resource',
     ...errorSamples.map(({ traceId, serviceName }) => ({
       apm: {
         sources: [
