@@ -19,7 +19,6 @@ import { getToolHandler } from './handler';
 export const OBSERVABILITY_ELASTICSEARCH_TOOL_ID = 'observability.elasticsearch';
 
 const ElasticsearchSchema = z.object({
-  query: z.string().describe('a query to search documents in Elasticsearch OpenAPI index.'),
   nlQuery: z
     .string()
     .describe('A natural language query to describe the Elasticsearch operation to perform.'),
@@ -47,12 +46,11 @@ export function createElasticsearchTool({
         return getAgentBuilderResourceAvailability({ core, request, logger });
       },
     },
-    handler: async ({ query, nlQuery }, { modelProvider, esClient, events, request }) => {
+    handler: async ({ nlQuery }, { modelProvider, esClient, events, request }) => {
       try {
         const data = await getToolHandler({
           core,
           nlQuery,
-          query,
           modelProvider,
           esClient,
           events,

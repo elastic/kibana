@@ -22,7 +22,6 @@ import { OpenAPIToolSet } from '../../utils/openapi_tool_set';
 const StateAnnotation = Annotation.Root({
   // inputs
   nlQuery: Annotation<string>(),
-  query: Annotation<string>(),
   // inner
   toolsValid: Annotation<boolean>(),
   tools: Annotation<Tool[]>(),
@@ -74,7 +73,7 @@ export const createElasticsearchToolGraph = async ({
     const connector = model.connector;
     // Retrieve documentation
     const result = await llmTasks.retrieveDocumentation({
-      searchTerm: state.query,
+      searchTerm: state.nlQuery,
       products: ['elasticsearch'],
       resourceTypes: ['openapi_spec'],
       max: 5,

@@ -15,7 +15,6 @@ import { createElasticsearchToolGraph } from './graph';
 export const getToolHandler = async ({
   core,
   nlQuery,
-  query,
   modelProvider,
   esClient,
   events,
@@ -23,7 +22,6 @@ export const getToolHandler = async ({
 }: {
   core: ObservabilityAgentBuilderCoreSetup;
   nlQuery: string;
-  query: string;
   modelProvider: ModelProvider;
   esClient: IScopedClusterClient;
   events: ToolEventEmitter;
@@ -46,7 +44,7 @@ export const getToolHandler = async ({
     },
     async () => {
       const outState = await toolGraph.invoke(
-        { nlQuery, query },
+        { nlQuery },
         { tags: ['elasticsearch_tool'], metadata: { graphName: 'elasticsearch_tool' } }
       );
 
