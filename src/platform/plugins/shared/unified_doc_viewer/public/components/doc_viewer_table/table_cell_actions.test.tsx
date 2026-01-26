@@ -8,7 +8,13 @@
  */
 
 import React from 'react';
-import { getFieldCellActions, getFieldValueCellActions } from './table_cell_actions';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import {
+  getFieldCellActions,
+  getFieldValueCellActions,
+  getFilterInOutPairDisabledWarning,
+  getFilterExistsDisabledWarning,
+} from './table_cell_actions';
 import { FieldRow } from './field_row';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -270,6 +276,273 @@ describe('TableActions', () => {
       expect(filterOutProps.title).toBe('Filter out value');
     });
 
-    // TODO: Extend
+    describe('when clicking filter actions', () => {
+      it('should call onFilter with correct params for FilterIn action', async () => {
+        const onFilterMock = jest.fn();
+        const actions = getFieldValueCellActions({
+          rows: getRows('extension', 'test-value'),
+          isEsqlMode: false,
+          toasts: toastsMock,
+          onFilter: onFilterMock,
+        }).map((Action, i) => (
+          <Action
+            key={i}
+            {...EuiCellParams}
+            Component={(props: any) => <button {...props}>{props.children}</button>}
+          />
+        ));
+
+        render(<>{actions}</>);
+        const user = userEvent.setup();
+        await user.click(screen.getByText('Filter for value'));
+
+        expect(onFilterMock).toHaveBeenCalledWith(expect.any(Object), 'test-value', '+');
+      });
+
+      it('should call onFilter with correct params for FilterOut action', async () => {
+        const onFilterMock = jest.fn();
+        const actions = getFieldValueCellActions({
+          rows: getRows('extension', 'test-value'),
+          isEsqlMode: false,
+          toasts: toastsMock,
+          onFilter: onFilterMock,
+        }).map((Action, i) => (
+          <Action
+            key={i}
+            {...EuiCellParams}
+            Component={(props: any) => <button {...props}>{props.children}</button>}
+          />
+        ));
+
+        render(<>{actions}</>);
+        const user = userEvent.setup();
+        await user.click(screen.getByText('Filter out value'));
+
+        expect(onFilterMock).toHaveBeenCalledWith(expect.any(Object), 'test-value', '-');
+      });
+    });
+
+    describe('when row is undefined', () => {
+      it('should not render any actions', () => {
+        // Create rows array with undefined element
+        const actions = getFieldValueCellActions({
+          rows: [undefined as any],
+          isEsqlMode: false,
+          toasts: toastsMock,
+          onFilter: jest.fn(),
+        }).map((Action, i) => (
+          <Action
+            key={i}
+            {...EuiCellParams}
+            Component={(props: any) => (
+              <div data-test-subj={props['data-test-subj']}>{props.children}</div>
+            )}
+          />
+        ));
+
+        render(<>{actions}</>);
+        expect(screen.queryByText('Copy value')).toBeNull();
+        expect(screen.queryByText('Filter for value')).toBeNull();
+        expect(screen.queryByText('Filter out value')).toBeNull();
+      });
+    });
+  });
+
+  describe('getFieldCellActions filter exists action', () => {
+    it('should call onFilter with "_exists_" when clicking filter exists', async () => {
+      const onFilterMock = jest.fn();
+      const actions = getFieldCellActions({
+        rows: getRows('extension'),
+        isEsqlMode: false,
+        onFilter: onFilterMock,
+        onToggleColumn: jest.fn(),
+      }).map((Action, i) => (
+        <Action
+          key={i}
+          {...EuiCellParams}
+          Component={(props: any) => <button {...props}>{props.children}</button>}
+        />
+      ));
+
+      render(<>{actions}</>);
+      const user = userEvent.setup();
+      await user.click(screen.getByText('Filter for field present'));
+
+      expect(onFilterMock).toHaveBeenCalledWith('_exists_', 'extension', '+');
+    });
+
+    it('should not render filter exists for scripted fields', () => {
+      const rowsWithScriptedField = getRows();
+      Object.defineProperty(rowsWithScriptedField[0], 'dataViewField', {
+        value: {
+          ...rowsWithScriptedField[0].dataViewField!,
+          scripted: true,
+        } as DataViewField,
+        writable: true,
+        configurable: true,
+      });
+
+      const actions = getFieldCellActions({
+        rows: rowsWithScriptedField,
+        isEsqlMode: false,
+        onFilter: jest.fn(),
+        onToggleColumn: jest.fn(),
+      }).map((Action, i) => (
+        <Action
+          key={i}
+          {...EuiCellParams}
+          Component={(props: any) => (
+            <div data-test-subj={props['data-test-subj']}>{props.children}</div>
+          )}
+        />
+      ));
+
+      render(<>{actions}</>);
+      expect(screen.queryByText('Filter for field present')).toBeNull();
+    });
+  });
+
+  describe('getFilterInOutPairDisabledWarning', () => {
+    it('should return undefined when row is undefined', () => {
+      const warning = getFilterInOutPairDisabledWarning({
+        row: undefined,
+        onFilter: jest.fn(),
+        isEsqlMode: false,
+        hideFilteringOnComputedColumns: false,
+      });
+      expect(warning).toBeUndefined();
+    });
+
+    it('should return warning for ignored fields', () => {
+      const rows = getRows();
+      Object.defineProperty(rows[0], 'ignoredReason', {
+        value: 'field_ignored',
+        writable: true,
+        configurable: true,
+      });
+
+      const warning = getFilterInOutPairDisabledWarning({
+        row: rows[0],
+        onFilter: jest.fn(),
+        isEsqlMode: false,
+        hideFilteringOnComputedColumns: false,
+      });
+      expect(warning).toBe('Ignored values cannot be searched');
+    });
+
+    it('should return warning for ES|QL multivalue fields', () => {
+      const rows = getRows('extension', ['foo', 'bar']);
+      const warning = getFilterInOutPairDisabledWarning({
+        row: rows[0],
+        onFilter: jest.fn(),
+        isEsqlMode: true,
+        hideFilteringOnComputedColumns: false,
+      });
+      expect(warning).toBe('Multivalue filtering is not supported in ES|QL');
+    });
+
+    it('should not return warning for ES|QL multivalue fields when hideFilteringOnComputedColumns is true', () => {
+      const rows = getRows('extension', ['foo', 'bar']);
+      const warning = getFilterInOutPairDisabledWarning({
+        row: rows[0],
+        onFilter: jest.fn(),
+        isEsqlMode: true,
+        hideFilteringOnComputedColumns: true,
+      });
+      expect(warning).toBeUndefined();
+    });
+
+    it('should return warning for unindexed fields', () => {
+      const rows = getRows();
+      Object.defineProperty(rows[0], 'dataViewField', {
+        value: undefined,
+        writable: true,
+        configurable: true,
+      });
+
+      const warning = getFilterInOutPairDisabledWarning({
+        row: rows[0],
+        onFilter: jest.fn(),
+        isEsqlMode: false,
+        hideFilteringOnComputedColumns: false,
+      });
+      expect(warning).toBe('Unindexed fields cannot be searched');
+    });
+
+    it('should return undefined when filtering is enabled', () => {
+      const rows = getRows();
+      const warning = getFilterInOutPairDisabledWarning({
+        row: rows[0],
+        onFilter: jest.fn(),
+        isEsqlMode: false,
+        hideFilteringOnComputedColumns: false,
+      });
+      expect(warning).toBeUndefined();
+    });
+
+    it('should return undefined when onFilter is not provided', () => {
+      const rows = getRows();
+      const warning = getFilterInOutPairDisabledWarning({
+        row: rows[0],
+        onFilter: undefined,
+        isEsqlMode: false,
+        hideFilteringOnComputedColumns: false,
+      });
+      expect(warning).toBeUndefined();
+    });
+  });
+
+  describe('getFilterExistsDisabledWarning', () => {
+    it('should return undefined when row is undefined', () => {
+      const warning = getFilterExistsDisabledWarning({
+        row: undefined,
+        onFilter: jest.fn(),
+        isEsqlMode: false,
+        hideFilteringOnComputedColumns: false,
+      });
+      expect(warning).toBeUndefined();
+    });
+
+    it('should return warning for scripted fields', () => {
+      const rows = getRows();
+      Object.defineProperty(rows[0], 'dataViewField', {
+        value: {
+          ...rows[0].dataViewField!,
+          scripted: true,
+        } as DataViewField,
+        writable: true,
+        configurable: true,
+      });
+
+      const warning = getFilterExistsDisabledWarning({
+        row: rows[0],
+        onFilter: jest.fn(),
+        isEsqlMode: false,
+        hideFilteringOnComputedColumns: false,
+      });
+      expect(warning).toBe('Unable to filter for presence of scripted fields');
+    });
+
+    it('should return undefined when filtering is enabled', () => {
+      const rows = getRows();
+      const warning = getFilterExistsDisabledWarning({
+        row: rows[0],
+        onFilter: jest.fn(),
+        isEsqlMode: false,
+        hideFilteringOnComputedColumns: false,
+      });
+      expect(warning).toBeUndefined();
+    });
+
+    it('should return undefined when onFilter is not provided', () => {
+      const rows = getRows();
+      const warning = getFilterExistsDisabledWarning({
+        row: rows[0],
+        onFilter: undefined,
+        isEsqlMode: false,
+        hideFilteringOnComputedColumns: false,
+      });
+      expect(warning).toBeUndefined();
+    });
   });
 });
