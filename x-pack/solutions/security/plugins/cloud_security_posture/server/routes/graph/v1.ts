@@ -19,7 +19,7 @@ interface GraphContextServices {
 export interface GetGraphParams {
   services: GraphContextServices;
   query: {
-    originEventIds: OriginEventId[];
+    originEventIds?: OriginEventId[];
     indexPatterns?: string[];
     spaceId?: string;
     start: string | number;
@@ -40,19 +40,19 @@ export const getGraph = async ({
   indexPatterns = indexPatterns ?? [`.alerts-security.alerts-${spaceId}`, 'logs-*'];
 
   logger.trace(
-    `Fetching graph for [originEventIds: ${originEventIds
-      .map((e) => e.id)
-      .join(', ')}] in [spaceId: ${spaceId}] [indexPatterns: ${indexPatterns.join(',')}]`
+    `Fetching graph for [originEventIds: ${
+      originEventIds?.map((e) => e.id).join(', ') ?? 'none'
+    }] in [spaceId: ${spaceId}] [indexPatterns: ${indexPatterns.join(',')}]`
   );
 
-  // Fetch events (existing logic)
+  // Fetch events (existing logic) - only if originEventIds are provided
   const eventResultsPromise = fetchGraph({
     esClient,
     showUnknownTarget,
     logger,
     start,
     end,
-    originEventIds,
+    originEventIds: originEventIds ?? [],
     indexPatterns,
     spaceId,
     esQuery,
@@ -62,6 +62,21 @@ export const getGraph = async ({
   const hasEntityIds = entityIds && entityIds.length > 0;
 
   // relationships-test-target-1, relationships-test-target-2, standalone-entity-1
+  // const relationshipResultsPromise = true
+  //   ? fetchEntityRelationships({
+  //       esClient,
+  //       logger,
+  //       entityIds: [
+  //         { id: 'relationships-test-target-1', isOrigin: false },
+  //         { id: 'relationships-test-target-2', isOrigin: false },
+  //         { id: 'standalone-entity-1', isOrigin: false },
+  //         { id: 'standalone-entity-2', isOrigin: true },
+  //         { id: 'standalone-entity-3', isOrigin: false },
+  //       ],
+  //       spaceId,
+  //     })
+  //   : Promise.resolve([]);
+
   const relationshipResultsPromise = hasEntityIds
     ? fetchEntityRelationships({
         esClient,

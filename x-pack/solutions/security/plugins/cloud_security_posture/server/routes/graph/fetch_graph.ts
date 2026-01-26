@@ -465,6 +465,7 @@ interface BuildRelationshipsEsqlQueryParams {
   relationshipFields: readonly string[];
   isLookupIndexAvailable: boolean;
   spaceId: string;
+  originEntityIds: string[]; // Entity IDs that are origins of the graph
 }
 
 /**
@@ -478,8 +479,15 @@ const buildRelationshipsEsqlQuery = ({
   relationshipFields,
   isLookupIndexAvailable,
   spaceId,
+  originEntityIds,
 }: BuildRelationshipsEsqlQueryParams): string => {
   const enrichPolicyName = getEnrichPolicyId(spaceId);
+
+  // Build isOrigin evaluation - check if entity.id is in the list of origin entity IDs
+  const isOriginEval =
+    originEntityIds.length > 0
+      ? `| EVAL isOrigin = entity.id IN (${originEntityIds.map((id) => `"${id}"`).join(', ')})`
+      : '| EVAL isOrigin = false';
 
   // Build COALESCE statements for each relationship field
   const coalesceStatements = relationshipFields
@@ -539,6 +547,7 @@ ${coalesceStatements}
 | FORK
 ${forkBranches}
 | WHERE _target_id != ""
+${isOriginEval}
 ${enrichmentSection}
 // Build enriched source doc data with entity metadata (from the queried entity)
 | EVAL sourceDocData = CONCAT("{\\"id\\":\\"", entity.id, "\\",\\"type\\":\\"entity\\",\\"entity\\":{",
@@ -557,7 +566,7 @@ ${enrichmentSection}
     ",\\"ecsParentField\\":\\"${ecsParentFieldValue}\\"",
   "}}")
 | STATS count = COUNT(*), targetIds = VALUES(_target_id), targetDocData = VALUES(targetDocData), sourceDocData = VALUES(sourceDocData)
-    BY entity.id, _relationship`;
+    BY entity.id, _relationship, isOrigin`;
 };
 
 /**
@@ -594,6 +603,7 @@ const parseRelationshipRecords = (
       targetIds,
       sourceDocData,
       targetDocData,
+      isOrigin: Boolean(record.isOrigin),
     });
   }
 
@@ -648,11 +658,15 @@ export const fetchEntityRelationships = async ({
   // If not, fall back to using enrich policy (deprecated)
   const isLookupIndexAvailable = await checkIfEntitiesIndexLookupMode(esClient, logger, spaceId);
 
+  // Extract origin entity IDs (entities that are the center of the graph)
+  const originEntityIds = entityIds.filter((e) => e.isOrigin).map((e) => e.id);
+
   const query = buildRelationshipsEsqlQuery({
     indexName,
     relationshipFields: ENTITY_RELATIONSHIP_FIELDS,
     isLookupIndexAvailable,
     spaceId,
+    originEntityIds,
   });
   const filter = buildRelationshipDslFilter(entityIds);
 

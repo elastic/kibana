@@ -85,13 +85,8 @@ export const parseRecords = (
   // Process relationships
   createRelationshipNodes(relationshipRecords, ctx);
 
-  // eslint-disable-next-line no-console
-  // console.log('ctx11 ', inspect(ctx, false, null, true));
-
   // Create edges and groups for both
   createEdgesAndGroups(ctx);
-  // eslint-disable-next-line no-console
-  // console.log('ctx22 ', inspect(ctx, false, null, true));
 
   logger.trace(
     `Parsed [nodes: ${Object.keys(ctx.nodesMap).length}, edges: ${
@@ -393,10 +388,11 @@ const createRelationshipNode = (
   sourceId: string,
   targetId: string,
   relationship: string,
-  edgeId: string
+  edgeId: string,
+  isOrigin: boolean
 ): RelationshipNodeDataModel => {
   return {
-    id: `${edgeId}rel(${relationship})`,
+    id: `${edgeId}rel(${relationship})oe(${isOrigin ? 1 : 0})`,
     label: relationship.replace(/_/g, ' '), // "Depends_on" -> "Depends on"
     shape: 'relationship',
   };
@@ -509,7 +505,8 @@ const createRelationshipNodes = (
         sourceId,
         targetId,
         record.relationship,
-        edgeId
+        edgeId,
+        record.isOrigin
       );
 
       processRelationshipNodes(context, {

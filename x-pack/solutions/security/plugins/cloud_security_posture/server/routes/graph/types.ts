@@ -59,6 +59,7 @@ export interface RelationshipEdge {
   targetIds: string[]; // Target entity IDs
   sourceDocData?: string; // Source entity metadata as JSON string
   targetDocData?: string[]; // Target entities metadata as JSON strings
+  isOrigin: boolean; // Whether this entity is the origin of the graph
 }
 
 /**

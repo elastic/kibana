@@ -10,25 +10,22 @@ import { schema } from '@kbn/config-schema';
 export const INDEX_PATTERN_REGEX = /^[^A-Z^\\/?"<>|\s#,]+$/;
 
 /**
- * Entity ID with type for relationship queries.
- * The type indicates which entity store index to query for relationships.
+ * Entity ID for relationship queries.
+ * isOrigin indicates whether this entity is the center/origin of the graph
+ * (relevant when opening graph from entity flyout).
  */
 export const entityIdSchema = schema.object({
   id: schema.string(),
-  type: schema.oneOf([
-    schema.literal('user'),
-    schema.literal('host'),
-    schema.literal('service'),
-    schema.literal('generic'),
-  ]),
+  isOrigin: schema.boolean(),
 });
 
 export const graphRequestSchema = schema.object({
   nodesLimit: schema.maybe(schema.number()),
   showUnknownTarget: schema.maybe(schema.boolean()),
   query: schema.object({
-    originEventIds: schema.arrayOf(
-      schema.object({ id: schema.string(), isAlert: schema.boolean() })
+    // Origin event IDs - optional, may be empty when opening from entity flyout
+    originEventIds: schema.maybe(
+      schema.arrayOf(schema.object({ id: schema.string(), isAlert: schema.boolean() }))
     ),
     // TODO: use zod for range validation instead of config schema
     start: schema.oneOf([schema.number(), schema.string()]),

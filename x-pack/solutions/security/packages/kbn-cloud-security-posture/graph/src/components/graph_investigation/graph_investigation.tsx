@@ -34,7 +34,7 @@ import { CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER, addFilter } from './search_fi
 import { useEntityNodeExpandPopover } from './use_entity_node_expand_popover';
 import { useLabelNodeExpandPopover } from './use_label_node_expand_popover';
 import type { NodeViewModel } from '../types';
-import { isLabelNode, showErrorToast } from '../utils';
+import { isLabelNode, isRelationshipNode, showErrorToast } from '../utils';
 import { GRAPH_SCOPE_ID } from '../constants';
 
 const useGraphPopovers = ({
@@ -177,6 +177,22 @@ export interface GraphInvestigationProps {
     }>;
 
     /**
+     * Entity IDs for fetching relationships from entity store.
+     * isOrigin indicates whether this entity is the center/origin of the graph.
+     */
+    entityIds?: Array<{
+      /**
+       * The ID of the entity.
+       */
+      id: string;
+
+      /**
+       * Whether this entity is the origin of the graph (for centering).
+       */
+      isOrigin: boolean;
+    }>;
+
+    /**
      * The initial timerange for the graph investigation view.
      */
     timeRange: TimeRange;
@@ -221,7 +237,13 @@ type EsQuery = UseFetchGraphDataParams['req']['query']['esQuery'];
  */
 export const GraphInvestigation = memo<GraphInvestigationProps>(
   ({
-    initialState: { indexPatterns, dataView, originEventIds, timeRange: initialTimeRange },
+    initialState: {
+      indexPatterns,
+      dataView,
+      originEventIds,
+      entityIds,
+      timeRange: initialTimeRange,
+    },
     showInvestigateInTimeline = false,
     showToggleSearch = false,
     onInvestigateInTimeline,
@@ -345,9 +367,10 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       eventPopover,
     ].some(({ state: { isOpen } }) => isOpen);
 
-    const { originEventIdsSet, originAlertIdsSet } = useMemo(() => {
+    const { originEventIdsSet, originAlertIdsSet, originEntityIdsSet } = useMemo(() => {
       const eventIds = new Set<string>();
       const alertIds = new Set<string>();
+      const entityIdsWithOrigin = new Set<string>();
 
       originEventIds.forEach(({ id, isAlert }) => {
         if (isAlert) {
@@ -357,11 +380,19 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
         }
       });
 
+      // Add entity IDs that are marked as origin (for centering when opening from entity flyout)
+      entityIds?.forEach(({ id, isOrigin }) => {
+        if (isOrigin) {
+          entityIdsWithOrigin.add(id);
+        }
+      });
+
       return {
         originEventIdsSet: eventIds,
         originAlertIdsSet: alertIds,
+        originEntityIdsSet: entityIdsWithOrigin,
       };
-    }, [originEventIds]);
+    }, [originEventIds, entityIds]);
 
     const nodes = useMemo(() => {
       return (
@@ -398,13 +429,24 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               countryClickHandler: createCountryClickHandler(nodeCountryCodes),
               eventClickHandler: createEventClickHandler(analysis, text),
             };
+          } else if (isRelationshipNode(node)) {
+            // Relationship node IDs follow pattern: a(sourceId)-b(targetId)rel(relationship)
+            // Extract source entity ID to check if it's an origin entity
+            const sourceEntityMatch = node.id.match(/^a\(([^)]+)\)-b\(/);
+            const sourceEntityId = sourceEntityMatch ? sourceEntityMatch[1] : null;
+            const isOrigin = sourceEntityId ? originEntityIdsSet.has(sourceEntityId) : false;
+
+            return {
+              ...node,
+              ...(isOrigin && { isOrigin }),
+            };
           }
 
           return { ...node };
         }) ?? []
       );
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [data?.nodes, originEventIdsSet, originAlertIdsSet]);
+    }, [data?.nodes, originEventIdsSet, originAlertIdsSet, originEntityIdsSet]);
 
     // Get callout state based on current graph state
     const calloutState = useGraphCallout(nodes);
