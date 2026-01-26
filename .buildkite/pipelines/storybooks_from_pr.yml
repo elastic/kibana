@@ -3,10 +3,10 @@ steps:
     commands:
       - .buildkite/scripts/steps/storybooks/build_and_upload.sh
       - |
-          STORYBOOK_URL=$(buildkite-agent meta-data get pr_comment:storybooks:head)
+          STORYBOOK_URL=$$(buildkite-agent meta-data get pr_comment:storybooks:head)
 
           ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
-            --message "Storybooks built and available at: $STORYBOOK_URL" \
+            --message "$$STORYBOOK_URL" \
             --context "kibana-storybooks-from-pr" \
             --clear-previous
     agents:
