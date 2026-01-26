@@ -3,7 +3,7 @@ navigation_title: "SharePoint Online"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/sharepoint-online-action-type.html
 applies_to:
-  stack: preview
+  stack: preview 9.4
   serverless: preview
 ---
 
@@ -13,19 +13,11 @@ The SharePoint Online connector enables federated search capabilities across Sha
 
 ## Create connectors in {{kib}} [define-sharepoint-online-ui]
 
-You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**. For example:
+You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [sharepoint-online-connector-configuration]
 
 SharePoint Online connectors have the following configuration properties:
-
-Region
-:   The geographic region where your SharePoint tenant is hosted. Required for search operations. Valid values:
-    - `NAM` - North America
-    - `EUR` - Europe
-    - `APC` - Asia Pacific
-    - `LAM` - Latin America
-    - `MEA` - Middle East and Africa
 
 Token URL
 :   The OAuth 2.0 token endpoint URL. Use the format: `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token`
@@ -41,7 +33,7 @@ Client Secret
 
 You can test connectors as you're creating or editing the connector in {{kib}}. The test verifies connectivity by accessing the root SharePoint site.
 
-The SharePoint Online connector has the following action:
+The SharePoint Online connector has the following actions:
 
 Search
 :   Search for content across SharePoint sites, lists, and drives using Microsoft Graph Search API.
@@ -49,6 +41,55 @@ Search
     - **entityTypes** (optional): Array of entity types to search. Valid values: `site`, `list`, `listItem`, `drive`, `driveItem`. Defaults to `driveItem`.
     - **from** (optional): Offset for pagination.
     - **size** (optional): Number of results to return.
+
+Get all sites
+:   List all SharePoint sites.
+
+Get site
+:   Get a single site by ID or relative URL.
+    - **siteId** (optional): Site ID.
+    - **relativeUrl** (optional): Relative URL path (for example, `contoso.sharepoint.com:/sites/site-name`).
+
+Get site pages
+:   List pages for a site.
+    - **siteId** (required): The site ID.
+
+Get site drives
+:   List drives for a site.
+    - **siteId** (required): The site ID.
+
+Get site lists
+:   List lists for a site.
+    - **siteId** (required): The site ID.
+
+Get site list items
+:   List items for a site list.
+    - **siteId** (required): The site ID.
+    - **listId** (required): The list ID.
+
+Get drive items
+:   List items in a drive by `driveId` (optionally by path). Returns metadata including `@microsoft.graph.downloadUrl`.
+    - **driveId** (required): The drive ID.
+    - **path** (optional): Path relative to drive root.
+
+Download drive item (text)
+:   Download a drive item by `driveId` and `itemId`, returning text content only.
+    - **driveId** (required): The drive ID.
+    - **itemId** (required): The drive item ID.
+
+Download item from URL
+:   Download item content from a pre-authenticated `downloadUrl`, returning text.
+    - **downloadUrl** (required): A pre-authenticated download URL.
+
+Call Graph API
+:   Call a Microsoft Graph v1.0 endpoint by path only.
+    - **method** (required): HTTP method, `GET` or `POST`.
+    - **path** (required): Graph path starting with `/v1.0/` (for example, `/v1.0/me`).
+    - **query** (optional): Query parameters (for example, `$top`, `$filter`).
+    - **body** (optional): Request body (for `POST`).
+
+Recommended flow
+:   Use `getDriveItems` to fetch metadata and `downloadUrl`, decide which items are worth retrieving, then call `downloadItemFromURL` for the selected items. This avoids extra round trips just to fetch download metadata.
 
 
 ## Get API credentials [sharepoint-online-api-credentials]
@@ -79,10 +120,6 @@ To use the SharePoint Online connector, you need to:
    - Copy the secret value immediately (it won't be shown again)
 
 4. Gather the following information for the connector configuration:
-   - **Region**: Select the geographic region where your Microsoft 365 tenant is hosted:
-     - Check your SharePoint URL (e.g., `contoso.sharepoint.com` vs `contoso-my.sharepoint.eu`)
-     - Common mappings: `.com` domains typically use `NAM`, `.eu` domains use `EUR`
-     - If unsure, check your Microsoft 365 admin center under **Settings** > **Org settings** > **Organization profile**
    - **Tenant ID**: Found in **Overview** section of your app registration (needed for Token URL)
    - **Token URL**: Construct using the format `https://login.microsoftonline.com/{your-tenant-id}/oauth2/v2.0/token`
    - **Client ID**: Found in **Overview** section (also called Application ID)

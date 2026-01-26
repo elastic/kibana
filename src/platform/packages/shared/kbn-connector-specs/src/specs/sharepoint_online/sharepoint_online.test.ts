@@ -595,7 +595,8 @@ describe('SharepointOnline', () => {
         'https://graph.microsoft.com/v1.0/drives/drive-123/root/children',
         {
           params: {
-            $select: 'id,name,webUrl,createdDateTime,lastModifiedDateTime,size',
+            $select:
+              'id,name,webUrl,createdDateTime,lastModifiedDateTime,size,@microsoft.graph.downloadUrl',
           },
         }
       );
@@ -617,7 +618,8 @@ describe('SharepointOnline', () => {
         'https://graph.microsoft.com/v1.0/drives/drive-123/root:/Folder/Subfolder:/children',
         {
           params: {
-            $select: 'id,name,webUrl,createdDateTime,lastModifiedDateTime,size',
+            $select:
+              'id,name,webUrl,createdDateTime,lastModifiedDateTime,size,@microsoft.graph.downloadUrl',
           },
         }
       );
@@ -626,32 +628,6 @@ describe('SharepointOnline', () => {
   });
 
   describe('downloadDriveItem action', () => {
-    it('should download drive item content as base64 by default', async () => {
-      const mockResponse = {
-        data: Uint8Array.from([72, 101, 108, 108, 111]),
-        headers: {
-          'content-type': 'text/plain',
-          'content-length': '5',
-        },
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
-
-      const result = await SharepointOnline.actions.downloadDriveItem.handler(mockContext, {
-        driveId: 'drive-123',
-        itemId: 'item-456',
-      });
-
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/drives/drive-123/items/item-456/content',
-        { responseType: 'arraybuffer' }
-      );
-      expect(result).toEqual({
-        contentType: 'text/plain',
-        contentLength: '5',
-        data: 'SGVsbG8=',
-      });
-    });
-
     it('should download drive item content as text', async () => {
       const mockResponse = {
         data: Uint8Array.from([72, 101, 108, 108, 111]),
@@ -665,7 +641,6 @@ describe('SharepointOnline', () => {
       const result = await SharepointOnline.actions.downloadDriveItem.handler(mockContext, {
         driveId: 'drive-123',
         itemId: 'item-456',
-        format: 'text',
       });
 
       expect(mockClient.get).toHaveBeenCalledWith(
@@ -678,39 +653,30 @@ describe('SharepointOnline', () => {
         text: 'Hello',
       });
     });
+  });
 
-    it('should return a download URL for the drive item', async () => {
+  describe('downloadItemFromURL action', () => {
+    it('should download content as text', async () => {
       const mockResponse = {
-        data: {
-          id: 'item-456',
-          name: 'Document.docx',
-          size: 42,
-          webUrl: 'https://contoso.sharepoint.com/sites/site1/Document.docx',
-          '@microsoft.graph.downloadUrl': 'https://download.example.com/file',
+        data: Uint8Array.from([72, 101, 108, 108, 111]),
+        headers: {
+          'content-type': 'text/plain',
+          'content-length': '5',
         },
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      const result = await SharepointOnline.actions.downloadDriveItem.handler(mockContext, {
-        driveId: 'drive-123',
-        itemId: 'item-456',
-        format: 'downloadUrl',
+      const result = await SharepointOnline.actions.downloadItemFromURL.handler(mockContext, {
+        downloadUrl: 'https://download.example.com/file',
       });
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://graph.microsoft.com/v1.0/drives/drive-123/items/item-456',
-        {
-          params: {
-            $select: 'id,name,size,webUrl,@microsoft.graph.downloadUrl',
-          },
-        }
-      );
+      expect(mockClient.get).toHaveBeenCalledWith('https://download.example.com/file', {
+        responseType: 'arraybuffer',
+      });
       expect(result).toEqual({
-        id: 'item-456',
-        name: 'Document.docx',
-        size: 42,
-        webUrl: 'https://contoso.sharepoint.com/sites/site1/Document.docx',
-        downloadUrl: 'https://download.example.com/file',
+        contentType: 'text/plain',
+        contentLength: '5',
+        text: 'Hello',
       });
     });
   });
@@ -858,7 +824,6 @@ describe('SharepointOnline', () => {
               query: {
                 queryString: 'test document',
               },
-              region: 'NAM',
             },
           ],
         }
@@ -906,7 +871,6 @@ describe('SharepointOnline', () => {
               query: {
                 queryString: 'project site',
               },
-              region: 'NAM',
             },
           ],
         }
@@ -947,7 +911,6 @@ describe('SharepointOnline', () => {
               query: {
                 queryString: 'documents',
               },
-              region: 'NAM',
               from: 10,
               size: 25,
             },
@@ -997,6 +960,9 @@ describe('SharepointOnline', () => {
     it('should call a GET endpoint with query params', async () => {
       const mockResponse = {
         data: { id: 'user-1', displayName: 'User 1' },
+        status: 200,
+        statusText: 'OK',
+        headers: { 'content-type': 'application/json' },
       };
       mockClient.request.mockResolvedValue(mockResponse);
 
@@ -1004,7 +970,12 @@ describe('SharepointOnline', () => {
         method: 'GET',
         path: '/v1.0/users',
         query: { $top: 5, $select: 'id,displayName' },
-      })) as Record<string, unknown>;
+      })) as {
+        status: number;
+        statusText: string;
+        headers: Record<string, string>;
+        data: Record<string, unknown>;
+      };
 
       expect(mockClient.request).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1014,12 +985,20 @@ describe('SharepointOnline', () => {
           data: undefined,
         })
       );
-      expect(result).toEqual(mockResponse.data);
+      expect(result).toEqual({
+        status: 200,
+        statusText: 'OK',
+        headers: { 'content-type': 'application/json' },
+        data: mockResponse.data,
+      });
     });
 
     it('should call a POST endpoint with a body', async () => {
       const mockResponse = {
         data: { id: 'created-item' },
+        status: 201,
+        statusText: 'Created',
+        headers: { 'content-type': 'application/json' },
       };
       mockClient.request.mockResolvedValue(mockResponse);
 
@@ -1028,7 +1007,12 @@ describe('SharepointOnline', () => {
         method: 'POST',
         path: '/v1.0/sites',
         body,
-      })) as Record<string, unknown>;
+      })) as {
+        status: number;
+        statusText: string;
+        headers: Record<string, string>;
+        data: Record<string, unknown>;
+      };
 
       expect(mockClient.request).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1038,7 +1022,12 @@ describe('SharepointOnline', () => {
           data: body,
         })
       );
-      expect(result).toEqual(mockResponse.data);
+      expect(result).toEqual({
+        status: 201,
+        statusText: 'Created',
+        headers: { 'content-type': 'application/json' },
+        data: mockResponse.data,
+      });
     });
 
     it('should propagate API errors', async () => {
@@ -1070,7 +1059,7 @@ describe('SharepointOnline', () => {
       }
       const result = (await SharepointOnline.test.handler(mockContext)) as TestResult;
 
-      expect(mockClient.get).toHaveBeenCalledWith('https://graph.microsoft.com/v1.0/sites/root');
+      expect(mockClient.get).toHaveBeenCalledWith('https://graph.microsoft.com/v1.0/');
       expect(result.ok).toBe(true);
       expect(result.message).toBe('Successfully connected to SharePoint Online: Contoso');
     });

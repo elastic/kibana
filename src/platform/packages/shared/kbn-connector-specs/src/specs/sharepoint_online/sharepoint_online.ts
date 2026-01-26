@@ -51,18 +51,14 @@ export const SharepointOnline: ConnectorSpec = {
           scope: 'https://graph.microsoft.com/.default',
           tokenUrl: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
         },
+        overrides: {
+          meta: {
+            scope: { hidden: true },
+          },
+        },
       },
     ],
   },
-
-  schema: z.object({
-    region: z
-      .enum(['NAM', 'EUR', 'LAM', 'MEA', 'APC'])
-      .meta({ label: 'Region' })
-      .describe(
-        'Geographic region for search queries (NAM=North America, EUR=Europe, APC=Asia Pacific, LAM=Latin America, MEA=Middle East/Africa)'
-      ),
-  }),
 
   actions: {
     getAllSites: {
@@ -228,7 +224,8 @@ export const SharepointOnline: ConnectorSpec = {
         ctx.log.debug(`SharePoint getting drive items from ${url}`);
         const response = await ctx.client.get(url, {
           params: {
-            $select: 'id,name,webUrl,createdDateTime,lastModifiedDateTime,size',
+            $select:
+              'id,name,webUrl,createdDateTime,lastModifiedDateTime,size,@microsoft.graph.downloadUrl',
           },
         });
         return response.data;
@@ -240,52 +237,45 @@ export const SharepointOnline: ConnectorSpec = {
       input: z.object({
         driveId: z.string().describe('Drive ID'),
         itemId: z.string().describe('Drive item ID'),
-        format: z
-          .enum(['base64', 'text', 'downloadUrl'])
-          .optional()
-          .default('base64')
-          .describe('Response format (base64, text, or downloadUrl)'),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as {
           driveId: string;
           itemId: string;
-          format?: 'base64' | 'text' | 'downloadUrl';
         };
-        const format = typedInput.format ?? 'base64';
         const baseUrl = `https://graph.microsoft.com/v1.0/drives/${typedInput.driveId}/items/${typedInput.itemId}`;
-
-        if (format === 'downloadUrl') {
-          ctx.log.debug(`SharePoint getting drive item download URL from ${baseUrl}`);
-          const response = await ctx.client.get(baseUrl, {
-            params: {
-              $select: 'id,name,size,webUrl,@microsoft.graph.downloadUrl',
-            },
-          });
-          return {
-            id: response.data?.id,
-            name: response.data?.name,
-            size: response.data?.size,
-            webUrl: response.data?.webUrl,
-            downloadUrl: response.data?.['@microsoft.graph.downloadUrl'],
-          };
-        }
 
         const contentUrl = `${baseUrl}/content`;
         ctx.log.debug(`SharePoint downloading drive item content from ${contentUrl}`);
         const response = await ctx.client.get(contentUrl, { responseType: 'arraybuffer' });
         const buffer = Buffer.from(response.data);
-        if (format === 'text') {
-          return {
-            contentType: response.headers?.['content-type'],
-            contentLength: response.headers?.['content-length'],
-            text: buffer.toString('utf8'),
-          };
-        }
         return {
           contentType: response.headers?.['content-type'],
           contentLength: response.headers?.['content-length'],
-          data: buffer.toString('base64'),
+          text: buffer.toString('utf8'),
+        };
+      },
+    },
+
+    downloadItemFromURL: {
+      isTool: true,
+      input: z.object({
+        downloadUrl: z.string().url().describe('Pre-authenticated download URL'),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as {
+          downloadUrl: string;
+        };
+
+        ctx.log.debug(`SharePoint downloading item from URL ${typedInput.downloadUrl}`);
+        const response = await ctx.client.get(typedInput.downloadUrl, {
+          responseType: 'arraybuffer',
+        });
+        const buffer = Buffer.from(response.data);
+        return {
+          contentType: response.headers?.['content-type'],
+          contentLength: response.headers?.['content-length'],
+          text: buffer.toString('utf8'),
         };
       },
     },
@@ -329,7 +319,12 @@ export const SharepointOnline: ConnectorSpec = {
           data: typedInput.body,
         });
 
-        return response.data;
+        return {
+          status: response.status,
+          statusText: response.statusText,
+          headers: response.headers,
+          data: response.data,
+        };
       },
     },
 
@@ -351,7 +346,7 @@ export const SharepointOnline: ConnectorSpec = {
           from?: number;
           size?: number;
         };
-        const config = ctx.config as { region: string };
+        // const config = ctx.config as { region: string };
 
         const searchRequest = {
           requests: [
@@ -360,14 +355,14 @@ export const SharepointOnline: ConnectorSpec = {
               query: {
                 queryString: typedInput.query,
               },
-              region: config.region,
+              // region: config.region,
               ...(typedInput.from !== undefined && { from: typedInput.from }),
               ...(typedInput.size !== undefined && { size: typedInput.size }),
             },
           ],
         };
 
-        ctx.log.debug(`SharePoint search request: ${JSON.stringify(searchRequest, null, 2)}`);
+        ctx.log.debug(`SharePoint search: ${JSON.stringify(typedInput.query)}`);
         const response = await ctx.client.post(
           'https://graph.microsoft.com/v1.0/search/query',
           searchRequest
@@ -385,7 +380,7 @@ export const SharepointOnline: ConnectorSpec = {
       ctx.log.debug('SharePoint Online test handler');
 
       try {
-        const response = await ctx.client.get('https://graph.microsoft.com/v1.0/sites/root');
+        const response = await ctx.client.get('https://graph.microsoft.com/v1.0/');
         const siteName = response.data.displayName || 'Unknown';
         return {
           ok: true,
