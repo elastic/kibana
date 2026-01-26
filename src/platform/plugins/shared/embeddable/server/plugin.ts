@@ -29,7 +29,7 @@ import type { EmbeddableTransforms } from '../common';
 import type { DrilldownSetup } from './drilldowns/types';
 import { getDrilldownRegistry } from './drilldowns/registry';
 import type { EmbeddableTransformsSetup } from './embeddable_transforms/types';
-import { getTranformsRegistry } from './embeddable_transforms/registry';
+import { getTransformsRegistry } from './embeddable_transforms/registry';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
@@ -73,7 +73,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
   private migrateFn: PersistableStateMigrateFn | undefined;
   private drilldownRegistry = getDrilldownRegistry();
-  private transformsRegistry = getTranformsRegistry(this.drilldownRegistry);
+  private transformsRegistry = getTransformsRegistry(this.drilldownRegistry);
 
   public setup(core: CoreSetup) {
     this.migrateFn = getMigrateFunction(this.getEmbeddableFactory);

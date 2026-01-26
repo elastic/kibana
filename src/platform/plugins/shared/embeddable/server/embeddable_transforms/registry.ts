@@ -11,7 +11,7 @@ import type { ObjectType } from '@kbn/config-schema';
 import type { getDrilldownRegistry } from '../drilldowns/registry';
 import type { EmbeddableTransformsSetup } from './types';
 
-export function getTranformsRegistry(drilldownRegistry: ReturnType<typeof getDrilldownRegistry>) {
+export function getTransformsRegistry(drilldownRegistry: ReturnType<typeof getDrilldownRegistry>) {
   const transformsRegistry: { [key: string]: EmbeddableTransformsSetup<any, any> } = {};
 
   return {
