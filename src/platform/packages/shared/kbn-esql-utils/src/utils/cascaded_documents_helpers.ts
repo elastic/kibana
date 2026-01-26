@@ -786,8 +786,8 @@ export const appendFilteringWhereClauseForCascadeLayout = <
       // especially when the function is unnamed for example if the user inputs "CATEGORIZE (message)" elasticsearch is able to understand this because the parser fixes it, and precisely because of that is why
       // we can't use this as-is when constructing the filtering query, so we appropriately extract correct value from the parsed AST
       normalizedFieldName =
-        isFunctionExpression(fieldDeclaration.arg) &&
-        fieldDeclaration.arg.subtype === 'variadic-call'
+        isFunctionExpression(fieldDeclaration.definition) &&
+        fieldDeclaration.definition.subtype === 'variadic-call'
           ? fieldDeclaration.definition.text
           : fieldDeclaration.column.name;
     }

@@ -8,7 +8,7 @@
  */
 import { isAssignment, isColumn, isOptionNode } from '../../../ast/is';
 import type { ESQLCommand, ESQLCommandOption } from '../../../types';
-import type { ESQLCommandSummary } from '../types';
+import type { ESQLCommandSummary, FieldSummary } from '../types';
 
 const getColumnNames = (
   command: ESQLCommand | ESQLCommandOption,
@@ -51,7 +51,12 @@ const getColumnNames = (
   return names;
 };
 
+export const getGroupings = (command: ESQLCommand, query: string): FieldSummary[] => {
+  return [];
+};
+
 export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary => {
   const newColumns = getColumnNames(command, query);
-  return { newColumns: new Set(newColumns) };
+  const newGroupings = getGroupings(command, query);
+  return { newColumns: new Set(newColumns), grouping: new Set(newGroupings) };
 };
