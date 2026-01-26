@@ -42,7 +42,8 @@
     "@kbn/kql",
     "@kbn/ebt-tools",
     "@kbn/shared-ux-utility",
-    "@kbn/projects-solutions-groups"
+    "@kbn/projects-solutions-groups",
+    "@kbn/field-utils"
   ],
   "exclude": [
     "target/**/*",
