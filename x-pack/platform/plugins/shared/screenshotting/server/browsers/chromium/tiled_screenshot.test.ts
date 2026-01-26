@@ -35,16 +35,10 @@ describe('stitched_screenshot', () => {
       expect(result).toMatchInlineSnapshot(`
         Array [
           Object {
-            "height": 8000,
+            "height": 1999,
             "width": 2000,
             "x": 3,
             "y": 4,
-          },
-          Object {
-            "height": 7999,
-            "width": 2000,
-            "x": 3,
-            "y": 8004,
           },
         ]
       `);
@@ -55,16 +49,10 @@ describe('stitched_screenshot', () => {
       expect(result).toMatchInlineSnapshot(`
         Array [
           Object {
-            "height": 8000,
+            "height": 2000,
             "width": 2000,
             "x": 3,
             "y": 4,
-          },
-          Object {
-            "height": 8000,
-            "width": 2000,
-            "x": 3,
-            "y": 8004,
           },
         ]
       `);
@@ -75,22 +63,10 @@ describe('stitched_screenshot', () => {
       expect(result).toMatchInlineSnapshot(`
         Array [
           Object {
-            "height": 8000,
+            "height": 2001,
             "width": 2000,
             "x": 3,
             "y": 4,
-          },
-          Object {
-            "height": 8000,
-            "width": 2000,
-            "x": 3,
-            "y": 8004,
-          },
-          Object {
-            "height": 1,
-            "width": 2000,
-            "x": 3,
-            "y": 16004,
           },
         ]
       `);
