@@ -28,6 +28,7 @@ import { useLoadActionTypes } from '@kbn/elastic-assistant/impl/connectorland/us
 import type { ActionConnector, ActionType } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
+import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import type { EntityType } from '../../../../../common/search_strategy';
 import { useStoredAssistantConnectorId } from '../../../../onboarding/components/hooks/use_stored_state';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
@@ -74,8 +75,9 @@ export const EntityHighlightsAccordion: React.FC<{
   }, [aiConnectors, connectorId]);
 
   const [isConnectorModalVisible, setIsConnectorModalVisible] = useState<boolean>(false);
-  const { hasAssistantPrivilege, isAssistantEnabled, isAssistantVisible } =
+  const { hasConnectorsReadPrivilege, hasAssistantPrivilege, isAssistantVisible } =
     useAssistantAvailability();
+  const { hasAgentBuilderPrivilege } = useAgentBuilderAvailability();
   const hasEntityHighlightsLicense = useHasEntityHighlightsLicense();
   const {
     gradientPanelStyle,
@@ -132,10 +134,24 @@ export const EntityHighlightsAccordion: React.FC<{
     setPopover(false);
   }, []);
 
-  const disabled = useMemo(
-    () => !hasAssistantPrivilege || !isAssistantEnabled || !hasEntityHighlightsLicense,
-    [hasAssistantPrivilege, isAssistantEnabled, hasEntityHighlightsLicense]
-  );
+  const disabled = useMemo(() => {
+    if (!hasEntityHighlightsLicense) {
+      return true;
+    }
+
+    // if user does not have access to connectors, we cannot invoke the inference action
+    if (!hasConnectorsReadPrivilege) {
+      return true;
+    }
+
+    // if user does not have access to assistant or agent builder, disable entity highlights
+    return !(hasAssistantPrivilege || hasAgentBuilderPrivilege);
+  }, [
+    hasConnectorsReadPrivilege,
+    hasAgentBuilderPrivilege,
+    hasAssistantPrivilege,
+    hasEntityHighlightsLicense,
+  ]);
 
   const isLoading = useMemo(
     () => isChatLoading || isAnonymizationFieldsLoading || isLoadingConnectors,

@@ -6,7 +6,7 @@
  */
 
 import { type KibanaUrl, type Locator, type ScoutPage } from '@kbn/scout-oblt';
-import { KUBERNETES_TOUR_STORAGE_KEY } from '../constants';
+import { EXTENDED_TIMEOUT, KUBERNETES_TOUR_STORAGE_KEY } from '../constants';
 
 export class InventoryPage {
   public readonly feedbackLink: Locator;
@@ -72,11 +72,13 @@ export class InventoryPage {
   }
 
   private async waitForNodesToLoad() {
-    await this.page.getByTestId('infraNodesOverviewLoadingPanel').waitFor({ state: 'hidden' });
+    await this.page
+      .getByTestId('infraNodesOverviewLoadingPanel')
+      .waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT });
   }
 
   private async waitForPageToLoad() {
-    await this.page.getByTestId('infraMetricsPage').waitFor();
+    await this.page.getByTestId('infraMetricsPage').waitFor({ timeout: EXTENDED_TIMEOUT });
     await this.waitForNodesToLoad();
     await this.page.getByTestId('savedViews-openPopover-loaded').waitFor();
   }
