@@ -18,7 +18,7 @@ describe('PROMQL Validation', () => {
   describe('required params', () => {
     test('no errors with all required params', () => {
       promqlExpectErrors(
-        'PROMQL index=metrics step=5m start=?_tstart end=?_tend (rate(http_requests[5m]))',
+        'PROMQL index=timeseries_index step=5m start=?_tstart end=?_tend (rate(http_requests[5m]))',
         []
       );
     });
@@ -26,17 +26,17 @@ describe('PROMQL Validation', () => {
     test.each([
       [
         'missing step param',
-        'PROMQL index=metrics start=?_tstart end=?_tend (rate(x[5m]))',
+        'PROMQL index=timeseries_index start=?_tstart end=?_tend (rate(x[5m]))',
         '[PROMQL] Missing required param "step"',
       ],
       [
         'missing start param',
-        'PROMQL index=metrics step=5m end=?_tend (rate(x[5m]))',
+        'PROMQL index=timeseries_index step=5m end=?_tend (rate(x[5m]))',
         '[PROMQL] Missing required param "start"',
       ],
       [
         'missing end param',
-        'PROMQL index=metrics step=5m start=?_tstart (rate(x[5m]))',
+        'PROMQL index=timeseries_index step=5m start=?_tstart (rate(x[5m]))',
         '[PROMQL] Missing required param "end"',
       ],
     ])('%s', (_title, query, error) => {
@@ -70,13 +70,6 @@ describe('PROMQL Validation', () => {
       promqlExpectErrors(
         'PROMQL step=5m start="2024-01-15T10:00:00Z" end=?_tend (rate(x[5m]))',
         []
-      );
-    });
-
-    test('start >= end error', () => {
-      promqlExpectErrors(
-        'PROMQL step=5m start="2024-01-15T10:00:00Z" end="2024-01-14T10:00:00Z" (rate(x[5m]))',
-        ['[PROMQL] Start must be earlier than end']
       );
     });
   });

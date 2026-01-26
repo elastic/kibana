@@ -492,8 +492,6 @@ export interface PromqlParamDefinition {
   suggestedValues?: string[];
 }
 
-export const PROMQL_REQUIRED_PARAMS: PromqlParamName[] = ['step'];
-
 const PROMQL_PARAMS: PromqlParamDefinition[] = [
   {
     name: 'index',
@@ -520,7 +518,7 @@ const PROMQL_PARAMS: PromqlParamDefinition[] = [
 
 export const PROMQL_PARAM_NAMES: string[] = PROMQL_PARAMS.map(({ name }) => name);
 
-const PROMQL_REQUIRED_PARAMS = PROMQL_PARAMS.filter(({ required }) => required).map(
+export const PROMQL_REQUIRED_PARAMS = PROMQL_PARAMS.filter(({ required }) => required).map(
   ({ name }) => name
 );
 
