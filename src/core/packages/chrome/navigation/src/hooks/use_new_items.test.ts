@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import type { IconType } from '@elastic/eui';
 
 import { useNewItems } from './use_new_items';
@@ -115,11 +115,17 @@ describe('useNewItems', () => {
     });
 
     it('persists visited items to localStorage', () => {
-      const { result } = renderHook(() => useNewItems([...primaryItems, ...footerItems]));
+      const { result, rerender } = renderHook((activeItemId?: string) =>
+        useNewItems([...primaryItems, ...footerItems], activeItemId)
+      );
 
-      act(() => {
-        result.current.markAsVisited('dashboards');
-      });
+      // Rerender with primary item being active
+      rerender('dashboards');
+      expect(result.current.getIsNewPrimary('dashboards')).toBe(true);
+
+      // Simulate navigating away to another item - last active item is marked as visited
+      rerender('home');
+      expect(result.current.getIsNewPrimary('dashboards')).toBe(false);
 
       const stored = localStorage.getItem(STORAGE_KEY);
       expect(stored).toBe(JSON.stringify(['dashboards']));
@@ -127,7 +133,7 @@ describe('useNewItems', () => {
   });
 
   describe('Visited items', () => {
-    it('auto-marks new primary item as visited when it becomes active', () => {
+    it('auto-marks new primary item as visited after clicking on it and navigating away from it', () => {
       // Initial render - no active item
       const { result, rerender } = renderHook((activeItemId?: string) =>
         useNewItems([...primaryItems, ...footerItems], activeItemId)
@@ -137,11 +143,14 @@ describe('useNewItems', () => {
 
       // Rerender with primary item being active
       rerender('dashboards');
+      expect(result.current.getIsNewPrimary('dashboards')).toBe(true);
 
+      // Simulate navigating away to another item - item loses new status
+      rerender('home');
       expect(result.current.getIsNewPrimary('dashboards')).toBe(false);
     });
 
-    it('marks both parent and child as visited when child is new and becomes active', () => {
+    it('marks both parent and child as visited after clicking on child and navigating away from it', () => {
       // Initial render - no active item
       const { result, rerender } = renderHook((activeItemId?: string) =>
         useNewItems([...primaryItemsWithNewSecondaryItems, ...footerItems], activeItemId)
@@ -152,11 +161,13 @@ describe('useNewItems', () => {
 
       // Rerender with child item being active
       rerender('footer-subitem-1');
-
-      // Parent item loses new status
-      expect(result.current.getIsNewPrimary('settings')).toBe(false);
-      // Child item should still be rendered as new
+      expect(result.current.getIsNewPrimary('settings')).toBe(true);
       expect(result.current.getIsNewSecondary('footer-subitem-1')).toBe(true);
+
+      // Simulate navigating away to another item - both items lose new status
+      rerender('home');
+      expect(result.current.getIsNewPrimary('settings')).toBe(false);
+      expect(result.current.getIsNewSecondary('footer-subitem-1')).toBe(false);
     });
   });
 });

@@ -111,15 +111,10 @@ export const Navigation = ({
 
   const setSize = visibleMenuItems.length + (overflowMenuItems.length > 0 ? 1 : 0);
 
-  const { getIsNewPrimary, getIsNewSecondary, markAsVisited } = useNewItems(
+  const { getIsNewPrimary, getIsNewSecondary } = useNewItems(
     [...items.primaryItems, ...items.footerItems],
     activeItemId
   );
-
-  const handleItemClick = (item: MenuItem | SecondaryMenuItem, parentItem?: MenuItem) => {
-    markAsVisited(item.id, parentItem?.id);
-    onItemClick?.(item);
-  };
 
   useLayoutWidth({ isCollapsed, isSidePanelOpen, setWidth });
 
@@ -168,7 +163,7 @@ export const Navigation = ({
                         isCurrent={actualActiveItemId === item.id}
                         isHighlighted={item.id === visuallyActivePageId}
                         isNew={getIsNewPrimary(item.id)}
-                        onClick={() => handleItemClick(item)}
+                        onClick={() => onItemClick?.(item)}
                         {...itemProps}
                       >
                         {item.label}
@@ -202,7 +197,7 @@ export const Navigation = ({
                                     isCurrent={actualActiveItemId === subItem.id}
                                     isNew={getIsNewSecondary(subItem.id)}
                                     onClick={() => {
-                                      handleItemClick(subItem, item);
+                                      onItemClick?.(subItem);
                                       if (subItem.href) {
                                         closePopover();
                                       }
@@ -287,7 +282,7 @@ export const Navigation = ({
                                   isNew={getIsNewPrimary(item.id)}
                                   hasSubmenu={hasSubmenu}
                                   onClick={() => {
-                                    handleItemClick(item);
+                                    onItemClick?.(item);
                                     if (!hasSubmenu) {
                                       closePopover();
                                       focusMainContent();
@@ -322,7 +317,7 @@ export const Navigation = ({
                                       isCurrent={actualActiveItemId === subItem.id}
                                       isNew={getIsNewSecondary(subItem.id)}
                                       onClick={() => {
-                                        handleItemClick(subItem, item);
+                                        onItemClick?.(subItem);
                                         closePopover();
                                         focusMainContent();
                                       }}
@@ -368,7 +363,7 @@ export const Navigation = ({
                         isCurrent={actualActiveItemId === item.id}
                         isNew={getIsNewPrimary(item.id)}
                         hasContent={getHasSubmenu(item)}
-                        onClick={() => handleItemClick(item)}
+                        onClick={() => onItemClick?.(item)}
                         {...itemProps}
                       />
                     }
@@ -400,7 +395,7 @@ export const Navigation = ({
                                     isCurrent={actualActiveItemId === subItem.id}
                                     isNew={getIsNewSecondary(subItem.id)}
                                     onClick={() => {
-                                      handleItemClick(subItem, item);
+                                      onItemClick?.(subItem);
                                       if (subItem.href) {
                                         closePopover();
                                       }
@@ -455,7 +450,7 @@ export const Navigation = ({
                           isCurrent={actualActiveItemId === subItem.id}
                           isHighlighted={subItem.id === visuallyActiveSubpageId}
                           isNew={getIsNewSecondary(subItem.id)}
-                          onClick={() => handleItemClick(subItem, openerNode)}
+                          onClick={() => onItemClick?.(subItem)}
                           testSubjPrefix={sidePanelItemPrefix}
                           {...subItem}
                         >

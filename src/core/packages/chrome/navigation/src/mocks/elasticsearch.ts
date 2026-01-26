@@ -94,10 +94,10 @@ export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
     href: '/developer-tools',
   },
   {
-    id: 'project-performance',
+    id: 'project-settings',
     label: 'Settings',
     iconType: 'gear',
-    href: '/settings/project/performance',
+    href: '/settings/project/settings',
     sections: [
       {
         id: 'project',

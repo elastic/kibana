@@ -1707,9 +1707,10 @@ describe('Both modes', () => {
     /**
      * GIVEN a primary menu item is new
      * WHEN a user visits the item
+     * AND navigates away from it
      * THEN the new indicator should disappear
      */
-    it('should remove new indicator after visiting a new primary item', async () => {
+    it('should remove new indicator after visiting a new primary item and navigating away from it', async () => {
       render(<TestComponent items={elasticsearchMock.navItems} logo={elasticsearchMock.logo} />);
 
       const webCrawlersItem = screen.getByTestId(primaryItemId('web_crawlers'));
@@ -1720,19 +1721,23 @@ describe('Both modes', () => {
       // Click on the item
       await user.click(webCrawlersItem);
 
-      // After clicking, new indicator should disappear
+      // Navigate away from the item
+      await user.click(screen.getByTestId(primaryItemId('dev_tools')));
+
+      // New indicator should disappear
       expect(webCrawlersItem.querySelector('[data-euiicon-type="dot"]')).not.toBeInTheDocument();
     });
 
     /**
      * GIVEN two secondary menu items are new
      * WHEN a user visits both items
+     * AND navigates away from them
      * THEN the new indicator should disappear
      */
-    it('should remove new indicator after visiting two new secondary items', async () => {
+    it('should remove new indicator after visiting two new secondary items and navigating away from them', async () => {
       render(<TestComponent items={elasticsearchMock.navItems} logo={elasticsearchMock.logo} />);
 
-      const performanceItem = screen.getByTestId(footerItemId('project-performance'));
+      const performanceItem = screen.getByTestId(footerItemId('project-settings'));
 
       // Initially should have new indicator
       expect(
@@ -1751,6 +1756,9 @@ describe('Both modes', () => {
 
       await user.click(performanceLink);
       await user.click(integrationsLink);
+
+      // Navigate away from the items
+      await user.click(within(sidePanel).getByTestId(sidePanelItemId('project-fleet')));
 
       // After clicking, new indicator should disappear
       expect(

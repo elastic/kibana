@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import type { MenuItem } from '../../types';
 
 const MAX_NEW_PRIMARY_ITEMS = 2;
@@ -46,7 +46,7 @@ const getNewItemsIds = (item: MenuItem) => {
  * - Max 2 new secondary items per parent
  * @param menuItems - Array of menu items to check
  * @param activeItemId - Currently active item ID for auto-marking as visited
- * @returns Functions to check new item status and mark item as visited
+ * @returns Functions to check new item status
  */
 
 export const useNewItems = (menuItems: MenuItem[], activeItemId?: string) => {
@@ -102,31 +102,37 @@ export const useNewItems = (menuItems: MenuItem[], activeItemId?: string) => {
     });
   }, []);
 
-  // Active items should be automatically marked as visited
-  // This is to tackle other ways of navigating to a page such as via global search/breadcrumbs etc.
+  // Active items are marked as visited once we navigate away from them
+  // We also account for other ways of navigating to a page such as via global search/breadcrumbs etc.
+  const lastActiveItemIdRef = useRef<string | undefined>();
+
   useEffect(() => {
-    if (!activeItemId) return;
+    const lastActiveItemId = lastActiveItemIdRef.current;
 
-    // Check if active item is a primary item
-    const activePrimaryItem = getPrimaryItemById(menuItems, activeItemId);
-    if (activePrimaryItem) {
-      if (isNew(activePrimaryItem)) markAsVisited(activeItemId);
-      return;
+    if (lastActiveItemId && lastActiveItemId !== activeItemId) {
+      // Check if last active item is a primary item
+      const lastActivePrimaryItem = getPrimaryItemById(menuItems, lastActiveItemId);
+      if (lastActivePrimaryItem) {
+        if (isNew(lastActivePrimaryItem)) markAsVisited(lastActiveItemId);
+        lastActiveItemIdRef.current = activeItemId;
+        return;
+      }
+
+      // Check if last active item is a secondary item
+      const lastActiveSecondaryItem = getSecondaryItemById(menuItems, lastActiveItemId);
+      if (lastActiveSecondaryItem) {
+        const { secondaryItem, parentItem } = lastActiveSecondaryItem;
+        const parentIsNew = isNew(parentItem);
+        const secondaryIsNew = isNew(secondaryItem);
+
+        // Mark as visited if either the parent or the secondary item is new
+        if (parentIsNew || secondaryIsNew) {
+          markAsVisited(lastActiveItemId, parentIsNew ? parentItem.id : undefined);
+        }
+      }
     }
-
-    // Check if active item is a secondary item
-    const activeSecondaryItem = getSecondaryItemById(menuItems, activeItemId);
-    if (!activeSecondaryItem) return;
-
-    const { secondaryItem, parentItem } = activeSecondaryItem;
-    const parentIsNew = isNew(parentItem);
-    const secondaryIsNew = isNew(secondaryItem);
-
-    // Mark as visited if either the parent or the secondary item is new
-    if (parentIsNew || secondaryIsNew) {
-      markAsVisited(activeItemId, parentIsNew ? parentItem.id : undefined);
-    }
-  }, [menuItems, activeItemId, markAsVisited]);
+    lastActiveItemIdRef.current = activeItemId;
+  }, [menuItems, markAsVisited, activeItemId]);
 
   const getIsNewPrimary = useCallback(
     (itemId: string) => {
@@ -139,7 +145,10 @@ export const useNewItems = (menuItems: MenuItem[], activeItemId?: string) => {
     [menuItems, newItems, visitedItems]
   );
 
-  const getIsNewSecondary = useCallback((itemId: string) => newItems.includes(itemId), [newItems]);
+  const getIsNewSecondary = useCallback(
+    (itemId: string) => newItems.includes(itemId) && !visitedItems.includes(itemId),
+    [newItems, visitedItems]
+  );
 
-  return { getIsNewPrimary, getIsNewSecondary, markAsVisited };
+  return { getIsNewPrimary, getIsNewSecondary };
 };
