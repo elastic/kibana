@@ -19,16 +19,15 @@ import { useLogFlyoutData, LogFlyoutContent, type LogFlyoutData } from './logs_f
 export type DocumentType = typeof spanFlyoutId | typeof logsFlyoutId;
 
 interface FlyoutContentProps {
-  isSpanType: boolean;
+  type: DocumentType;
   hit: DataTableRecord;
-  dataView: DocViewRenderProps['dataView'];
-  activeSection?: TraceOverviewSections;
+  spanData: { dataView: DocViewRenderProps['dataView']; activeSection?: TraceOverviewSections };
   logData: LogFlyoutData;
 }
 
-function FlyoutContent({ isSpanType, hit, dataView, activeSection, logData }: FlyoutContentProps) {
-  if (isSpanType) {
-    return <SpanFlyoutContent hit={hit} dataView={dataView} activeSection={activeSection} />;
+function FlyoutContent({ type, hit, spanData, logData }: FlyoutContentProps) {
+  if (type === spanFlyoutId) {
+    return <SpanFlyoutContent hit={hit} {...spanData} />;
   }
 
   if (logData.logDataView) {
@@ -81,10 +80,9 @@ export function DocumentDetailFlyout({
     >
       {hit ? (
         <FlyoutContent
-          isSpanType={isSpanType}
+          type={type}
           hit={hit}
-          dataView={dataView}
-          activeSection={activeSection}
+          spanData={{ dataView, activeSection }}
           logData={logData}
         />
       ) : null}
