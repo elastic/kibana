@@ -10,7 +10,7 @@
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
- * Source: /oas_docs/output/kibana.yaml, operations: addCaseCommentDefaultSpace
+ * Source: /oas_docs/output/kibana.yaml, operations: createCaseDefaultSpace
  *
  * To regenerate: node scripts/generate_workflow_kibana_contracts.js
  */
@@ -18,8 +18,8 @@
 import { z } from '@kbn/zod/v4';
 
 import {
-  add_case_comment_default_space_request,
-  add_case_comment_default_space_response,
+  create_case_default_space_request,
+  create_case_default_space_response,
 } from './schemas/kibana_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
 
@@ -29,32 +29,43 @@ import type { InternalConnectorContract } from '../../../types/latest';
 import { FetcherConfigSchema } from '../../schema';
 
 // export contract
-export const ADD_CASE_COMMENT_DEFAULT_SPACE_CONTRACT: InternalConnectorContract = {
-  type: 'kibana.addCaseComment',
-  summary: `Add a case comment or alert`,
+export const CREATE_CASE_CONTRACT: InternalConnectorContract = {
+  type: 'kibana.createCase',
+  summary: `Create a case`,
   description: `**Spaces method and path for this operation:**
 
-<div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/{caseId}/comments</span></div>
+<div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases</span></div>
 
 Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-You must have \`all\` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're creating. NOTE: Each case can have a maximum of 1,000 alerts.
+You must have \`all\` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana  feature privileges, depending on the owner of the case you're creating.
 `,
   methods: ['POST'],
-  patterns: ['/api/cases/{caseId}/comments'],
+  patterns: ['/api/cases'],
   documentation:
-    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-addcasecommentdefaultspace',
+    'https://www.elastic.co/docs/api/doc/kibana/operation/operation-createcasedefaultspace',
   parameterTypes: {
     headerParams: ['kbn-xsrf'],
-    pathParams: ['caseId'],
+    pathParams: [],
     urlParams: [],
-    bodyParams: ['alertId', 'index', 'owner', 'rule', 'type', 'comment'],
+    bodyParams: [
+      'assignees',
+      'category',
+      'connector',
+      'customFields',
+      'description',
+      'owner',
+      'settings',
+      'severity',
+      'tags',
+      'title',
+    ],
   },
   paramsSchema: z.object({
-    ...getShapeAt(add_case_comment_default_space_request, 'body'),
-    ...getShapeAt(add_case_comment_default_space_request, 'path'),
-    ...getShapeAt(add_case_comment_default_space_request, 'query'),
+    ...getShapeAt(create_case_default_space_request, 'body'),
+    ...getShapeAt(create_case_default_space_request, 'path'),
+    ...getShapeAt(create_case_default_space_request, 'query'),
     fetcher: FetcherConfigSchema,
   }),
-  outputSchema: add_case_comment_default_space_response,
+  outputSchema: create_case_default_space_response,
 };

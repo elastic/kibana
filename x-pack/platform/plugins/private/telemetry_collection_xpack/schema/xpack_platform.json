@@ -496,96 +496,7 @@
             }
           }
         },
-        "time_to_last_token": {
-          "properties": {
-            "p50": {
-              "type": "long",
-              "_meta": {
-                "description": "50th percentile time-to-last-token in milliseconds"
-              }
-            },
-            "p75": {
-              "type": "long",
-              "_meta": {
-                "description": "75th percentile time-to-last-token in milliseconds"
-              }
-            },
-            "p90": {
-              "type": "long",
-              "_meta": {
-                "description": "90th percentile time-to-last-token in milliseconds"
-              }
-            },
-            "p95": {
-              "type": "long",
-              "_meta": {
-                "description": "95th percentile time-to-last-token in milliseconds"
-              }
-            },
-            "p99": {
-              "type": "long",
-              "_meta": {
-                "description": "99th percentile time-to-last-token in milliseconds"
-              }
-            },
-            "mean": {
-              "type": "long",
-              "_meta": {
-                "description": "Mean time-to-last-token in milliseconds"
-              }
-            },
-            "total_samples": {
-              "type": "long",
-              "_meta": {
-                "description": "Total number of TTLT samples"
-              }
-            }
-          }
-        },
-        "latency_by_model": {
-          "type": "array",
-          "items": {
-            "properties": {
-              "model": {
-                "type": "keyword",
-                "_meta": {
-                  "description": "Model identifier (e.g., gpt-4o, claude-3-sonnet)"
-                }
-              },
-              "ttft_p50": {
-                "type": "long",
-                "_meta": {
-                  "description": "50th percentile TTFT for this model"
-                }
-              },
-              "ttft_p95": {
-                "type": "long",
-                "_meta": {
-                  "description": "95th percentile TTFT for this model"
-                }
-              },
-              "ttlt_p50": {
-                "type": "long",
-                "_meta": {
-                  "description": "50th percentile TTLT for this model"
-                }
-              },
-              "ttlt_p95": {
-                "type": "long",
-                "_meta": {
-                  "description": "95th percentile TTLT for this model"
-                }
-              },
-              "sample_count": {
-                "type": "long",
-                "_meta": {
-                  "description": "Number of samples for this model"
-                }
-              }
-            }
-          }
-        },
-        "latency_by_agent_type": {
+        "query_to_result_time_by_agent_type": {
           "type": "array",
           "items": {
             "properties": {
@@ -595,29 +506,26 @@
                   "description": "Agent ID"
                 }
               },
-              "ttft_p50": {
-                "type": "long",
-                "_meta": {
-                  "description": "50th percentile TTFT for this agent"
-                }
+              "p50": {
+                "type": "long"
               },
-              "ttft_p95": {
-                "type": "long",
-                "_meta": {
-                  "description": "95th percentile TTFT for this agent"
-                }
+              "p75": {
+                "type": "long"
               },
-              "ttlt_p50": {
-                "type": "long",
-                "_meta": {
-                  "description": "50th percentile TTLT for this agent"
-                }
+              "p90": {
+                "type": "long"
               },
-              "ttlt_p95": {
-                "type": "long",
-                "_meta": {
-                  "description": "95th percentile TTLT for this agent"
-                }
+              "p95": {
+                "type": "long"
+              },
+              "p99": {
+                "type": "long"
+              },
+              "mean": {
+                "type": "long"
+              },
+              "total_samples": {
+                "type": "long"
               },
               "sample_count": {
                 "type": "long",
