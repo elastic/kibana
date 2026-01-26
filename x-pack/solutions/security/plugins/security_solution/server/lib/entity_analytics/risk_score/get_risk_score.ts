@@ -16,28 +16,28 @@ import {
 } from '../../../../common/search_strategy/security_solution';
 import { buildRiskScoreQuery } from '../../../search_strategy/security_solution/factory/risk_score/all/query.risk_score.dsl';
 
+export interface CreateGetRiskScoresOpts {
+  logger: Logger;
+  esClient: ElasticsearchClient;
+  spaceId: string;
+}
+
+export interface GetRiskScoreOpts {
+  entityType: EntityType;
+  entityIdentifier: string;
+  pagination?: {
+    querySize: number;
+    cursorStart: number;
+  };
+}
+
 export const createGetRiskScores =
-  ({
-    logger,
-    esClient,
-    spaceId,
-  }: {
-    logger: Logger;
-    esClient: ElasticsearchClient;
-    spaceId: string;
-  }) =>
+  ({ logger, esClient, spaceId }: CreateGetRiskScoresOpts) =>
   async ({
     entityIdentifier,
     entityType,
     pagination,
-  }: {
-    entityType: EntityType;
-    entityIdentifier: string;
-    pagination?: {
-      querySize: number;
-      cursorStart: number;
-    };
-  }): Promise<EntityRiskScoreRecord[]> => {
+  }: GetRiskScoreOpts): Promise<EntityRiskScoreRecord[]> => {
     const query = buildRiskScoreQuery({
       filterQuery: buildEntityNameFilter(entityType, [entityIdentifier]),
       defaultIndex: [getRiskIndex(spaceId, false)],

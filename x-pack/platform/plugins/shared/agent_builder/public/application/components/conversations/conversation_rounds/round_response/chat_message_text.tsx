@@ -25,6 +25,7 @@ import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import {
   visualizationElement,
   dashboardElement,
+  entityElement,
 } from '@kbn/agent-builder-common/tools/tool_result';
 import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
 import {
@@ -32,9 +33,11 @@ import {
   esqlLanguagePlugin,
   createVisualizationRenderer,
   createDashboardRenderer,
+  createEntityRenderer,
   loadingCursorPlugin,
   visualizationTagParser,
   dashboardTagParser,
+  entityTagParser,
 } from './markdown_plugins';
 import { useStepsFromPrevRounds } from '../../../../hooks/use_conversation';
 
@@ -134,6 +137,10 @@ export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props
         stepsFromCurrentRound,
         stepsFromPrevRounds,
       }),
+      [entityElement.tagName]: createEntityRenderer({
+        stepsFromCurrentRound,
+        stepsFromPrevRounds,
+      }),
     };
 
     return {
@@ -142,6 +149,7 @@ export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props
         esqlLanguagePlugin,
         visualizationTagParser,
         dashboardTagParser,
+        entityTagParser,
         ...parsingPlugins,
       ],
       processingPluginList: processingPlugins,

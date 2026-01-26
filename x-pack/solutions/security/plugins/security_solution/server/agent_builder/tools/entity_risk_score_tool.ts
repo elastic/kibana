@@ -10,10 +10,14 @@ import { z } from '@kbn/zod';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
+import { get, has } from 'lodash';
+import { asyncForEach } from '@kbn/std';
+import { set } from '@kbn/safer-lodash-set';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { IdentifierType } from '../../../common/api/entity_analytics/common/common.gen';
 import type { EntityRiskScoreRecord } from '../../../common/api/entity_analytics/common';
+import type { CreateGetRiskScoresOpts } from '../../lib/entity_analytics/risk_score/get_risk_score';
 import { createGetRiskScores } from '../../lib/entity_analytics/risk_score/get_risk_score';
 import type { EntityType } from '../../../common/entity_analytics/types';
 import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../common/constants';
@@ -40,6 +44,11 @@ const entityRiskScoreSchema = z.object({
 
 export const SECURITY_ENTITY_RISK_SCORE_TOOL_ID = securityTool('entity_risk_score');
 
+interface EntityResultType {
+  type: string;
+  identifier: string;
+  score?: number;
+}
 /**
  * Queries the risk index directly for wildcard queries, returning entities sorted by calculated_score_norm
  */
@@ -87,6 +96,27 @@ const queryRiskIndexForWildcard = async ({
     .filter((risk): risk is EntityRiskScoreRecord => risk !== undefined);
 };
 
+type GetLatestRiskScoreOpts = CreateGetRiskScoresOpts & {
+  entityType: EntityType;
+  entityIdentifier: string;
+};
+const getLatestRiskScore = async (
+  opts: GetLatestRiskScoreOpts
+): Promise<EntityRiskScoreRecord | undefined> => {
+  const { entityType, entityIdentifier, logger, esClient, spaceId } = opts;
+  const getRiskScore = createGetRiskScores({ logger, esClient, spaceId });
+
+  const riskScores = await getRiskScore({
+    entityType,
+    entityIdentifier,
+    pagination: { querySize: 1, cursorStart: 0 },
+  });
+
+  if (riskScores.length > 0) {
+    return riskScores[0];
+  }
+};
+
 /**
  * Fetches alerts by their IDs, returning only essential fields for risk score context
  */
@@ -122,6 +152,52 @@ const getAlertsById = async ({
     }
     return acc;
   }, {});
+};
+
+type GetRelatedEntitiesOpts = GetLatestRiskScoreOpts & {
+  riskScoreInputAlerts: Array<unknown>;
+};
+const getRelatedEntities = async (opts: GetRelatedEntitiesOpts) => {
+  const { riskScoreInputAlerts, entityIdentifier, entityType, ...rest } = opts;
+  const relatedEntities: EntityResultType[] = [];
+  const relatedHosts = new Set<string>();
+  const relatedUsers = new Set<string>();
+  riskScoreInputAlerts.forEach((alert) => {
+    if (has(alert, 'host.name')) {
+      const host = get(alert, 'host.name');
+      if (entityType !== 'host' || entityIdentifier !== host) {
+        relatedHosts.add(host);
+      }
+    }
+
+    if (has(alert, 'user.name')) {
+      const user = get(alert, 'user.name');
+      if (entityType !== 'user' || entityIdentifier !== user) {
+        relatedUsers.add(user);
+      }
+    }
+  });
+
+  for (const host of relatedHosts) {
+    relatedEntities.push({ type: 'host', identifier: host });
+  }
+
+  for (const user of relatedUsers) {
+    relatedEntities.push({ type: 'user', identifier: user });
+  }
+
+  await asyncForEach(relatedEntities, async (entity) => {
+    const latest = await getLatestRiskScore({
+      ...rest,
+      entityType: entity.type as EntityType,
+      entityIdentifier: entity.identifier,
+    });
+    if (latest) {
+      set(entity, 'score', latest.calculated_score_norm);
+    }
+  });
+
+  return relatedEntities;
 };
 
 export const entityRiskScoreTool = (
@@ -235,20 +311,15 @@ export const entityRiskScoreTool = (
           };
         }
 
-        // Handle specific entity queries
-        const getRiskScore = createGetRiskScores({
+        const latestRiskScore = await getLatestRiskScore({
           logger,
           esClient: esClient.asCurrentUser,
           spaceId,
-        });
-
-        riskScores = await getRiskScore({
           entityType,
           entityIdentifier: identifier,
-          pagination: { querySize: 1, cursorStart: 0 },
         });
 
-        if (riskScores.length === 0) {
+        if (!latestRiskScore) {
           return {
             results: [
               {
@@ -262,14 +333,22 @@ export const entityRiskScoreTool = (
           };
         }
 
-        const latestRiskScore = riskScores[0];
-
         // Fetch all alerts that contributed to the risk score to enhance the inputs
         const alertIds = latestRiskScore.inputs.map((i) => i.id).filter(Boolean);
         const alertsById = await getAlertsById({
           esClient: esClient.asCurrentUser,
           index: alertsIndexPattern,
           ids: alertIds,
+        });
+
+        // Extract other entities that contributed to the risk score inputs and get their risk scores
+        const relatedEntities = await getRelatedEntities({
+          riskScoreInputAlerts: Object.values(alertsById),
+          logger,
+          esClient: esClient.asCurrentUser,
+          spaceId,
+          entityType,
+          entityIdentifier: identifier,
         });
 
         // Enhance inputs with alert data
@@ -301,15 +380,53 @@ export const entityRiskScoreTool = (
           ...(latestRiskScore.modifiers && { modifiers: latestRiskScore.modifiers ?? [] }),
         };
 
+        const resultId = getToolResultId();
+
         return {
           results: [
             {
-              tool_result_id: getToolResultId(),
+              tool_result_id: resultId,
               type: ToolResultType.other,
               data: {
                 riskScore: riskScoreData,
               },
             },
+            {
+              tool_result_id: `${resultId}-host-testhostname`,
+              type: ToolResultType.entity,
+              data: {
+                id: 'testhostname',
+                type: 'host',
+                link: {
+                  deepLinkId: 'hosts',
+                  path: `/name/${encodeURIComponent('testhostname')}`,
+                },
+              },
+            },
+            ...relatedEntities.map((entity) => ({
+              tool_result_id: `${resultId}-${entity.type}-${entity.identifier}`,
+              type: ToolResultType.entity,
+              data: {
+                id: entity.identifier,
+                type: entity.type,
+                ...(entity.type === 'host'
+                  ? {
+                      link: {
+                        deepLinkId: 'hosts',
+                        path: `/name/${encodeURIComponent(entity.identifier)}`,
+                      },
+                    }
+                  : entity.type === 'user'
+                  ? {
+                      link: {
+                        deepLinkId: 'users',
+                        path: `/name/${encodeURIComponent(entity.identifier)}`,
+                      },
+                    }
+                  : {}),
+                ...(entity.score !== undefined && { score: entity.score }),
+              },
+            })),
           ],
         };
       } catch (error) {
